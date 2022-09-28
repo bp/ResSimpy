@@ -1,0 +1,14 @@
+# IDE settings
+.idea
+.vscode
+
+# Checkpoints
+.ipynb_checkpoints
+__pycache__/
+.pyc
+.DS_Store
+
+# Unit tests
+pytest.xml
+.pytest_cache
+.coverage
