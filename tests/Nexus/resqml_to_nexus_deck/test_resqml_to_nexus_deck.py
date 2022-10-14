@@ -1,9 +1,4 @@
 import pytest
-# import utils.mock_extensions  # Import Needed for some Mock methods
-# import resqpy.model
-# import resqpy.model as rq
-# from resqpy import model
-
 from ResSimpy.Nexus.resqml_to_nexus_deck.ResqmlToNexusDeck import ResqmlToNexusDeck
 import resqpy.model
 import resqpy.crs
@@ -67,36 +62,23 @@ def test_select_correct_model_template(mocker, is_gas_model, expected_dirname):
 ])
 def test_get_trajectories(mocker, well_ids, well_names, expected_result):
     # Arrange
-    # from resqml_to_nexus_deck_mocks import resqml_well_mock, resqml_parts_value_mock
     resqpy_model_mock = mocker.Mock(name="Resqpy Model Mock", return_value='model')
     mocker.patch.object(resqpy.model, attribute='Model', return_value=resqpy_model_mock)
-    # resqpy_parts_mock = mocker.Mock(name="Resqpy Parts Mock", return_value=['Grid_1'])
     resqpy_uuids_value_mock = mocker.Mock(return_value=well_ids, name="UUIDs Value")
     mocker.patch.object(resqpy_model_mock, 'uuids', resqpy_uuids_value_mock)
 
-    # trajectory_mock = mocker.MagicMock(name="Trajectory", return_value="Trajectory_1")
     well_name_mock = mocker.MagicMock(name="Well Name")
     well_name_mock.side_effect = well_names
-    # mocker.patch.object()
-
-    # resqpy_well_mock = mocker.Mock(name="Well Mock")
-    # mocker.patch.object(resqpy_well_mock, 'Trajectory', trajectory_mock)
-    # mocker.patch.object(resqpy_well_mock, 'well_name', well_name_mock)
     mocker.patch.object(resqpy.well, 'well_name', new=well_name_mock)
-    # from ResSimpy.Nexus.resqml_to_nexus_deck.ResqmlToNexusDeck import ResqmlToNexusDeck
 
     # Act
     result = ResqmlToNexusDeck.get_trajectories('test/model/address')
 
     # Assert
     assert result == expected_result
-    # trajectory_mock.assert_not_called()
 
     for index, call in enumerate(well_name_mock.calls()):
         assert call[0] == well_names[index]
-
-    #well_name_mock.assert_called_with(well_ids)
-
 
 @pytest.mark.parametrize('trajectory_units, expected_returned_units', [
     ('m', 'm'),
@@ -105,8 +87,6 @@ def test_get_trajectories(mocker, well_ids, well_names, expected_result):
 ])
 def test_get_trajectory_units(mocker, trajectory_units, expected_returned_units):
     # Arrange
-    # from ResSimpy.Nexus.resqml_to_nexus_deck.ResqmlToNexusDeck import ResqmlToNexusDeck
-    # from resqml_to_nexus_deck_mocks import resqml_well_mock
     root_for_uuid_mock = mocker.Mock(name="root_for_uuid mock", return_value='2cbf7ec1-4aad-4a35-bae7-bb3d8b9871c1')
     resqpy_model_mock = mocker.Mock(name="Resqpy Model Mock", return_value='model')
     mocker.patch.object(resqpy_model_mock, attribute='root_for_uuid', return_value=root_for_uuid_mock)
@@ -117,12 +97,9 @@ def test_get_trajectory_units(mocker, trajectory_units, expected_returned_units)
     uom_value_mock = mocker.Mock(name="units value mock", return_value=trajectory_units)
     mocker.patch.object(trajectory_mock, 'md_uom', new=trajectory_units)
     mocker.patch.object(resqpy.well, 'Trajectory', return_value=trajectory_mock)
-    #mocker.patch.object(well_mock, 'Trajectory', trajectory_mock)
-    # mocker.patch.object(resqpy, 'well', new=well_mock)
 
     # Act
     result = ResqmlToNexusDeck.get_trajectory_units('model/address', 'efffc581-9be9-4b0c-b55a-0fdb040f217a')
 
     # Assert
     assert result == expected_returned_units
-    # trajectory_mock.assert_called_once()
