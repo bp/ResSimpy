@@ -1,11 +1,8 @@
-# from bifrost.simulation.io.fcstidy.execution import path_transformer, file_copier
-# from simkit.common.nexus_input_files import NexusInputFiles
 from datetime import datetime
 import os
 import copy
 from functools import cmp_to_key
 from datetime import timedelta
-# from bifrost.nexus_run import nexsub, status
 from ResSimpy.Nexus.Models.FcsConfig import FcsConfig
 from ResSimpy.Nexus.Models.StructuredGridFile import StructuredGridFile, PropertyToLoad
 import ResSimpy.Nexus.nexus_file_operations as nexus_file_operations
@@ -162,7 +159,6 @@ class Simulation:
 
         return eos_string
 
-
     @staticmethod
     def get_fluid_type(surface_file_name):
         surface_file = nexus_file_operations.load_file_as_list(surface_file_name)
@@ -180,7 +176,6 @@ class Simulation:
                 break
             elif "EOS" in line:
                 fluid_type = Simulation.get_eos_details(surface_file)
-
 
         if fluid_type is None:
             raise ValueError("No Oil / Gas type detected")
@@ -206,7 +201,6 @@ class Simulation:
         """ Initialises the output to the declared output location """
         self.__destination = path
         if self.__destination is not None and os.path.dirname(self.__origin) != os.path.dirname(self.__destination):
-
             # if self.__manual_fcs_tidy_call:
             #     self.call_fcstidy(fcs_files=[self.__origin], output_dir=self.__destination, options='--pathkeep 0')
             # else:
@@ -250,7 +244,7 @@ class Simulation:
                     self.use_american_input_units = value == 'ENGLISH'
             elif "SURFACE NETWORK 1" in uppercase_line:
                 value = nexus_file_operations.get_token_value(token="SURFACE Network 1", token_line=line,
-                                                                         file_list=fcs_file)
+                                                              file_list=fcs_file)
 
                 self.__surface_file_path = value if os.path.isabs(value) else \
                     os.path.dirname(self.__origin) + "/" + value
@@ -645,7 +639,7 @@ class Simulation:
                 job_number_line = [x for x in log_file_line_list if 'Job number:' in x]
                 if len(job_number_line) > 0:
                     self.__job_id = int(job_number_line[0].split(":")[1])
-                    return f"Job Running, ID: {self.__job_id}" # self.__get_job_status()
+                    return f"Job Running, ID: {self.__job_id}"  # self.__get_job_status()
 
     def load_structured_grid_file(self):
         """Loads in a structured grid file"""

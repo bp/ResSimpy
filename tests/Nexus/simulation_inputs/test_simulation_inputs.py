@@ -1,8 +1,6 @@
 import pytest
 from ResSimpy.Nexus.Models.StructuredGridFile import VariableEntry
-
-
-# import utils.mock_extensions  # Import Needed for some Mock methods
+from ResSimpy.Simulation import Simulation
 
 
 def mock_multiple_opens(mocker, filename, fcs_file_contents, run_control_contents, include_contents,
@@ -62,7 +60,6 @@ def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expec
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    from ResSimpy.Simulation import Simulation
     simulation = Simulation(origin='testpath1/Path.fcs')
 
     # Assert
@@ -83,7 +80,6 @@ def test_load_fcs_space_in_filename(mocker, run_control_path, expected_run_contr
     fcs_file = f"RUNCONTROL {run_control_path}\nDATEFORMAT {date_format}\n"
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
-    from ResSimpy.Simulation import Simulation
 
     # Act
     simulation = Simulation(origin='testpath1/Path.fcs')
@@ -100,7 +96,6 @@ def test_load_fcs_file_comment_after_declaration(mocker):
     fcs_file = "!RUNCONTROL run_control_1\n RUNCONTROL run_control_2.inc\nDATEFORMAT DD/MM/YY\n!DATEFORMAT MM/DD/YY"
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
-    from ResSimpy.Simulation import Simulation
 
     # Act
     simulation = Simulation(origin='testpath1/Path.fcs')
@@ -118,7 +113,7 @@ def test_load_fcs_file_comment_after_declaration(mocker):
     # Providing a relative path to the fcs file + Non-USA date format
     ("run/control/path", "original_output_path/run/control/path", "DD/MM/YYYY", False)
 ])
-def test_output_destination_missing(mocker, simulation, run_control_path, expected_run_control_path, date_format,
+def test_output_destination_missing(mocker, run_control_path, expected_run_control_path, date_format,
                                     expected_use_american_date_format):
     """Check that an exception is raised if the user attempts to modify files without a specified output directory"""
     # Arrange
@@ -127,7 +122,7 @@ def test_output_destination_missing(mocker, simulation, run_control_path, expect
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    simulation = simulation(origin='test/Path.fcs', destination='original_output_path')
+    simulation = Simulation(origin='test/Path.fcs', destination='original_output_path')
     with pytest.raises(ValueError):
         simulation.set_output_path(None)
 
@@ -150,7 +145,6 @@ def test_origin_missing(mocker, run_control_path, expected_run_control_path, dat
     fcs_file = f"RUNCONTROL {run_control_path}\nDATEFORMAT {date_format}"
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
-    from ResSimpy.Simulation import Simulation
 
     # Act
     with pytest.raises(ValueError):
@@ -201,7 +195,6 @@ def test_load_run_control_file_times_in_include_file(mocker, date_format, expect
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-    from ResSimpy.Simulation import Simulation
 
     # Act
     simulation = Simulation(origin=fcs_file_name)
@@ -236,7 +229,6 @@ def test_load_run_control_invalid_times(mocker, date_format, run_control_content
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-    from ResSimpy.Simulation import Simulation
 
     # Act
     with pytest.raises(ValueError):
@@ -253,7 +245,6 @@ def test_output_to_existing_directory(mocker):
 
     exists_mock = mocker.Mock(return_value=True)
     mocker.patch("os.path.exists", exists_mock)
-    from ResSimpy.Simulation import Simulation
 
     # Act + Assert
     with pytest.raises(FileExistsError):
@@ -314,7 +305,6 @@ def test_modify_times(mocker, date_format, expected_use_american_date_format,
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-    from ResSimpy.Simulation import Simulation
 
     # Act
     simulation = Simulation(origin=fcs_file_name, destination="test_new_destination")
@@ -386,7 +376,6 @@ def test_modify_times_invalid_date(mocker, date_format, expected_use_american_da
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-    from ResSimpy.Simulation import Simulation
 
     # Act
     simulation = Simulation(origin=fcs_file_name)
@@ -426,7 +415,6 @@ def test_get_status_running(mocker):
 
     listdir_mock = mocker.MagicMock(return_value=[])
     mocker.patch("os.listdir", listdir_mock)
-    from ResSimpy.Simulation import Simulation
 
     # Act
     simulation = Simulation(origin='testpath1/Path.fcs', destination="test_new_destination")
@@ -458,7 +446,6 @@ def test_get_status_finished(mocker, log_file_contents, errors, warnings):
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-    from ResSimpy.Simulation import Simulation
 
     simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
 
@@ -495,7 +482,6 @@ def test_get_status_running_from_log(mocker, log_file_contents, job_id):
 
     listdir_mock = mocker.MagicMock(return_value=['nexus_run.log', ''])
     mocker.patch("os.listdir", listdir_mock)
-    from ResSimpy.Simulation import Simulation
 
     simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
     mocker.patch("builtins.open", log_file_mock)
@@ -536,7 +522,6 @@ def test_load_structured_grid_file_basic_properties(mocker, structured_grid_file
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-    from ResSimpy.Simulation import Simulation
 
     # Act
     simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
@@ -591,7 +576,6 @@ def test_load_structured_grid_file_dict_basic_properties(mocker, structured_grid
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-    from ResSimpy.Simulation import Simulation
 
     # Act
     simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
@@ -621,7 +605,6 @@ def test_load_structured_grid_file_fails(mocker):
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-    from ResSimpy.Simulation import Simulation
 
     # Act
     with pytest.raises(ValueError):
@@ -656,7 +639,6 @@ def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-    from ResSimpy.Simulation import Simulation
 
     # Act
     simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
@@ -714,7 +696,6 @@ def test_load_structured_grid_file_k_values(mocker, structured_grid_file_content
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-    from ResSimpy.Simulation import Simulation
 
     # Act
     simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
@@ -783,7 +764,6 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-    from ResSimpy.Simulation import Simulation
 
     simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
     mocker.patch("builtins.open", structured_grid_mock)
@@ -839,7 +819,6 @@ def test_load_run_control_file_write_times_to_run_control(mocker, run_control_co
     include_file_mock = mocker.mock_open(read_data=run_control_contents)
 
     mocker.patch("builtins.open", include_file_mock)
-    from ResSimpy.Simulation import Simulation
 
     # Act
     simulation = Simulation(origin=fcs_file_name, destination='new_destination')
@@ -877,7 +856,6 @@ def test_get_simulation_start_time(mocker, log_file_contents, start_time):
 
     listdir_mock = mocker.MagicMock(return_value=['nexus_run.log', ''])
     mocker.patch("os.listdir", listdir_mock)
-    from ResSimpy.Simulation import Simulation
 
     simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
     mocker.patch("builtins.open", log_file_mock)
@@ -913,7 +891,6 @@ def test_get_simulation_end_time(mocker, log_file_contents, end_time):
 
     listdir_mock = mocker.MagicMock(return_value=['nexus_run.log', ''])
     mocker.patch("os.listdir", listdir_mock)
-    from ResSimpy.Simulation import Simulation
 
     simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
     mocker.patch("builtins.open", log_file_mock)
@@ -957,7 +934,6 @@ def test_get_simulation_start_end_time(mocker, log_file_contents, expected_start
 
     listdir_mock = mocker.MagicMock(return_value=['nexus_run.log', ''])
     mocker.patch("os.listdir", listdir_mock)
-    from ResSimpy.Simulation import Simulation
 
     simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
     mocker.patch("builtins.open", log_file_mock)
@@ -1001,7 +977,6 @@ def test_view_command(mocker, structured_grid_file_contents, expected_text):
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-    from ResSimpy.Simulation import Simulation
 
     # Act
     result = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
@@ -1035,7 +1010,6 @@ def test_get_abs_structured_grid_path(mocker, fcs_file, expected_result):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
-    from ResSimpy.Simulation import Simulation
 
     # Act
     simulation = Simulation(origin='testpath1/Path.fcs')
@@ -1060,7 +1034,6 @@ def test_get_abs_surface_file_path(mocker, fcs_file, expected_result):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
-    from ResSimpy.Simulation import Simulation
 
     # Act
     simulation = Simulation(origin='testpath1/Path.fcs')
@@ -1105,8 +1078,6 @@ def test_get_abs_surface_file_path(mocker, fcs_file, expected_result):
 def test_get_base_case_run_time(mocker, log_file_contents, run_time):
     """Test the 'retrieve previous time for run' functionality"""
     # Arrange
-    from ResSimpy.Simulation import Simulation
-
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\n"
     log_file_mock = mocker.mock_open(read_data=log_file_contents)
 
@@ -1130,8 +1101,6 @@ def test_get_base_case_run_time(mocker, log_file_contents, run_time):
 
     new_open_mock = mocker.mock_open(read_data='Nexus finished\n')
     mocker.patch("builtins.open", new_open_mock)
-
-    # simulation.get_simulation_status()
 
     # Act
     result = simulation.get_base_case_run_time()
@@ -1222,7 +1191,6 @@ def test_get_simulation_progress(mocker, log_file_contents, times, expected_prog
 
     listdir_mock = mocker.MagicMock(return_value=['nexus_run.log', ''])
     mocker.patch("os.listdir", listdir_mock)
-    from ResSimpy.Simulation import Simulation
 
     simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="mayall")
     simulation.modify(section="RUNCONTROL", keyword="TIME", content=times, operation='REPLACE')
@@ -1252,7 +1220,6 @@ def test_get_check_oil_gas_types_for_models_different_types(mocker):
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-    from ResSimpy.Simulation import Simulation
 
     # Act / Assert
     with pytest.raises(ValueError):
@@ -1293,7 +1260,6 @@ def test_get_check_oil_gas_types_for_models_same_types(mocker, fcs_file_contents
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-    from ResSimpy.Simulation import Simulation
 
     # Act
     result = Simulation.get_check_oil_gas_types_for_models(models)
@@ -1337,7 +1303,6 @@ def test_get_check_oil_gas_types_for_models_no_type_found(mocker, fcs_file_conte
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-    from ResSimpy.Simulation import Simulation
 
     # Act / Assert
     with pytest.raises(ValueError):
