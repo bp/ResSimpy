@@ -1,0 +1,27 @@
+DESC Nexus Oil Model Template
+DESC To be utilized as part of PImatch workflow with only static (resqml) models provided
+
+RUN_UNITS ENGLISH
+DEFAULT_UNITS ENGLISH
+DATEFORMAT MM/DD/YYYY
+
+GRID_FILES
+    STRUCTURED_GRID	Includes/grid_data/main_grid.dat
+    OPTIONS		Includes/nexus_data/options.dat
+
+ROCK_FILES
+    ROCK Method 1	Includes/nexus_data/rock.dat	  ! Contains pressure reference
+    RELPM Method 1 	Includes/nexus_data/relpm.dat
+
+PVT_FILES
+    PVT Method 1 	Includes/nexus_data/pvt_pvt.dat
+    WATER Method 1 	Includes/nexus_data/pvt_water.dat  ! Contains pressure reference
+
+INITIALIZATION_FILES
+    EQUIL Method 1 	Includes/nexus_data/init_equil.dat ! Contains pressure reference
+   
+! Recurrent files are optional. Without them, Nexus runs in Standalone mode
+RECURRENT_FILES
+    RUNCONTROL		Includes/nexus_data/mayall-runcontrol.dat
+    WELLS Set 1		Includes/nexus_data/mayall-wells.dat
+    SURFACE Network 1	Includes/nexus_data/mayall_hm-gaswater_surface.dat

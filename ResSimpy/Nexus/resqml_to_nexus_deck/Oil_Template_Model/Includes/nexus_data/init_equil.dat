@@ -1,0 +1,5 @@
+ENGLISH ! Units
+
+PINIT 2591      ! Initial reservoir pressure at the specified depth (psia)
+DINIT 5200      ! Datum depth (ft)
+WOC 5785        ! Depth of the water-oil contact (ft)

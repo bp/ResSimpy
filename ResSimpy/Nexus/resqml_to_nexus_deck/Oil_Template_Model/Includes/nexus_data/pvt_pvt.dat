@@ -1,0 +1,10 @@
+ENGLISH ! Units
+
+WATEROIL API 30. ! degrees
+
+OIL ! Table 
+  PRES	BO	VO
+! psia  rb/stb  cp
+  1000	1.4	0.9
+  20000	1.1	1.0
+
