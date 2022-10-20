@@ -1,6 +1,6 @@
 import pytest
-from ResSimpy.Nexus.Models.StructuredGridFile import VariableEntry
-from ResSimpy.Simulation import Simulation
+from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
+from ResSimpy.NexusSimulator import NexusSimulator
 
 
 def mock_multiple_opens(mocker, filename, fcs_file_contents, run_control_contents, include_contents,
@@ -60,7 +60,7 @@ def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expec
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    simulation = Simulation(origin='testpath1/Path.fcs')
+    simulation = NexusSimulator(origin='testpath1/Path.fcs')
 
     # Assert
     assert simulation.run_control_file == expected_run_control_path
@@ -82,7 +82,7 @@ def test_load_fcs_space_in_filename(mocker, run_control_path, expected_run_contr
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    simulation = Simulation(origin='testpath1/Path.fcs')
+    simulation = NexusSimulator(origin='testpath1/Path.fcs')
 
     # Assert
     assert simulation.run_control_file == expected_run_control_path
@@ -98,7 +98,7 @@ def test_load_fcs_file_comment_after_declaration(mocker):
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    simulation = Simulation(origin='testpath1/Path.fcs')
+    simulation = NexusSimulator(origin='testpath1/Path.fcs')
 
     # Assert
     assert simulation.run_control_file == "testpath1/run_control_2.inc"
@@ -122,7 +122,7 @@ def test_output_destination_missing(mocker, run_control_path, expected_run_contr
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    simulation = Simulation(origin='test/Path.fcs', destination='original_output_path')
+    simulation = NexusSimulator(origin='test/Path.fcs', destination='original_output_path')
     with pytest.raises(ValueError):
         simulation.set_output_path(None)
 
@@ -148,7 +148,7 @@ def test_origin_missing(mocker, run_control_path, expected_run_control_path, dat
 
     # Act
     with pytest.raises(ValueError):
-        Simulation()
+        NexusSimulator()
 
 
 @pytest.mark.parametrize(
@@ -197,7 +197,7 @@ def test_load_run_control_file_times_in_include_file(mocker, date_format, expect
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    simulation = Simulation(origin=fcs_file_name)
+    simulation = NexusSimulator(origin=fcs_file_name)
     result_times = simulation.get_content(section="RUNCONTROL", keyword="TIME")
 
     # Assert
@@ -232,7 +232,7 @@ def test_load_run_control_invalid_times(mocker, date_format, run_control_content
 
     # Act
     with pytest.raises(ValueError):
-        Simulation(origin=fcs_file_name)
+        NexusSimulator(origin=fcs_file_name)
 
 
 @pytest.mark.skip("re-enable once model moving has been implemented")
@@ -248,7 +248,7 @@ def test_output_to_existing_directory(mocker):
 
     # Act + Assert
     with pytest.raises(FileExistsError):
-        Simulation(origin='test/Path.fcs', destination='original_output_path')
+        NexusSimulator(origin='test/Path.fcs', destination='original_output_path')
 
 
 @pytest.mark.parametrize(
@@ -307,7 +307,7 @@ def test_modify_times(mocker, date_format, expected_use_american_date_format,
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    simulation = Simulation(origin=fcs_file_name, destination="test_new_destination")
+    simulation = NexusSimulator(origin=fcs_file_name, destination="test_new_destination")
     simulation.modify(section="RUNCONTROL", keyword="TIME", content=new_times, operation=operation)
     result_times = simulation.get_content(section="RUNCONTROL", keyword="TIME")
 
@@ -378,7 +378,7 @@ def test_modify_times_invalid_date(mocker, date_format, expected_use_american_da
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    simulation = Simulation(origin=fcs_file_name)
+    simulation = NexusSimulator(origin=fcs_file_name)
     with pytest.raises(ValueError):
         simulation.modify(section="RUNCONTROL", keyword="TIME", content=new_times, operation=operation)
     result_times = simulation.get_content(section="RUNCONTROL", keyword="TIME")
@@ -392,13 +392,13 @@ def test_modify_times_invalid_date(mocker, date_format, expected_use_american_da
 def test_run_simulator(mocker):
     """Testing the Simulator run code"""
     # Arrange
-    from ResSimpy.Simulation import Simulation
+    from ResSimpy.NexusSimulator import NexusSimulator
     fcs_file = f"RUNCONTROL /run/control/path\nDATEFORMAT DD/MM/YYYY\n"
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    simulation = Simulation(origin='testpath1/Path.fcs', destination="test_new_destination")
+    simulation = NexusSimulator(origin='testpath1/Path.fcs', destination="test_new_destination")
     result = simulation.run_simulation()
 
     # Assert
@@ -417,7 +417,7 @@ def test_get_status_running(mocker):
     mocker.patch("os.listdir", listdir_mock)
 
     # Act
-    simulation = Simulation(origin='testpath1/Path.fcs', destination="test_new_destination")
+    simulation = NexusSimulator(origin='testpath1/Path.fcs', destination="test_new_destination")
     result = simulation.get_simulation_status()
 
     # Assert
@@ -447,7 +447,7 @@ def test_get_status_finished(mocker, log_file_contents, errors, warnings):
 
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
 
     mocker.patch("builtins.open", log_file_mock)
 
@@ -483,7 +483,7 @@ def test_get_status_running_from_log(mocker, log_file_contents, job_id):
     listdir_mock = mocker.MagicMock(return_value=['nexus_run.log', ''])
     mocker.patch("os.listdir", listdir_mock)
 
-    simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
     mocker.patch("builtins.open", log_file_mock)
 
     expected_result = f"Job Running, ID: {job_id}"
@@ -524,7 +524,7 @@ def test_load_structured_grid_file_basic_properties(mocker, structured_grid_file
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
     result = simulation.get_structured_grid()
 
     # Assert
@@ -578,7 +578,7 @@ def test_load_structured_grid_file_dict_basic_properties(mocker, structured_grid
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
     result = simulation.get_structured_grid_dict()
 
     # Assert
@@ -608,7 +608,7 @@ def test_load_structured_grid_file_fails(mocker):
 
     # Act
     with pytest.raises(ValueError):
-        simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
+        simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
 
 
 @pytest.mark.parametrize("structured_grid_file_contents, expected_water_saturation_modifier, "
@@ -641,7 +641,7 @@ def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
     result = simulation.get_structured_grid_dict()
 
     # Assert
@@ -698,7 +698,7 @@ def test_load_structured_grid_file_k_values(mocker, structured_grid_file_content
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
     result = simulation.get_structured_grid()
 
     # Assert
@@ -765,7 +765,7 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
 
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
     mocker.patch("builtins.open", structured_grid_mock)
 
     # Act
@@ -821,7 +821,7 @@ def test_load_run_control_file_write_times_to_run_control(mocker, run_control_co
     mocker.patch("builtins.open", include_file_mock)
 
     # Act
-    simulation = Simulation(origin=fcs_file_name, destination='new_destination')
+    simulation = NexusSimulator(origin=fcs_file_name, destination='new_destination')
     result_times = simulation.get_content(section="RUNCONTROL", keyword="TIME")
 
     # Assert
@@ -857,7 +857,7 @@ def test_get_simulation_start_time(mocker, log_file_contents, start_time):
     listdir_mock = mocker.MagicMock(return_value=['nexus_run.log', ''])
     mocker.patch("os.listdir", listdir_mock)
 
-    simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
     mocker.patch("builtins.open", log_file_mock)
 
     # Act
@@ -892,7 +892,7 @@ def test_get_simulation_end_time(mocker, log_file_contents, end_time):
     listdir_mock = mocker.MagicMock(return_value=['nexus_run.log', ''])
     mocker.patch("os.listdir", listdir_mock)
 
-    simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
     mocker.patch("builtins.open", log_file_mock)
 
     # Act
@@ -935,7 +935,7 @@ def test_get_simulation_start_end_time(mocker, log_file_contents, expected_start
     listdir_mock = mocker.MagicMock(return_value=['nexus_run.log', ''])
     mocker.patch("os.listdir", listdir_mock)
 
-    simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
     mocker.patch("builtins.open", log_file_mock)
 
     # Act
@@ -979,7 +979,7 @@ def test_view_command(mocker, structured_grid_file_contents, expected_text):
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    result = Simulation(origin='testpath1/nexus_run.fcs', destination="new_destination")
+    result = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
 
     mocker.patch("builtins.open", structured_grid_mock)
 
@@ -1012,7 +1012,7 @@ def test_get_abs_structured_grid_path(mocker, fcs_file, expected_result):
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    simulation = Simulation(origin='testpath1/Path.fcs')
+    simulation = NexusSimulator(origin='testpath1/Path.fcs')
     result = simulation.get_abs_structured_grid_path('grid.dat')
 
     # Assert
@@ -1036,7 +1036,7 @@ def test_get_abs_surface_file_path(mocker, fcs_file, expected_result):
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    simulation = Simulation(origin='testpath1/Path.fcs')
+    simulation = NexusSimulator(origin='testpath1/Path.fcs')
     result = simulation.get_surface_file_path()
 
     # Assert
@@ -1094,7 +1094,7 @@ def test_get_base_case_run_time(mocker, log_file_contents, run_time):
     mocker.patch("os.rename", rename_mock)
     mocker.patch("os.listdir", initial_listdir_mock)
 
-    simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="/test/new_destination", root_name="new_case")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="/test/new_destination", root_name="new_case")
 
     final_listdir_mock = mocker.Mock(return_value=['new_case.log', ''])
     mocker.patch("os.listdir", final_listdir_mock)
@@ -1192,7 +1192,7 @@ def test_get_simulation_progress(mocker, log_file_contents, times, expected_prog
     listdir_mock = mocker.MagicMock(return_value=['nexus_run.log', ''])
     mocker.patch("os.listdir", listdir_mock)
 
-    simulation = Simulation(origin='testpath1/nexus_run.fcs', destination="mayall")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="mayall")
     simulation.modify(section="RUNCONTROL", keyword="TIME", content=times, operation='REPLACE')
     mocker.patch("builtins.open", log_file_mock)
 
@@ -1223,7 +1223,7 @@ def test_get_check_oil_gas_types_for_models_different_types(mocker):
 
     # Act / Assert
     with pytest.raises(ValueError):
-        Simulation.get_check_oil_gas_types_for_models(models)
+        NexusSimulator.get_check_oil_gas_types_for_models(models)
 
 
 @pytest.mark.parametrize("fcs_file_contents_1, fcs_file_contents_2, surface_file_contents_1, surface_file_contents_2,"
@@ -1262,7 +1262,7 @@ def test_get_check_oil_gas_types_for_models_same_types(mocker, fcs_file_contents
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    result = Simulation.get_check_oil_gas_types_for_models(models)
+    result = NexusSimulator.get_check_oil_gas_types_for_models(models)
 
     # Assert
     assert result == expected_type
@@ -1306,7 +1306,7 @@ def test_get_check_oil_gas_types_for_models_no_type_found(mocker, fcs_file_conte
 
     # Act / Assert
     with pytest.raises(ValueError):
-        Simulation.get_check_oil_gas_types_for_models(models)
+        NexusSimulator.get_check_oil_gas_types_for_models(models)
 
 
 #
@@ -1339,7 +1339,7 @@ def test_get_check_oil_gas_types_for_models_no_type_found(mocker, fcs_file_conte
 #     # Providing a relative path to the fcs file + Non-USA date format
 #     ("run/control/path", "testpath1/run/control/path", "DD/MM/YYYY", False)
 # ])
-# def test_change_force_output(mocker, Simulation, run_control_path, expected_run_control_path,
+# def test_change_force_output(mocker, NexusSimulator, run_control_path, expected_run_control_path,
 #                                                  date_format, expected_use_american_date_format):
 #     """Changing Force Output property"""
 #     # Arrange
@@ -1348,7 +1348,7 @@ def test_get_check_oil_gas_types_for_models_no_type_found(mocker, fcs_file_conte
 #     mocker.patch("builtins.open", open_mock)
 #
 #     # Act
-#     simulation = Simulation(origin='testpath1/Path', force_output=False)
+#     simulation = NexusSimulator(origin='testpath1/Path', force_output=False)
 #     simulation.change_force_output(True)
 #     simulation.set_output_path(None)
 #

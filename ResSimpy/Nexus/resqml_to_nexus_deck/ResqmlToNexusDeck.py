@@ -6,7 +6,7 @@ import resqpy.weights_and_measures as wam
 import os
 # from string import Template
 from inspect import getsourcefile
-from ResSimpy.Simulation import Simulation
+from ResSimpy.NexusSimulator import NexusSimulator
 import ResSimpy.Nexus.nexus_file_operations as nexus_file_operations
 
 
@@ -132,9 +132,9 @@ class ResqmlToNexusDeck:
     def __create_basic_model(self):
         base_folder = os.path.split(self.output_folder)[0]
         generic_model_location = self.get_model_template_location()
-        self.simulation = Simulation(origin=generic_model_location, destination=base_folder,
-                                     nexus_data_name="nexus_data", manual_fcs_tidy_call=True, root_name=self.root_name,
-                                     write_times=False)
+        self.simulation = NexusSimulator(origin=generic_model_location, destination=base_folder,
+                                         nexus_data_name="nexus_data", manual_fcs_tidy_call=True, root_name=self.root_name,
+                                         write_times=False)
 
     def __load_property_arrays(self):
         """ Load in the arrays from the models if they exist """

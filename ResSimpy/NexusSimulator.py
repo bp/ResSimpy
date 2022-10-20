@@ -3,17 +3,17 @@ import os
 import copy
 from functools import cmp_to_key
 from datetime import timedelta
-from ResSimpy.Nexus.Models.FcsConfig import FcsConfig
-from ResSimpy.Nexus.Models.StructuredGridFile import StructuredGridFile, PropertyToLoad
+from ResSimpy.Nexus.DataModels.FcsConfig import FcsConfig
+from ResSimpy.Nexus.DataModels.StructuredGridFile import StructuredGridFile, PropertyToLoad
 import ResSimpy.Nexus.nexus_file_operations as nexus_file_operations
 import resqpy.model as rq
 
 
-class Simulation:
+class NexusSimulator:
     # Constants
     DATE_WITH_TIME_LENGTH = 20
 
-    def __init__(self, origin=None, destination=None, simulator='Nexus', force_output=False, root_name=None,
+    def __init__(self, origin=None, destination=None, force_output=False, root_name=None,
                  nexus_data_name="data", write_times=True, manual_fcs_tidy_call=False):
 
         if origin is None:
@@ -135,7 +135,7 @@ class Simulation:
             if surface_filename is not None:
                 surface_filename = surface_filename if os.path.isabs(surface_filename) else \
                     os.path.dirname(model) + "/" + surface_filename
-                model_fluid_type = Simulation.get_fluid_type(surface_file_name=surface_filename)
+                model_fluid_type = NexusSimulator.get_fluid_type(surface_file_name=surface_filename)
 
             if fluid_type is None:
                 fluid_type = model_fluid_type
@@ -175,7 +175,7 @@ class Simulation:
                 fluid_type = "GASWATER"
                 break
             elif "EOS" in line:
-                fluid_type = Simulation.get_eos_details(surface_file)
+                fluid_type = NexusSimulator.get_eos_details(surface_file)
 
         if fluid_type is None:
             raise ValueError("No Oil / Gas type detected")
@@ -183,7 +183,7 @@ class Simulation:
         return fluid_type
 
     def get_model_oil_type(self):
-        return Simulation.get_fluid_type(self.__surface_file_path)
+        return NexusSimulator.get_fluid_type(self.__surface_file_path)
 
     def get_rootname(self):
         """ Returns the name of the fcs file without the .fcs extension """

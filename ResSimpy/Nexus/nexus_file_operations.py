@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from ResSimpy.Nexus.Models.StructuredGridFile import VariableEntry
+from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
 from string import Template
 
 
