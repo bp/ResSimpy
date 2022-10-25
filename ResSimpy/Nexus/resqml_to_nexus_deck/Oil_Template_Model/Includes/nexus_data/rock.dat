@@ -1,0 +1,5 @@
+ENGLISH ! Units
+
+!     Rock compressibility
+CR 2.e-5 	! 1/psi
+PREF 2591 	! psia

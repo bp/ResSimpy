@@ -1,0 +1,5 @@
+ENGLISH ! Units
+
+PINIT 2591      ! Initial reservoir pressure at the specified depth (psia)
+DINIT 5200      ! Datum depth (ft)
+GWC   5785      ! Depth of the gas-water contact (ft)

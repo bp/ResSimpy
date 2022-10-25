@@ -1,0 +1,67 @@
+
+
+MAPBINARY
+MAPVDB
+MAPOUT ALL
+
+!  ----------------
+!  GRID DATA ARRAYS
+!  ----------------
+
+!
+!  The model grid
+!
+NOLIST
+
+ARRAYS ROOT
+
+INCLUDE basic-grid.corp
+! INCLUDE /home/flcvid/scratch/flcvid/resqml_nexus_tests/main_grid.corp
+! INCLUDE /tcchou/isebo0/Projects/2020/Geomatch/Geomatch_month/test_corp.corp 
+
+LIST
+
+
+!
+!  Gridblock properties
+!
+!  Default the rock properties everywhere to background values
+!
+
+! KX VALUE
+! INCLUDE /tcchou/isebo0/Projects/2020/Geomatch/Geomatch_month/test_perm.inc
+
+KX CON
+   350      !  PERMX
+
+KY MULT
+   1.0  KX  ! PERMY = PERMX
+
+KZ MULT
+   0.1  KX  ! PERMZ = 0.1*PERMX
+
+POROSITY CON
+   0.2      !  PORO
+
+NETGRS CON
+   0.8      !  Net-to-gross
+
+SWL CON
+   0.26     ! Minimum water saturation
+
+SWR CON
+   0.30     ! Residual water saturation
+
+SWRO CON
+   0.8      ! Saturation of water at residual oil
+
+SWU CON
+   1.0      ! Maximum water saturation
+
+!
+!  Define the fluid equilibrium regions
+!     IEQUIL 1   = the main field 
+!
+IEQUIL CON
+   1
+
