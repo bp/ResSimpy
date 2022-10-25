@@ -22,6 +22,6 @@ INITIALIZATION_FILES
    
 ! Recurrent files are optional. Without them, Nexus runs in Standalone mode
 RECURRENT_FILES
-    RUNCONTROL		Includes/nexus_data/mayall-runcontrol.dat
-    WELLS Set 1		Includes/nexus_data/mayall-wells.dat
-    SURFACE Network 1	Includes/nexus_data/mayall_hm-wateroil_surface.dat
+    RUNCONTROL		Includes/nexus_data/basic-model-runcontrol.dat
+    WELLS Set 1		Includes/nexus_data/basic-model-wells.dat
+    SURFACE Network 1	Includes/nexus_data/basic-model_hm-wateroil_surface.dat

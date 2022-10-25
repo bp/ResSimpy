@@ -15,7 +15,7 @@ NOLIST
 
 ARRAYS ROOT
 
-INCLUDE juliana.corp
+INCLUDE basic-grid.corp
 ! INCLUDE /home/flcvid/scratch/flcvid/resqml_nexus_tests/main_grid.corp
 ! INCLUDE /tcchou/isebo0/Projects/2020/Geomatch/Geomatch_month/test_corp.corp 
 

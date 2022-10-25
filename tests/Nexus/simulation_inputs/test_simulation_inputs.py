@@ -1192,7 +1192,7 @@ def test_get_simulation_progress(mocker, log_file_contents, times, expected_prog
     listdir_mock = mocker.MagicMock(return_value=['nexus_run.log', ''])
     mocker.patch("os.listdir", listdir_mock)
 
-    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="mayall")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="basic-model")
     simulation.modify(section="RUNCONTROL", keyword="TIME", content=times, operation='REPLACE')
     mocker.patch("builtins.open", log_file_mock)
 
@@ -1200,7 +1200,7 @@ def test_get_simulation_progress(mocker, log_file_contents, times, expected_prog
     result = simulation.get_simulation_progress()
 
     # Assert
-    listdir_mock.assert_called_with('mayall')
+    listdir_mock.assert_called_with('basic-model')
     assert result == expected_progress
 
 
