@@ -1,6 +1,8 @@
 import pytest
 from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
-from ResSimpy.NexusSimulator import NexusSimulator
+from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+from pytest_mock import MockerFixture
+from unittest.mock import Mock
 
 
 def mock_multiple_opens(mocker, filename, fcs_file_contents, run_control_contents, include_contents,
@@ -46,6 +48,18 @@ def mock_different_model_opens(mocker, filename, fcs_file_contents_1, fcs_file_c
     return open_mock
 
 
+def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock_open: Mock,
+                                     mocker_fixture: MockerFixture):
+    assert len(modifying_mock_open.call_args_list) == 2
+    assert modifying_mock_open.call_args_list[0] == mocker_fixture.call('/my/file/path', 'r')
+    assert modifying_mock_open.call_args_list[1] == mocker_fixture.call('/my/file/path', 'w')
+
+    # Get all the calls to write() and check that the contents are what we expect
+    list_of_writes = [call for call in modifying_mock_open.mock_calls if 'call().write' in str(call)]
+    assert len(list_of_writes) == 1
+    assert list_of_writes[0].args[0] == expected_file_contents
+
+
 @pytest.mark.parametrize("run_control_path,expected_run_control_path,date_format,expected_use_american_date_format", [
     # Providing an absolute path to the fcs file + USA date format
     ("/run/control/path", "/run/control/path", "MM/DD/YYYY", True),
@@ -65,7 +79,7 @@ def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expec
     # Assert
     assert simulation.run_control_file == expected_run_control_path
     assert simulation.use_american_date_format == expected_use_american_date_format
-    open_mock.assert_called_with(expected_run_control_path)
+    open_mock.assert_called_with(expected_run_control_path, 'r')
 
 
 @pytest.mark.parametrize("run_control_path,expected_run_control_path,date_format,expected_use_american_date_format", [
@@ -87,7 +101,7 @@ def test_load_fcs_space_in_filename(mocker, run_control_path, expected_run_contr
     # Assert
     assert simulation.run_control_file == expected_run_control_path
     assert simulation.use_american_date_format == expected_use_american_date_format
-    open_mock.assert_called_with(expected_run_control_path)
+    open_mock.assert_called_with(expected_run_control_path, 'r')
 
 
 def test_load_fcs_file_comment_after_declaration(mocker):
@@ -103,7 +117,7 @@ def test_load_fcs_file_comment_after_declaration(mocker):
     # Assert
     assert simulation.run_control_file == "testpath1/run_control_2.inc"
     assert simulation.use_american_date_format == False
-    open_mock.assert_called_with("testpath1/run_control_2.inc")
+    open_mock.assert_called_with("testpath1/run_control_2.inc", 'r')
 
 
 @pytest.mark.skip("Code changed to not throw an error in this scenario now")
@@ -190,7 +204,7 @@ def test_load_run_control_file_times_in_include_file(mocker, date_format, expect
     run_control_file = run_control_contents
     include_file = include_file_contents
 
-    def mock_open_wrapper(filename):
+    def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_opens(mocker, filename, fcs_file, run_control_file, include_file).return_value
         return mock_open
 
@@ -224,7 +238,7 @@ def test_load_run_control_invalid_times(mocker, date_format, run_control_content
     run_control_file = run_control_contents
     include_file = include_file_contents
 
-    def mock_open_wrapper(filename):
+    def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_opens(mocker, filename, fcs_file, run_control_file, include_file).return_value
         return mock_open
 
@@ -371,7 +385,7 @@ def test_modify_times_invalid_date(mocker, date_format, expected_use_american_da
     run_control_file = run_control_contents
     include_file = include_file_contents
 
-    def mock_open_wrapper(filename):
+    def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_opens(mocker, filename, fcs_file, run_control_file, include_file).return_value
         return mock_open
 
@@ -392,7 +406,7 @@ def test_modify_times_invalid_date(mocker, date_format, expected_use_american_da
 def test_run_simulator(mocker):
     """Testing the Simulator run code"""
     # Arrange
-    from ResSimpy.NexusSimulator import NexusSimulator
+    from ResSimpy.Nexus.NexusSimulator import NexusSimulator
     fcs_file = f"RUNCONTROL /run/control/path\nDATEFORMAT DD/MM/YYYY\n"
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
@@ -991,20 +1005,20 @@ def test_view_command(mocker, structured_grid_file_contents, expected_text):
 @pytest.mark.parametrize("fcs_file, expected_result",
                          [
                              (
-                             'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID\n /path/to/structured/grid.dat',
-                             '/path/to/structured/grid.dat'),
+                                     'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID\n /path/to/structured/grid.dat',
+                                     '/path/to/structured/grid.dat'),
                              (
-                             'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID\n path/to/other_structured/grid.dat',
-                             'testpath1/path/to/other_structured/grid.dat'),
+                                     'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID\n path/to/other_structured/grid.dat',
+                                     'testpath1/path/to/other_structured/grid.dat'),
                              (
-                             'RUNControl run_control.inc\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_grid\n structured/grid.dat',
-                             'testpath1/structured/grid.dat'),
+                                     'RUNControl run_control.inc\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_grid\n structured/grid.dat',
+                                     'testpath1/structured/grid.dat'),
                              (
-                             'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nStructured_GRID\n path/to/includes/grid.dat',
-                             'testpath1/path/to/includes/grid.dat'),
+                                     'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nStructured_GRID\n path/to/includes/grid.dat',
+                                     'testpath1/path/to/includes/grid.dat'),
                              (
-                             'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nstructured_grid\n path/to/includes/grid.dat',
-                             'testpath1/path/to/includes/grid.dat'),
+                                     'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nstructured_grid\n path/to/includes/grid.dat',
+                                     'testpath1/path/to/includes/grid.dat'),
                          ])
 def test_get_abs_structured_grid_path(mocker, fcs_file, expected_result):
     # Arrange
@@ -1094,7 +1108,8 @@ def test_get_base_case_run_time(mocker, log_file_contents, run_time):
     mocker.patch("os.rename", rename_mock)
     mocker.patch("os.listdir", initial_listdir_mock)
 
-    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="/test/new_destination", root_name="new_case")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="/test/new_destination",
+                                root_name="new_case")
 
     final_listdir_mock = mocker.Mock(return_value=['new_case.log', ''])
     mocker.patch("os.listdir", final_listdir_mock)
@@ -1214,7 +1229,7 @@ def test_get_check_oil_gas_types_for_models_different_types(mocker):
     surface_file_contents_1 = "line 1\nline 2\nGASWATER"
     surface_file_contents_2 = "line 1\nBLACKOIL"
 
-    def mock_open_wrapper(filename):
+    def mock_open_wrapper(filename, mode):
         mock_open = mock_different_model_opens(mocker, filename, fcs_file_contents_1, fcs_file_contents_2,
                                                surface_file_contents_1, surface_file_contents_2).return_value
         return mock_open
@@ -1254,7 +1269,7 @@ def test_get_check_oil_gas_types_for_models_same_types(mocker, fcs_file_contents
     # Arrange
     models = ['path/to/model1.fcs', 'path/to/another/model2.fcs']
 
-    def mock_open_wrapper(filename):
+    def mock_open_wrapper(filename, mode):
         mock_open = mock_different_model_opens(mocker, filename, fcs_file_contents_1, fcs_file_contents_2,
                                                surface_file_contents_1, surface_file_contents_2).return_value
         return mock_open
@@ -1297,7 +1312,7 @@ def test_get_check_oil_gas_types_for_models_no_type_found(mocker, fcs_file_conte
     # Arrange
     models = ['path/to/model1.fcs', 'path/to/another/model2.fcs']
 
-    def mock_open_wrapper(filename):
+    def mock_open_wrapper(filename, mode):
         mock_open = mock_different_model_opens(mocker, filename, fcs_file_contents_1, fcs_file_contents_2,
                                                surface_file_contents_1, surface_file_contents_2).return_value
         return mock_open
@@ -1309,51 +1324,199 @@ def test_get_check_oil_gas_types_for_models_no_type_found(mocker, fcs_file_conte
         NexusSimulator.get_check_oil_gas_types_for_models(models)
 
 
-#
-# def test_get_grid_file_as_3d_list(mocker, simulation):
-#     # Arrange
-#     fcs_file = f"RUNCONTROL /run/control/path\nDATEFORMAT DD/MM/YYYY\n"
-#     open_mock = mocker.mock_open(read_data=fcs_file)
-#     mocker.patch("builtins.open", open_mock)
-#     simulation = simulation(origin='testpath1/Path')
-#
-#     grid_file = "start\n\n\n\n\n0\t0\n1\t1"
-#     grid_file_mock = mocker.mock_open(read_data=grid_file)
-#     mocker.patch("builtins.open", grid_file_mock)
-#
-#     # Act
-#     result = simulation.get_grid_file_as_3d_list('test/path')
-#
-#     # Assert
-#     assert result == []
+@pytest.mark.parametrize("original_file_contents, expected_file_contents, token, new_value, add_to_start",
+                         [("test 3", "test ABC3", "TEST", "ABC3", False),
+                          ("""!     Fluid model for network
+BLACKOIL
+!     Network default temperature
+NETTEMP 100.  !Comment after value
+
+!     lumped wellbore default to better match vip wellbore behaviour
+!     Connection defaults""",
+
+                           """!     Fluid model for network
+BLACKOIL
+!     Network default temperature
+NETTEMP 50.  !Comment after value
+
+!     lumped wellbore default to better match vip wellbore behaviour
+!     Connection defaults""",
+                           "NeTtEMp", "50.",
+                           False),
+                          ("""!     Fluid model for network
+BLACKOIL
+!     Network default temperature
+NETTEMP 100.  !Comment after value
+
+!     lumped wellbore default to better match vip wellbore behaviour
+!     Connection defaults""",
+
+                           """MYTOKEN new value
+!     Fluid model for network
+BLACKOIL
+!     Network default temperature
+NETTEMP 100.  !Comment after value
+
+!     lumped wellbore default to better match vip wellbore behaviour
+!     Connection defaults""",
+                           "MYTOKEN", "new value",
+                           True),
+                          ("""!     Fluid model for network
+BLACKOIL
+!     Network default temperature
+NETTEMP 100.  !Comment after value
+
+!     lumped wellbore default to better match vip wellbore behaviour
+!     Connection defaults""",
+
+                           """!     Fluid model for network
+BLACKOIL
+!     Network default temperature
+NETTEMP 100.  !Comment after value
+
+!     lumped wellbore default to better match vip wellbore behaviour
+!     Connection defaults
+MYTOKEN new value""",
+                           "MYTOKEN", "new value",
+                           False),
+                          ("""!     Fluid model for network
+BLACKOIL
+!     Network default temperature
+NETTEMP 100.  !Comment after value
+
+!     lumped wellbore default to better match vip wellbore behaviour
+!     Connection defaults""",
+
+                           """!     Fluid model for network
+BLACKOIL
+!     Network default temperature
+NETTEMP 100.  !Comment after value
+
+!     lumped wellbore default to better match vip wellbore behaviour
+!     Connection defaults
+TOKENNOVALUE """,
+                           "TOKENNOVALUE", "",
+                           False)
+                          ],
+                         ids=["basic case", "standard value change", "token not present (add to start)",
+                              "token not present (add to end)",
+                              "token not present and has no value"])
+def test_update_token_file_value(mocker, original_file_contents, expected_file_contents, token, new_value,
+                                 add_to_start):
+    """Test the update token value functionality"""
+    # Arrange
+
+    mock_original_opens = mocker.mock_open()
+    mocker.patch("builtins.open", mock_original_opens)
+
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
+
+    modifying_mock_open = mocker.mock_open(read_data=original_file_contents)
+    mocker.patch("builtins.open", modifying_mock_open)
+
+    # Act
+    simulation.update_file_value(file_path='/my/file/path', token=token, new_value=new_value, add_to_start=add_to_start)
+
+    # Assert
+    check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
+                                     modifying_mock_open=modifying_mock_open,
+                                     mocker_fixture=mocker)
 
 
-# Check that the new values are the same size as the existing grid
-"""Check that all k values relate to a valid include file"""
+@pytest.mark.parametrize("original_file_contents, expected_file_contents, token",
+                         [
+                             ("test 3", "! test 3", "TEST"),
+                             ("""START 11/01/1992
 
-# TODO: Re-write the following test when the force output functionality has been confirmed during Geo Month
+!     Timestepping method
+METHOD IMPLICIT
+!     Current optimized default for facilities
+SOLVER FACILITIES EXTENDED
+GRIDSOLVER IMPLICIT_COUPLING NONE
 
-# @pytest.mark.parametrize("run_control_path,expected_run_control_path,date_format,expected_use_american_date_format", [
-#     # Providing an absolute path to the fcs file + USA date format
-#     ("/run/control/path", "/run/control/path", "MM/DD/YYYY", True),
-#     # Providing a relative path to the fcs file + Non-USA date format
-#     ("run/control/path", "testpath1/run/control/path", "DD/MM/YYYY", False)
-# ])
-# def test_change_force_output(mocker, NexusSimulator, run_control_path, expected_run_control_path,
-#                                                  date_format, expected_use_american_date_format):
-#     """Changing Force Output property"""
-#     # Arrange
-#     fcs_file = "RUNCONTROL run/control/path\nDATEFORMAT DD/MM/YYYY\n"
-#     open_mock = mocker.mock_open(read_data=fcs_file)
-#     mocker.patch("builtins.open", open_mock)
-#
-#     # Act
-#     simulation = NexusSimulator(origin='testpath1/Path', force_output=False)
-#     simulation.change_force_output(True)
-#     simulation.set_output_path(None)
-#
-#
-#     # Assert
-#     assert simulation.run_control_file == expected_run_control_path
-#     assert simulation.use_american_date_format == expected_use_american_date_format
-#     open_mock.assert_called_with(expected_run_control_path)
+!     Use vip units for output to vdb
+VIPUNITS""",
+
+                              """START 11/01/1992
+
+!     Timestepping method
+! METHOD IMPLICIT
+!     Current optimized default for facilities
+SOLVER FACILITIES EXTENDED
+GRIDSOLVER IMPLICIT_COUPLING NONE
+
+!     Use vip units for output to vdb
+VIPUNITS""",
+                              "METHOD")
+                         ], ids=["standard comment out", "Larger file"])
+def test_comment_out_file_value(mocker, original_file_contents, expected_file_contents, token):
+    """Testing the functionality to comment out a line containing a specific token"""
+    # Arrange
+    mock_original_opens = mocker.mock_open()
+    mocker.patch("builtins.open", mock_original_opens)
+
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
+
+    modifying_mock_open = mocker.mock_open(read_data=original_file_contents)
+    mocker.patch("builtins.open", modifying_mock_open)
+
+    # Act
+    simulation.comment_out_file_value(file_path='/my/file/path', token=token)
+
+    # Assert
+    check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
+                                     modifying_mock_open=modifying_mock_open,
+                                     mocker_fixture=mocker)
+
+
+def test_add_map_statements(mocker):
+    """Testing the functionality to comment out a line containing a specific token"""
+    # Arrange
+
+    original_file_contents = """START 11/01/1992
+
+!     Timestepping method
+METHOD IMPLICIT
+!     Current optimized default for facilities
+SOLVER FACILITIES EXTENDED
+GRIDSOLVER IMPLICIT_COUPLING NONE
+
+!     Use vip units for output to vdb
+VIPUNITS
+
+MAPBINARY
+PLOTBINARY    
+    """
+
+    expected_file_contents = """MAPVDB
+MAPOUT ALL
+START 11/01/1992
+
+!     Timestepping method
+METHOD IMPLICIT
+!     Current optimized default for facilities
+SOLVER FACILITIES EXTENDED
+GRIDSOLVER IMPLICIT_COUPLING NONE
+
+!     Use vip units for output to vdb
+VIPUNITS
+
+MAPBINARY
+PLOTBINARY    
+    """
+
+    mock_original_opens = mocker.mock_open(read_data="STRUCTURED_GRID /my/file/path")
+    mocker.patch("builtins.open", mock_original_opens)
+
+    simulation = NexusSimulator(origin='nexus_run.fcs')
+
+    modifying_mock_open = mocker.mock_open(read_data=original_file_contents)
+    mocker.patch("builtins.open", modifying_mock_open)
+
+    # Act
+    simulation.add_map_properties_to_start_of_grid_file()
+
+    # Assert
+    check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
+                                     modifying_mock_open=modifying_mock_open,
+                                     mocker_fixture=mocker)

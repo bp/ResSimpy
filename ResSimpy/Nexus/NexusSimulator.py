@@ -3,13 +3,14 @@ import os
 import copy
 from functools import cmp_to_key
 from datetime import timedelta
-from ResSimpy.Nexus.DataModels.FcsConfig import FcsConfig
 from ResSimpy.Nexus.DataModels.StructuredGridFile import StructuredGridFile, PropertyToLoad
 import ResSimpy.Nexus.nexus_file_operations as nexus_file_operations
 import resqpy.model as rq
 
+from ResSimpy.Simulator import Simulator
 
-class NexusSimulator:
+
+class NexusSimulator(Simulator):
     # Constants
     DATE_WITH_TIME_LENGTH = 20
 
@@ -19,9 +20,10 @@ class NexusSimulator:
         if origin is None:
             raise ValueError("FCS File Path is required")
 
+        super().__init__()
+
         self.run_control_file = ''
         self.__times = []
-        self.__start_date = ''
         self.__destination = None
         self.use_american_date_format = False
         self.__job_id = -1
@@ -67,10 +69,6 @@ class NexusSimulator:
     def get_structured_grid_path(self):
         """Returns the location of the structured grid file"""
         return self.__structured_grid_file_path
-
-    def get_start_date(self):
-        """Returns the location of the model"""
-        return self.__start_date
 
     def get_new_fcs_name(self):
         """Returns the new name for the FCS file without the fcs extension"""
@@ -253,8 +251,10 @@ class NexusSimulator:
         if self.run_control_file != '':
             self.__load_run_control_file()
 
-    def update_file_value(self, file_path, token, new_value, add_to_start=False):
-        """Updates a value in a file if the format is {TOKEN} {VALUE}"""
+    @staticmethod
+    def update_file_value(file_path, token, new_value, add_to_start=False):
+        """Updates a value in a file if it is present and in the format {TOKEN} {VALUE}. If the token
+        isn't present, it will add the token + value to either the start or end of the file"""
         file = nexus_file_operations.load_file_as_list(file_path)
 
         line_counter = 0
@@ -263,18 +263,23 @@ class NexusSimulator:
             modified_line = line.lower().replace('/t', ' ')
             modified_line = ' '.join(modified_line.split())
             if token.lower() in modified_line:
-                # nexus_file_operations.get_next_value(line_counter, file, token, ignore_values=token, replace_with=new_value)
-                file[line_counter] = f"{token} {new_value}\n"
+                # We've found the token, now replace the value
+                token_location = modified_line.find(token.lower())
+                line_before_token_value = line[0: token_location]
+                line_after_token = line[token_location:]
+                current_value = nexus_file_operations.get_next_value(0, [line], line_after_token[len(token) + 1:])
+                new_line_after = line_after_token.replace(current_value, new_value, 1)
+                file[line_counter] = line_before_token_value + new_line_after
                 token_found = True
                 break
             line_counter += 1
 
         if token_found is False:
-            token_line = f"{token} {new_value}\n"
+            token_line = f"{token} {new_value}"
             if add_to_start:
-                file.insert(0, token_line)
+                file.insert(0,token_line + '\n')
             else:
-                file.append(token_line)
+                file.append('\n' + token_line)
 
         new_file_str = "".join(file)
 
@@ -285,17 +290,19 @@ class NexusSimulator:
         """Updates a value in the FCS file"""
         self.update_file_value(self.__new_fcs_file_path, token=token, new_value=new_value, add_to_start=add_to_start)
 
-    def comment_out_file_value(self, token, file_path):
-        """Comments out a line containing the specified token"""
+    @staticmethod
+    def comment_out_file_value(token, file_path):
+        """Comments out an uncommented line containing the specified token"""
         file = nexus_file_operations.load_file_as_list(file_path)
 
         line_counter = 0
         for line in file:
             modified_line = line.lower().replace('/t', ' ')
             modified_line = ' '.join(modified_line.split())
-            if token.lower() in modified_line:
-                # nexus_file_operations.get_next_value(line_counter, fcs_file, token, ignore_values=token, replace_with=new_value)
-                file[line_counter] = f"! {file[line_counter]}\n"
+            # If we've found the token, and it isn't already commented, comment it out
+            if token.lower() in modified_line and \
+                    (modified_line.find(token.lower()) < modified_line.find("!") or modified_line.find("!") == -1):
+                file[line_counter] = f"! {file[line_counter]}"
                 break
             line_counter += 1
 
@@ -321,7 +328,7 @@ class NexusSimulator:
             if nexus_file_operations.check_token('START', line):
                 value = nexus_file_operations.get_token_value('START', line, run_control_file)
                 if value is not None:
-                    self.__start_date = value
+                    self.start_date_set(value)
             elif 'INCLUDE' in line:
                 value = nexus_file_operations.get_token_value('INCLUDE', line, run_control_file)
                 if value is not None:
@@ -357,7 +364,7 @@ class NexusSimulator:
         with open(file_path, "w") as text_file:
             text_file.write(new_file_str)
 
-    def __convert_date_to_number(self, date):
+    def __convert_date_to_number(self, date: any) -> float:
         """ Converts a date to a number designating number of days from the start date """
         try:
             converted_date = float(date)
@@ -366,23 +373,23 @@ class NexusSimulator:
 
         if isinstance(converted_date, float):
             date_format = self.__date_format_string
-            if len(self.__start_date) == self.DATE_WITH_TIME_LENGTH:
+            if len(self.start_date) == self.DATE_WITH_TIME_LENGTH:
                 date_format += "(%H:%M:%S)"
-            start_date_as_datetime = datetime.strptime(self.__start_date, date_format)
+            start_date_as_datetime = datetime.strptime(self.start_date, date_format)
             date_as_datetime = start_date_as_datetime + timedelta(days=converted_date)
         else:
             start_date_format = self.__date_format_string
-            if len(self.__start_date) == self.DATE_WITH_TIME_LENGTH:
+            if len(self.start_date) == self.DATE_WITH_TIME_LENGTH:
                 start_date_format += "(%H:%M:%S)"
             end_date_format = self.__date_format_string
             if len(date) == self.DATE_WITH_TIME_LENGTH:
                 end_date_format += "(%H:%M:%S)"
             date_as_datetime = datetime.strptime(date, end_date_format)
-            start_date_as_datetime = datetime.strptime(self.__start_date, start_date_format)
+            start_date_as_datetime = datetime.strptime(self.start_date, start_date_format)
         difference = date_as_datetime - start_date_as_datetime
         return difference.total_seconds() / timedelta(days=1).total_seconds()
 
-    def __compare_dates(self, x: any, y: any):
+    def __compare_dates(self, x: any, y: any) -> float:
         """ Comparator for two supplied dates or numbers """
         return self.__convert_date_to_number(x) - self.__convert_date_to_number(y)
 
@@ -456,8 +463,8 @@ class NexusSimulator:
             self.__check_date_format(time)
 
         new_times = self.__sort_remove_duplicate_times(times=content)
-        if len(new_times) > 0 > self.__compare_dates(new_times[0], self.__start_date):
-            raise ValueError(f"The supplied date of {new_times[0]} precedes the start date of {self.__start_date}")
+        if len(new_times) > 0 > self.__compare_dates(new_times[0], self.start_date):
+            raise ValueError(f"The supplied date of {new_times[0]} precedes the start date of {self.start_date}")
 
         if operation.lower() == 'merge':
             self.__times.extend(content)
@@ -504,65 +511,6 @@ class NexusSimulator:
         filename = self.run_control_file
         with open(filename, "w") as text_file:
             text_file.write(new_file_str)
-
-    # def call_fcstidy(self, fcs_files=[], output_dir='.', options=''):
-    #     """Wrapper function that calls fcstidy on the command line
-    #     Arguments:
-    #         fcs_files: FCS file(s) to tidy (can be absolute or relative paths), input as a list
-    #         output_dir: Output directory (can be absolute or relative path), input as a string
-    #         options: fcstidy options input as a single string, e.g., '--pathkeep 0 --force --logrun'
-    #     """
-    #
-    #     # Build command to run
-    #     command = "fcstidy {} {} {}".format(options, ' '.join(fcs_files), output_dir)
-    #     proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    #     out, err = proc.communicate()
-    #     if out:
-    #         print('Out: {}'.format(out.decode()))
-    #     if err:
-    #         print('Error: {}'.format(err.decode()))
-    #
-    #     self.__new_fcs_file_path = self.__destination + "/" + self.__root_name + ".fcs"
-    #
-    #     if self.__root_name != self.get_rootname():
-    #         old_fcs_path = self.__destination + "/" + self.get_rootname() + ".fcs"
-    #         os.rename(old_fcs_path, self.__new_fcs_file_path)
-    #
-    # def __output_to_new_directory(self):
-    #     """ Outputs the input files to a new directory """
-    #     self.__check_output_path()
-    #     if self.__force_output is True or os.path.exists(self.__destination) is False:
-    #
-    #         nexus_input_files = NexusInputFiles([self.__origin])
-    #         nexus_input_files.parse_all()
-    #         config = FcsConfig(destination=self.__destination, nexus_data_name=self.__nexus_data_name)
-    #
-    #         # Transform the parsed data structure to prepare for duplication
-    #         node_to_output_dict = path_transformer.transform(config, nexus_input_files)
-    #
-    #         # Perform the duplication
-    #         # use --abspath if we don't want to copy include files
-    #         file_copier.copy(config=config, node_to_output_dict=node_to_output_dict, arguments=[])
-    #
-    #         self.__new_fcs_file_path = self.__destination + "/" + self.__root_name + ".fcs"
-    #
-    #         if self.__root_name != self.get_rootname():
-    #             old_fcs_path = self.__destination + "/" + self.get_rootname() + ".fcs"
-    #             os.rename(old_fcs_path, self.__new_fcs_file_path)
-    #     else:
-    #         raise FileExistsError(self.__destination, "already exists on disk, set force_output to True to override")
-
-    # def run_simulation(self, **kwargs):
-    #     """ Runs the simulator """
-    #     self.__check_output_path()
-    #
-    #     self.__job_id = nexsub(rootname=self.__new_fcs_file_path, **kwargs)
-    #
-    #     return "Job running, job number: " + str(self.__job_id)
-    #
-    # def __get_job_status(self):
-    #     """ Gets the status of a running job """
-    #     return status(job_id=self.__job_id, force_refresh=False)
 
     def change_force_output(self, force_output=True):
         """ Sets the force output parameter to the supplied value """
@@ -616,18 +564,12 @@ class NexusSimulator:
 
     def get_simulation_status(self, from_startup=False):
         """ Gets the status of the latest simulation run """
-        # self.__simulation_start_time = None
-        # self.__simulation_end_time = None
 
         log_file = self.__get_log_path(from_startup)
         if log_file is None:
             if from_startup:
                 return ''
             raise NotImplementedError("Only retrieving status from a log file is supported at the moment")
-            # if self.__job_id != -1:
-            #     return self.__get_job_status()
-            # else:
-            #     return "Not Run"
         else:
             log_file_line_list = nexus_file_operations.load_file_as_list(log_file)
             self.__update_simulation_start_and_end_times(log_file_line_list)

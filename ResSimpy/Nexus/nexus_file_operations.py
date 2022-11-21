@@ -143,7 +143,7 @@ def delete_times(file_content):
 
 def load_file_as_list(file_path):
     """ Reads the text file into a variable """
-    with open(file_path) as f:
+    with open(file_path, 'r') as f:
         file_content = list(f)
 
     return file_content

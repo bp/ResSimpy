@@ -6,7 +6,7 @@ import resqpy.weights_and_measures as wam
 import os
 # from string import Template
 from inspect import getsourcefile
-from ResSimpy.NexusSimulator import NexusSimulator
+from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 import ResSimpy.Nexus.nexus_file_operations as nexus_file_operations
 
 
