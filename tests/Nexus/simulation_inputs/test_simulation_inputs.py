@@ -1,6 +1,8 @@
 import pytest
 from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+from pytest_mock import MockerFixture
+from unittest.mock import Mock
 
 
 def mock_multiple_opens(mocker, filename, fcs_file_contents, run_control_contents, include_contents,
@@ -44,6 +46,18 @@ def mock_different_model_opens(mocker, filename, fcs_file_contents_1, fcs_file_c
         raise FileNotFoundError(filename)
     open_mock = mocker.mock_open(read_data=file_contents)
     return open_mock
+
+
+def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock_open: Mock,
+                                     mocker_fixture: MockerFixture):
+    assert len(modifying_mock_open.call_args_list) == 2
+    assert modifying_mock_open.call_args_list[0] == mocker_fixture.call('/my/file/path', 'r')
+    assert modifying_mock_open.call_args_list[1] == mocker_fixture.call('/my/file/path', 'w')
+
+    # Get all the calls to write() and check that the contents are what we expect
+    list_of_writes = [call for call in modifying_mock_open.mock_calls if 'call().write' in str(call)]
+    assert len(list_of_writes) == 1
+    assert list_of_writes[0].args[0] == expected_file_contents
 
 
 @pytest.mark.parametrize("run_control_path,expected_run_control_path,date_format,expected_use_american_date_format", [
@@ -1311,8 +1325,8 @@ def test_get_check_oil_gas_types_for_models_no_type_found(mocker, fcs_file_conte
 
 
 @pytest.mark.parametrize("original_file_contents, expected_file_contents, token, new_value, add_to_start",
-[("test 3", "test ABC3", "TEST", "ABC3", False),
-("""!     Fluid model for network
+                         [("test 3", "test ABC3", "TEST", "ABC3", False),
+                          ("""!     Fluid model for network
 BLACKOIL
 !     Network default temperature
 NETTEMP 100.  !Comment after value
@@ -1320,16 +1334,16 @@ NETTEMP 100.  !Comment after value
 !     lumped wellbore default to better match vip wellbore behaviour
 !     Connection defaults""",
 
-"""!     Fluid model for network
+                           """!     Fluid model for network
 BLACKOIL
 !     Network default temperature
 NETTEMP 50.  !Comment after value
 
 !     lumped wellbore default to better match vip wellbore behaviour
 !     Connection defaults""",
-"NeTtEMp", "50.",
-False),
-("""!     Fluid model for network
+                           "NeTtEMp", "50.",
+                           False),
+                          ("""!     Fluid model for network
 BLACKOIL
 !     Network default temperature
 NETTEMP 100.  !Comment after value
@@ -1337,7 +1351,7 @@ NETTEMP 100.  !Comment after value
 !     lumped wellbore default to better match vip wellbore behaviour
 !     Connection defaults""",
 
-"""MYTOKEN new value
+                           """MYTOKEN new value
 !     Fluid model for network
 BLACKOIL
 !     Network default temperature
@@ -1345,9 +1359,9 @@ NETTEMP 100.  !Comment after value
 
 !     lumped wellbore default to better match vip wellbore behaviour
 !     Connection defaults""",
-"MYTOKEN", "new value",
-True),
-("""!     Fluid model for network
+                           "MYTOKEN", "new value",
+                           True),
+                          ("""!     Fluid model for network
 BLACKOIL
 !     Network default temperature
 NETTEMP 100.  !Comment after value
@@ -1355,7 +1369,7 @@ NETTEMP 100.  !Comment after value
 !     lumped wellbore default to better match vip wellbore behaviour
 !     Connection defaults""",
 
-"""!     Fluid model for network
+                           """!     Fluid model for network
 BLACKOIL
 !     Network default temperature
 NETTEMP 100.  !Comment after value
@@ -1363,9 +1377,9 @@ NETTEMP 100.  !Comment after value
 !     lumped wellbore default to better match vip wellbore behaviour
 !     Connection defaults
 MYTOKEN new value""",
-"MYTOKEN", "new value",
-False),
-("""!     Fluid model for network
+                           "MYTOKEN", "new value",
+                           False),
+                          ("""!     Fluid model for network
 BLACKOIL
 !     Network default temperature
 NETTEMP 100.  !Comment after value
@@ -1373,7 +1387,7 @@ NETTEMP 100.  !Comment after value
 !     lumped wellbore default to better match vip wellbore behaviour
 !     Connection defaults""",
 
-"""!     Fluid model for network
+                           """!     Fluid model for network
 BLACKOIL
 !     Network default temperature
 NETTEMP 100.  !Comment after value
@@ -1381,11 +1395,12 @@ NETTEMP 100.  !Comment after value
 !     lumped wellbore default to better match vip wellbore behaviour
 !     Connection defaults
 TOKENNOVALUE """,
-"TOKENNOVALUE", "",
-False)
-],
-ids=["basic case", "standard value change", "token not present (add to start)", "token not present (add to end)",
-     "token not present and has no value"])
+                           "TOKENNOVALUE", "",
+                           False)
+                          ],
+                         ids=["basic case", "standard value change", "token not present (add to start)",
+                              "token not present (add to end)",
+                              "token not present and has no value"])
 def test_update_token_file_value(mocker, original_file_contents, expected_file_contents, token, new_value,
                                  add_to_start):
     """Test the update token value functionality"""
@@ -1394,8 +1409,51 @@ def test_update_token_file_value(mocker, original_file_contents, expected_file_c
     mock_original_opens = mocker.mock_open()
     mocker.patch("builtins.open", mock_original_opens)
 
-    listdir_mock = mocker.MagicMock(return_value=['nexus_run.log', ''])
-    mocker.patch("os.listdir", listdir_mock)
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
+
+    modifying_mock_open = mocker.mock_open(read_data=original_file_contents)
+    mocker.patch("builtins.open", modifying_mock_open)
+
+    # Act
+    simulation.update_file_value(file_path='/my/file/path', token=token, new_value=new_value, add_to_start=add_to_start)
+
+    # Assert
+    check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
+                                     modifying_mock_open=modifying_mock_open,
+                                     mocker_fixture=mocker)
+
+
+@pytest.mark.parametrize("original_file_contents, expected_file_contents, token",
+                         [
+                             ("test 3", "! test 3", "TEST"),
+                             ("""START 11/01/1992
+
+!     Timestepping method
+METHOD IMPLICIT
+!     Current optimized default for facilities
+SOLVER FACILITIES EXTENDED
+GRIDSOLVER IMPLICIT_COUPLING NONE
+
+!     Use vip units for output to vdb
+VIPUNITS""",
+
+                              """START 11/01/1992
+
+!     Timestepping method
+! METHOD IMPLICIT
+!     Current optimized default for facilities
+SOLVER FACILITIES EXTENDED
+GRIDSOLVER IMPLICIT_COUPLING NONE
+
+!     Use vip units for output to vdb
+VIPUNITS""",
+                              "METHOD")
+                         ], ids=["standard comment out", "Larger file"])
+def test_comment_out_file_value(mocker, original_file_contents, expected_file_contents, token):
+    """Testing the functionality to comment out a line containing a specific token"""
+    # Arrange
+    mock_original_opens = mocker.mock_open()
+    mocker.patch("builtins.open", mock_original_opens)
 
     simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
 
@@ -1403,15 +1461,62 @@ def test_update_token_file_value(mocker, original_file_contents, expected_file_c
     mocker.patch("builtins.open", modifying_mock_open)
 
     # Act
-    simulation.update_file_value(file_path='my/file/path', token=token, new_value=new_value, add_to_start=add_to_start)
+    simulation.comment_out_file_value(file_path='/my/file/path', token=token)
 
     # Assert
-    assert len(modifying_mock_open.call_args_list) == 2
-    assert modifying_mock_open.call_args_list[0] == mocker.call('my/file/path', 'r')
-    assert modifying_mock_open.call_args_list[1] == mocker.call('my/file/path', 'w')
+    check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
+                                     modifying_mock_open=modifying_mock_open,
+                                     mocker_fixture=mocker)
 
-    # Get all the calls to write() and check that the contents are what we expect
-    list_of_writes = [call for call in modifying_mock_open.mock_calls if 'call().write' in str(call)]
-    assert len(list_of_writes) == 1
-    assert list_of_writes[0].args[0] == expected_file_contents
 
+def test_add_map_statements(mocker):
+    """Testing the functionality to comment out a line containing a specific token"""
+    # Arrange
+
+    original_file_contents = """START 11/01/1992
+
+!     Timestepping method
+METHOD IMPLICIT
+!     Current optimized default for facilities
+SOLVER FACILITIES EXTENDED
+GRIDSOLVER IMPLICIT_COUPLING NONE
+
+!     Use vip units for output to vdb
+VIPUNITS
+
+MAPBINARY
+PLOTBINARY    
+    """
+
+    expected_file_contents = """MAPVDB
+MAPOUT ALL
+START 11/01/1992
+
+!     Timestepping method
+METHOD IMPLICIT
+!     Current optimized default for facilities
+SOLVER FACILITIES EXTENDED
+GRIDSOLVER IMPLICIT_COUPLING NONE
+
+!     Use vip units for output to vdb
+VIPUNITS
+
+MAPBINARY
+PLOTBINARY    
+    """
+
+    mock_original_opens = mocker.mock_open(read_data="STRUCTURED_GRID /my/file/path")
+    mocker.patch("builtins.open", mock_original_opens)
+
+    simulation = NexusSimulator(origin='nexus_run.fcs')
+
+    modifying_mock_open = mocker.mock_open(read_data=original_file_contents)
+    mocker.patch("builtins.open", modifying_mock_open)
+
+    # Act
+    simulation.add_map_properties_to_start_of_grid_file()
+
+    # Assert
+    check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
+                                     modifying_mock_open=modifying_mock_open,
+                                     mocker_fixture=mocker)

@@ -290,17 +290,19 @@ class NexusSimulator(Simulator):
         """Updates a value in the FCS file"""
         self.update_file_value(self.__new_fcs_file_path, token=token, new_value=new_value, add_to_start=add_to_start)
 
-    def comment_out_file_value(self, token, file_path):
-        """Comments out a line containing the specified token"""
+    @staticmethod
+    def comment_out_file_value(token, file_path):
+        """Comments out an uncommented line containing the specified token"""
         file = nexus_file_operations.load_file_as_list(file_path)
 
         line_counter = 0
         for line in file:
             modified_line = line.lower().replace('/t', ' ')
             modified_line = ' '.join(modified_line.split())
-            if token.lower() in modified_line:
-                # nexus_file_operations.get_next_value(line_counter, fcs_file, token, ignore_values=token, replace_with=new_value)
-                file[line_counter] = f"! {file[line_counter]}\n"
+            # If we've found the token, and it isn't already commented, comment it out
+            if token.lower() in modified_line and \
+                    (modified_line.find(token.lower()) < modified_line.find("!") or modified_line.find("!") == -1):
+                file[line_counter] = f"! {file[line_counter]}"
                 break
             line_counter += 1
 
