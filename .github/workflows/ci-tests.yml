@@ -1,0 +1,80 @@
+---
+
+name: Tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  static-analysis:
+    name: Static analysis
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        uses: ./.github/actions/prepare-poetry
+        with:
+          python-version: 3.10
+
+      # Post in-line comments for any issues found
+      # Do not run if coming from a forked repo
+      # See https://github.com/marketplace/actions/lint-action
+      - name: Run linters (with annotations)
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: wearerequired/lint-action@v1
+        with:
+          flake8: true
+          flake8_command_prefix: poetry run
+          flake8_dir: ResSimpy
+          mypy: true
+          mypy_command_prefix: poetry run
+          mypy_args: ResSimpy
+
+      # Alternative step that works with forked repo
+      - name: Run linters (without annotations)
+        if: github.event.pull_request.head.repo.full_name != github.repository
+        run: |
+          poetry run flake8 .
+          poetry run mypy ResSimpy
+
+      - name: Code formatting
+        run: poetry run yapf --diff -r -p .
+
+  unit-tests:
+    name: Unit tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        uses: ./.github/actions/prepare-poetry
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run pytest
+        run: poetry run pytest --cov=ResSimpy --cov-report=xml --junitxml=pytest.xml
+
+      - name: Upload pytest artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: Unit Test Results (Python ${{ matrix.python-version }})
+          path: pytest.xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml
+          fail_ci_if_error: true
