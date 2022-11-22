@@ -277,7 +277,7 @@ class NexusSimulator(Simulator):
         if token_found is False:
             token_line = f"{token} {new_value}"
             if add_to_start:
-                file.insert(0,token_line + '\n')
+                file.insert(0, token_line + '\n')
             else:
                 file.append('\n' + token_line)
 
@@ -575,7 +575,8 @@ class NexusSimulator(Simulator):
             self.__update_simulation_start_and_end_times(log_file_line_list)
             job_finished = 'Nexus finished\n' in log_file_line_list
             if job_finished:
-                self.__previous_run_time = self.__get_start_end_difference() if from_startup else self.__previous_run_time
+                self.__previous_run_time = self.__get_start_end_difference() if from_startup \
+                    else self.__previous_run_time
                 return nexus_file_operations.get_errors_warnings_string(log_file_line_list=log_file_line_list)
             else:
                 job_number_line = [x for x in log_file_line_list if 'Job number:' in x]
