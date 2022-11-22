@@ -32,6 +32,7 @@ jobs:
           flake8: true
           flake8_command_prefix: poetry run
           flake8_dir: ResSimpy
+          flake8_args: --append-config .config/flake8
           mypy: true
           mypy_command_prefix: poetry run
           mypy_args: ResSimpy
@@ -44,7 +45,7 @@ jobs:
           poetry run mypy ResSimpy
 
       - name: Code formatting
-        run: poetry run yapf --diff -r -p .
+        run: poetry run pycodestyle ResSimpy --config=.config/
 
   unit-tests:
     name: Unit tests (Python ${{ matrix.python-version }})
