@@ -72,9 +72,9 @@ jobs:
           name: Unit Test Results (Python ${{ matrix.python-version }})
           path: pytest.xml
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage.xml
-          fail_ci_if_error: true
+#      - name: Upload coverage to Codecov
+#        uses: codecov/codecov-action@v2
+#        with:
+#          token: ${{ secrets.CODECOV_TOKEN }}
+#          files: coverage.xml
+#          fail_ci_if_error: true
