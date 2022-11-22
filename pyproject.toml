@@ -9,10 +9,11 @@ readme = "README.md"
 python = ">=3.10, <3.11"
 resqpy = "^3.5.2"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest-mock = "^3.9"
 pytest = "^7.1"
 coverage = "^6.5"
+flake8 = "^5.0.4"
 
 [build-system]
 requires = ["poetry-core"]
