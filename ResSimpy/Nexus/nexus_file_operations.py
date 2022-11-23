@@ -11,6 +11,7 @@ def check_token(token, line):
     token_end_chars = [" ", '\n', '\t']
     token_location = line.find(token)
 
+
     if token_location == -1:
         return False
 
