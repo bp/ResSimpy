@@ -31,8 +31,7 @@ jobs:
         with:
           flake8: true
           flake8_command_prefix: poetry run
-          flake8_dir: ResSimpy
-          flake8_args: --append-config ./.config/flake8
+          flake8_args: ResSimpy --append-config ./.config/flake8
           mypy: true
           mypy_command_prefix: poetry run
           mypy_args: ResSimpy --config-file ./.config/mypy

@@ -366,15 +366,17 @@ class NexusSimulator(Simulator):
         with open(file_path, "w") as text_file:
             text_file.write(new_file_str)
 
-    def __convert_date_to_number(self, date: Union[str, float]) -> float:
+    def __convert_date_to_number(self, date: Union[str, int, float]) -> float:
         """ Converts a date to a number designating number of days from the start date """
-        try:
-            converted_date = float(date)
-        except ValueError:
-            converted_date: float = date
 
-        # If we have successfully converted the date to a number of days, use that, otherwise interpret the string date
-        # format
+        # If we can retrieve a number of days from date, use that, otherwise convert the string date to a number of days
+        try:
+            converted_date: Union[str, float] = float(date)
+        except ValueError:
+            if not isinstance(date, str):
+                raise ValueError("__convert_date_to_number: Incorrect type for 'date' parameter")
+            converted_date = date
+
         if isinstance(converted_date, float):
             date_format = self.__date_format_string
             if len(self.start_date) == self.DATE_WITH_TIME_LENGTH:
@@ -386,9 +388,9 @@ class NexusSimulator(Simulator):
             if len(self.start_date) == self.DATE_WITH_TIME_LENGTH:
                 start_date_format += "(%H:%M:%S)"
             end_date_format = self.__date_format_string
-            if len(date) == self.DATE_WITH_TIME_LENGTH:
+            if len(converted_date) == self.DATE_WITH_TIME_LENGTH:
                 end_date_format += "(%H:%M:%S)"
-            date_as_datetime = datetime.strptime(date, end_date_format)
+            date_as_datetime = datetime.strptime(converted_date, end_date_format)
             start_date_as_datetime = datetime.strptime(self.start_date, start_date_format)
 
         difference = date_as_datetime - start_date_as_datetime
