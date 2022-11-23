@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, Optional, TypedDict
+from typing import Dict, Optional
 
 from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
 from string import Template
