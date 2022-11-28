@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Dict, Optional
 
 from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
 from string import Template
@@ -24,7 +25,8 @@ def check_token(token, line):
     return False
 
 
-def get_next_value(start_line_index, file_as_list, search_string, ignore_values=None, replace_with=None):
+def get_next_value(start_line_index, file_as_list, search_string, ignore_values=None, replace_with=None) \
+        -> Optional[str]:
     """Gets the next non blank value in a line or list of lines"""
     invalid_characters = ["\n", "\t", " ", "!", ","]
     value_found = False
@@ -307,7 +309,7 @@ def get_relperm_base_saturation_column_heading(table_heading: str) -> str:
     return column_heading
 
 
-def load_nexus_relperm_table(relperm_file_path: str) -> dict[str: tuple[float, float]]:
+def load_nexus_relperm_table(relperm_file_path: str) -> dict[str, list[tuple[float, float]]]:
     """ Loads in a Nexus relperm table and returns a dictionary with two lists, one with the relperm values for the
     single fluid, and the other with the values for combined fluids """
     file_as_list = load_file_as_list(relperm_file_path)
@@ -324,12 +326,12 @@ def load_nexus_relperm_table(relperm_file_path: str) -> dict[str: tuple[float, f
             header_index = index + 1
             break
 
-    if header_index is None:
+    if header_index is None or table_heading is None:
         raise ValueError("Cannot find the header for this relperm table")
 
     # Read in the header line to get the column order
     header_line = file_as_list[header_index]
-    columns = []
+    columns: list[str] = []
 
     next_column_heading = get_next_value(0, [header_line], header_line)
     next_line = header_line
@@ -339,11 +341,11 @@ def load_nexus_relperm_table(relperm_file_path: str) -> dict[str: tuple[float, f
         next_column_heading = get_next_value(0, [next_line], next_line)
 
     # Load in each row from the table
-    all_values = []
+    all_values: list[Optional[Dict[str, str]]] = []
 
     for line in file_as_list[header_index + 1:]:
         trimmed_line = line
-        line_values = {}
+        line_values: Optional[Dict[str, str]] = {}
         for column in columns:
             value = get_next_value(0, [trimmed_line], trimmed_line)
 
@@ -353,7 +355,9 @@ def load_nexus_relperm_table(relperm_file_path: str) -> dict[str: tuple[float, f
                 break
 
             trimmed_line = trimmed_line.replace(value, "", 1)
-            line_values[column] = value
+
+            if line_values is not None:
+                line_values[column] = value
         if line_values is not None:
             all_values.append(line_values)
         elif len(all_values) > 0:
@@ -369,6 +373,8 @@ def load_nexus_relperm_table(relperm_file_path: str) -> dict[str: tuple[float, f
     base_saturation_heading = get_relperm_base_saturation_column_heading(table_heading)
 
     for index, row in enumerate(all_values):
+        if row is None:
+            continue
         single_fluid_relperms.append((float(row[base_saturation_heading]), float(row[single_fluid_column_heading])))
         combined_fluid_relperms.append((float(row[base_saturation_heading]), float(row[combined_fluid_column_heading])))
 

@@ -3,6 +3,8 @@ import os
 import copy
 from functools import cmp_to_key
 from datetime import timedelta
+from typing import Union
+
 from ResSimpy.Nexus.DataModels.StructuredGridFile import StructuredGridFile, PropertyToLoad
 import ResSimpy.Nexus.nexus_file_operations as nexus_file_operations
 import resqpy.model as rq
@@ -75,7 +77,7 @@ class NexusSimulator(Simulator):
         return self.__root_name
 
     @staticmethod
-    def get_check_run_input_units_for_models(models: []):
+    def get_check_run_input_units_for_models(models: list[str]):
         """Returns the run and input unit formats for all the supplied models"""
         american_run_units = None
         american_input_units = None
@@ -84,10 +86,10 @@ class NexusSimulator(Simulator):
             # If we're checking the units of a RESQML model, read it in and get the units. Otherwise, read the units
             # from the fcs file
             if os.path.splitext(model)[1] == '.epc':
-                model = rq.Model(epc_file=model)
+                resqpy_model = rq.Model(epc_file=model)
 
                 # Load in the RESQML grid
-                grid = model.grid()
+                grid = resqpy_model.grid()
 
                 # Check the grid units
                 grid_length_unit = grid.xy_units()
@@ -117,7 +119,7 @@ class NexusSimulator(Simulator):
         return american_run_units, american_input_units
 
     @staticmethod
-    def get_check_oil_gas_types_for_models(models: []):
+    def get_check_oil_gas_types_for_models(models: list[str]):
         fluid_type = None
         for model in models:
             model_fluid_type = None
@@ -143,7 +145,7 @@ class NexusSimulator(Simulator):
         return fluid_type
 
     @staticmethod
-    def get_eos_details(surface_file):
+    def get_eos_details(surface_file: list[str]):
         eos_string: str = ''
         eos_found: bool = False
         for line in surface_file:
@@ -277,7 +279,7 @@ class NexusSimulator(Simulator):
         if token_found is False:
             token_line = f"{token} {new_value}"
             if add_to_start:
-                file.insert(0,token_line + '\n')
+                file.insert(0, token_line + '\n')
             else:
                 file.append('\n' + token_line)
 
@@ -364,11 +366,15 @@ class NexusSimulator(Simulator):
         with open(file_path, "w") as text_file:
             text_file.write(new_file_str)
 
-    def __convert_date_to_number(self, date: any) -> float:
+    def __convert_date_to_number(self, date: Union[str, int, float]) -> float:
         """ Converts a date to a number designating number of days from the start date """
+
+        # If we can retrieve a number of days from date, use that, otherwise convert the string date to a number of days
         try:
-            converted_date = float(date)
+            converted_date: Union[str, float] = float(date)
         except ValueError:
+            if not isinstance(date, str):
+                raise ValueError("__convert_date_to_number: Incorrect type for 'date' parameter")
             converted_date = date
 
         if isinstance(converted_date, float):
@@ -382,14 +388,15 @@ class NexusSimulator(Simulator):
             if len(self.start_date) == self.DATE_WITH_TIME_LENGTH:
                 start_date_format += "(%H:%M:%S)"
             end_date_format = self.__date_format_string
-            if len(date) == self.DATE_WITH_TIME_LENGTH:
+            if len(converted_date) == self.DATE_WITH_TIME_LENGTH:
                 end_date_format += "(%H:%M:%S)"
-            date_as_datetime = datetime.strptime(date, end_date_format)
+            date_as_datetime = datetime.strptime(converted_date, end_date_format)
             start_date_as_datetime = datetime.strptime(self.start_date, start_date_format)
+
         difference = date_as_datetime - start_date_as_datetime
         return difference.total_seconds() / timedelta(days=1).total_seconds()
 
-    def __compare_dates(self, x: any, y: any) -> float:
+    def __compare_dates(self, x: Union[str, float], y: Union[str, float]) -> float:
         """ Comparator for two supplied dates or numbers """
         return self.__convert_date_to_number(x) - self.__convert_date_to_number(y)
 
@@ -575,7 +582,8 @@ class NexusSimulator(Simulator):
             self.__update_simulation_start_and_end_times(log_file_line_list)
             job_finished = 'Nexus finished\n' in log_file_line_list
             if job_finished:
-                self.__previous_run_time = self.__get_start_end_difference() if from_startup else self.__previous_run_time
+                self.__previous_run_time = self.__get_start_end_difference() if from_startup \
+                    else self.__previous_run_time
                 return nexus_file_operations.get_errors_warnings_string(log_file_line_list=log_file_line_list)
             else:
                 job_number_line = [x for x in log_file_line_list if 'Job number:' in x]

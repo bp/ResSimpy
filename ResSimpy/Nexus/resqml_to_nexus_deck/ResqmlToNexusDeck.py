@@ -1,10 +1,11 @@
+from typing import Optional
+
 import resqpy.model as rq
 import resqpy.well as rqw
 import resqpy.crs as rqc
 import resqpy.olio.write_data as wd
 import resqpy.weights_and_measures as wam
 import os
-# from string import Template
 from inspect import getsourcefile
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 import ResSimpy.Nexus.nexus_file_operations as nexus_file_operations
@@ -12,8 +13,9 @@ import ResSimpy.Nexus.nexus_file_operations as nexus_file_operations
 
 class ResqmlToNexusDeck:
 
-    def __init__(self, epc_path: str, output_folder: str, is_gas_model: bool = False, water_oil_contact: float = None,
-                 gas_water_contact: float = None, american_run_units: bool = True, pimatch_process=True, root_name='Flynn'):
+    def __init__(self, epc_path: str, output_folder: str, is_gas_model: bool = False,
+                 water_oil_contact: Optional[float] = None, gas_water_contact: Optional[float] = None,
+                 american_run_units: bool = True, pimatch_process=True, root_name='Flynn'):
         self.epc_path = epc_path
         self.output_folder = os.path.join(output_folder, 'nexus_data')
         self.__water_oil_contact = water_oil_contact
@@ -133,8 +135,8 @@ class ResqmlToNexusDeck:
         base_folder = os.path.split(self.output_folder)[0]
         generic_model_location = self.get_model_template_location()
         self.simulation = NexusSimulator(origin=generic_model_location, destination=base_folder,
-                                         nexus_data_name="nexus_data", manual_fcs_tidy_call=True, root_name=self.root_name,
-                                         write_times=False)
+                                         nexus_data_name="nexus_data", manual_fcs_tidy_call=True,
+                                         root_name=self.root_name, write_times=False)
 
     def __load_property_arrays(self):
         """ Load in the arrays from the models if they exist """
