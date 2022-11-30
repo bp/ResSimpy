@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.10, <3.11"
-resqpy = "^3.5.2"
+resqpy = "^3.8"
 
 [tool.poetry.group.dev.dependencies]
 pytest-mock = "^3.9"

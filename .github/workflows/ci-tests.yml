@@ -27,7 +27,7 @@ jobs:
       # See https://github.com/marketplace/actions/lint-action
       - name: Run linters (with annotations)
         if: github.event.pull_request.head.repo.full_name == github.repository
-        uses: wearerequired/lint-action@v2.1.0
+        uses: wearerequired/lint-action@v2
         with:
           flake8: true
           flake8_command_prefix: poetry run
@@ -67,7 +67,7 @@ jobs:
 
       - name: Upload pytest artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Unit Test Results (Python ${{ matrix.python-version }})
           path: pytest.xml
