@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
 from string import Template
@@ -25,8 +25,8 @@ def check_token(token, line):
     return False
 
 
-def get_next_value(start_line_index, file_as_list, search_string, ignore_values=None, replace_with=None) \
-        -> Optional[str]:
+def get_next_value(start_line_index, file_as_list, search_string, ignore_values=None,
+                   replace_with: Union[str, VariableEntry, None] = None) -> Optional[str]:
     """Gets the next non blank value in a line or list of lines"""
     invalid_characters = ["\n", "\t", " ", "!", ","]
     value_found = False
@@ -93,9 +93,20 @@ def get_next_value(start_line_index, file_as_list, search_string, ignore_values=
     return value
 
 
-def get_token_value(token: str, token_line: str, file_list: list[str], ignore_values: Optional[bool] = None,
-                    replace_with: Optional[str] = None) -> Optional[str]:
-    """Gets the value following a token if supplied with a line containing the token"""
+def get_token_value(token: str, token_line: str, file_list: list[str], ignore_values: Optional[list[str]] = None,
+                    replace_with: Union[str, VariableEntry, None] = None) -> Optional[str]:
+    """Gets the value following a token if supplied with a line containing the token.
+
+    arguments:
+        token: the token being searched for.
+        token_line: string value of the line that the token was found in.
+        file_list: a list of strings containing each line of the file as a new entry
+        ignore_values (optional): a list of values that should be ignored if found
+        replace_with (optional):  a value to replace the existing value with
+
+    returns:
+        The value following the supplied token, if it is present.
+    """
 
     # If this line is commented out, don't return a value
     if "!" in token_line and token_line.index("!") < token_line.index(token):
