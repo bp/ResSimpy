@@ -52,3 +52,49 @@ def test_load_nexus_relperm_table(mocker, file_contents, expected_result):
 
     # Assert
     assert result == expected_result
+
+
+@pytest.mark.parametrize("line_contents, file_contents, expected_result", [
+    ("MYTESTTOKEN 3", "MYTESTTOKEN 3\n ANOTHER_TOKEN 8", '3'),
+    ("MYTESTTOKEN 123",
+     """GOTABLE 
+               SG         KRG        KROG        PCGO
+          0.000000     0.000000     1.000000     0.000000
+          0.085260     0.011210     0.681265     0.000000
+          ! Test comment in the middle of the table          
+          0.100598     0.014109     0.625140     0.000000
+          ANOTHERTOKEN 6
+        MYTESTTOKEN 123
+          TOKENCONTAINING_MYTESTTOKEN 8
+          FINALTOKEN 90
+
+          """,
+     '123'),
+    ("MYTESTTOKEN",
+"""GOTABLE 
+       SG         KRG        KROG        PCGO
+  0.000000     0.000000     1.000000     0.000000
+  0.085260     0.011210     0.681265     0.000000
+  ! Test comment in the middle of the table          
+  0.100598     0.014109     0.625140     0.000000
+  ANOTHERTOKEN 6
+MYTESTTOKEN 
+7
+  TOKENCONTAINING_MYTESTTOKEN 8
+  FINALTOKEN 90
+
+  """,
+     '7'),
+], ids=['basic case', 'multiple lines', 'value on next line'])
+def test_get_token_value(mocker, line_contents, file_contents, expected_result):
+    # Arrange
+    dummy_file_as_list = [y for y in (x.strip() for x in file_contents.splitlines()) if y]
+    open_mock = mocker.mock_open(read_data=file_contents)
+    mocker.patch("builtins.open", open_mock)
+
+    # Act
+    result = nexus_file_operations.get_token_value(token='MYTESTTOKEN', token_line=line_contents,
+                                                   file_list=dummy_file_as_list)
+
+    # Assert
+    assert result == expected_result
