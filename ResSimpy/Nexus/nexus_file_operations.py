@@ -94,7 +94,7 @@ def get_next_value(start_line_index, file_as_list, search_string, ignore_values=
 
 
 def get_token_value(token: str, token_line: str, file_list: list[str], ignore_values: Optional[bool] = None,
-                    replace_with: str = None) -> Optional[str]:
+                    replace_with: Optional[str] = None) -> Optional[str]:
     """Gets the value following a token if supplied with a line containing the token"""
 
     # If this line is commented out, don't return a value
