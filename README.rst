@@ -21,7 +21,7 @@ Development environment setup
    **Note: due to a requirement of one of the dependencies, you will need to use a 64-bit installation of Python when working with ResSimpy.**
    The ResSimpy project uses `Poetry <https://python-poetry.org/>`_ for dependency management and environment setup. Please `install Poetry <https://python-poetry.org/docs/master/#installing-with-pip>`_ first if you have not already done so.
 
-   Once those packages are installed, the environment can then be setup automatically with all dependencies installed using the following command in the base directory (the directory with the pyproject.toml file):
+   Once those packages are installed, navigate to the project base directory (the directory with the pyproject.toml file) and run the following command, which will create the virtual environment with all dependencies installed:
 
    .. code-block:: bash
 
@@ -37,7 +37,7 @@ Development environment setup
 
    .. code-block:: bash
 
-      pytest
+      pytest tests
 
    If at a later date you wish to ensure that the dependencies in your dev environment are up to date with the latest supported versions, you can again run `poetry install` and your libraries will automatically be updated.
     
@@ -52,4 +52,4 @@ Development environment setup
       git checkout -b <your-branch-name>
 
    You can then commit and push your changes as usual. Open a Pull Request on
-   GitHub to submit your code to be merged into master.
+   GitHub to submit your code to be merged into master. If you do not have push privileges on the ResSimpy project, you will need to fork the repo first, then raise a PR from the forked repo.
