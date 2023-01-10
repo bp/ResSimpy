@@ -5,8 +5,14 @@ from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
 from string import Template
 
 
-def check_token(token: str, line: str):
-    """ Checks if the text line contains the supplied token """
+def check_token(token: str, line: str) -> bool:
+    """ Checks if the text line contains the supplied token
+    Args:
+        token (str): keyword value to search the line for
+        line (str): string to search the token in
+    Returns:
+        bool: boolean with whether the text line contains the supplied token
+    """    
     line_start_chars = ["", '\t', "\n"]
     token_end_chars = [" ", '\n', '\t']
     token_location = line.find(token)
@@ -111,11 +117,11 @@ def get_token_value(token: str, token_line: str, file_list: list[str], ignore_va
     """Gets the value following a token if supplied with a line containing the token.
 
     arguments:
-        token: the token being searched for.
-        token_line: string value of the line that the token was found in.
-        file_list: a list of strings containing each line of the file as a new entry
-        ignore_values (optional): a list of values that should be ignored if found
-        replace_with (optional):  a value to replace the existing value with
+        token (str): the token being searched for.
+        token_line (str): string value of the line that the token was found in.
+        file_list (list[str]): a list of strings containing each line of the file as a new entry
+        ignore_values (Optional[list[str]], optional): a list of values that should be ignored if found. Defaults to None.
+        replace_with (Union[str, VariableEntry, None], optional):  a value to replace the existing value with. Defaults to None.
 
     returns:
         The value following the supplied token, if it is present.
