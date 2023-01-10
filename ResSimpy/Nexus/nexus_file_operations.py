@@ -5,7 +5,7 @@ from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
 from string import Template
 
 
-def check_token(token, line):
+def check_token(token: str, line: str):
     """ Checks if the text line contains the supplied token """
     line_start_chars = ["", '\t', "\n"]
     token_end_chars = [" ", '\n', '\t']
@@ -25,9 +25,21 @@ def check_token(token, line):
     return False
 
 
-def get_next_value(start_line_index, file_as_list, search_string, ignore_values=None,
+def get_next_value(start_line_index: int, file_as_list: list[str], search_string: str, ignore_values: Optional[list[str]] = None,
                    replace_with: Union[str, VariableEntry, None] = None) -> Optional[str]:
-    """Gets the next non blank value in a line or list of lines"""
+    """Gets the next non blank value in a list of lines
+
+    Args:
+        start_line_index (int): line number to start reading file_as_list from
+        file_as_list (list[str]):  a list of strings containing each line of the file as a new entry
+        search_string (str): string to search from within the first indexed line
+        ignore_values (Optional[list[str]], optional): a list of values that should be ignored if found. Defaults to None.
+        replace_with (Union[str, VariableEntry, None], optional): a value to replace the existing value with. Defaults to None.
+
+    Returns:
+        Optional[str]: Next non blank value from the list, if none found returns None
+    """
+
     invalid_characters = ["\n", "\t", " ", "!", ","]
     value_found = False
     value = ""
@@ -35,13 +47,14 @@ def get_next_value(start_line_index, file_as_list, search_string, ignore_values=
         character_location = 0
         new_search_string = False
         for character in search_string:
+            # move lines once we hit a comment character or new line or are at the end of the search string
             if character == "!" or character == "\n" or \
                     (character_location != 0 and character_location == len(search_string) - 1):
                 start_line_index += 1
                 # If we've reached the end of the file, return None
                 if start_line_index >= len(file_as_list):
                     return None
-
+                # Move to the next line down in file_as_list
                 search_string = file_as_list[start_line_index]
                 break
             elif character not in invalid_characters:
@@ -53,7 +66,7 @@ def get_next_value(start_line_index, file_as_list, search_string, ignore_values=
                         new_search_string = True
                         value = ""
                         break
-
+                    # stop adding to the value once we hit an invalid_character
                     if value_character in invalid_characters:
                         break
                     value += value_character
