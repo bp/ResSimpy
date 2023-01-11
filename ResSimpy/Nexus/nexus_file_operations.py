@@ -32,7 +32,7 @@ def check_token(token: str, line: str) -> bool:
 
 
 def get_next_value(start_line_index: int, file_as_list: list[str], search_string: str,
-                   ignore_values: Optional[list[str]] = None,
+                   ignore_values: Optional[list[Optional[str]]] = None,
                    replace_with: Union[str, VariableEntry, None] = None) -> Optional[str]:
     """Gets the next non blank value in a list of lines
 
@@ -115,7 +115,7 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
     return value
 
 
-def get_token_value(token: str, token_line: str, file_list: list[str], 
+def get_token_value(token: str, token_line: str, file_list: list[str],
                     ignore_values: Optional[list[Optional[str]]] = None,
                     replace_with: Union[str, VariableEntry, None] = None) -> Optional[str]:
     """Gets the value following a token if supplied with a line containing the token.
@@ -210,7 +210,7 @@ def load_file_as_list(file_path: str) -> list[str]:
 
 def load_token_value_if_present(token: str, modifier: str, token_property: VariableEntry,
                                 line: str, file_as_list: list[str],
-                                ignore_values: Optional[list[str]] = None) -> None:
+                                ignore_values: Optional[list[Optional[str]]] = None) -> None:
     """Gets a token's value if there is one and loads it into the token_property
 
     Args:
