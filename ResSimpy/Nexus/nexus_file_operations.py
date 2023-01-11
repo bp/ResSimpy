@@ -120,7 +120,7 @@ def get_token_value(token: str, token_line: str, file_list: list[str], ignore_va
         token (str): the token being searched for.
         token_line (str): string value of the line that the token was found in.
         file_list (list[str]): a list of strings containing each line of the file as a new entry
-        ignore_values (Optional[list[str]], optional): a list of values that should be ignored if found. Defaults to None.
+        ignore_values (list[str], optional): a list of values that should be ignored if found. Defaults to None.
         replace_with (Union[str, VariableEntry, None], optional):  a value to replace the existing value with. Defaults to None.
 
     returns:
@@ -147,8 +147,15 @@ def get_token_value(token: str, token_line: str, file_list: list[str], ignore_va
     return value
 
 
-def get_times(times_file):
-    """ Retrieves a list of times from the supplied Runcontrol / Include file """
+def get_times(times_file: list[str]) -> list[str]:
+    """Retrieves a list of TIMES from the supplied Runcontrol / Include file
+
+    Args:
+        times_file (list[str]): list of strings with each line from the file a new entry in the list
+
+    Returns:
+        list[str]: list of all the values following the TIME keyword in supplied file
+    """    
     times = []
     for line in times_file:
         if check_token('TIME', line):
@@ -159,8 +166,14 @@ def get_times(times_file):
     return times
 
 
-def delete_times(file_content):
-    """ Deletes times from file contents """
+def delete_times(file_content: list[str]) -> list[str]:
+    """ Deletes times from file contents
+    Args:
+        file_content (list[str]):  list of strings with each line from the file a new entry in the list
+
+    Returns:
+        list[str]: the modified file without any TIME cards in
+    """
     new_file = []
     previous_line_is_time = False
     for line in file_content:
@@ -174,16 +187,37 @@ def delete_times(file_content):
     return new_file
 
 
-def load_file_as_list(file_path):
-    """ Reads the text file into a variable """
+def load_file_as_list(file_path: str) -> list[str]:
+    """ Reads the text file into a variable
+    Args:
+        file_path: (str): string containing a path pointing towards a text file
+    
+    Returns:
+        list[str]: list of strings with each line from the file a new entry in the list
+    
+     """
     with open(file_path, 'r') as f:
         file_content = list(f)
 
     return file_content
 
 
-def load_token_value_if_present(token, modifier, token_property, line, file_as_list, ignore_values=None):
-    """Gets a token's value if there is one"""
+def load_token_value_if_present(token: str, modifier: str, token_property: VariableEntry, 
+        line: str, file_as_list: list[str], ignore_values: Optional[list[str]]=None) -> None:
+    """Gets a token's value if there is one and loads it into the token_property
+
+    Args:
+        token (str): the token being searched for.
+        modifier (str): any modifiers applied to the token
+        token_property (VariableEntry): VariableEntry object to store the modifier and value pair into
+        line (str): line to search for the token in 
+        file_as_list (list[str]): a list of strings containing each line of the file as a new entry
+        ignore_values (Optional[list[str]], optional): values to be ignored. Defaults to None.
+    
+    Returns:
+        None: stores the value into token_property supplied instead
+    """    
+
     if ignore_values is None:
         ignore_values = []
     token_modifier = f"{token} {modifier}"
