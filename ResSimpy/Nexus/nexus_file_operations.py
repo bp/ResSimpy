@@ -298,7 +298,7 @@ def replace_value(file_as_list: list[str], old_property: VariableEntry, new_prop
     for line in file_as_list:
         old_token_modifier = f"{token_name} {old_property.modifier}"
         new_token_modifier = f"{token_name} {new_property.modifier}"
-        ignore_values = ['INCLUDE'] if old_property.modifier == 'VALUE' else []
+        ignore_values: Optional[list[Optional[str]]] = ['INCLUDE'] if old_property.modifier == 'VALUE' else []
         if old_token_modifier in line:
             # If we are replacing a mult, replace the first value with a blank
             if old_property.modifier == 'MULT':
