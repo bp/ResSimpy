@@ -300,15 +300,29 @@ def replace_value(file_as_list: list[str], old_property: VariableEntry, new_prop
 
 
 def clean_up_string(value: str) -> str:
-    """ Removes unwanted characters from a string """
+    """Removes unwanted characters from a string
+        unwanted characters: ("\\n", "\\t", "!")
+    Args:
+        value (str): string to clean up
+    Returns:
+        str: string with unwanted characters removed
+    """    
     value = value.replace("\n", "")
     value = value.replace("!", "")
     value = value.replace("\t", "")
     return value
 
 
-def convert_server_date(original_date):
-    """Convert a date read in from Nexus to a strptime object"""
+def convert_server_date(original_date: str) -> datetime:
+    """Convert a datetime string from the server for when the simulation was started to a strptime object
+
+    Args:
+        original_date (str): string of a date with format: "Mon Jan 01 00:00:00 CST 2020"
+
+    Returns:
+        datetime: datetime object for the input string 
+    """    
+
     date_format = '%a %b %d %X %Z %Y'
     converted_date = original_date
 
