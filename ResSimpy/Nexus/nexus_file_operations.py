@@ -232,7 +232,7 @@ def load_token_value_if_present(token: str, modifier: str, token_property: Varia
         # If we are loading a multiple, load the two relevant values, otherwise just the next value
         if modifier == 'MULT':
             numerical_value = get_token_value(token_modifier, line, file_as_list,
-                                              ignore_values=[])
+                                              ignore_values=None)
             value_to_multiply = get_token_value(token_modifier, line, file_as_list,
                                                 ignore_values=[numerical_value])
             if numerical_value is not None and value_to_multiply is not None:
