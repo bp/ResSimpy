@@ -11,7 +11,7 @@ def check_token(token: str, line: str) -> bool:
         token (str): keyword value to search the line for
         line (str): string to search the token in
     Returns:
-        bool: boolean with whether the text line contains the supplied token
+        bool: True if the text line contains the supplied token, False otherwise
     """    
     line_start_chars = ["", '\t', "\n"]
     token_end_chars = [" ", '\n', '\t']
@@ -154,8 +154,8 @@ def get_times(times_file: list[str]) -> list[str]:
         times_file (list[str]): list of strings with each line from the file a new entry in the list
 
     Returns:
-        list[str]: list of all the values following the TIME keyword in supplied file
-    """    
+        list[str]: list of all the values following the TIME keyword in supplied file, empty list if no values found 
+    """
     times = []
     for line in times_file:
         if check_token('TIME', line):
@@ -194,7 +194,6 @@ def load_file_as_list(file_path: str) -> list[str]:
     
     Returns:
         list[str]: list of strings with each line from the file a new entry in the list
-    
      """
     with open(file_path, 'r') as f:
         file_content = list(f)
@@ -320,7 +319,7 @@ def convert_server_date(original_date: str) -> datetime:
         original_date (str): string of a date with format: "Mon Jan 01 00:00:00 CST 2020"
 
     Returns:
-        datetime: datetime object for the input string 
+        datetime: datetime object derived from the input string 
     """    
 
     date_format = '%a %b %d %X %Z %Y'
@@ -390,26 +389,32 @@ def create_templated_file(template_location: str, substitutions: dict, output_fi
 
 
 def get_relperm_combined_fluid_column_heading(table_heading: str) -> str:
-    """Returns the combined fluid heading for a Nexus Relperm table
+    """Returns the combined rel perm fluid perm heading for a Nexus Relperm table
     Args:
-        table_heading (str): 
+        table_heading (str): heading for the rel perm table, expects one of (WOTABLE, GOTABLE, GWTABLE)
 
     Returns:
-        str: _description_
+        str: one of (KROW, KROG, KRWG) defaults to KRWG if one of the expected table_headings is not given
     """    
-
-    if table_heading == 'WOTABLE':
-        column_heading = 'KROW'
-    elif table_heading == 'GOTABLE':
-        column_heading = 'KROG'
-    else:
-        column_heading = 'KRWG'
+    rel_perm_header_map = {
+        'WOTABLE': 'KROW',
+        'GOTABLE': 'KROG',
+        'GWTABLE': 'KRWG',
+        }
+    column_heading = rel_perm_header_map.get(table_heading, 'KRWG')
 
     return column_heading
 
 
 def get_relperm_single_fluid_column_heading(table_heading: str) -> str:
-    """Returns the single fluid heading for a Nexus Relperm table"""
+    """Returns the single fluid heading for a Nexus Relperm table
+
+    Args:
+        table_heading (str): heading for the rel perm table, expects one of (WOTABLE, GOTABLE, GWTABLE)
+
+    Returns:
+        str: heading for the single fluid rel perm header one of (KRG, KRW)
+    """    
     if table_heading == 'GOTABLE':
         column_heading = 'KRG'
     else:
@@ -419,7 +424,15 @@ def get_relperm_single_fluid_column_heading(table_heading: str) -> str:
 
 
 def get_relperm_base_saturation_column_heading(table_heading: str) -> str:
-    """Returns the column heading for the base saturation column"""
+    """Returns the column heading for the base saturation column
+
+    Args:
+        table_heading (str): heading for the rel perm table, expects one of (WOTABLE, GOTABLE, GWTABLE)
+
+    Returns:
+        str: heading for the saturation based on the table header one of (SG, SW)
+    """    
+
     if table_heading == 'GOTABLE':
         column_heading = 'SG'
     else:
@@ -430,7 +443,19 @@ def get_relperm_base_saturation_column_heading(table_heading: str) -> str:
 
 def load_nexus_relperm_table(relperm_file_path: str) -> dict[str, list[tuple[float, float]]]:
     """ Loads in a Nexus relperm table and returns a dictionary with two lists, one with the relperm values for the
-    single fluid, and the other with the values for combined fluids """
+    single fluid, and the other with the values for combined fluids
+    Args:
+        relperm_file_path (str): path to a single Nexus rel perm file
+
+    Raises:
+        ValueError: if the table header cannot be found for the rel perm table 
+
+    Returns:
+        dict[str, list[tuple[float, float]]]: dictionary containing two entries one for the column (KRG, KRW) 
+        and one for one of (KROW, KROG, KRWG) depending on the type of table read. 
+        Each list entry consists of a tuple of (saturation, relperm value)
+    """    
+    
     file_as_list = load_file_as_list(relperm_file_path)
 
     # Find the column headings line (assume it is the first non-commented out line after the table heading)
