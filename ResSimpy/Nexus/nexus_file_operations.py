@@ -115,7 +115,8 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
     return value
 
 
-def get_token_value(token: str, token_line: str, file_list: list[str], ignore_values: Optional[list[str]] = None,
+def get_token_value(token: str, token_line: str, file_list: list[str], 
+                    ignore_values: Optional[list[Optional[str]]] = None,
                     replace_with: Union[str, VariableEntry, None] = None) -> Optional[str]:
     """Gets the value following a token if supplied with a line containing the token.
 
