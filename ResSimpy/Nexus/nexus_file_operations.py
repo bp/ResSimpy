@@ -206,8 +206,8 @@ def load_token_value_if_present(token: str, modifier: str, token_property: Varia
     """Gets a token's value if there is one and loads it into the token_property
 
     Args:
-        token (str): the token being searched for.
-        modifier (str): any modifiers applied to the token
+        token (str): the token being searched for. e.g. 'PERMX'
+        modifier (str): any modifiers applied to the token e.g. 'MULT'
         token_property (VariableEntry): VariableEntry object to store the modifier and value pair into
         line (str): line to search for the token in 
         file_as_list (list[str]): a list of strings containing each line of the file as a new entry
