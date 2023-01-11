@@ -12,7 +12,7 @@ def check_token(token: str, line: str) -> bool:
         line (str): string to search the token in
     Returns:
         bool: True if the text line contains the supplied token, False otherwise
-    """    
+    """
     line_start_chars = ["", '\t', "\n"]
     token_end_chars = [" ", '\n', '\t']
     token_location = line.find(token)
@@ -31,7 +31,8 @@ def check_token(token: str, line: str) -> bool:
     return False
 
 
-def get_next_value(start_line_index: int, file_as_list: list[str], search_string: str, ignore_values: Optional[list[str]] = None,
+def get_next_value(start_line_index: int, file_as_list: list[str], search_string: str,
+                   ignore_values: Optional[list[str]] = None,
                    replace_with: Union[str, VariableEntry, None] = None) -> Optional[str]:
     """Gets the next non blank value in a list of lines
 
@@ -39,8 +40,10 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
         start_line_index (int): line number to start reading file_as_list from
         file_as_list (list[str]):  a list of strings containing each line of the file as a new entry
         search_string (str): string to search from within the first indexed line
-        ignore_values (Optional[list[str]], optional): a list of values that should be ignored if found. Defaults to None.
-        replace_with (Union[str, VariableEntry, None], optional): a value to replace the existing value with. Defaults to None.
+        ignore_values (Optional[list[str]], optional): a list of values that should be ignored if found. \
+            Defaults to None.
+        replace_with (Union[str, VariableEntry, None], optional): a value to replace the existing value with. \
+            Defaults to None.
 
     Returns:
         Optional[str]: Next non blank value from the list, if none found returns None
@@ -120,8 +123,10 @@ def get_token_value(token: str, token_line: str, file_list: list[str], ignore_va
         token (str): the token being searched for.
         token_line (str): string value of the line that the token was found in.
         file_list (list[str]): a list of strings containing each line of the file as a new entry
-        ignore_values (list[str], optional): a list of values that should be ignored if found. Defaults to None.
-        replace_with (Union[str, VariableEntry, None], optional):  a value to replace the existing value with. Defaults to None.
+        ignore_values (list[str], optional): a list of values that should be ignored if found. \
+            Defaults to None.
+        replace_with (Union[str, VariableEntry, None], optional):  a value to replace the existing value with. \
+            Defaults to None.
 
     returns:
         The value following the supplied token, if it is present.
@@ -154,7 +159,8 @@ def get_times(times_file: list[str]) -> list[str]:
         times_file (list[str]): list of strings with each line from the file a new entry in the list
 
     Returns:
-        list[str]: list of all the values following the TIME keyword in supplied file, empty list if no values found 
+        list[str]: list of all the values following the TIME keyword in supplied file, \
+            empty list if no values found
     """
     times = []
     for line in times_file:
@@ -191,7 +197,7 @@ def load_file_as_list(file_path: str) -> list[str]:
     """ Reads the text file into a variable
     Args:
         file_path: (str): string containing a path pointing towards a text file
-    
+
     Returns:
         list[str]: list of strings with each line from the file a new entry in the list
      """
@@ -201,21 +207,22 @@ def load_file_as_list(file_path: str) -> list[str]:
     return file_content
 
 
-def load_token_value_if_present(token: str, modifier: str, token_property: VariableEntry, 
-        line: str, file_as_list: list[str], ignore_values: Optional[list[str]]=None) -> None:
+def load_token_value_if_present(token: str, modifier: str, token_property: VariableEntry,
+                                line: str, file_as_list: list[str],
+                                ignore_values: Optional[list[str]] = None) -> None:
     """Gets a token's value if there is one and loads it into the token_property
 
     Args:
         token (str): the token being searched for. e.g. 'PERMX'
         modifier (str): any modifiers applied to the token e.g. 'MULT'
         token_property (VariableEntry): VariableEntry object to store the modifier and value pair into
-        line (str): line to search for the token in 
+        line (str): line to search for the token in
         file_as_list (list[str]): a list of strings containing each line of the file as a new entry
         ignore_values (Optional[list[str]], optional): values to be ignored. Defaults to None.
-    
+
     Returns:
         None: stores the value into token_property supplied instead
-    """    
+    """
 
     if ignore_values is None:
         ignore_values = []
@@ -247,7 +254,7 @@ def get_simulation_time(line: str) -> str:
 
     Returns:
         str: value found after TIME card in a line
-    """    
+    """
     value_found = False
     value = ''
     line_string = line
@@ -266,13 +273,13 @@ def get_simulation_time(line: str) -> str:
     return value
 
 
-def replace_value(file_as_list: list[str], old_property: VariableEntry, new_property: VariableEntry, 
-        token_name: str) -> None:
+def replace_value(file_as_list: list[str], old_property: VariableEntry, new_property: VariableEntry,
+                  token_name: str) -> None:
     """Replace the value and token + modifier with the new values
 
     Args:
         file_as_list (list[str]): a list of strings containing each line of the file as a new entry
-        old_property (VariableEntry): property found in the original file to be replaced 
+        old_property (VariableEntry): property found in the original file to be replaced
         new_property (VariableEntry): new property to replace the old property with
         token_name (str): name of the token being replaced
     Returns:
@@ -305,7 +312,7 @@ def clean_up_string(value: str) -> str:
         value (str): string to clean up
     Returns:
         str: string with unwanted characters removed
-    """    
+    """
     value = value.replace("\n", "")
     value = value.replace("!", "")
     value = value.replace("\t", "")
@@ -319,8 +326,8 @@ def convert_server_date(original_date: str) -> datetime:
         original_date (str): string of a date with format: "Mon Jan 01 00:00:00 CST 2020"
 
     Returns:
-        datetime: datetime object derived from the input string 
-    """    
+        datetime: datetime object derived from the input string
+    """
 
     date_format = '%a %b %d %X %Z %Y'
     converted_date = original_date
@@ -337,16 +344,16 @@ def convert_server_date(original_date: str) -> datetime:
 
 
 def get_errors_warnings_string(log_file_line_list: list[str]) -> str:
-    """Retrieves the number of warnings and errors from the simulation log output, 
+    """Retrieves the number of warnings and errors from the simulation log output,
     and formats them as a string
 
     Args:
-        log_file_line_list (list[str]): log file formatted as a list of strings with 
-        a new list entry per line 
+        log_file_line_list (list[str]): log file formatted as a list of strings with \
+            a new list entry per line
 
     Returns:
         str: string containing the errors and warnings from the simulation log
-    """    
+    """
     error_warning = ""
     for line in log_file_line_list:
         line = line.lower()
@@ -395,7 +402,7 @@ def get_relperm_combined_fluid_column_heading(table_heading: str) -> str:
 
     Returns:
         str: one of (KROW, KROG, KRWG) defaults to KRWG if one of the expected table_headings is not given
-    """    
+    """
     rel_perm_header_map = {
         'WOTABLE': 'KROW',
         'GOTABLE': 'KROG',
@@ -414,7 +421,7 @@ def get_relperm_single_fluid_column_heading(table_heading: str) -> str:
 
     Returns:
         str: heading for the single fluid rel perm header one of (KRG, KRW)
-    """    
+    """
     if table_heading == 'GOTABLE':
         column_heading = 'KRG'
     else:
@@ -431,7 +438,7 @@ def get_relperm_base_saturation_column_heading(table_heading: str) -> str:
 
     Returns:
         str: heading for the saturation based on the table header one of (SG, SW)
-    """    
+    """
 
     if table_heading == 'GOTABLE':
         column_heading = 'SG'
@@ -448,14 +455,14 @@ def load_nexus_relperm_table(relperm_file_path: str) -> dict[str, list[tuple[flo
         relperm_file_path (str): path to a single Nexus rel perm file
 
     Raises:
-        ValueError: if the table header cannot be found for the rel perm table 
+        ValueError: if the table header cannot be found for the rel perm table
 
     Returns:
-        dict[str, list[tuple[float, float]]]: dictionary containing two entries one for the column (KRG, KRW) 
-        and one for one of (KROW, KROG, KRWG) depending on the type of table read. 
+        dict[str, list[tuple[float, float]]]: dictionary containing two entries one for the column (KRG, KRW)
+        and one for one of (KROW, KROG, KRWG) depending on the type of table read.
         Each list entry consists of a tuple of (saturation, relperm value)
-    """    
-    
+    """
+
     file_as_list = load_file_as_list(relperm_file_path)
 
     # Find the column headings line (assume it is the first non-commented out line after the table heading)
@@ -519,7 +526,11 @@ def load_nexus_relperm_table(relperm_file_path: str) -> dict[str, list[tuple[flo
     for index, row in enumerate(all_values):
         if row is None:
             continue
-        single_fluid_relperms.append((float(row[base_saturation_heading]), float(row[single_fluid_column_heading])))
-        combined_fluid_relperms.append((float(row[base_saturation_heading]), float(row[combined_fluid_column_heading])))
+        single_fluid_relperms.append(
+            (float(row[base_saturation_heading]), float(row[single_fluid_column_heading]))
+        )
+        combined_fluid_relperms.append(
+            (float(row[base_saturation_heading]), float(row[combined_fluid_column_heading]))
+        )
 
     return {'single_fluid': single_fluid_relperms, 'combined_fluids': combined_fluid_relperms}
