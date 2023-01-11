@@ -32,7 +32,7 @@ def check_token(token: str, line: str) -> bool:
 
 
 def get_next_value(start_line_index: int, file_as_list: list[str], search_string: str,
-                   ignore_values: Optional[list[Optional[str]]] = None,
+                   ignore_values: Optional[list[str]] = None,
                    replace_with: Union[str, VariableEntry, None] = None) -> Optional[str]:
     """Gets the next non blank value in a list of lines
 
@@ -116,7 +116,7 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
 
 
 def get_token_value(token: str, token_line: str, file_list: list[str],
-                    ignore_values: Optional[list[Optional[str]]] = None,
+                    ignore_values: Optional[list[str]] = None,
                     replace_with: Union[str, VariableEntry, None] = None) -> Optional[str]:
     """Gets the value following a token if supplied with a line containing the token.
 
@@ -210,7 +210,7 @@ def load_file_as_list(file_path: str) -> list[str]:
 
 def load_token_value_if_present(token: str, modifier: str, token_property: VariableEntry,
                                 line: str, file_as_list: list[str],
-                                ignore_values: Optional[list[Optional[str]]] = None) -> None:
+                                ignore_values: Optional[list[str]] = None) -> None:
     """Gets a token's value if there is one and loads it into the token_property
 
     Args:
@@ -220,7 +220,8 @@ def load_token_value_if_present(token: str, modifier: str, token_property: Varia
         line (str): line to search for the token in
         file_as_list (list[str]): a list of strings containing each line of the file as a new entry
         ignore_values (Optional[list[str]], optional): values to be ignored. Defaults to None.
-
+    Raises:
+        ValueError: raises an error if no numerical value can be found after the supplied token modifier pair
     Returns:
         None: stores the value into token_property supplied instead
     """
@@ -234,6 +235,8 @@ def load_token_value_if_present(token: str, modifier: str, token_property: Varia
         if modifier == 'MULT':
             numerical_value = get_token_value(token_modifier, line, file_as_list,
                                               ignore_values=None)
+            if numerical_value is None:
+                raise ValueError(f'No numerical value found after {token_modifier} keyword in line: {line}')
             value_to_multiply = get_token_value(token_modifier, line, file_as_list,
                                                 ignore_values=[numerical_value])
             if numerical_value is not None and value_to_multiply is not None:
@@ -242,9 +245,10 @@ def load_token_value_if_present(token: str, modifier: str, token_property: Varia
         else:
             value = get_token_value(token_modifier, line, file_as_list,
                                     ignore_values=ignore_values)
-            if value is not None:
-                token_property.value = value
-                token_property.modifier = modifier
+            if value is None:
+                raise ValueError(f'No value found after {token_modifier} in line: {line}')
+            token_property.value = value
+            token_property.modifier = modifier
 
 
 def get_simulation_time(line: str) -> str:
@@ -298,7 +302,7 @@ def replace_value(file_as_list: list[str], old_property: VariableEntry, new_prop
     for line in file_as_list:
         old_token_modifier = f"{token_name} {old_property.modifier}"
         new_token_modifier = f"{token_name} {new_property.modifier}"
-        ignore_values: Optional[list[Optional[str]]] = ['INCLUDE'] if old_property.modifier == 'VALUE' else []
+        ignore_values = ['INCLUDE'] if old_property.modifier == 'VALUE' else []
         if old_token_modifier in line:
             # If we are replacing a mult, replace the first value with a blank
             if old_property.modifier == 'MULT':
