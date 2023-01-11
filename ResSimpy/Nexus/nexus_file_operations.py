@@ -337,8 +337,17 @@ def convert_server_date(original_date: str) -> datetime:
     return datetime.strptime(converted_date, date_format)
 
 
-def get_errors_warnings_string(log_file_line_list):
-    """ Retrieves the number of warnings and errors from the simulation log output, and formats them as a string """
+def get_errors_warnings_string(log_file_line_list: list[str]) -> str:
+    """Retrieves the number of warnings and errors from the simulation log output, 
+    and formats them as a string
+
+    Args:
+        log_file_line_list (list[str]): log file formatted as a list of strings with 
+        a new list entry per line 
+
+    Returns:
+        str: string containing the errors and warnings from the simulation log
+    """    
     error_warning = ""
     for line in log_file_line_list:
         line = line.lower()
@@ -360,8 +369,13 @@ def get_errors_warnings_string(log_file_line_list):
 
 
 def create_templated_file(template_location: str, substitutions: dict, output_file_name: str):
-    """Creates a new text file at the requested destination substituting the supplied values."""
+    """Creates a new text file at the requested destination substituting the supplied values.
 
+    Args:
+        template_location (str): path to the template file
+        substitutions (dict): dictionary of substitutions to be made {variable: subsistuted_value,}
+        output_file_name (str): path/name of the file to write out to
+    """
     class NewTemplate(Template):
         delimiter = '**!'
 
@@ -376,7 +390,14 @@ def create_templated_file(template_location: str, substitutions: dict, output_fi
 
 
 def get_relperm_combined_fluid_column_heading(table_heading: str) -> str:
-    """Returns the combined fluid heading for a Nexus Relperm table"""
+    """Returns the combined fluid heading for a Nexus Relperm table
+    Args:
+        table_heading (str): 
+
+    Returns:
+        str: _description_
+    """    
+
     if table_heading == 'WOTABLE':
         column_heading = 'KROW'
     elif table_heading == 'GOTABLE':
