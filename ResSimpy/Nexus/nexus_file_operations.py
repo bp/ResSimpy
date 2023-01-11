@@ -252,6 +252,9 @@ def get_simulation_time(line: str) -> str:
     Args:
         line (str): line to search for the simulation time
 
+    Raises:
+        ValueError: Throws error if get_next_value doesn't find any subsequent value in the line
+
     Returns:
         str: value found after TIME card in a line
     """
@@ -260,13 +263,18 @@ def get_simulation_time(line: str) -> str:
     line_string = line
     while value_found is False:
         next_value = get_next_value(0, [line_string], line_string)
+        if next_value is None:
+            raise ValueError(f'No next value found in the line supplied, line: {line_string}')
         if next_value == 'on':
             line_string = line_string.replace(next_value, '', 1)
             next_value = get_next_value(0, [line_string], line_string)
-
+            if next_value is None:
+                raise ValueError(f'No next value found in the line supplied, line: {line_string}')
             for c in range(6):
                 line_string = line_string.replace(next_value, '', 1)
                 next_value = get_next_value(0, [line_string], line_string)
+                if next_value is None:
+                    raise ValueError(f'No next value found in the line supplied, line: {line_string}')
                 value += next_value + (' ' if c < 5 else '')
             value_found = True
         line_string = line_string.replace(next_value, '', 1)
@@ -343,7 +351,7 @@ def convert_server_date(original_date: str) -> datetime:
     return datetime.strptime(converted_date, date_format)
 
 
-def get_errors_warnings_string(log_file_line_list: list[str]) -> str:
+def get_errors_warnings_string(log_file_line_list: list[str]) -> Optional[str]:
     """Retrieves the number of warnings and errors from the simulation log output,
     and formats them as a string
 
