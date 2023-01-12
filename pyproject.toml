@@ -3,7 +3,7 @@ name = "ResSimpy"
 version = "0.1.0"
 description = ""
 authors = ["BP"]
-readme = "README.md"
+readme = "README.rst"
 
 [tool.poetry.dependencies]
 python = ">=3.10, <3.11"
