@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-from ResSimpy.Nexus.DataModels import NexusCompletion
 from ResSimpy.Well import Well
 
 

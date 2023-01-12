@@ -22,10 +22,10 @@ class Completion(ABC):
     __angle_v: Optional[float] = None
     __grid: Optional[str] = None
 
-    def __init__(self, i: Optional[int] = None, j: Optional[int] = None, k: Optional[int] = None,
+    def __init__(self, date: str, i: Optional[int] = None, j: Optional[int] = None, k: Optional[int] = None,
                  skin: Optional[float] = None, depth: Optional[float] = None, well_radius: Optional[float] = None,
                  x: Optional[float] = None, y: Optional[float] = None, angle_a: Optional[float] = None,
-                 angle_v: Optional[float] = None, grid: Optional[str] = None, date: Optional[str] = None):
+                 angle_v: Optional[float] = None, grid: Optional[str] = None):
         self.__well_radius = well_radius
         self.__date = date
         self.__i = i

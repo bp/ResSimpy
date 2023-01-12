@@ -1,9 +1,9 @@
 """The abstract base class for all wells"""
 
-from abc import ABC, abstractmethod
+from abc import ABC
 from dataclasses import dataclass
 
-from ResSimpy import Completion
+from ResSimpy.Completion import Completion
 
 
 @dataclass

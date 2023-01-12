@@ -90,17 +90,19 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
 
                         if isinstance(replace_with, str):
                             new_value = replace_with
-                        else:
-                            new_value = replace_with.value
+                        elif isinstance(replace_with, VariableEntry):
+                            new_value = replace_with.value if replace_with.value is not None else ''
 
                             if replace_with.modifier != 'VALUE':
                                 new_line = new_line.replace('INCLUDE ', '')
                             elif 'INCLUDE' not in original_line:
-                                new_value = 'INCLUDE ' + replace_with.value
+                                new_value = 'INCLUDE ' + replace_with.value if replace_with.value is not None else ''
 
                             # If we are replacing the first value from a mult, remove the space as well
                             if replace_with.modifier == 'MULT' and replace_with.value == '':
                                 value += ' '
+                        else:
+                            raise ValueError("Invalid type for replace_with: " + str(replace_with))
 
                         new_line = new_line.replace(value, new_value, 1)
                         file_as_list[start_line_index] = new_line
