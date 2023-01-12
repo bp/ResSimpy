@@ -1,23 +1,18 @@
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
 class VariableEntry:
-    def __init__(self, modifier=None, value=None):
-        self.modifier = modifier
-        self.value = value
-
-    def __eq__(self, other):
-        if not isinstance(other, VariableEntry):
-            return NotImplemented
-        return self.value == other.value and self.modifier == other.modifier
+    modifier: Optional[str] = None
+    value: Optional[str] = None
 
 
+@dataclass
 class PropertyToLoad:
-    def __init__(self, token, modifiers, property):
-        self.token = token
-        self.modifiers = modifiers
-        self.property = property
+    token: str
+    modifiers: list[str]
+    property: VariableEntry
 
 
 @dataclass

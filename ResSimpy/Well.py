@@ -6,10 +6,14 @@ from dataclasses import dataclass
 from ResSimpy import Completion
 
 
+@dataclass
 class Well(ABC):
-    def __init__(self, completions: list[Completion], well_name: str):
-        self.__completions: list[Completion] = completions
-        self.__well_name: str = well_name
+    __completions: list[Completion]
+    __well_name: str
+
+    def __init__(self, well_name, completions):
+        self.__well_name = well_name
+        self.__completions = completions
 
     @property
     def completions(self) -> list[Completion]:
