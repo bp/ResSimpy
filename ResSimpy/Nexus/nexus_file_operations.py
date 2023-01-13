@@ -96,12 +96,15 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
                             if replace_with.modifier != 'VALUE':
                                 new_line = new_line.replace('INCLUDE ', '')
                             elif 'INCLUDE' not in original_line:
-                                new_value = 'INCLUDE ' + replace_with.value
+                                if isinstance(replace_with.value, str):
+                                    new_value = 'INCLUDE ' + replace_with.value
 
                             # If we are replacing the first value from a mult, remove the space as well
                             if replace_with.modifier == 'MULT' and replace_with.value == '':
                                 value += ' '
-
+                        if new_value is None:
+                            raise ValueError(f'Value for replacing has returned a null value,\
+                            check replace_with input, {replace_with=}')
                         new_line = new_line.replace(value, new_value, 1)
                         file_as_list[start_line_index] = new_line
 
