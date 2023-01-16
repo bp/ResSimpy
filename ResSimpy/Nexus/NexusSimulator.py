@@ -334,9 +334,20 @@ class NexusSimulator(Simulator):
             self.__load_run_control_file()
 
     @staticmethod
-    def update_file_value(file_path, token, new_value, add_to_start=False):
+    def update_file_value(file_path: str, token: str, new_value: str, add_to_start: bool = False):
         """Updates a value in a file if it is present and in the format {TOKEN} {VALUE}. If the token
-        isn't present, it will add the token + value to either the start or end of the file"""
+        isn't present, it will add the token + value to either the start or end of the file
+
+        Args:
+            file_path (str): path to a file to update the token/value pair in
+            token (str): Keyword token to find in the given file (e.g. KX)
+            new_value (str): Value following the TOKEN to be replaced
+            add_to_start (bool, optional): Inserts the token/value pair to the start of the file. Defaults to False.
+
+        Raises:
+            ValueError: If no value is found after the token
+        """
+
         file = nexus_file_operations.load_file_as_list(file_path)
 
         line_counter = 0
@@ -350,6 +361,9 @@ class NexusSimulator(Simulator):
                 line_before_token_value = line[0: token_location]
                 line_after_token = line[token_location:]
                 current_value = nexus_file_operations.get_next_value(0, [line], line_after_token[len(token) + 1:])
+                if current_value is None:
+                    raise ValueError(f"No value found after the supplied {token=}, \
+                        please check the following line for that token: {line}")
                 new_line_after = line_after_token.replace(current_value, new_value, 1)
                 file[line_counter] = line_before_token_value + new_line_after
                 token_found = True
