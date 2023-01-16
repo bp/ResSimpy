@@ -239,7 +239,17 @@ class NexusSimulator(Simulator):
 
         return fluid_type
 
-    def get_model_oil_type(self):
+    def get_model_oil_type(self) -> str:
+        """Returns the get_fluid_type method on the existing NexusSimulator instance
+
+        Raises:
+            ValueError: If no file path is provided for the surface file path
+
+        Returns:
+            str: fluid type as one of [BLACKOIL, WATEROIL, GASWATER,] or the full details from an EOS model
+        """
+        if self.__surface_file_path is None:
+            raise ValueError("No value provided for the __surface_file_path")
         return NexusSimulator.get_fluid_type(self.__surface_file_path)
 
     def get_rootname(self) -> str:
