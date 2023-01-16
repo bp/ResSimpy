@@ -18,7 +18,7 @@ class NexusSimulator(Simulator):
 
     def __init__(self, origin: Optional[str] = None, destination: Optional[str] = None, force_output: bool = False,
                  root_name: Optional[str] = None, nexus_data_name: str = "data", write_times: bool = True,
-                 manual_fcs_tidy_call: bool = False):
+                 manual_fcs_tidy_call: bool = False) -> None:
 
         if origin is None:
             raise ValueError("FCS File Path is required")
@@ -89,10 +89,25 @@ class NexusSimulator(Simulator):
         return self.__root_name
 
     @staticmethod
-    def get_check_run_input_units_for_models(models: list[str]):
-        """Returns the run and input unit formats for all the supplied models"""
-        american_run_units = None
-        american_input_units = None
+    def get_check_run_input_units_for_models(models: list[str]) -> tuple[Optional[bool], Optional[bool]]:
+        # TODO: add LAB units
+        """Returns the run and input unit formats for all the supplied models.
+        Supported model formats:
+            RESQML type epc files ending in ".epc"
+            Nexus files containing a line identifying the "RUN_UNITS" or "DEFAULT_UNITS"
+        Supported units: ENGLISH, METRIC
+        Args:
+            models (list[str]): list of paths to supported reservoir models
+        Raises:
+            ValueError: if a model in the list is using inconcistent run/default units
+        Returns:
+            Tuple[Optional[Bool], Optional[Bool]]: If all units are consistent between models, 
+                Returns (True, True) if 'ft' is the length unit in an epc or Nexus specifies "ENGLISH" as the \
+                (RUN_UNITS,DEFAULT_UNITS) respectively and False, False otherwise. \
+                Returns (None, None) if it can't find a (RUN_UNITS, DEFAULT_UNITS) in the supplied files\
+        """
+        american_run_units: Optional[bool] = None
+        american_input_units: Optional[bool] = None
 
         for model in models:
             # If we're checking the units of a RESQML model, read it in and get the units. Otherwise, read the units
