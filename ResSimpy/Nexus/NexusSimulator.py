@@ -387,8 +387,13 @@ class NexusSimulator(Simulator):
         self.update_file_value(self.__new_fcs_file_path, token=token, new_value=new_value, add_to_start=add_to_start)
 
     @staticmethod
-    def comment_out_file_value(token, file_path):
-        """Comments out an uncommented line containing the specified token"""
+    def comment_out_file_value(token: str, file_path: str) -> None:
+        """Comments out an uncommented line containing the specified token
+
+        Args:
+            token (str): Keyword token to find in the given file (e.g. KX)
+            file_path (str): path to a file containing the token
+        """
         file = nexus_file_operations.load_file_as_list(file_path)
 
         line_counter = 0
@@ -416,7 +421,13 @@ class NexusSimulator(Simulator):
             return 'DD/MM/YYYY'
 
     def __load_run_control_file(self):
-        """ Loads the run control information into the class """
+        """Loads the run control information into the class instance. \
+            If the write_times attribute is True then expand out any INCLUDE files
+        Raises:
+            ValueError: if the run_control_file attribute is None
+        """
+        if self.run_control_file is None:
+            raise ValueError(f"No file path provided for {self.run_control_file=}")
         run_control_file = nexus_file_operations.load_file_as_list(self.run_control_file)
         include_file_path = ''
 
