@@ -146,7 +146,18 @@ class NexusSimulator(Simulator):
         return american_run_units, american_input_units
 
     @staticmethod
-    def get_check_oil_gas_types_for_models(models: list[str]):
+    def get_check_oil_gas_types_for_models(models: list[str]) -> Optional[str]:
+        """Checks for fluid types within a list of paths to models.
+        Currently limited to checking for the first SURFACE network in a file
+        Args:
+            models (list[str]): a list of paths to models to check for fluid types
+
+        Raises:
+            ValueError: If fluid types are inconsistent between models
+
+        Returns:
+            Optional[str]: The fluid type used for the model for the first surface network
+        """
         fluid_type = None
         for model in models:
             model_fluid_type = None
@@ -172,7 +183,15 @@ class NexusSimulator(Simulator):
         return fluid_type
 
     @staticmethod
-    def get_eos_details(surface_file: list[str]):
+    def get_eos_details(surface_file: list[str]) -> str:
+        """Gets all the information about an EOS from a Nexus model
+
+        Args:
+            surface_file (list[str]): path to the surface file in a Nexus model
+
+        Returns:
+            str: a concatenated string of EOS components
+        """
         eos_string: str = ''
         eos_found: bool = False
         for line in surface_file:
@@ -187,7 +206,18 @@ class NexusSimulator(Simulator):
         return eos_string
 
     @staticmethod
-    def get_fluid_type(surface_file_name):
+    def get_fluid_type(surface_file_name: str) -> str:
+        """gets the fluid type for a single model from a surface file
+
+        Args:
+            surface_file_name (str): path to the surface file in a Nexus model
+
+        Raises:
+            ValueError: if no fluid type is found within the provided file path
+
+        Returns:
+            str: fluid type as one of [BLACKOIL, WATEROIL, GASWATER,] or the full details from an EOS model
+        """
         surface_file = nexus_file_operations.load_file_as_list(surface_file_name)
         fluid_type = None
 
