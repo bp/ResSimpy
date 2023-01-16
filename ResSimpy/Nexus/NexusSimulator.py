@@ -58,7 +58,18 @@ class NexusSimulator(Simulator):
         self.__load_fcs_file()
 
     def remove_temp_from_properties(self):
-        """Updates model values if the files are moved from a temp directory"""
+        """Updates model values if the files are moved from a temp directory
+        Replaces the first instance of temp/ in the file paths in the nexus simulation file paths
+        Raises:
+            ValueError: if any of [__structured_grid_file_path, __new_fcs_file_path, __surface_file_path] are None
+        """
+        if self.__structured_grid_file_path is None:
+            raise ValueError("No __structured_grid_file_path found, can't remove temporary properties from file path")
+        if self.__new_fcs_file_path is None:
+            raise ValueError("No __new_fcs_file_path found, can't remove temporary properties from file path")
+        if self.__surface_file_path is None:
+            raise ValueError("No __surface_file_path found, can't remove temporary properties from file path")
+
         self.__origin = self.__origin.replace('temp/', '', 1)
         self.__root_name = self.__root_name.replace('temp/', '', 1)
         self.__structured_grid_file_path = self.__structured_grid_file_path.replace('temp/', '', 1)
