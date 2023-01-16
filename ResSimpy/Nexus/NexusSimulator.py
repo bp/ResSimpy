@@ -3,7 +3,7 @@ import os
 import copy
 from functools import cmp_to_key
 from datetime import timedelta
-from typing import Union
+from typing import Union, Optional
 
 from ResSimpy.Nexus.DataModels.StructuredGridFile import StructuredGridFile, PropertyToLoad
 import ResSimpy.Nexus.nexus_file_operations as nexus_file_operations
@@ -16,37 +16,38 @@ class NexusSimulator(Simulator):
     # Constants
     DATE_WITH_TIME_LENGTH = 20
 
-    def __init__(self, origin=None, destination=None, force_output=False, root_name=None,
-                 nexus_data_name="data", write_times=True, manual_fcs_tidy_call=False):
+    def __init__(self, origin: Optional[str] = None, destination: Optional[str] = None, force_output: bool = False,
+                 root_name: Optional[str] = None, nexus_data_name: str = "data", write_times: bool = True,
+                 manual_fcs_tidy_call: bool = False):
 
         if origin is None:
             raise ValueError("FCS File Path is required")
 
         super().__init__()
 
-        self.run_control_file = ''
-        self.__times = []
-        self.__destination = None
-        self.use_american_date_format = False
-        self.__job_id = -1
-        self.__date_format_string = ''
-        self.__original_fcs_file_path = origin.strip()
-        self.__new_fcs_file_path = origin.strip()
-        self.__force_output = force_output
-        self.__origin = origin.strip()  # this is the fcs file path
-        self.__root_name = root_name if root_name is not None else self.get_rootname()
-        self.__nexus_data_name = nexus_data_name
-        self.__structured_grid_file_path = None
-        self.__structured_grid_file = None
-        self.__simulation_start_time = None
-        self.__simulation_end_time = None
-        self.__previous_run_time = None
-        self.__run_units = None
-        self.use_american_run_units = False
-        self.use_american_input_units = False
-        self.__write_times = write_times
-        self.__manual_fcs_tidy_call = manual_fcs_tidy_call
-        self.__surface_file_path = None
+        self.run_control_file: Optional[str] = ''
+        self.__times: Optional[list[str]] = None
+        self.__destination: Optional[str] = None
+        self.use_american_date_format: bool = False
+        self.__job_id: int = -1  # maybe a float?
+        self.__date_format_string: str = ''
+        self.__original_fcs_file_path: str = origin.strip()
+        self.__new_fcs_file_path: str = origin.strip()
+        self.__force_output: bool = force_output
+        self.__origin: str = origin.strip()  # this is the fcs file path
+        self.__root_name: str = root_name if root_name is not None else self.get_rootname()
+        self.__nexus_data_name: str = nexus_data_name
+        self.__structured_grid_file_path: Optional[str] = None
+        self.__structured_grid_file: Optional[StructuredGridFile] = None
+        self.__simulation_start_time: Optional[str] = None  # run execution start time from the log file
+        self.__simulation_end_time: Optional[str] = None  # run execution finish time from the log file
+        self.__previous_run_time: Optional[str] = None  # run execution finish time from the log file
+        self.__run_units: Optional[str] = None
+        self.use_american_run_units: bool = False
+        self.use_american_input_units: bool = False
+        self.__write_times: bool = write_times
+        self.__manual_fcs_tidy_call: bool = manual_fcs_tidy_call
+        self.__surface_file_path: Optional[str] = None
 
         if destination is not None and destination != '':
             self.set_output_path(path=destination.strip())
@@ -185,8 +186,11 @@ class NexusSimulator(Simulator):
     def get_model_oil_type(self):
         return NexusSimulator.get_fluid_type(self.__surface_file_path)
 
-    def get_rootname(self):
-        """ Returns the name of the fcs file without the .fcs extension """
+    def get_rootname(self) -> str:
+        """ Returns the name of the fcs file without the .fcs extension
+        Returns:
+            str: string of the fcs file without the .fcs extension
+        """
         rootname = os.path.basename(self.__origin)
         rootname = rootname.split(".fcs")[0]
         return rootname
