@@ -261,14 +261,20 @@ class NexusSimulator(Simulator):
         rootname = rootname.split(".fcs")[0]
         return rootname
 
-    def __check_output_path(self):
+    def __check_output_path(self) -> None:
         """ Confirms that the output path has been set (used to stop accidental writing operations in the original
-        directory) """
+        directory)
+        Raises:
+            ValueError: if the destination provided is set to None
+        """
         if self.__destination is None:
             raise ValueError("Destination is required for this operation. Currently set to: ", self.__destination)
 
-    def set_output_path(self, path):
-        """ Initialises the output to the declared output location """
+    def set_output_path(self, path: str) -> None:
+        """ Initialises the output to the declared output location. \
+            If the file is a different directory to the origin path location the function will set the origin \
+            to the new destination.
+        """
         self.__destination = path
         if self.__destination is not None and os.path.dirname(self.__origin) != os.path.dirname(self.__destination):
             # if self.__manual_fcs_tidy_call:
@@ -279,7 +285,11 @@ class NexusSimulator(Simulator):
             self.__origin = self.__destination + "/" + os.path.basename(self.__original_fcs_file_path)
 
     def __load_fcs_file(self):
-        """ Loads in the information from the supplied FCS file """
+        """ Loads in the information from the supplied FCS file into the class instance.
+            Loads in the paths for runcontrol, strucutured grid and the first surface network.
+            Loads in the values for dateformat and run units.
+            Attempts to load the run_control_file.
+        """
         # self.get_simulation_status(True)
 
         fcs_file = nexus_file_operations.load_file_as_list(self.__new_fcs_file_path)
@@ -315,9 +325,9 @@ class NexusSimulator(Simulator):
             elif "SURFACE NETWORK 1" in uppercase_line:
                 value = nexus_file_operations.get_token_value(token="SURFACE Network 1", token_line=line,
                                                               file_list=fcs_file)
-
-                self.__surface_file_path = value if os.path.isabs(value) else \
-                    os.path.dirname(self.__origin) + "/" + value
+                if value is not None:
+                    self.__surface_file_path = value if os.path.isabs(value) else \
+                        os.path.dirname(self.__origin) + "/" + value
                 break
 
         if self.run_control_file != '':
