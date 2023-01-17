@@ -558,9 +558,7 @@ class NexusSimulator(Simulator):
                     date_format += "(%H:%M:%S)"
                 datetime.strptime(str(date), date_format)
             except Exception:
-                current_date_format = 'DD/MM/YYYY'
-                if self.use_american_date_format:
-                    current_date_format = 'MM/DD/YYYY'
+                current_date_format = self.get_date_format()
                 raise ValueError(
                     "Invalid date format " + str(date) + " the model is using " + current_date_format + " date format.")
 
