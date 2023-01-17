@@ -587,21 +587,19 @@ class NexusSimulator(Simulator):
         else:
             raise NotImplementedError(section, "not yet implemented")
 
-    def get_content(self, section, keyword):
-        """_summary_
+    def get_content(self, section: str, keyword: str) -> Union[list[str], None]:
+        """Returns the requested input information
 
         Args:
-            section (_type_): _description_
-            keyword (_type_): _description_
+            section (str): Section to retreive information from
+            keyword (str): Keyword/token to retrieve the information for
 
         Raises:
-            NotImplementedError: _description_
-            NotImplementedError: _description_
+            NotImplementedError: if the functionality is not yet implemented
 
         Returns:
-            _type_: _description_
-        """        
-        """ Returns the requested input information """
+            Union[list[str], None]: the requested information
+        """
         section = section.upper()
         keyword = keyword.upper()
         if section == "RUNCONTROL":
