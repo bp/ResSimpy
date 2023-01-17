@@ -688,12 +688,25 @@ class NexusSimulator(Simulator):
         with open(filename, "w") as text_file:
             text_file.write(new_file_str)
 
-    def change_force_output(self, force_output: bool = True):
-        """ Sets the force output parameter to the supplied value """
+    def change_force_output(self, force_output: bool = True) -> None:
+        """Sets the force output parameter to the supplied value
+
+        Args:
+            force_output (bool, optional): sets the force_output parameter in the class instance. Defaults to True.
+        """
         self.__force_output = force_output
 
-    def __get_log_path(self, from_startup=False):
-        """ Returns the path of the log file for the simulation """
+    def __get_log_path(self, from_startup: bool = False) -> Optional[str]:
+        """Returns the path of the log file for the simulation
+
+        Args:
+            from_startup (bool, optional): Searches the same directory as the original_fcs_file_path if True. \
+            Otherwise searches the destination folder path, failing this then searches the \
+            original_fcs_file_path if False. Defaults to False.
+
+        Returns:
+            Optional[str]: The path of the .log file from the simulation if found. If not found returns None.
+        """
         folder_path = os.path.dirname(self.__original_fcs_file_path) if from_startup else os.path.dirname(self.__origin)
         files = os.listdir(folder_path)
         original_fcs_file_location = os.path.basename(self.__original_fcs_file_path)
