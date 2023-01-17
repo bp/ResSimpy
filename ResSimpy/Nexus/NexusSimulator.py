@@ -652,10 +652,16 @@ class NexusSimulator(Simulator):
         if self.__destination is not None:
             self.__update_times_in_file()
 
-    def __update_times_in_file(self):
-        """ Updates the list of times in the Runcontrol file """
-        self.__check_output_path()
+    def __update_times_in_file(self) -> None:
+        """Updates the list of times in the Runcontrol file
 
+        Returns:
+            None: stores the modified values into the instance __times attribute
+        """
+        self.__check_output_path()
+        if self.run_control_file is None:
+            raise ValueError("No path provided for run_control_file attribute. \
+            Please provide/extract the path to the runcontrol file")
         file_content = nexus_file_operations.load_file_as_list(self.run_control_file)
 
         new_file_content = nexus_file_operations.delete_times(file_content)
