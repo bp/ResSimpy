@@ -478,8 +478,17 @@ class NexusSimulator(Simulator):
             text_file.write(new_file_str)
 
     def __convert_date_to_number(self, date: Union[str, int, float]) -> float:
-        """ Converts a date to a number designating number of days from the start date """
+        """Converts a date to a number designating number of days from the start date
 
+        Args:
+            date (Union[str, int, float]): a date or time stamp from a Nexus simulation
+
+        Raises:
+            ValueError: if supplied incorrect type for 'date' parameter
+
+        Returns:
+            float: the difference between the supplied date and the start date of the simulator
+        """
         # If we can retrieve a number of days from date, use that, otherwise convert the string date to a number of days
         try:
             converted_date: Union[str, float] = float(date)
@@ -508,10 +517,18 @@ class NexusSimulator(Simulator):
         return difference.total_seconds() / timedelta(days=1).total_seconds()
 
     def __compare_dates(self, x: Union[str, float], y: Union[str, float]) -> float:
-        """ Comparator for two supplied dates or numbers """
+        """Comparator for two supplied dates or numbers
+
+        Args:
+            x (Union[str, float]): first date to compare
+            y (Union[str, float]): second date to compare
+
+        Returns:
+            float: the difference between the first and second dates to compare
+        """
         return self.__convert_date_to_number(x) - self.__convert_date_to_number(y)
 
-    def __sort_remove_duplicate_times(self, times):
+    def __sort_remove_duplicate_times(self, times: list[str]) -> list[str]:
         """ Removes duplicates and nans from the times list, then sorts them """
         new_times = []
         for i in times:
@@ -522,17 +539,24 @@ class NexusSimulator(Simulator):
         new_times = sorted(new_times, key=cmp_to_key(self.__compare_dates))
         return new_times
 
-    def __check_date_format(self, date):
-        """ Checks that a supplied date is in the correct format """
+    def __check_date_format(self, date: Union[str, float]) -> None:
+        """Checks that a supplied date is in the correct format
+
+        Args:
+            date (Union[str, float]): date to check the format of
+
+        Raises:
+            ValueError: If a date provided isn't in a date format that the model expects
+        """
         try:
             float(date)
         except ValueError:
             # Value isn't a float - attempt to extract date from value
             try:
                 date_format = self.__date_format_string
-                if len(date) == self.DATE_WITH_TIME_LENGTH:
+                if len(str(date)) == self.DATE_WITH_TIME_LENGTH:
                     date_format += "(%H:%M:%S)"
-                datetime.strptime(date, date_format)
+                datetime.strptime(str(date), date_format)
             except Exception:
                 current_date_format = 'DD/MM/YYYY'
                 if self.use_american_date_format:
