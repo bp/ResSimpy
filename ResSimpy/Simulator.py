@@ -1,6 +1,7 @@
 """The abstract base class for all simulators"""
 
 from abc import ABC, abstractmethod
+from typing import Optional
 
 
 class Simulator(ABC):
@@ -23,11 +24,11 @@ class Simulator(ABC):
         raise NotImplementedError("This method has not been implemented for this simulator yet")
 
     @abstractmethod
-    def get_simulation_status(self) -> str:
+    def get_simulation_status(self) -> Optional[str]:
         raise NotImplementedError("This method has not been implemented for this simulator yet")
 
     @abstractmethod
-    def get_simulation_progress(self) -> str:
+    def get_simulation_progress(self) -> float:
         raise NotImplementedError("This method has not been implemented for this simulator yet")
 
     @abstractmethod
