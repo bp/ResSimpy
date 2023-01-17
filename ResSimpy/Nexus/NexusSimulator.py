@@ -988,7 +988,8 @@ class NexusSimulator(Simulator):
             ValueError: if no structured grid file path is specified in the class instance
 
         Returns:
-            Optional[str]: the string associated with the supplied property from within the structured grid.
+            Optional[str]: the string associated with the supplied property from within the structured grid. \
+                If the field is not found in the structured grid returns None.
         """
         structured_grid_dict = self.get_structured_grid_dict()
         command_token = f"{field.upper()} {structured_grid_dict[field.lower()].modifier}"
@@ -1008,6 +1009,7 @@ class NexusSimulator(Simulator):
                 new_array = [x.strip("'") for x in new_array]
                 value = "".join(new_array)
                 return value
+        return None
 
     def get_abs_structured_grid_path(self, filename: str):
         """Returns the absolute path to the Structured Grid file"""
