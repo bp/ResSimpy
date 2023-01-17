@@ -724,8 +724,12 @@ class NexusSimulator(Simulator):
         else:
             return None
 
-    def __update_simulation_start_and_end_times(self, log_file_line_list):
-        """Updates the stored simulation start and end times"""
+    def __update_simulation_start_and_end_times(self, log_file_line_list: list[str]) -> None:
+        """Updates the stored simulation execution start and end times from the log files
+
+        Args:
+            log_file_line_list (list[str]): log file information represented with a new entry per line of the file.
+        """
         for line in log_file_line_list:
             if 'start generic pdsh   prolog' in line:
                 value = nexus_file_operations.get_simulation_time(line)
@@ -735,8 +739,12 @@ class NexusSimulator(Simulator):
                 value = nexus_file_operations.get_simulation_time(line)
                 self.__simulation_end_time = value
 
-    def __get_start_end_difference(self):
-        """Returns a string with the previous time taken when the base case was run"""
+    def __get_start_end_difference(self) -> Optional[str]:
+        """Returns a string with the previous time taken when the base case was run
+
+        Returns:
+            Optional[str]: returns a human readable string of how long the simulation took to run
+        """
         if self.__simulation_start_time is None or self.__simulation_end_time is None:
             return None
 
@@ -751,9 +759,21 @@ class NexusSimulator(Simulator):
 
         return f"{days} Days, {hours} Hours, {minutes} Minutes {seconds} Seconds"
 
-    def get_simulation_status(self, from_startup=False):
-        """ Gets the status of the latest simulation run """
+    def get_simulation_status(self, from_startup: bool = False) -> Optional[str]:
+        """Gets the run status of the latest simulation run.
 
+        Args:
+            from_startup (bool, optional): Searches the same directory as the original_fcs_file_path if True. \
+            Otherwise searches the destination folder path, failing this then searches the \
+            original_fcs_file_path if False. Defaults to False.
+
+        Raises:
+            NotImplementedError: If log file is not found - only supporting simulation status from log files
+
+        Returns:
+            Optional[str]: the error/warning string if the simulation has finished, otherwise \
+                returns the running job ID. Empty string if a logfile is not found and from_start up is True
+        """
         log_file = self.__get_log_path(from_startup)
         if log_file is None:
             if from_startup:
@@ -774,7 +794,14 @@ class NexusSimulator(Simulator):
                     return f"Job Running, ID: {self.__job_id}"  # self.__get_job_status()
 
     def load_structured_grid_file(self):
-        """Loads in a structured grid file"""
+        """Loads in a structured grid file
+
+        Raises:
+            ValueError: _description_
+        """
+        if self.__structured_grid_file_path is None:
+            raise ValueError("No file path given or found for structured grid file path. \
+                Please update structured grid file path")
         file_as_list = nexus_file_operations.load_file_as_list(self.__structured_grid_file_path)
         structured_grid_file = StructuredGridFile()
         for line in file_as_list:

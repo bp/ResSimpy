@@ -368,7 +368,8 @@ def get_errors_warnings_string(log_file_line_list: list[str]) -> Optional[str]:
             a new list entry per line
 
     Returns:
-        str: string containing the errors and warnings from the simulation log
+        Optional[str]: string containing the errors and warnings from the simulation log. \
+            None if error/warning set is too short
     """
     error_warning = ""
     for line in log_file_line_list:
