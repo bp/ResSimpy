@@ -562,7 +562,7 @@ class NexusSimulator(Simulator):
                 raise ValueError(
                     "Invalid date format " + str(date) + " the model is using " + current_date_format + " date format.")
 
-    def modify(self, operation: str, section: str, keyword: str, content: str):
+    def modify(self, operation: str, section: str, keyword: str, content: list[str]):
         """Generic modify method to modify part of the input deck. \
         Operations are dependent on the section being modified
 
@@ -570,7 +570,8 @@ class NexusSimulator(Simulator):
             operation (str): operation to perform on the section of the input deck (e.g. 'merge')
             section (str): file type from the input deck provided (e.g. RUNCONTROL)
             keyword (str): which keyword/token to find within the deck provided (e.g. TIME)
-            content (str): The content to modify using the above operation
+            content (list[str]): The content to modify using the above operation, \
+            represented as a list of strings with a new entry per line of the file
 
         Raises:
             NotImplementedError: if the functionality is not yet implemented
@@ -610,8 +611,18 @@ class NexusSimulator(Simulator):
         else:
             raise NotImplementedError(section, "not yet implemented")
 
-    def __modify_times(self, content=None, operation='merge'):
-        """ Modifies the output times in the simulation """
+    def __modify_times(self, content: Optional[list[str]] = None, operation: str = 'merge'):
+        """Modifies the output times in the simulation
+
+        Args:
+            content (list[str]], optional): The content to modify using the above operation, \
+            represented as a list of strings with a new entry per line of the file. Defaults to None.
+            operation (str, optional): operation to perform on the content provided (e.g. 'merge'). Defaults to 'merge'.
+
+        Raises:
+            ValueError: if the supplied dates are before the start date of the simulation
+            AttributeError: if the instance __times attribute hasn't been set
+        """
         if content is None:
             content = []
         for time in content:
@@ -620,14 +631,18 @@ class NexusSimulator(Simulator):
         new_times = self.__sort_remove_duplicate_times(times=content)
         if len(new_times) > 0 > self.__compare_dates(new_times[0], self.start_date):
             raise ValueError(f"The supplied date of {new_times[0]} precedes the start date of {self.start_date}")
+        operation = operation.lower()
+        if self.__times is None:
+            raise AttributeError("No attribute set for __times. \
+            Please extract the times from the runcontrol file first")
 
-        if operation.lower() == 'merge':
+        if operation == 'merge':
             self.__times.extend(content)
-        elif operation.lower() == 'replace':
+        elif operation == 'replace':
             self.__times = content
-        elif operation.lower() == 'reset':
+        elif operation == 'reset':
             self.__times = []
-        elif operation.lower() == 'remove':
+        elif operation == 'remove':
             for time in content:
                 if time in self.__times:
                     self.__times.remove(time)
