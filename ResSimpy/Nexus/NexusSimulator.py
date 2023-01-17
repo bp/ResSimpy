@@ -945,7 +945,7 @@ class NexusSimulator(Simulator):
             text_file.write(new_file_str)
 
     @staticmethod
-    def get_grid_file_as_3d_list(path: str) -> Optional[list[str]]:
+    def get_grid_file_as_3d_list(path: str) -> Optional[list]:
         """Converts a grid file to a 3D list
 
         Args:
@@ -1029,7 +1029,7 @@ class NexusSimulator(Simulator):
         else:
             return '-'
 
-    def get_simulation_progress(self) -> Optional[float]:
+    def get_simulation_progress(self) -> float:
         """Returns the simulation progress from log files
 
         Raises:
