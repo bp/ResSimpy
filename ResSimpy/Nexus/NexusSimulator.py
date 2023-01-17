@@ -563,7 +563,8 @@ class NexusSimulator(Simulator):
                     "Invalid date format " + str(date) + " the model is using " + current_date_format + " date format.")
 
     def modify(self, operation: str, section: str, keyword: str, content: str):
-        """Generic modify method to modify part of the input deck
+        """Generic modify method to modify part of the input deck. \
+        Operations are dependent on the section being modified
 
         Args:
             operation (str): operation to perform on the section of the input deck (e.g. 'merge')
@@ -587,6 +588,19 @@ class NexusSimulator(Simulator):
             raise NotImplementedError(section, "not yet implemented")
 
     def get_content(self, section, keyword):
+        """_summary_
+
+        Args:
+            section (_type_): _description_
+            keyword (_type_): _description_
+
+        Raises:
+            NotImplementedError: _description_
+            NotImplementedError: _description_
+
+        Returns:
+            _type_: _description_
+        """        
         """ Returns the requested input information """
         section = section.upper()
         keyword = keyword.upper()
