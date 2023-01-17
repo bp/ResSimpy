@@ -3,7 +3,7 @@ import os
 import copy
 from functools import cmp_to_key
 from datetime import timedelta
-from typing import Union, Optional
+from typing import Any, Union, Optional
 
 from ResSimpy.Nexus.DataModels.StructuredGridFile import StructuredGridFile, PropertyToLoad
 import ResSimpy.Nexus.nexus_file_operations as nexus_file_operations
@@ -876,31 +876,31 @@ class NexusSimulator(Simulator):
 
         self.__structured_grid_file = structured_grid_file
 
-    def get_structured_grid(self):
+    def get_structured_grid(self) -> Optional[StructuredGridFile]:
         """Pass the structured grid information to the front end"""
         return self.__structured_grid_file
 
-    def get_structured_grid_dict(self):
+    def get_structured_grid_dict(self) -> dict[str, Any]:
         """Convert the structured grid info to a dictionary and pass it to the front end"""
         return self.__structured_grid_file.__dict__
 
-    def get_simulation_start_time(self):
-        """Get the start time of a simulation run"""
+    def get_simulation_start_time(self) -> str:
+        """Get the start time of an executed simulation run, if no simulation start time returns '-'"""
         self.get_simulation_status()
         if self.__simulation_start_time is not None:
             return self.__simulation_start_time
         else:
             return '-'
 
-    def get_simulation_end_time(self):
-        """Get the end time of a simulation run if it has completed"""
+    def get_simulation_end_time(self) -> str:
+        """Get the end time of an executed simulation run if it has completed, if no simulation end time returns '-'"""
         self.get_simulation_status()
         if self.__simulation_end_time is not None:
             return self.__simulation_end_time
         else:
             return '-'
 
-    def get_job_id(self):
+    def get_job_id(self) -> int:
         """Get the job Id of a simulation run"""
         return self.__job_id
 
