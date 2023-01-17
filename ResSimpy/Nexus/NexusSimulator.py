@@ -794,16 +794,37 @@ class NexusSimulator(Simulator):
                     return f"Job Running, ID: {self.__job_id}"  # self.__get_job_status()
 
     def load_structured_grid_file(self):
-        """Loads in a structured grid file
+        """Loads in a structured grid file including all grid properties and modifiers.
+        Currently loading in grids with FUNCTIONS included are not supported.
 
         Raises:
-            ValueError: _description_
+            AttributeError: if no value is found for the structured grid file path
+            ValueError: if when loading the grid no values can be found for the NX NY NZ line.
         """
         if self.__structured_grid_file_path is None:
             raise ValueError("No file path given or found for structured grid file path. \
                 Please update structured grid file path")
         file_as_list = nexus_file_operations.load_file_as_list(self.__structured_grid_file_path)
         structured_grid_file = StructuredGridFile()
+
+        def move_next_value(next_line: str) -> tuple[str, str]:
+            """finds the next value and then strips out the value from the line.
+
+            Args:
+                next_line (str): the line to search through for the value
+
+            Raises:
+                ValueError: if no value is found within the line provided
+
+            Returns:
+                tuple[str, str]: the next value found in the line, the line with the value stripped out.
+            """
+            value = nexus_file_operations.get_next_value(0, [next_line], next_line)
+            if value is None:
+                raise ValueError(f"No value found within the provided line: {next_line}")
+            next_line = next_line.replace(value, "", 1)
+            return value, next_line
+
         for line in file_as_list:
             # Load in the basic properties
             properties_to_load = [
@@ -845,11 +866,9 @@ class NexusSimulator(Simulator):
                 if "!" in line and line.index("!") < line.index('NX'):
                     continue
                 next_line = file_as_list[file_as_list.index(line) + 1]
-                first_value = nexus_file_operations.get_next_value(0, [next_line], next_line)
-                next_line = next_line.replace(first_value, "", 1)
-                second_value = nexus_file_operations.get_next_value(0, [next_line], next_line)
-                next_line = next_line.replace(second_value, "", 1)
-                third_value = nexus_file_operations.get_next_value(0, [next_line], next_line)
+                first_value, next_line = move_next_value(next_line)
+                second_value, next_line = move_next_value(next_line)
+                third_value, next_line = move_next_value(next_line)
 
                 structured_grid_file.range_x = int(first_value)
                 structured_grid_file.range_y = int(second_value)
