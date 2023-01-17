@@ -1019,17 +1019,18 @@ class NexusSimulator(Simulator):
         return os.path.dirname(self.__structured_grid_file_path) + '/' + filename
 
     def get_surface_file_path(self):
+        """Get the surface file path"""
         return self.__surface_file_path
 
-    def get_base_case_run_time(self):
-        """Get the time taken for the base case to run"""
+    def get_base_case_run_time(self) -> str:
+        """Get the time taken for the base case to run. Returns '-' if no run time found."""
         if self.__previous_run_time is not None:
             return self.__previous_run_time
         else:
             return '-'
 
-    def get_simulation_progress(self):
-        """Returns the simulation progress"""
+    def get_simulation_progress(self) -> Optional[float]:
+        """Returns the simulation progress from log files"""
         log_file_path = self.__get_log_path()
         if log_file_path is not None:
             log_file = nexus_file_operations.load_file_as_list(log_file_path)
