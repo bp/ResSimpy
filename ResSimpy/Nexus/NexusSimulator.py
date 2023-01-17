@@ -632,9 +632,7 @@ class NexusSimulator(Simulator):
         if len(new_times) > 0 > self.__compare_dates(new_times[0], self.start_date):
             raise ValueError(f"The supplied date of {new_times[0]} precedes the start date of {self.start_date}")
         operation = operation.lower()
-        if self.__times is None:
-            raise AttributeError("No attribute set for __times. \
-            Please extract the times from the runcontrol file first")
+        self.__times = self.__times if self.__times is not None else []
 
         if operation == 'merge':
             self.__times.extend(content)
