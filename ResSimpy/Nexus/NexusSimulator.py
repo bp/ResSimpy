@@ -1027,7 +1027,16 @@ class NexusSimulator(Simulator):
             return '-'
 
     def get_simulation_progress(self) -> Optional[float]:
-        """Returns the simulation progress from log files"""
+        """Returns the simulation progress from log files
+
+        Raises:
+            NotImplementedError: Only retrieving status from a log file is supported at the moment
+            ValueError: if no times from the runcontrol file are read in
+
+        Returns:
+            Optional[float]: how long through a simulation run as a proportion of the number of days \
+                simulated as stated in the runcontrol
+        """
         log_file_path = self.__get_log_path()
         if log_file_path is None:
             raise NotImplementedError("Only retrieving status from a log file is supported at the moment")
@@ -1072,13 +1081,26 @@ class NexusSimulator(Simulator):
 
         if last_time is not None:
             days_completed = self.__convert_date_to_number(last_time)
+            if self.__times is None:
+                raise ValueError("No times provided in the instance - please read them in from runcontrol file")
             total_days = self.__convert_date_to_number(self.__times[-1])
             return round((days_completed / total_days) * 100, 1)
 
         return 0
 
-    def append_include_to_grid_file(self, include_file_location):
+    def append_include_to_grid_file(self, include_file_location: str):
+        """Appends an include file to the end of a grid for adding LGRs
+
+        Args:
+            include_file_location (str): path to a file to include in the grid
+
+        Raises:
+            ValueError: if no structured grid file path is specified in the class instance
+        """
         # Get the existing file as a list
+        if self.__structured_grid_file_path is None:
+            raise ValueError("No file path given or found for structured grid file path. \
+                Please update structured grid file path")
         file = nexus_file_operations.load_file_as_list(self.__structured_grid_file_path)
 
         file.append(f"\nINCLUDE {include_file_location}\n")
@@ -1089,8 +1111,16 @@ class NexusSimulator(Simulator):
         with open(self.__structured_grid_file_path, "w") as text_file:
             text_file.write(new_file_str)
 
-    def __value_in_file(self, token: str, file: list):
-        """Returns true if a token is found in the specified file"""
+    def __value_in_file(self, token: str, file: list[str]) -> bool:
+        """Returns true if a token is found in the specified file
+
+        Args:
+            token (str): the token being searched for.
+            file (list[str]): a list of strings containing each line of the file as a new entry
+
+        Returns:
+            bool: True if the token is found and False otherwise
+        """
         token_found = False
         for line in file:
             if token in line:
@@ -1101,6 +1131,9 @@ class NexusSimulator(Simulator):
     def add_map_properties_to_start_of_grid_file(self):
         """Adds 'map' statements to the start of the grid file to ensure standalone outputs all the required
         properties """
+        if self.__structured_grid_file_path is None:
+            raise ValueError("No file path given or found for structured grid file path. \
+                Please update structured grid file path")
         file = nexus_file_operations.load_file_as_list(self.__structured_grid_file_path)
 
         if not self.__value_in_file('MAPBINARY', file):
