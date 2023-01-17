@@ -968,8 +968,8 @@ class NexusSimulator(Simulator):
                 new_list_split = [x.split("\t") for x in new_list_str.split("\n")]
                 new_list_split_cleaned = []
                 for x_list in new_list_split:
-                    new_list_split = [float(x) for x in x_list if x != ""]
-                    new_list_split_cleaned.append(new_list_split)
+                    float_list_split = [float(x) for x in x_list if x != ""]
+                    new_list_split_cleaned.append(float_list_split)
                 sub_lists.append(new_list_split_cleaned)
                 new_list_str = ""
             else:
