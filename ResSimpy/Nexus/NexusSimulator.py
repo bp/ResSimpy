@@ -101,7 +101,7 @@ class NexusSimulator(Simulator):
         Raises:
             ValueError: if a model in the list is using inconcistent run/default units
         Returns:
-            Tuple[Optional[Bool], Optional[Bool]]: If all units are consistent between models, 
+            Tuple[Optional[Bool], Optional[Bool]]: If all units are consistent between models,
                 Returns (True, True) if 'ft' is the length unit in an epc or Nexus specifies "ENGLISH" as the \
                 (RUN_UNITS,DEFAULT_UNITS) respectively and False, False otherwise. \
                 Returns (None, None) if it can't find a (RUN_UNITS, DEFAULT_UNITS) in the supplied files\
@@ -467,7 +467,7 @@ class NexusSimulator(Simulator):
         """Removes the times from a file - used for replacing with new times
         Args:
             file_content (list[str]): a list of strings containing each line of the file as a new entry
-            output_file_path (str): path to the file of 
+            output_file_path (str): path to the file to output to
         """
         self.__check_output_path()
         new_file_content = nexus_file_operations.delete_times(file_content)
