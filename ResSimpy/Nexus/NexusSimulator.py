@@ -621,7 +621,6 @@ class NexusSimulator(Simulator):
 
         Raises:
             ValueError: if the supplied dates are before the start date of the simulation
-            AttributeError: if the instance __times attribute hasn't been set
         """
         if content is None:
             content = []
