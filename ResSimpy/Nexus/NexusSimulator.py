@@ -789,6 +789,7 @@ class NexusSimulator(Simulator):
                 if len(job_number_line) > 0:
                     self.__job_id = int(job_number_line[0].split(":")[1])
                     return f"Job Running, ID: {self.__job_id}"  # self.__get_job_status()
+        return None
 
     def load_structured_grid_file(self):
         """Loads in a structured grid file including all grid properties and modifiers.
