@@ -5,7 +5,7 @@ from functools import cmp_to_key
 from datetime import timedelta
 from typing import Any, Union, Optional
 
-from ResSimpy.Nexus.DataModels.StructuredGridFile import StructuredGridFile, PropertyToLoad
+from ResSimpy.Nexus.DataModels.StructuredGridFile import StructuredGridFile, PropertyToLoad, VariableEntry
 import ResSimpy.Nexus.nexus_file_operations as nexus_file_operations
 import resqpy.model as rq
 
@@ -904,13 +904,26 @@ class NexusSimulator(Simulator):
         """Get the job Id of a simulation run"""
         return self.__job_id
 
-    def update_structured_grid_file(self, grid_dict):
-        """Save values passed from the front end to the structured grid file and update the class"""
+    def update_structured_grid_file(self, grid_dict: dict[str, Union[VariableEntry, int]]) -> None:
+        """Save values passed from the front end to the structured grid file and update the class
+
+        Args:
+            grid_dict (dict[str, Union[VariableEntry, int]]): dictionary containing grid properties to be replaced
+
+        Raises:
+            ValueError: If no structured grid file is in the instance of the Simulator class
+        """
+        if self.__structured_grid_file is None:
+            raise ValueError("No structured grid file found. Please provide data for structured grid \
+                e.g. through load_structured_grid_file method")
         # Convert the dictionary back to a class, and update the properties on our class
         original_structured_grid_file = copy.deepcopy(self.__structured_grid_file)
         self.__structured_grid_file = StructuredGridFile(grid_dict)
 
         # Get the existing file as a list
+        if self.__structured_grid_file_path is None:
+            raise ValueError("No path found for structured grid file path. \
+                Please provide a path to the structured grid")
         file = nexus_file_operations.load_file_as_list(self.__structured_grid_file_path)
 
         # Update each value in the file
