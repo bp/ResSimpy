@@ -424,7 +424,7 @@ class NexusSimulator(Simulator):
 
     def __load_run_control_file(self):
         """Loads the run control information into the class instance. \
-            If the write_times attribute is True then expand out any INCLUDE files
+            If the write_times attribute is True then it expands out any INCLUDE files with the times found within
         Raises:
             ValueError: if the run_control_file attribute is None
         """
@@ -463,14 +463,18 @@ class NexusSimulator(Simulator):
 
         self.__modify_times(content=times, operation='replace')
 
-    def __remove_times_from_file(self, file_content, file_path):
-        """ Removes the times from a file - used for replacing with new times """
+    def __remove_times_from_file(self, file_content: list[str], output_file_path: str):
+        """Removes the times from a file - used for replacing with new times
+        Args:
+            file_content (list[str]): a list of strings containing each line of the file as a new entry
+            output_file_path (str): path to the file of 
+        """
         self.__check_output_path()
         new_file_content = nexus_file_operations.delete_times(file_content)
 
         new_file_str = "".join(new_file_content)
 
-        with open(file_path, "w") as text_file:
+        with open(output_file_path, "w") as text_file:
             text_file.write(new_file_str)
 
     def __convert_date_to_number(self, date: Union[str, int, float]) -> float:
