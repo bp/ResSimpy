@@ -412,8 +412,10 @@ class NexusSimulator(Simulator):
         with open(file_path, "w") as text_file:
             text_file.write(new_file_str)
 
-    def get_date_format(self):
-        """Returns the date format being used by the model"""
+    def get_date_format(self) -> str:
+        """Returns the date format being used by the model
+        formats used: ('MM/DD/YYYY', 'DD/MM/YYYY')
+        """
 
         if self.use_american_date_format:
             return 'MM/DD/YYYY'
