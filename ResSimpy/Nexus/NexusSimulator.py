@@ -947,8 +947,15 @@ class NexusSimulator(Simulator):
             text_file.write(new_file_str)
 
     @staticmethod
-    def get_grid_file_as_3d_list(path):
-        """Converts a grid file to a 3D list"""
+    def get_grid_file_as_3d_list(path: str) -> Optional[list[str]]:
+        """Converts a grid file to a 3D list
+
+        Args:
+            path (str): path to a grid file
+
+        Returns:
+            Optional[list[str]]: Returns None if no file is found, returns the grid as a 3d array otherwise
+        """
         try:
             with open(path) as f:
                 grid_file_list = list(f)
@@ -971,10 +978,25 @@ class NexusSimulator(Simulator):
                 new_list_str = new_list_str + sub_list
         return sub_lists
 
-    def view_command(self, field, previous_lines=3, following_lines=3):
-        """Displays how the property is declared in the structured grid file"""
+    def view_command(self, field: str, previous_lines: int = 3, following_lines: int = 3) -> Optional[str]:
+        """Displays how the property is declared in the structured grid file
+
+        Args:
+            field (str): property as written in the structured grid (e.g. KX)
+            previous_lines (int, optional): how many lines to look back from the field searched for. Defaults to 3.
+            following_lines (int, optional): how many lines to look forward from the field searched for. Defaults to 3.
+
+        Raises:
+            ValueError: if no structured grid file path is specified in the class instance
+
+        Returns:
+            Optional[str]: the string associated with the supplied property from within the structured grid.
+        """
         structured_grid_dict = self.get_structured_grid_dict()
         command_token = f"{field.upper()} {structured_grid_dict[field.lower()].modifier}"
+        if self.__structured_grid_file_path is None:
+            raise ValueError("No path found for structured grid file path. \
+                Please provide a path to the structured grid")
         file_as_list = nexus_file_operations.load_file_as_list(self.__structured_grid_file_path)
 
         for line in file_as_list:
@@ -989,8 +1011,11 @@ class NexusSimulator(Simulator):
                 value = "".join(new_array)
                 return value
 
-    def get_abs_structured_grid_path(self, filename):
+    def get_abs_structured_grid_path(self, filename: str):
         """Returns the absolute path to the Structured Grid file"""
+        if self.__structured_grid_file_path is None:
+            raise ValueError("No path found for structured grid file path. \
+                Please provide a path to the structured grid")
         return os.path.dirname(self.__structured_grid_file_path) + '/' + filename
 
     def get_surface_file_path(self):
