@@ -562,14 +562,17 @@ class NexusSimulator(Simulator):
                 raise ValueError(
                     "Invalid date format " + str(date) + " the model is using " + current_date_format + " date format.")
 
-    def modify(self, operation, section, keyword, content):
-        """
-        Generic modify method to modify part of the input deck
-        args:
-            operation
-            section
-            keyword
-            content
+    def modify(self, operation: str, section: str, keyword: str, content: str):
+        """Generic modify method to modify part of the input deck
+
+        Args:
+            operation (str): operation to perform on the section of the input deck (e.g. 'merge')
+            section (str): file type from the input deck provided (e.g. RUNCONTROL)
+            keyword (str): which keyword/token to find within the deck provided (e.g. TIME)
+            content (str): The content to modify using the above operation
+
+        Raises:
+            NotImplementedError: if the functionality is not yet implemented
         """
         section = section.upper()
         keyword = keyword.upper()
