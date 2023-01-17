@@ -653,10 +653,10 @@ class NexusSimulator(Simulator):
             self.__update_times_in_file()
 
     def __update_times_in_file(self) -> None:
-        """Updates the list of times in the Runcontrol file
+        """Updates the list of times in the Runcontrol file to the current stored values in __times
 
         Returns:
-            None: stores the modified values into the instance __times attribute
+            None: writes out a file at the same path as the existing runcontrol file
         """
         self.__check_output_path()
         if self.run_control_file is None:
@@ -666,12 +666,12 @@ class NexusSimulator(Simulator):
 
         new_file_content = nexus_file_operations.delete_times(file_content)
 
-        time_list = self.__times
+        time_list = self.__times if self.__times is not None else []
         stop_string = 'STOP\n'
         if stop_string in new_file_content:
             new_file_content.remove(stop_string)
 
-        def prepend_time(s):
+        def prepend_time(s: str) -> str:
             return "TIME " + s
 
         time_list = [prepend_time(x) for x in time_list]
@@ -688,7 +688,7 @@ class NexusSimulator(Simulator):
         with open(filename, "w") as text_file:
             text_file.write(new_file_str)
 
-    def change_force_output(self, force_output=True):
+    def change_force_output(self, force_output: bool = True):
         """ Sets the force output parameter to the supplied value """
         self.__force_output = force_output
 
