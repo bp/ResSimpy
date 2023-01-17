@@ -1129,8 +1129,12 @@ class NexusSimulator(Simulator):
         return token_found
 
     def add_map_properties_to_start_of_grid_file(self):
-        """Adds 'map' statements to the start of the grid file to ensure standalone outputs all the required
-        properties """
+        """Adds 'map' statements to the start of the grid file to ensure standalone outputs all the required \
+        properties. Writes out to the same structured grid file path provided.
+
+        Raises:
+            ValueError: if no structured grid file path is specified in the class instance
+        """
         if self.__structured_grid_file_path is None:
             raise ValueError("No file path given or found for structured grid file path. \
                 Please update structured grid file path")
