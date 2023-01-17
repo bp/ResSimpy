@@ -1032,48 +1032,51 @@ class NexusSimulator(Simulator):
     def get_simulation_progress(self) -> Optional[float]:
         """Returns the simulation progress from log files"""
         log_file_path = self.__get_log_path()
-        if log_file_path is not None:
-            log_file = nexus_file_operations.load_file_as_list(log_file_path)
+        if log_file_path is None:
+            raise NotImplementedError("Only retrieving status from a log file is supported at the moment")
+        log_file = nexus_file_operations.load_file_as_list(log_file_path)
 
-            read_in_times = False
-            time_heading_location = None
-            last_time = None
-            for line in log_file:
-                case_name_string = f"Case Name = {self.__root_name}"
-                if case_name_string in line:
-                    read_in_times = True
-                    continue
-                if read_in_times and 'TIME' in line:
-                    heading_location = 0
-                    line_string = line
-                    while len(line_string) > 0:
+        read_in_times = False
+        time_heading_location = None
+        last_time = None
+        for line in log_file:
+            case_name_string = f"Case Name = {self.__root_name}"
+            if case_name_string in line:
+                read_in_times = True
+                continue
+            if read_in_times and 'TIME' in line:
+                heading_location = 0
+                line_string = line
+                while len(line_string) > 0:
+                    next_value = nexus_file_operations.get_next_value(0, [line_string], line_string)
+                    if next_value is None:
+                        break
+
+                    line_string = line_string.replace(next_value, '', 1)
+                    if next_value == 'TIME':
+                        time_heading_location = heading_location
+                    heading_location += 1
+
+            if read_in_times and time_heading_location is not None:
+                line_string = line
+                next_value = nexus_file_operations.get_next_value(0, [line_string], line_string)
+                if next_value is not None and next_value.replace('.', '', 1).isdigit():
+                    if time_heading_location == 0 and (last_time is None or float(next_value) > float(last_time)):
+                        last_time = next_value
+                    for x in range(0, time_heading_location):
+                        line_string = line_string.replace(next_value, '', 1)
                         next_value = nexus_file_operations.get_next_value(0, [line_string], line_string)
                         if next_value is None:
                             break
-
-                        line_string = line_string.replace(next_value, '', 1)
-                        if next_value == 'TIME':
-                            time_heading_location = heading_location
-                        heading_location += 1
-
-                if read_in_times and time_heading_location is not None:
-                    line_string = line
-                    next_value = nexus_file_operations.get_next_value(0, [line_string], line_string)
-                    if next_value is not None and next_value.replace('.', '', 1).isdigit():
-                        if time_heading_location == 0 and (last_time is None or float(next_value) > float(last_time)):
+                        # When we reach the time column, read in the time value.
+                        if x == (time_heading_location - 1) and \
+                                (last_time is None or float(next_value) > float(last_time)):
                             last_time = next_value
-                        for x in range(0, time_heading_location):
-                            line_string = line_string.replace(next_value, '', 1)
-                            next_value = nexus_file_operations.get_next_value(0, [line_string], line_string)
-                            # When we reach the time column, read in the time value.
-                            if x == (time_heading_location - 1) and \
-                                    (last_time is None or float(next_value) > float(last_time)):
-                                last_time = next_value
 
-            if last_time is not None:
-                days_completed = self.__convert_date_to_number(last_time)
-                total_days = self.__convert_date_to_number(self.__times[-1])
-                return round((days_completed / total_days) * 100, 1)
+        if last_time is not None:
+            days_completed = self.__convert_date_to_number(last_time)
+            total_days = self.__convert_date_to_number(self.__times[-1])
+            return round((days_completed / total_days) * 100, 1)
 
         return 0
 
