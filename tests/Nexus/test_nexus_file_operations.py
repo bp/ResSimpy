@@ -98,3 +98,38 @@ def test_get_token_value(mocker, line_contents, file_contents, expected_result):
 
     # Assert
     assert result == expected_result
+
+@pytest.mark.parametrize("file_contents, expected_result_contents", [
+('''
+SW         KRW        KROW        PCWO !Comments
+!comment
+''',
+'''SW         KRW        KROW        PCWO '''),
+
+('''
+  Spaces before
+Mid line ! comment
+Tabs  after ! comment ! comment ! comment
+Several comment characters !!!!! comment1 !!!!
+!single line comment
+   !blank space before comment
+''',
+'''  Spaces before
+Mid line 
+Tabs  after 
+Several comment characters 
+   '''),
+], ids=['basic test', 'several inline/single line comments']
+)
+def test_strip_file_of_comments(mocker, file_contents, expected_result_contents):
+    # Arrange
+    dummy_file_as_list = file_contents.splitlines()
+    expected_result = expected_result_contents.splitlines()
+    open_mock = mocker.mock_open(read_data=file_contents)
+    mocker.patch("builtins.open", open_mock)
+
+    # Act
+    result = nexus_file_operations.strip_file_of_comments(dummy_file_as_list)
+
+    # Assert
+    assert result == expected_result

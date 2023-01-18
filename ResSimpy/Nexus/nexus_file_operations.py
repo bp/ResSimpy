@@ -194,16 +194,37 @@ def delete_times(file_content: list[str]) -> list[str]:
     return new_file
 
 
-def load_file_as_list(file_path: str) -> list[str]:
+def strip_file_of_comments(file_as_list: list[str]) -> list[str]:
+    """Strips all of the inline and single line comments out of a file.
+
+    Args:
+        file_as_list (list[str]): a list of strings containing each line of the file as a new entry 
+
+    Returns:
+        list[str]: a list of strings containing each line of the file as a new entry without comments
+    """
+    file_as_list = list(filter(None, file_as_list))
+
+    file_without_comments = [x.split('!', 1)[0] for x in file_as_list if x[0] != '!']
+
+    return file_without_comments
+
+
+def load_file_as_list(file_path: str, strip_comments: bool = False) -> list[str]:
     """ Reads the text file into a variable
     Args:
-        file_path: (str): string containing a path pointing towards a text file
+        file_path (str): string containing a path pointing towards a text file
+        strip_comments (bool, optional): If set to True removes all inline/single line comments from \
+            the passed in file. Defaults to False.
 
     Returns:
         list[str]: list of strings with each line from the file a new entry in the list
      """
     with open(file_path, 'r') as f:
         file_content = list(f)
+
+    if strip_comments:
+        file_content = strip_file_of_comments(file_content)
 
     return file_content
 
