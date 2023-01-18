@@ -19,7 +19,52 @@ class NexusSimulator(Simulator):
     def __init__(self, origin: Optional[str] = None, destination: Optional[str] = None, force_output: bool = False,
                  root_name: Optional[str] = None, nexus_data_name: str = "data", write_times: bool = True,
                  manual_fcs_tidy_call: bool = False) -> None:
+        """Nexus simulator class. Inherits from the Simulator super class
 
+        Args:
+            origin (Optional[str], optional): file path to the fcs file. Defaults to None.
+            destination (Optional[str], optional): output path for the simulation. Defaults to None.
+            force_output (bool, optional): sets force_output parameter - unused. Defaults to False.
+            root_name (Optional[str], optional): Root file name of the fcs. Defaults to None.
+            nexus_data_name (str, optional): Folder name for the nexus data files to be stored in. Defaults to "data".
+            write_times (bool, optional): Sets whether the runcontrol file will expand the include files with time \
+                cards in. Defaults to True.
+            manual_fcs_tidy_call (bool, optional): Determines whether fcs_tidy should be called - Currently not used. \
+                Defaults to False.
+        Attributes:
+            run_control_file (Optional[str]): file path to the run control file - derived from the fcs file
+            __times (Optional[list[str]]): list of times to be included in the runcontrol file
+            __destination (Optional[str]): private attribute of destination, output path for the simulation.
+            use_american_date_format (bool): True if the simulation uses 'MM/DD/YYYY' date format.
+            __job_id (int): Run job ID for executed runs
+            __date_format_string (str): How the dates should formatted based on use_american_date_format
+            __original_fcs_file_path (str): Path to the original fcs file path supplied
+            __new_fcs_file_path (str): Where the new fcs will be saved to
+            __force_output (bool): private attribute of force_output
+            __origin (str): private attribute of origin. File path to the fcs file.
+            __root_name (str): private attribute of root_name. Root file name of the fcs.
+            __nexus_data_name (str): private attribute of nexus_data_name. Folder name for the nexus data files to be \
+                stored in.
+            __structured_grid_file_path (Optional[str]): file path to the structured grid.
+            __structured_grid_file (Optional[StructuredGridFile]): StructuredGridFile object representing the \
+                structured grid used in Nexus
+            __simulation_start_time (Optional[str]): Execution start time of the simulation when submitted \
+                to calculation engine
+            __simulation_end_time (Optional[str]): Execution end time of the last time the simulation was run
+            __previous_run_time (Optional[str]): Difference between simulation execution start time and end time
+            __run_units (Optional[str]): Unit system used in the Nexus model
+            use_american_run_units (bool): True if an American unit system is used equivalent to 'ENGLISH'. \
+                False otherwise. For the RUN_UNITS keyword.
+            use_american_input_units (bool): True if an American unit system is used equivalent to 'ENGLISH'. \
+                False otherwise. For the DEFAULT_UNITS keyword.
+            __write_times (bool): private attribute for write_times. Sets whether the runcontrol file will expand \
+                the include files with time cards in.
+            __manual_fcs_tidy_call (bool): private attribute for manual_fcs_tidy_call. Determines whether fcs_tidy \
+                should be called
+            __surface_file_path (Optional[str]): File path to the surface file. Derived from the fcs file.
+        Raises:
+            ValueError: If the FCS file path is not given
+        """
         if origin is None:
             raise ValueError("FCS File Path is required")
 
