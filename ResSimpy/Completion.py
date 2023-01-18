@@ -7,6 +7,9 @@ from typing import Optional
 @dataclass(kw_only=True)
 class Completion(ABC):
     """
+    A class representing well completions.
+    IMPORTANT: if modifying this class, make sure to update the relevant tests in test_load_wells, as well as updating
+    the constructor calls in the derived classes.
     well_radius: The well radius. 'RADW' in Nexus
     """
     __date: str
@@ -21,11 +24,14 @@ class Completion(ABC):
     __angle_a: Optional[float] = None
     __angle_v: Optional[float] = None
     __grid: Optional[str] = None
+    __depth_to_top: Optional[float] = None
+    __depth_to_bottom: Optional[float] = None
 
     def __init__(self, date: str, i: Optional[int] = None, j: Optional[int] = None, k: Optional[int] = None,
                  skin: Optional[float] = None, depth: Optional[float] = None, well_radius: Optional[float] = None,
                  x: Optional[float] = None, y: Optional[float] = None, angle_a: Optional[float] = None,
-                 angle_v: Optional[float] = None, grid: Optional[str] = None):
+                 angle_v: Optional[float] = None, grid: Optional[str] = None, depth_to_top: Optional[float] = None,
+                 depth_to_bottom: Optional[float] = None):
         self.__well_radius = well_radius
         self.__date = date
         self.__i = i
@@ -38,6 +44,8 @@ class Completion(ABC):
         self.__angle_a = angle_a
         self.__angle_v = angle_v
         self.__grid = grid
+        self.__depth_to_top = depth_to_top
+        self.__depth_to_bottom = depth_to_bottom
 
     @property
     def well_radius(self):

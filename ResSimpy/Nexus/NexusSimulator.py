@@ -810,6 +810,7 @@ class NexusSimulator(Simulator):
 
         return 0
 
+    # TODO: change append to be an optional parameter, + move this elsewhere
     def append_include_to_grid_file(self, include_file_location):
         # Get the existing file as a list
         file = nexus_file_operations.load_file_as_list(self.__structured_grid_file_path)
@@ -831,6 +832,7 @@ class NexusSimulator(Simulator):
 
         return token_found
 
+    # TODO: move to 'Reporting' module
     def add_map_properties_to_start_of_grid_file(self):
         """Adds 'map' statements to the start of the grid file to ensure standalone outputs all the required
         properties """

@@ -3,12 +3,14 @@ from typing import Optional
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
+from ResSimpy.Nexus.DataModels.UnitsEnum import Units
 
 
-def load_wells(well_file: str, start_date: str) -> list[NexusWell]:
+def load_wells(well_file: str, start_date: str, default_units: Units) -> list[NexusWell]:
     file_as_list = nfo.load_file_as_list(well_file)
 
     well_name: Optional[str] = None
+    well_units: Optional[Units] = None
     completions: list[NexusCompletion] = []
     headers: list[str] = []
 
@@ -16,12 +18,21 @@ def load_wells(well_file: str, start_date: str) -> list[NexusWell]:
     jw: Optional[str] = None
     kw: Optional[str] = None
     well_radius: Optional[str] = None
+    units_values = {'ENGLISH': Units.OILFIELD, 'METRIC': Units.METRIC_KPA, 'METKG/CM2': Units.METRIC_KGCM2,
+                    'METBAR': Units.METRIC_BARS, 'LAB': Units.LAB}
     header_values = {'IW': iw, 'JW': jw, 'L': kw, 'RADW': well_radius}
     header_index = -1
 
     for index, line in enumerate(file_as_list):
+        uppercase_line = line.upper()
 
-        if 'WELLSPEC' in line:
+        # If we haven't got the units yet, check to see if this line contains a declaration for them.
+        if well_units is None:
+            for key in units_values.keys():
+                if key in uppercase_line and (line.find('!') > line.find(key) or line.find('!') == -1):
+                    well_units = units_values[key]
+
+        if 'WELLSPEC' in uppercase_line:
             initial_well_name = nfo.get_token_value(token='WELLSPEC', token_line=line, file_list=file_as_list)
             if initial_well_name is None:
                 raise ValueError("Cannot find well name following WELLSPEC keyword")
@@ -70,5 +81,8 @@ def load_wells(well_file: str, start_date: str) -> list[NexusWell]:
 
             completions.append(new_completion)
 
-    well = [NexusWell(completions=completions, well_name=well_name)]
-    return well
+    if well_units is None:
+        well_units = default_units
+
+    wells = [NexusWell(completions=completions, well_name=well_name, units=well_units)]
+    return wells

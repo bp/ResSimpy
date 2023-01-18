@@ -210,6 +210,7 @@ def load_file_as_list(file_path: str) -> list[str]:
     return file_content
 
 
+# TODO: Rename
 def load_token_value_if_present(token: str, modifier: str, token_property: VariableEntry,
                                 line: str, file_as_list: list[str],
                                 ignore_values: Optional[list[str]] = None) -> None:
@@ -253,6 +254,7 @@ def load_token_value_if_present(token: str, modifier: str, token_property: Varia
             token_property.modifier = modifier
 
 
+# TODO: move to it's own module + rename
 def get_simulation_time(line: str) -> str:
     """searches for the simulation time in a line
 
@@ -287,7 +289,7 @@ def get_simulation_time(line: str) -> str:
         line_string = line_string.replace(next_value, '', 1)
     return value
 
-
+# TODO: move to structured grid module
 def replace_value(file_as_list: list[str], old_property: VariableEntry, new_property: VariableEntry,
                   token_name: str) -> None:
     """Replace the value and token + modifier with the new values
@@ -319,7 +321,7 @@ def replace_value(file_as_list: list[str], old_property: VariableEntry, new_prop
             line_index = file_as_list.index(line)
             file_as_list[line_index] = new_line
 
-
+# TODO: move to simulation log module
 def clean_up_string(value: str) -> str:
     """Removes unwanted characters from a string
         unwanted characters: ("\\n", "\\t", "!")
@@ -333,7 +335,7 @@ def clean_up_string(value: str) -> str:
     value = value.replace("\t", "")
     return value
 
-
+# TODO: move to simulation log module
 def convert_server_date(original_date: str) -> datetime:
     """Convert a datetime string from the server for when the simulation was started to a strptime object
 
@@ -357,7 +359,7 @@ def convert_server_date(original_date: str) -> datetime:
 
     return datetime.strptime(converted_date, date_format)
 
-
+# TODO: move to simulation log module
 def get_errors_warnings_string(log_file_line_list: list[str]) -> Optional[str]:
     """Retrieves the number of warnings and errors from the simulation log output,
     and formats them as a string
@@ -409,7 +411,7 @@ def create_templated_file(template_location: str, substitutions: dict, output_fi
     with open(output_file_name, 'w') as new_file:
         new_file.write(output_file)
 
-
+# TODO: MOVE TO RELPERM MODULE
 def get_relperm_combined_fluid_column_heading(table_heading: str) -> str:
     """Returns the combined rel perm fluid perm heading for a Nexus Relperm table
     Args:
