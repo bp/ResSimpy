@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
@@ -22,7 +23,7 @@ class PropertyToLoad:
 
 @dataclass
 class StructuredGridFile:
-    def __init__(self, data=None):
+    def __init__(self, data: Optional[dict] = None):
         self.netgrs = VariableEntry()
         self.porosity = VariableEntry()
         self.sw = VariableEntry()
@@ -30,9 +31,9 @@ class StructuredGridFile:
         self.ky = VariableEntry()
         self.kz = VariableEntry()
         # Grid dimensions
-        self.range_x = None
-        self.range_y = None
-        self.range_z = None
+        self.range_x: Optional[int] = None
+        self.range_y: Optional[int] = None
+        self.range_z: Optional[int] = None
 
         if data is not None:
             for name, value in data.items():
