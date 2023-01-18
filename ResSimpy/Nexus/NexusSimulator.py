@@ -516,7 +516,7 @@ class NexusSimulator(Simulator):
         difference = date_as_datetime - start_date_as_datetime
         return difference.total_seconds() / timedelta(days=1).total_seconds()
 
-    def __compare_dates(self, x: Union[str, float], y: Union[str, float]) -> float:
+    def __compare_dates(self, x: Union[str, float], y: Union[str, float]) -> int:
         """Comparator for two supplied dates or numbers
 
         Args:
@@ -524,9 +524,17 @@ class NexusSimulator(Simulator):
             y (Union[str, float]): second date to compare
 
         Returns:
-            float: the difference between the first and second dates to compare
+            int: the difference between the first and second dates to compare
         """
-        return self.__convert_date_to_number(x) - self.__convert_date_to_number(y)
+        date_comp = self.__convert_date_to_number(x) - self.__convert_date_to_number(y)
+        if date_comp < 0:
+            date_comp_int = -1
+        elif date_comp == 0:
+            date_comp_int = 0
+        else:
+            date_comp_int = 1
+
+        return date_comp_int
 
     def __sort_remove_duplicate_times(self, times: list[str]) -> list[str]:
         """ Removes duplicates and nans from the times list, then sorts them """
