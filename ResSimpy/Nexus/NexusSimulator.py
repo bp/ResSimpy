@@ -29,7 +29,7 @@ class NexusSimulator(Simulator):
         self.__times: Optional[list[str]] = None
         self.__destination: Optional[str] = None
         self.use_american_date_format: bool = False
-        self.__job_id: int = -1  # maybe a float?
+        self.__job_id: int = -1
         self.__date_format_string: str = ''
         self.__original_fcs_file_path: str = origin.strip()
         self.__new_fcs_file_path: str = origin.strip()
