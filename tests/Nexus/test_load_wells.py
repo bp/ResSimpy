@@ -21,7 +21,9 @@ from ResSimpy.Nexus.load_wells import load_wells
     """, "ANOTHER_WELL"),
                           ("""
     WELLSPEC "3"
+    
     JW IW L RADW
+    
     2  1  3  4.5
     7 6 8   9.11
     """, "3"),
@@ -76,6 +78,14 @@ def test_load_wells_multiple_wells(mocker):
     12 12   13 4.50000000000
     14 15 143243            0.00002
     18 155 143243 40.00002
+    
+    WELLSPEC	WEL1234
+	IW	JW	L	PPERF	RADW	SKIN
+	126	504	3	1	0.354	0
+	
+	126	504	4	1	0.354	0
+
+WELLMOD	RU001	DKH	CON	0
     """
 
     expected_well_1_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date=start_date)

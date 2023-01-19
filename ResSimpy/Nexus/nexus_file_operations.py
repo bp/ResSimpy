@@ -4,31 +4,59 @@ from typing import Dict, Optional, Union
 from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
 from string import Template
 
+from ResSimpy.Nexus.nexus_constants import VALID_NEXUS_TOKENS
+
+
+def nexus_token_found(line_to_check: str) -> bool:
+    """
+    Checks if a valid Nexus token has been found  in the supplied line
+
+    Args:
+        line_to_check (str):  The string to search for a Nexus keyword
+
+    Returns:
+        token_found (bool): A boolean value stating whether the token is found or not
+
+    """
+    uppercase_line = line_to_check.upper()
+    for token in VALID_NEXUS_TOKENS:
+        if check_token(token, uppercase_line):
+            return True
+
+    return False
+
 
 def check_token(token: str, line: str) -> bool:
-    """ Checks if the text line contains the supplied token
+    """ Checks if the text line contains the supplied token and is not commented out
     Args:
         token (str): keyword value to search the line for
         line (str): string to search the token in
     Returns:
         bool: True if the text line contains the supplied token, False otherwise
     """
-    line_start_chars = ["", '\t', "\n"]
-    token_end_chars = [" ", '\n', '\t']
-    token_location = line.find(token)
+    token_separator_chars = [" ", '\n', '\t', '!']
+    uppercase_line = line.upper()
+    token_location = uppercase_line.find(token.upper())
 
+    # Not found at all, return false
     if token_location == -1:
         return False
 
-    if token_location + len(token) == len(line):
-        return True
+    comment_character_location = line.find("!")
 
-    if line[token_location + len(token)] not in token_end_chars:
+    # Check if the line is commented out before the token appears
+    if comment_character_location != -1 and comment_character_location < token_location:
         return False
 
-    if token_location == 0 or line[token_location - 1] in line_start_chars:
-        return True
-    return False
+    # Check if the character before the token is a separator such as space, tab etc and not another alphanumeric char
+    if token_location != 0 and line[token_location - 1] not in token_separator_chars:
+        return False
+
+    # Check if the character after the token is a separator such as space, tab etc and not another alphanumeric char
+    if token_location + len(token) != len(line) and line[token_location + len(token)] not in token_separator_chars:
+        return False
+
+    return True
 
 
 def get_next_value(start_line_index: int, file_as_list: list[str], search_string: str,
@@ -289,6 +317,7 @@ def get_simulation_time(line: str) -> str:
         line_string = line_string.replace(next_value, '', 1)
     return value
 
+
 # TODO: move to structured grid module
 def replace_value(file_as_list: list[str], old_property: VariableEntry, new_property: VariableEntry,
                   token_name: str) -> None:
@@ -321,6 +350,7 @@ def replace_value(file_as_list: list[str], old_property: VariableEntry, new_prop
             line_index = file_as_list.index(line)
             file_as_list[line_index] = new_line
 
+
 # TODO: move to simulation log module
 def clean_up_string(value: str) -> str:
     """Removes unwanted characters from a string
@@ -334,6 +364,7 @@ def clean_up_string(value: str) -> str:
     value = value.replace("!", "")
     value = value.replace("\t", "")
     return value
+
 
 # TODO: move to simulation log module
 def convert_server_date(original_date: str) -> datetime:
@@ -358,6 +389,7 @@ def convert_server_date(original_date: str) -> datetime:
         date_format = '%a %b %d %X %z %Y'
 
     return datetime.strptime(converted_date, date_format)
+
 
 # TODO: move to simulation log module
 def get_errors_warnings_string(log_file_line_list: list[str]) -> Optional[str]:
@@ -399,6 +431,7 @@ def create_templated_file(template_location: str, substitutions: dict, output_fi
         substitutions (dict): dictionary of substitutions to be made {variable: subsistuted_value,}
         output_file_name (str): path/name of the file to write out to
     """
+
     class NewTemplate(Template):
         delimiter = '**!'
 
@@ -410,6 +443,7 @@ def create_templated_file(template_location: str, substitutions: dict, output_fi
     # Create the output file
     with open(output_file_name, 'w') as new_file:
         new_file.write(output_file)
+
 
 # TODO: MOVE TO RELPERM MODULE
 def get_relperm_combined_fluid_column_heading(table_heading: str) -> str:
@@ -424,7 +458,7 @@ def get_relperm_combined_fluid_column_heading(table_heading: str) -> str:
         'WOTABLE': 'KROW',
         'GOTABLE': 'KROG',
         'GWTABLE': 'KRWG',
-        }
+    }
     column_heading = rel_perm_header_map.get(table_heading, 'KRWG')
 
     return column_heading
@@ -447,6 +481,7 @@ def get_relperm_single_fluid_column_heading(table_heading: str) -> str:
     return column_heading
 
 
+# TODO: move this to a relperm specific module
 def get_relperm_base_saturation_column_heading(table_heading: str) -> str:
     """Returns the column heading for the base saturation column
 
@@ -465,6 +500,7 @@ def get_relperm_base_saturation_column_heading(table_heading: str) -> str:
     return column_heading
 
 
+# TODO: move this to a relperm specific module
 def load_nexus_relperm_table(relperm_file_path: str) -> dict[str, list[tuple[float, float]]]:
     """ Loads in a Nexus relperm table and returns a dictionary with two lists, one with the relperm values for the
     single fluid, and the other with the values for combined fluids
