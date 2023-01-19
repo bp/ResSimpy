@@ -205,13 +205,16 @@ def strip_file_of_comments(file_as_list: list[str]) -> list[str]:
     """
     # remove any empty lines
     file_as_list = list(filter(None, file_as_list))
-    # Currently does not work for the 
-    file_without_comments = [x.split('!', 1)[0] for x in file_as_list if x[0] != '!']
+
+    # regex: look back and forward 1 character from an ! and check if its a quotation mark and
+    # exclude it from the match if it is
+    file_without_comments = [re.split(r'(?<!\")!(?!\")', x)[0] for x in file_as_list if x[0] != '!']
 
     flat_file = '\n'.join(file_without_comments)
 
-    # remove everything between any instance of square brackets
-    flatfile_minus_square_brackets = re.sub(r"\[.*?\]", '', flat_file, flags=re.DOTALL)
+    # regex: look back and forward 1 character from a square bracket and check if its a quotation mark and
+    # exclude it from the match if it is
+    flatfile_minus_square_brackets = re.sub(r"(?<!\")\[.*?\](?!\")", '', flat_file, flags=re.DOTALL)
 
     file_without_comments = flatfile_minus_square_brackets.splitlines()
 

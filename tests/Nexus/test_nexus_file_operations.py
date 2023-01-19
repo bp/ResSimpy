@@ -136,8 +136,18 @@ exist] as [functionality]''',
 '''comment
  keep 
 keep  as '''
+),
+('''"[" [ "]" ] [
+remove
+]
+"[" keep "]"
+''',
+'''"["  
+"[" keep "]"
+'''
 )
-], ids=['basic test', 'several inline/single line comments', 'wrapped in quotations','Square bracket','square bracket complicated']
+], ids=['basic test', 'several inline/single line comments', 'wrapped in quotations','Square bracket',
+        'square bracket complicated','Square bracket quotation']
 )
 def test_strip_file_of_comments(mocker, file_contents, expected_result_contents):
     # Arrange
