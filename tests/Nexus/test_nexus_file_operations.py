@@ -108,18 +108,36 @@ SW         KRW        KROW        PCWO !Comments
 
 ('''
   Spaces before
+0
 Mid line ! comment
+
 Tabs  after ! comment ! comment ! comment
 Several comment characters !!!!! comment1 !!!!
 !single line comment
    !blank space before comment
 ''',
 '''  Spaces before
+0
 Mid line 
 Tabs  after 
 Several comment characters 
    '''),
-], ids=['basic test', 'several inline/single line comments']
+('''wrapped in quotations "!" included ! comment''',
+'''wrapped in quotations "!" included '''
+),
+('''KEYWORD [this should get commented out] keyword''',
+'''KEYWORD  keyword'''
+),
+('''comment
+[remove 
+remove] keep [remove]
+keep [ why does this even
+exist] as [functionality]''',
+'''comment
+ keep 
+keep  as '''
+)
+], ids=['basic test', 'several inline/single line comments', 'wrapped in quotations','Square bracket','square bracket complicated']
 )
 def test_strip_file_of_comments(mocker, file_contents, expected_result_contents):
     # Arrange
@@ -130,6 +148,6 @@ def test_strip_file_of_comments(mocker, file_contents, expected_result_contents)
 
     # Act
     result = nexus_file_operations.strip_file_of_comments(dummy_file_as_list)
-
+    print(result)
     # Assert
     assert result == expected_result

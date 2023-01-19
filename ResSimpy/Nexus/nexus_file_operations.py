@@ -3,7 +3,7 @@ from typing import Dict, Optional, Union
 
 from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
 from string import Template
-
+import re
 
 def check_token(token: str, line: str) -> bool:
     """ Checks if the text line contains the supplied token
@@ -203,9 +203,17 @@ def strip_file_of_comments(file_as_list: list[str]) -> list[str]:
     Returns:
         list[str]: a list of strings containing each line of the file as a new entry without comments
     """
+    # remove any empty lines
     file_as_list = list(filter(None, file_as_list))
-
+    # Currently does not work for the 
     file_without_comments = [x.split('!', 1)[0] for x in file_as_list if x[0] != '!']
+
+    flat_file = '\n'.join(file_without_comments)
+
+    # remove everything between any instance of square brackets
+    flatfile_minus_square_brackets = re.sub(r"\[.*?\]", '', flat_file, flags=re.DOTALL)
+
+    file_without_comments = flatfile_minus_square_brackets.splitlines()
 
     return file_without_comments
 
