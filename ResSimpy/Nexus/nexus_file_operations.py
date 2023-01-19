@@ -5,6 +5,7 @@ from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
 from string import Template
 import re
 
+
 def check_token(token: str, line: str) -> bool:
     """ Checks if the text line contains the supplied token
     Args:
@@ -198,7 +199,8 @@ def delete_times(file_content: list[str]) -> list[str]:
 
 
 def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False) -> list[str]:
-    """Strips all of the inline and single line comments out of a file.
+    """Strips all of the inline, single and multi line comments out of a file.
+    Comment characters assumed are: ! and square brackets. Escaped characters are ones wrapped in quotation marks
 
     Args:
         file_as_list (list[str]): a list of strings containing each line of the file as a new entry
