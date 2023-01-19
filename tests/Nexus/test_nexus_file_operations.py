@@ -172,11 +172,8 @@ def test_strip_file_of_comments(mocker, file_contents, strip_str, expected_resul
     # Arrange
     dummy_file_as_list = file_contents.splitlines()
     expected_result = expected_result_contents.splitlines()
-    open_mock = mocker.mock_open(read_data=file_contents)
-    mocker.patch("builtins.open", open_mock)
 
     # Act
     result = nexus_file_operations.strip_file_of_comments(dummy_file_as_list, strip_str=strip_str)
-    print(result)
     # Assert
     assert result == expected_result
