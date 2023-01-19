@@ -168,7 +168,7 @@ True,
 ], ids=['basic test', 'several inline/single line comments', 'wrapped in quotations', 'Square bracket',
         'square bracket complicated', 'Square bracket quotation', 'stripstring']
 )
-def test_strip_file_of_comments(mocker, file_contents, strip_str, expected_result_contents):
+def test_strip_file_of_comments(file_contents, strip_str, expected_result_contents):
     # Arrange
     dummy_file_as_list = file_contents.splitlines()
     expected_result = expected_result_contents.splitlines()
