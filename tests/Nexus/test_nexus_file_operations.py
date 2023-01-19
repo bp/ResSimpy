@@ -98,3 +98,82 @@ def test_get_token_value(mocker, line_contents, file_contents, expected_result):
 
     # Assert
     assert result == expected_result
+
+@pytest.mark.parametrize("file_contents, expected_result_contents, strip_str", [
+('''
+SW         KRW        KROW        PCWO !Comments
+!comment
+''',
+'''SW         KRW        KROW        PCWO ''',
+False,
+),
+
+('''
+  Spaces before
+0
+Mid line ! comment
+
+Tabs  after ! comment ! comment ! comment
+Several comment characters !!!!! comment1 !!!!
+!single line comment
+   !blank space before comment
+''',
+'''  Spaces before
+0
+Mid line 
+Tabs  after 
+Several comment characters 
+   ''',
+False,
+),
+('''wrapped in quotations "!" included ! comment''',
+'''wrapped in quotations "!" included ''',
+False,
+),
+('''KEYWORD [this should get commented out] keyword''',
+'''KEYWORD  keyword''',
+False,
+),
+('''comment
+[remove 
+remove] keep [remove]
+keep [ why does this even
+exist] as [functionality]''',
+'''comment
+ keep 
+keep  as ''',
+False,
+),
+('''"[" [ "]" ] [
+remove
+]
+"[" keep "]"
+''',
+'''"["  
+"[" keep "]"
+''',
+False,
+),
+('''some string \t! comment
+some [comment] \t
+[multiline
+commment] value
+''',
+'''some string
+some
+value
+''',
+True,
+),
+], ids=['basic test', 'several inline/single line comments', 'wrapped in quotations', 'Square bracket',
+        'square bracket complicated', 'Square bracket quotation', 'stripstring']
+)
+def test_strip_file_of_comments(file_contents, strip_str, expected_result_contents):
+    # Arrange
+    dummy_file_as_list = file_contents.splitlines()
+    expected_result = expected_result_contents.splitlines()
+
+    # Act
+    result = nexus_file_operations.strip_file_of_comments(dummy_file_as_list, strip_str=strip_str)
+    # Assert
+    assert result == expected_result
