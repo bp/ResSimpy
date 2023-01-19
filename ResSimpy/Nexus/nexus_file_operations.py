@@ -194,12 +194,12 @@ def delete_times(file_content: list[str]) -> list[str]:
     return new_file
 
 
-def strip_file_of_comments(file_as_list: list[str]) -> list[str]:
+def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False) -> list[str]:
     """Strips all of the inline and single line comments out of a file.
 
     Args:
-        file_as_list (list[str]): a list of strings containing each line of the file as a new entry 
-
+        file_as_list (list[str]): a list of strings containing each line of the file as a new entry
+        strip_str (bool, optional): if True strips the lines of whitespace. Defaults to False.
     Returns:
         list[str]: a list of strings containing each line of the file as a new entry without comments
     """
@@ -218,15 +218,18 @@ def strip_file_of_comments(file_as_list: list[str]) -> list[str]:
 
     file_without_comments = flatfile_minus_square_brackets.splitlines()
 
+    if strip_str:
+        file_without_comments = [x.strip() for x in file_without_comments]
     return file_without_comments
 
 
-def load_file_as_list(file_path: str, strip_comments: bool = False) -> list[str]:
+def load_file_as_list(file_path: str, strip_comments: bool = False, strip_str: bool = False) -> list[str]:
     """ Reads the text file into a variable
     Args:
         file_path (str): string containing a path pointing towards a text file
         strip_comments (bool, optional): If set to True removes all inline/single line comments from \
             the passed in file. Defaults to False.
+        strip_str (bool, optional): if True strips the lines of whitespace. Defaults to False.
 
     Returns:
         list[str]: list of strings with each line from the file a new entry in the list
@@ -235,7 +238,7 @@ def load_file_as_list(file_path: str, strip_comments: bool = False) -> list[str]
         file_content = list(f)
 
     if strip_comments:
-        file_content = strip_file_of_comments(file_content)
+        file_content = strip_file_of_comments(file_content, strip_str=strip_str)
 
     return file_content
 
