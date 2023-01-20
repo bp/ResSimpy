@@ -590,22 +590,28 @@ def load_nexus_relperm_table(relperm_file_path: str) -> dict[str, list[tuple[flo
     return {'single_fluid': single_fluid_relperms, 'combined_fluids': combined_fluid_relperms}
 
 
-def expand_include(file_as_list: list[str]) -> list:
+def expand_include(file_as_list: list[str]) -> tuple[list[str], Optional[str]]:
     no_comment_file = strip_file_of_comments(file_as_list, strip_str=True)
-    new_file_contents = no_comment_file.copy()
-    new_file_index = 0
-    for i, line in enumerate(no_comment_file):
+    new_file_contents = no_comment_file.copy()  # don't mutate iterator list (may refactor when moving to find)
+    inc_file_path = None
+    expanded_file = []
+    for i, line in enumerate(no_comment_file):  # replace this with a find/index command
         if "INCLUDE" in line:
             # doesn't necessarily work if the file is a relative reference
             inc_file_path = get_token_value('INCLUDE', line, [line])
             if inc_file_path is None:
                 raise ValueError(f"No value found after INCLUDE keyword in {line}")
             inc_data = load_file_as_list(inc_file_path, strip_comments=True, strip_str=True)
-            new_file_index += i
-            new_file_contents[new_file_index:new_file_index] = inc_data
-            new_file_index += len(inc_data)-1
-            new_file_contents[new_file_index] = new_file_contents[new_file_index].replace(
-                'INCLUDE'+inc_file_path, '', 1)
-            if not new_file_contents[new_file_index]:
-                new_file_contents.pop(new_file_index)
-    return new_file_contents
+            inc_data = list(filter(None, inc_data))
+            prefix_line, suffix_line = line.split('INCLUDE '+inc_file_path, 1)
+
+            expanded_file = new_file_contents[0:i]
+
+            if prefix_line:
+                expanded_file += [prefix_line]
+            expanded_file += inc_data
+            if suffix_line:
+                expanded_file += [suffix_line]
+            expanded_file += new_file_contents[i+1::]
+
+    return expanded_file, inc_file_path

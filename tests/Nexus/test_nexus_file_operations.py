@@ -181,7 +181,7 @@ def test_strip_file_of_comments(mocker, file_contents, strip_str, expected_resul
     # Assert
     assert result == expected_result
 
-@pytest.mark.parametrize("file_contents, include_contents, expected_result_contents",
+@pytest.mark.parametrize("file_contents, include_contents, expected_result_contents, expected_file_path",
 [
 (
 '''RUNFILES
@@ -193,10 +193,12 @@ CON 5''',
 included data
 KX
 CON 5''',
+'''data.inc''',
   ),
 ], ids=['one_include'],
 )
-def test_expand_include(mocker, file_contents, include_contents, expected_result_contents):
+def test_expand_include(mocker, file_contents, include_contents, expected_result_contents,
+                        expected_file_path):
     # Arrange
     dummy_file_as_list = file_contents.splitlines()
     expected_result = expected_result_contents.splitlines()
@@ -207,6 +209,7 @@ def test_expand_include(mocker, file_contents, include_contents, expected_result
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    result = nexus_file_operations.expand_include(dummy_file_as_list)
+    result, file_path = nexus_file_operations.expand_include(dummy_file_as_list)
     # Assert
+    assert file_path == expected_file_path
     assert result == expected_result
