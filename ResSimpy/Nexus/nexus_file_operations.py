@@ -603,6 +603,9 @@ def expand_include(file_as_list: list[str]) -> list:
             inc_data = load_file_as_list(inc_file_path, strip_comments=True, strip_str=True)
             new_file_index += i
             new_file_contents[new_file_index:new_file_index] = inc_data
-            new_file_index += len(inc_data)
-
+            new_file_index += len(inc_data)-1
+            new_file_contents[new_file_index] = new_file_contents[new_file_index].replace(
+                'INCLUDE'+inc_file_path, '', 1)
+            if not new_file_contents[new_file_index]:
+                new_file_contents.pop(new_file_index)
     return new_file_contents

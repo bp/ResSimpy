@@ -185,17 +185,14 @@ def test_strip_file_of_comments(mocker, file_contents, strip_str, expected_resul
 [
 (
 '''RUNFILES
-INCLUDE data.inc
-''',
+INCLUDE data.inc''',
 '''included data
 KX
-CON 5
-''',
+CON 5''',
 '''RUNFILES
 included data
 KX
-CON 5
-''',
+CON 5''',
   ),
 ], ids=['one_include'],
 )
