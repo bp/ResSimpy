@@ -596,7 +596,7 @@ def expand_include(file_as_list: list[str]) -> tuple[list[str], Optional[str]]:
     inc_file_path = None
     expanded_file = []
     for i, line in enumerate(no_comment_file):  # replace this with a find/index command
-        if "INCLUDE" in line:
+        if "INCLUDE" in line.upper():
             # doesn't necessarily work if the file is a relative reference
             inc_file_path = get_token_value('INCLUDE', line, [line])
             if inc_file_path is None:
