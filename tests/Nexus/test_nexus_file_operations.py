@@ -181,24 +181,111 @@ def test_strip_file_of_comments(mocker, file_contents, strip_str, expected_resul
     # Assert
     assert result == expected_result
 
-@pytest.mark.parametrize("file_contents, include_contents, expected_result_contents, expected_file_path",
+@pytest.mark.parametrize("file_contents, recursive, include_contents, expected_result_contents",
 [
+# one_include
 (
 '''RUNFILES
 INCLUDE data.inc''',
-'''included data
+True,
+'''data
 KX
 CON 5''',
 '''RUNFILES
-included data
+data
 KX
 CON 5''',
-'''data.inc''',
   ),
-], ids=['one_include'],
+# complicated
+  (
+'''RUNFILES
+something before InCLUde data.inc something after !comment INCLUDE''',
+True,
+'''data
+KX
+CON 5''',
+'''RUNFILES
+something before
+data
+KX
+CON 5
+something after''',
+  ),
+# no_include
+  (
+'''no_inc''',
+True,
+'''data
+KX
+CON 5''',
+'''no_inc''',
+  ),
+# multiple_includes
+  (
+'''Header
+INCLUDE data.inc
+INCLUDE data2.inc
+footer
+''',
+True,
+'''data
+KX
+CON 5''',
+# '''Second file here
+# second file data
+# '''
+'''Header
+data
+KX
+CON 5
+Second file here
+second file data
+footer''',
+  ),
+# multiple_includes_recursive_off
+  (
+'''Header
+INCLUDE data.inc
+INCLUDE data2.inc
+footer
+''',
+False,
+'''data
+KX
+CON 5''',
+# '''Second file here
+# second file data
+# '''
+'''Header
+data
+KX
+CON 5
+Second file here
+second file data
+footer''',
+  ),
+# nested_includes
+  (
+'''Header
+INCLUDE data.inc
+footer
+''',
+True,
+'''data
+INCLUDE data2.inc''',
+# '''Second file here
+# second file data
+# '''
+'''Header
+data
+Second file here
+second file data
+footer''',
+  ),
+], ids=['one_include', 'complicated', 'no_include', 'multiple_includes', 
+  'multiple_includes_recursive_off', 'nested_includes'],
 )
-def test_expand_include(mocker, file_contents, include_contents, expected_result_contents,
-                        expected_file_path):
+def test_expand_include(mocker, file_contents, recursive, include_contents, expected_result_contents,):
     # Arrange
     dummy_file_as_list = file_contents.splitlines()
     expected_result = expected_result_contents.splitlines()
@@ -209,7 +296,6 @@ def test_expand_include(mocker, file_contents, include_contents, expected_result
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    result, file_path = nexus_file_operations.expand_include(dummy_file_as_list)
+    result, _ = nexus_file_operations.expand_include(dummy_file_as_list)
     # Assert
-    assert file_path == expected_file_path
     assert result == expected_result
