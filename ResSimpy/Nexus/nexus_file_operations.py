@@ -613,5 +613,5 @@ def expand_include(file_as_list: list[str]) -> tuple[list[str], Optional[str]]:
             if suffix_line:
                 expanded_file += [suffix_line]
             expanded_file += new_file_contents[i+1::]
-
+            break
     return expanded_file, inc_file_path
