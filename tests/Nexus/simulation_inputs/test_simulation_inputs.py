@@ -1529,7 +1529,7 @@ PLOTBINARY
  'basic_file INCLUDE inc_file.inc',
  'test_file_path.dat',
  'inc_file.inc',
- '')
+ None)
 ], ids=['basic_test', ])
 def test_generate_file_include_structure(mocker, file_path, file_contents, expected_location, 
                                          expected_includes, expected_origin):
@@ -1541,7 +1541,7 @@ def test_generate_file_include_structure(mocker, file_path, file_contents, expec
     mocker.patch("builtins.open", mock_open)
 
     # Act
-    nexus_file = NexusSimulator.__generate_file_include_structure(file_path)
+    nexus_file = NexusFile.generate_file_include_structure(file_path)
 
     # Assert
     assert nexus_file.location == expected_location
