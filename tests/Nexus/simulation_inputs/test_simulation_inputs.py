@@ -3,6 +3,7 @@ from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from pytest_mock import MockerFixture
 from unittest.mock import Mock
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 
 def mock_multiple_opens(mocker, filename, fcs_file_contents, run_control_contents, include_contents,
@@ -1520,3 +1521,29 @@ PLOTBINARY
     check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
                                      modifying_mock_open=modifying_mock_open,
                                      mocker_fixture=mocker)
+
+
+@pytest.mark.parametrize("file_path, file_contents, expected_location, expected_includes, expected_origin",
+[
+('test_file_path.dat',
+ 'basic_file INCLUDE inc_file.inc',
+ 'test_file_path.dat',
+ 'inc_file.inc',
+ '')
+], ids=['basic_test', ])
+def test_generate_file_include_structure(mocker, file_path, file_contents, expected_location, 
+                                         expected_includes, expected_origin):
+    # Arrange
+
+    expected_includes_list = expected_includes.splitlines()
+
+    mock_open = mocker.mock_open(read_data=file_contents)
+    mocker.patch("builtins.open", mock_open)
+
+    # Act
+    nexus_file = NexusSimulator.__generate_file_include_structure(file_path)
+
+    # Assert
+    assert nexus_file.location == expected_location
+    assert nexus_file.includes == expected_includes_list
+    assert nexus_file.origin == expected_origin
