@@ -1529,8 +1529,15 @@ PLOTBINARY
  'basic_file INCLUDE inc_file.inc',
  'test_file_path.dat',
  'inc_file.inc',
- None)
-], ids=['basic_test', ])
+ None),
+('test_file_path.dat',
+'''basic_file INCLUDE inc_file.inc
+second_file INCLUDE inc_file2.inc''',
+'test_file_path.dat',
+'''inc_file.inc
+inc_file2.inc''',
+None),
+], ids=['basic_test', 'two_includes'])
 def test_generate_file_include_structure(mocker, file_path, file_contents, expected_location, 
                                          expected_includes, expected_origin):
     # Arrange
