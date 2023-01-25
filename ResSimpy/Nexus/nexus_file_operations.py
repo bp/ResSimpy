@@ -39,7 +39,7 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
 
     Args:
         start_line_index (int): line number to start reading file_as_list from
-        file_as_list (list[str]):  a list of strings containing each line of the file as a new entry
+        file_as_list (list[str]): a list of strings containing each line of the file as a new entry
         search_string (str): string to search from within the first indexed line
         ignore_values (Optional[list[str]], optional): a list of values that should be ignored if found. \
             Defaults to None.
@@ -588,3 +588,52 @@ def load_nexus_relperm_table(relperm_file_path: str) -> dict[str, list[tuple[flo
         )
 
     return {'single_fluid': single_fluid_relperms, 'combined_fluids': combined_fluid_relperms}
+
+
+def expand_include(file_as_list: list[str], recursive: bool = True) -> tuple[list[str], Optional[str]]:
+    """Expands out include files. If recursive set to True will expand all includes including nested
+
+    Args:
+        file_as_list (list[str]): a list of strings containing each line of the file as a new entry
+        recursive (bool): If recursive set to True will expand all includes including nested includes
+
+    Raises:
+        ValueError: if no value found after INCLUDE keyword in file
+
+    Returns:
+        list[str]: list of strings containing each line of the file as a new entry but with files following includes \
+            expanded out
+    """
+    no_comment_file = strip_file_of_comments(file_as_list, strip_str=True)
+
+    # Initialize iterator variables, if no Include is found then return the prvious file
+    old_file_contents = no_comment_file.copy()
+    inc_file_path = None
+    expanded_file = old_file_contents
+    for i, line in enumerate(no_comment_file):
+        if "INCLUDE" in line.upper():
+            # doesn't necessarily work if the file is a relative reference
+            inc_file_path = get_token_value('INCLUDE', line, [line])
+            if inc_file_path is None:
+                raise ValueError(f"No value found after INCLUDE keyword in {line}")
+            inc_data = load_file_as_list(inc_file_path, strip_comments=True, strip_str=True)
+            inc_data = list(filter(None, inc_data))
+
+            # this won't work with arbitrary whitespace
+            prefix_line, suffix_line = re.split('INCLUDE', line, maxsplit=1, flags=re.IGNORECASE)
+            suffix_line = suffix_line.lstrip()
+            suffix_line = suffix_line.replace(inc_file_path, '', 1)
+            expanded_file = old_file_contents[0:i]
+
+            if prefix_line:
+                expanded_file += [prefix_line]
+            expanded_file += inc_data
+            if suffix_line:
+                expanded_file += [suffix_line]
+            expanded_file += old_file_contents[i+1::]
+            break
+    # if INCLUDE is not found in the file provided then inc_file_path is None and so will break recursion
+    if recursive:
+        while inc_file_path is not None:
+            expanded_file, inc_file_path = expand_include(expanded_file)
+    return expanded_file, inc_file_path

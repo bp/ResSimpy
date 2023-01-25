@@ -177,3 +177,140 @@ def test_strip_file_of_comments(file_contents, strip_str, expected_result_conten
     result = nexus_file_operations.strip_file_of_comments(dummy_file_as_list, strip_str=strip_str)
     # Assert
     assert result == expected_result
+
+
+def mock_includes(mocker, filename, include_contents0, include_contents1):
+    # yes this should just index a tuple
+    if "0" in filename:
+        file_contents = include_contents0
+    elif "1" in filename:
+        file_contents = include_contents1
+    else:
+        raise FileNotFoundError(filename)
+    open_mock = mocker.mock_open(read_data=file_contents)
+    return open_mock
+
+
+@pytest.mark.parametrize("file_contents, recursive, include_contents0, include_contents1, expected_result_contents",
+[
+# one_include
+(
+'''RUNFILES
+INCLUDE data0.inc''',
+True,
+'''data
+KX
+CON 5''',
+'',
+'''RUNFILES
+data
+KX
+CON 5''',
+  ),
+# complicated
+  (
+'''RUNFILES
+something before InCLUde data0.inc something after !comment INCLUDE''',
+True,
+'''data
+KX
+CON 5''',
+'',
+'''RUNFILES
+something before
+data
+KX
+CON 5
+something after''',
+  ),
+# no_include
+  (
+'''no_inc''',
+True,
+'''data
+KX
+CON 5''',
+'',
+'''no_inc''',
+  ),
+# multiple_includes
+  (
+'''Header
+INCLUDE data0.inc
+INCLUDE data1.inc
+footer
+''',
+True,
+'''data
+KX
+CON 5''',
+'''Second file here
+second file data
+''',
+'''Header
+data
+KX
+CON 5
+Second file here
+second file data
+footer''',
+  ),
+# multiple_includes_recursive_off
+  (
+'''Header
+INCLUDE data0.inc
+INCLUDE data1.inc
+footer
+''',
+False,
+'''data
+KX
+CON 5''',
+'''Second file here
+second file data
+''',
+'''Header
+data
+KX
+CON 5
+INCLUDE data1.inc
+footer''',
+  ),
+# nested_includes
+  (
+'''Header
+INCLUDE data0.inc
+footer
+''',
+True,
+'''data
+INCLUDE data1.inc''',
+'''Second file here
+second file data
+''',
+'''Header
+data
+Second file here
+second file data
+footer''',
+  ),
+], ids=['one_include', 'complicated', 'no_include', 'multiple_includes', 
+  'multiple_includes_recursive_off', 'nested_includes'],
+)
+def test_expand_include(mocker, file_contents, recursive, include_contents0, include_contents1,
+                        expected_result_contents,):
+    # Arrange
+    dummy_file_as_list = file_contents.splitlines()
+    expected_result = expected_result_contents.splitlines()
+
+
+    def mock_open_wrapper(filename, operation=None):
+        mock_open = mock_includes(mocker, filename, include_contents0, include_contents1).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act
+    result, _ = nexus_file_operations.expand_include(dummy_file_as_list, recursive)
+    # Assert
+    assert result == expected_result
