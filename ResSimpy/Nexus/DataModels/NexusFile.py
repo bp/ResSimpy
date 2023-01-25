@@ -40,7 +40,7 @@ class NexusFile:
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str):
-        """generates a nexus file instance for a provided text file with information storing the 
+        """generates a nexus file instance for a provided text file with information storing the included files
 
         Args:
             file_path (str): path to a file
