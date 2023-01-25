@@ -15,32 +15,11 @@ class NexusFile:
         origin (Optional[str]): Where the file was opened from. Defaults to None.
         includes_objects (Optional[list['NexusFile']]): The include files but generated as a NexusFile instance. \
             Defaults to None.
-
     """
     location: Optional[str] = None
     includes: Optional[list[str]] = None
     origin: Optional[str] = None
     includes_objects: Optional[list['NexusFile']] = None
-
-    def export_network_lists(self):
-        """ Exports lists of connections from and to for use in network graphs
-
-        Raises:
-            ValueError: If the from and to lists are not the same length
-        Returns:
-            tuple[list]: list of to and from file paths where the equivalent indexes relate to a connection
-        """
-        from_list = [self.origin]
-        to_list = [self.location]
-        if not [self.origin]:
-            to_list = []
-        if self.includes is not None:
-            from_list += [self.location] * len(self.includes)
-            to_list += self.includes
-        if len(from_list) != len(to_list):
-            raise ValueError(f"{from_list=} and {to_list=} are not the same length")
-
-        return from_list, to_list
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None):
@@ -80,6 +59,8 @@ class NexusFile:
             ValueError: If no include files are provided
         """
         if not self.includes:
+            # Maybe this shouldn't raise a value error if we want to run it on all Nexus file objects
+
             raise ValueError('No include files found in NexusFile instance')
         self.includes_objects = []
         for file_path in self.includes:
@@ -87,3 +68,23 @@ class NexusFile:
             self.includes_objects.append(inc_file)
 
         return self.includes_objects
+
+    def export_network_lists(self):
+        """ Exports lists of connections from and to for use in network graphs
+
+        Raises:
+            ValueError: If the from and to lists are not the same length
+        Returns:
+            tuple[list]: list of to and from file paths where the equivalent indexes relate to a connection
+        """
+        from_list = [self.origin]
+        to_list = [self.location]
+        if not [self.origin]:
+            to_list = []
+        if self.includes is not None:
+            from_list += [self.location] * len(self.includes)
+            to_list += self.includes
+        if len(from_list) != len(to_list):
+            raise ValueError(f"{from_list=} and {to_list=} are not the same length")
+
+        return from_list, to_list
