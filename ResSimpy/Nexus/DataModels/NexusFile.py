@@ -57,7 +57,8 @@ class NexusFile:
         for line in file_as_list:
             if "INCLUDE" in line.upper():
                 inc_file_path = nexus_file_operations.get_token_value('INCLUDE', line, [line])
-                inc_file_list.append(inc_file_path)
+                if inc_file_path is not None:
+                    inc_file_list.append(inc_file_path)
 
         nexus_file = cls(
             location=file_path,
