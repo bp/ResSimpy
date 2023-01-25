@@ -1536,13 +1536,16 @@ second_file INCLUDE inc_file2.inc''',
 'test_file_path.dat',
 '''inc_file.inc
 inc_file2.inc''',
-None),
+None)
 ], ids=['basic_test', 'two_includes'])
 def test_generate_file_include_structure(mocker, file_path, file_contents, expected_location, 
                                          expected_includes, expected_origin):
     # Arrange
 
     expected_includes_list = expected_includes.splitlines()
+
+    expected_nexus_file = NexusFile(location=expected_location, includes=expected_includes_list, 
+                                    origin=expected_origin)
 
     mock_open = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", mock_open)
@@ -1551,6 +1554,4 @@ def test_generate_file_include_structure(mocker, file_path, file_contents, expec
     nexus_file = NexusFile.generate_file_include_structure(file_path)
 
     # Assert
-    assert nexus_file.location == expected_location
-    assert nexus_file.includes == expected_includes_list
-    assert nexus_file.origin == expected_origin
+    assert nexus_file == expected_nexus_file

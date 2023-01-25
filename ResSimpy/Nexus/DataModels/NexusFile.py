@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Type
+from typing import Optional
 
 from ResSimpy.Nexus import nexus_file_operations
 
