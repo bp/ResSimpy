@@ -3,12 +3,10 @@ from typing import Optional
 
 from ResSimpy.Nexus import nexus_file_operations
 
-# to deal with origin and structure of Nexus files and preserve origin of include files
 
-
-@dataclass
+@dataclass(kw_only=True)
 class NexusFile:
-    """
+    """ Class to deal with origin and structure of Nexus files and preserve origin of include files
     Attributes:
         location (Optional[str]): Path to the original file being opened. Defaults to None.
         includes (Optional[list[str]]): list of file paths that the file contains. Defaults to None.
@@ -20,6 +18,16 @@ class NexusFile:
     includes: Optional[list[str]] = None
     origin: Optional[str] = None
     includes_objects: Optional[list['NexusFile']] = None
+
+    def __init__(self, location: Optional[str] = None, includes: Optional[list[str]] = None,
+                 origin: Optional[str] = None, includes_objects: Optional[list['NexusFile']] = None,
+                 run_generator: bool = True):
+        self.location: Optional[str] = location
+        self.includes: Optional[list[str]] = includes
+        self.origin: Optional[str] = origin
+        self.includes_objects: Optional[list['NexusFile']] = includes_objects
+        if run_generator:
+            self.generate_included_file_objects()
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None):
@@ -52,16 +60,13 @@ class NexusFile:
 
         return nexus_file
 
-    def generate_include_file_structure(self):
+    def generate_included_file_objects(self):
         """Builds NexusFile objects for any include files that have been found in the original instance
-
-        Raises:
-            ValueError: If no include files are provided
         """
+        # check if there are any includes and exit if not
         if not self.includes:
-            # Maybe this shouldn't raise a value error if we want to run it on all Nexus file objects
+            return None
 
-            raise ValueError('No include files found in NexusFile instance')
         self.includes_objects = []
         for file_path in self.includes:
             inc_file = self.generate_file_include_structure(file_path, origin=self.location)
