@@ -49,6 +49,21 @@ def mock_different_model_opens(mocker, filename, fcs_file_contents_1, fcs_file_c
     return open_mock
 
 
+def mock_different_includes(mocker, filename, test_file_contents, inc_file_content1, inc_file_content2='',
+                            ):
+    """Mock method that returns different test file contents depending upon the model"""
+    if "test_file_path" in filename:
+        file_contents = test_file_contents
+    elif "inc_file1" in filename:
+        file_contents = inc_file_content1
+    elif "inc_file2" in filename:
+        file_contents = inc_file_content2
+    else:
+        raise FileNotFoundError(filename)
+    open_mock = mocker.mock_open(read_data=file_contents)
+    return open_mock
+
+
 def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock_open: Mock,
                                      mocker_fixture: MockerFixture):
     assert len(modifying_mock_open.call_args_list) == 2
@@ -1523,32 +1538,55 @@ PLOTBINARY
                                      mocker_fixture=mocker)
 
 
-@pytest.mark.parametrize("file_path, file_contents, expected_location, expected_includes, expected_origin",
+
+@pytest.mark.parametrize("file_path, test_file_contents, include_contents1, include_contents2, expected_location, expected_includes, expected_origin",
 [
+('test_file_path.dat', # file_path
+ 'basic_file INCLUDE inc_file1.inc', # file_contents
+ 'inc file contents', # include_contents1
+ '', # include_contents2
+ 'test_file_path.dat', # expected_location
+ 'inc_file1.inc', # expected_includes
+ None), # expected_origin
 ('test_file_path.dat',
- 'basic_file INCLUDE inc_file.inc',
- 'test_file_path.dat',
- 'inc_file.inc',
- None),
-('test_file_path.dat',
-'''basic_file INCLUDE inc_file.inc
+'''basic_file INCLUDE inc_file1.inc
 second_file INCLUDE inc_file2.inc''',
+'inc file contents',
+'inc2 file contents',
 'test_file_path.dat',
-'''inc_file.inc
+'''inc_file1.inc
 inc_file2.inc''',
-None)
-], ids=['basic_test', 'two_includes'])
-def test_generate_file_include_structure(mocker, file_path, file_contents, expected_location, 
-                                         expected_includes, expected_origin):
+None),
+('test_file_path.dat',
+'basic_file INCLUDE inc_file1.inc',
+'inc file contents INCLUDE inc_file2.inc',
+'inc2 file contents',
+'test_file_path.dat',
+'inc_file1.inc',
+None,
+),
+], ids=['basic_test', 'two_includes', 'stacked_includes'])
+def test_generate_file_include_structure(mocker, file_path, test_file_contents, include_contents1, include_contents2,
+                                         expected_location, expected_includes, expected_origin):
     # Arrange
 
     expected_includes_list = expected_includes.splitlines()
+    nested_nexus_file = None
+    if 'INCLUDE' in include_contents1:
+        # not a very generic test yet
+        include2_nexus_file = NexusFile(location='inc_file2.inc', includes=[], origin='inc_file1.inc',
+                                        includes_objects=None, run_generator=False)
+        nested_nexus_file = [NexusFile(location='inc_file1.inc', includes=['inc_file2.inc'], origin=file_path,
+                                       includes_objects=[include2_nexus_file], run_generator=False)]
 
-    expected_nexus_file = NexusFile(location=expected_location, includes=expected_includes_list, 
-                                    origin=expected_origin)
+    expected_nexus_file = NexusFile(location=expected_location, includes=expected_includes_list,
+                                    origin=expected_origin, includes_objects=nested_nexus_file, run_generator=False)
 
-    mock_open = mocker.mock_open(read_data=file_contents)
-    mocker.patch("builtins.open", mock_open)
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_different_includes(mocker, filename, test_file_contents, include_contents1, include_contents2).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
     nexus_file = NexusFile.generate_file_include_structure(file_path)
