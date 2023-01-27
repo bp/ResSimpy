@@ -1144,7 +1144,10 @@ class NexusSimulator(Simulator):
 
         return 0
 
+<<<<<<< HEAD
     # TODO: change append to be an optional parameter, + move this elsewhere
+    def append_include_to_grid_file(self, include_file_location):
+=======
     def append_include_to_grid_file(self, include_file_location: str):
         """Appends an include file to the end of a grid for adding LGRs
 
@@ -1154,6 +1157,7 @@ class NexusSimulator(Simulator):
         Raises:
             ValueError: if no structured grid file path is specified in the class instance
         """
+>>>>>>> origin/master
         # Get the existing file as a list
         if self.__structured_grid_file_path is None:
             raise ValueError("No file path given or found for structured grid file path. \

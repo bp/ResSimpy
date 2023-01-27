@@ -99,6 +99,7 @@ def test_get_token_value(mocker, line_contents, file_contents, expected_result):
     # Assert
     assert result == expected_result
 
+<<<<<<< HEAD
 
 @pytest.mark.parametrize("line_string, token, expected_result",
                          [("Line contains TOKEN 124", "ToKEN", True),
@@ -119,9 +120,7 @@ def test_check_token(line_string, token, expected_result):
     # Act
     result = nexus_file_operations.check_token(token=token, line=line_string)
 
-    # Assert
-    assert result == expected_result
-
+=======
 @pytest.mark.parametrize("file_contents, expected_result_contents, strip_str", [
 ('''
 SW         KRW        KROW        PCWO !Comments
@@ -335,5 +334,6 @@ def test_expand_include(mocker, file_contents, recursive, include_contents0, inc
 
     # Act
     result, _ = nexus_file_operations.expand_include(dummy_file_as_list, recursive)
+>>>>>>> origin/master
     # Assert
     assert result == expected_result
