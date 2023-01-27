@@ -839,8 +839,8 @@ def test_load_run_control_file_write_times_to_run_control(mocker, run_control_co
     result_times = simulation.get_content(section="RUNCONTROL", keyword="TIME")
 
     # Assert
-    include_file_mock.assert_called_with('/path/run_control', 'w')
-    include_file_mock.return_value.write.assert_called_with(expected_output)
+    include_file_mock.assert_any_call('/path/run_control', 'w')
+    include_file_mock.return_value.write.assert_any_call(expected_output)
     assert result_times == expected_times
 
 

@@ -3,7 +3,7 @@ from typing import Optional
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
-from ResSimpy.Nexus.DataModels.UnitsEnum import Units
+from ResSimpy.UnitsEnum import Units
 
 
 def load_wells(well_file: str, start_date: str, default_units: Units) -> list[NexusWell]:
@@ -41,6 +41,9 @@ def load_wells(well_file: str, start_date: str, default_units: Units) -> list[Ne
 
         # Load in the column headings, which appear after the well name
         header_index = __load_wellspec_table_headings(header_index, header_values, headers, index, line, well_name)
+
+        if header_index != -1:
+            break
 
     # Load in each line of the table
     completions = __load_wellspec_table_completions(file_as_list, header_index, header_values, headers, start_date)
@@ -83,7 +86,7 @@ def __load_wellspec_table_completions(file_as_list, header_index, header_values,
 def __load_wellspec_table_headings(header_index, header_values, headers, index, line, well_name):
     if well_name is not None:
         for key in header_values.keys():
-            if key in line:
+            if nfo.check_token(key, line):
                 header_line = line
                 header_index = index
                 # Map the headers

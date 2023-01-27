@@ -4,7 +4,7 @@ from abc import ABC
 from dataclasses import dataclass
 
 from ResSimpy.Completion import Completion
-from ResSimpy.Nexus.DataModels.UnitsEnum import Units
+from ResSimpy.UnitsEnum import Units
 
 
 @dataclass

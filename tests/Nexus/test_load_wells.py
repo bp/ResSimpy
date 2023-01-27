@@ -2,7 +2,7 @@ import pytest
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
-from ResSimpy.Nexus.DataModels.UnitsEnum import Units
+from ResSimpy.UnitsEnum import Units
 from ResSimpy.Nexus.load_wells import load_wells
 
 
@@ -34,9 +34,8 @@ from ResSimpy.Nexus.load_wells import load_wells
     2  1  3  4.5 !Inline Comment Here
     !Another Comment here
     7 6 8   9.11
-    """, "Well3")
-
-                          ], ids=["basic case", "swapped columns", "number name", "Comments"])
+    """, "Well3")],
+                         ids=["basic case", "swapped columns", "number name", "Comments"])
 def test_load_basic_wellspec(mocker, file_contents, expected_name):
     # Arrange
     start_date = '01/01/2023'
@@ -250,13 +249,13 @@ def test_load_wells_na_values_converted_to_none(mocker):
 
 @pytest.mark.parametrize("file_contents, expected_units",
                          [
-("""       TIME 01/08/2023 !232 days
+                             ("""       TIME 01/08/2023 !232 days
        WELLSPEC DEV1
        IW JW L RADW
        1  2  3  4.5
        6 7 8   9.11""", Units.METRIC_KPA),
 
-("""       
+                             ("""       
 ENGLish
 
 TIME 01/08/2023 !232 days
@@ -265,7 +264,7 @@ TIME 01/08/2023 !232 days
        1  2  3  4.5
        6 7 8   9.11""", Units.OILFIELD),
 
-(""" 
+                             (""" 
       TIME 01/08/2023 !232 days
       
       METRIC
@@ -275,7 +274,7 @@ TIME 01/08/2023 !232 days
        1  2  3  4.5
        6 7 8   9.11""", Units.METRIC_KPA),
 
-(""" 
+                             (""" 
       ! ENGLISH
       METKG/CM2
       
@@ -285,14 +284,14 @@ TIME 01/08/2023 !232 days
        1  2  3  4.5
        6 7 8   9.11""", Units.METRIC_KGCM2),
 
-("""
+                             ("""
        METBAR
        TIME 01/08/2023 !232 days
        WELLSPEC DEV1
        IW JW L RADW
        1  2  3  4.5
        6 7 8   9.11""", Units.METRIC_BARS),
-("""
+                             ("""
                     LAB
        TIME 01/08/2023 !232 days
        WELLSPEC DEV1
@@ -321,5 +320,3 @@ def test_correct_units_loaded(mocker, file_contents, expected_units):
 
     # Assert
     assert result_wells == expected_wells
-
-

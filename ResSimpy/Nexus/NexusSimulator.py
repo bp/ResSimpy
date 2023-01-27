@@ -5,10 +5,12 @@ from functools import cmp_to_key
 from datetime import timedelta
 from typing import Any, Union, Optional
 
+from ResSimpy.UnitsEnum import Units
 from ResSimpy.Nexus.DataModels.StructuredGridFile import StructuredGridFile, PropertyToLoad, VariableEntry
 import ResSimpy.Nexus.nexus_file_operations as nexus_file_operations
 import resqpy.model as rq
 
+from ResSimpy.Nexus.NexusWells import NexusWells
 from ResSimpy.Simulator import Simulator
 
 
@@ -93,6 +95,8 @@ class NexusSimulator(Simulator):
         self.__write_times: bool = write_times
         self.__manual_fcs_tidy_call: bool = manual_fcs_tidy_call
         self.__surface_file_path: Optional[str] = None
+        self.Wells: NexusWells = NexusWells()
+        self.__default_units: Units = Units.OILFIELD  # The Nexus default
 
         if destination is not None and destination != '':
             self.set_output_path(path=destination.strip())
@@ -100,6 +104,7 @@ class NexusSimulator(Simulator):
         # Check the status of any existing or completed runs related to this model
         self.get_simulation_status(from_startup=True)
 
+        # Load in the model
         self.__load_fcs_file()
 
     def remove_temp_from_properties(self):
@@ -375,8 +380,31 @@ class NexusSimulator(Simulator):
                         os.path.dirname(self.__origin) + "/" + value
                 break
 
+            elif nexus_file_operations.check_token('WELLS', line):
+                well_filepath = nexus_file_operations.get_token_value(token="WELLS", token_line=line,
+                                                                      file_list=fcs_file)
+                complete_well_filepath = self.__get_full_file_path(well_filepath)
+                self.Wells.wellspec_paths.append(complete_well_filepath)
+
+        # Load in the other files
+        # Load in Runcontrol
         if self.run_control_file != '':
             self.__load_run_control_file()
+
+        # Load in wellspec files
+        if len(self.Wells.wellspec_paths) > 0:
+            for path in self.Wells.wellspec_paths:
+                self.Wells.load_wells(well_file=path, start_date=self.start_date, default_units=self.__default_units)
+
+    # TODO: replace the repeated logic above with a call to this method when working with file paths.
+    def __get_full_file_path(self, file_path: str):
+        """Returns the full file path including the base directories if they aren't present in the string
+
+        Args:
+            file_path (str): the initial file path found in a file
+        """
+        return file_path if os.path.isabs(file_path) else os.path.dirname(self.__origin) + "/" + file_path
+
 
     @staticmethod
     def update_file_value(file_path: str, token: str, new_value: str, add_to_start: bool = False):

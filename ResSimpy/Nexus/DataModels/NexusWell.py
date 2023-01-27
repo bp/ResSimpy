@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
-from ResSimpy.Nexus.DataModels.UnitsEnum import Units
+from ResSimpy.UnitsEnum import Units
 from ResSimpy.Well import Well
 
 
