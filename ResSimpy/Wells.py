@@ -1,8 +1,5 @@
-from dataclasses import dataclass, field
-from typing import Type
+from dataclasses import dataclass
 from abc import ABC
-
-from ResSimpy.Well import Well
 
 
 @dataclass(kw_only=True)

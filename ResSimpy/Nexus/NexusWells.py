@@ -19,7 +19,5 @@ class NexusWells(Wells):
         return self.__wells
 
     def load_wells(self, well_file: str, start_date: str, default_units: Units):
-        new_wells = load_wells(well_file=well_file, start_date=start_date, default_units=default_units)
+        new_wells = load_wells(wellspec_file_path=well_file, start_date=start_date, default_units=default_units)
         self.__wells += new_wells
-
-

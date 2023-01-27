@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
@@ -6,8 +6,8 @@ from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.UnitsEnum import Units
 
 
-def load_wells(well_file: str, start_date: str, default_units: Units) -> list[NexusWell]:
-    file_as_list = nfo.load_file_as_list(well_file)
+def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -> list[NexusWell]:
+    file_as_list = nfo.load_file_as_list(wellspec_file_path)
 
     well_name: Optional[str] = None
     wellspec_file_units: Optional[Units] = None
@@ -18,9 +18,9 @@ def load_wells(well_file: str, start_date: str, default_units: Units) -> list[Ne
     jw: Optional[str] = None
     kw: Optional[str] = None
     well_radius: Optional[str] = None
-    units_values = {'ENGLISH': Units.OILFIELD, 'METRIC': Units.METRIC_KPA, 'METKG/CM2': Units.METRIC_KGCM2,
-                    'METBAR': Units.METRIC_BARS, 'LAB': Units.LAB}
-    header_values = {'IW': iw, 'JW': jw, 'L': kw, 'RADW': well_radius}
+    units_values: dict[str, Units] = {'ENGLISH': Units.OILFIELD, 'METRIC': Units.METRIC_KPA,
+                                      'METKG/CM2': Units.METRIC_KGCM2, 'METBAR': Units.METRIC_BARS, 'LAB': Units.LAB}
+    header_values: dict[str, Union[int, float, str]] = {'IW': iw, 'JW': jw, 'L': kw, 'RADW': well_radius}
     header_index = -1
 
     for index, line in enumerate(file_as_list):
@@ -44,6 +44,9 @@ def load_wells(well_file: str, start_date: str, default_units: Units) -> list[Ne
 
         if header_index != -1:
             break
+
+    if well_name is None:
+        raise ValueError(f"No wells found in file: {wellspec_file_path}")
 
     # Load in each line of the table
     completions = __load_wellspec_table_completions(file_as_list, header_index, header_values, headers, start_date)
@@ -83,7 +86,8 @@ def __load_wellspec_table_completions(file_as_list, header_index, header_values,
     return completions
 
 
-def __load_wellspec_table_headings(header_index, header_values, headers, index, line, well_name):
+def __load_wellspec_table_headings(header_index: int, header_values: dict[str, Union[int, float, str]],
+                                   headers: list[str], index: int, line: str, well_name: Optional[str]) -> int:
     if well_name is not None:
         for key in header_values.keys():
             if nfo.check_token(key, line):

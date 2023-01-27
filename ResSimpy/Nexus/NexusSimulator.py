@@ -405,7 +405,6 @@ class NexusSimulator(Simulator):
         """
         return file_path if os.path.isabs(file_path) else os.path.dirname(self.__origin) + "/" + file_path
 
-
     @staticmethod
     def update_file_value(file_path: str, token: str, new_value: str, add_to_start: bool = False):
         """Updates a value in a file if it is present and in the format {TOKEN} {VALUE}. If the token
