@@ -1539,7 +1539,8 @@ PLOTBINARY
 
 
 
-@pytest.mark.parametrize("file_path, test_file_contents, include_contents1, include_contents2, expected_location, expected_includes, expected_origin",
+@pytest.mark.parametrize("file_path, test_file_contents, include_contents1, include_contents2,"
+                         "expected_location, expected_includes, expected_origin",
 [
 ('test_file_path.dat', # file_path
  'basic_file INCLUDE inc_file1.inc', # file_contents
@@ -1571,13 +1572,20 @@ def test_generate_file_include_structure(mocker, file_path, test_file_contents, 
     # Arrange
 
     expected_includes_list = expected_includes.splitlines()
-    nested_nexus_file = None
-    if 'INCLUDE' in include_contents1:
+    nested_nexus_file = []
+    if 'inc_file2.inc' in include_contents1:
         # not a very generic test yet
         include2_nexus_file = NexusFile(location='inc_file2.inc', includes=[], origin='inc_file1.inc',
                                         includes_objects=None, run_generator=False)
-        nested_nexus_file = [NexusFile(location='inc_file1.inc', includes=['inc_file2.inc'], origin=file_path,
-                                       includes_objects=[include2_nexus_file], run_generator=False)]
+        include1_nexus_file = NexusFile(location='inc_file1.inc', includes=['inc_file2.inc'], origin=file_path,
+                                        includes_objects=[include2_nexus_file], run_generator=False)
+        nested_nexus_file.append(include1_nexus_file)
+    elif 'inc_file1.inc' in test_file_contents:
+        include1_nexus_file = NexusFile(location='inc_file1.inc', includes=[], origin=file_path, includes_objects=None, run_generator=False)
+        nested_nexus_file.append(include1_nexus_file)
+    if 'inc_file2.inc' in test_file_contents:
+        include2_nexus_file = NexusFile(location='inc_file2.inc', includes=[], origin=file_path, includes_objects=None, run_generator=False)
+        nested_nexus_file.append(include2_nexus_file)
 
     expected_nexus_file = NexusFile(location=expected_location, includes=expected_includes_list,
                                     origin=expected_origin, includes_objects=nested_nexus_file, run_generator=False)
