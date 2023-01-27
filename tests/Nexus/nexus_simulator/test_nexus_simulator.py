@@ -1,8 +1,13 @@
 import pytest
+
+from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
+from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from pytest_mock import MockerFixture
 from unittest.mock import Mock
+
+from ResSimpy.UnitsEnum import Units
 
 
 def mock_multiple_opens(mocker, filename, fcs_file_contents, run_control_contents, include_contents,
@@ -1520,3 +1525,38 @@ PLOTBINARY
     check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
                                      modifying_mock_open=modifying_mock_open,
                                      mocker_fixture=mocker)
+
+
+def test_get_wells(mocker: MockerFixture):
+    """Testing the functionality to load in and retrieve a set of wells"""
+    # Arrange
+
+    fcs_file_contents = """
+       WELLS my/wellspec/file.dat
+    """
+
+    fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
+    mocker.patch("builtins.open", fcs_file_open)
+
+    loaded_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid=None, skin=None,
+                                          angle_v=None)
+    loaded_completion_2 = NexusCompletion(i=6, j=7, k=8, well_radius=9.11, date='01/01/2023')
+    loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
+                              units=Units.OILFIELD)]
+
+    # mock out the load_wells function as that is tested elsewhere
+    mock_load_wells = mocker.Mock(return_value=loaded_wells)
+    mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
+
+    simulation = NexusSimulator(origin='nexus_run.fcs')
+
+    # Act
+    result = simulation.Wells.get_wells()
+
+    # Assert
+    assert result == loaded_wells
+
+
+# TODO: as above, but for get_wells_df
+def test_get_wells_df(mocker):
+    assert False
