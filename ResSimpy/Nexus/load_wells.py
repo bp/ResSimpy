@@ -20,7 +20,8 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
     well_radius: Optional[str] = None
     units_values: dict[str, Units] = {'ENGLISH': Units.OILFIELD, 'METRIC': Units.METRIC_KPA,
                                       'METKG/CM2': Units.METRIC_KGCM2, 'METBAR': Units.METRIC_BARS, 'LAB': Units.LAB}
-    header_values: dict[str, Union[int, float, str]] = {'IW': iw, 'JW': jw, 'L': kw, 'RADW': well_radius}
+    header_values: dict[str, Union[Optional[int], Optional[float], Optional[str]]] = {'IW': iw, 'JW': jw, 'L': kw,
+                                                                                      'RADW': well_radius}
     header_index = -1
 
     for index, line in enumerate(file_as_list):
@@ -86,7 +87,8 @@ def __load_wellspec_table_completions(file_as_list, header_index, header_values,
     return completions
 
 
-def __load_wellspec_table_headings(header_index: int, header_values: dict[str, Union[int, float, str]],
+def __load_wellspec_table_headings(header_index: int,
+                                   header_values: dict[str, Union[Optional[int], Optional[float], Optional[str]]],
                                    headers: list[str], index: int, line: str, well_name: Optional[str]) -> int:
     if well_name is not None:
         for key in header_values.keys():
