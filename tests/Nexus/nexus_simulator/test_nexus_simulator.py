@@ -810,22 +810,22 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
     "run_control_contents, expected_times, expected_output", [
         ("RUNCONTROL /path/run_control\nDATEFORMAT DD/MM/YYYY\n"
          "START 01/01/1980\nINCLUDE  \n! Comment \n   include.inc\n"
-         "SPREADSHEET\n\tFIELD TIMES\n\tWELLS TIMES\nENDSPREADSHEET\n"
+         "SPREADSHEET\n\tFIELD TIMES\n\tWELLSS TIMES\nENDSPREADSHEET\n"
          "OUTPUT TARGETS TIMES\n\tMAPS TIMES\nENDOUTPUT\nTIME 0.3\n",
          ['0.3'],
          "RUNCONTROL /path/run_control\nDATEFORMAT DD/MM/YYYY\n"
          "START 01/01/1980\nINCLUDE  \n! Comment \n   include.inc\n"
-         "SPREADSHEET\n\tFIELD TIMES\n\tWELLS TIMES\nENDSPREADSHEET\n"
+         "SPREADSHEET\n\tFIELD TIMES\n\tWELLSS TIMES\nENDSPREADSHEET\n"
          "OUTPUT TARGETS TIMES\n\tMAPS TIMES\nENDOUTPUT\nTIME 0.3\n\nSTOP\n"),
 
         ("RUNCONTROL /path/run_control\nDATEFORMAT DD/MM/YYYY\n"
          "START 01/01/1980\nINCLUDE  \n! Comment \n   include.inc\n"
-         "SPREADSHEET\n\tFIELD TIMES\n\tWELLS TIMES\nENDSPREADSHEET\n"
+         "SPREADSHEET\n\tFIELD TIMES\n\tWELLSS TIMES\nENDSPREADSHEET\n"
          "OUTPUT TARGETS TIMES\n\tMAPS TIMES\nENDOUTPUT\nTIME 0.3\n\nTIME 01/01/2001\n\tTIME 15/10/2020\n",
          ['0.3', '01/01/2001', '15/10/2020'],
          "RUNCONTROL /path/run_control\nDATEFORMAT DD/MM/YYYY\n"
          "START 01/01/1980\nINCLUDE  \n! Comment \n   include.inc\n"
-         "SPREADSHEET\n\tFIELD TIMES\n\tWELLS TIMES\nENDSPREADSHEET\n"
+         "SPREADSHEET\n\tFIELD TIMES\n\tWELLSS TIMES\nENDSPREADSHEET\n"
          "OUTPUT TARGETS TIMES\n\tMAPS TIMES\nENDOUTPUT\nTIME 0.3\n\nTIME 01/01/2001\n\nTIME 15/10/2020\n\nSTOP\n"),
 
     ])
@@ -1555,6 +1555,8 @@ def test_get_wells(mocker: MockerFixture):
 
     # Assert
     assert result == loaded_wells
+    mock_load_wells.assert_called_once_with(wellspec_file_path='/my/wellspec/file.dat', default_units=Units.OILFIELD,
+                                            start_date='')
 
 
 # TODO: as above, but for get_wells_df
