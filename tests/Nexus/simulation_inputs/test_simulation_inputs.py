@@ -1539,16 +1539,19 @@ PLOTBINARY
 
 
 
-@pytest.mark.parametrize("file_path, test_file_contents, include_contents1, include_contents2,"
-                         "expected_location, expected_includes, expected_origin",
+@pytest.mark.parametrize("file_path, test_file_contents, include_contents1, include_contents2, expected_location,"
+"expected_includes, expected_origin, expected_contents, expected_inc_contents",
 [
-('test_file_path.dat', # file_path
- 'basic_file INCLUDE inc_file1.inc', # file_contents
- 'inc file contents', # include_contents1
+('test_file_path.dat',  # file_path
+ 'basic_file INCLUDE inc_file1.inc',  # file_contents
+ 'inc file contents',  # include_contents1
  '', # include_contents2
- 'test_file_path.dat', # expected_location
- 'inc_file1.inc', # expected_includes
- None), # expected_origin
+ 'test_file_path.dat',  # expected_location
+ 'inc_file1.inc',  # expected_includes
+ None,
+'''basic_file 
+inc_file1.inc''',
+None),  # expected_origin
 ('test_file_path.dat',
 '''basic_file INCLUDE inc_file1.inc
 second_file INCLUDE inc_file2.inc''',
@@ -1556,6 +1559,12 @@ second_file INCLUDE inc_file2.inc''',
 'inc2 file contents',
 'test_file_path.dat',
 '''inc_file1.inc
+inc_file2.inc''',
+None,
+'''basic_file 
+inc_file1.inc
+
+second_file 
 inc_file2.inc''',
 None),
 ('test_file_path.dat',
@@ -1565,30 +1574,50 @@ None),
 'test_file_path.dat',
 'inc_file1.inc',
 None,
-),
+'''basic_file 
+inc_file1.inc''',
+'''inc file contents 
+inc_file2.inc''',),
 ], ids=['basic_test', 'two_includes', 'stacked_includes'])
 def test_generate_file_include_structure(mocker, file_path, test_file_contents, include_contents1, include_contents2,
-                                         expected_location, expected_includes, expected_origin):
+                                         expected_location, expected_includes, expected_origin, expected_contents, expected_inc_contents):
     # Arrange
-
     expected_includes_list = expected_includes.splitlines()
     nested_nexus_file = []
+
+    # for stacked includes
     if 'inc_file2.inc' in include_contents1:
         # not a very generic test yet
         include2_nexus_file = NexusFile(location='inc_file2.inc', includes=[], origin='inc_file1.inc',
-                                        includes_objects=None, run_generator=False)
+                                        includes_objects=None, file_content_as_list=include_contents2.splitlines())
+        expected_inc1_file_contents = [include2_nexus_file if x == include2_nexus_file.location
+                                       else x for x in expected_inc_contents.splitlines()]
         include1_nexus_file = NexusFile(location='inc_file1.inc', includes=['inc_file2.inc'], origin=file_path,
-                                        includes_objects=[include2_nexus_file], run_generator=False)
+                                        includes_objects=[include2_nexus_file],
+                                        file_content_as_list=expected_inc1_file_contents)
         nested_nexus_file.append(include1_nexus_file)
+    # for basic test
     elif 'inc_file1.inc' in test_file_contents:
-        include1_nexus_file = NexusFile(location='inc_file1.inc', includes=[], origin=file_path, includes_objects=None, run_generator=False)
+        expected_inc1_contents = include_contents1.splitlines()
+        include1_nexus_file = NexusFile(location='inc_file1.inc', includes=[], origin=file_path,
+                                        includes_objects=None, file_content_as_list=expected_inc1_contents)
         nested_nexus_file.append(include1_nexus_file)
+    # for the two include case
     if 'inc_file2.inc' in test_file_contents:
-        include2_nexus_file = NexusFile(location='inc_file2.inc', includes=[], origin=file_path, includes_objects=None, run_generator=False)
+        expected_inc2_contents = include_contents2.splitlines()
+        include2_nexus_file = NexusFile(location='inc_file2.inc', includes=[], origin=file_path,
+                                        includes_objects=None, file_content_as_list=expected_inc2_contents)
         nested_nexus_file.append(include2_nexus_file)
 
+    expected_file_content_as_list = expected_contents.splitlines()
+    if nested_nexus_file:
+        for nested_nexfile in nested_nexus_file:
+            expected_file_content_as_list = [nested_nexfile if x == nested_nexfile.location
+                                             else x for x in expected_file_content_as_list]
+
     expected_nexus_file = NexusFile(location=expected_location, includes=expected_includes_list,
-                                    origin=expected_origin, includes_objects=nested_nexus_file, run_generator=False)
+                                    origin=expected_origin, includes_objects=nested_nexus_file,
+                                    file_content_as_list=expected_file_content_as_list)
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_different_includes(mocker, filename, test_file_contents, include_contents1, include_contents2).return_value
