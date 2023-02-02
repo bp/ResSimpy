@@ -348,8 +348,7 @@ class NexusSimulator(Simulator):
             if nexus_file_operations.check_token('RUNCONTROL', line):
                 runcontrol_path = nexus_file_operations.get_token_value('RUNCONTROL', line, fcs_file)
                 if runcontrol_path is not None:
-                    self.run_control_file = runcontrol_path if os.path.isabs(runcontrol_path) else \
-                        os.path.dirname(self.__origin) + "/" + runcontrol_path
+                    self.run_control_file = nexus_file_operations.get_full_file_path(runcontrol_path, self.__origin)
             elif nexus_file_operations.check_token('DATEFORMAT', line):
                 value = nexus_file_operations.get_token_value('DATEFORMAT', line, fcs_file)
                 if value is not None:
@@ -358,8 +357,7 @@ class NexusSimulator(Simulator):
             elif nexus_file_operations.check_token('STRUCTURED_GRID', line):
                 value = nexus_file_operations.get_token_value('STRUCTURED_GRID', line, fcs_file)
                 if value is not None:
-                    self.__structured_grid_file_path = value if os.path.isabs(value) else \
-                        os.path.dirname(self.__origin) + "/" + value
+                    self.__structured_grid_file_path = nexus_file_operations.get_full_file_path(value, self.__origin)
                     self.load_structured_grid_file()
             elif nexus_file_operations.check_token('RUN_UNITS', line):
                 value = nexus_file_operations.get_token_value('RUN_UNITS', line, fcs_file)
@@ -375,15 +373,15 @@ class NexusSimulator(Simulator):
                 value = nexus_file_operations.get_token_value(token="SURFACE Network 1", token_line=line,
                                                               file_list=fcs_file)
                 if value is not None:
-                    self.__surface_file_path = value if os.path.isabs(value) else \
-                        os.path.dirname(self.__origin) + "/" + value
+                    self.__surface_file_path = nexus_file_operations.get_full_file_path(value, self.__origin)
                 break
 
             elif nexus_file_operations.check_token('WELLS', line):
                 well_filepath = nexus_file_operations.get_token_value(token="WELLS", token_line=line,
                                                                       file_list=fcs_file)
-                complete_well_filepath = self.__get_full_file_path(well_filepath)
-                self.Wells.wellspec_paths.append(complete_well_filepath)
+                if well_filepath is not None:
+                    complete_well_filepath = nexus_file_operations.get_full_file_path(well_filepath, self.__origin)
+                    self.Wells.wellspec_paths.append(complete_well_filepath)
 
         # Load in the other files
         # Load in Runcontrol
@@ -394,15 +392,6 @@ class NexusSimulator(Simulator):
         if len(self.Wells.wellspec_paths) > 0:
             for path in self.Wells.wellspec_paths:
                 self.Wells.load_wells(well_file=path, start_date=self.start_date, default_units=self.__default_units)
-
-    # TODO: replace the repeated logic above with a call to this method when working with file paths.
-    def __get_full_file_path(self, file_path: str):
-        """Returns the full file path including the base directories if they aren't present in the string
-
-        Args:
-            file_path (str): the initial file path found in a file
-        """
-        return file_path if os.path.isabs(file_path) else os.path.dirname(self.__origin) + "/" + file_path
 
     @staticmethod
     def update_file_value(file_path: str, token: str, new_value: str, add_to_start: bool = False):
@@ -523,8 +512,7 @@ class NexusSimulator(Simulator):
             return
 
         if include_file_path != '':
-            full_file_path = include_file_path if os.path.isabs(include_file_path) else os.path.dirname(
-                self.run_control_file) + "/" + include_file_path
+            full_file_path = nexus_file_operations.get_full_file_path(include_file_path, self.run_control_file)
 
             include_file = nexus_file_operations.load_file_as_list(full_file_path)
             include_times = nexus_file_operations.get_times(include_file)

@@ -6,6 +6,7 @@ from string import Template
 import re
 
 from ResSimpy.Nexus.nexus_constants import VALID_NEXUS_TOKENS
+import os
 
 
 def nexus_token_found(line_to_check: str) -> bool:
@@ -674,3 +675,17 @@ def expand_include(file_as_list: list[str], recursive: bool = True) -> tuple[lis
         while inc_file_path is not None:
             expanded_file, inc_file_path = expand_include(expanded_file)
     return expanded_file, inc_file_path
+
+
+def get_full_file_path(file_path: str, origin: str):
+    """Returns the full file path including the base directories if they aren't present in the string
+
+    Args:
+        file_path (str): the initial file path found in a file
+        origin (str): the initial origin of the file
+    """
+    if os.path.isabs(file_path):
+        return_path = file_path
+    else:
+        return_path = os.path.dirname(origin) + '/' + file_path
+    return return_path
