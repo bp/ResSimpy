@@ -345,34 +345,33 @@ class NexusSimulator(Simulator):
         fcs_file = nexus_file_operations.load_file_as_list(self.__new_fcs_file_path)
 
         for line in fcs_file:
-            uppercase_line = line.upper()
-            if 'RUNCONTROL' in uppercase_line:
+            if nexus_file_operations.check_token('RUNCONTROL', line):
                 runcontrol_path = nexus_file_operations.get_token_value('RUNCONTROL', line, fcs_file)
                 if runcontrol_path is not None:
                     self.run_control_file = runcontrol_path if os.path.isabs(runcontrol_path) else \
                         os.path.dirname(self.__origin) + "/" + runcontrol_path
-            elif 'DATEFORMAT' in uppercase_line:
+            elif nexus_file_operations.check_token('DATEFORMAT', line):
                 value = nexus_file_operations.get_token_value('DATEFORMAT', line, fcs_file)
                 if value is not None:
                     self.use_american_date_format = value == 'MM/DD/YYYY'
                 self.__date_format_string = "%m/%d/%Y" if self.use_american_date_format else "%d/%m/%Y"
-            elif 'STRUCTURED_GRID' in uppercase_line:
+            elif nexus_file_operations.check_token('STRUCTURED_GRID', line):
                 value = nexus_file_operations.get_token_value('STRUCTURED_GRID', line, fcs_file)
                 if value is not None:
                     self.__structured_grid_file_path = value if os.path.isabs(value) else \
                         os.path.dirname(self.__origin) + "/" + value
                     self.load_structured_grid_file()
-            elif 'RUN_UNITS' in uppercase_line:
+            elif nexus_file_operations.check_token('RUN_UNITS', line):
                 value = nexus_file_operations.get_token_value('RUN_UNITS', line, fcs_file)
                 if value is not None:
                     self.__run_units = value
                     self.use_american_run_units = value == 'ENGLISH'
-            elif 'DEFAULT_UNITS' in uppercase_line:
+            elif nexus_file_operations.check_token('DEFAULT_UNITS', line):
                 value = nexus_file_operations.get_token_value('DEFAULT_UNITS', line, fcs_file)
                 if value is not None:
                     self.__run_units = value
                     self.use_american_input_units = value == 'ENGLISH'
-            elif "SURFACE NETWORK 1" in uppercase_line:
+            elif nexus_file_operations.check_token("SURFACE NETWORK 1", line):
                 value = nexus_file_operations.get_token_value(token="SURFACE Network 1", token_line=line,
                                                               file_list=fcs_file)
                 if value is not None:
