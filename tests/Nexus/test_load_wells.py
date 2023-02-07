@@ -95,8 +95,10 @@ WELLMOD	RU001	DKH	CON	0
     expected_well_2_completion_2 = NexusCompletion(i=14, j=15, k=143243, well_radius=0.00002, date=start_date)
     expected_well_2_completion_3 = NexusCompletion(i=18, j=155, k=143243, well_radius=40.00002, date=start_date)
 
-    expected_well_3_completion_1 = NexusCompletion(i=126, j=504, k=3, well_radius=0.354, date=start_date)
-    expected_well_3_completion_2 = NexusCompletion(i=126, j=504, k=4, well_radius=0.354, date=start_date)
+    expected_well_3_completion_1 = NexusCompletion(i=126, j=504, k=3, well_radius=0.354, skin=0, date=start_date,
+                                                   partial_perf=1)
+    expected_well_3_completion_2 = NexusCompletion(i=126, j=504, k=4, well_radius=0.354, skin=0, date=start_date,
+                                                   partial_perf=1)
 
     expected_well_1 = NexusWell(well_name='DEV1',
                                 completions=[expected_well_1_completion_1, expected_well_1_completion_2],
@@ -260,7 +262,7 @@ def test_load_wells_na_values_converted_to_none(mocker):
        WELLSPEC DEV1
        IW JW L RADW
        1  2  3  4.5
-       6 7 8   9.11""", Units.METRIC_KPA),
+       6 7 8   9.11""", Units.OILFIELD),
 
                              ("""       
 ENGLish
@@ -310,7 +312,7 @@ TIME 01/08/2023 !232 days
                          ids=['None specified', 'Oilfield', 'kpa', 'kgcm2 + comment before', 'metbar', 'lab'])
 def test_correct_units_loaded(mocker, file_contents, expected_units):
     # Arrange
-    start_date = '01/01/2023'
+    start_date = '01/08/2023'
 
     expected_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date=start_date, grid=None, skin=None,
                                             angle_v=None)
@@ -323,7 +325,7 @@ def test_correct_units_loaded(mocker, file_contents, expected_units):
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=Units.METRIC_KPA)
+    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=Units.OILFIELD)
 
     # Assert
     assert result_wells == expected_wells

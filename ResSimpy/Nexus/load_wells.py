@@ -4,7 +4,6 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.UnitsEnum import Units
-from typing import Literal
 
 
 def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -> list[NexusWell]:
@@ -29,13 +28,14 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
     wi: Optional[str] = None
     dtop: Optional[str] = None
     dbot: Optional[str] = None
-
+    partial_perf: Optional[str] = None
     well_radius: Optional[str] = None
     units_values: dict[str, Units] = {'ENGLISH': Units.OILFIELD, 'METRIC': Units.METRIC_KPA,
                                       'METKG/CM2': Units.METRIC_KGCM2, 'METBAR': Units.METRIC_BARS, 'LAB': Units.LAB}
     header_values: dict[str, Union[Optional[int], Optional[float], Optional[str]]] = {
         'IW': iw, 'JW': jw, 'L': kw, 'MD': md, 'SKIN': skin, 'DEPTH': depth, 'X': x_value, 'Y': y_value,
-        'ANGLA': angla, 'ANGLV': anglv, 'GRID': grid, 'WI': wi, 'DTOP': dtop, 'DBOT': dbot, 'RADW': well_radius}
+        'ANGLA': angla, 'ANGLV': anglv, 'GRID': grid, 'WI': wi, 'DTOP': dtop, 'DBOT': dbot, 'RADW': well_radius,
+        'PPERF': partial_perf}
     header_index: int = -1
     wellspec_found: bool = False
     current_date: Optional[str] = None
@@ -135,6 +135,7 @@ def __load_wellspec_table_completions(file_as_list, header_index, header_values,
                 well_indices=(None if header_values['WI'] is None else float(header_values['WI'])),
                 depth_to_top=(None if header_values['DTOP'] is None else float(header_values['DTOP'])),
                 depth_to_bottom=(None if header_values['DBOT'] is None else float(header_values['DBOT'])),
+                partial_perf=(None if header_values['PPERF'] is None else float(header_values['PPERF'])),
                 date=start_date,
             )
 

@@ -8,16 +8,18 @@ from ResSimpy.Completion import Completion
 class NexusCompletion(Completion):
     __measured_depth: Optional[float] = None
     __well_indices: Optional[float] = None
+    __partial_perf: Optional[float] = None
 
     def __init__(self, date: str, i: Optional[int] = None, j: Optional[int] = None, k: Optional[int] = None,
                  skin: Optional[float] = None, depth: Optional[float] = None, well_radius: Optional[float] = None,
                  x: Optional[float] = None, y: Optional[float] = None, angle_a: Optional[float] = None,
                  angle_v: Optional[float] = None, grid: Optional[str] = None, measured_depth: Optional[float] = None,
                  well_indices: Optional[float] = None, depth_to_top: Optional[float] = None,
-                 depth_to_bottom: Optional[float] = None):
+                 depth_to_bottom: Optional[float] = None, partial_perf: Optional[float] = None):
 
         self.__measured_depth = measured_depth
         self.__well_indices = well_indices
+        self.__partial_perf = partial_perf
 
         super().__init__(date=date, i=i, j=j, k=k, skin=skin, depth=depth, well_radius=well_radius, x=x, y=y,
                          angle_a=angle_a, angle_v=angle_v, grid=grid, depth_to_top=depth_to_top,
