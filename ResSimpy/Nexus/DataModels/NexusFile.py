@@ -64,6 +64,8 @@ class NexusFile:
                 modified_file_as_list.append(line)
             else:
                 inc_file = cls.generate_file_include_structure(inc_file_path, origin=file_path, recursive=True)
+                if includes_objects is None:
+                    raise ValueError('includes_objects is None - recursion failure.')
                 includes_objects.append(inc_file)
 
                 prefix_line, suffix_line = re.split('INCLUDE', line, maxsplit=1, flags=re.IGNORECASE)
