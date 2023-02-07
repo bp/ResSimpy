@@ -46,10 +46,10 @@ class NexusFile:
         file_as_list = nexus_file_operations.strip_file_of_comments(file_as_list)
 
         # prevent python from mutating the lists that its iterating over
-        modified_file_as_list = []
+        modified_file_as_list: list = []
         # search for the INCLUDE keyword and append to a list:
-        inc_file_list = []
-        includes_objects = []
+        inc_file_list: list[str] = []
+        includes_objects: Optional[list] = []
         for line in file_as_list:
             if "INCLUDE" not in line.upper():  # TODO replace with check_token function
                 modified_file_as_list.append(line)
