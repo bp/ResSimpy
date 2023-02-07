@@ -194,11 +194,11 @@ def test_load_wells_all_columns_present(mocker):
     6 7 8   9.11    1.568   4.52    8.955   9000.48974      2   1   5.68    GRID_B  0.2874   0.2132  5.45454
        """
 
-    expected_well_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/08/2023',
+    expected_well_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/03/2023',
                                                  measured_depth=1.38974, skin=8.9, depth=7.56, x=89787.5478, y=1.24,
                                                  angle_a=0.98, angle_v=3, grid='GRID_A', well_indices=2.84,
                                                  depth_to_top=8.95, depth_to_bottom=7.1564)
-    expected_well_completion_2 = NexusCompletion(i=6, j=7, k=8, well_radius=9.11, date='01/08/2023',
+    expected_well_completion_2 = NexusCompletion(i=6, j=7, k=8, well_radius=9.11, date='01/03/2023',
                                                  measured_depth=1.568, skin=4.52, depth=8.955, x=9000.48974, y=2,
                                                  angle_a=1, angle_v=5.68, grid='GRID_B', well_indices=0.2874,
                                                  depth_to_top=0.2132, depth_to_bottom=5.45454)

@@ -4,6 +4,7 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.UnitsEnum import Units
+from typing import Literal
 
 
 def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -> list[NexusWell]:
@@ -17,11 +18,24 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
     iw: Optional[str] = None
     jw: Optional[str] = None
     kw: Optional[str] = None
+    md: Optional[str] = None
+    skin: Optional[str] = None
+    depth: Optional[str] = None
+    x_value: Optional[str] = None
+    y_value: Optional[str] = None
+    angla: Optional[str] = None
+    anglv: Optional[str] = None
+    grid: Optional[str] = None
+    wi: Optional[str] = None
+    dtop: Optional[str] = None
+    dbot: Optional[str] = None
+
     well_radius: Optional[str] = None
     units_values: dict[str, Units] = {'ENGLISH': Units.OILFIELD, 'METRIC': Units.METRIC_KPA,
                                       'METKG/CM2': Units.METRIC_KGCM2, 'METBAR': Units.METRIC_BARS, 'LAB': Units.LAB}
-    header_values: dict[str, Union[Optional[int], Optional[float], Optional[str]]] = {'IW': iw, 'JW': jw, 'L': kw,
-                                                                                      'RADW': well_radius}
+    header_values: dict[str, Union[Optional[int], Optional[float], Optional[str]]] = {
+        'IW': iw, 'JW': jw, 'L': kw, 'MD': md, 'SKIN': skin, 'DEPTH': depth, 'X': x_value, 'Y': y_value,
+        'ANGLA': angla, 'ANGLV': anglv, 'GRID': grid, 'WI': wi, 'DTOP': dtop, 'DBOT': dbot, 'RADW': well_radius}
     header_index: int = -1
     wellspec_found: bool = False
     current_date: Optional[str] = None
@@ -83,6 +97,18 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
 def __load_wellspec_table_completions(file_as_list, header_index, header_values, headers, start_date):
     completions: list[NexusCompletion] = []
 
+    # def access_header_value(header_values: dict[str, Union[Optional[int], Optional[float], Optional[str]]],
+    #                         key: str, how: Literal['int', 'float', 'string']):
+    #     if header_values[key] is None:
+    #         return None
+    #     match how:
+    #         case 'int':
+    #             return int(header_values[key])
+    #         case 'float':
+    #             return float(header_values[key])
+    #         case 'string':
+    #             return str(header_values[key])
+
     for line in file_as_list[header_index + 1:]:
         # check for end of table lines:
         end_of_table = nfo.check_token('TIME', line) or nfo.check_token('WELLSPEC', line)
@@ -100,12 +126,24 @@ def __load_wellspec_table_completions(file_as_list, header_index, header_values,
             trimmed_line = trimmed_line.replace(value, "", 1)
 
         if valid_line:
-            new_completion = NexusCompletion(i=(None if header_values['IW'] is None else int(header_values['IW'])),
-                                             j=(None if header_values['JW'] is None else int(header_values['JW'])),
-                                             k=(None if header_values['L'] is None else int(header_values['L'])),
-                                             well_radius=(None if header_values['RADW'] is None else float(
-                                                 header_values['RADW'])),
-                                             date=start_date)
+            new_completion = NexusCompletion(
+                i=(None if header_values['IW'] is None else int(header_values['IW'])),
+                j=(None if header_values['JW'] is None else int(header_values['JW'])),
+                k=(None if header_values['L'] is None else int(header_values['L'])),
+                grid=(None if header_values['GRID'] is None else header_values['GRID']),
+                well_radius=(None if header_values['RADW'] is None else float(header_values['RADW'])),
+                measured_depth=(None if header_values['MD'] is None else float(header_values['MD'])),
+                skin=(None if header_values['SKIN'] is None else float(header_values['SKIN'])),
+                depth=(None if header_values['DEPTH'] is None else float(header_values['DEPTH'])),
+                x=(None if header_values['X'] is None else float(header_values['X'])),
+                y=(None if header_values['Y'] is None else float(header_values['Y'])),
+                angle_a=(None if header_values['ANGLA'] is None else float(header_values['ANGLA'])),
+                angle_v=(None if header_values['ANGLV'] is None else float(header_values['ANGLV'])),
+                well_indices=(None if header_values['WI'] is None else float(header_values['WI'])),
+                depth_to_top=(None if header_values['DTOP'] is None else float(header_values['DTOP'])),
+                depth_to_bottom=(None if header_values['DBOT'] is None else float(header_values['DBOT'])),
+                date=start_date,
+            )
 
             completions.append(new_completion)
 
