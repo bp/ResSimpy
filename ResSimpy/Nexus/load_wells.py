@@ -97,18 +97,6 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
 def __load_wellspec_table_completions(file_as_list, header_index, header_values, headers, start_date):
     completions: list[NexusCompletion] = []
 
-    # def access_header_value(header_values: dict[str, Union[Optional[int], Optional[float], Optional[str]]],
-    #                         key: str, how: Literal['int', 'float', 'string']):
-    #     if header_values[key] is None:
-    #         return None
-    #     match how:
-    #         case 'int':
-    #             return int(header_values[key])
-    #         case 'float':
-    #             return float(header_values[key])
-    #         case 'string':
-    #             return str(header_values[key])
-
     for line in file_as_list[header_index + 1:]:
         # check for end of table lines:
         end_of_table = nfo.check_token('TIME', line) or nfo.check_token('WELLSPEC', line)
@@ -124,6 +112,11 @@ def __load_wellspec_table_completions(file_as_list, header_index, header_values,
 
             header_values[column] = value
             trimmed_line = trimmed_line.replace(value, "", 1)
+        for item in header_values:
+            if item == 'GRID':
+                continue
+            if header_values[item] == 'NA':
+                header_values[item] = None
 
         if valid_line:
             new_completion = NexusCompletion(
