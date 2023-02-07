@@ -25,7 +25,8 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
     header_index: int = -1
     wellspec_found: bool = False
     current_date: Optional[str] = None
-    wells: list = []
+    wells: list[NexusWell] = []
+    well_name_list: list[str] = []
 
     for index, line in enumerate(file_as_list):
         uppercase_line = line.upper()
@@ -68,9 +69,13 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
 
             if wellspec_file_units is None:
                 wellspec_file_units = default_units
-            new_well = NexusWell(completions=completions, well_name=well_name, units=wellspec_file_units)
 
-            wells.append(new_well)
+            if well_name in well_name_list:
+                wells[well_name_list.index(well_name)].completions.extend(completions)
+            else:
+                new_well = NexusWell(completions=completions, well_name=well_name, units=wellspec_file_units)
+                well_name_list.append(well_name)
+                wells.append(new_well)
             wellspec_found = False
     return wells
 
