@@ -22,7 +22,10 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
                                       'METKG/CM2': Units.METRIC_KGCM2, 'METBAR': Units.METRIC_BARS, 'LAB': Units.LAB}
     header_values: dict[str, Union[Optional[int], Optional[float], Optional[str]]] = {'IW': iw, 'JW': jw, 'L': kw,
                                                                                       'RADW': well_radius}
-    header_index = -1
+    header_index: int = -1
+    wellspec_found: bool = False
+    current_date: Optional[str] = None
+    wells: list = []
 
     for index, line in enumerate(file_as_list):
         uppercase_line = line.upper()
@@ -33,29 +36,42 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
                 if key in uppercase_line and (line.find('!') > line.find(key) or line.find('!') == -1):
                     wellspec_file_units = units_values[key]
 
+        if nfo.check_token('TIME', line):
+            current_date = nfo.get_token_value(token='TIME', token_line=line, file_list=file_as_list)
+            if current_date is None:
+                raise ValueError(f"Cannot find the date associated with the TIME card in {line=} at line number \
+                                 {index}")
+
         if 'WELLSPEC' in uppercase_line:
             initial_well_name = nfo.get_token_value(token='WELLSPEC', token_line=line, file_list=file_as_list)
             if initial_well_name is None:
                 raise ValueError("Cannot find well name following WELLSPEC keyword")
             well_name = initial_well_name.strip('\"')
+            wellspec_found = True
             continue
 
         # Load in the column headings, which appear after the well name
-        header_index = __load_wellspec_table_headings(header_index, header_values, headers, index, line, well_name)
+        header_index, headers = __load_wellspec_table_headings(header_index, header_values, index, line, well_name)
 
-        if header_index != -1:
-            break
+        if header_index == -1:
+            continue
 
-    if well_name is None:
-        raise ValueError(f"No wells found in file: {wellspec_file_path}")
+        if well_name is None:
+            raise ValueError(f"No wells found in file: {wellspec_file_path}")
 
-    # Load in each line of the table
-    completions = __load_wellspec_table_completions(file_as_list, header_index, header_values, headers, start_date)
+        if wellspec_found:
+            if current_date is None:
+                current_date = start_date
+            # Load in each line of the table
+            completions = __load_wellspec_table_completions(
+                file_as_list, header_index, header_values, headers, current_date)
 
-    if wellspec_file_units is None:
-        wellspec_file_units = default_units
+            if wellspec_file_units is None:
+                wellspec_file_units = default_units
+            new_well = NexusWell(completions=completions, well_name=well_name, units=wellspec_file_units)
 
-    wells = [NexusWell(completions=completions, well_name=well_name, units=wellspec_file_units)]
+            wells.append(new_well)
+            wellspec_found = False
     return wells
 
 
@@ -63,6 +79,10 @@ def __load_wellspec_table_completions(file_as_list, header_index, header_values,
     completions: list[NexusCompletion] = []
 
     for line in file_as_list[header_index + 1:]:
+        # check for end of table lines:
+        end_of_table = nfo.check_token('TIME', line) or nfo.check_token('WELLSPEC', line)
+        if end_of_table:
+            return completions
         trimmed_line = line
         valid_line = True
         for column in headers:
@@ -89,7 +109,10 @@ def __load_wellspec_table_completions(file_as_list, header_index, header_values,
 
 def __load_wellspec_table_headings(header_index: int,
                                    header_values: dict[str, Union[Optional[int], Optional[float], Optional[str]]],
-                                   headers: list[str], index: int, line: str, well_name: Optional[str]) -> int:
+                                   index: int, line: str, well_name: Optional[str],
+                                   headers: Optional[list[str]] = None) -> tuple[int, list[str]]:
+    headers = [] if headers is None else headers
+
     if well_name is not None:
         for key in header_values.keys():
             if nfo.check_token(key, line):
@@ -107,4 +130,4 @@ def __load_wellspec_table_headings(header_index: int,
 
                 if len(headers) > 0:
                     break
-    return header_index
+    return header_index, headers

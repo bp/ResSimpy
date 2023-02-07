@@ -74,6 +74,7 @@ def test_load_wells_multiple_wells(mocker):
     6 7 8   9.11
     
     WELLSPEC DEV2
+    IW JW L RADW
     12 12   13 4.50000000000
     14 15 143243            0.00002
     18 155 143243 40.00002
@@ -94,14 +95,20 @@ WELLMOD	RU001	DKH	CON	0
     expected_well_2_completion_2 = NexusCompletion(i=14, j=15, k=143243, well_radius=0.00002, date=start_date)
     expected_well_2_completion_3 = NexusCompletion(i=18, j=155, k=143243, well_radius=40.00002, date=start_date)
 
+    expected_well_3_completion_1 = NexusCompletion(i=126, j=504, k=3, well_radius=0.354, date=start_date)
+    expected_well_3_completion_2 = NexusCompletion(i=126, j=504, k=4, well_radius=0.354, date=start_date)
+
     expected_well_1 = NexusWell(well_name='DEV1',
                                 completions=[expected_well_1_completion_1, expected_well_1_completion_2],
                                 units=Units.OILFIELD)
     expected_well_2 = NexusWell(well_name='DEV2',
                                 completions=[expected_well_2_completion_1, expected_well_2_completion_2,
                                              expected_well_2_completion_3], units=Units.OILFIELD)
+    expected_well_3 = NexusWell(well_name='WEL1234',
+                                completions=[expected_well_3_completion_1, expected_well_3_completion_2],
+                                units=Units.OILFIELD)
 
-    expected_wells = [expected_well_1, expected_well_2]
+    expected_wells = [expected_well_1, expected_well_2, expected_well_3]
 
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)
