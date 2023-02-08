@@ -377,7 +377,6 @@ class NexusSimulator(Simulator):
                 break
 
             elif nexus_file_operations.check_token('WELLS', line):
-                # WELLS set 1 wellspec.dat
                 well_keyword = nexus_file_operations.get_token_value(token="WELLS", token_line=line,
                                                                      file_list=fcs_file)
                 if well_keyword is not None:
