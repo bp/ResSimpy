@@ -15,7 +15,6 @@ class NexusWells(Wells):
         return self.__wells
 
     def get_wells_df(self):
-        # TODO: implement this
         # loop through wells and completions to output a table
         df_store = pd.DataFrame()
         for well in self.__wells:

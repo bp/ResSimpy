@@ -1559,7 +1559,6 @@ def test_get_wells(mocker: MockerFixture):
                                             start_date='')
 
 
-# TODO: as above, but for get_wells_df
 def test_get_wells_df(mocker: MockerFixture):
     # Arrange
     fcs_file_contents = """
@@ -1573,12 +1572,14 @@ def test_get_wells_df(mocker: MockerFixture):
     loaded_completion_2 = NexusCompletion(i=6, j=7, k=8, well_radius=9.11, date='01/01/2023')
     loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
                               units=Units.OILFIELD)]
+    # create the expected dataframe
     loaded_wells_txt = ['WELL1, OILFIELD, 4.5, 01/01/2023, 1, 2, 3',
                         'WELL1, OILFIELD, 9.11, 01/01/2023, 6, 7, 8', ]
     loaded_wells_txt = [x.split(', ') for x in loaded_wells_txt]
     loaded_wells_df = pd.DataFrame(loaded_wells_txt,
                                    columns=['well_name', 'units', 'well_radius', 'date', 'i', 'j', 'k', ])
     loaded_wells_df = loaded_wells_df.astype({'well_radius': 'float64', 'i': 'int64', 'j': 'int64', 'k': 'int64'})
+
     mock_load_wells = mocker.Mock(return_value=loaded_wells)
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
     simulation = NexusSimulator(origin='nexus_run.fcs')
