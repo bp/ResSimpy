@@ -50,3 +50,22 @@ class Completion(ABC):
     @property
     def well_radius(self):
         return self.__well_radius
+
+    def to_dict(self) -> dict[str, None | float | int | str]:
+        attribute_dict = {
+            'well_radius': self.__well_radius,
+            'date': self.__date,
+            'i': self.__i,
+            'j': self.__j,
+            'k': self.__k,
+            'skin': self.__skin,
+            'depth': self.__depth,
+            'x': self.__x,
+            'y': self.__y,
+            'angle_a': self.__angle_a,
+            'angle_v': self.__angle_v,
+            'grid': self.__grid,
+            'depth_to_top': self.__depth_to_top,
+            'depth_to_bottom': self.__depth_to_bottom,
+        }
+        return attribute_dict

@@ -24,3 +24,12 @@ class NexusCompletion(Completion):
         super().__init__(date=date, i=i, j=j, k=k, skin=skin, depth=depth, well_radius=well_radius, x=x, y=y,
                          angle_a=angle_a, angle_v=angle_v, grid=grid, depth_to_top=depth_to_top,
                          depth_to_bottom=depth_to_bottom)
+
+    def to_dict(self) -> dict[str, None | float | int | str]:
+        attribute_dict: dict[str, None | float | int | str] = {
+            'measured_depth': self.__measured_depth,
+            'well_indices': self.__well_indices,
+            'partial_perf': self.__partial_perf,
+        }
+        attribute_dict.update(super().to_dict())
+        return attribute_dict
