@@ -25,3 +25,7 @@ class Well(ABC):
     @property
     def well_name(self) -> str:
         return self.__well_name
+
+    @property
+    def units(self) -> Units:
+        return self.__units
