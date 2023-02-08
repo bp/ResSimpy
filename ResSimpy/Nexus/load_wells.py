@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional
 
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
@@ -45,7 +45,7 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
     well_radius: Optional[str] = None
     units_values: dict[str, Units] = {'ENGLISH': Units.OILFIELD, 'METRIC': Units.METRIC_KPA,
                                       'METKG/CM2': Units.METRIC_KGCM2, 'METBAR': Units.METRIC_BARS, 'LAB': Units.LAB}
-    header_values: dict[str, Union[Optional[int], Optional[float], Optional[str]]] = {
+    header_values: dict[str, None | int | float | str] = {
         'IW': iw, 'JW': jw, 'L': kw, 'MD': md, 'SKIN': skin, 'DEPTH': depth, 'X': x_value, 'Y': y_value,
         'ANGLA': angla, 'ANGLV': anglv, 'GRID': grid, 'WI': wi, 'DTOP': dtop, 'DBOT': dbot, 'RADW': well_radius,
         'PPERF': partial_perf}
@@ -108,7 +108,7 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
 
 
 def __load_wellspec_table_completions(file_as_list: list[str], header_index: int,
-                                      header_values: dict[str, Union[Optional[int], Optional[float], Optional[str]]],
+                                      header_values: dict[str, None | int | float | str],
                                       headers: list[str], start_date: str) -> list[NexusCompletion]:
     """Loads a completion table in for a single WELLSPEC keyword. \
         Loads in the next available completions following a WELLSPEC keyword and a header line.
@@ -124,6 +124,18 @@ def __load_wellspec_table_completions(file_as_list: list[str], header_index: int
     Returns:
         list[NexusCompletion]: list of nexus completions for a given table.
     """
+    def convert_header_value_float(key: str, header_values=header_values) -> Optional[float]:
+        value = header_values[key]
+        if value == 'NA':
+            value = None
+        return None if value is None else float(value)
+
+    def convert_header_value_int(key, header_values=header_values) -> Optional[int]:
+        value = header_values[key]
+        if value == 'NA':
+            value = None
+        return None if value is None else int(value)
+
     completions: list[NexusCompletion] = []
 
     for line in file_as_list[header_index + 1:]:
@@ -141,31 +153,26 @@ def __load_wellspec_table_completions(file_as_list: list[str], header_index: int
 
             header_values[column] = value
             trimmed_line = trimmed_line.replace(value, "", 1)
-        for item in header_values:
-            # keep grid NA's as it could be a grid called NA
-            if item == 'GRID':
-                continue
-            if header_values[item] == 'NA':
-                header_values[item] = None
 
         if valid_line:
             new_completion = NexusCompletion(
-                i=(None if header_values['IW'] is None else int(header_values['IW'])),
-                j=(None if header_values['JW'] is None else int(header_values['JW'])),
-                k=(None if header_values['L'] is None else int(header_values['L'])),
+                i=convert_header_value_int('IW'),
+                j=convert_header_value_int('JW'),
+                k=convert_header_value_int('L'),
+                # keep grid = 'NA' as 'NA' and not None
                 grid=(None if header_values['GRID'] is None else str(header_values['GRID'])),
-                well_radius=(None if header_values['RADW'] is None else float(header_values['RADW'])),
-                measured_depth=(None if header_values['MD'] is None else float(header_values['MD'])),
-                skin=(None if header_values['SKIN'] is None else float(header_values['SKIN'])),
-                depth=(None if header_values['DEPTH'] is None else float(header_values['DEPTH'])),
-                x=(None if header_values['X'] is None else float(header_values['X'])),
-                y=(None if header_values['Y'] is None else float(header_values['Y'])),
-                angle_a=(None if header_values['ANGLA'] is None else float(header_values['ANGLA'])),
-                angle_v=(None if header_values['ANGLV'] is None else float(header_values['ANGLV'])),
-                well_indices=(None if header_values['WI'] is None else float(header_values['WI'])),
-                depth_to_top=(None if header_values['DTOP'] is None else float(header_values['DTOP'])),
-                depth_to_bottom=(None if header_values['DBOT'] is None else float(header_values['DBOT'])),
-                partial_perf=(None if header_values['PPERF'] is None else float(header_values['PPERF'])),
+                well_radius=convert_header_value_float('RADW'),
+                measured_depth=convert_header_value_float('MD'),
+                skin=convert_header_value_float('SKIN'),
+                depth=convert_header_value_float('DEPTH'),
+                x=convert_header_value_float('X'),
+                y=convert_header_value_float('Y'),
+                angle_a=convert_header_value_float('ANGLA'),
+                angle_v=convert_header_value_float('ANGLV'),
+                well_indices=convert_header_value_float('WI'),
+                depth_to_top=convert_header_value_float('DTOP'),
+                depth_to_bottom=convert_header_value_float('DBOT'),
+                partial_perf=convert_header_value_float('PPERF'),
                 date=start_date,
             )
 
@@ -174,8 +181,7 @@ def __load_wellspec_table_completions(file_as_list: list[str], header_index: int
     return completions
 
 
-def __load_wellspec_table_headings(header_index: int,
-                                   header_values: dict[str, Union[Optional[int], Optional[float], Optional[str]]],
+def __load_wellspec_table_headings(header_index: int, header_values: dict[str, None | int | float | str],
                                    index: int, line: str, well_name: Optional[str],
                                    headers: Optional[list[str]] = None) -> tuple[int, list[str]]:
     """Loads in the wellspec headers from a line in a file.
