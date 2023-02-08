@@ -7,8 +7,21 @@ from ResSimpy.UnitsEnum import Units
 
 
 def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -> list[NexusWell]:
-    file_as_list = nfo.load_file_as_list(wellspec_file_path)
+    """Loads a list of Nexus Well instances and populates it with the wells completions over time from a wells file
+    Args:
+        wellspec_file_path (str): file path to the wellspec file to read.
+        start_date (str): starting date of the wellspec file as a string.
+        default_units (Units): default units to use if no units are found.
+    Raises:
+        ValueError: If no value is found after a TIME card.
+        ValueError: If no well name is found after a WELLSPEC keyword.
+        ValueError: If no valid wells are found in the wellspec file.
 
+    Returns:
+        list[NexusWell]: list of Nexus well classes contained within a wellspec file.
+    """
+
+    file_as_list = nfo.load_file_as_list(wellspec_file_path)
     well_name: Optional[str] = None
     wellspec_file_units: Optional[Units] = None
     completions: list[NexusCompletion] = []
@@ -94,7 +107,23 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
     return wells
 
 
-def __load_wellspec_table_completions(file_as_list, header_index, header_values, headers, start_date):
+def __load_wellspec_table_completions(file_as_list: list[str], header_index: int,
+                                      header_values: dict[str, Union[Optional[int], Optional[float], Optional[str]]],
+                                      headers: list[str], start_date: str) -> list[NexusCompletion]:
+    """Loads a completion table in for a single WELLSPEC keyword. \
+        Loads in the next available completions following a WELLSPEC keyword and a header line.
+
+    Args:
+        file_as_list (list[str]): File represented as a list of strings
+        header_index (int): index number of the header in the file as list parameter
+        header_values (dict[str, Union[Optional[int], Optional[float], Optional[str]]]): dictionary of column \
+            headings to populate from the table
+        headers (list[str]): list of strings containing the headers from the wellspec table
+        start_date (str): date to populate the completion class with.
+
+    Returns:
+        list[NexusCompletion]: list of nexus completions for a given table.
+    """
     completions: list[NexusCompletion] = []
 
     for line in file_as_list[header_index + 1:]:
@@ -113,6 +142,7 @@ def __load_wellspec_table_completions(file_as_list, header_index, header_values,
             header_values[column] = value
             trimmed_line = trimmed_line.replace(value, "", 1)
         for item in header_values:
+            # keep grid NA's as it could be a grid called NA
             if item == 'GRID':
                 continue
             if header_values[item] == 'NA':
@@ -123,7 +153,7 @@ def __load_wellspec_table_completions(file_as_list, header_index, header_values,
                 i=(None if header_values['IW'] is None else int(header_values['IW'])),
                 j=(None if header_values['JW'] is None else int(header_values['JW'])),
                 k=(None if header_values['L'] is None else int(header_values['L'])),
-                grid=(None if header_values['GRID'] is None else header_values['GRID']),
+                grid=(None if header_values['GRID'] is None else str(header_values['GRID'])),
                 well_radius=(None if header_values['RADW'] is None else float(header_values['RADW'])),
                 measured_depth=(None if header_values['MD'] is None else float(header_values['MD'])),
                 skin=(None if header_values['SKIN'] is None else float(header_values['SKIN'])),
@@ -148,6 +178,21 @@ def __load_wellspec_table_headings(header_index: int,
                                    header_values: dict[str, Union[Optional[int], Optional[float], Optional[str]]],
                                    index: int, line: str, well_name: Optional[str],
                                    headers: Optional[list[str]] = None) -> tuple[int, list[str]]:
+    """Loads in the wellspec headers from a line in a file.
+
+    Args:
+        header_index (int): index of the header
+        header_values (dict[str, Union[Optional[int], Optional[float], Optional[str]]]): dictionary of column \
+            headings to populate from the table
+        index (int): starting index to search from
+        line (str): line to extract header values from
+        well_name (Optional[str]): well name from the previous WELLSPEC keyword
+        headers (Optional[list[str]], optional): list of headers to append the next set of found headers to. \
+            Defaults to None and will create a new list to return if None.
+
+    Returns:
+        tuple[int, list[str]]: _description_
+    """
     headers = [] if headers is None else headers
 
     if well_name is not None:
