@@ -18,8 +18,13 @@ class Simulator(ABC):
     def start_date_set(self, value) -> None:
         self.__start_date = value
 
+    @property
     def Wells(self) -> Wells:
         return self.__Wells
+
+    @Wells.setter
+    def Wells(self, cls):
+        self.__Wells = cls
 
     """ Class Methods """
     @staticmethod
