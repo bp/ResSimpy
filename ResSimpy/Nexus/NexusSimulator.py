@@ -334,6 +334,22 @@ class NexusSimulator(Simulator):
 
             self.__origin = self.__destination + "/" + os.path.basename(self.__original_fcs_file_path)
 
+    def __get_wells_paths(self, line: str, fcs_file: list[str]):
+        well_keyword = nexus_file_operations.get_token_value(token="WELLS", token_line=line,
+                                                             file_list=fcs_file)
+        if well_keyword is not None:
+            if well_keyword.upper() == 'SET':
+                well_set_number = nexus_file_operations.get_token_value(token="SET", token_line=line,
+                                                                        file_list=fcs_file)
+                if well_set_number is not None:
+                    index = line.find(well_set_number)
+                    modified_line = line[index+len(well_set_number)::]
+                    well_keyword = nexus_file_operations.get_next_value(0, [modified_line],
+                                                                        search_string=modified_line, )
+        if well_keyword is not None:
+            complete_well_filepath = nexus_file_operations.get_full_file_path(well_keyword, self.__origin)
+            self.Wells.wellspec_paths.append(complete_well_filepath)
+
     def __load_fcs_file(self):
         """ Loads in the information from the supplied FCS file into the class instance.
             Loads in the paths for runcontrol, strucutured grid and the first surface network.
@@ -377,20 +393,8 @@ class NexusSimulator(Simulator):
                 break
 
             elif nexus_file_operations.check_token('WELLS', line):
-                well_keyword = nexus_file_operations.get_token_value(token="WELLS", token_line=line,
-                                                                     file_list=fcs_file)
-                if well_keyword is not None:
-                    if well_keyword.upper() == 'SET':
-                        well_set_number = nexus_file_operations.get_token_value(token="SET", token_line=line,
-                                                                                file_list=fcs_file)
-                        if well_set_number is not None:
-                            index = line.find(well_set_number)
-                            modified_line = line[index+len(well_set_number)::]
-                            well_keyword = nexus_file_operations.get_next_value(0, [modified_line],
-                                                                                search_string=modified_line, )
-                if well_keyword is not None:
-                    complete_well_filepath = nexus_file_operations.get_full_file_path(well_keyword, self.__origin)
-                    self.Wells.wellspec_paths.append(complete_well_filepath)
+                # TODO: abstract this to a get wells_file method
+                self.__get_wells_paths(line, fcs_file)
 
         # Load in the other files
         # Load in Runcontrol
