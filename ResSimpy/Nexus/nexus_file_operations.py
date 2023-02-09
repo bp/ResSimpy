@@ -236,6 +236,7 @@ def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False) -> 
     Returns:
         list[str]: a list of strings containing each line of the file as a new entry without comments
     """
+    # TODO: support VIP comment out single C character
     # remove any empty lines
     file_as_list = list(filter(None, file_as_list))
 
