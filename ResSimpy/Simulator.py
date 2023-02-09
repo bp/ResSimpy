@@ -24,6 +24,8 @@ class Simulator(ABC):
 
     @Wells.setter
     def Wells(self, cls):
+        if not isinstance(cls, Wells):
+            raise ValueError(f"Wells must take a valid Wells type. Instead got provided class of {type(cls)}")
         self.__Wells = cls
 
     """ Class Methods """
