@@ -153,30 +153,31 @@ def __load_wellspec_table_completions(file_as_list: list[str], header_index: int
 
             header_values[column] = value
             trimmed_line = trimmed_line.replace(value, "", 1)
+        # if a valid line is found load a completion otherwise continue
+        if not valid_line:
+            continue
+        new_completion = NexusCompletion(
+            i=convert_header_value_int('IW'),
+            j=convert_header_value_int('JW'),
+            k=convert_header_value_int('L'),
+            # keep grid = 'NA' as 'NA' and not None
+            grid=(None if header_values['GRID'] is None else str(header_values['GRID'])),
+            well_radius=convert_header_value_float('RADW'),
+            measured_depth=convert_header_value_float('MD'),
+            skin=convert_header_value_float('SKIN'),
+            depth=convert_header_value_float('DEPTH'),
+            x=convert_header_value_float('X'),
+            y=convert_header_value_float('Y'),
+            angle_a=convert_header_value_float('ANGLA'),
+            angle_v=convert_header_value_float('ANGLV'),
+            well_indices=convert_header_value_float('WI'),
+            depth_to_top=convert_header_value_float('DTOP'),
+            depth_to_bottom=convert_header_value_float('DBOT'),
+            partial_perf=convert_header_value_float('PPERF'),
+            date=start_date,
+        )
 
-        if valid_line:
-            new_completion = NexusCompletion(
-                i=convert_header_value_int('IW'),
-                j=convert_header_value_int('JW'),
-                k=convert_header_value_int('L'),
-                # keep grid = 'NA' as 'NA' and not None
-                grid=(None if header_values['GRID'] is None else str(header_values['GRID'])),
-                well_radius=convert_header_value_float('RADW'),
-                measured_depth=convert_header_value_float('MD'),
-                skin=convert_header_value_float('SKIN'),
-                depth=convert_header_value_float('DEPTH'),
-                x=convert_header_value_float('X'),
-                y=convert_header_value_float('Y'),
-                angle_a=convert_header_value_float('ANGLA'),
-                angle_v=convert_header_value_float('ANGLV'),
-                well_indices=convert_header_value_float('WI'),
-                depth_to_top=convert_header_value_float('DTOP'),
-                depth_to_bottom=convert_header_value_float('DBOT'),
-                partial_perf=convert_header_value_float('PPERF'),
-                date=start_date,
-            )
-
-            completions.append(new_completion)
+        completions.append(new_completion)
 
     return completions
 

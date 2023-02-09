@@ -1526,6 +1526,7 @@ PLOTBINARY
                                      modifying_mock_open=modifying_mock_open,
                                      mocker_fixture=mocker)
 
+
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
        WELLS my/wellspec/file.dat
