@@ -17,6 +17,17 @@ class PropertyToLoad:
 
 @dataclass(kw_only=True)
 class StructuredGridFile:
+    netgrs: VariableEntry()
+    porosity: VariableEntry()
+    sw: VariableEntry()
+    kx: VariableEntry()
+    ky: VariableEntry()
+    kz: VariableEntry()
+    # Grid dimensions
+    range_x: Optional[int]
+    range_y: Optional[int]
+    range_z: Optional[int]
+
     def __init__(self, data: Optional[dict] = None):
         self.netgrs = VariableEntry()
         self.porosity = VariableEntry()
@@ -29,6 +40,7 @@ class StructuredGridFile:
         self.range_y: Optional[int] = None
         self.range_z: Optional[int] = None
 
+        # Use the dict provided to populate the properties
         if data is not None:
             for name, value in data.items():
                 setattr(self, name, self.__wrap(value))
