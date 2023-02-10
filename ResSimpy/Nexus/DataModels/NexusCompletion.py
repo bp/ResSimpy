@@ -25,6 +25,18 @@ class NexusCompletion(Completion):
                          angle_a=angle_a, angle_v=angle_v, grid=grid, depth_to_top=depth_to_top,
                          depth_to_bottom=depth_to_bottom)
 
+    @property
+    def measured_depth(self):
+        return self.__measured_depth
+
+    @property
+    def well_indices(self):
+        return self.__well_indices
+
+    @property
+    def partial_perf(self):
+        return self.__partial_perf
+
     def to_dict(self) -> dict[str, None | float | int | str]:
         attribute_dict: dict[str, None | float | int | str] = {
             'measured_depth': self.__measured_depth,
