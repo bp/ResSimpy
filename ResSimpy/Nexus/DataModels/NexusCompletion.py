@@ -6,6 +6,14 @@ from ResSimpy.Completion import Completion
 
 @dataclass(kw_only=True)
 class NexusCompletion(Completion):
+    """
+    A class representing a completion specific to a Nexus Model. Inherits from Completion
+    Additional Attributes:
+        measured_depth (Optional[float]): Measured depth of a completion. 'MD' in Nexus
+        well_indices (Optional[float]): Well index used to calculate performance of the completion. 'WI' in Nexus
+        partial_perf (Optional[float]): Partial penetration factor. 'PPERF' in Nexus
+    """
+    # TODO: flesh out the attributes in this class
     __measured_depth: Optional[float] = None
     __well_indices: Optional[float] = None
     __partial_perf: Optional[float] = None
