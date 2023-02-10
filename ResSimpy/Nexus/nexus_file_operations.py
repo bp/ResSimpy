@@ -5,31 +5,60 @@ from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
 from string import Template
 import re
 
+from ResSimpy.Nexus.nexus_constants import VALID_NEXUS_TOKENS
+import os
+
+
+def nexus_token_found(line_to_check: str) -> bool:
+    """
+    Checks if a valid Nexus token has been found  in the supplied line
+
+    Args:
+        line_to_check (str):  The string to search for a Nexus keyword
+
+    Returns:
+        token_found (bool): A boolean value stating whether the token is found or not
+
+    """
+    uppercase_line = line_to_check.upper()
+    for token in VALID_NEXUS_TOKENS:
+        if check_token(token, uppercase_line):
+            return True
+
+    return False
+
 
 def check_token(token: str, line: str) -> bool:
-    """ Checks if the text line contains the supplied token
+    """ Checks if the text line contains the supplied token and is not commented out
     Args:
         token (str): keyword value to search the line for
         line (str): string to search the token in
     Returns:
         bool: True if the text line contains the supplied token, False otherwise
     """
-    line_start_chars = ["", '\t', "\n"]
-    token_end_chars = [" ", '\n', '\t']
-    token_location = line.find(token)
+    token_separator_chars = [" ", '\n', '\t', '!']
+    uppercase_line = line.upper()
+    token_location = uppercase_line.find(token.upper())
 
+    # Not found at all, return false
     if token_location == -1:
         return False
 
-    if token_location + len(token) == len(line):
-        return True
+    comment_character_location = line.find("!")
 
-    if line[token_location + len(token)] not in token_end_chars:
+    # Check if the line is commented out before the token appears
+    if comment_character_location != -1 and comment_character_location < token_location:
         return False
 
-    if token_location == 0 or line[token_location - 1] in line_start_chars:
-        return True
-    return False
+    # Check if the character before the token is a separator such as space, tab etc and not another alphanumeric char
+    if token_location != 0 and line[token_location - 1] not in token_separator_chars:
+        return False
+
+    # Check if the character after the token is a separator such as space, tab etc and not another alphanumeric char
+    if token_location + len(token) != len(line) and line[token_location + len(token)] not in token_separator_chars:
+        return False
+
+    return True
 
 
 def get_next_value(start_line_index: int, file_as_list: list[str], search_string: str,
@@ -91,14 +120,13 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
 
                         if isinstance(replace_with, str):
                             new_value = replace_with
-                        else:
-                            new_value = replace_with.value
+                        elif isinstance(replace_with, VariableEntry):
+                            new_value = replace_with.value if replace_with.value is not None else ''
 
                             if replace_with.modifier != 'VALUE':
                                 new_line = new_line.replace('INCLUDE ', '')
                             elif 'INCLUDE' not in original_line:
-                                if isinstance(replace_with.value, str):
-                                    new_value = 'INCLUDE ' + replace_with.value
+                                new_value = 'INCLUDE ' + replace_with.value if replace_with.value is not None else ''
 
                             # If we are replacing the first value from a mult, remove the space as well
                             if replace_with.modifier == 'MULT' and replace_with.value == '':
@@ -208,6 +236,7 @@ def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False) -> 
     Returns:
         list[str]: a list of strings containing each line of the file as a new entry without comments
     """
+    # TODO: support VIP comment out single C character
     # remove any empty lines
     file_as_list = list(filter(None, file_as_list))
 
@@ -248,6 +277,7 @@ def load_file_as_list(file_path: str, strip_comments: bool = False, strip_str: b
     return file_content
 
 
+# TODO: Rename
 def load_token_value_if_present(token: str, modifier: str, token_property: VariableEntry,
                                 line: str, file_as_list: list[str],
                                 ignore_values: Optional[list[str]] = None) -> None:
@@ -291,6 +321,7 @@ def load_token_value_if_present(token: str, modifier: str, token_property: Varia
             token_property.modifier = modifier
 
 
+# TODO: move to it's own module + rename
 def get_simulation_time(line: str) -> str:
     """searches for the simulation time in a line
 
@@ -326,6 +357,7 @@ def get_simulation_time(line: str) -> str:
     return value
 
 
+# TODO: move to structured grid module
 def replace_value(file_as_list: list[str], old_property: VariableEntry, new_property: VariableEntry,
                   token_name: str) -> None:
     """Replace the value and token + modifier with the new values
@@ -358,6 +390,7 @@ def replace_value(file_as_list: list[str], old_property: VariableEntry, new_prop
             file_as_list[line_index] = new_line
 
 
+# TODO: move to simulation log module
 def clean_up_string(value: str) -> str:
     """Removes unwanted characters from a string
         unwanted characters: ("\\n", "\\t", "!")
@@ -372,6 +405,7 @@ def clean_up_string(value: str) -> str:
     return value
 
 
+# TODO: move to simulation log module
 def convert_server_date(original_date: str) -> datetime:
     """Convert a datetime string from the server for when the simulation was started to a strptime object
 
@@ -396,6 +430,7 @@ def convert_server_date(original_date: str) -> datetime:
     return datetime.strptime(converted_date, date_format)
 
 
+# TODO: move to simulation log module
 def get_errors_warnings_string(log_file_line_list: list[str]) -> Optional[str]:
     """Retrieves the number of warnings and errors from the simulation log output,
     and formats them as a string
@@ -436,6 +471,7 @@ def create_templated_file(template_location: str, substitutions: dict, output_fi
         substitutions (dict): dictionary of substitutions to be made {variable: subsistuted_value,}
         output_file_name (str): path/name of the file to write out to
     """
+
     class NewTemplate(Template):
         delimiter = '**!'
 
@@ -449,6 +485,7 @@ def create_templated_file(template_location: str, substitutions: dict, output_fi
         new_file.write(output_file)
 
 
+# TODO: MOVE TO RELPERM MODULE
 def get_relperm_combined_fluid_column_heading(table_heading: str) -> str:
     """Returns the combined rel perm fluid perm heading for a Nexus Relperm table
     Args:
@@ -461,7 +498,7 @@ def get_relperm_combined_fluid_column_heading(table_heading: str) -> str:
         'WOTABLE': 'KROW',
         'GOTABLE': 'KROG',
         'GWTABLE': 'KRWG',
-        }
+    }
     column_heading = rel_perm_header_map.get(table_heading, 'KRWG')
 
     return column_heading
@@ -484,6 +521,7 @@ def get_relperm_single_fluid_column_heading(table_heading: str) -> str:
     return column_heading
 
 
+# TODO: move this to a relperm specific module
 def get_relperm_base_saturation_column_heading(table_heading: str) -> str:
     """Returns the column heading for the base saturation column
 
@@ -502,6 +540,7 @@ def get_relperm_base_saturation_column_heading(table_heading: str) -> str:
     return column_heading
 
 
+# TODO: move this to a relperm specific module
 def load_nexus_relperm_table(relperm_file_path: str) -> dict[str, list[tuple[float, float]]]:
     """ Loads in a Nexus relperm table and returns a dictionary with two lists, one with the relperm values for the
     single fluid, and the other with the values for combined fluids
@@ -637,3 +676,17 @@ def expand_include(file_as_list: list[str], recursive: bool = True) -> tuple[lis
         while inc_file_path is not None:
             expanded_file, inc_file_path = expand_include(expanded_file)
     return expanded_file, inc_file_path
+
+
+def get_full_file_path(file_path: str, origin: str):
+    """Returns the full file path including the base directories if they aren't present in the string
+
+    Args:
+        file_path (str): the initial file path found in a file
+        origin (str): the initial origin of the file
+    """
+    if os.path.isabs(file_path):
+        return_path = file_path
+    else:
+        return_path = os.path.join(os.path.dirname(origin), file_path)
+    return return_path

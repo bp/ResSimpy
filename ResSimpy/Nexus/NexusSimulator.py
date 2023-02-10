@@ -5,10 +5,12 @@ from functools import cmp_to_key
 from datetime import timedelta
 from typing import Any, Union, Optional
 
+from ResSimpy.UnitsEnum import Units
 from ResSimpy.Nexus.DataModels.StructuredGridFile import StructuredGridFile, PropertyToLoad, VariableEntry
 import ResSimpy.Nexus.nexus_file_operations as nexus_file_operations
 import resqpy.model as rq
 
+from ResSimpy.Nexus.NexusWells import NexusWells
 from ResSimpy.Simulator import Simulator
 
 
@@ -93,6 +95,8 @@ class NexusSimulator(Simulator):
         self.__write_times: bool = write_times
         self.__manual_fcs_tidy_call: bool = manual_fcs_tidy_call
         self.__surface_file_path: Optional[str] = None
+        self.Wells: NexusWells = NexusWells()
+        self.__default_units: Units = Units.OILFIELD  # The Nexus default
 
         if destination is not None and destination != '':
             self.set_output_path(path=destination.strip())
@@ -100,6 +104,7 @@ class NexusSimulator(Simulator):
         # Check the status of any existing or completed runs related to this model
         self.get_simulation_status(from_startup=True)
 
+        # Load in the model
         self.__load_fcs_file()
 
     def remove_temp_from_properties(self):
@@ -340,43 +345,62 @@ class NexusSimulator(Simulator):
         fcs_file = nexus_file_operations.load_file_as_list(self.__new_fcs_file_path)
 
         for line in fcs_file:
-            uppercase_line = line.upper()
-            if 'RUNCONTROL' in uppercase_line:
+            if nexus_file_operations.check_token('RUNCONTROL', line):
                 runcontrol_path = nexus_file_operations.get_token_value('RUNCONTROL', line, fcs_file)
                 if runcontrol_path is not None:
-                    self.run_control_file = runcontrol_path if os.path.isabs(runcontrol_path) else \
-                        os.path.dirname(self.__origin) + "/" + runcontrol_path
-            elif 'DATEFORMAT' in uppercase_line:
+                    self.run_control_file = nexus_file_operations.get_full_file_path(runcontrol_path, self.__origin)
+            elif nexus_file_operations.check_token('DATEFORMAT', line):
                 value = nexus_file_operations.get_token_value('DATEFORMAT', line, fcs_file)
                 if value is not None:
                     self.use_american_date_format = value == 'MM/DD/YYYY'
                 self.__date_format_string = "%m/%d/%Y" if self.use_american_date_format else "%d/%m/%Y"
-            elif 'STRUCTURED_GRID' in uppercase_line:
+            elif nexus_file_operations.check_token('STRUCTURED_GRID', line):
                 value = nexus_file_operations.get_token_value('STRUCTURED_GRID', line, fcs_file)
                 if value is not None:
-                    self.__structured_grid_file_path = value if os.path.isabs(value) else \
-                        os.path.dirname(self.__origin) + "/" + value
+                    self.__structured_grid_file_path = nexus_file_operations.get_full_file_path(value, self.__origin)
                     self.load_structured_grid_file()
-            elif 'RUN_UNITS' in uppercase_line:
+            elif nexus_file_operations.check_token('RUN_UNITS', line):
                 value = nexus_file_operations.get_token_value('RUN_UNITS', line, fcs_file)
                 if value is not None:
                     self.__run_units = value
                     self.use_american_run_units = value == 'ENGLISH'
-            elif 'DEFAULT_UNITS' in uppercase_line:
+            elif nexus_file_operations.check_token('DEFAULT_UNITS', line):
                 value = nexus_file_operations.get_token_value('DEFAULT_UNITS', line, fcs_file)
                 if value is not None:
                     self.__run_units = value
                     self.use_american_input_units = value == 'ENGLISH'
-            elif "SURFACE NETWORK 1" in uppercase_line:
+            elif nexus_file_operations.check_token("SURFACE NETWORK 1", line):
                 value = nexus_file_operations.get_token_value(token="SURFACE Network 1", token_line=line,
                                                               file_list=fcs_file)
                 if value is not None:
-                    self.__surface_file_path = value if os.path.isabs(value) else \
-                        os.path.dirname(self.__origin) + "/" + value
+                    self.__surface_file_path = nexus_file_operations.get_full_file_path(value, self.__origin)
                 break
 
+            elif nexus_file_operations.check_token('WELLS', line):
+                well_keyword = nexus_file_operations.get_token_value(token="WELLS", token_line=line,
+                                                                     file_list=fcs_file)
+                if well_keyword is not None:
+                    if well_keyword.upper() == 'SET':
+                        well_set_number = nexus_file_operations.get_token_value(token="SET", token_line=line,
+                                                                                file_list=fcs_file)
+                        if well_set_number is not None:
+                            index = line.find(well_set_number)
+                            modified_line = line[index+len(well_set_number)::]
+                            well_keyword = nexus_file_operations.get_next_value(0, [modified_line],
+                                                                                search_string=modified_line, )
+                if well_keyword is not None:
+                    complete_well_filepath = nexus_file_operations.get_full_file_path(well_keyword, self.__origin)
+                    self.Wells.wellspec_paths.append(complete_well_filepath)
+
+        # Load in the other files
+        # Load in Runcontrol
         if self.run_control_file != '':
             self.__load_run_control_file()
+
+        # Load in wellspec files
+        if len(self.Wells.wellspec_paths) > 0:
+            for path in self.Wells.wellspec_paths:
+                self.Wells.load_wells(well_file=path, start_date=self.start_date, default_units=self.__default_units)
 
     @staticmethod
     def update_file_value(file_path: str, token: str, new_value: str, add_to_start: bool = False):
@@ -497,8 +521,7 @@ class NexusSimulator(Simulator):
             return
 
         if include_file_path != '':
-            full_file_path = include_file_path if os.path.isabs(include_file_path) else os.path.dirname(
-                self.run_control_file) + "/" + include_file_path
+            full_file_path = nexus_file_operations.get_full_file_path(include_file_path, self.run_control_file)
 
             include_file = nexus_file_operations.load_file_as_list(full_file_path)
             include_times = nexus_file_operations.get_times(include_file)
@@ -1144,6 +1167,7 @@ class NexusSimulator(Simulator):
 
         return 0
 
+    # TODO: change append to be an optional parameter, + move this elsewhere
     def append_include_to_grid_file(self, include_file_location: str):
         """Appends an include file to the end of a grid for adding LGRs
 
@@ -1184,6 +1208,7 @@ class NexusSimulator(Simulator):
 
         return token_found
 
+    # TODO: move to 'Reporting' module
     def add_map_properties_to_start_of_grid_file(self):
         """Adds 'map' statements to the start of the grid file to ensure standalone outputs all the required \
         properties. Writes out to the same structured grid file path provided.

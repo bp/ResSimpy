@@ -1,9 +1,14 @@
+import os
 import pytest
+import pandas as pd
+from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
+from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from pytest_mock import MockerFixture
 from unittest.mock import Mock
-from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+
+from ResSimpy.UnitsEnum import Units
 
 
 def mock_multiple_opens(mocker, filename, fcs_file_contents, run_control_contents, include_contents,
@@ -49,21 +54,6 @@ def mock_different_model_opens(mocker, filename, fcs_file_contents_1, fcs_file_c
     return open_mock
 
 
-def mock_different_includes(mocker, filename, test_file_contents, inc_file_content1, inc_file_content2='',
-                            ):
-    """Mock method that returns different test file contents depending upon the model"""
-    if "test_file_path" in filename:
-        file_contents = test_file_contents
-    elif "inc_file1" in filename:
-        file_contents = inc_file_content1
-    elif "inc_file2" in filename:
-        file_contents = inc_file_content2
-    else:
-        raise FileNotFoundError(filename)
-    open_mock = mocker.mock_open(read_data=file_contents)
-    return open_mock
-
-
 def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock_open: Mock,
                                      mocker_fixture: MockerFixture):
     assert len(modifying_mock_open.call_args_list) == 2
@@ -76,48 +66,49 @@ def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock
     assert list_of_writes[0].args[0] == expected_file_contents
 
 
-@pytest.mark.parametrize("run_control_path,expected_run_control_path,date_format,expected_use_american_date_format", [
+@pytest.mark.parametrize("run_control_path,expected_root,expected_run_control_path,date_format,expected_use_american_date_format", [
     # Providing an absolute path to the fcs file + USA date format
-    ("/run/control/path", "/run/control/path", "MM/DD/YYYY", True),
+    ("/run/control/path", "", "/run/control/path", "MM/DD/YYYY", True),
     # Providing a relative path to the fcs file + Non-USA date format
-    ("run/control/path", "testpath1/run/control/path", "DD/MM/YYYY", False)
+    ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", False)
 ])
-def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expected_run_control_path,
+def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expected_root, expected_run_control_path,
                                                  date_format, expected_use_american_date_format):
     # Arrange
     fcs_file = f"RUNCONTROL {run_control_path}\nDATEFORMAT {date_format}\n"
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
-
+    expected_full_path = os.path.join(expected_root, expected_run_control_path)
     # Act
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
 
     # Assert
-    assert simulation.run_control_file == expected_run_control_path
+    assert simulation.run_control_file == expected_full_path
     assert simulation.use_american_date_format == expected_use_american_date_format
-    open_mock.assert_called_with(expected_run_control_path, 'r')
+    open_mock.assert_called_with(expected_full_path, 'r')
 
 
-@pytest.mark.parametrize("run_control_path,expected_run_control_path,date_format,expected_use_american_date_format", [
+@pytest.mark.parametrize("run_control_path,expected_root,expected_run_control_path,date_format,expected_use_american_date_format", [
     # Providing an absolute path to the fcs file + USA date format
-    ("/run/control/path", "/run/control/path", "MM/DD/YYYY", True),
+    ("/run/control/path", "", "/run/control/path", "MM/DD/YYYY", True),
     # Providing a relative path to the fcs file + Non-USA date format
-    ("run/control/path", "testpath1/run/control/path", "DD/MM/YYYY", False)
+    ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", False)
 ])
-def test_load_fcs_space_in_filename(mocker, run_control_path, expected_run_control_path,
+def test_load_fcs_space_in_filename(mocker, run_control_path, expected_root, expected_run_control_path,
                                     date_format, expected_use_american_date_format):
     # Arrange
     fcs_file = f"RUNCONTROL {run_control_path}\nDATEFORMAT {date_format}\n"
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
+    expected_full_path = os.path.join(expected_root, expected_run_control_path)
 
     # Act
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
 
     # Assert
-    assert simulation.run_control_file == expected_run_control_path
+    assert simulation.run_control_file == expected_full_path
     assert simulation.use_american_date_format == expected_use_american_date_format
-    open_mock.assert_called_with(expected_run_control_path, 'r')
+    open_mock.assert_called_with(expected_full_path, 'r')
 
 
 def test_load_fcs_file_comment_after_declaration(mocker):
@@ -126,14 +117,14 @@ def test_load_fcs_file_comment_after_declaration(mocker):
     fcs_file = "!RUNCONTROL run_control_1\n RUNCONTROL run_control_2.inc\nDATEFORMAT DD/MM/YY\n!DATEFORMAT MM/DD/YY"
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
-
+    expected_file_path = os.path.join('testpath1', 'run_control_2.inc')
     # Act
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
 
     # Assert
-    assert simulation.run_control_file == "testpath1/run_control_2.inc"
+    assert simulation.run_control_file == expected_file_path
     assert simulation.use_american_date_format == False
-    open_mock.assert_called_with("testpath1/run_control_2.inc", 'r')
+    open_mock.assert_called_with(expected_file_path, 'r')
 
 
 @pytest.mark.skip("Code changed to not throw an error in this scenario now")
@@ -185,15 +176,15 @@ def test_origin_missing(mocker, run_control_path, expected_run_control_path, dat
     "date_format,expected_use_american_date_format,run_control_contents,include_file_contents,expected_times", [
         # USA date format, no times in run control
         ("MM/DD/YYYY", True, "START 01/01/1980\nINCLUDE     path/to/include\nWELLS\nTIMES PERFS\n",
-         "TIME 0.1\nTIME 10/15/1983\ntime "
+         "TIME 0.1\nTIME 10/15/1983\n "
          "invalidtime", ['0.1', '10/15/1983']),
         # Non-USA date format, times in run control and include files
         ("DD/MM/YYYY", False, "START 01/01/1980\nINCLUDE  \n! Comment \n   path/to/include\nTIME 01/01/1981\nTIME 0.1",
-         "TIME 0.3\nTIME 15/10/1983\ntime invalidtime\nTIME 1503.1\nTIME 15/12/1996",
+         "TIME 0.3\nTIME 15/10/1983\nTIME 1503.1\nTIME 15/12/1996",
          ['0.1', '0.3', '01/01/1981', '15/10/1983', '1503.1', '15/12/1996']),
         # Non-USA date format, times in include file only
         ("DD/MM/YYYY", False, "START 01/01/1980\nINCLUDE  !test comment\n   path/to/include",
-         "TIME 0.1\nTIME 15/10/1983\ntime invalidtime\nTIME 1503.1\nTIME 15/12/2021",
+         "TIME 0.1\nTIME 15/10/1983\n invalidtime\nTIME 1503.1\nTIME 15/12/2021",
          ['0.1', '15/10/1983', '1503.1', '15/12/2021']),
         # Non-USA date format, times in run control only, but include file declared
         ("DD/MM/YYYY", False, "START 01/01/1980\nINCLUDE     path/to/include\nTIME 19/08/2025\nTIME 0.1\nTIME 50000",
@@ -201,12 +192,12 @@ def test_origin_missing(mocker, run_control_path, expected_run_control_path, dat
          ['0.1', '19/08/2025', '50000']),
         # Non-USA date format, times with times as well as dates
         ("DD/MM/YYYY", False, "START 01/01/1980\nINCLUDE  !test comment\n   path/to/include",
-         "TIME 0.1\nTIME 15/10/1983(01:30:00)\ntime invalidtime\nTIME 15/10/1983(18:30:12)\nTIME 1503.1\n"
+         "TIME 0.1\nTIME 15/10/1983(01:30:00)\n invalidtime\nTIME 15/10/1983(18:30:12)\nTIME 1503.1\n"
          "TIME 15/12/2021",
          ['0.1', '15/10/1983(01:30:00)', '15/10/1983(18:30:12)', '1503.1', '15/12/2021']),
         # Non-USA date format, times with times as well as dates
         ("DD/MM/YYYY", False, "START 01/01/1980\nINCLUDE  !test comment\n   path/to/include",
-         "TIME 0.1\nTIME 15/10/1983(01:30:00)\ntime invalidtime\nTIME 15/10/1983(18:30:12)\nTIME 15/10/1983(18:30:11)\n"
+         "TIME 0.1\nTIME 15/10/1983(01:30:00)\n invalidtime\nTIME 15/10/1983(18:30:12)\nTIME 15/10/1983(18:30:11)\n"
          "TIME 1503.1\nTIME 15/12/2021\nTIME 15/12/2021(00:00:01)",
          ['0.1', '15/10/1983(01:30:00)', '15/10/1983(18:30:11)', '15/10/1983(18:30:12)', '1503.1', '15/12/2021',
           '15/12/2021(00:00:01)']),
@@ -286,33 +277,33 @@ def test_output_to_existing_directory(mocker):
     "expected_times",
     [
         # USA date format, replace
-        ("MM/DD/YYYY", True, "START 01/01/1980\nINCLUDE     path/to/include", "TIME 0.1\nTIME 10/15/1983\ntime ",
+        ("MM/DD/YYYY", True, "START 01/01/1980\nINCLUDE     path/to/include", "TIME 0.1\nTIME 10/15/1983\n ",
          ['01/01/2001', '12/15/2000', '08/08/2008', '0.1', '08/07/2008'], 'REPLACE',
          ['0.1', '12/15/2000', '01/01/2001', '08/07/2008', '08/08/2008']),
         # Non-USA date format, merge
         ("DD/MM/YYYY", False, "START 01/01/1980\nINCLUDE     path/to/include\nTIME 01/01/1981\nTIME 0.1",
-         "TIME 0.3\nTIME 15/10/1983\ntime invalidtime\nTIME 1503.1\nTIME 15/12/1998",
+         "TIME 0.3\nTIME 15/10/1983\n invalidtime\nTIME 1503.1\nTIME 15/12/1998",
          ['01/01/2001', '15/12/2000', '08/08/1998', '0.1', '08/07/2008', '01/02/1981'], 'merge',
          ['0.1', '0.3', '01/01/1981', '01/02/1981', '15/10/1983', '1503.1', '08/08/1998', '15/12/1998', '15/12/2000',
           '01/01/2001', '08/07/2008']),
         # Non-USA date format, replace
         ("DD/MM/YYYY", False, "START 01/01/1980\nINCLUDE     path/to/include",
-         "TIME 0.1\nTIME 15/10/1983\ntime invalidtime\nTIME 1503.1\nTIME 15/12/2021",
+         "TIME 0.1\nTIME 15/10/1983\ntimeer invalidtime\nTIME 1503.1\nTIME 15/12/2021",
          ['01/01/2001', '15/12/2000', '08/08/1998', '0.1', '08/07/2025', '01/02/1981'], 'replace',
          ['0.1', '01/02/1981', '08/08/1998', '15/12/2000', '01/01/2001', '08/07/2025']),
         # Non-USA date format, reset
         ("DD/MM/YYYY", False, "START 01/01/1980\nINCLUDE     path/to/include",
-         "TIME 0.1\nTIME 15/10/1983\ntime invalidtime\nTIME 1503.1\nTIME 15/12/2021",
+         "TIME 0.1\nTIME 15/10/1983\ntimer invalidtime\nTIME 1503.1\nTIME 15/12/2021",
          ['01/01/2001', '15/12/2000', '08/08/1998', '0.1', '08/07/2025', '01/02/1981'], 'reset',
          []),
         # Non-USA date format, remove
         ("DD/MM/YYYY", False, "START 01/01/1980\nINCLUDE     path/to/include\nTIME 01/01/1981\nTIME 0.1",
-         "TIME 0.3\nTIME 15/10/1983\ntime invalidtime\nTIME 1503.1\nTIME 15/12/1996\nTIME 01/01/2000\nSTOP\n",
+         "TIME 0.3\nTIME 15/10/1983\nytime invalidtime\nTIME 1503.1\nTIME 15/12/1996\nTIME 01/01/2000\nSTOP\n",
          ['0.3', '01/01/1981', '01/01/2000', '08/05/2015'], 'REMOVE',
          ['0.1', '15/10/1983', '1503.1', '15/12/1996']),
         # Non-USA date format, replace, duplicate in run control
         ("DD/MM/YYYY", False, "START 01/01/1980\nINCLUDE     path/to/include",
-         "TIME 01/01/1980\nTIME 15/10/1983\ntime invalidtime\nTIME 1503.1\nTIME 15/12/2021",
+         "TIME 01/01/1980\nTIME 15/10/1983\nxtime invalidtime\nTIME 1503.1\nTIME 15/12/2021",
          ['01/01/2001', '15/12/2000', '08/08/1998', '0.1', '08/07/2025', '01/02/1981'], 'replace',
          ['0.1', '01/02/1981', '08/08/1998', '15/12/2000', '01/01/2001', '08/07/2025']),
     ])
@@ -366,27 +357,27 @@ def test_modify_times(mocker, date_format, expected_use_american_date_format,
     "expected_times",
     [
         # USA date format, replace
-        ("MM/DD/YYYY", True, "START 12/01/1980\nINCLUDE     path/to/include", "TIME 0.1\nTIME 10/15/1983\ntime ",
+        ("MM/DD/YYYY", True, "START 12/01/1980\nINCLUDE     path/to/include", "TIME 0.1\nTIME 10/15/1983\ntimee ",
          ['01/01/2001', '12/15/2000', '08/08/2008', '0.1', '01/12/1980', '08/07/2008'], 'REPLACE',
          ['0.1', '10/15/1983']),
         # Non-USA date format, merge
         ("DD/MM/YYYY", False, "START 01/01/1980\nINCLUDE     path/to/include\nTIME 01/01/1981\nTIME 0.1",
-         "TIME 0.3\nTIME 15/10/1983\ntime invalidtime\nTIME 1503.1\nTIME 15/12/1998",
+         "TIME 0.3\nTIME 15/10/1983\n invalidtime\nTIME 1503.1\nTIME 15/12/1998",
          ['01/01/2001', '15/12/2000', '08/08/1998', '0.1', '08/07/2008', '01/02/1979'], 'merge',
          ['0.1', '0.3', '01/01/1981', '15/10/1983', '1503.1', '15/12/1998']),
         # Non-USA date format, replace
         ("DD/MM/YYYY", False, "START 01/01/1980\nINCLUDE     path/to/include",
-         "TIME 0.1\nTIME 15/10/1983\ntime invalidtime\nTIME 1503.1\nTIME 15/12/2021",
+         "TIME 0.1\nTIME 15/10/1983\ntimee invalidtime\nTIME 1503.1\nTIME 15/12/2021",
          ['01/01/2001', '15/12/2000', '08/08/1998', '0.1', '08/07/1970', '01/02/1981'], 'replace',
          ['0.1', '15/10/1983', '1503.1', '15/12/2021']),
         # Non-USA date format, reset
         ("DD/MM/YYYY", False, "START 01/12/1980\nINCLUDE     path/to/include",
-         "TIME 0.1\nTIME 15/10/1983\ntime invalidtime\nTIME 1503.1\nTIME 15/12/2021\nSTOP\n",
+         "TIME 0.1\nTIME 15/10/1983\nttime invalidtime\nTIME 1503.1\nTIME 15/12/2021\nSTOP\n",
          ['01/01/2001', '15/12/2000', '08/08/1998', '0.1', '12/01/1980', '01/02/1981'], 'reset',
          ['0.1', '15/10/1983', '1503.1', '15/12/2021']),
         # Non-USA date format, remove
         ("DD/MM/YYYY", False, "START 01/01/1985\nINCLUDE     path/to/include\nTIME 01/01/1986\nTIME 0.1",
-         "TIME 0.3\nTIME 15/10/1993\ntime invalidtime\nTIME 1503.1\nTIME 15/12/1996\nTIME 01/01/2000",
+         "TIME 0.3\nTIME 15/10/1993\n invalidtime\nTIME 1503.1\nTIME 15/12/1996\nTIME 01/01/2000",
          ['0.3', '01/01/1981', '01/01/2000', '08/08/1981'], 'REMOVE',
          ['0.1', '0.3', '01/01/1986', '1503.1', '15/10/1993', '15/12/1996', '01/01/2000']),
     ])
@@ -805,7 +796,7 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
     # Assert
 
     # Check the newly written file is as expected
-    structured_grid_mock.assert_called_with('new_destination/test_structured_grid.dat', 'w')
+    structured_grid_mock.assert_called_with(os.path.join('new_destination', 'test_structured_grid.dat'), 'w')
     structured_grid_mock.return_value.write.assert_called_with(expected_output_file)
 
     # Check that the class properties have been updated
@@ -821,22 +812,22 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
     "run_control_contents, expected_times, expected_output", [
         ("RUNCONTROL /path/run_control\nDATEFORMAT DD/MM/YYYY\n"
          "START 01/01/1980\nINCLUDE  \n! Comment \n   include.inc\n"
-         "SPREADSHEET\n\tFIELD TIMES\n\tWELLS TIMES\nENDSPREADSHEET\n"
+         "SPREADSHEET\n\tFIELD TIMES\n\tWELLSS TIMES\nENDSPREADSHEET\n"
          "OUTPUT TARGETS TIMES\n\tMAPS TIMES\nENDOUTPUT\nTIME 0.3\n",
          ['0.3'],
          "RUNCONTROL /path/run_control\nDATEFORMAT DD/MM/YYYY\n"
          "START 01/01/1980\nINCLUDE  \n! Comment \n   include.inc\n"
-         "SPREADSHEET\n\tFIELD TIMES\n\tWELLS TIMES\nENDSPREADSHEET\n"
+         "SPREADSHEET\n\tFIELD TIMES\n\tWELLSS TIMES\nENDSPREADSHEET\n"
          "OUTPUT TARGETS TIMES\n\tMAPS TIMES\nENDOUTPUT\nTIME 0.3\n\nSTOP\n"),
 
         ("RUNCONTROL /path/run_control\nDATEFORMAT DD/MM/YYYY\n"
          "START 01/01/1980\nINCLUDE  \n! Comment \n   include.inc\n"
-         "SPREADSHEET\n\tFIELD TIMES\n\tWELLS TIMES\nENDSPREADSHEET\n"
+         "SPREADSHEET\n\tFIELD TIMES\n\tWELLSS TIMES\nENDSPREADSHEET\n"
          "OUTPUT TARGETS TIMES\n\tMAPS TIMES\nENDOUTPUT\nTIME 0.3\n\nTIME 01/01/2001\n\tTIME 15/10/2020\n",
          ['0.3', '01/01/2001', '15/10/2020'],
          "RUNCONTROL /path/run_control\nDATEFORMAT DD/MM/YYYY\n"
          "START 01/01/1980\nINCLUDE  \n! Comment \n   include.inc\n"
-         "SPREADSHEET\n\tFIELD TIMES\n\tWELLS TIMES\nENDSPREADSHEET\n"
+         "SPREADSHEET\n\tFIELD TIMES\n\tWELLSS TIMES\nENDSPREADSHEET\n"
          "OUTPUT TARGETS TIMES\n\tMAPS TIMES\nENDOUTPUT\nTIME 0.3\n\nTIME 01/01/2001\n\nTIME 15/10/2020\n\nSTOP\n"),
 
     ])
@@ -855,8 +846,8 @@ def test_load_run_control_file_write_times_to_run_control(mocker, run_control_co
     result_times = simulation.get_content(section="RUNCONTROL", keyword="TIME")
 
     # Assert
-    include_file_mock.assert_called_with('/path/run_control', 'w')
-    include_file_mock.return_value.write.assert_called_with(expected_output)
+    include_file_mock.assert_any_call('/path/run_control', 'w')
+    include_file_mock.return_value.write.assert_any_call(expected_output)
     assert result_times == expected_times
 
 
@@ -1018,28 +1009,29 @@ def test_view_command(mocker, structured_grid_file_contents, expected_text):
     assert value == expected_text
 
 
-@pytest.mark.parametrize("fcs_file, expected_result",
+@pytest.mark.parametrize("fcs_file, expected_root, expected_extracted_path",
                          [
                              (
                                      'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID\n /path/to/structured/grid.dat',
-                                     '/path/to/structured/grid.dat'),
+                                     '', '/path/to/structured/grid.dat'),
                              (
                                      'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID\n path/to/other_structured/grid.dat',
-                                     'testpath1/path/to/other_structured/grid.dat'),
+                                     'testpath1', 'path/to/other_structured/grid.dat'),
                              (
                                      'RUNControl run_control.inc\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_grid\n structured/grid.dat',
-                                     'testpath1/structured/grid.dat'),
+                                     'testpath1', 'structured/grid.dat'),
                              (
                                      'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nStructured_GRID\n path/to/includes/grid.dat',
-                                     'testpath1/path/to/includes/grid.dat'),
+                                     'testpath1', 'path/to/includes/grid.dat'),
                              (
                                      'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nstructured_grid\n path/to/includes/grid.dat',
-                                     'testpath1/path/to/includes/grid.dat'),
+                                     'testpath1', 'path/to/includes/grid.dat'),
                          ])
-def test_get_abs_structured_grid_path(mocker, fcs_file, expected_result):
+def test_get_abs_structured_grid_path(mocker, fcs_file, expected_root, expected_extracted_path):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
+    expected_result = os.path.join(expected_root, expected_extracted_path)
 
     # Act
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
@@ -1049,21 +1041,22 @@ def test_get_abs_structured_grid_path(mocker, fcs_file, expected_result):
     assert result == expected_result
 
 
-@pytest.mark.parametrize("fcs_file, expected_result",
+@pytest.mark.parametrize("fcs_file, expected_root, expected_extracted_path",
                          [(
                                  'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data/Includes/nexus_data/surface_simplified_06082018.inc',
-                                 'testpath1/nexus_data/Includes/nexus_data/surface_simplified_06082018.inc'),
+                                 'testpath1', 'nexus_data/Includes/nexus_data/surface_simplified_06082018.inc'),
                              (
                                      'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE Network 1 	file/path/location/surface.inc',
-                                     'testpath1/file/path/location/surface.inc'),
+                                     'testpath1', 'file/path/location/surface.inc'),
                              (
                                      'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nsurface network 1 	file/path/location/surface.inc',
-                                     'testpath1/file/path/location/surface.inc'),
+                                     'testpath1', 'file/path/location/surface.inc'),
                          ])
-def test_get_abs_surface_file_path(mocker, fcs_file, expected_result):
+def test_get_abs_surface_file_path(mocker, fcs_file, expected_root, expected_extracted_path):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
+    expected_result = os.path.join(expected_root, expected_extracted_path)
 
     # Act
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
@@ -1538,104 +1531,69 @@ PLOTBINARY
                                      mocker_fixture=mocker)
 
 
-def test_generate_file_include_structure_basic(mocker):
+@pytest.mark.parametrize("fcs_file_contents", [
+    ("""
+       WELLS my/wellspec/file.dat
+    """),
+    ("""
+       WelLS sEt 1 my/wellspec/file.dat
+    """)
+], ids=['path_after_wells', 'path_after_set'])
+def test_get_wells(mocker: MockerFixture, fcs_file_contents: str):
+    """Testing the functionality to load in and retrieve a set of wells"""
     # Arrange
-    file_path = 'test_file_path.dat'
-    test_file_contents = 'basic_file INCLUDE inc_file1.inc'
-    include_file_contents = 'inc file contents'
+    fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
+    mocker.patch("builtins.open", fcs_file_open)
 
-    expected_includes_list = ['inc_file1.inc']
-    expected_location = 'test_file_path.dat'
-    expected_origin = None
+    loaded_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid=None, skin=None,
+                                          angle_v=None)
+    loaded_completion_2 = NexusCompletion(i=6, j=7, k=8, well_radius=9.11, date='01/01/2023')
+    loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
+                              units=Units.OILFIELD)]
 
-    nexus_file_include1 = NexusFile(location='inc_file1.inc', includes=[], origin=file_path,
-                                    includes_objects=None, file_content_as_list=[include_file_contents])
+    # mock out the load_wells function as that is tested elsewhere
+    mock_load_wells = mocker.Mock(return_value=loaded_wells)
+    mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
 
-    expected_file_content_as_list = ['basic_file ', nexus_file_include1]
+    simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
-    expected_nexus_file = NexusFile(location=expected_location, includes=expected_includes_list,
-                                    origin=expected_origin, includes_objects=[nexus_file_include1],
-                                    file_content_as_list=expected_file_content_as_list)
-
-    def mock_open_wrapper(filename, mode):
-        mock_open = mock_different_includes(mocker, filename, test_file_contents, include_file_contents).return_value
-        return mock_open
-
-    mocker.patch("builtins.open", mock_open_wrapper)
     # Act
-    nexus_file = NexusFile.generate_file_include_structure(file_path)
+    result = simulation.Wells.get_wells()
 
+    expected_well_spec_file_path = os.path.join('path', 'my/wellspec/file.dat')
     # Assert
-    assert nexus_file == expected_nexus_file
+    assert result == loaded_wells
+    mock_load_wells.assert_called_once_with(wellspec_file_path=expected_well_spec_file_path,
+                                            default_units=Units.OILFIELD,
+                                            start_date='')
 
 
-def test_generate_file_include_structure_multiple_includes(mocker):
+def test_get_wells_df(mocker: MockerFixture):
     # Arrange
-    file_path = 'test_file_path.dat'
-    test_file_contents = ('basic_file INCLUDE inc_file1.inc\n'
-                          'second_file INCLUDE inc_file2.inc')
-    include_file_contents = 'inc file contents'
-    include_file_contents_2 = 'inc2 file contents'
+    fcs_file_contents = """
+       WELLS my/wellspec/file.dat
+    """
+    fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
+    mocker.patch("builtins.open", fcs_file_open)
 
-    expected_includes_list = ['inc_file1.inc', 'inc_file2.inc']
-    expected_location = 'test_file_path.dat'
-    expected_origin = None
+    loaded_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid=None, skin=None,
+                                          angle_v=None)
+    loaded_completion_2 = NexusCompletion(i=6, j=7, k=8, well_radius=9.11, date='01/01/2023')
+    loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
+                              units=Units.OILFIELD)]
+    # create the expected dataframe
+    loaded_wells_txt = ['WELL1, OILFIELD, 4.5, 01/01/2023, 1, 2, 3',
+                        'WELL1, OILFIELD, 9.11, 01/01/2023, 6, 7, 8', ]
+    loaded_wells_txt = [x.split(', ') for x in loaded_wells_txt]
+    loaded_wells_df = pd.DataFrame(loaded_wells_txt,
+                                   columns=['well_name', 'units', 'well_radius', 'date', 'i', 'j', 'k', ])
+    loaded_wells_df = loaded_wells_df.astype({'well_radius': 'float64', 'i': 'int64', 'j': 'int64', 'k': 'int64'})
 
-    nexus_file_include1 = NexusFile(location='inc_file1.inc', includes=[], origin=file_path,
-                                    includes_objects=None, file_content_as_list=[include_file_contents])
-    nexus_file_include2 = NexusFile(location='inc_file2.inc', includes=[], origin=file_path,
-                                    includes_objects=None, file_content_as_list=[include_file_contents_2])
-    expected_file_content_as_list = ['basic_file ', nexus_file_include1, '', 'second_file ', nexus_file_include2]
-
-    expected_nexus_file = NexusFile(location=expected_location, includes=expected_includes_list,
-                                    origin=expected_origin, includes_objects=[nexus_file_include1, nexus_file_include2],
-                                    file_content_as_list=expected_file_content_as_list)
-
-    def mock_open_wrapper(filename, mode):
-        mock_open = mock_different_includes(mocker, filename, test_file_contents, include_file_contents,
-                                            include_file_contents_2).return_value
-        return mock_open
-
-    mocker.patch("builtins.open", mock_open_wrapper)
+    mock_load_wells = mocker.Mock(return_value=loaded_wells)
+    mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
+    simulation = NexusSimulator(origin='nexus_run.fcs')
     # Act
-    nexus_file = NexusFile.generate_file_include_structure(file_path)
-
+    result = simulation.Wells.get_wells_df()
     # Assert
-    assert nexus_file == expected_nexus_file
 
-
-def test_generate_file_include_structure_nested_includes(mocker):
-    # Arrange
-    file_path = 'test_file_path.dat'
-    test_file_contents = 'basic_file INCLUDE inc_file1.inc'
-
-    include_file_contents = 'inc file contents INCLUDE inc_file2.inc'
-    include_file_contents_2 = 'inc2 file contents'
-
-    expected_includes_list = ['inc_file1.inc']
-    expected_location = 'test_file_path.dat'
-    expected_origin = None
-
-    nexus_file_include2 = NexusFile(location='inc_file2.inc', includes=[], origin='inc_file1.inc',
-                                    includes_objects=None, file_content_as_list=[include_file_contents_2])
-    nexus_file_include1 = NexusFile(location='inc_file1.inc', includes=['inc_file2.inc'], origin=file_path,
-                                    includes_objects=[nexus_file_include2],
-                                    file_content_as_list=['inc file contents ', nexus_file_include2])
-
-    expected_file_content_as_list = ['basic_file ', nexus_file_include1]
-
-    expected_nexus_file = NexusFile(location=expected_location, includes=expected_includes_list,
-                                    origin=expected_origin, includes_objects=[nexus_file_include1],
-                                    file_content_as_list=expected_file_content_as_list)
-
-    def mock_open_wrapper(filename, mode):
-        mock_open = mock_different_includes(mocker, filename, test_file_contents, include_file_contents,
-                                            include_file_contents_2).return_value
-        return mock_open
-
-    mocker.patch("builtins.open", mock_open_wrapper)
-    # Act
-    nexus_file = NexusFile.generate_file_include_structure(file_path)
-
-    # Assert
-    assert nexus_file == expected_nexus_file
+    pd.testing.assert_frame_equal(result, loaded_wells_df)

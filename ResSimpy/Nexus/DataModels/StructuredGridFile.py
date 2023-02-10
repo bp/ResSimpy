@@ -4,25 +4,30 @@ from typing import Optional
 
 @dataclass
 class VariableEntry:
-    def __init__(self, modifier=None, value=None):
-        self.modifier = modifier
-        self.value = value
-
-    def __eq__(self, other):
-        if not isinstance(other, VariableEntry):
-            return NotImplemented
-        return self.value == other.value and self.modifier == other.modifier
-
-
-class PropertyToLoad:
-    def __init__(self, token, modifiers, property):
-        self.token = token
-        self.modifiers = modifiers
-        self.property = property
+    modifier: Optional[str] = None
+    value: Optional[str] = None
 
 
 @dataclass
+class PropertyToLoad:
+    token: str
+    modifiers: list[str]
+    property: VariableEntry
+
+
+@dataclass(kw_only=True)
 class StructuredGridFile:
+    netgrs: VariableEntry = VariableEntry()
+    porosity: VariableEntry = VariableEntry()
+    sw: VariableEntry = VariableEntry()
+    kx: VariableEntry = VariableEntry()
+    ky: VariableEntry = VariableEntry()
+    kz: VariableEntry = VariableEntry()
+    # Grid dimensions
+    range_x: Optional[int]
+    range_y: Optional[int]
+    range_z: Optional[int]
+
     def __init__(self, data: Optional[dict] = None):
         self.netgrs = VariableEntry()
         self.porosity = VariableEntry()
@@ -35,6 +40,7 @@ class StructuredGridFile:
         self.range_y: Optional[int] = None
         self.range_z: Optional[int] = None
 
+        # Use the dict provided to populate the properties
         if data is not None:
             for name, value in data.items():
                 setattr(self, name, self.__wrap(value))

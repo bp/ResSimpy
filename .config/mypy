@@ -1,3 +1,5 @@
 # Suppress the RESQPY type warnings for now
 [mypy-resqpy.*]
 ignore_missing_imports = True
+[mypy-pandas.*]
+ignore_missing_imports = True

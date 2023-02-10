@@ -71,7 +71,7 @@ def test_load_nexus_relperm_table(mocker, file_contents, expected_result):
           """,
      '123'),
     ("MYTESTTOKEN",
-"""GOTABLE 
+     """GOTABLE 
        SG         KRG        KROG        PCGO
   0.000000     0.000000     1.000000     0.000000
   0.085260     0.011210     0.681265     0.000000
@@ -95,6 +95,29 @@ def test_get_token_value(mocker, line_contents, file_contents, expected_result):
     # Act
     result = nexus_file_operations.get_token_value(token='MYTESTTOKEN', token_line=line_contents,
                                                    file_list=dummy_file_as_list)
+
+    # Assert
+    assert result == expected_result
+
+
+@pytest.mark.parametrize("line_string, token, expected_result",
+                         [("Line contains TOKEN 124", "ToKEN", True),
+                          ("TokeN 323 and other text", "TOKEN", True),
+                          ("other text and TokEN", "TOKEN", True),
+                          ("No T0k3N here", "TOKEN", False),
+                          ("!TOKEN", "TOKEN", False),
+                          ("THISTOKEN etc", "TOKEN", False),
+                          ("TOKENLONGERWORD etc", "TOKEN", False),
+                          ("TOKEN!comment", "TOKEN", True),
+                          ("TOKEN  value", "TOKEN", True),
+                          ("TOKEN\n", "TOKEN", True),
+                          ("T", "T", True),
+                          ], ids=["standard case", "token at start", "token at end", "no token", "token commented out",
+                                  "token only part of longer word 1", "token only part of longer word 2",
+                                  "token before comment", "token then tab", "token then newline", "single character"])
+def test_check_token(line_string, token, expected_result):
+    # Act
+    result = nexus_file_operations.check_token(token=token, line=line_string)
 
     # Assert
     assert result == expected_result
