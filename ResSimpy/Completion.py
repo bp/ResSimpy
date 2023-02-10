@@ -51,6 +51,57 @@ class Completion(ABC):
     def well_radius(self):
         return self.__well_radius
 
+    @property
+    def date(self):
+        return self.__date
+
+    @property
+    def i(self):
+        return self.__i
+
+    def j(self):
+        return self.__j
+
+    @property
+    def k(self):
+        return self.__k
+
+    @property
+    def skin(self):
+        return self.__skin
+
+    @property
+    def depth(self):
+        return self.__depth
+
+    @property
+    def x(self):
+        return self.__x
+
+    @property
+    def y(self):
+        return self.__y
+
+    @property
+    def angle_a(self):
+        return self.__angle_a
+
+    @property
+    def angle_v(self):
+        return self.__angle_v
+
+    @property
+    def grid(self):
+        return self.__grid
+
+    @property
+    def depth_to_top(self):
+        return self.__depth_to_top
+
+    @property
+    def depth_to_bottom(self):
+        return self.__depth_to_bottom
+
     def to_dict(self) -> dict[str, None | float | int | str]:
         attribute_dict = {
             'well_radius': self.__well_radius,
