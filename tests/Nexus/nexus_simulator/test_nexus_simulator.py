@@ -1551,14 +1551,14 @@ def test_get_wells(mocker: MockerFixture, fcs_file_contents: str):
     mock_load_wells = mocker.Mock(return_value=loaded_wells)
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
 
-    simulation = NexusSimulator(origin='nexus_run.fcs')
+    simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
     result = simulation.Wells.get_wells()
 
     # Assert
     assert result == loaded_wells
-    mock_load_wells.assert_called_once_with(wellspec_file_path='/my/wellspec/file.dat', default_units=Units.OILFIELD,
+    mock_load_wells.assert_called_once_with(wellspec_file_path='path/my/wellspec/file.dat', default_units=Units.OILFIELD,
                                             start_date='')
 
 
