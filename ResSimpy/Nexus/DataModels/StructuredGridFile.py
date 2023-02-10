@@ -17,12 +17,12 @@ class PropertyToLoad:
 
 @dataclass(kw_only=True)
 class StructuredGridFile:
-    netgrs: VariableEntry()
-    porosity: VariableEntry()
-    sw: VariableEntry()
-    kx: VariableEntry()
-    ky: VariableEntry()
-    kz: VariableEntry()
+    netgrs: VariableEntry = VariableEntry()
+    porosity: VariableEntry = VariableEntry()
+    sw: VariableEntry = VariableEntry()
+    kx: VariableEntry = VariableEntry()
+    ky: VariableEntry = VariableEntry()
+    kz: VariableEntry = VariableEntry()
     # Grid dimensions
     range_x: Optional[int]
     range_y: Optional[int]
