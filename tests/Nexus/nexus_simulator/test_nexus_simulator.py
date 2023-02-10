@@ -69,7 +69,7 @@ def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock
     # Providing an absolute path to the fcs file + USA date format
     ("/run/control/path", "/run/control/path", "MM/DD/YYYY", True),
     # Providing a relative path to the fcs file + Non-USA date format
-    ("run/control/path", "testpath1/run/control/path", "DD/MM/YYYY", False)
+    ("run/control/path", "testpath1\\run/control/path", "DD/MM/YYYY", False)
 ])
 def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expected_run_control_path,
                                                  date_format, expected_use_american_date_format):
@@ -91,7 +91,7 @@ def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expec
     # Providing an absolute path to the fcs file + USA date format
     ("/run/control/path", "/run/control/path", "MM/DD/YYYY", True),
     # Providing a relative path to the fcs file + Non-USA date format
-    ("run/control/path", "testpath1/run/control/path", "DD/MM/YYYY", False)
+    ("run/control/path", "testpath1\\run/control/path", "DD/MM/YYYY", False)
 ])
 def test_load_fcs_space_in_filename(mocker, run_control_path, expected_run_control_path,
                                     date_format, expected_use_american_date_format):
@@ -117,12 +117,12 @@ def test_load_fcs_file_comment_after_declaration(mocker):
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    simulation = NexusSimulator(origin='testpath1/Path.fcs')
+    simulation = NexusSimulator(origin='testpath1\\Path.fcs')
 
     # Assert
-    assert simulation.run_control_file == "testpath1/run_control_2.inc"
-    assert simulation.use_american_date_format == False
-    open_mock.assert_called_with("testpath1/run_control_2.inc", 'r')
+    assert simulation.run_control_file == "testpath1\\run_control_2.inc"
+    assert simulation.use_american_date_format is False
+    open_mock.assert_called_with("testpath1\\run_control_2.inc", 'r')
 
 
 @pytest.mark.skip("Code changed to not throw an error in this scenario now")
@@ -794,7 +794,7 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
     # Assert
 
     # Check the newly written file is as expected
-    structured_grid_mock.assert_called_with('new_destination/test_structured_grid.dat', 'w')
+    structured_grid_mock.assert_called_with('new_destination\\test_structured_grid.dat', 'w')
     structured_grid_mock.return_value.write.assert_called_with(expected_output_file)
 
     # Check that the class properties have been updated
@@ -1014,16 +1014,16 @@ def test_view_command(mocker, structured_grid_file_contents, expected_text):
                                      '/path/to/structured/grid.dat'),
                              (
                                      'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID\n path/to/other_structured/grid.dat',
-                                     'testpath1/path/to/other_structured/grid.dat'),
+                                     'testpath1\\path/to/other_structured/grid.dat'),
                              (
                                      'RUNControl run_control.inc\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_grid\n structured/grid.dat',
-                                     'testpath1/structured/grid.dat'),
+                                     'testpath1\\structured/grid.dat'),
                              (
                                      'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nStructured_GRID\n path/to/includes/grid.dat',
-                                     'testpath1/path/to/includes/grid.dat'),
+                                     'testpath1\\path/to/includes/grid.dat'),
                              (
                                      'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nstructured_grid\n path/to/includes/grid.dat',
-                                     'testpath1/path/to/includes/grid.dat'),
+                                     'testpath1\\path/to/includes/grid.dat'),
                          ])
 def test_get_abs_structured_grid_path(mocker, fcs_file, expected_result):
     # Arrange
@@ -1041,13 +1041,13 @@ def test_get_abs_structured_grid_path(mocker, fcs_file, expected_result):
 @pytest.mark.parametrize("fcs_file, expected_result",
                          [(
                                  'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data/Includes/nexus_data/surface_simplified_06082018.inc',
-                                 'testpath1/nexus_data/Includes/nexus_data/surface_simplified_06082018.inc'),
+                                 'testpath1\\nexus_data/Includes/nexus_data/surface_simplified_06082018.inc'),
                              (
                                      'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE Network 1 	file/path/location/surface.inc',
-                                     'testpath1/file/path/location/surface.inc'),
+                                     'testpath1\\file/path/location/surface.inc'),
                              (
                                      'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nsurface network 1 	file/path/location/surface.inc',
-                                     'testpath1/file/path/location/surface.inc'),
+                                     'testpath1\\file/path/location/surface.inc'),
                          ])
 def test_get_abs_surface_file_path(mocker, fcs_file, expected_result):
     # Arrange
@@ -1551,15 +1551,15 @@ def test_get_wells(mocker: MockerFixture, fcs_file_contents: str):
     mock_load_wells = mocker.Mock(return_value=loaded_wells)
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
 
-    simulation = NexusSimulator(origin='nexus_run.fcs')
+    simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
     result = simulation.Wells.get_wells()
 
     # Assert
     assert result == loaded_wells
-    mock_load_wells.assert_called_once_with(wellspec_file_path='/my/wellspec/file.dat', default_units=Units.OILFIELD,
-                                            start_date='')
+    mock_load_wells.assert_called_once_with(wellspec_file_path='path\\my/wellspec/file.dat',
+                                            default_units=Units.OILFIELD, start_date='')
 
 
 def test_get_wells_df(mocker: MockerFixture):
