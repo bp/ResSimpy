@@ -41,7 +41,6 @@ def check_token(token: str, line: str) -> bool:
     token_location = uppercase_line.find(token.upper())
 
     # Not found at all, return false
-    # Not found at all, return false
     if token_location == -1:
         return False
 
@@ -51,8 +50,6 @@ def check_token(token: str, line: str) -> bool:
     if comment_character_location != -1 and comment_character_location < token_location:
         return False
 
-    # Check if the character before the token is a separator such as space, tab etc and not another alphanumeric char
-    if token_location != 0 and line[token_location - 1] not in token_separator_chars:
     # Check if the character before the token is a separator such as space, tab etc and not another alphanumeric char
     if token_location != 0 and line[token_location - 1] not in token_separator_chars:
         return False
