@@ -334,7 +334,7 @@ class NexusSimulator(Simulator):
 
             self.__origin = self.__destination + "/" + os.path.basename(self.__original_fcs_file_path)
 
-    def __get_wells_paths(self, line: str, fcs_file: list[str]):
+    def __get_wells_paths(self, line: str, fcs_file: list[str]) -> None:
         well_keyword = nexus_file_operations.get_token_value(token="WELLS", token_line=line,
                                                              file_list=fcs_file)
         if well_keyword is not None:

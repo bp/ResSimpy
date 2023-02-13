@@ -391,7 +391,6 @@ def replace_value(file_as_list: list[str], old_property: VariableEntry, new_prop
 
 
 # TODO: move to simulation log module
-# TODO: move to simulation log module
 def clean_up_string(value: str) -> str:
     """Removes unwanted characters from a string
         unwanted characters: ("\\n", "\\t", "!")
