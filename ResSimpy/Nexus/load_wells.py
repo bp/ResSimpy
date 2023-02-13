@@ -78,14 +78,14 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
             wellspec_found = True
             continue
 
-        if well_name is None:
-            raise ValueError(f"No wells found in file: {wellspec_file_path}")
-
         # Load in the column headings, which appear after the well name
         header_index, headers = __load_wellspec_table_headings(header_index, header_values, index, line, well_name)
 
         if header_index == -1:
             continue
+
+        if well_name is None:
+            raise ValueError(f"No wells found in file: {wellspec_file_path}")
 
         if wellspec_found:
             if current_date is None:
