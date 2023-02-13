@@ -184,7 +184,7 @@ def test_load_wells_multiple_wells_multiple_dates(mocker):
     assert result_wells == expected_wells
 
 
-def test_load_wells_all_columns_present(mocker):
+def test_load_wells_all_columns_present_structured_grid(mocker):
     # Arrange
     start_date = '01/01/2023'
 
@@ -209,6 +209,74 @@ def test_load_wells_all_columns_present(mocker):
                               units=Units.OILFIELD)
     expected_wells = [expected_well]
 
+    open_mock = mocker.mock_open(read_data=file_contents)
+    mocker.patch("builtins.open", open_mock)
+
+    # Act
+    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=Units.OILFIELD)
+
+    # Assert
+    assert result_wells == expected_wells
+
+
+def test_load_wells_all_columns_unstructured_grid(mocker):
+    # Arrange
+    start_date = '01/01/2023'
+
+    # FM and PORTYPE can't appear in the same file in Nexus but we don't care, just store either
+    file_contents = """
+    TIME 01/03/2023 !658 days
+    WELLSPEC WELL_3
+    \n
+    CELL  KH     RADB PORTYPE  FM    IRELPM  SECT   GROUP       ZONE   ANGLE   TEMP   FLOWSECT   PARENT   MDCON   IPTN   LENGTH   K         D       ND   DZ   LAYER   STAT   RADBP   RADWP 
+    1     2000.3 2.2  FRACTURE 0.5   1       1      well_group  1      10.2    60.3   2          NODe     10.765  7      150.66   300.2     0.005   3    0.5  20      OFF    0.25    0.35
+       """
+
+    expected_well_completion_1 = NexusCompletion(date='01/03/2023', cell=1, kh=2000.3, radb=2.2, portype='FRACTURE', fm=0.5, irelpm=1,
+                                                 sect=1, group='well_group', zone=1, angle=10.2, temp=60.3, flowsect=2, parent='NODe', mdcon=10.765,
+                                                 iptn=7, length=150.66, k=300.2, d=0.005, nd=3, dz=0.5, layer=20, stat='OFF', radbp=0.25, radwp=0.35, )
+
+    expected_well = NexusWell(well_name='WELL_3', completions=[expected_well_completion_1],
+                              units=Units.OILFIELD)
+    expected_wells = [expected_well]
+
+    open_mock = mocker.mock_open(read_data=file_contents)
+    mocker.patch("builtins.open", open_mock)
+
+    # Act
+    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=Units.OILFIELD)
+
+    # Assert
+    assert result_wells == expected_wells
+
+
+def test_load_wells_rel_perm_tables(mocker):
+    # Arrange
+    start_date = '01/01/2023'
+
+    file_contents = """WELLSPEC WELL_3
+
+    cell SWL   SWR    SWU   sgl   SGR   SGU   SWRO    sgro   SGRW   KRW_SWRO   KRW_SWU   KRG_SGRO   KRG_SGU   KRO_SWL   KRO_SWR   KRO_SGL   KRO_SGR   KRW_SGL   KRW_SGR   KRG_SGRW   SGTR    SOTR 
+    1    0.1    0.2   0.54  .5    0.4   0.2   .01     1      1      0.5        0.2       1          0.2       0.4       1         1         0.2       0.3       0.1       0.125      0.134   0.7
+    2    0.05	0.15  0.49	0.45  0.35	0.15  0		  0.95	 0.95	0.45	   0.15		 0.95		0.15	  0.35		0.95	  0.95		0.15	  0.25		0.05	  0.075		 0.084	 0.65
+
+    """
+    expected_well_completion_1 = NexusCompletion(date=start_date, cell=1, swl=0.1, swr=0.2, swu=0.54, sgl=0.5, sgr=0.4, sgu=0.2,
+                                                 swro=0.01, sgro=1, sgrw=1, krw_swro=0.5, krw_swu=0.2, krg_sgro=1, krg_sgu=0.2,
+                                                 kro_swl=0.4, kro_swr=1, kro_sgl=1, kro_sgr=0.2, krw_sgl=0.3, krw_sgr=0.1,
+                                                 krg_sgrw=0.125, sgtr=0.134, sotr=0.7, )
+    expected_well_completion_2 = NexusCompletion(date=start_date, cell=2, swl=0.05, swr=0.15, swu=0.49, sgl=0.45, sgr=0.35, sgu=0.15,
+                                                 swro=0, sgro=0.95, sgrw=0.95, krw_swro=0.45, krw_swu=0.15, krg_sgro=0.95, krg_sgu=0.15,
+                                                 kro_swl=0.35, kro_swr=0.95, kro_sgl=0.95, kro_sgr=0.15, krw_sgl=0.25, krw_sgr=0.05,
+                                                 krg_sgrw=0.075, sgtr=0.084, sotr=0.65, )
+
+    expected_well = NexusWell(well_name='WELL_3', completions=[expected_well_completion_1, expected_well_completion_2],
+                              units=Units.OILFIELD)
+
+    expected_wells = [expected_well]
+
+    expected_well = NexusWell(well_name='WELL_3', completions=[expected_well_completion_1, expected_well_completion_2],
+                              units=Units.OILFIELD)
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)
 
