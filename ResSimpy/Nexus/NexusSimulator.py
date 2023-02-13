@@ -379,18 +379,23 @@ class NexusSimulator(Simulator):
             elif nexus_file_operations.check_token('WELLS', line):
                 well_keyword = nexus_file_operations.get_token_value(token="WELLS", token_line=line,
                                                                      file_list=fcs_file)
-                if well_keyword is not None:
-                    if well_keyword.upper() == 'SET':
-                        well_set_number = nexus_file_operations.get_token_value(token="SET", token_line=line,
-                                                                                file_list=fcs_file)
-                        if well_set_number is not None:
-                            index = line.find(well_set_number)
-                            modified_line = line[index+len(well_set_number)::]
-                            well_keyword = nexus_file_operations.get_next_value(0, [modified_line],
-                                                                                search_string=modified_line, )
-                if well_keyword is not None:
-                    complete_well_filepath = nexus_file_operations.get_full_file_path(well_keyword, self.__origin)
-                    self.Wells.wellspec_paths.append(complete_well_filepath)
+                if well_keyword is None:
+                    raise ValueError(f'No Wells file path found in line: {line}')
+
+                # WELLS SET 1 wells.dat
+                if well_keyword.upper() == 'SET':
+                    well_set_number = nexus_file_operations.get_token_value(token="SET", token_line=line,
+                                                                            file_list=fcs_file)
+                    if well_set_number is None:
+                        raise ValueError(f'No Wells Set number found in line: {line}')
+                    index = line.find(well_set_number)
+                    modified_line = line[index+len(well_set_number)::]
+                    well_keyword = nexus_file_operations.get_next_value(0, [modified_line],
+                                                                        search_string=modified_line, )
+                if well_keyword is None:
+                    raise ValueError(f'No Wells file path found in line: {line}')
+                complete_well_filepath = nexus_file_operations.get_full_file_path(well_keyword, self.__origin)
+                self.Wells.wellspec_paths.append(complete_well_filepath)
 
         # Load in the other files
         # Load in Runcontrol

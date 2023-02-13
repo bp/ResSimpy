@@ -28,7 +28,7 @@ from ResSimpy.Nexus.load_wells import load_wells
     7 6 8   9.11
     """, "3"),
                           ("""
-    WELLSPEC Well3
+    WELLSPEC "Well3"
     ! RADW
     JW IW L RADW !Another inline comment 
     2  1  3  4.5 !Inline Comment Here
