@@ -6,6 +6,14 @@ from ResSimpy.Completion import Completion
 
 @dataclass(kw_only=True)
 class NexusCompletion(Completion):
+    """
+    A class representing a completion specific to a Nexus Model. Inherits from Completion
+    Additional Attributes:
+        measured_depth (Optional[float]): Measured depth of a completion. 'MD' in Nexus
+        well_indices (Optional[float]): Well index used to calculate performance of the completion. 'WI' in Nexus
+        partial_perf (Optional[float]): Partial penetration factor. 'PPERF' in Nexus
+    """
+    # TODO: flesh out the attributes in this class
     __measured_depth: Optional[float] = None
     __well_indices: Optional[float] = None
     __partial_perf: Optional[float] = None
@@ -24,6 +32,18 @@ class NexusCompletion(Completion):
         super().__init__(date=date, i=i, j=j, k=k, skin=skin, depth=depth, well_radius=well_radius, x=x, y=y,
                          angle_a=angle_a, angle_v=angle_v, grid=grid, depth_to_top=depth_to_top,
                          depth_to_bottom=depth_to_bottom)
+
+    @property
+    def measured_depth(self):
+        return self.__measured_depth
+
+    @property
+    def well_indices(self):
+        return self.__well_indices
+
+    @property
+    def partial_perf(self):
+        return self.__partial_perf
 
     def to_dict(self) -> dict[str, None | float | int | str]:
         attribute_dict: dict[str, None | float | int | str] = {

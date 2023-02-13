@@ -8,9 +8,25 @@ from typing import Optional
 class Completion(ABC):
     """
     A class representing well completions.
+
     IMPORTANT: if modifying this class, make sure to update the relevant tests in test_load_wells, as well as updating
     the constructor calls in the derived classes.
-    well_radius: The well radius. 'RADW' in Nexus
+
+    Attributes:
+        date (str): The starting date of the completion. Applies until changed.
+        i (Optional[int]): The structured grid cell location in the x direction. 'IW' in Nexus
+        j (Optional[int]): The structured grid cell location in the y direction. 'JW' in Nexus
+        k (Optional[int]): The structured grid cell location in the z direction. 'L' in Nexus
+        skin (Optional[float]): The skin value for the completion. 'SKIN' in Nexus
+        depth (Optional[float]): The depth of the completion. 'DEPTH' in Nexus
+        well_radius (Optional[float]): The well radius. 'RADW' in Nexus
+        x (Optional[float]): The x location of the well in distance units/coordinates. 'X' in Nexus
+        y (Optional[float]): The y location of the well in distance units/coordinates. 'Y' in Nexus
+        angle_a (Optional[float]): the angle relative to the local I axis. 'ANGLA' in Nexus.
+        angle_v (Optional[float]): the angle relative to the true vertical axis (global Z axis). 'ANGLV' in Nexus
+        grid (Optional[str]): the grid name to which the completion data applies. 'GRID' in Nexus
+        depth_to_top (Optional[float]): subsea depth to the top of a completion interval. 'DTOP' in Nexus
+        depth_to_bot (Optional[float]): subsea depth to the bottom of the completion interval. 'DBOT' in Nexus
     """
     __date: str
     __i: Optional[int] = None
@@ -50,6 +66,57 @@ class Completion(ABC):
     @property
     def well_radius(self):
         return self.__well_radius
+
+    @property
+    def date(self):
+        return self.__date
+
+    @property
+    def i(self):
+        return self.__i
+
+    def j(self):
+        return self.__j
+
+    @property
+    def k(self):
+        return self.__k
+
+    @property
+    def skin(self):
+        return self.__skin
+
+    @property
+    def depth(self):
+        return self.__depth
+
+    @property
+    def x(self):
+        return self.__x
+
+    @property
+    def y(self):
+        return self.__y
+
+    @property
+    def angle_a(self):
+        return self.__angle_a
+
+    @property
+    def angle_v(self):
+        return self.__angle_v
+
+    @property
+    def grid(self):
+        return self.__grid
+
+    @property
+    def depth_to_top(self):
+        return self.__depth_to_top
+
+    @property
+    def depth_to_bottom(self):
+        return self.__depth_to_bottom
 
     def to_dict(self) -> dict[str, None | float | int | str]:
         attribute_dict = {

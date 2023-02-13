@@ -41,6 +41,7 @@ def check_token(token: str, line: str) -> bool:
     token_location = uppercase_line.find(token.upper())
 
     # Not found at all, return false
+    # Not found at all, return false
     if token_location == -1:
         return False
 
@@ -50,6 +51,8 @@ def check_token(token: str, line: str) -> bool:
     if comment_character_location != -1 and comment_character_location < token_location:
         return False
 
+    # Check if the character before the token is a separator such as space, tab etc and not another alphanumeric char
+    if token_location != 0 and line[token_location - 1] not in token_separator_chars:
     # Check if the character before the token is a separator such as space, tab etc and not another alphanumeric char
     if token_location != 0 and line[token_location - 1] not in token_separator_chars:
         return False
@@ -391,6 +394,7 @@ def replace_value(file_as_list: list[str], old_property: VariableEntry, new_prop
 
 
 # TODO: move to simulation log module
+# TODO: move to simulation log module
 def clean_up_string(value: str) -> str:
     """Removes unwanted characters from a string
         unwanted characters: ("\\n", "\\t", "!")
@@ -688,5 +692,5 @@ def get_full_file_path(file_path: str, origin: str):
     if os.path.isabs(file_path):
         return_path = file_path
     else:
-        return_path = os.path.dirname(origin) + '/' + file_path
+        return_path = os.path.join(os.path.dirname(origin), file_path)
     return return_path

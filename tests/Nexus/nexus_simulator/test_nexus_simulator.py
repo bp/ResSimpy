@@ -1,3 +1,4 @@
+import os
 import pytest
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
@@ -65,48 +66,49 @@ def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock
     assert list_of_writes[0].args[0] == expected_file_contents
 
 
-@pytest.mark.parametrize("run_control_path,expected_run_control_path,date_format,expected_use_american_date_format", [
+@pytest.mark.parametrize("run_control_path,expected_root,expected_run_control_path,date_format,expected_use_american_date_format", [
     # Providing an absolute path to the fcs file + USA date format
-    ("/run/control/path", "/run/control/path", "MM/DD/YYYY", True),
+    ("/run/control/path", "", "/run/control/path", "MM/DD/YYYY", True),
     # Providing a relative path to the fcs file + Non-USA date format
-    ("run/control/path", "testpath1/run/control/path", "DD/MM/YYYY", False)
+    ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", False)
 ])
-def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expected_run_control_path,
+def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expected_root, expected_run_control_path,
                                                  date_format, expected_use_american_date_format):
     # Arrange
     fcs_file = f"RUNCONTROL {run_control_path}\nDATEFORMAT {date_format}\n"
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
-
+    expected_full_path = os.path.join(expected_root, expected_run_control_path)
     # Act
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
 
     # Assert
-    assert simulation.run_control_file == expected_run_control_path
+    assert simulation.run_control_file == expected_full_path
     assert simulation.use_american_date_format == expected_use_american_date_format
-    open_mock.assert_called_with(expected_run_control_path, 'r')
+    open_mock.assert_called_with(expected_full_path, 'r')
 
 
-@pytest.mark.parametrize("run_control_path,expected_run_control_path,date_format,expected_use_american_date_format", [
+@pytest.mark.parametrize("run_control_path,expected_root,expected_run_control_path,date_format,expected_use_american_date_format", [
     # Providing an absolute path to the fcs file + USA date format
-    ("/run/control/path", "/run/control/path", "MM/DD/YYYY", True),
+    ("/run/control/path", "", "/run/control/path", "MM/DD/YYYY", True),
     # Providing a relative path to the fcs file + Non-USA date format
-    ("run/control/path", "testpath1/run/control/path", "DD/MM/YYYY", False)
+    ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", False)
 ])
-def test_load_fcs_space_in_filename(mocker, run_control_path, expected_run_control_path,
+def test_load_fcs_space_in_filename(mocker, run_control_path, expected_root, expected_run_control_path,
                                     date_format, expected_use_american_date_format):
     # Arrange
     fcs_file = f"RUNCONTROL {run_control_path}\nDATEFORMAT {date_format}\n"
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
+    expected_full_path = os.path.join(expected_root, expected_run_control_path)
 
     # Act
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
 
     # Assert
-    assert simulation.run_control_file == expected_run_control_path
+    assert simulation.run_control_file == expected_full_path
     assert simulation.use_american_date_format == expected_use_american_date_format
-    open_mock.assert_called_with(expected_run_control_path, 'r')
+    open_mock.assert_called_with(expected_full_path, 'r')
 
 
 def test_load_fcs_file_comment_after_declaration(mocker):
@@ -115,14 +117,14 @@ def test_load_fcs_file_comment_after_declaration(mocker):
     fcs_file = "!RUNCONTROL run_control_1\n RUNCONTROL run_control_2.inc\nDATEFORMAT DD/MM/YY\n!DATEFORMAT MM/DD/YY"
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
-
+    expected_file_path = os.path.join('testpath1', 'run_control_2.inc')
     # Act
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
 
     # Assert
-    assert simulation.run_control_file == "testpath1/run_control_2.inc"
+    assert simulation.run_control_file == expected_file_path
     assert simulation.use_american_date_format == False
-    open_mock.assert_called_with("testpath1/run_control_2.inc", 'r')
+    open_mock.assert_called_with(expected_file_path, 'r')
 
 
 @pytest.mark.skip("Code changed to not throw an error in this scenario now")
@@ -794,7 +796,7 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
     # Assert
 
     # Check the newly written file is as expected
-    structured_grid_mock.assert_called_with('new_destination/test_structured_grid.dat', 'w')
+    structured_grid_mock.assert_called_with(os.path.join('new_destination', 'test_structured_grid.dat'), 'w')
     structured_grid_mock.return_value.write.assert_called_with(expected_output_file)
 
     # Check that the class properties have been updated
@@ -1007,28 +1009,29 @@ def test_view_command(mocker, structured_grid_file_contents, expected_text):
     assert value == expected_text
 
 
-@pytest.mark.parametrize("fcs_file, expected_result",
+@pytest.mark.parametrize("fcs_file, expected_root, expected_extracted_path",
                          [
                              (
                                      'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID\n /path/to/structured/grid.dat',
-                                     '/path/to/structured/grid.dat'),
+                                     '', '/path/to/structured/grid.dat'),
                              (
                                      'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID\n path/to/other_structured/grid.dat',
-                                     'testpath1/path/to/other_structured/grid.dat'),
+                                     'testpath1', 'path/to/other_structured/grid.dat'),
                              (
                                      'RUNControl run_control.inc\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_grid\n structured/grid.dat',
-                                     'testpath1/structured/grid.dat'),
+                                     'testpath1', 'structured/grid.dat'),
                              (
                                      'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nStructured_GRID\n path/to/includes/grid.dat',
-                                     'testpath1/path/to/includes/grid.dat'),
+                                     'testpath1', 'path/to/includes/grid.dat'),
                              (
                                      'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nstructured_grid\n path/to/includes/grid.dat',
-                                     'testpath1/path/to/includes/grid.dat'),
+                                     'testpath1', 'path/to/includes/grid.dat'),
                          ])
-def test_get_abs_structured_grid_path(mocker, fcs_file, expected_result):
+def test_get_abs_structured_grid_path(mocker, fcs_file, expected_root, expected_extracted_path):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
+    expected_result = os.path.join(expected_root, expected_extracted_path)
 
     # Act
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
@@ -1038,21 +1041,22 @@ def test_get_abs_structured_grid_path(mocker, fcs_file, expected_result):
     assert result == expected_result
 
 
-@pytest.mark.parametrize("fcs_file, expected_result",
+@pytest.mark.parametrize("fcs_file, expected_root, expected_extracted_path",
                          [(
                                  'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data/Includes/nexus_data/surface_simplified_06082018.inc',
-                                 'testpath1/nexus_data/Includes/nexus_data/surface_simplified_06082018.inc'),
+                                 'testpath1', 'nexus_data/Includes/nexus_data/surface_simplified_06082018.inc'),
                              (
                                      'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE Network 1 	file/path/location/surface.inc',
-                                     'testpath1/file/path/location/surface.inc'),
+                                     'testpath1', 'file/path/location/surface.inc'),
                              (
                                      'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nsurface network 1 	file/path/location/surface.inc',
-                                     'testpath1/file/path/location/surface.inc'),
+                                     'testpath1', 'file/path/location/surface.inc'),
                          ])
-def test_get_abs_surface_file_path(mocker, fcs_file, expected_result):
+def test_get_abs_surface_file_path(mocker, fcs_file, expected_root, expected_extracted_path):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
+    expected_result = os.path.join(expected_root, expected_extracted_path)
 
     # Act
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
@@ -1551,14 +1555,16 @@ def test_get_wells(mocker: MockerFixture, fcs_file_contents: str):
     mock_load_wells = mocker.Mock(return_value=loaded_wells)
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
 
-    simulation = NexusSimulator(origin='nexus_run.fcs')
+    simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
     result = simulation.Wells.get_wells()
 
+    expected_well_spec_file_path = os.path.join('path', 'my/wellspec/file.dat')
     # Assert
     assert result == loaded_wells
-    mock_load_wells.assert_called_once_with(wellspec_file_path='/my/wellspec/file.dat', default_units=Units.OILFIELD,
+    mock_load_wells.assert_called_once_with(wellspec_file_path=expected_well_spec_file_path,
+                                            default_units=Units.OILFIELD,
                                             start_date='')
 
 
