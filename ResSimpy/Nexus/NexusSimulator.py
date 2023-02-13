@@ -134,6 +134,10 @@ class NexusSimulator(Simulator):
         """Returns the location of the structured grid file"""
         return self.__structured_grid_file_path
 
+    def get_default_units(self):
+        """Returns the default units"""
+        return self.__default_units
+
     def get_new_fcs_name(self):
         """Returns the new name for the FCS file without the fcs extension"""
         return self.__root_name
@@ -383,8 +387,10 @@ class NexusSimulator(Simulator):
             elif nexus_file_operations.check_token('DEFAULT_UNITS', line):
                 value = nexus_file_operations.get_token_value('DEFAULT_UNITS', line, fcs_file)
                 if value is not None:
-                    self.__run_units = value
-                    self.use_american_input_units = value == 'ENGLISH'
+                    if value == 'ENGLISH':
+                        self.__default_units = Units.OILFIELD
+                    else:
+                        self.__default_units = Units[value]
             elif nexus_file_operations.check_token("SURFACE NETWORK 1", line):
                 value = nexus_file_operations.get_token_value(token="SURFACE Network 1", token_line=line,
                                                               file_list=fcs_file)
