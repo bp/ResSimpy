@@ -1079,8 +1079,7 @@ class NexusSimulator(Simulator):
         file_as_list = nexus_file_operations.load_file_as_list(self.__structured_grid_file_path)
 
         for line in file_as_list:
-            if nexus_file_operations.check_token(command_token, line) and \
-                    ('!' not in line or line.index(command_token) < line.index('!')):
+            if nexus_file_operations.check_token(command_token, line):
                 start_index = file_as_list.index(line) - previous_lines \
                     if file_as_list.index(line) - previous_lines > 0 else 0
                 end_index = file_as_list.index(line) + following_lines \
