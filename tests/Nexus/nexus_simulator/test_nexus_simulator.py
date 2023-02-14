@@ -1046,7 +1046,9 @@ def test_get_abs_structured_grid_path(mocker, fcs_file, expected_root, expected_
                           ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS LAB\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
                             Units.LAB),
                             ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS METRIC_BARS\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                            Units.METRIC_BARS)
+                            Units.METRIC_BARS),
+                            ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                            Units.OILFIELD)
                          ])
 def test_load_fcs_file_populates_default_units(mocker, fcs_file, expected_default_unit_value):
     # Arrange
@@ -1074,7 +1076,40 @@ def test_load_fcs_file_raises_error_for_undefined_default_units(mocker, fcs_file
         NexusSimulator(origin='testpath1/Path.fcs')
 
 
+@pytest.mark.parametrize("fcs_file, expected_run_unit_value",
+                         [('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                            Units.OILFIELD),
+                          ('DESC Test model\n\nRUN_UNITS LAB\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                            Units.LAB),
+                            ('DESC Test model\n\nRUN_UNITS METRIC_BARS\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                            Units.METRIC_BARS),
+                            ('DESC Test model\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                            Units.OILFIELD)
+                         ])
+def test_load_fcs_file_populates_run_units(mocker, fcs_file, expected_run_unit_value):
+    # Arrange
+    open_mock = mocker.mock_open(read_data=fcs_file)
+    mocker.patch("builtins.open", open_mock)
 
+    # Act
+    simulation = NexusSimulator(origin='testpath1/Path.fcs')
+    result = simulation.get_run_units()
+
+    # Assert
+    assert result == expected_run_unit_value
+
+@pytest.mark.parametrize("fcs_file",
+                         ['DESC Test model\n\nRUN_UNITS BLAH\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                          'DESC Test model\n\nRUN_UNITS \nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
+                         ])
+def test_load_fcs_file_raises_error_for_undefined_run_units(mocker, fcs_file):
+    # Arrange
+    open_mock = mocker.mock_open(read_data=fcs_file)
+    mocker.patch("builtins.open", open_mock)
+
+    # Act
+    with pytest.raises(KeyError):
+        NexusSimulator(origin='testpath1/Path.fcs')
 
 @pytest.mark.parametrize("fcs_file, expected_root, expected_extracted_path",
                          [(

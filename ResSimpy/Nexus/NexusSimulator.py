@@ -89,7 +89,7 @@ class NexusSimulator(Simulator):
         self.__simulation_start_time: Optional[str] = None  # run execution start time from the log file
         self.__simulation_end_time: Optional[str] = None  # run execution finish time from the log file
         self.__previous_run_time: Optional[str] = None  # run execution finish time from the log file
-        self.__run_units: Optional[str] = None
+        self.__run_units:  Units = Units.OILFIELD  # The Nexus default
         self.use_american_run_units: bool = False
         self.use_american_input_units: bool = False
         self.__write_times: bool = write_times
@@ -137,6 +137,10 @@ class NexusSimulator(Simulator):
     def get_default_units(self):
         """Returns the default units"""
         return self.__default_units
+
+    def get_run_units(self):
+        """Returns the run units"""
+        return self.__run_units
 
     def get_new_fcs_name(self):
         """Returns the new name for the FCS file without the fcs extension"""
@@ -356,7 +360,7 @@ class NexusSimulator(Simulator):
 
     def __load_fcs_file(self):
         """ Loads in the information from the supplied FCS file into the class instance.
-            Loads in the paths for runcontrol, strucutured grid and the first surface network.
+            Loads in the paths for runcontrol, structured grid and the first surface network.
             Loads in the values for dateformat and run units.
             Attempts to load the run_control_file.
         """
@@ -382,8 +386,10 @@ class NexusSimulator(Simulator):
             elif nexus_file_operations.check_token('RUN_UNITS', line):
                 value = nexus_file_operations.get_token_value('RUN_UNITS', line, fcs_file)
                 if value is not None:
-                    self.__run_units = value
-                    self.use_american_run_units = value == 'ENGLISH'
+                    if value == 'ENGLISH':
+                        self.__run_units = Units.OILFIELD
+                    else:
+                        self.__run_units = Units[value]
             elif nexus_file_operations.check_token('DEFAULT_UNITS', line):
                 value = nexus_file_operations.get_token_value('DEFAULT_UNITS', line, fcs_file)
                 if value is not None:
