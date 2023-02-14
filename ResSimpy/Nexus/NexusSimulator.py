@@ -1080,7 +1080,7 @@ class NexusSimulator(Simulator):
 
         for line in file_as_list:
             if nexus_file_operations.check_token(command_token, line) and \
-            ('!' not in line or line.index(command_token) < line.index('!')):
+                    ('!' not in line or line.index(command_token) < line.index('!')):
                 start_index = file_as_list.index(line) - previous_lines \
                     if file_as_list.index(line) - previous_lines > 0 else 0
                 end_index = file_as_list.index(line) + following_lines \
