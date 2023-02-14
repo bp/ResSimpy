@@ -43,12 +43,43 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
     dbot: Optional[str] = None
     partial_perf: Optional[str] = None
     well_radius: Optional[str] = None
+
+    perm_thickness_ovr: Optional[str] = None
+    dfactor: Optional[str] = None
+    rel_perm_method: Optional[str] = None
+    status: Optional[str] = None
+
+    cell_number: Optional[str] = None
+    bore_radius: Optional[str] = None
+    portype: Optional[str] = None
+    fracture_mult: Optional[str] = None
+    sector: Optional[str] = None
+    well_group: Optional[str] = None
+    zone: Optional[str] = None
+    angle_open_flow: Optional[str] = None
+    temperature: Optional[str] = None
+    flowsector: Optional[str] = None
+    parent_node: Optional[str] = None
+    mdcon: Optional[str] = None
+    pressure_avg_pattern: Optional[str] = None
+    length: Optional[str] = None
+    permeability: Optional[str] = None
+    non_darcy_model: Optional[str] = None
+    comp_dz: Optional[str] = None
+    layer_assignment: Optional[str] = None
+    polymer_bore_radius: Optional[str] = None
+    polymer_well_radius: Optional[str] = None
     units_values: dict[str, Units] = {'ENGLISH': Units.OILFIELD, 'METRIC': Units.METRIC_KPA,
                                       'METKG/CM2': Units.METRIC_KGCM2, 'METBAR': Units.METRIC_BARS, 'LAB': Units.LAB}
     header_values: dict[str, None | int | float | str] = {
         'IW': iw, 'JW': jw, 'L': kw, 'MD': md, 'SKIN': skin, 'DEPTH': depth, 'X': x_value, 'Y': y_value,
         'ANGLA': angla, 'ANGLV': anglv, 'GRID': grid, 'WI': wi, 'DTOP': dtop, 'DBOT': dbot, 'RADW': well_radius,
-        'PPERF': partial_perf}
+        'PPERF': partial_perf, 'CELL': cell_number, 'KH': perm_thickness_ovr, 'D': dfactor, 'IRELPM': rel_perm_method,
+        'STAT': status, 'RADB': bore_radius, 'PORTYPE': portype, 'FM': fracture_mult, 'SECT': sector,
+        'GROUP': well_group, 'ZONE': zone, 'ANGLE': angle_open_flow, 'TEMP': temperature, 'FLOWSECT': flowsector,
+        'PARENT': parent_node, 'MDCON': mdcon, 'IPTN': pressure_avg_pattern, 'LENGTH': length, 'K': permeability,
+        'ND': non_darcy_model, 'DZ': comp_dz, 'LAYER': layer_assignment, 'RADBP': polymer_bore_radius,
+        'RADWP': polymer_well_radius}
     header_index: int = -1
     wellspec_found: bool = False
     current_date: Optional[str] = None
@@ -174,6 +205,30 @@ def __load_wellspec_table_completions(file_as_list: list[str], header_index: int
             depth_to_top=convert_header_value_float('DTOP'),
             depth_to_bottom=convert_header_value_float('DBOT'),
             partial_perf=convert_header_value_float('PPERF'),
+            cell_number=convert_header_value_int('CELL'),
+            perm_thickness_ovr=convert_header_value_float('KH'),
+            dfactor=convert_header_value_float('D'),
+            rel_perm_method=convert_header_value_int('IRELPM'),
+            status=(None if header_values['STAT'] is None else str(header_values['STAT'])),
+            bore_radius=convert_header_value_float('RADB'),
+            portype=(None if header_values['PORTYPE'] is None else str(header_values['PORTYPE'])),
+            fracture_mult=convert_header_value_float('FM'),
+            sector=convert_header_value_int('SECT'),
+            well_group=(None if header_values['GROUP'] is None else str(header_values['GROUP'])),
+            zone=convert_header_value_int('ZONE'),
+            angle_open_flow=convert_header_value_float('ANGLE'),
+            temperature=convert_header_value_float('TEMP'),
+            flowsector=convert_header_value_int('FLOWSECT'),
+            parent_node=(None if header_values['PARENT'] is None else str(header_values['PARENT'])),
+            mdcon=convert_header_value_float('MDCON'),
+            pressure_avg_pattern=convert_header_value_int('IPTN'),
+            length=convert_header_value_float('LENGTH'),
+            permeability=convert_header_value_float('K'),
+            non_darcy_model=(None if header_values['ND'] is None else str(header_values['ND'])),
+            comp_dz=convert_header_value_float('DZ'),
+            layer_assignment=convert_header_value_int('LAYER'),
+            polymer_bore_radius=convert_header_value_float('RADBP'),
+            polymer_well_radius=convert_header_value_float('RADWP'),
             date=start_date,
         )
 
