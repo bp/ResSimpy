@@ -27,6 +27,12 @@ class Completion(ABC):
         grid (Optional[str]): the grid name to which the completion data applies. 'GRID' in Nexus
         depth_to_top (Optional[float]): subsea depth to the top of a completion interval. 'DTOP' in Nexus
         depth_to_bot (Optional[float]): subsea depth to the bottom of the completion interval. 'DBOT' in Nexus
+        perm_thickness_ovr (Optional[float]): permeability thickness override value to use for the completion interval.\
+            'KH' in Nexus.
+        dfactor (Optional[float]): non-darcy factor to use for rate dependent skin calculations. 'D' in Nexus
+        rel_perm_method (Optional[int]): rel perm method to use for the completion. 'IRELPM' in Nexus
+        
+
     """
     __date: str
     __i: Optional[int] = None
@@ -42,12 +48,18 @@ class Completion(ABC):
     __grid: Optional[str] = None
     __depth_to_top: Optional[float] = None
     __depth_to_bottom: Optional[float] = None
+    __perm_thickness_ovr: Optional[float] = None
+    __dfactor: Optional[float] = None
+    __rel_perm_method: Optional[int] = None
+    __status: Optional[str] = None
 
     def __init__(self, date: str, i: Optional[int] = None, j: Optional[int] = None, k: Optional[int] = None,
                  skin: Optional[float] = None, depth: Optional[float] = None, well_radius: Optional[float] = None,
                  x: Optional[float] = None, y: Optional[float] = None, angle_a: Optional[float] = None,
                  angle_v: Optional[float] = None, grid: Optional[str] = None, depth_to_top: Optional[float] = None,
-                 depth_to_bottom: Optional[float] = None):
+                 depth_to_bottom: Optional[float] = None, perm_thickness_ovr: Optional[float] = None,
+                 dfactor: Optional[float] = None, rel_perm_method: Optional[int] = None, status: Optional[str] = None):
+
         self.__well_radius = well_radius
         self.__date = date
         self.__i = i
@@ -62,6 +74,11 @@ class Completion(ABC):
         self.__grid = grid
         self.__depth_to_top = depth_to_top
         self.__depth_to_bottom = depth_to_bottom
+
+        self.__perm_thickness_ovr = perm_thickness_ovr
+        self.__dfactor = dfactor
+        self.__rel_perm_method = rel_perm_method
+        self.__status = status
 
     @property
     def well_radius(self):
@@ -118,6 +135,22 @@ class Completion(ABC):
     def depth_to_bottom(self):
         return self.__depth_to_bottom
 
+    @property
+    def perm_thickness_ovr(self):
+        return self.__perm_thickness_ovr
+
+    @property
+    def dfactor(self):
+        return self.__dfactor
+
+    @property
+    def rel_perm_method(self):
+        return self.__rel_perm_method
+
+    @property
+    def status(self):
+        return self.__status
+
     def to_dict(self) -> dict[str, None | float | int | str]:
         attribute_dict = {
             'well_radius': self.__well_radius,
@@ -134,5 +167,9 @@ class Completion(ABC):
             'grid': self.__grid,
             'depth_to_top': self.__depth_to_top,
             'depth_to_bottom': self.__depth_to_bottom,
+            'perm_thickness_ovr': self.__perm_thickness_ovr,
+            'dfactor': self.__dfactor,
+            'rel_perm_method': self.__rel_perm_method,
+            'status': self.__status,
         }
         return attribute_dict

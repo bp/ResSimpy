@@ -228,13 +228,13 @@ def test_load_wells_all_columns_unstructured_grid(mocker):
     TIME 01/03/2023 !658 days
     WELLSPEC WELL_3
     \n
-    CELL  KH     RADB PORTYPE  FM    IRELPM  SECT   GROUP       ZONE   ANGLE   TEMP   FLOWSECT   PARENT   MDCON   IPTN   LENGTH   K         D       ND   DZ   LAYER   STAT   RADBP   RADWP 
-    1     2000.3 2.2  FRACTURE 0.5   1       1      well_group  1      10.2    60.3   2          NODe     10.765  7      150.66   300.2     0.005   3    0.5  20      OFF    0.25    0.35
+    CELL  KH     RADB PORTYPE  FM    IRELPM  SECT   GROUP       ZONE   ANGLE   TEMP   FLOWSECT   PARENT   MDCON   IPTN   LENGTH   K         D       ND          DZ   LAYER   STAT   RADBP   RADWP 
+    1     2000.3 2.2  FRACTURE 0.5   1       1      well_group  1      10.2    60.3   2          NODe     10.765  7      150.66   300.2     0.005   nondarcy    0.5  20      OFF    0.25    0.35
        """
 
-    expected_well_completion_1 = NexusCompletion(date='01/03/2023', cell=1, kh=2000.3, radb=2.2, portype='FRACTURE', fm=0.5, irelpm=1,
-                                                 sect=1, group='well_group', zone=1, angle=10.2, temp=60.3, flowsect=2, parent='NODe', mdcon=10.765,
-                                                 iptn=7, length=150.66, k=300.2, d=0.005, nd=3, dz=0.5, layer=20, stat='OFF', radbp=0.25, radwp=0.35, )
+    expected_well_completion_1 = NexusCompletion(date='01/03/2023', cell_number=1, perm_thickness_ovr=2000.3, bore_radius=2.2, portype='FRACTURE', fracture_mult=0.5, rel_perm_method=1,
+                                                 sector=1, well_group='well_group', zone=1, angle_open_flow=10.2, temperature=60.3, flowsector=2, parent_node='NODe', mdcon=10.765,
+                                                 pressure_avg_pattern=7, length=150.66, permeability=300.2, dfactor=0.005, non_darcy_model='nondarcy', comp_dz=0.5, layer_assignment=20, status='OFF', polymer_bore_radius=0.25, polymer_well_radius=0.35, )
 
     expected_well = NexusWell(well_name='WELL_3', completions=[expected_well_completion_1],
                               units=Units.OILFIELD)
@@ -261,7 +261,7 @@ def test_load_wells_rel_perm_tables(mocker):
     2    0.05	0.15  0.49	0.45  0.35	0.15  0		  0.95	 0.95	0.45	   0.15		 0.95		0.15	  0.35		0.95	  0.95		0.15	  0.25		0.05	  0.075		 0.084	 0.65
 
     """
-    expected_well_completion_1 = NexusCompletion(date=start_date, cell=1, swl=0.1, swr=0.2, swu=0.54, sgl=0.5, sgr=0.4, sgu=0.2,
+    expected_well_completion_1 = NexusCompletion(date=start_date, cell_number=1, swl=0.1, swr=0.2, swu=0.54, sgl=0.5, sgr=0.4, sgu=0.2,
                                                  swro=0.01, sgro=1, sgrw=1, krw_swro=0.5, krw_swu=0.2, krg_sgro=1, krg_sgu=0.2,
                                                  kro_swl=0.4, kro_swr=1, kro_sgl=1, kro_sgr=0.2, krw_sgl=0.3, krw_sgr=0.1,
                                                  krg_sgrw=0.125, sgtr=0.134, sotr=0.7, )
