@@ -226,11 +226,10 @@ def __load_wellspec_table_completions(file_as_list: list[str], header_index: int
         # if a valid line is found load a completion otherwise continue
         if not valid_line:
             continue
-        end_point_scaling_header_values = {key: convert_header_value_float(key) for key
-                                           in header_values if key in end_point_scaling_header_values}
+        rel_perm_dict = {key.lower(): convert_header_value_float(key) for key
+                         in header_values if key in end_point_scaling_header_values}
         if any(end_point_scaling_header_values.values()):
-            lower_dict = {k.lower(): i for k, i in end_point_scaling_header_values.items()}
-            new_rel_perm_end_point = NexusRelPermEndPoint(**lower_dict)
+            new_rel_perm_end_point = NexusRelPermEndPoint(**rel_perm_dict)
         else:
             new_rel_perm_end_point = None
 
