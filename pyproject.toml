@@ -6,8 +6,8 @@ authors = ["BP"]
 readme = "README.rst"
 
 [tool.poetry.dependencies]
-python = ">=3.10, <3.11"
-resqpy = "^3.8"
+python = ">=3.10, <3.12"
+resqpy = "^4.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest-mock = "^3.9"
