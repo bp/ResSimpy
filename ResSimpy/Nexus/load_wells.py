@@ -137,7 +137,7 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
                 raise ValueError(f"Cannot find the date associated with the TIME card in {line=} at line number \
                                  {index}")
 
-        if 'WELLSPEC' in uppercase_line:
+        if nfo.check_token('WELLSPEC', uppercase_line):
             initial_well_name = nfo.get_token_value(token='WELLSPEC', token_line=line, file_list=file_as_list)
             if initial_well_name is None:
                 raise ValueError("Cannot find well name following WELLSPEC keyword")
