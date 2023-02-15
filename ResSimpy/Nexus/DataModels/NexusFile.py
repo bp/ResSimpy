@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import re
-from typing import Optional
+from typing import Optional, Union, Generator
 
 from ResSimpy.Nexus import nexus_file_operations
 
@@ -23,7 +23,7 @@ class NexusFile:
 
     def __init__(self, location: Optional[str] = None, includes: Optional[list[str]] = None,
                  origin: Optional[str] = None, includes_objects: Optional[list['NexusFile']] = None,
-                 file_content_as_list: Optional[list] = None):
+                 file_content_as_list: Optional[list[Union[str, 'NexusFile']]] = None):
         self.location: Optional[str] = location
         self.includes: Optional[list[str]] = includes
         self.origin: Optional[str] = origin
@@ -122,3 +122,25 @@ class NexusFile:
             raise ValueError(f"{from_list=} and {to_list=} are not the same length")
 
         return from_list, to_list
+
+    @staticmethod
+    def iterate_line(file_content_as_list: list[Union[str, 'NexusFile']], max_depth=None) \
+            -> Generator[str, None, None]:
+        """Generator object for iterating over a list of strings with nested NexusFile objects in them
+        Usage Example: for line in NexusFile.iterate_line(nexus_file.file_content_as_list):
+
+        Yields:
+            str: sequential line from the file.
+        """
+        depth: int = 0
+        if max_depth is not None:
+            depth = max_depth
+        for row in file_content_as_list:
+            if isinstance(row, NexusFile):
+                if (max_depth is None or depth > 0) and row.file_content_as_list is not None:
+                    depth -= 1
+                    yield from NexusFile.iterate_line(row.file_content_as_list, max_depth=depth)
+                else:
+                    continue
+            else:
+                yield row
