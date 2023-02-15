@@ -388,14 +388,14 @@ class NexusSimulator(Simulator):
                     if value == 'ENGLISH':
                         self.__run_units = Units.OILFIELD
                     else:
-                        self.__run_units = Units[value]
+                        self.__run_units = Units[value.upper()]
             elif nexus_file_operations.check_token('DEFAULT_UNITS', line):
                 value = nexus_file_operations.get_token_value('DEFAULT_UNITS', line, fcs_file)
                 if value is not None:
                     if value == 'ENGLISH':
                         self.__default_units = Units.OILFIELD
                     else:
-                        self.__default_units = Units[value]
+                        self.__default_units = Units[value.upper()]
             elif nexus_file_operations.check_token("SURFACE NETWORK 1", line):
                 value = nexus_file_operations.get_token_value(token="SURFACE Network 1", token_line=line,
                                                               file_list=fcs_file)

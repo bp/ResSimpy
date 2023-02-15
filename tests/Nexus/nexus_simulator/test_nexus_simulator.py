@@ -1045,10 +1045,14 @@ def test_get_abs_structured_grid_path(mocker, fcs_file, expected_root, expected_
                             Units.OILFIELD),
                           ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS LAB\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
                             Units.LAB),
-                            ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS METRIC_BARS\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS METRIC_BARS\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
                             Units.METRIC_BARS),
-                            ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                            Units.OILFIELD)
+                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                            Units.OILFIELD),
+                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS Metric_Bars\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                            Units.METRIC_BARS),
+                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDeFault_UNITS METRIC_BARS\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                            Units.METRIC_BARS)
                          ])
 def test_load_fcs_file_populates_default_units(mocker, fcs_file, expected_default_unit_value):
     # Arrange
