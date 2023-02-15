@@ -306,21 +306,23 @@ def __load_wellspec_table_headings(header_index: int, header_values: dict[str, N
     """
     headers = [] if headers is None else headers
 
-    if well_name is not None:
-        for key in header_values.keys():
-            if nfo.check_token(key, line):
-                header_line = line
-                header_index = index
-                # Map the headers
-                next_column_heading = nfo.get_next_value(start_line_index=0, file_as_list=[line],
-                                                         search_string=line)
-                trimmed_line = header_line
+    if well_name is None:
+        return header_index, headers
 
-                while next_column_heading is not None:
-                    headers.append(next_column_heading)
-                    trimmed_line = trimmed_line.replace(next_column_heading, "", 1)
-                    next_column_heading = nfo.get_next_value(index, [trimmed_line], trimmed_line)
+    for key in header_values.keys():
+        if nfo.check_token(key, line):
+            header_line = line.upper()
+            header_index = index
+            # Map the headers
+            next_column_heading = nfo.get_next_value(start_line_index=0, file_as_list=[line],
+                                                     search_string=line)
+            trimmed_line = header_line
 
-                if len(headers) > 0:
-                    break
+            while next_column_heading is not None:
+                headers.append(next_column_heading)
+                trimmed_line = trimmed_line.replace(next_column_heading, "", 1)
+                next_column_heading = nfo.get_next_value(index, [trimmed_line], trimmed_line)
+
+            if len(headers) > 0:
+                break
     return header_index, headers

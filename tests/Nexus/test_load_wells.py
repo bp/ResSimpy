@@ -35,8 +35,15 @@ from ResSimpy.Nexus.load_wells import load_wells
     2  1  3  4.5 !Inline Comment Here
     !Another Comment here
     7 6 8   9.11
-    """, "Well3")],
-                         ids=["basic case", "swapped columns", "number name", "Comments"])
+    """, "Well3"),
+                          ("""
+    WELLSPEC well3
+    ! RADW radw
+    JW iw l radw
+    2  1  3  4.5
+    7 6 8   9.11
+    """, "well3"), ],
+                         ids=["basic case", "swapped columns", "number name", "comments", "different cases"])
 def test_load_basic_wellspec(mocker, file_contents, expected_name):
     # Arrange
     start_date = '01/01/2023'
@@ -261,7 +268,7 @@ def test_load_wells_rel_perm_tables(mocker):
 
     file_contents = """WELLSPEC WELL_3
 
-    CELL SWL   SWR    SWU   SGL   SGR   SGU   SWRO    SGRO   SGRW   KRW_SWRO   KRW_SWU   KRG_SGRO   KRG_SGU   KRO_SWL   KRO_SWR   KRO_SGL   KRO_SGR   KRW_SGL   KRW_SGR   KRG_SGRW   SGTR    SOTR 
+    CELL SWL   SWR    swu   SGL   SGR   SGU   SWRO    SGRO   SGRW   KRW_SWRO   KRW_SWU   KRG_SGRO   KRG_SGU   KRO_SWL   KRO_SWR   KRO_SGL   KRO_SGR   KRW_SGL   KRW_SGR   KRG_SGRW   SGTR    SOTR 
     1    0.1    0.2   0.54  .5    0.4   0.2   .01     1      1      0.5        0.2       1          0.2       0.4       1         1         0.2       0.3       0.1       0.125      0.134   0.7
     2    0.05	0.15  0.49	0.45  0.35	0.15  0		  0.95	 0.95	0.45	   0.15		 0.95		0.15	  0.35		0.95	  0.95		0.15	  0.25		0.05	  0.075		 0.084	 0.65
 
