@@ -164,8 +164,8 @@ class NexusSimulator(Simulator):
                 (RUN_UNITS,DEFAULT_UNITS) respectively and False, False otherwise. \
                 Returns (None, None) if it can't find a (RUN_UNITS, DEFAULT_UNITS) in the supplied files\
         """
-        american_run_units: Optional[bool] = None
-        american_input_units: Optional[bool] = None
+        oilfield_run_units: Optional[bool] = None
+        oilfield_default_units: Optional[bool] = None
 
         for model in models:
             # If we're checking the units of a RESQML model, read it in and get the units. Otherwise, read the units
@@ -178,30 +178,29 @@ class NexusSimulator(Simulator):
 
                 # Check the grid units
                 grid_length_unit = grid.xy_units()
-                american_input_units = grid_length_unit == 'ft'
-                american_run_units = grid_length_unit == 'ft'
+                model_oilfield_default_units = grid_length_unit == 'ft'
+                model_oilfield_run_units = grid_length_unit == 'ft'
             else:
-                fcs_file = nexus_file_operations.load_file_as_list(model)
+                simulator = NexusSimulator(origin=model)
+                model_oilfield_default_units = simulator.get_default_units() == Units.OILFIELD
+                model_oilfield_run_units = simulator.get_run_units() == Units.OILFIELD
 
-                for line in fcs_file:
-                    if nexus_file_operations.check_token('RUN_UNITS', line):
-                        value = nexus_file_operations.get_token_value('RUN_UNITS', line, fcs_file)
-                        if value is not None:
-                            model_american_run_units = value == 'ENGLISH'
-                            if american_run_units is None:
-                                american_run_units = model_american_run_units
-                            elif model_american_run_units != american_run_units:
-                                raise ValueError(f"Model at {model} using inconsistent run units")
-                    elif nexus_file_operations.check_token('DEFAULT_UNITS', line):
-                        value = nexus_file_operations.get_token_value('DEFAULT_UNITS', line, fcs_file)
-                        if value is not None:
-                            model_american_input_units = value == 'ENGLISH'
-                            if american_input_units is None:
-                                american_input_units = model_american_input_units
-                            elif american_run_units != american_input_units:
-                                raise ValueError(f"Model at {model} using inconsistent default units")
+            # If not defined, assign it to model_oilfield_default_units
+            if oilfield_default_units is None:
+                oilfield_default_units = model_oilfield_default_units
+            # Raise ValueError if default units are inconsistent with the other models
+            elif model_oilfield_default_units != oilfield_default_units:
+                raise ValueError(f"Model at {model} using inconsistent default units")
 
-        return american_run_units, american_input_units
+            # If not defined, assign it to model_oilfield_run_units
+            if oilfield_run_units is None:
+                oilfield_run_units = model_oilfield_run_units
+            # Raise ValueError if run units are inconsistent with the other models
+            elif model_oilfield_run_units != oilfield_run_units:
+                raise ValueError(f"Model at {model} using inconsistent run units")
+
+
+        return oilfield_run_units, oilfield_default_units
 
     @staticmethod
     def get_check_oil_gas_types_for_models(models: list[str]) -> Optional[str]:
