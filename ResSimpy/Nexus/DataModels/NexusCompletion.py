@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional, Union
 
 from ResSimpy.Completion import Completion
+from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
 
 
 @dataclass(kw_only=True)
@@ -40,6 +41,7 @@ class NexusCompletion(Completion):
     __layer_assignment: Optional[int] = None
     __polymer_bore_radius: Optional[float] = None
     __polymer_well_radius: Optional[float] = None
+    __rel_perm_end_point: Optional[NexusRelPermEndPoint] = None
 
     def __init__(self, date: str, i: Optional[int] = None, j: Optional[int] = None, k: Optional[int] = None,
                  skin: Optional[float] = None, depth: Optional[float] = None, well_radius: Optional[float] = None,
@@ -57,7 +59,7 @@ class NexusCompletion(Completion):
                  permeability: Optional[float] = None, non_darcy_model: Optional[str] = None,
                  comp_dz: Optional[float] = None, layer_assignment: Optional[int] = None,
                  polymer_bore_radius: Optional[float] = None, polymer_well_radius: Optional[float] = None,
-                 portype: Optional[str] = None,
+                 portype: Optional[str] = None, rel_perm_end_point: Optional[NexusRelPermEndPoint] = None,
                  ):
 
         self.__measured_depth = measured_depth
@@ -84,6 +86,7 @@ class NexusCompletion(Completion):
         self.__polymer_bore_radius = polymer_bore_radius
         self.__polymer_well_radius = polymer_well_radius
         self.__portype = portype
+        self.__rel_perm_end_point = rel_perm_end_point
 
         super().__init__(date=date, i=i, j=j, k=k, skin=skin, depth=depth, well_radius=well_radius, x=x, y=y,
                          angle_a=angle_a, angle_v=angle_v, grid=grid, depth_to_top=depth_to_top,
@@ -182,6 +185,10 @@ class NexusCompletion(Completion):
     def polymer_well_radius(self):
         return self.__polymer_well_radius
 
+    @property
+    def rel_perm_end_point(self):
+        return self.__rel_perm_end_point
+
     def to_dict(self) -> dict[str, None | float | int | str]:
         attribute_dict: dict[str, None | float | int | str] = {
             'measured_depth': self.__measured_depth,
@@ -193,4 +200,6 @@ class NexusCompletion(Completion):
             'fracture_mult': self.__fracture_mult,
         }
         attribute_dict.update(super().to_dict())
+        if self.rel_perm_end_point is not None:
+            attribute_dict.update(self.rel_perm_end_point.to_dict())
         return attribute_dict

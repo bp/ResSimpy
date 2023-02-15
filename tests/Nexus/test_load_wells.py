@@ -232,9 +232,13 @@ def test_load_wells_all_columns_unstructured_grid(mocker):
     1     2000.3 2.2  FRACTURE 0.5   1       1      well_group  1      10.2    60.3   2          NODe     10.765  7      150.66   300.2     0.005   nondarcy    0.5  20      OFF    0.25    0.35
        """
 
-    expected_well_completion_1 = NexusCompletion(date='01/03/2023', cell_number=1, perm_thickness_ovr=2000.3, bore_radius=2.2, portype='FRACTURE', fracture_mult=0.5, rel_perm_method=1,
-                                                 sector=1, well_group='well_group', zone=1, angle_open_flow=10.2, temperature=60.3, flowsector=2, parent_node='NODe', mdcon=10.765,
-                                                 pressure_avg_pattern=7, length=150.66, permeability=300.2, dfactor=0.005, non_darcy_model='nondarcy', comp_dz=0.5, layer_assignment=20, status='OFF', polymer_bore_radius=0.25, polymer_well_radius=0.35, )
+    expected_well_completion_1 = NexusCompletion(
+        date='01/03/2023', cell_number=1, perm_thickness_ovr=2000.3, bore_radius=2.2, portype='FRACTURE',
+        fracture_mult=0.5, rel_perm_method=1, sector=1, well_group='well_group', zone=1, angle_open_flow=10.2,
+        temperature=60.3, flowsector=2, parent_node='NODe', mdcon=10.765, pressure_avg_pattern=7,length=150.66,
+        permeability=300.2, dfactor=0.005, non_darcy_model='nondarcy', comp_dz=0.5, layer_assignment=20, status='OFF',
+        polymer_bore_radius=0.25, polymer_well_radius=0.35,
+    )
 
     expected_well = NexusWell(well_name='WELL_3', completions=[expected_well_completion_1],
                               units=Units.OILFIELD)

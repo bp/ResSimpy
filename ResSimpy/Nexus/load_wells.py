@@ -3,6 +3,8 @@ from typing import Optional
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
+from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
+
 from ResSimpy.UnitsEnum import Units
 
 
@@ -69,6 +71,30 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
     layer_assignment: Optional[str] = None
     polymer_bore_radius: Optional[str] = None
     polymer_well_radius: Optional[str] = None
+
+    # End point values:
+    swl: Optional[str] = None
+    swr: Optional[str] = None
+    swu: Optional[str] = None
+    sgl: Optional[str] = None
+    sgr: Optional[str] = None
+    sgu: Optional[str] = None
+    swro: Optional[str] = None
+    sgro: Optional[str] = None
+    sgrw: Optional[str] = None
+    krw_swro: Optional[str] = None
+    krw_swu: Optional[str] = None
+    krg_sgro: Optional[str] = None
+    krg_sgu: Optional[str] = None
+    kro_swl: Optional[str] = None
+    kro_swr: Optional[str] = None
+    kro_sgl: Optional[str] = None
+    kro_sgr: Optional[str] = None
+    krw_sgl: Optional[str] = None
+    krw_sgr: Optional[str] = None
+    krg_sgrw: Optional[str] = None
+    sgtr: Optional[str] = None
+    sotr: Optional[str] = None
     units_values: dict[str, Units] = {'ENGLISH': Units.OILFIELD, 'METRIC': Units.METRIC_KPA,
                                       'METKG/CM2': Units.METRIC_KGCM2, 'METBAR': Units.METRIC_BARS, 'LAB': Units.LAB}
     header_values: dict[str, None | int | float | str] = {
@@ -79,7 +105,17 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
         'GROUP': well_group, 'ZONE': zone, 'ANGLE': angle_open_flow, 'TEMP': temperature, 'FLOWSECT': flowsector,
         'PARENT': parent_node, 'MDCON': mdcon, 'IPTN': pressure_avg_pattern, 'LENGTH': length, 'K': permeability,
         'ND': non_darcy_model, 'DZ': comp_dz, 'LAYER': layer_assignment, 'RADBP': polymer_bore_radius,
-        'RADWP': polymer_well_radius}
+        'RADWP': polymer_well_radius,
+    }
+    end_point_scaling_header_values: dict[str, None | int | float | str] = {
+        'SWL': swl, 'SWR': swr, 'SWU': swu, 'SGL': sgl, 'SGR': sgr, 'SGU': sgu,
+        'SWRO': swro, 'SGRO': sgro, 'SGRW': sgrw, 'KRW_SWRO': krw_swro, 'KRW_SWU': krw_swu, 'KRG_SGRO': krg_sgro,
+        'KRG_SGU': krg_sgu, 'KRO_SWL': kro_swl, 'KRO_SWR': kro_swr, 'KRO_SGL': kro_sgl, 'KRO_SGR': kro_sgr,
+        'KRW_SGL': krw_sgl, 'KRW_SGR': krw_sgr, 'KRG_SGRW': krg_sgrw, 'SGTR': sgtr, 'SOTR': sotr,
+    }
+    # add end point scaling header to the header values we search for:
+    header_values.update(end_point_scaling_header_values)
+
     header_index: int = -1
     wellspec_found: bool = False
     current_date: Optional[str] = None
@@ -123,7 +159,7 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
                 current_date = start_date
             # Load in each line of the table
             completions = __load_wellspec_table_completions(
-                file_as_list, header_index, header_values, headers, current_date)
+                file_as_list, header_index, header_values, headers, current_date, end_point_scaling_header_values)
 
             if wellspec_file_units is None:
                 wellspec_file_units = default_units
@@ -140,7 +176,9 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
 
 def __load_wellspec_table_completions(file_as_list: list[str], header_index: int,
                                       header_values: dict[str, None | int | float | str],
-                                      headers: list[str], start_date: str) -> list[NexusCompletion]:
+                                      headers: list[str], start_date: str,
+                                      end_point_scaling_header_values: dict[str, None | int | float | str],
+                                      ) -> list[NexusCompletion]:
     """Loads a completion table in for a single WELLSPEC keyword. \
         Loads in the next available completions following a WELLSPEC keyword and a header line.
 
@@ -171,6 +209,7 @@ def __load_wellspec_table_completions(file_as_list: list[str], header_index: int
 
     for line in file_as_list[header_index + 1:]:
         # check for end of table lines:
+        # TODO update with a more robust table end checker function
         end_of_table = nfo.check_token('TIME', line) or nfo.check_token('WELLSPEC', line)
         if end_of_table:
             return completions
@@ -187,6 +226,13 @@ def __load_wellspec_table_completions(file_as_list: list[str], header_index: int
         # if a valid line is found load a completion otherwise continue
         if not valid_line:
             continue
+        end_point_scaling_header_values = {key: convert_header_value_float(item) for key, item
+                                           in header_values if key in end_point_scaling_header_values.keys()}
+        if any(end_point_scaling_header_values.values()):
+            new_rel_perm_end_point = NexusRelPermEndPoint(**end_point_scaling_header_values)
+        else:
+            new_rel_perm_end_point = None
+
         new_completion = NexusCompletion(
             i=convert_header_value_int('IW'),
             j=convert_header_value_int('JW'),
@@ -229,6 +275,7 @@ def __load_wellspec_table_completions(file_as_list: list[str], header_index: int
             layer_assignment=convert_header_value_int('LAYER'),
             polymer_bore_radius=convert_header_value_float('RADBP'),
             polymer_well_radius=convert_header_value_float('RADWP'),
+            rel_perm_end_point=new_rel_perm_end_point,
             date=start_date,
         )
 
