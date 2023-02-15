@@ -1,6 +1,7 @@
 import pytest
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
+from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.UnitsEnum import Units
 from ResSimpy.Nexus.load_wells import load_wells
@@ -260,19 +261,23 @@ def test_load_wells_rel_perm_tables(mocker):
 
     file_contents = """WELLSPEC WELL_3
 
-    cell SWL   SWR    SWU   sgl   SGR   SGU   SWRO    sgro   SGRW   KRW_SWRO   KRW_SWU   KRG_SGRO   KRG_SGU   KRO_SWL   KRO_SWR   KRO_SGL   KRO_SGR   KRW_SGL   KRW_SGR   KRG_SGRW   SGTR    SOTR 
+    CELL SWL   SWR    SWU   SGL   SGR   SGU   SWRO    SGRO   SGRW   KRW_SWRO   KRW_SWU   KRG_SGRO   KRG_SGU   KRO_SWL   KRO_SWR   KRO_SGL   KRO_SGR   KRW_SGL   KRW_SGR   KRG_SGRW   SGTR    SOTR 
     1    0.1    0.2   0.54  .5    0.4   0.2   .01     1      1      0.5        0.2       1          0.2       0.4       1         1         0.2       0.3       0.1       0.125      0.134   0.7
     2    0.05	0.15  0.49	0.45  0.35	0.15  0		  0.95	 0.95	0.45	   0.15		 0.95		0.15	  0.35		0.95	  0.95		0.15	  0.25		0.05	  0.075		 0.084	 0.65
 
     """
-    expected_well_completion_1 = NexusCompletion(date=start_date, cell_number=1, swl=0.1, swr=0.2, swu=0.54, sgl=0.5, sgr=0.4, sgu=0.2,
-                                                 swro=0.01, sgro=1, sgrw=1, krw_swro=0.5, krw_swu=0.2, krg_sgro=1, krg_sgu=0.2,
-                                                 kro_swl=0.4, kro_swr=1, kro_sgl=1, kro_sgr=0.2, krw_sgl=0.3, krw_sgr=0.1,
-                                                 krg_sgrw=0.125, sgtr=0.134, sotr=0.7, )
-    expected_well_completion_2 = NexusCompletion(date=start_date, cell=2, swl=0.05, swr=0.15, swu=0.49, sgl=0.45, sgr=0.35, sgu=0.15,
-                                                 swro=0, sgro=0.95, sgrw=0.95, krw_swro=0.45, krw_swu=0.15, krg_sgro=0.95, krg_sgu=0.15,
-                                                 kro_swl=0.35, kro_swr=0.95, kro_sgl=0.95, kro_sgr=0.15, krw_sgl=0.25, krw_sgr=0.05,
-                                                 krg_sgrw=0.075, sgtr=0.084, sotr=0.65, )
+    expected_rel_perm_end_point_1 = NexusRelPermEndPoint(swl=0.1, swr=0.2, swu=0.54, sgl=0.5, sgr=0.4, sgu=0.2,
+                                                         swro=0.01, sgro=1, sgrw=1, krw_swro=0.5, krw_swu=0.2, krg_sgro=1, krg_sgu=0.2,
+                                                         kro_swl=0.4, kro_swr=1, kro_sgl=1, kro_sgr=0.2, krw_sgl=0.3, krw_sgr=0.1,
+                                                         krg_sgrw=0.125, sgtr=0.134, sotr=0.7, )
+    expected_rel_perm_end_point_2 = NexusRelPermEndPoint(swl=0.05, swr=0.15, swu=0.49, sgl=0.45, sgr=0.35, sgu=0.15,
+                                                         swro=0, sgro=0.95, sgrw=0.95, krw_swro=0.45, krw_swu=0.15, krg_sgro=0.95, krg_sgu=0.15,
+                                                         kro_swl=0.35, kro_swr=0.95, kro_sgl=0.95, kro_sgr=0.15, krw_sgl=0.25, krw_sgr=0.05,
+                                                         krg_sgrw=0.075, sgtr=0.084, sotr=0.65, )
+
+    expected_well_completion_1 = NexusCompletion(date=start_date, cell_number=1, rel_perm_end_point=expected_rel_perm_end_point_1)
+
+    expected_well_completion_2 = NexusCompletion(date=start_date, cell_number=2, rel_perm_end_point=expected_rel_perm_end_point_2)
 
     expected_well = NexusWell(well_name='WELL_3', completions=[expected_well_completion_1, expected_well_completion_2],
                               units=Units.OILFIELD)
