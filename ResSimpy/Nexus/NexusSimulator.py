@@ -199,7 +199,6 @@ class NexusSimulator(Simulator):
             elif model_oilfield_run_units != oilfield_run_units:
                 raise ValueError(f"Model at {model} using inconsistent run units")
 
-
         return oilfield_run_units, oilfield_default_units
 
     @staticmethod
