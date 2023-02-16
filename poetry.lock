@@ -305,7 +305,7 @@ python-versions = "*"
 
 [[package]]
 name = "resqpy"
-version = "4.2.0"
+version = "4.2.1"
 description = "Python API for working with RESQML models"
 category = "main"
 optional = false
@@ -339,7 +339,7 @@ test = ["asv", "gmpy2", "mpmath", "pooch", "pytest", "pytest-cov", "pytest-timeo
 
 [[package]]
 name = "setuptools"
-version = "67.3.1"
+version = "67.3.2"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 category = "main"
 optional = false
@@ -762,8 +762,8 @@ pytz = [
     {file = "pytz-2022.7.1.tar.gz", hash = "sha256:01a0681c4b9684a28304615eba55d1ab31ae00bf68ec157ec3708a8182dbbcd0"},
 ]
 resqpy = [
-    {file = "resqpy-4.2.0-py3-none-any.whl", hash = "sha256:0145175361a4f03836561072d8407692ca348c96568c7809486e0a828841c91c"},
-    {file = "resqpy-4.2.0.tar.gz", hash = "sha256:59b8745432189db0b8c2d82c79ac18e0eff8160ec7da0ccaf5d8e3a605a17f14"},
+    {file = "resqpy-4.2.1-py3-none-any.whl", hash = "sha256:64fe97fa8de77e7b3929111601a1d8ca9468e2a40721da56b0aa0c39a40c1b5a"},
+    {file = "resqpy-4.2.1.tar.gz", hash = "sha256:fe2a30b8bfb1a7adfad0607e7f172a311cdec0add36c90608bc4292958c5c0fb"},
 ]
 scipy = [
     {file = "scipy-1.10.0-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:b901b423c91281a974f6cd1c36f5c6c523e665b5a6d5e80fcb2334e14670eefd"},
@@ -789,8 +789,8 @@ scipy = [
     {file = "scipy-1.10.0.tar.gz", hash = "sha256:c8b3cbc636a87a89b770c6afc999baa6bcbb01691b5ccbbc1b1791c7c0a07540"},
 ]
 setuptools = [
-    {file = "setuptools-67.3.1-py3-none-any.whl", hash = "sha256:23c86b4e44432bfd8899384afc08872ec166a24f48a3f99f293b0a557e6a6b5d"},
-    {file = "setuptools-67.3.1.tar.gz", hash = "sha256:daec07fd848d80676694d6bf69c009d28910aeece68a38dbe88b7e1bb6dba12e"},
+    {file = "setuptools-67.3.2-py3-none-any.whl", hash = "sha256:bb6d8e508de562768f2027902929f8523932fcd1fb784e6d573d2cafac995a48"},
+    {file = "setuptools-67.3.2.tar.gz", hash = "sha256:95f00380ef2ffa41d9bba85d95b27689d923c93dfbafed4aecd7cf988a25e012"},
 ]
 six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
