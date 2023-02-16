@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Dict, Optional, Union
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
 from string import Template
@@ -61,24 +62,27 @@ def check_token(token: str, line: str) -> bool:
     return True
 
 
-def get_next_value(start_line_index: int, file_as_list: list[str], search_string: str,
+def get_next_value(start_line_index: int, file_as_list: list[str | NexusFile], search_string: str,
                    ignore_values: Optional[list[str]] = None,
                    replace_with: Union[str, VariableEntry, None] = None) -> Optional[str]:
     """Gets the next non blank value in a list of lines
 
     Args:
         start_line_index (int): line number to start reading file_as_list from
-        file_as_list (list[str]): a list of strings containing each line of the file as a new entry
+        file_as_list (list[str | NexusFile]): a list of strings containing each line of the file as a new entry
         search_string (str): string to search from within the first indexed line
         ignore_values (Optional[list[str]], optional): a list of values that should be ignored if found. \
             Defaults to None.
         replace_with (Union[str, VariableEntry, None], optional): a value to replace the existing value with. \
             Defaults to None.
+    Raises:
+        ValueError: If an include line represented as a NexusFile is hit before finding any value.
 
     Returns:
         Optional[str]: Next non blank value from the list, if none found returns None
     """
-
+    if isinstance(search_string, NexusFile):
+        raise ValueError()
     invalid_characters = ["\n", "\t", " ", "!", ","]
     value_found = False
     value = ""
@@ -94,7 +98,11 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
                 if start_line_index >= len(file_as_list):
                     return None
                 # Move to the next line down in file_as_list
-                search_string = file_as_list[start_line_index]
+                new_search_string = file_as_list[start_line_index]
+                if not isinstance(new_search_string, str):
+                    raise ValueError(f'No valid value found, hit INCLUDE statement instead on line number \
+                        {start_line_index}')
+                search_string = new_search_string
                 break
             elif character not in invalid_characters:
                 value_string = search_string[character_location: len(search_string)]
@@ -116,6 +124,9 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
                     # Replace the original value with the new requested value
                     if replace_with is not None:
                         original_line = file_as_list[start_line_index]
+                        if not isinstance(original_line, str):
+                            raise ValueError(f'No valid value found, hit INCLUDE statement instead on line number \
+                                             {start_line_index}')
                         new_line = original_line
 
                         if isinstance(replace_with, str):
@@ -147,7 +158,7 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
     return value
 
 
-def get_token_value(token: str, token_line: str, file_list: list[str],
+def get_token_value(token: str, token_line: str, file_list: list[str | NexusFile],
                     ignore_values: Optional[list[str]] = None,
                     replace_with: Union[str, VariableEntry, None] = None) -> Optional[str]:
     """Gets the value following a token if supplied with a line containing the token.
@@ -180,12 +191,13 @@ def get_token_value(token: str, token_line: str, file_list: list[str],
     if len(search_string) < 1:
         line_index += 1
         search_string = file_list[line_index]
-
+    if isinstance(search_string, NexusFile):
+        raise ValueError
     value = get_next_value(line_index, file_list, search_string, ignore_values, replace_with)
     return value
 
 
-def get_times(times_file: list[str]) -> list[str]:
+def get_times(times_file: list[str | NexusFile]) -> list[str]:
     """Retrieves a list of TIMES from the supplied Runcontrol / Include file
 
     Args:
@@ -196,7 +208,7 @@ def get_times(times_file: list[str]) -> list[str]:
             empty list if no values found
     """
     times = []
-    for line in times_file:
+    for line in NexusFile.iterate_line(times_file):
         if check_token('TIME', line):
             value = get_token_value('TIME', line, times_file)
             if value is not None:
@@ -205,7 +217,7 @@ def get_times(times_file: list[str]) -> list[str]:
     return times
 
 
-def delete_times(file_content: list[str]) -> list[str]:
+def delete_times(file_content: list[str | NexusFile]) -> list[str]:
     """ Deletes times from file contents
     Args:
         file_content (list[str]):  list of strings with each line from the file a new entry in the list
@@ -213,9 +225,9 @@ def delete_times(file_content: list[str]) -> list[str]:
     Returns:
         list[str]: the modified file without any TIME cards in
     """
-    new_file = []
+    new_file: list[str] = []
     previous_line_is_time = False
-    for line in file_content:
+    for line in NexusFile.iterate_line(file_content):
         if "TIME " not in line and (previous_line_is_time is False or line != '\n'):
             new_file.append(line)
             previous_line_is_time = False
@@ -242,7 +254,7 @@ def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False) -> 
 
     # regex: look back and forward 1 character from an ! and check if its a quotation mark and
     # exclude it from the match if it is
-    file_without_comments = [re.split(r'(?<!\")!(?!\")', x)[0] for x in file_as_list if x[0] != '!']
+    file_without_comments = [re.split(r'(?<!\")!(?!\")', x)[0] if x and x[0] != '!' else x for x in file_as_list]
 
     flat_file = '\n'.join(file_without_comments)
 
@@ -279,7 +291,7 @@ def load_file_as_list(file_path: str, strip_comments: bool = False, strip_str: b
 
 # TODO: Rename
 def load_token_value_if_present(token: str, modifier: str, token_property: VariableEntry,
-                                line: str, file_as_list: list[str],
+                                line: str, file_as_list: list[str | NexusFile],
                                 ignore_values: Optional[list[str]] = None) -> None:
     """Gets a token's value if there is one and loads it into the token_property
 
@@ -288,7 +300,7 @@ def load_token_value_if_present(token: str, modifier: str, token_property: Varia
         modifier (str): any modifiers applied to the token e.g. 'MULT'
         token_property (VariableEntry): VariableEntry object to store the modifier and value pair into
         line (str): line to search for the token in
-        file_as_list (list[str]): a list of strings containing each line of the file as a new entry
+        file_as_list (list[str] | NexusFile): a list of strings containing each line of the file as a new entry
         ignore_values (Optional[list[str]], optional): values to be ignored. Defaults to None.
     Raises:
         ValueError: raises an error if no numerical value can be found after the supplied token modifier pair
@@ -358,7 +370,7 @@ def get_simulation_time(line: str) -> str:
 
 
 # TODO: move to structured grid module
-def replace_value(file_as_list: list[str], old_property: VariableEntry, new_property: VariableEntry,
+def replace_value(file_as_list: list[str | NexusFile], old_property: VariableEntry, new_property: VariableEntry,
                   token_name: str) -> None:
     """Replace the value and token + modifier with the new values
 
@@ -371,11 +383,11 @@ def replace_value(file_as_list: list[str], old_property: VariableEntry, new_prop
         None: modifies the file_as_list with the new property
     """
 
-    for line in file_as_list:
+    for line in NexusFile.iterate_line(file_as_list):
         old_token_modifier = f"{token_name} {old_property.modifier}"
         new_token_modifier = f"{token_name} {new_property.modifier}"
         ignore_values = ['INCLUDE'] if old_property.modifier == 'VALUE' else []
-        if old_token_modifier in line:
+        if check_token(old_token_modifier, line):
             # If we are replacing a mult, replace the first value with a blank
             if old_property.modifier == 'MULT':
                 dummy_value = VariableEntry('MULT', '')

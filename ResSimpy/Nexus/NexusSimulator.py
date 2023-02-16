@@ -4,6 +4,8 @@ import copy
 from functools import cmp_to_key
 from datetime import timedelta
 from typing import Any, Union, Optional
+import warnings
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from ResSimpy.UnitsEnum import Units
 from ResSimpy.Nexus.DataModels.StructuredGridFile import StructuredGridFile, PropertyToLoad, VariableEntry
@@ -217,10 +219,12 @@ class NexusSimulator(Simulator):
         fluid_type = None
         for model in models:
             model_fluid_type = None
-            fcs_file = nexus_file_operations.load_file_as_list(model)
+            fcs_file = NexusFile.generate_file_include_structure(model).file_content_as_list
             surface_filename = None
-
-            for line in fcs_file:
+            if fcs_file is None:
+                warnings.warn(UserWarning(f'No file found for {model}'))
+                continue
+            for line in NexusFile.iterate_line(fcs_file):
                 if nexus_file_operations.check_token("SURFACE Network 1", line):
                     surface_filename = nexus_file_operations.get_token_value(token="SURFACE Network 1", token_line=line,
                                                                              file_list=fcs_file)
@@ -340,7 +344,7 @@ class NexusSimulator(Simulator):
 
             self.__origin = self.__destination + "/" + os.path.basename(self.__original_fcs_file_path)
 
-    def __get_wells_paths(self, line: str, fcs_file: list[str]) -> None:
+    def __get_wells_paths(self, line: str, fcs_file: list[str | NexusFile]) -> None:
         well_keyword = nexus_file_operations.get_token_value(token="WELLS", token_line=line,
                                                              file_list=fcs_file)
         if well_keyword is None:
@@ -369,32 +373,36 @@ class NexusSimulator(Simulator):
         """
         # self.get_simulation_status(True)
 
-        fcs_file = nexus_file_operations.load_file_as_list(self.__new_fcs_file_path)
-
-        for line in fcs_file:
+        self.fcs_file = NexusFile.generate_file_include_structure(self.__new_fcs_file_path, origin=None)
+        fcs_file_content = self.fcs_file.file_content_as_list
+        if fcs_file_content is None:
+            raise ValueError(f'FCS file not found, no content for {self.__new_fcs_file_path}')
+        for line in NexusFile.iterate_line(fcs_file_content):
             if nexus_file_operations.check_token('RUNCONTROL', line):
-                runcontrol_path = nexus_file_operations.get_token_value('RUNCONTROL', line, fcs_file)
+                runcontrol_path = nexus_file_operations.get_token_value('RUNCONTROL', line, fcs_file_content)
                 if runcontrol_path is not None:
                     self.run_control_file = nexus_file_operations.get_full_file_path(runcontrol_path, self.__origin)
+                    self.runcontrol_file = NexusFile.generate_file_include_structure(self.run_control_file,
+                                                                                     origin=self.__new_fcs_file_path)
             elif nexus_file_operations.check_token('DATEFORMAT', line):
-                value = nexus_file_operations.get_token_value('DATEFORMAT', line, fcs_file)
+                value = nexus_file_operations.get_token_value('DATEFORMAT', line, fcs_file_content)
                 if value is not None:
                     self.use_american_date_format = value == 'MM/DD/YYYY'
                 self.__date_format_string = "%m/%d/%Y" if self.use_american_date_format else "%d/%m/%Y"
             elif nexus_file_operations.check_token('STRUCTURED_GRID', line):
-                value = nexus_file_operations.get_token_value('STRUCTURED_GRID', line, fcs_file)
+                value = nexus_file_operations.get_token_value('STRUCTURED_GRID', line, fcs_file_content)
                 if value is not None:
                     self.__structured_grid_file_path = nexus_file_operations.get_full_file_path(value, self.__origin)
                     self.load_structured_grid_file()
             elif nexus_file_operations.check_token('RUN_UNITS', line):
-                value = nexus_file_operations.get_token_value('RUN_UNITS', line, fcs_file)
+                value = nexus_file_operations.get_token_value('RUN_UNITS', line, fcs_file_content)
                 if value is not None:
                     if value == 'ENGLISH':
                         self.__run_units = Units.OILFIELD
                     else:
                         self.__run_units = Units[value.upper()]
             elif nexus_file_operations.check_token('DEFAULT_UNITS', line):
-                value = nexus_file_operations.get_token_value('DEFAULT_UNITS', line, fcs_file)
+                value = nexus_file_operations.get_token_value('DEFAULT_UNITS', line, fcs_file_content)
                 if value is not None:
                     if value == 'ENGLISH':
                         self.__default_units = Units.OILFIELD
@@ -402,13 +410,13 @@ class NexusSimulator(Simulator):
                         self.__default_units = Units[value.upper()]
             elif nexus_file_operations.check_token("SURFACE NETWORK 1", line):
                 value = nexus_file_operations.get_token_value(token="SURFACE Network 1", token_line=line,
-                                                              file_list=fcs_file)
+                                                              file_list=fcs_file_content)
                 if value is not None:
                     self.__surface_file_path = nexus_file_operations.get_full_file_path(value, self.__origin)
                 break
 
             elif nexus_file_operations.check_token('WELLS', line):
-                self.__get_wells_paths(line, fcs_file)
+                self.__get_wells_paths(line, fcs_file_content)
 
         # Load in the other files
         # Load in Runcontrol
@@ -515,41 +523,33 @@ class NexusSimulator(Simulator):
         Raises:
             ValueError: if the run_control_file attribute is None
         """
-        if self.run_control_file is None:
-            raise ValueError(f"No file path provided for {self.run_control_file=}")
-        run_control_file = nexus_file_operations.load_file_as_list(self.run_control_file)
-        include_file_path = ''
 
-        for line in run_control_file:
+        run_control_file_content = self.runcontrol_file.file_content_as_list
+
+        if (run_control_file_content is None) or (self.runcontrol_file.location is None):
+            raise ValueError(f"No file path provided for {self.runcontrol_file.location=}")
+
+        for line in NexusFile.iterate_line(run_control_file_content):
             if nexus_file_operations.check_token('START', line):
-                value = nexus_file_operations.get_token_value('START', line, run_control_file)
+                value = nexus_file_operations.get_token_value('START', line, run_control_file_content)
                 if value is not None:
                     self.start_date_set(value)
-            elif nexus_file_operations.check_token('INCLUDE', line):
-                value = nexus_file_operations.get_token_value('INCLUDE', line, run_control_file)
-                if value is not None:
-                    include_file_path = value
 
         times = []
-        run_control_times = nexus_file_operations.get_times(run_control_file)
+        run_control_times = nexus_file_operations.get_times(run_control_file_content)
         times.extend(run_control_times)
 
         # If we don't want to write the times, return here.
         if not self.__write_times:
             return
 
-        if include_file_path != '':
-            full_file_path = nexus_file_operations.get_full_file_path(include_file_path, self.run_control_file)
-
-            include_file = nexus_file_operations.load_file_as_list(full_file_path)
-            include_times = nexus_file_operations.get_times(include_file)
-            times.extend(include_times)
+        if self.runcontrol_file.includes:
             if self.__destination is not None:
-                self.__remove_times_from_file(include_file, full_file_path)
+                self.__remove_times_from_file(run_control_file_content, self.runcontrol_file.location)
 
         self.__modify_times(content=times, operation='replace')
 
-    def __remove_times_from_file(self, file_content: list[str], output_file_path: str):
+    def __remove_times_from_file(self, file_content: list[str | NexusFile], output_file_path: str):
         """Removes the times from a file - used for replacing with new times
         Args:
             file_content (list[str]): a list of strings containing each line of the file as a new entry
@@ -1263,3 +1263,12 @@ class NexusSimulator(Simulator):
         new_file_str = "".join(new_file)
         with open(self.__structured_grid_file_path, "w") as text_file:
             text_file.write(new_file_str)
+
+        # def export_fcs_file_graph(self):
+        #     from_main_lists = []
+        #     to_main_lists = []
+        #     from_list, to_list = self.runcontrol_file.export_network_lists()
+        #     from_main_lists.extend(from_list)
+        #     to_main_lists.extend(to_list)
+
+            

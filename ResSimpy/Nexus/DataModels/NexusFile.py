@@ -1,8 +1,9 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import re
 from typing import Optional, Union, Generator
 
 from ResSimpy.Nexus import nexus_file_operations
+import warnings
 
 
 @dataclass(kw_only=True)
@@ -16,19 +17,20 @@ class NexusFile:
             Defaults to None.
     """
     location: Optional[str] = None
-    includes: Optional[list[str]] = None
+    includes: Optional[list[str]] = field(default_factory=list)
     origin: Optional[str] = None
-    includes_objects: Optional[list['NexusFile']] = None
-    file_content_as_list: Optional[list] = None
+    includes_objects: Optional[list['NexusFile']] = field(default_factory=list)
+    file_content_as_list: Optional[list[Union[str, 'NexusFile']]] = field(default_factory=list)
 
-    def __init__(self, location: Optional[str] = None, includes: Optional[list[str]] = None,
-                 origin: Optional[str] = None, includes_objects: Optional[list['NexusFile']] = None,
-                 file_content_as_list: Optional[list[Union[str, 'NexusFile']]] = None):
+    def __init__(self, location: Optional[str] = None, includes: Optional[list[str]] = field(default_factory=list),
+                 origin: Optional[str] = None, includes_objects: Optional[list['NexusFile']] =
+                 field(default_factory=list), file_content_as_list: Optional[list[Union[str, 'NexusFile']]] =
+                 field(default_factory=list)):
         self.location: Optional[str] = location
         self.includes: Optional[list[str]] = includes
         self.origin: Optional[str] = origin
         self.includes_objects: Optional[list['NexusFile']] = includes_objects
-        self.file_content_as_list: Optional[list] = file_content_as_list
+        self.file_content_as_list: Optional[list[Union[str, 'NexusFile']]] = file_content_as_list
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True):
@@ -42,8 +44,17 @@ class NexusFile:
             NexusFile: a class instance for NexusFile with knowledge of include files
         """
         # load file as list and clean up file
-        file_as_list = nexus_file_operations.load_file_as_list(file_path)
-        file_as_list = nexus_file_operations.strip_file_of_comments(file_as_list)
+        try:
+            file_as_list = nexus_file_operations.load_file_as_list(file_path)
+        except FileNotFoundError:
+            # handle if a file can't be found
+            nexus_file_class = cls(location=file_path,
+                                   includes=None,
+                                   origin=origin,
+                                   includes_objects=None,
+                                   file_content_as_list=None,)
+            warnings.warn(UserWarning(f'No file found for: {file_path}'))
+            return nexus_file_class
 
         # prevent python from mutating the lists that its iterating over
         modified_file_as_list: list = []
@@ -51,7 +62,7 @@ class NexusFile:
         inc_file_list: list[str] = []
         includes_objects: Optional[list] = []
         for line in file_as_list:
-            if "INCLUDE" not in line.upper():  # TODO replace with check_token function
+            if not nexus_file_operations.check_token("INCLUDE", line):
                 modified_file_as_list.append(line)
                 continue
             inc_file_path = nexus_file_operations.get_token_value('INCLUDE', line, [line])
@@ -145,3 +156,5 @@ class NexusFile:
                     continue
             else:
                 yield row
+
+# ['str', NexusFile, 'str', NexusFile]

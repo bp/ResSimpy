@@ -1,5 +1,7 @@
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
+from tests.multifile_mocker import mock_multiple_files
+
 
 def mock_different_includes(mocker, filename, test_file_contents, inc_file_content1, inc_file_content2='',
                             ):
@@ -36,7 +38,11 @@ def test_generate_file_include_structure_basic(mocker):
                                     file_content_as_list=expected_file_content_as_list)
 
     def mock_open_wrapper(filename, mode):
-        mock_open = mock_different_includes(mocker, filename, test_file_contents, include_file_contents).return_value
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'test_file_path.dat': test_file_contents,
+            'inc_file1.inc': include_file_contents,
+        }
+                                        ).return_value
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
@@ -70,10 +76,12 @@ def test_generate_file_include_structure_multiple_includes(mocker):
                                     file_content_as_list=expected_file_content_as_list)
 
     def mock_open_wrapper(filename, mode):
-        mock_open = mock_different_includes(mocker, filename, test_file_contents, include_file_contents,
-                                            include_file_contents_2).return_value
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'test_file_path.dat': test_file_contents,
+            'inc_file1.inc': include_file_contents,
+            'inc_file2.inc': include_file_contents_2,
+        }).return_value
         return mock_open
-
     mocker.patch("builtins.open", mock_open_wrapper)
     # Act
     nexus_file = NexusFile.generate_file_include_structure(file_path)
@@ -107,8 +115,11 @@ def test_generate_file_include_structure_nested_includes(mocker):
                                     file_content_as_list=expected_file_content_as_list)
 
     def mock_open_wrapper(filename, mode):
-        mock_open = mock_different_includes(mocker, filename, test_file_contents, include_file_contents,
-                                            include_file_contents_2).return_value
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'test_file_path.dat': test_file_contents,
+            'inc_file1.inc': include_file_contents,
+            'inc_file2.inc': include_file_contents_2,
+        }).return_value
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
