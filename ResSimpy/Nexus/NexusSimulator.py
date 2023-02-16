@@ -89,7 +89,7 @@ class NexusSimulator(Simulator):
         self.__simulation_start_time: Optional[str] = None  # run execution start time from the log file
         self.__simulation_end_time: Optional[str] = None  # run execution finish time from the log file
         self.__previous_run_time: Optional[str] = None  # run execution finish time from the log file
-        self.__run_units: Optional[str] = None
+        self.__run_units:  Units = Units.OILFIELD  # The Nexus default
         self.use_american_run_units: bool = False
         self.use_american_input_units: bool = False
         self.__write_times: bool = write_times
@@ -134,6 +134,14 @@ class NexusSimulator(Simulator):
         """Returns the location of the structured grid file"""
         return self.__structured_grid_file_path
 
+    def get_default_units(self):
+        """Returns the default units"""
+        return self.__default_units
+
+    def get_run_units(self):
+        """Returns the run units"""
+        return self.__run_units
+
     def get_new_fcs_name(self):
         """Returns the new name for the FCS file without the fcs extension"""
         return self.__root_name
@@ -156,8 +164,8 @@ class NexusSimulator(Simulator):
                 (RUN_UNITS,DEFAULT_UNITS) respectively and False, False otherwise. \
                 Returns (None, None) if it can't find a (RUN_UNITS, DEFAULT_UNITS) in the supplied files\
         """
-        american_run_units: Optional[bool] = None
-        american_input_units: Optional[bool] = None
+        oilfield_run_units: Optional[bool] = None
+        oilfield_default_units: Optional[bool] = None
 
         for model in models:
             # If we're checking the units of a RESQML model, read it in and get the units. Otherwise, read the units
@@ -170,30 +178,28 @@ class NexusSimulator(Simulator):
 
                 # Check the grid units
                 grid_length_unit = grid.xy_units()
-                american_input_units = grid_length_unit == 'ft'
-                american_run_units = grid_length_unit == 'ft'
+                model_oilfield_default_units = grid_length_unit == 'ft'
+                model_oilfield_run_units = grid_length_unit == 'ft'
             else:
-                fcs_file = nexus_file_operations.load_file_as_list(model)
+                simulator = NexusSimulator(origin=model)
+                model_oilfield_default_units = simulator.get_default_units() == Units.OILFIELD
+                model_oilfield_run_units = simulator.get_run_units() == Units.OILFIELD
 
-                for line in fcs_file:
-                    if 'RUN_UNITS' in line:
-                        value = nexus_file_operations.get_token_value('RUN_UNITS', line, fcs_file)
-                        if value is not None:
-                            model_american_run_units = value == 'ENGLISH'
-                            if american_run_units is None:
-                                american_run_units = model_american_run_units
-                            elif model_american_run_units != american_run_units:
-                                raise ValueError(f"Model at {model} using inconsistent run units")
-                    elif 'DEFAULT_UNITS' in line:
-                        value = nexus_file_operations.get_token_value('DEFAULT_UNITS', line, fcs_file)
-                        if value is not None:
-                            model_american_input_units = value == 'ENGLISH'
-                            if american_input_units is None:
-                                american_input_units = model_american_input_units
-                            elif american_run_units != american_input_units:
-                                raise ValueError(f"Model at {model} using inconsistent default units")
+            # If not defined, assign it to model_oilfield_default_units
+            if oilfield_default_units is None:
+                oilfield_default_units = model_oilfield_default_units
+            # Raise ValueError if default units are inconsistent with the other models
+            elif model_oilfield_default_units != oilfield_default_units:
+                raise ValueError(f"Model at {model} using inconsistent default units")
 
-        return american_run_units, american_input_units
+            # If not defined, assign it to model_oilfield_run_units
+            if oilfield_run_units is None:
+                oilfield_run_units = model_oilfield_run_units
+            # Raise ValueError if run units are inconsistent with the other models
+            elif model_oilfield_run_units != oilfield_run_units:
+                raise ValueError(f"Model at {model} using inconsistent run units")
+
+        return oilfield_run_units, oilfield_default_units
 
     @staticmethod
     def get_check_oil_gas_types_for_models(models: list[str]) -> Optional[str]:
@@ -215,7 +221,7 @@ class NexusSimulator(Simulator):
             surface_filename = None
 
             for line in fcs_file:
-                if "SURFACE Network 1" in line:
+                if nexus_file_operations.check_token("SURFACE Network 1", line):
                     surface_filename = nexus_file_operations.get_token_value(token="SURFACE Network 1", token_line=line,
                                                                              file_list=fcs_file)
                     break
@@ -245,12 +251,12 @@ class NexusSimulator(Simulator):
         eos_string: str = ''
         eos_found: bool = False
         for line in surface_file:
-            if "EOS" in line:
+            if nexus_file_operations.check_token("EOS", line):
                 eos_string += line
                 eos_found = True
             elif eos_found:
                 eos_string += line
-            if "COMPONENTS" in line:
+            if nexus_file_operations.check_token("COMPONENTS", line):
                 break
 
         return eos_string
@@ -272,16 +278,16 @@ class NexusSimulator(Simulator):
         fluid_type = None
 
         for line in surface_file:
-            if "BLACKOIL" in line:
+            if nexus_file_operations.check_token("BLACKOIL", line):
                 fluid_type = "BLACKOIL"
                 break
-            elif "WATEROIL" in line:
+            elif nexus_file_operations.check_token("WATEROIL", line):
                 fluid_type = "WATEROIL"
                 break
-            elif "GASWATER" in line:
+            elif nexus_file_operations.check_token("GASWATER", line):
                 fluid_type = "GASWATER"
                 break
-            elif "EOS" in line:
+            elif nexus_file_operations.check_token("EOS", line):
                 fluid_type = NexusSimulator.get_eos_details(surface_file)
 
         if fluid_type is None:
@@ -334,9 +340,30 @@ class NexusSimulator(Simulator):
 
             self.__origin = self.__destination + "/" + os.path.basename(self.__original_fcs_file_path)
 
+    def __get_wells_paths(self, line: str, fcs_file: list[str]) -> None:
+        well_keyword = nexus_file_operations.get_token_value(token="WELLS", token_line=line,
+                                                             file_list=fcs_file)
+        if well_keyword is None:
+            raise ValueError(f'No Wells file path found in line: {line}')
+
+        # WELLS SET 1 wells.dat
+        if well_keyword.upper() == 'SET':
+            well_set_number = nexus_file_operations.get_token_value(token="SET", token_line=line,
+                                                                    file_list=fcs_file)
+            if well_set_number is None:
+                raise ValueError(f'No Wells Set number found in line: {line}')
+            index = line.find(well_set_number)
+            modified_line = line[index+len(well_set_number)::]
+            well_keyword = nexus_file_operations.get_next_value(0, [modified_line],
+                                                                search_string=modified_line, )
+        if well_keyword is None:
+            raise ValueError(f'No Wells file path found in line: {line}')
+        complete_well_filepath = nexus_file_operations.get_full_file_path(well_keyword, self.__origin)
+        self.Wells.wellspec_paths.append(complete_well_filepath)
+
     def __load_fcs_file(self):
         """ Loads in the information from the supplied FCS file into the class instance.
-            Loads in the paths for runcontrol, strucutured grid and the first surface network.
+            Loads in the paths for runcontrol, structured grid and the first surface network.
             Loads in the values for dateformat and run units.
             Attempts to load the run_control_file.
         """
@@ -362,13 +389,17 @@ class NexusSimulator(Simulator):
             elif nexus_file_operations.check_token('RUN_UNITS', line):
                 value = nexus_file_operations.get_token_value('RUN_UNITS', line, fcs_file)
                 if value is not None:
-                    self.__run_units = value
-                    self.use_american_run_units = value == 'ENGLISH'
+                    if value == 'ENGLISH':
+                        self.__run_units = Units.OILFIELD
+                    else:
+                        self.__run_units = Units[value.upper()]
             elif nexus_file_operations.check_token('DEFAULT_UNITS', line):
                 value = nexus_file_operations.get_token_value('DEFAULT_UNITS', line, fcs_file)
                 if value is not None:
-                    self.__run_units = value
-                    self.use_american_input_units = value == 'ENGLISH'
+                    if value == 'ENGLISH':
+                        self.__default_units = Units.OILFIELD
+                    else:
+                        self.__default_units = Units[value.upper()]
             elif nexus_file_operations.check_token("SURFACE NETWORK 1", line):
                 value = nexus_file_operations.get_token_value(token="SURFACE Network 1", token_line=line,
                                                               file_list=fcs_file)
@@ -377,20 +408,7 @@ class NexusSimulator(Simulator):
                 break
 
             elif nexus_file_operations.check_token('WELLS', line):
-                well_keyword = nexus_file_operations.get_token_value(token="WELLS", token_line=line,
-                                                                     file_list=fcs_file)
-                if well_keyword is not None:
-                    if well_keyword.upper() == 'SET':
-                        well_set_number = nexus_file_operations.get_token_value(token="SET", token_line=line,
-                                                                                file_list=fcs_file)
-                        if well_set_number is not None:
-                            index = line.find(well_set_number)
-                            modified_line = line[index+len(well_set_number)::]
-                            well_keyword = nexus_file_operations.get_next_value(0, [modified_line],
-                                                                                search_string=modified_line, )
-                if well_keyword is not None:
-                    complete_well_filepath = nexus_file_operations.get_full_file_path(well_keyword, self.__origin)
-                    self.Wells.wellspec_paths.append(complete_well_filepath)
+                self.__get_wells_paths(line, fcs_file)
 
         # Load in the other files
         # Load in Runcontrol
@@ -507,7 +525,7 @@ class NexusSimulator(Simulator):
                 value = nexus_file_operations.get_token_value('START', line, run_control_file)
                 if value is not None:
                     self.start_date_set(value)
-            elif 'INCLUDE' in line:
+            elif nexus_file_operations.check_token('INCLUDE', line):
                 value = nexus_file_operations.get_token_value('INCLUDE', line, run_control_file)
                 if value is not None:
                     include_file_path = value
@@ -804,11 +822,11 @@ class NexusSimulator(Simulator):
             log_file_line_list (list[str]): log file information represented with a new entry per line of the file.
         """
         for line in log_file_line_list:
-            if 'start generic pdsh   prolog' in line:
+            if nexus_file_operations.check_token('start generic pdsh   prolog', line):
                 value = nexus_file_operations.get_simulation_time(line)
                 self.__simulation_start_time = value
 
-            if 'end generic pdsh   epilog' in line:
+            if nexus_file_operations.check_token('end generic pdsh   epilog', line):
                 value = nexus_file_operations.get_simulation_time(line)
                 self.__simulation_end_time = value
 
@@ -926,7 +944,7 @@ class NexusSimulator(Simulator):
                                                                       file_as_list, ['INCLUDE'])
 
             # Load in grid dimensions
-            if 'NX' in line:
+            if nexus_file_operations.check_token('NX', line):
                 # Check that the format of the grid is NX followed by NY followed by NZ
                 current_line = file_as_list[file_as_list.index(line)]
                 remaining_line = current_line[current_line.index('NX') + 2:]
@@ -1075,7 +1093,7 @@ class NexusSimulator(Simulator):
         file_as_list = nexus_file_operations.load_file_as_list(self.__structured_grid_file_path)
 
         for line in file_as_list:
-            if command_token in line and ('!' not in line or line.index(command_token) < line.index('!')):
+            if nexus_file_operations.check_token(command_token, line):
                 start_index = file_as_list.index(line) - previous_lines \
                     if file_as_list.index(line) - previous_lines > 0 else 0
                 end_index = file_as_list.index(line) + following_lines \
@@ -1129,7 +1147,7 @@ class NexusSimulator(Simulator):
             if case_name_string in line:
                 read_in_times = True
                 continue
-            if read_in_times and 'TIME' in line:
+            if read_in_times and nexus_file_operations.check_token('TIME', line):
                 heading_location = 0
                 line_string = line
                 while len(line_string) > 0:
@@ -1203,7 +1221,7 @@ class NexusSimulator(Simulator):
         """
         token_found = False
         for line in file:
-            if token in line:
+            if nexus_file_operations.check_token(token, line):
                 token_found = True
 
         return token_found
@@ -1234,7 +1252,7 @@ class NexusSimulator(Simulator):
         else:
             line_counter = 0
             for line in file:
-                if 'MAPOUT' in line:
+                if nexus_file_operations.check_token('MAPOUT', line):
                     file[line_counter] = 'MAPOUT ALL\n'
                     break
                 line_counter += 1
