@@ -104,6 +104,7 @@ class NexusFile:
         return self.includes_objects
 
     def export_network_lists(self):
+        # TODO: add to test coverage
         """ Exports lists of connections from and to for use in network graphs
 
         Raises:
