@@ -4,9 +4,18 @@ version = "0.1.0"
 description = ""
 authors = ["BP"]
 readme = "README.rst"
+keywords = ["ResSimpy", "Reservoir Engineering"]
+classifiers = [
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.10",
+    "Development Status :: 3 - Alpha",
+    "Topic :: Scientific/Engineering",
+    "Topic :: System :: Filesystems",
+    "Topic :: Scientific/Engineering :: Information Analysis"
+]
 
 [tool.poetry.dependencies]
-python = ">=3.10, <3.12"
+python = ">=3.10, <3.11"
 resqpy = "^4.2"
 
 [tool.poetry.group.dev.dependencies]
