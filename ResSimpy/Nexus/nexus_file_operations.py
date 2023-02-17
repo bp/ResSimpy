@@ -695,11 +695,11 @@ def get_full_file_path(file_path: str, origin: str):
     return return_path
 
 
-def read_table(file_as_list: list[str], keep_comments: bool = False) -> pd.DataFrame:
+def read_table_to_df(file_as_list: list[str], keep_comments: bool = False) -> pd.DataFrame:
     """From a list of strings that represents a table, generate a Pandas dataframe representation of the table
 
     Args:
-        file_as_list (list[str]): List of strings representing table to be read
+        file_as_list (list[str]): List of strings representing a single table to be read
         keep_comments (bool): Boolean to determine if we keep comments as a separate column or not
 
     Returns:

@@ -373,7 +373,7 @@ L3  10  9 10  2.3
      'L': [3,8,None,10], 'RADW': [4.5, None, None, 2.3], 'COMMENT': ['1000','2000','This is a comment',None]})
       ],
                          ids=["basic case", "na case", "lower triangular case", "comments case"])
-def test_read_table(file_contents, keep_comments, expected_df_dict):
+def test_read_table_to_df(file_contents, keep_comments, expected_df_dict):
     # Arrange
     if keep_comments:
         df_expected = pd.DataFrame(expected_df_dict).convert_dtypes()
@@ -384,7 +384,7 @@ def test_read_table(file_contents, keep_comments, expected_df_dict):
     file_as_list = file_contents.splitlines()
 
     # Act
-    df_received = nexus_file_operations.read_table(file_as_list, keep_comments)
+    df_received = nexus_file_operations.read_table_to_df(file_as_list, keep_comments)
 
     # Assert
     # Deep compare expected and received dataframes
