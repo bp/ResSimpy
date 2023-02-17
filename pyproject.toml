@@ -8,6 +8,8 @@ readme = "README.rst"
 [tool.poetry.dependencies]
 python = ">=3.10, <3.11"
 resqpy = "^3.8"
+numpy = "^1.23"
+pandas = "^1.5"
 
 [tool.poetry.group.dev.dependencies]
 pytest-mock = "^3.9"
