@@ -70,7 +70,7 @@ second_file INCLUDE inc_file2.inc''')
                                     includes_objects=None, file_content_as_list=[include_file_contents])
     nexus_file_include2 = NexusFile(location='inc_file2.inc', includes=[], origin=file_path,
                                     includes_objects=None, file_content_as_list=[include_file_contents_2])
-    expected_file_content_as_list = ['basic_file ', nexus_file_include1, '', 'second_file ', nexus_file_include2]
+    expected_file_content_as_list = ['basic_file ', nexus_file_include1, '\n', 'second_file ', nexus_file_include2]
 
     expected_nexus_file = NexusFile(location=expected_location, includes=expected_includes_list,
                                     origin=expected_origin, includes_objects=[nexus_file_include1, nexus_file_include2],
