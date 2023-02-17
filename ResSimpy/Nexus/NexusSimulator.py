@@ -1078,9 +1078,7 @@ class NexusSimulator(Simulator):
         # TODO move the loading of structured grid file to fcs_reader
         structured_grid_contents = NexusFile.generate_file_include_structure(
             self.__structured_grid_file_path)
-        file = structured_grid_contents.file_content_as_list
-        if file is None:
-            raise ValueError(f"No file data found for {structured_grid_contents.location}")
+        file = structured_grid_contents.get_flat_list_str_file()
         # Update each value in the file
         structured_grid_operations.replace_value(file, original_structured_grid_file.netgrs,
                                                  self.__structured_grid_file.netgrs, 'NETGRS')
