@@ -719,8 +719,7 @@ def read_table_to_df(file_as_list: list[str], keep_comments: bool = False) -> pd
                                 for line in file_as_list]
         cleaned_file_as_list = [line if not line.startswith('!') else '' for line in cleaned_file_as_list]
         # Save comments in a list
-        comment_column = [re.split(r'(?<!\")!(?!\")', line)[1].strip()
-                          if '!' in line else None for line in file_as_list]
+        comment_column = [line.split('!',1)[1].strip() if '!' in line else None for line in file_as_list]
         # Create dataframe
         df = pd.read_csv(StringIO('\n'.join(cleaned_file_as_list)+'\n'), sep=r'\s+', skip_blank_lines=False)
         df.columns = [col.upper() for col in df.columns if isinstance(col, str)]
