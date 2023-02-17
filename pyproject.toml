@@ -16,7 +16,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = ">=3.10, <3.11"
-resqpy = "^4.2"
+resqpy = "^4.3"
 numpy = "^1.23"
 pandas = "^1.5"
 
