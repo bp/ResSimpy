@@ -1,5 +1,7 @@
 import ResSimpy.Nexus.nexus_file_operations as nexus_file_operations
 import pytest
+import pandas as pd
+import numpy as np
 
 
 @pytest.mark.parametrize("file_contents, expected_result", [
@@ -337,3 +339,54 @@ def test_expand_include(mocker, file_contents, recursive, include_contents0, inc
     result, _ = nexus_file_operations.expand_include(dummy_file_as_list, recursive)
     # Assert
     assert result == expected_result
+
+@pytest.mark.parametrize("file_contents, keep_comments, expected_df_dict",
+                         [("""
+    NAME IW JW L Radw 
+    L1   1  2  3  4.5 
+    L2   6  7  8   9.11 
+    """, False, 
+    {'NAME': ['L1','L2'], 'IW': [1,6], 'JW': [2,7], 'L': [3,8], 'RADW': [4.5, 9.11]}),
+    ("""
+    NAME IW JW L Radw 
+    L1   1  2  3  4.5 
+    L2   6  7  8   NA 
+    """, False, 
+    {'NAME': ['L1','L2'], 'IW': [1,6], 'JW': [2,7], 'L': [3,8], 'RADW': [4.5, np.nan]}),
+    ("""
+    COMPONENT N2    C1    PS1  C2 
+    C1        0.028
+    PS1       0.17  0.0
+    C2        0.061 0.005 0.0
+    PS2       0.17  0.0   0.0  0.0
+    """, False, 
+    {'COMPONENT': ['C1','PS1','C2','PS2'], 'N2': [0.028,0.17,0.061,0.17], 
+     'C1': [None,0.0,0.005,0.0], 'PS1': [None,None,0.0,0.0], 'C2': [None,None,None,0.0]}),
+    ("""NAME IW JW L Radw ! Depth
+L1   1  2  3  4.5 ! 1000
+
+L2   6  7  8   NA ! 2000 ! 3000
+! This is a comment
+L3  10  9 10  2.3
+""", True, 
+    {'NAME': ['L1','L2',None,'L3'], 'IW': [1,6,None,10], 'JW': [2,7,None,9], 
+     'L': [3,8,None,10], 'RADW': [4.5, None, None, 2.3], 'COMMENT': ['1000','2000 ! 3000','This is a comment',None]})
+      ],
+                         ids=["basic case", "na case", "lower triangular case", "comments case"])
+def test_read_table_to_df(file_contents, keep_comments, expected_df_dict):
+    # Arrange
+    if keep_comments:
+        df_expected = pd.DataFrame(expected_df_dict).convert_dtypes()
+    else:
+      df_expected = pd.DataFrame(expected_df_dict)
+
+    # mock out test file contents
+    file_as_list = file_contents.splitlines()
+
+    # Act
+    df_received = nexus_file_operations.read_table_to_df(file_as_list, keep_comments)
+
+    # Assert
+    # Deep compare expected and received dataframes
+    pd.testing.assert_frame_equal(df_expected, df_received)
+
