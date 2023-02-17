@@ -20,7 +20,8 @@ class NexusFile:
     includes: Optional[list[str]] = field(default_factory=list)
     origin: Optional[str] = None
     includes_objects: Optional[list['NexusFile']] = field(default_factory=list)
-    file_content_as_list: Optional[list[Union[str, 'NexusFile']]] = field(default_factory=list)
+    file_content_as_list: Optional[list[Union[str, 'NexusFile']]] = field(
+        default_factory=list)
 
     def __init__(self, location: Optional[str] = None, includes: Optional[list[str]] = field(default_factory=list),
                  origin: Optional[str] = None, includes_objects: Optional[list['NexusFile']] =
@@ -30,7 +31,8 @@ class NexusFile:
         self.includes: Optional[list[str]] = includes
         self.origin: Optional[str] = origin
         self.includes_objects: Optional[list['NexusFile']] = includes_objects
-        self.file_content_as_list: Optional[list[Union[str, 'NexusFile']]] = file_content_as_list
+        self.file_content_as_list: Optional[list[Union[str,
+                                                       'NexusFile']]] = file_content_as_list
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True):
@@ -65,7 +67,8 @@ class NexusFile:
             if not nexus_file_operations.check_token("INCLUDE", line):
                 modified_file_as_list.append(line)
                 continue
-            inc_file_path = nexus_file_operations.get_token_value('INCLUDE', line, [line])
+            inc_file_path = nexus_file_operations.get_token_value(
+                'INCLUDE', line, [line])
             if inc_file_path is None:
                 modified_file_as_list.append(line)
                 continue
@@ -74,12 +77,15 @@ class NexusFile:
             if not recursive:
                 modified_file_as_list.append(line)
             else:
-                inc_file = cls.generate_file_include_structure(inc_file_path, origin=file_path, recursive=True)
+                inc_file = cls.generate_file_include_structure(
+                    inc_file_path, origin=file_path, recursive=True)
                 if includes_objects is None:
-                    raise ValueError('includes_objects is None - recursion failure.')
+                    raise ValueError(
+                        'includes_objects is None - recursion failure.')
                 includes_objects.append(inc_file)
 
-                prefix_line, suffix_line = re.split('INCLUDE', line, maxsplit=1, flags=re.IGNORECASE)
+                prefix_line, suffix_line = re.split(
+                    'INCLUDE', line, maxsplit=1, flags=re.IGNORECASE)
                 suffix_line = suffix_line.lstrip()
                 suffix_line = suffix_line.replace(inc_file_path, '', 1)
                 if prefix_line:
@@ -96,7 +102,7 @@ class NexusFile:
             origin=origin,
             includes_objects=includes_objects,
             file_content_as_list=modified_file_as_list,
-            )
+        )
 
         return nexus_file_class
 
@@ -109,7 +115,8 @@ class NexusFile:
 
         self.includes_objects = []
         for file_path in self.includes:
-            inc_file = self.generate_file_include_structure(file_path, origin=self.location)
+            inc_file = self.generate_file_include_structure(
+                file_path, origin=self.location)
             self.includes_objects.append(inc_file)
 
         return self.includes_objects
@@ -131,7 +138,8 @@ class NexusFile:
             from_list += [self.location] * len(self.includes)
             to_list += self.includes
         if len(from_list) != len(to_list):
-            raise ValueError(f"{from_list=} and {to_list=} are not the same length")
+            raise ValueError(
+                f"{from_list=} and {to_list=} are not the same length")
 
         return from_list, to_list
 
@@ -158,3 +166,10 @@ class NexusFile:
                 yield row
 
 # ['str', NexusFile, 'str', NexusFile]
+    def get_flat_list_str_file(self) -> list[str]:
+        if self.file_content_as_list is None:
+            raise ValueError(f'No file content found for {self.location}')
+        flat_list = [x for x in self.iterate_line(self.file_content_as_list)]
+        return flat_list
+
+# TODO write an output function using the iterate_line method

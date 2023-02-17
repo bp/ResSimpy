@@ -1,4 +1,4 @@
-import ResSimpy.Nexus.nexus_file_operations as nexus_file_operations
+import ResSimpy.Nexus.nexus_file_operations as nfo
 import pytest
 
 
@@ -48,7 +48,7 @@ def test_load_nexus_relperm_table(mocker, file_contents, expected_result):
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    result = nexus_file_operations.load_nexus_relperm_table(relperm_file_path)
+    result = nfo.load_nexus_relperm_table(relperm_file_path)
 
     # Assert
     assert result == expected_result
@@ -93,7 +93,7 @@ def test_get_token_value(mocker, line_contents, file_contents, expected_result):
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    result = nexus_file_operations.get_token_value(token='MYTESTTOKEN', token_line=line_contents,
+    result = nfo.get_token_value(token='MYTESTTOKEN', token_line=line_contents,
                                                    file_list=dummy_file_as_list)
 
     # Assert
@@ -117,7 +117,7 @@ def test_get_token_value(mocker, line_contents, file_contents, expected_result):
                                   "token before comment", "token then tab", "token then newline", "single character"])
 def test_check_token(line_string, token, expected_result):
     # Act
-    result = nexus_file_operations.check_token(token=token, line=line_string)
+    result = nfo.check_token(token=token, line=line_string)
 
     # Assert
     assert result == expected_result
@@ -197,7 +197,7 @@ def test_strip_file_of_comments(file_contents, strip_str, expected_result_conten
     expected_result = expected_result_contents.splitlines()
 
     # Act
-    result = nexus_file_operations.strip_file_of_comments(dummy_file_as_list, strip_str=strip_str)
+    result = nfo.strip_file_of_comments(dummy_file_as_list, strip_str=strip_str)
     # Assert
     assert result == expected_result
 
@@ -334,6 +334,6 @@ def test_expand_include(mocker, file_contents, recursive, include_contents0, inc
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    result, _ = nexus_file_operations.expand_include(dummy_file_as_list, recursive)
+    result, _ = nfo.expand_include(dummy_file_as_list, recursive)
     # Assert
     assert result == expected_result

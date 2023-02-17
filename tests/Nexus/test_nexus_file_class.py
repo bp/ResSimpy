@@ -56,8 +56,9 @@ def test_generate_file_include_structure_basic(mocker):
 def test_generate_file_include_structure_multiple_includes(mocker):
     # Arrange
     file_path = 'test_file_path.dat'
-    test_file_contents = ('basic_file INCLUDE inc_file1.inc\n'
-                          'second_file INCLUDE inc_file2.inc')
+    test_file_contents = (
+'''basic_file INCLUDE inc_file1.inc
+second_file INCLUDE inc_file2.inc''')
     include_file_contents = 'inc file contents'
     include_file_contents_2 = 'inc2 file contents'
 
