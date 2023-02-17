@@ -1076,9 +1076,7 @@ class NexusSimulator(Simulator):
             raise ValueError("No path found for structured grid file path. \
                 Please provide a path to the structured grid")
         # TODO move the loading of structured grid file to fcs_reader
-        structured_grid_contents = NexusFile.generate_file_include_structure(
-            self.__structured_grid_file_path)
-        file = structured_grid_contents.get_flat_list_str_file()
+        file = nfo.load_file_as_list(self.__structured_grid_file_path)
         # Update each value in the file
         structured_grid_operations.replace_value(file, original_structured_grid_file.netgrs,
                                                  self.__structured_grid_file.netgrs, 'NETGRS')
@@ -1099,7 +1097,7 @@ class NexusSimulator(Simulator):
                                                  'KZ')
 
         # Save the new file contents
-        new_file_str = "".join(structured_grid_contents.get_flat_list_str_file())
+        new_file_str = "".join(file)
         with open(self.__structured_grid_file_path, "w") as text_file:
             text_file.write(new_file_str)
 
