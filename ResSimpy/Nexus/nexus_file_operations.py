@@ -1,13 +1,9 @@
-from datetime import datetime
 from io import StringIO
-from typing import Dict, Optional, Union
-
+from typing import Optional, Union
 import pandas as pd
-
 from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
 from string import Template
 import re
-
 from ResSimpy.Nexus.nexus_constants import VALID_NEXUS_TOKENS
 import os
 
