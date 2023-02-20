@@ -92,11 +92,11 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
                 if start_line_index >= len(file_as_list):
                     return None
                 # Move to the next line down in file_as_list
-                new_search_string = file_as_list[start_line_index]
-                if not isinstance(new_search_string, str):
+                temp_search_string = file_as_list[start_line_index]
+                if not isinstance(temp_search_string, str):
                     raise ValueError(f'No valid value found, hit INCLUDE statement instead on line number \
                         {start_line_index}')
-                search_string = new_search_string
+                search_string = temp_search_string
                 break
             elif character not in invalid_characters:
                 value_string = search_string[character_location: len(
