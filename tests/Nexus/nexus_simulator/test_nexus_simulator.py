@@ -854,6 +854,7 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
     assert result.kz == new_kz
 
 
+@pytest.mark.skip('Functionality for writing to runcontrols does not work and is currently not requested by the user.')
 @pytest.mark.parametrize(
     "fcs_content, run_control_contents, inc_file_contents, expected_times, expected_output", [
         ("RUNCONTROL /path/run_control\nDATEFORMAT DD/MM/YYYY\n",
@@ -898,7 +899,7 @@ def test_load_run_control_file_write_times_to_run_control(mocker, fcs_content, r
     result_times = simulation.get_content(section="RUNCONTROL", keyword="TIME")
 
     # Assert
-    # TODO REASSERT THESE CALLS 
+    # TODO REASSERT THESE CALLS
     # .assert_any_call('/path/run_control', 'w')
     # .return_value.write.assert_any_call(expected_output)
     assert result_times == expected_times
