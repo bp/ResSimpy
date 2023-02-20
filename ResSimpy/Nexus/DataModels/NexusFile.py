@@ -68,7 +68,7 @@ class NexusFile:
                 modified_file_as_list.append(line)
                 continue
             inc_file_path = nexus_file_operations.get_token_value(
-                'INCLUDE', line, [line])
+                'INCLUDE', line, file_as_list)
             if inc_file_path is None:
                 modified_file_as_list.append(line)
                 continue

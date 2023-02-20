@@ -210,7 +210,7 @@ def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False) -> 
 
     # regex: look back and forward 1 character from an ! and check if its a quotation mark and
     # exclude it from the match if it is
-    file_without_comments = [re.split(r'(?<!\")!(?!\")', x)[0] for x in file_as_list if x and x[0] != '!' ]
+    file_without_comments = [re.split(r'(?<!\")!(?!\")', x)[0] for x in file_as_list if x and x[0] != '!']
 
     flat_file = '\n'.join(file_without_comments)
 

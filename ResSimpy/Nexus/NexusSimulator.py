@@ -564,6 +564,7 @@ class NexusSimulator(Simulator):
             raise ValueError(
                 f"No file path provided for {self.runcontrol_file.location=}")
 
+        # set the start date
         for line in run_control_file_content:
             if nfo.check_token('START', line):
                 value = nfo.get_token_value(
@@ -579,11 +580,13 @@ class NexusSimulator(Simulator):
         # If we don't want to write the times, return here.
         if not self.__write_times:
             return
-
-        if self.runcontrol_file.includes:
+        if self.runcontrol_file.includes is None:
+            warnings.warn(f'No includes files found in {self.runcontrol_file.location}')
+            return
+        for file in self.runcontrol_file.includes:
             if self.__destination is not None:
                 runcontrol_operations.remove_times_from_file(
-                    run_control_file_content, self.runcontrol_file.location)
+                    run_control_file_content, file)
 
         self.__modify_times(content=times, operation='replace')
 
@@ -641,8 +644,7 @@ class NexusSimulator(Simulator):
         Returns:
             int: the difference between the first and second dates to compare
         """
-        date_comp = self.__convert_date_to_number(
-            x) - self.__convert_date_to_number(y)
+        date_comp = self.__convert_date_to_number(x) - self.__convert_date_to_number(y)
         if date_comp < 0:
             date_comp_int = -1
         elif date_comp == 0:
