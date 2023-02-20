@@ -378,15 +378,14 @@ def test_read_table_to_df(file_contents, keep_comments, expected_df_dict):
     if keep_comments:
         df_expected = pd.DataFrame(expected_df_dict).convert_dtypes()
     else:
-      df_expected = pd.DataFrame(expected_df_dict)
+        df_expected = pd.DataFrame(expected_df_dict)
 
     # mock out test file contents
     file_as_list = file_contents.splitlines()
 
     # Act
-    df_received = nexus_file_operations.read_table_to_df(file_as_list, keep_comments)
+    df_received = nfo.read_table_to_df(file_as_list, keep_comments)
 
     # Assert
     # Deep compare expected and received dataframes
     pd.testing.assert_frame_equal(df_expected, df_received)
-
