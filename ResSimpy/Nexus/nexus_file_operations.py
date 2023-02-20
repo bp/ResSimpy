@@ -8,7 +8,7 @@ from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
 from string import Template
 import re
 
-from ResSimpy.Nexus.nexus_constants import VALID_NEXUS_TOKENS
+from ResSimpy.Nexus.nexus_constants import VALID_NEXUS_KEYWORDS
 import os
 
 
@@ -24,7 +24,7 @@ def nexus_token_found(line_to_check: str) -> bool:
 
     """
     uppercase_line = line_to_check.upper()
-    for token in VALID_NEXUS_TOKENS:
+    for token in VALID_NEXUS_KEYWORDS:
         if check_token(token, uppercase_line):
             return True
 
