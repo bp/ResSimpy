@@ -16,8 +16,9 @@ class NexusFile:
         includes_objects (Optional[list['NexusFile']]): The include files but generated as a NexusFile instance. \
             Defaults to None.
     """
+    # TODO: better typing on the fields with default factor lists enabled (e.g. list['NexusFile'])
     location: Optional[str] = None
-    includes: Optional[list[str]] = field(default_factory=list)
+    includes: Optional[list] = field(default_factory=list)
     origin: Optional[str] = None
     includes_objects: Optional[list] = field(default_factory=list)
     file_content_as_list: Optional[list] = field(default_factory=list)
@@ -26,7 +27,7 @@ class NexusFile:
                  origin: Optional[str] = None, includes_objects: Optional[list] = field(default_factory=list),
                  file_content_as_list: Optional[list] = field(default_factory=list)):
         self.location: Optional[str] = location
-        self.includes: Optional[list[str]] = includes
+        self.includes: Optional[list] = includes
         self.origin: Optional[str] = origin
         self.includes_objects: Optional[list] = includes_objects
         self.file_content_as_list: Optional[list] = file_content_as_list
