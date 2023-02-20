@@ -19,20 +19,17 @@ class NexusFile:
     location: Optional[str] = None
     includes: Optional[list[str]] = field(default_factory=list)
     origin: Optional[str] = None
-    includes_objects: Optional[list['NexusFile']] = field(default_factory=list)
-    file_content_as_list: Optional[list[Union[str, 'NexusFile']]] = field(
-        default_factory=list)
+    includes_objects: Optional[list] = field(default_factory=list)
+    file_content_as_list: Optional[list] = field(default_factory=list)
 
-    def __init__(self, location: Optional[str] = None, includes: Optional[list[str]] = field(default_factory=list),
-                 origin: Optional[str] = None, includes_objects: Optional[list['NexusFile']] =
-                 field(default_factory=list), file_content_as_list: Optional[list[Union[str, 'NexusFile']]] =
-                 field(default_factory=list)):
+    def __init__(self, location: Optional[str] = None, includes: Optional[list] = field(default_factory=list),
+                 origin: Optional[str] = None, includes_objects: Optional[list] = field(default_factory=list),
+                 file_content_as_list: Optional[list] = field(default_factory=list)):
         self.location: Optional[str] = location
         self.includes: Optional[list[str]] = includes
         self.origin: Optional[str] = origin
-        self.includes_objects: Optional[list['NexusFile']] = includes_objects
-        self.file_content_as_list: Optional[list[Union[str,
-                                                       'NexusFile']]] = file_content_as_list
+        self.includes_objects: Optional[list] = includes_objects
+        self.file_content_as_list: Optional[list] = file_content_as_list
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True):
