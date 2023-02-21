@@ -1,9 +1,11 @@
 from dataclasses import dataclass, field
 import re
-from typing import Optional, Union, Generator, List
+from typing import Optional, Union, Generator
 
 from ResSimpy.Nexus import nexus_file_operations
 import warnings
+
+from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_str_nexus_file, get_empty_list_nexus_file
 
 
 @dataclass(kw_only=True)
@@ -16,22 +18,23 @@ class NexusFile:
         includes_objects (Optional[list['NexusFile']]): The include files but generated as a NexusFile instance. \
             Defaults to None.
     """
-    # TODO: better typing on the fields with default factor lists enabled (e.g. list['NexusFile'])
     location: Optional[str] = None
-    includes: Optional[List[str]] = field(default_factory=lambda: [])
+    includes: Optional[list[str]] = field(default_factory=get_empty_list_str)
     origin: Optional[str] = None
-    includes_objects: Optional[list] = field(default_factory=list)
-    file_content_as_list: Optional[list] = field(default_factory=list)
+    includes_objects: Optional[list['NexusFile']] = field(default_factory=get_empty_list_nexus_file)
+    file_content_as_list: Optional[list[Union[str, 'NexusFile']]] = field(default_factory=get_empty_list_str_nexus_file)
 
-    def __init__(self, location: Optional[str] = None, includes: Optional[List[str]] =
-                 field(default_factory=lambda: []), origin: Optional[str] = None,
-                 includes_objects: Optional[list] = field(default_factory=list),
-                 file_content_as_list: Optional[list] = field(default_factory=list)):
+    def __init__(self, location: Optional[str] = None,
+                 includes: Optional[list[str]] = field(default_factory=get_empty_list_str),
+                 origin: Optional[str] = None,
+                 includes_objects: Optional[list['NexusFile']] = field(default_factory=get_empty_list_nexus_file),
+                 file_content_as_list: Optional[list[Union[str, 'NexusFile']]] =
+                 field(default_factory=get_empty_list_str_nexus_file)):
         self.location: Optional[str] = location
-        self.includes: Optional[List[str]] = includes
+        self.includes: Optional[list[str]] = includes
         self.origin: Optional[str] = origin
-        self.includes_objects: Optional[list] = includes_objects
-        self.file_content_as_list: Optional[list] = file_content_as_list
+        self.includes_objects: Optional[list['NexusFile']] = includes_objects
+        self.file_content_as_list: Optional[list[Union[str, 'NexusFile']]] = file_content_as_list
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True):
