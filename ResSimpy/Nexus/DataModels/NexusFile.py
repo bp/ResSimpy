@@ -5,6 +5,7 @@ from typing import Optional, Union, Generator
 from ResSimpy.Nexus import nexus_file_operations
 import warnings
 
+
 # Factory methods for generating empty lists with typing
 def get_empty_list_str() -> list[str]:
     value: list[str] = []
