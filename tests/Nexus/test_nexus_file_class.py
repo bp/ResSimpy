@@ -1,4 +1,6 @@
 from typing import Union
+
+import pytest
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from tests.multifile_mocker import mock_multiple_files
@@ -151,14 +153,16 @@ def test_iterate_line():
     assert store_list == expected_flat_list
 
 
-def test_iterate_line_nested():
+@pytest.mark.parametrize("max_depth, expected_results", [
+    (0, ['fcs_file content', 'footer']),
+    (1, ['fcs_file content', 'hello', 'world', 'footer']),
+    (2, ['fcs_file content', 'hello', 'deeper', 'nesting', 'world', 'footer']),
+    (None, ['fcs_file content', 'hello', 'deeper', 'nesting', 'world', 'footer'])
+], ids=['0 depth', '1 layer', '2 layers', 'all layers'])
+def test_iterate_line_nested(max_depth, expected_results):
     # Arrange
-    expected_flat_list_depth = [['fcs_file content', 'footer'],
-                                ['fcs_file content', 'hello', 'world', 'footer'],
-                                ['fcs_file content', 'hello', 'deeper', 'nesting', 'world', 'footer']]
-
     inc_2 = NexusFile(location='inc2.inc', includes=[], origin='inc_file1.inc',
-                             includes_objects=None, file_content_as_list=['deeper', 'nesting'])
+                      includes_objects=None, file_content_as_list=['deeper', 'nesting'])
     include_file = NexusFile(location='inc_file1.inc', includes=[], origin='test_file.dat',
                              includes_objects=[inc_2], file_content_as_list=['hello', inc_2, 'world'])
 
@@ -167,15 +171,8 @@ def test_iterate_line_nested():
                            includes_objects=[include_file], file_content_as_list=nested_list)
 
     # Act
-    depth_cases = [0, 1, 2, None]
     store_results = []
-    for i in depth_cases:
-        store_list = []
-        for line in NexusFile.iterate_line(nexus_file.file_content_as_list, max_depth=i):
-            store_list.append(line)
-        store_results.append(store_list)
+    for line in NexusFile.iterate_line(nexus_file.file_content_as_list, max_depth=max_depth):
+        store_results.append(line)
     # Assert
-    assert store_results[0] == expected_flat_list_depth[0]
-    assert store_results[1] == expected_flat_list_depth[1]
-    assert store_results[2] == expected_flat_list_depth[2]
-    assert store_results[3] == expected_flat_list_depth[2]
+    assert store_results == expected_results
