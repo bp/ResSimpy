@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 import re
 from typing import Optional, Union, Generator
 
-from ResSimpy.Nexus import nexus_file_operations
+import ResSimpy.Nexus.nexus_file_operations as nfo
 import warnings
 
 from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_nexus_file, get_empty_list_str_nexus_file
@@ -50,7 +50,7 @@ class NexusFile:
         """
         # load file as list and clean up file
         try:
-            file_as_list = nexus_file_operations.load_file_as_list(file_path)
+            file_as_list = nfo.load_file_as_list(file_path)
         except FileNotFoundError:
             # handle if a file can't be found
             nexus_file_class = cls(location=file_path,
@@ -67,10 +67,10 @@ class NexusFile:
         inc_file_list: list[str] = []
         includes_objects: Optional[list] = []
         for line in file_as_list:
-            if not nexus_file_operations.check_token("INCLUDE", line):
+            if not nfo.check_token("INCLUDE", line):
                 modified_file_as_list.append(line)
                 continue
-            inc_file_path = nexus_file_operations.get_token_value(
+            inc_file_path = nfo.get_token_value(
                 'INCLUDE', line, file_as_list)
             if inc_file_path is None:
                 modified_file_as_list.append(line)
