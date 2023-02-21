@@ -161,7 +161,8 @@ class NexusFile:
         for row in file_content_as_list:
             if isinstance(row, NexusFile):
                 if (max_depth is None or depth > 0) and row.file_content_as_list is not None:
-                    yield from NexusFile.iterate_line(row.file_content_as_list, max_depth=depth-1)
+                    level_down_max_depth = None if max_depth is None else depth-1
+                    yield from NexusFile.iterate_line(row.file_content_as_list, max_depth=level_down_max_depth)
                 else:
                     continue
             else:

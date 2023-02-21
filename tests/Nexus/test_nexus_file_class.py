@@ -1,3 +1,4 @@
+from typing import Union
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from tests.multifile_mocker import mock_multiple_files
@@ -129,3 +130,52 @@ def test_generate_file_include_structure_nested_includes(mocker):
 
     # Assert
     assert nexus_file == expected_nexus_file
+
+
+def test_iterate_line():
+    # Arrange
+    expected_flat_list = ['fcs_file content', 'hello', 'world', 'footer']
+
+    include_file = NexusFile(location='inc_file1.inc', includes=[], origin='test_file.dat',
+                             includes_objects=None, file_content_as_list=['hello', 'world'])
+    nested_list: list[Union[str, NexusFile]] = ['fcs_file content', include_file, 'footer']
+    nexus_file = NexusFile(location='test_file.dat', includes=['inc_file1.inc'], origin=None,
+                           includes_objects=[include_file], file_content_as_list=nested_list)
+
+    # Act
+    store_list = []
+    for line in NexusFile.iterate_line(nexus_file.file_content_as_list):
+        store_list.append(line)
+
+    # Assert
+    assert store_list == expected_flat_list
+
+
+def test_iterate_line_nested():
+    # Arrange
+    expected_flat_list_depth = [['fcs_file content', 'footer'],
+                                ['fcs_file content', 'hello', 'world', 'footer'],
+                                ['fcs_file content', 'hello', 'deeper', 'nesting', 'world', 'footer']]
+
+    inc_2 = NexusFile(location='inc2.inc', includes=[], origin='inc_file1.inc',
+                             includes_objects=None, file_content_as_list=['deeper', 'nesting'])
+    include_file = NexusFile(location='inc_file1.inc', includes=[], origin='test_file.dat',
+                             includes_objects=[inc_2], file_content_as_list=['hello', inc_2, 'world'])
+
+    nested_list: list[Union[str, NexusFile]] = ['fcs_file content', include_file, 'footer']
+    nexus_file = NexusFile(location='test_file.dat', includes=['inc_file1.inc'], origin=None,
+                           includes_objects=[include_file], file_content_as_list=nested_list)
+
+    # Act
+    depth_cases = [0, 1, 2, None]
+    store_results = []
+    for i in depth_cases:
+        store_list = []
+        for line in NexusFile.iterate_line(nexus_file.file_content_as_list, max_depth=i):
+            store_list.append(line)
+        store_results.append(store_list)
+    # Assert
+    assert store_results[0] == expected_flat_list_depth[0]
+    assert store_results[1] == expected_flat_list_depth[1]
+    assert store_results[2] == expected_flat_list_depth[2]
+    assert store_results[3] == expected_flat_list_depth[2]
