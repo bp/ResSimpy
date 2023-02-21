@@ -5,7 +5,22 @@ from typing import Optional, Union, Generator
 from ResSimpy.Nexus import nexus_file_operations
 import warnings
 
-from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_str_nexus_file, get_empty_list_nexus_file
+# from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_str_nexus_file, get_empty_list_nexus_file
+
+
+def get_empty_list_str() -> list[str]:
+    value: list[str] = []
+    return value
+
+
+def get_empty_list_str_nexus_file() -> list[Union[str, 'NexusFile']]:
+    value: list[Union[str, 'NexusFile']] = []
+    return value
+
+
+def get_empty_list_nexus_file() -> list['NexusFile']:
+    value: list['NexusFile'] = []
+    return value
 
 
 @dataclass(kw_only=True)
