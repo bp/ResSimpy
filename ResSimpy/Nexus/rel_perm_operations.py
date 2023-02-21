@@ -1,5 +1,3 @@
-
-# TODO: MOVE TO RELPERM MODULE
 from typing import Dict, Optional
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
@@ -57,7 +55,6 @@ def get_relperm_base_saturation_column_heading(table_heading: str) -> str:
     return column_heading
 
 
-# TODO: move this to a relperm specific module
 def load_nexus_relperm_table(relperm_file_path: str) -> dict[str, list[tuple[float, float]]]:
     """ Loads in a Nexus relperm table and returns a dictionary with two lists, one with the relperm values for the
     single fluid, and the other with the values for combined fluids
