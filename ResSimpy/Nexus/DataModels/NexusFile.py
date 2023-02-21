@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass, field
 import re
 from typing import Optional, Union, Generator
@@ -5,21 +6,7 @@ from typing import Optional, Union, Generator
 from ResSimpy.Nexus import nexus_file_operations
 import warnings
 
-
-# Factory methods for generating empty lists with typing
-def get_empty_list_str() -> list[str]:
-    value: list[str] = []
-    return value
-
-
-def get_empty_list_str_nexus_file() -> list[Union[str, 'NexusFile']]:
-    value: list[Union[str, 'NexusFile']] = []
-    return value
-
-
-def get_empty_list_nexus_file() -> list['NexusFile']:
-    value: list['NexusFile'] = []
-    return value
+from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_nexus_file, get_empty_list_str_nexus_file
 
 
 @dataclass(kw_only=True)
@@ -29,26 +16,26 @@ class NexusFile:
         location (Optional[str]): Path to the original file being opened. Defaults to None.
         includes (Optional[list[str]]): list of file paths that the file contains. Defaults to None.
         origin (Optional[str]): Where the file was opened from. Defaults to None.
-        includes_objects (Optional[list['NexusFile']]): The include files but generated as a NexusFile instance. \
+        includes_objects (Optional[list[NexusFile]]): The include files but generated as a NexusFile instance. \
             Defaults to None.
     """
     location: Optional[str] = None
     includes: Optional[list[str]] = field(default_factory=get_empty_list_str)
     origin: Optional[str] = None
-    includes_objects: Optional[list['NexusFile']] = field(default_factory=get_empty_list_nexus_file)
-    file_content_as_list: Optional[list[Union[str, 'NexusFile']]] = field(default_factory=get_empty_list_str_nexus_file)
+    includes_objects: Optional[list[NexusFile]] = field(default_factory=get_empty_list_nexus_file)
+    file_content_as_list: Optional[list[Union[str, NexusFile]]] = field(default_factory=get_empty_list_str_nexus_file)
 
     def __init__(self, location: Optional[str] = None,
                  includes: Optional[list[str]] = field(default_factory=get_empty_list_str),
                  origin: Optional[str] = None,
-                 includes_objects: Optional[list['NexusFile']] = field(default_factory=get_empty_list_nexus_file),
-                 file_content_as_list: Optional[list[Union[str, 'NexusFile']]] =
+                 includes_objects: Optional[list[NexusFile]] = field(default_factory=get_empty_list_nexus_file),
+                 file_content_as_list: Optional[list[Union[str, NexusFile]]] =
                  field(default_factory=get_empty_list_str_nexus_file)):
         self.location: Optional[str] = location
         self.includes: Optional[list[str]] = includes
         self.origin: Optional[str] = origin
-        self.includes_objects: Optional[list['NexusFile']] = includes_objects
-        self.file_content_as_list: Optional[list[Union[str, 'NexusFile']]] = file_content_as_list
+        self.includes_objects: Optional[list[NexusFile]] = includes_objects
+        self.file_content_as_list: Optional[list[Union[str, NexusFile]]] = file_content_as_list
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True):
@@ -160,7 +147,7 @@ class NexusFile:
         return from_list, to_list
 
     @staticmethod
-    def iterate_line(file_content_as_list: list[Union[str, 'NexusFile']], max_depth=None) \
+    def iterate_line(file_content_as_list: list[Union[str, NexusFile]], max_depth=None) \
             -> Generator[str, None, None]:
         """Generator object for iterating over a list of strings with nested NexusFile objects in them
         Usage Example: for line in NexusFile.iterate_line(nexus_file.file_content_as_list):
@@ -174,18 +161,27 @@ class NexusFile:
         for row in file_content_as_list:
             if isinstance(row, NexusFile):
                 if (max_depth is None or depth > 0) and row.file_content_as_list is not None:
-                    depth -= 1
-                    yield from NexusFile.iterate_line(row.file_content_as_list, max_depth=depth)
+                    yield from NexusFile.iterate_line(row.file_content_as_list, max_depth=depth-1)
                 else:
                     continue
             else:
                 yield row
 
-# ['str', NexusFile, 'str', NexusFile]
     def get_flat_list_str_file(self) -> list[str]:
         if self.file_content_as_list is None:
             raise ValueError(f'No file content found for {self.location}')
         flat_list = [x for x in self.iterate_line(self.file_content_as_list)]
         return flat_list
+
+    # this isnt' that helpful honestly
+    def get_flat_list_str_until_file(self):
+        flat_list: list[str] = []
+        if self.file_content_as_list is None:
+            raise ValueError(f'No file content found for {self.location=}')
+        for row in self.file_content_as_list:
+            if isinstance(row, NexusFile):
+                break
+            flat_list.append(row)
+        return
 
 # TODO write an output function using the iterate_line method
