@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 import re
-from typing import Optional, Union, Generator
+from typing import Optional, Union, Generator, List
 
 from ResSimpy.Nexus import nexus_file_operations
 import warnings
@@ -18,17 +18,17 @@ class NexusFile:
     """
     # TODO: better typing on the fields with default factor lists enabled (e.g. list['NexusFile'])
     location: Optional[str] = None
-    includes: Optional[list[str]] = field(default_factory=lambda: [])
+    includes: Optional[List[str]] = field(default_factory=lambda: [])
     origin: Optional[str] = None
     includes_objects: Optional[list] = field(default_factory=list)
     file_content_as_list: Optional[list] = field(default_factory=list)
 
-    def __init__(self, location: Optional[str] = None, includes: Optional[list[str]] =
+    def __init__(self, location: Optional[str] = None, includes: Optional[List[str]] =
                  field(default_factory=lambda: []), origin: Optional[str] = None,
                  includes_objects: Optional[list] = field(default_factory=list),
                  file_content_as_list: Optional[list] = field(default_factory=list)):
         self.location: Optional[str] = location
-        self.includes: Optional[list[str]] = includes
+        self.includes: Optional[List[str]] = includes
         self.origin: Optional[str] = origin
         self.includes_objects: Optional[list] = includes_objects
         self.file_content_as_list: Optional[list] = file_content_as_list
