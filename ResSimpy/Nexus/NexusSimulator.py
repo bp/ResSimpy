@@ -133,12 +133,9 @@ class NexusSimulator(Simulator):
 
         self.__origin = self.__origin.replace('temp/', '', 1)
         self.__root_name = self.__root_name.replace('temp/', '', 1)
-        self.__structured_grid_file_path = self.__structured_grid_file_path.replace(
-            'temp/', '', 1)
-        self.__new_fcs_file_path = self.__new_fcs_file_path.replace(
-            'temp/', '', 1)
-        self.__surface_file_path = self.__surface_file_path.replace(
-            'temp/', '', 1)
+        self.__structured_grid_file_path = self.__structured_grid_file_path.replace('temp/', '', 1)
+        self.__new_fcs_file_path = self.__new_fcs_file_path.replace('temp/', '', 1)
+        self.__surface_file_path = self.__surface_file_path.replace('temp/', '', 1)
 
     def get_model_location(self):
         """Returns the location of the model"""
@@ -204,16 +201,14 @@ class NexusSimulator(Simulator):
                 oilfield_default_units = model_oilfield_default_units
             # Raise ValueError if default units are inconsistent with the other models
             elif model_oilfield_default_units != oilfield_default_units:
-                raise ValueError(
-                    f"Model at {model} using inconsistent default units")
+                raise ValueError(f"Model at {model} using inconsistent default units")
 
             # If not defined, assign it to model_oilfield_run_units
             if oilfield_run_units is None:
                 oilfield_run_units = model_oilfield_run_units
             # Raise ValueError if run units are inconsistent with the other models
             elif model_oilfield_run_units != oilfield_run_units:
-                raise ValueError(
-                    f"Model at {model} using inconsistent run units")
+                raise ValueError(f"Model at {model} using inconsistent run units")
 
         return oilfield_run_units, oilfield_default_units
 
@@ -233,8 +228,7 @@ class NexusSimulator(Simulator):
         fluid_type = None
         for model in models:
             model_fluid_type = None
-            fcs_file = NexusFile.generate_file_include_structure(
-                model).get_flat_list_str_file()
+            fcs_file = NexusFile.generate_file_include_structure(model).get_flat_list_str_file()
             surface_filename = None
             if fcs_file is None:
                 warnings.warn(UserWarning(f'No file found for {model}'))
@@ -364,25 +358,21 @@ class NexusSimulator(Simulator):
                 os.path.basename(self.__original_fcs_file_path)
 
     def __get_wells_paths(self, line: str, fcs_file: list[str]) -> None:
-        well_keyword = nfo.get_token_value(token="WELLS", token_line=line,
-                                           file_list=fcs_file)
+        well_keyword = nfo.get_token_value(token="WELLS", token_line=line, file_list=fcs_file)
         if well_keyword is None:
             raise ValueError(f'No Wells file path found in line: {line}')
 
         # WELLS SET 1 wells.dat
         if well_keyword.upper() == 'SET':
-            well_set_number = nfo.get_token_value(token="SET", token_line=line,
-                                                  file_list=fcs_file)
+            well_set_number = nfo.get_token_value(token="SET", token_line=line, file_list=fcs_file)
             if well_set_number is None:
                 raise ValueError(f'No Wells Set number found in line: {line}')
             index = line.find(well_set_number)
             modified_line = line[index+len(well_set_number)::]
-            well_keyword = nfo.get_next_value(0, [modified_line],
-                                              search_string=modified_line, )
+            well_keyword = nfo.get_next_value(0, [modified_line], search_string=modified_line, )
         if well_keyword is None:
             raise ValueError(f'No Wells file path found in line: {line}')
-        complete_well_filepath = nfo.get_full_file_path(
-            well_keyword, self.__origin)
+        complete_well_filepath = nfo.get_full_file_path(well_keyword, self.__origin)
         self.Wells.wellspec_paths.append(complete_well_filepath)
 
     def __load_fcs_file(self):
@@ -393,45 +383,36 @@ class NexusSimulator(Simulator):
         """
         # self.get_simulation_status(True)
 
-        self.fcs_file = NexusFile.generate_file_include_structure(
-            self.__new_fcs_file_path, origin=None)
+        self.fcs_file = NexusFile.generate_file_include_structure(self.__new_fcs_file_path, origin=None)
         fcs_file_content = self.fcs_file.get_flat_list_str_file()
         if fcs_file_content is None:
-            raise ValueError(
-                f'FCS file not found, no content for {self.__new_fcs_file_path}')
+            raise ValueError(f'FCS file not found, no content for {self.__new_fcs_file_path}')
         for line in fcs_file_content:
             if nfo.check_token('RUNCONTROL', line):
-                runcontrol_path = nfo.get_token_value(
-                    'RUNCONTROL', line, fcs_file_content)
+                runcontrol_path = nfo.get_token_value('RUNCONTROL', line, fcs_file_content)
                 if runcontrol_path is not None:
-                    self.run_control_file = nfo.get_full_file_path(
-                        runcontrol_path, self.__origin)
+                    self.run_control_file = nfo.get_full_file_path(runcontrol_path, self.__origin)
                     self.runcontrol_file = NexusFile.generate_file_include_structure(self.run_control_file,
                                                                                      origin=self.__new_fcs_file_path)
             elif nfo.check_token('DATEFORMAT', line):
-                value = nfo.get_token_value(
-                    'DATEFORMAT', line, fcs_file_content)
+                value = nfo.get_token_value('DATEFORMAT', line, fcs_file_content)
                 if value is not None:
                     self.use_american_date_format = value == 'MM/DD/YYYY'
                 self.__date_format_string = "%m/%d/%Y" if self.use_american_date_format else "%d/%m/%Y"
             elif nfo.check_token('STRUCTURED_GRID', line):
-                value = nfo.get_token_value(
-                    'STRUCTURED_GRID', line, fcs_file_content)
+                value = nfo.get_token_value('STRUCTURED_GRID', line, fcs_file_content)
                 if value is not None:
-                    self.__structured_grid_file_path = nfo.get_full_file_path(
-                        value, self.__origin)
+                    self.__structured_grid_file_path = nfo.get_full_file_path(value, self.__origin)
                     self.load_structured_grid_file()
             elif nfo.check_token('RUN_UNITS', line):
-                value = nfo.get_token_value(
-                    'RUN_UNITS', line, fcs_file_content)
+                value = nfo.get_token_value('RUN_UNITS', line, fcs_file_content)
                 if value is not None:
                     if value == 'ENGLISH':
                         self.__run_units = Units.OILFIELD
                     else:
                         self.__run_units = Units[value.upper()]
             elif nfo.check_token('DEFAULT_UNITS', line):
-                value = nfo.get_token_value(
-                    'DEFAULT_UNITS', line, fcs_file_content)
+                value = nfo.get_token_value('DEFAULT_UNITS', line, fcs_file_content)
                 if value is not None:
                     if value == 'ENGLISH':
                         self.__default_units = Units.OILFIELD
@@ -441,8 +422,7 @@ class NexusSimulator(Simulator):
                 value = nfo.get_token_value(token="SURFACE Network 1", token_line=line,
                                             file_list=fcs_file_content)
                 if value is not None:
-                    self.__surface_file_path = nfo.get_full_file_path(
-                        value, self.__origin)
+                    self.__surface_file_path = nfo.get_full_file_path(value, self.__origin)
                 break
 
             elif nfo.check_token('WELLS', line):
@@ -486,8 +466,7 @@ class NexusSimulator(Simulator):
                 token_location = modified_line.find(token.lower())
                 line_before_token_value = line[0: token_location]
                 line_after_token = line[token_location:]
-                current_value = nfo.get_next_value(
-                    0, [line], line_after_token[len(token) + 1:])
+                current_value = nfo.get_next_value(0, [line], line_after_token[len(token) + 1:])
                 if current_value is None:
                     raise ValueError(f"No value found after the supplied {token=}, \
                         please check the following line for that token: {line}")
@@ -512,8 +491,7 @@ class NexusSimulator(Simulator):
 
     def update_fcs_file_value(self, token, new_value, add_to_start=False):
         """Updates a value in the FCS file"""
-        self.update_file_value(self.__new_fcs_file_path, token=token,
-                               new_value=new_value, add_to_start=add_to_start)
+        self.update_file_value(self.__new_fcs_file_path, token=token, new_value=new_value, add_to_start=add_to_start)
 
     @staticmethod
     def comment_out_file_value(token: str, file_path: str) -> None:
@@ -561,20 +539,17 @@ class NexusSimulator(Simulator):
         run_control_file_content = self.runcontrol_file.get_flat_list_str_file()
 
         if (run_control_file_content is None) or (self.runcontrol_file.location is None):
-            raise ValueError(
-                f"No file path provided for {self.runcontrol_file.location=}")
+            raise ValueError(f"No file path provided for {self.runcontrol_file.location=}")
 
         # set the start date
         for line in run_control_file_content:
             if nfo.check_token('START', line):
-                value = nfo.get_token_value(
-                    'START', line, run_control_file_content)
+                value = nfo.get_token_value('START', line, run_control_file_content)
                 if value is not None:
                     self.start_date_set(value)
 
         times = []
-        run_control_times = runcontrol_operations.get_times(
-            run_control_file_content)
+        run_control_times = runcontrol_operations.get_times(run_control_file_content)
         times.extend(run_control_times)
 
         # If we don't want to write the times, return here.
@@ -585,8 +560,7 @@ class NexusSimulator(Simulator):
             return
         for file in self.runcontrol_file.includes:
             if self.__destination is not None:
-                runcontrol_operations.remove_times_from_file(
-                    run_control_file_content, file)
+                runcontrol_operations.remove_times_from_file(run_control_file_content, file)
 
         self.__modify_times(content=times, operation='replace')
 
@@ -607,18 +581,15 @@ class NexusSimulator(Simulator):
             converted_date: Union[str, float] = float(date)
         except ValueError:
             if not isinstance(date, str):
-                raise ValueError(
-                    "__convert_date_to_number: Incorrect type for 'date' parameter")
+                raise ValueError("__convert_date_to_number: Incorrect type for 'date' parameter")
             converted_date = date
 
         if isinstance(converted_date, float):
             date_format = self.__date_format_string
             if len(self.start_date) == self.DATE_WITH_TIME_LENGTH:
                 date_format += "(%H:%M:%S)"
-            start_date_as_datetime = datetime.strptime(
-                self.start_date, date_format)
-            date_as_datetime = start_date_as_datetime + \
-                timedelta(days=converted_date)
+            start_date_as_datetime = datetime.strptime(self.start_date, date_format)
+            date_as_datetime = start_date_as_datetime + timedelta(days=converted_date)
         else:
             start_date_format = self.__date_format_string
             if len(self.start_date) == self.DATE_WITH_TIME_LENGTH:
@@ -626,10 +597,8 @@ class NexusSimulator(Simulator):
             end_date_format = self.__date_format_string
             if len(converted_date) == self.DATE_WITH_TIME_LENGTH:
                 end_date_format += "(%H:%M:%S)"
-            date_as_datetime = datetime.strptime(
-                converted_date, end_date_format)
-            start_date_as_datetime = datetime.strptime(
-                self.start_date, start_date_format)
+            date_as_datetime = datetime.strptime(converted_date, end_date_format)
+            start_date_as_datetime = datetime.strptime(self.start_date, start_date_format)
 
         difference = date_as_datetime - start_date_as_datetime
         return difference.total_seconds() / timedelta(days=1).total_seconds()
@@ -876,10 +845,8 @@ class NexusSimulator(Simulator):
         if self.__simulation_start_time is None or self.__simulation_end_time is None:
             return None
 
-        start_date = logfile_operations.convert_server_date(
-            self.__simulation_start_time)
-        end_date = logfile_operations.convert_server_date(
-            self.__simulation_end_time)
+        start_date = logfile_operations.convert_server_date(self.__simulation_start_time)
+        end_date = logfile_operations.convert_server_date(self.__simulation_end_time)
 
         total_difference = (end_date - start_date)
         days = int(total_difference.days)
@@ -956,44 +923,28 @@ class NexusSimulator(Simulator):
             """
             value = nfo.get_next_value(0, [next_line], next_line)
             if value is None:
-                raise ValueError(
-                    f"No value found within the provided line: {next_line}")
+                raise ValueError(f"No value found within the provided line: {next_line}")
             next_line = next_line.replace(value, "", 1)
             return value, next_line
 
         for line in file_as_list:
             # Load in the basic properties
             properties_to_load = [
-                PropertyToLoad('NETGRS', ['VALUE', 'CON'],
-                               structured_grid_file.netgrs),
-                PropertyToLoad(
-                    'POROSITY', ['VALUE', 'CON'], structured_grid_file.porosity),
-                PropertyToLoad('SW', ['VALUE', 'CON'],
-                               structured_grid_file.sw),
-                PropertyToLoad(
-                    'KX', ['VALUE', 'MULT', 'CON'], structured_grid_file.kx),
-                PropertyToLoad(
-                    'PERMX', ['VALUE', 'MULT', 'CON'], structured_grid_file.kx),
-                PropertyToLoad(
-                    'PERMI', ['VALUE', 'MULT', 'CON'], structured_grid_file.kx),
-                PropertyToLoad(
-                    'KI', ['VALUE', 'MULT', 'CON'], structured_grid_file.kx),
-                PropertyToLoad(
-                    'KY', ['VALUE', 'MULT', 'CON'], structured_grid_file.ky),
-                PropertyToLoad(
-                    'PERMY', ['VALUE', 'MULT', 'CON'], structured_grid_file.ky),
-                PropertyToLoad(
-                    'PERMJ', ['VALUE', 'MULT', 'CON'], structured_grid_file.ky),
-                PropertyToLoad(
-                    'KJ', ['VALUE', 'MULT', 'CON'], structured_grid_file.ky),
-                PropertyToLoad(
-                    'KZ', ['VALUE', 'MULT', 'CON'], structured_grid_file.kz),
-                PropertyToLoad(
-                    'PERMZ', ['VALUE', 'MULT', 'CON'], structured_grid_file.kz),
-                PropertyToLoad(
-                    'PERMK', ['VALUE', 'MULT', 'CON'], structured_grid_file.kz),
-                PropertyToLoad(
-                    'KK', ['VALUE', 'MULT', 'CON'], structured_grid_file.kz),
+                PropertyToLoad('NETGRS', ['VALUE', 'CON'], structured_grid_file.netgrs),
+                PropertyToLoad('POROSITY', ['VALUE', 'CON'], structured_grid_file.porosity),
+                PropertyToLoad('SW', ['VALUE', 'CON'], structured_grid_file.sw),
+                PropertyToLoad('KX', ['VALUE', 'MULT', 'CON'], structured_grid_file.kx),
+                PropertyToLoad('PERMX', ['VALUE', 'MULT', 'CON'], structured_grid_file.kx),
+                PropertyToLoad('PERMI', ['VALUE', 'MULT', 'CON'], structured_grid_file.kx),
+                PropertyToLoad('KI', ['VALUE', 'MULT', 'CON'], structured_grid_file.kx),
+                PropertyToLoad('KY', ['VALUE', 'MULT', 'CON'], structured_grid_file.ky),
+                PropertyToLoad('PERMY', ['VALUE', 'MULT', 'CON'], structured_grid_file.ky),
+                PropertyToLoad('PERMJ', ['VALUE', 'MULT', 'CON'], structured_grid_file.ky),
+                PropertyToLoad('KJ', ['VALUE', 'MULT', 'CON'], structured_grid_file.ky),
+                PropertyToLoad('KZ', ['VALUE', 'MULT', 'CON'], structured_grid_file.kz),
+                PropertyToLoad('PERMZ', ['VALUE', 'MULT', 'CON'], structured_grid_file.kz),
+                PropertyToLoad('PERMK', ['VALUE', 'MULT', 'CON'], structured_grid_file.kz),
+                PropertyToLoad('KK', ['VALUE', 'MULT', 'CON'], structured_grid_file.kz),
             ]
 
             for token_property in properties_to_load:
@@ -1009,8 +960,7 @@ class NexusSimulator(Simulator):
                 remaining_line = current_line[current_line.index('NX') + 2:]
                 if nfo.get_next_value(0, [remaining_line], remaining_line) != 'NY':
                     continue
-                remaining_line = remaining_line[remaining_line.index(
-                    'NY') + 2:]
+                remaining_line = remaining_line[remaining_line.index('NY') + 2:]
                 if nfo.get_next_value(0, [remaining_line], remaining_line) != 'NZ':
                     continue
 
@@ -1069,8 +1019,7 @@ class NexusSimulator(Simulator):
             raise ValueError("No structured grid file found. Please provide data for structured grid \
                 e.g. through load_structured_grid_file method")
         # Convert the dictionary back to a class, and update the properties on our class
-        original_structured_grid_file = copy.deepcopy(
-            self.__structured_grid_file)
+        original_structured_grid_file = copy.deepcopy(self.__structured_grid_file)
         self.__structured_grid_file = StructuredGridFile(grid_dict)
 
         # Get the existing file as a list
@@ -1124,8 +1073,7 @@ class NexusSimulator(Simulator):
         new_list_str = ""
         for sub_list in grid_file_list[4:]:
             if sub_list == '\n':
-                new_list_split = [x.split("\t")
-                                  for x in new_list_str.split("\n")]
+                new_list_split = [x.split("\t") for x in new_list_str.split("\n")]
                 new_list_split_cleaned = []
                 for x_list in new_list_split:
                     float_list_split = [float(x) for x in x_list if x != ""]
@@ -1202,8 +1150,7 @@ class NexusSimulator(Simulator):
         """
         log_file_path = self.__get_log_path()
         if log_file_path is None:
-            raise NotImplementedError(
-                "Only retrieving status from a log file is supported at the moment")
+            raise NotImplementedError("Only retrieving status from a log file is supported at the moment")
         log_file = nfo.load_file_as_list(log_file_path)
 
         read_in_times = False
@@ -1218,8 +1165,7 @@ class NexusSimulator(Simulator):
                 heading_location = 0
                 line_string = line
                 while len(line_string) > 0:
-                    next_value = nfo.get_next_value(
-                        0, [line_string], line_string)
+                    next_value = nfo.get_next_value(0, [line_string], line_string)
                     if next_value is None:
                         break
 
@@ -1236,8 +1182,7 @@ class NexusSimulator(Simulator):
                         last_time = next_value
                     for x in range(0, time_heading_location):
                         line_string = line_string.replace(next_value, '', 1)
-                        next_value = nfo.get_next_value(
-                            0, [line_string], line_string)
+                        next_value = nfo.get_next_value(0, [line_string], line_string)
                         if next_value is None:
                             break
                         # When we reach the time column, read in the time value.
@@ -1248,8 +1193,7 @@ class NexusSimulator(Simulator):
         if last_time is not None:
             days_completed = self.__convert_date_to_number(last_time)
             if self.__times is None:
-                raise ValueError(
-                    "No times provided in the instance - please read them in from runcontrol file")
+                raise ValueError("No times provided in the instance - please read them in from runcontrol file")
             total_days = self.__convert_date_to_number(self.__times[-1])
             return round((days_completed / total_days) * 100, 1)
 
