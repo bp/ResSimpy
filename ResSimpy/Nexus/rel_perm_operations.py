@@ -39,7 +39,6 @@ def get_relperm_single_fluid_column_heading(table_heading: str) -> str:
     return column_heading
 
 
-# TODO: move this to a relperm specific module
 def get_relperm_base_saturation_column_heading(table_heading: str) -> str:
     """Returns the column heading for the base saturation column
 

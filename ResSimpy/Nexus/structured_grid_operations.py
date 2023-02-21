@@ -50,7 +50,6 @@ def load_token_value_if_present(token: str, modifier: str, token_property: Varia
             token_property.modifier = modifier
 
 
-# TODO: move to structured grid module
 def replace_value(file_as_list: list[str], old_property: VariableEntry, new_property: VariableEntry,
                   token_name: str) -> None:
     """Replace the value and token + modifier with the new values
