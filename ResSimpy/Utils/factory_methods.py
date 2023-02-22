@@ -1,5 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Union
+import pandas as pd
+
 if TYPE_CHECKING:
     from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
@@ -7,6 +9,12 @@ if TYPE_CHECKING:
 # Factory methods for generating empty lists with typing
 def get_empty_list_str() -> list[str]:
     value: list[str] = []
+    return value
+
+
+# Factory method for generating empty dictionary with typing
+def get_empty_dict_union() -> dict[str, Union[str, dict, int, float, pd.DataFrame]]:
+    value: dict[str, Union[str, dict, int, float, pd.DataFrame]] = {}
     return value
 
 
