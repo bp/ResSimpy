@@ -14,10 +14,11 @@ RUNCONTROL_KEYWORDS = ['TIME', 'RUNCONTROL']
 UNIT_KEYWORDS = ['ENGLISH', 'METRIC', 'METKG/CM2', 'METBAR', 'LAB']
 
 # Keywords that sometimes follow other keywords before the value
-INTERMEDIATE_KEYWORDS = ['SET', 'METHOD', 'NETWORK'] # always followed by an int, then a file path
+INTERMEDIATE_KEYWORDS = ['SET', 'METHOD', 'NETWORK']  # always followed by an int, then a file path
 
 # Keywords that require another keyword after their declaration
 STARTING_KEYWORDS = ['RESTART']
 
 # Combine all lists into the complete list
-VALID_NEXUS_KEYWORDS = WELLSPEC_KEYWORDS + RUNCONTROL_KEYWORDS + UNIT_KEYWORDS + INTERMEDIATE_KEYWORDS + STARTING_KEYWORDS
+VALID_NEXUS_KEYWORDS = WELLSPEC_KEYWORDS + RUNCONTROL_KEYWORDS + UNIT_KEYWORDS + INTERMEDIATE_KEYWORDS \
+                       + STARTING_KEYWORDS
