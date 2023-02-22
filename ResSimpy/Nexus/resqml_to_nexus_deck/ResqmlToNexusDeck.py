@@ -8,7 +8,7 @@ import resqpy.weights_and_measures as wam
 import os
 from inspect import getsourcefile
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
-import ResSimpy.Nexus.nexus_file_operations as nexus_file_operations
+import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
 class ResqmlToNexusDeck:
@@ -251,8 +251,8 @@ class ResqmlToNexusDeck:
 
         output_file_name = os.path.join(self.output_folder, 'main_grid.dat')
 
-        nexus_file_operations.create_templated_file(template_location=template_location, substitutions=substitutions,
-                                                    output_file_name=output_file_name)
+        nfo.create_templated_file(template_location=template_location, substitutions=substitutions,
+                                  output_file_name=output_file_name)
 
     @staticmethod
     def get_trajectories(model_address: str):
