@@ -3,13 +3,13 @@ from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from tests.multifile_mocker import mock_multiple_files
 
+
 def test_fcs_file(mocker):
     # Arrange
     fcs_content = '''DESC reservoir1
 RUN_UNITS ENGLISH
 DATEFORMAT DD/MM/YYYY
 GRID_FILES
-
 	 STRUCTURED_GRID nexus_data/mp2020_structured_grid_1_reg_update.dat
 	 OPTIONS nexus_data/nexus_data/mp2020_ref_options_reg_update.dat'''
 
@@ -30,9 +30,9 @@ GRID_FILES
     expected_fcs_file = FcsNexusFile(location=fcs_path, origin=None,
                                      includes_objects=[expected_structured_grid_file, expected_options_file],
                                      file_content_as_list=[
-                                         'DESC reservoir1', 'RUN_UNITS ENGLISH' , 'DATEFORMAT DD/MM/YYYY',
-                                         'GRID_FILES', '	 STRUCTURED_GRID ', expected_structured_grid_file,
-                                         '	 OPTIONS ', expected_options_file, ],
+                                         'DESC reservoir1', 'RUN_UNITS ENGLISH', 'DATEFORMAT DD/MM/YYYY',
+                                         'GRID_FILES', '	 STRUCTURED_GRID ', expected_structured_grid_file,'',
+                                         '	 OPTIONS ', expected_options_file, '',],
                                      structured_grid_file=expected_structured_grid_file,
                                      options_file=expected_options_file,
                                      )
@@ -45,14 +45,14 @@ GRID_FILES
 
 
 @pytest.mark.parametrize("input_line, expected_result", [
-    ('STRUCTURED_GRID nexus_data/mp2020_structured_grid_1_reg_update.dat',
+    ('STRUCTURED_GRID nexus_data/mp2020_structured_grid_1_reg_update.dat\n',
      ['STRUCTURED_GRID ', 'NEXUSFILE', '']),
     ('STRUCTURED_GRID nexus_data/mp2020_structured_grid_1_reg_update.dat !comment',
      ['STRUCTURED_GRID ', 'NEXUSFILE', ' !comment']),
     ('STRUCTURED_GRID nexus_data/mp2020_structured_grid_1_reg_update.dat !nexus_data/mp2020_structured_grid_1_reg_update.dat',
      ['STRUCTURED_GRID ', 'NEXUSFILE', ' !nexus_data/mp2020_structured_grid_1_reg_update.dat']),
     ('\t    STRUCTURED_GRID \t  nexus_data/mp2020_structured_grid_1_reg_update.dat',
-     ['\t    STRUCTURED_GRID \t  ', 'NEXUSFILE', ' !nexus_data/mp2020_structured_grid_1_reg_update.dat']),
+     ['\t    STRUCTURED_GRID \t  ', 'NEXUSFILE', '']),
     ], ids=['basic', 'with_comment', 'with filename in comment', 'weird tabbing'])
 def test_line_as_nexus_list(input_line, expected_result):
     # Arrange
