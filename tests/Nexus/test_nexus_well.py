@@ -213,9 +213,9 @@ def test_printable_well_info():
     # Arrange
     completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None,
                                    angle_v=None, status='ON')
-    completion_2 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None,
+    completion_2 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2024', grid='GRID1', skin=None,
                                    angle_v=None, status='ON', partial_perf=1)
-    completion_3 = NexusCompletion(i=1, j=2, k=3, date='01/02/2023', partial_perf=0)
+    completion_3 = NexusCompletion(i=1, j=2, k=3, date='01/02/2025', partial_perf=0)
     completions = [completion_1, completion_2, completion_3]
 
     well = NexusWell(well_name='test well', completions=completions, units=Units.OILFIELD)
@@ -224,7 +224,8 @@ def test_printable_well_info():
         """
     Well Name: test well
     First Perforation: 01/01/2023
-    Last Shut-in: 01/02/2023
+    Last Shut-in: 01/02/2025
+    Dates Changed: 01/01/2023, 01/01/2024, 01/02/2025
     """
 
     # Act
@@ -243,9 +244,9 @@ def test_printable_well_info_missing_info():
     expected_info = \
     """
     Well Name: test well
-    Grid: 
     First Perforation: N/A
     Last Shut-in: N/A
+    Dates Changed: N/A
     """
 
     # Act
