@@ -8,19 +8,20 @@ from ResSimpy.Nexus.nexus_constants import VALID_NEXUS_KEYWORDS
 import os
 
 
-def nexus_token_found(line_to_check: str) -> bool:
+def nexus_token_found(line_to_check: str, valid_list: list[str] = VALID_NEXUS_KEYWORDS) -> bool:
     """
     Checks if a valid Nexus token has been found  in the supplied line
 
     Args:
         line_to_check (str):  The string to search for a Nexus keyword
+        valid_list (list[str]): list of keywords to search from (e.g. from nexus_constants)
 
     Returns:
         token_found (bool): A boolean value stating whether the token is found or not
 
     """
     uppercase_line = line_to_check.upper()
-    for token in VALID_NEXUS_KEYWORDS:
+    for token in valid_list:
         if check_token(token, uppercase_line):
             return True
 
