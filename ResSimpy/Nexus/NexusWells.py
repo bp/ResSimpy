@@ -30,3 +30,10 @@ class NexusWells(Wells):
     def load_wells(self, well_file: str, start_date: str, default_units: Units) -> None:
         new_wells = load_wells(wellspec_file_path=well_file, start_date=start_date, default_units=default_units)
         self.__wells += new_wells
+
+    def get_wells_overview(self) -> str:
+        overview: str = ''
+        for well in self.__wells:
+            overview += well.printable_well_info
+
+        return overview

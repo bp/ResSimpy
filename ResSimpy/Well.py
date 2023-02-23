@@ -50,3 +50,8 @@ class Well(ABC):
     def last_shutin(self) -> Optional[str]:
         """Returns the first perforation for the well"""
         return NotImplementedError("This method has not been implemented for this simulator yet")
+
+    @property
+    def printable_well_info(self) -> str:
+        """Returns some printable well information in string format"""
+        return NotImplementedError("This method has not been implemented for this simulator yet")

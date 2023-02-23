@@ -47,7 +47,7 @@ from ResSimpy.UnitsEnum import Units
     ([], [])
 
 ], ids=['basic case', 'mixture of perf and not perf', 'no perforations', 'no perf info', 'empty list'])
-def test_get_perforations(mocker, completions, expected_perforations):
+def test_get_perforations(completions, expected_perforations):
     # Arrange
     well = NexusWell(well_name='test well', completions=completions,
                      units=Units.OILFIELD)
@@ -91,7 +91,7 @@ def test_get_perforations(mocker, completions, expected_perforations):
     ([], None)
 
 ], ids=['basic case', 'mixture of perf and not perf', 'no perforations', 'empty list'])
-def test_get_first_perforation(mocker, completions, expected_perforation):
+def test_get_first_perforation(completions, expected_perforation):
     # Arrange
     well = NexusWell(well_name='test well', completions=completions,
                      units=Units.OILFIELD)
@@ -150,7 +150,7 @@ def test_get_first_perforation(mocker, completions, expected_perforation):
     ([], [])
 
 ], ids=['basic case', 'mixture of perf and not perf', 'no shutins', 'no perf info', 'empty list'])
-def test_get_shutins(mocker, completions, expected_shutins):
+def test_get_shutins(completions, expected_shutins):
     # Arrange
     well = NexusWell(well_name='test well', completions=completions,
                      units=Units.OILFIELD)
@@ -197,7 +197,7 @@ def test_get_shutins(mocker, completions, expected_shutins):
     ([], None)
 
 ], ids=['basic case', 'mixture of perf and not perf', 'no shutins', 'no perf info', 'empty list'])
-def test_get_last_shutin(mocker, completions, expected_shutin):
+def test_get_last_shutin(completions, expected_shutin):
     # Arrange
     well = NexusWell(well_name='test well', completions=completions,
                      units=Units.OILFIELD)
@@ -207,3 +207,49 @@ def test_get_last_shutin(mocker, completions, expected_shutin):
 
     # Assert
     assert result == expected_shutin
+
+
+def test_printable_well_info():
+    # Arrange
+    completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None,
+                                   angle_v=None, status='ON')
+    completion_2 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None,
+                                   angle_v=None, status='ON', partial_perf=1)
+    completion_3 = NexusCompletion(i=1, j=2, k=3, date='01/02/2023', partial_perf=0)
+    completions = [completion_1, completion_2, completion_3]
+
+    well = NexusWell(well_name='test well', completions=completions, units=Units.OILFIELD)
+
+    expected_info = \
+        """
+    Well Name: test well
+    First Perforation: 01/01/2023
+    Last Shut-in: 01/02/2023
+    """
+
+    # Act
+    result = well.printable_well_info
+
+    # Assert
+    assert result == expected_info
+
+
+def test_printable_well_info_missing_info():
+    # Arrange
+    completions = []
+
+    well = NexusWell(well_name='test well', completions=completions, units=Units.OILFIELD)
+
+    expected_info = \
+    """
+    Well Name: test well
+    Grid: 
+    First Perforation: N/A
+    Last Shut-in: N/A
+    """
+
+    # Act
+    result = well.printable_well_info
+
+    # Assert
+    assert result == expected_info
