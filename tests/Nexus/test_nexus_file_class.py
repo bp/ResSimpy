@@ -45,7 +45,7 @@ def test_generate_file_include_structure_basic(mocker):
             'test_file_path.dat': test_file_contents,
             'inc_file1.inc': include_file_contents,
         }
-                                        ).return_value
+        ).return_value
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
@@ -60,7 +60,7 @@ def test_generate_file_include_structure_multiple_includes(mocker):
     # Arrange
     file_path = 'test_file_path.dat'
     test_file_contents = (
-'''basic_file INCLUDE inc_file1.inc
+        '''basic_file INCLUDE inc_file1.inc
 second_file INCLUDE inc_file2.inc''')
     include_file_contents = 'inc file contents'
     include_file_contents_2 = 'inc2 file contents'
