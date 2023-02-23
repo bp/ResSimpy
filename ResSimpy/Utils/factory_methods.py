@@ -13,8 +13,8 @@ def get_empty_list_str() -> list[str]:
 
 
 # Factory method for generating empty dictionary with typing
-def get_empty_dict_union() -> dict[str, Union[str, dict, int, float, pd.DataFrame]]:
-    value: dict[str, Union[str, dict, int, float, pd.DataFrame]] = {}
+def get_empty_dict_union() -> dict[str, Union[str, int, float, pd.DataFrame, dict[str, pd.DataFrame]]]:
+    value: dict[str, Union[str, int, float, pd.DataFrame, dict[str, pd.DataFrame]]] = {}
     return value
 
 
