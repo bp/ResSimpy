@@ -1,5 +1,7 @@
+import copy
 from dataclasses import dataclass, field
 import os
+import warnings
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from typing import Optional, Union, Generator
@@ -62,49 +64,57 @@ class FcsNexusFile(NexusFile):
 
     @classmethod
     def generate_fcs_structure(cls, fcs_file_path: str, recursive: bool = True):
-        fcs_tokens = FCS_KEYWORDS
         fcs_file = cls(location=fcs_file_path)
         fcs_file.includes_objects = get_empty_list_nexus_file()
         fcs_file.file_content_as_list = get_empty_list_str_nexus_file()
-        equil = None
-        structured_grid_file = None
-        options = None
-        rock = None
-        relpms = None
 
-        fcs_keyword_map = {
-            'EQUIL': equil,
-            'STRUCTURED_GRID': structured_grid_file,
-            'OPTIONS': options,
-            'ROCK': rock,
-            'RELPM': relpms,
+        fcs_keyword_map_single = {
+            'STRUCTURED_GRID': 'structured_grid_file',
+            'OPTIONS': 'options_file',
+        }
+        fcs_keyword_map_multi = {
+            'EQUIL': 'equil_files',
+            'ROCK': 'rock_files',
+            'RELPM': 'relperm_files',
         }
 
+        # guard against bad links/empty files:
         if not os.path.isfile(fcs_file_path):
             raise FileNotFoundError(f'fcs file not found for path {fcs_file_path}')
         flat_fcs_file_content = NexusFile.generate_file_include_structure(
             fcs_file_path, origin=None).get_flat_list_str_file()
         if flat_fcs_file_content is None:
             raise ValueError(f'FCS file not found, no content for {fcs_file_path=}')
-        for line in flat_fcs_file_content:
-            if nfo.check_token('STRUCTURED_GRID', line):
-                value = nfo.get_token_value('STRUCTURED_GRID', line, flat_fcs_file_content)
-                if value is not None:
-                    structured_grid_path = nfo.get_full_file_path(value, fcs_file_path)
-                    fcs_file.structured_grid_file = NexusFile.generate_file_include_structure(
-                        structured_grid_path, origin=fcs_file_path)
-                    fcs_file.includes_objects.append(fcs_file.structured_grid_file)
+        # for key, item in fcs_keyword_map_single.items():
+        for i, line in enumerate(flat_fcs_file_content):
+            if nfo.nexus_token_found(line, valid_list=FCS_KEYWORDS):
+                key = nfo.get_next_value(start_line_index=i, file_as_list=flat_fcs_file_content, search_string='')
+                if key is None:
+                    warnings.warn(f'get next value failed to find a suitable token in {line}')
+                    continue
+                value = nfo.get_token_value(key, line, flat_fcs_file_content[i::])
+                if value is None:
+                    warnings.warn(f'No value found for {key}, skipping file')
+                    continue
+                if key not in fcs_keyword_map_single and key not in fcs_keyword_map_multi:
+                    fcs_file.file_content_as_list.append(line.replace('\n', ''))
+                    continue
+                # TODO handle methods / sets instead of getting full file path
+                sub_file_path = nfo.get_full_file_path(value, fcs_file_path)
+                nexus_file = NexusFile.generate_file_include_structure(
+                    sub_file_path, origin=fcs_file_path)
+                fcs_file.includes_objects.append(nexus_file)
+                if key in fcs_keyword_map_single.keys():
+                    setattr(fcs_file, fcs_keyword_map_single[key], nexus_file)
                     fcs_file.file_content_as_list.extend(cls.line_as_nexus_list(
-                        line, value, fcs_file.structured_grid_file))
-            elif nfo.check_token('OPTIONS', line):
-                value = nfo.get_token_value('OPTIONS', line, flat_fcs_file_content)
-                if value is not None:
-                    options_path = nfo.get_full_file_path(value, fcs_file_path)
-                    fcs_file.options_file = NexusFile.generate_file_include_structure(
-                        options_path, origin=fcs_file_path,)
-                    fcs_file.includes_objects.append(fcs_file.options_file)
-                    fcs_file.file_content_as_list.extend(cls.line_as_nexus_list(
-                        line, value, fcs_file.options_file))
+                        line, value, nexus_file))
+                else:
+                    fcs_property = getattr(fcs_file, fcs_keyword_map_multi[key])
+                    if not isinstance(fcs_property, list):
+                        raise ValueError('Attribute extracted from the fcs_file instance is not a list.')
+                    fcs_property_list = copy.deepcopy(fcs_property)
+                    fcs_property_list.append(nexus_file)
+                    setattr(fcs_file, fcs_keyword_map_multi[key], fcs_property_list)
             else:
                 fcs_file.file_content_as_list.append(line.replace('\n', ''))
         return fcs_file

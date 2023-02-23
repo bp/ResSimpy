@@ -31,8 +31,8 @@ GRID_FILES
                                      includes_objects=[expected_structured_grid_file, expected_options_file],
                                      file_content_as_list=[
                                          'DESC reservoir1', 'RUN_UNITS ENGLISH', 'DATEFORMAT DD/MM/YYYY',
-                                         'GRID_FILES', '	 STRUCTURED_GRID ', expected_structured_grid_file,'',
-                                         '	 OPTIONS ', expected_options_file, '',],
+                                         'GRID_FILES', '	 STRUCTURED_GRID ', expected_structured_grid_file, '',
+                                         '	 OPTIONS ', expected_options_file, '', ],
                                      structured_grid_file=expected_structured_grid_file,
                                      options_file=expected_options_file,
                                      )
