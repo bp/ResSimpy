@@ -66,12 +66,24 @@ class FcsNexusFile(NexusFile):
         fcs_file = cls(location=fcs_file_path)
         fcs_file.includes_objects = get_empty_list_nexus_file()
         fcs_file.file_content_as_list = get_empty_list_str_nexus_file()
+        equil = None
+        structured_grid_file = None
+        options = None
+        rock = None
+        relpms = None
+
+        fcs_keyword_map = {
+            'EQUIL': equil,
+            'STRUCTURED_GRID': structured_grid_file,
+            'OPTIONS': options,
+            'ROCK': rock,
+            'RELPM': relpms,
+        }
 
         if not os.path.isfile(fcs_file_path):
             raise FileNotFoundError(f'fcs file not found for path {fcs_file_path}')
         flat_fcs_file_content = NexusFile.generate_file_include_structure(
             fcs_file_path, origin=None).get_flat_list_str_file()
-
         if flat_fcs_file_content is None:
             raise ValueError(f'FCS file not found, no content for {fcs_file_path=}')
         for line in flat_fcs_file_content:
@@ -98,7 +110,18 @@ class FcsNexusFile(NexusFile):
         return fcs_file
 
     @staticmethod
-    def line_as_nexus_list(line: str, path: str, nexus_obj: NexusFile):
+    def line_as_nexus_list(line: str, path: str, nexus_obj: NexusFile) -> list[Union[str, NexusFile]]:
+        """split out a line into the start and finish and inserts a NexusFile object into the place of the path.
+
+        Args:
+            line (str): line to split apart (containing path)
+            path (str): path to remove from the line
+            nexus_obj (NexusFile): NexusFile instance to replace the path with
+
+        Returns:
+            list[Union[str, NexusFile]]: list of the format [prefix, NexusFile, suffix] where the NexusFile object is \
+            in place of the path provided
+        """
         new_list = []
         prefix = line.split(path, 1)[0]
         new_list.append(prefix)
