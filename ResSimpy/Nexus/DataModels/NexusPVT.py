@@ -99,17 +99,17 @@ class NexusPVT():
                     pvt_table_indices['GAS'][1] = line_indx
                     start_reading_table = False
                     gas_table = False
-                if 'UNSATOIL_PSAT' in pvt_table_indices.keys() and \
+                if 'UNSATOIL_PSAT' in pvt_table_indices_dict.keys() and \
                         [i for i in line.split() if i in VALID_NEXUS_KEYWORDS] and unsatoil_table:
                     pvt_table_indices_dict['UNSATOIL_PSAT'][psat_values[-1]][1] = line_indx
                     start_reading_table = False
                     unsatoil_table = False
-                if 'UNSATOIL_RSSAT' in pvt_table_indices.keys() and \
+                if 'UNSATOIL_RSSAT' in pvt_table_indices_dict.keys() and \
                         [i for i in line.split() if i in VALID_NEXUS_KEYWORDS] and unsatoil_table:
                     pvt_table_indices_dict['UNSATOIL_RSSAT'][rs_values[-1]][1] = line_indx
                     start_reading_table = False
                     unsatoil_table = False
-                if 'UNSATGAS' in pvt_table_indices.keys() and \
+                if 'UNSATGAS' in pvt_table_indices_dict.keys() and \
                         [i for i in line.split() if i in VALID_NEXUS_KEYWORDS] and unsatgas_table:
                     pvt_table_indices_dict['UNSATGAS'][p_values[-1]][1] = line_indx
                     start_reading_table = False
@@ -133,13 +133,13 @@ class NexusPVT():
             if nfo.check_token('UNSATOIL', line):
                 if nfo.check_token('PSAT', line):
                     psat_values.append(str(nfo.get_token_value('PSAT', line, file_as_list)))
-                    if 'UNSATOIL_PSAT' in pvt_table_indices.keys():
+                    if 'UNSATOIL_PSAT' in pvt_table_indices_dict.keys():
                         pvt_table_indices_dict['UNSATOIL_PSAT'][psat_values[-1]] = [line_indx+1, len(file_as_list)]
                     else:
                         pvt_table_indices_dict['UNSATOIL_PSAT'] = {psat_values[-1]: [line_indx+1, len(file_as_list)]}
                 if nfo.check_token('RSSAT', line):
                     rs_values.append(str(nfo.get_token_value('RSSAT', line, file_as_list)))
-                    if 'UNSATOIL_RSSAT' in pvt_table_indices.keys():
+                    if 'UNSATOIL_RSSAT' in pvt_table_indices_dict.keys():
                         pvt_table_indices_dict['UNSATOIL_RSSAT'][rs_values[-1]] = [line_indx+1, len(file_as_list)]
                     else:
                         pvt_table_indices_dict['UNSATOIL_RSSAT'] = {rs_values[-1]: [line_indx+1, len(file_as_list)]}
@@ -149,7 +149,7 @@ class NexusPVT():
             if nfo.check_token('UNSATGAS', line):
                 if nfo.check_token('PRES', line):
                     p_values.append(str(nfo.get_token_value('PRES', line, file_as_list)))
-                    if 'UNSATGAS' in pvt_table_indices.keys():
+                    if 'UNSATGAS' in pvt_table_indices_dict.keys():
                         pvt_table_indices_dict['UNSATGAS'][p_values[-1]] = [line_indx+1, len(file_as_list)]
                     else:
                         pvt_table_indices_dict['UNSATGAS'] = {p_values[-1]: [line_indx+1, len(file_as_list)]}
