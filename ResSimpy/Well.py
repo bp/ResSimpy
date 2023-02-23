@@ -2,6 +2,7 @@
 
 from abc import ABC
 from dataclasses import dataclass
+from typing import Optional
 
 from ResSimpy.Completion import Completion
 from ResSimpy.UnitsEnum import Units
@@ -29,3 +30,23 @@ class Well(ABC):
     @property
     def units(self) -> Units:
         return self.__units
+
+    @property
+    def perforations(self) -> list[Completion]:
+        """Returns a list of all of the perforations for the well"""
+        return NotImplementedError("This method has not been implemented for this simulator yet")
+
+    @property
+    def first_perforation(self) -> Optional[str]:
+        """Returns the first perforation for the well"""
+        return NotImplementedError("This method has not been implemented for this simulator yet")
+
+    @property
+    def shutins(self) -> list[Completion]:
+        """Returns a list of all of the perforations for the well"""
+        return NotImplementedError("This method has not been implemented for this simulator yet")
+
+    @property
+    def last_shutin(self) -> Optional[str]:
+        """Returns the first perforation for the well"""
+        return NotImplementedError("This method has not been implemented for this simulator yet")

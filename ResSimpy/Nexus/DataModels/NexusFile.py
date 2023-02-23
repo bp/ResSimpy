@@ -175,7 +175,7 @@ class NexusFile:
         return flat_list
 
     # this isnt' that helpful honestly
-    def get_flat_list_str_until_file(self):
+    def get_flat_list_str_until_file(self) -> None:
         flat_list: list[str] = []
         if self.file_content_as_list is None:
             raise ValueError(f'No file content found for {self.location=}')

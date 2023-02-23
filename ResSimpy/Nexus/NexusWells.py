@@ -11,10 +11,10 @@ class NexusWells(Wells):
     __wells: list[NexusWell] = field(default_factory=lambda: [])
     wellspec_paths: list[str] = field(default_factory=lambda: [])
 
-    def get_wells(self):
+    def get_wells(self) -> list[NexusWell]:
         return self.__wells
 
-    def get_wells_df(self):
+    def get_wells_df(self) -> pd.DataFrame:
         # loop through wells and completions to output a table
         df_store = pd.DataFrame()
         for well in self.__wells:
@@ -27,6 +27,6 @@ class NexusWells(Wells):
         df_store = df_store.dropna(axis=1, how='all')
         return df_store
 
-    def load_wells(self, well_file: str, start_date: str, default_units: Units):
+    def load_wells(self, well_file: str, start_date: str, default_units: Units) -> None:
         new_wells = load_wells(wellspec_file_path=well_file, start_date=start_date, default_units=default_units)
         self.__wells += new_wells
