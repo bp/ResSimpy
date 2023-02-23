@@ -330,7 +330,7 @@ def get_full_file_path(file_path: str, origin: str):
     if os.path.isabs(file_path):
         return_path = file_path
     else:
-        return_path = os.path.join(os.path.dirname(origin), file_path)
+        return_path = str(os.path.join(os.path.dirname(origin), file_path))
     return return_path
 
 
