@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from typing import Union
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.Utils.factory_methods import get_empty_dict_union  # , get_empty_list_str  # , get_empty_dict_union_int
+from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.nexus_constants import VALID_NEXUS_KEYWORDS
 
@@ -33,8 +33,6 @@ class NexusPVT():
 
         # Initialize flags and containers used to record properties as we iterate through pvt file contents
         # Dictionary to record start and ending indices for tables
-        # pvt_table_indices: dict[str | None, Union[list[int], dict[str | None, list[int]]]] = \
-        #     field(default_factory=get_empty_dict_union_int)
         pvt_table_indices: dict[str, list[int]] = {}
         pvt_table_indices_dict:  dict[str, dict[str, list[int]]] = {}
         start_reading_table: bool = False  # Flag to tell when to start reading a table
@@ -44,10 +42,10 @@ class NexusPVT():
         unsatoil_table: bool = False  # Flag indicating UNSATOIL table is to be read
         unsatgas_table: bool = False  # Flag indicating UNSATGAS table is to be read
         # List to track saturation pressures from which undersaturated branches emanate
-        psat_values: list[str] = []  # field(default_factory=get_empty_list_str)
+        psat_values: list[str] = []
         p_values: list[str] = []
         # List to track saturation Rs from which undersaturated branches emanate
-        rs_values: list[str] = []  # field(default_factory=get_empty_list_str)
+        rs_values: list[str] = []
 
         line_indx = 0
         for line in file_as_list:
