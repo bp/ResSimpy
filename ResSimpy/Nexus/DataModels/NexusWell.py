@@ -5,6 +5,11 @@ from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.UnitsEnum import Units
 from ResSimpy.Well import Well
 
+@dataclass
+class CompletionEvent:
+    """Class representing an 'event' for a completion, i.e. whether a k layer has been switched on or off"""
+    date: str
+    k_perforated_values: list[tuple[int, bool]]
 
 @dataclass
 class NexusWell(Well):
@@ -38,18 +43,19 @@ class NexusWell(Well):
 
         return self.perforations[0]
 
+    @staticmethod
+    def completion_is_shutin(completion: NexusCompletion):
+        # If we don't have any non-none values for these properties, assume this is a shutin
+        if completion.partial_perf is None and completion.well_indices is None and completion.status is None:
+            return True
+
+        return completion.partial_perf == 0 or completion.well_indices == 0 or completion.status == 'OFF'
+
     @property
     def shutins(self) -> list[NexusCompletion]:
         """Returns a list of all of the shut-ins for the well"""
 
-        def completion_is_shutin(completion: NexusCompletion):
-            # If we don't have any non-none values for these properties, assume this is a shutin
-            if completion.partial_perf is None and completion.well_indices is None and completion.status is None:
-                return True
-
-            return completion.partial_perf == 0 or completion.well_indices == 0 or completion.status == 'OFF'
-
-        shutins = filter(completion_is_shutin, self.__completions)
+        shutins = filter(self.completion_is_shutin, self.__completions)
         return list(shutins)
 
     @property
@@ -84,3 +90,17 @@ class NexusWell(Well):
     """
 
         return well_info
+
+    @property
+    def completion_events(self) -> list[CompletionEvent]:
+        """Returns a list of dates and a boolean representing whether the well was switched on or off on that date"""
+        events = []
+
+        for completion in self.__completions:
+            is_perforation = not(self.completion_is_shutin(completion))
+            events.append((completion.date, is_perforation))
+
+        return events
+
+
+

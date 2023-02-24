@@ -1,7 +1,7 @@
 import pytest
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
-from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
+from ResSimpy.Nexus.DataModels.NexusWell import NexusWell, CompletionEvent
 from ResSimpy.UnitsEnum import Units
 
 
@@ -189,6 +189,12 @@ def test_get_shutins(completions, expected_shutins):
      # Expected:
      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', partial_perf=0.5, well_indices=5, status='OFF')),
 
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+                      partial_perf=0.1),
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', partial_perf=0.5, well_indices=5)],
+     # Expected:
+     None),
+
     ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None),
       NexusCompletion(i=1, j=2, k=3, date='01/02/2023')],
      # Expected:
@@ -196,7 +202,7 @@ def test_get_shutins(completions, expected_shutins):
 
     ([], None)
 
-], ids=['basic case', 'mixture of perf and not perf', 'no shutins', 'no perf info', 'empty list'])
+], ids=['basic case', 'mixture of perf and not perf', 'only shutins', 'no shutins', 'no perf info', 'empty list'])
 def test_get_last_shutin(completions, expected_shutin):
     # Arrange
     well = NexusWell(well_name='test well', completions=completions,
@@ -254,3 +260,51 @@ def test_printable_well_info_missing_info():
 
     # Assert
     assert result == expected_info
+
+
+@pytest.mark.parametrize('completions, expected_shutin', [
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+                      partial_perf=0),
+      NexusCompletion(i=1, j=2, k=3, well_radius=9.11, date='01/02/2024', partial_perf=0.5, status='OFF')],
+     # Expected:
+     [CompletionEvent(date='01/01/2023', k_perforated_values=[(3, False)]),
+      CompletionEvent(date='01/01/2024', k_perforated_values=[(3, False)])]),
+
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+                      partial_perf=0.1),
+      NexusCompletion(i=1, j=2, k=4, well_radius=9.11, date='01/02/2024', partial_perf=0),
+      NexusCompletion(i=1, j=2, k=5, well_radius=9.11, date='01/02/2024', status='ON'),
+      NexusCompletion(i=1, j=2, k=6, well_radius=9.11, date='01/02/2024', status='ON', well_indices=0),
+      NexusCompletion(i=1, j=2, k=7, well_radius=9.11, date='01/02/2024', status='ON', partial_perf=0.000),
+      NexusCompletion(i=1, j=2, k=8, well_radius=9.11, date='01/02/2024', status='OFF', partial_perf=1),
+      NexusCompletion(i=1, j=2, k=9, well_radius=9.11, date='01/02/2024', status='ON', partial_perf=1, well_indices=0),
+      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2025', status='ON', partial_perf=1, well_indices=1),
+      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2028', well_indices=3),
+      NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/02/2034', partial_perf=0.5)],
+     # Expected:
+     [('01/01/2023', True), ('01/02/2024', False)]),
+
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+                      partial_perf=0.1, status='ON', well_indices=0),
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', partial_perf=0.5, well_indices=5, status='OFF')],
+     # Expected:
+     NexusCompletion(i=1, j=2, k=3, date='01/02/2023', partial_perf=0.5, well_indices=5, status='OFF')),
+
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None),
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023')],
+     # Expected:
+     NexusCompletion(i=1, j=2, k=3, date='01/02/2023')),
+
+    ([], None)
+
+], ids=['Only shutins', 'mixture of perf and not perf', 'only perforations', 'no perf info', 'empty list'])
+def test_get_completion_events(completions, expected_shutin):
+    # Arrange
+    well = NexusWell(well_name='test well', completions=completions,
+                     units=Units.OILFIELD)
+
+    # Act
+    result = well.last_shutin
+
+    # Assert
+    assert result == expected_shutin

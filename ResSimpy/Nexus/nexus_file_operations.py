@@ -311,7 +311,7 @@ def expand_include(file_as_list: list[str], recursive: bool = True) -> tuple[lis
             expanded_file += inc_data
             if suffix_line:
                 expanded_file += [suffix_line]
-            expanded_file += old_file_contents[i+1::]
+            expanded_file += old_file_contents[i + 1::]
             break
     # if INCLUDE is not found in the file provided then inc_file_path is None and so will break recursion
     if recursive:
@@ -360,7 +360,7 @@ def read_table_to_df(file_as_list: list[str], keep_comments: bool = False) -> pd
         # Save comments in a list
         comment_column = [line.split('!', 1)[1].strip() if '!' in line else None for line in file_as_list]
         # Create dataframe
-        df = pd.read_csv(StringIO('\n'.join(cleaned_file_as_list)+'\n'), sep=r'\s+', skip_blank_lines=False)
+        df = pd.read_csv(StringIO('\n'.join(cleaned_file_as_list) + '\n'), sep=r'\s+', skip_blank_lines=False)
         df.columns = [col.upper() for col in df.columns if isinstance(col, str)]
         if any(x is not None for x in comment_column):  # If comment column isn't a full column of Nones
             df['COMMENT'] = comment_column[1:]
