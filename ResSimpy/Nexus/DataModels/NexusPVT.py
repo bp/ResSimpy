@@ -47,34 +47,25 @@ class NexusPVT():
         # List to track saturation Rs from which undersaturated branches emanate
         rs_values: list[str] = []
 
+        # List of potential pvt types
+        potential_pvt_types = ['BLACKOIL', 'WATEROIL', 'GASWATER', 'EOS']
+        # List of potential fluid density parameters
+        potential_fluid_density_params = ['DENOIL', 'API', 'GOR', 'OGR', 'DENGAS', 'SPECG', 'MWOR']
+
         line_indx = 0
         for line in file_as_list:
 
             # Determine PVT type, i.e., BLACKOIL, WATEROIL, EOS, etc.
-            if nfo.check_token('BLACKOIL', line):
-                self.properties['PVT_TYPE'] = 'BLACKOIL'
-            if nfo.check_token('WATEROIL', line):
-                self.properties['PVT_TYPE'] = 'WATEROIL'
-            if nfo.check_token('GASWATER', line):
-                self.properties['PVT_TYPE'] = 'GASWATER'
-            if nfo.check_token('EOS', line):
-                self.properties['PVT_TYPE'] = 'EOS'
+            for pvt_type in potential_pvt_types:
+                if nfo.check_token(pvt_type, line):
+                    self.properties['PVT_TYPE'] = pvt_type
 
             # Extract fluid density parameters
-            if nfo.check_token('DENOIL', line):
-                self.properties['DENOIL'] = float(str(nfo.get_token_value('DENOIL', line, file_as_list)))
-            if nfo.check_token('API', line):
-                self.properties['API'] = float(str(nfo.get_token_value('API', line, file_as_list)))
-            if nfo.check_token('GOR', line):
-                self.properties['GOR'] = float(str(nfo.get_token_value('GOR', line, file_as_list)))
-            if nfo.check_token('OGR', line):
-                self.properties['OGR'] = float(str(nfo.get_token_value('OGR', line, file_as_list)))
-            if nfo.check_token('DENGAS', line):
-                self.properties['DENGAS'] = float(str(nfo.get_token_value('DENGAS', line, file_as_list)))
-            if nfo.check_token('SPECG', line):
-                self.properties['SPECG'] = float(str(nfo.get_token_value('SPECG', line, file_as_list)))
-            if nfo.check_token('MWOR', line):
-                self.properties['MWOR'] = float(str(nfo.get_token_value('MWOR', line, file_as_list)))
+            for fluid_param in potential_fluid_density_params:
+                if nfo.check_token(fluid_param, line):
+                    if nfo.get_token_value(fluid_param, line, file_as_list) is None:
+                        raise ValueError(f"Property {fluid_param} does not have a numerical value.")
+                    self.properties[fluid_param] = float(str(nfo.get_token_value(fluid_param, line, file_as_list)))
             if nfo.check_token('DRYGAS_MFP', line):
                 self.properties['DRYGAS_MFP'] = True
 
@@ -128,12 +119,16 @@ class NexusPVT():
                 continue
             if nfo.check_token('UNSATOIL', line):
                 if nfo.check_token('PSAT', line):
+                    if nfo.get_token_value('PSAT', line, file_as_list) is None:
+                        raise ValueError("Property PSAT does not have a numerical value.")
                     psat_values.append(str(nfo.get_token_value('PSAT', line, file_as_list)))
                     if 'UNSATOIL_PSAT' in pvt_table_indices_dict.keys():
                         pvt_table_indices_dict['UNSATOIL_PSAT'][psat_values[-1]] = [line_indx+1, len(file_as_list)]
                     else:
                         pvt_table_indices_dict['UNSATOIL_PSAT'] = {psat_values[-1]: [line_indx+1, len(file_as_list)]}
                 if nfo.check_token('RSSAT', line):
+                    if nfo.get_token_value('RSSAT', line, file_as_list) is None:
+                        raise ValueError("Property RSSAT does not have a numerical value.")
                     rs_values.append(str(nfo.get_token_value('RSSAT', line, file_as_list)))
                     if 'UNSATOIL_RSSAT' in pvt_table_indices_dict.keys():
                         pvt_table_indices_dict['UNSATOIL_RSSAT'][rs_values[-1]] = [line_indx+1, len(file_as_list)]
@@ -144,6 +139,8 @@ class NexusPVT():
                 continue
             if nfo.check_token('UNSATGAS', line):
                 if nfo.check_token('PRES', line):
+                    if nfo.get_token_value('PRES', line, file_as_list) is None:
+                        raise ValueError("Property PRES does not have a numerical value.")
                     p_values.append(str(nfo.get_token_value('PRES', line, file_as_list)))
                     if 'UNSATGAS' in pvt_table_indices_dict.keys():
                         pvt_table_indices_dict['UNSATGAS'][p_values[-1]] = [line_indx+1, len(file_as_list)]
