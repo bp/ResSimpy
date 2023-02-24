@@ -438,3 +438,59 @@ def clean_up_string(value: str) -> str:
     value = value.replace("!", "")
     value = value.replace("\t", "")
     return value
+
+
+def check_for_common_input_data(file_as_list: list[str], property_dict: dict) -> dict:
+    """Loop through lines of Nexus input file content looking for common input data, e.g.,
+    units such as ENGLISH or METRIC, temparure units such as FAHR or CELSIUS, DATEFORMAT, etc.,
+    as defined in Nexus manual. If any found, include in provided property_dict and return
+
+    Args:
+        file_as_list (list[str]): Nexus input file content
+        property_dict (dict): Dictionary in which to include common input data if found
+
+    Returns:
+        dict: Dictionary including found common input data
+    """
+    for line in file_as_list:
+        # Check for description
+        if check_token('DESC', line):
+            if 'DESC' in property_dict.keys():
+                property_dict['DESC'].append(line.split('DESC')[1].strip())
+            else:
+                property_dict['DESC'] = [line.split('DESC')[1].strip()]
+        # Check for label
+        if check_token('LABEL', line):
+            property_dict['LABEL'] = get_token_value('LABEL', line, file_as_list)
+        # Check for dateformat
+        if check_token('DATEFORMAT', line):
+            property_dict['DATEFORMAT'] = get_token_value('DATEFORMAT', line, file_as_list)
+        # Check unit system specification
+        if check_token('ENGLISH', line):
+            property_dict['UNIT_SYSTEM'] = 'ENGLISH'
+            property_dict['TEMP_UNIT'] = 'FAHR'
+        if check_token('METRIC', line):
+            property_dict['UNIT_SYSTEM'] = 'METRIC'
+            property_dict['TEMP_UNIT'] = 'CELSIUS'
+        if check_token('METKG/CM2', line):
+            property_dict['UNIT_SYSTEM'] = 'METKG/CM2'
+        if check_token('METBAR', line):
+            property_dict['UNIT_SYSTEM'] = 'METBAR'
+            property_dict['TEMP_UNIT'] = 'CELSIUS'
+        if check_token('LAB', line):
+            property_dict['UNIT_SYSTEM'] = 'LAB'
+            property_dict['TEMP_UNIT'] = 'CELSIUS'
+        # Check to see if sality unit is provided
+        if check_token('SUNITS', line):
+            property_dict['SUNITS'] = get_token_value('SUNITS', line, file_as_list)
+        # Check to see if temperature units are provided
+        if check_token('KELVIN', line):
+            property_dict['TEMP_UNIT'] = 'KELVIN'
+        if check_token('RANKINE', line):
+            property_dict['TEMP_UNIT'] = 'RANKINE'
+        if check_token('FAHR', line):
+            property_dict['TEMP_UNIT'] = 'FAHR'
+        if check_token('CELSIUS', line):
+            property_dict['TEMP_UNIT'] = 'CELSIUS'
+
+    return property_dict
