@@ -43,6 +43,47 @@ GRID_FILES
     assert fcs_file == expected_fcs_file
     assert fcs_file.structured_grid_file == expected_fcs_file.structured_grid_file
 
+def test_fcs_file_multiple_methods(mocker):
+    # Arrange
+    fcs_content = '''DESC reservoir1
+    RUN_UNITS ENGLISH
+    DATEFORMAT DD/MM/YYYY
+    INITIALIZATION_FILES
+	 EQUIL Method 1 nexus_data/nexus_data/mp2017hm_ref_equil_01.dat
+	 EQUIL Method 2 nexus_data/nexus_data/mp2017hm_ref_equil_02.dat
+	 EQUIL Method 3 nexus_data/nexus_data/mp2017hm_ref_equil_03.dat'''
+  
+    fcs_path = 'test_fcs.fcs'
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'test_fcs.fcs': fcs_content,
+            }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+    mocker.patch("os.path.isfile", lambda x: True)
+
+    expected_equil_1 = NexusFile(location='nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',
+                                 origin=fcs_path, includes=None,
+                                 includes_objects=None, file_content_as_list=None)
+    expected_equil_2 = NexusFile(location='nexus_data/nexus_data/mp2017hm_ref_equil_02.dat',
+                                 origin=fcs_path, includes=None,
+                                 includes_objects=None, file_content_as_list=None)
+    expected_equil_3 = NexusFile(location='nexus_data/nexus_data/mp2017hm_ref_equil_03.dat',
+                                 origin=fcs_path, includes=None,
+                                 includes_objects=None, file_content_as_list=None)
+    expected_fcs_file = FcsNexusFile(location=fcs_path, origin=None,
+                                     includes_objects=[expected_equil_1, expected_equil_2, expected_equil_3],
+                                     file_content_as_list=[
+                                         'DESC reservoir1', '    RUN_UNITS ENGLISH', '    DATEFORMAT DD/MM/YYYY',
+                                         '    INITIALIZATION_FILES', '	 EQUIL Method 1 ', expected_equil_1, '',
+                                         '	 EQUIL Method 2 ', expected_equil_2, '', '	 EQUIL Method 3 ',
+                                         expected_equil_3, ''],
+                                     equil_files=[expected_equil_1, expected_equil_2, expected_equil_3],
+                                     )
+    # Act
+    result = FcsNexusFile.generate_fcs_structure(fcs_path)
+    # Assert
+    assert result == expected_fcs_file
 
 @pytest.mark.parametrize("input_line, expected_result", [
     ('STRUCTURED_GRID nexus_data/mp2020_structured_grid_1_reg_update.dat\n',

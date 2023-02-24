@@ -389,3 +389,38 @@ def test_read_table_to_df(file_contents, keep_comments, expected_df_dict):
     # Assert
     # Deep compare expected and received dataframes
     pd.testing.assert_frame_equal(df_expected, df_received)
+
+
+@pytest.mark.parametrize("line, number_tokens, expected_result", [
+  ('EQUIL METHOD 1 /path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
+  ('EQUIL METHOD 1 /path/equil.dat ! comment', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
+  ('EQUIL METHOD 1 /path/equil.dat TOKEN TOKEN', 6, ['EQUIL', 'METHOD', '1', '/path/equil.dat','TOKEN', 'TOKEN']),
+  ('EQUIL METHOD 1 \n /path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
+  ('EQUIL METHOD !comment\n \t 1 ', 3, ['EQUIL', 'METHOD', '1']),
+  ('EQUIL\n METHOD\n1\n/path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat'])
+  ], ids=["basic", "more tokens", "get more tokens", "new line", "newline comment", "lots of newlines"])
+def test_get_multiple_sequential_tokens(line, number_tokens, expected_result):
+    # Arrange
+    list_of_strings = line.splitlines()
+    # Act
+    result = nfo.get_multiple_sequential_tokens(list_of_strings, number_tokens)
+    # Assert
+    assert result == expected_result
+
+def test_get_multiple_sequential_tokens_fail_case():
+    # Arrange
+    line = 'EQUIL METHOD'
+    number_tokens = 3
+    # Act + Assert
+    with pytest.raises(ValueError):
+        value = nfo.get_multiple_sequential_tokens([line], number_tokens)
+
+
+def test_get_next_value():
+    # Arrange
+    line = '\t 1'
+    expected_result = '1'
+    # Act
+    result = nfo.get_next_value(0, [line], line)
+    # Assert
+    assert result == expected_result

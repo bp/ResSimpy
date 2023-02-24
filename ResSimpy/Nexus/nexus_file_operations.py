@@ -381,3 +381,20 @@ def clean_up_string(value: str) -> str:
     value = value.replace("!", "")
     value = value.replace("\t", "")
     return value
+
+
+def get_multiple_sequential_tokens(list_of_strings: list[str], number_tokens: int) -> list:
+    store_values = []
+    filter_list = list_of_strings.copy()
+    for i in range(0, number_tokens):
+        # TODO: change to get_expected_next_value
+        value = get_next_value(0, filter_list, filter_list[0], replace_with='')
+        while value is None:
+            # if no valid value found in the first line, remove it and try it again
+            filter_list.pop(0)
+            if len(filter_list) == 0:
+                raise ValueError('Too many values requested from the list of strings passed')
+            value = get_next_value(0, filter_list, filter_list[0], replace_with='')
+        store_values.append(value)
+
+    return store_values

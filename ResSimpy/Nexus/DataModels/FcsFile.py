@@ -1,5 +1,5 @@
 import copy
-from dataclasses import dataclass, field
+from dataclasses import Field, dataclass, field
 import os
 import warnings
 
@@ -88,7 +88,7 @@ class FcsNexusFile(NexusFile):
         # for key, item in fcs_keyword_map_single.items():
         for i, line in enumerate(flat_fcs_file_content):
             if nfo.nexus_token_found(line, valid_list=FCS_KEYWORDS):
-                key = nfo.get_next_value(start_line_index=i, file_as_list=flat_fcs_file_content, search_string='')
+                key = nfo.get_next_value(start_line_index=i, file_as_list=flat_fcs_file_content, search_string=line)
                 if key is None:
                     warnings.warn(f'get next value failed to find a suitable token in {line}')
                     continue
@@ -100,21 +100,34 @@ class FcsNexusFile(NexusFile):
                     fcs_file.file_content_as_list.append(line.replace('\n', ''))
                     continue
                 # TODO handle methods / sets instead of getting full file path
-                sub_file_path = nfo.get_full_file_path(value, fcs_file_path)
-                nexus_file = NexusFile.generate_file_include_structure(
-                    sub_file_path, origin=fcs_file_path)
-                fcs_file.includes_objects.append(nexus_file)
-                if key in fcs_keyword_map_single.keys():
-                    setattr(fcs_file, fcs_keyword_map_single[key], nexus_file)
-                    fcs_file.file_content_as_list.extend(cls.line_as_nexus_list(
-                        line, value, nexus_file))
-                else:
+                if key in fcs_keyword_map_multi:
+
+                    # for keywords that have multiple methods we store the value in a dictionary
+                    # with the method number and the NexusFile object
+                    _, method_string, method_number, value = (
+                        nfo.get_multiple_sequential_tokens(flat_fcs_file_content[i::], 4)
+                    )
+                    sub_file_path = nfo.get_full_file_path(value, fcs_file_path)
+                    nexus_file = NexusFile.generate_file_include_structure(
+                        sub_file_path, origin=fcs_file_path)
                     fcs_property = getattr(fcs_file, fcs_keyword_map_multi[key])
-                    if not isinstance(fcs_property, list):
-                        raise ValueError('Attribute extracted from the fcs_file instance is not a list.')
-                    fcs_property_list = copy.deepcopy(fcs_property)
+                    if isinstance(fcs_property, Field):
+                        fcs_property = get_empty_list_nexus_file()
+                    # shallow copy to maintain list elements pointing to nexus_file that are
+                    # stored in the file_content_as_list
+                    fcs_property_list = fcs_property.copy()
                     fcs_property_list.append(nexus_file)
+                    # set the attribute in the fcs_file instance
                     setattr(fcs_file, fcs_keyword_map_multi[key], fcs_property_list)
+                    fcs_file.file_content_as_list.extend(cls.line_as_nexus_list(line, value, nexus_file))
+                    fcs_file.includes_objects.append(nexus_file)
+                else:
+                    sub_file_path = nfo.get_full_file_path(value, fcs_file_path)
+                    nexus_file = NexusFile.generate_file_include_structure(
+                        sub_file_path, origin=fcs_file_path)
+                    setattr(fcs_file, fcs_keyword_map_single[key], nexus_file)
+                    fcs_file.file_content_as_list.extend(cls.line_as_nexus_list(line, value, nexus_file))
+                    fcs_file.includes_objects.append(nexus_file)
             else:
                 fcs_file.file_content_as_list.append(line.replace('\n', ''))
         return fcs_file
