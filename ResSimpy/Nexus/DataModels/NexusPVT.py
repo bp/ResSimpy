@@ -1,8 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Union
 import pandas as pd
-# import sys
-# sys.path.insert(0, '/tcchou/isebo0/Testing/github_repos/ResSimpy')
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Utils.factory_methods import get_empty_dict_union  # , get_empty_list_str  # , get_empty_dict_union_int
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -175,8 +173,3 @@ class NexusPVT():
                     raise ValueError(f"Property is not a dictionary: {str(self.properties[key])}")
                 self.properties[key][subkey] = nfo.read_table_to_df(file_as_list[
                     pvt_table_indices_dict[key][subkey][0]:pvt_table_indices_dict[key][subkey][1]])
-
-
-# pvt_obj = NexusPVT()
-# pvt_obj.read_properties_from_file('/tcchou/scratch2/isebo0/Testing/test_pvt.dat')
-# print(pvt_obj.properties)
