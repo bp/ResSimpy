@@ -26,3 +26,8 @@ def get_empty_list_str_nexus_file() -> list[Union[str, NexusFile]]:
 def get_empty_list_nexus_file() -> list[NexusFile]:
     value: list[NexusFile] = []
     return value
+
+
+def get_empty_dict_nexus_file() -> dict[str, NexusFile]:
+    value: dict[str, NexusFile] = {}
+    return value

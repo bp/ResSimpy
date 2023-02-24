@@ -43,6 +43,7 @@ GRID_FILES
     assert fcs_file == expected_fcs_file
     assert fcs_file.structured_grid_file == expected_fcs_file.structured_grid_file
 
+
 def test_fcs_file_multiple_methods(mocker):
     # Arrange
     fcs_content = '''DESC reservoir1
@@ -71,15 +72,16 @@ def test_fcs_file_multiple_methods(mocker):
     expected_equil_3 = NexusFile(location='nexus_data/nexus_data/mp2017hm_ref_equil_03.dat',
                                  origin=fcs_path, includes=None,
                                  includes_objects=None, file_content_as_list=None)
-    expected_fcs_file = FcsNexusFile(location=fcs_path, origin=None,
-                                     includes_objects=[expected_equil_1, expected_equil_2, expected_equil_3],
-                                     file_content_as_list=[
-                                         'DESC reservoir1', '    RUN_UNITS ENGLISH', '    DATEFORMAT DD/MM/YYYY',
-                                         '    INITIALIZATION_FILES', '	 EQUIL Method 1 ', expected_equil_1, '',
-                                         '	 EQUIL Method 2 ', expected_equil_2, '', '	 EQUIL Method 3 ',
-                                         expected_equil_3, ''],
-                                     equil_files=[expected_equil_1, expected_equil_2, expected_equil_3],
-                                     )
+    expected_fcs_file = FcsNexusFile(
+        location=fcs_path, origin=None,
+        includes_objects=[expected_equil_1, expected_equil_2, expected_equil_3],
+        file_content_as_list=[
+            'DESC reservoir1', '    RUN_UNITS ENGLISH', '    DATEFORMAT DD/MM/YYYY',
+            '    INITIALIZATION_FILES', '	 EQUIL Method 1 ', expected_equil_1, '',
+            '	 EQUIL Method 2 ', expected_equil_2, '', '	 EQUIL Method 3 ',
+            expected_equil_3, ''],
+        equil_files={'1': expected_equil_1, '2': expected_equil_2, '3': expected_equil_3},
+    )
     # Act
     result = FcsNexusFile.generate_fcs_structure(fcs_path)
     # Assert
