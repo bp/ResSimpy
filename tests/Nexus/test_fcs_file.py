@@ -80,7 +80,7 @@ def test_fcs_file_multiple_methods(mocker):
             '    INITIALIZATION_FILES', '	 EQUIL Method 1 ', expected_equil_1, '',
             '	 EQUIL Method 2 ', expected_equil_2, '', '	 EQUIL Method 3 ',
             expected_equil_3, ''],
-        equil_files={'1': expected_equil_1, '2': expected_equil_2, '3': expected_equil_3},
+        equil_files={1: expected_equil_1, 2: expected_equil_2, 3: expected_equil_3},
     )
     # Act
     result = FcsNexusFile.generate_fcs_structure(fcs_path)

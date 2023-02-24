@@ -4,8 +4,8 @@ import warnings
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from typing import Optional, Union
-from ResSimpy.Utils.factory_methods import get_empty_dict_nexus_file, get_empty_list_str, get_empty_list_nexus_file, \
-    get_empty_list_str_nexus_file
+from ResSimpy.Utils.factory_methods import get_empty_dict_int_nexus_file, get_empty_list_str,\
+    get_empty_list_nexus_file, get_empty_list_str_nexus_file
 from ResSimpy.Nexus.nexus_constants import FCS_KEYWORDS
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
@@ -17,14 +17,14 @@ class FcsNexusFile(NexusFile):
     options_file: Optional[NexusFile] = None
     runcontrol_file: Optional[NexusFile] = None
     well_file: Optional[NexusFile] = None
-    surface_file: Optional[dict[str, NexusFile]] = field(default_factory=get_empty_dict_nexus_file)
-    rock_files: Optional[dict[str, NexusFile]] = field(default_factory=get_empty_dict_nexus_file)
-    relperm_files: Optional[dict[str, NexusFile]] = field(default_factory=get_empty_dict_nexus_file)
-    pvt_files: Optional[dict[str, NexusFile]] = field(default_factory=get_empty_dict_nexus_file)
-    water_files: Optional[dict[str, NexusFile]] = field(default_factory=get_empty_dict_nexus_file)
-    equil_files: Optional[dict[str, NexusFile]] = field(default_factory=get_empty_dict_nexus_file)
-    aquifer_files: Optional[dict[str, NexusFile]] = field(default_factory=get_empty_dict_nexus_file)
-    hyd_files: Optional[dict[str, NexusFile]] = field(default_factory=get_empty_dict_nexus_file)
+    surface_file: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
+    rock_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
+    relperm_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
+    pvt_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
+    water_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
+    equil_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
+    aquifer_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
+    hyd_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
 
     def __init__(self, location: Optional[str] = None,
                  includes: Optional[list[str]] = field(default_factory=get_empty_list_str),
@@ -37,14 +37,14 @@ class FcsNexusFile(NexusFile):
                  options_file: Optional[NexusFile] = None,
                  runcontrol_file: Optional[NexusFile] = None,
                  well_file: Optional[NexusFile] = None,
-                 surface_files: Optional[dict[str, NexusFile]] = field(default_factory=get_empty_dict_nexus_file),
-                 rock_files: Optional[dict[str, NexusFile]] = field(default_factory=get_empty_dict_nexus_file),
-                 relperm_files: Optional[dict[str, NexusFile]] = field(default_factory=get_empty_dict_nexus_file),
-                 pvt_files: Optional[dict[str, NexusFile]] = field(default_factory=get_empty_dict_nexus_file),
-                 water_files: Optional[dict[str, NexusFile]] = field(default_factory=get_empty_dict_nexus_file),
-                 equil_files: Optional[dict[str, NexusFile]] = field(default_factory=get_empty_dict_nexus_file),
-                 aquifer_files: Optional[dict[str, NexusFile]] = field(default_factory=get_empty_dict_nexus_file),
-                 hyd_files: Optional[dict[str, NexusFile]] = field(default_factory=get_empty_dict_nexus_file),
+                 surface_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
+                 rock_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
+                 relperm_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
+                 pvt_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
+                 water_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
+                 equil_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
+                 aquifer_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
+                 hyd_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
                  ):
         self.restart_file = restart_file
         self.structured_grid_file = structured_grid_file
@@ -114,11 +114,11 @@ class FcsNexusFile(NexusFile):
                         sub_file_path, origin=fcs_file_path)
                     fcs_property = getattr(fcs_file, fcs_keyword_map_multi[key])
                     if isinstance(fcs_property, Field):
-                        fcs_property = get_empty_dict_nexus_file()
+                        fcs_property = get_empty_dict_int_nexus_file()
                     # shallow copy to maintain list elements pointing to nexus_file that are
                     # stored in the file_content_as_list
                     fcs_property_list = fcs_property.copy()
-                    fcs_property_list.update({method_number: nexus_file})
+                    fcs_property_list.update({int(method_number): nexus_file})
                     # set the attribute in the fcs_file instance
                     setattr(fcs_file, fcs_keyword_map_multi[key], fcs_property_list)
                     fcs_file.file_content_as_list.extend(cls.line_as_nexus_list(line, value, nexus_file))

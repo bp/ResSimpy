@@ -28,6 +28,6 @@ def get_empty_list_nexus_file() -> list[NexusFile]:
     return value
 
 
-def get_empty_dict_nexus_file() -> dict[str, NexusFile]:
-    value: dict[str, NexusFile] = {}
+def get_empty_dict_int_nexus_file() -> dict[int, NexusFile]:
+    value: dict[int, NexusFile] = {}
     return value
