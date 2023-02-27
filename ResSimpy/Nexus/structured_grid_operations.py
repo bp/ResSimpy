@@ -30,8 +30,7 @@ def load_token_value_if_present(token: str, modifier: str, token_property: Varia
     if token_modifier in line:
         # If we are loading a multiple, load the two relevant values, otherwise just the next value
         if modifier == 'MULT':
-            numerical_value = nfo.get_token_value(token_modifier, line, file_as_list,
-                                                  ignore_values=None)
+            numerical_value = nfo.get_expected_token_value(token_modifier, line, file_as_list, ignore_values=None)
             if numerical_value is None:
                 raise ValueError(
                     f'No numerical value found after {token_modifier} keyword in line: {line}')

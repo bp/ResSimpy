@@ -44,6 +44,7 @@ class NexusFile:
         Args:
             file_path (str): path to a file
             origin (Optional[str], optional): Where the file was opened from. Defaults to None.
+            recursive (bool): Whether the method should recursively drill down multiple layers of includes.
 
         Returns:
             NexusFile: a class instance for NexusFile with knowledge of include files

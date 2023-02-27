@@ -4,7 +4,7 @@ import pandas as pd
 from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
 from string import Template
 import re
-from ResSimpy.Nexus.nexus_constants import VALID_NEXUS_TOKENS
+from ResSimpy.Nexus.nexus_constants import VALID_NEXUS_KEYWORDS
 import os
 
 
@@ -20,7 +20,7 @@ def nexus_token_found(line_to_check: str) -> bool:
 
     """
     uppercase_line = line_to_check.upper()
-    for token in VALID_NEXUS_TOKENS:
+    for token in VALID_NEXUS_KEYWORDS:
         if check_token(token, uppercase_line):
             return True
 
@@ -154,6 +154,36 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
     return value
 
 
+def get_expected_next_value(start_line_index: int, file_as_list: list[str], search_string: str,
+                            ignore_values: Optional[list[str]] = None,
+                            replace_with: Union[str, VariableEntry, None] = None,
+                            custom_message: Optional[str] = None) -> str:
+    """Gets the next non blank value in a list of lines
+
+    Args:
+        start_line_index (int): line number to start reading file_as_list from
+        file_as_list (list[str]): a list of strings containing each line of the file as a new entry
+        search_string (str): string to search from within the first indexed line
+        ignore_values (Optional[list[str]], optional): a list of values that should be ignored if found. \
+            Defaults to None.
+        replace_with (Union[str, VariableEntry, None], optional): a value to replace the existing value with. \
+            Defaults to None.
+        custom_message Optional[str]: A custom error message if no value is found
+
+    Returns:
+        str: Next non blank value from the list, if none found raises ValueError
+    """
+    value = get_next_value(start_line_index, file_as_list, search_string, ignore_values, replace_with)
+
+    if value is None:
+        if custom_message is None:
+            raise ValueError(f"No value found in the line, line: {file_as_list[start_line_index]}")
+        else:
+            raise ValueError(f"{custom_message} {file_as_list[start_line_index]}")
+
+    return value
+
+
 def get_token_value(token: str, token_line: str, file_list: list[str],
                     ignore_values: Optional[list[str]] = None,
                     replace_with: Union[str, VariableEntry, None] = None) -> Optional[str]:
@@ -191,6 +221,37 @@ def get_token_value(token: str, token_line: str, file_list: list[str],
         raise ValueError
     value = get_next_value(line_index, file_list,
                            search_string, ignore_values, replace_with)
+    return value
+
+
+def get_expected_token_value(token: str, token_line: str, file_list: list[str],
+                             ignore_values: Optional[list[str]] = None,
+                             replace_with: Union[str, VariableEntry, None] = None,
+                             custom_message: Optional[str] = None) -> str:
+    """Function that returns the result of get_token_value if a value is found, otherwise it raises a ValueError
+     arguments:
+        token (str): the token being searched for.
+        token_line (str): string value of the line that the token was found in.
+        file_list (list[str]): a list of strings containing each line of the file as a new entry
+        ignore_values (list[str], optional): a list of values that should be ignored if found. \
+            Defaults to None.
+        replace_with (Union[str, VariableEntry, None], optional):  a value to replace the existing value with. \
+            Defaults to None.
+        custom_message Optional[str]: A custom error message if no value is found
+
+    returns:
+        The value following the supplied token, if it is present.
+
+    raises: ValueError if a value is not found
+    """
+    value = get_token_value(token, token_line, file_list, ignore_values, replace_with)
+
+    if value is None:
+        if custom_message is None:
+            raise ValueError(f"No value found in the line after the expected token ({token}), line: {token_line}")
+        else:
+            raise ValueError(f"{custom_message} {token_line}")
+
     return value
 
 
@@ -291,12 +352,9 @@ def expand_include(file_as_list: list[str], recursive: bool = True) -> tuple[lis
     for i, line in enumerate(no_comment_file):
         if "INCLUDE" in line.upper():
             # doesn't necessarily work if the file is a relative reference
-            inc_file_path = get_token_value('INCLUDE', line, [line])
-            if inc_file_path is None:
-                raise ValueError(
-                    f"No value found after INCLUDE keyword in {line}")
-            inc_data = load_file_as_list(
-                inc_file_path, strip_comments=True, strip_str=True)
+            inc_file_path = get_expected_token_value('INCLUDE', line, [line],
+                                                     custom_message="No value found after INCLUDE keyword in")
+            inc_data = load_file_as_list(inc_file_path, strip_comments=True, strip_str=True)
             inc_data = list(filter(None, inc_data))
 
             # this won't work with arbitrary whitespace
@@ -380,3 +438,59 @@ def clean_up_string(value: str) -> str:
     value = value.replace("!", "")
     value = value.replace("\t", "")
     return value
+
+
+def check_for_common_input_data(file_as_list: list[str], property_dict: dict) -> dict:
+    """Loop through lines of Nexus input file content looking for common input data, e.g.,
+    units such as ENGLISH or METRIC, temparure units such as FAHR or CELSIUS, DATEFORMAT, etc.,
+    as defined in Nexus manual. If any found, include in provided property_dict and return
+
+    Args:
+        file_as_list (list[str]): Nexus input file content
+        property_dict (dict): Dictionary in which to include common input data if found
+
+    Returns:
+        dict: Dictionary including found common input data
+    """
+    for line in file_as_list:
+        # Check for description
+        if check_token('DESC', line):
+            if 'DESC' in property_dict.keys():
+                property_dict['DESC'].append(line.split('DESC')[1].strip())
+            else:
+                property_dict['DESC'] = [line.split('DESC')[1].strip()]
+        # Check for label
+        if check_token('LABEL', line):
+            property_dict['LABEL'] = get_token_value('LABEL', line, file_as_list)
+        # Check for dateformat
+        if check_token('DATEFORMAT', line):
+            property_dict['DATEFORMAT'] = get_token_value('DATEFORMAT', line, file_as_list)
+        # Check unit system specification
+        if check_token('ENGLISH', line):
+            property_dict['UNIT_SYSTEM'] = 'ENGLISH'
+            property_dict['TEMP_UNIT'] = 'FAHR'
+        if check_token('METRIC', line):
+            property_dict['UNIT_SYSTEM'] = 'METRIC'
+            property_dict['TEMP_UNIT'] = 'CELSIUS'
+        if check_token('METKG/CM2', line):
+            property_dict['UNIT_SYSTEM'] = 'METKG/CM2'
+        if check_token('METBAR', line):
+            property_dict['UNIT_SYSTEM'] = 'METBAR'
+            property_dict['TEMP_UNIT'] = 'CELSIUS'
+        if check_token('LAB', line):
+            property_dict['UNIT_SYSTEM'] = 'LAB'
+            property_dict['TEMP_UNIT'] = 'CELSIUS'
+        # Check to see if sality unit is provided
+        if check_token('SUNITS', line):
+            property_dict['SUNITS'] = get_token_value('SUNITS', line, file_as_list)
+        # Check to see if temperature units are provided
+        if check_token('KELVIN', line):
+            property_dict['TEMP_UNIT'] = 'KELVIN'
+        if check_token('RANKINE', line):
+            property_dict['TEMP_UNIT'] = 'RANKINE'
+        if check_token('FAHR', line):
+            property_dict['TEMP_UNIT'] = 'FAHR'
+        if check_token('CELSIUS', line):
+            property_dict['TEMP_UNIT'] = 'CELSIUS'
+
+    return property_dict

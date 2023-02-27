@@ -138,9 +138,9 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
                                  {index}")
 
         if nfo.check_token('WELLSPEC', uppercase_line):
-            initial_well_name = nfo.get_token_value(token='WELLSPEC', token_line=line, file_list=file_as_list)
-            if initial_well_name is None:
-                raise ValueError("Cannot find well name following WELLSPEC keyword")
+            initial_well_name = nfo.get_expected_token_value(token='WELLSPEC', token_line=line, file_list=file_as_list,
+                                                             custom_message="Cannot find well name following WELLSPEC "
+                                                                            "keyword")
             well_name = initial_well_name.strip('\"')
             wellspec_found = True
             continue
@@ -193,6 +193,7 @@ def __load_wellspec_table_completions(file_as_list: list[str], header_index: int
     Returns:
         list[NexusCompletion]: list of nexus completions for a given table.
     """
+
     def convert_header_value_float(key: str, header_values=header_values) -> Optional[float]:
         value = header_values[key]
         if value == 'NA':
