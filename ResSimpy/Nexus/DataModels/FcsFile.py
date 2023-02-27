@@ -110,6 +110,7 @@ class FcsNexusFile(NexusFile):
         fcs_file = cls(location=fcs_file_path)
         fcs_file.includes_objects = get_empty_list_nexus_file()
         fcs_file.file_content_as_list = get_empty_list_str_nexus_file()
+        fcs_file.includes = get_empty_list_str()
 
         fcs_keyword_map_single = {
             'STRUCTURED_GRID': 'structured_grid_file',
@@ -188,14 +189,6 @@ class FcsNexusFile(NexusFile):
                     setattr(fcs_file, fcs_keyword_map_single[key], nexus_file)
                     fcs_file.file_content_as_list.extend(cls.line_as_nexus_list(line, value, nexus_file))
                     fcs_file.includes_objects.append(nexus_file)
-
-                # handle include files:
-                elif nfo.check_token('INCLUDE', line):
-                    sub_file_path = nfo.get_full_file_path(value, fcs_file_path)
-                    nexus_file = NexusFile.generate_file_include_structure(
-                        sub_file_path, origin=fcs_file_path)
-                    fcs_file.includes_objects.append(nexus_file)
-                    fcs_file.file_content_as_list.extend(cls.line_as_nexus_list(line, value, nexus_file))
                 else:
                     fcs_file.file_content_as_list.append(line.replace('\n', ''))
                     continue
