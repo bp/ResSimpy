@@ -154,6 +154,36 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
     return value
 
 
+def get_expected_next_value(start_line_index: int, file_as_list: list[str], search_string: str,
+                            ignore_values: Optional[list[str]] = None,
+                            replace_with: Union[str, VariableEntry, None] = None,
+                            custom_message: Optional[str] = None) -> str:
+    """Gets the next non blank value in a list of lines
+
+    Args:
+        start_line_index (int): line number to start reading file_as_list from
+        file_as_list (list[str]): a list of strings containing each line of the file as a new entry
+        search_string (str): string to search from within the first indexed line
+        ignore_values (Optional[list[str]], optional): a list of values that should be ignored if found. \
+            Defaults to None.
+        replace_with (Union[str, VariableEntry, None], optional): a value to replace the existing value with. \
+            Defaults to None.
+        custom_message Optional[str]: A custom error message if no value is found
+
+    Returns:
+        str: Next non blank value from the list, if none found raises ValueError
+    """
+    value = get_next_value(start_line_index, file_as_list, search_string, ignore_values, replace_with)
+
+    if value is None:
+        if custom_message is None:
+            raise ValueError(f"No value found in the line, line: {file_as_list[start_line_index]}")
+        else:
+            raise ValueError(f"{custom_message} {file_as_list[start_line_index]}")
+
+    return value
+
+
 def get_token_value(token: str, token_line: str, file_list: list[str],
                     ignore_values: Optional[list[str]] = None,
                     replace_with: Union[str, VariableEntry, None] = None) -> Optional[str]:
@@ -191,6 +221,37 @@ def get_token_value(token: str, token_line: str, file_list: list[str],
         raise ValueError
     value = get_next_value(line_index, file_list,
                            search_string, ignore_values, replace_with)
+    return value
+
+
+def get_expected_token_value(token: str, token_line: str, file_list: list[str],
+                             ignore_values: Optional[list[str]] = None,
+                             replace_with: Union[str, VariableEntry, None] = None,
+                             custom_message: Optional[str] = None) -> str:
+    """Function that returns the result of get_token_value if a value is found, otherwise it raises a ValueError
+     arguments:
+        token (str): the token being searched for.
+        token_line (str): string value of the line that the token was found in.
+        file_list (list[str]): a list of strings containing each line of the file as a new entry
+        ignore_values (list[str], optional): a list of values that should be ignored if found. \
+            Defaults to None.
+        replace_with (Union[str, VariableEntry, None], optional):  a value to replace the existing value with. \
+            Defaults to None.
+        custom_message Optional[str]: A custom error message if no value is found
+
+    returns:
+        The value following the supplied token, if it is present.
+
+    raises: ValueError if a value is not found
+    """
+    value = get_token_value(token, token_line, file_list, ignore_values, replace_with)
+
+    if value is None:
+        if custom_message is None:
+            raise ValueError(f"No value found in the line after the expected token ({token}), line: {token_line}")
+        else:
+            raise ValueError(f"{custom_message} {token_line}")
+
     return value
 
 
@@ -291,12 +352,9 @@ def expand_include(file_as_list: list[str], recursive: bool = True) -> tuple[lis
     for i, line in enumerate(no_comment_file):
         if "INCLUDE" in line.upper():
             # doesn't necessarily work if the file is a relative reference
-            inc_file_path = get_token_value('INCLUDE', line, [line])
-            if inc_file_path is None:
-                raise ValueError(
-                    f"No value found after INCLUDE keyword in {line}")
-            inc_data = load_file_as_list(
-                inc_file_path, strip_comments=True, strip_str=True)
+            inc_file_path = get_expected_token_value('INCLUDE', line, [line],
+                                                     custom_message="No value found after INCLUDE keyword in")
+            inc_data = load_file_as_list(inc_file_path, strip_comments=True, strip_str=True)
             inc_data = list(filter(None, inc_data))
 
             # this won't work with arbitrary whitespace
@@ -311,7 +369,7 @@ def expand_include(file_as_list: list[str], recursive: bool = True) -> tuple[lis
             expanded_file += inc_data
             if suffix_line:
                 expanded_file += [suffix_line]
-            expanded_file += old_file_contents[i+1::]
+            expanded_file += old_file_contents[i + 1::]
             break
     # if INCLUDE is not found in the file provided then inc_file_path is None and so will break recursion
     if recursive:
@@ -360,7 +418,7 @@ def read_table_to_df(file_as_list: list[str], keep_comments: bool = False) -> pd
         # Save comments in a list
         comment_column = [line.split('!', 1)[1].strip() if '!' in line else None for line in file_as_list]
         # Create dataframe
-        df = pd.read_csv(StringIO('\n'.join(cleaned_file_as_list)+'\n'), sep=r'\s+', skip_blank_lines=False)
+        df = pd.read_csv(StringIO('\n'.join(cleaned_file_as_list) + '\n'), sep=r'\s+', skip_blank_lines=False)
         df.columns = [col.upper() for col in df.columns if isinstance(col, str)]
         if any(x is not None for x in comment_column):  # If comment column isn't a full column of Nones
             df['COMMENT'] = comment_column[1:]
