@@ -549,11 +549,11 @@ def test_get_status_running_from_log(mocker, log_file_contents, job_id):
                          "expected_range_y, expected_range_z",
                          [
                              ("! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
-                              "\nother text\n\n,NETGRS VALUE\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\n POROSITY "
+                              "\nother text\n\n,NETGRS VALUE\n  /path_to_netgrs_file/net_to_gross.inc\n POROSITY "
                               "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc",
                               "/path_to_netgrs_file/net_to_gross.inc", "path/to/porosity.inc", 1, 2, 3),
                              ("! Grid dimensions\nNX NY NZ\n111 123 321\ntest string\nPOROSITY VALUE\n!random text\n"
-                              "porosity_file.inc\nNETGRS VALUE\n!Comment Line 1\n\n!Comment Line 2\nINCLUDE   "
+                              "porosity_file.inc\nNETGRS VALUE\n!Comment Line 1\n\n!Comment Line 2\n   "
                               "/path/to/netgrs_file\nother text\n\n",
                               "/path/to/netgrs_file", "porosity_file.inc", 111, 123, 321)
                          ])
@@ -592,7 +592,7 @@ def test_load_structured_grid_file_basic_properties(mocker, structured_grid_file
                          "expected_range_z",
                          [
                              ("! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
-                              "\nother text\n\n,NETGRS VALUE\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\n POROSITY "
+                              "\nother text\n\n,NETGRS VALUE\n  /path_to_netgrs_file/net_to_gross.inc\n POROSITY "
                               "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc",
                               "/path_to_netgrs_file/net_to_gross.inc", "path/to/porosity.inc", "VALUE", "VALUE", 1, 2,
                               3),
@@ -742,7 +742,7 @@ def test_load_structured_grid_file_k_values(mocker, structured_grid_file_content
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID \"test_structured_grid.dat\""
     base_structured_grid_file = "! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text " \
                                 "\nother text\n\n,NETGRS VALUE\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\n POROSITY " \
-                                "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc"
+                                "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc "
 
     structured_grid_file = base_structured_grid_file + structured_grid_file_contents
 
