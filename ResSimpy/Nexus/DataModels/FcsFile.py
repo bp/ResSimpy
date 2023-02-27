@@ -140,7 +140,6 @@ class FcsNexusFile(NexusFile):
             'ADSORPTION': 'adsorption_files',
             'FLUXIN': 'flux_in_files',
             'TRACER_INIT': 'tracer_init_files',
-
         }
 
         # guard against bad links/empty files:
@@ -161,12 +160,8 @@ class FcsNexusFile(NexusFile):
                 if value is None:
                     warnings.warn(f'No value found for {key}, skipping file')
                     continue
-                if key not in fcs_keyword_map_single and key not in fcs_keyword_map_multi:
-                    fcs_file.file_content_as_list.append(line.replace('\n', ''))
-                    continue
                 # TODO handle methods / sets instead of getting full file path
                 if key in fcs_keyword_map_multi:
-
                     # for keywords that have multiple methods we store the value in a dictionary
                     # with the method number and the NexusFile object
                     _, method_string, method_number, value = (
@@ -186,13 +181,24 @@ class FcsNexusFile(NexusFile):
                     setattr(fcs_file, fcs_keyword_map_multi[key], fcs_property_list)
                     fcs_file.file_content_as_list.extend(cls.line_as_nexus_list(line, value, nexus_file))
                     fcs_file.includes_objects.append(nexus_file)
-                else:
+                elif key in fcs_keyword_map_single:
                     sub_file_path = nfo.get_full_file_path(value, fcs_file_path)
                     nexus_file = NexusFile.generate_file_include_structure(
                         sub_file_path, origin=fcs_file_path)
                     setattr(fcs_file, fcs_keyword_map_single[key], nexus_file)
                     fcs_file.file_content_as_list.extend(cls.line_as_nexus_list(line, value, nexus_file))
                     fcs_file.includes_objects.append(nexus_file)
+
+                # handle include files:
+                elif nfo.check_token('INCLUDE', line):
+                    sub_file_path = nfo.get_full_file_path(value, fcs_file_path)
+                    nexus_file = NexusFile.generate_file_include_structure(
+                        sub_file_path, origin=fcs_file_path)
+                    fcs_file.includes_objects.append(nexus_file)
+                    fcs_file.file_content_as_list.extend(cls.line_as_nexus_list(line, value, nexus_file))
+                else:
+                    fcs_file.file_content_as_list.append(line.replace('\n', ''))
+                    continue
             else:
                 fcs_file.file_content_as_list.append(line.replace('\n', ''))
         return fcs_file
