@@ -235,8 +235,8 @@ class NexusSimulator(Simulator):
                 continue
             for line in fcs_file:
                 if nfo.check_token("SURFACE Network 1", line):
-                    surface_filename = nfo.get_token_value(token="SURFACE Network 1", token_line=line,
-                                                           file_list=fcs_file)
+                    surface_filename = nfo.get_expected_token_value(token="SURFACE Network 1", token_line=line,
+                                                                    file_list=fcs_file)
                     break
 
             if surface_filename is not None:
@@ -358,20 +358,17 @@ class NexusSimulator(Simulator):
                 os.path.basename(self.__original_fcs_file_path)
 
     def __get_wells_paths(self, line: str, fcs_file: list[str]) -> None:
-        well_keyword = nfo.get_token_value(token="WELLS", token_line=line, file_list=fcs_file)
-        if well_keyword is None:
-            raise ValueError(f'No Wells file path found in line: {line}')
+        well_keyword = nfo.get_expected_token_value(token="WELLS", token_line=line, file_list=fcs_file,
+                                                    custom_message="No Wells file path found in line:")
 
         # WELLS SET 1 wells.dat
         if well_keyword.upper() == 'SET':
-            well_set_number = nfo.get_token_value(token="SET", token_line=line, file_list=fcs_file)
-            if well_set_number is None:
-                raise ValueError(f'No Wells Set number found in line: {line}')
+            well_set_number = nfo.get_expected_token_value(token="SET", token_line=line, file_list=fcs_file,
+                                                           custom_message="No Wells Set number found in line")
             index = line.find(well_set_number)
             modified_line = line[index+len(well_set_number)::]
-            well_keyword = nfo.get_next_value(0, [modified_line], search_string=modified_line, )
-        if well_keyword is None:
-            raise ValueError(f'No Wells file path found in line: {line}')
+            well_keyword = nfo.get_expected_next_value(0, [modified_line], search_string=modified_line,
+                                                       custom_message="No Wells file path found in line:")
         complete_well_filepath = nfo.get_full_file_path(well_keyword, self.__origin)
         self.Wells.wellspec_paths.append(complete_well_filepath)
 
@@ -389,7 +386,7 @@ class NexusSimulator(Simulator):
             raise ValueError(f'FCS file not found, no content for {self.__new_fcs_file_path}')
         for line in fcs_file_content:
             if nfo.check_token('RUNCONTROL', line):
-                runcontrol_path = nfo.get_token_value('RUNCONTROL', line, fcs_file_content)
+                runcontrol_path = nfo.get_expected_token_value('RUNCONTROL', line, fcs_file_content)
                 if runcontrol_path is not None:
                     self.run_control_file = nfo.get_full_file_path(runcontrol_path, self.__origin)
                     self.runcontrol_file = NexusFile.generate_file_include_structure(self.run_control_file,
@@ -400,7 +397,7 @@ class NexusSimulator(Simulator):
                     self.use_american_date_format = value == 'MM/DD/YYYY'
                 self.__date_format_string = "%m/%d/%Y" if self.use_american_date_format else "%d/%m/%Y"
             elif nfo.check_token('STRUCTURED_GRID', line):
-                value = nfo.get_token_value('STRUCTURED_GRID', line, fcs_file_content)
+                value = nfo.get_expected_token_value('STRUCTURED_GRID', line, fcs_file_content)
                 if value is not None:
                     self.__structured_grid_file_path = nfo.get_full_file_path(value, self.__origin)
                     self.load_structured_grid_file()
@@ -419,8 +416,8 @@ class NexusSimulator(Simulator):
                     else:
                         self.__default_units = Units[value.upper()]
             elif nfo.check_token("SURFACE NETWORK 1", line):
-                value = nfo.get_token_value(token="SURFACE Network 1", token_line=line,
-                                            file_list=fcs_file_content)
+                value = nfo.get_expected_token_value(token="SURFACE Network 1", token_line=line,
+                                                     file_list=fcs_file_content)
                 if value is not None:
                     self.__surface_file_path = nfo.get_full_file_path(value, self.__origin)
                 break
@@ -544,7 +541,7 @@ class NexusSimulator(Simulator):
         # set the start date
         for line in run_control_file_content:
             if nfo.check_token('START', line):
-                value = nfo.get_token_value('START', line, run_control_file_content)
+                value = nfo.get_expected_token_value('START', line, run_control_file_content)
                 if value is not None:
                     self.start_date_set(value)
 

@@ -125,16 +125,17 @@ def test_check_token(line_string, token, expected_result):
     # Assert
     assert result == expected_result
 
+
 @pytest.mark.parametrize("file_contents, expected_result_contents, strip_str", [
-('''
+    ('''
 SW         KRW        KROW        PCWO !Comments
 !comment
 ''',
-'''SW         KRW        KROW        PCWO ''',
-False,
-),
+     '''SW         KRW        KROW        PCWO ''',
+     False,
+     ),
 
-('''
+    ('''
   Spaces before
 0
 Mid line ! comment
@@ -144,56 +145,56 @@ Several comment characters !!!!! comment1 !!!!
 !single line comment
    !blank space before comment
 ''',
-'''  Spaces before
+     '''  Spaces before
 0
 Mid line 
 Tabs  after 
 Several comment characters 
    ''',
-False,
-),
-('''wrapped in quotations "!" included ! comment''',
-'''wrapped in quotations "!" included ''',
-False,
-),
-('''KEYWORD [this should get commented out] keyword''',
-'''KEYWORD  keyword''',
-False,
-),
-('''comment
+     False,
+     ),
+    ('''wrapped in quotations "!" included ! comment''',
+     '''wrapped in quotations "!" included ''',
+     False,
+     ),
+    ('''KEYWORD [this should get commented out] keyword''',
+     '''KEYWORD  keyword''',
+     False,
+     ),
+    ('''comment
 [remove 
 remove] keep [remove]
 keep [ why does this even
 exist] as [functionality]''',
-'''comment
+     '''comment
  keep 
 keep  as ''',
-False,
-),
-('''"[" [ "]" ] [
+     False,
+     ),
+    ('''"[" [ "]" ] [
 remove
 ]
 "[" keep "]"
 ''',
-'''"["  
+     '''"["  
 "[" keep "]"
 ''',
-False,
-),
-('''some string \t! comment
+     False,
+     ),
+    ('''some string \t! comment
 some [comment] \t
 [multiline
 commment] value
 ''',
-'''some string
+     '''some string
 some
 value
 ''',
-True,
-),
+     True,
+     ),
 ], ids=['basic test', 'several inline/single line comments', 'wrapped in quotations', 'Square bracket',
         'square bracket complicated', 'Square bracket quotation', 'stripstring']
-)
+                         )
 def test_strip_file_of_comments(file_contents, strip_str, expected_result_contents):
     # Arrange
     dummy_file_as_list = file_contents.splitlines()
@@ -218,113 +219,113 @@ def mock_includes(mocker, filename, include_contents0, include_contents1):
 
 
 @pytest.mark.parametrize("file_contents, recursive, include_contents0, include_contents1, expected_result_contents",
-[
-# one_include
-(
-'''RUNFILES
+                         [
+                             # one_include
+                             (
+                                     '''RUNFILES
 INCLUDE data0.inc''',
-True,
-'''data
+                                     True,
+                                     '''data
 KX
 CON 5''',
-'',
-'''RUNFILES
+                                     '',
+                                     '''RUNFILES
 data
 KX
 CON 5''',
-  ),
-# complicated
-  (
-'''RUNFILES
+                             ),
+                             # complicated
+                             (
+                                     '''RUNFILES
 something before InCLUde data0.inc something after !comment INCLUDE''',
-True,
-'''data
+                                     True,
+                                     '''data
 KX
 CON 5''',
-'',
-'''RUNFILES
+                                     '',
+                                     '''RUNFILES
 something before
 data
 KX
 CON 5
 something after''',
-  ),
-# no_include
-  (
-'''no_inc''',
-True,
-'''data
+                             ),
+                             # no_include
+                             (
+                                     '''no_inc''',
+                                     True,
+                                     '''data
 KX
 CON 5''',
-'',
-'''no_inc''',
-  ),
-# multiple_includes
-  (
-'''Header
+                                     '',
+                                     '''no_inc''',
+                             ),
+                             # multiple_includes
+                             (
+                                     '''Header
 INCLUDE data0.inc
 INCLUDE data1.inc
 footer
 ''',
-True,
-'''data
+                                     True,
+                                     '''data
 KX
 CON 5''',
-'''Second file here
+                                     '''Second file here
 second file data
 ''',
-'''Header
+                                     '''Header
 data
 KX
 CON 5
 Second file here
 second file data
 footer''',
-  ),
-# multiple_includes_recursive_off
-  (
-'''Header
+                             ),
+                             # multiple_includes_recursive_off
+                             (
+                                     '''Header
 INCLUDE data0.inc
 INCLUDE data1.inc
 footer
 ''',
-False,
-'''data
+                                     False,
+                                     '''data
 KX
 CON 5''',
-'''Second file here
+                                     '''Second file here
 second file data
 ''',
-'''Header
+                                     '''Header
 data
 KX
 CON 5
 INCLUDE data1.inc
 footer''',
-  ),
-# nested_includes
-  (
-'''Header
+                             ),
+                             # nested_includes
+                             (
+                                     '''Header
 INCLUDE data0.inc
 footer
 ''',
-True,
-'''data
+                                     True,
+                                     '''data
 INCLUDE data1.inc''',
-'''Second file here
+                                     '''Second file here
 second file data
 ''',
-'''Header
+                                     '''Header
 data
 Second file here
 second file data
 footer''',
-  ),
-], ids=['one_include', 'complicated', 'no_include', 'multiple_includes', 
-  'multiple_includes_recursive_off', 'nested_includes'],
-)
+                             ),
+                         ], ids=['one_include', 'complicated', 'no_include', 'multiple_includes',
+                                 'multiple_includes_recursive_off', 'nested_includes'],
+                         )
 def test_expand_include(mocker, file_contents, recursive, include_contents0, include_contents1,
-                        expected_result_contents,):
+                        expected_result_contents, ):
     # Arrange
     dummy_file_as_list = file_contents.splitlines()
     expected_result = expected_result_contents.splitlines()
@@ -340,38 +341,41 @@ def test_expand_include(mocker, file_contents, recursive, include_contents0, inc
     # Assert
     assert result == expected_result
 
+
 @pytest.mark.parametrize("file_contents, keep_comments, expected_df_dict",
                          [("""
     NAME IW JW L Radw 
     L1   1  2  3  4.5 
     L2   6  7  8   9.11 
-    """, False, 
-    {'NAME': ['L1','L2'], 'IW': [1,6], 'JW': [2,7], 'L': [3,8], 'RADW': [4.5, 9.11]}),
-    ("""
+    """, False,
+                           {'NAME': ['L1', 'L2'], 'IW': [1, 6], 'JW': [2, 7], 'L': [3, 8], 'RADW': [4.5, 9.11]}),
+                          ("""
     NAME IW JW L Radw 
     L1   1  2  3  4.5 
     L2   6  7  8   NA 
-    """, False, 
-    {'NAME': ['L1','L2'], 'IW': [1,6], 'JW': [2,7], 'L': [3,8], 'RADW': [4.5, np.nan]}),
-    ("""
+    """, False,
+                           {'NAME': ['L1', 'L2'], 'IW': [1, 6], 'JW': [2, 7], 'L': [3, 8], 'RADW': [4.5, np.nan]}),
+                          ("""
     COMPONENT N2    C1    PS1  C2 
     C1        0.028
     PS1       0.17  0.0
     C2        0.061 0.005 0.0
     PS2       0.17  0.0   0.0  0.0
-    """, False, 
-    {'COMPONENT': ['C1','PS1','C2','PS2'], 'N2': [0.028,0.17,0.061,0.17], 
-     'C1': [None,0.0,0.005,0.0], 'PS1': [None,None,0.0,0.0], 'C2': [None,None,None,0.0]}),
-    ("""NAME IW JW L Radw ! Depth
+    """, False,
+                           {'COMPONENT': ['C1', 'PS1', 'C2', 'PS2'], 'N2': [0.028, 0.17, 0.061, 0.17],
+                            'C1': [None, 0.0, 0.005, 0.0], 'PS1': [None, None, 0.0, 0.0],
+                            'C2': [None, None, None, 0.0]}),
+                          ("""NAME IW JW L Radw ! Depth
 L1   1  2  3  4.5 ! 1000
 
 L2   6  7  8   NA ! 2000 ! 3000
 ! This is a comment
 L3  10  9 10  2.3
-""", True, 
-    {'NAME': ['L1','L2',None,'L3'], 'IW': [1,6,None,10], 'JW': [2,7,None,9], 
-     'L': [3,8,None,10], 'RADW': [4.5, None, None, 2.3], 'COMMENT': ['1000','2000 ! 3000','This is a comment',None]})
-      ],
+""", True,
+                           {'NAME': ['L1', 'L2', None, 'L3'], 'IW': [1, 6, None, 10], 'JW': [2, 7, None, 9],
+                            'L': [3, 8, None, 10], 'RADW': [4.5, None, None, 2.3],
+                            'COMMENT': ['1000', '2000 ! 3000', 'This is a comment', None]})
+                          ],
                          ids=["basic case", "na case", "lower triangular case", "comments case"])
 def test_read_table_to_df(file_contents, keep_comments, expected_df_dict):
     # Arrange
@@ -389,6 +393,30 @@ def test_read_table_to_df(file_contents, keep_comments, expected_df_dict):
     # Assert
     # Deep compare expected and received dataframes
     pd.testing.assert_frame_equal(df_expected, df_received)
+
+
+def test_get_expected_token_value_no_value():
+    # Arrange
+    token = 'test_token'
+    line = 'no token'
+    file_list = [line]
+
+    # Act + Assert
+    with pytest.raises(ValueError):
+        value = float(nfo.get_expected_token_value(token, line, file_list))
+
+
+def test_get_expected_token_value_value_present():
+    # Arrange
+    token = 'test_token'
+    line = 'test_token 4'
+    file_list = [line]
+
+    # Act
+    value = float(nfo.get_expected_token_value(token, line, file_list))
+
+    # Assert
+    assert value == 4.0
 
 
 @pytest.mark.parametrize("line, number_tokens, expected_result", [
