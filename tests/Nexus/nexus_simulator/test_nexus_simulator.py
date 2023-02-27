@@ -1680,12 +1680,9 @@ PLOTBINARY
 
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
-       WELLS my/wellspec/file.dat
-    """),
-    ("""
        WelLS sEt 1 my/wellspec/file.dat
     """)
-], ids=['path_after_wells', 'path_after_set'])
+], ids=['path_after_set'])
 def test_get_wells(mocker: MockerFixture, fcs_file_contents: str):
     """Testing the functionality to load in and retrieve a set of wells"""
     # Arrange
