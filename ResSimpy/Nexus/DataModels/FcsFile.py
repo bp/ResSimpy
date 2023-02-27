@@ -209,7 +209,7 @@ class FcsNexusFile(NexusFile):
             list[Union[str, NexusFile]]: list of the format [prefix, NexusFile, suffix] where the NexusFile object is \
             in place of the path provided
         """
-        new_list = []
+        new_list: list[Union[str, NexusFile]] = []
         prefix = line.split(path, 1)[0]
         new_list.append(prefix)
         new_list.append(nexus_obj)

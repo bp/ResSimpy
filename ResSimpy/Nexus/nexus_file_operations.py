@@ -441,7 +441,7 @@ def clean_up_string(value: str) -> str:
     return value
 
 
-def get_multiple_sequential_tokens(list_of_strings: list[str], number_tokens: int) -> list:
+def get_multiple_sequential_tokens(list_of_strings: list[str], number_tokens: int) -> list[str]:
     store_values = []
     filter_list = list_of_strings.copy()
     for i in range(0, number_tokens):
