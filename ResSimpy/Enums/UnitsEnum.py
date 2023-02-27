@@ -7,5 +7,5 @@ class Units(Enum):
     LAB = 2
     METRIC_KPA = 3
     METRIC_KGCM2 = 4
-    METRIC_BARS = 5
+    METRIC_BARS = 5 # defined as 'METBAR' in Nexus
     METRIC_ATMOSPHERES = 6
