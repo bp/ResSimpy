@@ -191,3 +191,84 @@ def test_line_as_nexus_list(input_line, expected_result):
 
     # Assert
     assert result == expected_result
+
+
+def test_get_full_network(mocker):
+    # Arrange
+    fcs_content = '''DESC reservoir1
+    RUN_UNITS ENGLISH
+    DATEFORMAT DD/MM/YYYY
+    INITIALIZATION_FILES
+	 EQUIL Method 1 nexus_data/nexus_data/mp2017hm_ref_equil_01.dat
+	 EQUIL Method 2 nexus_data/nexus_data/mp2017hm_ref_equil_02.dat
+    STRUCTURED_GRID nexus_data/mp2020_structured_grid_1_reg_update.dat
+	 OPTIONS nexus_data/nexus_data/mp2020_ref_options_reg_update.dat
+     INCLUDE wells.inc
+     HYD METHOd 3 hyd.dat'''
+    include_contents = 'WELLS SET 1 wells.dat'
+    
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'test_fcs.fcs': fcs_content,
+            'wells.inc': include_contents,
+            }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+    mocker.patch("os.path.isfile", lambda x: True)
+    fcs_path = 'test_fcs.fcs'
+
+    expected_equil_1 = NexusFile(location='nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',
+                                 origin=fcs_path, includes=None,
+                                 includes_objects=None, file_content_as_list=None)
+    expected_equil_2 = NexusFile(location='nexus_data/nexus_data/mp2017hm_ref_equil_02.dat',
+                                 origin=fcs_path, includes=None,
+                                 includes_objects=None, file_content_as_list=None)
+    expected_structured_grid_file = NexusFile(location='nexus_data/mp2020_structured_grid_1_reg_update.dat',
+                                              origin=fcs_path, includes=None,
+                                              includes_objects=None, file_content_as_list=None)
+    expected_options_file = NexusFile(location='nexus_data/nexus_data/mp2020_ref_options_reg_update.dat', includes=None,
+                                      origin=fcs_path, includes_objects=None, file_content_as_list=None)
+    expected_wells_file = NexusFile(location='wells.dat', origin=fcs_path, includes=None, includes_objects=None,
+                                    file_content_as_list=None)
+    expected_hyd_method_file = NexusFile(location='hyd.dat', origin=fcs_path, includes=None,
+                                         includes_objects=None, file_content_as_list=None)
+
+    equil_files = {1: expected_equil_1, 2: expected_equil_2, }
+    include_objects = [expected_equil_1, expected_equil_2, expected_structured_grid_file, expected_options_file,
+                       expected_wells_file, expected_hyd_method_file]
+    expected_fcs_contents_as_list = ['DESC reservoir1',
+                                     '    RUN_UNITS ENGLISH',
+                                     '    DATEFORMAT DD/MM/YYYY',
+                                     '    INITIALIZATION_FILES',
+                                     '	 EQUIL Method 1 ',
+                                     expected_equil_1,
+                                     '',
+                                     '	 EQUIL Method 2 ',
+                                     expected_equil_2,
+                                     '',
+                                     '    STRUCTURED_GRID ',
+                                     expected_structured_grid_file,
+                                     '',
+                                     '	 OPTIONS ',
+                                     expected_options_file,
+                                     '',
+                                     '     ',
+                                     'WELLS SET 1 ',
+                                     expected_wells_file,
+                                     '',
+                                     '',
+                                     '     HYD METHOd 3 ',
+                                     expected_hyd_method_file,
+                                     '',
+                                     ]
+    compiled_fcs_file = FcsNexusFile(location=fcs_path, origin=None, includes_objects=include_objects,
+                                     equil_files=equil_files, structured_grid_file=expected_structured_grid_file, 
+                                     options_file=expected_options_file, well_files={1: expected_wells_file},
+                                     hyd_files={3: expected_hyd_method_file},
+                                     file_content_as_list=expected_fcs_contents_as_list, includes=[])
+    
+    from_list, to_list = compiled_fcs_file.get_full_network()
+    expected_from_list = []
+    expected_to_list = []
+    assert to_list == expected_to_list
+    assert from_list == expected_from_list

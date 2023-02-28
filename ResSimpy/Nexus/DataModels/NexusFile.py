@@ -187,3 +187,22 @@ class NexusFile:
         return
 
 # TODO write an output function using the iterate_line method
+    def get_full_network(self, max_depth: Optional[int] = None) -> tuple[list[str | None], list[str | None]]:
+        depth: int = 0
+        from_list = [self.origin]
+        to_list = [self.location]
+        if max_depth is not None:
+            depth = max_depth
+        if self.file_content_as_list is None:
+            return from_list, to_list
+        for row in self.file_content_as_list:
+            if isinstance(row, NexusFile):
+                if (max_depth is None or depth > 0):
+                    level_down_max_depth = None if max_depth is None else depth-1
+                    temp_from_list, temp_to_list = row.export_network_lists()
+                    from_list.extend(temp_from_list)
+                    to_list.extend(temp_to_list)
+                    temp_from_list, temp_to_list = row.get_full_network(max_depth=level_down_max_depth)
+                    from_list.extend(temp_from_list)
+                    to_list.extend(temp_to_list)
+        return from_list, to_list
