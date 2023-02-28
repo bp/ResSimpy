@@ -427,7 +427,8 @@ def test_get_expected_token_value_value_present():
     ("\t ", None),
     ("   \t   ", None),
     ("", None),
-    ("\t   a", 'a')
+    ("\t   a", 'a'),
+    ("a", 'a')
 ])
 def test_get_next_value_single_line(line, expected_result):
     # Act
