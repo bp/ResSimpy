@@ -424,9 +424,9 @@ def test_get_expected_token_value_value_present():
   ('EQUIL METHOD 1 /path/equil.dat ! comment', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
   ('EQUIL METHOD 1 /path/equil.dat TOKEN TOKEN', 6, ['EQUIL', 'METHOD', '1', '/path/equil.dat','TOKEN', 'TOKEN']),
   ('EQUIL METHOD 1 \n /path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
-  # ('EQUIL METHOD !comment\n \t 1 ', 3, ['EQUIL', 'METHOD', '1']),
-  # ('EQUIL\n METHOD\n1\n/path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat'])
-  ], ids=["basic", "more tokens", "get more tokens", "new line",])# "newline comment", "lots of newlines"])
+  ('EQUIL METHOD !comment\n \t 1 ', 3, ['EQUIL', 'METHOD', '1']),
+  ('EQUIL\n METHOD\n1\n/path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat'])
+  ], ids=["basic", "more tokens", "get more tokens", "new line", "newline comment", "lots of newlines"])
 def test_get_multiple_sequential_tokens(line, number_tokens, expected_result):
     # Arrange
     list_of_strings = line.splitlines()
@@ -436,7 +436,6 @@ def test_get_multiple_sequential_tokens(line, number_tokens, expected_result):
     assert result == expected_result
 
 
-@pytest.mark.skip(reason='hanging tests, fixing in later PR for get_next_value')
 def test_get_multiple_sequential_tokens_fail_case():
     # Arrange
     line = 'EQUIL METHOD'
@@ -444,17 +443,6 @@ def test_get_multiple_sequential_tokens_fail_case():
     # Act + Assert
     with pytest.raises(ValueError):
         value = nfo.get_multiple_sequential_tokens([line], number_tokens)
-
-
-@pytest.mark.skip(reason='hanging tests, fixing in later PR for get_next_value')
-def test_get_next_value():
-    # Arrange
-    line = '\t 1'
-    expected_result = '1'
-    # Act
-    result = nfo.get_next_value(0, [line], line)
-    # Assert
-    assert result == expected_result
 
 
 @pytest.mark.parametrize("line, expected_result",[
