@@ -99,7 +99,7 @@ class NexusSimulator(Simulator):
         self.__simulation_end_time: Optional[str] = None
         # run execution finish time from the log file
         self.__previous_run_time: Optional[str] = None
-        self.__run_units:  UnitSystem = UnitSystem.ENGLISH  # The Nexus default
+        self.__run_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
         self.use_american_run_units: bool = False
         self.use_american_input_units: bool = False
         self.__write_times: bool = write_times
@@ -357,7 +357,7 @@ class NexusSimulator(Simulator):
             #     self.__output_to_new_directory()
 
             self.__origin = self.__destination + "/" + \
-                os.path.basename(self.__original_fcs_file_path)
+                            os.path.basename(self.__original_fcs_file_path)
 
     def __get_wells_paths(self, line: str, fcs_file: list[str]) -> None:
         well_keyword = nfo.get_expected_token_value(token="WELLS", token_line=line, file_list=fcs_file,
@@ -368,7 +368,7 @@ class NexusSimulator(Simulator):
             well_set_number = nfo.get_expected_token_value(token="SET", token_line=line, file_list=fcs_file,
                                                            custom_message="No Wells Set number found in line")
             index = line.find(well_set_number)
-            modified_line = line[index+len(well_set_number)::]
+            modified_line = line[index + len(well_set_number)::]
             well_keyword = nfo.get_expected_next_value(0, [modified_line], search_string=modified_line,
                                                        custom_message="No Wells file path found in line:")
         complete_well_filepath = nfo.get_full_file_path(well_keyword, self.__origin)
@@ -795,7 +795,7 @@ class NexusSimulator(Simulator):
         original_fcs_file_location = os.path.basename(
             self.__original_fcs_file_path)
         log_file_name = os.path.splitext(original_fcs_file_location)[
-            0] + ".log" if from_startup else self.__root_name + ".log"
+                            0] + ".log" if from_startup else self.__root_name + ".log"
 
         if log_file_name in files:
             if from_startup:
