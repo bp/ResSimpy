@@ -7,3 +7,4 @@ def simulation(mocker):
 
     listdir_mock = mocker.Mock(return_value=[])
     mocker.patch("os.listdir", listdir_mock)
+    mocker.patch("os.path.isfile", lambda x: True)

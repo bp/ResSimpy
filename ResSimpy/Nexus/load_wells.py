@@ -142,9 +142,9 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
                                  {index}")
 
         if nfo.check_token('WELLSPEC', uppercase_line):
-            initial_well_name = nfo.get_token_value(token='WELLSPEC', token_line=line, file_list=file_as_list)
-            if initial_well_name is None:
-                raise ValueError("Cannot find well name following WELLSPEC keyword")
+            initial_well_name = nfo.get_expected_token_value(token='WELLSPEC', token_line=line, file_list=file_as_list,
+                                                             custom_message="Cannot find well name following WELLSPEC "
+                                                                            "keyword")
             well_name = initial_well_name.strip('\"')
             wellspec_found = True
             continue
@@ -197,13 +197,14 @@ def __load_wellspec_table_completions(file_as_list: list[str], header_index: int
     Returns:
         list[NexusCompletion]: list of nexus completions for a given table.
     """
-    def convert_header_value_float(key: str, header_values=header_values) -> Optional[float]:
+
+    def convert_header_value_float(key: str) -> Optional[float]:
         value = header_values[key]
         if value == 'NA':
             value = None
         return None if value is None else float(value)
 
-    def convert_header_value_int(key, header_values=header_values) -> Optional[int]:
+    def convert_header_value_int(key: str) -> Optional[int]:
         value = header_values[key]
         if value == 'NA':
             value = None
@@ -318,14 +319,13 @@ def __load_wellspec_table_headings(header_index: int, header_values: dict[str, N
             header_line = line.upper()
             header_index = index
             # Map the headers
-            next_column_heading = nfo.get_next_value(start_line_index=0, file_as_list=[line],
-                                                     search_string=line)
+            next_column_heading = nfo.get_next_value(start_line_index=0, file_as_list=[line])
             trimmed_line = header_line
 
             while next_column_heading is not None:
                 headers.append(next_column_heading)
                 trimmed_line = trimmed_line.replace(next_column_heading, "", 1)
-                next_column_heading = nfo.get_next_value(index, [trimmed_line], trimmed_line)
+                next_column_heading = nfo.get_next_value(0, [trimmed_line], trimmed_line)
 
             if len(headers) > 0:
                 break
