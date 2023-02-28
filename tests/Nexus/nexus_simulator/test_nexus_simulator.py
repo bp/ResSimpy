@@ -549,7 +549,7 @@ def test_get_status_running_from_log(mocker, log_file_contents, job_id):
                          "expected_range_y, expected_range_z",
                          [
                              ("! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
-                              "\nother text\n\n,NETGRS VALUE\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\n POROSITY "
+                              "\nother text\n\n,NETGRS VALUE\n INCLUDE /path_to_netgrs_file/net_to_gross.inc\n POROSITY "
                               "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc",
                               "/path_to_netgrs_file/net_to_gross.inc", "path/to/porosity.inc", 1, 2, 3),
                              ("! Grid dimensions\nNX NY NZ\n111 123 321\ntest string\nPOROSITY VALUE\n!random text\n"
