@@ -549,9 +549,9 @@ def test_get_status_running_from_log(mocker, log_file_contents, job_id):
                          "expected_range_y, expected_range_z",
                          [
                              ("! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
-                              "\nother text\n\n,NETGRS VALUE\n INCLUDE /path_to_netgrs_file/net_to_gross.inc\n POROSITY "
+                              "\nother text\n\n,NETGRS VALUE\n INCLUDE /path_to_netgrs_file/include_net_to_gross.inc\n POROSITY "
                               "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc",
-                              "/path_to_netgrs_file/net_to_gross.inc", "path/to/porosity.inc", 1, 2, 3),
+                              "/path_to_netgrs_file/include_net_to_gross.inc", "path/to/porosity.inc", 1, 2, 3),
                              ("! Grid dimensions\nNX NY NZ\n111 123 321\ntest string\nPOROSITY VALUE\n!random text\n"
                               "porosity_file.inc\nNETGRS VALUE\n!Comment Line 1\n\n!Comment Line 2\nINCLUDE   "
                               "/path/to/netgrs_file\nother text\n\n",
@@ -564,11 +564,14 @@ def test_load_structured_grid_file_basic_properties(mocker, structured_grid_file
     # Arrange
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
 
-    structured_grid_mock = mocker.mock_open(read_data=structured_grid_file_contents)
-
-    def mock_open_wrapper(filename, operation=None):
-        mock_open = mock_multiple_opens(mocker, filename, fcs_file, "", "",
-                                        structured_grid_mock=structured_grid_mock).return_value
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'testpath1/nexus_run.fcs': fcs_file,
+                                         '/run_control/path': '',
+                                         'new_destination\\test_structured_grid.dat': structured_grid_file_contents,
+                                         '/path_to_netgrs_file/include_net_to_gross.inc': '',
+                                         'path/to/porosity.inc': '',
+                                         }).return_value
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
