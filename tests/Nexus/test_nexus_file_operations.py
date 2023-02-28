@@ -455,3 +455,33 @@ def test_get_next_value():
     result = nfo.get_next_value(0, [line], line)
     # Assert
     assert result == expected_result
+
+
+@pytest.mark.parametrize("line, expected_result",[
+    ('\t 1', '1'),
+    ('\t 1 ', '1'),
+    (' ', None),
+    ("   IW   ", 'IW'),
+    ("\t ", None),
+    ("   \t   ", None),
+    ("", None),
+    ("\t   a", 'a'),
+    ("a", 'a')
+])
+def test_get_next_value_single_line(line, expected_result):
+    # Act
+    result = nfo.get_next_value(0, [line])
+    # Assert
+    assert result == expected_result
+
+
+@pytest.mark.parametrize("file, expected_result",[
+    (['\t ', '1'], '1'),
+    (['\t ', '\n', '\n', '\n', '\n', '1'], '1'),
+    (['!Comment Line 1','\n', '\n', '\t', ' !Comment Line 2 ', '\n', ' ABCDEFG '], 'ABCDEFG')
+])
+def test_get_next_value_multiple_lines(file, expected_result):
+    # Act
+    result = nfo.get_next_value(0, file)
+    # Assert
+    assert result == expected_result
