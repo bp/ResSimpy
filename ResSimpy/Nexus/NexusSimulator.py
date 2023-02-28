@@ -7,7 +7,7 @@ from typing import Any, Union, Optional
 import warnings
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
-from ResSimpy.UnitsEnum import Units
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import Units
 from ResSimpy.Nexus.DataModels.StructuredGridFile import StructuredGridFile, PropertyToLoad, VariableEntry
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import resqpy.model as rq
@@ -97,14 +97,14 @@ class NexusSimulator(Simulator):
         self.__simulation_end_time: Optional[str] = None
         # run execution finish time from the log file
         self.__previous_run_time: Optional[str] = None
-        self.__run_units:  Units = Units.OILFIELD  # The Nexus default
+        self.__run_units:  Units = Units.ENGLISH  # The Nexus default
         self.use_american_run_units: bool = False
         self.use_american_input_units: bool = False
         self.__write_times: bool = write_times
         self.__manual_fcs_tidy_call: bool = manual_fcs_tidy_call
         self.__surface_file_path: Optional[str] = None
         self.Wells: NexusWells = NexusWells()
-        self.__default_units: Units = Units.OILFIELD  # The Nexus default
+        self.__default_units: Units = Units.ENGLISH  # The Nexus default
 
         if destination is not None and destination != '':
             self.set_output_path(path=destination.strip())
@@ -193,8 +193,8 @@ class NexusSimulator(Simulator):
                 model_oilfield_run_units = grid_length_unit == 'ft'
             else:
                 simulator = NexusSimulator(origin=model)
-                model_oilfield_default_units = simulator.get_default_units() == Units.OILFIELD
-                model_oilfield_run_units = simulator.get_run_units() == Units.OILFIELD
+                model_oilfield_default_units = simulator.get_default_units() == Units.ENGLISH
+                model_oilfield_run_units = simulator.get_run_units() == Units.ENGLISH
 
             # If not defined, assign it to model_oilfield_default_units
             if oilfield_default_units is None:
@@ -407,17 +407,11 @@ class NexusSimulator(Simulator):
             elif nfo.check_token('RUN_UNITS', line):
                 value = nfo.get_token_value('RUN_UNITS', line, fcs_file_content)
                 if value is not None:
-                    if value == 'ENGLISH':
-                        self.__run_units = Units.OILFIELD
-                    else:
-                        self.__run_units = Units[value.upper()]
+                    self.__run_units = Units(value.upper())
             elif nfo.check_token('DEFAULT_UNITS', line):
                 value = nfo.get_token_value('DEFAULT_UNITS', line, fcs_file_content)
                 if value is not None:
-                    if value == 'ENGLISH':
-                        self.__default_units = Units.OILFIELD
-                    else:
-                        self.__default_units = Units[value.upper()]
+                    self.__default_units = Units(value.upper())
             elif nfo.check_token("SURFACE NETWORK 1", line):
                 value = nfo.get_token_value(token="SURFACE Network 1", token_line=line,
                                             file_list=fcs_file_content)

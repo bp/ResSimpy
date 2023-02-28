@@ -1,4 +1,4 @@
-# Extracted from 20 bp models. Not a complete list.
+# Not a complete list.
 # Need to delete the keywords that are not tokens (i.e. that are only values in a table)
 
 SURFACE_KEYWORDS = ['A', 'ACPGCR', 'ACTIONS', 'ACTIVATE', 'ACTIVE', 'ADD', 'ADDVALUE', 'ALL', 'ALL1D', 'ALLOW_BHMOVE',

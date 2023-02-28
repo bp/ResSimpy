@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
-from ResSimpy.UnitsEnum import Units
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import Units
 from ResSimpy.Wells import Wells
 from ResSimpy.Nexus.load_wells import load_wells
 

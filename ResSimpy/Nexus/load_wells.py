@@ -5,7 +5,7 @@ from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
 
-from ResSimpy.UnitsEnum import Units
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import Units
 
 
 def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -> list[NexusWell]:
@@ -95,8 +95,8 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
     krg_sgrw: Optional[str] = None
     sgtr: Optional[str] = None
     sotr: Optional[str] = None
-    units_values: dict[str, Units] = {'ENGLISH': Units.OILFIELD, 'METRIC': Units.METRIC_KPA,
-                                      'METKG/CM2': Units.METRIC_KGCM2, 'METBAR': Units.METRIC_BARS, 'LAB': Units.LAB}
+    # units_values: dict[str, Units] = {'ENGLISH': Units.OILFIELD, 'METRIC': Units.METRIC_KPA,
+    #                                   'METKG/CM2': Units.METRIC_KGCM2, 'METBAR': Units.METRIC_BARS, 'LAB': Units.LAB}
     header_values: dict[str, None | int | float | str] = {
         'IW': iw, 'JW': jw, 'L': kw, 'MD': md, 'SKIN': skin, 'DEPTH': depth, 'X': x_value, 'Y': y_value,
         'ANGLA': angla, 'ANGLV': anglv, 'GRID': grid, 'WI': wi, 'DTOP': dtop, 'DBOT': dbot, 'RADW': well_radius,
@@ -126,10 +126,14 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
         uppercase_line = line.upper()
 
         # If we haven't got the units yet, check to see if this line contains a declaration for them.
+        # if wellspec_file_units is None:
+        #     for key in units_values.keys():
+        #         if key in uppercase_line and (line.find('!') > line.find(key) or line.find('!') == -1):
+        #             wellspec_file_units = units_values[key]
         if wellspec_file_units is None:
-            for key in units_values.keys():
-                if key in uppercase_line and (line.find('!') > line.find(key) or line.find('!') == -1):
-                    wellspec_file_units = units_values[key]
+            for unit in Units:
+                if unit.value in uppercase_line and (line.find('!') > line.find(unit.value) or line.find('!') == -1):
+                    wellspec_file_units = unit
 
         if nfo.check_token('TIME', line):
             current_date = nfo.get_token_value(token='TIME', token_line=line, file_list=file_as_list)

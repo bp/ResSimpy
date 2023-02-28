@@ -4,7 +4,7 @@ FCS_KEYWORDS = ['RESERVOIR', 'EQUIL', 'EOS_DEFAULTS', 'TRACER_INIT', 'STRUCTURED
                      'ADSORPTION', 'PVT', 'SEPARATOR', 'ALPHAF', 'POLYMER', 'WATER', 'AQUIFER', 'FLUXIN', 'RUNCONTROL',
                      'WELLS', 'SURFACE', 'IPR', 'GASLIFT', 'VALVE', 'HYD', 'PUMP', 'COMPRESSOR', 'CHOKE',  'ICD', 'ESP']
 
-# Extracted from 20 bp models. Not a complete list.
+# Not a complete list.
 # Need to delete the keywords that are not tokens (i.e. that are only values in a table)
 
 FCS_ALL_KEYWORDS = ['ADSORPTION', 'ALPHA', 'ALPHAF', 'AQUIFER', 'AQUIFER_FILES', 'CASE', 'CHOKE', 'COMPRESSOR',
