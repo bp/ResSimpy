@@ -5,15 +5,15 @@ from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
 
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import Units
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 
 
-def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -> list[NexusWell]:
+def load_wells(wellspec_file_path: str, start_date: str, default_units: UnitSystem) -> list[NexusWell]:
     """Loads a list of Nexus Well instances and populates it with the wells completions over time from a wells file
     Args:
         wellspec_file_path (str): file path to the wellspec file to read.
         start_date (str): starting date of the wellspec file as a string.
-        default_units (Units): default units to use if no units are found.
+        default_units (UnitSystem): default units to use if no units are found.
     Raises:
         ValueError: If no value is found after a TIME card.
         ValueError: If no well name is found after a WELLSPEC keyword.
@@ -25,7 +25,7 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
 
     file_as_list = nfo.load_file_as_list(wellspec_file_path)
     well_name: Optional[str] = None
-    wellspec_file_units: Optional[Units] = None
+    wellspec_file_units: Optional[UnitSystem] = None
     completions: list[NexusCompletion] = []
     headers: list[str] = []
 
@@ -131,7 +131,7 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
         #         if key in uppercase_line and (line.find('!') > line.find(key) or line.find('!') == -1):
         #             wellspec_file_units = units_values[key]
         if wellspec_file_units is None:
-            for unit in Units:
+            for unit in UnitSystem:
                 if unit.value in uppercase_line and (line.find('!') > line.find(unit.value) or line.find('!') == -1):
                     wellspec_file_units = unit
 

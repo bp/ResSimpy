@@ -3,7 +3,7 @@ import pytest
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import Units
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.load_wells import load_wells
 
 
@@ -51,14 +51,14 @@ def test_load_basic_wellspec(mocker, file_contents, expected_name):
                                             angle_v=None)
     expected_completion_2 = NexusCompletion(i=6, j=7, k=8, well_radius=9.11, date=start_date)
     expected_well = NexusWell(well_name=expected_name, completions=[expected_completion_1, expected_completion_2],
-                              units=Units.ENGLISH)
+                              units=UnitSystem.ENGLISH)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    result_wells = load_wells('test/file/location.dat', start_date=start_date, default_units=Units.ENGLISH)
+    result_wells = load_wells('test/file/location.dat', start_date=start_date, default_units=UnitSystem.ENGLISH)
 
     # Assert
     # Deep compare expected and received wells
@@ -109,13 +109,13 @@ WELLMOD	RU001	DKH	CON	0
 
     expected_well_1 = NexusWell(well_name='DEV1',
                                 completions=[expected_well_1_completion_1, expected_well_1_completion_2],
-                                units=Units.ENGLISH)
+                                units=UnitSystem.ENGLISH)
     expected_well_2 = NexusWell(well_name='DEV2',
                                 completions=[expected_well_2_completion_1, expected_well_2_completion_2,
-                                             expected_well_2_completion_3], units=Units.ENGLISH)
+                                             expected_well_2_completion_3], units=UnitSystem.ENGLISH)
     expected_well_3 = NexusWell(well_name='WEL1234',
                                 completions=[expected_well_3_completion_1, expected_well_3_completion_2],
-                                units=Units.ENGLISH)
+                                units=UnitSystem.ENGLISH)
 
     expected_wells = [expected_well_1, expected_well_2, expected_well_3]
 
@@ -123,7 +123,7 @@ WELLMOD	RU001	DKH	CON	0
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=Units.ENGLISH)
+    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=UnitSystem.ENGLISH)
 
     # Assert
     assert result_wells == expected_wells
@@ -173,11 +173,11 @@ def test_load_wells_multiple_wells_multiple_dates(mocker):
     expected_well_1 = NexusWell(well_name='DEV1',
                                 completions=[expected_well_1_completion_1, expected_well_1_completion_2,
                                              expected_well_1_completion_3, expected_well_1_completion_4],
-                                units=Units.ENGLISH)
+                                units=UnitSystem.ENGLISH)
     expected_well_2 = NexusWell(well_name='DEV2',
                                 completions=[expected_well_2_completion_1, expected_well_2_completion_2,
                                              expected_well_2_completion_3, expected_well_2_completion_4,
-                                             expected_well_2_completion_5], units=Units.ENGLISH)
+                                             expected_well_2_completion_5], units=UnitSystem.ENGLISH)
 
     expected_wells = [expected_well_1, expected_well_2]
 
@@ -185,7 +185,7 @@ def test_load_wells_multiple_wells_multiple_dates(mocker):
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=Units.ENGLISH)
+    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=UnitSystem.ENGLISH)
 
     # Assert
     assert result_wells == expected_wells
@@ -213,14 +213,14 @@ def test_load_wells_all_columns_present_structured_grid(mocker):
                                                  depth_to_top=0.2132, depth_to_bottom=5.45454)
 
     expected_well = NexusWell(well_name='WELL_3', completions=[expected_well_completion_1, expected_well_completion_2],
-                              units=Units.ENGLISH)
+                              units=UnitSystem.ENGLISH)
     expected_wells = [expected_well]
 
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=Units.ENGLISH)
+    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=UnitSystem.ENGLISH)
 
     # Assert
     assert result_wells == expected_wells
@@ -248,14 +248,14 @@ def test_load_wells_all_columns_unstructured_grid(mocker):
     )
 
     expected_well = NexusWell(well_name='WELL_3', completions=[expected_well_completion_1],
-                              units=Units.ENGLISH)
+                              units=UnitSystem.ENGLISH)
     expected_wells = [expected_well]
 
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=Units.ENGLISH)
+    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=UnitSystem.ENGLISH)
 
     # Assert
     assert result_wells == expected_wells
@@ -286,17 +286,17 @@ def test_load_wells_rel_perm_tables(mocker):
     expected_well_completion_2 = NexusCompletion(date=start_date, cell_number=2, rel_perm_end_point=expected_rel_perm_end_point_2)
 
     expected_well = NexusWell(well_name='WELL_3', completions=[expected_well_completion_1, expected_well_completion_2],
-                              units=Units.ENGLISH)
+                              units=UnitSystem.ENGLISH)
 
     expected_wells = [expected_well]
 
     expected_well = NexusWell(well_name='WELL_3', completions=[expected_well_completion_1, expected_well_completion_2],
-                              units=Units.ENGLISH)
+                              units=UnitSystem.ENGLISH)
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=Units.ENGLISH)
+    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=UnitSystem.ENGLISH)
 
     # Assert
     assert result_wells == expected_wells
@@ -326,14 +326,14 @@ def test_load_wells_na_values_converted_to_none(mocker):
                                                  angle_a=None, angle_v=None, grid='NA')
 
     expected_well = NexusWell(well_name='WELL_3', completions=[expected_well_completion_1, expected_well_completion_2,
-                                                               expected_well_completion_3], units=Units.ENGLISH)
+                                                               expected_well_completion_3], units=UnitSystem.ENGLISH)
     expected_wells = [expected_well]
 
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=Units.ENGLISH)
+    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=UnitSystem.ENGLISH)
 
     # Assert
     assert result_wells == expected_wells
@@ -345,7 +345,7 @@ def test_load_wells_na_values_converted_to_none(mocker):
        WELLSPEC DEV1
        IW JW L RADW
        1  2  3  4.5
-       6 7 8   9.11""", Units.ENGLISH),
+       6 7 8   9.11""", UnitSystem.ENGLISH),
 
                              ("""       
 ENGLish
@@ -354,7 +354,7 @@ TIME 01/08/2023 !232 days
        WELLSPEC DEV1
        IW JW L RADW
        1  2  3  4.5
-       6 7 8   9.11""", Units.ENGLISH),
+       6 7 8   9.11""", UnitSystem.ENGLISH),
 
                              (""" 
       TIME 01/08/2023 !232 days
@@ -364,7 +364,7 @@ TIME 01/08/2023 !232 days
        WELLSPEC DEV1
        IW JW L RADW
        1  2  3  4.5
-       6 7 8   9.11""", Units.METRIC),
+       6 7 8   9.11""", UnitSystem.METRIC),
 
                              (""" 
       ! ENGLISH
@@ -374,7 +374,7 @@ TIME 01/08/2023 !232 days
        WELLSPEC DEV1
        IW JW L RADW
        1  2  3  4.5
-       6 7 8   9.11""", Units.METKGCM2),
+       6 7 8   9.11""", UnitSystem.METKGCM2),
 
                              ("""
        METBAR
@@ -382,14 +382,14 @@ TIME 01/08/2023 !232 days
        WELLSPEC DEV1
        IW JW L RADW
        1  2  3  4.5
-       6 7 8   9.11""", Units.METBAR),
+       6 7 8   9.11""", UnitSystem.METBAR),
                              ("""
                     LAB
        TIME 01/08/2023 !232 days
        WELLSPEC DEV1
        IW JW L RADW
        1  2  3  4.5
-       6 7 8   9.11""", Units.LAB),
+       6 7 8   9.11""", UnitSystem.LAB),
 
                          ],
                          ids=['None specified', 'Oilfield', 'kpa', 'kgcm2 + comment before', 'metbar', 'lab'])
@@ -408,7 +408,7 @@ def test_correct_units_loaded(mocker, file_contents, expected_units):
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=Units.ENGLISH)
+    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=UnitSystem.ENGLISH)
 
     # Assert
     assert result_wells == expected_wells

@@ -4,14 +4,14 @@ from abc import ABC
 from dataclasses import dataclass
 
 from ResSimpy.Completion import Completion
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import Units
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 
 
 @dataclass
 class Well(ABC):
     __completions: list[Completion]
     __well_name: str
-    __units: Units
+    __units: UnitSystem
 
     def __init__(self, well_name, completions, units):
         self.__well_name = well_name
@@ -27,5 +27,5 @@ class Well(ABC):
         return self.__well_name
 
     @property
-    def units(self) -> Units:
+    def units(self) -> UnitSystem:
         return self.__units
