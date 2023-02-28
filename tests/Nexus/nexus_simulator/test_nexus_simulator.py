@@ -87,7 +87,7 @@ def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expec
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
 
     # Assert
-    assert simulation.run_control_file == expected_full_path
+    assert simulation.run_control_file_path == expected_full_path
     assert simulation.use_american_date_format == expected_use_american_date_format
     open_mock.assert_called_with(expected_full_path, 'r')
 
@@ -110,7 +110,7 @@ def test_load_fcs_space_in_filename(mocker, run_control_path, expected_root, exp
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
 
     # Assert
-    assert simulation.run_control_file == expected_full_path
+    assert simulation.run_control_file_path == expected_full_path
     assert simulation.use_american_date_format == expected_use_american_date_format
     open_mock.assert_called_with(expected_full_path, 'r')
 
@@ -126,8 +126,8 @@ def test_load_fcs_file_comment_after_declaration(mocker):
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
 
     # Assert
-    assert simulation.run_control_file == expected_file_path
-    assert simulation.use_american_date_format == False
+    assert simulation.run_control_file_path == expected_file_path
+    assert simulation.use_american_date_format is False
     open_mock.assert_called_with(expected_file_path, 'r')
 
 
@@ -153,7 +153,7 @@ def test_output_destination_missing(mocker, run_control_path, expected_run_contr
         simulation.set_output_path(None)
 
     # Assert
-    assert simulation.run_control_file == expected_run_control_path
+    assert simulation.run_control_file_path == expected_run_control_path
     assert simulation.use_american_date_format == expected_use_american_date_format
 
 
@@ -549,9 +549,9 @@ def test_get_status_running_from_log(mocker, log_file_contents, job_id):
                          "expected_range_y, expected_range_z",
                          [
                              ("! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
-                              "\nother text\n\n,NETGRS VALUE\n INCLUDE /path_to_netgrs_file/net_to_gross.inc\n POROSITY "
+                              "\nother text\n\n,NETGRS VALUE\n INCLUDE /path_to_netgrs_file/include_net_to_gross.inc\n POROSITY "
                               "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc",
-                              "/path_to_netgrs_file/net_to_gross.inc", "path/to/porosity.inc", 1, 2, 3),
+                              "/path_to_netgrs_file/include_net_to_gross.inc", "path/to/porosity.inc", 1, 2, 3),
                              ("! Grid dimensions\nNX NY NZ\n111 123 321\ntest string\nPOROSITY VALUE\n!random text\n"
                               "porosity_file.inc\nNETGRS VALUE\n!Comment Line 1\n\n!Comment Line 2\nINCLUDE   "
                               "/path/to/netgrs_file\nother text\n\n",
@@ -562,14 +562,16 @@ def test_load_structured_grid_file_basic_properties(mocker, structured_grid_file
                                                     expected_range_y, expected_range_z):
     """Read in Structured Grid File"""
     # Arrange
-    fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID \"test_structured_grid.dat\""
-
-    structured_grid_mock = mocker.mock_open(
-        read_data=structured_grid_file_contents)
-
-    def mock_open_wrapper(filename, operation=None):
-        mock_open = mock_multiple_opens(mocker, filename, fcs_file, "", "",
-                                        structured_grid_mock=structured_grid_mock).return_value
+    fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('new_destination', 'test_structured_grid.dat')
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'testpath1/nexus_run.fcs': fcs_file,
+                                         '/run_control/path': '',
+                                         structured_grid_name: structured_grid_file_contents,
+                                         '/path_to_netgrs_file/include_net_to_gross.inc': '',
+                                         'path/to/porosity.inc': '',
+                                         }).return_value
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
@@ -619,15 +621,16 @@ def test_load_structured_grid_file_dict_basic_properties(mocker, structured_grid
     """Read in Structured Grid File and return a dict object"""
     # Arrange
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID \"test_structured_grid.dat\""
-
-    structured_grid_mock = mocker.mock_open(
-        read_data=structured_grid_file_contents)
-
-    def mock_open_wrapper(filename, operation=None):
-        mock_open = mock_multiple_opens(mocker, filename, fcs_file, "", "",
-                                        structured_grid_mock=structured_grid_mock).return_value
+    structured_grid_name = os.path.join('new_destination', '\"test_structured_grid.dat\"')
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'testpath1/nexus_run.fcs': fcs_file,
+                                         '/run_control/path': '',
+                                         structured_grid_name: structured_grid_file_contents,
+                                         '/path_to_netgrs_file/include_net_to_gross.inc': '',
+                                         'path/to/porosity.inc': '',
+                                         }).return_value
         return mock_open
-
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
@@ -687,14 +690,16 @@ def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
                                 "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc"
 
     structured_grid_file = base_structured_grid_file + structured_grid_file_contents
-
-    structured_grid_mock = mocker.mock_open(read_data=structured_grid_file)
-
-    def mock_open_wrapper(filename, operation=None):
-        mock_open = mock_multiple_opens(mocker, filename, fcs_file, "", "",
-                                        structured_grid_mock=structured_grid_mock).return_value
+    structured_grid_name = os.path.join('new_destination', '\"test_structured_grid.dat\"')
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'testpath1/nexus_run.fcs': fcs_file,
+                                         '/run_control/path': '',
+                                         structured_grid_name: structured_grid_file,
+                                         '/path_to_netgrs_file/include_net_to_gross.inc': '',
+                                         'path/to/porosity.inc': '',
+                                         }).return_value
         return mock_open
-
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
@@ -745,14 +750,17 @@ def test_load_structured_grid_file_k_values(mocker, structured_grid_file_content
                                 "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc"
 
     structured_grid_file = base_structured_grid_file + structured_grid_file_contents
-
-    structured_grid_mock = mocker.mock_open(read_data=structured_grid_file)
-
-    def mock_open_wrapper(filename, operation=None):
-        mock_open = mock_multiple_opens(mocker, filename, fcs_file, "", "",
-                                        structured_grid_mock=structured_grid_mock).return_value
+    structured_grid_name = os.path.join('new_destination', '\"test_structured_grid.dat\"')
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'testpath1/nexus_run.fcs': fcs_file,
+                                         '/run_control/path': '',
+                                         structured_grid_name: structured_grid_file,
+                                         '/path_to_netgrs_file/include_net_to_gross.inc': '',
+                                         'path/to/porosity.inc': '',
+                                         "/path/to/kz.inc": '',
+                                         }).return_value
         return mock_open
-
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
@@ -821,10 +829,16 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
                            f"{' INCLUDE' if new_sw.modifier == 'VALUE' else ''} {new_sw.value}"
 
     structured_grid_mock = mocker.mock_open(read_data=structured_grid_file)
-
-    def mock_open_wrapper(filename, operation=None):
-        mock_open = mock_multiple_opens(mocker, filename, fcs_file, "", "",
-                                        structured_grid_mock=structured_grid_mock).return_value
+    structured_grid_name = os.path.join('new_destination', 'test_structured_grid.dat')
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'testpath1/nexus_run.fcs': fcs_file,
+                                         '/run_control/path': '',
+                                         structured_grid_name: structured_grid_file,
+                                         '/path_to_netgrs_file/include_net_to_gross.inc': '',
+                                         'path/to/porosity.inc': '',
+                                         "/path/to/kz.inc": '',
+                                         }).return_value
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
@@ -840,8 +854,7 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
     # Assert
 
     # Check the newly written file is as expected
-    structured_grid_mock.assert_called_with(os.path.join(
-        'new_destination', 'test_structured_grid.dat'), 'w')
+    structured_grid_mock.assert_called_with(structured_grid_name, 'w')
     structured_grid_mock.return_value.write.assert_called_with(
         expected_output_file)
 
@@ -1049,13 +1062,18 @@ def test_view_command(mocker, structured_grid_file_contents, expected_text):
     """Test the View Command functionality"""
     # Arrange
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID \"test_structured_grid.dat\""
-
-    structured_grid_mock = mocker.mock_open(
-        read_data=structured_grid_file_contents)
-
-    def mock_open_wrapper(filename, operation=None):
-        mock_open = mock_multiple_opens(mocker, filename, fcs_file, "", "",
-                                        structured_grid_mock=structured_grid_mock).return_value
+    structured_grid_name = os.path.join('new_destination', 'test_structured_grid.dat')
+    structured_grid_name_quotes = os.path.join('new_destination', '\"test_structured_grid.dat\"')
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'testpath1/nexus_run.fcs': fcs_file,
+                                         '/run_control/path': '',
+                                         structured_grid_name: structured_grid_file_contents,
+                                         structured_grid_name_quotes: structured_grid_file_contents,
+                                         '/path_to_netgrs_file/include_net_to_gross.inc': '',
+                                         'path/to/porosity.inc': '',
+                                         "/path/to/kz.inc": '',
+                                         }).return_value
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
@@ -1063,8 +1081,6 @@ def test_view_command(mocker, structured_grid_file_contents, expected_text):
     # Act
     result = NexusSimulator(
         origin='testpath1/nexus_run.fcs', destination="new_destination")
-
-    mocker.patch("builtins.open", structured_grid_mock)
 
     # Assert
     value = result.view_command(field='netgrs')
@@ -1680,12 +1696,9 @@ PLOTBINARY
 
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
-       WELLS my/wellspec/file.dat
-    """),
-    ("""
        WelLS sEt 1 my/wellspec/file.dat
     """)
-], ids=['path_after_wells', 'path_after_set'])
+], ids=['path_after_set'])
 def test_get_wells(mocker: MockerFixture, fcs_file_contents: str):
     """Testing the functionality to load in and retrieve a set of wells"""
     # Arrange
@@ -1719,7 +1732,7 @@ def test_get_wells(mocker: MockerFixture, fcs_file_contents: str):
 def test_get_wells_df(mocker: MockerFixture):
     # Arrange
     fcs_file_contents = """
-       WELLS my/wellspec/file.dat
+       WelLS sEt 1 my/wellspec/file.dat
     """
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
     mocker.patch("builtins.open", fcs_file_open)

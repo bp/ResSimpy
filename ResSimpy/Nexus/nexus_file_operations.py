@@ -8,19 +8,20 @@ from ResSimpy.Nexus.nexus_constants import VALID_NEXUS_KEYWORDS
 import os
 
 
-def nexus_token_found(line_to_check: str) -> bool:
+def nexus_token_found(line_to_check: str, valid_list: list[str] = VALID_NEXUS_KEYWORDS) -> bool:
     """
     Checks if a valid Nexus token has been found  in the supplied line
 
     Args:
         line_to_check (str):  The string to search for a Nexus keyword
+        valid_list (list[str]): list of keywords to search from (e.g. from nexus_constants)
 
     Returns:
         token_found (bool): A boolean value stating whether the token is found or not
 
     """
     uppercase_line = line_to_check.upper()
-    for token in VALID_NEXUS_KEYWORDS:
+    for token in valid_list:
         if check_token(token, uppercase_line):
             return True
 
@@ -314,8 +315,7 @@ def load_file_as_list(file_path: str, strip_comments: bool = False, strip_str: b
         file_content = list(f)
 
     if strip_comments:
-        file_content = strip_file_of_comments(
-            file_content, strip_str=strip_str)
+        file_content = strip_file_of_comments(file_content, strip_str=strip_str)
 
     return file_content
 
@@ -401,7 +401,7 @@ def get_full_file_path(file_path: str, origin: str):
     if os.path.isabs(file_path):
         return_path = file_path
     else:
-        return_path = os.path.join(os.path.dirname(origin), file_path)
+        return_path = str(os.path.join(os.path.dirname(origin), file_path))
     return return_path
 
 
@@ -451,6 +451,35 @@ def clean_up_string(value: str) -> str:
     value = value.replace("!", "")
     value = value.replace("\t", "")
     return value
+
+
+def get_multiple_sequential_tokens(list_of_strings: list[str], number_tokens: int) -> list[str]:
+    """Returns a sequential list of tokens as long as the number of tokens requested.
+
+    Args:
+        list_of_strings (list[str]): list of strings to represent the file with a new entry per line in the file.
+        number_tokens (int): number of tokens to return values of
+
+    Raises:
+        ValueError: if too many tokens are requested compared to the file provided
+
+    Returns:
+        list[str]: list of strings comprised of the token values in order.
+    """
+    store_values = []
+    filter_list = list_of_strings.copy()
+    for i in range(0, number_tokens):
+        # TODO: change to get_expected_next_value
+        value = get_next_value(0, filter_list, filter_list[0], replace_with='')
+        while value is None:
+            # if no valid value found in the first line, remove it and try it again
+            filter_list.pop(0)
+            if len(filter_list) == 0:
+                raise ValueError('Too many values requested from the list of strings passed')
+            value = get_next_value(0, filter_list, filter_list[0], replace_with='')
+        store_values.append(value)
+
+    return store_values
 
 
 def check_for_common_input_data(file_as_list: list[str], property_dict: dict) -> dict:

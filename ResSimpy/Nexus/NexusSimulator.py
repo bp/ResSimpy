@@ -1,3 +1,4 @@
+from dataclasses import Field
 from datetime import datetime
 import os
 import copy
@@ -5,6 +6,7 @@ from functools import cmp_to_key
 from datetime import timedelta
 from typing import Any, Union, Optional
 import warnings
+from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from ResSimpy.UnitsEnum import Units
@@ -39,7 +41,7 @@ class NexusSimulator(Simulator):
             manual_fcs_tidy_call (bool, optional): Determines whether fcs_tidy should be called - Currently not used. \
                 Defaults to False.
         Attributes:
-            run_control_file (Optional[str]): file path to the run control file - derived from the fcs file
+            run_control_file_path (Optional[str]): file path to the run control file - derived from the fcs file
             __times (Optional[list[str]]): list of times to be included in the runcontrol file
             __destination (Optional[str]): private attribute of destination, output path for the simulation.
             use_american_date_format (bool): True if the simulation uses 'MM/DD/YYYY' date format.
@@ -77,7 +79,7 @@ class NexusSimulator(Simulator):
 
         super().__init__()
 
-        self.run_control_file: Optional[str] = ''
+        self.run_control_file_path: Optional[str] = ''
         self.__times: Optional[list[str]] = None
         self.__destination: Optional[str] = None
         self.use_american_date_format: bool = False
@@ -380,27 +382,16 @@ class NexusSimulator(Simulator):
         """
         # self.get_simulation_status(True)
 
-        self.fcs_file = NexusFile.generate_file_include_structure(self.__new_fcs_file_path, origin=None)
+        self.fcs_file = FcsNexusFile.generate_fcs_structure(self.__new_fcs_file_path, origin_folder=self.__origin)
         fcs_file_content = self.fcs_file.get_flat_list_str_file()
         if fcs_file_content is None:
             raise ValueError(f'FCS file not found, no content for {self.__new_fcs_file_path}')
         for line in fcs_file_content:
-            if nfo.check_token('RUNCONTROL', line):
-                runcontrol_path = nfo.get_expected_token_value('RUNCONTROL', line, fcs_file_content)
-                if runcontrol_path is not None:
-                    self.run_control_file = nfo.get_full_file_path(runcontrol_path, self.__origin)
-                    self.runcontrol_file = NexusFile.generate_file_include_structure(self.run_control_file,
-                                                                                     origin=self.__new_fcs_file_path)
-            elif nfo.check_token('DATEFORMAT', line):
+            if nfo.check_token('DATEFORMAT', line):
                 value = nfo.get_token_value('DATEFORMAT', line, fcs_file_content)
                 if value is not None:
                     self.use_american_date_format = value == 'MM/DD/YYYY'
                 self.__date_format_string = "%m/%d/%Y" if self.use_american_date_format else "%d/%m/%Y"
-            elif nfo.check_token('STRUCTURED_GRID', line):
-                value = nfo.get_expected_token_value('STRUCTURED_GRID', line, fcs_file_content)
-                if value is not None:
-                    self.__structured_grid_file_path = nfo.get_full_file_path(value, self.__origin)
-                    self.load_structured_grid_file()
             elif nfo.check_token('RUN_UNITS', line):
                 value = nfo.get_token_value('RUN_UNITS', line, fcs_file_content)
                 if value is not None:
@@ -415,26 +406,31 @@ class NexusSimulator(Simulator):
                         self.__default_units = Units.OILFIELD
                     else:
                         self.__default_units = Units[value.upper()]
-            elif nfo.check_token("SURFACE NETWORK 1", line):
-                value = nfo.get_expected_token_value(token="SURFACE Network 1", token_line=line,
-                                                     file_list=fcs_file_content)
-                if value is not None:
-                    self.__surface_file_path = nfo.get_full_file_path(value, self.__origin)
-                break
-
-            elif nfo.check_token('WELLS', line):
-                self.__get_wells_paths(line, fcs_file_content)
 
         # Load in the other files
         # Load in Runcontrol
-        if self.run_control_file != '':
+
+        if not isinstance(self.fcs_file.runcontrol_file, Field) and self.fcs_file.runcontrol_file is not None:
+            self.run_control_file_path = self.fcs_file.runcontrol_file.location
             self.__load_run_control_file()
+        if not isinstance(self.fcs_file.surface_files, Field) and self.fcs_file.surface_files is not None:
+            # TODO support multiple surface file paths
+            self.__surface_file_path = list(self.fcs_file.surface_files.values())[0].location
+
+        if not isinstance(self.fcs_file.structured_grid_file, Field) and self.fcs_file.structured_grid_file is not None:
+            self.__structured_grid_file_path = self.fcs_file.structured_grid_file.location
+            self.load_structured_grid_file()
 
         # Load in wellspec files
-        if len(self.Wells.wellspec_paths) > 0:
-            for path in self.Wells.wellspec_paths:
+        if not isinstance(self.fcs_file.well_files, Field) and self.fcs_file.well_files is not None and \
+                len(self.fcs_file.well_files) > 0:
+            for well_file in self.fcs_file.well_files.values():
+                if well_file.location is None:
+                    warnings.warn(f'Well file location has not been found for {well_file}')
+                    continue
                 self.Wells.load_wells(
-                    well_file=path, start_date=self.start_date, default_units=self.__default_units)
+                    well_file=well_file.location, start_date=self.start_date, default_units=self.__default_units)
+                self.Wells.wellspec_paths.append(well_file.location)
 
     @staticmethod
     def update_file_value(file_path: str, token: str, new_value: str, add_to_start: bool = False):
@@ -532,11 +528,13 @@ class NexusSimulator(Simulator):
         Raises:
             ValueError: if the run_control_file attribute is None
         """
+        if self.fcs_file.runcontrol_file is None:
+            warnings.warn(f"Run control file path not found for {self.fcs_file.location}")
+            return
+        run_control_file_content = self.fcs_file.runcontrol_file.get_flat_list_str_file()
 
-        run_control_file_content = self.runcontrol_file.get_flat_list_str_file()
-
-        if (run_control_file_content is None) or (self.runcontrol_file.location is None):
-            raise ValueError(f"No file path provided for {self.runcontrol_file.location=}")
+        if (run_control_file_content is None) or (self.fcs_file.runcontrol_file.location is None):
+            raise ValueError(f"No file path provided for {self.fcs_file.runcontrol_file.location=}")
 
         # set the start date
         for line in run_control_file_content:
@@ -552,10 +550,10 @@ class NexusSimulator(Simulator):
         # If we don't want to write the times, return here.
         if not self.__write_times:
             return
-        if self.runcontrol_file.includes is None:
-            warnings.warn(f'No includes files found in {self.runcontrol_file.location}')
+        if self.fcs_file.runcontrol_file.includes is None:
+            warnings.warn(f'No includes files found in {self.fcs_file.runcontrol_file.location}')
             return
-        for file in self.runcontrol_file.includes:
+        for file in self.fcs_file.runcontrol_file.includes:
             if self.__destination is not None:
                 runcontrol_operations.remove_times_from_file(run_control_file_content, file)
 
@@ -750,12 +748,10 @@ class NexusSimulator(Simulator):
             None: writes out a file at the same path as the existing runcontrol file
         """
         self.__check_output_path()
-        file_content = self.runcontrol_file.get_flat_list_str_file()
-        filename = self.runcontrol_file.location
-        if filename is None:
-            raise ValueError(f"No file path found for {filename}")
-        if file_content is None:
-            raise ValueError(f"No file content found for {filename}")
+        if self.fcs_file.runcontrol_file is None or self.fcs_file.runcontrol_file.location is None:
+            raise ValueError(f"No file path found for {self.fcs_file}")
+        file_content = self.fcs_file.runcontrol_file.get_flat_list_str_file()
+        filename = self.fcs_file.runcontrol_file.location
 
         new_file_content = runcontrol_operations.delete_times(file_content)
 
@@ -1029,20 +1025,15 @@ class NexusSimulator(Simulator):
         structured_grid_operations.replace_value(file, original_structured_grid_file.netgrs,
                                                  self.__structured_grid_file.netgrs, 'NETGRS')
         structured_grid_operations.replace_value(file, original_structured_grid_file.porosity,
-                                                 self.__structured_grid_file.porosity,
-                                                 'POROSITY')
+                                                 self.__structured_grid_file.porosity, 'POROSITY')
         structured_grid_operations.replace_value(file, original_structured_grid_file.sw,
-                                                 self.__structured_grid_file.sw,
-                                                 'SW')
+                                                 self.__structured_grid_file.sw, 'SW')
         structured_grid_operations.replace_value(file, original_structured_grid_file.kx,
-                                                 self.__structured_grid_file.kx,
-                                                 'KX')
+                                                 self.__structured_grid_file.kx, 'KX')
         structured_grid_operations.replace_value(file, original_structured_grid_file.ky,
-                                                 self.__structured_grid_file.ky,
-                                                 'KY')
+                                                 self.__structured_grid_file.ky, 'KY')
         structured_grid_operations.replace_value(file, original_structured_grid_file.kz,
-                                                 self.__structured_grid_file.kz,
-                                                 'KZ')
+                                                 self.__structured_grid_file.kz, 'KZ')
 
         # Save the new file contents
         new_file_str = "".join(file)
