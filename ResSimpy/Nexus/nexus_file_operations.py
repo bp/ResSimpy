@@ -454,6 +454,18 @@ def clean_up_string(value: str) -> str:
 
 
 def get_multiple_sequential_tokens(list_of_strings: list[str], number_tokens: int) -> list[str]:
+    """Returns a sequential list of tokens as long as the number of tokens requested.
+
+    Args:
+        list_of_strings (list[str]): list of strings to represent the file with a new entry per line in the file.
+        number_tokens (int): number of tokens to return values of
+
+    Raises:
+        ValueError: if too many tokens are requested compared to the file provided
+
+    Returns:
+        list[str]: list of strings comprised of the token values in order.
+    """
     store_values = []
     filter_list = list_of_strings.copy()
     for i in range(0, number_tokens):
