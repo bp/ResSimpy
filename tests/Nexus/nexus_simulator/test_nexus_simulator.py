@@ -87,7 +87,7 @@ def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expec
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
 
     # Assert
-    assert simulation.run_control_file == expected_full_path
+    assert simulation.run_control_file_path == expected_full_path
     assert simulation.use_american_date_format == expected_use_american_date_format
     open_mock.assert_called_with(expected_full_path, 'r')
 
@@ -110,7 +110,7 @@ def test_load_fcs_space_in_filename(mocker, run_control_path, expected_root, exp
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
 
     # Assert
-    assert simulation.run_control_file == expected_full_path
+    assert simulation.run_control_file_path == expected_full_path
     assert simulation.use_american_date_format == expected_use_american_date_format
     open_mock.assert_called_with(expected_full_path, 'r')
 
@@ -126,8 +126,8 @@ def test_load_fcs_file_comment_after_declaration(mocker):
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
 
     # Assert
-    assert simulation.run_control_file == expected_file_path
-    assert simulation.use_american_date_format == False
+    assert simulation.run_control_file_path == expected_file_path
+    assert simulation.use_american_date_format is False
     open_mock.assert_called_with(expected_file_path, 'r')
 
 
@@ -153,7 +153,7 @@ def test_output_destination_missing(mocker, run_control_path, expected_run_contr
         simulation.set_output_path(None)
 
     # Assert
-    assert simulation.run_control_file == expected_run_control_path
+    assert simulation.run_control_file_path == expected_run_control_path
     assert simulation.use_american_date_format == expected_use_american_date_format
 
 
@@ -562,10 +562,9 @@ def test_load_structured_grid_file_basic_properties(mocker, structured_grid_file
                                                     expected_range_y, expected_range_z):
     """Read in Structured Grid File"""
     # Arrange
-    fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID \"test_structured_grid.dat\""
+    fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
 
-    structured_grid_mock = mocker.mock_open(
-        read_data=structured_grid_file_contents)
+    structured_grid_mock = mocker.mock_open(read_data=structured_grid_file_contents)
 
     def mock_open_wrapper(filename, operation=None):
         mock_open = mock_multiple_opens(mocker, filename, fcs_file, "", "",
@@ -1716,7 +1715,7 @@ def test_get_wells(mocker: MockerFixture, fcs_file_contents: str):
 def test_get_wells_df(mocker: MockerFixture):
     # Arrange
     fcs_file_contents = """
-       WELLS my/wellspec/file.dat
+       WelLS sEt 1 my/wellspec/file.dat
     """
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
     mocker.patch("builtins.open", fcs_file_open)

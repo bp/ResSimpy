@@ -382,7 +382,7 @@ class NexusSimulator(Simulator):
         """
         # self.get_simulation_status(True)
 
-        self.fcs_file = FcsNexusFile.generate_fcs_structure(self.__new_fcs_file_path, )
+        self.fcs_file = FcsNexusFile.generate_fcs_structure(self.__new_fcs_file_path, origin_folder=self.__origin)
         fcs_file_content = self.fcs_file.get_flat_list_str_file()
         if fcs_file_content is None:
             raise ValueError(f'FCS file not found, no content for {self.__new_fcs_file_path}')
@@ -1025,20 +1025,15 @@ class NexusSimulator(Simulator):
         structured_grid_operations.replace_value(file, original_structured_grid_file.netgrs,
                                                  self.__structured_grid_file.netgrs, 'NETGRS')
         structured_grid_operations.replace_value(file, original_structured_grid_file.porosity,
-                                                 self.__structured_grid_file.porosity,
-                                                 'POROSITY')
+                                                 self.__structured_grid_file.porosity, 'POROSITY')
         structured_grid_operations.replace_value(file, original_structured_grid_file.sw,
-                                                 self.__structured_grid_file.sw,
-                                                 'SW')
+                                                 self.__structured_grid_file.sw, 'SW')
         structured_grid_operations.replace_value(file, original_structured_grid_file.kx,
-                                                 self.__structured_grid_file.kx,
-                                                 'KX')
+                                                 self.__structured_grid_file.kx, 'KX')
         structured_grid_operations.replace_value(file, original_structured_grid_file.ky,
-                                                 self.__structured_grid_file.ky,
-                                                 'KY')
+                                                 self.__structured_grid_file.ky, 'KY')
         structured_grid_operations.replace_value(file, original_structured_grid_file.kz,
-                                                 self.__structured_grid_file.kz,
-                                                 'KZ')
+                                                 self.__structured_grid_file.kz, 'KZ')
 
         # Save the new file contents
         new_file_str = "".join(file)
