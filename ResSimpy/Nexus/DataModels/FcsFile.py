@@ -107,7 +107,23 @@ class FcsNexusFile(NexusFile):
                          file_content_as_list=file_content_as_list)
 
     @classmethod
-    def generate_fcs_structure(cls, fcs_file_path: str, recursive: bool = True, origin_folder=None) -> FcsNexusFile:
+    def generate_fcs_structure(cls, fcs_file_path: str, recursive: bool = True, origin_folder: Optional[str] = None) \
+            -> FcsNexusFile:
+        """Creates an instance of the FcsNexusFile, populates it through looking through the different keywords \
+            in the FCS and assigning the paths to objects.
+
+        Args:
+            fcs_file_path (str): path to the fcs file of interest
+            recursive (bool, optional): Whether the NexusFile structure will be recursively created. Defaults to True.
+            origin_folder (Optional[str], optional): origin folder of the fcs_file. Defaults to None.
+
+        Raises:
+            FileNotFoundError: if the fcs file cannot be found
+            ValueError: if no content can be found within the fcsfile
+
+        Returns:
+            FcsNexusFile: instance of a FcsNexusFile for a given fcs file path
+        """
         fcs_file = cls(location=fcs_file_path)
         fcs_file.includes_objects = get_empty_list_nexus_file()
         fcs_file.file_content_as_list = get_empty_list_str_nexus_file()
@@ -175,6 +191,7 @@ class FcsNexusFile(NexusFile):
                     nexus_file = NexusFile.generate_file_include_structure(
                         sub_file_path, origin=fcs_file_path, recursive=recursive)
                     fcs_property = getattr(fcs_file, fcs_keyword_map_multi[key])
+                    # manually initialise if the property is still a field type after class instantiation
                     if isinstance(fcs_property, Field):
                         fcs_property = get_empty_dict_int_nexus_file()
                     # shallow copy to maintain list elements pointing to nexus_file that are
