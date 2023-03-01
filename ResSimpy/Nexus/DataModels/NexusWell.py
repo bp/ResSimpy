@@ -55,7 +55,7 @@ class NexusWell(Well):
 
     @property
     def last_shutin(self) -> Optional[NexusCompletion]:
-        """Returns the first perforation for the well"""
+        """Returns the last shut-in for the well in the Wellspec file"""
         if len(self.shutins) == 0:
             return None
 

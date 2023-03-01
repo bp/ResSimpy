@@ -7,7 +7,7 @@ from ResSimpy.Wells import Wells
 
 class Simulator(ABC):
 
-    def __init__(self, start_date='') -> None:
+    def __init__(self, start_date: str = '') -> None:
         self.__start_date: str = start_date
         self.__Wells: Wells = Wells()
 
