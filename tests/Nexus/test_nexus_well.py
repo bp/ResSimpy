@@ -1,8 +1,8 @@
 import pytest
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
-from ResSimpy.Nexus.DataModels.NexusWell import NexusWell, CompletionEvent
-from ResSimpy.UnitsEnum import Units
+from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 
 
 @pytest.mark.parametrize('completions, expected_perforations', [
@@ -50,7 +50,7 @@ from ResSimpy.UnitsEnum import Units
 def test_get_perforations(completions, expected_perforations):
     # Arrange
     well = NexusWell(well_name='test well', completions=completions,
-                     units=Units.OILFIELD)
+                     units=UnitSystem.ENGLISH)
 
     # Act
     result = well.perforations
@@ -94,7 +94,7 @@ def test_get_perforations(completions, expected_perforations):
 def test_get_first_perforation(completions, expected_perforation):
     # Arrange
     well = NexusWell(well_name='test well', completions=completions,
-                     units=Units.OILFIELD)
+                     units=UnitSystem.ENGLISH)
 
     # Act
     result = well.first_perforation
@@ -153,7 +153,7 @@ def test_get_first_perforation(completions, expected_perforation):
 def test_get_shutins(completions, expected_shutins):
     # Arrange
     well = NexusWell(well_name='test well', completions=completions,
-                     units=Units.OILFIELD)
+                     units=UnitSystem.ENGLISH)
 
     # Act
     result = well.shutins
@@ -206,7 +206,7 @@ def test_get_shutins(completions, expected_shutins):
 def test_get_last_shutin(completions, expected_shutin):
     # Arrange
     well = NexusWell(well_name='test well', completions=completions,
-                     units=Units.OILFIELD)
+                     units=UnitSystem.ENGLISH)
 
     # Act
     result = well.last_shutin
@@ -224,7 +224,7 @@ def test_printable_well_info():
     completion_3 = NexusCompletion(i=1, j=2, k=3, date='01/02/2025', partial_perf=0)
     completions = [completion_1, completion_2, completion_3]
 
-    well = NexusWell(well_name='test well', completions=completions, units=Units.OILFIELD)
+    well = NexusWell(well_name='test well', completions=completions, units=UnitSystem.LAB)
 
     expected_info = \
         """
@@ -245,7 +245,7 @@ def test_printable_well_info_missing_info():
     # Arrange
     completions = []
 
-    well = NexusWell(well_name='test well', completions=completions, units=Units.OILFIELD)
+    well = NexusWell(well_name='test well', completions=completions, units=UnitSystem.METRIC)
 
     expected_info = \
     """
@@ -294,7 +294,7 @@ def test_printable_well_info_missing_info():
 def test_get_completion_events(completions, expected_shutin):
     # Arrange
     well = NexusWell(well_name='test well', completions=completions,
-                     units=Units.OILFIELD)
+                     units=UnitSystem.METKGCM2)
 
     # Act
     result = well.completion_events

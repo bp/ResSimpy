@@ -1,15 +1,10 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Tuple, Sequence
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Well import Well
 
-@dataclass
-class CompletionEvent:
-    """Class representing an 'event' for a completion, i.e. whether a k layer has been switched on or off"""
-    date: str
-    k_perforated_values: list[tuple[int, bool]]
 
 @dataclass
 class NexusWell(Well):
@@ -20,7 +15,7 @@ class NexusWell(Well):
         super().__init__(well_name=well_name, completions=completions, units=units)
 
     @property
-    def perforations(self) -> list[NexusCompletion]:
+    def perforations(self) -> Sequence[NexusCompletion]:
         """Returns a list of all of the perforations for the well"""
 
         def completion_is_perforation(completion: NexusCompletion):
@@ -52,7 +47,7 @@ class NexusWell(Well):
         return completion.partial_perf == 0 or completion.well_indices == 0 or completion.status == 'OFF'
 
     @property
-    def shutins(self) -> list[NexusCompletion]:
+    def shutins(self) -> Sequence[NexusCompletion]:
         """Returns a list of all of the shut-ins for the well"""
 
         shutins = filter(self.completion_is_shutin, self.__completions)
@@ -82,7 +77,7 @@ class NexusWell(Well):
         """Returns some printable well information in string format"""
         printable_dates_of_completions = ", ".join(self.dates_of_completions)
         well_info = \
-    f"""
+            f"""
     Well Name: {self.well_name}
     First Perforation: {'N/A' if self.first_perforation is None else self.first_perforation.date}
     Last Shut-in: {'N/A' if self.last_shutin is None else self.last_shutin.date}
@@ -92,18 +87,13 @@ class NexusWell(Well):
         return well_info
 
     @property
-    def completion_events(self) -> list[(str, int)]:
+    def completion_events(self) -> list[Tuple[str, int]]:
         """Returns a list of dates and a boolean representing whether the well was switched on or off on that date"""
         events = []
 
-        unsorted_events = []
-
         for completion in self.__completions:
-            is_perforation = not(self.completion_is_shutin(completion))
+            is_perforation = not (self.completion_is_shutin(completion))
             if is_perforation:
                 events.append((completion.date, completion.k))
 
         return events
-
-
-

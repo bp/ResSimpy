@@ -1,4 +1,6 @@
 from dataclasses import dataclass, field
+from typing import Sequence
+
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -11,7 +13,7 @@ class NexusWells(Wells):
     __wells: list[NexusWell] = field(default_factory=lambda: [])
     wellspec_paths: list[str] = field(default_factory=lambda: [])
 
-    def get_wells(self) -> list[NexusWell]:
+    def get_wells(self) -> Sequence[NexusWell]:
         return self.__wells
 
     def get_wells_df(self) -> pd.DataFrame:

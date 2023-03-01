@@ -2,13 +2,13 @@ from dataclasses import dataclass
 from abc import ABC
 
 import pandas as pd
-
-from ResSimpy import Well
+from ResSimpy.Well import Well
+from typing import Sequence
 
 
 @dataclass(kw_only=True)
 class Wells(ABC):
-    def get_wells(self) -> list[Well]:
+    def get_wells(self) -> Sequence[Well]:
         raise NotImplementedError("Implement this in the derived class")
 
     def get_wells_df(self) -> pd.DataFrame:
