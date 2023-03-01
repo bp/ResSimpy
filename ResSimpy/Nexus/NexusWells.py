@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
-from ResSimpy.UnitsEnum import Units
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Wells import Wells
 from ResSimpy.Nexus.load_wells import load_wells
 
@@ -27,6 +27,6 @@ class NexusWells(Wells):
         df_store = df_store.dropna(axis=1, how='all')
         return df_store
 
-    def load_wells(self, well_file: str, start_date: str, default_units: Units):
+    def load_wells(self, well_file: str, start_date: str, default_units: UnitSystem):
         new_wells = load_wells(wellspec_file_path=well_file, start_date=start_date, default_units=default_units)
         self.__wells += new_wells

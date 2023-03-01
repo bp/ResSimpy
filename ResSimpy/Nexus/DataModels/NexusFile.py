@@ -58,7 +58,7 @@ class NexusFile:
                                    includes=None,
                                    origin=origin,
                                    includes_objects=None,
-                                   file_content_as_list=None,)
+                                   file_content_as_list=None, )
             warnings.warn(UserWarning(f'No file found for: {file_path}'))
             return nexus_file_class
 
@@ -162,7 +162,7 @@ class NexusFile:
         for row in file_content_as_list:
             if isinstance(row, NexusFile):
                 if (max_depth is None or depth > 0) and row.file_content_as_list is not None:
-                    level_down_max_depth = None if max_depth is None else depth-1
+                    level_down_max_depth = None if max_depth is None else depth - 1
                     yield from NexusFile.iterate_line(row.file_content_as_list, max_depth=level_down_max_depth)
                 else:
                     continue
