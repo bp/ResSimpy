@@ -2,8 +2,8 @@ FCS_KEYWORDS = ['RESERVOIR', 'EQUIL', 'EOS_DEFAULTS', 'TRACER_INIT', 'STRUCTURED
                 'ADSORPTION', 'PVT', 'SEPARATOR', 'ALPHAF', 'POLYMER', 'WATER', 'AQUIFER', 'FLUXIN', 'RUNCONTROL',
                 'WELLS', 'SURFACE', 'IPR', 'GASLIFT', 'VALVE', 'HYD', 'PUMP', 'COMPRESSOR', 'CHOKE', 'ICD', 'ESP']
 
-# Not a complete list.
-# Need to delete the keywords that are not tokens (i.e. that are only values in a table)
+# TODO: Not a complete list. Check manual for missing keywords.
+# TODO: Delete the keywords that are not tokens (i.e. that are only values in a table)
 
 FCS_ALL_KEYWORDS = ['ADSORPTION', 'ALPHA', 'ALPHAF', 'AQUIFER', 'AQUIFER_FILES', 'CASE', 'CHOKE', 'COMPRESSOR',
                     'DATEFORMAT', 'DD/MM/YYYY', 'DEFAULT_SUNITS', 'DEFAULT_UNITS', 'DESC', 'ENGLISH', 'EOS_DEFAULTS',

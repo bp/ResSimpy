@@ -1,5 +1,5 @@
-# Not a complete list.
-# Need to delete the keywords that are not tokens (i.e. that are only values in a table)
+# TODO: Not a complete list. Check manual for missing keywords.
+# TODO: Delete the keywords that are not tokens (i.e. that are only values in a table)
 
 RUNCONTROL_KEYWORDS = ['2PHASE', 'ADJUSTTOTIME', 'ALL', 'ALLOW', 'AQFLUX', 'ARRAYS', 'AUTO', 'AVGSG', 'AVGSO', 'AVGSW',
                        'BG', 'BHP', 'BOF', 'CGFLUX', 'CGI', 'CGLG', 'CGP', 'CLP', 'COFLUX', 'COMP', 'CONCENTRATION',

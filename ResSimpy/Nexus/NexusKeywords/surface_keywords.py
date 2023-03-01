@@ -1,5 +1,5 @@
-# Not a complete list.
-# Need to delete the keywords that are not tokens (i.e. that are only values in a table)
+# TODO: Not a complete list. Check manual for missing keywords.
+# TODO: Delete the keywords that are not tokens (i.e. that are only values in a table)
 
 SURFACE_KEYWORDS = ['A', 'ACPGCR', 'ACTIONS', 'ACTIVATE', 'ACTIVE', 'ADD', 'ADDVALUE', 'ALL', 'ALL1D', 'ALLOW_BHMOVE',
                     'ANGLE', 'API', 'ARRAYBOUNDS', 'AVG', 'B', 'BACKFLOW', 'BEGGS', 'BHCON', 'BHDEPTH', 'BHP',
