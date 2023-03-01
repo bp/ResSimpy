@@ -8,7 +8,7 @@ from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from pytest_mock import MockerFixture
 from unittest.mock import Mock
 
-from ResSimpy.UnitsEnum import Units
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from tests.multifile_mocker import mock_multiple_files
 
 
@@ -87,7 +87,7 @@ def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expec
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
 
     # Assert
-    assert simulation.run_control_file == expected_full_path
+    assert simulation.run_control_file_path == expected_full_path
     assert simulation.use_american_date_format == expected_use_american_date_format
     open_mock.assert_called_with(expected_full_path, 'r')
 
@@ -110,7 +110,7 @@ def test_load_fcs_space_in_filename(mocker, run_control_path, expected_root, exp
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
 
     # Assert
-    assert simulation.run_control_file == expected_full_path
+    assert simulation.run_control_file_path == expected_full_path
     assert simulation.use_american_date_format == expected_use_american_date_format
     open_mock.assert_called_with(expected_full_path, 'r')
 
@@ -126,8 +126,8 @@ def test_load_fcs_file_comment_after_declaration(mocker):
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
 
     # Assert
-    assert simulation.run_control_file == expected_file_path
-    assert simulation.use_american_date_format == False
+    assert simulation.run_control_file_path == expected_file_path
+    assert simulation.use_american_date_format is False
     open_mock.assert_called_with(expected_file_path, 'r')
 
 
@@ -153,7 +153,7 @@ def test_output_destination_missing(mocker, run_control_path, expected_run_contr
         simulation.set_output_path(None)
 
     # Assert
-    assert simulation.run_control_file == expected_run_control_path
+    assert simulation.run_control_file_path == expected_run_control_path
     assert simulation.use_american_date_format == expected_use_american_date_format
 
 
@@ -549,9 +549,9 @@ def test_get_status_running_from_log(mocker, log_file_contents, job_id):
                          "expected_range_y, expected_range_z",
                          [
                              ("! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
-                              "\nother text\n\n,NETGRS VALUE\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\n POROSITY "
+                              "\nother text\n\n,NETGRS VALUE\n INCLUDE /path_to_netgrs_file/include_net_to_gross.inc\n POROSITY "
                               "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc",
-                              "/path_to_netgrs_file/net_to_gross.inc", "path/to/porosity.inc", 1, 2, 3),
+                              "/path_to_netgrs_file/include_net_to_gross.inc", "path/to/porosity.inc", 1, 2, 3),
                              ("! Grid dimensions\nNX NY NZ\n111 123 321\ntest string\nPOROSITY VALUE\n!random text\n"
                               "porosity_file.inc\nNETGRS VALUE\n!Comment Line 1\n\n!Comment Line 2\nINCLUDE   "
                               "/path/to/netgrs_file\nother text\n\n",
@@ -562,14 +562,16 @@ def test_load_structured_grid_file_basic_properties(mocker, structured_grid_file
                                                     expected_range_y, expected_range_z):
     """Read in Structured Grid File"""
     # Arrange
-    fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID \"test_structured_grid.dat\""
-
-    structured_grid_mock = mocker.mock_open(
-        read_data=structured_grid_file_contents)
-
-    def mock_open_wrapper(filename, operation=None):
-        mock_open = mock_multiple_opens(mocker, filename, fcs_file, "", "",
-                                        structured_grid_mock=structured_grid_mock).return_value
+    fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('new_destination', 'test_structured_grid.dat')
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'testpath1/nexus_run.fcs': fcs_file,
+                                         '/run_control/path': '',
+                                         structured_grid_name: structured_grid_file_contents,
+                                         '/path_to_netgrs_file/include_net_to_gross.inc': '',
+                                         'path/to/porosity.inc': '',
+                                         }).return_value
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
@@ -619,15 +621,16 @@ def test_load_structured_grid_file_dict_basic_properties(mocker, structured_grid
     """Read in Structured Grid File and return a dict object"""
     # Arrange
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID \"test_structured_grid.dat\""
-
-    structured_grid_mock = mocker.mock_open(
-        read_data=structured_grid_file_contents)
-
-    def mock_open_wrapper(filename, operation=None):
-        mock_open = mock_multiple_opens(mocker, filename, fcs_file, "", "",
-                                        structured_grid_mock=structured_grid_mock).return_value
+    structured_grid_name = os.path.join('new_destination', '\"test_structured_grid.dat\"')
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'testpath1/nexus_run.fcs': fcs_file,
+                                         '/run_control/path': '',
+                                         structured_grid_name: structured_grid_file_contents,
+                                         '/path_to_netgrs_file/include_net_to_gross.inc': '',
+                                         'path/to/porosity.inc': '',
+                                         }).return_value
         return mock_open
-
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
@@ -687,14 +690,16 @@ def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
                                 "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc"
 
     structured_grid_file = base_structured_grid_file + structured_grid_file_contents
-
-    structured_grid_mock = mocker.mock_open(read_data=structured_grid_file)
-
-    def mock_open_wrapper(filename, operation=None):
-        mock_open = mock_multiple_opens(mocker, filename, fcs_file, "", "",
-                                        structured_grid_mock=structured_grid_mock).return_value
+    structured_grid_name = os.path.join('new_destination', '\"test_structured_grid.dat\"')
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'testpath1/nexus_run.fcs': fcs_file,
+                                         '/run_control/path': '',
+                                         structured_grid_name: structured_grid_file,
+                                         '/path_to_netgrs_file/include_net_to_gross.inc': '',
+                                         'path/to/porosity.inc': '',
+                                         }).return_value
         return mock_open
-
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
@@ -745,14 +750,17 @@ def test_load_structured_grid_file_k_values(mocker, structured_grid_file_content
                                 "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc"
 
     structured_grid_file = base_structured_grid_file + structured_grid_file_contents
-
-    structured_grid_mock = mocker.mock_open(read_data=structured_grid_file)
-
-    def mock_open_wrapper(filename, operation=None):
-        mock_open = mock_multiple_opens(mocker, filename, fcs_file, "", "",
-                                        structured_grid_mock=structured_grid_mock).return_value
+    structured_grid_name = os.path.join('new_destination', '\"test_structured_grid.dat\"')
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'testpath1/nexus_run.fcs': fcs_file,
+                                         '/run_control/path': '',
+                                         structured_grid_name: structured_grid_file,
+                                         '/path_to_netgrs_file/include_net_to_gross.inc': '',
+                                         'path/to/porosity.inc': '',
+                                         "/path/to/kz.inc": '',
+                                         }).return_value
         return mock_open
-
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
@@ -821,10 +829,16 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
                            f"{' INCLUDE' if new_sw.modifier == 'VALUE' else ''} {new_sw.value}"
 
     structured_grid_mock = mocker.mock_open(read_data=structured_grid_file)
-
-    def mock_open_wrapper(filename, operation=None):
-        mock_open = mock_multiple_opens(mocker, filename, fcs_file, "", "",
-                                        structured_grid_mock=structured_grid_mock).return_value
+    structured_grid_name = os.path.join('new_destination', 'test_structured_grid.dat')
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'testpath1/nexus_run.fcs': fcs_file,
+                                         '/run_control/path': '',
+                                         structured_grid_name: structured_grid_file,
+                                         '/path_to_netgrs_file/include_net_to_gross.inc': '',
+                                         'path/to/porosity.inc': '',
+                                         "/path/to/kz.inc": '',
+                                         }).return_value
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
@@ -840,8 +854,7 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
     # Assert
 
     # Check the newly written file is as expected
-    structured_grid_mock.assert_called_with(os.path.join(
-        'new_destination', 'test_structured_grid.dat'), 'w')
+    structured_grid_mock.assert_called_with(structured_grid_name, 'w')
     structured_grid_mock.return_value.write.assert_called_with(
         expected_output_file)
 
@@ -1049,13 +1062,18 @@ def test_view_command(mocker, structured_grid_file_contents, expected_text):
     """Test the View Command functionality"""
     # Arrange
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID \"test_structured_grid.dat\""
-
-    structured_grid_mock = mocker.mock_open(
-        read_data=structured_grid_file_contents)
-
-    def mock_open_wrapper(filename, operation=None):
-        mock_open = mock_multiple_opens(mocker, filename, fcs_file, "", "",
-                                        structured_grid_mock=structured_grid_mock).return_value
+    structured_grid_name = os.path.join('new_destination', 'test_structured_grid.dat')
+    structured_grid_name_quotes = os.path.join('new_destination', '\"test_structured_grid.dat\"')
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'testpath1/nexus_run.fcs': fcs_file,
+                                         '/run_control/path': '',
+                                         structured_grid_name: structured_grid_file_contents,
+                                         structured_grid_name_quotes: structured_grid_file_contents,
+                                         '/path_to_netgrs_file/include_net_to_gross.inc': '',
+                                         'path/to/porosity.inc': '',
+                                         "/path/to/kz.inc": '',
+                                         }).return_value
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
@@ -1063,8 +1081,6 @@ def test_view_command(mocker, structured_grid_file_contents, expected_text):
     # Act
     result = NexusSimulator(
         origin='testpath1/nexus_run.fcs', destination="new_destination")
-
-    mocker.patch("builtins.open", structured_grid_mock)
 
     # Assert
     value = result.view_command(field='netgrs')
@@ -1105,17 +1121,17 @@ def test_get_abs_structured_grid_path(mocker, fcs_file, expected_root, expected_
 
 @pytest.mark.parametrize("fcs_file, expected_default_unit_value",
                          [('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           Units.OILFIELD),
-                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS LAB\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           Units.LAB),
-                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS METRIC_BARS\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           Units.METRIC_BARS),
+                           UnitSystem.ENGLISH),
+                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS \n LAB\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                           UnitSystem.LAB),
+                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS METKG/CM2\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                           UnitSystem.METKGCM2),
+                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_units    METRIC\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                           UnitSystem.METRIC),
                           ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           Units.OILFIELD),
-                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS Metric_Bars\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           Units.METRIC_BARS),
-                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDeFault_UNITS METRIC_BARS\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           Units.METRIC_BARS)
+                           UnitSystem.ENGLISH),
+                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\ndefault_Units Metbar\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                           UnitSystem.METBAR),
                           ])
 def test_load_fcs_file_populates_default_units(mocker, fcs_file, expected_default_unit_value):
     # Arrange
@@ -1132,7 +1148,7 @@ def test_load_fcs_file_populates_default_units(mocker, fcs_file, expected_defaul
 
 @pytest.mark.parametrize("fcs_file",
                          ['DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS NOTVALID\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                          'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS \nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
+                         'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS \nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
                           ])
 def test_load_fcs_file_raises_error_for_undefined_default_units(mocker, fcs_file):
     # Arrange
@@ -1140,19 +1156,21 @@ def test_load_fcs_file_raises_error_for_undefined_default_units(mocker, fcs_file
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         NexusSimulator(origin='testpath1/Path.fcs')
 
 
 @pytest.mark.parametrize("fcs_file, expected_run_unit_value",
                          [('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           Units.OILFIELD),
-                          ('DESC Test model\n\nRUN_UNITS LAB\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           Units.LAB),
-                          ('DESC Test model\n\nRUN_UNITS METRIC_BARS\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                             Units.METRIC_BARS),
+                           UnitSystem.ENGLISH),
+                          ('DESC Test model\n\nRUN_UNITS  \n lab  \n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                           UnitSystem.LAB),
+                          ('DESC Test model\n\nRun_UNITS MetBar\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                           UnitSystem.METBAR),
+                          ('DESC Test model\n\nRun_UNITS METKG/CM2\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                           UnitSystem.METKGCM2),
                           ('DESC Test model\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                             Units.OILFIELD)
+                           UnitSystem.ENGLISH)
                           ])
 def test_load_fcs_file_populates_run_units(mocker, fcs_file, expected_run_unit_value):
     # Arrange
@@ -1169,7 +1187,8 @@ def test_load_fcs_file_populates_run_units(mocker, fcs_file, expected_run_unit_v
 
 @pytest.mark.parametrize("fcs_file",
                          ['DESC Test model\n\nRUN_UNITS BLAH\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                          'DESC Test model\n\nRUN_UNITS \nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
+                          'DESC Test model\n\nRUN_UNITs \nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
+                          'DESC Test model\n\nRUN_UNITs 1\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
                           ])
 def test_load_fcs_file_raises_error_for_undefined_run_units(mocker, fcs_file):
     # Arrange
@@ -1177,7 +1196,7 @@ def test_load_fcs_file_raises_error_for_undefined_run_units(mocker, fcs_file):
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         NexusSimulator(origin='testpath1/Path.fcs')
 
 
@@ -1680,12 +1699,9 @@ PLOTBINARY
 
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
-       WELLS my/wellspec/file.dat
-    """),
-    ("""
        WelLS sEt 1 my/wellspec/file.dat
     """)
-], ids=['path_after_wells', 'path_after_set'])
+], ids=['path_after_set'])
 def test_get_wells(mocker: MockerFixture, fcs_file_contents: str):
     """Testing the functionality to load in and retrieve a set of wells"""
     # Arrange
@@ -1697,7 +1713,7 @@ def test_get_wells(mocker: MockerFixture, fcs_file_contents: str):
     loaded_completion_2 = NexusCompletion(
         i=6, j=7, k=8, well_radius=9.11, date='01/01/2023')
     loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
-                              units=Units.OILFIELD)]
+                              units=UnitSystem.ENGLISH)]
 
     # mock out the load_wells function as that is tested elsewhere
     mock_load_wells = mocker.Mock(return_value=loaded_wells)
@@ -1712,14 +1728,14 @@ def test_get_wells(mocker: MockerFixture, fcs_file_contents: str):
     # Assert
     assert result == loaded_wells
     mock_load_wells.assert_called_once_with(wellspec_file_path=expected_well_spec_file_path,
-                                            default_units=Units.OILFIELD,
+                                            default_units=UnitSystem.ENGLISH,
                                             start_date='')
 
 
 def test_get_wells_df(mocker: MockerFixture):
     # Arrange
     fcs_file_contents = """
-       WELLS my/wellspec/file.dat
+       WelLS sEt 1 my/wellspec/file.dat
     """
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
     mocker.patch("builtins.open", fcs_file_open)
@@ -1729,10 +1745,10 @@ def test_get_wells_df(mocker: MockerFixture):
     loaded_completion_2 = NexusCompletion(
         i=6, j=7, k=8, well_radius=9.11, date='01/01/2023')
     loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
-                              units=Units.OILFIELD)]
+                              units=UnitSystem.ENGLISH)]
     # create the expected dataframe
-    loaded_wells_txt = ['WELL1, OILFIELD, 4.5, 01/01/2023, 1, 2, 3',
-                        'WELL1, OILFIELD, 9.11, 01/01/2023, 6, 7, 8', ]
+    loaded_wells_txt = ['WELL1, ENGLISH, 4.5, 01/01/2023, 1, 2, 3',
+                        'WELL1, ENGLISH, 9.11, 01/01/2023, 6, 7, 8', ]
     loaded_wells_txt = [x.split(', ') for x in loaded_wells_txt]
     loaded_wells_df = pd.DataFrame(loaded_wells_txt,
                                    columns=['well_name', 'units', 'well_radius', 'date', 'i', 'j', 'k', ])

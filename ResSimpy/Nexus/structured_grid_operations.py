@@ -1,4 +1,3 @@
-
 # TODO: Rename
 from typing import Optional
 from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry

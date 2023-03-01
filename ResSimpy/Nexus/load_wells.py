@@ -5,15 +5,15 @@ from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
 
-from ResSimpy.UnitsEnum import Units
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 
 
-def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -> list[NexusWell]:
+def load_wells(wellspec_file_path: str, start_date: str, default_units: UnitSystem) -> list[NexusWell]:
     """Loads a list of Nexus Well instances and populates it with the wells completions over time from a wells file
     Args:
         wellspec_file_path (str): file path to the wellspec file to read.
         start_date (str): starting date of the wellspec file as a string.
-        default_units (Units): default units to use if no units are found.
+        default_units (UnitSystem): default units to use if no units are found.
     Raises:
         ValueError: If no value is found after a TIME card.
         ValueError: If no well name is found after a WELLSPEC keyword.
@@ -25,7 +25,7 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
 
     file_as_list = nfo.load_file_as_list(wellspec_file_path)
     well_name: Optional[str] = None
-    wellspec_file_units: Optional[Units] = None
+    wellspec_file_units: Optional[UnitSystem] = None
     completions: list[NexusCompletion] = []
     headers: list[str] = []
 
@@ -95,8 +95,6 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
     krg_sgrw: Optional[str] = None
     sgtr: Optional[str] = None
     sotr: Optional[str] = None
-    units_values: dict[str, Units] = {'ENGLISH': Units.OILFIELD, 'METRIC': Units.METRIC_KPA,
-                                      'METKG/CM2': Units.METRIC_KGCM2, 'METBAR': Units.METRIC_BARS, 'LAB': Units.LAB}
     header_values: dict[str, None | int | float | str] = {
         'IW': iw, 'JW': jw, 'L': kw, 'MD': md, 'SKIN': skin, 'DEPTH': depth, 'X': x_value, 'Y': y_value,
         'ANGLA': angla, 'ANGLV': anglv, 'GRID': grid, 'WI': wi, 'DTOP': dtop, 'DBOT': dbot, 'RADW': well_radius,
@@ -127,9 +125,9 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: Units) -
 
         # If we haven't got the units yet, check to see if this line contains a declaration for them.
         if wellspec_file_units is None:
-            for key in units_values.keys():
-                if key in uppercase_line and (line.find('!') > line.find(key) or line.find('!') == -1):
-                    wellspec_file_units = units_values[key]
+            for unit in UnitSystem:
+                if unit.value in uppercase_line and (line.find('!') > line.find(unit.value) or line.find('!') == -1):
+                    wellspec_file_units = unit
 
         if nfo.check_token('TIME', line):
             current_date = nfo.get_token_value(token='TIME', token_line=line, file_list=file_as_list)
@@ -194,13 +192,13 @@ def __load_wellspec_table_completions(file_as_list: list[str], header_index: int
         list[NexusCompletion]: list of nexus completions for a given table.
     """
 
-    def convert_header_value_float(key: str, header_values=header_values) -> Optional[float]:
+    def convert_header_value_float(key: str) -> Optional[float]:
         value = header_values[key]
         if value == 'NA':
             value = None
         return None if value is None else float(value)
 
-    def convert_header_value_int(key, header_values=header_values) -> Optional[int]:
+    def convert_header_value_int(key: str) -> Optional[int]:
         value = header_values[key]
         if value == 'NA':
             value = None
@@ -315,14 +313,13 @@ def __load_wellspec_table_headings(header_index: int, header_values: dict[str, N
             header_line = line.upper()
             header_index = index
             # Map the headers
-            next_column_heading = nfo.get_next_value(start_line_index=0, file_as_list=[line],
-                                                     search_string=line)
+            next_column_heading = nfo.get_next_value(start_line_index=0, file_as_list=[line])
             trimmed_line = header_line
 
             while next_column_heading is not None:
                 headers.append(next_column_heading)
                 trimmed_line = trimmed_line.replace(next_column_heading, "", 1)
-                next_column_heading = nfo.get_next_value(index, [trimmed_line], trimmed_line)
+                next_column_heading = nfo.get_next_value(0, [trimmed_line], trimmed_line)
 
             if len(headers) > 0:
                 break

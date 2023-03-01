@@ -417,3 +417,59 @@ def test_get_expected_token_value_value_present():
 
     # Assert
     assert value == 4.0
+
+
+@pytest.mark.parametrize("line, number_tokens, expected_result", [
+  ('EQUIL METHOD 1 /path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
+  ('EQUIL METHOD 1 /path/equil.dat ! comment', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
+  ('EQUIL METHOD 1 /path/equil.dat TOKEN TOKEN', 6, ['EQUIL', 'METHOD', '1', '/path/equil.dat','TOKEN', 'TOKEN']),
+  ('EQUIL METHOD 1 \n /path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
+  ('EQUIL METHOD !comment\n \t 1 ', 3, ['EQUIL', 'METHOD', '1']),
+  ('EQUIL\n METHOD\n1\n/path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat'])
+  ], ids=["basic", "more tokens", "get more tokens", "new line", "newline comment", "lots of newlines"])
+def test_get_multiple_sequential_tokens(line, number_tokens, expected_result):
+    # Arrange
+    list_of_strings = line.splitlines()
+    # Act
+    result = nfo.get_multiple_sequential_tokens(list_of_strings, number_tokens)
+    # Assert
+    assert result == expected_result
+
+
+def test_get_multiple_sequential_tokens_fail_case():
+    # Arrange
+    line = 'EQUIL METHOD'
+    number_tokens = 3
+    # Act + Assert
+    with pytest.raises(ValueError):
+        value = nfo.get_multiple_sequential_tokens([line], number_tokens)
+
+
+@pytest.mark.parametrize("line, expected_result",[
+    ('\t 1', '1'),
+    ('\t 1 ', '1'),
+    (' ', None),
+    ("   IW   ", 'IW'),
+    ("\t ", None),
+    ("   \t   ", None),
+    ("", None),
+    ("\t   a", 'a'),
+    ("a", 'a')
+])
+def test_get_next_value_single_line(line, expected_result):
+    # Act
+    result = nfo.get_next_value(0, [line])
+    # Assert
+    assert result == expected_result
+
+
+@pytest.mark.parametrize("file, expected_result",[
+    (['\t ', '1'], '1'),
+    (['\t ', '\n', '\n', '\n', '\n', '1'], '1'),
+    (['!Comment Line 1','\n', '\n', '\t', ' !Comment Line 2 ', '\n', ' ABCDEFG '], 'ABCDEFG')
+])
+def test_get_next_value_multiple_lines(file, expected_result):
+    # Act
+    result = nfo.get_next_value(0, file)
+    # Assert
+    assert result == expected_result

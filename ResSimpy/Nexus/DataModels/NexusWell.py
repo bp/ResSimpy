@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
-from ResSimpy.UnitsEnum import Units
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Well import Well
 
 @dataclass
@@ -15,7 +15,7 @@ class CompletionEvent:
 class NexusWell(Well):
     __completions: list[NexusCompletion]
 
-    def __init__(self, well_name: str, completions: list[NexusCompletion], units: Units):
+    def __init__(self, well_name: str, completions: list[NexusCompletion], units: UnitSystem):
         self.__completions = completions
         super().__init__(well_name=well_name, completions=completions, units=units)
 
