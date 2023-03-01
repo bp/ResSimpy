@@ -92,13 +92,16 @@ class NexusWell(Well):
         return well_info
 
     @property
-    def completion_events(self) -> list[CompletionEvent]:
+    def completion_events(self) -> list[(str, int)]:
         """Returns a list of dates and a boolean representing whether the well was switched on or off on that date"""
         events = []
 
+        unsorted_events = []
+
         for completion in self.__completions:
             is_perforation = not(self.completion_is_shutin(completion))
-            events.append((completion.date, is_perforation))
+            if is_perforation:
+                events.append((completion.date, completion.k))
 
         return events
 

@@ -264,11 +264,10 @@ def test_printable_well_info_missing_info():
 
 @pytest.mark.parametrize('completions, expected_shutin', [
     ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
-                      partial_perf=0),
-      NexusCompletion(i=1, j=2, k=3, well_radius=9.11, date='01/02/2024', partial_perf=0.5, status='OFF')],
+                      well_indices=3),
+      NexusCompletion(i=1, j=2, k=3, well_radius=9.11, date='01/02/2024', partial_perf=0.5)],
      # Expected:
-     [CompletionEvent(date='01/01/2023', k_perforated_values=[(3, False)]),
-      CompletionEvent(date='01/01/2024', k_perforated_values=[(3, False)])]),
+     [('01/01/2023', 3), ('01/02/2024', 3)]),
 
     ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
                       partial_perf=0.1),
@@ -282,29 +281,23 @@ def test_printable_well_info_missing_info():
       NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2028', well_indices=3),
       NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/02/2034', partial_perf=0.5)],
      # Expected:
-     [('01/01/2023', True), ('01/02/2024', False)]),
-
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
-                      partial_perf=0.1, status='ON', well_indices=0),
-      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', partial_perf=0.5, well_indices=5, status='OFF')],
-     # Expected:
-     NexusCompletion(i=1, j=2, k=3, date='01/02/2023', partial_perf=0.5, well_indices=5, status='OFF')),
+     [('01/01/2023', 3), ('01/02/2024', 5), ('01/02/2025', 10), ('01/02/2028', 10), ('01/02/2034', 38)]),
 
     ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None),
-      NexusCompletion(i=1, j=2, k=3, date='01/02/2023')],
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1, well_indices=0)],
      # Expected:
-     NexusCompletion(i=1, j=2, k=3, date='01/02/2023')),
+     []),
 
-    ([], None)
+    ([], [])
 
-], ids=['Only shutins', 'mixture of perf and not perf', 'only perforations', 'no perf info', 'empty list'])
+], ids=['Only perforations', 'mixture of perf and not perf', 'no perforations', 'empty list'])
 def test_get_completion_events(completions, expected_shutin):
     # Arrange
     well = NexusWell(well_name='test well', completions=completions,
                      units=Units.OILFIELD)
 
     # Act
-    result = well.last_shutin
+    result = well.completion_events
 
     # Assert
     assert result == expected_shutin
