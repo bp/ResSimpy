@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Sequence
+from typing import Sequence, Optional
 
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
@@ -15,6 +15,12 @@ class NexusWells(Wells):
 
     def get_wells(self) -> Sequence[NexusWell]:
         return self.__wells
+
+    def get_well(self, well_name: str) -> Optional[NexusWell]:
+        """Returns a specific well requested, or None if that well cannot be found"""
+        wells_to_return = filter(lambda x: x.well_name.upper() == well_name.upper(), self.__wells)
+
+        return next(wells_to_return, None)
 
     def get_wells_df(self) -> pd.DataFrame:
         # loop through wells and completions to output a table
