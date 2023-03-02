@@ -1697,6 +1697,7 @@ PLOTBINARY
                                      mocker_fixture=mocker)
 
 
+# TODO: move these methods to a separate WELLS test file
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
        WelLS sEt 1 my/wellspec/file.dat
@@ -1763,3 +1764,40 @@ def test_get_wells_df(mocker: MockerFixture):
     # Assert
 
     pd.testing.assert_frame_equal(result, loaded_wells_df)
+
+@pytest.mark.parametrize("fcs_file_contents", [
+    ("""
+       WelLS set 1 my/wellspec/file.dat
+    """)
+], ids=['basic case'])
+def test_get_well(mocker: MockerFixture, fcs_file_contents: str):
+    """Testing the functionality to load in and retrieve a single wells"""
+    # Arrange
+    fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
+    mocker.patch("builtins.open", fcs_file_open)
+
+    loaded_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid=None, skin=None,
+                                          angle_v=None)
+    loaded_completion_2 = NexusCompletion(
+        i=6, j=7, k=8, well_radius=9.11, date='01/01/2023')
+    loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
+                              units=UnitSystem.ENGLISH),
+                    NexusWell(well_name='WELL2', completions=[loaded_completion_1, loaded_completion_2],
+                              units=UnitSystem.ENGLISH)
+                    ]
+
+    # mock out the load_wells function as that is tested elsewhere
+    mock_load_wells = mocker.Mock(return_value=loaded_wells)
+    mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
+
+    simulation = NexusSimulator(origin='path/nexus_run.fcs')
+
+    # Act
+    result = simulation.Wells.get_well(well_name='WELL2')
+
+    expected_well_spec_file_path = os.path.join('path', 'my/wellspec/file.dat')
+    # Assert
+    assert result == loaded_wells[1]
+    mock_load_wells.assert_called_once_with(wellspec_file_path=expected_well_spec_file_path,
+                                            default_units=UnitSystem.ENGLISH,
+                                            start_date='')
