@@ -7,7 +7,7 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from typing import Optional, Union
 from ResSimpy.Utils.factory_methods import get_empty_dict_int_nexus_file, get_empty_list_str,\
     get_empty_list_nexus_file, get_empty_list_str_nexus_file
-from ResSimpy.Nexus.nexus_constants import FCS_KEYWORDS
+from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
