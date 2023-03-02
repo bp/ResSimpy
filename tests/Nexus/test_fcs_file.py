@@ -268,7 +268,36 @@ def test_get_full_network(mocker):
                                      file_content_as_list=expected_fcs_contents_as_list, includes=[])
     
     from_list, to_list = compiled_fcs_file.get_full_network()
-    expected_from_list = []
-    expected_to_list = []
+    expected_to_list = [
+        'test_fcs.fcs',
+        'nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',
+        'nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',
+        'nexus_data/nexus_data/mp2017hm_ref_equil_02.dat',
+        'nexus_data/nexus_data/mp2017hm_ref_equil_02.dat',
+        'nexus_data/mp2020_structured_grid_1_reg_update.dat',
+        'nexus_data/mp2020_structured_grid_1_reg_update.dat',
+        'nexus_data/nexus_data/mp2020_ref_options_reg_update.dat',
+        'nexus_data/nexus_data/mp2020_ref_options_reg_update.dat',
+        'wells.dat',
+        'wells.dat',
+        'hyd.dat',
+        'hyd.dat',
+        ]
+
+    expected_from_list = [
+        None,
+        'test_fcs.fcs',
+        'test_fcs.fcs',
+        'test_fcs.fcs',
+        'test_fcs.fcs',
+        'test_fcs.fcs',
+        'test_fcs.fcs',
+        'test_fcs.fcs',
+        'test_fcs.fcs',
+        'test_fcs.fcs',
+        'test_fcs.fcs',
+        'test_fcs.fcs',
+        'test_fcs.fcs',
+    ]
     assert to_list == expected_to_list
     assert from_list == expected_from_list
