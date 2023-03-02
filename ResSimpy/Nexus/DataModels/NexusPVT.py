@@ -34,7 +34,7 @@ class NexusPVT():
         # Initialize flags and containers used to record properties as we iterate through pvt file contents
         # Dictionary to record start and ending indices for tables
         pvt_table_indices: dict[str, list[int]] = {}
-        pvt_table_indices_dict:  dict[str, dict[str, list[int]]] = {}
+        pvt_table_indices_dict: dict[str, dict[str, list[int]]] = {}
         start_reading_table: bool = False  # Flag to tell when to start reading a table
         sat_table: bool = False  # Flag indicating SATURATED table is to be read
         oil_table: bool = False  # Flag indicating OIL table is to be read
@@ -103,17 +103,17 @@ class NexusPVT():
                     unsatgas_table = False
             # Figure out beginning line indices
             if nfo.check_token('SATURATED', line):
-                pvt_table_indices['SATURATED'] = [line_indx+1, len(file_as_list)]
+                pvt_table_indices['SATURATED'] = [line_indx + 1, len(file_as_list)]
                 sat_table = True
                 line_indx += 1
                 continue
             if nfo.check_token('OIL', line):
-                pvt_table_indices['OIL'] = [line_indx+1, len(file_as_list)]
+                pvt_table_indices['OIL'] = [line_indx + 1, len(file_as_list)]
                 oil_table = True
                 line_indx += 1
                 continue
             if nfo.check_token('GAS', line):
-                pvt_table_indices['GAS'] = [line_indx+1, len(file_as_list)]
+                pvt_table_indices['GAS'] = [line_indx + 1, len(file_as_list)]
                 gas_table = True
                 line_indx += 1
                 continue
@@ -123,17 +123,17 @@ class NexusPVT():
                         raise ValueError("Property PSAT does not have a numerical value.")
                     psat_values.append(str(nfo.get_token_value('PSAT', line, file_as_list)))
                     if 'UNSATOIL_PSAT' in pvt_table_indices_dict.keys():
-                        pvt_table_indices_dict['UNSATOIL_PSAT'][psat_values[-1]] = [line_indx+1, len(file_as_list)]
+                        pvt_table_indices_dict['UNSATOIL_PSAT'][psat_values[-1]] = [line_indx + 1, len(file_as_list)]
                     else:
-                        pvt_table_indices_dict['UNSATOIL_PSAT'] = {psat_values[-1]: [line_indx+1, len(file_as_list)]}
+                        pvt_table_indices_dict['UNSATOIL_PSAT'] = {psat_values[-1]: [line_indx + 1, len(file_as_list)]}
                 if nfo.check_token('RSSAT', line):
                     if nfo.get_token_value('RSSAT', line, file_as_list) is None:
                         raise ValueError("Property RSSAT does not have a numerical value.")
                     rs_values.append(str(nfo.get_token_value('RSSAT', line, file_as_list)))
                     if 'UNSATOIL_RSSAT' in pvt_table_indices_dict.keys():
-                        pvt_table_indices_dict['UNSATOIL_RSSAT'][rs_values[-1]] = [line_indx+1, len(file_as_list)]
+                        pvt_table_indices_dict['UNSATOIL_RSSAT'][rs_values[-1]] = [line_indx + 1, len(file_as_list)]
                     else:
-                        pvt_table_indices_dict['UNSATOIL_RSSAT'] = {rs_values[-1]: [line_indx+1, len(file_as_list)]}
+                        pvt_table_indices_dict['UNSATOIL_RSSAT'] = {rs_values[-1]: [line_indx + 1, len(file_as_list)]}
                 unsatoil_table = True
                 line_indx += 1
                 continue
@@ -143,9 +143,9 @@ class NexusPVT():
                         raise ValueError("Property PRES does not have a numerical value.")
                     p_values.append(str(nfo.get_token_value('PRES', line, file_as_list)))
                     if 'UNSATGAS' in pvt_table_indices_dict.keys():
-                        pvt_table_indices_dict['UNSATGAS'][p_values[-1]] = [line_indx+1, len(file_as_list)]
+                        pvt_table_indices_dict['UNSATGAS'][p_values[-1]] = [line_indx + 1, len(file_as_list)]
                     else:
-                        pvt_table_indices_dict['UNSATGAS'] = {p_values[-1]: [line_indx+1, len(file_as_list)]}
+                        pvt_table_indices_dict['UNSATGAS'] = {p_values[-1]: [line_indx + 1, len(file_as_list)]}
                 unsatgas_table = True
                 line_indx += 1
                 continue

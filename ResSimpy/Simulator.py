@@ -7,10 +7,12 @@ from ResSimpy.Wells import Wells
 
 class Simulator(ABC):
 
-    def __init__(self, start_date=''):
-        self.__start_date = start_date
+    def __init__(self, start_date: str = '') -> None:
+        self.__start_date: str = start_date
         self.__Wells: Wells = Wells()
+
     """Class Properties"""
+
     @property
     def start_date(self) -> str:
         return self.__start_date
@@ -29,6 +31,7 @@ class Simulator(ABC):
         self.__Wells = cls
 
     """ Class Methods """
+
     @staticmethod
     @abstractmethod
     def get_fluid_type(surface_file_name: str) -> str:

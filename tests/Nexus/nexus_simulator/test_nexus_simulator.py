@@ -8,7 +8,7 @@ from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from pytest_mock import MockerFixture
 from unittest.mock import Mock
 
-from ResSimpy.UnitsEnum import Units
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from tests.multifile_mocker import mock_multiple_files
 
 
@@ -1121,17 +1121,17 @@ def test_get_abs_structured_grid_path(mocker, fcs_file, expected_root, expected_
 
 @pytest.mark.parametrize("fcs_file, expected_default_unit_value",
                          [('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           Units.OILFIELD),
-                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS LAB\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           Units.LAB),
-                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS METRIC_BARS\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           Units.METRIC_BARS),
+                           UnitSystem.ENGLISH),
+                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS \n LAB\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                           UnitSystem.LAB),
+                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS METKG/CM2\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                           UnitSystem.METKGCM2),
+                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_units    METRIC\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                           UnitSystem.METRIC),
                           ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           Units.OILFIELD),
-                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS Metric_Bars\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           Units.METRIC_BARS),
-                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDeFault_UNITS METRIC_BARS\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           Units.METRIC_BARS)
+                           UnitSystem.ENGLISH),
+                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\ndefault_Units Metbar\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                           UnitSystem.METBAR),
                           ])
 def test_load_fcs_file_populates_default_units(mocker, fcs_file, expected_default_unit_value):
     # Arrange
@@ -1148,7 +1148,7 @@ def test_load_fcs_file_populates_default_units(mocker, fcs_file, expected_defaul
 
 @pytest.mark.parametrize("fcs_file",
                          ['DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS NOTVALID\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                          'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS \nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
+                         'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS \nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
                           ])
 def test_load_fcs_file_raises_error_for_undefined_default_units(mocker, fcs_file):
     # Arrange
@@ -1156,19 +1156,21 @@ def test_load_fcs_file_raises_error_for_undefined_default_units(mocker, fcs_file
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         NexusSimulator(origin='testpath1/Path.fcs')
 
 
 @pytest.mark.parametrize("fcs_file, expected_run_unit_value",
                          [('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           Units.OILFIELD),
-                          ('DESC Test model\n\nRUN_UNITS LAB\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           Units.LAB),
-                          ('DESC Test model\n\nRUN_UNITS METRIC_BARS\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                             Units.METRIC_BARS),
+                           UnitSystem.ENGLISH),
+                          ('DESC Test model\n\nRUN_UNITS  \n lab  \n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                           UnitSystem.LAB),
+                          ('DESC Test model\n\nRun_UNITS MetBar\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                           UnitSystem.METBAR),
+                          ('DESC Test model\n\nRun_UNITS METKG/CM2\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                           UnitSystem.METKGCM2),
                           ('DESC Test model\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                             Units.OILFIELD)
+                           UnitSystem.ENGLISH)
                           ])
 def test_load_fcs_file_populates_run_units(mocker, fcs_file, expected_run_unit_value):
     # Arrange
@@ -1185,7 +1187,8 @@ def test_load_fcs_file_populates_run_units(mocker, fcs_file, expected_run_unit_v
 
 @pytest.mark.parametrize("fcs_file",
                          ['DESC Test model\n\nRUN_UNITS BLAH\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                          'DESC Test model\n\nRUN_UNITS \nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
+                          'DESC Test model\n\nRUN_UNITs \nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
+                          'DESC Test model\n\nRUN_UNITs 1\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
                           ])
 def test_load_fcs_file_raises_error_for_undefined_run_units(mocker, fcs_file):
     # Arrange
@@ -1193,7 +1196,7 @@ def test_load_fcs_file_raises_error_for_undefined_run_units(mocker, fcs_file):
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         NexusSimulator(origin='testpath1/Path.fcs')
 
 
@@ -1694,6 +1697,7 @@ PLOTBINARY
                                      mocker_fixture=mocker)
 
 
+# TODO: move these methods to a separate WELLS test file
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
        WelLS sEt 1 my/wellspec/file.dat
@@ -1710,7 +1714,7 @@ def test_get_wells(mocker: MockerFixture, fcs_file_contents: str):
     loaded_completion_2 = NexusCompletion(
         i=6, j=7, k=8, well_radius=9.11, date='01/01/2023')
     loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
-                              units=Units.OILFIELD)]
+                              units=UnitSystem.ENGLISH)]
 
     # mock out the load_wells function as that is tested elsewhere
     mock_load_wells = mocker.Mock(return_value=loaded_wells)
@@ -1725,7 +1729,7 @@ def test_get_wells(mocker: MockerFixture, fcs_file_contents: str):
     # Assert
     assert result == loaded_wells
     mock_load_wells.assert_called_once_with(wellspec_file_path=expected_well_spec_file_path,
-                                            default_units=Units.OILFIELD,
+                                            default_units=UnitSystem.ENGLISH,
                                             start_date='')
 
 
@@ -1742,10 +1746,10 @@ def test_get_wells_df(mocker: MockerFixture):
     loaded_completion_2 = NexusCompletion(
         i=6, j=7, k=8, well_radius=9.11, date='01/01/2023')
     loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
-                              units=Units.OILFIELD)]
+                              units=UnitSystem.ENGLISH)]
     # create the expected dataframe
-    loaded_wells_txt = ['WELL1, OILFIELD, 4.5, 01/01/2023, 1, 2, 3',
-                        'WELL1, OILFIELD, 9.11, 01/01/2023, 6, 7, 8', ]
+    loaded_wells_txt = ['WELL1, ENGLISH, 4.5, 01/01/2023, 1, 2, 3',
+                        'WELL1, ENGLISH, 9.11, 01/01/2023, 6, 7, 8', ]
     loaded_wells_txt = [x.split(', ') for x in loaded_wells_txt]
     loaded_wells_df = pd.DataFrame(loaded_wells_txt,
                                    columns=['well_name', 'units', 'well_radius', 'date', 'i', 'j', 'k', ])
@@ -1760,3 +1764,40 @@ def test_get_wells_df(mocker: MockerFixture):
     # Assert
 
     pd.testing.assert_frame_equal(result, loaded_wells_df)
+
+@pytest.mark.parametrize("fcs_file_contents", [
+    ("""
+       WelLS set 1 my/wellspec/file.dat
+    """)
+], ids=['basic case'])
+def test_get_well(mocker: MockerFixture, fcs_file_contents: str):
+    """Testing the functionality to load in and retrieve a single wells"""
+    # Arrange
+    fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
+    mocker.patch("builtins.open", fcs_file_open)
+
+    loaded_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid=None, skin=None,
+                                          angle_v=None)
+    loaded_completion_2 = NexusCompletion(
+        i=6, j=7, k=8, well_radius=9.11, date='01/01/2023')
+    loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
+                              units=UnitSystem.ENGLISH),
+                    NexusWell(well_name='WELL2', completions=[loaded_completion_1, loaded_completion_2],
+                              units=UnitSystem.ENGLISH)
+                    ]
+
+    # mock out the load_wells function as that is tested elsewhere
+    mock_load_wells = mocker.Mock(return_value=loaded_wells)
+    mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
+
+    simulation = NexusSimulator(origin='path/nexus_run.fcs')
+
+    # Act
+    result = simulation.Wells.get_well(well_name='WELL2')
+
+    expected_well_spec_file_path = os.path.join('path', 'my/wellspec/file.dat')
+    # Assert
+    assert result == loaded_wells[1]
+    mock_load_wells.assert_called_once_with(wellspec_file_path=expected_well_spec_file_path,
+                                            default_units=UnitSystem.ENGLISH,
+                                            start_date='')

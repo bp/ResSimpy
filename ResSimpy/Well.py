@@ -1,17 +1,17 @@
 """The abstract base class for all wells"""
-
 from abc import ABC
 from dataclasses import dataclass
+from typing import Optional, Sequence
 
 from ResSimpy.Completion import Completion
-from ResSimpy.UnitsEnum import Units
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 
 
 @dataclass
 class Well(ABC):
     __completions: list[Completion]
     __well_name: str
-    __units: Units
+    __units: UnitSystem
 
     def __init__(self, well_name, completions, units):
         self.__well_name = well_name
@@ -27,5 +27,30 @@ class Well(ABC):
         return self.__well_name
 
     @property
-    def units(self) -> Units:
+    def units(self) -> UnitSystem:
         return self.__units
+
+    @property
+    def perforations(self) -> Sequence[Completion]:
+        """Returns a list of all of the perforations for the well"""
+        raise NotImplementedError("This method has not been implemented for this simulator yet")
+
+    @property
+    def first_perforation(self) -> Optional[Completion]:
+        """Returns the first perforation for the well"""
+        raise NotImplementedError("This method has not been implemented for this simulator yet")
+
+    @property
+    def shutins(self) -> Sequence[Completion]:
+        """Returns a list of all of the perforations for the well"""
+        raise NotImplementedError("This method has not been implemented for this simulator yet")
+
+    @property
+    def last_shutin(self) -> Optional[Completion]:
+        """Returns the first perforation for the well"""
+        raise NotImplementedError("This method has not been implemented for this simulator yet")
+
+    @property
+    def printable_well_info(self) -> str:
+        """Returns some printable well information in string format"""
+        raise NotImplementedError("This method has not been implemented for this simulator yet")
