@@ -249,7 +249,6 @@ def test_get_full_network(mocker):
         'test_fcs.fcs',
     ]
 
-    # Act
     equil1 = NexusFile(location='nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',
                        origin=fcs_path, includes=None,
                        includes_objects=None, file_content_as_list=None)
@@ -300,6 +299,7 @@ def test_get_full_network(mocker):
                                      hyd_files={3: hyd_method_file},
                                      file_content_as_list=fcs_contents_as_list, includes=[])
 
+    # Act
     from_list, to_list = compiled_fcs_file.get_full_network()
 
     # Assert
