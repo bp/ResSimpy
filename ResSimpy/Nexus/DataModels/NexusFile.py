@@ -78,13 +78,13 @@ class NexusFile:
             if inc_file_path is None:
                 modified_file_as_list.append(line)
                 continue
+            inc_full_path = nfo.get_full_file_path(inc_file_path, origin=file_path)
             # store the included files as files inside the object
-            inc_file_list.append(inc_file_path)
+            inc_file_list.append(inc_full_path)
             if not recursive:
                 modified_file_as_list.append(line)
             else:
                 # TODO also store the full file paths
-                inc_full_path = nfo.get_full_file_path(inc_file_path, origin=file_path)
                 inc_file = cls.generate_file_include_structure(inc_full_path, origin=file_path, recursive=True)
                 if includes_objects is None:
                     raise ValueError('includes_objects is None - recursion failure.')

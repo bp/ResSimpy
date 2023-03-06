@@ -1,3 +1,4 @@
+import os
 from typing import Union
 
 import pytest
@@ -126,6 +127,40 @@ def test_generate_file_include_structure_nested_includes(mocker):
         }).return_value
         return mock_open
 
+    mocker.patch("builtins.open", mock_open_wrapper)
+    # Act
+    nexus_file = NexusFile.generate_file_include_structure(file_path)
+
+    # Assert
+    assert nexus_file == expected_nexus_file
+
+
+def test_generate_file_include_structure_origin_path(mocker):
+    # Arrange
+    file_path = '/origin/path/test_file_path.dat'
+    test_file_contents = 'basic_file INCLUDE nexus_data/inc_file1.inc'
+    include_file_contents = 'inc file contents INCLUDE inc_file2.inc'
+    inc2_file_contents = 'second_file'
+    include_full_file_path_1 = os.path.join('/origin/path', 'nexus_data/inc_file1.inc')
+    include_full_file_path_2 = os.path.join('/origin/path', 'nexus_data', 'inc_file2.inc')
+    expected_includes_list = [include_full_file_path_1]
+    expected_location = '/origin/path/test_file_path.dat'
+
+    nexus_file_include2 = NexusFile(location=include_full_file_path_2, includes=[], origin=include_full_file_path_1,
+                                    includes_objects=None, file_content_as_list=['second_file'])
+    nexus_file_include1 = NexusFile(location=include_full_file_path_1, includes=[include_full_file_path_2],
+                                    origin=file_path, includes_objects=[nexus_file_include2],
+                                    file_content_as_list=['inc file contents ', nexus_file_include2])
+    expected_nexus_file = NexusFile(location=expected_location, includes=expected_includes_list,
+                                    origin=None, includes_objects=[nexus_file_include1],
+                                    file_content_as_list=['basic_file ', nexus_file_include1])
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            file_path: test_file_contents,
+            include_full_file_path_1: include_file_contents,
+            include_full_file_path_2: inc2_file_contents,
+        }).return_value
+        return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
     # Act
     nexus_file = NexusFile.generate_file_include_structure(file_path)
