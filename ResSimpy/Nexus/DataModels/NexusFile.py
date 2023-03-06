@@ -54,7 +54,10 @@ class NexusFile:
             file_as_list = nfo.load_file_as_list(file_path)
         except FileNotFoundError:
             # handle if a file can't be found
-            nexus_file_class = cls(location=file_path,
+            location = file_path
+            if origin is not None:
+                location = nfo.get_full_file_path(file_path, origin)
+            nexus_file_class = cls(location=location,
                                    includes=None,
                                    origin=origin,
                                    includes_objects=None,
@@ -66,13 +69,12 @@ class NexusFile:
         modified_file_as_list: list = []
         # search for the INCLUDE keyword and append to a list:
         inc_file_list: list[str] = []
-        includes_objects: Optional[list] = []
+        includes_objects: Optional[list[NexusFile]] = []
         for line in file_as_list:
             if not nfo.check_token("INCLUDE", line):
                 modified_file_as_list.append(line)
                 continue
-            inc_file_path = nfo.get_token_value(
-                'INCLUDE', line, file_as_list)
+            inc_file_path = nfo.get_token_value('INCLUDE', line, file_as_list)
             if inc_file_path is None:
                 modified_file_as_list.append(line)
                 continue
@@ -81,15 +83,14 @@ class NexusFile:
             if not recursive:
                 modified_file_as_list.append(line)
             else:
-                inc_file = cls.generate_file_include_structure(
-                    inc_file_path, origin=file_path, recursive=True)
+                # TODO also store the full file paths
+                inc_full_path = nfo.get_full_file_path(inc_file_path, origin=file_path)
+                inc_file = cls.generate_file_include_structure(inc_full_path, origin=file_path, recursive=True)
                 if includes_objects is None:
-                    raise ValueError(
-                        'includes_objects is None - recursion failure.')
+                    raise ValueError('includes_objects is None - recursion failure.')
                 includes_objects.append(inc_file)
 
-                prefix_line, suffix_line = re.split(
-                    'INCLUDE', line, maxsplit=1, flags=re.IGNORECASE)
+                prefix_line, suffix_line = re.split('INCLUDE', line, maxsplit=1, flags=re.IGNORECASE)
                 suffix_line = suffix_line.lstrip()
                 suffix_line = suffix_line.replace(inc_file_path, '', 1)
                 if prefix_line:
@@ -109,21 +110,6 @@ class NexusFile:
         )
 
         return nexus_file_class
-
-    def generate_included_file_objects(self):
-        """Builds NexusFile objects for any include files that have been found in the original instance
-        """
-        # check if there are any includes and exit if not
-        if not self.includes:
-            return None
-
-        self.includes_objects = []
-        for file_path in self.includes:
-            inc_file = self.generate_file_include_structure(
-                file_path, origin=self.location)
-            self.includes_objects.append(inc_file)
-
-        return self.includes_objects
 
     def export_network_lists(self):
         # TODO: add to test coverage
@@ -187,3 +173,33 @@ class NexusFile:
         return
 
 # TODO write an output function using the iterate_line method
+    def get_full_network(self, max_depth: Optional[int] = None) -> tuple[list[str | None], list[str | None]]:
+        """ recursively constructs two lists of from and to nodes representing the connections between files.
+
+        Args:
+            max_depth (Optional[int], optional): depth of the iteration to construct the network down to. \
+                Defaults to None.
+
+        Returns:
+            tuple[list[str | None], list[str | None]]: two lists of from and to nodes where corresponding \
+                indices create an edge within a graph network. e.g. (from_list[i], to_list[i]) \
+                is a connection between two files.
+        """
+        depth: int = 0
+        from_list = [self.origin]
+        to_list = [self.location]
+        if max_depth is not None:
+            depth = max_depth
+        if self.file_content_as_list is None:
+            return from_list, to_list
+        for row in self.file_content_as_list:
+            if isinstance(row, NexusFile):
+                if (max_depth is None or depth > 0):
+                    level_down_max_depth = None if max_depth is None else depth-1
+                    temp_from_list, temp_to_list = row.export_network_lists()
+                    from_list.extend(temp_from_list)
+                    to_list.extend(temp_to_list)
+                    temp_from_list, temp_to_list = row.get_full_network(max_depth=level_down_max_depth)
+                    from_list.extend(temp_from_list)
+                    to_list.extend(temp_to_list)
+        return from_list, to_list
