@@ -174,6 +174,17 @@ class NexusFile:
 
 # TODO write an output function using the iterate_line method
     def get_full_network(self, max_depth: Optional[int] = None) -> tuple[list[str | None], list[str | None]]:
+        """ recursively constructs two lists of from and to nodes representing the connections between files. 
+
+        Args:
+            max_depth (Optional[int], optional): depth of the iteration to construct the network down to. \
+                Defaults to None.
+
+        Returns:
+            tuple[list[str | None], list[str | None]]: two lists of from and to nodes where corresponding \
+                indices create an edge within a graph network. e.g. (from_list[i], to_list[i]) \
+                is a connection between two files.
+        """
         depth: int = 0
         from_list = [self.origin]
         to_list = [self.location]
