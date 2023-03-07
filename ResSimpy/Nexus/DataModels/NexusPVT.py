@@ -1,33 +1,35 @@
 from dataclasses import dataclass, field
-from typing import Union
+from typing import Optional, Union
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_BLACKOIL_PRIMARY_KEYWORDS, PVT_TYPE_KEYWORDS
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.nexus_constants import VALID_NEXUS_KEYWORDS
 
 
-@dataclass
+@dataclass  # Doesn't need to write an _init_, _eq_ methods, etc.
 class NexusPVT():
     """ Class to hold Nexus PVT properties
     Attributes:
         properties (dict[str, Union[str, dict, int, float, pd.DataFrame]]): Dictionary holding all properties for
         a specific PVT method. Defaults to empty dictionary.
     """
+    # General parameters
+    file_path: str
+    pvt_type: Optional[str] = None
     properties: dict[str, Union[str, int, float, pd.DataFrame, dict[str, pd.DataFrame]]] \
         = field(default_factory=get_empty_dict_union)
 
-    def read_properties_from_file(self, file_path: str):
+    def read_properties(self):
         """Read Nexus pvt file contents and populate the NexusPVT properties object
 
         Args:
             file_path (str): path to PVT file
         """
-        file_obj = NexusFile.generate_file_include_structure(file_path, origin=None)
+        file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
         file_as_list = file_obj.get_flat_list_str_file()
 
-        # Record PVT filepath
-        self.properties['FILEPATH'] = file_path
         # Check for common input data
         self.properties = nfo.check_for_common_input_data(file_as_list, self.properties)
 
@@ -47,21 +49,16 @@ class NexusPVT():
         # List to track saturation Rs from which undersaturated branches emanate
         rs_values: list[str] = []
 
-        # List of potential pvt types
-        potential_pvt_types = ['BLACKOIL', 'WATEROIL', 'GASWATER', 'EOS']
-        # List of potential fluid density parameters
-        potential_fluid_density_params = ['DENOIL', 'API', 'GOR', 'OGR', 'DENGAS', 'SPECG', 'MWOR']
-
         line_indx = 0
         for line in file_as_list:
 
             # Determine PVT type, i.e., BLACKOIL, WATEROIL, EOS, etc.
-            for pvt_type in potential_pvt_types:
+            for pvt_type in PVT_TYPE_KEYWORDS:
                 if nfo.check_token(pvt_type, line):
-                    self.properties['PVT_TYPE'] = pvt_type
+                    self.pvt_type = pvt_type
 
             # Extract fluid density parameters
-            for fluid_param in potential_fluid_density_params:
+            for fluid_param in PVT_BLACKOIL_PRIMARY_KEYWORDS:
                 if nfo.check_token(fluid_param, line):
                     if nfo.get_token_value(fluid_param, line, file_as_list) is None:
                         raise ValueError(f"Property {fluid_param} does not have a numerical value.")
