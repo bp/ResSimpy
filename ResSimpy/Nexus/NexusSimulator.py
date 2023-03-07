@@ -357,7 +357,7 @@ class NexusSimulator(Simulator):
             #     self.__output_to_new_directory()
 
             self.__origin = self.__destination + "/" + \
-                            os.path.basename(self.__original_fcs_file_path)
+                os.path.basename(self.__original_fcs_file_path)
 
     def __get_wells_paths(self, line: str, fcs_file: list[str]) -> None:
         well_keyword = nfo.get_expected_token_value(token="WELLS", token_line=line, file_list=fcs_file,
@@ -382,7 +382,7 @@ class NexusSimulator(Simulator):
         """
         # self.get_simulation_status(True)
 
-        self.fcs_file = FcsNexusFile.generate_fcs_structure(self.__new_fcs_file_path, origin_folder=self.__origin)
+        self.fcs_file = FcsNexusFile.generate_fcs_structure(self.__new_fcs_file_path)
         fcs_file_content = self.fcs_file.get_flat_list_str_file()
         if fcs_file_content is None:
             raise ValueError(f'FCS file not found, no content for {self.__new_fcs_file_path}')
@@ -795,7 +795,7 @@ class NexusSimulator(Simulator):
         original_fcs_file_location = os.path.basename(
             self.__original_fcs_file_path)
         log_file_name = os.path.splitext(original_fcs_file_location)[
-                            0] + ".log" if from_startup else self.__root_name + ".log"
+            0] + ".log" if from_startup else self.__root_name + ".log"
 
         if log_file_name in files:
             if from_startup:

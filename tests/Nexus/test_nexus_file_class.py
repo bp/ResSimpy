@@ -154,6 +154,7 @@ def test_generate_file_include_structure_origin_path(mocker):
     expected_nexus_file = NexusFile(location=expected_location, includes=expected_includes_list,
                                     origin=None, includes_objects=[nexus_file_include1],
                                     file_content_as_list=['basic_file ', nexus_file_include1])
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             file_path: test_file_contents,
