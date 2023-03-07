@@ -288,9 +288,47 @@ def test_printable_well_info_missing_info():
      # Expected:
      []),
 
-    ([], [])
+    ([], []),
 
-], ids=['Only perforations', 'mixture of perf and not perf', 'no perforations', 'empty list'])
+    ([NexusCompletion(i=1, j=2, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+                      depth_to_top=1000, depth_to_bottom=1300, well_indices=1),
+      NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=1, depth_to_top=1156,
+                      depth_to_bottom=1234),
+      NexusCompletion(i=1, j=2, date='01/02/2023', status='OFF', partial_perf=1, depth_to_top=1156,
+                      depth_to_bottom=1234)],
+     # Expected:
+     [('01/01/2023', (1000, 1300)), ('01/02/2023', (1156, 1234))]),
+
+    ([NexusCompletion(i=1, j=2, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+                      depth_to_top=1000, depth_to_bottom=1300, well_indices=1),
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1),
+      NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=2, depth_to_top=1156,
+                      depth_to_bottom=1234),
+      NexusCompletion(i=1, j=2,k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=3),
+      NexusCompletion(i=1, j=2, date='01/03/2025', status='ON', partial_perf=1, well_indices=3, depth_to_top=1156,
+                      depth_to_bottom=1234),
+      ],
+     # Expected:
+     [('01/01/2023', (1000, 1300)),
+      ('01/02/2023', (1156, 1234)),
+      ('01/03/2025', (1156, 1234)),]),
+
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+                      well_indices=1),
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1),
+      NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+                      depth_to_bottom=1234),
+      NexusCompletion(i=1, j=2, k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=3),
+      NexusCompletion(i=1, j=2, date='01/03/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+                      depth_to_bottom=1234),
+      ],
+     # Expected:
+     [('01/01/2023', 3),
+      ('01/02/2023', 3),
+      ('01/02/2023', 5)]),
+
+], ids=['Only perforations', 'mixture of perf and not perf', 'no perforations', 'empty list', 'D Values',
+        'Mix D values first', 'Mix K values first'])
 def test_get_completion_events(completions, expected_shutin):
     # Arrange
     well = NexusWell(well_name='test well', completions=completions,
