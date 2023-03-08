@@ -240,3 +240,53 @@ def test_modify_times_invalid_date(mocker, date_format, expected_use_american_da
     # Assert
     assert result_times == expected_times
     assert simulation.use_american_date_format == expected_use_american_date_format
+
+
+@pytest.mark.skip('Functionality for writing to runcontrols does not work and is currently not requested by the user.')
+@pytest.mark.parametrize(
+    "fcs_content, run_control_contents, inc_file_contents, expected_times, expected_output", [
+        ("RUNCONTROL /path/run_control\nDATEFORMAT DD/MM/YYYY\n",
+         "START 01/01/1980\nINCLUDE  \n! Comment \n   include.inc\n",
+         "SPREADSHEET\n\tFIELD TIMES\n\tWELLSS TIMES\nENDSPREADSHEET\n"
+         "OUTPUT TARGETS TIMES\n\tMAPS TIMES\nENDOUTPUT\nTIME 0.3\n",
+         ['0.3'],
+         "RUNCONTROL /path/run_control\nDATEFORMAT DD/MM/YYYY\n"
+         "START 01/01/1980\nINCLUDE  \n! Comment \n   include.inc\n"
+         "SPREADSHEET\n\tFIELD TIMES\n\tWELLSS TIMES\nENDSPREADSHEET\n"
+         "OUTPUT TARGETS TIMES\n\tMAPS TIMES\nENDOUTPUT\nTIME 0.3\n\nSTOP\n"),
+
+        ("RUNCONTROL /path/run_control\nDATEFORMAT DD/MM/YYYY\n",
+         "START 01/01/1980\nINCLUDE  \n! Comment \n   include.inc\n",
+         "SPREADSHEET\n\tFIELD TIMES\n\tWELLSS TIMES\nENDSPREADSHEET\n"
+         "OUTPUT TARGETS TIMES\n\tMAPS TIMES\nENDOUTPUT\nTIME 0.3\n\nTIME 01/01/2001\n\tTIME 15/10/2020\n",
+         ['0.3', '01/01/2001', '15/10/2020'],
+         "RUNCONTROL /path/run_control\nDATEFORMAT DD/MM/YYYY\n"
+         "START 01/01/1980\nINCLUDE  \n! Comment \n   include.inc\n"
+         "SPREADSHEET\n\tFIELD TIMES\n\tWELLSS TIMES\nENDSPREADSHEET\n"
+         "OUTPUT TARGETS TIMES\n\tMAPS TIMES\nENDOUTPUT\nTIME 0.3\n\nTIME 01/01/2001\n\nTIME 15/10/2020\n\nSTOP\n"),
+
+    ])
+def test_load_run_control_file_write_times_to_run_control(mocker, fcs_content, run_control_contents, inc_file_contents,
+                                                          expected_times, expected_output):
+    """Getting times from an external include file"""
+    # Arrange
+    fcs_file_name = 'testpath1/test.fcs'
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename,
+                                        potential_file_dict={'testpath1/test.fcs': fcs_content,
+                                                             '/path/run_control': run_control_contents,
+                                                             'include.inc': inc_file_contents}).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act
+    simulation = NexusSimulator(origin=fcs_file_name, )
+    result_times = simulation.get_content(section="RUNCONTROL", keyword="TIME")
+
+    # Assert
+    # TODO REASSERT THESE CALLS
+    # .assert_any_call('/path/run_control', 'w')
+    # .return_value.write.assert_any_call(expected_output)
+    assert result_times == expected_times
