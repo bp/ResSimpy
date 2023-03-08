@@ -1,10 +1,7 @@
 from dataclasses import Field
-from datetime import datetime
 import os
 import copy
-from functools import cmp_to_key
-from datetime import timedelta
-from typing import Any, Union, Optional
+from typing import Any, Final, Union, Optional
 import warnings
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -23,7 +20,7 @@ import ResSimpy.Nexus.structured_grid_operations as structured_grid_operations
 
 class NexusSimulator(Simulator):
     # Constants
-    DATE_WITH_TIME_LENGTH = 20
+    DATE_WITH_TIME_LENGTH: Final[int] = 20
 
     def __init__(self, origin: Optional[str] = None, destination: Optional[str] = None, force_output: bool = False,
                  root_name: Optional[str] = None, nexus_data_name: str = "data", write_times: bool = True,
@@ -351,28 +348,8 @@ class NexusSimulator(Simulator):
         """
         self.__destination = path
         if self.__destination is not None and os.path.dirname(self.__origin) != os.path.dirname(self.__destination):
-            # if self.__manual_fcs_tidy_call:
-            #     self.call_fcstidy(fcs_files=[self.__origin], output_dir=self.__destination, options='--pathkeep 0')
-            # else:
-            #     self.__output_to_new_directory()
-
             self.__origin = self.__destination + "/" + \
-                            os.path.basename(self.__original_fcs_file_path)
-
-    def __get_wells_paths(self, line: str, fcs_file: list[str]) -> None:
-        well_keyword = nfo.get_expected_token_value(token="WELLS", token_line=line, file_list=fcs_file,
-                                                    custom_message="No Wells file path found in line:")
-
-        # WELLS SET 1 wells.dat
-        if well_keyword.upper() == 'SET':
-            well_set_number = nfo.get_expected_token_value(token="SET", token_line=line, file_list=fcs_file,
-                                                           custom_message="No Wells Set number found in line")
-            index = line.find(well_set_number)
-            modified_line = line[index + len(well_set_number)::]
-            well_keyword = nfo.get_expected_next_value(0, [modified_line], search_string=modified_line,
-                                                       custom_message="No Wells file path found in line:")
-        complete_well_filepath = nfo.get_full_file_path(well_keyword, self.__origin)
-        self.Wells.wellspec_paths.append(complete_well_filepath)
+                os.path.basename(self.__original_fcs_file_path)
 
     def __load_fcs_file(self):
         """ Loads in the information from the supplied FCS file into the class instance.
@@ -510,11 +487,7 @@ class NexusSimulator(Simulator):
         """Returns the date format being used by the model
         formats used: ('MM/DD/YYYY', 'DD/MM/YYYY')
         """
-
-        if self.use_american_date_format:
-            return 'MM/DD/YYYY'
-        else:
-            return 'DD/MM/YYYY'
+        return runcontrol_operations.get_date_format(self.use_american_date_format)
 
     def __load_run_control_file(self):
         """Loads the run control information into the class instance. \
@@ -552,99 +525,6 @@ class NexusSimulator(Simulator):
                 runcontrol_operations.remove_times_from_file(run_control_file_content, file)
 
         self.__modify_times(content=times, operation='replace')
-
-    def __convert_date_to_number(self, date: Union[str, int, float]) -> float:
-        """Converts a date to a number designating number of days from the start date
-
-        Args:
-            date (Union[str, int, float]): a date or time stamp from a Nexus simulation
-
-        Raises:
-            ValueError: if supplied incorrect type for 'date' parameter
-
-        Returns:
-            float: the difference between the supplied date and the start date of the simulator
-        """
-        # If we can retrieve a number of days from date, use that, otherwise convert the string date to a number of days
-        try:
-            converted_date: Union[str, float] = float(date)
-        except ValueError:
-            if not isinstance(date, str):
-                raise ValueError("__convert_date_to_number: Incorrect type for 'date' parameter")
-            converted_date = date
-
-        if isinstance(converted_date, float):
-            date_format = self.__date_format_string
-            if len(self.start_date) == self.DATE_WITH_TIME_LENGTH:
-                date_format += "(%H:%M:%S)"
-            start_date_as_datetime = datetime.strptime(self.start_date, date_format)
-            date_as_datetime = start_date_as_datetime + timedelta(days=converted_date)
-        else:
-            start_date_format = self.__date_format_string
-            if len(self.start_date) == self.DATE_WITH_TIME_LENGTH:
-                start_date_format += "(%H:%M:%S)"
-            end_date_format = self.__date_format_string
-            if len(converted_date) == self.DATE_WITH_TIME_LENGTH:
-                end_date_format += "(%H:%M:%S)"
-            date_as_datetime = datetime.strptime(converted_date, end_date_format)
-            start_date_as_datetime = datetime.strptime(self.start_date, start_date_format)
-
-        difference = date_as_datetime - start_date_as_datetime
-        return difference.total_seconds() / timedelta(days=1).total_seconds()
-
-    def __compare_dates(self, x: Union[str, float], y: Union[str, float]) -> int:
-        """Comparator for two supplied dates or numbers
-
-        Args:
-            x (Union[str, float]): first date to compare
-            y (Union[str, float]): second date to compare
-
-        Returns:
-            int: the difference between the first and second dates to compare
-        """
-        date_comp = self.__convert_date_to_number(x) - self.__convert_date_to_number(y)
-        if date_comp < 0:
-            date_comp_int = -1
-        elif date_comp == 0:
-            date_comp_int = 0
-        else:
-            date_comp_int = 1
-
-        return date_comp_int
-
-    def __sort_remove_duplicate_times(self, times: list[str]) -> list[str]:
-        """ Removes duplicates and nans from the times list, then sorts them """
-        new_times = []
-        for i in times:
-            i_value = i.strip()
-            if i != i or i_value in new_times:
-                continue
-            new_times.append(i_value)
-        new_times = sorted(new_times, key=cmp_to_key(self.__compare_dates))
-        return new_times
-
-    def __check_date_format(self, date: Union[str, float]) -> None:
-        """Checks that a supplied date is in the correct format
-
-        Args:
-            date (Union[str, float]): date to check the format of
-
-        Raises:
-            ValueError: If a date provided isn't in a date format that the model expects
-        """
-        try:
-            float(date)
-        except ValueError:
-            # Value isn't a float - attempt to extract date from value
-            try:
-                date_format = self.__date_format_string
-                if len(str(date)) == self.DATE_WITH_TIME_LENGTH:
-                    date_format += "(%H:%M:%S)"
-                datetime.strptime(str(date), date_format)
-            except Exception:
-                current_date_format = self.get_date_format()
-                raise ValueError(
-                    "Invalid date format " + str(date) + " the model is using " + current_date_format + " date format.")
 
     def modify(self, operation: str, section: str, keyword: str, content: list[str]):
         """Generic modify method to modify part of the input deck. \
@@ -709,10 +589,13 @@ class NexusSimulator(Simulator):
         if content is None:
             content = []
         for time in content:
-            self.__check_date_format(time)
+            runcontrol_operations.check_date_format(
+                time, self.__date_format_string, self.DATE_WITH_TIME_LENGTH, self.use_american_date_format)
 
-        new_times = self.__sort_remove_duplicate_times(times=content)
-        if len(new_times) > 0 > self.__compare_dates(new_times[0], self.start_date):
+        new_times = runcontrol_operations.sort_remove_duplicate_times(
+            content, self.start_date, self.__date_format_string, self.DATE_WITH_TIME_LENGTH)
+        if len(new_times) > 0 > runcontrol_operations.compare_dates(
+                new_times[0], self.start_date, self.start_date, self.__date_format_string, self.DATE_WITH_TIME_LENGTH):
             raise ValueError(
                 f"The supplied date of {new_times[0]} precedes the start date of {self.start_date}")
         operation = operation.lower()
@@ -729,7 +612,9 @@ class NexusSimulator(Simulator):
                 if time in self.__times:
                     self.__times.remove(time)
 
-        self.__times = self.__sort_remove_duplicate_times(self.__times)
+        self.__times = runcontrol_operations.sort_remove_duplicate_times(self.__times, self.start_date,
+                                                                         self.__date_format_string,
+                                                                         self.DATE_WITH_TIME_LENGTH)
 
         if self.__destination is not None:
             self.__update_times_in_file()
@@ -795,7 +680,7 @@ class NexusSimulator(Simulator):
         original_fcs_file_location = os.path.basename(
             self.__original_fcs_file_path)
         log_file_name = os.path.splitext(original_fcs_file_location)[
-                            0] + ".log" if from_startup else self.__root_name + ".log"
+            0] + ".log" if from_startup else self.__root_name + ".log"
 
         if log_file_name in files:
             if from_startup:
@@ -1173,10 +1058,12 @@ class NexusSimulator(Simulator):
                             last_time = next_value
 
         if last_time is not None:
-            days_completed = self.__convert_date_to_number(last_time)
+            days_completed = runcontrol_operations.convert_date_to_number(
+                last_time, self.start_date, self.__date_format_string, self.DATE_WITH_TIME_LENGTH)
             if self.__times is None:
                 raise ValueError("No times provided in the instance - please read them in from runcontrol file")
-            total_days = self.__convert_date_to_number(self.__times[-1])
+            total_days = runcontrol_operations.convert_date_to_number(
+                self.__times[-1],  self.start_date, self.__date_format_string, self.DATE_WITH_TIME_LENGTH)
             return round((days_completed / total_days) * 100, 1)
 
         return 0
