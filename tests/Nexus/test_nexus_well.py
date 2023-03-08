@@ -42,11 +42,19 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
     ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None),
       NexusCompletion(i=1, j=2, k=3, date='01/02/2023')],
      # Expected:
-     []),
+     [NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None),
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023')]),
+
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', status='OFF',
+                      grid='GRID1', skin=None, angle_v=None),
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023')],
+     # Expected:
+     [NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1',  skin=None, angle_v=None),
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023')]),
 
     ([], [])
 
-], ids=['basic case', 'mixture of perf and not perf', 'no perforations', 'no perf info', 'empty list'])
+], ids=['basic case', 'mixture of perf and not perf', 'using defaults', 'no perforations', 'no perf info', 'empty list'])
 def test_get_perforations(completions, expected_perforations):
     # Arrange
     well = NexusWell(well_name='test well', completions=completions,
