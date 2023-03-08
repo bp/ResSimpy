@@ -107,16 +107,13 @@ class FcsNexusFile(NexusFile):
                          file_content_as_list=file_content_as_list)
 
     @classmethod
-    def generate_fcs_structure(cls, fcs_file_path: str, recursive: bool = True, origin_folder: Optional[str] = None) \
-            -> FcsNexusFile:
+    def generate_fcs_structure(cls, fcs_file_path: str, recursive: bool = True) -> FcsNexusFile:
         """Creates an instance of the FcsNexusFile, populates it through looking through the different keywords \
             in the FCS and assigning the paths to objects.
 
         Args:
             fcs_file_path (str): path to the fcs file of interest
             recursive (bool, optional): Whether the NexusFile structure will be recursively created. Defaults to True.
-            origin_folder (Optional[str], optional): origin folder of the fcs_file. Defaults to None.
-
         Raises:
             FileNotFoundError: if the fcs file cannot be found
             ValueError: if no content can be found within the fcsfile
@@ -160,11 +157,10 @@ class FcsNexusFile(NexusFile):
             'TRACER_INIT': 'tracer_init_files',
         }
 
-        if origin_folder is None:
-            origin_folder = ''
         # guard against bad links/empty files:
         if not os.path.isfile(fcs_file_path):
             raise FileNotFoundError(f'fcs file not found for path {fcs_file_path}')
+        origin_path = fcs_file_path
         flat_fcs_file_content = NexusFile.generate_file_include_structure(
             fcs_file_path, origin=None).get_flat_list_str_file()
         if flat_fcs_file_content is None:
@@ -187,7 +183,7 @@ class FcsNexusFile(NexusFile):
                     _, method_string, method_number, value = (
                         nfo.get_multiple_sequential_tokens(flat_fcs_file_content[i::], 4)
                     )
-                    sub_file_path = nfo.get_full_file_path(value, origin_folder)
+                    sub_file_path = nfo.get_full_file_path(value, origin_path)
                     nexus_file = NexusFile.generate_file_include_structure(
                         sub_file_path, origin=fcs_file_path, recursive=recursive)
                     fcs_property = getattr(fcs_file, fcs_keyword_map_multi[key])
@@ -202,13 +198,15 @@ class FcsNexusFile(NexusFile):
                     setattr(fcs_file, fcs_keyword_map_multi[key], fcs_property_list)
                     fcs_file.file_content_as_list.extend(cls.line_as_nexus_list(line, value, nexus_file))
                     fcs_file.includes_objects.append(nexus_file)
+                    fcs_file.includes.append(sub_file_path)
                 elif key in fcs_keyword_map_single:
-                    sub_file_path = nfo.get_full_file_path(value, origin_folder)
+                    sub_file_path = nfo.get_full_file_path(value, origin_path)
                     nexus_file = NexusFile.generate_file_include_structure(
                         sub_file_path, origin=fcs_file_path, recursive=recursive)
                     setattr(fcs_file, fcs_keyword_map_single[key], nexus_file)
                     fcs_file.file_content_as_list.extend(cls.line_as_nexus_list(line, value, nexus_file))
                     fcs_file.includes_objects.append(nexus_file)
+                    fcs_file.includes.append(sub_file_path)
                 else:
                     fcs_file.file_content_as_list.append(line.replace('\n', ''))
                     continue
