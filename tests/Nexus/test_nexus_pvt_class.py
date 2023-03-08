@@ -171,18 +171,19 @@ from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
             ])
 def test_read_properties_from_file(mocker, file_contents, expected_pvt_properties):
     # Arrange
-    pvt_obj = NexusPVT()
+    pvt_obj = NexusPVT(file_path='test/file/pvt.dat')
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    pvt_obj.read_properties_from_file('test/file/pvt.dat')
+    pvt_obj.read_properties()
     props = pvt_obj.properties
 
     # Assert
-    for key in expected_pvt_properties.keys():
+    assert pvt_obj.pvt_type == expected_pvt_properties['PVT_TYPE']
+    for key in [key for key in expected_pvt_properties.keys() if key != 'PVT_TYPE']:
         if type(expected_pvt_properties[key]) == pd.DataFrame:
             pd.testing.assert_frame_equal(expected_pvt_properties[key], props[key])
         elif type(expected_pvt_properties[key]) == dict:

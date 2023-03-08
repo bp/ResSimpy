@@ -32,7 +32,6 @@ class NexusSimulator(Simulator):
 
         Args:
             origin (Optional[str], optional): file path to the fcs file. Defaults to None.
-            destination (Optional[str], optional): output path for the simulation. Defaults to None.
             force_output (bool, optional): sets force_output parameter - unused. Defaults to False.
             root_name (Optional[str], optional): Root file name of the fcs. Defaults to None.
             nexus_data_name (str, optional): Folder name for the nexus data files to be stored in. Defaults to "data".
@@ -43,7 +42,7 @@ class NexusSimulator(Simulator):
         Attributes:
             run_control_file_path (Optional[str]): file path to the run control file - derived from the fcs file
             __times (Optional[list[str]]): list of times to be included in the runcontrol file
-            __destination (Optional[str]): private attribute of destination, output path for the simulation.
+            __destination (Optional[str]): output path for the simulation. Currently not used.
             use_american_date_format (bool): True if the simulation uses 'MM/DD/YYYY' date format.
             __job_id (int): Run job ID for executed runs
             __date_format_string (str): How the dates should formatted based on use_american_date_format
@@ -351,28 +350,8 @@ class NexusSimulator(Simulator):
         """
         self.__destination = path
         if self.__destination is not None and os.path.dirname(self.__origin) != os.path.dirname(self.__destination):
-            # if self.__manual_fcs_tidy_call:
-            #     self.call_fcstidy(fcs_files=[self.__origin], output_dir=self.__destination, options='--pathkeep 0')
-            # else:
-            #     self.__output_to_new_directory()
-
             self.__origin = self.__destination + "/" + \
-                            os.path.basename(self.__original_fcs_file_path)
-
-    def __get_wells_paths(self, line: str, fcs_file: list[str]) -> None:
-        well_keyword = nfo.get_expected_token_value(token="WELLS", token_line=line, file_list=fcs_file,
-                                                    custom_message="No Wells file path found in line:")
-
-        # WELLS SET 1 wells.dat
-        if well_keyword.upper() == 'SET':
-            well_set_number = nfo.get_expected_token_value(token="SET", token_line=line, file_list=fcs_file,
-                                                           custom_message="No Wells Set number found in line")
-            index = line.find(well_set_number)
-            modified_line = line[index + len(well_set_number)::]
-            well_keyword = nfo.get_expected_next_value(0, [modified_line], search_string=modified_line,
-                                                       custom_message="No Wells file path found in line:")
-        complete_well_filepath = nfo.get_full_file_path(well_keyword, self.__origin)
-        self.Wells.wellspec_paths.append(complete_well_filepath)
+                os.path.basename(self.__original_fcs_file_path)
 
     def __load_fcs_file(self):
         """ Loads in the information from the supplied FCS file into the class instance.
@@ -382,7 +361,7 @@ class NexusSimulator(Simulator):
         """
         # self.get_simulation_status(True)
 
-        self.fcs_file = FcsNexusFile.generate_fcs_structure(self.__new_fcs_file_path, origin_folder=self.__origin)
+        self.fcs_file = FcsNexusFile.generate_fcs_structure(self.__new_fcs_file_path)
         fcs_file_content = self.fcs_file.get_flat_list_str_file()
         if fcs_file_content is None:
             raise ValueError(f'FCS file not found, no content for {self.__new_fcs_file_path}')
@@ -795,7 +774,7 @@ class NexusSimulator(Simulator):
         original_fcs_file_location = os.path.basename(
             self.__original_fcs_file_path)
         log_file_name = os.path.splitext(original_fcs_file_location)[
-                            0] + ".log" if from_startup else self.__root_name + ".log"
+            0] + ".log" if from_startup else self.__root_name + ".log"
 
         if log_file_name in files:
             if from_startup:

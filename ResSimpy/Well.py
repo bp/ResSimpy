@@ -1,7 +1,7 @@
 """The abstract base class for all wells"""
 from abc import ABC
 from dataclasses import dataclass
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Tuple, Union
 
 from ResSimpy.Completion import Completion
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -53,4 +53,9 @@ class Well(ABC):
     @property
     def printable_well_info(self) -> str:
         """Returns some printable well information in string format"""
+        raise NotImplementedError("This method has not been implemented for this simulator yet")
+
+    @property
+    def completion_events(self) -> list[Tuple[str, Union[int, Tuple[float, float]]]]:
+        """Returns a list of dates and values representing either the layer, or the depths of each perforation"""
         raise NotImplementedError("This method has not been implemented for this simulator yet")

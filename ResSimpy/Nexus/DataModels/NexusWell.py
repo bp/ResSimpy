@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Tuple, Sequence
+from typing import Optional, Tuple, Sequence, Union
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -87,13 +87,20 @@ class NexusWell(Well):
         return well_info
 
     @property
-    def completion_events(self) -> list[Tuple[str, int]]:
-        """Returns a list of dates and a boolean representing whether the well was switched on or off on that date"""
+    def completion_events(self) -> list[Tuple[str, Union[int, Tuple[float, float]]]]:
+        """Returns a list of dates and values representing either the layer, or the depths of each perforation"""
         events = []
+        using_k_values: Optional[bool] = None
 
         for completion in self.__completions:
             is_perforation = not (self.completion_is_shutin(completion))
-            if is_perforation:
+            if not is_perforation:
+                continue
+            if completion.k is not None and using_k_values is not False:
+                using_k_values = True
                 events.append((completion.date, completion.k))
+            elif completion.depth_to_top is not None and using_k_values is not True:
+                using_k_values = False
+                events.append((completion.date, (completion.depth_to_top, completion.depth_to_bottom)))
 
         return events
