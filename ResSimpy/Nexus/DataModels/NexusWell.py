@@ -94,12 +94,13 @@ class NexusWell(Well):
 
         for completion in self.__completions:
             is_perforation = not (self.completion_is_shutin(completion))
-            if is_perforation:
-                if completion.k is not None and using_k_values is not False:
-                    using_k_values = True
-                    events.append((completion.date, completion.k))
-                elif completion.depth_to_top is not None and using_k_values is not True:
-                    using_k_values = False
-                    events.append((completion.date, (completion.depth_to_top, completion.depth_to_bottom)))
+            if not is_perforation:
+                continue
+            if completion.k is not None and using_k_values is not False:
+                using_k_values = True
+                events.append((completion.date, completion.k))
+            elif completion.depth_to_top is not None and using_k_values is not True:
+                using_k_values = False
+                events.append((completion.date, (completion.depth_to_top, completion.depth_to_bottom)))
 
         return events
