@@ -29,7 +29,6 @@ class NexusSimulator(Simulator):
 
         Args:
             origin (Optional[str], optional): file path to the fcs file. Defaults to None.
-            destination (Optional[str], optional): output path for the simulation. Defaults to None.
             force_output (bool, optional): sets force_output parameter - unused. Defaults to False.
             root_name (Optional[str], optional): Root file name of the fcs. Defaults to None.
             nexus_data_name (str, optional): Folder name for the nexus data files to be stored in. Defaults to "data".
@@ -40,7 +39,7 @@ class NexusSimulator(Simulator):
         Attributes:
             run_control_file_path (Optional[str]): file path to the run control file - derived from the fcs file
             __times (Optional[list[str]]): list of times to be included in the runcontrol file
-            __destination (Optional[str]): private attribute of destination, output path for the simulation.
+            __destination (Optional[str]): output path for the simulation. Currently not used.
             use_american_date_format (bool): True if the simulation uses 'MM/DD/YYYY' date format.
             __job_id (int): Run job ID for executed runs
             __date_format_string (str): How the dates should formatted based on use_american_date_format
@@ -359,7 +358,7 @@ class NexusSimulator(Simulator):
         """
         # self.get_simulation_status(True)
 
-        self.fcs_file = FcsNexusFile.generate_fcs_structure(self.__new_fcs_file_path, origin_folder=self.__origin)
+        self.fcs_file = FcsNexusFile.generate_fcs_structure(self.__new_fcs_file_path)
         fcs_file_content = self.fcs_file.get_flat_list_str_file()
         if fcs_file_content is None:
             raise ValueError(f'FCS file not found, no content for {self.__new_fcs_file_path}')

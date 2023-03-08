@@ -1,3 +1,4 @@
+import os
 import pytest
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -13,20 +14,24 @@ GRID_FILES
 	 STRUCTURED_GRID nexus_data/mp2020_structured_grid_1_reg_update.dat
 	 OPTIONS nexus_data/nexus_data/mp2020_ref_options_reg_update.dat'''
 
-
-    fcs_path = 'test_fcs.fcs'
+    fcs_path = '/root_folder/test_fcs.fcs'
+    root_folder = '/root_folder'
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
-            'test_fcs.fcs': fcs_content,
+            '/root_folder/test_fcs.fcs': fcs_content,
             }).return_value
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
     mocker.patch("os.path.isfile", lambda x: True)
-    expected_structured_grid_file = NexusFile(location='nexus_data/mp2020_structured_grid_1_reg_update.dat',
+    structured_grid_path = os.path.join(root_folder, 'nexus_data/mp2020_structured_grid_1_reg_update.dat')
+    options_file_path = os.path.join(root_folder, 'nexus_data/nexus_data/mp2020_ref_options_reg_update.dat')
+    expected_includes = [ structured_grid_path, options_file_path]
+    expected_structured_grid_file = NexusFile(location=structured_grid_path,
                                               origin=fcs_path, includes=None,
                                               includes_objects=None, file_content_as_list=None)
-    expected_options_file = NexusFile(location='nexus_data/nexus_data/mp2020_ref_options_reg_update.dat', includes=None,
-                                      origin=fcs_path, includes_objects=None, file_content_as_list=None)
+    
+    expected_options_file = NexusFile(location=options_file_path,
+                                      includes=None, origin=fcs_path, includes_objects=None, file_content_as_list=None)
     expected_fcs_file = FcsNexusFile(location=fcs_path, origin=None,
                                      includes_objects=[expected_structured_grid_file, expected_options_file],
                                      file_content_as_list=[
@@ -34,7 +39,7 @@ GRID_FILES
                                          'GRID_FILES', '	 STRUCTURED_GRID ', expected_structured_grid_file, '',
                                          '	 OPTIONS ', expected_options_file, '', ],
                                      structured_grid_file=expected_structured_grid_file,
-                                     options_file=expected_options_file, includes=[],
+                                     options_file=expected_options_file, includes=expected_includes,
                                      )
 
     # Act
@@ -62,7 +67,9 @@ def test_fcs_file_multiple_methods(mocker):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
     mocker.patch("os.path.isfile", lambda x: True)
-
+    expected_includes = ['nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',
+                         'nexus_data/nexus_data/mp2017hm_ref_equil_02.dat',
+	                     'nexus_data/nexus_data/mp2017hm_ref_equil_03.dat', ]
     expected_equil_1 = NexusFile(location='nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',
                                  origin=fcs_path, includes=None,
                                  includes_objects=None, file_content_as_list=None)
@@ -81,7 +88,7 @@ def test_fcs_file_multiple_methods(mocker):
             '	 EQUIL Method 2 ', expected_equil_2, '', '	 EQUIL Method 3 ',
             expected_equil_3, ''],
         equil_files={1: expected_equil_1, 2: expected_equil_2, 3: expected_equil_3},
-        includes=[],
+        includes=expected_includes,
     )
     # Act
     result = FcsNexusFile.generate_fcs_structure(fcs_path)
@@ -113,7 +120,13 @@ def test_fcs_file_all_methods(mocker):
     mocker.patch("builtins.open", mock_open_wrapper)
     mocker.patch("os.path.isfile", lambda x: True)
     fcs_path = 'test_fcs.fcs'
-
+    expected_includes = ['nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',
+                         'nexus_data/nexus_data/mp2017hm_ref_equil_02.dat',
+                         'nexus_data/mp2020_structured_grid_1_reg_update.dat',
+                         'nexus_data/nexus_data/mp2020_ref_options_reg_update.dat',
+                         #'wells.inc',  # TODO fix this test to ensure the include files get included here 
+                         'wells.dat',
+                         'hyd.dat']
     expected_equil_1 = NexusFile(location='nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',
                                  origin=fcs_path, includes=None,
                                  includes_objects=None, file_content_as_list=None)
@@ -162,7 +175,7 @@ def test_fcs_file_all_methods(mocker):
                                      equil_files=equil_files, structured_grid_file=expected_structured_grid_file, 
                                      options_file=expected_options_file, well_files={1: expected_wells_file},
                                      hyd_files={3: expected_hyd_method_file},
-                                     file_content_as_list=expected_fcs_contents_as_list, includes=[])
+                                     file_content_as_list=expected_fcs_contents_as_list, includes=expected_includes)
     # Act
     result = FcsNexusFile.generate_fcs_structure(fcs_file_path=fcs_path)
     

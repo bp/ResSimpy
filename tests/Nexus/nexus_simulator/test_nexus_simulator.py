@@ -214,7 +214,7 @@ def test_load_structured_grid_file_basic_properties(mocker, structured_grid_file
     """Read in Structured Grid File"""
     # Arrange
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
-    structured_grid_name = os.path.join('new_destination', 'test_structured_grid.dat')
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
                                         {'testpath1/nexus_run.fcs': fcs_file,
@@ -228,8 +228,7 @@ def test_load_structured_grid_file_basic_properties(mocker, structured_grid_file
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    simulation = NexusSimulator(
-        origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
     result = simulation.get_structured_grid()
 
     # Assert
@@ -272,7 +271,7 @@ def test_load_structured_grid_file_dict_basic_properties(mocker, structured_grid
     """Read in Structured Grid File and return a dict object"""
     # Arrange
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID \"test_structured_grid.dat\""
-    structured_grid_name = os.path.join('new_destination', '\"test_structured_grid.dat\"')
+    structured_grid_name = os.path.join('testpath1', '\"test_structured_grid.dat\"')
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
                                         {'testpath1/nexus_run.fcs': fcs_file,
@@ -285,8 +284,7 @@ def test_load_structured_grid_file_dict_basic_properties(mocker, structured_grid
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    simulation = NexusSimulator(
-        origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', )
     result = simulation.get_structured_grid_dict()
 
     # Assert
@@ -341,7 +339,7 @@ def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
                                 "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc"
 
     structured_grid_file = base_structured_grid_file + structured_grid_file_contents
-    structured_grid_name = os.path.join('new_destination', '\"test_structured_grid.dat\"')
+    structured_grid_name = os.path.join('testpath1', '\"test_structured_grid.dat\"')
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
                                         {'testpath1/nexus_run.fcs': fcs_file,
@@ -354,8 +352,7 @@ def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    simulation = NexusSimulator(
-        origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', )
     result = simulation.get_structured_grid_dict()
 
     # Assert
@@ -401,7 +398,7 @@ def test_load_structured_grid_file_k_values(mocker, structured_grid_file_content
                                 "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc"
 
     structured_grid_file = base_structured_grid_file + structured_grid_file_contents
-    structured_grid_name = os.path.join('new_destination', '\"test_structured_grid.dat\"')
+    structured_grid_name = os.path.join('testpath1', '\"test_structured_grid.dat\"')
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
                                         {'testpath1/nexus_run.fcs': fcs_file,
@@ -415,8 +412,7 @@ def test_load_structured_grid_file_k_values(mocker, structured_grid_file_content
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    simulation = NexusSimulator(
-        origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', )
     result = simulation.get_structured_grid()
 
     # Assert
@@ -480,7 +476,7 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
                            f"{' INCLUDE' if new_sw.modifier == 'VALUE' else ''} {new_sw.value}"
 
     structured_grid_mock = mocker.mock_open(read_data=structured_grid_file)
-    structured_grid_name = os.path.join('new_destination', 'test_structured_grid.dat')
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
                                         {'testpath1/nexus_run.fcs': fcs_file,
@@ -494,8 +490,7 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
 
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    simulation = NexusSimulator(
-        origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', )
     mocker.patch("builtins.open", structured_grid_mock)
 
     # Act
@@ -558,8 +553,7 @@ def test_load_run_control_file_write_times_to_run_control(mocker, fcs_content, r
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    simulation = NexusSimulator(
-        origin=fcs_file_name, destination='new_destination')
+    simulation = NexusSimulator(origin=fcs_file_name, )
     result_times = simulation.get_content(section="RUNCONTROL", keyword="TIME")
 
     # Assert
@@ -590,8 +584,8 @@ def test_view_command(mocker, structured_grid_file_contents, expected_text):
     """Test the View Command functionality"""
     # Arrange
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID \"test_structured_grid.dat\""
-    structured_grid_name = os.path.join('new_destination', 'test_structured_grid.dat')
-    structured_grid_name_quotes = os.path.join('new_destination', '\"test_structured_grid.dat\"')
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_name_quotes = os.path.join('testpath1', '\"test_structured_grid.dat\"')
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
                                         {'testpath1/nexus_run.fcs': fcs_file,
@@ -607,8 +601,7 @@ def test_view_command(mocker, structured_grid_file_contents, expected_text):
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    result = NexusSimulator(
-        origin='testpath1/nexus_run.fcs', destination="new_destination")
+    result = NexusSimulator(origin='testpath1/nexus_run.fcs', )
 
     # Assert
     value = result.view_command(field='netgrs')
