@@ -537,6 +537,7 @@ def check_for_common_input_data(file_as_list: list[str], property_dict: dict) ->
 
     return property_dict
 
+
 def value_in_file(token: str, file: list[str]) -> bool:
     """Returns true if a token is found in the specified file
 

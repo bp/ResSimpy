@@ -1,7 +1,4 @@
-# TODO: Rename
 from typing import Optional
-
-from ResSimpy.Nexus import nexus_file_operations
 from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
@@ -82,13 +79,13 @@ def replace_value(file_as_list: list[str], old_property: VariableEntry, new_prop
             file_as_list[line_index] = new_line
 
 
-    # TODO: change append to be an optional parameter
 def append_include_to_grid_file(include_file_location: str, structured_grid_file_path: str):
+    # TODO: change append to be an optional parameter
     """Appends an include file to the end of a grid for adding LGRs
 
     Args:
         include_file_location (str): path to a file to include in the grid
-
+        structured_grid_file_path (str): file path to the structured grid.
     Raises:
         ValueError: if no structured grid file path is specified in the class instance
     """

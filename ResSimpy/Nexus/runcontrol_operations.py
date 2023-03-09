@@ -5,11 +5,10 @@ from datetime import datetime, timedelta
 from functools import cmp_to_key
 from typing import Union, Optional
 import ResSimpy.Nexus.nexus_file_operations as nfo
-# from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
 
 class Runcontrol:
-    def __init__(self, model):# NexusSimulator):
+    def __init__(self, model):
         """ class for controlling all time related problems
         Args:
             model: NexusSimulator instance
@@ -285,7 +284,7 @@ class Runcontrol:
             self.check_date_format(time)
 
         new_times = self.sort_remove_duplicate_times(content)
-        if len(new_times) > 0 > self.compare_dates(new_times[0], self.model.start_date,):
+        if len(new_times) > 0 > self.compare_dates(new_times[0], self.model.start_date, ):
             raise ValueError(
                 f"The supplied date of {new_times[0]} precedes the start date of {self.model.start_date}")
         operation = operation.lower()
