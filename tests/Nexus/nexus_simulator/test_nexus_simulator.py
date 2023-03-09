@@ -3,6 +3,8 @@ import pytest
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
+from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
+from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from pytest_mock import MockerFixture
 from unittest.mock import Mock
@@ -728,3 +730,31 @@ def test_get_well(mocker: MockerFixture, fcs_file_contents: str):
     mock_load_wells.assert_called_once_with(wellspec_file_path=expected_well_spec_file_path,
                                             default_units=UnitSystem.ENGLISH,
                                             start_date='')
+
+
+@pytest.mark.parametrize("fcs_file_contents", [
+    ("""
+       PVT method 1 my/pvt/file1.dat
+
+       pvt Method 2 my/pvt/file2.dat
+       Pvt METHOD 3 my/pvt/file3.dat
+    """)
+], ids=['basic case'])
+def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
+    """Testing the functionality to retrieve pvt methods from Nexus fcs file"""
+    # Arrange
+    fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
+    mocker.patch("builtins.open", fcs_file_open)
+
+    loaded_pvt = {1: NexusPVT(file_path=os.path.join('path', 'my/pvt/file1.dat')),
+                  2: NexusPVT(file_path=os.path.join('path', 'my/pvt/file2.dat')),
+                  3: NexusPVT(file_path=os.path.join('path', 'my/pvt/file3.dat')),
+                 }
+
+    simulation = NexusSimulator(origin='path/nexus_run.fcs')
+
+    # Act
+    result = simulation.pvt_methods
+
+    # Assert
+    assert result == loaded_pvt
