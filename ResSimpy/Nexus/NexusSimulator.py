@@ -15,7 +15,7 @@ import resqpy.model as rq
 from ResSimpy.Nexus.NexusWells import NexusWells
 from ResSimpy.Simulator import Simulator
 from ResSimpy.Nexus.runcontrol_operations import Runcontrol
-import ResSimpy.Nexus.logfile_operations as logfile_operations
+from ResSimpy.Nexus.logfile_operations import Logging
 import ResSimpy.Nexus.structured_grid_operations as structured_grid_operations
 
 
@@ -102,6 +102,7 @@ class NexusSimulator(Simulator):
         self.__default_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
 
         self.Runcontrol = Runcontrol(self)
+        self.Logging = Logging(self)
 
         if destination is not None and destination != '':
             self.set_output_path(path=destination.strip())
@@ -587,11 +588,11 @@ class NexusSimulator(Simulator):
         """
         for line in log_file_line_list:
             if nfo.check_token('start generic pdsh   prolog', line):
-                value = logfile_operations.get_simulation_time(line)
+                value = self.Logging.get_simulation_time(line)
                 self.__simulation_start_time = value
 
             if nfo.check_token('end generic pdsh   epilog', line):
-                value = logfile_operations.get_simulation_time(line)
+                value = self.Logging.get_simulation_time(line)
                 self.__simulation_end_time = value
 
     def __get_start_end_difference(self) -> Optional[str]:
@@ -603,8 +604,8 @@ class NexusSimulator(Simulator):
         if self.__simulation_start_time is None or self.__simulation_end_time is None:
             return None
 
-        start_date = logfile_operations.convert_server_date(self.__simulation_start_time)
-        end_date = logfile_operations.convert_server_date(self.__simulation_end_time)
+        start_date = self.Logging.convert_server_date(self.__simulation_start_time)
+        end_date = self.Logging.convert_server_date(self.__simulation_end_time)
 
         total_difference = (end_date - start_date)
         days = int(total_difference.days)
@@ -643,7 +644,7 @@ class NexusSimulator(Simulator):
             if job_finished:
                 self.__previous_run_time = self.__get_start_end_difference() if from_startup \
                     else self.__previous_run_time
-                return logfile_operations.get_errors_warnings_string(log_file_line_list=log_file_line_list)
+                return self.Logging.get_errors_warnings_string(log_file_line_list=log_file_line_list)
             else:
                 job_number_line = [
                     x for x in log_file_line_list if 'Job number:' in x]
