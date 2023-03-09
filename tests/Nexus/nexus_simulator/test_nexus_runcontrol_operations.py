@@ -35,7 +35,8 @@ from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
          "TIME 1503.1\nTIME 15/12/2021\nTIME 15/12/2021(00:00:01)",
          ['0.1', '15/10/1983(01:30:00)', '15/10/1983(18:30:11)', '15/10/1983(18:30:12)', '1503.1', '15/12/2021',
           '15/12/2021(00:00:01)']),
-    ])
+    ], ids=['USA date format', 'Non-USA date format', 'times in include', 'times in runcontrol only',
+            'times and dates', 'times and dates 2'])
 def test_load_run_control_file_times_in_include_file(mocker, date_format, expected_use_american_date_format,
                                                      run_control_contents, include_file_contents, expected_times):
     """Getting times from an external include file"""

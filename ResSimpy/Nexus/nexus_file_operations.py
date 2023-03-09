@@ -536,3 +536,20 @@ def check_for_common_input_data(file_as_list: list[str], property_dict: dict) ->
             property_dict['TEMP_UNIT'] = 'CELSIUS'
 
     return property_dict
+
+def value_in_file(token: str, file: list[str]) -> bool:
+    """Returns true if a token is found in the specified file
+
+    Args:
+        token (str): the token being searched for.
+        file (list[str]): a list of strings containing each line of the file as a new entry
+
+    Returns:
+        bool: True if the token is found and False otherwise
+    """
+    token_found = False
+    for line in file:
+        if check_token(token, line):
+            token_found = True
+
+    return token_found

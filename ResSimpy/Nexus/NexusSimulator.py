@@ -13,7 +13,7 @@ import resqpy.model as rq
 
 from ResSimpy.Nexus.NexusWells import NexusWells
 from ResSimpy.Simulator import Simulator
-import ResSimpy.Nexus.runcontrol_operations as runcontrol_operations
+from ResSimpy.Nexus.runcontrol_operations import Runcontrol
 import ResSimpy.Nexus.logfile_operations as logfile_operations
 import ResSimpy.Nexus.structured_grid_operations as structured_grid_operations
 
@@ -103,6 +103,11 @@ class NexusSimulator(Simulator):
         self.__surface_file_path: Optional[str] = None
         self.Wells: NexusWells = NexusWells()
         self.__default_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
+
+        self.Runcontrol = Runcontrol(use_american_date_format=self.use_american_date_format,
+                                     start_date=self.start_date,
+                                     date_format_string=self.__date_format_string,
+                                     date_with_time_length=self.DATE_WITH_TIME_LENGTH)
 
         if destination is not None and destination != '':
             self.set_output_path(path=destination.strip())
@@ -357,23 +362,24 @@ class NexusSimulator(Simulator):
             Attempts to load the run_control_file.
         """
         # self.get_simulation_status(True)
-
+        fcs_include_only = NexusFile.generate_file_include_structure(self.__new_fcs_file_path).get_flat_list_str_file()
         self.fcs_file = FcsNexusFile.generate_fcs_structure(self.__new_fcs_file_path)
-        fcs_file_content = self.fcs_file.get_flat_list_str_file()
-        if fcs_file_content is None:
+        if fcs_include_only is None:
             raise ValueError(f'FCS file not found, no content for {self.__new_fcs_file_path}')
-        for line in fcs_file_content:
+        for line in fcs_include_only:
             if nfo.check_token('DATEFORMAT', line):
-                value = nfo.get_token_value('DATEFORMAT', line, fcs_file_content)
+                value = nfo.get_token_value('DATEFORMAT', line, fcs_include_only)
                 if value is not None:
                     self.use_american_date_format = value == 'MM/DD/YYYY'
+                    self.Runcontrol.use_american_date_format = self.use_american_date_format
                 self.__date_format_string = "%m/%d/%Y" if self.use_american_date_format else "%d/%m/%Y"
+                self.Runcontrol.date_format_string = self.__date_format_string
             elif nfo.check_token('RUN_UNITS', line):
-                value = nfo.get_token_value('RUN_UNITS', line, fcs_file_content)
+                value = nfo.get_token_value('RUN_UNITS', line, fcs_include_only)
                 if value is not None:
                     self.__run_units = UnitSystem(value.upper())
             elif nfo.check_token('DEFAULT_UNITS', line):
-                value = nfo.get_token_value('DEFAULT_UNITS', line, fcs_file_content)
+                value = nfo.get_token_value('DEFAULT_UNITS', line, fcs_include_only)
                 if value is not None:
                     self.__default_units = UnitSystem(value.upper())
 
@@ -486,7 +492,7 @@ class NexusSimulator(Simulator):
         """Returns the date format being used by the model
         formats used: ('MM/DD/YYYY', 'DD/MM/YYYY')
         """
-        return runcontrol_operations.get_date_format(self.use_american_date_format)
+        return self.Runcontrol.get_date_format(self.use_american_date_format)
 
     def __load_run_control_file(self):
         """Loads the run control information into the class instance. \
@@ -508,9 +514,10 @@ class NexusSimulator(Simulator):
                 value = nfo.get_expected_token_value('START', line, run_control_file_content)
                 if value is not None:
                     self.start_date_set(value)
+                    self.Runcontrol.start_date = value
 
         times = []
-        run_control_times = runcontrol_operations.get_times(run_control_file_content)
+        run_control_times = self.Runcontrol.get_times(run_control_file_content)
         times.extend(run_control_times)
 
         # If we don't want to write the times, return here.
@@ -521,7 +528,7 @@ class NexusSimulator(Simulator):
             return
         for file in self.fcs_file.runcontrol_file.includes:
             if self.__destination is not None:
-                runcontrol_operations.remove_times_from_file(run_control_file_content, file)
+                self.Runcontrol.remove_times_from_file(run_control_file_content, file)
 
         self.__modify_times(content=times, operation='replace')
 
@@ -588,13 +595,10 @@ class NexusSimulator(Simulator):
         if content is None:
             content = []
         for time in content:
-            runcontrol_operations.check_date_format(
-                time, self.__date_format_string, self.DATE_WITH_TIME_LENGTH, self.use_american_date_format)
+            self.Runcontrol.check_date_format(time)
 
-        new_times = runcontrol_operations.sort_remove_duplicate_times(
-            content, self.start_date, self.__date_format_string, self.DATE_WITH_TIME_LENGTH)
-        if len(new_times) > 0 > runcontrol_operations.compare_dates(
-                new_times[0], self.start_date, self.start_date, self.__date_format_string, self.DATE_WITH_TIME_LENGTH):
+        new_times = self.Runcontrol.sort_remove_duplicate_times(content)
+        if len(new_times) > 0 > self.Runcontrol.compare_dates(new_times[0], self.start_date,):
             raise ValueError(
                 f"The supplied date of {new_times[0]} precedes the start date of {self.start_date}")
         operation = operation.lower()
@@ -611,9 +615,7 @@ class NexusSimulator(Simulator):
                 if time in self.__times:
                     self.__times.remove(time)
 
-        self.__times = runcontrol_operations.sort_remove_duplicate_times(self.__times, self.start_date,
-                                                                         self.__date_format_string,
-                                                                         self.DATE_WITH_TIME_LENGTH)
+        self.__times = self.Runcontrol.sort_remove_duplicate_times(self.__times)
 
         if self.__destination is not None:
             self.__update_times_in_file()
@@ -631,7 +633,7 @@ class NexusSimulator(Simulator):
         file_content = self.fcs_file.runcontrol_file.get_flat_list_str_file()
         filename = self.fcs_file.runcontrol_file.location
 
-        new_file_content = runcontrol_operations.delete_times(file_content)
+        new_file_content = self.Runcontrol.delete_times(file_content)
 
         time_list = self.__times if self.__times is not None else []
         stop_string = 'STOP\n'
@@ -1057,56 +1059,14 @@ class NexusSimulator(Simulator):
                             last_time = next_value
 
         if last_time is not None:
-            days_completed = runcontrol_operations.convert_date_to_number(
-                last_time, self.start_date, self.__date_format_string, self.DATE_WITH_TIME_LENGTH)
+            days_completed = self.Runcontrol.convert_date_to_number(last_time)
             if self.__times is None:
                 raise ValueError("No times provided in the instance - please read them in from runcontrol file")
-            total_days = runcontrol_operations.convert_date_to_number(
-                self.__times[-1],  self.start_date, self.__date_format_string, self.DATE_WITH_TIME_LENGTH)
+            total_days = self.Runcontrol.convert_date_to_number(self.__times[-1], )
             return round((days_completed / total_days) * 100, 1)
 
         return 0
 
-    # TODO: change append to be an optional parameter, + move this elsewhere
-    def append_include_to_grid_file(self, include_file_location: str):
-        """Appends an include file to the end of a grid for adding LGRs
-
-        Args:
-            include_file_location (str): path to a file to include in the grid
-
-        Raises:
-            ValueError: if no structured grid file path is specified in the class instance
-        """
-        # Get the existing file as a list
-        if self.__structured_grid_file_path is None:
-            raise ValueError("No file path given or found for structured grid file path. \
-                Please update structured grid file path")
-        file = nfo.load_file_as_list(self.__structured_grid_file_path)
-
-        file.append(f"\nINCLUDE {include_file_location}\n")
-        file.append("TOLPV LGR1 0\n")
-
-        # Save the new file contents
-        new_file_str = "".join(file)
-        with open(self.__structured_grid_file_path, "w") as text_file:
-            text_file.write(new_file_str)
-
-    def __value_in_file(self, token: str, file: list[str]) -> bool:
-        """Returns true if a token is found in the specified file
-
-        Args:
-            token (str): the token being searched for.
-            file (list[str]): a list of strings containing each line of the file as a new entry
-
-        Returns:
-            bool: True if the token is found and False otherwise
-        """
-        token_found = False
-        for line in file:
-            if nfo.check_token(token, line):
-                token_found = True
-
-        return token_found
 
     # TODO: move to 'Reporting' module
     def add_map_properties_to_start_of_grid_file(self):
@@ -1121,15 +1081,15 @@ class NexusSimulator(Simulator):
                 Please update structured grid file path")
         file = nfo.load_file_as_list(self.__structured_grid_file_path)
 
-        if not self.__value_in_file('MAPBINARY', file):
+        if not nfo.value_in_file('MAPBINARY', file):
             new_file = ['MAPBINARY\n']
         else:
             new_file = []
 
-        if not self.__value_in_file('MAPVDB', file):
+        if not nfo.value_in_file('MAPVDB', file):
             new_file.extend(['MAPVDB\n'])
 
-        if not self.__value_in_file('MAPOUT', file):
+        if not nfo.value_in_file('MAPOUT', file):
             new_file.extend(['MAPOUT ALL\n'])
         else:
             line_counter = 0
