@@ -42,7 +42,6 @@ class NexusSimulator(Simulator):
             run_control_file_path (Optional[str]): file path to the run control file - derived from the fcs file
             __destination (Optional[str]): output path for the simulation. Currently not used.
             use_american_date_format (bool): True if the simulation uses 'MM/DD/YYYY' date format.
-            __job_id (int): Run job ID for executed runs
             __original_fcs_file_path (str): Path to the original fcs file path supplied
             __new_fcs_file_path (str): Where the new fcs will be saved to
             __force_output (bool): private attribute of force_output
@@ -53,10 +52,6 @@ class NexusSimulator(Simulator):
             __structured_grid_file_path (Optional[str]): file path to the structured grid.
             __structured_grid_file (Optional[StructuredGridFile]): StructuredGridFile object representing the \
                 structured grid used in Nexus
-            __simulation_start_time (Optional[str]): Execution start time of the simulation when submitted \
-                to calculation engine
-            __simulation_end_time (Optional[str]): Execution end time of the last time the simulation was run
-            __previous_run_time (Optional[str]): Difference between simulation execution start time and end time
             __run_units (Optional[str]): Unit system used in the Nexus model
             use_american_run_units (bool): True if an American unit system is used equivalent to 'ENGLISH'. \
                 False otherwise. For the RUN_UNITS keyword.
@@ -78,7 +73,6 @@ class NexusSimulator(Simulator):
         self.run_control_file_path: Optional[str] = ''
         self.__destination: Optional[str] = None
         self.use_american_date_format: bool = False
-        self.__job_id: int = -1
         self.__original_fcs_file_path: str = origin.strip()
         self.__new_fcs_file_path: str = origin.strip()
         self.__force_output: bool = force_output
@@ -87,12 +81,6 @@ class NexusSimulator(Simulator):
         self.__nexus_data_name: str = nexus_data_name
         self.__structured_grid_file_path: Optional[str] = None
         self.__structured_grid_file: Optional[StructuredGridFile] = None
-        # run execution start time from the log file
-        self.__simulation_start_time: Optional[str] = None
-        # run execution finish time from the log file
-        self.__simulation_end_time: Optional[str] = None
-        # run execution finish time from the log file
-        self.__previous_run_time: Optional[str] = None
         self.__run_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
         self.use_american_run_units: bool = False
         self.use_american_input_units: bool = False
@@ -138,6 +126,12 @@ class NexusSimulator(Simulator):
         self.__new_fcs_file_path = self.__new_fcs_file_path.replace('temp/', '', 1)
         self.__surface_file_path = self.__surface_file_path.replace('temp/', '', 1)
 
+    def get_simulation_status(self, from_startup: bool = False) -> Optional[str]:
+        return self.Logging.get_simulation_status(from_startup)
+
+    def get_simulation_progress(self) -> float:
+        return self.Logging.get_simulation_progress()
+
     def get_model_location(self):
         """Returns the location of the model"""
         return os.path.dirname(self.__origin)
@@ -160,6 +154,14 @@ class NexusSimulator(Simulator):
 
     def get_write_times(self) -> bool:
         return self.__write_times
+
+    @property
+    def original_fcs_file_path(self):
+        return self.__original_fcs_file_path
+
+    @property
+    def origin(self):
+        return self.__origin
 
     @staticmethod
     def get_check_run_input_units_for_models(models: list[str]) -> tuple[Optional[bool], Optional[bool]]:
@@ -356,8 +358,7 @@ class NexusSimulator(Simulator):
         """
         self.__destination = path
         if self.__destination is not None and os.path.dirname(self.__origin) != os.path.dirname(self.__destination):
-            self.__origin = self.__destination + "/" + \
-                            os.path.basename(self.__original_fcs_file_path)
+            self.__origin = self.__destination + "/" + os.path.basename(self.__original_fcs_file_path)
 
     def __load_fcs_file(self):
         """ Loads in the information from the supplied FCS file into the class instance.
@@ -775,75 +776,6 @@ class NexusSimulator(Simulator):
     def get_surface_file_path(self):
         """Get the surface file path"""
         return self.__surface_file_path
-
-    def get_base_case_run_time(self) -> str:
-        """Get the time taken for the base case to run. Returns '-' if no run time found."""
-        if self.__previous_run_time is not None:
-            return self.__previous_run_time
-        else:
-            return '-'
-
-    def get_simulation_progress(self) -> float:
-        """Returns the simulation progress from log files
-
-        Raises:
-            NotImplementedError: Only retrieving status from a log file is supported at the moment
-            ValueError: if no times from the runcontrol file are read in
-
-        Returns:
-            Optional[float]: how long through a simulation run as a proportion of the number of days \
-                simulated as stated in the runcontrol
-        """
-        log_file_path = self.__get_log_path()
-        if log_file_path is None:
-            raise NotImplementedError("Only retrieving status from a log file is supported at the moment")
-        log_file = nfo.load_file_as_list(log_file_path)
-
-        read_in_times = False
-        time_heading_location = None
-        last_time = None
-        for line in log_file:
-            case_name_string = f"Case Name = {self.__root_name}"
-            if case_name_string in line:
-                read_in_times = True
-                continue
-            if read_in_times and nfo.check_token('TIME', line):
-                heading_location = 0
-                line_string = line
-                while len(line_string) > 0:
-                    next_value = nfo.get_next_value(0, [line_string], line_string)
-                    if next_value is None:
-                        break
-
-                    line_string = line_string.replace(next_value, '', 1)
-                    if next_value == 'TIME':
-                        time_heading_location = heading_location
-                    heading_location += 1
-
-            if read_in_times and time_heading_location is not None:
-                line_string = line
-                next_value = nfo.get_next_value(0, [line_string], line_string)
-                if next_value is not None and next_value.replace('.', '', 1).isdigit():
-                    if time_heading_location == 0 and (last_time is None or float(next_value) > float(last_time)):
-                        last_time = next_value
-                    for x in range(0, time_heading_location):
-                        line_string = line_string.replace(next_value, '', 1)
-                        next_value = nfo.get_next_value(0, [line_string], line_string)
-                        if next_value is None:
-                            break
-                        # When we reach the time column, read in the time value.
-                        if x == (time_heading_location - 1) and \
-                                (last_time is None or float(next_value) > float(last_time)):
-                            last_time = next_value
-
-        if last_time is not None:
-            days_completed = self.Runcontrol.convert_date_to_number(last_time)
-            if self.Runcontrol.times is None:
-                raise ValueError("No times provided in the instance - please read them in from runcontrol file")
-            total_days = self.Runcontrol.convert_date_to_number(self.Runcontrol.times[-1], )
-            return round((days_completed / total_days) * 100, 1)
-
-        return 0
 
     # TODO: move to 'Reporting' module
     def add_map_properties_to_start_of_grid_file(self):

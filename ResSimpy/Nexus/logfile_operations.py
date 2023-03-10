@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import os
 from datetime import datetime
 from typing import Optional
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -8,12 +10,21 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
 class Logging:
-    def __init__(self, model):  # NexusSimulator):
+    def __init__(self, model, ):  # NexusSimulator):
         """ class for controlling all logging and logfile (*.log) related functionality
         Args:
             model: NexusSimulator instance
+            __job_id (int): Run job ID for executed runs
+            __simulation_start_time (Optional[str]): Execution start time of the simulation when submitted \
+                to calculation engine
+            __simulation_end_time (Optional[str]): Execution end time of the last time the simulation was run
+            __previous_run_time (Optional[str]): Difference between simulation execution start time and end time
         """
         self.model = model
+        self.__job_id: int = -1
+        self.__simulation_start_time: Optional[str] = None
+        self.__simulation_end_time: Optional[str] = None
+        self.__previous_run_time: Optional[str] = None
 
     @staticmethod
     def get_simulation_time(line: str) -> str:
@@ -127,7 +138,7 @@ class Logging:
 
     def get_job_id(self) -> int:
         """Get the job Id of a simulation run"""
-        return self.model.__job_id
+        return self.__job_id
 
     def __get_log_path(self, from_startup: bool = False) -> Optional[str]:
         """Returns the path of the log file for the simulation
@@ -141,18 +152,17 @@ class Logging:
             Optional[str]: The path of the .log file from the simulation if found. If not found returns None.
         """
         folder_path = os.path.dirname(
-            self.__original_fcs_file_path) if from_startup else os.path.dirname(self.__origin)
+            self.model.original_fcs_file_path) if from_startup else os.path.dirname(self.model.origin)
         files = os.listdir(folder_path)
-        original_fcs_file_location = os.path.basename(
-            self.__original_fcs_file_path)
+        original_fcs_file_location = os.path.basename(self.model.original_fcs_file_path)
         log_file_name = os.path.splitext(original_fcs_file_location)[
-                            0] + ".log" if from_startup else self.__root_name + ".log"
+                            0] + ".log" if from_startup else self.model.get_rootname() + ".log"
 
         if log_file_name in files:
             if from_startup:
                 file_location = folder_path
             else:
-                file_location = self.__destination if self.__destination is not None else folder_path
+                file_location = self.model.destination if self.model.destination is not None else folder_path
 
             log_file_path = file_location + "/" + log_file_name
             return log_file_path
@@ -202,7 +212,7 @@ class Logging:
             if job_finished:
                 self.__previous_run_time = self.__get_start_end_difference() if from_startup \
                     else self.__previous_run_time
-                return self.Logging.get_errors_warnings_string(log_file_line_list=log_file_line_list)
+                return self.get_errors_warnings_string(log_file_line_list=log_file_line_list)
             else:
                 job_number_line = [
                     x for x in log_file_line_list if 'Job number:' in x]
@@ -221,8 +231,8 @@ class Logging:
         if self.__simulation_start_time is None or self.__simulation_end_time is None:
             return None
 
-        start_date = self.Logging.convert_server_date(self.__simulation_start_time)
-        end_date = self.Logging.convert_server_date(self.__simulation_end_time)
+        start_date = self.convert_server_date(self.__simulation_start_time)
+        end_date = self.convert_server_date(self.__simulation_end_time)
 
         total_difference = (end_date - start_date)
         days = int(total_difference.days)
@@ -232,3 +242,72 @@ class Logging:
                       (hours * 60 * 60) - (minutes * 60))
 
         return f"{days} Days, {hours} Hours, {minutes} Minutes {seconds} Seconds"
+
+    def get_base_case_run_time(self) -> str:
+        """Get the time taken for the base case to run. Returns '-' if no run time found."""
+        if self.__previous_run_time is not None:
+            return self.__previous_run_time
+        else:
+            return '-'
+
+    def get_simulation_progress(self) -> float:
+        """Returns the simulation progress from log files
+
+        Raises:
+            NotImplementedError: Only retrieving status from a log file is supported at the moment
+            ValueError: if no times from the runcontrol file are read in
+
+        Returns:
+            Optional[float]: how long through a simulation run as a proportion of the number of days \
+                simulated as stated in the runcontrol
+        """
+        log_file_path = self.__get_log_path()
+        if log_file_path is None:
+            raise NotImplementedError("Only retrieving status from a log file is supported at the moment")
+        log_file = nfo.load_file_as_list(log_file_path)
+
+        read_in_times = False
+        time_heading_location = None
+        last_time = None
+        for line in log_file:
+            case_name_string = f"Case Name = {self.model.get_rootname()}"
+            if case_name_string in line:
+                read_in_times = True
+                continue
+            if read_in_times and nfo.check_token('TIME', line):
+                heading_location = 0
+                line_string = line
+                while len(line_string) > 0:
+                    next_value = nfo.get_next_value(0, [line_string], line_string)
+                    if next_value is None:
+                        break
+
+                    line_string = line_string.replace(next_value, '', 1)
+                    if next_value == 'TIME':
+                        time_heading_location = heading_location
+                    heading_location += 1
+
+            if read_in_times and time_heading_location is not None:
+                line_string = line
+                next_value = nfo.get_next_value(0, [line_string], line_string)
+                if next_value is not None and next_value.replace('.', '', 1).isdigit():
+                    if time_heading_location == 0 and (last_time is None or float(next_value) > float(last_time)):
+                        last_time = next_value
+                    for x in range(0, time_heading_location):
+                        line_string = line_string.replace(next_value, '', 1)
+                        next_value = nfo.get_next_value(0, [line_string], line_string)
+                        if next_value is None:
+                            break
+                        # When we reach the time column, read in the time value.
+                        if x == (time_heading_location - 1) and \
+                                (last_time is None or float(next_value) > float(last_time)):
+                            last_time = next_value
+
+        if last_time is not None:
+            days_completed = self.model.Runcontrol.convert_date_to_number(last_time)
+            if self.model.Runcontrol.times is None:
+                raise ValueError("No times provided in the instance - please read them in from runcontrol file")
+            total_days = self.model.Runcontrol.convert_date_to_number(self.model.Runcontrol.times[-1], )
+            return round((days_completed / total_days) * 100, 1)
+
+        return 0
