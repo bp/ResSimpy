@@ -69,12 +69,13 @@ def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock
     assert list_of_writes[0].args[0] == expected_file_contents
 
 
-@pytest.mark.parametrize("run_control_path,expected_root,expected_run_control_path,date_format,expected_use_american_date_format", [
-    # Providing an absolute path to the fcs file + USA date format
-    ("/run/control/path", "", "/run/control/path", "MM/DD/YYYY", True),
-    # Providing a relative path to the fcs file + Non-USA date format
-    ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", False)
-])
+@pytest.mark.parametrize(
+    "run_control_path,expected_root,expected_run_control_path,date_format,expected_use_american_date_format", [
+        # Providing an absolute path to the fcs file + USA date format
+        ("/run/control/path", "", "/run/control/path", "MM/DD/YYYY", True),
+        # Providing a relative path to the fcs file + Non-USA date format
+        ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", False)
+    ])
 def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expected_root, expected_run_control_path,
                                                  date_format, expected_use_american_date_format):
     # Arrange
@@ -91,12 +92,13 @@ def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expec
     open_mock.assert_called_with(expected_full_path, 'r')
 
 
-@pytest.mark.parametrize("run_control_path,expected_root,expected_run_control_path,date_format,expected_use_american_date_format", [
-    # Providing an absolute path to the fcs file + USA date format
-    ("/run/control/path", "", "/run/control/path", "MM/DD/YYYY", True),
-    # Providing a relative path to the fcs file + Non-USA date format
-    ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", False)
-])
+@pytest.mark.parametrize(
+    "run_control_path,expected_root,expected_run_control_path,date_format,expected_use_american_date_format", [
+        # Providing an absolute path to the fcs file + USA date format
+        ("/run/control/path", "", "/run/control/path", "MM/DD/YYYY", True),
+        # Providing a relative path to the fcs file + Non-USA date format
+        ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", False)
+    ])
 def test_load_fcs_space_in_filename(mocker, run_control_path, expected_root, expected_run_control_path,
                                     date_format, expected_use_american_date_format):
     # Arrange
@@ -196,18 +198,24 @@ def test_output_to_existing_directory(mocker):
 
 
 @pytest.mark.parametrize("fcs_file, expected_default_unit_value",
-                         [('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           UnitSystem.ENGLISH),
-                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS \n LAB\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           UnitSystem.LAB),
-                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS METKG/CM2\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           UnitSystem.METKGCM2),
-                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_units    METRIC\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           UnitSystem.METRIC),
-                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           UnitSystem.ENGLISH),
-                          ('DESC Test model\n\nRUN_UNITS ENGLISH\n\ndefault_Units Metbar\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           UnitSystem.METBAR),
+                         [(
+                          'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                          UnitSystem.ENGLISH),
+                          (
+                          'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS \n LAB\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                          UnitSystem.LAB),
+                          (
+                          'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS METKG/CM2\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                          UnitSystem.METKGCM2),
+                          (
+                          'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_units    METRIC\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                          UnitSystem.METRIC),
+                          (
+                          'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                          UnitSystem.ENGLISH),
+                          (
+                          'DESC Test model\n\nRUN_UNITS ENGLISH\n\ndefault_Units Metbar\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                          UnitSystem.METBAR),
                           ])
 def test_load_fcs_file_populates_default_units(mocker, fcs_file, expected_default_unit_value):
     # Arrange
@@ -223,9 +231,10 @@ def test_load_fcs_file_populates_default_units(mocker, fcs_file, expected_defaul
 
 
 @pytest.mark.parametrize("fcs_file",
-                         ['DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS NOTVALID\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                         'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS \nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
-                          ])
+                         [
+                             'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS NOTVALID\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                             'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS \nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
+                             ])
 def test_load_fcs_file_raises_error_for_undefined_default_units(mocker, fcs_file):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file)
@@ -237,16 +246,21 @@ def test_load_fcs_file_raises_error_for_undefined_default_units(mocker, fcs_file
 
 
 @pytest.mark.parametrize("fcs_file, expected_run_unit_value",
-                         [('DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           UnitSystem.ENGLISH),
-                          ('DESC Test model\n\nRUN_UNITS  \n lab  \n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           UnitSystem.LAB),
-                          ('DESC Test model\n\nRun_UNITS MetBar\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           UnitSystem.METBAR),
-                          ('DESC Test model\n\nRun_UNITS METKG/CM2\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           UnitSystem.METKGCM2),
-                          ('DESC Test model\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                           UnitSystem.ENGLISH)
+                         [(
+                          'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                          UnitSystem.ENGLISH),
+                          (
+                          'DESC Test model\n\nRUN_UNITS  \n lab  \n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                          UnitSystem.LAB),
+                          (
+                          'DESC Test model\n\nRun_UNITS MetBar\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                          UnitSystem.METBAR),
+                          (
+                          'DESC Test model\n\nRun_UNITS METKG/CM2\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                          UnitSystem.METKGCM2),
+                          (
+                          'DESC Test model\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                          UnitSystem.ENGLISH)
                           ])
 def test_load_fcs_file_populates_run_units(mocker, fcs_file, expected_run_unit_value):
     # Arrange
@@ -262,10 +276,11 @@ def test_load_fcs_file_populates_run_units(mocker, fcs_file, expected_run_unit_v
 
 
 @pytest.mark.parametrize("fcs_file",
-                         ['DESC Test model\n\nRUN_UNITS BLAH\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                          'DESC Test model\n\nRUN_UNITs \nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
-                          'DESC Test model\n\nRUN_UNITs 1\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
-                          ])
+                         [
+                             'DESC Test model\n\nRUN_UNITS BLAH\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                             'DESC Test model\n\nRUN_UNITs \nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
+                             'DESC Test model\n\nRUN_UNITs 1\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
+                             ])
 def test_load_fcs_file_raises_error_for_undefined_run_units(mocker, fcs_file):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file)
@@ -278,15 +293,15 @@ def test_load_fcs_file_raises_error_for_undefined_run_units(mocker, fcs_file):
 
 @pytest.mark.parametrize("fcs_file, expected_root, expected_extracted_path",
                          [(
-                             'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data/Includes/nexus_data/surface_simplified_06082018.inc',
-                             'testpath1', 'nexus_data/Includes/nexus_data/surface_simplified_06082018.inc'),
+                                 'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data/Includes/nexus_data/surface_simplified_06082018.inc',
+                                 'testpath1', 'nexus_data/Includes/nexus_data/surface_simplified_06082018.inc'),
                              (
-                             'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE Network 1 	file/path/location/surface.inc',
-                             'testpath1', 'file/path/location/surface.inc'),
+                                     'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE Network 1 	file/path/location/surface.inc',
+                                     'testpath1', 'file/path/location/surface.inc'),
                              (
-                             'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nsurface network 1 	file/path/location/surface.inc',
-                             'testpath1', 'file/path/location/surface.inc'),
-                          ])
+                                     'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nsurface network 1 	file/path/location/surface.inc',
+                                     'testpath1', 'file/path/location/surface.inc'),
+                         ])
 def test_get_abs_surface_file_path(mocker, fcs_file, expected_root, expected_extracted_path):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file)
@@ -618,7 +633,7 @@ PLOTBINARY
     mocker.patch("builtins.open", modifying_mock_open)
 
     # Act
-    simulation.add_map_properties_to_start_of_grid_file()
+    simulation.Reporting.add_map_properties_to_start_of_grid_file()
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
@@ -694,6 +709,7 @@ def test_get_wells_df(mocker: MockerFixture):
 
     pd.testing.assert_frame_equal(result, loaded_wells_df)
 
+
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
        WelLS set 1 my/wellspec/file.dat
@@ -749,7 +765,7 @@ def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
     loaded_pvt = {1: NexusPVT(file_path=os.path.join('path', 'my/pvt/file1.dat')),
                   2: NexusPVT(file_path=os.path.join('path', 'my/pvt/file2.dat')),
                   3: NexusPVT(file_path=os.path.join('path', 'my/pvt/file3.dat')),
-                 }
+                  }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 

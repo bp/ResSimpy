@@ -367,7 +367,7 @@ def test_view_command(mocker, structured_grid_file_contents, expected_text):
     result = NexusSimulator(origin='testpath1/nexus_run.fcs', )
 
     # Assert
-    value = result.view_command(field='netgrs')
+    value = result.StructuredGridOperations.view_command(field='netgrs')
     assert value == expected_text
 
 
