@@ -8,6 +8,7 @@ from typing import Any, Union, Optional
 import warnings
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
 
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.StructuredGridFile import StructuredGridFile, PropertyToLoad, VariableEntry
@@ -106,6 +107,8 @@ class NexusSimulator(Simulator):
         self.__surface_file_path: Optional[str] = None
         self.Wells: NexusWells = NexusWells()
         self.__default_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
+        # Model dynamic properties
+        self.pvt_methods: dict[int, NexusPVT] = {}
 
         if destination is not None and destination != '':
             self.set_output_path(path=destination.strip())
@@ -358,6 +361,7 @@ class NexusSimulator(Simulator):
             Loads in the paths for runcontrol, structured grid and the first surface network.
             Loads in the values for dateformat and run units.
             Attempts to load the run_control_file.
+            Loads the wellspec and dynamic property files.
         """
         # self.get_simulation_status(True)
 
@@ -381,8 +385,20 @@ class NexusSimulator(Simulator):
                     self.__default_units = UnitSystem(value.upper())
 
         # Load in the other files
-        # Load in Runcontrol
 
+        # === Load in dynamic properties
+        # Read in PVT properties from Nexus PVT method files
+        if not isinstance(self.fcs_file.pvt_files, Field) and self.fcs_file.pvt_files is not None and \
+                len(self.fcs_file.pvt_files) > 0:  # Check if PVT files exist
+            for table_num in self.fcs_file.pvt_files.keys():  # For each PVT method
+                pvt_file = self.fcs_file.pvt_files[table_num].location
+                if pvt_file is None:
+                    raise ValueError(f'Unable to find pvt file: {pvt_file}')
+                if os.path.isfile(pvt_file):
+                    self.pvt_methods[table_num] = NexusPVT(file_path=pvt_file)  # Create NexusPVT object
+                    self.pvt_methods[table_num].read_properties()  # Populate object with PVT properties in file
+
+        # Load in Runcontrol
         if not isinstance(self.fcs_file.runcontrol_file, Field) and self.fcs_file.runcontrol_file is not None:
             self.run_control_file_path = self.fcs_file.runcontrol_file.location
             self.__load_run_control_file()
