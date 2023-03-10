@@ -1,5 +1,5 @@
-from datetime import datetime, timedelta
-from typing import Optional, Union
+from datetime import datetime
+from typing import Optional
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
@@ -95,47 +95,3 @@ def get_errors_warnings_string(log_file_line_list: list[str]) -> Optional[str]:
 
     error_warning_str = f"Simulation complete - Errors: {errors} and Warnings: {warnings}"
     return error_warning_str
-
-
-def __convert_date_to_number(self, date: Union[str, int, float]) -> float:
-    """Converts a date to a number designating number of days from the start date
-
-    Args:
-        date (Union[str, int, float]): a date or time stamp from a Nexus simulation
-
-    Raises:
-        ValueError: if supplied incorrect type for 'date' parameter
-
-    Returns:
-        float: the difference between the supplied date and the start date of the simulator
-    """
-    # If we can retrieve a number of days from date, use that, otherwise convert the string date to a number of days
-    try:
-        converted_date: Union[str, float] = float(date)
-    except ValueError:
-        if not isinstance(date, str):
-            raise ValueError(
-                "__convert_date_to_number: Incorrect type for 'date' parameter")
-        converted_date = date
-
-    if isinstance(converted_date, float):
-        date_format = self.__date_format_string
-        if len(self.start_date) == self.DATE_WITH_TIME_LENGTH:
-            date_format += "(%H:%M:%S)"
-        start_date_as_datetime = datetime.strptime(
-            self.start_date, date_format)
-        date_as_datetime = start_date_as_datetime + \
-            timedelta(days=converted_date)
-    else:
-        start_date_format = self.__date_format_string
-        if len(self.start_date) == self.DATE_WITH_TIME_LENGTH:
-            start_date_format += "(%H:%M:%S)"
-        end_date_format = self.__date_format_string
-        if len(converted_date) == self.DATE_WITH_TIME_LENGTH:
-            end_date_format += "(%H:%M:%S)"
-        date_as_datetime = datetime.strptime(converted_date, end_date_format)
-        start_date_as_datetime = datetime.strptime(
-            self.start_date, start_date_format)
-
-    difference = date_as_datetime - start_date_as_datetime
-    return difference.total_seconds() / timedelta(days=1).total_seconds()
