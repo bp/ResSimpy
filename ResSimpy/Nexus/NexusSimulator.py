@@ -366,22 +366,27 @@ class NexusSimulator(Simulator):
             Loads the wellspec and dynamic property files.
         """
         # self.get_simulation_status(True)
-        fcs_include_only = NexusFile.generate_file_include_structure(self.__new_fcs_file_path).get_flat_list_str_file()
+        # fcs_content_with_includes is used to scan only the fcs file and files specifically called with the INCLUDE
+        # token in front of it to prevent it from reading through all the other files. We need this here to extract the
+        # fcs properties only. The FcsFile structure is then generated and stored in the object (with all the nesting of
+        # the NexusFiles as self.fcs_file (e.g. STRUCTURED_GRID, RUNCONTROL etc)
+        fcs_content_with_includes = NexusFile.generate_file_include_structure(
+            self.__new_fcs_file_path).get_flat_list_str_file()
         self.fcs_file = FcsNexusFile.generate_fcs_structure(self.__new_fcs_file_path)
-        if fcs_include_only is None:
+        if fcs_content_with_includes is None:
             raise ValueError(f'FCS file not found, no content for {self.__new_fcs_file_path}')
-        for line in fcs_include_only:
+        for line in fcs_content_with_includes:
             if nfo.check_token('DATEFORMAT', line):
-                value = nfo.get_token_value('DATEFORMAT', line, fcs_include_only)
+                value = nfo.get_token_value('DATEFORMAT', line, fcs_content_with_includes)
                 if value is not None:
                     self.use_american_date_format = value == 'MM/DD/YYYY'
                 self.Runcontrol.date_format_string = "%m/%d/%Y" if self.use_american_date_format else "%d/%m/%Y"
             elif nfo.check_token('RUN_UNITS', line):
-                value = nfo.get_token_value('RUN_UNITS', line, fcs_include_only)
+                value = nfo.get_token_value('RUN_UNITS', line, fcs_content_with_includes)
                 if value is not None:
                     self.__run_units = UnitSystem(value.upper())
             elif nfo.check_token('DEFAULT_UNITS', line):
-                value = nfo.get_token_value('DEFAULT_UNITS', line, fcs_include_only)
+                value = nfo.get_token_value('DEFAULT_UNITS', line, fcs_content_with_includes)
                 if value is not None:
                     self.__default_units = UnitSystem(value.upper())
 
