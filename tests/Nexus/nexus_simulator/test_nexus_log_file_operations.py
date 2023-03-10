@@ -49,7 +49,7 @@ from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
                               f"\n5230 0   1 81961.8     0.0 347997. 2495.18 883.375 30000.3     0.0 34278.1"
                               f"\n5560 0   1 81961.8     0.0 347997. 2495.18 883.375 30000.3     0.0 34278.1\n\n",
                               ["02/01/2001", "03/07/2007", "01/01/2003",
-                                  "01/01/2010", "23/03/2015", "05/06/2016"],
+                               "01/01/2010", "23/03/2015", "05/06/2016"],
                               92.7),
                              (f"start generic pdsh   prolog  with cleanup on  hpchw1104 Wed Sep 2 03:20:19 CST 2020\n\n"
                               f" Case Name = nexus_run        \nCOL1 COL2 TIME  TS NWT   OIL     GAS    WATER  OIL GAS"
@@ -219,7 +219,7 @@ def test_get_base_case_run_time(mocker, log_file_contents, run_time):
     mocker.patch("builtins.open", new_open_mock)
 
     # Act
-    result = simulation.get_base_case_run_time()
+    result = simulation.Logging.get_base_case_run_time()
 
     # Assert
     initial_listdir_mock.assert_called_once_with('testpath1')
@@ -260,7 +260,7 @@ def test_get_simulation_start_time(mocker, log_file_contents, start_time):
     mocker.patch("builtins.open", log_file_mock)
 
     # Act
-    result = simulation.get_simulation_start_time()
+    result = simulation.Logging.get_simulation_start_time()
 
     # Assert
     assert result == start_time
@@ -297,7 +297,7 @@ def test_get_simulation_end_time(mocker, log_file_contents, end_time):
     mocker.patch("builtins.open", log_file_mock)
 
     # Act
-    result = simulation.get_simulation_end_time()
+    result = simulation.Logging.get_simulation_end_time()
 
     # Assert
     assert result == end_time
@@ -342,8 +342,8 @@ def test_get_simulation_start_end_time(mocker, log_file_contents, expected_start
     mocker.patch("builtins.open", log_file_mock)
 
     # Act
-    result_start_time = simulation.get_simulation_start_time()
-    result_end_time = simulation.get_simulation_end_time()
+    result_start_time = simulation.Logging.get_simulation_start_time()
+    result_end_time = simulation.Logging.get_simulation_end_time()
 
     # Assert
     assert result_start_time == expected_start_time
