@@ -77,11 +77,11 @@ class NexusSimulator(Simulator):
         self.__new_fcs_file_path: str = origin.strip()
         self.__force_output: bool = force_output
         self.__origin: str = origin.strip()  # this is the fcs file path
-        self.__root_name: str = root_name if root_name is not None else self.get_rootname()
         self.__nexus_data_name: str = nexus_data_name
         self.__structured_grid_file_path: Optional[str] = None
         self.__structured_grid_file: Optional[StructuredGridFile] = None
         self.__run_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
+        self.root_name: str = root_name
         self.use_american_run_units: bool = False
         self.use_american_input_units: bool = False
         self.__write_times: bool = write_times
@@ -162,6 +162,23 @@ class NexusSimulator(Simulator):
     @property
     def origin(self):
         return self.__origin
+
+    @property
+    def root_name(self):
+        return self.__root_name
+
+    @root_name.setter
+    def root_name(self, value: str) -> None:
+        """ Returns the name of the fcs file without the .fcs extension
+        Returns:
+            str: string of the fcs file without the .fcs extension
+        """
+        if value is not None:
+            rootname = value
+        else:
+            rootname = os.path.basename(self.__origin)
+            rootname = rootname.split(".fcs")[0]
+        self.__root_name = rootname
 
     @staticmethod
     def get_check_run_input_units_for_models(models: list[str]) -> tuple[Optional[bool], Optional[bool]]:
@@ -328,15 +345,6 @@ class NexusSimulator(Simulator):
         if self.__surface_file_path is None:
             raise ValueError("No value provided for the __surface_file_path")
         return NexusSimulator.get_fluid_type(self.__surface_file_path)
-
-    def get_rootname(self) -> str:
-        """ Returns the name of the fcs file without the .fcs extension
-        Returns:
-            str: string of the fcs file without the .fcs extension
-        """
-        rootname = os.path.basename(self.__origin)
-        rootname = rootname.split(".fcs")[0]
-        return rootname
 
     def check_output_path(self) -> None:
         """ Confirms that the output path has been set (used to stop accidental writing operations in the original

@@ -156,7 +156,7 @@ class Logging:
         files = os.listdir(folder_path)
         original_fcs_file_location = os.path.basename(self.model.original_fcs_file_path)
         log_file_name = os.path.splitext(original_fcs_file_location)[
-                            0] + ".log" if from_startup else self.model.get_rootname() + ".log"
+                            0] + ".log" if from_startup else self.model.root_name + ".log"
 
         if log_file_name in files:
             if from_startup:
@@ -270,7 +270,7 @@ class Logging:
         time_heading_location = None
         last_time = None
         for line in log_file:
-            case_name_string = f"Case Name = {self.model.get_rootname()}"
+            case_name_string = f"Case Name = {self.model.root_name}"
             if case_name_string in line:
                 read_in_times = True
                 continue
