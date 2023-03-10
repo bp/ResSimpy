@@ -7,11 +7,8 @@ from typing import Union, Optional
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
-# from ResSimpy.Nexus.NexusSimulator import NexusSimulator
-
-
 class Runcontrol:
-    def __init__(self, model):  # NexusSimulator):
+    def __init__(self, model):
         """ class for controlling all runcontrol and time related functionality
         Args:
             model: NexusSimulator instance
