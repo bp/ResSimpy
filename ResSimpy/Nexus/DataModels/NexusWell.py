@@ -18,16 +18,7 @@ class NexusWell(Well):
     def perforations(self) -> Sequence[NexusCompletion]:
         """Returns a list of all of the perforations for the well"""
 
-        def completion_is_perforation(completion: NexusCompletion):
-            # If we don't have any non-none values for these properties, no perforation present
-            if completion.partial_perf is None and completion.well_indices is None and completion.status is None:
-                return False
-
-            return ((completion.partial_perf is None or completion.partial_perf > 0) and
-                    (completion.well_indices is None or completion.well_indices > 0) and
-                    (completion.status != 'OFF'))
-
-        activations = filter(completion_is_perforation, self.__completions)
+        activations = filter(NexusCompletion.completion_is_perforation, self.__completions)
         return list(activations)
 
     @property
@@ -38,19 +29,11 @@ class NexusWell(Well):
 
         return self.perforations[0]
 
-    @staticmethod
-    def completion_is_shutin(completion: NexusCompletion):
-        # If we don't have any non-none values for these properties, assume this is a shutin
-        if completion.partial_perf is None and completion.well_indices is None and completion.status is None:
-            return True
-
-        return completion.partial_perf == 0 or completion.well_indices == 0 or completion.status == 'OFF'
-
     @property
     def shutins(self) -> Sequence[NexusCompletion]:
         """Returns a list of all of the shut-ins for the well"""
 
-        shutins = filter(self.completion_is_shutin, self.__completions)
+        shutins = filter(NexusCompletion.completion_is_shutin, self.__completions)
         return list(shutins)
 
     @property
@@ -93,7 +76,7 @@ class NexusWell(Well):
         using_k_values: Optional[bool] = None
 
         for completion in self.__completions:
-            is_perforation = not (self.completion_is_shutin(completion))
+            is_perforation = NexusCompletion.completion_is_perforation(completion)
             if not is_perforation:
                 continue
             if completion.k is not None and using_k_values is not False:

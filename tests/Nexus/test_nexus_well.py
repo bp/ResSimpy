@@ -24,6 +24,9 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
       NexusCompletion(i=1, j=2, k=9, well_radius=9.11, date='01/02/2024', status='ON', partial_perf=1, well_indices=0),
       NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2025', status='ON', partial_perf=1, well_indices=1),
       NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2028', well_indices=3),
+      NexusCompletion(i=1, j=2, k=11, well_radius=9.11, date='01/02/2028', perm_thickness_ovr=1),
+      NexusCompletion(i=1, j=2, k=11, well_radius=9.11, date='01/05/2028', perm_thickness_ovr=1, partial_perf=1,
+                      kh_mult=1),
       NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/02/2034', partial_perf=0.5)],
      # Expected:
      [NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
@@ -31,22 +34,20 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
       NexusCompletion(i=1, j=2, k=5, well_radius=9.11, date='01/02/2024', status='ON'),
       NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2025', status='ON', partial_perf=1, well_indices=1),
       NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2028', well_indices=3),
+      NexusCompletion(i=1, j=2, k=11, well_radius=9.11, date='01/02/2028', perm_thickness_ovr=1),
+      NexusCompletion(i=1, j=2, k=11, well_radius=9.11, date='01/05/2028', perm_thickness_ovr=1, partial_perf=1,
+                      kh_mult=1),
       NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/02/2034', partial_perf=0.5)]),
 
     ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
                       partial_perf=0.1, status='ON', well_indices=0),
-      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', partial_perf=0.5, well_indices=5, status='OFF')],
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', partial_perf=0.5, well_indices=5, status='OFF'),
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', partial_perf=0.5, well_indices=5, perm_thickness_ovr=0),
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', partial_perf=0.5, well_indices=5, kh_mult=0)],
      # Expected:
      []),
 
     ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None),
-      NexusCompletion(i=1, j=2, k=3, date='01/02/2023')],
-     # Expected:
-     [NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None),
-      NexusCompletion(i=1, j=2, k=3, date='01/02/2023')]),
-
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', status='OFF',
-                      grid='GRID1', skin=None, angle_v=None),
       NexusCompletion(i=1, j=2, k=3, date='01/02/2023')],
      # Expected:
      [NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1',  skin=None, angle_v=None),
@@ -54,7 +55,7 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 
     ([], [])
 
-], ids=['basic case', 'mixture of perf and not perf', 'using defaults', 'no perforations', 'no perf info', 'empty list'])
+], ids=['basic case', 'mixture of perf and not perf', 'no perforations', 'using defaults', 'empty list'])
 def test_get_perforations(completions, expected_perforations):
     # Arrange
     well = NexusWell(well_name='test well', completions=completions,
@@ -151,9 +152,7 @@ def test_get_first_perforation(completions, expected_perforation):
     ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None),
       NexusCompletion(i=1, j=2, k=3, date='01/02/2023')],
      # Expected:
-     [NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None),
-      NexusCompletion(i=1, j=2, k=3, date='01/02/2023')
-      ]),
+     []),
 
     ([], [])
 
@@ -206,7 +205,7 @@ def test_get_shutins(completions, expected_shutins):
     ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None),
       NexusCompletion(i=1, j=2, k=3, date='01/02/2023')],
      # Expected:
-     NexusCompletion(i=1, j=2, k=3, date='01/02/2023')),
+     None),
 
     ([], None)
 
@@ -291,7 +290,7 @@ def test_printable_well_info_missing_info():
      # Expected:
      [('01/01/2023', 3), ('01/02/2024', 5), ('01/02/2025', 10), ('01/02/2028', 10), ('01/02/2034', 38)]),
 
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None),
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None, partial_perf=0),
       NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1, well_indices=0)],
      # Expected:
      []),

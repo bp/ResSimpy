@@ -26,8 +26,6 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: UnitSyst
     file_as_list = nfo.load_file_as_list(wellspec_file_path)
     well_name: Optional[str] = None
     wellspec_file_units: Optional[UnitSystem] = None
-    completions: list[NexusCompletion] = []
-    headers: list[str] = []
 
     iw: Optional[str] = None
     jw: Optional[str] = None
@@ -71,6 +69,7 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: UnitSyst
     layer_assignment: Optional[str] = None
     polymer_bore_radius: Optional[str] = None
     polymer_well_radius: Optional[str] = None
+    kh_mult: Optional[float] = None
 
     # End point values:
     swl: Optional[str] = None
@@ -103,7 +102,7 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: UnitSyst
         'GROUP': well_group, 'ZONE': zone, 'ANGLE': angle_open_flow, 'TEMP': temperature, 'FLOWSECT': flowsector,
         'PARENT': parent_node, 'MDCON': mdcon, 'IPTN': pressure_avg_pattern, 'LENGTH': length, 'K': permeability,
         'ND': non_darcy_model, 'DZ': comp_dz, 'LAYER': layer_assignment, 'RADBP': polymer_bore_radius,
-        'RADWP': polymer_well_radius,
+        'RADWP': polymer_well_radius, 'KHMULT': kh_mult
     }
     end_point_scaling_header_values: dict[str, None | int | float | str] = {
         'SWL': swl, 'SWR': swr, 'SWU': swu, 'SGL': sgl, 'SGR': sgr, 'SGU': sgu,
@@ -278,6 +277,7 @@ def __load_wellspec_table_completions(file_as_list: list[str], header_index: int
             polymer_well_radius=convert_header_value_float('RADWP'),
             rel_perm_end_point=new_rel_perm_end_point,
             date=start_date,
+            kh_mult=convert_header_value_float('KHMULT')
         )
 
         completions.append(new_completion)
