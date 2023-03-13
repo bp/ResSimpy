@@ -1,26 +1,25 @@
 from __future__ import annotations
-from dataclasses import Field
+
 import os
-import copy
-from typing import Any, Final, Union, Optional
 import warnings
+from dataclasses import Field
+from typing import Any, Final, Union, Optional
+
+import resqpy.model as rq
+
+import ResSimpy.Nexus.logfile_operations as logfile_operations
+import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
 from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
-
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import StructuredGridFile
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
-from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import StructuredGridFile, PropertyToLoad
-from ResSimpy.Grid import VariableEntry
-import ResSimpy.Nexus.nexus_file_operations as nfo
-import resqpy.model as rq
-
-from ResSimpy.Nexus.NexusWells import NexusWells
-from ResSimpy.Simulator import Simulator
-from ResSimpy.Nexus.runcontrol_operations import Runcontrol
-import ResSimpy.Nexus.logfile_operations as logfile_operations
-from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 from ResSimpy.Nexus.NexusReporting import Reporting
+from ResSimpy.Nexus.NexusWells import NexusWells
+from ResSimpy.Nexus.runcontrol_operations import Runcontrol
+from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
+from ResSimpy.Simulator import Simulator
 
 
 class NexusSimulator(Simulator):
@@ -126,9 +125,9 @@ class NexusSimulator(Simulator):
         Raises:
             ValueError: if any of [__structured_grid_file_path, __new_fcs_file_path, __surface_file_path] are None
         """
-        if self.__structured_grid_file_path is None:
+        if self.fcs_file.structured_grid_file.location is None:
             raise ValueError(
-                "No __structured_grid_file_path found, can't remove temporary properties from file path")
+                "No structured_grid_file_path found, can't remove temporary properties from file path")
         if self.__new_fcs_file_path is None:
             raise ValueError(
                 "No __new_fcs_file_path found, can't remove temporary properties from file path")
@@ -138,7 +137,8 @@ class NexusSimulator(Simulator):
 
         self.__origin = self.__origin.replace('temp/', '', 1)
         self.__root_name = self.__root_name.replace('temp/', '', 1)
-        self.__structured_grid_file_path = self.__structured_grid_file_path.replace('temp/', '', 1)
+        self.fcs_file.structured_grid_file.location = self.fcs_file.structured_grid_file.location.replace('temp/', '',
+                                                                                                          1)
         self.__new_fcs_file_path = self.__new_fcs_file_path.replace('temp/', '', 1)
         self.__surface_file_path = self.__surface_file_path.replace('temp/', '', 1)
 

@@ -1,6 +1,6 @@
 from abc import ABC
 from dataclasses import dataclass
-from typing import Optional, Sequence
+from typing import Sequence
 
 from ResSimpy.Grid import Grid
 
