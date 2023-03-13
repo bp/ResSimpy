@@ -209,7 +209,7 @@ class NexusFile:
 
     def get_next_value_nexus_file(self, start_line_index: int, search_string: Optional[str] = None,
                                   ignore_values: Optional[list[str]] = None,
-                                  replace_with: Union[str, VariableEntry, None] = None) -> Optional[str]:
+                                  replace_with: Union[str, VariableEntry, None] = None) -> Optional[str | NexusFile]:
 
         file_as_list, nexus_file = self.get_flat_list_str_until_file(start_line_index)
         value = nfo.get_next_value(start_line_index, file_as_list, search_string, ignore_values, replace_with)

@@ -45,6 +45,9 @@ class StructuredGridFile(Grid):
             AttributeError: if no value is found for the structured grid file path
             ValueError: if when loading the grid no values can be found for the NX NY NZ line.
         """
+        if structure_grid_file.location is None:
+            raise ValueError(f"No file path given or found for structured grid file path. \
+                Instead got {structure_grid_file.location}")
         file_as_list = nfo.load_file_as_list(structure_grid_file.location)
         if file_as_list is None:
             raise ValueError("No file path given or found for structured grid file path. \
@@ -132,10 +135,14 @@ class StructuredGridFile(Grid):
         """
         # Convert the dictionary back to a class, and update the properties on our class
         structured_grid = model.get_structured_grid()
+        if structured_grid is None:
+            raise ValueError("Model does not contain a structured grid")
         original_structured_grid_file = copy.deepcopy(structured_grid)
         structured_grid = StructuredGridFile(grid_dict)
         model.set_structured_grid(structured_grid)
         grid_file_path = model.fcs_file.structured_grid_file.location
+        if grid_file_path is None:
+            raise ValueError("No path found for structured grid file path.")
         structured_grid_contents = nfo.load_file_as_list(grid_file_path)
         # Get the existing file as a list
         if structured_grid_contents is None:

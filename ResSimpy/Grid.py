@@ -36,5 +36,5 @@ class Grid(ABC):
         self.range_y: Optional[int] = None
         self.range_z: Optional[int] = None
 
-    def load_structured_grid_file(self, structure_grid_file) -> None:
+    def load_structured_grid_file(self, structure_grid_file) -> Grid:
         raise NotImplementedError("Implement this in the derived class")

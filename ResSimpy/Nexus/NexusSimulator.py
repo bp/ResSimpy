@@ -601,10 +601,11 @@ class NexusSimulator(Simulator):
 
     def get_abs_structured_grid_path(self, filename: str):
         """Returns the absolute path to the Structured Grid file"""
-        if self.fcs_file.structured_grid_file is None:
+        grid_path = self.fcs_file.structured_grid_file.location
+        if grid_path is None:
             raise ValueError("No path found for structured grid file path. \
                 Please provide a path to the structured grid")
-        return os.path.dirname(self.fcs_file.structured_grid_file.location) + '/' + filename
+        return os.path.dirname(grid_path) + '/' + filename
 
     def get_surface_file_path(self):
         """Get the surface file path"""
