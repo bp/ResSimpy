@@ -7,7 +7,6 @@ from typing import Any, Final, Union, Optional
 
 import resqpy.model as rq
 
-import ResSimpy.Nexus.logfile_operations as logfile_operations
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
