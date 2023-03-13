@@ -9,7 +9,7 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 
 class Runcontrol:
     def __init__(self, model):
-        """ class for controlling all time related problems
+        """ class for controlling all runcontrol and time related functionality
         Args:
             model: NexusSimulator instance
             __times (Optional[list[str]]): list of times to be included in the runcontrol file
