@@ -3,9 +3,6 @@ from typing import Optional, TYPE_CHECKING
 from ResSimpy.Grid import VariableEntry
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
-if TYPE_CHECKING:
-    from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import StructuredGridFile
-
 
 class StructuredGridOperations:
     def __init__(self, model):
