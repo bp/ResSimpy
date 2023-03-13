@@ -3,11 +3,13 @@
 import os
 
 import pytest
-from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
+from ResSimpy.Grid import VariableEntry
+from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import StructuredGridFile
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
 from tests.multifile_mocker import mock_multiple_files
-
+from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 
 @pytest.mark.parametrize("structured_grid_file_contents, expected_net_to_gross, expected_porosity, expected_range_x,"
                          "expected_range_y, expected_range_z",
@@ -307,7 +309,7 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
     mocker.patch("builtins.open", structured_grid_mock)
 
     # Act
-    simulation.update_structured_grid_file(new_structured_grid_dictionary)
+    StructuredGridFile.update_structured_grid_file(new_structured_grid_dictionary, simulation)
     result = simulation.get_structured_grid()
 
     # Assert

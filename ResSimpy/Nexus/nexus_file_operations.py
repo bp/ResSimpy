@@ -1,7 +1,7 @@
 from io import StringIO
 from typing import Optional, Union
 import pandas as pd
-from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
+from ResSimpy.Grid import VariableEntry
 from string import Template
 import re
 from ResSimpy.Nexus.nexus_constants import VALID_NEXUS_KEYWORDS

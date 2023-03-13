@@ -1,6 +1,11 @@
-from typing import Optional
-from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
+from __future__ import annotations
+import copy
+from typing import Optional, TYPE_CHECKING
+from ResSimpy.Grid import VariableEntry
 import ResSimpy.Nexus.nexus_file_operations as nfo
+
+if TYPE_CHECKING:
+    from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import StructuredGridFile
 
 
 class StructuredGridOperations:
