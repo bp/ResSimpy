@@ -80,8 +80,7 @@ class NexusSimulator(Simulator):
         self.__force_output: bool = force_output
         self.__origin: str = origin.strip()  # this is the fcs file path
         self.__nexus_data_name: str = nexus_data_name
-        self.__structured_grid_file_path: Optional[str] = None
-        self.__structured_grid_file: Optional[StructuredGridFile] = None
+        self.__structured_grid: Optional[StructuredGridFile] = None
         self.__run_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
         self.root_name: str = root_name
         self.use_american_run_units: bool = False
@@ -600,6 +599,9 @@ class NexusSimulator(Simulator):
 
     def get_abs_structured_grid_path(self, filename: str):
         """Returns the absolute path to the Structured Grid file"""
+        if self.fcs_file.structured_grid_file is None:
+            raise ValueError(
+                f"No structured grid file found within simulator class: {self.fcs_file.structured_grid_file}")
         grid_path = self.fcs_file.structured_grid_file.location
         if grid_path is None:
             raise ValueError("No path found for structured grid file path. \

@@ -40,7 +40,9 @@ class StructuredGridFile(Grid):
     def load_structured_grid_file(cls: Type[StructuredGridFile], structure_grid_file: NexusFile) -> StructuredGridFile:
         """Loads in a structured grid file including all grid properties and modifiers.
         Currently loading in grids with FUNCTIONS included are not supported.
-
+        Args:
+            structure_grid_file (NexusFile): the NexusFile representation of a structured grid file for converting \
+                into a structured grid file class
         Raises:
             AttributeError: if no value is found for the structured grid file path
             ValueError: if when loading the grid no values can be found for the NX NY NZ line.
@@ -129,17 +131,21 @@ class StructuredGridFile(Grid):
 
         Args:
             grid_dict (dict[str, Union[VariableEntry, int]]): dictionary containing grid properties to be replaced
-
+            model (NexusSimulator): an instance of a NexusSimulator object
         Raises:
             ValueError: If no structured grid file is in the instance of the Simulator class
         """
         # Convert the dictionary back to a class, and update the properties on our class
         structured_grid = model.get_structured_grid()
-        if structured_grid is None:
+        if structured_grid is None or model.fcs_file.structured_grid_file is None:
             raise ValueError("Model does not contain a structured grid")
         original_structured_grid_file = copy.deepcopy(structured_grid)
+
+        # replace the structured grid with a new object with an updated dictionary
         structured_grid = StructuredGridFile(grid_dict)
         model.set_structured_grid(structured_grid)
+
+        # change it in the text file for nexus:
         grid_file_path = model.fcs_file.structured_grid_file.location
         if grid_file_path is None:
             raise ValueError("No path found for structured grid file path.")
