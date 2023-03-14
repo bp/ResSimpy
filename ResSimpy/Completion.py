@@ -31,6 +31,7 @@ class Completion(ABC):
             'KH' in Nexus.
         dfactor (Optional[float]): non-darcy factor to use for rate dependent skin calculations. 'D' in Nexus
         rel_perm_method (Optional[int]): rel perm method to use for the completion. 'IRELPM' in Nexus
+        status (Optional[str]): the status of the layer, can be 'ON' or 'OFF'
 
 
     """
