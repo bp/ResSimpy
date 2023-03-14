@@ -226,6 +226,7 @@ class NexusCompletion(Completion):
                 (completion.well_indices is None or completion.well_indices > 0) and
                 (completion.perm_thickness_ovr is None or completion.perm_thickness_ovr > 0) and
                 (completion.kh_mult is None or completion.kh_mult > 0) and
+                (completion.length is None or completion.length > 0) and
                 (completion.status != 'OFF'))
 
     @staticmethod
