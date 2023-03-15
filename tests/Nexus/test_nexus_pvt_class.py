@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -166,9 +167,212 @@ from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
                                 'VG': [0.0105, 0.0109, 0.0193, 0.0193]
                                 }),
           }),
-    ], ids=['basic black-oil', 'equiv black-oil', 'water-oil',
-            'volatile oil', 'gas-water'
-            ])
+    ("""
+      DESC SPE 5
+
+      EOS NHC 6
+      COMPONENTS C1 C3 C6 C10 C15 C20
+
+      ENGLISH FAHR
+      TEMP 160.0
+
+      PROPS
+      COMPONENT MOLWT OMEGAA OMEGAB TC PC VC ACENTR
+      C1 16.04 0.4572355 0.0777961 -116.67 667.8 1.598 0.0130
+      C3 44.01 0.4572355 0.0777961 206.03 616.3 3.129 0.1524
+      C6 86.18 0.4572355 0.0777961 453.73 436.99 5.922 0.3007
+      C10 142.29 0.4572355 0.0777961 652.13 304.0 10.09 0.4885
+      C15 206.00 0.4572355 0.0777961 810.33 200.0 16.69 0.6500
+      C20 282.00 0.4572355 0.0777961 920.33 162.0 21.48 0.8500
+      ENDPROPS
+      ! This is a random test comment
+      BINA
+      COMPONENT C1 C3 C6 C10 C15
+      C3 0.0
+      C6 0.0 0.0
+      C10 0.0 0.0 0.0
+      C15 0.05 0.005 0.0 0.0
+      C20 0.05 0.005 0.0 0.0 0.0
+      ENDBINA
+
+      EOSOPTIONS PR
+                 ZGIBBS
+                 FLASH_GIBBS_ON
+                 STKATZOFF
+                 CAPILLARYFLASH
+                 FUGERR 6
+                 TRANSITION
+                             NEIGHBOR
+                 PHASEID
+                             FLASH
+                 TRANS_OPTIMIZATION TDELP 1 TDELZ 0.001
+                 TRANS_TEST GIBBS
+                 TOL 1.0e-4
+                 TOLSS 1.0e-2
+                 VISPE
+                        PEDTUNE
+                        INDEX    COEFF
+                        1        1.0
+                        2        1.0
+                        3        1.847
+                        4        .5173
+                        5        7.378e-3
+                        6        3.1e-2
+                        ENDPEDTUNE
+    
+    """, {'PVT_TYPE': 'EOS', 'UNIT_SYSTEM': 'ENGLISH', 'TEMP_UNIT': 'FAHR',
+          'DESC': ['SPE 5'], 'TEMP': 160.0, 'NHC': 6, 'COMPONENTS': ['C1', 'C3', 'C6', 'C10', 'C15', 'C20'],
+          'EOSOPTIONS': {'EOS_METHOD': 'PR',
+                         'EOS_OPT_PRIMARY_LIST': ['ZGIBBS', 'FLASH_GIBBS_ON', 'STKATZOFF', 'CAPILLARYFLASH', 'VISPE'],
+                         'FUGERR': 6,
+                         'TRANSITION': 'NEIGHBOR',
+                         'TRANS_OPTIMIZATION': {'TDELZ': 1e-3, 'TDELP': 1.0},
+                         'TRANS_TEST': 'GIBBS',
+                         'TOL': 0.0001,
+                         'TOLSS': 0.01,
+                         'PHASEID': 'FLASH'
+                         },
+          'PROPS': pd.DataFrame({'COMPONENT': ['C1', 'C3', 'C6', 'C10', 'C15', 'C20'],
+                                 'MOLWT': [16.04, 44.01, 86.18, 142.29, 206, 282],
+                                 'OMEGAA': [0.4572355, 0.4572355, 0.4572355, 0.4572355, 0.4572355, 0.4572355],
+                                 'OMEGAB': [0.0777961, 0.0777961, 0.0777961, 0.0777961, 0.0777961, 0.0777961],
+                                 'TC': [-116.67, 206.03, 453.73, 652.13, 810.33, 920.33],
+                                 'PC': [667.8, 616.3, 436.99, 304, 200, 162],
+                                 'VC': [1.598, 3.129, 5.922, 10.09, 16.69, 21.48],
+                                 'ACENTR': [0.013, 0.1524, 0.3007, 0.4885, 0.65, 0.85]
+                                 }),
+          'BINA': pd.DataFrame({'COMPONENT': ['C3', 'C6', 'C10', 'C15', 'C20'],
+                                'C1':  [0.0,    0.0,    0.0,    0.05,   0.05],
+                                'C3':  [np.nan, 0.0,    0.0,    0.005,  0.005],
+                                'C6':  [np.nan, np.nan, 0.0,    0.0,    0.0],
+                                'C10': [np.nan, np.nan, np.nan, 0.0,    0.0],
+                                'C15': [np.nan, np.nan, np.nan, np.nan, 0.0]
+                                }),
+          'PEDTUNE': pd.DataFrame({'INDEX': [1, 2, 3, 4, 5, 6],
+                                   'COEFF': [1, 1, 1.847, 0.5173, 0.007378, 0.031]
+                                   })
+          }),
+    ("""
+      DESC EOS EXAMPLE WITH NO TABLES
+
+      EOS NHC 5
+      COMPONENTS C1 C2 C3-4 C5-6 C7+
+      LABEL Test1
+      TEMP 520.0
+
+      ENGLISH RANKINE
+
+      EOSOPTIONS PR
+                 PHASEID
+                     DENSITY THRESHOLD 40
+                 ALPHAMU 0.01
+                 ZGIBBS
+                 CAPILLARYFLASH
+                 LI_FACT 0.9
+                 LBC1 0.1023
+                 LBC2 0.02336
+                 LBC3 0.05853
+                 LBC4 -0.04076
+                 LBC5 0.009332
+                 TRANSITION DELTA TCRIT 0.15 TDELZ 0.001
+                 TRANS_TEST INCRP PHASEFRAC 0.05
+                 VISPE
+    
+    """, {'PVT_TYPE': 'EOS', 'UNIT_SYSTEM': 'ENGLISH', 'TEMP_UNIT': 'RANKINE',
+          'DESC': ['EOS EXAMPLE WITH NO TABLES'], 'NHC': 5, 'COMPONENTS': ['C1', 'C2', 'C3-4', 'C5-6', 'C7+'],
+          'TEMP': 520.0,
+          'EOSOPTIONS': {'EOS_METHOD': 'PR',
+                         'EOS_OPT_PRIMARY_LIST': ['ZGIBBS', 'CAPILLARYFLASH', 'VISPE'],
+                         'TRANSITION': ('DELTA', {'TCRIT': 0.15, 'TDELZ': 1e-3}),
+                         'TRANS_TEST': ('INCRP', {'PHASEFRAC': 0.05}),
+                         'PHASEID': ('DENSITY', {'THRESHOLD': 40.0}),
+                         'ALPHAMU': 0.01,
+                         'LI_FACT': 0.9,
+                         'LBC1': 0.1023,
+                         'LBC2': 0.02336,
+                         'LBC3': 0.05853,
+                         'LBC4': -0.04076,
+                         'LBC5': 0.009332,
+                         }
+          }),
+    ("""
+      DESC EOS EXAMPLE WITH PEDERSON VISCOSITY COEFFICIENTS MODIFIED
+
+      EOS NHC 5
+      COMPONENTS C1 C2 C3-4 C5-6 C7+
+      LABEL Test1
+      TEMP 520.0
+
+      ENGLISH RANKINE
+
+      EOSOPTIONS PR
+                 PHASEID
+                     DENSITY THRESHOLD 40
+                 ALPHAMU 0.01
+                 ZGIBBS
+                 CAPILLARYFLASH
+                 LI_FACT 0.9
+                 LBC1 0.1023
+                 LBC2 0.02336
+                 LBC3 0.05853
+                 LBC4 -0.04076
+                 LBC5 0.009332
+                 TRANSITION DELTA TCRIT 0.15 TDELZ 0.001
+                 TRANS_TEST INCRP PHASEFRAC 0.05
+                 VISPE
+! This is a random comment
+                        VISKJ
+                        INDEX COEFF
+                        1 -10.4
+                        2 17.6
+                        3 -3019.4
+                        4 188.7
+                        5 0.0429
+                        6 145.29
+                        7 6127.68
+                        ENDVISKJ
+
+                        VISKK
+                        INDEX COEFF
+                        1 9.74
+                        2 18.08
+                        3 4126.66
+                        4 44.6
+                        5 0.9765
+                        6 81.81
+                        7 15649.9
+                        ENDVISKK
+
+                        VISKKIJ
+                        COMP1 COMP2 COEFF
+                        C1 C7+ 0.01
+                        C3-4 C5-6 -0.025
+                        ENDVISKKIJ
+    
+    """, {'PVT_TYPE': 'EOS', 'UNIT_SYSTEM': 'ENGLISH', 'TEMP_UNIT': 'RANKINE',
+          'DESC': ['EOS EXAMPLE WITH PEDERSON VISCOSITY COEFFICIENTS MODIFIED'], 'NHC': 5,
+          'COMPONENTS': ['C1', 'C2', 'C3-4', 'C5-6', 'C7+'],
+          'TEMP': 520.0,
+          'EOSOPTIONS': {'EOS_METHOD': 'PR',
+                         'EOS_OPT_PRIMARY_LIST': ['ZGIBBS', 'CAPILLARYFLASH', 'VISPE'],
+                         'TRANSITION': ('DELTA', {'TCRIT': 0.15, 'TDELZ': 1e-3}),
+                         'TRANS_TEST': ('INCRP', {'PHASEFRAC': 0.05}),
+                         'PHASEID': ('DENSITY', {'THRESHOLD': 40.0}),
+                         'ALPHAMU': 0.01,
+                         'LI_FACT': 0.9,
+                         'LBC1': 0.1023,
+                         'LBC2': 0.02336,
+                         'LBC3': 0.05853,
+                         'LBC4': -0.04076,
+                         'LBC5': 0.009332,
+                         },
+          'VISKJ': pd.DataFrame({'INDEX': [1, 2, 3, 4, 5, 6, 7],
+                                 'COEFF': [-10.4, 17.6, -3019.4, 188.7, 0.0429, 145.29, 6127.68]
+                                 })
+          })
+     ], ids=['basic black-oil', 'equiv black-oil', 'water-oil',
+             'volatile oil', 'gas-water', 'eos_with_tables', 'eos_notables', 'eos_with_visk'
+             ])
 def test_read_properties_from_file(mocker, file_contents, expected_pvt_properties):
     # Arrange
     pvt_obj = NexusPVT(file_path='test/file/pvt.dat')
@@ -183,7 +387,15 @@ def test_read_properties_from_file(mocker, file_contents, expected_pvt_propertie
 
     # Assert
     assert pvt_obj.pvt_type == expected_pvt_properties['PVT_TYPE']
-    for key in [key for key in expected_pvt_properties.keys() if key != 'PVT_TYPE']:
+    if pvt_obj.pvt_type == 'EOS':
+        eos_opts = pvt_obj.eos_options
+        assert pvt_obj.eos_temp == expected_pvt_properties['TEMP']
+        assert pvt_obj.eos_nhc == expected_pvt_properties['NHC']
+        assert pvt_obj.eos_components == expected_pvt_properties['COMPONENTS']
+        for key in expected_pvt_properties['EOSOPTIONS'].keys():
+            assert expected_pvt_properties['EOSOPTIONS'][key] == eos_opts[key]
+    for key in [key for key in expected_pvt_properties.keys()
+                if key not in ['PVT_TYPE', 'TEMP', 'NHC', 'COMPONENTS', 'EOSOPTIONS']]:
         if type(expected_pvt_properties[key]) == pd.DataFrame:
             pd.testing.assert_frame_equal(expected_pvt_properties[key], props[key])
         elif type(expected_pvt_properties[key]) == dict:
