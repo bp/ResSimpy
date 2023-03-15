@@ -116,7 +116,6 @@ class NexusFile:
         return nexus_file_class
 
     def export_network_lists(self):
-        # TODO: add to test coverage
         """ Exports lists of connections from and to for use in network graphs
 
         Raises:
@@ -217,3 +216,28 @@ class NexusFile:
             return nexus_file
         else:
             return value
+
+    def get_token_value_nexus_file(self, token: str, token_line: str,
+                                   ignore_values: Optional[list[str]] = None,
+                                   replace_with: Union[str, VariableEntry, None] = None) -> Optional[str | NexusFile]:
+        token_upper = token.upper()
+        token_line_upper = token_line.upper()
+        if "!" in token_line_upper and token_line_upper.index("!") < token_line_upper.index(token_upper):
+            return None
+
+        search_start = token_line_upper.index(token_upper) + len(token) + 1
+        search_string = token_line[search_start: len(token_line)]
+
+        line_index = self.file_content_as_list.index(token_line)
+
+        # If we have reached the end of the line, go to the next line to start our search
+        if len(search_string) < 1:
+            line_index += 1
+            search_string = self.file_content_as_list[line_index]
+
+        if search_string in self.includes_objects:
+            return search_string
+        if not isinstance(search_string, str):
+            raise ValueError
+        value = self.get_next_value_nexus_file(line_index, search_string, ignore_values, replace_with)
+        return value
