@@ -66,9 +66,6 @@ class NexusPVT():
         rs_values: list[str] = []
 
         line_indx = 0
-        # eos_opts_flag = False
-        # props_flag = True
-        # bina_flag = True
         for line in file_as_list:
 
             # Determine PVT type, i.e., BLACKOIL, WATEROIL, EOS, etc.
