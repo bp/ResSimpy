@@ -232,10 +232,12 @@ class NexusFile:
         line_index = self.file_content_as_list.index(token_line)
 
         # If we have reached the end of the line, go to the next line to start our search
+        if isinstance(search_string, self.__class__):
+            return search_string
         if len(search_string) < 1:
             line_index += 1
             search_string = self.file_content_as_list[line_index]
-        if self.includes_objects is not None and search_string in self.includes_objects:
+        if isinstance(search_string, self.__class__):
             return search_string
         if not isinstance(search_string, str):
             raise ValueError(f'No file found in the include objects for file {search_string}')
