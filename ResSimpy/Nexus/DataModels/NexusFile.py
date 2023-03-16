@@ -226,7 +226,7 @@ class NexusFile:
             return None
 
         search_start = token_line_upper.index(token_upper) + len(token) + 1
-        search_string = token_line[search_start: len(token_line)]
+        search_string: Union[str, NexusFile] = token_line[search_start: len(token_line)]
         if self.file_content_as_list is None:
             raise ValueError(f'No file content to scan for tokens in {self.location}')
         line_index = self.file_content_as_list.index(token_line)
