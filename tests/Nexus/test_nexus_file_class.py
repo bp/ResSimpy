@@ -251,7 +251,6 @@ def test_get_token_value_nexus_file(mocker, test_file_contents, token_line):
 @pytest.mark.parametrize("test_file_contents, token_line, expected_result", [
     ('basic_file KH VALUE  10\n\ncontinuing the file ', 'basic_file KH VALUE  10\n', '10'),
     ('basic_file KH \n\nVALUE\n\n10\n\ncontinuing the file ', 'VALUE\n', '10'),
-    ('basic_file KH \n\nVALUE\n\n10\n\ncontinuing the file ', 'VALUE\n', '10'),
 ], ids=['basic_test', 'multilines'])
 def test_get_token_value_nexus_file_string(mocker, test_file_contents, token_line, expected_result):
     # Arrange
