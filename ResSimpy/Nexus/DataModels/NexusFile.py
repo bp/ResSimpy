@@ -219,7 +219,7 @@ class NexusFile:
 
     def get_token_value_nexus_file(self, token: str, token_line: str,
                                    ignore_values: Optional[list[str]] = None,
-                                   replace_with: Union[str, VariableEntry, None] = None) -> Optional[str | NexusFile]:
+                                   replace_with: Union[str, VariableEntry, None] = None) -> None | str | NexusFile:
         token_upper = token.upper()
         token_line_upper = token_line.upper()
         if "!" in token_line_upper and token_line_upper.index("!") < token_line_upper.index(token_upper):
@@ -227,7 +227,8 @@ class NexusFile:
 
         search_start = token_line_upper.index(token_upper) + len(token) + 1
         search_string = token_line[search_start: len(token_line)]
-
+        if self.file_content_as_list is None:
+            raise ValueError(f'No file content to scan for tokens in {self.location}')
         line_index = self.file_content_as_list.index(token_line)
 
         # If we have reached the end of the line, go to the next line to start our search
