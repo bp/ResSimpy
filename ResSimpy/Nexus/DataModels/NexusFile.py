@@ -211,7 +211,7 @@ class NexusFile:
                                   replace_with: Union[str, VariableEntry, None] = None) -> Optional[str | NexusFile]:
 
         file_as_list, nexus_file = self.get_flat_list_str_until_file(start_line_index)
-        value = nfo.get_next_value(start_line_index, file_as_list, search_string, ignore_values, replace_with)
+        value = nfo.get_next_value(0, file_as_list, search_string, ignore_values, replace_with)
         if value is None:
             return nexus_file
         else:
@@ -234,10 +234,9 @@ class NexusFile:
         if len(search_string) < 1:
             line_index += 1
             search_string = self.file_content_as_list[line_index]
-
-        if search_string in self.includes_objects:
+        if self.includes_objects is not None and search_string in self.includes_objects:
             return search_string
         if not isinstance(search_string, str):
-            raise ValueError
+            raise ValueError(f'No file found in the include objects for file {search_string}')
         value = self.get_next_value_nexus_file(line_index, search_string, ignore_values, replace_with)
         return value
