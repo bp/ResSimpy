@@ -232,7 +232,8 @@ class NexusFile:
         line_index = self.file_content_as_list.index(token_line)
 
         # If we have reached the end of the line, go to the next line to start our search
-        if isinstance(search_string, self.__class__):
+        if not isinstance(search_string, str):
+            # if search string isn't a string it will be a nexus file therefore return it.
             return search_string
         if len(search_string) < 1:
             line_index += 1
