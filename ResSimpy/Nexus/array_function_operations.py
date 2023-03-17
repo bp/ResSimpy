@@ -85,9 +85,10 @@ def create_function_parameters_df(file_as_list: list[str]):
         # set the default values for the parameters,
         # so if they don't exist in dataframe they won't appear as NaN or give error.
         i1 = i2 = j1 = j2 = k1 = k2 = region_type = region_number_list = function_type = function_coefficients = \
-            grid_name = input_arrays_min_max_list = output_arrays_min_max_list = drange_list = input_array_list = output_array_list = ''
+            grid_name = input_arrays_min_max_list = output_arrays_min_max_list = drange_list = input_array_list = \
+            output_array_list = ''
 
-        for l, line in enumerate(block):
+        for li, line in enumerate(block):
             line = line.upper()
             words = line.split()
             if 'BLOCKS' in line:
@@ -102,10 +103,9 @@ def create_function_parameters_df(file_as_list: list[str]):
                     continue
                 if len(words) == 2:  # TODO: deal with tabular function option keywords
                     region_type = words[1]
-                    region_number_list = block[l + 1].split()
+                    region_number_list = block[li + 1].split()
                 if len(words) > 2:  # TODO: deal with tabular function option keywords
-                    print(
-                        'Detected Max number of func table entries. This method only works with analytical functions, not with function tables.')
+                    print('Detected Max number of func table entries. This method does not collect function tables.')
             if 'ANALYT' in line:
                 function_type = words[1]
                 if len(words) > 2:
@@ -139,17 +139,8 @@ def create_function_parameters_df(file_as_list: list[str]):
     return functions_df
 
 
-# now create a column, that will turn the function to a human readable mathematical notation
-# function_properties['func_meaning'] = pd.concat(function_properties['input_arrays'], function_properties['drange'])
-# function_properties
-
-# my_functions_df = create_function_parameters_df(my_str_file_lines)
-# print(my_functions_df)
-# my_functions_df.to_csv('C:\\Users\\dirii0\\OneDrive - BP\\Documents\\ResSimPy\\notebooks\\test_output_functions_df.csv')
-
-
 def summarize_model_functions(file_as_list: list[str]):
-    """ Translates and summarizes the model functions in a non-maddening, human-readable form:
+    """ Extracts all function parameters into a df, with an added column of human-readable notations for each function:
       Args:
           file_as_list (list[str] | NexusFile): a list of strings containing each line of the file as an item,
                      --->file_as_list = nfo.load_file_as_list(str_grid_file_path, strip_comments=True, strip_str=True)
@@ -204,19 +195,22 @@ def summarize_model_functions(file_as_list: list[str]):
 
         # ANALYT LOG10
         if row['analyt_func_type'].upper() == 'LOG10':
-            #formula += f"log\u2081\u2080|{row['input_arrays'][0]}|"
+            # formula += f"log\u2081\u2080|{row['input_arrays'][0]}|"
             formula += f"log10|{row['input_arrays'][0]}|"
+
         # ANALYT SQRT
         if row['analyt_func_type'].upper() == 'SQRT':
             formula += f"SQRT|{row['input_arrays'][0]}|"
 
         # ANALYT GE
         if row['analyt_func_type'].upper() == 'GE':
-            formula += f"({row['input_arrays'][0]} if {row['input_arrays'][0]} >= {row['func_coeff'][0]}; {row['func_coeff'][1]} otherwise)"
+            formula += f"({row['input_arrays'][0]} if {row['input_arrays'][0]} >= {row['func_coeff'][0]}; " \
+                       f"{row['func_coeff'][1]} otherwise)"
 
         # ANALYT LE
         if row['analyt_func_type'].upper() == 'LE':
-            formula += f"({row['input_arrays'][0]} if {row['input_arrays'][0]} <= {row['func_coeff'][0]}; {row['func_coeff'][1]} otherwise)"
+            formula += f"({row['input_arrays'][0]} if {row['input_arrays'][0]} <= {row['func_coeff'][0]}; " \
+                       f"{row['func_coeff'][1]} otherwise)"
 
         # ANALYT ADD
         if row['analyt_func_type'].upper() == 'ADD':
@@ -228,7 +222,8 @@ def summarize_model_functions(file_as_list: list[str]):
 
         # ANALYT DIV
         if row['analyt_func_type'].upper() == 'DIV':
-            formula += f"({row['input_arrays'][0]} / {row['input_arrays'][1]} if {row['input_arrays'][1]} != 0; {row['input_arrays'][0]} otherwise)"
+            formula += f"({row['input_arrays'][0]} / {row['input_arrays'][1]} if {row['input_arrays'][1]} != 0; " \
+                       f"{row['input_arrays'][0]} otherwise)"
 
         # ANALYT MULT
         if row['analyt_func_type'].upper() == 'MULT':
