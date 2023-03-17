@@ -1,6 +1,6 @@
-#from ResSimpy.Nexus.NexusSimulator import NexusSimulator
-#import ResSimpy.Nexus.nexus_file_operations as nfo
-#from ResSimpy.Nexus.NexusKeywords.grid_function_keywords import INTEGER_ARRAYS
+# from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+# import ResSimpy.Nexus.nexus_file_operations as nfo
+# from ResSimpy.Nexus.NexusKeywords.grid_function_keywords import INTEGER_ARRAYS
 import pandas as pd
 
 
@@ -85,11 +85,11 @@ def create_function_parameters_df(file_as_list: list[str]):
         # set the default values for the parameters,
         # so if they don't exist in dataframe they won't appear as NaN or give error.
         i1 = i2 = j1 = j2 = k1 = k2 = region_type = region_number_list = function_type = function_coefficients = \
-        grid_name = input_arrays_min_max_list = output_arrays_min_max_list = drange_list = input_array_list = output_array_list = ''
+            grid_name = input_arrays_min_max_list = output_arrays_min_max_list = drange_list = input_array_list = output_array_list = ''
 
         for l, line in enumerate(block):
+            line = line.upper()
             words = line.split()
-            # print(f'reading line number: {l}')
             if 'BLOCKS' in line:
                 i1 = words[1]
                 i2 = words[2]
@@ -97,49 +97,39 @@ def create_function_parameters_df(file_as_list: list[str]):
                 j2 = words[4]
                 k1 = words[5]
                 k2 = words[6]
-                print (f'blocks {i1,i2,j1, j2, k1, k2}')
             if 'FUNCTION' in line:
                 if len(words) == 1:
                     continue
                 if len(words) == 2:  # TODO: deal with tabular function option keywords
                     region_type = words[1]
-                    # print(f'reg_type: {reg_type}')
                     region_number_list = block[l + 1].split()
-                    # print(f'reg_numbers: {reg_numbers}')
                 if len(words) > 2:  # TODO: deal with tabular function option keywords
                     print(
                         'Detected Max number of func table entries. This method only works with analytical functions, not with function tables.')
             if 'ANALYT' in line:
                 function_type = words[1]
-                # print(function_type)
                 if len(words) > 2:
                     # remove the first 2 words in line, and set the rest to coefficients
                     words.pop(0)
                     words.pop(0)
                     function_coefficients = words
-                    # print(function_coefficients)
             if 'GRID' in line:
                 grid_name = words[1]
             if 'RANGE' in line and 'INPUT' in line:
                 words.pop(0)
                 words.pop(0)
                 input_arrays_min_max_list = words
-                # print(f'input arrays ranges: {input_arrays_min_max_list}')
             if 'RANGE' in line and 'OUTPUT' in line:
                 words.pop(0)
                 words.pop(0)
                 output_arrays_min_max_list = words
-                # print(f'output arrays ranges: {output_arrays_min_max_list}')
             if 'DRANGE' in line:
                 print('DRANGE: This method only works with analytical functions, not with function tables.')
                 words.pop(0)
                 drange_list = words
-                # print (drange_list)
             if 'OUTPUT' in line and 'RANGE' not in line:
                 input_array_list = words[:words.index('OUTPUT')]
                 output_array_list = words[words.index('OUTPUT') + 1:]
-                # print(input_array_list)
-                # print(output_array_list)
         # TODO: find a safer way to create the new function row
         function_row = [b + 1, i1, i2, j1, j2, k1, k2, region_type, region_number_list, function_type,
                         function_coefficients,
@@ -169,6 +159,90 @@ def summarize_model_functions(file_as_list: list[str]):
           pandas.DataFrame: a dataframe holding each function's translation/summary in a row.
       """
 
-    # create a new dataframe that will hold the summary of all the functions
-    function_summary_df = pd.DataFrame(columns=['function#', 'output_array', 'where', 'function'])
+    # get the df from create_function_parameters_df, add a new column, and populate based on ANALYT function type:
+
+    function_summary_df = create_function_parameters_df(file_as_list)
+    function_summary_df['notation'] = ''
+
+    for index, row in function_summary_df.iterrows():
+
+        formula = row['output_arrays'][0] + ' = '
+
+        # ANALYT POLYN
+        if row['analyt_func_type'].upper() == 'POLYN':
+            n = len(row['func_coeff'])
+
+            for x in range(n):
+                c = row['func_coeff'][x]
+                p = n - x - 1
+                arr = row['input_arrays'][0]
+                if p == 0:
+                    f_portion = f'{c}'
+                elif p == 1:
+                    f_portion = f'{c}*{arr} + '
+                else:
+                    f_portion = f'{c}*({arr}**{p}) + '
+                formula += f_portion
+
+        # ANALYT ABS
+        # TODO: test nexus with multiple input and output arrays
+
+        if row['analyt_func_type'].upper() == 'ABS':
+            formula += f"| {row['input_arrays'][0]} |"
+
+        # ANALYT EXP
+        if row['analyt_func_type'].upper() == 'EXP':
+            formula += f"e**{row['input_arrays'][0]}"
+
+        # ANALYT EXP10
+        if row['analyt_func_type'].upper() == 'EXP10':
+            formula += f"10**{row['input_arrays'][0]}"
+
+        # ANALYT LOG
+        if row['analyt_func_type'].upper() == 'LOG':
+            formula += f"ln|{row['input_arrays'][0]}|"
+
+        # ANALYT LOG10
+        if row['analyt_func_type'].upper() == 'LOG10':
+            #formula += f"log\u2081\u2080|{row['input_arrays'][0]}|"
+            formula += f"log10|{row['input_arrays'][0]}|"
+        # ANALYT SQRT
+        if row['analyt_func_type'].upper() == 'SQRT':
+            formula += f"SQRT|{row['input_arrays'][0]}|"
+
+        # ANALYT GE
+        if row['analyt_func_type'].upper() == 'GE':
+            formula += f"({row['input_arrays'][0]} if {row['input_arrays'][0]} >= {row['func_coeff'][0]}; {row['func_coeff'][1]} otherwise)"
+
+        # ANALYT LE
+        if row['analyt_func_type'].upper() == 'LE':
+            formula += f"({row['input_arrays'][0]} if {row['input_arrays'][0]} <= {row['func_coeff'][0]}; {row['func_coeff'][1]} otherwise)"
+
+        # ANALYT ADD
+        if row['analyt_func_type'].upper() == 'ADD':
+            formula += f"{row['input_arrays'][0]} + {row['input_arrays'][1]}"
+
+        # ANALYT SUBT
+        if row['analyt_func_type'].upper() == 'SUBT':
+            formula += f"{row['input_arrays'][0]} - {row['input_arrays'][1]}"
+
+        # ANALYT DIV
+        if row['analyt_func_type'].upper() == 'DIV':
+            formula += f"({row['input_arrays'][0]} / {row['input_arrays'][1]} if {row['input_arrays'][1]} != 0; {row['input_arrays'][0]} otherwise)"
+
+        # ANALYT MULT
+        if row['analyt_func_type'].upper() == 'MULT':
+            formula += f"{row['input_arrays'][0]} * {row['input_arrays'][1]}"
+
+        # ANALYT MIN
+        if row['analyt_func_type'].upper() == 'MIN':
+            formula += f"min({row['input_arrays'][0]}, {row['input_arrays'][1]})"
+
+        # ANALYT MAX
+        if row['analyt_func_type'].upper() == 'MAX':
+            formula += f"max({row['input_arrays'][0]}, {row['input_arrays'][1]})"
+
+        # fill in the notation value for the row
+        function_summary_df.loc[index, 'notation'] = formula
+
     return function_summary_df

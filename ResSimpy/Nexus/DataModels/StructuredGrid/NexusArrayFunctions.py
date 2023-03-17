@@ -1,7 +1,5 @@
 from dataclasses import dataclass
 import pandas as pd
-
-from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 import ResSimpy.Nexus.array_function_operations as afo
 
 
@@ -15,11 +13,6 @@ class NexusArrayFunctions:
 
            """
 
-    functions_summary_df: pd.DataFrame
-    str_grid_file_path: str
-    grid_file_as_list: list[str]
-    model: NexusSimulator
-
-    def load_functions_summary(self):
-        self.grid_file_as_list = self.model.fcs_file.structured_grid_file.file_content_as_list
-        self.functions_summary_df = afo.create_function_parameters_df(self.grid_file_as_list)
+    @staticmethod
+    def load_functions_summary(file_content_as_list: list[str]):
+        return afo.summarize_model_functions(file_content_as_list)
