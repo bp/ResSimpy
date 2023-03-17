@@ -2,7 +2,7 @@
 # import ResSimpy.Nexus.nexus_file_operations as nfo
 # from ResSimpy.Nexus.NexusKeywords.grid_function_keywords import INTEGER_ARRAYS
 import pandas as pd
-from typing import Union
+from typing import Union, List
 
 
 def collect_function_block_lines(file_as_list: list[str], str_to_search: str = 'OUTPUT',
@@ -87,17 +87,14 @@ def create_function_parameters_df(file_as_list: list[str]):
         # so if they don't exist in dataframe they won't appear as NaN or give error,
         # or repeat the last value for each row.
         i1 = i2 = j1 = j2 = k1 = k2 = region_type = function_type = grid_name = ''
-        # set the lists as emtry strings as well, otherwise they show up as [] on the dataframe.
-        # Reassign to [] if value is not None, otherwise mypy gives error.
-        # region_number_list = function_coefficients = input_arrays_min_max_list = output_arrays_min_max_list = \
-        #     input_array_list = output_array_list = drange_list = ''
-        region_number_list: Union[str, list[str]] = ''
-        function_coefficients: Union[str, list[str]] = ''
-        input_arrays_min_max_list: Union[str, list[str]] = ''
-        output_arrays_min_max_list: Union[str, list[str]] = ''
-        input_array_list: Union[str, list[str]] = ''
-        output_array_list: Union[str, list[str]] = ''
-        drange_list: Union[str, list[str]] = ''
+        # set the lists as empty strings as well, otherwise they show up as [] on the dataframe.
+        region_number_list: Union[str, List[str]] = ''
+        function_coefficients: Union[str, List[str]] = ''
+        input_arrays_min_max_list: Union[str, List[str]] = ''
+        output_arrays_min_max_list: Union[str, List[str]] = ''
+        input_array_list: Union[str, List[str]] = ''
+        output_array_list: Union[str, List[str]] = ''
+        drange_list: Union[str, List[str]] = ''
 
         for li, line in enumerate(block):
             line = line.upper()

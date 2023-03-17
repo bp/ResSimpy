@@ -36,3 +36,23 @@ STRUCTURED_GRID_KEYWORDS = ['ADD', 'ALL', 'ANALYT', 'ARRAYS', 'B', 'BLOCKS', 'C'
                             'SGRO', 'SGRW', 'SGU', 'SINF', 'STD', 'SW', 'SWL', 'SWR', 'SWRO', 'SWRO_LS', 'SWU', 'TMX',
                             'TMY', 'TMZ', 'TOLPV', 'TX', 'TY', 'TZ', 'V98', 'VALUE', 'WATER', 'WINDOW', 'WORKA1', 'X',
                             'XREG', 'Z', 'ZVAR']
+
+
+INTEGER_ARRAYS = ['ICOARS', 'IEQUIL', 'IPVT', 'IWATER', 'IALPHAF', 'IPOLYMER', 'IRELPM', 'IROCK', 'IREGION',
+                  'IADSORPTION', 'ITRAN', 'ITRACER', 'DEADCELL', 'LIVECELL', 'IGRID', 'ISECTOR']
+
+WORK_ARRAYS = ['WORKA1', 'WORKA2', 'WORKA3', 'WORKA4', 'WORKA5', 'WORKA6', 'WORKA7', 'WORKA8', 'WORKA9']
+
+ROCK_ARRAYS = ['SWL', 'SWR', 'SGL', 'SGR', 'SWRO', 'SWRO_LS', 'SGRO', 'SGRW', 'KRW_SWRO', 'KRWS_LS', 'KRW_SWU',
+               'KRG_SGRO', 'KRG_SGU', 'KRO_SWL', 'KRO_SGL', 'KRO_SGR', 'KRW_SGL', 'KRW_SGR', 'KRG_SGRW', 'SGTR',
+               'SOTR', 'SWLPC', 'SGLPC', 'PCW_SWL', 'PCG_SGU']
+
+USER_INIT_ARRAYS = ['SW', 'SG', 'PRESSURE', 'TEMPERATURE', 'CHLORIDE', 'CALCIUM', 'SALINITY', 'API',
+                    'WORKA1', 'WORKA2', 'WORKA3', 'WORKA4', 'WORKA5', 'WORKA6', 'WORKA7', 'WORKA8', 'WORKA9']
+
+MULTIPLIER_ARRAYS = ['TMX', 'TMY', 'TMZ', 'MULTBV']
+
+PROPERTY_ARRAYS = ['POROSITY', 'POR', 'PV', 'KX', 'KY', 'KZ', 'COMPR', 'CR', 'NETGRS', 'KWX', 'KWY', 'KWZ', 'PEMDMAT',
+                   'PEMGMAT', 'PEMKMAT', 'BW_SAL', 'BW_T']
+
+
