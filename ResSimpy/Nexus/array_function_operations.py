@@ -2,6 +2,7 @@
 # import ResSimpy.Nexus.nexus_file_operations as nfo
 # from ResSimpy.Nexus.NexusKeywords.grid_function_keywords import INTEGER_ARRAYS
 import pandas as pd
+from typing import Union
 
 
 def collect_function_block_lines(file_as_list: list[str], str_to_search: str = 'OUTPUT',
@@ -88,8 +89,15 @@ def create_function_parameters_df(file_as_list: list[str]):
         i1 = i2 = j1 = j2 = k1 = k2 = region_type = function_type = grid_name = ''
         # set the lists as emtry strings as well, otherwise they show up as [] on the dataframe.
         # Reassign to [] if value is not None, otherwise mypy gives error.
-        region_number_list = function_coefficients = input_arrays_min_max_list = output_arrays_min_max_list = \
-            input_array_list = output_array_list = drange_list = ''
+        # region_number_list = function_coefficients = input_arrays_min_max_list = output_arrays_min_max_list = \
+        #     input_array_list = output_array_list = drange_list = ''
+        region_number_list: Union[str, list[str]] = ''
+        function_coefficients: Union[str, list[str]] = ''
+        input_arrays_min_max_list: Union[str, list[str]] = ''
+        output_arrays_min_max_list: Union[str, list[str]] = ''
+        input_array_list: Union[str, list[str]] = ''
+        output_array_list: Union[str, list[str]] = ''
+        drange_list: Union[str, list[str]] = ''
 
         for li, line in enumerate(block):
             line = line.upper()
@@ -106,7 +114,6 @@ def create_function_parameters_df(file_as_list: list[str]):
                     continue
                 if len(words) == 2:  # TODO: deal with tabular function option keywords
                     region_type = words[1]
-                    region_number_list = []
                     region_number_list = block[li + 1].split()
                 if len(words) > 2:  # TODO: deal with tabular function option keywords
                     print('Detected Max number of func table entries. This method does not collect function tables.')
@@ -116,29 +123,23 @@ def create_function_parameters_df(file_as_list: list[str]):
                     # remove the first 2 words in line, and set the rest to coefficients
                     words.pop(0)
                     words.pop(0)
-                    function_coefficients = []
                     function_coefficients = words
             if 'GRID' in line:
                 grid_name = words[1]
             if 'RANGE' in line and 'INPUT' in line:
                 words.pop(0)
                 words.pop(0)
-                input_arrays_min_max_list = []
                 input_arrays_min_max_list = words
             if 'RANGE' in line and 'OUTPUT' in line:
                 words.pop(0)
                 words.pop(0)
-                output_arrays_min_max_list = []
                 output_arrays_min_max_list = words
             if 'DRANGE' in line:
                 print('DRANGE: This method only works with analytical functions, not with function tables.')
                 words.pop(0)
-                drange_list = []
                 drange_list = words
             if 'OUTPUT' in line and 'RANGE' not in line:
-                input_array_list = []
                 input_array_list = words[:words.index('OUTPUT')]
-                output_array_list = []
                 output_array_list = words[words.index('OUTPUT') + 1:]
         # TODO: find a safer way to create the new function row
         function_row = [b + 1, i1, i2, j1, j2, k1, k2, region_type, region_number_list, function_type,
