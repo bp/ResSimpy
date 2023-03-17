@@ -15,7 +15,6 @@ STRUCTURED_GRID_KEYWORDS = ['ADD', 'ALL', 'ANALYT', 'ARRAYS', 'B', 'BLOCKS', 'C'
                             'TMY', 'TMZ', 'TOLPV', 'TX', 'TY', 'TZ', 'V98', 'VALUE', 'WATER', 'WINDOW', 'WORKA1', 'X',
                             'XREG', 'Z', 'ZVAR']
 
-
 INTEGER_ARRAYS = ['ICOARS', 'IEQUIL', 'IPVT', 'IWATER', 'IALPHAF', 'IPOLYMER', 'IRELPM', 'IROCK', 'IREGION',
                   'IADSORPTION', 'ITRAN', 'ITRACER', 'DEADCELL', 'LIVECELL', 'IGRID', 'ISECTOR']
 
@@ -32,5 +31,3 @@ MULTIPLIER_ARRAYS = ['TMX', 'TMY', 'TMZ', 'MULTBV']
 
 PROPERTY_ARRAYS = ['POROSITY', 'POR', 'PV', 'KX', 'KY', 'KZ', 'COMPR', 'CR', 'NETGRS', 'KWX', 'KWY', 'KWZ', 'PEMDMAT',
                    'PEMGMAT', 'PEMKMAT', 'BW_SAL', 'BW_T']
-
-
