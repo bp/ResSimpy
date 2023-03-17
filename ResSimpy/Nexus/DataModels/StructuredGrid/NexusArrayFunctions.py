@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-import pandas as pd
 import ResSimpy.Nexus.array_function_operations as afo
 
 
