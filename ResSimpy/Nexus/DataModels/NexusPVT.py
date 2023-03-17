@@ -58,7 +58,11 @@ class NexusPVT():
                         if nfo.check_token(tertiary_key, single_line):
                             if type(self.eos_options[primary_key]) == str:  # Convert to tuple
                                 self.eos_options[primary_key] = (secondary_key, {})
-                            self.eos_options[primary_key][1][tertiary_key] = float(  # type: ignore
+
+                            secondary_eos_option = self.eos_options[primary_key]
+                            if not type(secondary_eos_option) is tuple or not type(secondary_eos_option[1]) is dict:
+                                raise ValueError("Incorrect format")
+                            secondary_eos_option[1][tertiary_key] = float(
                                 str(nfo.get_token_value(tertiary_key, single_line, line_list)))
 
     def __find_pvt_table_starting_index(self, table_key: str, single_line: str, line_list: list[str],
@@ -222,7 +226,7 @@ class NexusPVT():
             if [i for i in line.split() if i in PVT_EOSOPTIONS_PRIMARY_WORDS]:
                 if 'EOS_OPT_PRIMARY_LIST' not in self.eos_options.keys():
                     self.eos_options['EOS_OPT_PRIMARY_LIST'] = []
-                self.eos_options['EOS_OPT_PRIMARY_LIST'].extend([i for i in line.split() if i  # type: ignore
+                self.eos_options['EOS_OPT_PRIMARY_LIST'].extend([i for i in line.split() if i
                                                                  in PVT_EOSOPTIONS_PRIMARY_WORDS])
             # Find EOS key-value pairs, like LI_FACT 0.9 or FUGERR 5
             if [i for i in line.split() if i in PVT_EOSOPTIONS_PRIMARY_KEYS_FLOAT]:
@@ -305,5 +309,5 @@ class NexusPVT():
             for subkey in pvt_table_indices_dict[key].keys():
                 if not isinstance(self.properties[key], dict):
                     raise ValueError(f"Property is not a dictionary: {str(self.properties[key])}")
-                self.properties[key][subkey] = nfo.read_table_to_df(file_as_list[  # type: ignore
+                self.properties[key][subkey] = nfo.read_table_to_df(file_as_list[
                     pvt_table_indices_dict[key][subkey][0]:pvt_table_indices_dict[key][subkey][1]])
