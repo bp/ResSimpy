@@ -61,7 +61,7 @@ class NexusPVT():
 
                             secondary_eos_option = self.eos_options[primary_key]
                             if not type(secondary_eos_option) is tuple or not type(secondary_eos_option[1]) is dict:
-                                raise ValueError("Incorrect format")
+                                raise ValueError(f"EOS secondary key invalid: {secondary_key}")
                             secondary_eos_option[1][tertiary_key] = float(
                                 str(nfo.get_token_value(tertiary_key, single_line, line_list)))
 
