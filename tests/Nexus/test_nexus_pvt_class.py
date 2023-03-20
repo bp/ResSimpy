@@ -58,13 +58,13 @@ from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
     3515 1.33 0.69 0.79
 
     GAS
-    PRES BG VG
+    PRES BG vg
     14.7 225.0 0.0105
     115. 25.0 0.0109
     2515 1.089 0.0193
     3515 0.787 0.0193
     
-    UNSATOIL PSAT 2000.0
+    UNSATOIL RSSAT 0.5
     PRES BO VO
     2515 1.25 0.99
     3515 1.24 0.98
@@ -78,7 +78,7 @@ from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
                                 'BG': [225, 25, 1.089, 0.787],
                                 'VG': [0.0105, 0.0109, 0.0193, 0.0193]
                                 }),
-          'UNSATOIL_PSAT': {'2000.0': pd.DataFrame({'PRES': [2515, 3515],
+          'UNSATOIL_RSSAT': {'0.5': pd.DataFrame({'PRES': [2515, 3515],
                                                     'BO': [1.25, 1.24],
                                                     'VO': [0.99, 0.98]
                                                     })
@@ -177,7 +177,7 @@ from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
       TEMP 160.0
 
       PROPS
-      COMPONENT MOLWT OMEGAA OMEGAB TC PC VC ACENTR
+      COMPONENT MOLWT OMEGAA OMEGAB TC PC VC acentr
       C1 16.04 0.4572355 0.0777961 -116.67 667.8 1.598 0.0130
       C3 44.01 0.4572355 0.0777961 206.03 616.3 3.129 0.1524
       C6 86.18 0.4572355 0.0777961 453.73 436.99 5.922 0.3007

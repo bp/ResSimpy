@@ -25,8 +25,8 @@ class NexusPVT():
     # General parameters
     file_path: str
     pvt_type: Optional[str] = None
-    eos_nhc: int = 0  # Number of hydrocarbon components
-    eos_temp: float = 60.0  # Default temperature for EOS method
+    eos_nhc: Optional[int] = None  # Number of hydrocarbon components
+    eos_temp: Optional[float] = None  # Default temperature for EOS method
     eos_components: Optional[list[str]] = field(default_factory=get_empty_list_str)
     eos_options: dict[str, Union[str, int, float, pd.DataFrame, list[str], dict[str, float],
                                  tuple[str, dict[str, float]], dict[str, pd.DataFrame]]] \
@@ -56,14 +56,14 @@ class NexusPVT():
                     self.eos_options[primary_key] = secondary_key
                     for tertiary_key in PVT_EOSOPTIONS_TERTIARY_KEYS:
                         if nfo.check_token(tertiary_key, single_line):
-                            if type(self.eos_options[primary_key]) == str:  # Convert to tuple
+                            if isinstance(self.eos_options[primary_key], str):  # Convert to tuple
                                 self.eos_options[primary_key] = (secondary_key, {})
 
                             secondary_eos_option = self.eos_options[primary_key]
                             if not type(secondary_eos_option) is tuple or not type(secondary_eos_option[1]) is dict:
                                 raise ValueError(f"EOS secondary key invalid: {secondary_key}")
                             secondary_eos_option[1][tertiary_key] = float(
-                                str(nfo.get_token_value(tertiary_key, single_line, line_list)))
+                                nfo.get_expected_token_value(tertiary_key, single_line, line_list))
 
     def __find_pvt_table_starting_index(self, table_key: str, single_line: str, line_list: list[str],
                                         table_indices: dict[str, list[int]],
@@ -84,6 +84,9 @@ class NexusPVT():
             l_index (int): current line index
             unsat_obj (dict[str, list[str]]): track saturation pressures from which undersaturated branches emanate
 
+        Raises:
+            ValueError: If a property table key does not have a numerical value
+
         Returns:
             int: Updated line index
         """
@@ -99,15 +102,14 @@ class NexusPVT():
             else:
                 table_name = 'UNSATOIL'
                 full_table_name = table_name + '_' + table_key
-            if nfo.check_token(table_name, single_line):
-                if nfo.check_token(table_key, single_line):
-                    if nfo.get_token_value(table_key, single_line, line_list) is None:
-                        raise ValueError(f'Property {table_key} does not have a numerical value.')
-                    unsat_obj[table_key].append(str(nfo.get_token_value(table_key, single_line, line_list)))
-                    if full_table_name in table_indices.keys():
-                        table_indices_dict[full_table_name][unsat_obj[table_key][-1]] = [l_index + 1, len(line_list)]
-                    else:
-                        table_indices_dict[full_table_name] = {unsat_obj[table_key][-1]: [l_index + 1, len(line_list)]}
+            if nfo.check_token(table_name, single_line) and nfo.check_token(table_key, single_line):
+                if nfo.get_token_value(table_key, single_line, line_list) is None:
+                    raise ValueError(f'Property {table_key} does not have a numerical value.')
+                unsat_obj[table_key].append(str(nfo.get_token_value(table_key, single_line, line_list)))
+                if full_table_name in table_indices_dict.keys():
+                    table_indices_dict[full_table_name][unsat_obj[table_key][-1]] = [l_index + 1, len(line_list)]
+                else:
+                    table_indices_dict[full_table_name] = {unsat_obj[table_key][-1]: [l_index + 1, len(line_list)]}
                 table_flag[table_name] = True
                 return l_index + 1
         return None
@@ -152,7 +154,7 @@ class NexusPVT():
         if table_has_endkeyword and nfo.check_token('END'+table_name, single_line):
             end_flag_found = True
         if (full_table_name in table_indices.keys() or
-                full_table_name in table_indices_dict) and end_flag_found and table_flag[table_name]:
+                full_table_name in table_indices_dict.keys()) and end_flag_found and table_flag[table_name]:
             if table_key not in PVT_UNSAT_TABLE_INDICES:  # All tables except undersaturated tables
                 table_indices[table_name][1] = l_index
             else:  # Handle undersaturated tables
@@ -176,6 +178,7 @@ class NexusPVT():
         pvt_table_indices_dict: dict[str, dict[str, list[int]]] = {}
         # Flag to tell when to start reading a table
         start_reading_table: bool = False
+        trans_flag = False
         # Dictionary of flags indicating which tables are being read
         table_being_read: dict[str, bool] = {}
         for table_name in PVT_ALL_TABLE_KEYWORDS:
@@ -196,36 +199,40 @@ class NexusPVT():
             # Extract blackoil fluid density parameters
             for fluid_param in PVT_BLACKOIL_PRIMARY_KEYWORDS:
                 if nfo.check_token(fluid_param, line):
-                    if nfo.get_token_value(fluid_param, line, file_as_list) is None:
-                        raise ValueError(f"Property {fluid_param} does not have a numerical value.")
-                    self.properties[fluid_param] = float(str(nfo.get_token_value(fluid_param, line, file_as_list)))
+                    self.properties[fluid_param] = float(nfo.get_expected_token_value(
+                        fluid_param, line, file_as_list, custom_message=f"Property {fluid_param} does \
+                        not have a numerical value."))
             if nfo.check_token('DRYGAS_MFP', line):
                 self.properties['DRYGAS_MFP'] = True
 
             # For EOS or compositional models, get required parameters
             if nfo.check_token('NHC', line):  # Get number of components
-                if nfo.get_token_value('NHC', line, file_as_list) is None:
-                    raise ValueError("Property NHC does not have a numerical value.")
-                self.eos_nhc = int(str(nfo.get_token_value('NHC', line, file_as_list)))
+                self.eos_nhc = int(nfo.get_expected_token_value('NHC', line,
+                                                                file_as_list,
+                                                                custom_message="Property NHC does not \
+                                                                have a numerical value."))
             if nfo.check_token('COMPONENTS', line):  # Get NHC components
                 elems = line.split()
                 components_index = elems.index('COMPONENTS')
-                self.eos_components = elems[components_index+1:components_index+1+int(self.eos_nhc)]
+                if self.eos_nhc and self.eos_nhc > 0:
+                    self.eos_components = elems[components_index+1:components_index+1+int(self.eos_nhc)]
             if nfo.check_token('TEMP', line):  # Get default EOS temperature
-                if nfo.get_token_value('TEMP', line, file_as_list) is None:
-                    raise ValueError("Property TEMP does not have a numerical value.")
-                self.eos_temp = float(str(nfo.get_token_value('TEMP', line, file_as_list)))
+                self.eos_temp = float(nfo.get_expected_token_value(
+                    'TEMP', line, file_as_list, custom_message="Property TEMP does not have a numerical value."))
 
             # Check for EOS options
             if nfo.check_token('EOSOPTIONS', line):
-                if str(nfo.get_token_value('EOSOPTIONS', line, file_as_list)) in PVT_EOS_METHODS:
-                    self.eos_options['EOS_METHOD'] = str(nfo.get_token_value('EOSOPTIONS', line, file_as_list))
+                if nfo.get_expected_token_value('EOSOPTIONS', line, file_as_list) in PVT_EOS_METHODS:
+                    self.eos_options['EOS_METHOD'] = nfo.get_expected_token_value('EOSOPTIONS', line, file_as_list)
                 else:
                     self.eos_options['EOS_METHOD'] = 'PR'
             # Find EOS single-word options, like CAPILLARYFLASH and add to list
             if [i for i in line.split() if i in PVT_EOSOPTIONS_PRIMARY_WORDS]:
                 if 'EOS_OPT_PRIMARY_LIST' not in self.eos_options.keys():
                     self.eos_options['EOS_OPT_PRIMARY_LIST'] = []
+                if not isinstance(self.eos_options['EOS_OPT_PRIMARY_LIST'], list):
+                    raise ValueError(f"EOS_OPT_PRIMARY_LIST should be a list, instead \
+                                     got {self.eos_options['EOS_OPT_PRIMARY_LIST']}")
                 self.eos_options['EOS_OPT_PRIMARY_LIST'].extend([i for i in line.split() if i
                                                                  in PVT_EOSOPTIONS_PRIMARY_WORDS])
             # Find EOS key-value pairs, like LI_FACT 0.9 or FUGERR 5
@@ -241,15 +248,18 @@ class NexusPVT():
             primary_keys2populate = ['TRANSITION', 'TRANS_TEST', 'PHASEID']
             primary_keys2populate_defaults = ['TEST', 'INCRP', '']
             secondary_keys = [PVT_EOSOPTIONS_TRANS_KEYS, PVT_EOSOPTIONS_TRANS_TEST_KEYS, PVT_EOSOPTIONS_PHASEID_KEYS]
-            for index, key in enumerate(zip(primary_keys2populate, primary_keys2populate_defaults, secondary_keys)):
-                self.__populate_eos_opts_to_tertiary_keys(key[0], key[1], line, file_as_list, key[2])
+            if [i for i in line.split() if i in primary_keys2populate]:
+                trans_flag = True
+            if trans_flag:
+                for index, key in enumerate(zip(primary_keys2populate, primary_keys2populate_defaults, secondary_keys)):
+                    self.__populate_eos_opts_to_tertiary_keys(key[0], key[1], line, file_as_list, key[2])
             # Read TRANS_OPTIMIZATION eos options, if present
             if nfo.check_token('TRANS_OPTIMIZATION', line):
                 self.eos_options['TRANS_OPTIMIZATION'] = {}
                 for tert_key in PVT_EOSOPTIONS_TERTIARY_KEYS:
                     if nfo.check_token(tert_key, line):
                         self.eos_options['TRANS_OPTIMIZATION'][tert_key] = float(
-                            str(nfo.get_token_value(tert_key, line, file_as_list)))
+                            nfo.get_expected_token_value(tert_key, line, file_as_list))
 
             # Identify beginning and ending line indices for different kinds tables in PVT file
             if start_reading_table:  # Figure out ending line indices for tables
@@ -307,7 +317,8 @@ class NexusPVT():
         for key in pvt_table_indices_dict.keys():
             self.properties[key] = {}
             for subkey in pvt_table_indices_dict[key].keys():
-                if not isinstance(self.properties[key], dict):
+                property_key = self.properties[key]
+                if not isinstance(property_key, dict):
                     raise ValueError(f"Property is not a dictionary: {str(self.properties[key])}")
-                self.properties[key][subkey] = nfo.read_table_to_df(file_as_list[
+                property_key[subkey] = nfo.read_table_to_df(file_as_list[
                     pvt_table_indices_dict[key][subkey][0]:pvt_table_indices_dict[key][subkey][1]])
