@@ -1,41 +1,56 @@
 import pytest
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Surface.NexusNode import NexusNode
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.Surface.load_nodes import load_nodes
 
 def test_load_single_node():
+    pass
 
-@pytest.mark.parametrize('file_contents',[
-('''WELLHEAD
-WELL NAME DEPTH TYPE METHOD
-R001	TH-R001	0	PIPE 	2
-'''),
-(
-'''WELLHEAD
-WELL NAME DEPTH TYPE METHOD
-!RU415	TH-RU415	0	PIPE 	3	
-R001	TH-R001	0	PIPE 	2	
-R002	TH-R002	0	PIPE 	1	
-R003	TH-R003	0	PIPE 	1	
-ENDWELLHEAD
-R005 TH-R005 0 PIPE 5'''),
+
+@pytest.mark.parametrize('file_contents, node1_props, node2_props',[
+('''NODES
+  NAME                           TYPE       DEPTH   TEMP
+ ! Riser Nodes
+  node1                         NA            NA      #
+  node_2        WELLHEAD     1167.3 # 
+  ENDNODES
+''',
+{'name': 'node1', 'type': None, 'depth': None,  'temp': None, },
+{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, }
+    ),
+('''nodes
+  NAME       TYPE       DEPTH   TemP    X     Y       NUMBER  StatiON
+ ! Riser Nodes
+  node1         NA        NA    60.5    100.5 300.5   1     station
+  node_2        WELLHEAD     1167.3 #  10.21085 3524.23 2   station2 ! COMMENT 
+  endnodes
+  content outside of the node statement
+  node1         NA        NA    60.5    10.5 3.5   1     station_null
+  ''',
+{'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1, 'station': 1},
+{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': 10.21085, 'y_pos': 3524.23, 'number': 2,
+    'station': 2}
+  )
 
 ],
-ids=['basic', 'reaching endwellhead']
+ids=['basic', 'all columns']
 
 )
-def test_load_nodes(mocker, file_contents):
+def test_load_nodes(mocker, file_contents, node1_props, node2_props):
     # Arrange
     # mock out a surface file:
+    start_date = '01/01/2023'
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
 
-    node_1 = NexusNode(name='R001', )
+    node_1 = NexusNode(**node1_props)
+    node_2 = NexusNode(**node2_props)
 
-    expected_result = []
+    expected_result = [node_1, node_2]
 
     # Act
 
-    result = load_nodes(surface_file)
+    result = load_nodes(surface_file, start_date, default_units=UnitSystem.ENGLISH)
     # Assert
     assert result == expected_result
 
