@@ -27,11 +27,13 @@ class StructuredGridFile(Grid):
 
     def __init__(self, data: Optional[dict] = None):
         super().__init__()
+        self.__array_functions_list: list[str] = None
+        self.__array_functions_df: pd.DataFrame = None
+
         # Use the dict provided to populate the properties
         if data is not None:
             for name, value in data.items():
                 setattr(self, name, self.__wrap(value))
-        self.__array_functions: pd.DataFrame = None
 
     def __wrap(self, value):
         if isinstance(value, (tuple, list, set, frozenset)):
@@ -41,8 +43,8 @@ class StructuredGridFile(Grid):
 
     @classmethod
     def load_structured_grid_file(cls: Type[StructuredGridFile], structure_grid_file: NexusFile) -> StructuredGridFile:
-        """Loads in a structured grid file including all grid properties and modifiers.
-        Currently loading in grids with FUNCTIONS included are not supported.
+        """Loads in a structured grid file including all grid properties and array functions defined with 'FUNCTION'.
+        Other grid modifiers are currently not supported.
         Args:
             structure_grid_file (NexusFile): the NexusFile representation of a structured grid file for converting \
                 into a structured grid file class
@@ -53,11 +55,14 @@ class StructuredGridFile(Grid):
         if structure_grid_file.location is None:
             raise ValueError(f"No file path given or found for structured grid file path. \
                 Instead got {structure_grid_file.location}")
-        file_as_list = nfo.load_file_as_list(structure_grid_file.location)
+        file_as_list = nfo.load_file_as_list(structure_grid_file.location) #, strip_comments=True, strip_str=True)
         if file_as_list is None:
             raise ValueError("No file path given or found for structured grid file path. \
                 Please update structured grid file path")
         structured_grid_file = cls()
+
+        # Load the array functions defined with 'FUNCTION' keyword
+        structured_grid_file.load_array_functions(structure_grid_file.location)
 
         def move_next_value(next_line: str) -> tuple[str, str]:
             """finds the next value and then strips out the value from the line.
@@ -176,10 +181,15 @@ class StructuredGridFile(Grid):
         with open(grid_file_path, "w") as text_file:
             text_file.write(new_file_str)
 
-    def load_array_functions(self):
-        self.__array_functions = NexusArrayFunctions.load_functions_summary(
-            self.fcs_file.structured_grid_file.file_content_as_list)
+    def load_array_functions(self, grid_file_path: str):
+        file_content_as_list = nfo.load_file_as_list(grid_file_path, strip_comments=True, strip_str=True)
+        self.__array_functions_list = NexusArrayFunctions.load_functions_list(file_content_as_list)
+        self.__array_functions_df = NexusArrayFunctions.load_functions_df(file_content_as_list)
 
-    def get_array_functions(self):
+    def get_array_functions_list(self):
         """Returns the grid array functions as a dataframe"""
-        return self.__array_functions
+        return self.__array_functions_list
+
+    def get_array_functions_df(self):
+        """Returns the grid array functions as a dataframe"""
+        return self.__array_functions_df

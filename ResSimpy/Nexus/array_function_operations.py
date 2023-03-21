@@ -27,7 +27,7 @@ def collect_function_block_lines(file_as_list: list[str], str_to_search: str = '
 
     # If str_to_search is in first item of list, return the first item only.
     # TODO: raise error if str_to_search is the last item in file_as_list
-    if (str_to_search in file_as_list[0]) and (str_to_avoid not in file_as_list[0]):
+    if (str_to_search in file_as_list[0].upper()) and (str_to_avoid not in file_as_list[0].upper()):
         return [file_as_list[0]]
 
     # Recursion time!!! get the first item, search for str_to_search in the rest of the lines, and repeat.
@@ -47,7 +47,7 @@ def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
 
     for i, line in enumerate(file_as_list):
 
-        if line.startswith('FUNCTION'):
+        if line.upper().startswith('FUNCTION'):
             # fetch the rest of the items until finding the line that contains 'OUTPUT', but not 'RANGE':
             function_body = collect_function_block_lines(file_as_list[i:])
             function_list.append(function_body)
