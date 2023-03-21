@@ -1,8 +1,10 @@
+from enum import Enum
 import numpy as np
 import pandas as pd
 import pytest
 
 from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits
 
 
 
@@ -31,7 +33,7 @@ from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
     2515 1.25 0.99
     3515 1.24 0.98
     """, {'PVT_TYPE': 'BLACKOIL', 'API': 30.0, 'SPECG': 0.6,
-          'UNIT_SYSTEM': 'ENGLISH', 'DESC': ['This is first line of description',
+          'UNIT_SYSTEM': UnitSystem.ENGLISH, 'DESC': ['This is first line of description',
                                              'and this is second line of description'
                                              ],
           'SATURATED': pd.DataFrame({'PRES': [14.7, 115., 2515, 3515],
@@ -96,7 +98,7 @@ from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
     2515 1.25 0.505 0.99
     3515 1.33 0.69 0.79
     """, {'PVT_TYPE': 'WATEROIL', 'DENOIL': 55.185,
-          'UNIT_SYSTEM': 'ENGLISH', 
+          'UNIT_SYSTEM': UnitSystem.ENGLISH,
           'OIL': pd.DataFrame({'PRES': [14.7, 115., 2515, 3515],
                                 'BO': [1.05, 1.08, 1.25, 1.33],
                                 'RS': [0.005, 0.045, 0.505, 0.69],
@@ -132,7 +134,7 @@ from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
     0.0 0.787 0.0193
     
     """, {'PVT_TYPE': 'BLACKOIL', 'API': 30.0, 'SPECG': 0.6,
-          'UNIT_SYSTEM': 'ENGLISH', 'DESC': ['This is first line of description',
+          'UNIT_SYSTEM': UnitSystem.ENGLISH, 'DESC': ['This is first line of description',
                                              'and this is second line of description'
                                              ],
           'SATURATED': pd.DataFrame({'PRES': [14.7, 115., 2515, 3515],
@@ -220,7 +222,7 @@ from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
                         6        3.1e-2
                         ENDPEDTUNE
     
-    """, {'PVT_TYPE': 'EOS', 'UNIT_SYSTEM': 'ENGLISH', 'TEMP_UNIT': 'FAHR',
+    """, {'PVT_TYPE': 'EOS', 'UNIT_SYSTEM': UnitSystem.ENGLISH, 'TEMP_UNIT': TemperatureUnits.FAHR,
           'DESC': ['SPE 5'], 'TEMP': 160.0, 'NHC': 6, 'COMPONENTS': ['C1', 'C3', 'C6', 'C10', 'C15', 'C20'],
           'EOSOPTIONS': {'EOS_METHOD': 'PR',
                          'EOS_OPT_PRIMARY_LIST': ['ZGIBBS', 'FLASH_GIBBS_ON', 'STKATZOFF', 'CAPILLARYFLASH', 'VISPE'],
@@ -278,7 +280,7 @@ from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
                  TRANS_TEST INCRP PHASEFRAC 0.05
                  VISPE
     
-    """, {'PVT_TYPE': 'EOS', 'UNIT_SYSTEM': 'ENGLISH', 'TEMP_UNIT': 'RANKINE',
+    """, {'PVT_TYPE': 'EOS', 'UNIT_SYSTEM': UnitSystem.ENGLISH, 'TEMP_UNIT': TemperatureUnits.RANKINE,
           'DESC': ['EOS EXAMPLE WITH NO TABLES'], 'NHC': 5, 'COMPONENTS': ['C1', 'C2', 'C3-4', 'C5-6', 'C7+'],
           'TEMP': 520.0,
           'EOSOPTIONS': {'EOS_METHOD': 'PR',
@@ -349,7 +351,7 @@ from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
                         C3-4 C5-6 -0.025
                         ENDVISKKIJ
     
-    """, {'PVT_TYPE': 'EOS', 'UNIT_SYSTEM': 'ENGLISH', 'TEMP_UNIT': 'RANKINE',
+    """, {'PVT_TYPE': 'EOS', 'UNIT_SYSTEM': UnitSystem.ENGLISH, 'TEMP_UNIT': TemperatureUnits.RANKINE,
           'DESC': ['EOS EXAMPLE WITH PEDERSON VISCOSITY COEFFICIENTS MODIFIED'], 'NHC': 5,
           'COMPONENTS': ['C1', 'C2', 'C3-4', 'C5-6', 'C7+'],
           'TEMP': 520.0,
@@ -401,6 +403,8 @@ def test_read_properties_from_file(mocker, file_contents, expected_pvt_propertie
         elif type(expected_pvt_properties[key]) == dict:
             for subkey in expected_pvt_properties[key].keys():
                 pd.testing.assert_frame_equal(expected_pvt_properties[key][subkey], props[key][subkey])
+        elif isinstance(expected_pvt_properties[key], Enum):
+            assert expected_pvt_properties[key] == props[key]
         else:
             assert expected_pvt_properties[key] == props[key]
 
