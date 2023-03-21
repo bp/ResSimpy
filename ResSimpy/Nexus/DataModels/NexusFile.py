@@ -231,7 +231,7 @@ class NexusFile:
             replace_with (Union[str, VariableEntry, None]): a value to replace the existing value with. \
                 Defaults to None.
         Raises:
-
+            ValueError: if no file content is found in the NexusFile or if the search string is not found
         Returns:
             None | str | NexusFile: value of the string if a string is found, the next NexusFile in the list after the \
                         token if no value is found. Else returns None.
@@ -257,6 +257,6 @@ class NexusFile:
         if isinstance(search_string, self.__class__):
             return search_string
         if not isinstance(search_string, str):
-            raise ValueError(f'No file found in the include objects for file {search_string}')
+            raise ValueError(f'{search_string=} was not class or subclass of type NexusFile and not a string.')
         value = self.get_next_value_nexus_file(line_index, search_string, ignore_values, replace_with)
         return value
