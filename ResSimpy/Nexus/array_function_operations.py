@@ -7,7 +7,7 @@ from typing import Union, List
 
 def collect_function_block_lines(file_as_list: list[str], str_to_search: str = 'OUTPUT',
                                  str_to_avoid: str = 'RANGE') -> list:
-    """ Collects all lines until the line that contains str_to_search.
+    """ Collects all lines until the line that contains str_to_search, but not str_to_avoid.
         Uses recursion.
      Args:
          file_as_list (list[str] | NexusFile): a list of strings containing each line of the file as an item,
@@ -34,26 +34,21 @@ def collect_function_block_lines(file_as_list: list[str], str_to_search: str = '
     return [file_as_list[0]] + collect_function_block_lines(file_as_list[1:])
 
 
-# Find the FUNCTION keywords in str_file_words_as_list
-# Walk str_file_lines one by one and collect the keywords from referenced files
-# Returns list[list[function lines]]
 def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
     """ Collects all the function blocks within a grid file.
       Args:
           file_as_list (list[str] | NexusFile): a list of strings containing each line of the file as an item,
                      --->file_as_list = nfo.load_file_as_list(str_grid_file_path, strip_comments=True, strip_str=True)
           str_to_search (str): string to search in the file. Defaults to 'OUTPUT'.
-      Raises:
-          ValueError: #TODO
       Returns:
-          list[str]: function block lines as a list of strings
+          list[list[str]]: list of function block lines as a list of strings
       """
     function_list = []
 
     for i, line in enumerate(file_as_list):
 
         if line.startswith('FUNCTION'):
-            # fetch the rest of the items until finding the line that contains 'OUTPUT'
+            # fetch the rest of the items until finding the line that contains 'OUTPUT', but not 'RANGE':
             function_body = collect_function_block_lines(file_as_list[i:])
             function_list.append(function_body)
 
@@ -65,8 +60,6 @@ def create_function_parameters_df(file_as_list: list[str]):
       Args:
           file_as_list (list[str] | NexusFile): a list of strings containing each line of the file as an item,
                      --->file_as_list = nfo.load_file_as_list(str_grid_file_path, strip_comments=True, strip_str=True)
-      Raises:
-          ValueError: #TODO
       Returns:
           pandas.DataFrame: a dataframe holding each function's parameters in a row.
       """
@@ -77,7 +70,6 @@ def create_function_parameters_df(file_as_list: list[str]):
                  'input_arrays', 'output_arrays'])
 
     # Collect all the function blocks in a grid file:
-
     function_list_to_parse = collect_all_function_blocks(file_as_list)
 
     for b, block in enumerate(function_list_to_parse):
