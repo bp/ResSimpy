@@ -4,10 +4,6 @@ from ResSimpy.Nexus.DataModels.Surface.NexusNode import NexusNode
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.Surface.load_nodes import load_nodes
 
-def test_load_single_node():
-    pass
-
-
 @pytest.mark.parametrize('file_contents, node1_props, node2_props',[
 ('''NODES
   NAME                           TYPE       DEPTH   TEMP

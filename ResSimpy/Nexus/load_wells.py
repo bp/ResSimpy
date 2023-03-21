@@ -6,6 +6,7 @@ from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
 
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.nexus_file_operations import get_table_header
 
 
 def load_wells(wellspec_file_path: str, start_date: str, default_units: UnitSystem) -> list[NexusWell]:
@@ -301,26 +302,11 @@ def __load_wellspec_table_headings(header_index: int, header_values: dict[str, N
             Defaults to None and will create a new list to return if None.
 
     Returns:
-        tuple[int, list[str]]: _description_
+        tuple[int, list[str]]: index in the file as list for the header, list of headers found in the file
     """
     headers = [] if headers is None else headers
 
     if well_name is None:
         return header_index, headers
-
-    for key in header_values.keys():
-        if nfo.check_token(key, line):
-            header_line = line.upper()
-            header_index = index
-            # Map the headers
-            next_column_heading = nfo.get_next_value(start_line_index=0, file_as_list=[line])
-            trimmed_line = header_line
-
-            while next_column_heading is not None:
-                headers.append(next_column_heading)
-                trimmed_line = trimmed_line.replace(next_column_heading, "", 1)
-                next_column_heading = nfo.get_next_value(0, [trimmed_line], trimmed_line)
-
-            if len(headers) > 0:
-                break
+    header_index, headers = get_table_header(header_index, header_values, index, line, headers, )
     return header_index, headers

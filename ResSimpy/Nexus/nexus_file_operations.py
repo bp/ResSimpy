@@ -583,3 +583,35 @@ def value_in_file(token: str, file: list[str]) -> bool:
             token_found = True
 
     return token_found
+
+
+def get_table_header(header_index: int, header_values: dict, index: int, line: str,
+                     headers: Optional[list[str]] = None) -> tuple[int, list[str]]:
+    """ Gets the table headers for a given line in a file.
+    Args:
+        header_index (int): index of the header
+        header_values (dict[str, Union[Optional[int], Optional[float], Optional[str]]]): dictionary of column \
+            headings to populate from the table
+        index (int): starting index to search from
+        line (str): line to extract header values from
+        well_name (Optional[str]): well name from the previous WELLSPEC keyword
+        headers (Optional[list[str]], optional): list of headers to append the next set of found headers to. \
+            Defaults to None and will create a new list to return if None.
+    """
+    headers = [] if headers is None else headers
+    for key in header_values.keys():
+        if check_token(key, line):
+            header_line = line.upper()
+            header_index = index
+            # Map the headers
+            next_column_heading = get_next_value(start_line_index=0, file_as_list=[line])
+            trimmed_line = header_line
+
+            while next_column_heading is not None:
+                headers.append(next_column_heading)
+                trimmed_line = trimmed_line.replace(next_column_heading, "", 1)
+                next_column_heading = get_next_value(0, [trimmed_line], trimmed_line)
+
+            if len(headers) > 0:
+                break
+    return header_index, headers
