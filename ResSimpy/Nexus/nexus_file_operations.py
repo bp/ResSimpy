@@ -214,7 +214,7 @@ def get_token_value(token: str, token_line: str, file_list: list[str],
             Defaults to None.
 
     returns:
-        The value following the supplied token, if it is present.
+        Optional[str]: The value following the supplied token, if it is present.
     """
 
     # If this line is commented out, don't return a value
@@ -254,7 +254,7 @@ def get_expected_token_value(token: str, token_line: str, file_list: list[str],
         custom_message Optional[str]: A custom error message if no value is found
 
     returns:
-        The value following the supplied token, if it is present.
+        str:  The value following the supplied token, if it is present.
 
     raises: ValueError if a value is not found
     """

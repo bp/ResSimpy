@@ -220,6 +220,22 @@ class NexusFile:
     def get_token_value_nexus_file(self, token: str, token_line: str,
                                    ignore_values: Optional[list[str]] = None,
                                    replace_with: Union[str, VariableEntry, None] = None) -> None | str | NexusFile:
+        """Gets the next value after a given token within the NexusFile's content as list.
+        If no token is found and the next item in the list is a NexusFile it will then return the NexusFile.
+
+        Args:
+            token (str): the token being searched for.
+            token_line (str): string value of the line that the token was found in.
+            ignore_values (Optional[list[str]]): a list of values that should be ignored if found. \
+                Defaults to None.
+            replace_with (Union[str, VariableEntry, None]): a value to replace the existing value with. \
+                Defaults to None.
+        Raises:
+
+        Returns:
+            None | str | NexusFile: value of the string if a string is found, the next NexusFile in the list after the \
+                        token if no value is found. Else returns None.
+        """
         token_upper = token.upper()
         token_line_upper = token_line.upper()
         if "!" in token_line_upper and token_line_upper.index("!") < token_line_upper.index(token_upper):
