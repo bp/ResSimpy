@@ -6,6 +6,7 @@ from typing import Optional, Union, Generator
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import warnings
 
+from ResSimpy.Grid import VariableEntry
 from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_nexus_file, get_empty_list_str_nexus_file
 
 
@@ -89,10 +90,13 @@ class NexusFile:
                 if includes_objects is None:
                     raise ValueError('includes_objects is None - recursion failure.')
                 includes_objects.append(inc_file)
+                try:
+                    prefix_line, suffix_line = re.split(inc_file_path, line, maxsplit=1, flags=re.IGNORECASE)
+                    suffix_line = suffix_line.lstrip()
+                except ValueError:
+                    prefix_line = line.replace(inc_file_path, '')
+                    suffix_line = None
 
-                prefix_line, suffix_line = re.split('INCLUDE', line, maxsplit=1, flags=re.IGNORECASE)
-                suffix_line = suffix_line.lstrip()
-                suffix_line = suffix_line.replace(inc_file_path, '', 1)
                 if prefix_line:
                     modified_file_as_list.append(prefix_line)
                 modified_file_as_list.append(inc_file)
@@ -112,7 +116,6 @@ class NexusFile:
         return nexus_file_class
 
     def export_network_lists(self):
-        # TODO: add to test coverage
         """ Exports lists of connections from and to for use in network graphs
 
         Raises:
@@ -161,18 +164,17 @@ class NexusFile:
         flat_list = [x for x in self.iterate_line(self.file_content_as_list)]
         return flat_list
 
-    # this isnt' that helpful honestly
-    def get_flat_list_str_until_file(self) -> None:
+    def get_flat_list_str_until_file(self, start_line_index: int) -> tuple[list[str], Optional[NexusFile]]:
         flat_list: list[str] = []
         if self.file_content_as_list is None:
             raise ValueError(f'No file content found for {self.location=}')
-        for row in self.file_content_as_list:
+        for row in self.file_content_as_list[start_line_index::]:
             if isinstance(row, NexusFile):
-                break
+                return flat_list, row
             flat_list.append(row)
-        return
+        return flat_list, None
 
-# TODO write an output function using the iterate_line method
+    # TODO write an output function using the iterate_line method
     def get_full_network(self, max_depth: Optional[int] = None) -> tuple[list[str | None], list[str | None]]:
         """ recursively constructs two lists of from and to nodes representing the connections between files.
 
@@ -195,7 +197,7 @@ class NexusFile:
         for row in self.file_content_as_list:
             if isinstance(row, NexusFile):
                 if (max_depth is None or depth > 0):
-                    level_down_max_depth = None if max_depth is None else depth-1
+                    level_down_max_depth = None if max_depth is None else depth - 1
                     temp_from_list, temp_to_list = row.export_network_lists()
                     from_list.extend(temp_from_list)
                     to_list.extend(temp_to_list)
@@ -203,3 +205,58 @@ class NexusFile:
                     from_list.extend(temp_from_list)
                     to_list.extend(temp_to_list)
         return from_list, to_list
+
+    def get_next_value_nexus_file(self, start_line_index: int, search_string: Optional[str] = None,
+                                  ignore_values: Optional[list[str]] = None,
+                                  replace_with: Union[str, VariableEntry, None] = None) -> Optional[str | NexusFile]:
+
+        file_as_list, nexus_file = self.get_flat_list_str_until_file(start_line_index)
+        value = nfo.get_next_value(0, file_as_list, search_string, ignore_values, replace_with)
+        if value is None:
+            return nexus_file
+        else:
+            return value
+
+    def get_token_value_nexus_file(self, token: str, token_line: str,
+                                   ignore_values: Optional[list[str]] = None,
+                                   replace_with: Union[str, VariableEntry, None] = None) -> None | str | NexusFile:
+        """Gets the next value after a given token within the NexusFile's content as list.
+        If no token is found and the next item in the list is a NexusFile it will then return the NexusFile.
+
+        Args:
+            token (str): the token being searched for.
+            token_line (str): string value of the line that the token was found in.
+            ignore_values (Optional[list[str]]): a list of values that should be ignored if found. \
+                Defaults to None.
+            replace_with (Union[str, VariableEntry, None]): a value to replace the existing value with. \
+                Defaults to None.
+        Raises:
+            ValueError: if no file content is found in the NexusFile or if the search string is not found
+        Returns:
+            None | str | NexusFile: value of the string if a string is found, the next NexusFile in the list after the \
+                        token if no value is found. Else returns None.
+        """
+        token_upper = token.upper()
+        token_line_upper = token_line.upper()
+        if "!" in token_line_upper and token_line_upper.index("!") < token_line_upper.index(token_upper):
+            return None
+
+        search_start = token_line_upper.index(token_upper) + len(token) + 1
+        search_string: Union[str, NexusFile] = token_line[search_start: len(token_line)]
+        if self.file_content_as_list is None:
+            raise ValueError(f'No file content to scan for tokens in {self.location}')
+        line_index = self.file_content_as_list.index(token_line)
+
+        # If we have reached the end of the line, go to the next line to start our search
+        if not isinstance(search_string, str):
+            # if search string isn't a string it will be a nexus file therefore return it.
+            return search_string
+        if len(search_string) < 1:
+            line_index += 1
+            search_string = self.file_content_as_list[line_index]
+        if isinstance(search_string, self.__class__):
+            return search_string
+        if not isinstance(search_string, str):
+            raise ValueError(f'{search_string=} was not class or subclass of type NexusFile and not a string.')
+        value = self.get_next_value_nexus_file(line_index, search_string, ignore_values, replace_with)
+        return value

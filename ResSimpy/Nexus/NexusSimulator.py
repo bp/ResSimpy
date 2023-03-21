@@ -1,23 +1,25 @@
 from __future__ import annotations
-from dataclasses import Field
+
 import os
-import copy
-from typing import Any, Final, Union, Optional
 import warnings
+from dataclasses import Field
+from typing import Any, Final, Union, Optional
+
+import resqpy.model as rq
+
+import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
-
+from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import StructuredGridFile
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
-from ResSimpy.Nexus.DataModels.StructuredGridFile import StructuredGridFile, PropertyToLoad, VariableEntry
-import ResSimpy.Nexus.nexus_file_operations as nfo
-import resqpy.model as rq
-
+from ResSimpy.Nexus.NexusReporting import Reporting
 from ResSimpy.Nexus.NexusWells import NexusWells
-from ResSimpy.Simulator import Simulator
 from ResSimpy.Nexus.runcontrol_operations import Runcontrol
 from ResSimpy.Nexus.logfile_operations import Logging
-import ResSimpy.Nexus.structured_grid_operations as structured_grid_operations
+from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
+from ResSimpy.Simulator import Simulator
 
 
 class NexusSimulator(Simulator):
@@ -78,8 +80,7 @@ class NexusSimulator(Simulator):
         self.__force_output: bool = force_output
         self.__origin: str = origin.strip()  # this is the fcs file path
         self.__nexus_data_name: str = nexus_data_name
-        self.__structured_grid_file_path: Optional[str] = None
-        self.__structured_grid_file: Optional[StructuredGridFile] = None
+        self.__structured_grid: Optional[StructuredGridFile] = None
         self.__run_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
         self.root_name: str = root_name
         self.use_american_run_units: bool = False
@@ -91,8 +92,10 @@ class NexusSimulator(Simulator):
         self.__default_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
         # Model dynamic properties
         self.pvt_methods: dict[int, NexusPVT] = {}
-
+        # Nexus operations modules
         self.Runcontrol = Runcontrol(self)
+        self.Reporting = Reporting(self)
+        self.StructuredGridOperations = StructuredGridOperations(self)
         self.Logging = Logging(self)
 
         if destination is not None and destination != '':
@@ -101,6 +104,7 @@ class NexusSimulator(Simulator):
         # Check the status of any existing or completed runs related to this model
         self.get_simulation_status(from_startup=True)
 
+        self.fcs_file: FcsNexusFile
         # Load in the model
         self.__load_fcs_file()
 
@@ -110,9 +114,9 @@ class NexusSimulator(Simulator):
         Raises:
             ValueError: if any of [__structured_grid_file_path, __new_fcs_file_path, __surface_file_path] are None
         """
-        if self.__structured_grid_file_path is None:
+        if self.fcs_file.structured_grid_file.location is None:
             raise ValueError(
-                "No __structured_grid_file_path found, can't remove temporary properties from file path")
+                "No structured_grid_file_path found, can't remove temporary properties from file path")
         if self.__new_fcs_file_path is None:
             raise ValueError(
                 "No __new_fcs_file_path found, can't remove temporary properties from file path")
@@ -122,7 +126,8 @@ class NexusSimulator(Simulator):
 
         self.__origin = self.__origin.replace('temp/', '', 1)
         self.__root_name = self.__root_name.replace('temp/', '', 1)
-        self.__structured_grid_file_path = self.__structured_grid_file_path.replace('temp/', '', 1)
+        self.fcs_file.structured_grid_file.location = self.fcs_file.structured_grid_file.location.replace('temp/', '',
+                                                                                                          1)
         self.__new_fcs_file_path = self.__new_fcs_file_path.replace('temp/', '', 1)
         self.__surface_file_path = self.__surface_file_path.replace('temp/', '', 1)
 
@@ -138,7 +143,7 @@ class NexusSimulator(Simulator):
 
     def get_structured_grid_path(self):
         """Returns the location of the structured grid file"""
-        return self.__structured_grid_file_path
+        return self.fcs_file.structured_grid_file.location
 
     def get_default_units(self):
         """Returns the default units"""
@@ -423,8 +428,8 @@ class NexusSimulator(Simulator):
             self.__surface_file_path = list(self.fcs_file.surface_files.values())[0].location
 
         if not isinstance(self.fcs_file.structured_grid_file, Field) and self.fcs_file.structured_grid_file is not None:
-            self.__structured_grid_file_path = self.fcs_file.structured_grid_file.location
-            self.load_structured_grid_file()
+            self.__structured_grid = NexusGrid.StructuredGridFile.load_structured_grid_file(
+                self.fcs_file.structured_grid_file)
 
         # Load in wellspec files
         if not isinstance(self.fcs_file.well_files, Field) and self.fcs_file.well_files is not None and \
@@ -580,257 +585,29 @@ class NexusSimulator(Simulator):
         """
         self.__force_output = force_output
 
-    def load_structured_grid_file(self):
-        """Loads in a structured grid file including all grid properties and modifiers.
-        Currently loading in grids with FUNCTIONS included are not supported.
-
-        Raises:
-            AttributeError: if no value is found for the structured grid file path
-            ValueError: if when loading the grid no values can be found for the NX NY NZ line.
-        """
-        if self.__structured_grid_file_path is None:
-            raise ValueError("No file path given or found for structured grid file path. \
-                Please update structured grid file path")
-        file_as_list = nfo.load_file_as_list(self.__structured_grid_file_path)
-        structured_grid_file = StructuredGridFile()
-
-        def move_next_value(next_line: str) -> tuple[str, str]:
-            """finds the next value and then strips out the value from the line.
-
-            Args:
-                next_line (str): the line to search through for the value
-
-            Raises:
-                ValueError: if no value is found within the line provided
-
-            Returns:
-                tuple[str, str]: the next value found in the line, the line with the value stripped out.
-            """
-            value = nfo.get_next_value(0, [next_line], next_line)
-            if value is None:
-                raise ValueError(f"No value found within the provided line: {next_line}")
-            next_line = next_line.replace(value, "", 1)
-            return value, next_line
-
-        for line in file_as_list:
-            # Load in the basic properties
-            properties_to_load = [
-                PropertyToLoad('NETGRS', ['VALUE', 'CON'], structured_grid_file.netgrs),
-                PropertyToLoad('POROSITY', ['VALUE', 'CON'], structured_grid_file.porosity),
-                PropertyToLoad('SW', ['VALUE', 'CON'], structured_grid_file.sw),
-                PropertyToLoad('KX', ['VALUE', 'MULT', 'CON'], structured_grid_file.kx),
-                PropertyToLoad('PERMX', ['VALUE', 'MULT', 'CON'], structured_grid_file.kx),
-                PropertyToLoad('PERMI', ['VALUE', 'MULT', 'CON'], structured_grid_file.kx),
-                PropertyToLoad('KI', ['VALUE', 'MULT', 'CON'], structured_grid_file.kx),
-                PropertyToLoad('KY', ['VALUE', 'MULT', 'CON'], structured_grid_file.ky),
-                PropertyToLoad('PERMY', ['VALUE', 'MULT', 'CON'], structured_grid_file.ky),
-                PropertyToLoad('PERMJ', ['VALUE', 'MULT', 'CON'], structured_grid_file.ky),
-                PropertyToLoad('KJ', ['VALUE', 'MULT', 'CON'], structured_grid_file.ky),
-                PropertyToLoad('KZ', ['VALUE', 'MULT', 'CON'], structured_grid_file.kz),
-                PropertyToLoad('PERMZ', ['VALUE', 'MULT', 'CON'], structured_grid_file.kz),
-                PropertyToLoad('PERMK', ['VALUE', 'MULT', 'CON'], structured_grid_file.kz),
-                PropertyToLoad('KK', ['VALUE', 'MULT', 'CON'], structured_grid_file.kz),
-            ]
-
-            for token_property in properties_to_load:
-                for modifier in token_property.modifiers:
-                    structured_grid_operations.load_token_value_if_present(token_property.token, modifier,
-                                                                           token_property.property, line,
-                                                                           file_as_list, ['INCLUDE'])
-
-            # Load in grid dimensions
-            if nfo.check_token('NX', line):
-                # Check that the format of the grid is NX followed by NY followed by NZ
-                current_line = file_as_list[file_as_list.index(line)]
-                remaining_line = current_line[current_line.index('NX') + 2:]
-                if nfo.get_next_value(0, [remaining_line], remaining_line) != 'NY':
-                    continue
-                remaining_line = remaining_line[remaining_line.index('NY') + 2:]
-                if nfo.get_next_value(0, [remaining_line], remaining_line) != 'NZ':
-                    continue
-
-                # Avoid loading in a comment
-                if "!" in line and line.index("!") < line.index('NX'):
-                    continue
-                next_line = file_as_list[file_as_list.index(line) + 1]
-                first_value, next_line = move_next_value(next_line)
-                second_value, next_line = move_next_value(next_line)
-                third_value, next_line = move_next_value(next_line)
-
-                structured_grid_file.range_x = int(first_value)
-                structured_grid_file.range_y = int(second_value)
-                structured_grid_file.range_z = int(third_value)
-
-        self.__structured_grid_file = structured_grid_file
-
     def get_structured_grid(self) -> Optional[StructuredGridFile]:
         """Pass the structured grid information to the front end"""
-        return self.__structured_grid_file
+        return self.__structured_grid
 
     def get_structured_grid_dict(self) -> dict[str, Any]:
         """Convert the structured grid info to a dictionary and pass it to the front end"""
-        return self.__structured_grid_file.__dict__
+        return self.__structured_grid.__dict__
 
-    def update_structured_grid_file(self, grid_dict: dict[str, Union[VariableEntry, int]]) -> None:
-        """Save values passed from the front end to the structured grid file and update the class
-
-        Args:
-            grid_dict (dict[str, Union[VariableEntry, int]]): dictionary containing grid properties to be replaced
-
-        Raises:
-            ValueError: If no structured grid file is in the instance of the Simulator class
-        """
-        if self.__structured_grid_file is None:
-            raise ValueError("No structured grid file found. Please provide data for structured grid \
-                e.g. through load_structured_grid_file method")
-        # Convert the dictionary back to a class, and update the properties on our class
-        original_structured_grid_file = copy.deepcopy(self.__structured_grid_file)
-        self.__structured_grid_file = StructuredGridFile(grid_dict)
-
-        # Get the existing file as a list
-        if self.__structured_grid_file_path is None:
-            raise ValueError("No path found for structured grid file path. \
-                Please provide a path to the structured grid")
-        # TODO move the loading of structured grid file to fcs_reader
-        file = nfo.load_file_as_list(self.__structured_grid_file_path)
-        # Update each value in the file
-        structured_grid_operations.replace_value(file, original_structured_grid_file.netgrs,
-                                                 self.__structured_grid_file.netgrs, 'NETGRS')
-        structured_grid_operations.replace_value(file, original_structured_grid_file.porosity,
-                                                 self.__structured_grid_file.porosity, 'POROSITY')
-        structured_grid_operations.replace_value(file, original_structured_grid_file.sw,
-                                                 self.__structured_grid_file.sw, 'SW')
-        structured_grid_operations.replace_value(file, original_structured_grid_file.kx,
-                                                 self.__structured_grid_file.kx, 'KX')
-        structured_grid_operations.replace_value(file, original_structured_grid_file.ky,
-                                                 self.__structured_grid_file.ky, 'KY')
-        structured_grid_operations.replace_value(file, original_structured_grid_file.kz,
-                                                 self.__structured_grid_file.kz, 'KZ')
-
-        # Save the new file contents
-        new_file_str = "".join(file)
-        with open(self.__structured_grid_file_path, "w") as text_file:
-            text_file.write(new_file_str)
-
-    @staticmethod
-    def get_grid_file_as_3d_list(path: str) -> Optional[list]:
-        """Converts a grid file to a 3D list
-
-        Args:
-            path (str): path to a grid file
-
-        Returns:
-            Optional[list[str]]: Returns None if no file is found, returns the grid as a 3d array otherwise
-        """
-        try:
-            with open(path) as f:
-                grid_file_list = list(f)
-        except FileNotFoundError:
-            return None
-
-        sub_lists = []
-
-        new_list_str = ""
-        for sub_list in grid_file_list[4:]:
-            if sub_list == '\n':
-                new_list_split = [x.split("\t") for x in new_list_str.split("\n")]
-                new_list_split_cleaned = []
-                for x_list in new_list_split:
-                    float_list_split = [float(x) for x in x_list if x != ""]
-                    new_list_split_cleaned.append(float_list_split)
-                sub_lists.append(new_list_split_cleaned)
-                new_list_str = ""
-            else:
-                new_list_str = new_list_str + sub_list
-        return sub_lists
-
-    def view_command(self, field: str, previous_lines: int = 3, following_lines: int = 3) -> Optional[str]:
-        """Displays how the property is declared in the structured grid file
-
-        Args:
-            field (str): property as written in the structured grid (e.g. KX)
-            previous_lines (int, optional): how many lines to look back from the field searched for. Defaults to 3.
-            following_lines (int, optional): how many lines to look forward from the field searched for. Defaults to 3.
-
-        Raises:
-            ValueError: if no structured grid file path is specified in the class instance
-
-        Returns:
-            Optional[str]: the string associated with the supplied property from within the structured grid. \
-                If the field is not found in the structured grid returns None.
-        """
-        structured_grid_dict = self.get_structured_grid_dict()
-        command_token = f"{field.upper()} {structured_grid_dict[field.lower()].modifier}"
-        if self.__structured_grid_file_path is None:
-            raise ValueError("No path found for structured grid file path. \
-                Please provide a path to the structured grid")
-        file_as_list = nfo.load_file_as_list(self.__structured_grid_file_path)
-
-        for line in file_as_list:
-            if nfo.check_token(command_token, line):
-                start_index = file_as_list.index(line) - previous_lines \
-                    if file_as_list.index(line) - previous_lines > 0 else 0
-                end_index = file_as_list.index(line) + following_lines \
-                    if file_as_list.index(line) + following_lines < len(file_as_list) else len(file_as_list) - 1
-
-                new_array = file_as_list[start_index: end_index]
-                new_array = [x.strip("'") for x in new_array]
-                value = "".join(new_array)
-                return value
-        return None
+    def set_structured_grid(self, structured_grid: StructuredGridFile):
+        """Setter method for the structured grid file for use with modifying functions"""
+        self.__structured_grid = structured_grid
 
     def get_abs_structured_grid_path(self, filename: str):
         """Returns the absolute path to the Structured Grid file"""
-        if self.__structured_grid_file_path is None:
+        if self.fcs_file.structured_grid_file is None:
+            raise ValueError(
+                f"No structured grid file found within simulator class: {self.fcs_file.structured_grid_file}")
+        grid_path = self.fcs_file.structured_grid_file.location
+        if grid_path is None:
             raise ValueError("No path found for structured grid file path. \
                 Please provide a path to the structured grid")
-        return os.path.dirname(self.__structured_grid_file_path) + '/' + filename
+        return os.path.dirname(grid_path) + '/' + filename
 
     def get_surface_file_path(self):
         """Get the surface file path"""
         return self.__surface_file_path
-
-    # TODO: move to 'Reporting' module
-    def add_map_properties_to_start_of_grid_file(self):
-        """Adds 'map' statements to the start of the grid file to ensure standalone outputs all the required \
-        properties. Writes out to the same structured grid file path provided.
-
-        Raises:
-            ValueError: if no structured grid file path is specified in the class instance
-        """
-        if self.__structured_grid_file_path is None:
-            raise ValueError("No file path given or found for structured grid file path. \
-                Please update structured grid file path")
-        file = nfo.load_file_as_list(self.__structured_grid_file_path)
-
-        if not nfo.value_in_file('MAPBINARY', file):
-            new_file = ['MAPBINARY\n']
-        else:
-            new_file = []
-
-        if not nfo.value_in_file('MAPVDB', file):
-            new_file.extend(['MAPVDB\n'])
-
-        if not nfo.value_in_file('MAPOUT', file):
-            new_file.extend(['MAPOUT ALL\n'])
-        else:
-            line_counter = 0
-            for line in file:
-                if nfo.check_token('MAPOUT', line):
-                    file[line_counter] = 'MAPOUT ALL\n'
-                    break
-                line_counter += 1
-
-        new_file.extend(file)
-
-        # Save the new file contents
-        new_file_str = "".join(new_file)
-        with open(self.__structured_grid_file_path, "w") as text_file:
-            text_file.write(new_file_str)
-
-        # def export_fcs_file_graph(self):
-        #     from_main_lists = []
-        #     to_main_lists = []
-        #     from_list, to_list = self.runcontrol_file.export_network_lists()
-        #     from_main_lists.extend(from_list)
-        #     to_main_lists.extend(to_list)

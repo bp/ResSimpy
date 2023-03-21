@@ -35,7 +35,7 @@ def test_generate_file_include_structure_basic(mocker):
     nexus_file_include1 = NexusFile(location='inc_file1.inc', includes=[], origin=file_path,
                                     includes_objects=None, file_content_as_list=[include_file_contents])
 
-    expected_file_content_as_list = ['basic_file ', nexus_file_include1]
+    expected_file_content_as_list = ['basic_file INCLUDE ', nexus_file_include1]
 
     expected_nexus_file = NexusFile(location=expected_location, includes=expected_includes_list,
                                     origin=expected_origin, includes_objects=[nexus_file_include1],
@@ -74,7 +74,7 @@ second_file INCLUDE inc_file2.inc''')
                                     includes_objects=None, file_content_as_list=[include_file_contents])
     nexus_file_include2 = NexusFile(location='inc_file2.inc', includes=[], origin=file_path,
                                     includes_objects=None, file_content_as_list=[include_file_contents_2])
-    expected_file_content_as_list = ['basic_file ', nexus_file_include1, '\n', 'second_file ', nexus_file_include2]
+    expected_file_content_as_list = ['basic_file INCLUDE ', nexus_file_include1, 'second_file INCLUDE ', nexus_file_include2]
 
     expected_nexus_file = NexusFile(location=expected_location, includes=expected_includes_list,
                                     origin=expected_origin, includes_objects=[nexus_file_include1, nexus_file_include2],
@@ -111,9 +111,9 @@ def test_generate_file_include_structure_nested_includes(mocker):
                                     includes_objects=None, file_content_as_list=[include_file_contents_2])
     nexus_file_include1 = NexusFile(location='inc_file1.inc', includes=['inc_file2.inc'], origin=file_path,
                                     includes_objects=[nexus_file_include2],
-                                    file_content_as_list=['inc file contents ', nexus_file_include2])
+                                    file_content_as_list=['inc file contents INCLUDE ', nexus_file_include2])
 
-    expected_file_content_as_list = ['basic_file ', nexus_file_include1]
+    expected_file_content_as_list = ['basic_file INCLUDE ', nexus_file_include1]
 
     expected_nexus_file = NexusFile(location=expected_location, includes=expected_includes_list,
                                     origin=expected_origin, includes_objects=[nexus_file_include1],
@@ -150,10 +150,10 @@ def test_generate_file_include_structure_origin_path(mocker):
                                     includes_objects=None, file_content_as_list=['second_file'])
     nexus_file_include1 = NexusFile(location=include_full_file_path_1, includes=[include_full_file_path_2],
                                     origin=file_path, includes_objects=[nexus_file_include2],
-                                    file_content_as_list=['inc file contents ', nexus_file_include2])
+                                    file_content_as_list=['inc file contents INCLUDE ', nexus_file_include2])
     expected_nexus_file = NexusFile(location=expected_location, includes=expected_includes_list,
                                     origin=None, includes_objects=[nexus_file_include1],
-                                    file_content_as_list=['basic_file ', nexus_file_include1])
+                                    file_content_as_list=['basic_file INCLUDE ', nexus_file_include1])
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -212,3 +212,67 @@ def test_iterate_line_nested(max_depth, expected_results):
         store_results.append(line)
     # Assert
     assert store_results == expected_results
+
+@pytest.mark.parametrize("test_file_contents, token_line", [
+    ('basic_file KH VAlUE INCLUDE nexus_data/inc_file1.inc', 'basic_file KH VAlUE INCLUDE ' ),
+    ('basic_file KH VAlUE\n\n INCLUDE nexus_data/inc_file1.inc', 'basic_file KH VAlUE\n'),
+    ('basic_file KH VAlUE !comment\n\n INCLUDE nexus_data/inc_file1.inc', 'basic_file KH VAlUE !comment\n'),
+    ('basic_file KH VAlUE\n\n INCLUDE nexus_data/inc_file1.inc\n\nVALUE 10', 'basic_file KH VAlUE\n'),
+    ('basic_file KH VAlUE\n\n 10 \n\nKH VALUE INCLUDE\n\n nexus_data/inc_file1.inc', 'KH VALUE INCLUDE\n'),
+
+], ids=['basic_test', 'newline', 'comment', 'another_token', 'second_token'])
+def test_get_token_value_nexus_file(mocker, test_file_contents, token_line):
+    # Arrange
+    file_path = '/origin/path/test_file_path.dat'
+    include_file_contents = 'inc file contents'
+    include_full_file_path_1 = os.path.join('/origin/path', 'nexus_data/inc_file1.inc')
+
+    nexus_file_include1 = NexusFile(location=include_full_file_path_1, includes=[],
+                                    origin=file_path, includes_objects=None,
+                                    file_content_as_list=['inc file contents'])
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            file_path: test_file_contents,
+            include_full_file_path_1: include_file_contents,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    expected_result = nexus_file_include1
+    # Act
+    nexus_file = NexusFile.generate_file_include_structure(file_path)
+
+    value = nexus_file.get_token_value_nexus_file(token='Value', token_line=token_line, ignore_values=['INCLUDE'])
+    # Assert
+    assert value == expected_result
+
+
+@pytest.mark.parametrize("test_file_contents, token_line, expected_result", [
+    ('basic_file KH VALUE  10\n\ncontinuing the file ', 'basic_file KH VALUE  10\n', '10'),
+    ('basic_file KH \n\nVALUE\n\n10\n\ncontinuing the file ', 'VALUE\n', '10'),
+], ids=['basic_test', 'multilines'])
+def test_get_token_value_nexus_file_string(mocker, test_file_contents, token_line, expected_result):
+    # Arrange
+    file_path = '/origin/path/test_file_path.dat'
+    include_file_contents = 'inc file contents'
+    include_full_file_path_1 = os.path.join('/origin/path', 'nexus_data/inc_file1.inc')
+
+    nexus_file_include1 = NexusFile(location=include_full_file_path_1, includes=[],
+                                    origin=file_path, includes_objects=None,
+                                    file_content_as_list=['inc file contents'])
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            file_path: test_file_contents,
+            include_full_file_path_1: include_file_contents,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act
+    nexus_file = NexusFile.generate_file_include_structure(file_path)
+
+    value = nexus_file.get_token_value_nexus_file(token='Value', token_line=token_line, ignore_values=['INCLUDE'])
+    # Assert
+    assert value == expected_result

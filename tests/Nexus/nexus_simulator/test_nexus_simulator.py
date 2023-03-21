@@ -4,7 +4,6 @@ import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
-from ResSimpy.Nexus.DataModels.StructuredGridFile import VariableEntry
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from pytest_mock import MockerFixture
 from unittest.mock import Mock
@@ -633,7 +632,7 @@ PLOTBINARY
     mocker.patch("builtins.open", modifying_mock_open)
 
     # Act
-    simulation.add_map_properties_to_start_of_grid_file()
+    simulation.Reporting.add_map_properties_to_start_of_grid_file()
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
