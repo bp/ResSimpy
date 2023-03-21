@@ -14,15 +14,16 @@ class NexusNode(Node):
     station: Optional[str] = None
 
     @staticmethod
-    def get_node_nexus_mapping():
+    def get_node_nexus_mapping() -> dict[str, tuple[str, type]]:
         """gets the mapping of nexus keywords to attribute definitions"""
         keywords = {
-            'NAME': 'name',
-            'TYPE': 'type',
-            'DEPTH': 'depth',
-            'X': 'x_pos',
-            'Y': 'y_pos',
-            'NUMBER': 'number',
-            'TEMP': 'temp',
-            'STATION': 'station',
+            'NAME': ('name', str),
+            'TYPE': ('type', str),
+            'DEPTH': ('depth', float),
+            'X': ('x_pos', float),
+            'Y': ('y_pos', float),
+            'NUMBER': ('number', int),
+            'TEMP': ('temp', float),
+            'STATION': ('station', str),
         }
+        return keywords
