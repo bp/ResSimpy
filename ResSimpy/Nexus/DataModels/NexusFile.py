@@ -220,6 +220,22 @@ class NexusFile:
     def get_token_value_nexus_file(self, token: str, token_line: str,
                                    ignore_values: Optional[list[str]] = None,
                                    replace_with: Union[str, VariableEntry, None] = None) -> None | str | NexusFile:
+        """Gets the next value after a given token within the NexusFile's content as list.
+        If no token is found and the next item in the list is a NexusFile it will then return the NexusFile.
+
+        Args:
+            token (str): the token being searched for.
+            token_line (str): string value of the line that the token was found in.
+            ignore_values (Optional[list[str]]): a list of values that should be ignored if found. \
+                Defaults to None.
+            replace_with (Union[str, VariableEntry, None]): a value to replace the existing value with. \
+                Defaults to None.
+        Raises:
+            ValueError: if no file content is found in the NexusFile or if the search string is not found
+        Returns:
+            None | str | NexusFile: value of the string if a string is found, the next NexusFile in the list after the \
+                        token if no value is found. Else returns None.
+        """
         token_upper = token.upper()
         token_line_upper = token_line.upper()
         if "!" in token_line_upper and token_line_upper.index("!") < token_line_upper.index(token_upper):
@@ -241,6 +257,6 @@ class NexusFile:
         if isinstance(search_string, self.__class__):
             return search_string
         if not isinstance(search_string, str):
-            raise ValueError(f'No file found in the include objects for file {search_string}')
+            raise ValueError(f'{search_string=} was not class or subclass of type NexusFile and not a string.')
         value = self.get_next_value_nexus_file(line_index, search_string, ignore_values, replace_with)
         return value

@@ -18,6 +18,14 @@ def get_empty_dict_union() -> dict[str, Union[str, int, float, pd.DataFrame, dic
     return value
 
 
+# Factory method for generating empty dictionary for eos options
+def get_empty_eosopt_dict_union() -> dict[str, Union[str, int, float, pd.DataFrame, list[str], dict[str, float],
+tuple[str, dict[str, float]], dict[str, pd.DataFrame]]]:
+    value: dict[str, Union[str, int, float, pd.DataFrame, list[str], dict[str, float],
+    tuple[str, dict[str, float]], dict[str, pd.DataFrame]]] = {}
+    return value
+
+
 def get_empty_list_str_nexus_file() -> list[Union[str, NexusFile]]:
     value: list[Union[str, NexusFile]] = []
     return value
