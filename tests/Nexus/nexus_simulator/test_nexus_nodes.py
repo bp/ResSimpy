@@ -12,25 +12,26 @@ from ResSimpy.Nexus.Surface.load_nodes import load_nodes
   node_2        WELLHEAD     1167.3 # 
   ENDNODES
 ''',
-{'name': 'node1', 'type': None, 'depth': None,  'temp': None, },
-{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, }
+{'name': 'node1', 'type': None, 'depth': None,  'temp': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/01/2023',
+    'unit_system': UnitSystem.ENGLISH}
     ),
-('''nodes
+('''NODES
   NAME       TYPE       DEPTH   TemP    X     Y       NUMBER  StatiON
  ! Riser Nodes
   node1         NA        NA    60.5    100.5 300.5   1     station
   node_2        WELLHEAD     1167.3 #  10.21085 3524.23 2   station2 ! COMMENT 
-  endnodes
+  ENDNODES
   content outside of the node statement
   node1         NA        NA    60.5    10.5 3.5   1     station_null
   ''',
-{'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1, 'station': 1},
+{'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
+    'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
 {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': 10.21085, 'y_pos': 3524.23, 'number': 2,
-    'station': 2}
+    'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH}
   )
-
 ],
-ids=['basic', 'all columns']
+ids=['basic', 'all columns']  # TODO add data for nodes changing over time, add data for units changing
 
 )
 def test_load_nodes(mocker, file_contents, node1_props, node2_props):

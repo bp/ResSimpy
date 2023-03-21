@@ -613,6 +613,8 @@ def get_table_header(file_as_list: list[str], header_values: dict[str, str]) -> 
 
                 if len(headers) > 0:
                     break
+        if len(headers) > 0:
+            break
     if header_index == -1:
         raise ValueError('No headers belonging to the header_values dictionary found within the provided file')
     return header_index, headers
@@ -645,7 +647,7 @@ def table_line_reader(keyword_store: dict[str, None | int | float | str], header
 
 
 def correct_datatypes(value: Optional[str], dtype: type, na_to_none: bool = True) -> None | int | str | float:
-    """ takes a value and returns a the value but converted to specified type. if na_to_none True then
+    """ takes a value and returns the value but converted to specified type. if na_to_none True then
 
     Args:
         value (str): value to convert
@@ -656,5 +658,7 @@ def correct_datatypes(value: Optional[str], dtype: type, na_to_none: bool = True
         None | int | str | float: value but cast to the requested type
     """
     if na_to_none and value == 'NA':
+        return None
+    if value == '#':
         return None
     return None if value is None else dtype(value)

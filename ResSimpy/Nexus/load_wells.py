@@ -6,7 +6,6 @@ from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
 
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
-from ResSimpy.Nexus.nexus_file_operations import get_table_header
 
 
 def load_wells(wellspec_file_path: str, start_date: str, default_units: UnitSystem) -> list[NexusWell]:
@@ -212,16 +211,7 @@ def __load_wellspec_table_completions(file_as_list: list[str], header_index: int
         end_of_table = nfo.check_token('TIME', line) or nfo.check_token('WELLSPEC', line)
         if end_of_table:
             return completions
-        trimmed_line = line
-        valid_line = True
-        for column in headers:
-            value = nfo.get_next_value(0, [trimmed_line], trimmed_line)
-            if value is None:
-                valid_line = False
-                break
-
-            header_values[column] = value
-            trimmed_line = trimmed_line.replace(value, "", 1)
+        valid_line, header_values = nfo.table_line_reader(header_values, headers, line)
         # if a valid line is found load a completion otherwise continue
         if not valid_line:
             continue
@@ -308,5 +298,20 @@ def __load_wellspec_table_headings(header_index: int, header_values: dict[str, N
 
     if well_name is None:
         return header_index, headers
-    header_index, headers = get_table_header(header_index, header_values, index, line, headers, )
+
+    for key in header_values.keys():
+        if nfo.check_token(key, line):
+            header_line = line.upper()
+            header_index = index
+            # Map the headers
+            next_column_heading = nfo.get_next_value(start_line_index=0, file_as_list=[line])
+            trimmed_line = header_line
+
+            while next_column_heading is not None:
+                headers.append(next_column_heading)
+                trimmed_line = trimmed_line.replace(next_column_heading, "", 1)
+                next_column_heading = nfo.get_next_value(0, [trimmed_line], trimmed_line)
+
+            if len(headers) > 0:
+                break
     return header_index, headers
