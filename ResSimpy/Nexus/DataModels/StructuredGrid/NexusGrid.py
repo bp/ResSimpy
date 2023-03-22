@@ -55,14 +55,15 @@ class StructuredGridFile(Grid):
         if structure_grid_file.location is None:
             raise ValueError(f"No file path given or found for structured grid file path. \
                 Instead got {structure_grid_file.location}")
-        file_as_list = nfo.load_file_as_list(structure_grid_file.location)
+        file_as_list = nfo.load_file_as_list(structure_grid_file.location, strip_comments=True, strip_str=True)
+
         if file_as_list is None:
             raise ValueError("No file path given or found for structured grid file path. \
                 Please update structured grid file path")
         structured_grid_file = cls()
 
         # Load the array functions defined with 'FUNCTION' keyword
-        structured_grid_file.load_array_functions(structure_grid_file.location)
+        structured_grid_file.load_array_functions(file_as_list)
 
         def move_next_value(next_line: str) -> tuple[str, str]:
             """finds the next value and then strips out the value from the line.
@@ -181,8 +182,7 @@ class StructuredGridFile(Grid):
         with open(grid_file_path, "w") as text_file:
             text_file.write(new_file_str)
 
-    def load_array_functions(self, grid_file_path: str):
-        file_content_as_list = nfo.load_file_as_list(grid_file_path, strip_comments=True, strip_str=True)
+    def load_array_functions(self, file_content_as_list: list[str]):
         self.__array_functions_list = NexusArrayFunctions.load_functions_list(file_content_as_list)
         self.__array_functions_df = NexusArrayFunctions.load_functions_df(file_content_as_list)
 
