@@ -22,7 +22,7 @@ def collect_function_block_lines(file_as_list: list[str], str_to_search: str = '
     if not file_as_list:
         return []
 
-    # Filter the empty strings from file: # TODO: incorporate this into nfo.load_file_as_list()
+    # Filter the empty strings from file:
     # file_as_list = list(filter(None, file_as_list))
 
     # If str_to_search is in first item of list, return the first item only.
@@ -73,7 +73,7 @@ def create_function_parameters_df(file_as_list: list[str]):
     function_list_to_parse = collect_all_function_blocks(file_as_list)
 
     for b, block in enumerate(function_list_to_parse):
-        print(f'reading function block number: {b}')
+        #print(f'reading function block number: {b}')
 
         # set the empty default values for the parameters,
         # so if they don't exist in dataframe they won't appear as NaN or give error,
