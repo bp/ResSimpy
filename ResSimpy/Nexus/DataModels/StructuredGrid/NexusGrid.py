@@ -27,8 +27,8 @@ class StructuredGridFile(Grid):
 
     def __init__(self, data: Optional[dict] = None):
         super().__init__()
-        self.__array_functions_list: list[str] = None
-        self.__array_functions_df: pd.DataFrame = None
+        self.__array_functions_list: Optional[list[str]] = None
+        self.__array_functions_df: Optional[pd.DataFrame] = None
 
         # Use the dict provided to populate the properties
         if data is not None:
