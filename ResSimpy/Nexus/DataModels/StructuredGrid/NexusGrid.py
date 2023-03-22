@@ -55,7 +55,8 @@ class StructuredGridFile(Grid):
         if structure_grid_file.location is None:
             raise ValueError(f"No file path given or found for structured grid file path. \
                 Instead got {structure_grid_file.location}")
-        file_as_list = nfo.load_file_as_list(structure_grid_file.location, strip_comments=True, strip_str=True)
+        #file_as_list = nfo.load_file_as_list(structure_grid_file.location, strip_comments=True, strip_str=True)
+        file_as_list = structure_grid_file.get_flat_list_str_file()
 
         if file_as_list is None:
             raise ValueError("No file path given or found for structured grid file path. \
