@@ -158,6 +158,8 @@ bugger
     func_list = structured_grid.get_array_functions_list()
     func_summary_df = structured_grid.get_array_functions_df()
 
+    print(func_summary_df)
+
     # Assert
     assert_frame_equal(expected_functions_df, func_summary_df)
     assert len(func_summary_df) == len(expected_functions)
