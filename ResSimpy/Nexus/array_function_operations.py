@@ -23,7 +23,7 @@ def collect_function_block_lines(file_as_list: list[str], str_to_search: str = '
         return []
 
     # Filter the empty strings from file: # TODO: incorporate this into nfo.load_file_as_list()
-    file_as_list = list(filter(None, file_as_list))
+    # file_as_list = list(filter(None, file_as_list))
 
     # If str_to_search is in first item of list, return the first item only.
     # TODO: raise error if str_to_search is the last item in file_as_list

@@ -324,6 +324,8 @@ def load_file_as_list(file_path: str, strip_comments: bool = False, strip_str: b
     if strip_comments:
         file_content = strip_file_of_comments(file_content, strip_str=strip_str)
 
+    file_content = list(filter(None, file_content))  # filters out the empty strings. Shout out if an issue!!!
+
     return file_content
 
 
