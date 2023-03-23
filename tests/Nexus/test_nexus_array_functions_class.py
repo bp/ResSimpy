@@ -118,7 +118,7 @@ bugger
                            'WORKA3 ky OUTPUT KX'], ['FUNCTION', 'ANALYT min', 'KX KY OUTPUT KY'],
                           ['FUNCTION', 'ANALYT  max', 'KX KY OUTPUT KX KY']]
 
-    data = {'FUNCTION #': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], \
+    data_dict = {'FUNCTION #': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], \
             'i1': ['', '', '', '1', '', '', '', '', '', '', '', '', '1', '', ''], \
             'i2': ['', '', '', '30', '', '', '', '', '', '', '', '', '20', '', ''], \
             'j1': ['', '', '', '1', '', '', '', '', '', '', '', '', '1', '', ''], \
@@ -140,7 +140,7 @@ bugger
                         'KX = (KY if KY <= 500; 1000 otherwise)', 'KX = WORKA3 + KY', 'KZ = KX - KY', 'KZ = (KX / KY if KY != 0; KX otherwise)',
                         'KX = WORKA3 * KY', 'KY = min(KX, KY)', 'KX = max(KX, KY)']}
 
-    expected_functions_df = pd.DataFrame(data)
+    expected_functions_df = pd.DataFrame(data_dict)
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=

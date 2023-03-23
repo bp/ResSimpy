@@ -145,7 +145,7 @@ def summarize_model_functions(file_as_list: list[str]):
           file_as_list (list[str] | NexusFile): a list of strings containing each line of the file as an item,
                      --->file_as_list = nfo.load_file_as_list(str_grid_file_path, strip_comments=True, strip_str=True)
       Raises:
-          ValueError: #TODO
+          AttributeError: if no functions have been found # TODO
       Returns:
           pandas.DataFrame: a dataframe holding each function's translation/summary in a row.
       """
