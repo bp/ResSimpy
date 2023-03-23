@@ -135,8 +135,8 @@ bugger
             'drange': ['', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
             'input_arrays': [['WORKA3'], ['WORKA3'], ['POROSITY'], ['WORKA3'], ['KX'], ['KX'], ['WORKA3'], ['KX'], ['KY'], ['WORKA3', 'KY'], ['KX', 'KY'], ['KX', 'KY'], ['WORKA3', 'KY'], ['KX', 'KY'], ['KX', 'KY']],
             'output_arrays': [['KX'], ['KX'], ['POROSITY'], ['KX'], ['KX'], ['KX'], ['KX'], ['KX'], ['KX'], ['KX'], ['KZ'], ['KZ'], ['KX'], ['KY'], ['KX', 'KY']],
-            'notation': ['KX = ln|WORKA3|', 'KX = log10|WORKA3|', 'POROSITY = 1.4*(POROSITY**4) + 1.3*(POROSITY**3) + 1.2*(POROSITY**2) + 1.1*POROSITY + 1.0',
-                        'KX = | WORKA3 |', 'KX = e**KX', 'KX = 10**KX', 'KX = SQRT|WORKA3|', 'KX = (KX if KX >= 1000; 500 otherwise)',
+            'notation': ['KX = ln|WORKA3|', 'KX = log10|WORKA3|', 'POROSITY = 1.4*(POROSITY^4) + 1.3*(POROSITY^3) + 1.2*(POROSITY^2) + 1.1*POROSITY + 1.0',
+                        'KX = | WORKA3 |', 'KX = e^KX', 'KX = 10^KX', 'KX = SQRT|WORKA3|', 'KX = (KX if KX >= 1000; 500 otherwise)',
                         'KX = (KY if KY <= 500; 1000 otherwise)', 'KX = WORKA3 + KY', 'KZ = KX - KY', 'KZ = (KX / KY if KY != 0; KX otherwise)',
                         'KX = WORKA3 * KY', 'KY = min(KX, KY)', 'KX = max(KX, KY)']}
 

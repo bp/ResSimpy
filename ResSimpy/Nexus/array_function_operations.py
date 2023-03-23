@@ -172,7 +172,7 @@ def summarize_model_functions(file_as_list: list[str]):
                 elif p == 1:
                     f_portion = f'{c}*{arr} + '
                 else:
-                    f_portion = f'{c}*({arr}**{p}) + '
+                    f_portion = f'{c}*({arr}^{p}) + '
                 formula += f_portion
 
         # ANALYT ABS
@@ -183,11 +183,11 @@ def summarize_model_functions(file_as_list: list[str]):
 
         # ANALYT EXP
         if row['analyt_func_type'].upper() == 'EXP':
-            formula += f"e**{row['input_arrays'][0]}"
+            formula += f"e^{row['input_arrays'][0]}"
 
         # ANALYT EXP10
         if row['analyt_func_type'].upper() == 'EXP10':
-            formula += f"10**{row['input_arrays'][0]}"
+            formula += f"10^{row['input_arrays'][0]}"
 
         # ANALYT LOG
         if row['analyt_func_type'].upper() == 'LOG':
