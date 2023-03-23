@@ -43,7 +43,7 @@ class StructuredGridFile(Grid):
 
     @classmethod
     def load_structured_grid_file(cls: Type[StructuredGridFile], structure_grid_file: NexusFile) -> StructuredGridFile:
-        """Loads in a structured grid file including all grid properties and array functions defined with 'FUNCTION'.
+        """Loads in a structured grid file with all grid properties, and the array functions defined with 'FUNCTION'.
         Other grid modifiers are currently not supported.
         Args:
             structure_grid_file (NexusFile): the NexusFile representation of a structured grid file for converting \
@@ -55,14 +55,17 @@ class StructuredGridFile(Grid):
         if structure_grid_file.location is None:
             raise ValueError(f"No file path given or found for structured grid file path. \
                 Instead got {structure_grid_file.location}")
-        #file_as_list = nfo.load_file_as_list(structure_grid_file.location, strip_comments=True, strip_str=True)
-        file_as_list = structure_grid_file.get_flat_list_str_file()
+        file_as_list = nfo.load_file_as_list(structure_grid_file.location, strip_comments=True, strip_str=True)
+        # use this for it to go into includes:
+        #file_as_list = structure_grid_file.get_flat_list_str_file()
 
         if file_as_list is None:
             raise ValueError("No file path given or found for structured grid file path. \
                 Please update structured grid file path")
         structured_grid_file = cls()
 
+        # TODO: searching for functions should be an option for the user, as it is time consuming
+        # like an argument as load_functions: True
         # Load the array functions defined with 'FUNCTION' keyword
         structured_grid_file.load_array_functions(file_as_list)
 

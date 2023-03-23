@@ -64,7 +64,7 @@ class NexusFile:
         #     return nexus_file_class
 
         try:
-            file_as_list = nfo.load_file_as_list(file_path)
+            file_as_list = nfo.load_file_as_list(file_path, strip_comments=True)
         except FileNotFoundError:
             # handle if a file can't be found
             location = file_path
