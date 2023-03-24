@@ -583,3 +583,7 @@ def value_in_file(token: str, file: list[str]) -> bool:
             token_found = True
 
     return token_found
+
+
+def looks_like_grid_array(file_path: str) -> bool:
+    return False
