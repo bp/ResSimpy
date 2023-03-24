@@ -28,8 +28,9 @@ class NexusPVT():
     eos_nhc: Optional[int] = None  # Number of hydrocarbon components
     eos_temp: Optional[float] = None  # Default temperature for EOS method
     eos_components: Optional[list[str]] = field(default_factory=get_empty_list_str)
-    eos_options: dict[str, Union[str, int, float, pd.DataFrame, list[str], dict[str, float],
-    tuple[str, dict[str, float]], dict[str, pd.DataFrame]]] \
+    eos_options: dict[str, Union[
+        str, int, float, pd.DataFrame, list[str], dict[str, float], tuple[str, dict[str, float]], dict[
+            str, pd.DataFrame]]] \
         = field(default_factory=get_empty_eosopt_dict_union)
     properties: dict[str, Union[str, int, float, pd.DataFrame, dict[str, pd.DataFrame]]] \
         = field(default_factory=get_empty_dict_union)
@@ -153,8 +154,8 @@ class NexusPVT():
             end_flag_found = True
         if table_has_endkeyword and nfo.check_token('END' + table_name, single_line):
             end_flag_found = True
-        if (full_table_name in table_indices.keys() or
-            full_table_name in table_indices_dict.keys()) and end_flag_found and table_flag[table_name]:
+        if (full_table_name in table_indices.keys() or full_table_name in table_indices_dict.keys()) and \
+                end_flag_found and table_flag[table_name]:
             if table_key not in PVT_UNSAT_TABLE_INDICES:  # All tables except undersaturated tables
                 table_indices[table_name][1] = l_index
             else:  # Handle undersaturated tables

@@ -1,6 +1,6 @@
 from enum import Enum
 from io import StringIO
-from typing import Optional, Union, Literal
+from typing import Optional, Union
 import pandas as pd
 from ResSimpy.Grid import VariableEntry
 from string import Template

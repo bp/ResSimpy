@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
