@@ -27,3 +27,17 @@ class NexusNode(Node):
             'STATION': ('station', str),
         }
         return keywords
+
+    def to_dict(self, keys_in_nexus_style: bool = False) -> dict[str, None | str | int | float]:
+        """Returns a dictionary of the key properties of a node"""
+        mapping_dict = self.get_node_nexus_mapping()
+        if keys_in_nexus_style:
+            result_dict = {x: self.__getattribute__(y[0]) for x, y in mapping_dict.items()}
+
+        else:
+            result_dict = {y[0]: self.__getattribute__(y[0]) for y in mapping_dict.values()}
+        extra_attributes = {'date': self.date, }
+        if self.unit_system is not None:
+            extra_attributes.update({'unit_system': self.unit_system.value})
+        result_dict.update(extra_attributes)
+        return result_dict

@@ -90,3 +90,26 @@ def test_load_nexus_nodes(mocker, file_contents, node1_props, node2_props):
     assert result == expected_result
     assert single_node_result == node_2
 
+@pytest.mark.parametrize('file_contents, node1_props, node2_props',[
+('''NODES
+  NAME       TYPE       DEPTH   TemP    X     Y       NUMBER  StatiON
+ ! Riser Nodes
+  node1         NA        NA    60.5    100.5 300.5   1     station
+  node_2        WELLHEAD     1167.3 #  10.21085 3524.23 2   station2 ! COMMENT 
+  ENDNODES
+  content outside of the node statement
+  node1         NA        NA    60.5    10.5 3.5   1     station_null
+  ''',
+{'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
+    'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': 10.21085, 'y_pos': 3524.23, 'number': 2,
+    'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH}
+  )],)
+def test_get_node_df(file_contents, node1_props, node2_props):
+    # Arrange
+    start_date = '01/01/2023'
+    surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
+
+
+    # Act
+    # Assert

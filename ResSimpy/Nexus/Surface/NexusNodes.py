@@ -21,11 +21,22 @@ class NexusNodes(Nodes):
         return next(nodes_to_return, None)
 
     def get_node_df(self) -> pd.DataFrame:
-        raise NotImplementedError('To be implemented')
+        """ Creates a dataframe representing all processed node data in a surface file
+        Returns:
+            DataFrame: of the properties of the nodes through time with each row representing a node.
+        """
+        df_store = pd.DataFrame()
+        for node in self.__nodes:
+            df_row = pd.DataFrame(node.to_dict(), index=[0])
+            df_store = pd.concat([df_store, df_row], axis=0, ignore_index=True)
+        df_store = df_store.dropna(axis=1, how='all')
+        return df_store
 
     def get_nodes_overview(self) -> str:
         raise NotImplementedError('To be implemented')
 
     def load_nodes(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
+        """ Calls load nodes and appends the list of discovered nodes into the NexusNodes object
+        """
         new_nodes = load_nodes(surface_file, start_date, default_units)
         self.__nodes += new_nodes
