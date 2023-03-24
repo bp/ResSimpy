@@ -2,6 +2,7 @@ import pytest
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Surface.NexusNode import NexusNode
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.Surface.NexusNodes import NexusNodes
 from ResSimpy.Nexus.Surface.load_nodes import load_nodes
 
 @pytest.mark.parametrize('file_contents, node1_props, node2_props',[
@@ -29,12 +30,44 @@ from ResSimpy.Nexus.Surface.load_nodes import load_nodes
     'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
 {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': 10.21085, 'y_pos': 3524.23, 'number': 2,
     'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH}
-  )
-],
-ids=['basic', 'all columns']  # TODO add data for nodes changing over time, add data for units changing
+  ),
+('''NODES
+  NAME                           TYPE       DEPTH   TEMP
+ ! Riser Nodes
+  node1                         NA            NA      #
+  ENDNODES
+  TIME 01/02/2023
+  NODES
+    NAME                           TYPE       DEPTH   TEMP
 
+  node_2        WELLHEAD     1167.3 # 
+  ENDNODES
+''',
+{'name': 'node1', 'type': None, 'depth': None,  'temp': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/02/2023',
+    'unit_system': UnitSystem.ENGLISH}
+    ),
+('''NODES
+  NAME                           TYPE       DEPTH   TEMP
+ ! Riser Nodes
+  node1                         NA            NA      #
+  ENDNODES
+  METRIC
+  TIME 01/02/2023
+  NODES
+    NAME                           TYPE       DEPTH   TEMP
+
+  node_2        WELLHEAD     1167.3 # 
+  ENDNODES
+''',
+{'name': 'node1', 'type': None, 'depth': None,  'temp': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/02/2023',
+    'unit_system': UnitSystem.METRIC}
+    ),
+],
+ids=['basic', 'all columns', 'times', 'units']
 )
-def test_load_nodes(mocker, file_contents, node1_props, node2_props):
+def test_load_nexus_nodes(mocker, file_contents, node1_props, node2_props):
     # Arrange
     # mock out a surface file:
     start_date = '01/01/2023'
@@ -44,10 +77,16 @@ def test_load_nodes(mocker, file_contents, node1_props, node2_props):
     node_2 = NexusNode(**node2_props)
 
     expected_result = [node_1, node_2]
-
+    # get the second node only
+    second_node_name = node2_props['name']
     # Act
 
-    result = load_nodes(surface_file, start_date, default_units=UnitSystem.ENGLISH)
+    nexus_nodes = NexusNodes()
+    nexus_nodes.load_nodes(surface_file, start_date, default_units=UnitSystem.ENGLISH)
+    result = nexus_nodes.get_nodes()
+    single_node_result = nexus_nodes.get_node(second_node_name)
+
     # Assert
     assert result == expected_result
+    assert single_node_result == node_2
 

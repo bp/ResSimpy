@@ -14,17 +14,18 @@ class NexusNodes(Nodes):
     __nodes: list[NexusNode] = field(default_factory=lambda: [])
 
     def get_nodes(self) -> Sequence[NexusNode]:
-        pass
+        return self.__nodes
 
     def get_node(self, node_name: str) -> Optional[NexusNode]:
-        pass
+        nodes_to_return = filter(lambda x: x.name.upper() == node_name.upper(), self.__nodes)
+        return next(nodes_to_return, None)
 
     def get_node_df(self) -> pd.DataFrame:
-        pass
+        raise NotImplementedError('To be implemented')
 
     def get_nodes_overview(self) -> str:
-        pass
+        raise NotImplementedError('To be implemented')
 
     def load_nodes(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
-        new_nodes = load_nodes(surface_file, )
+        new_nodes = load_nodes(surface_file, start_date, default_units)
         self.__nodes += new_nodes

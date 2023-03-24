@@ -21,7 +21,7 @@ def load_node_table(file_as_list: list[str], current_date: str, unit_system: Uni
     keyword_map = {x: y[0] for x, y in node_map.items()}
     header_index, headers = nfo.get_table_header(file_as_list, keyword_map)
     for line in file_as_list[header_index + 1::]:
-        keyword_store = {x: None for x in keyword_map}
+        keyword_store: dict[str, None | int | float | str] = {x: None for x in keyword_map}
         valid_line, keyword_store = nfo.table_line_reader(keyword_store, headers, line)
         if not valid_line:
             continue
@@ -29,6 +29,7 @@ def load_node_table(file_as_list: list[str], current_date: str, unit_system: Uni
         keyword_store = {x: nfo.correct_datatypes(y, node_map[x][1]) for x, y in keyword_store.items()}
 
         # generate a node object using the properties stored in the keyword dict
+        # Use the map to create a kwargs dict for passing to the NexusNode object
         keyword_store = {keyword_map[x]: y for x, y in keyword_store.items()}
         new_node = NexusNode(**keyword_store)
         new_node.date = current_date
@@ -44,7 +45,8 @@ def load_nodes(surface_file: NexusFile, start_date: str, default_units: UnitSyst
         surface_file (NexusFile): NexusFile representation of the surface file.
         start_date (str): Starting date of the run
         default_units (UnitSystem): Units used in case not specified by surface file.
-
+    Raises:
+        TypeError: if the unit system found in the property check is not a valid enum UnitSystem
     Returns:
         Sequence[NexusNode]: a list of NexusNodes from the surface_file provided
     """
@@ -53,11 +55,14 @@ def load_nodes(surface_file: NexusFile, start_date: str, default_units: UnitSyst
     file_as_list = surface_file.get_flat_list_str_file()
     node_start = -1
     node_end = -1
+    property_dict: dict = {}
     for index, line in enumerate(file_as_list):
-        property_dict = {}
+        # check for changes in unit system
         nfo.check_property_in_line(line, property_dict, file_as_list)
-        unit_system = property_dict.get('UNIT_SYSTEM') if property_dict.get(
-            'UNIT_SYSTEM') is not None else default_units
+        unit_system = property_dict.get('UNIT_SYSTEM', default_units)
+        if not isinstance(unit_system, UnitSystem):
+            raise TypeError(f"Value found for {unit_system=} of type {type(unit_system)} \
+                            not compatible, expected type UnitSystem Enum")
         if nfo.check_token('TIME', line):
             current_date = nfo.get_expected_token_value(
                 token='TIME', token_line=line, file_list=file_as_list,
@@ -70,6 +75,7 @@ def load_nodes(surface_file: NexusFile, start_date: str, default_units: UnitSyst
         if 0 < node_start < node_end:
             node_table = load_node_table(file_as_list[node_start: node_end], current_date, unit_system)
             nexus_nodes_list.extend(node_table)
+            # reset indices for further tables
             node_start = -1
             node_end = -1
     return nexus_nodes_list
