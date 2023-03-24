@@ -39,7 +39,8 @@ class NexusFile:
         self.file_content_as_list: Optional[list[Union[str, NexusFile]]] = file_content_as_list
 
     @classmethod
-    def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True):
+    def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True,
+                                        skip_arrays: bool = True) -> NexusFile:
         """generates a nexus file instance for a provided text file with information storing the included files
 
         Args:
@@ -51,6 +52,16 @@ class NexusFile:
             NexusFile: a class instance for NexusFile with knowledge of include files
         """
         # load file as list and clean up file
+        if skip_arrays and looks_like_array():
+            location = file_path
+            nexus_file_class = cls(location=location,
+                                   includes=None,
+                                   origin=origin,
+                                   includes_objects=None,
+                                   file_content_as_list=None, )
+            warnings.warn(UserWarning(f'File skipped due to looking like an array {file_path}'))
+            return nexus_file_class
+
         try:
             file_as_list = nfo.load_file_as_list(file_path)
         except FileNotFoundError:
@@ -86,7 +97,8 @@ class NexusFile:
                 modified_file_as_list.append(line)
             else:
                 # TODO also store the full file paths
-                inc_file = cls.generate_file_include_structure(inc_full_path, origin=file_path, recursive=True)
+                inc_file = cls.generate_file_include_structure(inc_full_path, origin=file_path, recursive=True,
+                                                               skip_arrays=skip_arrays)
                 if includes_objects is None:
                     raise ValueError('includes_objects is None - recursion failure.')
                 includes_objects.append(inc_file)
