@@ -105,7 +105,7 @@ class NexusFile:
             elif skip_arrays and skip_next_include:
                 inc_file = cls(location=inc_full_path,
                                includes=None,
-                               origin=origin,
+                               origin=file_path,
                                includes_objects=None,
                                file_content_as_list=None, )
                 if includes_objects is None:
