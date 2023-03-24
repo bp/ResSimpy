@@ -1,3 +1,5 @@
+import numpy as np
+import pandas as pd
 import pytest
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Surface.NexusNode import NexusNode
@@ -89,6 +91,9 @@ def test_load_nexus_nodes(mocker, file_contents, node1_props, node2_props):
     # Assert
     assert result == expected_result
     assert single_node_result == node_2
+    if single_node_result.depth is not None:
+        assert single_node_result.depth / 2 == 1167.3 / 2
+
 
 @pytest.mark.parametrize('file_contents, node1_props, node2_props',[
 ('''NODES
@@ -101,15 +106,21 @@ def test_load_nexus_nodes(mocker, file_contents, node1_props, node2_props):
   node1         NA        NA    60.5    10.5 3.5   1     station_null
   ''',
 {'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
-    'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+    'station': 'station', 'date': '01/01/2023', 'unit_system': 'ENGLISH'},
 {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': 10.21085, 'y_pos': 3524.23, 'number': 2,
-    'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH}
+    'station': 'station2', 'date': '01/01/2023', 'unit_system': 'ENGLISH'}
   )],)
 def test_get_node_df(file_contents, node1_props, node2_props):
     # Arrange
     start_date = '01/01/2023'
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
+    nexus_nodes = NexusNodes()
+    nexus_nodes.load_nodes(surface_file, start_date, default_units=UnitSystem.ENGLISH)
 
-
+    expected_df = pd.DataFrame([node1_props, node2_props])
+    expected_df = expected_df.fillna(value=np.nan).dropna(axis=1, how='all')
     # Act
+    result = nexus_nodes.get_node_df()
+
     # Assert
+    assert pd.testing.assert_frame_equal(result, expected_df,)

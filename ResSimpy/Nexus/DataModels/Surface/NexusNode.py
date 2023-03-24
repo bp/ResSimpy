@@ -20,10 +20,10 @@ class NexusNode(Node):
             'NAME': ('name', str),
             'TYPE': ('type', str),
             'DEPTH': ('depth', float),
+            'TEMP': ('temp', float),
             'X': ('x_pos', float),
             'Y': ('y_pos', float),
             'NUMBER': ('number', int),
-            'TEMP': ('temp', float),
             'STATION': ('station', str),
         }
         return keywords

@@ -1,4 +1,6 @@
 from dataclasses import dataclass, field
+
+import numpy as np
 import pandas as pd
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -29,6 +31,7 @@ class NexusNodes(Nodes):
         for node in self.__nodes:
             df_row = pd.DataFrame(node.to_dict(), index=[0])
             df_store = pd.concat([df_store, df_row], axis=0, ignore_index=True)
+        df_store = df_store.fillna(value=np.nan)
         df_store = df_store.dropna(axis=1, how='all')
         return df_store
 
