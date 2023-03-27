@@ -445,3 +445,27 @@ def test_get_table_header(file_contents, expected_header_index, expected_header_
     # Assert
     assert result_header_index == expected_header_index
     assert result_headers == expected_header_result
+
+
+@pytest.mark.parametrize("headers, line, expected_dictionary, expected_valid_line", [
+    (['KH', 'NAME', 'COLUMN1', 'COLUMN2'], '10 well1 value1 0.2',
+    {'KH': '10', 'NAME': 'well1', 'COLUMN1': 'value1', 'COLUMN2': '0.2'}, True),
+    (['KH', 'NAME', 'COLUMN1', 'COLUMN2'], '10 well1 ',
+    {'KH': '10', 'NAME': 'well1', 'COLUMN1': None, 'COLUMN2': None}, False),
+    (['KH', 'NAME',], '10 well1',
+    {'KH': '10', 'NAME': 'well1', 'COLUMN1': None, 'COLUMN2': None}, True),
+    (['KH', 'NAME',], '10 well1 !comment',
+    {'KH': '10', 'NAME': 'well1', 'COLUMN1': None, 'COLUMN2': None}, True),
+    (['KH', 'NAME','NOTINDICT'], '10 well1 value !comment',
+    {'KH': '10', 'NAME': 'well1', 'COLUMN1': None, 'COLUMN2': None,'NOTINDICT': 'value'}, True),
+], ids=['basic', 'invalid_line (too short)', 'fewer_columns_than_dict', 'comments', 'value not in dict'])
+def test_table_line_reader(headers, line, expected_dictionary, expected_valid_line):
+    # Arrange
+    dict_to_populate = {'KH': None, 'NAME': None, 'COLUMN1': None, 'COLUMN2': None}
+
+    # Act
+    result_valid_line, result_dict = nfo.table_line_reader(dict_to_populate, headers, line)
+
+    # Assert
+    assert result_dict == expected_dictionary
+    assert result_valid_line == expected_valid_line
