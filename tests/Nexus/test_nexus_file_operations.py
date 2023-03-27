@@ -469,3 +469,19 @@ def test_table_line_reader(headers, line, expected_dictionary, expected_valid_li
     # Assert
     assert result_dict == expected_dictionary
     assert result_valid_line == expected_valid_line
+
+
+@pytest.mark.parametrize("value, dtype, na_to_none, expected_result",[
+    ('string', str, True, 'string'),
+    ('10', int, True, 10),
+    ('10', float, True, 10.0),
+    ('1.9101', float, True, 1.9101),
+    ('#', int, True, None),
+    ('NA', int, True, None),
+    ('NA', str, False, 'NA')
+])
+def test_correct_datatypes(value, dtype, na_to_none, expected_result):
+    # Act
+    result = nfo.correct_datatypes(value, dtype, na_to_none)
+    # Assert
+    assert result == expected_result
