@@ -236,6 +236,8 @@ def get_token_value(token: str, token_line: str, file_list: list[str],
     # If we have reached the end of the line, go to the next line to start our search
     if len(search_string) < 1:
         line_index += 1
+        if line_index >= len(file_list):
+            return None
         search_string = file_list[line_index]
     if not isinstance(search_string, str):
         raise ValueError
@@ -603,7 +605,7 @@ def looks_like_grid_array(file_path: str, lines2check: int = 10) -> bool:
         for i in range(0, lines2check):
             line = f.readline()
             line_elems = line.split()
-            found_keywords = [word for word in line_elems if word in GRID_ARRAY_KEYWORDS and
+            found_keywords = [word for word in line_elems if (word in GRID_ARRAY_KEYWORDS) and
                               check_token(word, line)]
             if found_keywords:
                 for word in found_keywords:

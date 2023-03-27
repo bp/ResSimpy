@@ -227,9 +227,9 @@ def test_get_token_value_nexus_file(mocker, test_file_contents, token_line):
     include_file_contents = 'inc file contents'
     include_full_file_path_1 = os.path.join('/origin/path', 'nexus_data/inc_file1.inc')
 
-    nexus_file_include1 = NexusFile(location=include_full_file_path_1, includes=[],
+    nexus_file_include1 = NexusFile(location=include_full_file_path_1, includes=None,
                                     origin=file_path, includes_objects=None,
-                                    file_content_as_list=['inc file contents'])
+                                    file_content_as_list=None)
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
