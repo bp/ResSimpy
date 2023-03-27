@@ -8,6 +8,7 @@ import re
 
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits, SUnits
+from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEYWORDS
 from ResSimpy.Nexus.nexus_constants import VALID_NEXUS_KEYWORDS
 import os
 
@@ -221,12 +222,12 @@ def get_token_value(token: str, token_line: str, file_list: list[str],
         Optional[str]: The value following the supplied token, if it is present.
     """
 
-    # If this line is commented out, don't return a value
-    if "!" in token_line and token_line.index("!") < token_line.index(token):
-        return None
-
     token_upper = token.upper()
     token_line_upper = token_line.upper()
+
+    # If this line is commented out, don't return a value
+    if "!" in token_line_upper and token_line_upper.index("!") < token_line_upper.index(token_upper):
+        return None
 
     search_start = token_line_upper.index(token_upper) + len(token) + 1
     search_string = token_line[search_start: len(token_line)]
@@ -235,6 +236,8 @@ def get_token_value(token: str, token_line: str, file_list: list[str],
     # If we have reached the end of the line, go to the next line to start our search
     if len(search_string) < 1:
         line_index += 1
+        if line_index >= len(file_list):
+            return None
         search_string = file_list[line_index]
     if not isinstance(search_string, str):
         raise ValueError
@@ -583,3 +586,30 @@ def value_in_file(token: str, file: list[str]) -> bool:
             token_found = True
 
     return token_found
+
+
+def looks_like_grid_array(file_path: str, lines2check: int = 10) -> bool:
+    """Returns true if a Nexus include file begins with one of the
+    Nexus grid array keywords.
+
+    Args:
+        file_path (str): Path to Nexus include file
+        lines2check (int): First number of lines in file to check, looking for
+        a Nexus grid array keyword. Default: first 10 lines of file
+
+    Returns:
+        bool: True if file begins with one of Nexus grid array keywords
+    """
+    with open(file_path, 'r') as f:
+
+        for i in range(0, lines2check):
+            line = f.readline()
+            line_elems = line.split()
+            found_keywords = [word for word in line_elems if (word in GRID_ARRAY_KEYWORDS) and
+                              check_token(word, line)]
+            if found_keywords:
+                for word in found_keywords:
+                    if (line_elems.index(word) < len(line_elems)-1 and
+                            line_elems[line_elems.index(word)+1].upper() == 'VALUE'):
+                        return True
+    return False

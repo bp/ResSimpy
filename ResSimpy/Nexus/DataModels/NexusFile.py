@@ -39,18 +39,30 @@ class NexusFile:
         self.file_content_as_list: Optional[list[Union[str, NexusFile]]] = file_content_as_list
 
     @classmethod
-    def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True):
+    def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True,
+                                        skip_arrays: bool = True) -> NexusFile:
         """generates a nexus file instance for a provided text file with information storing the included files
 
         Args:
             file_path (str): path to a file
             origin (Optional[str], optional): Where the file was opened from. Defaults to None.
             recursive (bool): Whether the method should recursively drill down multiple layers of includes.
+            skip_arrays (bool): If set True skips the INCLUDE arrays that come after property array and VALUE
 
         Returns:
             NexusFile: a class instance for NexusFile with knowledge of include files
         """
         # load file as list and clean up file
+        # if skip_arrays and nfo.looks_like_grid_array(file_path):
+        #     location = file_path
+        #     nexus_file_class = cls(location=location,
+        #                            includes=None,
+        #                            origin=origin,
+        #                            includes_objects=None,
+        #                            file_content_as_list=None, )
+        #     warnings.warn(UserWarning(f'File skipped due to looking like an array {file_path}'))
+        #     return nexus_file_class
+
         try:
             file_as_list = nfo.load_file_as_list(file_path)
         except FileNotFoundError:
@@ -71,7 +83,13 @@ class NexusFile:
         # search for the INCLUDE keyword and append to a list:
         inc_file_list: list[str] = []
         includes_objects: Optional[list[NexusFile]] = []
-        for line in file_as_list:
+        skip_next_include = False
+
+        for i, line in enumerate(file_as_list):
+            # check if the next include should be skipped
+            if skip_arrays and nfo.check_token("VALUE", line) and \
+                    nfo.get_token_value("VALUE", line, file_as_list) == "INCLUDE":
+                skip_next_include = True
             if not nfo.check_token("INCLUDE", line):
                 modified_file_as_list.append(line)
                 continue
@@ -84,9 +102,32 @@ class NexusFile:
             inc_file_list.append(inc_full_path)
             if not recursive:
                 modified_file_as_list.append(line)
+            elif skip_arrays and skip_next_include:
+                inc_file = cls(location=inc_full_path,
+                               includes=None,
+                               origin=file_path,
+                               includes_objects=None,
+                               file_content_as_list=None, )
+                if includes_objects is None:
+                    raise ValueError('includes_objects is None - recursion failure.')
+                includes_objects.append(inc_file)
+                try:
+                    prefix_line, suffix_line = re.split(inc_file_path, line, maxsplit=1, flags=re.IGNORECASE)
+                    suffix_line = suffix_line.lstrip()
+                except ValueError:
+                    prefix_line = line.replace(inc_file_path, '')
+                    suffix_line = None
+
+                if prefix_line:
+                    modified_file_as_list.append(prefix_line)
+                modified_file_as_list.append(inc_file)
+                if suffix_line:
+                    modified_file_as_list.append(suffix_line)
+                skip_next_include = False
             else:
                 # TODO also store the full file paths
-                inc_file = cls.generate_file_include_structure(inc_full_path, origin=file_path, recursive=True)
+                inc_file = cls.generate_file_include_structure(inc_full_path, origin=file_path, recursive=True,
+                                                               skip_arrays=skip_arrays)
                 if includes_objects is None:
                     raise ValueError('includes_objects is None - recursion failure.')
                 includes_objects.append(inc_file)
