@@ -222,12 +222,12 @@ def get_token_value(token: str, token_line: str, file_list: list[str],
         Optional[str]: The value following the supplied token, if it is present.
     """
 
-    # If this line is commented out, don't return a value
-    if "!" in token_line and token_line.index("!") < token_line.index(token):
-        return None
-
     token_upper = token.upper()
     token_line_upper = token_line.upper()
+
+    # If this line is commented out, don't return a value
+    if "!" in token_line_upper and token_line_upper.index("!") < token_line_upper.index(token_upper):
+        return None
 
     search_start = token_line_upper.index(token_upper) + len(token) + 1
     search_string = token_line[search_start: len(token_line)]
