@@ -1,4 +1,5 @@
 from enum import Enum
+from functools import partial
 from io import StringIO
 from typing import Optional, Union
 import pandas as pd
@@ -577,10 +578,7 @@ def value_in_file(token: str, file: list[str]) -> bool:
     Returns:
         bool: True if the token is found and False otherwise
     """
-    token_found = False
-    for line in file:
-        if check_token(token, line):
-            token_found = True
+    token_found = any(map(partial(check_token, token), file))
 
     return token_found
 
