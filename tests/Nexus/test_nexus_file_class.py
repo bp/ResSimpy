@@ -281,12 +281,12 @@ def test_get_token_value_nexus_file_string(mocker, test_file_contents, token_lin
 @pytest.mark.parametrize("test_file_contents, token_line", [
     ('basic_file KH VAlUE INCLUDE nexus_data/inc_file1.inc', 'basic_file KH VAlUE INCLUDE ' ),
     ('basic_file KH VAlUE\n\n INCLUDE nexus_data/inc_file1.inc', 'basic_file KH VAlUE\n'),
-    #('basic_file KH VAlUE !comment\n\n INCLUDE nexus_data/inc_file1.inc', 'basic_file KH VAlUE !comment\n'),
+    ('basic_file KH VAlUE !comment\n\n INCLUDE nexus_data/inc_file1.inc', 'basic_file KH VAlUE !comment\n'),
     ('basic_file KH VAlUE\n\n INCLUDE nexus_data/inc_file1.inc\n\nVALUE 10', 'basic_file KH VAlUE\n'),
     ('basic_file KH VAlUE\n\n 10 \n\nKH VALUE INCLUDE\n\n nexus_data/inc_file1.inc', 'KH VALUE INCLUDE\n'),
 
 ], ids=['basic_test', 'newline',
-        # 'comment',
+        'comment',
         'another_token', 'second_token'])
 def test_generate_file_include_structure_skip_array(mocker, test_file_contents, token_line):
     # Arrange

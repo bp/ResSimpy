@@ -8,6 +8,7 @@ import re
 
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits, SUnits
+from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEYWORDS
 from ResSimpy.Nexus.nexus_constants import VALID_NEXUS_KEYWORDS
 import os
 
@@ -585,5 +586,28 @@ def value_in_file(token: str, file: list[str]) -> bool:
     return token_found
 
 
-def looks_like_grid_array(file_path: str) -> bool:
+def looks_like_grid_array(file_path: str, lines2check: int = 10) -> bool:
+    """Returns true if a Nexus include file begins with one of the
+    Nexus grid array keywords.
+
+    Args:
+        file_path (str): Path to Nexus include file
+        lines2check (int): First number of lines in file to check, looking for
+        a Nexus grid array keyword. Default: first 10 lines of file
+
+    Returns:
+        bool: True if file begins with one of Nexus grid array keywords
+    """
+    with open(file_path, 'r') as f:
+
+        for i in range(0, lines2check):
+            line = f.readline()
+            line_elems = line.split()
+            found_keywords = [word for word in line_elems if word in GRID_ARRAY_KEYWORDS and
+                              check_token(word, line)]
+            if found_keywords:
+                for word in found_keywords:
+                    if (line_elems.index(word) < len(line_elems)-1 and
+                            line_elems[line_elems.index(word)+1].upper() == 'VALUE'):
+                        return True
     return False
