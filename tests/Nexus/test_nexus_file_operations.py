@@ -420,3 +420,28 @@ def test_get_next_value_multiple_lines(file, expected_result):
     result = nfo.get_next_value(0, file)
     # Assert
     assert result == expected_result
+
+
+@pytest.mark.parametrize("file_contents, expected_header_index, expected_header_result",[
+    ('KH \t NAME \t COLUMN1 \t   COLUMN2 \n\n SOMETHING ELSe',
+        0, ['KH', 'NAME', 'COLUMN1', 'COLUMN2']),
+    ('KH \t NAME \t COLUMN1 \t   COLUMN2 COLUMN3 \n\n SOMETHING ELSe',
+        0, ['KH', 'NAME', 'COLUMN1', 'COLUMN2', 'COLUMN3']),
+    ('! comment first \n KH \t NAME \t COLUMN1 \t   COLUMN2 ! comment \n 10 well1 10 item',
+        1, ['KH', 'NAME', 'COLUMN1', 'COLUMN2'])
+], ids=['basic', 'additional column', 'comments'])
+def test_get_table_header(file_contents, expected_header_index, expected_header_result):
+    # Arrange
+    header_values = {
+        'KH': 'kh',
+        'NAME': 'Name',
+        'COLUMN1': 'Column',
+        'COLUMN2': 'Column',
+    }
+    file_as_list = file_contents.splitlines()
+    # Act
+    result_header_index, result_headers = nfo.get_table_header(file_as_list, header_values)
+
+    # Assert
+    assert result_header_index == expected_header_index
+    assert result_headers == expected_header_result
