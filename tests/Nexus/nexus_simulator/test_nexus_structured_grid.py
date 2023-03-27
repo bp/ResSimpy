@@ -1,7 +1,7 @@
 
 
 import os
-
+import pandas as pd
 import pytest
 from ResSimpy.Grid import VariableEntry
 from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
@@ -403,3 +403,68 @@ def test_get_abs_structured_grid_path(mocker, fcs_file, expected_root, expected_
 
     # Assert
     assert result == expected_result
+
+
+# @pytest.mark.parametrize("structured_grid_file_contents, expected_results",
+#     [
+#     ("""
+#       MULT TX ALL PLUS MULT
+#        FNAME F1
+#        1 5 2 2 1 10 1.0
+#        6 9 2 2 1 10 0.1
+
+#       MULT TY ALL PLUS MULT
+#        FNAME F1
+#        1 1 2 5 1 10 1.0
+#        1 1 6 9 1 10 0.0
+
+#       MULT TX ALL MINUS MULT
+#        FNAME F2
+#        1 5 4 4 1 10 1.0
+#        6 9 4 4 1 10 1.0
+
+#       MULT TY ALL PLUS MULT
+#        FNAME F2
+#        3 3 2 5 1 10 1.0
+#        3 3 6 9 1 10 1.0
+
+#     """, pd.DataFrame({'I1': [1, 6, 1, 1, 1, 6, 3, 3],
+#                        'I2': [5, 9, 1, 1, 5, 9, 3, 3],
+#                        'J1': [2, 2, 2, 6, 4, 4, 2, 6],
+#                        'J2': [2, 2, 5, 9, 4, 4, 5, 9],
+#                        'K1': [1, 1, 1, 1, 1, 1, 1, 1],
+#                        'K2': [10, 10, 10, 10, 10, 10, 10, 10],
+#                        'MULT': [1.0, 0.1, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0],
+#                        'GRID': ['ROOT', 'ROOT', 'ROOT', 'ROOT', 'ROOT', 'ROOT', 'ROOT', 'ROOT'],
+#                        'NAME': ['F1', 'F1', 'F1', 'F1', 'F2', 'F2', 'F2', 'F2'],
+#                        'FACE': ['I', 'I', 'J', 'J', 'I-', 'I-', 'J', 'J']}
+#                       )
+#     )
+#     ], ids=['basic_nomultfl']
+#                          )
+# def test_load_faults(mocker, structured_grid_file_contents, expected_results):
+#     """Read in Structured Grid File and test extraction of fault information"""
+#     # Arrange
+#     fcs_path = 'testpath1/nexus_run.fcs'
+#     fcs_file = "DESC test fcs file\nDATEFORMAT MM/DD/YYYY\nGRID_FILES\n\tSTRUCTURED_GRID test_structured_grid.dat"
+#     structured_grid_path = os.path.join('testpath1', 'test_structured_grid.dat')
+
+#     def mock_open_wrapper(filename, mode):
+#         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+#                                         {fcs_path: fcs_file,
+#                                          structured_grid_path: structured_grid_file_contents
+#                                          }).return_value
+#         return mock_open
+
+#     mocker.patch("builtins.open", mock_open_wrapper)
+
+#     # Act
+#     simulation = NexusSimulator(origin=fcs_path)
+#     sim_grid = simulation.get_structured_grid()
+#     file_as_list = simulation.fcs_file.structured_grid_file.get_flat_list_str_file()
+#     sim_grid.load_faults(file_as_list)
+#     faults_df = sim_grid.get_faults_df()
+    
+
+#     # Assert
+#     pd.testing.assert_frame_equal(expected_results, faults_df)

@@ -9,6 +9,11 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
+import pandas as pd
+# import sys
+# sys.path.insert(0, '/tcchou/isebo0/Testing/github_repos/resqpy/resqpy')
+# from resqpy.olio.read_nexus_fault import load_nexus_fault_mult_table_from_list
+
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
@@ -23,8 +28,13 @@ class PropertyToLoad:
 @dataclass(kw_only=True)
 class StructuredGridFile(Grid):
 
+    __faults_df: Optional[pd.DataFrame] = None
+
     def __init__(self, data: Optional[dict] = None):
         super().__init__()
+
+        self.__faults_df: Optional[pd.DataFrame] = None
+
         # Use the dict provided to populate the properties
         if data is not None:
             for name, value in data.items():
@@ -172,3 +182,19 @@ class StructuredGridFile(Grid):
         new_file_str = "".join(structured_grid_contents)
         with open(grid_file_path, "w") as text_file:
             text_file.write(new_file_str)
+
+    # def load_faults(self, file_content_as_list: list[str]):
+    #     """Function to read faults in Nexus grid file defined using MULT and FNAME keywords
+
+    #     Args:
+    #         file_content_as_list (list[str]): list of strings that comprise input from Nexus structured grid file
+
+    #     """
+    #     df = load_nexus_fault_mult_table_from_list(file_content_as_list)
+    #     # Ensure resulting dataframe has uppercase column names
+    #     df.columns = [col.upper() for col in df.columns]
+    #     self.__faults_df = df
+
+    def get_faults_df(self) -> Optional[pd.DataFrame]:
+        """Returns the fault definition and transmissility multiplier information as a dataframe"""
+        return self.__faults_df
