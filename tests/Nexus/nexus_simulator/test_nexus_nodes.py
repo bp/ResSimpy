@@ -123,4 +123,4 @@ def test_get_node_df(file_contents, node1_props, node2_props):
     result = nexus_nodes.get_node_df()
 
     # Assert
-    assert pd.testing.assert_frame_equal(result, expected_df,)
+    pd.testing.assert_frame_equal(result, expected_df,)
