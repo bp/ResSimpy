@@ -302,7 +302,7 @@ python-versions = "*"
 
 [[package]]
 name = "resqpy"
-version = "4.6.1"
+version = "4.6.2"
 description = "Python API for working with RESQML models"
 category = "main"
 optional = false
@@ -759,8 +759,8 @@ pytz = [
     {file = "pytz-2023.2.tar.gz", hash = "sha256:a27dcf612c05d2ebde626f7d506555f10dfc815b3eddccfaadfc7d99b11c9a07"},
 ]
 resqpy = [
-    {file = "resqpy-4.6.1-py3-none-any.whl", hash = "sha256:0b30fb3c2f9e40e40a309bbfa2264b701cdc80c73faa6c1bb7008dcaf337024f"},
-    {file = "resqpy-4.6.1.tar.gz", hash = "sha256:a05640591fab21df5bfebab21490be692c39b50154e12a319d4dcca79505c670"},
+    {file = "resqpy-4.6.2-py3-none-any.whl", hash = "sha256:b1f7a9ef51ca4a3afc3f64313f3307c8901aa291ea9b59e32d5a094fecdf2931"},
+    {file = "resqpy-4.6.2.tar.gz", hash = "sha256:050cf2a8e4f65f282db837d767260bfcf5b4eba30fad64c1e51b7dedd49a0c87"},
 ]
 scipy = [
     {file = "scipy-1.10.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:e7354fd7527a4b0377ce55f286805b34e8c54b91be865bac273f527e1b839019"},
