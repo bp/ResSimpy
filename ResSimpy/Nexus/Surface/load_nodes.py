@@ -31,7 +31,7 @@ def load_node_table(file_as_list: list[str], current_date: str, unit_system: Uni
         # generate a node object using the properties stored in the keyword dict
         # Use the map to create a kwargs dict for passing to the NexusNode object
         keyword_store = {keyword_map[x]: y for x, y in keyword_store.items()}
-        new_node = NexusNode(**keyword_store)
+        new_node = NexusNode(keyword_store)
         new_node.date = current_date
         new_node.unit_system = unit_system
         list_of_nodes.append(new_node)

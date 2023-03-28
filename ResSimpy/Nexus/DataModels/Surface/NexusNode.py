@@ -13,6 +13,11 @@ class NexusNode(Node):
     temp: Optional[float] = None
     station: Optional[str] = None
 
+    def __init__(self, properties_dict: dict[str, None | int | str | float]):
+        super().__init__()
+        for key, prop in properties_dict.items():
+            self.__setattr__(key, prop)
+
     @staticmethod
     def get_node_nexus_mapping() -> dict[str, tuple[str, type]]:
         """gets the mapping of nexus keywords to attribute definitions"""

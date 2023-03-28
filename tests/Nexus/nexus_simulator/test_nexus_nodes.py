@@ -75,8 +75,8 @@ def test_load_nexus_nodes(mocker, file_contents, node1_props, node2_props):
     start_date = '01/01/2023'
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
 
-    node_1 = NexusNode(**node1_props)
-    node_2 = NexusNode(**node2_props)
+    node_1 = NexusNode(node1_props)
+    node_2 = NexusNode(node2_props)
 
     expected_result = [node_1, node_2]
     # get the second node only

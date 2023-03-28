@@ -8,7 +8,7 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 
 @dataclass
 class Node(ABC):
-    name: str
+    name: Optional[str] = None
     type: Optional[str] = None
     depth: Optional[float] = None
     date: Optional[str] = None

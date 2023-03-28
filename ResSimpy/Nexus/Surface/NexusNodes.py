@@ -19,7 +19,8 @@ class NexusNodes(Nodes):
         return self.__nodes
 
     def get_node(self, node_name: str) -> Optional[NexusNode]:
-        nodes_to_return = filter(lambda x: x.name.upper() == node_name.upper(), self.__nodes)
+        nodes_to_return = filter(lambda x: False if x.name is None else x.name.upper() == node_name.upper(),
+                                 self.__nodes)
         return next(nodes_to_return, None)
 
     def get_node_df(self) -> pd.DataFrame:
