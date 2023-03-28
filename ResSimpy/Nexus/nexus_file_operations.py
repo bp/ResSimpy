@@ -1,4 +1,5 @@
 from enum import Enum
+from functools import partial
 from io import StringIO
 from typing import Optional, Union
 import pandas as pd
@@ -510,7 +511,7 @@ def check_for_common_input_data(file_as_list: list[str], property_dict: dict) ->
 
 def check_property_in_line(line: str, property_dict: dict, file_as_list: list[str]) -> dict:
     """Given a line of Nexus input file content looking for common input data, e.g.,
-        units such as ENGLISH or METRIC, temparure units such as FAHR or CELSIUS, DATEFORMAT, etc.,
+        units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
         as defined in Nexus manual. If any found, include in provided property_dict and return
 
         Args:
@@ -580,10 +581,7 @@ def value_in_file(token: str, file: list[str]) -> bool:
     Returns:
         bool: True if the token is found and False otherwise
     """
-    token_found = False
-    for line in file:
-        if check_token(token, line):
-            token_found = True
+    token_found = any(map(partial(check_token, token), file))
 
     return token_found
 
@@ -613,3 +611,85 @@ def looks_like_grid_array(file_path: str, lines2check: int = 10) -> bool:
                             line_elems[line_elems.index(word)+1].upper() == 'VALUE'):
                         return True
     return False
+
+
+def get_table_header(file_as_list: list[str], header_values: dict[str, str]) -> tuple[int, list[str]]:
+    """ Gets the table headers for a given line in a file.
+    Args:
+        file_as_list (list[str]): file represented as a list of strings
+        header_values (dict[str, str]): dictionary of column headings to populate from the table
+    Raises:
+        ValueError: if no headers belonging to the header_values dict is found
+    Returns:
+        int, list[str]: index in the file provided for the header, list of headers
+    """
+    headers = []
+    header_index = -1
+    for index, line in enumerate(file_as_list):
+        for key in header_values:
+            if check_token(key, line):
+                header_line = line.upper()
+                header_index = index
+                # Map the headers
+                next_column_heading = get_next_value(start_line_index=0, file_as_list=[line])
+                trimmed_line = header_line
+
+                while next_column_heading is not None:
+                    headers.append(next_column_heading)
+                    trimmed_line = trimmed_line.replace(next_column_heading, "", 1)
+                    next_column_heading = get_next_value(0, [trimmed_line], trimmed_line)
+
+                if len(headers) > 0:
+                    break
+        if len(headers) > 0:
+            break
+    if header_index == -1:
+        raise ValueError('No headers belonging to the header_values dictionary found within the provided file')
+    return header_index, headers
+
+
+def table_line_reader(keyword_store: dict[str, None | int | float | str], headers: list[str], line: str) -> \
+        tuple[bool, dict[str, None | int | float | str]]:
+    """ reads in a line from a nexus table with a given set of headers and populates each of those values into a \
+    corresponding dictionary
+
+    Args:
+        keyword_store (dict[str, None | int | float | str]):
+        headers (list[str]):
+        line (str):
+
+    Returns:
+        tuple[bool, dict[str, None | int | float | str]]: a dictionary with the found set of
+    """
+    trimmed_line = line
+    valid_line = True
+    for column in headers:
+        value = get_next_value(0, [trimmed_line], trimmed_line)
+        if value is None:
+            valid_line = False
+            break
+
+        keyword_store[column] = value
+        trimmed_line = trimmed_line.replace(value, "", 1)
+    return valid_line, keyword_store
+
+
+def correct_datatypes(value: None | int | float | str, dtype: type,
+                      na_to_none: bool = True) -> None | int | str | float:
+    """ takes a value and returns the value but converted to specified type. if na_to_none True then
+
+    Args:
+        value (None | int | float | str): value to convert
+        dtype (type): one of (int, float, str)
+        na_to_none (bool): if True NA strings are sent to None
+
+    Returns:
+        None | int | str | float: value but cast to the requested type
+    """
+    if value is None:
+        return None
+    if na_to_none and value == 'NA':
+        return None
+    if value == '#':
+        return None
+    return None if value is None else dtype(value)

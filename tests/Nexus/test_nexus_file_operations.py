@@ -420,3 +420,70 @@ def test_get_next_value_multiple_lines(file, expected_result):
     result = nfo.get_next_value(0, file)
     # Assert
     assert result == expected_result
+
+
+@pytest.mark.parametrize("file_contents, expected_header_index, expected_header_result",[
+    ('KH \t NAME \t COLUMN1 \t   COLUMN2 \n\n SOMETHING ELSe',
+        0, ['KH', 'NAME', 'COLUMN1', 'COLUMN2']),
+    ('KH \t NAME \t COLUMN1 \t   COLUMN2 COLUMN3 \n\n SOMETHING ELSe',
+        0, ['KH', 'NAME', 'COLUMN1', 'COLUMN2', 'COLUMN3']),
+    ('! comment first \n KH \t NAME \t COLUMN1 \t   COLUMN2 ! comment \n 10 well1 10 item',
+        1, ['KH', 'NAME', 'COLUMN1', 'COLUMN2'])
+], ids=['basic', 'additional column', 'comments'])
+def test_get_table_header(file_contents, expected_header_index, expected_header_result):
+    # Arrange
+    header_values = {
+        'KH': 'kh',
+        'NAME': 'Name',
+        'COLUMN1': 'Column',
+        'COLUMN2': 'Column',
+    }
+    file_as_list = file_contents.splitlines()
+    # Act
+    result_header_index, result_headers = nfo.get_table_header(file_as_list, header_values)
+
+    # Assert
+    assert result_header_index == expected_header_index
+    assert result_headers == expected_header_result
+
+
+@pytest.mark.parametrize("headers, line, expected_dictionary, expected_valid_line", [
+    (['KH', 'NAME', 'COLUMN1', 'COLUMN2'], '10 well1 value1 0.2',
+    {'KH': '10', 'NAME': 'well1', 'COLUMN1': 'value1', 'COLUMN2': '0.2'}, True),
+    (['KH', 'NAME', 'COLUMN1', 'COLUMN2'], '10 well1 ',
+    {'KH': '10', 'NAME': 'well1', 'COLUMN1': None, 'COLUMN2': None}, False),
+    (['KH', 'NAME',], '10 well1',
+    {'KH': '10', 'NAME': 'well1', 'COLUMN1': None, 'COLUMN2': None}, True),
+    (['KH', 'NAME',], '10 well1 !comment',
+    {'KH': '10', 'NAME': 'well1', 'COLUMN1': None, 'COLUMN2': None}, True),
+    (['KH', 'NAME','NOTINDICT'], '10 well1 value !comment',
+    {'KH': '10', 'NAME': 'well1', 'COLUMN1': None, 'COLUMN2': None,'NOTINDICT': 'value'}, True),
+], ids=['basic', 'invalid_line (too short)', 'fewer_columns_than_dict', 'comments', 'value not in dict'])
+def test_table_line_reader(headers, line, expected_dictionary, expected_valid_line):
+    # Arrange
+    dict_to_populate = {'KH': None, 'NAME': None, 'COLUMN1': None, 'COLUMN2': None}
+
+    # Act
+    result_valid_line, result_dict = nfo.table_line_reader(dict_to_populate, headers, line)
+
+    # Assert
+    assert result_dict == expected_dictionary
+    assert result_valid_line == expected_valid_line
+
+
+@pytest.mark.parametrize("value, dtype, na_to_none, expected_result",[
+    ('string', str, True, 'string'),
+    ('10', int, True, 10),
+    ('10', float, True, 10.0),
+    ('1.9101', float, True, 1.9101),
+    ('#', int, True, None),
+    ('NA', int, True, None),
+    ('NA', str, False, 'NA'),
+    (None, str, False, None),
+    (10.0, str, False, '10.0'),
+])
+def test_correct_datatypes(value, dtype, na_to_none, expected_result):
+    # Act
+    result = nfo.correct_datatypes(value, dtype, na_to_none)
+    # Assert
+    assert result == expected_result

@@ -35,3 +35,9 @@ SURFACE_KEYWORDS = ['A', 'ACPGCR', 'ACTIONS', 'ACTIVATE', 'ACTIVE', 'ADD', 'ADDV
                     'TIME', 'TRACER', 'TRACERS', 'TSTPRF', 'TVD', 'TYPE', 'VALUE', 'W', 'WATER', 'WATERINJWELLS',
                     'WCUT', 'WCUTMAX', 'WCUTPERF', 'WCUTPLUG', 'WELL', 'WELLBORE', 'WELLCONTROL', 'WELLDATUM',
                     'WELLGRAD', 'WELLHEAD', 'WELLLIST', 'WELLS', 'WI', 'WIMULT', 'X', 'YEAR']
+
+CONNECTION_KEYWORDS = ['NAME', 'NODEIN', 'NODEOUT', 'IPVT', 'IWAT', 'IBAT', 'TYPE', 'METHOD', 'LENGTH', 'NUMBER',
+                       'DDEPTH', 'DIAM', 'INNERDIAM', 'ROUGHNESS', 'ELEVPR', 'TEMPPR', 'MDIN', 'MDOUT', 'HTC', 'DPADD',
+                       'RATEMULT', 'TEMPIN', 'TEMPOUT', 'TRACERS', 'POLYMER', 'DTADD', 'SEAWPR', 'THICKNESS', 'INSTHN',
+                       'INSK', 'GRPGCR', 'FRPGCR', 'ACPGCR',
+                       ]

@@ -211,16 +211,7 @@ def __load_wellspec_table_completions(file_as_list: list[str], header_index: int
         end_of_table = nfo.check_token('TIME', line) or nfo.check_token('WELLSPEC', line)
         if end_of_table:
             return completions
-        trimmed_line = line
-        valid_line = True
-        for column in headers:
-            value = nfo.get_next_value(0, [trimmed_line], trimmed_line)
-            if value is None:
-                valid_line = False
-                break
-
-            header_values[column] = value
-            trimmed_line = trimmed_line.replace(value, "", 1)
+        valid_line, header_values = nfo.table_line_reader(header_values, headers, line)
         # if a valid line is found load a completion otherwise continue
         if not valid_line:
             continue
@@ -301,7 +292,7 @@ def __load_wellspec_table_headings(header_index: int, header_values: dict[str, N
             Defaults to None and will create a new list to return if None.
 
     Returns:
-        tuple[int, list[str]]: _description_
+        tuple[int, list[str]]: index in the file as list for the header, list of headers found in the file
     """
     headers = [] if headers is None else headers
 

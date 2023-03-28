@@ -28,8 +28,9 @@ class NexusPVT():
     eos_nhc: Optional[int] = None  # Number of hydrocarbon components
     eos_temp: Optional[float] = None  # Default temperature for EOS method
     eos_components: Optional[list[str]] = field(default_factory=get_empty_list_str)
-    eos_options: dict[str, Union[str, int, float, pd.DataFrame, list[str], dict[str, float],
-                                 tuple[str, dict[str, float]], dict[str, pd.DataFrame]]] \
+    eos_options: dict[str, Union[
+        str, int, float, pd.DataFrame, list[str], dict[str, float], tuple[str, dict[str, float]], dict[
+            str, pd.DataFrame]]] \
         = field(default_factory=get_empty_eosopt_dict_union)
     properties: dict[str, Union[str, int, float, pd.DataFrame, dict[str, pd.DataFrame]]] \
         = field(default_factory=get_empty_dict_union)
@@ -151,10 +152,10 @@ class NexusPVT():
                 full_table_name = table_name + '_' + table_key
         if not table_has_endkeyword and [i for i in single_line.split() if i in PVT_KEYWORDS]:
             end_flag_found = True
-        if table_has_endkeyword and nfo.check_token('END'+table_name, single_line):
+        if table_has_endkeyword and nfo.check_token('END' + table_name, single_line):
             end_flag_found = True
-        if (full_table_name in table_indices.keys() or
-                full_table_name in table_indices_dict.keys()) and end_flag_found and table_flag[table_name]:
+        if (full_table_name in table_indices.keys() or full_table_name in table_indices_dict.keys()) and \
+                end_flag_found and table_flag[table_name]:
             if table_key not in PVT_UNSAT_TABLE_INDICES:  # All tables except undersaturated tables
                 table_indices[table_name][1] = l_index
             else:  # Handle undersaturated tables
@@ -215,7 +216,7 @@ class NexusPVT():
                 elems = line.split()
                 components_index = elems.index('COMPONENTS')
                 if self.eos_nhc and self.eos_nhc > 0:
-                    self.eos_components = elems[components_index+1:components_index+1+int(self.eos_nhc)]
+                    self.eos_components = elems[components_index + 1:components_index + 1 + int(self.eos_nhc)]
             if nfo.check_token('TEMP', line):  # Get default EOS temperature
                 self.eos_temp = float(nfo.get_expected_token_value(
                     'TEMP', line, file_as_list, custom_message="Property TEMP does not have a numerical value."))
@@ -313,7 +314,7 @@ class NexusPVT():
         # Read in tables
         for key in pvt_table_indices.keys():
             self.properties[key] = nfo.read_table_to_df(file_as_list[
-                pvt_table_indices[key][0]:pvt_table_indices[key][1]])
+                                                        pvt_table_indices[key][0]:pvt_table_indices[key][1]])
         for key in pvt_table_indices_dict.keys():
             self.properties[key] = {}
             for subkey in pvt_table_indices_dict[key].keys():
@@ -321,4 +322,5 @@ class NexusPVT():
                 if not isinstance(property_key, dict):
                     raise ValueError(f"Property is not a dictionary: {str(self.properties[key])}")
                 property_key[subkey] = nfo.read_table_to_df(file_as_list[
-                    pvt_table_indices_dict[key][subkey][0]:pvt_table_indices_dict[key][subkey][1]])
+                                                            pvt_table_indices_dict[key][subkey][0]:
+                                                            pvt_table_indices_dict[key][subkey][1]])
