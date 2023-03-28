@@ -44,22 +44,30 @@ def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
           list[list[str]]: list of function block lines as a list of strings
       """
     function_list = []
-
+    # function_body = []
+    # reading_function = False
     for i, line in enumerate(file_as_list):
-
         if line.upper().startswith('FUNCTION'):
             # fetch the rest of the items until finding the line that contains 'OUTPUT', but not 'RANGE':
             function_body = collect_function_block_lines(file_as_list[i:])
             function_list.append(function_body)
+        # if nfo.check_token('FUNCTION', line):
+        #     function_body = []
+        #     reading_function = True
+        # if reading_function:
+        #     function_body.append(line.strip())
+        #     if nfo.check_token('OUTPUT', line) and not nfo.check_token('RANGE', line):
+        #         function_list.append(function_body)
+        #         reading_function = False
 
     return function_list
 
 
-def create_function_parameters_df(file_as_list: list[str]):
+def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd.DataFrame:
     """ Creates a dataframe to hold all the function properties and parameters:
       Args:
-          file_as_list (list[str] | NexusFile): a list of strings containing each line of the file as an item,
-                     --->file_as_list = nfo.load_file_as_list(str_grid_file_path, strip_comments=True, strip_str=True)
+          function_list_to_parse (list[list[str]]): list of functions extracted as list of lines.
+
       Returns:
           pandas.DataFrame: a dataframe holding each function's parameters in a row.
       """
@@ -69,11 +77,8 @@ def create_function_parameters_df(file_as_list: list[str]):
                  'analyt_func_type', 'func_coeff', 'grid', 'range_input', 'range_output', 'drange',
                  'input_arrays', 'output_arrays'])
 
-    # Collect all the function blocks in a grid file:
-    function_list_to_parse = collect_all_function_blocks(file_as_list)
-
     for b, block in enumerate(function_list_to_parse):
-        #print(f'reading function block number: {b}')
+        # print(f'reading function block number: {b}')
 
         # set the empty default values for the parameters,
         # so if they don't exist in dataframe they won't appear as NaN or give error,
@@ -105,7 +110,7 @@ def create_function_parameters_df(file_as_list: list[str]):
                     region_type = words[1]
                     region_number_list = block[li + 1].split()
                 if len(words) > 2:  # TODO: deal with tabular function option keywords
-                    print('Detected Max number of func table entries. This method does not collect function tables.')
+                    print('This method does not support function/interpolation tables.')
             if 'ANALYT' in line:
                 function_type = words[1]
                 if len(words) > 2:
@@ -139,11 +144,10 @@ def create_function_parameters_df(file_as_list: list[str]):
     return functions_df
 
 
-def summarize_model_functions(file_as_list: list[str]):
+def summarize_model_functions(function_list_to_parse: List[List[str]]) -> pd.DataFrame:
     """ Extracts all function parameters into a df, with an added column of human-readable notations for each function:
       Args:
-          file_as_list (list[str] | NexusFile): a list of strings containing each line of the file as an item,
-                     --->file_as_list = nfo.load_file_as_list(str_grid_file_path, strip_comments=True, strip_str=True)
+          function_list_to_parse (list[list[str]]): list of functions extracted as list of lines.
       Raises:
           AttributeError: if no functions have been found # TODO
       Returns:
@@ -152,7 +156,7 @@ def summarize_model_functions(file_as_list: list[str]):
 
     # get the df from create_function_parameters_df, add a new column, and populate based on ANALYT function type:
 
-    function_summary_df = create_function_parameters_df(file_as_list)
+    function_summary_df = create_function_parameters_df(function_list_to_parse)
     function_summary_df['notation'] = ''
 
     for index, row in function_summary_df.iterrows():

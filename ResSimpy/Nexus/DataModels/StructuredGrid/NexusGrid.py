@@ -9,7 +9,6 @@ from ResSimpy.Grid import Grid, VariableEntry
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 import ResSimpy.Nexus.nexus_file_operations as nfo
-from ResSimpy.Nexus.DataModels.StructuredGrid.NexusArrayFunctions import NexusArrayFunctions
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
@@ -55,9 +54,12 @@ class StructuredGridFile(Grid):
         if structure_grid_file.location is None:
             raise ValueError(f"No file path given or found for structured grid file path. \
                 Instead got {structure_grid_file.location}")
-        file_as_list = nfo.load_file_as_list(structure_grid_file.location, strip_comments=True, strip_str=True)
+
+        #file_as_list = nfo.load_file_as_list(structure_grid_file.location, strip_comments=True, strip_str=True)
         # use this for it to go into includes:
-        #file_as_list = structure_grid_file.get_flat_list_str_file()
+        file_as_list = structure_grid_file.get_flat_list_str_file()
+        file_as_list = [s.strip() for s in file_as_list]
+        file_as_list = list(filter(None, file_as_list))
 
         if file_as_list is None:
             raise ValueError("No file path given or found for structured grid file path. \

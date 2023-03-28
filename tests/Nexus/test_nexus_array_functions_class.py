@@ -82,8 +82,7 @@ FUNCTION
 ANALYT DIV
  KX KY OUTPUT Kz
  
-FUNCTION IREGION
-8 9 10
+FUNCTION IREGION\n 8 9 10
  GRID ROOT
 BLOCKS 1 20 1  40 1 10
 RANGE  INPUT 1 2  1000 2000
@@ -150,15 +149,13 @@ bugger
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    test_input_grid_file_object: NexusFile = NexusFile(location='mock/str_grid/path.inc')
+    test_input_grid_file_object: NexusFile = NexusFile.generate_file_include_structure('mock/str_grid/path.inc')
 
     structured_grid = NexusGrid.StructuredGridFile.load_structured_grid_file(
-        test_input_grid_file_object)
+        test_input_grid_file_object, extract_array_functions=True)
 
     func_list = structured_grid.get_array_functions_list()
     func_summary_df = structured_grid.get_array_functions_df()
-
-    print(structured_grid)
 
     # Assert
     assert_frame_equal(expected_functions_df, func_summary_df)

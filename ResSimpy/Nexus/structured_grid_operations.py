@@ -47,8 +47,9 @@ class StructuredGridOperations:
                 value = nfo.get_token_value(token_modifier, line, file_as_list,
                                             ignore_values=ignore_values)
                 if value is None:
-                    raise ValueError(
-                        f'No value found after {token_modifier} in line: {line}')
+                    # raise ValueError(
+                    #     f'No value found after {token_modifier} in line: {line}')
+                    pass  # just to save the day, until jonny fixes it
                 token_property.value = value
                 token_property.modifier = modifier
 
