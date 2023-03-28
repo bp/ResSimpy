@@ -1,6 +1,7 @@
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import StructuredGridFile
 from tests.multifile_mocker import mock_multiple_files
 from pandas.testing import assert_frame_equal
 
@@ -82,8 +83,7 @@ FUNCTION
 ANALYT DIV
  KX KY OUTPUT Kz
  
-FUNCTION IREGION
-8 9 10
+FUNCTION IREGION\n 8 9 10
  GRID ROOT
 BLOCKS 1 20 1  40 1 10
 RANGE  INPUT 1 2  1000 2000
@@ -150,15 +150,16 @@ bugger
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    test_input_grid_file_object: NexusFile = NexusFile(location='mock/str_grid/path.inc')
+    test_input_grid_file_object: NexusFile = NexusFile.generate_file_include_structure('mock/str_grid/path.inc')
 
-    structured_grid = NexusGrid.StructuredGridFile.load_structured_grid_file(
-        test_input_grid_file_object)
+    #structured_grid = NexusGrid.StructuredGridFile.load_structured_grid_file(test_input_grid_file_object)
 
-    func_list = structured_grid.get_array_functions_list()
-    func_summary_df = structured_grid.get_array_functions_df()
 
-    print(structured_grid)
+
+    #simulation = NexusSimulator(origin=fcs_path)
+    new_sim_grid = StructuredGridFile.load_structured_grid_file(test_input_grid_file_object)
+    func_list = new_sim_grid.get_array_functions_list()
+    func_summary_df = new_sim_grid.get_array_functions_df()
 
     # Assert
     assert_frame_equal(expected_functions_df, func_summary_df)

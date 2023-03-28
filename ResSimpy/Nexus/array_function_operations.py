@@ -1,37 +1,6 @@
-# from ResSimpy.Nexus.NexusSimulator import NexusSimulator
-# import ResSimpy.Nexus.nexus_file_operations as nfo
-# from ResSimpy.Nexus.NexusKeywords.grid_function_keywords import INTEGER_ARRAYS
+import ResSimpy.Nexus.nexus_file_operations as nfo
 import pandas as pd
 from typing import Union, List
-
-
-def collect_function_block_lines(file_as_list: list[str], str_to_search: str = 'OUTPUT',
-                                 str_to_avoid: str = 'RANGE') -> list:
-    """ Collects all lines until the line that contains str_to_search, but not str_to_avoid.
-        Uses recursion.
-     Args:
-         file_as_list (list[str] | NexusFile): a list of strings containing each line of the file as an item,
-                    --->file_as_list = nfo.load_file_as_list(str_grid_file_path, strip_comments=True, strip_str=True)
-         str_to_search (str): string to search in the file. Defaults to 'OUTPUT'.
-     Raises:
-         ValueError: #TODO
-     Returns:
-         list[str]: function block lines as a list of strings
-     """
-    # Return empty list if list is empty - probably unnecessary # TODO: Raise error??
-    if not file_as_list:
-        return []
-
-    # Filter the empty strings from file:
-    # file_as_list = list(filter(None, file_as_list))
-
-    # If str_to_search is in first item of list, return the first item only.
-    # TODO: raise error if str_to_search is the last item in file_as_list
-    if (str_to_search in file_as_list[0].upper()) and (str_to_avoid not in file_as_list[0].upper()):
-        return [file_as_list[0]]
-
-    # Recursion time!!! get the first item, search for str_to_search in the rest of the lines, and repeat.
-    return [file_as_list[0]] + collect_function_block_lines(file_as_list[1:])
 
 
 def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
@@ -44,22 +13,26 @@ def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
           list[list[str]]: list of function block lines as a list of strings
       """
     function_list = []
-
+    function_body: list[str] = []
+    reading_function = False
     for i, line in enumerate(file_as_list):
-
-        if line.upper().startswith('FUNCTION'):
-            # fetch the rest of the items until finding the line that contains 'OUTPUT', but not 'RANGE':
-            function_body = collect_function_block_lines(file_as_list[i:])
-            function_list.append(function_body)
+        if nfo.check_token('FUNCTION', line):
+            function_body = []
+            reading_function = True
+        if reading_function:
+            function_body.append(line.strip())
+            if nfo.check_token('OUTPUT', line) and not nfo.check_token('RANGE', line):
+                function_list.append(function_body)
+                reading_function = False
 
     return function_list
 
 
-def create_function_parameters_df(file_as_list: list[str]):
+def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd.DataFrame:
     """ Creates a dataframe to hold all the function properties and parameters:
       Args:
-          file_as_list (list[str] | NexusFile): a list of strings containing each line of the file as an item,
-                     --->file_as_list = nfo.load_file_as_list(str_grid_file_path, strip_comments=True, strip_str=True)
+          function_list_to_parse (list[list[str]]): list of functions extracted as list of lines.
+
       Returns:
           pandas.DataFrame: a dataframe holding each function's parameters in a row.
       """
@@ -69,11 +42,8 @@ def create_function_parameters_df(file_as_list: list[str]):
                  'analyt_func_type', 'func_coeff', 'grid', 'range_input', 'range_output', 'drange',
                  'input_arrays', 'output_arrays'])
 
-    # Collect all the function blocks in a grid file:
-    function_list_to_parse = collect_all_function_blocks(file_as_list)
-
     for b, block in enumerate(function_list_to_parse):
-        #print(f'reading function block number: {b}')
+        print(f'reading function block number: {b}')
 
         # set the empty default values for the parameters,
         # so if they don't exist in dataframe they won't appear as NaN or give error,
@@ -105,7 +75,7 @@ def create_function_parameters_df(file_as_list: list[str]):
                     region_type = words[1]
                     region_number_list = block[li + 1].split()
                 if len(words) > 2:  # TODO: deal with tabular function option keywords
-                    print('Detected Max number of func table entries. This method does not collect function tables.')
+                    print('This method does not support function/interpolation tables.')
             if 'ANALYT' in line:
                 function_type = words[1]
                 if len(words) > 2:
@@ -124,7 +94,7 @@ def create_function_parameters_df(file_as_list: list[str]):
                 words.pop(0)
                 output_arrays_min_max_list = words
             if 'DRANGE' in line:
-                print('DRANGE: This method only works with analytical functions, not with function tables.')
+                print('DRANGE: This method only supports analytical functions, not the function tables.')
                 words.pop(0)
                 drange_list = words
             if 'OUTPUT' in line and 'RANGE' not in line:
@@ -139,20 +109,17 @@ def create_function_parameters_df(file_as_list: list[str]):
     return functions_df
 
 
-def summarize_model_functions(file_as_list: list[str]):
+def summarize_model_functions(function_list_to_parse: List[List[str]]) -> pd.DataFrame:
     """ Extracts all function parameters into a df, with an added column of human-readable notations for each function:
       Args:
-          file_as_list (list[str] | NexusFile): a list of strings containing each line of the file as an item,
-                     --->file_as_list = nfo.load_file_as_list(str_grid_file_path, strip_comments=True, strip_str=True)
-      Raises:
-          AttributeError: if no functions have been found # TODO
+          function_list_to_parse (list[list[str]]): list of functions extracted as list of lines.
       Returns:
           pandas.DataFrame: a dataframe holding each function's translation/summary in a row.
       """
 
     # get the df from create_function_parameters_df, add a new column, and populate based on ANALYT function type:
 
-    function_summary_df = create_function_parameters_df(file_as_list)
+    function_summary_df = create_function_parameters_df(function_list_to_parse)
     function_summary_df['notation'] = ''
 
     for index, row in function_summary_df.iterrows():
@@ -162,7 +129,7 @@ def summarize_model_functions(file_as_list: list[str]):
         # ANALYT POLYN
         if row['analyt_func_type'].upper() == 'POLYN':
             n = len(row['func_coeff'])
-
+            # TODO: deal with negative coefficient notations
             for x in range(n):
                 c = row['func_coeff'][x]
                 p = n - x - 1

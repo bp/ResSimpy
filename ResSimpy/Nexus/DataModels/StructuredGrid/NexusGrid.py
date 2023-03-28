@@ -9,7 +9,7 @@ from ResSimpy.Grid import Grid, VariableEntry
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 import ResSimpy.Nexus.nexus_file_operations as nfo
-from ResSimpy.Nexus.DataModels.StructuredGrid.NexusArrayFunctions import NexusArrayFunctions
+import ResSimpy.Nexus.array_function_operations as afo
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
@@ -24,11 +24,17 @@ class PropertyToLoad:
 
 @dataclass(kw_only=True)
 class StructuredGridFile(Grid):
+    __array_functions_list: Optional[list[str]] = None
+    __array_functions_df: Optional[pd.DataFrame] = None
+    __array_functions_loaded: bool = False
+    __grid_file_contents: Optional[list[str]] = None
 
-    def __init__(self, data: Optional[dict] = None):
+    def __init__(self, data: Optional[dict] = None, grid_file_contents: Optional[list[str]] = None):
         super().__init__()
         self.__array_functions_list: Optional[list[str]] = None
         self.__array_functions_df: Optional[pd.DataFrame] = None
+        self.__array_functions_loaded: bool = False
+        self.__grid_file_contents: Optional[list[str]] = grid_file_contents
 
         # Use the dict provided to populate the properties
         if data is not None:
@@ -55,19 +61,22 @@ class StructuredGridFile(Grid):
         if structure_grid_file.location is None:
             raise ValueError(f"No file path given or found for structured grid file path. \
                 Instead got {structure_grid_file.location}")
-        file_as_list = nfo.load_file_as_list(structure_grid_file.location, strip_comments=True, strip_str=True)
+
         # use this for it to go into includes:
-        #file_as_list = structure_grid_file.get_flat_list_str_file()
+        file_as_list = structure_grid_file.get_flat_list_str_file()
+        file_as_list = [s.strip() for s in file_as_list]
+        file_as_list = list(filter(None, file_as_list))
 
         if file_as_list is None:
             raise ValueError("No file path given or found for structured grid file path. \
                 Please update structured grid file path")
-        structured_grid_file = cls()
+
+        loaded_structured_grid_file = cls(grid_file_contents=file_as_list)
 
         # TODO: searching for functions should be an option for the user, as it is time consuming
         # like an argument as load_functions: True
         # Load the array functions defined with 'FUNCTION' keyword
-        structured_grid_file.load_array_functions(file_as_list)
+        # structured_grid_file.load_array_functions(file_as_list)
 
         def move_next_value(next_line: str) -> tuple[str, str]:
             """finds the next value and then strips out the value from the line.
@@ -90,21 +99,21 @@ class StructuredGridFile(Grid):
         for line in file_as_list:
             # Load in the basic properties
             properties_to_load = [
-                PropertyToLoad('NETGRS', ['VALUE', 'CON'], structured_grid_file.netgrs),
-                PropertyToLoad('POROSITY', ['VALUE', 'CON'], structured_grid_file.porosity),
-                PropertyToLoad('SW', ['VALUE', 'CON'], structured_grid_file.sw),
-                PropertyToLoad('KX', ['VALUE', 'MULT', 'CON'], structured_grid_file.kx),
-                PropertyToLoad('PERMX', ['VALUE', 'MULT', 'CON'], structured_grid_file.kx),
-                PropertyToLoad('PERMI', ['VALUE', 'MULT', 'CON'], structured_grid_file.kx),
-                PropertyToLoad('KI', ['VALUE', 'MULT', 'CON'], structured_grid_file.kx),
-                PropertyToLoad('KY', ['VALUE', 'MULT', 'CON'], structured_grid_file.ky),
-                PropertyToLoad('PERMY', ['VALUE', 'MULT', 'CON'], structured_grid_file.ky),
-                PropertyToLoad('PERMJ', ['VALUE', 'MULT', 'CON'], structured_grid_file.ky),
-                PropertyToLoad('KJ', ['VALUE', 'MULT', 'CON'], structured_grid_file.ky),
-                PropertyToLoad('KZ', ['VALUE', 'MULT', 'CON'], structured_grid_file.kz),
-                PropertyToLoad('PERMZ', ['VALUE', 'MULT', 'CON'], structured_grid_file.kz),
-                PropertyToLoad('PERMK', ['VALUE', 'MULT', 'CON'], structured_grid_file.kz),
-                PropertyToLoad('KK', ['VALUE', 'MULT', 'CON'], structured_grid_file.kz),
+                PropertyToLoad('NETGRS', ['VALUE', 'CON'], loaded_structured_grid_file.netgrs),
+                PropertyToLoad('POROSITY', ['VALUE', 'CON'], loaded_structured_grid_file.porosity),
+                PropertyToLoad('SW', ['VALUE', 'CON'], loaded_structured_grid_file.sw),
+                PropertyToLoad('KX', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kx),
+                PropertyToLoad('PERMX', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kx),
+                PropertyToLoad('PERMI', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kx),
+                PropertyToLoad('KI', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kx),
+                PropertyToLoad('KY', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.ky),
+                PropertyToLoad('PERMY', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.ky),
+                PropertyToLoad('PERMJ', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.ky),
+                PropertyToLoad('KJ', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.ky),
+                PropertyToLoad('KZ', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kz),
+                PropertyToLoad('PERMZ', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kz),
+                PropertyToLoad('PERMK', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kz),
+                PropertyToLoad('KK', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kz),
             ]
 
             for token_property in properties_to_load:
@@ -132,11 +141,11 @@ class StructuredGridFile(Grid):
                 second_value, next_line = move_next_value(next_line)
                 third_value, next_line = move_next_value(next_line)
 
-                structured_grid_file.range_x = int(first_value)
-                structured_grid_file.range_y = int(second_value)
-                structured_grid_file.range_z = int(third_value)
+                loaded_structured_grid_file.range_x = int(first_value)
+                loaded_structured_grid_file.range_y = int(second_value)
+                loaded_structured_grid_file.range_z = int(third_value)
 
-        return structured_grid_file
+        return loaded_structured_grid_file
 
     @staticmethod
     def update_structured_grid_file(grid_dict: dict[str, VariableEntry | int], model: NexusSimulator) -> None:
@@ -186,14 +195,19 @@ class StructuredGridFile(Grid):
         with open(grid_file_path, "w") as text_file:
             text_file.write(new_file_str)
 
-    def load_array_functions(self, file_content_as_list: list[str]):
-        self.__array_functions_list = NexusArrayFunctions.load_functions_list(file_content_as_list)
-        self.__array_functions_df = NexusArrayFunctions.load_functions_df(file_content_as_list)
+    def load_array_functions(self):
+        self.__array_functions_list = afo.collect_all_function_blocks(self.__grid_file_contents)
+        self.__array_functions_df = afo.summarize_model_functions(self.__array_functions_list)
+        self.__array_functions_loaded = True
 
     def get_array_functions_list(self):
         """Returns the grid array functions as a dataframe"""
+        if not self.__array_functions_loaded:
+            self.load_array_functions()
         return self.__array_functions_list
 
     def get_array_functions_df(self):
         """Returns the grid array functions as a dataframe"""
+        if not self.__array_functions_loaded:
+            self.load_array_functions()
         return self.__array_functions_df
