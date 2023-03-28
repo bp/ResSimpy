@@ -478,7 +478,9 @@ def test_table_line_reader(headers, line, expected_dictionary, expected_valid_li
     ('1.9101', float, True, 1.9101),
     ('#', int, True, None),
     ('NA', int, True, None),
-    ('NA', str, False, 'NA')
+    ('NA', str, False, 'NA'),
+    (None, str, False, None),
+    (10.0, str, False, '10.0'),
 ])
 def test_correct_datatypes(value, dtype, na_to_none, expected_result):
     # Act

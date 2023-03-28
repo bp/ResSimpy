@@ -51,7 +51,7 @@ def load_nodes(surface_file: NexusFile, start_date: str, default_units: UnitSyst
         Sequence[NexusNode]: a list of NexusNodes from the surface_file provided
     """
     current_date = start_date
-    nexus_nodes_list = []
+    nexus_nodes_list: list[NexusNode] = []
     file_as_list = surface_file.get_flat_list_str_file()
     node_start = -1
     node_end = -1

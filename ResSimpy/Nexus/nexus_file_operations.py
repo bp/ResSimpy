@@ -644,17 +644,20 @@ def table_line_reader(keyword_store: dict[str, None | int | float | str], header
     return valid_line, keyword_store
 
 
-def correct_datatypes(value: Optional[str], dtype: type, na_to_none: bool = True) -> None | int | str | float:
+def correct_datatypes(value: None | int | float | str, dtype: type,
+                      na_to_none: bool = True) -> None | int | str | float:
     """ takes a value and returns the value but converted to specified type. if na_to_none True then
 
     Args:
-        value (str): value to convert
+        value (None | int | float | str): value to convert
         dtype (type): one of (int, float, str)
         na_to_none (bool): if True NA strings are sent to None
 
     Returns:
         None | int | str | float: value but cast to the requested type
     """
+    if value is None:
+        return None
     if na_to_none and value == 'NA':
         return None
     if value == '#':
