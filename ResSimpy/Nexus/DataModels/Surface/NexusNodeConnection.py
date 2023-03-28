@@ -1,6 +1,8 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
+
+from ResSimpy.Nexus.DataModels.Surface.NexusNode import NexusNode
 from ResSimpy.NodeConnection import NodeConnection
 
 
@@ -48,30 +50,30 @@ class NexusNodeConnection(NodeConnection):
     polymer: Optional[str] = None
 
     @staticmethod
-    def get_connection_nexus_mapping() -> dict[str, str]:
+    def get_connection_nexus_mapping() -> dict[str, tuple[str, type]]:
         """gets the mapping of nexus keywords to attribute definitions"""
         nexus_mapping = {
-            'NAME': 'name',
-            'NODEIN': 'node_in',
-            'NODEOUT': 'node_out',
-            'TYPE': 'con_type',
-            'METHOD': 'hyd_method',
-            'IPVT': 'pvt_method',
-            'IWAT': 'water_method',
-            'IBAT': 'bat_method',
-            'ELEVPR': 'elevation_profile',
-            'MDIN': 'measured_depth_in',
-            'MDOUT': 'measured_depth_out',
-            'DIAMETER': 'diameter',
-            'INNERDIAM': 'inner_diameter',
-            'ROUGHNESS': 'roughness',
-            'HTC': 'heat_transfer_coeff',
-            'TEMPPR': 'temperature_profile',
-            'LENGTH': 'length',
-            'DDEPTH': 'delta_depth',
-            'NUMBER': 'connection_number',
-            'SEAWPR': 'seawater_profile',
-            'RATEMULT': 'rate_mult',
-            'POLYMER': 'polymer',
+            'NAME': ('name', str),
+            'NODEIN': ('node_in', NexusNode),
+            'NODEOUT': ('node_out', NexusNode),
+            'TYPE': ('con_type', str),
+            'METHOD': ('hyd_method', str),
+            'IPVT': ('pvt_method', int),
+            'IWAT': ('water_method', int),
+            'IBAT': ('bat_method', int),
+            'ELEVPR': ('elevation_profile', str),
+            'MDIN': ('measured_depth_in', float),
+            'MDOUT': ('measured_depth_out', float),
+            'DIAMETER': ('diameter', float),
+            'INNERDIAM': ('inner_diameter', float),
+            'ROUGHNESS': ('roughness', float),
+            'HTC': ('heat_transfer_coeff', float),
+            'TEMPPR': ('temperature_profile', str),
+            'LENGTH': ('length', float),
+            'DDEPTH': ('delta_depth', float),
+            'NUMBER': ('connection_number', int),
+            'SEAWPR': ('seawater_profile', str),
+            'RATEMULT': ('rate_mult', float),
+            'POLYMER': ('polymer', str),
         }
         return nexus_mapping
