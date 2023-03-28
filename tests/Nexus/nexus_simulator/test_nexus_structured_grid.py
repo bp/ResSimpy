@@ -449,7 +449,7 @@ def test_get_abs_structured_grid_path(mocker, fcs_file, expected_root, expected_
       KX VALUE
       INCLUDE BLAH/BLAH
 
-    """, pd.DataFrame()
+    """, None
      ),
      ("""
 
@@ -518,4 +518,7 @@ def test_load_faults(mocker, structured_grid_file_contents, expected_results):
     faults_df = new_sim_grid.get_faults_df()
 
     # Assert
-    pd.testing.assert_frame_equal(expected_results, faults_df)
+    if expected_results is None:
+        assert expected_results == faults_df
+    else:
+        pd.testing.assert_frame_equal(expected_results, faults_df)
