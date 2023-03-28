@@ -427,6 +427,7 @@ class NexusSimulator(Simulator):
             # TODO support multiple surface file paths
             self.__surface_file_path = list(self.fcs_file.surface_files.values())[0].location
 
+        # Load in Structured Grid
         if not isinstance(self.fcs_file.structured_grid_file, Field) and self.fcs_file.structured_grid_file is not None:
             self.__structured_grid = NexusGrid.StructuredGridFile.load_structured_grid_file(
                 self.fcs_file.structured_grid_file)

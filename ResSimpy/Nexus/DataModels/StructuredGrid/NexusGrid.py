@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import pandas as pd
 from dataclasses import dataclass
 from typing import Optional, Type, TYPE_CHECKING
 
@@ -8,6 +9,7 @@ from ResSimpy.Grid import Grid, VariableEntry
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 import ResSimpy.Nexus.nexus_file_operations as nfo
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusArrayFunctions import NexusArrayFunctions
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
@@ -29,6 +31,7 @@ class StructuredGridFile(Grid):
         if data is not None:
             for name, value in data.items():
                 setattr(self, name, self.__wrap(value))
+        self.__array_functions: pd.DataFrame = None
 
     def __wrap(self, value):
         if isinstance(value, (tuple, list, set, frozenset)):
@@ -172,3 +175,11 @@ class StructuredGridFile(Grid):
         new_file_str = "".join(structured_grid_contents)
         with open(grid_file_path, "w") as text_file:
             text_file.write(new_file_str)
+
+    def load_array_functions(self):
+        self.__array_functions = NexusArrayFunctions.load_functions_summary(
+            self.fcs_file.structured_grid_file.file_content_as_list)
+
+    def get_array_functions(self):
+        """Returns the grid array functions as a dataframe"""
+        return self.__array_functions
