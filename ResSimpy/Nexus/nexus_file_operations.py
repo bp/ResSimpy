@@ -314,8 +314,6 @@ def load_file_as_list(file_path: str, strip_comments: bool = False, strip_str: b
 
     file_content = []
 
-    #with open(file_path, 'r') as f:
-    #with open(file_path, 'r', encoding='cp437') as f:
     try:
         with open(file_path, "r") as f:
             file_content = list(f)
