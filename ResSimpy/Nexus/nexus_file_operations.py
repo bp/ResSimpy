@@ -1,17 +1,17 @@
 from enum import Enum
 from functools import partial
 from io import StringIO
-from typing import Optional, Union
+from typing import Optional, Union, Any
 import pandas as pd
 from ResSimpy.Grid import VariableEntry
 from string import Template
 import re
+import os
 
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits, SUnits
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEYWORDS
 from ResSimpy.Nexus.nexus_constants import VALID_NEXUS_KEYWORDS
-import os
 
 
 def nexus_token_found(line_to_check: str, valid_list: list[str] = VALID_NEXUS_KEYWORDS) -> bool:
@@ -607,8 +607,8 @@ def looks_like_grid_array(file_path: str, lines2check: int = 10) -> bool:
                               check_token(word, line)]
             if found_keywords:
                 for word in found_keywords:
-                    if (line_elems.index(word) < len(line_elems)-1 and
-                            line_elems[line_elems.index(word)+1].upper() == 'VALUE'):
+                    if (line_elems.index(word) < len(line_elems) - 1 and
+                            line_elems[line_elems.index(word) + 1].upper() == 'VALUE'):
                         return True
     return False
 
@@ -672,6 +672,48 @@ def table_line_reader(keyword_store: dict[str, None | int | float | str], header
         keyword_store[column] = value
         trimmed_line = trimmed_line.replace(value, "", 1)
     return valid_line, keyword_store
+
+
+def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map: dict[str, tuple[str, type]],
+                          current_date: Optional[str] = None, unit_system: Optional[UnitSystem] = None,
+                          list_of_objects: Optional[list[Any]] = None) -> list[Any]:
+    """ Loads a table row by row to an object provided in the row_object.
+
+    Args:
+        file_as_list (list[str]): file represented as a list of strings.
+        row_object (Any): class to populate, should take a dictionary of attributes as an argument to the __init__
+        property_map (dict[str, tuple[str, type]]): map of the Nexus keywords as keys to the dictionary and the names\
+            of the object attribute and the type of that attribute as a tuple in the values.
+            e.g. {'NAME': ('name', str)} for the object obj with attribute obj.name
+        current_date (Optional[str]): date/time at which the object was found within a recurrent file
+        unit_system (Optional[UnitSystem): most recent UnitSystem enum of the file where the object was found
+        list_of_objects (Optional[list[Any]]): list of objects to append to. If None creates an empty list to populate.
+
+    Returns:
+        list[obj]: list of instances of the class provided for the row_object, populated with attributes from the\
+            property map dictionary.
+    """
+    keyword_map = {x: y[0] for x, y in property_map.items()}
+    header_index, headers = get_table_header(file_as_list, keyword_map)
+    table_as_list = file_as_list[header_index + 1::]
+    if list_of_objects is None:
+        list_of_objects = []
+    for line in table_as_list:
+        keyword_store: dict[str, None | int | float | str] = {x: None for x in property_map.keys()}
+        valid_line, keyword_store = table_line_reader(keyword_store, headers, line)
+        if not valid_line:
+            continue
+        # cast the values to the correct typing
+        keyword_store = {x: correct_datatypes(y, property_map[x][1]) for x, y in keyword_store.items()}
+
+        # generate a node object using the properties stored in the keyword dict
+        # Use the map to create a kwargs dict for passing to the object
+        keyword_store = {keyword_map[x]: y for x, y in keyword_store.items()}
+        new_object = row_object(keyword_store)
+        setattr(new_object, 'date', current_date)
+        setattr(new_object, 'unit_system', unit_system)
+        list_of_objects.append(new_object)
+    return list_of_objects
 
 
 def correct_datatypes(value: None | int | float | str, dtype: type,

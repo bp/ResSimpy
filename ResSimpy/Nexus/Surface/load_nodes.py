@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Sequence, Type
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Surface.NexusNode import NexusNode
@@ -16,25 +16,9 @@ def load_node_table(file_as_list: list[str], current_date: str, unit_system: Uni
     Returns:
         Sequence[NexusNode]: a list of nodes extracted from the provided table.
     """
-    list_of_nodes: list[NexusNode] = []
     node_map = NexusNode.get_node_nexus_mapping()
-    keyword_map = {x: y[0] for x, y in node_map.items()}
-    header_index, headers = nfo.get_table_header(file_as_list, keyword_map)
-    for line in file_as_list[header_index + 1::]:
-        keyword_store: dict[str, None | int | float | str] = {x: None for x in keyword_map}
-        valid_line, keyword_store = nfo.table_line_reader(keyword_store, headers, line)
-        if not valid_line:
-            continue
-        # cast the values to the correct typing
-        keyword_store = {x: nfo.correct_datatypes(y, node_map[x][1]) for x, y in keyword_store.items()}
-
-        # generate a node object using the properties stored in the keyword dict
-        # Use the map to create a kwargs dict for passing to the NexusNode object
-        keyword_store = {keyword_map[x]: y for x, y in keyword_store.items()}
-        new_node = NexusNode(keyword_store)
-        new_node.date = current_date
-        new_node.unit_system = unit_system
-        list_of_nodes.append(new_node)
+    list_of_nodes = nfo.load_table_to_objects(file_as_list=file_as_list, row_object=NexusNode, property_map=node_map,
+                                              current_date=current_date, unit_system=unit_system)
     return list_of_nodes
 
 

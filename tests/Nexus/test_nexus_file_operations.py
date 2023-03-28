@@ -1,7 +1,9 @@
+from dataclasses import dataclass
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import pytest
 import pandas as pd
 import numpy as np
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 
 
 @pytest.mark.parametrize("line_contents, file_contents, expected_result", [
@@ -487,3 +489,86 @@ def test_correct_datatypes(value, dtype, na_to_none, expected_result):
     result = nfo.correct_datatypes(value, dtype, na_to_none)
     # Assert
     assert result == expected_result
+
+
+def test_load_table_to_objects_basic():
+    # Arrange
+    property_map = {'NAME': ('name', str), 'KH': ('kh', int), 'L': ('k', float)}
+
+    @dataclass
+    class TestClass:
+        name: str
+        kh: int
+        k: float
+
+        def __init__(self, properties_dict):
+            for key, prop in properties_dict.items():
+                self.__setattr__(key, prop)
+
+    file_contents = '''NAME     KH  L \n\n well1        10   13.5 \n\n well2 20 7.501'''
+    file_as_list = file_contents.splitlines()
+    expected_dict_1 = {'name': 'well1', 'kh': 10, 'k': 13.5}
+    expected_dict_2 = {'name': 'well2', 'kh': 20, 'k': 7.501}
+    expected_obj_1 = TestClass(expected_dict_1)
+    expected_obj_2 = TestClass(expected_dict_2)
+    expected_result = [expected_obj_1, expected_obj_2]
+
+    # Act
+    result = nfo.load_table_to_objects(file_as_list, TestClass, property_map, )
+
+    # Assert
+    assert result == expected_result
+
+
+def test_load_table_to_objects_date_units():
+
+    # Arrange
+    property_map = {'NAME': ('name', str), 'KH': ('kh', int), 'L': ('k', float)}
+    date = '20/12/2023'
+    units = UnitSystem.ENGLISH
+
+    # the date and units should not be added to this class
+    @dataclass
+    class TestClass:
+        name: str
+        kh: int
+        k: float
+
+        def __init__(self, properties_dict):
+            for key, prop in properties_dict.items():
+                self.__setattr__(key, prop)
+
+    # but should be added to this class:
+    @dataclass
+    class TestClassUnitDates:
+        date: str
+        unit_system: UnitSystem
+        name: str
+        kh: int
+        k: float
+
+        def __init__(self, properties_dict):
+            for key, prop in properties_dict.items():
+                self.__setattr__(key, prop)
+
+    file_contents = '''NAME     KH  L \n\n well1        10   13.5 \n\n well2 20 7.501'''
+    file_as_list = file_contents.splitlines()
+    expected_dict_1 = {'name': 'well1', 'kh': 10, 'k': 13.5}
+    expected_dict_2 = {'name': 'well2', 'kh': 20, 'k': 7.501}
+    # create expected testclass examples where they shouldn't get the name, date attribute
+    expected_obj_1 = TestClass(expected_dict_1)
+    expected_obj_2 = TestClass(expected_dict_2)
+    expected_result = [expected_obj_1, expected_obj_2]
+
+    # add in the date and unit systems to the kwargs dict
+    unit_date_dict = {'date': date, 'unit_system': units}
+    expected_dict_1.update(unit_date_dict)
+    expected_dict_2.update(unit_date_dict)
+    # create a new set of objects that should get the date and unit system
+    expected_result_unit_date = [TestClassUnitDates(expected_dict_1), TestClassUnitDates(expected_dict_2)]
+    # Act
+    result = nfo.load_table_to_objects(file_as_list, TestClass, property_map, date, units)
+    result_unit_date = nfo.load_table_to_objects(file_as_list, TestClassUnitDates, property_map, date, units)
+    # Assert
+    assert result == expected_result
+    assert result_unit_date == expected_result_unit_date
