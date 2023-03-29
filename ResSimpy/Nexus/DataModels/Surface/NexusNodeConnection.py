@@ -50,12 +50,12 @@ class NexusNodeConnection(NodeConnection):
     polymer: Optional[str] = None
 
     @staticmethod
-    def get_connection_nexus_mapping() -> dict[str, tuple[str, type]]:
+    def get_nexus_mapping() -> dict[str, tuple[str, type]]:
         """gets the mapping of nexus keywords to attribute definitions"""
         nexus_mapping = {
             'NAME': ('name', str),
-            'NODEIN': ('node_in', NexusNode),
-            'NODEOUT': ('node_out', NexusNode),
+            'NODEIN': ('node_in', str),
+            'NODEOUT': ('node_out', str),
             'TYPE': ('con_type', str),
             'METHOD': ('hyd_method', str),
             'IPVT': ('pvt_method', int),
