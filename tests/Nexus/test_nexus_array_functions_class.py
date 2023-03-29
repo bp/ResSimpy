@@ -27,7 +27,7 @@ WORKA3 CON
 BLOCKS   1 30  1 30  1 1
 
 ANALYT POLYN 1 0
-blah
+some line
 WORKA3 OUTPUT SW
 
 1
@@ -37,7 +37,7 @@ ANALYT POLYN 1 0
 
 WORKA3 OUTPUT SWL
 
-bugger line
+some line
 Function IREGION
 8 9 10
 ANALYT     log
@@ -96,8 +96,7 @@ KX KY OUTPUT KY
 FUNCTION
 ANALYT  max
  KX KY OUTPUT KX KY
-bugger
-bugger
+some line
 
     """
     expected_functions = [['Function IREGION', '8 9 10', 'ANALYT     log', 'WORKA3    OUTPUT  KX'],
@@ -127,7 +126,7 @@ bugger
             'k2': ['', '', '', '5', '', '', '', '', '', '', '', '', '10', '', ''], \
             'region_type': ['IREGION', '', 'IREGION', '', '', '', '', '', '', '', '', '', 'IREGION', '', ''],
             'region_numbers':  [['8', '9', '10'], '', ['8', '9', '10'], '', '', '', '', '', '', '', '', '', ['8', '9', '10'], '', ''],
-            'analyt_func_type': ['LOG', 'LOG10', 'POLYN', 'ABS', 'EXP', 'EXP10', 'SQRT', 'GE', 'LE', 'ADD', 'SUBT', 'DIV', 'MULT', 'MIN', 'MAX'],
+            'func_type': ['LOG', 'LOG10', 'POLYN', 'ABS', 'EXP', 'EXP10', 'SQRT', 'GE', 'LE', 'ADD', 'SUBT', 'DIV', 'MULT', 'MIN', 'MAX'],
             'func_coeff': ['', '', ['1.4', '1.3', '1.2', '1.1', '1.0'], '', '', '', '', ['1000', '500'], ['500', '1000'], '', '', '', '', '', ''],
             'grid': ['', '', '', '', '', '', '', '', '', '', '', '', 'ROOT', '', ''],
             'range_input': ['', '', '', '', '', '', '', '', '', '', '', '', ['1', '2', '1000', '2000'], '', ''],
