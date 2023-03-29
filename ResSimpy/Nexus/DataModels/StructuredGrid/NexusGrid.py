@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import pandas as pd
 from dataclasses import dataclass
 from typing import Optional, Type, TYPE_CHECKING
 
@@ -8,8 +9,8 @@ from ResSimpy.Grid import Grid, VariableEntry
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 import ResSimpy.Nexus.nexus_file_operations as nfo
+import ResSimpy.Nexus.array_function_operations as afo
 
-import pandas as pd
 from resqpy.olio.read_nexus_fault import load_nexus_fault_mult_table_from_list
 
 if TYPE_CHECKING:
@@ -25,17 +26,21 @@ class PropertyToLoad:
 
 @dataclass(kw_only=True)
 class StructuredGridFile(Grid):
-
+    __array_functions_list: Optional[list[str]] = None
+    __array_functions_df: Optional[pd.DataFrame] = None
+    __array_functions_loaded: bool = False
+    __grid_file_contents: Optional[list[str]] = None
     __faults_df: Optional[pd.DataFrame] = None
     __grid_faults_loaded: bool = False
-    __grid_file_contents: Optional[list[str]] = None
 
     def __init__(self, data: Optional[dict] = None, grid_file_contents: Optional[list[str]] = None):
         super().__init__()
-
+        self.__array_functions_list: Optional[list[str]] = None
+        self.__array_functions_df: Optional[pd.DataFrame] = None
+        self.__array_functions_loaded: bool = False
+        self.__grid_file_contents: Optional[list[str]] = grid_file_contents
         self.__faults_df: Optional[pd.DataFrame] = None
         self.__grid_faults_loaded: bool = False
-        self.__grid_file_contents = grid_file_contents
 
         # Use the dict provided to populate the properties
         if data is not None:
@@ -50,8 +55,8 @@ class StructuredGridFile(Grid):
 
     @classmethod
     def load_structured_grid_file(cls: Type[StructuredGridFile], structure_grid_file: NexusFile) -> StructuredGridFile:
-        """Loads in a structured grid file including all grid properties and modifiers.
-        Currently loading in grids with FUNCTIONS included are not supported.
+        """Loads in a structured grid file with all grid properties, and the array functions defined with 'FUNCTION'.
+        Other grid modifiers are currently not supported.
         Args:
             structure_grid_file (NexusFile): the NexusFile representation of a structured grid file for converting \
                 into a structured grid file class
@@ -70,7 +75,13 @@ class StructuredGridFile(Grid):
         if file_as_list is None:
             raise ValueError("No file path given or found for structured grid file path. \
                 Please update structured grid file path")
+
         loaded_structured_grid_file = cls(grid_file_contents=file_as_list)
+
+        # TODO: searching for functions should be an option for the user, as it is time consuming
+        # like an argument as load_functions: True
+        # Load the array functions defined with 'FUNCTION' keyword
+        # structured_grid_file.load_array_functions(file_as_list)
 
         def move_next_value(next_line: str) -> tuple[str, str]:
             """finds the next value and then strips out the value from the line.
@@ -189,11 +200,25 @@ class StructuredGridFile(Grid):
         with open(grid_file_path, "w") as text_file:
             text_file.write(new_file_str)
 
+    def load_array_functions(self):
+        self.__array_functions_list = afo.collect_all_function_blocks(self.__grid_file_contents)
+        self.__array_functions_df = afo.summarize_model_functions(self.__array_functions_list)
+        self.__array_functions_loaded = True
+
+    def get_array_functions_list(self):
+        """Returns the grid array functions as a dataframe"""
+        if not self.__array_functions_loaded:
+            self.load_array_functions()
+        return self.__array_functions_list
+
+    def get_array_functions_df(self):
+        """Returns the grid array functions as a dataframe"""
+        if not self.__array_functions_loaded:
+            self.load_array_functions()
+        return self.__array_functions_df
+
     def load_faults(self):
         """Function to read faults in Nexus grid file defined using MULT and FNAME keywords
-
-        Args:
-            file_content_as_list (list[str]): list of strings that comprise input from Nexus structured grid file
 
         """
         if self.__grid_file_contents is None:
@@ -207,7 +232,7 @@ class StructuredGridFile(Grid):
 
             # Check if any multfl's have been used in grid file and update fault trans multipliers accordingly
             f_names = df['NAME'].unique()
-            f_mults = [1.]*len(f_names)
+            f_mults = [1.] * len(f_names)
             mult_dict = dict(zip(f_names, f_mults))
             for line in file_content_as_list:
                 if nfo.check_token('MULTFL', line):
@@ -222,7 +247,7 @@ class StructuredGridFile(Grid):
             mult_df = pd.DataFrame.from_dict(mult_dict, orient='index').reset_index()
             mult_df.columns = ['NAME', 'TMULT']
             new_df = df.merge(mult_df, how='left', on='NAME', validate='many_to_one')
-            new_df['MULT'] = new_df['MULT']*new_df['TMULT']
+            new_df['MULT'] = new_df['MULT'] * new_df['TMULT']
             self.__faults_df = new_df.drop(['TMULT'], axis=1)
         self.__grid_faults_loaded = True
 

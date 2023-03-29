@@ -11,6 +11,7 @@ from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
 from tests.multifile_mocker import mock_multiple_files
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 
+
 # TODO Jonny to update the tests/method for collecting file paths from a structured grid file
 @pytest.mark.skip(reason="Need to update NexusFile method for dealing with this.")
 @pytest.mark.parametrize("structured_grid_file_contents, expected_net_to_gross, expected_porosity, expected_range_x,"
@@ -25,6 +26,7 @@ from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
                               "/path/to/netgrs_file\nother text\n\n",
                               "/path/to/netgrs_file", "porosity_file.inc", 111, 123, 321)
                          ])
+
 def test_load_structured_grid_file_basic_properties(mocker, structured_grid_file_contents,
                                                     expected_net_to_gross, expected_porosity, expected_range_x,
                                                     expected_range_y, expected_range_z):
