@@ -206,18 +206,24 @@ class StructuredGridFile(Grid):
             df.columns = [col.upper() for col in df.columns]
 
             # Check if any multfl's have been used in grid file and update fault trans multipliers accordingly
+            f_names = df['NAME'].unique()
+            f_mults = [1.]*len(f_names)
+            mult_dict = dict(zip(f_names, f_mults))
             for line in file_content_as_list:
                 if nfo.check_token('MULTFL', line):
-                    if nfo.get_token_value('MULTFL', line, file_content_as_list) is None:
-                        raise ValueError(f'{line} does not have a fault name following MULTFL.')
-                    fname = str(nfo.get_token_value('MULTFL', line, file_content_as_list))
+                    fname = str(nfo.get_expected_token_value(
+                        'MULTFL', line, file_content_as_list,
+                        custom_message=f'{line} does not have a fault name following MULTFL'))
                     if fname in df['NAME'].unique():
-                        if nfo.get_token_value(fname, line, file_content_as_list) is None:
-                            raise ValueError(f'MULTFL {fname} does not have a numerical tmult value.')
-                        tmult = float(str(nfo.get_token_value(fname, line, file_content_as_list)))
-                        df.loc[df['NAME'] == fname, 'MULT'] *= tmult
-
-            self.__faults_df = df
+                        tmult = float(str(nfo.get_expected_token_value(
+                            fname, line, file_content_as_list,
+                            custom_message=f'MULTFL {fname} does not have a numerical tmult value')))
+                        mult_dict[fname] *= tmult
+            mult_df = pd.DataFrame.from_dict(mult_dict, orient='index').reset_index()
+            mult_df.columns = ['NAME', 'TMULT']
+            new_df = df.merge(mult_df, how='left', on='NAME', validate='many_to_one')
+            new_df['MULT'] = new_df['MULT']*new_df['TMULT']
+            self.__faults_df = new_df.drop(['TMULT'], axis=1)
         self.__grid_faults_loaded = True
 
     def get_faults_df(self) -> Optional[pd.DataFrame]:
