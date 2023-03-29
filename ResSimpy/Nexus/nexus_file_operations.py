@@ -1,7 +1,8 @@
+from __future__ import annotations
 from enum import Enum
 from functools import partial
 from io import StringIO
-from typing import Optional, Union, Any
+from typing import Optional, Union, Any, TYPE_CHECKING, Sequence
 import pandas as pd
 from ResSimpy.Grid import VariableEntry
 from string import Template
@@ -12,6 +13,9 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits, SUnits
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEYWORDS
 from ResSimpy.Nexus.nexus_constants import VALID_NEXUS_KEYWORDS
+
+if TYPE_CHECKING:
+    from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 
 def nexus_token_found(line_to_check: str, valid_list: list[str] = VALID_NEXUS_KEYWORDS) -> bool:
@@ -706,7 +710,7 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
         # cast the values to the correct typing
         keyword_store = {x: correct_datatypes(y, property_map[x][1]) for x, y in keyword_store.items()}
 
-        # generate a node object using the properties stored in the keyword dict
+        # generate an object using the properties stored in the keyword dict
         # Use the map to create a kwargs dict for passing to the object
         keyword_store = {keyword_map[x]: y for x, y in keyword_store.items()}
         new_object = row_object(keyword_store)
@@ -714,6 +718,57 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
         setattr(new_object, 'unit_system', unit_system)
         list_of_objects.append(new_object)
     return list_of_objects
+
+
+def collect_all_tables_to_objects(nexus_file: NexusFile, row_object: Any, table_names_list: list[str],
+                                  start_date: Optional[str],
+                                  default_units: Optional[UnitSystem], ) -> Sequence[Any]:
+    """ Loads all tables from a given file.
+
+        Args:
+            nexus_file (NexusFile): NexusFile representation of the file.
+            row_object (Type(Storage_Object)): object type to store the data from each row into
+            start_date (str): Starting date of the run
+            default_units (UnitSystem): Units used in case not specified by file.
+            table_names_list (list[str]): list of possible table header names
+        Raises:
+            TypeError: if the unit system found in the property check is not a valid enum UnitSystem
+        Returns:
+            Sequence[Storage_Object]: a list of arbitrary objects populated with properties from the file provided
+        """
+    current_date = start_date
+    nexus_object_list: list[Any] = []
+    file_as_list = nexus_file.get_flat_list_str_file()
+    property_map = row_object.get_nexus_mapping()
+    table_start = -1
+    table_end = -1
+    property_dict: dict = {}
+    for index, line in enumerate(file_as_list):
+        # check for changes in unit system
+        check_property_in_line(line, property_dict, file_as_list)
+        unit_system = property_dict.get('UNIT_SYSTEM', default_units)
+        if not isinstance(unit_system, UnitSystem):
+            raise TypeError(f"Value found for {unit_system=} of type {type(unit_system)} \
+                                not compatible, expected type UnitSystem Enum")
+        if check_token('TIME', line):
+            current_date = get_expected_token_value(
+                token='TIME', token_line=line, file_list=file_as_list,
+                custom_message=f"Cannot find the date associated with the TIME card in {line=} at line number {index}")
+
+        if any([check_token(x, line) for x in table_names_list]):
+            table_start = index + 1
+        if table_start > 0 and any([check_token('END' + x, line) for x in table_names_list]):
+            table_end = index
+        if 0 < table_start < table_end:
+            list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
+                                                 row_object=row_object,
+                                                 property_map=property_map, current_date=current_date,
+                                                 unit_system=unit_system)
+            nexus_object_list.extend(list_objects)
+            # reset indices for further tables
+            table_start = -1
+            table_end = -1
+    return nexus_object_list
 
 
 def correct_datatypes(value: None | int | float | str, dtype: type,
@@ -730,8 +785,18 @@ def correct_datatypes(value: None | int | float | str, dtype: type,
     """
     if value is None:
         return None
-    if na_to_none and value == 'NA':
-        return None
-    if value == '#':
-        return None
-    return None if value is None else dtype(value)
+    check_value = value
+    if isinstance(value, str):
+        check_value = value.upper()
+    match check_value:
+        case 'NA':
+            if na_to_none:
+                return None
+            else:
+                return value
+        case '#':
+            return None
+        case 'NONE':
+            return None
+        case _:
+            return dtype(value)

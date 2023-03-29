@@ -2,10 +2,10 @@ from dataclasses import dataclass, field
 import numpy as np
 import pandas as pd
 from typing import Sequence, Optional
+import ResSimpy.Nexus.nexus_file_operations as nfo
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
-from ResSimpy.Nexus.Surface.load_connections import load_connections
 from ResSimpy.NodeConnection import NodeConnection
 from ResSimpy.NodeConnections import NodeConnections
 
@@ -42,5 +42,8 @@ class NexusNodeConnections(NodeConnections):
         """ Calls load connections and appends the list of discovered NodeConnections into the NexusNodeConnection \
             object
         """
-        new_connections = load_connections(surface_file, start_date, default_units)
+        new_connections = nfo.collect_all_tables_to_objects(surface_file, row_object=NexusNodeConnections,
+                                                            table_names_list=['NODECON'],
+                                                            start_date=start_date,
+                                                            default_units=default_units)
         self.__connections += new_connections

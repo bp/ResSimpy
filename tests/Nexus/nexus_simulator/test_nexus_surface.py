@@ -5,7 +5,7 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Surface.NexusNode import NexusNode
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.Surface.NexusNodes import NexusNodes
-from ResSimpy.Nexus.Surface.load_nodes import load_nodes
+
 
 @pytest.mark.parametrize('file_contents, node1_props, node2_props',[
 ('''NODES
@@ -66,8 +66,25 @@ from ResSimpy.Nexus.Surface.load_nodes import load_nodes
 {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/02/2023',
     'unit_system': UnitSystem.METRIC}
     ),
+('''NODES
+  NAME       TYPE       DEPTH   TemP    X     Y       NUMBER  StatiON
+ ! Riser Nodes
+  node1         NA        NA    60.5    100.5 300.5   1     station
+  ENDNODES
+  NODES
+    NAME       TYPE       DEPTH   TemP       NUMBER  StatiON    
+node_2        WELLHEAD     1167.3 #  2   station2 
+ENDNODES
+  content outside of the node statement
+  node1         NA        NA    60.5    10.5 3.5   1     station_null
+  ''',
+{'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
+    'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': None, 'y_pos': None, 'number': 2,
+    'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH}
+  ),
 ],
-ids=['basic', 'all columns', 'times', 'units']
+ids=['basic', 'all columns', 'times', 'units', 'two tables']
 )
 def test_load_nexus_nodes(mocker, file_contents, node1_props, node2_props):
     # Arrange
@@ -124,3 +141,4 @@ def test_get_node_df(file_contents, node1_props, node2_props):
 
     # Assert
     pd.testing.assert_frame_equal(result, expected_df,)
+
