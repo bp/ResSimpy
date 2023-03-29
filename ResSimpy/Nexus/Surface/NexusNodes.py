@@ -16,9 +16,19 @@ class NexusNodes(Nodes):
     __nodes: list[NexusNode] = field(default_factory=lambda: [])
 
     def get_nodes(self) -> Sequence[NexusNode]:
+        """ Returns a list of nodes loaded from the simulator"""
         return self.__nodes
 
     def get_node(self, node_name: str) -> Optional[NexusNode]:
+        """ Returns a single node with the provided name loaded from the simulator
+
+        Args:
+            node_name (str): name of the requested node
+
+        Returns:
+            NexusNode: which has the same name as the requested node_name
+
+        """
         nodes_to_return = filter(lambda x: False if x.name is None else x.name.upper() == node_name.upper(),
                                  self.__nodes)
         return next(nodes_to_return, None)
@@ -41,6 +51,13 @@ class NexusNodes(Nodes):
 
     def load_nodes(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
         """ Calls load nodes and appends the list of discovered nodes into the NexusNodes object
+        Args:
+            surface_file (NexusFile): NexusFile representation of the surface file.
+            start_date (str): Starting date of the run
+            default_units (UnitSystem): Units used in case not specified by surface file.
+        Raises:
+            TypeError: if the unit system found in the property check is not a valid enum UnitSystem
+
         """
         new_nodes = nfo.collect_all_tables_to_objects(surface_file, row_object=NexusNode, table_names_list=['NODES'],
                                                       start_date=start_date,
