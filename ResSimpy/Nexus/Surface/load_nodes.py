@@ -6,22 +6,6 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
-def load_node_table(file_as_list: list[str], current_date: str, unit_system: UnitSystem) -> Sequence[NexusNode]:
-    """ Extracts the nodes line by line from a given table.
-    Args:
-        file_as_list (list[str]): the table represented as a list of strings
-        current_date (str): the date at which the table was extracted from
-        unit_system (UnitSystem): Units used in case not specified by surface file.
-
-    Returns:
-        Sequence[NexusNode]: a list of nodes extracted from the provided table.
-    """
-    node_map = NexusNode.get_node_nexus_mapping()
-    list_of_nodes = nfo.load_table_to_objects(file_as_list=file_as_list, row_object=NexusNode, property_map=node_map,
-                                              current_date=current_date, unit_system=unit_system)
-    return list_of_nodes
-
-
 def load_nodes(surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> Sequence[NexusNode]:
     """ Loads all nodes from a given surface file.
 
@@ -37,6 +21,7 @@ def load_nodes(surface_file: NexusFile, start_date: str, default_units: UnitSyst
     current_date = start_date
     nexus_nodes_list: list[NexusNode] = []
     file_as_list = surface_file.get_flat_list_str_file()
+    node_map = NexusNode.get_nexus_mapping()
     node_start = -1
     node_end = -1
     property_dict: dict = {}
@@ -57,7 +42,9 @@ def load_nodes(surface_file: NexusFile, start_date: str, default_units: UnitSyst
         if node_start > 0 and nfo.check_token('ENDNODES', line):
             node_end = index
         if 0 < node_start < node_end:
-            node_table = load_node_table(file_as_list[node_start: node_end], current_date, unit_system)
+            node_table = nfo.load_table_to_objects(file_as_list=file_as_list, row_object=NexusNode,
+                                                   property_map=node_map, current_date=current_date,
+                                                   unit_system=unit_system)
             nexus_nodes_list.extend(node_table)
             # reset indices for further tables
             node_start = -1
