@@ -6,7 +6,7 @@ import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Surface.NexusNode import NexusNode
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
-from ResSimpy.Nexus.Surface.load_nodes import load_nodes
+import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nodes import Nodes
 from typing import Sequence, Optional
 
@@ -42,5 +42,7 @@ class NexusNodes(Nodes):
     def load_nodes(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
         """ Calls load nodes and appends the list of discovered nodes into the NexusNodes object
         """
-        new_nodes = load_nodes(surface_file, start_date, default_units)
+        new_nodes = nfo.collect_all_tables_to_objects(surface_file, row_object=NexusNode, table_names_list=['NODES'],
+                                                      start_date=start_date,
+                                                      default_units=default_units)
         self.__nodes += new_nodes

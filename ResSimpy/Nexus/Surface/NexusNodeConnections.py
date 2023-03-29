@@ -5,6 +5,7 @@ from typing import Sequence, Optional
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.DataModels.Surface.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.NodeConnection import NodeConnection
 from ResSimpy.NodeConnections import NodeConnections
@@ -12,9 +13,9 @@ from ResSimpy.NodeConnections import NodeConnections
 
 @dataclass(kw_only=True)
 class NexusNodeConnections(NodeConnections):
-    __connections: list[NodeConnection] = field(default_factory=lambda: [])
+    __connections: list[NexusNodeConnection] = field(default_factory=lambda: [])
 
-    def get_connections(self) -> Sequence[NodeConnection]:
+    def get_connections(self) -> Sequence[NexusNodeConnection]:
         return self.__connections
 
     def get_connection(self, connection_name: str) -> Optional[NodeConnection]:
@@ -42,7 +43,7 @@ class NexusNodeConnections(NodeConnections):
         """ Calls load connections and appends the list of discovered NodeConnections into the NexusNodeConnection \
             object
         """
-        new_connections = nfo.collect_all_tables_to_objects(surface_file, row_object=NexusNodeConnections,
+        new_connections = nfo.collect_all_tables_to_objects(surface_file, row_object=NexusNodeConnection,
                                                             table_names_list=['NODECON'],
                                                             start_date=start_date,
                                                             default_units=default_units)
