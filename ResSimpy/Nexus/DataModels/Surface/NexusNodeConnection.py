@@ -1,8 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
-
-from ResSimpy.Nexus.DataModels.Surface.NexusNode import NexusNode
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.NodeConnection import NodeConnection
 
