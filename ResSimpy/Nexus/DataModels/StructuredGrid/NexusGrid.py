@@ -62,7 +62,6 @@ class StructuredGridFile(Grid):
         if structure_grid_file.location is None:
             raise ValueError(f"No file path given or found for structured grid file path. \
                 Instead got {structure_grid_file.location}")
-        # file_as_list = nfo.load_file_as_list(structure_grid_file.location)
         file_as_list = structure_grid_file.get_flat_list_str_file()
         # Clean up file_as_list
         file_as_list = [s.strip() for s in file_as_list]
@@ -72,8 +71,6 @@ class StructuredGridFile(Grid):
             raise ValueError("No file path given or found for structured grid file path. \
                 Please update structured grid file path")
         loaded_structured_grid_file = cls(grid_file_contents=file_as_list)
-
-        # structured_grid_file.load_faults(file_as_list)
 
         def move_next_value(next_line: str) -> tuple[str, str]:
             """finds the next value and then strips out the value from the line.
