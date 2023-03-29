@@ -16,6 +16,8 @@ from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import StructuredGridFil
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusReporting import Reporting
 from ResSimpy.Nexus.NexusWells import NexusWells
+from ResSimpy.Nexus.Surface.NexusNodeConnections import NexusNodeConnections
+from ResSimpy.Nexus.Surface.NexusNodes import NexusNodes
 from ResSimpy.Nexus.runcontrol_operations import Runcontrol
 from ResSimpy.Nexus.logfile_operations import Logging
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
@@ -97,6 +99,11 @@ class NexusSimulator(Simulator):
         self.Reporting = Reporting(self)
         self.StructuredGridOperations = StructuredGridOperations(self)
         self.Logging = Logging(self)
+
+        # Surface file attributes
+        # TODO maybe put this under a surface class?
+        self.Connections: NexusNodeConnections = NexusNodeConnections()
+        self.Nodes: NexusNodes = NexusNodes()
 
         if destination is not None and destination != '':
             self.set_output_path(path=destination.strip())
