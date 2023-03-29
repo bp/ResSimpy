@@ -9,6 +9,9 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
+import pandas as pd
+from resqpy.olio.read_nexus_fault import load_nexus_fault_mult_table_from_list
+
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
@@ -23,8 +26,17 @@ class PropertyToLoad:
 @dataclass(kw_only=True)
 class StructuredGridFile(Grid):
 
-    def __init__(self, data: Optional[dict] = None):
+    __faults_df: Optional[pd.DataFrame] = None
+    __grid_faults_loaded: bool = False
+    __grid_file_contents: Optional[list[str]] = None
+
+    def __init__(self, data: Optional[dict] = None, grid_file_contents: Optional[list[str]] = None):
         super().__init__()
+
+        self.__faults_df: Optional[pd.DataFrame] = None
+        self.__grid_faults_loaded: bool = False
+        self.__grid_file_contents = grid_file_contents
+
         # Use the dict provided to populate the properties
         if data is not None:
             for name, value in data.items():
@@ -50,11 +62,15 @@ class StructuredGridFile(Grid):
         if structure_grid_file.location is None:
             raise ValueError(f"No file path given or found for structured grid file path. \
                 Instead got {structure_grid_file.location}")
-        file_as_list = nfo.load_file_as_list(structure_grid_file.location)
+        file_as_list = structure_grid_file.get_flat_list_str_file()
+        # Clean up file_as_list
+        file_as_list = [s.strip() for s in file_as_list]
+        file_as_list = list(filter(None, file_as_list))
+
         if file_as_list is None:
             raise ValueError("No file path given or found for structured grid file path. \
                 Please update structured grid file path")
-        structured_grid_file = cls()
+        loaded_structured_grid_file = cls(grid_file_contents=file_as_list)
 
         def move_next_value(next_line: str) -> tuple[str, str]:
             """finds the next value and then strips out the value from the line.
@@ -77,21 +93,21 @@ class StructuredGridFile(Grid):
         for line in file_as_list:
             # Load in the basic properties
             properties_to_load = [
-                PropertyToLoad('NETGRS', ['VALUE', 'CON'], structured_grid_file.netgrs),
-                PropertyToLoad('POROSITY', ['VALUE', 'CON'], structured_grid_file.porosity),
-                PropertyToLoad('SW', ['VALUE', 'CON'], structured_grid_file.sw),
-                PropertyToLoad('KX', ['VALUE', 'MULT', 'CON'], structured_grid_file.kx),
-                PropertyToLoad('PERMX', ['VALUE', 'MULT', 'CON'], structured_grid_file.kx),
-                PropertyToLoad('PERMI', ['VALUE', 'MULT', 'CON'], structured_grid_file.kx),
-                PropertyToLoad('KI', ['VALUE', 'MULT', 'CON'], structured_grid_file.kx),
-                PropertyToLoad('KY', ['VALUE', 'MULT', 'CON'], structured_grid_file.ky),
-                PropertyToLoad('PERMY', ['VALUE', 'MULT', 'CON'], structured_grid_file.ky),
-                PropertyToLoad('PERMJ', ['VALUE', 'MULT', 'CON'], structured_grid_file.ky),
-                PropertyToLoad('KJ', ['VALUE', 'MULT', 'CON'], structured_grid_file.ky),
-                PropertyToLoad('KZ', ['VALUE', 'MULT', 'CON'], structured_grid_file.kz),
-                PropertyToLoad('PERMZ', ['VALUE', 'MULT', 'CON'], structured_grid_file.kz),
-                PropertyToLoad('PERMK', ['VALUE', 'MULT', 'CON'], structured_grid_file.kz),
-                PropertyToLoad('KK', ['VALUE', 'MULT', 'CON'], structured_grid_file.kz),
+                PropertyToLoad('NETGRS', ['VALUE', 'CON'], loaded_structured_grid_file.netgrs),
+                PropertyToLoad('POROSITY', ['VALUE', 'CON'], loaded_structured_grid_file.porosity),
+                PropertyToLoad('SW', ['VALUE', 'CON'], loaded_structured_grid_file.sw),
+                PropertyToLoad('KX', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kx),
+                PropertyToLoad('PERMX', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kx),
+                PropertyToLoad('PERMI', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kx),
+                PropertyToLoad('KI', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kx),
+                PropertyToLoad('KY', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.ky),
+                PropertyToLoad('PERMY', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.ky),
+                PropertyToLoad('PERMJ', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.ky),
+                PropertyToLoad('KJ', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.ky),
+                PropertyToLoad('KZ', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kz),
+                PropertyToLoad('PERMZ', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kz),
+                PropertyToLoad('PERMK', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kz),
+                PropertyToLoad('KK', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kz),
             ]
 
             for token_property in properties_to_load:
@@ -119,11 +135,11 @@ class StructuredGridFile(Grid):
                 second_value, next_line = move_next_value(next_line)
                 third_value, next_line = move_next_value(next_line)
 
-                structured_grid_file.range_x = int(first_value)
-                structured_grid_file.range_y = int(second_value)
-                structured_grid_file.range_z = int(third_value)
+                loaded_structured_grid_file.range_x = int(first_value)
+                loaded_structured_grid_file.range_y = int(second_value)
+                loaded_structured_grid_file.range_z = int(third_value)
 
-        return structured_grid_file
+        return loaded_structured_grid_file
 
     @staticmethod
     def update_structured_grid_file(grid_dict: dict[str, VariableEntry | int], model: NexusSimulator) -> None:
@@ -172,3 +188,41 @@ class StructuredGridFile(Grid):
         new_file_str = "".join(structured_grid_contents)
         with open(grid_file_path, "w") as text_file:
             text_file.write(new_file_str)
+
+    def load_faults(self):
+        """Function to read faults in Nexus grid file defined using MULT and FNAME keywords
+
+        Args:
+            file_content_as_list (list[str]): list of strings that comprise input from Nexus structured grid file
+
+        """
+        if self.__grid_file_contents is None:
+            raise ValueError('Grid file contents have not been loaded')
+        file_content_as_list = self.__grid_file_contents
+        df = load_nexus_fault_mult_table_from_list(file_content_as_list)
+
+        if not df.empty:
+            # Ensure resulting dataframe has uppercase column names
+            df.columns = [col.upper() for col in df.columns]
+
+            # Check if any multfl's have been used in grid file and update fault trans multipliers accordingly
+            for line in file_content_as_list:
+                if nfo.check_token('MULTFL', line):
+                    if nfo.get_token_value('MULTFL', line, file_content_as_list) is None:
+                        raise ValueError(f'{line} does not have a fault name following MULTFL.')
+                    fname = str(nfo.get_token_value('MULTFL', line, file_content_as_list))
+                    if fname in df['NAME'].unique():
+                        if nfo.get_token_value(fname, line, file_content_as_list) is None:
+                            raise ValueError(f'MULTFL {fname} does not have a numerical tmult value.')
+                        tmult = float(str(nfo.get_token_value(fname, line, file_content_as_list)))
+                        df.loc[df['NAME'] == fname, 'MULT'] *= tmult
+
+            self.__faults_df = df
+        self.__grid_faults_loaded = True
+
+    def get_faults_df(self) -> Optional[pd.DataFrame]:
+        """Returns the fault definition and transmissility multiplier information as a dataframe"""
+
+        if not self.__grid_faults_loaded:
+            self.load_faults()
+        return self.__faults_df
