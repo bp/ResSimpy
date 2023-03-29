@@ -40,7 +40,6 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                  'input_arrays', 'output_arrays'])
 
     for b, block in enumerate(function_list_to_parse):
-        print(f'reading function block number: {b}')
 
         # set the empty default values for the parameters,
         # so if they don't exist in dataframe they won't appear as NaN or give error,

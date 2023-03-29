@@ -151,12 +151,6 @@ bugger
 
     # Act
     test_input_grid_file_object: NexusFile = NexusFile.generate_file_include_structure('mock/str_grid/path.inc')
-
-    #structured_grid = NexusGrid.StructuredGridFile.load_structured_grid_file(test_input_grid_file_object)
-
-
-
-    #simulation = NexusSimulator(origin=fcs_path)
     new_sim_grid = StructuredGridFile.load_structured_grid_file(test_input_grid_file_object)
     func_list = new_sim_grid.get_array_functions_list()
     func_summary_df = new_sim_grid.get_array_functions_df()
