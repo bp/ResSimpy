@@ -6,7 +6,7 @@ import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Surface.NexusNode import NexusNode
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
-from ResSimpy.Nexus.Surface.load_nodes import load_nodes
+import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nodes import Nodes
 from typing import Sequence, Optional
 
@@ -20,7 +20,7 @@ class NexusNodes(Nodes):
         return self.__nodes
 
     def get_node(self, node_name: str) -> Optional[NexusNode]:
-        """
+        """ Returns a single node with the provided name loaded from the simulator
 
         Args:
             node_name (str): name of the requested node
@@ -50,8 +50,7 @@ class NexusNodes(Nodes):
         raise NotImplementedError('To be implemented')
 
     def load_nodes(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
-        """ Loads all nodes from a given surface file.
-
+        """ Calls load nodes and appends the list of discovered nodes into the NexusNodes object
         Args:
             surface_file (NexusFile): NexusFile representation of the surface file.
             start_date (str): Starting date of the run
@@ -60,5 +59,7 @@ class NexusNodes(Nodes):
             TypeError: if the unit system found in the property check is not a valid enum UnitSystem
 
         """
-        new_nodes = load_nodes(surface_file, start_date, default_units)
+        new_nodes = nfo.collect_all_tables_to_objects(surface_file, row_object=NexusNode, table_names_list=['NODES'],
+                                                      start_date=start_date,
+                                                      default_units=default_units)
         self.__nodes += new_nodes
