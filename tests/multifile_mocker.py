@@ -4,7 +4,7 @@ from pytest_mock import MockerFixture
 def mock_multiple_files(mocker: MockerFixture, passed_filename: str, potential_file_dict: dict[str, str]):
     """Mock method that returns different test file contents that are stored in the potential file dict
     Called via a mocker wrapper within a test for example:
-        from multiplefile_mocker import mock_multiple_files
+        from multifile_mocker import mock_multiple_files
         def mock_open_wrapper(filename, mode):
             mock_open = mock_multiple_files(mocker, filename, potential_file_dict={'key':value, }).return_value
             return mock_open
