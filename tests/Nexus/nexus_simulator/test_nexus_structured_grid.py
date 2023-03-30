@@ -518,13 +518,18 @@ def test_load_faults(mocker, structured_grid_file_contents, expected_results):
 
     mocker.patch("builtins.open", mock_open_wrapper)
     # explicitly set datatype to int32
-    expected_results = expected_results.astype({'I1': 'int32', 'I2': 'int32', 'J1': 'int32', 'J2': 'int32',
-        'K1': 'int32', 'K2': 'int32'})
+    if expected_results is not None:
+        expected_results = expected_results.astype({'I1': 'int32', 'I2': 'int32', 'J1': 'int32', 'J2': 'int32',
+            'K1': 'int32', 'K2': 'int32'})
+
     # Act
     simulation = NexusSimulator(origin=fcs_path)
     new_sim_grid = StructuredGridFile.load_structured_grid_file(simulation.fcs_file.structured_grid_file)
     faults_df = new_sim_grid.get_faults_df()
 
+    if faults_df is not None:
+        faults_df = faults_df.astype({'I1': 'int32', 'I2': 'int32', 'J1': 'int32', 'J2': 'int32',
+                'K1': 'int32', 'K2': 'int32'})
     # Assert
     if expected_results is None:
         assert expected_results == faults_df
