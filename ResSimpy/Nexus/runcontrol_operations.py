@@ -254,7 +254,17 @@ class Runcontrol:
         times = []
         run_control_times = self.get_times(run_control_file_content)
         times.extend(run_control_times)
-
+        if self.model.start_date is None or self.model.start_date == '':
+            try:
+                self.model.start_date_set(times[0])
+            except IndexError:
+                for line in run_control_file_content:
+                    if nfo.check_token('TIME', line):
+                        value = nfo.get_expected_token_value('TIME', line, run_control_file_content)
+                        self.model.start_date_set(value)
+                        warnings.warn(f'Setting start date to first time card found in the runcontrol file as: {value}')
+                        break
+                warnings.warn('No value found for start date explicitly with START or TIME card')
         # If we don't want to write the times, return here.
         if not self.model.get_write_times():
             return

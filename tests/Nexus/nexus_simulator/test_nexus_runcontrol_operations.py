@@ -2,6 +2,7 @@
 
 import pytest
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+from multifile_mocker import mock_multiple_files
 
 from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
 
@@ -291,3 +292,35 @@ def test_load_run_control_file_write_times_to_run_control(mocker, fcs_content, r
     # .assert_any_call('/path/run_control', 'w')
     # .return_value.write.assert_any_call(expected_output)
     assert result_times == expected_times
+
+
+def test_runcontrol_no_start_time(mocker):
+    fcs_data ='''RUN_UNITS     ENGLISH
+DEFAULT_UNITS ENGLISH
+DATEFORMAT    DD/MM/YYYY
+RUNCONTROL            runcontrol.dat     '''
+
+    runcontrol_data = '''
+!
+OUTPUT MAPS TNEXT			
+ENDOUTPUT	
+TIME 01/01/2016																			
+TIME 01/02/2016												
+TIME 01/03/2016												!	
+STOP
+'''
+
+    fcs_file_name = 'test.fcs'
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename,
+                                        potential_file_dict={'test.fcs': fcs_data,
+                                                             r'runcontrol.dat': runcontrol_data,
+                                                           }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act
+    simulation = NexusSimulator(origin=fcs_file_name, )
+    simulation.start_date
