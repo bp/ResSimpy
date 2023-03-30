@@ -26,7 +26,6 @@ from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
                               "/path/to/netgrs_file\nother text\n\n",
                               "/path/to/netgrs_file", "porosity_file.inc", 111, 123, 321)
                          ])
-
 def test_load_structured_grid_file_basic_properties(mocker, structured_grid_file_contents,
                                                     expected_net_to_gross, expected_porosity, expected_range_x,
                                                     expected_range_y, expected_range_z):
@@ -157,7 +156,7 @@ def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID \"test_structured_grid.dat\""
     base_structured_grid_file = "! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text " \
                                 "\nother text\n\n,NETGRS VALUE\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\n POROSITY " \
-                                "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc"
+                                "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc "
 
     structured_grid_file = base_structured_grid_file + structured_grid_file_contents
     structured_grid_name = os.path.join('testpath1', '\"test_structured_grid.dat\"')
@@ -207,6 +206,8 @@ def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
                               "0.11333", "CON", "1 PERMI", "MULT", "12 PERMJ", "MULT"),
                              ("KI CON\n 0.11333\nKJ MULT\n1 KI\n KK MULT\n12 KI",
                               "0.11333", "CON", "1 KI", "MULT", "12 KI", "MULT"),
+                            ("!KX VALUE\nKX VALUE\n /path/to/kx.inc\nKY MULT\n12 KX\n KZ VALUE\n\n\n kz.inc", "/path/to/kx.inc",
+                              "VALUE", "12 KX", "MULT", "kz.inc", "VALUE"),
                          ])
 def test_load_structured_grid_file_k_values(mocker, structured_grid_file_contents, expected_kx_value,
                                             expected_kx_modifier, expected_ky_value, expected_ky_modifier,
@@ -216,7 +217,7 @@ def test_load_structured_grid_file_k_values(mocker, structured_grid_file_content
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID \"test_structured_grid.dat\""
     base_structured_grid_file = "! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text " \
                                 "\nother text\n\n,NETGRS VALUE\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\n POROSITY " \
-                                "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc"
+                                "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc "
 
     structured_grid_file = base_structured_grid_file + structured_grid_file_contents
     structured_grid_name = os.path.join('testpath1', '\"test_structured_grid.dat\"')

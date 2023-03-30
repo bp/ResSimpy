@@ -75,7 +75,7 @@ class NexusFile:
                                    origin=origin,
                                    includes_objects=None,
                                    file_content_as_list=None, )
-            warnings.warn(UserWarning(f'No file found for: {file_path}'))
+            warnings.warn(UserWarning(f'No file found for: {file_path} while loading {origin}'))
             return nexus_file_class
 
         # prevent python from mutating the lists that its iterating over
