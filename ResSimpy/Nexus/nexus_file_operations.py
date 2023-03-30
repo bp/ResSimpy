@@ -27,9 +27,10 @@ def nexus_token_found(line_to_check: str, valid_list: list[str] = VALID_NEXUS_KE
 
     """
     uppercase_line = line_to_check.upper()
-    token_found = any(map(partial(check_token, line=uppercase_line), valid_list))
-
-    return token_found
+    for token in valid_list:
+        if check_token(token, uppercase_line):
+            return True
+    return False
 
 
 def value_in_file(token: str, file: list[str]) -> bool:
