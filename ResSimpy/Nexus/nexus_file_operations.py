@@ -50,6 +50,9 @@ def check_token(token: str, line: str) -> bool:
     if token_location == -1:
         return False
 
+    if line.startswith('C '):
+        return False
+
     comment_character_location = line.find("!")
 
     # Check if the line is commented out before the token appears
@@ -98,7 +101,9 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
         line_already_skipped = False
         for character in search_string:
             # move lines once we hit a comment character or new line character, or are at the end of the search string
-            if character == "!" or character == "\n":
+            if character == "!" or character == "\n" or (character_location == 0 and character == "C" and
+                                                         (len(search_string) == 1 or search_string[
+                                                             character_location + 1] == ' ')):
                 line_index += 1
                 line_already_skipped = True
                 # If we've reached the end of the file, return None
@@ -607,8 +612,8 @@ def looks_like_grid_array(file_path: str, lines2check: int = 10) -> bool:
                               check_token(word, line)]
             if found_keywords:
                 for word in found_keywords:
-                    if (line_elems.index(word) < len(line_elems)-1 and
-                            line_elems[line_elems.index(word)+1].upper() == 'VALUE'):
+                    if (line_elems.index(word) < len(line_elems) - 1 and
+                            line_elems[line_elems.index(word) + 1].upper() == 'VALUE'):
                         return True
     return False
 
