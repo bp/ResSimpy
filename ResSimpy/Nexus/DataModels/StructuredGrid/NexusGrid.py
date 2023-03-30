@@ -68,9 +68,6 @@ class StructuredGridFile(Grid):
             raise ValueError(f"No file path given or found for structured grid file path. \
                 Instead got {structure_grid_file.location}")
         file_as_list = structure_grid_file.get_flat_list_str_file()
-        # Clean up file_as_list
-        file_as_list = [s.strip() for s in file_as_list]
-        file_as_list = list(filter(None, file_as_list))
 
         if file_as_list is None:
             raise ValueError("No file path given or found for structured grid file path. \
@@ -123,9 +120,9 @@ class StructuredGridFile(Grid):
 
             for token_property in properties_to_load:
                 for modifier in token_property.modifiers:
-                    StructuredGridOperations.load_token_value_if_present(token_property.token, modifier,
-                                                                         token_property.property, line,
-                                                                         file_as_list, ['INCLUDE'])
+                    StructuredGridOperations.load_token_value_if_present(
+                        token_property.token, modifier, token_property.property, line, file_as_list,
+                        structure_grid_file, ['INCLUDE'])
 
             # Load in grid dimensions
             if nfo.check_token('NX', line):

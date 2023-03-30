@@ -19,7 +19,7 @@ class NexusNode(Node):
             self.__setattr__(key, prop)
 
     @staticmethod
-    def get_node_nexus_mapping() -> dict[str, tuple[str, type]]:
+    def get_nexus_mapping() -> dict[str, tuple[str, type]]:
         """gets the mapping of nexus keywords to attribute definitions"""
         keywords = {
             'NAME': ('name', str),
@@ -35,7 +35,7 @@ class NexusNode(Node):
 
     def to_dict(self, keys_in_nexus_style: bool = False) -> dict[str, None | str | int | float]:
         """Returns a dictionary of the key properties of a node"""
-        mapping_dict = self.get_node_nexus_mapping()
+        mapping_dict = self.get_nexus_mapping()
         if keys_in_nexus_style:
             result_dict = {x: self.__getattribute__(y[0]) for x, y in mapping_dict.items()}
 

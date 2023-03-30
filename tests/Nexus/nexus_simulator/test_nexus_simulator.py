@@ -4,10 +4,13 @@ import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
+from ResSimpy.Nexus.DataModels.Surface.NexusNode import NexusNode
+from ResSimpy.Nexus.DataModels.Surface.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from pytest_mock import MockerFixture
 from unittest.mock import Mock
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from tests.multifile_mocker import mock_multiple_files
 
 
 def mock_multiple_opens(mocker, filename, fcs_file_contents, run_control_contents, include_contents,
@@ -773,3 +776,64 @@ def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
 
     # Assert
     assert result == loaded_pvt
+
+
+@pytest.mark.parametrize("fcs_file_contents, surface_file_content, node1_props, node2_props, \
+connection1_props, connection2_props",
+     [(
+         'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data/surface.inc',
+         '''NODECON
+            NAME            NODEIN    NODEOUT       TYPE        METHOD    DDEPTH
+            CP01            CP01      wh_cp01       PIPE        2          7002.67
+            cp01_gaslift    GAS       CP01          GASLIFT     NONE        NA ! Checked NODECON 13/05/2020 
+            ENDNODECON
+            NODES
+          NAME       TYPE       DEPTH   TemP    X     Y       NUMBER  StatiON
+         ! Riser Nodes
+          node1         NA        NA    60.5    100.5 300.5   1     station
+          node_2        WELLHEAD     1167.3 #  10.21085 3524.23 2   station2 ! COMMENT 
+          ENDNODES
+          content outside of the node statement
+          node1         NA        NA    60.5    10.5 3.5   1     station_null
+          ''',
+            {'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
+                'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+            {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': 10.21085, 'y_pos': 3524.23, 'number': 2,
+                'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+            {'name': 'CP01', 'node_in': 'CP01', 'node_out': 'wh_cp01', 'con_type': 'PIPE', 'hyd_method': '2',
+            'delta_depth': 7002.67, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+            {'name': 'cp01_gaslift', 'node_in': 'GAS', 'node_out': 'CP01', 'con_type': 'GASLIFT', 'hyd_method': None,
+            'delta_depth': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH}
+         ),
+     ])
+def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node1_props, node2_props,
+    connection1_props, connection2_props,):
+    # Arrange
+    # Mock out the surface and fcs file
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            fcs_file_path: fcs_file_contents,
+            'nexus_data/surface.inc': surface_file_content,
+            'run_control.inc': 'START 01/01/2023',
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    fcs_file_path = 'fcs_file.fcs'
+    nexus_sim = NexusSimulator(fcs_file_path)
+
+    # Create the expected objects
+    node_1 = NexusNode(node1_props)
+    node_2 = NexusNode(node2_props)
+    expected_nodes = [node_1, node_2]
+    con1 = NexusNodeConnection(connection1_props)
+    con2 = NexusNodeConnection(connection2_props)
+    expected_cons = [con1, con2]
+    # Act
+    nexus_sim.load_surface_file()
+    result_nodes = nexus_sim.Nodes.get_nodes()
+    result_cons = nexus_sim.Connections.get_connections()
+    # Assert
+    assert result_nodes == expected_nodes
+    assert result_cons == expected_cons

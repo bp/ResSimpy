@@ -13,3 +13,6 @@ class Node(ABC):
     depth: Optional[float] = None
     date: Optional[str] = None
     unit_system: Optional[UnitSystem] = None
+
+    def to_dict(self):
+        raise NotImplementedError("Implement this in the derived class")
