@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Optional
 from ResSimpy.Grid import VariableEntry
 import ResSimpy.Nexus.nexus_file_operations as nfo
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 
 class StructuredGridOperations:
@@ -10,7 +11,7 @@ class StructuredGridOperations:
 
     @staticmethod
     def load_token_value_if_present(token: str, modifier: str, token_property: VariableEntry,
-                                    line: str, file_as_list: list[str],
+                                    line: str, file_as_list: list[str], grid_file: NexusFile,
                                     ignore_values: Optional[list[str]] = None) -> None:
         """Gets a token's value if there is one and loads it into the token_property
 
@@ -19,7 +20,7 @@ class StructuredGridOperations:
             modifier (str): any modifiers applied to the token e.g. 'MULT'
             token_property (VariableEntry): VariableEntry object to store the modifier and value pair into
             line (str): line to search for the token in
-            file_as_list (list[str] | NexusFile): a list of strings containing each line of the file as a new entry
+            grid_file (list[str] | NexusFile): a list of strings containing each line of the file as a new entry
             ignore_values (Optional[list[str]], optional): values to be ignored. Defaults to None.
         Raises:
             ValueError: raises an error if no numerical value can be found after the supplied token modifier pair
@@ -44,12 +45,14 @@ class StructuredGridOperations:
                     token_property.modifier = 'MULT'
                     token_property.value = f"{numerical_value} {value_to_multiply}"
             else:
-                value = nfo.get_token_value(token_modifier, line, file_as_list,
-                                            ignore_values=ignore_values)
+                value = grid_file.get_token_value_nexus_file(token_modifier, line, ignore_values=ignore_values)
                 if value is None:
                     raise ValueError(
                         f'No value found after {token_modifier} in line: {line}')
-                token_property.value = value
+                if isinstance(value, NexusFile):
+                    token_property.value = value.location
+                else:
+                    token_property.value = value
                 token_property.modifier = modifier
 
     @staticmethod
