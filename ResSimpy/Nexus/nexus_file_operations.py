@@ -98,7 +98,9 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
         line_already_skipped = False
         for character in search_string:
             # move lines once we hit a comment character or new line character, or are at the end of the search string
-            if character == "!" or character == "\n":
+            if character == "!" or character == "\n" or (character_location == 0 and character == "C" and
+                                                         (len(search_string) == 1 or search_string[
+                                                             character_location + 1] == ' ')):
                 line_index += 1
                 line_already_skipped = True
                 # If we've reached the end of the file, return None
@@ -228,6 +230,8 @@ def get_token_value(token: str, token_line: str, file_list: list[str],
 
     # If this line is commented out, don't return a value
     if "!" in token_line_upper and token_line_upper.index("!") < token_line_upper.index(token_upper):
+        return None
+    if check_token("C", token_line_upper) and token_line_upper.index("C") < token_line_upper.index(token_upper):
         return None
 
     search_start = token_line_upper.index(token_upper) + len(token) + 1
@@ -607,8 +611,8 @@ def looks_like_grid_array(file_path: str, lines2check: int = 10) -> bool:
                               check_token(word, line)]
             if found_keywords:
                 for word in found_keywords:
-                    if (line_elems.index(word) < len(line_elems)-1 and
-                            line_elems[line_elems.index(word)+1].upper() == 'VALUE'):
+                    if (line_elems.index(word) < len(line_elems) - 1 and
+                            line_elems[line_elems.index(word) + 1].upper() == 'VALUE'):
                         return True
     return False
 
