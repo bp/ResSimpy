@@ -12,13 +12,11 @@ from tests.multifile_mocker import mock_multiple_files
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 
 
-# TODO Jonny to update the tests/method for collecting file paths from a structured grid file
-@pytest.mark.skip(reason="Need to update NexusFile method for dealing with this.")
 @pytest.mark.parametrize("structured_grid_file_contents, expected_net_to_gross, expected_porosity, expected_range_x,"
                          "expected_range_y, expected_range_z",
                          [
                              ("! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
-                              "\nother text\n\n,NETGRS VALUE\n INCLUDE /path_to_netgrs_file/include_net_to_gross.inc\n POROSITY "
+                              "\nother text\n\nNETGRS VALUE\n INCLUDE /path_to_netgrs_file/include_net_to_gross.inc\n POROSITY "
                               "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc",
                               "/path_to_netgrs_file/include_net_to_gross.inc", "path/to/porosity.inc", 1, 2, 3),
                              ("! Grid dimensions\nNX NY NZ\n111 123 321\ntest string\nPOROSITY VALUE\n!random text\n"
@@ -57,14 +55,12 @@ def test_load_structured_grid_file_basic_properties(mocker, structured_grid_file
     assert result.range_z == expected_range_z
 
 
-# TODO Jonny to update the tests/method for collecting file paths from a structured grid file
-@pytest.mark.skip(reason="Need to update NexusFile method for dealing with this.")
 @pytest.mark.parametrize("structured_grid_file_contents, expected_net_to_gross, expected_porosity,  "
                          "expected_ntg_modifier, expected_porosity_modifier, expected_range_x, expected_range_y, "
                          "expected_range_z",
                          [
                              ("! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
-                              "\nother text\n\n,NETGRS VALUE\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\n POROSITY "
+                              "\nother text\n\nNETGRS VALUE\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\n POROSITY "
                               "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc",
                               "/path_to_netgrs_file/net_to_gross.inc", "path/to/porosity.inc", "VALUE", "VALUE", 1, 2,
                               3),
@@ -73,14 +69,14 @@ def test_load_structured_grid_file_basic_properties(mocker, structured_grid_file
                               "/path/to/netgrs_file\nother text\n\n",
                               "/path/to/netgrs_file", "porosity_file.inc", "VALUE", "VALUE", 111, 123, 321),
                              ("! Grid dimensions\nNX NY NZ\n999 9 9\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
-                              "\nother text\n\n,NETGRS CON\n 0.55\n POROSITY "
+                              "\nother text\n\nNETGRS CON\n 0.55\n POROSITY "
                               "VALUE\n!ANOTHER COMMENT \npath/to/porosity2.inc",
                               "0.55", "path/to/porosity2.inc", "CON", "VALUE", 999, 9, 9),
                              ("! Grid dimensions\nNX NY NZ\n8 5 \t6\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
-                              "\nother text\n\n,NETGRS VALUE\n\t ntg_file.dat\n POROSITY CON\n!ANOTHER COMMENT \n3",
+                              "\nother text\n\nNETGRS VALUE\n\t ntg_file.dat\n POROSITY CON\n!ANOTHER COMMENT \n3",
                               "ntg_file.dat", "3", "VALUE", "CON", 8, 5, 6),
                              ("! Grid dimensions\nNX   NY   NZ\n69   30    1\ntest string\nDUMMY VALUE\n!ioeheih\ntext"
-                              "\nother text\n\n,NETGRS VALUE\n\t ntg_file.dat\n POROSITY CON\n!ANOTHER COMMENT \n3",
+                              "\nother text\n\nNETGRS VALUE\n\t ntg_file.dat\n POROSITY CON\n!ANOTHER COMMENT \n3",
                               "ntg_file.dat", "3", "VALUE", "CON", 69, 30, 1),
                          ])
 def test_load_structured_grid_file_dict_basic_properties(mocker, structured_grid_file_contents,
