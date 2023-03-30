@@ -37,7 +37,7 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
       """
 
     functions_df = pd.DataFrame(
-        columns=['FUNCTION #', 'i1', 'i2', 'j1', 'j2', 'k1', 'k2', 'region_type', 'region_numbers',
+        columns=['FUNCTION #', 'blocks [i1,i2,j1,j2,k1,k2]', 'i1', 'i2', 'j1', 'j2', 'k1', 'k2', 'region_type', 'region_numbers',
                  'func_type', 'func_coeff', 'grid', 'range_input', 'range_output', 'drange',
                  'input_arrays', 'output_arrays'])
 
@@ -55,6 +55,7 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
         input_array_list: Union[str, List[str]] = ''
         output_array_list: Union[str, List[str]] = ''
         drange_list: Union[str, List[str]] = ''
+        blocks_list: Union[str, List[str]] = ''
 
         for li, line in enumerate(block):
             line = line.upper()
@@ -66,6 +67,9 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                 j2 = words[4]
                 k1 = words[5]
                 k2 = words[6]
+                blocks_list = words[1:7]
+                blocks_list = [round(float(i)) for i in blocks_list]
+
             if 'FUNCTION' in line:
                 if len(words) == 1:
                     continue
@@ -106,7 +110,7 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                 input_array_list = words[:words.index('OUTPUT')]
                 output_array_list = words[words.index('OUTPUT') + 1:]
         # TODO: find a safer way to create the new function row
-        function_row = [b + 1, i1, i2, j1, j2, k1, k2, region_type, region_number_list, function_type,
+        function_row = [b + 1, blocks_list, i1, i2, j1, j2, k1, k2, region_type, region_number_list, function_type,
                         function_coefficients,
                         grid_name, input_arrays_min_max_list, output_arrays_min_max_list, drange_list, input_array_list,
                         output_array_list]
@@ -210,5 +214,13 @@ def summarize_model_functions(function_list_to_parse: List[List[str]]) -> pd.Dat
 
         # fill in the notation value for the row
         function_summary_df.loc[index, 'notation'] = formula
+
+    # move notation column to the beginning of table:
+    second_column = function_summary_df.pop('notation')
+    function_summary_df.insert(1, 'notation', second_column)
+
+    # set FUNCTION number as the index colum:
+    function_summary_df.set_index('FUNCTION #', inplace=True)
+
 
     return function_summary_df
