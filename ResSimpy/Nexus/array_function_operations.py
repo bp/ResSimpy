@@ -37,10 +37,10 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
       """
 
     functions_df = pd.DataFrame(
-        columns=['FUNCTION #', 'blocks [i1,i2,j1,j2,k1,k2]', 'i1', 'i2', 'j1', 'j2', 'k1', 'k2', 'region_type',
+        columns=['FUNCTION #', 'blocks [i1,i2,j1,j2,k1,k2]', 'region_type',
                  'region_numbers',
                  'func_type', 'func_coeff', 'grid', 'range_input', 'range_output', 'drange',
-                 'input_arrays', 'output_arrays'])
+                 'input_arrays', 'output_arrays', 'i1', 'i2', 'j1', 'j2', 'k1', 'k2'])
 
     for b, block in enumerate(function_list_to_parse):
 
@@ -106,10 +106,10 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                 input_array_list = words[:words.index('OUTPUT')]
                 output_array_list = words[words.index('OUTPUT') + 1:]
         # TODO: find a safer way to create the new function row
-        function_row = [b + 1, blocks_list, i1, i2, j1, j2, k1, k2, region_type, region_number_list, function_type,
+        function_row = [b + 1, blocks_list, region_type, region_number_list, function_type,
                         function_coefficients,
                         grid_name, input_arrays_min_max_list, output_arrays_min_max_list, drange_list, input_array_list,
-                        output_array_list]
+                        output_array_list, i1, i2, j1, j2, k1, k2]
         functions_df.loc[len(functions_df)] = function_row
     return functions_df
 
