@@ -31,7 +31,7 @@ class StructuredGridOperations:
             ignore_values = []
         token_modifier = f"{token} {modifier}"
 
-        if token_modifier in line:
+        if nfo.check_token(token, line) and nfo.get_token_value(token, line, file_as_list) == modifier:
             # If we are loading a multiple, load the two relevant values, otherwise just the next value
             if modifier == 'MULT':
                 numerical_value = nfo.get_expected_token_value(token_modifier, line, file_as_list, ignore_values=None)
