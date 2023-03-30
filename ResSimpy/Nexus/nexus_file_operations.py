@@ -50,6 +50,9 @@ def check_token(token: str, line: str) -> bool:
     if token_location == -1:
         return False
 
+    if line.startswith('C '):
+        return False
+
     comment_character_location = line.find("!")
 
     # Check if the line is commented out before the token appears
@@ -230,8 +233,6 @@ def get_token_value(token: str, token_line: str, file_list: list[str],
 
     # If this line is commented out, don't return a value
     if "!" in token_line_upper and token_line_upper.index("!") < token_line_upper.index(token_upper):
-        return None
-    if check_token("C", token_line_upper) and token_line_upper.index("C") < token_line_upper.index(token_upper):
         return None
 
     search_start = token_line_upper.index(token_upper) + len(token) + 1

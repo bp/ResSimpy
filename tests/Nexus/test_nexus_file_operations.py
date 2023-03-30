@@ -40,8 +40,8 @@ MYTESTTOKEN
      C Comment line
      token_value''',
      'token_value'),
-    ("MYTESTTOKEN",
-     '''MYTESTTOKEN
+    ("not a comment C MYTESTTOKEN",
+     '''not a comment C MYTESTTOKEN
      C Comment line
      C
      Ctoken_value''',
