@@ -37,7 +37,8 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
       """
 
     functions_df = pd.DataFrame(
-        columns=['FUNCTION #', 'blocks [i1,i2,j1,j2,k1,k2]', 'i1', 'i2', 'j1', 'j2', 'k1', 'k2', 'region_type', 'region_numbers',
+        columns=['FUNCTION #', 'blocks [i1,i2,j1,j2,k1,k2]', 'i1', 'i2', 'j1', 'j2', 'k1', 'k2', 'region_type',
+                 'region_numbers',
                  'func_type', 'func_coeff', 'grid', 'range_input', 'range_output', 'drange',
                  'input_arrays', 'output_arrays'])
 
@@ -81,30 +82,25 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                     else:
                         region_type = words[1]
                         region_number_list = block[li + 1].split()
+                        region_number_list = [round(float(i)) for i in region_number_list]
                 if len(words) > 2:  # TODO: deal with tabular function option keywords
-                    warnings.warn(f'Function {b+1}:  Function table entries will be excluded from summary df.')
+                    warnings.warn(f'Function {b + 1}:  Function table entries will be excluded from summary df.')
                     function_type = 'function table'
             if 'ANALYT' in line:
                 function_type = words[1]
                 if len(words) > 2:
                     # remove the first 2 words in line, and set the rest to coefficients
-                    words.pop(0)
-                    words.pop(0)
-                    function_coefficients = words
+                    function_coefficients = words[2:]
+                    function_coefficients = [float(i) for i in function_coefficients]
             if 'GRID' in line:
                 grid_name = words[1]
             if 'RANGE' in line and 'INPUT' in line:
-                words.pop(0)
-                words.pop(0)
-                input_arrays_min_max_list = words
+                input_arrays_min_max_list = words[2:]
             if 'RANGE' in line and 'OUTPUT' in line:
-                words.pop(0)
-                words.pop(0)
-                output_arrays_min_max_list = words
+                output_arrays_min_max_list = words[2:]
             if 'DRANGE' in line:
-                warnings.warn(f'Function {b+1}: Function table entries will be excluded from summary df.')
-                words.pop(0)
-                drange_list = words
+                warnings.warn(f'Function {b + 1}: Function table entries will be excluded from summary df.')
+                drange_list = words[1:]
                 function_type = 'function table'
             if 'OUTPUT' in line and 'RANGE' not in line:
                 input_array_list = words[:words.index('OUTPUT')]
@@ -143,12 +139,46 @@ def summarize_model_functions(function_list_to_parse: List[List[str]]) -> pd.Dat
                 c = row['func_coeff'][x]
                 p = n - x - 1
                 arr = row['input_arrays'][0]
-                if p == 0:
+
+                if n == 1:
                     f_portion = f'{c}'
-                elif p == 1:
-                    f_portion = f'{c}*{arr} + '
-                else:
-                    f_portion = f'{c}*({arr}^{p}) + '
+
+                if p == 0 and x > 0:
+                    if c > 0:
+                        f_portion = f' +{c}'
+                    elif c < 0:
+                        f_portion = f'{c}'
+                    else:
+                        continue
+
+                if p == 1 and x > 0:
+                    if c > 0:
+                        f_portion = f' +{c}*{arr}'
+                    elif c < 0:
+                        f_portion = f'{c}*{arr}'
+                    else:
+                        continue
+
+                if p == 1 and x == 0:
+                    if c != 0:
+                        f_portion = f'{c}*{arr}'
+                    else:
+                        continue
+
+                if p > 1 and x > 0:
+                    if c > 0 :
+                        f_portion = f' +{c}*({arr}^{p})'
+                    elif c < 0:
+                        f_portion = f'{c}*({arr}^{p})'
+                    else:
+                        continue
+
+                if p > 1 and x == 0:
+                    if c != 0:
+                        f_portion = f'{c}*({arr}^{p})'
+                    else:
+                        continue
+
                 formula += f_portion
 
         # ANALYT ABS
@@ -221,6 +251,5 @@ def summarize_model_functions(function_list_to_parse: List[List[str]]) -> pd.Dat
 
     # set FUNCTION number as the index colum:
     function_summary_df.set_index('FUNCTION #', inplace=True)
-
 
     return function_summary_df
