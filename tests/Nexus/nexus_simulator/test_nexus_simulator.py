@@ -10,7 +10,7 @@ from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from pytest_mock import MockerFixture
 from unittest.mock import Mock
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
-from multifile_mocker import mock_multiple_files
+from tests.multifile_mocker import mock_multiple_files
 
 
 def mock_multiple_opens(mocker, filename, fcs_file_contents, run_control_contents, include_contents,
