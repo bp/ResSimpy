@@ -26,11 +26,14 @@ def nexus_token_found(line_to_check: str, valid_list: list[str] = VALID_NEXUS_KE
         token_found (bool): A boolean value stating whether the token is found or not
 
     """
+    valid_list = set(valid_list)
     uppercase_line = line_to_check.upper()
-    for token in valid_list:
-        if check_token(token, uppercase_line):
-            return True
-    return False
+    strip_comments = strip_file_of_comments([uppercase_line])
+    if len(strip_comments) == 0:
+        return False
+    split_line = set(strip_comments[0].split())
+
+    return not valid_list.isdisjoint(split_line)
 
 
 def value_in_file(token: str, file: list[str]) -> bool:
