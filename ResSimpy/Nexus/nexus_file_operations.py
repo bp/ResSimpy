@@ -27,11 +27,24 @@ def nexus_token_found(line_to_check: str, valid_list: list[str] = VALID_NEXUS_KE
 
     """
     uppercase_line = line_to_check.upper()
-    for token in valid_list:
-        if check_token(token, uppercase_line):
-            return True
+    token_found = any(map(partial(check_token, line=uppercase_line), valid_list))
 
-    return False
+    return token_found
+
+
+def value_in_file(token: str, file: list[str]) -> bool:
+    """Returns true if a token is found in the specified file
+
+    Args:
+        token (str): the token being searched for.
+        file (list[str]): a list of strings containing each line of the file as a new entry
+
+    Returns:
+        bool: True if the token is found and False otherwise
+    """
+    token_found = any(map(partial(check_token, token), file))
+
+    return token_found
 
 
 def check_token(token: str, line: str) -> bool:
@@ -571,21 +584,6 @@ def check_property_in_line(line: str, property_dict: dict, file_as_list: list[st
     return property_dict
 
 
-def value_in_file(token: str, file: list[str]) -> bool:
-    """Returns true if a token is found in the specified file
-
-    Args:
-        token (str): the token being searched for.
-        file (list[str]): a list of strings containing each line of the file as a new entry
-
-    Returns:
-        bool: True if the token is found and False otherwise
-    """
-    token_found = any(map(partial(check_token, token), file))
-
-    return token_found
-
-
 def looks_like_grid_array(file_path: str, lines2check: int = 10) -> bool:
     """Returns true if a Nexus include file begins with one of the
     Nexus grid array keywords.
@@ -607,8 +605,8 @@ def looks_like_grid_array(file_path: str, lines2check: int = 10) -> bool:
                               check_token(word, line)]
             if found_keywords:
                 for word in found_keywords:
-                    if (line_elems.index(word) < len(line_elems)-1 and
-                            line_elems[line_elems.index(word)+1].upper() == 'VALUE'):
+                    if (line_elems.index(word) < len(line_elems) - 1 and
+                            line_elems[line_elems.index(word) + 1].upper() == 'VALUE'):
                         return True
     return False
 

@@ -6,6 +6,7 @@ from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
 
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
 
 
 def load_wells(wellspec_file_path: str, start_date: str, default_units: UnitSystem) -> list[NexusWell]:
@@ -208,7 +209,7 @@ def __load_wellspec_table_completions(file_as_list: list[str], header_index: int
     for line in file_as_list[header_index + 1:]:
         # check for end of table lines:
         # TODO update with a more robust table end checker function
-        end_of_table = nfo.check_token('TIME', line) or nfo.check_token('WELLSPEC', line)
+        end_of_table = nfo.nexus_token_found(line, WELLS_KEYWORDS)
         if end_of_table:
             return completions
         valid_line, header_values = nfo.table_line_reader(header_values, headers, line)

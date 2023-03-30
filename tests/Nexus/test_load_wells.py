@@ -41,8 +41,15 @@ from ResSimpy.Nexus.load_wells import load_wells
     JW iw l radw
     2  1  3  4.5
     7 6 8   9.11
-    """, "well3"), ],
-                         ids=["basic case", "swapped columns", "number name", "comments", "different cases"])
+    """, "well3"),
+    ("""
+    WELLSPEC well3
+    ! RADW radw
+    JW iw l radw
+    2  1  3  4.5
+    7 6 8   9.11
+    WELLMOD PD---_BB KHMULT CON 0.4""", "well3"),
+    ], ids=["basic case", "swapped columns", "number name", "comments", "different cases", "WELLMOD"])
 def test_load_basic_wellspec(mocker, file_contents, expected_name):
     # Arrange
     start_date = '01/01/2023'
