@@ -621,7 +621,8 @@ class NexusSimulator(Simulator):
 
     def load_surface_file(self):
         """ Populates nodes and connections from a surface file  """
-        self.Connections.load_connections(self.fcs_file.structured_grid_file, start_date=self.start_date,
-                                          default_units=self.__default_units)
-        self.Nodes.load_nodes(self.fcs_file.structured_grid_file, start_date=self.start_date,
-                              default_units=self.__default_units)
+        for surface in self.fcs_file.surface_files.values():
+            self.Connections.load_connections(surface, start_date=self.start_date,
+                                              default_units=self.__default_units)
+            self.Nodes.load_nodes(surface, start_date=self.start_date,
+                                  default_units=self.__default_units)
