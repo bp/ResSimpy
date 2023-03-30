@@ -156,7 +156,7 @@ def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID \"test_structured_grid.dat\""
     base_structured_grid_file = "! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text " \
                                 "\nother text\n\n,NETGRS VALUE\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\n POROSITY " \
-                                "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc"
+                                "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc "
 
     structured_grid_file = base_structured_grid_file + structured_grid_file_contents
     structured_grid_name = os.path.join('testpath1', '\"test_structured_grid.dat\"')
