@@ -24,6 +24,8 @@ def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
             if nfo.check_token('OUTPUT', line) and not nfo.check_token('RANGE', line):
                 function_list.append(function_body)
                 reading_function = False
+    # remove null values
+    function_list = [list(filter(None, x)) for x in function_list]
 
     return function_list
 
@@ -78,7 +80,7 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                         region_type = words[1]
                         region_number_list = block[li + 1].split()
                 if len(words) > 2:  # TODO: deal with tabular function option keywords
-                    warnings.warn(f'Function {b+1}:  Function table entries will be excluded from summary df.')
+                    warnings.warn(f'Function {b + 1}:  Function table entries will be excluded from summary df.')
                     function_type = 'function table'
             if 'ANALYT' in line:
                 function_type = words[1]
@@ -98,7 +100,7 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                 words.pop(0)
                 output_arrays_min_max_list = words
             if 'DRANGE' in line:
-                warnings.warn(f'Function {b+1}: Function table entries will be excluded from summary df.')
+                warnings.warn(f'Function {b + 1}: Function table entries will be excluded from summary df.')
                 words.pop(0)
                 drange_list = words
                 function_type = 'function table'
