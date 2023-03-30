@@ -320,7 +320,10 @@ STOP
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-
+    expected_result = '01/01/2016'
     # Act
     simulation = NexusSimulator(origin=fcs_file_name, )
-    simulation.start_date
+    result = simulation.start_date
+
+    # Assert
+    assert result == expected_result
