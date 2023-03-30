@@ -49,14 +49,14 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
         # or repeat the last value for each row.
         i1 = i2 = j1 = j2 = k1 = k2 = region_type = function_type = grid_name = ''
         # set the lists as empty strings as well, otherwise they show up as [] on the dataframe.
-        region_number_list: Union[str, List[str]] = ''
-        function_coefficients: Union[str, List[str]] = ''
+        region_number_list: Union[str, List[str], List[int]] = ''
+        function_coefficients: Union[str, List[str], List[float]] = ''
         input_arrays_min_max_list: Union[str, List[str]] = ''
         output_arrays_min_max_list: Union[str, List[str]] = ''
         input_array_list: Union[str, List[str]] = ''
         output_array_list: Union[str, List[str]] = ''
         drange_list: Union[str, List[str]] = ''
-        blocks_list: Union[str, List[str]] = ''
+        blocks_list: Union[str, List[str], List[int]] = ''
 
         for li, line in enumerate(block):
             line = line.upper()
@@ -166,7 +166,7 @@ def summarize_model_functions(function_list_to_parse: List[List[str]]) -> pd.Dat
                         continue
 
                 if p > 1 and x > 0:
-                    if c > 0 :
+                    if c > 0:
                         f_portion = f' +{c}*({arr}^{p})'
                     elif c < 0:
                         f_portion = f'{c}*({arr}^{p})'
