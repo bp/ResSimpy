@@ -295,20 +295,21 @@ def test_load_run_control_file_write_times_to_run_control(mocker, fcs_content, r
 
 
 def test_runcontrol_no_start_time(mocker):
+    # Arrange
     fcs_data ='''RUN_UNITS     ENGLISH
-DEFAULT_UNITS ENGLISH
-DATEFORMAT    DD/MM/YYYY
-RUNCONTROL            runcontrol.dat     '''
+    DEFAULT_UNITS ENGLISH
+    DATEFORMAT    DD/MM/YYYY
+    RUNCONTROL            runcontrol.dat     '''
 
     runcontrol_data = '''
-!
-OUTPUT MAPS TNEXT			
-ENDOUTPUT	
-TIME 01/01/2016																			
-TIME 01/02/2016												
-TIME 01/03/2016												!	
-STOP
-'''
+    !
+    OUTPUT MAPS TNEXT			
+    ENDOUTPUT	
+    TIME 01/01/2016																			
+    TIME 01/02/2016												
+    TIME 01/03/2016												!	
+    STOP
+    '''
 
     fcs_file_name = 'test.fcs'
 
