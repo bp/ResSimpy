@@ -2,7 +2,7 @@
 
 import pytest
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
-from multifile_mocker import mock_multiple_files
+from tests.multifile_mocker import mock_multiple_files
 
 from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
 
