@@ -50,8 +50,7 @@ MYTESTTOKEN
      C
      Ctoken_value''',
      'Ctoken_value'),
-], ids=['basic case', 'multiple lines', 'value on next line', 'Comment character C', 'complex C comment',
-    'dodgy ANSI character'])
+], ids=['basic case', 'multiple lines', 'value on next line', 'Comment character C', 'complex C comment',])
 def test_get_token_value(mocker, line_contents, file_contents, expected_result):
     # Arrange
     dummy_file_as_list = [y for y in (x.strip() for x in file_contents.splitlines()) if y]

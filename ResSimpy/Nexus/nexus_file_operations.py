@@ -330,8 +330,13 @@ def load_file_as_list(file_path: str, strip_comments: bool = False, strip_str: b
     Returns:
         list[str]: list of strings with each line from the file a new entry in the list
      """
-    with open(file_path, 'r', errors='replace') as f:
-        file_content = list(f)
+    try:
+        with open(file_path, 'r') as f:
+            file_content = list(f)
+    except UnicodeDecodeError:
+        with open(file_path, 'rb') as f:
+            f = decode(f.read(), errors='replace')[0]
+            file_content = list(f)
 
     if strip_comments:
         file_content = strip_file_of_comments(file_content, strip_str=strip_str)
