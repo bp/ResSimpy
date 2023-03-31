@@ -133,8 +133,13 @@ def summarize_model_functions(function_list_to_parse: List[List[str]]) -> pd.Dat
 
         # ANALYT POLYN
         if row['func_type'].upper() == 'POLYN':
+            # get number of coefficients, n
             n = len(row['func_coeff'])
-            # TODO: deal with negative coefficient notations
+
+            # For each coefficient (c), calculate the corresponding exponent -or power (p)
+            # Create polynomial function notation, term by term, for any number of coefficients (n)
+            # using the first item in input arrays list (arr),
+            # and the position (x) of the function term/portion we are creating.
             for x in range(n):
                 c = row['func_coeff'][x]
                 p = n - x - 1
