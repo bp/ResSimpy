@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from codecs import Codec
+from codecs import decode
 from enum import Enum
 from functools import partial
 from io import StringIO
@@ -335,7 +335,7 @@ def load_file_as_list(file_path: str, strip_comments: bool = False, strip_str: b
             file_content = list(f)
     except UnicodeDecodeError:
         with open(file_path, 'rb') as f:
-            f = Codec.decode(input=f, errors='replace')[0]
+            f = decode(f, errors='replace')[0]
             file_content = list(f)
 
     if strip_comments:
