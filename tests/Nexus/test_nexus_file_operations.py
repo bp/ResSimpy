@@ -49,8 +49,15 @@ MYTESTTOKEN
      C Comment line
      C
      Ctoken_value''',
-     'Ctoken_value')
-], ids=['basic case', 'multiple lines', 'value on next line', 'Comment character C', 'complex C comment'])
+     'Ctoken_value'),
+     ('MYTESTTOKEN value',
+     '''B31 Venus  Miocene
+! built using Venus Eos for s1.8 (M Roffey 2004)
+! Std Conds are 14.7 psia and 60F
+MYTESTTOKEN value''', 'value')
+
+], ids=['basic case', 'multiple lines', 'value on next line', 'Comment character C', 'complex C comment',
+    'dodgy ANSI character'])
 def test_get_token_value(mocker, line_contents, file_contents, expected_result):
     # Arrange
     dummy_file_as_list = [y for y in (x.strip() for x in file_contents.splitlines()) if y]
