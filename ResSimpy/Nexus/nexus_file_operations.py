@@ -30,12 +30,29 @@ def nexus_token_found(line_to_check: str, valid_list: list[str] = VALID_NEXUS_KE
         token_found (bool): A boolean value stating whether the token is found or not
 
     """
+    valid_set = set(valid_list)
     uppercase_line = line_to_check.upper()
-    for token in valid_list:
-        if check_token(token, uppercase_line):
-            return True
+    strip_comments = strip_file_of_comments([uppercase_line])
+    if len(strip_comments) == 0:
+        return False
+    split_line = set(strip_comments[0].split())
 
-    return False
+    return not valid_set.isdisjoint(split_line)
+
+
+def value_in_file(token: str, file: list[str]) -> bool:
+    """Returns true if a token is found in the specified file
+
+    Args:
+        token (str): the token being searched for.
+        file (list[str]): a list of strings containing each line of the file as a new entry
+
+    Returns:
+        bool: True if the token is found and False otherwise
+    """
+    token_found = any(map(partial(check_token, token), file))
+
+    return token_found
 
 
 def check_token(token: str, line: str) -> bool:
@@ -578,21 +595,6 @@ def check_property_in_line(line: str, property_dict: dict, file_as_list: list[st
     if check_token('CELSIUS', line):
         property_dict['TEMP_UNIT'] = TemperatureUnits.CELSIUS
     return property_dict
-
-
-def value_in_file(token: str, file: list[str]) -> bool:
-    """Returns true if a token is found in the specified file
-
-    Args:
-        token (str): the token being searched for.
-        file (list[str]): a list of strings containing each line of the file as a new entry
-
-    Returns:
-        bool: True if the token is found and False otherwise
-    """
-    token_found = any(map(partial(check_token, token), file))
-
-    return token_found
 
 
 def looks_like_grid_array(file_path: str, lines2check: int = 10) -> bool:
