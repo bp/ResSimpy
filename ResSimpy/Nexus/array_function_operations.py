@@ -39,9 +39,10 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
       """
 
     functions_df = pd.DataFrame(
-        columns=['FUNCTION #', 'i1', 'i2', 'j1', 'j2', 'k1', 'k2', 'region_type', 'region_numbers',
+        columns=['FUNCTION #', 'blocks [i1,i2,j1,j2,k1,k2]', 'region_type',
+                 'region_numbers',
                  'func_type', 'func_coeff', 'grid', 'range_input', 'range_output', 'drange',
-                 'input_arrays', 'output_arrays'])
+                 'input_arrays', 'output_arrays', 'i1', 'i2', 'j1', 'j2', 'k1', 'k2'])
 
     for b, block in enumerate(function_list_to_parse):
 
@@ -50,13 +51,14 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
         # or repeat the last value for each row.
         i1 = i2 = j1 = j2 = k1 = k2 = region_type = function_type = grid_name = ''
         # set the lists as empty strings as well, otherwise they show up as [] on the dataframe.
-        region_number_list: Union[str, List[str]] = ''
-        function_coefficients: Union[str, List[str]] = ''
+        region_number_list: Union[str, List[str], List[int]] = ''
+        function_coefficients: Union[str, List[str], List[float]] = ''
         input_arrays_min_max_list: Union[str, List[str]] = ''
         output_arrays_min_max_list: Union[str, List[str]] = ''
         input_array_list: Union[str, List[str]] = ''
         output_array_list: Union[str, List[str]] = ''
         drange_list: Union[str, List[str]] = ''
+        blocks_list: Union[str, List[str], List[int]] = ''
 
         for li, line in enumerate(block):
             line = line.upper()
@@ -68,6 +70,9 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                 j2 = words[4]
                 k1 = words[5]
                 k2 = words[6]
+                blocks_list = words[1:7]
+                blocks_list = [round(float(i)) for i in blocks_list]
+
             if 'FUNCTION' in line:
                 if len(words) == 1:
                     continue
@@ -79,6 +84,7 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                     else:
                         region_type = words[1]
                         region_number_list = block[li + 1].split()
+                        region_number_list = [round(float(i)) for i in region_number_list]
                 if len(words) > 2:  # TODO: deal with tabular function option keywords
                     warnings.warn(f'Function {b + 1}:  Function table entries will be excluded from summary df.')
                     function_type = 'function table'
@@ -86,32 +92,26 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                 function_type = words[1]
                 if len(words) > 2:
                     # remove the first 2 words in line, and set the rest to coefficients
-                    words.pop(0)
-                    words.pop(0)
-                    function_coefficients = words
+                    function_coefficients = words[2:]
+                    function_coefficients = [float(i) for i in function_coefficients]
             if 'GRID' in line:
                 grid_name = words[1]
             if 'RANGE' in line and 'INPUT' in line:
-                words.pop(0)
-                words.pop(0)
-                input_arrays_min_max_list = words
+                input_arrays_min_max_list = words[2:]
             if 'RANGE' in line and 'OUTPUT' in line:
-                words.pop(0)
-                words.pop(0)
-                output_arrays_min_max_list = words
+                output_arrays_min_max_list = words[2:]
             if 'DRANGE' in line:
                 warnings.warn(f'Function {b + 1}: Function table entries will be excluded from summary df.')
-                words.pop(0)
-                drange_list = words
+                drange_list = words[1:]
                 function_type = 'function table'
             if 'OUTPUT' in line and 'RANGE' not in line:
                 input_array_list = words[:words.index('OUTPUT')]
                 output_array_list = words[words.index('OUTPUT') + 1:]
         # TODO: find a safer way to create the new function row
-        function_row = [b + 1, i1, i2, j1, j2, k1, k2, region_type, region_number_list, function_type,
+        function_row = [b + 1, blocks_list, region_type, region_number_list, function_type,
                         function_coefficients,
                         grid_name, input_arrays_min_max_list, output_arrays_min_max_list, drange_list, input_array_list,
-                        output_array_list]
+                        output_array_list, i1, i2, j1, j2, k1, k2]
         functions_df.loc[len(functions_df)] = function_row
     return functions_df
 
@@ -135,18 +135,57 @@ def summarize_model_functions(function_list_to_parse: List[List[str]]) -> pd.Dat
 
         # ANALYT POLYN
         if row['func_type'].upper() == 'POLYN':
+            # get number of coefficients, n
             n = len(row['func_coeff'])
-            # TODO: deal with negative coefficient notations
+
+            # For each coefficient (c), calculate the corresponding exponent -or power (p)
+            # Create polynomial function notation, term by term, for any number of coefficients (n)
+            # using the first item in input arrays list (arr),
+            # and the position (x) of the function term/portion we are creating.
             for x in range(n):
                 c = row['func_coeff'][x]
                 p = n - x - 1
                 arr = row['input_arrays'][0]
-                if p == 0:
+
+                if n == 1:
                     f_portion = f'{c}'
-                elif p == 1:
-                    f_portion = f'{c}*{arr} + '
-                else:
-                    f_portion = f'{c}*({arr}^{p}) + '
+
+                if p == 0 and x > 0:
+                    if c > 0:
+                        f_portion = f' +{c}'
+                    elif c < 0:
+                        f_portion = f'{c}'
+                    else:
+                        continue
+
+                if p == 1 and x > 0:
+                    if c > 0:
+                        f_portion = f' +{c}*{arr}'
+                    elif c < 0:
+                        f_portion = f'{c}*{arr}'
+                    else:
+                        continue
+
+                if p == 1 and x == 0:
+                    if c != 0:
+                        f_portion = f'{c}*{arr}'
+                    else:
+                        continue
+
+                if p > 1 and x > 0:
+                    if c > 0:
+                        f_portion = f' +{c}*({arr}^{p})'
+                    elif c < 0:
+                        f_portion = f'{c}*({arr}^{p})'
+                    else:
+                        continue
+
+                if p > 1 and x == 0:
+                    if c != 0:
+                        f_portion = f'{c}*({arr}^{p})'
+                    else:
+                        continue
+
                 formula += f_portion
 
         # ANALYT ABS
@@ -212,5 +251,12 @@ def summarize_model_functions(function_list_to_parse: List[List[str]]) -> pd.Dat
 
         # fill in the notation value for the row
         function_summary_df.loc[index, 'notation'] = formula
+
+    # move notation column to the beginning of table:
+    second_column = function_summary_df.pop('notation')
+    function_summary_df.insert(1, 'notation', second_column)
+
+    # set FUNCTION number as the index colum:
+    function_summary_df.set_index('FUNCTION #', inplace=True)
 
     return function_summary_df
