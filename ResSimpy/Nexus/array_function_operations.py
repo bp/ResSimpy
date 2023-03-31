@@ -24,6 +24,8 @@ def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
             if nfo.check_token('OUTPUT', line) and not nfo.check_token('RANGE', line):
                 function_list.append(function_body)
                 reading_function = False
+    # remove null values
+    function_list = [list(filter(None, x)) for x in function_list]
 
     return function_list
 
