@@ -335,7 +335,7 @@ def load_file_as_list(file_path: str, strip_comments: bool = False, strip_str: b
             file_content = list(f)
     except UnicodeDecodeError:
         with open(file_path, 'rb') as f:
-            f = decode(f, errors='replace')[0]
+            f = decode(f.read(), errors='replace')[0]
             file_content = list(f)
 
     if strip_comments:
