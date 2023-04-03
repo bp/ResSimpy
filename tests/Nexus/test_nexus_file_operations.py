@@ -680,7 +680,7 @@ def test_collect_all_tables_to_objects(mocker, file_contents, node1_props, node2
 
     # Act
 
-    result = nfo.collect_all_tables_to_objects(surface_file, NexusNode, ['NODES', 'WELLS'], start_date,
+    result = nfo.collect_all_tables_to_objects(surface_file, {'NODES': NexusNode, 'WELLS': NexusNode}, start_date,
                                                default_units=UnitSystem.ENGLISH)
 
     # Assert

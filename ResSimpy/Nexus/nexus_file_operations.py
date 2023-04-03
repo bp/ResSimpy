@@ -727,17 +727,35 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
     return list_of_objects
 
 
-def collect_all_tables_to_objects(nexus_file: NexusFile, row_object: Any, table_names_list: list[str],
-                                  start_date: Optional[str],
+def check_list_tokens(list_tokens: list[str], line: str) -> Optional[str]:
+    """ Checks a list of tokens for whether it exists in a string
+
+    Args:
+        list_tokens (list[str]): list of tokens to search for within the line
+        line (str): line to search for tokens
+
+    Returns:
+        bool, Optional[str]: returns the token which was found otherwise returns None.
+
+    """
+    for x in list_tokens:
+        token_found = check_token(x, line)
+        if token_found:
+            return x
+    return None
+
+
+def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[str, Any], start_date: Optional[str],
                                   default_units: Optional[UnitSystem], ) -> Sequence[Any]:
     """ Loads all tables from a given file.
 
         Args:
             nexus_file (NexusFile): NexusFile representation of the file.
-            row_object (Type(Storage_Object)): object type to store the data from each row into
+            table_object_map (dict[str, Storage_Object]): dictionary containing the name of the table as keys and \
+                the object type to store the data from each row into. Requires objects to have a get_nexus_mapping \
+                function
             start_date (str): Starting date of the run
             default_units (UnitSystem): Units used in case not specified by file.
-            table_names_list (list[str]): list of possible table header names
         Raises:
             TypeError: if the unit system found in the property check is not a valid enum UnitSystem
         Returns:
@@ -746,10 +764,10 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, row_object: Any, table_
     current_date = start_date
     nexus_object_list: list[Any] = []
     file_as_list = nexus_file.get_flat_list_str_file()
-    property_map = row_object.get_nexus_mapping()
     table_start = -1
     table_end = -1
     property_dict: dict = {}
+    token_found = None
     for index, line in enumerate(file_as_list):
         # check for changes in unit system
         check_property_in_line(line, property_dict, file_as_list)
@@ -761,20 +779,24 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, row_object: Any, table_
             current_date = get_expected_token_value(
                 token='TIME', token_line=line, file_list=file_as_list,
                 custom_message=f"Cannot find the date associated with the TIME card in {line=} at line number {index}")
-
-        if any([check_token(x, line) for x in table_names_list]):
+        if table_start < 0:
+            token_found = check_list_tokens(list(table_object_map.keys()), line)
+            if token_found is None:
+                continue
             table_start = index + 1
-        if table_start > 0 and any([check_token('END' + x, line) for x in table_names_list]):
+        if table_start > 0 and check_token('END' + token_found, line):
             table_end = index
         if 0 < table_start < table_end:
+            property_map = table_object_map[token_found].get_nexus_mapping()
             list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
-                                                 row_object=row_object,
+                                                 row_object=table_object_map[token_found],
                                                  property_map=property_map, current_date=current_date,
                                                  unit_system=unit_system)
             nexus_object_list.extend(list_objects)
             # reset indices for further tables
             table_start = -1
             table_end = -1
+            token_found = None
     return nexus_object_list
 
 
