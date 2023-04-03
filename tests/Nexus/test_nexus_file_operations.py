@@ -6,6 +6,7 @@ import numpy as np
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Surface.NexusNode import NexusNode
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from unittest.mock import Mock
 
 
 @pytest.mark.parametrize("line_contents, file_contents, expected_result", [
@@ -685,3 +686,24 @@ def test_collect_all_tables_to_objects(mocker, file_contents, node1_props, node2
 
     # Assert
     assert result == expected_result
+
+
+def test_load_file_as_list_unicode_error(mocker,):
+    # Arrange
+    file_contents = 'file\ncontents'
+    expected_file_as_list = ['file\n', 'contents']
+    file_path = 'file_path.dat'
+
+    def side_effect(filename, mode, errors=None):
+        if errors is None:
+            raise UnicodeDecodeError('test_error', b'', 0, 0, '')
+        else:
+            open_mock = mocker.mock_open(read_data=file_contents)
+            return open_mock.return_value
+    mock_open = Mock(side_effect=side_effect)
+    mocker.patch("builtins.open", mock_open)
+
+    # Act
+    result = nfo.load_file_as_list(file_path)
+    # Assert
+    assert result == expected_file_as_list
