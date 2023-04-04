@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from functools import partial
 from io import StringIO
-from typing import Optional, Union, Any, TYPE_CHECKING, Sequence
+from typing import Optional, Union, Any, TYPE_CHECKING
 import pandas as pd
 from ResSimpy.Grid import VariableEntry
 from string import Template
