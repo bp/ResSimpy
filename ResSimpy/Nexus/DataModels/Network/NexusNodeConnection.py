@@ -50,6 +50,7 @@ class NexusNodeConnection(NodeConnection):
     polymer: Optional[str] = None
     unit_system: Optional[UnitSystem] = None
     dp_add: Optional[float] = None
+    dt_add: Optional[float] = None
 
     def __init__(self, properties_dict: dict[str, None | int | str | float]):
         super().__init__()
@@ -83,6 +84,7 @@ class NexusNodeConnection(NodeConnection):
             'RATEMULT': ('rate_mult', float),
             'POLYMER': ('polymer', str),
             'DPADD': ('dp_add', float),
+            'DTADD': ('dt_add', float),
         }
         return nexus_mapping
 
