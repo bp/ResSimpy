@@ -733,7 +733,7 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
 
 
 def check_list_tokens(list_tokens: list[str], line: str) -> Optional[str]:
-    """ Checks a list of tokens for whether it exists in a string
+    """ Checks a list of tokens for whether it exists in a string and returns the token that matched
 
     Args:
         list_tokens (list[str]): list of tokens to search for within the line

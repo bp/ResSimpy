@@ -4,7 +4,7 @@ import pytest
 import pandas as pd
 import numpy as np
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.Nexus.DataModels.Surface.NexusNode import NexusNode
+from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from unittest.mock import Mock
 

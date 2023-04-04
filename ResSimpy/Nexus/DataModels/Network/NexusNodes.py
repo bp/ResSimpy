@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.Nexus.DataModels.Surface.NexusNode import NexusNode
+from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nodes import Nodes

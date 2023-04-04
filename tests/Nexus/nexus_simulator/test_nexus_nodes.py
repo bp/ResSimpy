@@ -2,9 +2,9 @@ import numpy as np
 import pandas as pd
 import pytest
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.Nexus.DataModels.Surface.NexusNode import NexusNode
+from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
-from ResSimpy.Nexus.DataModels.Surface.NexusNodes import NexusNodes
+from ResSimpy.Nexus.DataModels.Network.NexusNodes import NexusNodes
 
 
 @pytest.mark.parametrize('file_contents, node1_props, node2_props',[
