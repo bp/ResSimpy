@@ -45,4 +45,17 @@ class NexusNodeConnections(NodeConnections):
         """
         new_connections = nfo.collect_all_tables_to_objects(surface_file, {'NODECON': NexusNodeConnection, },
                                                             start_date=start_date, default_units=default_units)
-        self.__connections += new_connections
+        self.add_connections(new_connections.get('NODECON'))
+
+    def add_connections(self, additional_list: Optional[list[NexusNodeConnection]]):
+        """ extends the nodes object by a list of nodes provided to it.
+
+        Args:
+            additional_list (Sequence[NexusNodeConnection]): list of nexus connections to add to the connection list.
+
+        Returns:
+            None
+        """
+        if additional_list is None:
+            return
+        self.__connections.extend(additional_list)

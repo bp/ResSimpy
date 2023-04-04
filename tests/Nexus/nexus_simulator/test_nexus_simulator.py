@@ -831,9 +831,9 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
     con2 = NexusNodeConnection(connection2_props)
     expected_cons = [con1, con2]
     # Act
-    nexus_sim.load_surface_file()
-    result_nodes = nexus_sim.Nodes.get_nodes()
-    result_cons = nexus_sim.Connections.get_connections()
+    nexus_sim.load_network()
+    result_nodes = nexus_sim.Network.Nodes.get_nodes()
+    result_cons = nexus_sim.Network.Connections.get_connections()
     # Assert
     assert result_nodes == expected_nodes
     assert result_cons == expected_cons

@@ -751,7 +751,7 @@ def check_list_tokens(list_tokens: list[str], line: str) -> Optional[str]:
 
 
 def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[str, Any], start_date: Optional[str],
-                                  default_units: Optional[UnitSystem], ) -> Sequence[Any]:
+                                  default_units: Optional[UnitSystem], ) -> dict[str, list[Any]]:
     """ Loads all tables from a given file.
 
         Args:
@@ -764,10 +764,11 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
         Raises:
             TypeError: if the unit system found in the property check is not a valid enum UnitSystem
         Returns:
-            Sequence[Storage_Object]: a list of arbitrary objects populated with properties from the file provided
+            dict[str, list[Storage_Object]]: a dictionary of lists of arbitrary objects populated \
+                with properties from the file provided, keyed with the NexusTable name associated with table_object_map.
         """
     current_date = start_date
-    nexus_object_list: list[Any] = []
+    nexus_object_results: dict[str, list[Any]] = {x: [] for x in table_object_map}
     file_as_list: list[str] = nexus_file.get_flat_list_str_file()
     table_start: int = -1
     table_end: int = -1
@@ -801,12 +802,12 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
                                                  row_object=table_object_map[token_found],
                                                  property_map=property_map, current_date=current_date,
                                                  unit_system=unit_system)
-            nexus_object_list.extend(list_objects)
+            nexus_object_results[token_found].extend(list_objects)
             # reset indices for further tables
             table_start = -1
             table_end = -1
             token_found = None
-    return nexus_object_list
+    return nexus_object_results
 
 
 def correct_datatypes(value: None | int | float | str, dtype: type,

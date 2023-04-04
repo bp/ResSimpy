@@ -681,9 +681,11 @@ def test_collect_all_tables_to_objects(mocker, file_contents, node1_props, node2
 
     # Act
 
-    result = nfo.collect_all_tables_to_objects(surface_file, {'NODES': NexusNode, 'WELLS': NexusNode}, start_date,
+    result_dict = nfo.collect_all_tables_to_objects(surface_file, {'NODES': NexusNode, 'WELLS': NexusNode}, start_date,
                                                default_units=UnitSystem.ENGLISH)
-
+    result = result_dict.get('NODES')
+    if result_dict.get('WELLS') is not None:
+        result.extend(result_dict.get('WELLS'))
     # Assert
     assert result == expected_result
 

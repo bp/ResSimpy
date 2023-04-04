@@ -90,6 +90,8 @@ class NexusFile:
             if skip_arrays and nfo.check_token("VALUE", line) and \
                     nfo.get_token_value("VALUE", line, file_as_list) == "INCLUDE":
                 skip_next_include = True
+            if skip_arrays and nfo.check_token("VMOD", line):
+                skip_next_include = True
             if not nfo.check_token("INCLUDE", line):
                 modified_file_as_list.append(line)
                 continue

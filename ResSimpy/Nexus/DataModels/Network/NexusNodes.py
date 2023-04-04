@@ -62,4 +62,17 @@ class NexusNodes(Nodes):
         new_nodes = nfo.collect_all_tables_to_objects(surface_file, {'NODES': NexusNode, },
                                                       start_date=start_date,
                                                       default_units=default_units)
-        self.__nodes += new_nodes
+        self.add_nodes(new_nodes.get('NODES'))
+
+    def add_nodes(self, additional_list: Optional[list[NexusNode]]) -> None:
+        """ extends the nodes object by a list of nodes provided to it.
+
+        Args:
+            additional_list (Sequence[NexusNode]): list of nexus nodes to add to the nodes list.
+
+        Returns:
+            None
+        """
+        if additional_list is None:
+            return
+        self.__nodes.extend(additional_list)
