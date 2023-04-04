@@ -16,8 +16,8 @@ from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import StructuredGridFil
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusReporting import Reporting
 from ResSimpy.Nexus.NexusWells import NexusWells
-from ResSimpy.Nexus.Surface.NexusNodeConnections import NexusNodeConnections
-from ResSimpy.Nexus.Surface.NexusNodes import NexusNodes
+from ResSimpy.Nexus.DataModels.Surface.NexusNodeConnections import NexusNodeConnections
+from ResSimpy.Nexus.DataModels.Surface.NexusNodes import NexusNodes
 from ResSimpy.Nexus.runcontrol_operations import Runcontrol
 from ResSimpy.Nexus.logfile_operations import Logging
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations

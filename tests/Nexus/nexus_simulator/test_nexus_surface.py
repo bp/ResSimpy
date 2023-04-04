@@ -5,8 +5,8 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Surface.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Surface.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
-from ResSimpy.Nexus.Surface.NexusNodeConnections import NexusNodeConnections
-from ResSimpy.Nexus.Surface.NexusNodes import NexusNodes
+from ResSimpy.Nexus.DataModels.Surface.NexusNodeConnections import NexusNodeConnections
+from ResSimpy.Nexus.DataModels.Surface.NexusNodes import NexusNodes
 
 
 @pytest.mark.parametrize('file_contents, node1_props, node2_props',[
