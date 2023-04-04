@@ -6,6 +6,7 @@ from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
 from ResSimpy.Nexus.DataModels.Surface.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Surface.NexusNodeConnection import NexusNodeConnection
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from pytest_mock import MockerFixture
 from unittest.mock import Mock
@@ -72,14 +73,14 @@ def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock
 
 
 @pytest.mark.parametrize(
-    "run_control_path,expected_root,expected_run_control_path,date_format,expected_use_american_date_format", [
+    "run_control_path, expected_root, expected_run_control_path, date_format, expected_date_format", [
         # Providing an absolute path to the fcs file + USA date format
-        ("/run/control/path", "", "/run/control/path", "MM/DD/YYYY", True),
+        ("/run/control/path", "", "/run/control/path", "MM/DD/YYYY", DateFormat.MM_DD_YYYY),
         # Providing a relative path to the fcs file + Non-USA date format
-        ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", False)
+        ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
     ])
 def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expected_root, expected_run_control_path,
-                                                 date_format, expected_use_american_date_format):
+                                                 date_format, expected_date_format):
     # Arrange
     fcs_file = f"RUNCONTROL {run_control_path}\nDATEFORMAT {date_format}\n"
     open_mock = mocker.mock_open(read_data=fcs_file)
@@ -90,19 +91,19 @@ def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expec
 
     # Assert
     assert simulation.run_control_file_path == expected_full_path
-    assert simulation.use_american_date_format == expected_use_american_date_format
+    assert simulation.date_format is expected_date_format
     open_mock.assert_called_with(expected_full_path, 'r')
 
 
 @pytest.mark.parametrize(
-    "run_control_path,expected_root,expected_run_control_path,date_format,expected_use_american_date_format", [
+    "run_control_path, expected_root, expected_run_control_path, date_format, expected_date_format", [
         # Providing an absolute path to the fcs file + USA date format
-        ("/run/control/path", "", "/run/control/path", "MM/DD/YYYY", True),
+        ("/run/control/path", "", "/run/control/path", "MM/DD/YYYY", DateFormat.MM_DD_YYYY),
         # Providing a relative path to the fcs file + Non-USA date format
-        ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", False)
+        ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
     ])
 def test_load_fcs_space_in_filename(mocker, run_control_path, expected_root, expected_run_control_path,
-                                    date_format, expected_use_american_date_format):
+                                    date_format, expected_date_format):
     # Arrange
     fcs_file = f"RUNCONTROL {run_control_path}\nDATEFORMAT {date_format}\n"
     open_mock = mocker.mock_open(read_data=fcs_file)
@@ -114,14 +115,14 @@ def test_load_fcs_space_in_filename(mocker, run_control_path, expected_root, exp
 
     # Assert
     assert simulation.run_control_file_path == expected_full_path
-    assert simulation.use_american_date_format == expected_use_american_date_format
+    assert simulation.date_format is expected_date_format
     open_mock.assert_called_with(expected_full_path, 'r')
 
 
 def test_load_fcs_file_comment_after_declaration(mocker):
     """Check that the code ignores lines with comments that contain tokens"""
     # Arrange
-    fcs_file = "!RUNCONTROL run_control_1\n RUNCONTROL run_control_2.inc\nDATEFORMAT DD/MM/YY\n!DATEFORMAT MM/DD/YY"
+    fcs_file = "!RUNCONTROL run_control_1\n RUNCONTROL run_control_2.inc\nDATEFORMAT DD/MM/YYYY\n!DATEFORMAT MM/DD/YYYY"
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
     expected_file_path = os.path.join('testpath1', 'run_control_2.inc')
@@ -130,19 +131,19 @@ def test_load_fcs_file_comment_after_declaration(mocker):
 
     # Assert
     assert simulation.run_control_file_path == expected_file_path
-    assert simulation.use_american_date_format is False
+    assert simulation.date_format is DateFormat.DD_MM_YYYY
     open_mock.assert_called_with(expected_file_path, 'r')
 
 
 @pytest.mark.skip("Code changed to not throw an error in this scenario now")
-@pytest.mark.parametrize("run_control_path,expected_run_control_path,date_format,expected_use_american_date_format", [
+@pytest.mark.parametrize("run_control_path, expected_run_control_path, date_format, expected_date_format", [
     # Providing an absolute path to the fcs file + USA date format
     ("/run/control/path", "/run/control/path", "MM/DD/YYYY", True),
     # Providing a relative path to the fcs file + Non-USA date format
-    ("run/control/path", "original_output_path/run/control/path", "DD/MM/YYYY", False)
+    ("run/control/path", "original_output_path/run/control/path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
 ])
 def test_output_destination_missing(mocker, run_control_path, expected_run_control_path, date_format,
-                                    expected_use_american_date_format):
+                                    expected_date_format):
     """Check that an exception is raised if the user attempts to modify files without a specified output directory"""
     # Arrange
     fcs_file = f"RUNCONTROL {run_control_path}\nDATEFORMAT {date_format}"
@@ -157,7 +158,7 @@ def test_output_destination_missing(mocker, run_control_path, expected_run_contr
 
     # Assert
     assert simulation.run_control_file_path == expected_run_control_path
-    assert simulation.use_american_date_format == expected_use_american_date_format
+    assert simulation.date_format is expected_date_format
 
 
 @pytest.mark.parametrize("run_control_path,expected_run_control_path,date_format,expected_use_american_date_format",
@@ -226,7 +227,7 @@ def test_load_fcs_file_populates_default_units(mocker, fcs_file, expected_defaul
 
     # Act
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
-    result = simulation.get_default_units()
+    result = simulation.default_units
 
     # Assert
     assert result == expected_default_unit_value
@@ -271,7 +272,7 @@ def test_load_fcs_file_populates_run_units(mocker, fcs_file, expected_run_unit_v
 
     # Act
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
-    result = simulation.get_run_units()
+    result = simulation.run_units
 
     # Assert
     assert result == expected_run_unit_value

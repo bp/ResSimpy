@@ -46,5 +46,5 @@ class Simulator(ABC):
         raise NotImplementedError("This method has not been implemented for this simulator yet")
 
     @abstractmethod
-    def get_model_location(self) -> str:
+    def model_location(self) -> str:
         raise NotImplementedError("This method has not been implemented for this simulator yet")

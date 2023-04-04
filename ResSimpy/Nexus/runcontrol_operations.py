@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 from functools import cmp_to_key
 from typing import Union, Optional
 import ResSimpy.Nexus.nexus_file_operations as nfo
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
+from ResSimpy.Nexus.constants import DATE_WITH_TIME_LENGTH
 
 
 class Runcontrol:
@@ -13,7 +15,7 @@ class Runcontrol:
         Args:
             model: NexusSimulator instance
             __times (Optional[list[str]]): list of times to be included in the runcontrol file
-            __date_format_string (str): How the dates should formatted based on use_american_date_format
+            __date_format_string (str): How the dates should formatted based on date_format
 
         """
         self.model = model
@@ -107,16 +109,16 @@ class Runcontrol:
 
         if isinstance(converted_date, float):
             date_format = self.date_format_string
-            if len(self.model.start_date) == self.model.DATE_WITH_TIME_LENGTH:
+            if len(self.model.start_date) == DATE_WITH_TIME_LENGTH:
                 date_format += "(%H:%M:%S)"
             start_date_as_datetime = datetime.strptime(self.model.start_date, date_format)
             date_as_datetime = start_date_as_datetime + timedelta(days=converted_date)
         else:
             start_date_format = self.date_format_string
-            if len(self.model.start_date) == self.model.DATE_WITH_TIME_LENGTH:
+            if len(self.model.start_date) == DATE_WITH_TIME_LENGTH:
                 start_date_format += "(%H:%M:%S)"
             end_date_format = self.date_format_string
-            if len(converted_date) == self.model.DATE_WITH_TIME_LENGTH:
+            if len(converted_date) == DATE_WITH_TIME_LENGTH:
                 end_date_format += "(%H:%M:%S)"
             date_as_datetime = datetime.strptime(converted_date, end_date_format)
             start_date_as_datetime = datetime.strptime(self.model.start_date, start_date_format)
@@ -176,21 +178,21 @@ class Runcontrol:
             # Value isn't a float - attempt to extract date from value
             try:
                 date_format = self.date_format_string
-                if len(str(date)) == self.model.DATE_WITH_TIME_LENGTH:
+                if len(str(date)) == DATE_WITH_TIME_LENGTH:
                     date_format += "(%H:%M:%S)"
                 datetime.strptime(str(date), date_format)
-            except Exception:
-                current_date_format = self.get_date_format(self.model.use_american_date_format)
+            except ValueError:
+                current_date_format = self.get_date_format(self.model.date_format)
                 raise ValueError(
                     "Invalid date format " + str(date) + " the model is using " + current_date_format + " date format.")
 
     @staticmethod
-    def get_date_format(use_american_date_format: bool) -> str:
+    def get_date_format(date_format: DateFormat) -> str:
         """Returns the date format being used by the model
         formats used: ('MM/DD/YYYY', 'DD/MM/YYYY')
         """
 
-        if use_american_date_format:
+        if date_format is DateFormat.MM_DD_YYYY:
             return 'MM/DD/YYYY'
         else:
             return 'DD/MM/YYYY'
@@ -266,7 +268,7 @@ class Runcontrol:
                         break
                 warnings.warn('No value found for start date explicitly with START or TIME card')
         # If we don't want to write the times, return here.
-        if not self.model.get_write_times():
+        if not self.model.write_times:
             return
         if self.model.fcs_file.runcontrol_file.includes is None:
             warnings.warn(f'No includes files found in {self.model.fcs_file.runcontrol_file.location}')

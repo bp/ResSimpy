@@ -13,6 +13,7 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
 from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import StructuredGridFile
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusReporting import Reporting
 from ResSimpy.Nexus.NexusWells import NexusWells
@@ -25,8 +26,6 @@ from ResSimpy.Simulator import Simulator
 
 
 class NexusSimulator(Simulator):
-    # Constants
-    DATE_WITH_TIME_LENGTH: Final[int] = 20
 
     def __init__(self, origin: Optional[str] = None, destination: Optional[str] = None, force_output: bool = False,
                  root_name: Optional[str] = None, nexus_data_name: str = "data", write_times: bool = True,
@@ -45,7 +44,7 @@ class NexusSimulator(Simulator):
         Attributes:
             run_control_file_path (Optional[str]): file path to the run control file - derived from the fcs file
             __destination (Optional[str]): output path for the simulation. Currently not used.
-            use_american_date_format (bool): True if the simulation uses 'MM/DD/YYYY' date format.
+            date_format (bool): True if the simulation uses 'MM/DD/YYYY' date format.
             __original_fcs_file_path (str): Path to the original fcs file path supplied
             __new_fcs_file_path (str): Where the new fcs will be saved to
             __force_output (bool): private attribute of force_output
@@ -76,7 +75,7 @@ class NexusSimulator(Simulator):
 
         self.run_control_file_path: Optional[str] = ''
         self.__destination: Optional[str] = None
-        self.use_american_date_format: bool = False
+        self.date_format: DateFormat = DateFormat.MM_DD_YYYY # Nexus default
         self.__original_fcs_file_path: str = origin.strip()
         self.__new_fcs_file_path: str = origin.strip()
         self.__force_output: bool = force_output
@@ -144,27 +143,33 @@ class NexusSimulator(Simulator):
     def get_simulation_progress(self) -> float:
         return self.Logging.get_simulation_progress()
 
-    def get_model_location(self):
+    @property
+    def model_location(self):
         """Returns the location of the model"""
         return os.path.dirname(self.__origin)
 
-    def get_structured_grid_path(self):
+    @property
+    def structured_grid_path(self):
         """Returns the location of the structured grid file"""
         return self.fcs_file.structured_grid_file.location
 
-    def get_default_units(self):
+    @property
+    def default_units(self):
         """Returns the default units"""
         return self.__default_units
 
-    def get_run_units(self):
+    @property
+    def run_units(self):
         """Returns the run units"""
         return self.__run_units
 
-    def get_new_fcs_name(self):
+    @property
+    def new_fcs_name(self):
         """Returns the new name for the FCS file without the fcs extension"""
         return self.__root_name
 
-    def get_write_times(self) -> bool:
+    @property
+    def write_times(self) -> bool:
         return self.__write_times
 
     @property
@@ -228,8 +233,8 @@ class NexusSimulator(Simulator):
                 model_oilfield_run_units = grid_length_unit == 'ft'
             else:
                 simulator = NexusSimulator(origin=model)
-                model_oilfield_default_units = simulator.get_default_units() == UnitSystem.ENGLISH
-                model_oilfield_run_units = simulator.get_run_units() == UnitSystem.ENGLISH
+                model_oilfield_default_units = simulator.default_units() == UnitSystem.ENGLISH
+                model_oilfield_run_units = simulator.run_units() == UnitSystem.ENGLISH
 
             # If not defined, assign it to model_oilfield_default_units
             if oilfield_default_units is None:
@@ -401,8 +406,10 @@ class NexusSimulator(Simulator):
             if nfo.check_token('DATEFORMAT', line):
                 value = nfo.get_token_value('DATEFORMAT', line, fcs_content_with_includes)
                 if value is not None:
-                    self.use_american_date_format = value == 'MM/DD/YYYY'
-                self.Runcontrol.date_format_string = "%m/%d/%Y" if self.use_american_date_format else "%d/%m/%Y"
+                    self.date_format = DateFormat.DD_MM_YYYY if value == 'DD/MM/YYYY' else DateFormat.MM_DD_YYYY
+
+                self.Runcontrol.date_format_string = "%m/%d/%Y" if self.date_format is DateFormat.MM_DD_YYYY \
+                    else "%d/%m/%Y"
             elif nfo.check_token('RUN_UNITS', line):
                 value = nfo.get_token_value('RUN_UNITS', line, fcs_content_with_includes)
                 if value is not None:
@@ -533,7 +540,7 @@ class NexusSimulator(Simulator):
         """Returns the date format being used by the model
         formats used: ('MM/DD/YYYY', 'DD/MM/YYYY')
         """
-        return self.Runcontrol.get_date_format(self.use_american_date_format)
+        return self.Runcontrol.get_date_format(self.date_format)
 
     def modify(self, operation: str, section: str, keyword: str, content: list[str]):
         """Generic modify method to modify part of the input deck. \

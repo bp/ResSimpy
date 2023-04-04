@@ -12,8 +12,8 @@ class Reporting:
         Raises:
             ValueError: if no structured grid file path is specified in the class instance
         """
-        structured_grid_path = self.model.get_structured_grid_path()
-        if self.model.get_structured_grid_path() is None:
+        structured_grid_path = self.model.structured_grid_path
+        if self.model.structured_grid_path is None:
             raise ValueError("No file path given or found for structured grid file path. \
                 Please update structured grid file path")
         file = nfo.load_file_as_list(structured_grid_path)
