@@ -19,7 +19,7 @@ class NexusNetwork:
     Nodes: NexusNodes = NexusNodes()
     Connections: NexusNodeConnections = NexusNodeConnections()
 
-    def get_surface_file(self, method_number: Optional[int] = None) -> Optional[dict[int, NexusFile]]:
+    def get_surface_file(self, method_number: Optional[int] = None) -> Optional[dict[int, NexusFile] | NexusFile]:
         """ gets a specific surface file object or a dictionary of surface files keyed by method number
 
         Args:
@@ -27,14 +27,14 @@ class NexusNetwork:
                 If None then returns a dictionary of method, surface file object
 
         Returns:
-            Optional[dict[int, NexusFile]]: returns a specific surface file object or a dictionary of surface files \
-                keyed by method number
+            Optional[dict[int, NexusFile] | NexusFile]: returns a specific surface file object or a dictionary of \
+                surface files keyed by method number
         """
         if method_number is None:
             return self.model.fcs_file.surface_files
         if self.model.fcs_file.surface_files is None:
             return None
-        return self.model.fcs_file.surface_files[method_number]
+        return self.model.fcs_file.surface_files.get(method_number)
 
     def load(self):
         """ Loads all the objects from the surface files in the Simulator class.
