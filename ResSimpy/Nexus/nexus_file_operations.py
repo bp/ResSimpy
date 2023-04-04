@@ -763,11 +763,11 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
         """
     current_date = start_date
     nexus_object_list: list[Any] = []
-    file_as_list = nexus_file.get_flat_list_str_file()
-    table_start = -1
-    table_end = -1
+    file_as_list: list[str] = nexus_file.get_flat_list_str_file()
+    table_start: int = -1
+    table_end: int = -1
     property_dict: dict = {}
-    token_found = None
+    token_found: Optional[str] = None
     for index, line in enumerate(file_as_list):
         # check for changes in unit system
         check_property_in_line(line, property_dict, file_as_list)
@@ -783,9 +783,13 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
             token_found = check_list_tokens(list(table_object_map.keys()), line)
             if token_found is None:
                 continue
+            # if a token is found get the starting index of the table
             table_start = index + 1
+        if token_found is None:
+            continue
         if table_start > 0 and check_token('END' + token_found, line):
             table_end = index
+        # if we have a complete table to read in start reading it into objects
         if 0 < table_start < table_end:
             property_map = table_object_map[token_found].get_nexus_mapping()
             list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
