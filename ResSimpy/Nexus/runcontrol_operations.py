@@ -267,6 +267,9 @@ class Runcontrol:
                         warnings.warn(f'Setting start date to first time card found in the runcontrol file as: {value}')
                         break
                 warnings.warn('No value found for start date explicitly with START or TIME card')
+
+        self.__times = self.sort_remove_duplicate_times(times)
+        
         # If we don't want to write the times, return here.
         if not self.model.write_times:
             return

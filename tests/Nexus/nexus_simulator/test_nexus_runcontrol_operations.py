@@ -58,7 +58,7 @@ def test_load_run_control_file_times_in_include_file(mocker, date_format, expect
 
     # Act
     simulation = NexusSimulator(origin=fcs_file_name)
-    result_times = simulation.get_content(section="RUNCONTROL", keyword="TIME")
+    result_times = simulation.Runcontrol.times
 
     # Assert
     assert result_times == expected_times
@@ -77,7 +77,7 @@ def test_load_run_control_file_times_in_include_file(mocker, date_format, expect
          ""),
     ])
 def test_load_run_control_invalid_times(mocker, date_format, run_control_contents, include_file_contents):
-    """Included files contain dates in invalid format"""
+    """Included files contain dates in invalid format, raise error when attempting to re-write them"""
     # Arrange
     fcs_file_name = 'testpath1/test.fcs'
     fcs_file = f"RUNCONTROL /path/run_control\nDATEFORMAT {date_format}\n"
@@ -93,7 +93,7 @@ def test_load_run_control_invalid_times(mocker, date_format, run_control_content
 
     # Act
     with pytest.raises(ValueError):
-        NexusSimulator(origin=fcs_file_name)
+        NexusSimulator(origin=fcs_file_name, write_times=True)
 
 
 @pytest.mark.parametrize(
@@ -158,7 +158,7 @@ def test_modify_times(mocker, date_format, expected_date_format,
 
     # Act
     simulation = NexusSimulator(
-        origin=fcs_file_name, destination="test_new_destination")
+        origin=fcs_file_name, destination="test_new_destination", write_times=True)
     simulation.modify(section="RUNCONTROL", keyword="TIME",
                       content=new_times, operation=operation)
     result_times = simulation.get_content(section="RUNCONTROL", keyword="TIME")
@@ -235,7 +235,7 @@ def test_modify_times_invalid_date(mocker, date_format, expected_date_format,
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    simulation = NexusSimulator(origin=fcs_file_name)
+    simulation = NexusSimulator(origin=fcs_file_name, write_times=True)
     with pytest.raises(ValueError):
         simulation.modify(section="RUNCONTROL", keyword="TIME",
                           content=new_times, operation=operation)

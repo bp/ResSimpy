@@ -28,7 +28,7 @@ from ResSimpy.Simulator import Simulator
 class NexusSimulator(Simulator):
 
     def __init__(self, origin: Optional[str] = None, destination: Optional[str] = None, force_output: bool = False,
-                 root_name: Optional[str] = None, nexus_data_name: str = "data", write_times: bool = True,
+                 root_name: Optional[str] = None, nexus_data_name: str = "data", write_times: bool = False,
                  manual_fcs_tidy_call: bool = False) -> None:
         """Nexus simulator class. Inherits from the Simulator super class
 
