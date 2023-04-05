@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import pytest
+from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
+from ResSimpy.Nexus.DataModels.Network.NexusWellConnections import NexusWellConnections
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
@@ -223,3 +225,42 @@ def test_load_connections(file_contents, connection1_props, connection2_props):
     if single_connection_result.depth is not None:
         assert single_connection_result.depth / 2 == 7002.67 / 2
     pd.testing.assert_frame_equal(result_df, expected_df,)
+
+@pytest.mark.parametrize('file_contents, well_connection_props1, well_connection_props2',[
+(''' TIME 02/10/2032
+METRIC
+WELLS
+  NAME    STREAM   NUMBER   DATUM   CROSSFLOW   CROSS_SHUT
+  prod   PRODUCER   94     4039.3     ON        CELLGRAD
+  inj   WATER      95     4039.3     OFF        CALC
+  bad_data
+    ENDWELLS
+''',
+{'name': 'prod', 'stream': 'PRODUCER', 'number': 94, 'datum_depth': 4039.3, 'crossflow': 'ON', 'crossshut_method': 'CELLGRAD',
+'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
+{'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 4039.3, 'crossflow': 'OFF', 'crossshut_method': 'CALC',
+'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
+)
+])
+def test_load_well_connections(file_contents, well_connection_props1, well_connection_props2,):
+    # Arrange
+    start_date = '01/01/2023'
+    surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
+
+    wellcon1 = NexusWellConnection(well_connection_props1)
+    wellcon2 = NexusWellConnection(well_connection_props2)
+    expected_result = [wellcon1, wellcon2]
+    nexus_well_cons = NexusWellConnections()
+    expected_df = pd.DataFrame([well_connection_props1, well_connection_props2])
+    expected_df = expected_df.fillna(value=np.nan).dropna(axis=1, how='all')
+
+    # Act
+    nexus_well_cons.load_well_connections(surface_file, start_date, default_units=UnitSystem.ENGLISH)
+    result = nexus_well_cons.get_well_connections()
+    single_connection_result = nexus_well_cons.get_well_connection('prod')
+    result_df = nexus_well_cons.get_well_connections_df()
+
+    # Assert
+    assert result == expected_result
+    assert single_connection_result == wellcon1
+    pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
