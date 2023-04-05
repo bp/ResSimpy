@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Optional
 
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+import ResSimpy.Utils.to_dict_generic as to_dict_generic
+
 
 @dataclass(kw_only=True)
 class NexusWellConnection:
@@ -51,6 +54,12 @@ class NexusWellConnection:
         drill_queue (str): COMMENT (ASSCDR)
         drill_order_benefit (float): COMMENT (BENEFIT)
     """
+    name: Optional[str] = None
+    date: Optional[str] = None
+    unit_system: Optional[UnitSystem] = None
+    bh_node_name: Optional[str] = None
+    wh_node_name: Optional[str] = None
+
     stream: Optional[str] = None
     number: Optional[int] = None
     scale: Optional[float] = None
@@ -95,15 +104,19 @@ class NexusWellConnection:
     station: Optional[str] = None
     drill_queue: Optional[str] = None
     drill_order_benefit: Optional[float] = None
-    
+
     def __init__(self, properties_dict: dict[str, None | int | str | float]):
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)
+        if self.name is not None:
+            self.bh_node_name = self.name + '%bh'
+            self.wh_node_name = self.name + '%wh'
 
     @staticmethod
     def get_nexus_mapping() -> dict[str, tuple[str, type]]:
         """gets the mapping of nexus keywords to attribute definitions"""
         nexus_mapping = {
+            'NAME': ('name', str),
             'STREAM': ('stream', str),
             'NUMBER': ('number', int),
             'SCALE': ('scale', float),
@@ -150,3 +163,6 @@ class NexusWellConnection:
             'BENEFIT': ('drill_order_benefit', float),
         }
         return nexus_mapping
+
+    def to_dict(self):
+        to_dict_generic.to_dict(self, )
