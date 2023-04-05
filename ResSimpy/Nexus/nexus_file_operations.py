@@ -92,6 +92,50 @@ def check_token(token: str, line: str) -> bool:
     return True
 
 
+def get_previous_value(file_as_list: list[str], search_before: Optional[str] = None,
+                       ignore_values: Optional[list[str]] = None) -> Optional[str]:
+    """Gets the previous non blank value in a list of lines. Starts from the last line working backwards
+
+        Args:
+            file_as_list (list[str]): a list of strings containing each line of the file as a new entry,
+            ending with the line to start searching from.
+            search_before (Optional[str]): The string to start the search from in a backwards direction
+            ignore_values (Optional[list[str]], optional): a list of values that should be ignored if found. \
+                Defaults to None.
+
+        Returns:
+            Optional[str]: Next non blank value from the list, if none found returns None
+        """
+
+    # Reverse the order of the lines
+    file_as_list.reverse()
+
+    # If we are searching before a specific token, remove that and the rest of the line.
+    if search_before is not None:
+        search_before_location = file_as_list[0].rfind(search_before)
+        file_as_list[0] = file_as_list[0][0: search_before_location]
+
+    previous_value: str = ''
+
+    for line in file_as_list:
+        string_to_search: str = line
+
+        # Retrieve all of the values in the line, then return the last one found if one is found.
+        # Otherwise search the next line
+        next_value = get_next_value(0, [string_to_search], ignore_values=ignore_values)
+
+        while next_value is not None and search_before != next_value:
+            previous_value = next_value
+            string_to_search = string_to_search.replace(next_value, '')
+            next_value = get_next_value(0, [string_to_search], ignore_values=ignore_values)
+
+        if previous_value != '':
+            return previous_value
+
+    # Start of file reached, no values found
+    return None
+
+
 def get_next_value(start_line_index: int, file_as_list: list[str], search_string: Optional[str] = None,
                    ignore_values: Optional[list[str]] = None,
                    replace_with: Union[str, VariableEntry, None] = None) -> Optional[str]:
@@ -740,7 +784,7 @@ def check_list_tokens(list_tokens: list[str], line: str) -> Optional[str]:
         line (str): line to search for tokens
 
     Returns:
-        bool, Optional[str]: returns the token which was found otherwise returns None.
+        Optional[str]: returns the token which was found otherwise returns None.
 
     """
     for x in list_tokens:
