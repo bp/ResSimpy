@@ -10,7 +10,7 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
 class Logging:
-    def __init__(self, model, ):  # NexusSimulator):
+    def __init__(self, model) -> None:
         """ class for controlling all logging and logfile (*.log) related functionality
         Args:
             model: NexusSimulator instance

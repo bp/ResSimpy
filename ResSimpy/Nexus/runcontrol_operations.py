@@ -10,7 +10,7 @@ from ResSimpy.Nexus.constants import DATE_WITH_TIME_LENGTH
 
 
 class Runcontrol:
-    def __init__(self, model):
+    def __init__(self, model) -> None:
         """ class for controlling all runcontrol and time related functionality
         Args:
             model: NexusSimulator instance
@@ -269,7 +269,7 @@ class Runcontrol:
                 warnings.warn('No value found for start date explicitly with START or TIME card')
 
         self.__times = self.sort_remove_duplicate_times(times)
-        
+
         # If we don't want to write the times, return here.
         if not self.model.write_times:
             return

@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import warnings
 from dataclasses import Field
-from typing import Any, Final, Union, Optional
+from typing import Any, Union, Optional
 
 import resqpy.model as rq
 
@@ -75,7 +75,7 @@ class NexusSimulator(Simulator):
 
         self.run_control_file_path: Optional[str] = ''
         self.__destination: Optional[str] = None
-        self.date_format: DateFormat = DateFormat.MM_DD_YYYY # Nexus default
+        self.date_format: DateFormat = DateFormat.MM_DD_YYYY  # Nexus default
         self.__original_fcs_file_path: str = origin.strip()
         self.__new_fcs_file_path: str = origin.strip()
         self.__force_output: bool = force_output
