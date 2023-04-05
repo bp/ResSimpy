@@ -181,7 +181,7 @@ class FcsNexusFile(NexusFile):
                     # for keywords that have multiple methods we store the value in a dictionary
                     # with the method number and the NexusFile object
                     _, method_string, method_number, value = (
-                        nfo.get_multiple_sequential_tokens(flat_fcs_file_content[i::], 4)
+                        nfo.get_multiple_sequential_values(flat_fcs_file_content[i::], 4)
                     )
                     sub_file_path = nfo.get_full_file_path(value, origin_path)
                     nexus_file = NexusFile.generate_file_include_structure(
