@@ -23,20 +23,22 @@ class NexusFile:
     location: Optional[str] = None
     includes: Optional[list[str]] = field(default_factory=get_empty_list_str)
     origin: Optional[str] = None
-    includes_objects: Optional[list[NexusFile]] = field(default_factory=get_empty_list_nexus_file)
-    file_content_as_list: Optional[list[Union[str, NexusFile]]] = field(default_factory=get_empty_list_str_nexus_file)
+    includes_objects: Optional[list[NexusFile]] = field(default_factory=get_empty_list_nexus_file, repr=False)
+    file_content_as_list: Optional[list[Union[str, NexusFile]]] = field(default_factory=get_empty_list_str_nexus_file,
+                                                                        repr=False)
 
     def __init__(self, location: Optional[str] = None,
-                 includes: Optional[list[str]] = field(default_factory=get_empty_list_str),
+                 includes: Optional[list[str]] = None,
                  origin: Optional[str] = None,
-                 includes_objects: Optional[list[NexusFile]] = field(default_factory=get_empty_list_nexus_file),
-                 file_content_as_list: Optional[list[Union[str, NexusFile]]] =
-                 field(default_factory=get_empty_list_str_nexus_file)):
+                 includes_objects: Optional[list[NexusFile]] = None,
+                 file_content_as_list: Optional[list[Union[str, NexusFile]]] = None):
         self.location: Optional[str] = location
-        self.includes: Optional[list[str]] = includes
+        self.includes: Optional[list[str]] = get_empty_list_str() if includes is None else includes
         self.origin: Optional[str] = origin
-        self.includes_objects: Optional[list[NexusFile]] = includes_objects
-        self.file_content_as_list: Optional[list[Union[str, NexusFile]]] = file_content_as_list
+        self.includes_objects: Optional[list[NexusFile]] = get_empty_list_nexus_file() \
+            if includes_objects is None else includes_objects
+        self.file_content_as_list: Optional[list[Union[str, NexusFile]]] = get_empty_list_str_nexus_file() \
+            if file_content_as_list is None else file_content_as_list
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True,
