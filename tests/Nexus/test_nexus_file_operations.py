@@ -40,7 +40,7 @@ MYTESTTOKEN
 
   """,
      '7'),
-     ("MYTESTTOKEN",
+    ("MYTESTTOKEN",
      '''MYTESTTOKEN
      C Comment line
      token_value''',
@@ -51,7 +51,7 @@ MYTESTTOKEN
      C
      Ctoken_value''',
      'Ctoken_value'),
-], ids=['basic case', 'multiple lines', 'value on next line', 'Comment character C', 'complex C comment',])
+], ids=['basic case', 'multiple lines', 'value on next line', 'Comment character C', 'complex C comment', ])
 def test_get_token_value(mocker, line_contents, file_contents, expected_result):
     # Arrange
     dummy_file_as_list = [y for y in (x.strip() for x in file_contents.splitlines()) if y]
@@ -383,13 +383,13 @@ def test_get_expected_token_value_value_present():
 
 
 @pytest.mark.parametrize("line, number_tokens, expected_result", [
-  ('EQUIL METHOD 1 /path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
-  ('EQUIL METHOD 1 /path/equil.dat ! comment', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
-  ('EQUIL METHOD 1 /path/equil.dat TOKEN TOKEN', 6, ['EQUIL', 'METHOD', '1', '/path/equil.dat','TOKEN', 'TOKEN']),
-  ('EQUIL METHOD 1 \n /path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
-  ('EQUIL METHOD !comment\n \t 1 ', 3, ['EQUIL', 'METHOD', '1']),
-  ('EQUIL\n METHOD\n1\n/path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat'])
-  ], ids=["basic", "more tokens", "get more tokens", "new line", "newline comment", "lots of newlines"])
+    ('EQUIL METHOD 1 /path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
+    ('EQUIL METHOD 1 /path/equil.dat ! comment', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
+    ('EQUIL METHOD 1 /path/equil.dat TOKEN TOKEN', 6, ['EQUIL', 'METHOD', '1', '/path/equil.dat', 'TOKEN', 'TOKEN']),
+    ('EQUIL METHOD 1 \n /path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
+    ('EQUIL METHOD !comment\n \t 1 ', 3, ['EQUIL', 'METHOD', '1']),
+    ('EQUIL\n METHOD\n1\n/path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat'])
+], ids=["basic", "more tokens", "get more tokens", "new line", "newline comment", "lots of newlines"])
 def test_get_multiple_sequential_tokens(line, number_tokens, expected_result):
     # Arrange
     list_of_strings = line.splitlines()
@@ -408,7 +408,7 @@ def test_get_multiple_sequential_tokens_fail_case():
         value = nfo.get_multiple_sequential_tokens([line], number_tokens)
 
 
-@pytest.mark.parametrize("line, expected_result",[
+@pytest.mark.parametrize("line, expected_result", [
     ('\t 1', '1'),
     ('\t 1 ', '1'),
     (' ', None),
@@ -426,10 +426,10 @@ def test_get_next_value_single_line(line, expected_result):
     assert result == expected_result
 
 
-@pytest.mark.parametrize("file, expected_result",[
+@pytest.mark.parametrize("file, expected_result", [
     (['\t ', '1'], '1'),
     (['\t ', '\n', '\n', '\n', '\n', '1'], '1'),
-    (['!Comment Line 1','\n', '\n', '\t', ' !Comment Line 2 ', '\n', ' ABCDEFG '], 'ABCDEFG')
+    (['!Comment Line 1', '\n', '\n', '\t', ' !Comment Line 2 ', '\n', ' ABCDEFG '], 'ABCDEFG')
 ])
 def test_get_next_value_multiple_lines(file, expected_result):
     # Act
@@ -438,13 +438,62 @@ def test_get_next_value_multiple_lines(file, expected_result):
     assert result == expected_result
 
 
-@pytest.mark.parametrize("file_contents, expected_header_index, expected_header_result",[
+@pytest.mark.parametrize("line, expected_result", [
+    ('\t 1', '1'),
+    ('\t 1 ', '1'),
+    (' ', None),
+    ("   IW   ", 'IW'),
+    ("\t ", None),
+    ("   \t   ", None),
+    ("", None),
+    ("\t   a", 'a'),
+    ("a", 'a')
+])
+def test_get_previous_value_single_line(line, expected_result):
+    # Act
+    result = nfo.get_previous_value([line])
+    # Assert
+    assert result == expected_result
+
+
+@pytest.mark.parametrize("line, search_before, expected_result", [
+    ('\t 2 1', '1', '2'),
+    ('\t 21 1', '1', '21'),
+    ('KX INCLUDE', 'INCLUDE', 'KX'),
+    ('  \t INCLUDE', 'INCLUDE', None),
+    ('  \t test INCLUDE !INCLUDE', 'INCLUDE', 'test')
+])
+def test_get_previous_value_single_line_specify_search_before(line, search_before, expected_result):
+    # Act
+    result = nfo.get_previous_value([line], search_before=search_before)
+    # Assert
+    assert result == expected_result
+
+
+@pytest.mark.parametrize("file, search_before, expected_result", [
+    (['\t ', '1', '       INCLUDE'], 'INCLUDE', '1'),
+    (['\t ', '\n', '     \n', '\n', '\n', '1'], '1', None),
+    (['\t ', '1\n', '     \n', '\n', '12 \n', '1'], '1', '12'),
+    (['\t ', '3\n', '     \n', '\n', '12 1', '1'], '1', '12'),
+    ([' ABCDEFG ', '!Comment Line 1', '\n', '\n', '\t', ' !Comment Line 2 ', '\n' 'START_TEXT'], 'START_TEXT', 'ABCDEFG'),
+    ([' ABCDEFG ', '!Comment Line 1', '\n', '\n', '\t', ' !Comment Line 2 ', '\n', '12_3 START_TEXT'], 'START_TEXT', '12_3'),
+    (['1', '2 ', ' 3', '!4', ' START_TEXT 5'], 'START_TEXT', '3'),
+    (['1', '2 ', ' 3', '!4', '1 START_TEXT 5'], 'START_TEXT', '1')
+])
+def test_get_previous_value_multiple_lines_specify_search_before(file, search_before, expected_result):
+    # Act
+    result = nfo.get_previous_value(file_as_list=file, search_before=search_before)
+    # Assert
+    assert result == expected_result
+
+
+@pytest.mark.parametrize("file_contents, expected_header_index, expected_header_result", [
     ('KH \t NAME \t COLUMN1 \t   COLUMN2 \n\n SOMETHING ELSe',
-        0, ['KH', 'NAME', 'COLUMN1', 'COLUMN2']),
+     0, ['KH', 'NAME', 'COLUMN1', 'COLUMN2']),
     ('KH \t NAME \t COLUMN1 \t   COLUMN2 COLUMN3 \n\n SOMETHING ELSe',
-        0, ['KH', 'NAME', 'COLUMN1', 'COLUMN2', 'COLUMN3']),
+     0, ['KH', 'NAME', 'COLUMN1', 'COLUMN2', 'COLUMN3']),
     ('! comment first \n KH \t NAME \t COLUMN1 \t   COLUMN2 ! comment \n 10 well1 10 item',
-        1, ['KH', 'NAME', 'COLUMN1', 'COLUMN2'])
+     1, ['KH', 'NAME', 'COLUMN1', 'COLUMN2'])
 ], ids=['basic', 'additional column', 'comments'])
 def test_get_table_header(file_contents, expected_header_index, expected_header_result):
     # Arrange
@@ -465,15 +514,15 @@ def test_get_table_header(file_contents, expected_header_index, expected_header_
 
 @pytest.mark.parametrize("headers, line, expected_dictionary, expected_valid_line", [
     (['KH', 'NAME', 'COLUMN1', 'COLUMN2'], '10 well1 value1 0.2',
-    {'KH': '10', 'NAME': 'well1', 'COLUMN1': 'value1', 'COLUMN2': '0.2'}, True),
+     {'KH': '10', 'NAME': 'well1', 'COLUMN1': 'value1', 'COLUMN2': '0.2'}, True),
     (['KH', 'NAME', 'COLUMN1', 'COLUMN2'], '10 well1 ',
-    {'KH': '10', 'NAME': 'well1', 'COLUMN1': None, 'COLUMN2': None}, False),
-    (['KH', 'NAME',], '10 well1',
-    {'KH': '10', 'NAME': 'well1', 'COLUMN1': None, 'COLUMN2': None}, True),
-    (['KH', 'NAME',], '10 well1 !comment',
-    {'KH': '10', 'NAME': 'well1', 'COLUMN1': None, 'COLUMN2': None}, True),
-    (['KH', 'NAME','NOTINDICT'], '10 well1 value !comment',
-    {'KH': '10', 'NAME': 'well1', 'COLUMN1': None, 'COLUMN2': None,'NOTINDICT': 'value'}, True),
+     {'KH': '10', 'NAME': 'well1', 'COLUMN1': None, 'COLUMN2': None}, False),
+    (['KH', 'NAME', ], '10 well1',
+     {'KH': '10', 'NAME': 'well1', 'COLUMN1': None, 'COLUMN2': None}, True),
+    (['KH', 'NAME', ], '10 well1 !comment',
+     {'KH': '10', 'NAME': 'well1', 'COLUMN1': None, 'COLUMN2': None}, True),
+    (['KH', 'NAME', 'NOTINDICT'], '10 well1 value !comment',
+     {'KH': '10', 'NAME': 'well1', 'COLUMN1': None, 'COLUMN2': None, 'NOTINDICT': 'value'}, True),
 ], ids=['basic', 'invalid_line (too short)', 'fewer_columns_than_dict', 'comments', 'value not in dict'])
 def test_table_line_reader(headers, line, expected_dictionary, expected_valid_line):
     # Arrange
@@ -487,7 +536,7 @@ def test_table_line_reader(headers, line, expected_dictionary, expected_valid_li
     assert result_valid_line == expected_valid_line
 
 
-@pytest.mark.parametrize("value, dtype, na_to_none, expected_result",[
+@pytest.mark.parametrize("value, dtype, na_to_none, expected_result", [
     ('string', str, True, 'string'),
     ('10', int, True, 10),
     ('10', float, True, 10.0),
@@ -536,7 +585,6 @@ def test_load_table_to_objects_basic():
 
 
 def test_load_table_to_objects_date_units():
-
     # Arrange
     property_map = {'NAME': ('name', str), 'KH': ('kh', int), 'L': ('k', float)}
     date = '20/12/2023'
@@ -589,19 +637,20 @@ def test_load_table_to_objects_date_units():
     assert result_unit_date == expected_result_unit_date
 
 
-@pytest.mark.parametrize('file_contents, node1_props, node2_props',[
-('''NODES
+@pytest.mark.parametrize('file_contents, node1_props, node2_props', [
+    ('''NODES
   NAME                           TYPE       DEPTH   TEMP
  ! Riser Nodes
   node1                         NA            NA      #
   node_2        WELLHEAD     1167.3 # 
   ENDNODES
 ''',
-{'name': 'node1', 'type': None, 'depth': None,  'temp': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/01/2023',
-    'unit_system': UnitSystem.ENGLISH}
-    ),
-('''NODES
+     {'name': 'node1', 'type': None, 'depth': None, 'temp': None, 'date': '01/01/2023',
+      'unit_system': UnitSystem.ENGLISH},
+     {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/01/2023',
+      'unit_system': UnitSystem.ENGLISH}
+     ),
+    ('''NODES
   NAME       TYPE       DEPTH   TemP    X     Y       NUMBER  StatiON
  ! Riser Nodes
   node1         NA        NA    60.5    100.5 300.5   1     station
@@ -610,12 +659,13 @@ def test_load_table_to_objects_date_units():
   content outside of the node statement
   node1         NA        NA    60.5    10.5 3.5   1     station_null
   ''',
-{'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
-    'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': 10.21085, 'y_pos': 3524.23, 'number': 2,
-    'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH}
-  ),
-('''NODES
+     {'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
+      'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+     {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': 10.21085, 'y_pos': 3524.23,
+      'number': 2,
+      'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH}
+     ),
+    ('''NODES
   NAME                           TYPE       DEPTH   TEMP
  ! Riser Nodes
   node1                         NA            NA      #
@@ -627,11 +677,12 @@ def test_load_table_to_objects_date_units():
   node_2        WELLHEAD     1167.3 # 
   ENDNODES
 ''',
-{'name': 'node1', 'type': None, 'depth': None,  'temp': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/02/2023',
-    'unit_system': UnitSystem.ENGLISH}
-    ),
-('''NODES
+     {'name': 'node1', 'type': None, 'depth': None, 'temp': None, 'date': '01/01/2023',
+      'unit_system': UnitSystem.ENGLISH},
+     {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/02/2023',
+      'unit_system': UnitSystem.ENGLISH}
+     ),
+    ('''NODES
   NAME                           TYPE       DEPTH   TEMP
  ! Riser Nodes
   node1                         NA            NA      #
@@ -644,11 +695,12 @@ def test_load_table_to_objects_date_units():
   node_2        WELLHEAD     1167.3 # 
   ENDNODES
 ''',
-{'name': 'node1', 'type': None, 'depth': None,  'temp': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/02/2023',
-    'unit_system': UnitSystem.METRIC}
-    ),
-('''NODES
+     {'name': 'node1', 'type': None, 'depth': None, 'temp': None, 'date': '01/01/2023',
+      'unit_system': UnitSystem.ENGLISH},
+     {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/02/2023',
+      'unit_system': UnitSystem.METRIC}
+     ),
+    ('''NODES
   NAME       TYPE       DEPTH   TemP    X     Y       NUMBER  StatiON
  ! Riser Nodes
   node1         NA        NA    60.5    100.5 300.5   1     station
@@ -660,14 +712,14 @@ ENDWELLS
   content outside of the node statement
   node1         NA        NA    60.5    10.5 3.5   1     station_null
   ''',
-{'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
-    'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': None, 'y_pos': None, 'number': 2,
-    'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH}
-  ),
+     {'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
+      'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+     {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': None, 'y_pos': None, 'number': 2,
+      'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH}
+     ),
 ],
-ids=['basic', 'all columns', 'times', 'units', 'two tables']
-)
+                         ids=['basic', 'all columns', 'times', 'units', 'two tables']
+                         )
 def test_collect_all_tables_to_objects(mocker, file_contents, node1_props, node2_props):
     # Arrange
     # mock out a surface file:
@@ -681,14 +733,14 @@ def test_collect_all_tables_to_objects(mocker, file_contents, node1_props, node2
 
     # Act
 
-    result = nfo.collect_all_tables_to_objects(surface_file, NexusNode, ['NODES', 'WELLS'], start_date,
+    result = nfo.collect_all_tables_to_objects(surface_file, {'NODES': NexusNode, 'WELLS': NexusNode}, start_date,
                                                default_units=UnitSystem.ENGLISH)
 
     # Assert
     assert result == expected_result
 
 
-def test_load_file_as_list_unicode_error(mocker,):
+def test_load_file_as_list_unicode_error(mocker, ):
     # Arrange
     file_contents = 'file\ncontents'
     expected_file_as_list = ['file\n', 'contents']
@@ -700,6 +752,7 @@ def test_load_file_as_list_unicode_error(mocker,):
         else:
             open_mock = mocker.mock_open(read_data=file_contents)
             return open_mock.return_value
+
     mock_open = Mock(side_effect=side_effect)
     mocker.patch("builtins.open", mock_open)
 

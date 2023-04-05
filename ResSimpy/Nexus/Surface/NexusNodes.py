@@ -59,7 +59,7 @@ class NexusNodes(Nodes):
             TypeError: if the unit system found in the property check is not a valid enum UnitSystem
 
         """
-        new_nodes = nfo.collect_all_tables_to_objects(surface_file, row_object=NexusNode, table_names_list=['NODES'],
+        new_nodes = nfo.collect_all_tables_to_objects(surface_file, {'NODES': NexusNode, },
                                                       start_date=start_date,
                                                       default_units=default_units)
         self.__nodes += new_nodes

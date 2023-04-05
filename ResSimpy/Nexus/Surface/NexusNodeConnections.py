@@ -43,8 +43,6 @@ class NexusNodeConnections(NodeConnections):
         """ Calls load connections and appends the list of discovered NodeConnections into the NexusNodeConnection \
             object
         """
-        new_connections = nfo.collect_all_tables_to_objects(surface_file, row_object=NexusNodeConnection,
-                                                            table_names_list=['NODECON'],
-                                                            start_date=start_date,
-                                                            default_units=default_units)
+        new_connections = nfo.collect_all_tables_to_objects(surface_file, {'NODECON': NexusNodeConnection, },
+                                                            start_date=start_date, default_units=default_units)
         self.__connections += new_connections
