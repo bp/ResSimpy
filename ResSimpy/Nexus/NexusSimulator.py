@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import warnings
-from dataclasses import Field
 from typing import Any, Final, Union, Optional
 
 import resqpy.model as rq
