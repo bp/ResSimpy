@@ -162,14 +162,14 @@ def test_get_node_df(file_contents, node1_props, node2_props):
   node_2        WELLHEAD     1167.3 #  10.21085 3524.23 2   station2 ! COMMENT 
   ENDNODES
   NODECON
-	NAME            NODEIN    NODEOUT       TYPE        METHOD    DDEPTH
-	CP01            CP01      wh_cp01       PIPE        2          7002.67
-	cp01_gaslift    GAS       CP01          GASLIFT     NONE        NA ! Checked NODECON 13/05/2020 
+	NAME            NODEIN    NODEOUT       TYPE        METHOD    DDEPTH    DPADD
+	CP01            CP01      wh_cp01       PIPE        2          7002.67  20486
+	cp01_gaslift    GAS       CP01          GASLIFT     NONE        NA    1000.23! Checked NODECON 13/05/2020 
 	ENDNODECON''',
     {'name': 'CP01', 'node_in': 'CP01', 'node_out': 'wh_cp01', 'con_type': 'PIPE', 'hyd_method': '2',
-    'delta_depth': 7002.67, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+    'delta_depth': 7002.67, 'dp_add': 20486, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
     {'name': 'cp01_gaslift', 'node_in': 'GAS', 'node_out': 'CP01', 'con_type': 'GASLIFT', 'hyd_method': None,
-    'delta_depth': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},),
+    'delta_depth': None, 'dp_add': 1000.23, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},),
 (	''' TIME 01/02/2023
   NODECON
 	NAME            NODEIN    NODEOUT       TYPE        METHOD    DDEPTH

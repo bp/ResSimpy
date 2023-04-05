@@ -28,6 +28,7 @@ class NexusNodeConnection(NodeConnection):
         seawater_profile: seawater profile used. (SEAWPR)
         rate_mult: multiplier to the rate (RATEMULT)
         polymer: whether polymer is a stream here (POLYMER)
+        dp_add: Additional delta pressure (DPADD)
     """
     hyd_method: Optional[str | int] = None
     pvt_method: Optional[int] = None
@@ -48,6 +49,7 @@ class NexusNodeConnection(NodeConnection):
     rate_mult: Optional[float] = None
     polymer: Optional[str] = None
     unit_system: Optional[UnitSystem] = None
+    dp_add: Optional[float] = None
 
     def __init__(self, properties_dict: dict[str, None | int | str | float]):
         super().__init__()
@@ -80,6 +82,7 @@ class NexusNodeConnection(NodeConnection):
             'SEAWPR': ('seawater_profile', str),
             'RATEMULT': ('rate_mult', float),
             'POLYMER': ('polymer', str),
+            'DPADD': ('dp_add', float),
         }
         return nexus_mapping
 
