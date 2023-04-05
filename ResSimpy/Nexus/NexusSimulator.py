@@ -403,8 +403,9 @@ class NexusSimulator(Simulator):
         if fcs_content_with_includes is None:
             raise ValueError(f'FCS file not found, no content for {self.__new_fcs_file_path}')
         for line in fcs_content_with_includes:
-            if nfo.check_token('DATEFORMAT', line):
-                value = nfo.get_token_value('DATEFORMAT', line, fcs_content_with_includes)
+            if nfo.check_token('DATEFORMAT', line) or nfo.check_token('DATE_FORMAT', line):
+                format_token = 'DATEFORMAT' if nfo.check_token('DATEFORMAT', line) else 'DATE_FORMAT'
+                value = nfo.get_token_value(format_token, line, fcs_content_with_includes)
                 if value is not None:
                     self.date_format = DateFormat.DD_MM_YYYY if value == 'DD/MM/YYYY' else DateFormat.MM_DD_YYYY
 
