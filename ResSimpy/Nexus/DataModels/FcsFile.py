@@ -186,8 +186,8 @@ class FcsNexusFile(NexusFile):
                     nexus_file = NexusFile.generate_file_include_structure(
                         sub_file_path, origin=fcs_file_path, recursive=recursive)
                     fcs_property = getattr(fcs_file, fcs_keyword_map_multi[key])
-                    # manually initialise if the property is still a field type after class instantiation
-                    if isinstance(fcs_property, Field):
+                    # manually initialise if the property is still a None after class instantiation
+                    if fcs_property is None:
                         fcs_property = get_empty_dict_int_nexus_file()
                     # shallow copy to maintain list elements pointing to nexus_file that are
                     # stored in the file_content_as_list
