@@ -5,7 +5,8 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 
 def to_dict(nexus_object: Any, keys_in_nexus_style: bool = False, add_date: bool = True, add_units: bool = True) -> \
         dict[str, None | str | int | float]:
-    """ Returns a dictionary of the key properties of a connection. Requires a nexus mapping dictionary
+    """ Returns a dictionary of the attributes of a Nexus object. Requires a nexus mapping dictionary.
+        Useful for creating dataframes of objects
 
     Args:
         nexus_object (Any): Nexus object with a mapping dictionary defined
@@ -15,7 +16,7 @@ def to_dict(nexus_object: Any, keys_in_nexus_style: bool = False, add_date: bool
         add_units (bool): adds a units attribute if it exists.
 
     Returns:
-
+        a dictionary keyed by attributes and values as the value of the attribute
     """
     mapping_dict = nexus_object.get_nexus_mapping()
     if keys_in_nexus_style:

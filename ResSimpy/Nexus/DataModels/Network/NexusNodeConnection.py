@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Optional
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.NodeConnection import NodeConnection
+from ResSimpy.Utils import to_dict_generic
 
 
 @dataclass
@@ -89,16 +90,14 @@ class NexusNodeConnection(NodeConnection):
         return nexus_mapping
 
     def to_dict(self, keys_in_nexus_style: bool = False) -> dict[str, None | str | int | float]:
-        """Returns a dictionary of the key properties of a connection"""
-        # TODO turn this into a generic method
-        mapping_dict = self.get_nexus_mapping()
-        if keys_in_nexus_style:
-            result_dict = {x: self.__getattribute__(y[0]) for x, y in mapping_dict.items()}
+        """
+            Returns a dictionary of the attributes of the Node
+        Args:
+            keys_in_nexus_style (bool): if True returns the key values in Nexus keywords, otherwise returns the \
+                attribute name as stored by ressimpy
 
-        else:
-            result_dict = {y[0]: self.__getattribute__(y[0]) for y in mapping_dict.values()}
-        extra_attributes = {'date': self.date, }
-        if self.unit_system is not None:
-            extra_attributes.update({'unit_system': self.unit_system.value})
-        result_dict.update(extra_attributes)
+        Returns:
+            a dictionary keyed by attributes and values as the value of the attribute
+        """
+        result_dict = to_dict_generic.to_dict(self, keys_in_nexus_style, add_date=True, add_units=True)
         return result_dict
