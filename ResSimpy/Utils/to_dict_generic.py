@@ -33,8 +33,6 @@ def to_dict(nexus_object: Any, keys_in_nexus_style: bool = False, add_date: bool
         unit_sys = getattr(nexus_object, 'unit_system', None)
         if isinstance(unit_sys, UnitSystem):
             units = {'unit_system': unit_sys.value}
-        else:
-            units = {'unit_system': unit_sys}
-        extra_attributes.update(units)
+            extra_attributes.update(units)
     result_dict.update(extra_attributes)
     return result_dict
