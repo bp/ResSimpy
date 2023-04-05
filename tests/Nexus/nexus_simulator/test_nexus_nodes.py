@@ -5,6 +5,7 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.Network.NexusNodes import NexusNodes
+from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 
 
 @pytest.mark.parametrize('file_contents, node1_props, node2_props',[
@@ -81,9 +82,11 @@ def test_load_nexus_nodes(mocker, file_contents, node1_props, node2_props):
     expected_result = [node_1, node_2]
     # get the second node only
     second_node_name = node2_props['name']
+    mock_nexus_network = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
     # Act
 
-    nexus_nodes = NexusNodes()
+    nexus_nodes = NexusNodes(mock_nexus_network)
     nexus_nodes.load_nodes(surface_file, start_date, default_units=UnitSystem.ENGLISH)
     result = nexus_nodes.get_nodes()
     single_node_result = nexus_nodes.get_node(second_node_name)
@@ -110,11 +113,13 @@ def test_load_nexus_nodes(mocker, file_contents, node1_props, node2_props):
 {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': 10.21085, 'y_pos': 3524.23, 'number': 2,
     'station': 'station2', 'date': '01/01/2023', 'unit_system': 'ENGLISH'}
   )],)
-def test_get_node_df(file_contents, node1_props, node2_props):
+def test_get_node_df(mocker, file_contents, node1_props, node2_props):
     # Arrange
     start_date = '01/01/2023'
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
-    nexus_nodes = NexusNodes()
+    mock_nexus_network = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
+    nexus_nodes = NexusNodes(mock_nexus_network)
     nexus_nodes.load_nodes(surface_file, start_date, default_units=UnitSystem.ENGLISH)
 
     expected_df = pd.DataFrame([node1_props, node2_props])

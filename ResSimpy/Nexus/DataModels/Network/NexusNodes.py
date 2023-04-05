@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -8,15 +9,23 @@ from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nodes import Nodes
-from typing import Sequence, Optional
+from typing import Sequence, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 
 
 @dataclass(kw_only=True)
 class NexusNodes(Nodes):
     __nodes: list[NexusNode] = field(default_factory=lambda: [])
 
+    def __init__(self, parent_network: NexusNetwork):
+        self.parent_network: NexusNetwork = parent_network
+        self.__nodes: list[NexusNode] = []
+
     def get_nodes(self) -> Sequence[NexusNode]:
         """ Returns a list of nodes loaded from the simulator"""
+        self.parent_network.get_load_status()
         return self.__nodes
 
     def get_node(self, node_name: str) -> Optional[NexusNode]:

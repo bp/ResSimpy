@@ -99,12 +99,14 @@ def test_load_nexus_nodes(mocker, file_contents, node1_props, node2_props):
     node_1 = NexusNode(node1_props)
     node_2 = NexusNode(node2_props)
 
+    mock_nexus_network = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
     expected_result = [node_1, node_2]
     # get the second node only
     second_node_name = node2_props['name']
     # Act
 
-    nexus_nodes = NexusNodes()
+    nexus_nodes = NexusNodes(mock_nexus_network)
     nexus_nodes.load_nodes(surface_file, start_date, default_units=UnitSystem.ENGLISH)
     result = nexus_nodes.get_nodes()
     single_node_result = nexus_nodes.get_node(second_node_name)
@@ -131,11 +133,13 @@ def test_load_nexus_nodes(mocker, file_contents, node1_props, node2_props):
 {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': 10.21085, 'y_pos': 3524.23, 'number': 2,
     'station': 'station2', 'date': '01/01/2023', 'unit_system': 'ENGLISH'}
   )],)
-def test_get_node_df(file_contents, node1_props, node2_props):
+def test_get_node_df(mocker, file_contents, node1_props, node2_props):
     # Arrange
     start_date = '01/01/2023'
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
-    nexus_nodes = NexusNodes()
+    mock_nexus_network = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
+    nexus_nodes = NexusNodes(mock_nexus_network)
     nexus_nodes.load_nodes(surface_file, start_date, default_units=UnitSystem.ENGLISH)
 
     expected_df = pd.DataFrame([node1_props, node2_props])
@@ -200,7 +204,7 @@ def test_get_node_df(file_contents, node1_props, node2_props):
     'temperature_profile': 'prtempr', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},),
 
 	], ids=['basic', 'other_tables', 'time changes two tables', 'More Columns'])
-def test_load_connections(file_contents, connection1_props, connection2_props):
+def test_load_connections(mocker, file_contents, connection1_props, connection2_props):
     # Arrange
     start_date = '01/01/2023'
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
@@ -211,8 +215,9 @@ def test_load_connections(file_contents, connection1_props, connection2_props):
     # create the dataframe output
     expected_df = pd.DataFrame([connection1_props, connection2_props])
     expected_df = expected_df.fillna(value=np.nan).dropna(axis=1, how='all')
-
-    nexus_cons = NexusNodeConnections()
+    mock_nexus_network = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
+    nexus_cons = NexusNodeConnections(mock_nexus_network)
     # Act
     nexus_cons.load_connections(surface_file, start_date, default_units=UnitSystem.ENGLISH)
     result = nexus_cons.get_connections()
@@ -242,7 +247,7 @@ WELLS
 'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
 )
 ])
-def test_load_well_connections(file_contents, well_connection_props1, well_connection_props2,):
+def test_load_well_connections(mocker, file_contents, well_connection_props1, well_connection_props2,):
     # Arrange
     start_date = '01/01/2023'
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
@@ -250,9 +255,12 @@ def test_load_well_connections(file_contents, well_connection_props1, well_conne
     wellcon1 = NexusWellConnection(well_connection_props1)
     wellcon2 = NexusWellConnection(well_connection_props2)
     expected_result = [wellcon1, wellcon2]
-    nexus_well_cons = NexusWellConnections()
+    mock_nexus_network = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
+    nexus_well_cons = NexusWellConnections(mock_nexus_network)
     expected_df = pd.DataFrame([well_connection_props1, well_connection_props2])
     expected_df = expected_df.fillna(value=np.nan).dropna(axis=1, how='all')
+
 
     # Act
     nexus_well_cons.load_well_connections(surface_file, start_date, default_units=UnitSystem.ENGLISH)

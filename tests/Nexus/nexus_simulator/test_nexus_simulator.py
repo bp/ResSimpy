@@ -1,6 +1,7 @@
 import os
 import pytest
 import pandas as pd
+from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
@@ -779,7 +780,7 @@ def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
 
 
 @pytest.mark.parametrize("fcs_file_contents, surface_file_content, node1_props, node2_props, \
-connection1_props, connection2_props",
+connection1_props, connection2_props, wellconprops1, wellconprops2",
      [(
          'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data/surface.inc',
          '''NODECON
@@ -795,6 +796,12 @@ connection1_props, connection2_props",
           ENDNODES
           content outside of the node statement
           node1         NA        NA    60.5    10.5 3.5   1     station_null
+          TIME 01/02/2024
+          WELLS
+         NAME   STREAM DATUM CROSSFLOW CROSS_SHUT
+         R001 PRODUCER 10350       OFF        OFF
+         R002 PRODUCER 10350       ON        OFF
+         ENDWELLS
           ''',
             {'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
                 'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
@@ -803,11 +810,15 @@ connection1_props, connection2_props",
             {'name': 'CP01', 'node_in': 'CP01', 'node_out': 'wh_cp01', 'con_type': 'PIPE', 'hyd_method': '2',
             'delta_depth': 7002.67, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
             {'name': 'cp01_gaslift', 'node_in': 'GAS', 'node_out': 'CP01', 'con_type': 'GASLIFT', 'hyd_method': None,
-            'delta_depth': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH}
+            'delta_depth': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+            {'name': 'R001', 'stream': 'PRODUCER', 'datum_depth': 10350.0, 'crossflow': 'OFF', 'crossshut_method': 'OFF',
+            'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH},
+            {'name': 'R002', 'stream': 'PRODUCER', 'datum_depth': 10350.0, 'crossflow': 'ON', 'crossshut_method': 'OFF',
+             'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH}
          ),
      ])
 def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node1_props, node2_props,
-    connection1_props, connection2_props,):
+    connection1_props, connection2_props, wellconprops1, wellconprops2):
     # Arrange
     # Mock out the surface and fcs file
     def mock_open_wrapper(filename, mode):
@@ -830,10 +841,21 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
     con1 = NexusNodeConnection(connection1_props)
     con2 = NexusNodeConnection(connection2_props)
     expected_cons = [con1, con2]
+
+    well_con1 = NexusWellConnection(wellconprops1)
+    well_con2 = NexusWellConnection(wellconprops2)
+    expected_wellcons = [well_con1, well_con2]
+
+    # create a mocker spy to check the network loader gets called once
+    spy = mocker.spy(nexus_sim.Network, 'load')
+
     # Act
-    nexus_sim.load_network()
     result_nodes = nexus_sim.Network.Nodes.get_nodes()
     result_cons = nexus_sim.Network.Connections.get_connections()
+    result_wellcons = nexus_sim.Network.WellConnections.get_well_connections()
     # Assert
     assert result_nodes == expected_nodes
     assert result_cons == expected_cons
+    assert result_wellcons == expected_wellcons
+
+    spy.assert_called_once()

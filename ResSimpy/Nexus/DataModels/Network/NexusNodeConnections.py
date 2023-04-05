@@ -1,7 +1,8 @@
+from __future__ import annotations
 from dataclasses import dataclass, field
 import numpy as np
 import pandas as pd
-from typing import Sequence, Optional
+from typing import Sequence, Optional, TYPE_CHECKING
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -10,12 +11,20 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.NodeConnection import NodeConnection
 from ResSimpy.NodeConnections import NodeConnections
 
+if TYPE_CHECKING:
+    from ResSimpy.Nexus.NexusNetwork import NexusNetwork
+
 
 @dataclass(kw_only=True)
 class NexusNodeConnections(NodeConnections):
     __connections: list[NexusNodeConnection] = field(default_factory=lambda: [])
 
+    def __init__(self, parent_network: NexusNetwork):
+        self.parent_network: NexusNetwork = parent_network
+        self.__connections: list[NexusNodeConnection] = []
+
     def get_connections(self) -> Sequence[NexusNodeConnection]:
+        self.parent_network.get_load_status()
         return self.__connections
 
     def get_connection(self, connection_name: str) -> Optional[NodeConnection]:

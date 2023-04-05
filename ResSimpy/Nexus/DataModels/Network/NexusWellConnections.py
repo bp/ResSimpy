@@ -1,5 +1,6 @@
+from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
@@ -9,13 +10,21 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
+if TYPE_CHECKING:
+    from ResSimpy.Nexus.NexusNetwork import NexusNetwork
+
 
 @dataclass
 class NexusWellConnections:
     __well_connections: list[NexusWellConnection] = field(default_factory=list)
 
+    def __init__(self, parent_network: NexusNetwork):
+        self.parent_network: NexusNetwork = parent_network
+        self.__well_connections: list[NexusWellConnection] = []
+
     def get_well_connections(self) -> list[NexusWellConnection]:
         """ Returns a list of well connections loaded from the simulator"""
+        self.parent_network.get_load_status()
         return self.__well_connections
 
     def get_well_connection(self, name: str) -> Optional[NexusWellConnection]:

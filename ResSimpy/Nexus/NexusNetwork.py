@@ -18,9 +18,21 @@ if TYPE_CHECKING:
 @dataclass(kw_only=True)
 class NexusNetwork:
     model: NexusSimulator
-    Nodes: NexusNodes = NexusNodes()
-    Connections: NexusNodeConnections = NexusNodeConnections()
-    WellConnections: NexusWellConnections = NexusWellConnections()
+    Nodes: NexusNodes
+    Connections: NexusNodeConnections
+    WellConnections: NexusWellConnections
+    __has_been_loaded: bool = False
+
+    def __init__(self, model: NexusSimulator):
+        self.model: NexusSimulator = model
+        self.Nodes: NexusNodes = NexusNodes(self)
+        self.Connections: NexusNodeConnections = NexusNodeConnections(self)
+        self.WellConnections: NexusWellConnections = NexusWellConnections(self)
+        self.__has_been_loaded: bool = False
+
+    def get_load_status(self):
+        if not self.__has_been_loaded:
+            self.load()
 
     def get_surface_file(self, method_number: Optional[int] = None) -> Optional[dict[int, NexusFile] | NexusFile]:
         """ gets a specific surface file object or a dictionary of surface files keyed by method number
@@ -53,3 +65,5 @@ class NexusNetwork:
             self.Nodes.add_nodes(nexus_obj_dict.get('NODES'))
             self.Connections.add_connections(nexus_obj_dict.get('NODECON'))
             self.WellConnections.add_connections(nexus_obj_dict.get('WELLS'))
+
+        self.__has_been_loaded = True
