@@ -735,7 +735,7 @@ def check_list_tokens(list_tokens: list[str], line: str) -> Optional[str]:
         line (str): line to search for tokens
 
     Returns:
-        bool, Optional[str]: returns the token which was found otherwise returns None.
+        Optional[str]: returns the token which was found otherwise returns None.
 
     """
     for x in list_tokens:
