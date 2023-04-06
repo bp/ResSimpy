@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnections import NexusWellConnections
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -280,14 +281,33 @@ def test_load_well_connections(mocker, file_contents, well_connection_props1, we
     well2	 QWSMAX 	0.0  QLIQSMAX- 10000.0 QLIQSMAX 15.5
     ENDCONSTRAINTS
     ''',
-    ({'name': 'well1', 'qliqsmax': 3884.0, 'qwsmax': 0},
-     {'name': 'well1', 'qwsmax': 0.0, 'qliqsmax-': 10000.0, 'qliqsmax': 15.5})
+    ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0},
+     {'date': '01/01/2019', 'name': 'well1', 'max_surface_water_rate': 0.0, 'max_reverse_reservoir_liquid_rate': 10000.0,
+      'max_surface_liquid_rate': 15.5})
+    ),
+    ('''CONSTAINTS
+    well1	 QLIQSMAX 	3884.0  QWSMAX 	0
+    well2	 QWSMAX 	0.0  QLIQSMAX- 10000.0 QLIQSMAX 15.5
+    ENDCONSTRAINTS
+    TIME 01/01/2020
+    CONSTAINTS
+    well1	 QLIQSMAX 	5000
+    well2	 QWSMAX 	0.0  QLIQSMAX 20.5
+    ENDCONSTRAINTS''',
+    ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'qwsmax': 0},
+     {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_reservoir_liquid_rate': 10000.0,
+      'max_surface_liquid_rate': 15.5},
+     {'date': '01/01/2020', 'name': 'well1', 'max_surface_liquid_rate': 5000, 'qwsmax': 0},
+   {'date': '01/01/2020', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_reservoir_liquid_rate': 10000.0,
+   'max_surface_liquid_rate': 20.5}
+     ),
     )
-    ], ids=['basic_test',]
+    ], ids=['basic_test', 'Change in Time']
     )
 def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
-
+    start_date = '01/01/2019'
+    expected_constraints = [NexusConstraint(x) for x in expected_content]
     # Act
-
+    result = NexusConstraints.load_well_constraints()
     # Assert
