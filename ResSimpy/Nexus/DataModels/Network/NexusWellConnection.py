@@ -3,6 +3,7 @@ from typing import Optional
 
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 import ResSimpy.Utils.to_dict_generic as to_dict_generic
+from ResSimpy.Utils.generic_repr import generic_repr
 
 
 @dataclass(kw_only=True)
@@ -111,6 +112,9 @@ class NexusWellConnection:
         if self.name is not None:
             self.bh_node_name = self.name + '%bh'
             self.wh_node_name = self.name + '%wh'
+
+    def __repr__(self):
+        return generic_repr(self)
 
     @staticmethod
     def get_nexus_mapping() -> dict[str, tuple[str, type]]:
