@@ -1,11 +1,11 @@
 from __future__ import annotations
-from dataclasses import Field, dataclass, field
+from dataclasses import dataclass, field
 import os
 import warnings
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from typing import Optional, Union
-from ResSimpy.Utils.factory_methods import get_empty_dict_int_nexus_file, get_empty_list_str,\
+from ResSimpy.Utils.factory_methods import get_empty_dict_int_nexus_file, get_empty_list_str, \
     get_empty_list_nexus_file, get_empty_list_str_nexus_file
 from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -42,39 +42,38 @@ class FcsNexusFile(NexusFile):
     tracer_init_file: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
 
     def __init__(
-        self, location: Optional[str] = None,
-        includes: Optional[list[str]] = field(default_factory=get_empty_list_str),
-        origin: Optional[str] = None,
-        includes_objects: Optional[list[NexusFile]] = field(default_factory=get_empty_list_nexus_file),
-        file_content_as_list: Optional[list[Union[str, NexusFile]]] = field(
-            default_factory=get_empty_list_str_nexus_file),
-        restart_file: Optional[NexusFile] = None,
-        structured_grid_file: Optional[NexusFile] = None,
-        options_file: Optional[NexusFile] = None,
-        runcontrol_file: Optional[NexusFile] = None,
-        override_file: Optional[NexusFile] = None,
-        eos_default_file: Optional[NexusFile] = None,
-        well_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
-        surface_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
-        rock_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
-        relperm_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
-        pvt_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
-        water_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
-        equil_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
-        aquifer_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
-        hyd_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
-        separator_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
-        ipr_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
-        gas_lift_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
-        pump_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
-        compressor_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
-        choke_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
-        icd_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
-        esp_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
-        polymer_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
-        adsorption_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
-        flux_in_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
-        tracer_init_file: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file),
+            self, location: Optional[str] = None,
+            includes: Optional[list[str]] = None,
+            origin: Optional[str] = None,
+            includes_objects: Optional[list[NexusFile]] = None,
+            file_content_as_list: Optional[list[Union[str, NexusFile]]] = None,
+            restart_file: Optional[NexusFile] = None,
+            structured_grid_file: Optional[NexusFile] = None,
+            options_file: Optional[NexusFile] = None,
+            runcontrol_file: Optional[NexusFile] = None,
+            override_file: Optional[NexusFile] = None,
+            eos_default_file: Optional[NexusFile] = None,
+            well_files: Optional[dict[int, NexusFile]] = None,
+            surface_files: Optional[dict[int, NexusFile]] = None,
+            rock_files: Optional[dict[int, NexusFile]] = None,
+            relperm_files: Optional[dict[int, NexusFile]] = None,
+            pvt_files: Optional[dict[int, NexusFile]] = None,
+            water_files: Optional[dict[int, NexusFile]] = None,
+            equil_files: Optional[dict[int, NexusFile]] = None,
+            aquifer_files: Optional[dict[int, NexusFile]] = None,
+            hyd_files: Optional[dict[int, NexusFile]] = None,
+            separator_files: Optional[dict[int, NexusFile]] = None,
+            ipr_files: Optional[dict[int, NexusFile]] = None,
+            gas_lift_files: Optional[dict[int, NexusFile]] = None,
+            pump_files: Optional[dict[int, NexusFile]] = None,
+            compressor_files: Optional[dict[int, NexusFile]] = None,
+            choke_files: Optional[dict[int, NexusFile]] = None,
+            icd_files: Optional[dict[int, NexusFile]] = None,
+            esp_files: Optional[dict[int, NexusFile]] = None,
+            polymer_files: Optional[dict[int, NexusFile]] = None,
+            adsorption_files: Optional[dict[int, NexusFile]] = None,
+            flux_in_files: Optional[dict[int, NexusFile]] = None,
+            tracer_init_file: Optional[dict[int, NexusFile]] = None,
     ):
         self.restart_file = restart_file
         self.structured_grid_file = structured_grid_file
@@ -83,26 +82,26 @@ class FcsNexusFile(NexusFile):
         self.override_file = override_file
         self.eos_default_file = eos_default_file
         self.surface_files = surface_files
-        self.well_files = well_files
-        self.rock_files = rock_files
-        self.relperm_files = relperm_files
-        self.pvt_files = pvt_files
-        self.water_files = water_files
-        self.equil_files = equil_files
-        self.aquifer_files = aquifer_files
-        self.hyd_files = hyd_files
-        self.separator_files = separator_files
-        self.ipr_files = ipr_files
-        self.gas_lift_files = gas_lift_files
-        self.pump_files = pump_files
-        self.compressor_files = compressor_files
-        self.choke_files = choke_files
-        self.icd_files = icd_files
-        self.esp_files = esp_files
-        self.polymer_files = polymer_files
-        self.adsorption_files = adsorption_files
-        self.flux_in_files = flux_in_files
-        self.tracer_init_file = tracer_init_file
+        self.well_files = well_files if well_files is not None else get_empty_dict_int_nexus_file()
+        self.rock_files = rock_files if rock_files is not None else get_empty_dict_int_nexus_file()
+        self.relperm_files = relperm_files if relperm_files is not None else get_empty_dict_int_nexus_file()
+        self.pvt_files = pvt_files if pvt_files is not None else get_empty_dict_int_nexus_file()
+        self.water_files = water_files if water_files is not None else get_empty_dict_int_nexus_file()
+        self.equil_files = equil_files if equil_files is not None else get_empty_dict_int_nexus_file()
+        self.aquifer_files = aquifer_files if aquifer_files is not None else get_empty_dict_int_nexus_file()
+        self.hyd_files = hyd_files if hyd_files is not None else get_empty_dict_int_nexus_file()
+        self.separator_files = separator_files if separator_files is not None else get_empty_dict_int_nexus_file()
+        self.ipr_files = ipr_files if ipr_files is not None else get_empty_dict_int_nexus_file()
+        self.gas_lift_files = gas_lift_files if gas_lift_files is not None else get_empty_dict_int_nexus_file()
+        self.pump_files = pump_files if pump_files is not None else get_empty_dict_int_nexus_file()
+        self.compressor_files = compressor_files if compressor_files is not None else get_empty_dict_int_nexus_file()
+        self.choke_files = choke_files if choke_files is not None else get_empty_dict_int_nexus_file()
+        self.icd_files = icd_files if icd_files is not None else get_empty_dict_int_nexus_file()
+        self.esp_files = esp_files if esp_files is not None else get_empty_dict_int_nexus_file()
+        self.polymer_files = polymer_files if polymer_files is not None else get_empty_dict_int_nexus_file()
+        self.adsorption_files = adsorption_files if adsorption_files is not None else get_empty_dict_int_nexus_file()
+        self.flux_in_files = flux_in_files if flux_in_files is not None else get_empty_dict_int_nexus_file()
+        self.tracer_init_file = tracer_init_file if tracer_init_file is not None else get_empty_dict_int_nexus_file()
         super().__init__(location=location, includes=includes, origin=origin, includes_objects=includes_objects,
                          file_content_as_list=file_content_as_list)
 
@@ -187,8 +186,8 @@ class FcsNexusFile(NexusFile):
                     nexus_file = NexusFile.generate_file_include_structure(
                         sub_file_path, origin=fcs_file_path, recursive=recursive)
                     fcs_property = getattr(fcs_file, fcs_keyword_map_multi[key])
-                    # manually initialise if the property is still a field type after class instantiation
-                    if isinstance(fcs_property, Field):
+                    # manually initialise if the property is still a None after class instantiation
+                    if fcs_property is None:
                         fcs_property = get_empty_dict_int_nexus_file()
                     # shallow copy to maintain list elements pointing to nexus_file that are
                     # stored in the file_content_as_list

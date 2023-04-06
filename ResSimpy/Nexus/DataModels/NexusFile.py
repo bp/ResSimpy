@@ -7,6 +7,8 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 import warnings
 
 from ResSimpy.Grid import VariableEntry
+from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_OPERATION_KEYWORDS, GRID_ARRAY_FORMAT_KEYWORDS,\
+    GRID_ARRAY_KEYWORDS
 from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_nexus_file, get_empty_list_str_nexus_file
 
 
@@ -23,20 +25,22 @@ class NexusFile:
     location: Optional[str] = None
     includes: Optional[list[str]] = field(default_factory=get_empty_list_str)
     origin: Optional[str] = None
-    includes_objects: Optional[list[NexusFile]] = field(default_factory=get_empty_list_nexus_file)
-    file_content_as_list: Optional[list[Union[str, NexusFile]]] = field(default_factory=get_empty_list_str_nexus_file)
+    includes_objects: Optional[list[NexusFile]] = field(default_factory=get_empty_list_nexus_file, repr=False)
+    file_content_as_list: Optional[list[Union[str, NexusFile]]] = field(default_factory=get_empty_list_str_nexus_file,
+                                                                        repr=False)
 
     def __init__(self, location: Optional[str] = None,
-                 includes: Optional[list[str]] = field(default_factory=get_empty_list_str),
+                 includes: Optional[list[str]] = None,
                  origin: Optional[str] = None,
-                 includes_objects: Optional[list[NexusFile]] = field(default_factory=get_empty_list_nexus_file),
-                 file_content_as_list: Optional[list[Union[str, NexusFile]]] =
-                 field(default_factory=get_empty_list_str_nexus_file)):
+                 includes_objects: Optional[list[NexusFile]] = None,
+                 file_content_as_list: Optional[list[Union[str, NexusFile]]] = None):
         self.location: Optional[str] = location
-        self.includes: Optional[list[str]] = includes
+        self.includes: Optional[list[str]] = get_empty_list_str() if includes is None else includes
         self.origin: Optional[str] = origin
-        self.includes_objects: Optional[list[NexusFile]] = includes_objects
-        self.file_content_as_list: Optional[list[Union[str, NexusFile]]] = file_content_as_list
+        self.includes_objects: Optional[list[NexusFile]] = get_empty_list_nexus_file() \
+            if includes_objects is None else includes_objects
+        self.file_content_as_list: Optional[list[Union[str, NexusFile]]] = get_empty_list_str_nexus_file() \
+            if file_content_as_list is None else file_content_as_list
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True,
@@ -86,11 +90,20 @@ class NexusFile:
         skip_next_include = False
 
         for i, line in enumerate(file_as_list):
-            # check if the next include should be skipped
-            if skip_arrays and nfo.check_token("VALUE", line) and \
-                    nfo.get_token_value("VALUE", line, file_as_list) == "INCLUDE":
-                skip_next_include = True
-            if not nfo.check_token("INCLUDE", line):
+            if nfo.check_token("INCLUDE", line):
+                # Include found, check if we should skip loading it in (e.g. if it is a large array file)
+                ignore_keywords = ['NOLIST']
+                previous_value = nfo.get_previous_value(file_as_list=file_as_list[0: i + 1], search_before='INCLUDE',
+                                                        ignore_values=ignore_keywords)
+
+                keywords_to_skip_include = GRID_ARRAY_FORMAT_KEYWORDS + GRID_ARRAY_KEYWORDS + GRID_OPERATION_KEYWORDS
+                if previous_value is None:
+                    skip_next_include = False
+
+                elif previous_value.upper() in keywords_to_skip_include:
+                    skip_next_include = True
+
+            else:
                 modified_file_as_list.append(line)
                 continue
             inc_file_path = nfo.get_token_value('INCLUDE', line, file_as_list)

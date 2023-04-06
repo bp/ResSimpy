@@ -92,6 +92,50 @@ def check_token(token: str, line: str) -> bool:
     return True
 
 
+def get_previous_value(file_as_list: list[str], search_before: Optional[str] = None,
+                       ignore_values: Optional[list[str]] = None) -> Optional[str]:
+    """Gets the previous non blank value in a list of lines. Starts from the last line working backwards
+
+        Args:
+            file_as_list (list[str]): a list of strings containing each line of the file as a new entry,
+            ending with the line to start searching from.
+            search_before (Optional[str]): The string to start the search from in a backwards direction
+            ignore_values (Optional[list[str]], optional): a list of values that should be ignored if found. \
+                Defaults to None.
+
+        Returns:
+            Optional[str]: Next non blank value from the list, if none found returns None
+        """
+
+    # Reverse the order of the lines
+    file_as_list.reverse()
+
+    # If we are searching before a specific token, remove that and the rest of the line.
+    if search_before is not None:
+        search_before_location = file_as_list[0].rfind(search_before)
+        file_as_list[0] = file_as_list[0][0: search_before_location]
+
+    previous_value: str = ''
+
+    for line in file_as_list:
+        string_to_search: str = line
+
+        # Retrieve all of the values in the line, then return the last one found if one is found.
+        # Otherwise search the next line
+        next_value = get_next_value(0, [string_to_search], ignore_values=ignore_values)
+
+        while next_value is not None and search_before != next_value:
+            previous_value = next_value
+            string_to_search = string_to_search.replace(next_value, '')
+            next_value = get_next_value(0, [string_to_search], ignore_values=ignore_values)
+
+        if previous_value != '':
+            return previous_value
+
+    # Start of file reached, no values found
+    return None
+
+
 def get_next_value(start_line_index: int, file_as_list: list[str], search_string: Optional[str] = None,
                    ignore_values: Optional[list[str]] = None,
                    replace_with: Union[str, VariableEntry, None] = None) -> Optional[str]:
@@ -731,17 +775,35 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
     return list_of_objects
 
 
-def collect_all_tables_to_objects(nexus_file: NexusFile, row_object: Any, table_names_list: list[str],
-                                  start_date: Optional[str],
+def check_list_tokens(list_tokens: list[str], line: str) -> Optional[str]:
+    """ Checks a list of tokens for whether it exists in a string
+
+    Args:
+        list_tokens (list[str]): list of tokens to search for within the line
+        line (str): line to search for tokens
+
+    Returns:
+        Optional[str]: returns the token which was found otherwise returns None.
+
+    """
+    for x in list_tokens:
+        token_found = check_token(x, line)
+        if token_found:
+            return x
+    return None
+
+
+def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[str, Any], start_date: Optional[str],
                                   default_units: Optional[UnitSystem], ) -> Sequence[Any]:
     """ Loads all tables from a given file.
 
         Args:
             nexus_file (NexusFile): NexusFile representation of the file.
-            row_object (Type(Storage_Object)): object type to store the data from each row into
+            table_object_map (dict[str, Storage_Object]): dictionary containing the name of the table as keys and \
+                the object type to store the data from each row into. Requires objects to have a get_nexus_mapping \
+                function
             start_date (str): Starting date of the run
             default_units (UnitSystem): Units used in case not specified by file.
-            table_names_list (list[str]): list of possible table header names
         Raises:
             TypeError: if the unit system found in the property check is not a valid enum UnitSystem
         Returns:
@@ -749,11 +811,11 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, row_object: Any, table_
         """
     current_date = start_date
     nexus_object_list: list[Any] = []
-    file_as_list = nexus_file.get_flat_list_str_file()
-    property_map = row_object.get_nexus_mapping()
-    table_start = -1
-    table_end = -1
+    file_as_list: list[str] = nexus_file.get_flat_list_str_file()
+    table_start: int = -1
+    table_end: int = -1
     property_dict: dict = {}
+    token_found: Optional[str] = None
     for index, line in enumerate(file_as_list):
         # check for changes in unit system
         check_property_in_line(line, property_dict, file_as_list)
@@ -765,20 +827,28 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, row_object: Any, table_
             current_date = get_expected_token_value(
                 token='TIME', token_line=line, file_list=file_as_list,
                 custom_message=f"Cannot find the date associated with the TIME card in {line=} at line number {index}")
-
-        if any([check_token(x, line) for x in table_names_list]):
+        if table_start < 0:
+            token_found = check_list_tokens(list(table_object_map.keys()), line)
+            if token_found is None:
+                continue
+            # if a token is found get the starting index of the table
             table_start = index + 1
-        if table_start > 0 and any([check_token('END' + x, line) for x in table_names_list]):
+        if token_found is None:
+            continue
+        if table_start > 0 and check_token('END' + token_found, line):
             table_end = index
+        # if we have a complete table to read in start reading it into objects
         if 0 < table_start < table_end:
+            property_map = table_object_map[token_found].get_nexus_mapping()
             list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
-                                                 row_object=row_object,
+                                                 row_object=table_object_map[token_found],
                                                  property_map=property_map, current_date=current_date,
                                                  unit_system=unit_system)
             nexus_object_list.extend(list_objects)
             # reset indices for further tables
             table_start = -1
             table_end = -1
+            token_found = None
     return nexus_object_list
 
 
