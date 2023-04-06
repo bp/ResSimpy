@@ -2,9 +2,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional, TYPE_CHECKING
 
-import numpy as np
 import pandas as pd
 
+from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -46,13 +46,7 @@ class NexusWellConnections:
             DataFrame: of the properties of the well connections through time with each row representing a single well \
             connection
         """
-        df_store = pd.DataFrame()
-        for node in self.__well_connections:
-            df_row = pd.DataFrame(node.to_dict(), index=[0])
-            df_store = pd.concat([df_store, df_row], axis=0, ignore_index=True)
-        df_store = df_store.fillna(value=np.nan)
-        df_store = df_store.dropna(axis=1, how='all')
-        return df_store
+        return obj_to_dataframe(self.__well_connections)
 
     def get_well_connections_overview(self) -> str:
         raise NotImplementedError('To be implemented')
@@ -64,10 +58,10 @@ class NexusWellConnections:
         self.add_connections(new_well_connections.get('WELLS'))
 
     def add_connections(self, additional_list: Optional[list[NexusWellConnection]]) -> None:
-        """ extends the nodes object by a list of nodes provided to it.
+        """ extends the nodes object by a list of connections provided to it.
 
         Args:
-            additional_list (Sequence[NexusWellConnection]): list of nexus nodes to add to the nodes list.
+            additional_list (Sequence[NexusWellConnection]): list of nexus connections to add to the nodes list.
 
         Returns:
             None
