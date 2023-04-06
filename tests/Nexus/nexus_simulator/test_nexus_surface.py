@@ -3,6 +3,8 @@ import pandas as pd
 import pytest
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnections import NexusWellConnections
+from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
+from ResSimpy.Nexus.DataModels.Network.NexusWellheads import NexusWellheads
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
@@ -271,4 +273,42 @@ def test_load_well_connections(mocker, file_contents, well_connection_props1, we
     # Assert
     assert result == expected_result
     assert single_connection_result == wellcon1
+    pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
+
+
+@pytest.mark.parametrize('file_contents, wellhead_props_1, wellhead_props_2', [
+(''' TIME 01/03/2019
+WELLHEAD
+WELL NAME DEPTH TYPE METHOD
+!ru	TH-ru	100	PIPE 	3	
+R001	tubing	50.2	PIPE 	2	!ENDWELLHEAD
+R-0_02	TH-03	0	PIPE 	1! comment
+	ENDWELLHEAD''',
+{'well': 'R001', 'name': 'tubing', 'DEPTH': 50.2, 'type': 'PIPE', 'hyd_method': 2, 'date': '01/03/2019', 'unit_system': UnitSystem.ENGLISH},
+{'well': 'R-0_02', 'name': 'TH-03', 'DEPTH': 0, 'type': 'PIPE', 'hyd_method': 1, 'date': '01/03/2019', 'unit_system': UnitSystem.ENGLISH},)
+
+])
+def test_load_wellhead(mocker, file_contents, wellhead_props_1, wellhead_props_2):
+    # Arrange
+    start_date = '01/01/2018'
+    surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
+
+    wellhead1 = NexusWellhead(wellhead_props_1)
+    wellhead2 = NexusWellhead(wellhead_props_2)
+    expected_result = [wellhead1, wellhead2]
+    mock_nexus_network = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
+    nexus_wellheads = NexusWellheads(mock_nexus_network)
+    expected_df = pd.DataFrame([wellhead_props_1, wellhead_props_2])
+    expected_df = expected_df.fillna(value=np.nan).dropna(axis=1, how='all')
+
+    # Act
+    nexus_wellheads.load_wellheads(surface_file, start_date, default_units=UnitSystem.ENGLISH)
+    result = nexus_wellheads.get_wellheads()
+    single_wellhead = nexus_wellheads.get_wellhead('R001')
+    result_df = nexus_wellheads.get_wellheads_df()
+
+    # Assert
+    assert result == expected_result
+    assert single_wellhead == single_wellhead
     pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)

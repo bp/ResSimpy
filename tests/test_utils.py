@@ -77,7 +77,7 @@ def test_obj_to_dataframe():
                                 'attr_2': [10, 2],
                                 'attr_3': [43020.2, 2.2],
                                 'unit_system': ['METRIC', 'ENGLISH'],
-                                'date': ['01/01/2030', '01/01/2033']
+                                'date': ['01/01/2030', '01/01/2033'],
                                 })
     # Act
     result = obj_to_dataframe(list_class)
