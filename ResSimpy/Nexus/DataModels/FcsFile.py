@@ -9,6 +9,7 @@ from ResSimpy.Utils.factory_methods import get_empty_dict_int_nexus_file, get_em
     get_empty_list_nexus_file, get_empty_list_str_nexus_file
 from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
 import ResSimpy.Nexus.nexus_file_operations as nfo
+from ResSimpy.Utils.generic_repr import generic_repr
 
 
 @dataclass(kw_only=True)
@@ -104,6 +105,9 @@ class FcsNexusFile(NexusFile):
         self.tracer_init_file = tracer_init_file if tracer_init_file is not None else get_empty_dict_int_nexus_file()
         super().__init__(location=location, includes=includes, origin=origin, includes_objects=includes_objects,
                          file_content_as_list=file_content_as_list)
+
+    def __repr__(self):
+        return generic_repr(self)
 
     @classmethod
     def generate_fcs_structure(cls, fcs_file_path: str, recursive: bool = True) -> FcsNexusFile:

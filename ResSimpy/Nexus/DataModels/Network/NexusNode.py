@@ -4,6 +4,7 @@ from typing import Optional
 
 from ResSimpy.Node import Node
 from ResSimpy.Utils import to_dict_generic
+from ResSimpy.Utils.generic_repr import generic_repr
 
 
 @dataclass(kw_only=True)
@@ -18,6 +19,9 @@ class NexusNode(Node):
         super().__init__()
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)
+
+    def __repr__(self):
+        return generic_repr(self)
 
     @staticmethod
     def get_nexus_mapping() -> dict[str, tuple[str, type]]:
