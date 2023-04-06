@@ -1,10 +1,12 @@
 from dataclasses import dataclass
+from typing import Optional
 
 import pandas as pd
 import pytest
 
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Utils import to_dict_generic
+from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 from ResSimpy.Utils.to_dict_generic import to_dict
 
@@ -83,3 +85,26 @@ def test_obj_to_dataframe():
     result = obj_to_dataframe(list_class)
     # Assert
     pd.testing.assert_frame_equal(result, expected_df, check_like=True)
+
+
+def test_generic_repr():
+    @dataclass
+    class MyClass:
+        well: str
+        depth: float
+        x_pos: Optional[float]
+        y_pos: Optional[float]
+        temp: Optional[float]
+
+        def __repr__(self):
+            return generic_repr(self)
+
+    obj = MyClass(
+        well="my_well",
+        depth=100,
+        x_pos=50.0,
+        y_pos=75.0,
+        temp=None
+    )
+    expected = "MyClass(well='my_well', depth=100, x_pos=50.0, y_pos=75.0)"
+    assert repr(obj) == expected
