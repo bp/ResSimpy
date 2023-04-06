@@ -160,7 +160,7 @@ class StructuredGridOperations:
                 If the field is not found in the structured grid returns None.
         """
         structured_grid_dict = self.model.get_structured_grid_dict()
-        structured_grid_path = self.model.get_structured_grid_path()
+        structured_grid_path = self.model.structured_grid_path
         command_token = f"{field.upper()} {structured_grid_dict[field.lower()].modifier}"
         if structured_grid_path is None:
             raise ValueError("No path found for structured grid file path. \

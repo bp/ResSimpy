@@ -2,15 +2,15 @@ from __future__ import annotations
 
 import os
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
-
-# from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+if TYPE_CHECKING:
+    from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
 
 class Logging:
-    def __init__(self, model, ):  # NexusSimulator):
+    def __init__(self, model: NexusSimulator) -> None:
         """ class for controlling all logging and logfile (*.log) related functionality
         Args:
             model: NexusSimulator instance

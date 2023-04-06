@@ -13,7 +13,7 @@ import os
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits, SUnits
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEYWORDS
-from ResSimpy.Nexus.nexus_constants import VALID_NEXUS_KEYWORDS
+from ResSimpy.Nexus.NexusKeywords.nexus_keywords import VALID_NEXUS_KEYWORDS
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -536,8 +536,8 @@ def clean_up_string(value: str) -> str:
     return value
 
 
-def get_multiple_sequential_tokens(list_of_strings: list[str], number_tokens: int) -> list[str]:
-    """Returns a sequential list of tokens as long as the number of tokens requested.
+def get_multiple_sequential_values(list_of_strings: list[str], number_tokens: int) -> list[str]:
+    """Returns a sequential list of values as long as the number of tokens requested.
 
     Args:
         list_of_strings (list[str]): list of strings to represent the file with a new entry per line in the file.
@@ -552,8 +552,7 @@ def get_multiple_sequential_tokens(list_of_strings: list[str], number_tokens: in
     store_values = []
     filter_list = list_of_strings.copy()
     for i in range(0, number_tokens):
-        # TODO: change to get_expected_next_value
-        value = get_next_value(0, filter_list, filter_list[0], replace_with='')
+        value = get_expected_next_value(0, filter_list, filter_list[0], replace_with='')
         while value is None:
             # if no valid value found in the first line, remove it and try it again
             filter_list.pop(0)

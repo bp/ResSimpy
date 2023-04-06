@@ -394,7 +394,7 @@ def test_get_multiple_sequential_tokens(line, number_tokens, expected_result):
     # Arrange
     list_of_strings = line.splitlines()
     # Act
-    result = nfo.get_multiple_sequential_tokens(list_of_strings, number_tokens)
+    result = nfo.get_multiple_sequential_values(list_of_strings, number_tokens)
     # Assert
     assert result == expected_result
 
@@ -405,7 +405,7 @@ def test_get_multiple_sequential_tokens_fail_case():
     number_tokens = 3
     # Act + Assert
     with pytest.raises(ValueError):
-        value = nfo.get_multiple_sequential_tokens([line], number_tokens)
+        value = nfo.get_multiple_sequential_values([line], number_tokens)
 
 
 @pytest.mark.parametrize("line, expected_result", [

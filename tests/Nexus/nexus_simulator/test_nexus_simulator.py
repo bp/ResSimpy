@@ -6,6 +6,7 @@ from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
 from ResSimpy.Nexus.DataModels.Surface.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Surface.NexusNodeConnection import NexusNodeConnection
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from pytest_mock import MockerFixture
 from unittest.mock import Mock
@@ -72,14 +73,14 @@ def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock
 
 
 @pytest.mark.parametrize(
-    "run_control_path,expected_root,expected_run_control_path,date_format,expected_use_american_date_format", [
+    "run_control_path, expected_root, expected_run_control_path, date_format, expected_date_format", [
         # Providing an absolute path to the fcs file + USA date format
-        ("/run/control/path", "", "/run/control/path", "MM/DD/YYYY", True),
+        ("/run/control/path", "", "/run/control/path", "MM/DD/YYYY", DateFormat.MM_DD_YYYY),
         # Providing a relative path to the fcs file + Non-USA date format
-        ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", False)
+        ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
     ])
 def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expected_root, expected_run_control_path,
-                                                 date_format, expected_use_american_date_format):
+                                                 date_format, expected_date_format):
     # Arrange
     fcs_file = f"RUNCONTROL {run_control_path}\nDATEFORMAT {date_format}\n"
     open_mock = mocker.mock_open(read_data=fcs_file)
@@ -90,19 +91,19 @@ def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expec
 
     # Assert
     assert simulation.run_control_file_path == expected_full_path
-    assert simulation.use_american_date_format == expected_use_american_date_format
+    assert simulation.date_format is expected_date_format
     open_mock.assert_called_with(expected_full_path, 'r')
 
 
 @pytest.mark.parametrize(
-    "run_control_path,expected_root,expected_run_control_path,date_format,expected_use_american_date_format", [
+    "run_control_path, expected_root, expected_run_control_path, date_format, expected_date_format", [
         # Providing an absolute path to the fcs file + USA date format
-        ("/run/control/path", "", "/run/control/path", "MM/DD/YYYY", True),
+        ("/run/control/path", "", "/run/control/path", "MM/DD/YYYY", DateFormat.MM_DD_YYYY),
         # Providing a relative path to the fcs file + Non-USA date format
-        ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", False)
+        ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
     ])
 def test_load_fcs_space_in_filename(mocker, run_control_path, expected_root, expected_run_control_path,
-                                    date_format, expected_use_american_date_format):
+                                    date_format, expected_date_format):
     # Arrange
     fcs_file = f"RUNCONTROL {run_control_path}\nDATEFORMAT {date_format}\n"
     open_mock = mocker.mock_open(read_data=fcs_file)
@@ -114,14 +115,33 @@ def test_load_fcs_space_in_filename(mocker, run_control_path, expected_root, exp
 
     # Assert
     assert simulation.run_control_file_path == expected_full_path
-    assert simulation.use_american_date_format == expected_use_american_date_format
+    assert simulation.date_format is expected_date_format
     open_mock.assert_called_with(expected_full_path, 'r')
+
+
+# Check that DATE_FORMAT is read in correctly (not documented, but still works in Nexus)
+@pytest.mark.parametrize(
+    "fcs_file_contents, expected_date_format", [
+        ("RUNCONTROL /path/to/run/control\n  DATE_FORMAT MM/DD/YYYY", DateFormat.MM_DD_YYYY),
+        ("RUNCONTROL /path/to/run/control\n  DATE_FORMAT DD/MM/YYYY", DateFormat.DD_MM_YYYY),
+        ("RUNCONTROL /path/to/run/control\n", DateFormat.MM_DD_YYYY),
+    ], ids=['US date format', 'non-us date format', 'default (us format)'])
+def test_load_fcs_date_format(mocker, fcs_file_contents, expected_date_format):
+    # Arrange
+    open_mock = mocker.mock_open(read_data=fcs_file_contents)
+    mocker.patch("builtins.open", open_mock)
+
+    # Act
+    simulation = NexusSimulator(origin='testpath1/Path.fcs')
+
+    # Assert
+    assert simulation.date_format is expected_date_format
 
 
 def test_load_fcs_file_comment_after_declaration(mocker):
     """Check that the code ignores lines with comments that contain tokens"""
     # Arrange
-    fcs_file = "!RUNCONTROL run_control_1\n RUNCONTROL run_control_2.inc\nDATEFORMAT DD/MM/YY\n!DATEFORMAT MM/DD/YY"
+    fcs_file = "!RUNCONTROL run_control_1\n RUNCONTROL run_control_2.inc\nDATEFORMAT DD/MM/YYYY\n!DATEFORMAT MM/DD/YYYY"
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
     expected_file_path = os.path.join('testpath1', 'run_control_2.inc')
@@ -130,19 +150,19 @@ def test_load_fcs_file_comment_after_declaration(mocker):
 
     # Assert
     assert simulation.run_control_file_path == expected_file_path
-    assert simulation.use_american_date_format is False
+    assert simulation.date_format is DateFormat.DD_MM_YYYY
     open_mock.assert_called_with(expected_file_path, 'r')
 
 
 @pytest.mark.skip("Code changed to not throw an error in this scenario now")
-@pytest.mark.parametrize("run_control_path,expected_run_control_path,date_format,expected_use_american_date_format", [
+@pytest.mark.parametrize("run_control_path, expected_run_control_path, date_format, expected_date_format", [
     # Providing an absolute path to the fcs file + USA date format
     ("/run/control/path", "/run/control/path", "MM/DD/YYYY", True),
     # Providing a relative path to the fcs file + Non-USA date format
-    ("run/control/path", "original_output_path/run/control/path", "DD/MM/YYYY", False)
+    ("run/control/path", "original_output_path/run/control/path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
 ])
 def test_output_destination_missing(mocker, run_control_path, expected_run_control_path, date_format,
-                                    expected_use_american_date_format):
+                                    expected_date_format):
     """Check that an exception is raised if the user attempts to modify files without a specified output directory"""
     # Arrange
     fcs_file = f"RUNCONTROL {run_control_path}\nDATEFORMAT {date_format}"
@@ -157,7 +177,7 @@ def test_output_destination_missing(mocker, run_control_path, expected_run_contr
 
     # Assert
     assert simulation.run_control_file_path == expected_run_control_path
-    assert simulation.use_american_date_format == expected_use_american_date_format
+    assert simulation.date_format is expected_date_format
 
 
 @pytest.mark.parametrize("run_control_path,expected_run_control_path,date_format,expected_use_american_date_format",
@@ -201,24 +221,24 @@ def test_output_to_existing_directory(mocker):
 
 @pytest.mark.parametrize("fcs_file, expected_default_unit_value",
                          [(
-                          'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                          UnitSystem.ENGLISH),
-                          (
-                          'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS \n LAB\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                          UnitSystem.LAB),
-                          (
-                          'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS METKG/CM2\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                          UnitSystem.METKGCM2),
-                          (
-                          'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_units    METRIC\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                          UnitSystem.METRIC),
-                          (
-                          'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                          UnitSystem.ENGLISH),
-                          (
-                          'DESC Test model\n\nRUN_UNITS ENGLISH\n\ndefault_Units Metbar\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                          UnitSystem.METBAR),
-                          ])
+                                 'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                                 UnitSystem.ENGLISH),
+                             (
+                                     'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS \n LAB\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                                     UnitSystem.LAB),
+                             (
+                                     'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS METKG/CM2\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                                     UnitSystem.METKGCM2),
+                             (
+                                     'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_units    METRIC\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                                     UnitSystem.METRIC),
+                             (
+                                     'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                                     UnitSystem.ENGLISH),
+                             (
+                                     'DESC Test model\n\nRUN_UNITS ENGLISH\n\ndefault_Units Metbar\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                                     UnitSystem.METBAR),
+                         ])
 def test_load_fcs_file_populates_default_units(mocker, fcs_file, expected_default_unit_value):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file)
@@ -226,7 +246,7 @@ def test_load_fcs_file_populates_default_units(mocker, fcs_file, expected_defaul
 
     # Act
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
-    result = simulation.get_default_units()
+    result = simulation.default_units
 
     # Assert
     assert result == expected_default_unit_value
@@ -236,7 +256,7 @@ def test_load_fcs_file_populates_default_units(mocker, fcs_file, expected_defaul
                          [
                              'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS NOTVALID\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
                              'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS \nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
-                             ])
+                         ])
 def test_load_fcs_file_raises_error_for_undefined_default_units(mocker, fcs_file):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file)
@@ -249,21 +269,21 @@ def test_load_fcs_file_raises_error_for_undefined_default_units(mocker, fcs_file
 
 @pytest.mark.parametrize("fcs_file, expected_run_unit_value",
                          [(
-                          'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                          UnitSystem.ENGLISH),
-                          (
-                          'DESC Test model\n\nRUN_UNITS  \n lab  \n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                          UnitSystem.LAB),
-                          (
-                          'DESC Test model\n\nRun_UNITS MetBar\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                          UnitSystem.METBAR),
-                          (
-                          'DESC Test model\n\nRun_UNITS METKG/CM2\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                          UnitSystem.METKGCM2),
-                          (
-                          'DESC Test model\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
-                          UnitSystem.ENGLISH)
-                          ])
+                                 'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                                 UnitSystem.ENGLISH),
+                             (
+                                     'DESC Test model\n\nRUN_UNITS  \n lab  \n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                                     UnitSystem.LAB),
+                             (
+                                     'DESC Test model\n\nRun_UNITS MetBar\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                                     UnitSystem.METBAR),
+                             (
+                                     'DESC Test model\n\nRun_UNITS METKG/CM2\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                                     UnitSystem.METKGCM2),
+                             (
+                                     'DESC Test model\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
+                                     UnitSystem.ENGLISH)
+                         ])
 def test_load_fcs_file_populates_run_units(mocker, fcs_file, expected_run_unit_value):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file)
@@ -271,7 +291,7 @@ def test_load_fcs_file_populates_run_units(mocker, fcs_file, expected_run_unit_v
 
     # Act
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
-    result = simulation.get_run_units()
+    result = simulation.run_units
 
     # Assert
     assert result == expected_run_unit_value
@@ -282,7 +302,7 @@ def test_load_fcs_file_populates_run_units(mocker, fcs_file, expected_run_unit_v
                              'DESC Test model\n\nRUN_UNITS BLAH\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
                              'DESC Test model\n\nRUN_UNITs \nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
                              'DESC Test model\n\nRUN_UNITs 1\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
-                             ])
+                         ])
 def test_load_fcs_file_raises_error_for_undefined_run_units(mocker, fcs_file):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file)
@@ -780,9 +800,9 @@ def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
 
 @pytest.mark.parametrize("fcs_file_contents, surface_file_content, node1_props, node2_props, \
 connection1_props, connection2_props",
-     [(
-         'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data/surface.inc',
-         '''NODECON
+                         [(
+                                 'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data/surface.inc',
+                                 '''NODECON
             NAME            NODEIN    NODEOUT       TYPE        METHOD    DDEPTH
             CP01            CP01      wh_cp01       PIPE        2          7002.67
             cp01_gaslift    GAS       CP01          GASLIFT     NONE        NA ! Checked NODECON 13/05/2020 
@@ -796,18 +816,22 @@ connection1_props, connection2_props",
           content outside of the node statement
           node1         NA        NA    60.5    10.5 3.5   1     station_null
           ''',
-            {'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
-                'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-            {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': 10.21085, 'y_pos': 3524.23, 'number': 2,
-                'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-            {'name': 'CP01', 'node_in': 'CP01', 'node_out': 'wh_cp01', 'con_type': 'PIPE', 'hyd_method': '2',
-            'delta_depth': 7002.67, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-            {'name': 'cp01_gaslift', 'node_in': 'GAS', 'node_out': 'CP01', 'con_type': 'GASLIFT', 'hyd_method': None,
-            'delta_depth': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH}
-         ),
-     ])
+                                 {'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5,
+                                  'y_pos': 300.5, 'number': 1,
+                                  'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+                                 {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None,
+                                  'x_pos': 10.21085, 'y_pos': 3524.23, 'number': 2,
+                                  'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+                                 {'name': 'CP01', 'node_in': 'CP01', 'node_out': 'wh_cp01', 'con_type': 'PIPE',
+                                  'hyd_method': '2',
+                                  'delta_depth': 7002.67, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+                                 {'name': 'cp01_gaslift', 'node_in': 'GAS', 'node_out': 'CP01', 'con_type': 'GASLIFT',
+                                  'hyd_method': None,
+                                  'delta_depth': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH}
+                         ),
+                         ])
 def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node1_props, node2_props,
-    connection1_props, connection2_props,):
+                           connection1_props, connection2_props, ):
     # Arrange
     # Mock out the surface and fcs file
     def mock_open_wrapper(filename, mode):
