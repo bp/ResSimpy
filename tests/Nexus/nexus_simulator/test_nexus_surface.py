@@ -3,6 +3,8 @@ import pandas as pd
 import pytest
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnections import NexusWellConnections
+from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
+from ResSimpy.Nexus.DataModels.Network.NexusWellbores import NexusWellbores
 from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.Network.NexusWellheads import NexusWellheads
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -311,4 +313,45 @@ def test_load_wellhead(mocker, file_contents, wellhead_props_1, wellhead_props_2
     # Assert
     assert result == expected_result
     assert single_wellhead == wellhead1
+    pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
+
+@pytest.mark.parametrize('file_contents, wellboreprops1, wellboreprops2', [
+(''' TIME 01/03/2019
+WELLBORE
+WELL METHOD DIAM TYPE
+well1 BEGGS 3.5 PIPE
+ENDWELLBORE
+WELLBORE
+WELL METHOD DIAM FLOWSECT ROUGHNESS
+well2 BRILL 3.25 2      0.2002
+ENDWELLBORE
+	''',
+{'name': 'well1', 'bore_type': 'PIPE', 'hyd_method': "BEGGS", 'diameter': 3.5, 'date': '01/03/2019',
+ 'unit_system': UnitSystem.ENGLISH},
+{'name': 'well2', 'hyd_method': "BRILL", 'diameter': 3.25, 'flowsect': 2, 'roughness': 0.2002,
+ 'date': '01/03/2019', 'unit_system': UnitSystem.ENGLISH},)
+])
+def test_load_wellhead(mocker, file_contents, wellboreprops1, wellboreprops2):
+    # Arrange
+    start_date = '01/01/2018'
+    surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
+
+    wellbore1 = NexusWellbore(wellboreprops1)
+    wellbore2 = NexusWellbore(wellboreprops2)
+    expected_result = [wellbore1, wellbore2]
+    mock_nexus_network = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
+    nexuswellbore = NexusWellbores(mock_nexus_network)
+    expected_df = pd.DataFrame([wellboreprops1, wellboreprops2])
+    expected_df = expected_df.fillna(value=np.nan).dropna(axis=1, how='all')
+
+    # Act
+    nexuswellbore.load_wellbores(surface_file, start_date, default_units=UnitSystem.ENGLISH)
+    result = nexuswellbore.get_wellbores()
+    single_wellbore = nexuswellbore.get_wellbore('well1')
+    result_df = nexuswellbore.get_wellbores_df()
+
+    # Assert
+    assert result == expected_result
+    assert single_wellbore == wellbore1
     pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
