@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
+from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnections import NexusWellConnections
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
@@ -391,6 +392,17 @@ def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'
     expected_constraints = [NexusConstraint(x) for x in expected_content]
+    expected_single_constraint = [NexusConstraint(x) for x in expected_content if x['name']=='well1']
+    mock_nexus_network = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
+    expected_df = pd.DataFrame(expected_content)
     # Act
-    result = NexusConstraints.load_well_constraints()
+    constraints = NexusConstraints(mock_nexus_network)
+    constraints.load_constraints()
+    result = constraints.get_constraints()
+    result_single = constraints.get_constraint('well1')
+    result_df = constraints.get_constraint_df()
     # Assert
+    assert result == expected_constraints
+    assert result_single == expected_single_constraint
+    pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
