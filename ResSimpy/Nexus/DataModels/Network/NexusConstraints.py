@@ -39,3 +39,14 @@ class NexusConstraints:
         """
         self.__parent_network.get_load_status()
         return obj_to_dataframe(self.__constraints)
+
+    def get_constraint_overview(self) -> str:
+        raise NotImplementedError('To be implemented')
+
+    def load_constraints(self) -> None:
+        pass
+
+    def add_constraints(self, additional_list: Optional[list[NexusConstraint]]):
+        if additional_list is None:
+            return
+        self.__constraints.extend(additional_list)
