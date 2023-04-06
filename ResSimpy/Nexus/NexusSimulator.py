@@ -14,10 +14,9 @@ from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import StructuredGridFile
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from ResSimpy.Nexus.NexusReporting import Reporting
 from ResSimpy.Nexus.NexusWells import NexusWells
-from ResSimpy.Nexus.Surface.NexusNodeConnections import NexusNodeConnections
-from ResSimpy.Nexus.Surface.NexusNodes import NexusNodes
 from ResSimpy.Nexus.runcontrol_operations import Runcontrol
 from ResSimpy.Nexus.logfile_operations import Logging
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
@@ -98,10 +97,8 @@ class NexusSimulator(Simulator):
         self.StructuredGridOperations: StructuredGridOperations = StructuredGridOperations(self)
         self.Logging: Logging = Logging(self)
 
-        # Surface file attributes
-        # TODO maybe put this under a surface class?
-        self.Connections: NexusNodeConnections = NexusNodeConnections()
-        self.Nodes: NexusNodes = NexusNodes()
+        # Network file attributes
+        self.Network = NexusNetwork(model=self)
 
         if destination is not None and destination != '':
             self.set_output_path(path=destination.strip())
@@ -626,10 +623,6 @@ class NexusSimulator(Simulator):
         """Get the surface file path"""
         return self.__surface_file_path
 
-    def load_surface_file(self):
+    def load_network(self):
         """ Populates nodes and connections from a surface file  """
-        for surface in self.fcs_file.surface_files.values():
-            self.Connections.load_connections(surface, start_date=self.start_date,
-                                              default_units=self.__default_units)
-            self.Nodes.load_nodes(surface, start_date=self.start_date,
-                                  default_units=self.__default_units)
+        self.Network.load()

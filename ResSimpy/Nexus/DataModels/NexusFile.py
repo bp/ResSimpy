@@ -7,7 +7,7 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 import warnings
 
 from ResSimpy.Grid import VariableEntry
-from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_OPERATION_KEYWORDS, GRID_ARRAY_FORMAT_KEYWORDS,\
+from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_OPERATION_KEYWORDS, GRID_ARRAY_FORMAT_KEYWORDS, \
     GRID_ARRAY_KEYWORDS
 from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_nexus_file, get_empty_list_str_nexus_file
 
