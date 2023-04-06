@@ -10,8 +10,7 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
-from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
-from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import StructuredGridFile
+from ResSimpy.Nexus.DataModels.StructuredGrid.StructuredGridFile import StructuredGridFile
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
@@ -439,8 +438,7 @@ class NexusSimulator(Simulator):
             self.__surface_file_path = list(self.fcs_file.surface_files.values())[0].location
 
         if self.fcs_file.structured_grid_file is not None:
-            self.__structured_grid = NexusGrid.StructuredGridFile.load_structured_grid_file(
-                self.fcs_file.structured_grid_file)
+            self.__structured_grid = StructuredGridFile.load_structured_grid_file(self.fcs_file.structured_grid_file)
 
         # Load in wellspec files
         if self.fcs_file.well_files is not None and \
@@ -596,7 +594,8 @@ class NexusSimulator(Simulator):
         """
         self.__force_output = force_output
 
-    def get_structured_grid(self) -> Optional[StructuredGridFile]:
+    @property
+    def StructuredGrid(self) -> Optional[StructuredGridFile]:
         """Pass the structured grid information to the front end"""
         return self.__structured_grid
 
