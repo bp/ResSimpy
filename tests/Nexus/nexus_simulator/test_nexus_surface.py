@@ -272,3 +272,22 @@ def test_load_well_connections(mocker, file_contents, well_connection_props1, we
     assert result == expected_result
     assert single_connection_result == wellcon1
     pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
+
+
+@pytest.mark.parametrize("file_contents, expected_content",[
+    (''' CONSTAINTS
+    well1	 QLIQSMAX 	3884.0  QWSMAX 	0
+    well2	 QWSMAX 	0.0  QLIQSMAX- 10000.0 QLIQSMAX 15.5
+    ENDCONSTRAINTS
+    ''',
+    ({'name': 'well1', 'qliqsmax': 3884.0, 'qwsmax': 0},
+     {'name': 'well1', 'qwsmax': 0.0, 'qliqsmax-': 10000.0, 'qliqsmax': 15.5})
+    )
+    ], ids=['basic_test',]
+    )
+def test_load_constraints(mocker, file_contents, expected_content):
+    # Arrange
+
+    # Act
+
+    # Assert
