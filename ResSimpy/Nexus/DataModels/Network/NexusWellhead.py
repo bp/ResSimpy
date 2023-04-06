@@ -112,3 +112,8 @@ class NexusWellhead:
         """
         result_dict = to_dict_generic.to_dict(self, keys_in_nexus_style, add_date=True, add_units=True)
         return result_dict
+
+    def __repr__(self):
+        filtered_attrs = {k: v for k, v in vars(self).items() if v is not None}
+        attrs = ', '.join(f"{k}={v!r}" for k, v in filtered_attrs.items())
+        return f"{self.__class__.__name__}({attrs})"

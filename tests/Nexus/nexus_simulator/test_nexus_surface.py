@@ -305,10 +305,10 @@ def test_load_wellhead(mocker, file_contents, wellhead_props_1, wellhead_props_2
     # Act
     nexus_wellheads.load_wellheads(surface_file, start_date, default_units=UnitSystem.ENGLISH)
     result = nexus_wellheads.get_wellheads()
-    single_wellhead = nexus_wellheads.get_wellhead('R001')
+    single_wellhead = nexus_wellheads.get_wellhead('tubing')
     result_df = nexus_wellheads.get_wellheads_df()
 
     # Assert
     assert result == expected_result
-    assert single_wellhead == single_wellhead
+    assert single_wellhead == wellhead1
     pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
