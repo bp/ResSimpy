@@ -3,6 +3,7 @@ from typing import Optional
 
 import ResSimpy.Utils.to_dict_generic as to_dict_generic
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Utils.generic_repr import generic_repr
 
 
 @dataclass(kw_only=True)
@@ -114,6 +115,4 @@ class NexusWellhead:
         return result_dict
 
     def __repr__(self):
-        filtered_attrs = {k: v for k, v in vars(self).items() if v is not None}
-        attrs = ', '.join(f"{k}={v!r}" for k, v in filtered_attrs.items())
-        return f"{self.__class__.__name__}({attrs})"
+        return generic_repr(self)
