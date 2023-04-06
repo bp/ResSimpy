@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import warnings
-from dataclasses import Field
 from typing import Any, Final, Union, Optional
 
 import resqpy.model as rq
@@ -416,7 +415,7 @@ class NexusSimulator(Simulator):
 
         # === Load in dynamic properties
         # Read in PVT properties from Nexus PVT method files
-        if not isinstance(self.fcs_file.pvt_files, Field) and self.fcs_file.pvt_files is not None and \
+        if self.fcs_file.pvt_files is not None and \
                 len(self.fcs_file.pvt_files) > 0:  # Check if PVT files exist
             for table_num in self.fcs_file.pvt_files.keys():  # For each PVT method
                 pvt_file = self.fcs_file.pvt_files[table_num].location
@@ -427,19 +426,19 @@ class NexusSimulator(Simulator):
                     self.pvt_methods[table_num].read_properties()  # Populate object with PVT properties in file
 
         # Load in Runcontrol
-        if not isinstance(self.fcs_file.runcontrol_file, Field) and self.fcs_file.runcontrol_file is not None:
+        if self.fcs_file.runcontrol_file is not None:
             self.run_control_file_path = self.fcs_file.runcontrol_file.location
             self.Runcontrol.load_run_control_file()
-        if not isinstance(self.fcs_file.surface_files, Field) and self.fcs_file.surface_files is not None:
+        if self.fcs_file.surface_files is not None:
             # TODO support multiple surface file paths
             self.__surface_file_path = list(self.fcs_file.surface_files.values())[0].location
 
-        if not isinstance(self.fcs_file.structured_grid_file, Field) and self.fcs_file.structured_grid_file is not None:
+        if self.fcs_file.structured_grid_file is not None:
             self.__structured_grid = NexusGrid.StructuredGridFile.load_structured_grid_file(
                 self.fcs_file.structured_grid_file)
 
         # Load in wellspec files
-        if not isinstance(self.fcs_file.well_files, Field) and self.fcs_file.well_files is not None and \
+        if self.fcs_file.well_files is not None and \
                 len(self.fcs_file.well_files) > 0:
             for well_file in self.fcs_file.well_files.values():
                 if well_file.location is None:
