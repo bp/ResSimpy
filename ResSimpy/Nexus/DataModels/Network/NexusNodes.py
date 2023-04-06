@@ -20,12 +20,12 @@ class NexusNodes(Nodes):
     __nodes: list[NexusNode] = field(default_factory=lambda: [])
 
     def __init__(self, parent_network: NexusNetwork):
-        self.parent_network: NexusNetwork = parent_network
+        self.__parent_network: NexusNetwork = parent_network
         self.__nodes: list[NexusNode] = []
 
     def get_nodes(self) -> Sequence[NexusNode]:
         """ Returns a list of nodes loaded from the simulator"""
-        self.parent_network.get_load_status()
+        self.__parent_network.get_load_status()
         return self.__nodes
 
     def get_node(self, node_name: str) -> Optional[NexusNode]:

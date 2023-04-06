@@ -20,11 +20,11 @@ class NexusNodeConnections(NodeConnections):
     __connections: list[NexusNodeConnection] = field(default_factory=lambda: [])
 
     def __init__(self, parent_network: NexusNetwork):
-        self.parent_network: NexusNetwork = parent_network
+        self.__parent_network: NexusNetwork = parent_network
         self.__connections: list[NexusNodeConnection] = []
 
     def get_connections(self) -> Sequence[NexusNodeConnection]:
-        self.parent_network.get_load_status()
+        self.__parent_network.get_load_status()
         return self.__connections
 
     def get_connection(self, connection_name: str) -> Optional[NodeConnection]:

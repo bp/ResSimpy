@@ -19,12 +19,12 @@ class NexusWellConnections:
     __well_connections: list[NexusWellConnection] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork):
-        self.parent_network: NexusNetwork = parent_network
+        self.__parent_network: NexusNetwork = parent_network
         self.__well_connections: list[NexusWellConnection] = []
 
     def get_well_connections(self) -> list[NexusWellConnection]:
         """ Returns a list of well connections loaded from the simulator"""
-        self.parent_network.get_load_status()
+        self.__parent_network.get_load_status()
         return self.__well_connections
 
     def get_well_connection(self, name: str) -> Optional[NexusWellConnection]:
