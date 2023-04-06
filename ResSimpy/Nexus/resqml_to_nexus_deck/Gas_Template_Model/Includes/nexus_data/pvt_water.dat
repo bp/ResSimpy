@@ -1,8 +1,0 @@
-ENGLISH ! Units
-
-DENW 63.3  ! lbm/ft3
-CW 2.8e-6  ! 1/psi
-VISW 0.7   ! cp
-BW 1.01    ! rb/stb
-PREF 2591  ! psia
-
