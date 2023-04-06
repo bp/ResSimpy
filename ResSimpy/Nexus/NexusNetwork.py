@@ -61,7 +61,7 @@ class NexusNetwork:
                           'WELLS': NexusWellConnection,
                           },
                 start_date=self.model.start_date,
-                default_units=self.model.get_default_units())
+                default_units=self.model.default_units)
             self.Nodes.add_nodes(nexus_obj_dict.get('NODES'))
             self.Connections.add_connections(nexus_obj_dict.get('NODECON'))
             self.WellConnections.add_connections(nexus_obj_dict.get('WELLS'))
