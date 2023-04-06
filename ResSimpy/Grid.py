@@ -24,7 +24,7 @@ class Grid(ABC):
     ky: VariableEntry = VariableEntry()
     kz: VariableEntry = VariableEntry()
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.netgrs = VariableEntry()
         self.porosity = VariableEntry()
         self.sw = VariableEntry()
