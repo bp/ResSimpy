@@ -1,16 +1,16 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 import ResSimpy.Utils.to_dict_generic as to_dict_generic
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 
 
 @dataclass(kw_only=True)
 class NexusWellhead:
     """
     Attributes:
-        well (str):  The well name. (WELL)
-        name (str):  The name of the well. (NAME)
+        well (str):  Associates the wellhead to the well. (WELL)
+        name (str):  The name of the wellhead. (NAME)
         type (str):  The type of well. (TYPE)
         depth (float):  The depth of the wellhead  (DEPTH)
         x_pos (float):  The x-coordinate location of the wellhead  (X)
@@ -38,6 +38,8 @@ class NexusWellhead:
     """
     well: Optional[str] = None
     name: Optional[str] = None
+    date: Optional[str] = None
+    unit_system: Optional[UnitSystem] = None
     type: Optional[str] = None
     depth: Optional[float] = None
     x_pos: Optional[float] = None
