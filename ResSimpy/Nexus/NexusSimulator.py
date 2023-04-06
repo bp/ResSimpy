@@ -43,7 +43,7 @@ class NexusSimulator(Simulator):
         Attributes:
             run_control_file_path (Optional[str]): file path to the run control file - derived from the fcs file
             __destination (Optional[str]): output path for the simulation. Currently not used.
-            date_format (bool): True if the simulation uses 'MM/DD/YYYY' date format.
+            date_format (DateFormat): Enum value representing the date format.
             __original_fcs_file_path (str): Path to the original fcs file path supplied
             __new_fcs_file_path (str): Where the new fcs will be saved to
             __force_output (bool): private attribute of force_output
@@ -93,10 +93,10 @@ class NexusSimulator(Simulator):
         # Model dynamic properties
         self.pvt_methods: dict[int, NexusPVT] = {}
         # Nexus operations modules
-        self.Runcontrol = Runcontrol(self)
-        self.Reporting = Reporting(self)
-        self.StructuredGridOperations = StructuredGridOperations(self)
-        self.Logging = Logging(self)
+        self.Runcontrol: Runcontrol = Runcontrol(self)
+        self.Reporting: Reporting = Reporting(self)
+        self.StructuredGridOperations: StructuredGridOperations = StructuredGridOperations(self)
+        self.Logging: Logging = Logging(self)
 
         # Surface file attributes
         # TODO maybe put this under a surface class?
