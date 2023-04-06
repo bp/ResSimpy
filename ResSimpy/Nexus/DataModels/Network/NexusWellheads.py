@@ -21,12 +21,12 @@ class NexusWellheads:
         self.__parent_network: NexusNetwork = parent_network
         self.__wellheads: list[NexusWellhead] = []
 
-    def get_well_heads(self) -> list[NexusWellhead]:
+    def get_wellheads(self) -> list[NexusWellhead]:
         """ Returns a list of wellheads loaded from the simulator"""
         self.__parent_network.get_load_status()
         return self.__wellheads
 
-    def get_well_connection(self, name: str) -> Optional[NexusWellhead]:
+    def get_wellhead(self, name: str) -> Optional[NexusWellhead]:
         """ Returns a single well connection with the provided name loaded from the simulator
 
         Args:
@@ -39,7 +39,7 @@ class NexusWellheads:
                            self.__wellheads)
         return next(to_return, None)
 
-    def get_wellhead_df(self) -> pd.DataFrame:
+    def get_wellheads_df(self) -> pd.DataFrame:
         return obj_to_dataframe(self.__wellheads)
 
     def get_wellheads_overview(self) -> str:
@@ -56,10 +56,12 @@ class NexusWellheads:
 
         Args:
             additional_list (list[NexusWellhead]): list of nexus wellheads to add to the nodes list.
-
-        Returns:
-            None
         """
         if additional_list is None:
             return
         self.__wellheads.extend(additional_list)
+
+    def __repr__(self):
+        filtered_attrs = {k: v for k, v in vars(self).items() if v is not None}
+        attrs = ', '.join(f"{k}={v!r}" for k, v in filtered_attrs.items())
+        return f"{self.__class__.__name__}({attrs})"
