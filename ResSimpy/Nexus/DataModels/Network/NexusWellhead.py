@@ -40,7 +40,7 @@ class NexusWellhead:
     name: Optional[str] = None
     date: Optional[str] = None
     unit_system: Optional[UnitSystem] = None
-    type: Optional[str] = None
+    wellhead_type: Optional[str] = None
     depth: Optional[float] = None
     x_pos: Optional[float] = None
     y_pos: Optional[float] = None
@@ -71,10 +71,10 @@ class NexusWellhead:
     @staticmethod
     def get_nexus_mapping() -> dict[str, tuple[str, type]]:
         """gets the mapping of nexus keywords to attribute definitions"""
-        nexus_mapping = keywords = {
+        nexus_mapping = {
             'WELL': ('well', str),
             'NAME': ('name', str),
-            'TYPE': ('type', str),
+            'TYPE': ('wellhead_type', str),
             'DEPTH': ('depth', float),
             'X': ('x_pos', float),
             'Y': ('y_pos', float),

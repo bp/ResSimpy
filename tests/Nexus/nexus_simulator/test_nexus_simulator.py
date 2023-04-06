@@ -843,8 +843,8 @@ connection1_props, connection2_props, wellconprops1, wellconprops2, wellheadprop
             'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH},
             {'name': 'R002', 'stream': 'PRODUCER', 'datum_depth': 10350.0, 'crossflow': 'ON', 'crossshut_method': 'OFF',
              'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH},
-{'well': 'R001', 'name': 'tubing', 'depth': 50.2, 'type': 'PIPE', 'hyd_method': 2, 'date': '01/03/2025', 'unit_system': UnitSystem.ENGLISH},
-{'well': 'R-0_02', 'name': 'TH-03', 'depth': 0, 'type': 'PIPE', 'hyd_method': 1, 'date': '01/03/2025', 'unit_system': UnitSystem.ENGLISH},
+{'well': 'R001', 'name': 'tubing', 'depth': 50.2, 'wellhead_type': 'PIPE', 'hyd_method': 2, 'date': '01/03/2025', 'unit_system': UnitSystem.ENGLISH},
+{'well': 'R-0_02', 'name': 'TH-03', 'depth': 0, 'wellhead_type': 'PIPE', 'hyd_method': 1, 'date': '01/03/2025', 'unit_system': UnitSystem.ENGLISH},
          ),
      ])
 def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node1_props, node2_props,

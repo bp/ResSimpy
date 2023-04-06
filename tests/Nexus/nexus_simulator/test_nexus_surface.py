@@ -284,8 +284,8 @@ WELL NAME DEPTH TYPE METHOD
 R001	tubing	50.2	PIPE 	2	!ENDWELLHEAD
 R-0_02	TH-03	0	PIPE 	1! comment
 	ENDWELLHEAD''',
-{'well': 'R001', 'name': 'tubing', 'depth': 50.2, 'type': 'PIPE', 'hyd_method': 2, 'date': '01/03/2019', 'unit_system': UnitSystem.ENGLISH},
-{'well': 'R-0_02', 'name': 'TH-03', 'depth': 0, 'type': 'PIPE', 'hyd_method': 1, 'date': '01/03/2019', 'unit_system': UnitSystem.ENGLISH},)
+{'well': 'R001', 'name': 'tubing', 'depth': 50.2, 'wellhead_type': 'PIPE', 'hyd_method': 2, 'date': '01/03/2019', 'unit_system': UnitSystem.ENGLISH},
+{'well': 'R-0_02', 'name': 'TH-03', 'depth': 0, 'wellhead_type': 'PIPE', 'hyd_method': 1, 'date': '01/03/2019', 'unit_system': UnitSystem.ENGLISH},)
 
 ])
 def test_load_wellhead(mocker, file_contents, wellhead_props_1, wellhead_props_2):
