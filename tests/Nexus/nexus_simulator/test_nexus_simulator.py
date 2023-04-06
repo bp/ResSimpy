@@ -2,6 +2,7 @@ import os
 import pytest
 import pandas as pd
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
+from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
 from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
@@ -801,7 +802,8 @@ def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
 
 
 @pytest.mark.parametrize("fcs_file_contents, surface_file_content, node1_props, node2_props, \
-connection1_props, connection2_props, wellconprops1, wellconprops2, wellheadprops1, wellheadprops2",
+connection1_props, connection2_props, wellconprops1, wellconprops2, wellheadprops1, wellheadprops2, wellboreprops1, \
+wellboreprops2",
      [(
          'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data/surface.inc',
          '''NODECON
@@ -829,7 +831,15 @@ connection1_props, connection2_props, wellconprops1, wellconprops2, wellheadprop
         !ru	TH-ru	100	PIPE 	3	
         R001	tubing	50.2	PIPE 	2	!ENDWELLHEAD
         R-0_02	TH-03	0	PIPE 	1! comment
-            ENDWELLHEAD
+        ENDWELLHEAD
+        WELLBORE
+        WELL METHOD DIAM TYPE
+        well1 BEGGS 3.5 PIPE
+        ENDWELLBORE
+        WELLBORE
+        WELL METHOD DIAM FLOWSECT ROUGHNESS
+        well2 BRILL 3.25 2      0.2002
+        ENDWELLBORE
           ''',
             {'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
                 'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
@@ -845,10 +855,16 @@ connection1_props, connection2_props, wellconprops1, wellconprops2, wellheadprop
              'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH},
 {'well': 'R001', 'name': 'tubing', 'depth': 50.2, 'wellhead_type': 'PIPE', 'hyd_method': 2, 'date': '01/03/2025', 'unit_system': UnitSystem.ENGLISH},
 {'well': 'R-0_02', 'name': 'TH-03', 'depth': 0, 'wellhead_type': 'PIPE', 'hyd_method': 1, 'date': '01/03/2025', 'unit_system': UnitSystem.ENGLISH},
+
+{'name': 'well1', 'bore_type': 'PIPE', 'hyd_method': "BEGGS", 'diameter': 3.5, 'date': '01/03/2025',
+ 'unit_system': UnitSystem.ENGLISH},
+{'name': 'well2', 'hyd_method': "BRILL", 'diameter': 3.25, 'flowsect': 2, 'roughness': 0.2002,
+ 'date': '01/03/2025', 'unit_system': UnitSystem.ENGLISH},
          ),
      ])
 def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node1_props, node2_props,
-    connection1_props, connection2_props, wellconprops1, wellconprops2, wellheadprops1, wellheadprops2,):
+    connection1_props, connection2_props, wellconprops1, wellconprops2, wellheadprops1, wellheadprops2,
+    wellboreprops1, wellboreprops2):
     # Arrange
     # Mock out the surface and fcs file
     def mock_open_wrapper(filename, mode):
@@ -865,20 +881,11 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
     nexus_sim = NexusSimulator(fcs_file_path)
 
     # Create the expected objects
-    node_1 = NexusNode(node1_props)
-    node_2 = NexusNode(node2_props)
-    expected_nodes = [node_1, node_2]
-    con1 = NexusNodeConnection(connection1_props)
-    con2 = NexusNodeConnection(connection2_props)
-    expected_cons = [con1, con2]
-
-    well_con1 = NexusWellConnection(wellconprops1)
-    well_con2 = NexusWellConnection(wellconprops2)
-    expected_wellcons = [well_con1, well_con2]
-
-    wellhead_1 = NexusWellhead(wellheadprops1)
-    wellhead_2 = NexusWellhead(wellheadprops2)
-    expected_wellheads = [wellhead_1, wellhead_2]
+    expected_nodes = [NexusNode(node1_props), NexusNode(node2_props)]
+    expected_cons = [NexusNodeConnection(connection1_props), NexusNodeConnection(connection2_props)]
+    expected_wellcons = [NexusWellConnection(wellconprops1), NexusWellConnection(wellconprops2)]
+    expected_wellheads = [NexusWellhead(wellheadprops1), NexusWellhead(wellheadprops2)]
+    expected_wellbores = [NexusWellbore(wellboreprops1), NexusWellbore(wellboreprops2)]
 
     # create a mocker spy to check the network loader gets called once
     spy = mocker.spy(nexus_sim.Network, 'load')
@@ -888,9 +895,11 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
     result_cons = nexus_sim.Network.Connections.get_connections()
     result_wellcons = nexus_sim.Network.WellConnections.get_well_connections()
     result_wellheads = nexus_sim.Network.Wellheads.get_wellheads()
+    result_wellbores = nexus_sim.Network.Wellbores.get_wellbores()
     # Assert
     assert result_nodes == expected_nodes
     assert result_cons == expected_cons
     assert result_wellcons == expected_wellcons
     assert result_wellheads == expected_wellheads
+    assert result_wellbores == expected_wellbores
     spy.assert_called_once()

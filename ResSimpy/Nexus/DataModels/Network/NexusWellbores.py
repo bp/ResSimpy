@@ -1,14 +1,18 @@
+from __future__ import annotations
+
 from dataclasses import field, dataclass
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 import pandas as pd
 
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
-from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 import ResSimpy.Nexus.nexus_file_operations as nfo
+
+if TYPE_CHECKING:
+    from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 
 
 @dataclass

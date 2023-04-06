@@ -9,6 +9,8 @@ from ResSimpy.Nexus.DataModels.Network.NexusNodes import NexusNodes
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnections import NexusWellConnections
+from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
+from ResSimpy.Nexus.DataModels.Network.NexusWellbores import NexusWellbores
 from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.Network.NexusWellheads import NexusWellheads
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -31,6 +33,7 @@ class NexusNetwork:
         self.Connections: NexusNodeConnections = NexusNodeConnections(self)
         self.WellConnections: NexusWellConnections = NexusWellConnections(self)
         self.Wellheads: NexusWellheads = NexusWellheads(self)
+        self.Wellbores: NexusWellbores = NexusWellbores(self)
         self.__has_been_loaded: bool = False
 
     def get_load_status(self):
@@ -63,6 +66,7 @@ class NexusNetwork:
                           'NODES': NexusNode,
                           'WELLS': NexusWellConnection,
                           'WELLHEAD': NexusWellhead,
+                          'WELLBORE': NexusWellbore,
                           },
                 start_date=self.model.start_date,
                 default_units=self.model.default_units)
@@ -70,5 +74,6 @@ class NexusNetwork:
             self.Connections.add_connections(nexus_obj_dict.get('NODECON'))
             self.WellConnections.add_connections(nexus_obj_dict.get('WELLS'))
             self.Wellheads.add_wellheads(nexus_obj_dict.get('WELLHEAD'))
+            self.Wellbores.add_wellbores(nexus_obj_dict.get('WELLBORE'))
 
         self.__has_been_loaded = True
