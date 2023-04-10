@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 from enum import Enum
 from functools import partial
 from io import StringIO
@@ -17,6 +18,7 @@ from ResSimpy.Nexus.NexusKeywords.nexus_keywords import VALID_NEXUS_KEYWORDS
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+    from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 
 
 def nexus_token_found(line_to_check: str, valid_list: list[str] = VALID_NEXUS_KEYWORDS) -> bool:
@@ -842,10 +844,11 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
         if 0 < table_start < table_end:
             property_map = table_object_map[token_found].get_nexus_mapping()
             if token_found.upper() == 'CONSTRAINTS':
-                list_objects = load_inline_row(file_as_list=file_as_list[table_start:table_end],
-                                               row_object=table_object_map[token_found],
-                                               current_date=current_date,
-                                               unit_system=unit_system, property_map=property_map)
+                list_objects = load_inline_constraints(file_as_list=file_as_list[table_start:table_end],
+                                                       constraint=table_object_map[token_found],
+                                                       current_date=current_date,
+                                                       unit_system=unit_system, property_map=property_map,
+                                                       existing_constraints=nexus_object_results['CONSTRAINTS'])
             else:
                 list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
                                                      row_object=table_object_map[token_found],
@@ -859,9 +862,25 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
     return nexus_object_results
 
 
-def load_inline_row(file_as_list: list[str], row_object: Any, current_date: str, unit_system: UnitSystem,
-                    property_map: dict[str, str]) -> list[Any]:
-    constraints_dict = {}  # name: NexusConstraint
+def load_inline_constraints(file_as_list: list[str], constraint: NexusConstraint, current_date: str,
+                            unit_system: UnitSystem, property_map: dict[str, tuple[str, type]],
+                            existing_constraints: list[NexusConstraint]) -> list[NexusConstraint]:
+    """ Loads table of constraints with the wellname/node first and the constraints following inline
+        uses previous set of constraints as still applied to the well.
+    Args:
+        file_as_list (list[str]):
+        constraint (NexusConstraint): object to store the attributes extracted from each row.
+        current_date (str): the current date in the table
+        unit_system (UnitSystem): Unit system enum
+        property_map (dict[str, tuple[str, type]]): Mapping of nexus keywords to attributes
+        existing_constraints (list[NexusConstraint]):
+
+    Returns:
+        list[NexusConstraint]: list of constraint objects for the given timestep/constraint table
+    """
+    # deepcopy to prevent historic constraints from being changed outside the scope of this function
+    existing_constraint_copy = copy.deepcopy(existing_constraints)
+    constraints_dict = {x.name: x for x in existing_constraint_copy}
     for line in file_as_list:
         properties_dict = {'date': current_date, 'unit_system': unit_system}
         # first value in the line has to be the node/wellname
@@ -871,8 +890,10 @@ def load_inline_row(file_as_list: list[str], row_object: Any, current_date: str,
         properties_dict['name'] = name
         trimmed_line = line.replace(name, "", 1)
         next_value = get_next_value(0, [trimmed_line], )
+        # loop through the line for each set of constraints
         while next_value is not None:
             trimmed_line = trimmed_line.replace(next_value, "", 1)
+            # extract the attribute name for the given nexus constraint token
             attribute = property_map[next_value][0]
             next_value = get_next_value(0, [trimmed_line], )
             if next_value is None:
@@ -885,7 +906,7 @@ def load_inline_row(file_as_list: list[str], row_object: Any, current_date: str,
         if nexus_constraint is not None:
             nexus_constraint.update(properties_dict)
         else:
-            nexus_constraint = row_object(properties_dict)
+            nexus_constraint = constraint(properties_dict)
         constraints_dict.update({name: nexus_constraint})
 
     return list(constraints_dict.values())

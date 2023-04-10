@@ -375,15 +375,15 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
     well2	 QWSMAX 	0.0  QLIQSMAX- 10000.0 QLIQSMAX 15.5
     ENDCONSTRAINTS
     TIME 01/01/2020
-    CONSTAINTS
+    CONSTRAINTS
     well1	 QLIQSMAX 	5000
     well2	 QWSMAX 	0.0  QLIQSMAX 20.5
     ENDCONSTRAINTS''',
-    ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'qwsmax': 0,'unit_system': UnitSystem.ENGLISH},
-     {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_reservoir_liquid_rate': 10000.0,
+    ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,'unit_system': UnitSystem.ENGLISH},
+     {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
       'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
-     {'date': '01/01/2020', 'name': 'well1', 'max_surface_liquid_rate': 5000, 'qwsmax': 0, 'unit_system': UnitSystem.ENGLISH},
-   {'date': '01/01/2020', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_reservoir_liquid_rate': 10000.0,
+     {'date': '01/01/2020', 'name': 'well1', 'max_surface_liquid_rate': 5000.0, 'max_surface_water_rate': 0, 'unit_system': UnitSystem.ENGLISH},
+   {'date': '01/01/2020', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
    'max_surface_liquid_rate': 20.5, 'unit_system': UnitSystem.ENGLISH}
      ),
     )
