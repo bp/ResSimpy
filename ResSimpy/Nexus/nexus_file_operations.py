@@ -841,16 +841,54 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
         # if we have a complete table to read in start reading it into objects
         if 0 < table_start < table_end:
             property_map = table_object_map[token_found].get_nexus_mapping()
-            list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
-                                                 row_object=table_object_map[token_found],
-                                                 property_map=property_map, current_date=current_date,
-                                                 unit_system=unit_system)
+            if token_found.upper() == 'CONSTRAINTS':
+                list_objects = load_inline_row(file_as_list=file_as_list[table_start:table_end],
+                                               row_object=table_object_map[token_found],
+                                               current_date=current_date,
+                                               unit_system=unit_system, property_map=property_map)
+            else:
+                list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
+                                                     row_object=table_object_map[token_found],
+                                                     property_map=property_map, current_date=current_date,
+                                                     unit_system=unit_system)
             nexus_object_results[token_found].extend(list_objects)
             # reset indices for further tables
             table_start = -1
             table_end = -1
             token_found = None
     return nexus_object_results
+
+
+def load_inline_row(file_as_list: list[str], row_object: Any, current_date: str, unit_system: UnitSystem,
+                    property_map: dict[str, str]) -> list[Any]:
+    constraints_dict = {}  # name: NexusConstraint
+    for line in file_as_list:
+        properties_dict = {'date': current_date, 'unit_system': unit_system}
+        # first value in the line has to be the node/wellname
+        name = get_next_value(0, [line], )
+        if name is None:
+            continue
+        properties_dict['name'] = name
+        trimmed_line = line.replace(name, "", 1)
+        next_value = get_next_value(0, [trimmed_line], )
+        while next_value is not None:
+            trimmed_line = trimmed_line.replace(next_value, "", 1)
+            attribute = property_map[next_value][0]
+            next_value = get_next_value(0, [trimmed_line], )
+            if next_value is None:
+                raise ValueError(f'No value found after last keyword in {line}')
+            properties_dict[attribute] = float(next_value)
+            trimmed_line = trimmed_line.replace(next_value, "", 1)
+            next_value = get_next_value(0, [trimmed_line])
+
+        nexus_constraint = constraints_dict.get(name, None)
+        if nexus_constraint is not None:
+            nexus_constraint.update(properties_dict)
+        else:
+            nexus_constraint = row_object(properties_dict)
+        constraints_dict.update({name: nexus_constraint})
+
+    return list(constraints_dict.values())
 
 
 def correct_datatypes(value: None | int | float | str, dtype: type,

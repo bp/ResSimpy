@@ -360,16 +360,17 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
 
 
 @pytest.mark.parametrize("file_contents, expected_content",[
-    (''' CONSTAINTS
+    (''' CONSTRAINTS
     well1	 QLIQSMAX 	3884.0  QWSMAX 	0
     well2	 QWSMAX 	0.0  QLIQSMAX- 10000.0 QLIQSMAX 15.5
     ENDCONSTRAINTS
     ''',
-    ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0},
-     {'date': '01/01/2019', 'name': 'well1', 'max_surface_water_rate': 0.0, 'max_reverse_reservoir_liquid_rate': 10000.0,
-      'max_surface_liquid_rate': 15.5})
+    ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
+    'unit_system': UnitSystem.ENGLISH},
+     {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
+      'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH})
     ),
-    ('''CONSTAINTS
+    ('''CONSTRAINTS
     well1	 QLIQSMAX 	3884.0  QWSMAX 	0
     well2	 QWSMAX 	0.0  QLIQSMAX- 10000.0 QLIQSMAX 15.5
     ENDCONSTRAINTS
@@ -378,12 +379,12 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
     well1	 QLIQSMAX 	5000
     well2	 QWSMAX 	0.0  QLIQSMAX 20.5
     ENDCONSTRAINTS''',
-    ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'qwsmax': 0},
+    ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'qwsmax': 0,'unit_system': UnitSystem.ENGLISH},
      {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_reservoir_liquid_rate': 10000.0,
-      'max_surface_liquid_rate': 15.5},
-     {'date': '01/01/2020', 'name': 'well1', 'max_surface_liquid_rate': 5000, 'qwsmax': 0},
+      'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
+     {'date': '01/01/2020', 'name': 'well1', 'max_surface_liquid_rate': 5000, 'qwsmax': 0, 'unit_system': UnitSystem.ENGLISH},
    {'date': '01/01/2020', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_reservoir_liquid_rate': 10000.0,
-   'max_surface_liquid_rate': 20.5}
+   'max_surface_liquid_rate': 20.5, 'unit_system': UnitSystem.ENGLISH}
      ),
     )
     ], ids=['basic_test', 'Change in Time']
@@ -391,18 +392,19 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
 def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'
+    surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
     expected_constraints = [NexusConstraint(x) for x in expected_content]
-    expected_single_constraint = [NexusConstraint(x) for x in expected_content if x['name']=='well1']
+    expected_single_name_constraint = [NexusConstraint(x) for x in expected_content if x['name']=='well1']
     mock_nexus_network = mocker.MagicMock()
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
     expected_df = pd.DataFrame(expected_content)
     # Act
     constraints = NexusConstraints(mock_nexus_network)
-    constraints.load_constraints()
+    constraints.load_constraints(surface_file, start_date, UnitSystem.ENGLISH)
     result = constraints.get_constraints()
     result_single = constraints.get_constraint('well1')
     result_df = constraints.get_constraint_df()
     # Assert
     assert result == expected_constraints
-    assert result_single == expected_single_constraint
+    assert result_single == expected_single_name_constraint
     pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)

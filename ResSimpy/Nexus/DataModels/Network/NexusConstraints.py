@@ -6,7 +6,10 @@ from typing import TYPE_CHECKING, Optional
 import pandas as pd
 
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
+import ResSimpy.Nexus.nexus_file_operations as nfo
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
@@ -30,7 +33,7 @@ class NexusConstraints:
         self.__parent_network.get_load_status()
         constraints_to_return = filter(lambda x: False if x.name is None else x.name.upper() == name.upper(),
                                        self.__constraints)
-        return next(constraints_to_return, None)
+        return list(constraints_to_return)
 
     def get_constraint_df(self) -> pd.DataFrame:
         """ Creates a dataframe representing all processed constraint data in a surface file
@@ -43,10 +46,13 @@ class NexusConstraints:
     def get_constraint_overview(self) -> str:
         raise NotImplementedError('To be implemented')
 
-    def load_constraints(self) -> None:
-        pass
+    def load_constraints(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
+        new_constraints = nfo.collect_all_tables_to_objects(surface_file, {'CONSTRAINTS': NexusConstraint},
+                                                            start_date=start_date,
+                                                            default_units=default_units)
+        self.add_constraints(new_constraints.get('CONSTRAINTS'))
 
-    def add_constraints(self, additional_list: Optional[list[NexusConstraint]]):
+    def add_constraints(self, additional_list: Optional[list[NexusConstraint]]) -> None:
         if additional_list is None:
             return
         self.__constraints.extend(additional_list)
