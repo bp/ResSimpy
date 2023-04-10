@@ -18,7 +18,7 @@ class NexusConstraint(Constraint):
     max_reverse_reservoir_water_rate: Optional[float] = None
     max_reverse_reservoir_liquid_rate: Optional[float] = None
 
-    def __init__(self, properties_dict: dict[str, None | int | str | float]):
+    def __init__(self, properties_dict: dict[str, None | int | str | float | UnitSystem]):
         super().__init__()
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)
@@ -52,10 +52,11 @@ class NexusConstraint(Constraint):
         result_dict = to_dict_generic.to_dict(self, keys_in_nexus_style, add_date=True, add_units=True)
         return result_dict
 
-    def update(self, new_data: dict[str, str | int | float | UnitSystem]):
+    def update(self, new_data: dict[str, None | int | str | float | UnitSystem]):
         """Updates attributes in the object based on the dictionary provided"""
         for k, v in new_data.items():
-            setattr(self, k, v)
+            if v is not None:
+                setattr(self, k, v)
 
     def __repr__(self):
         return generic_repr(self)

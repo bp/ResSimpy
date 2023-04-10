@@ -38,7 +38,8 @@ class NexusConstraints:
     def get_constraint_df(self) -> pd.DataFrame:
         """ Creates a dataframe representing all processed constraint data in a surface file
         Returns:
-            DataFrame: of the properties of the constraint through time with each row representing a change in constraint.
+            DataFrame: of the properties of the constraint through time with each row representing \
+                a change in constraint.
         """
         self.__parent_network.get_load_status()
         return obj_to_dataframe(self.__constraints)
