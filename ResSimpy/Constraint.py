@@ -18,6 +18,6 @@ class Constraint(ABC):
     max_reservoir_gas_rate: Optional[float] = None
     max_reservoir_water_rate: Optional[float] = None
     max_reservoir_liquid_rate: Optional[float] = None
-    
+
     def to_dict(self):
         raise NotImplementedError("Implement this in the derived class")
