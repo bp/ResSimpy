@@ -898,7 +898,7 @@ def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConst
             next_value = get_next_value(0, [trimmed_line], )
             if next_value is None:
                 raise ValueError(f'No value found after last keyword in {line}')
-            properties_dict[attribute] = float(next_value)
+            properties_dict[attribute] = correct_datatypes(next_value, float)
             trimmed_line = trimmed_line.replace(next_value, "", 1)
             next_value = get_next_value(0, [trimmed_line])
 
