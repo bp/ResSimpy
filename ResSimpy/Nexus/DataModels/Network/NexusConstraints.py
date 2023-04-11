@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from functools import cmp_to_key
 from typing import TYPE_CHECKING, Optional
 
 import pandas as pd
@@ -48,12 +49,21 @@ class NexusConstraints:
         raise NotImplementedError('To be implemented')
 
     def load_constraints(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
-        new_constraints = nfo.collect_all_tables_to_objects(surface_file, {'CONSTRAINTS': NexusConstraint},
+        # CONSTRAINT keyword represents a table with a header and columns.
+        # CONSTRAINTS keyword represents a list of semi structured constraints with a well_name and then constraints
+        new_constraints = nfo.collect_all_tables_to_objects(surface_file,
+                                                            {'CONSTRAINTS': NexusConstraint,
+                                                             'CONSTRAINT': NexusConstraint},
                                                             start_date=start_date,
                                                             default_units=default_units)
         self.add_constraints(new_constraints.get('CONSTRAINTS'))
+        self.add_constraints(new_constraints.get('CONSTRAINT'))
 
     def add_constraints(self, additional_list: Optional[list[NexusConstraint]]) -> None:
         if additional_list is None:
             return
         self.__constraints.extend(additional_list)
+        # TODO sort by date:
+        # # use the compare dates function stored in the runcontrol to sort the constraints
+        # sorted(self.__constraints, key=lambda x:
+        # self.__parent_network.model.Runcontrol.convert_date_to_number(x.date))
