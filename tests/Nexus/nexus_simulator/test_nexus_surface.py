@@ -385,10 +385,17 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
      {'date': '01/01/2020', 'name': 'well1', 'max_surface_liquid_rate': 5000.0, 'max_surface_water_rate': 0, 'unit_system': UnitSystem.ENGLISH},
    {'date': '01/01/2020', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
    'max_surface_liquid_rate': 20.5, 'unit_system': UnitSystem.ENGLISH}
-     ),
-    )
-    ], ids=['basic_test', 'Change in Time']
-    )
+     )),
+     ('''CONSTRAINTS
+    well1	 QHCMAX- 	3884.0  PMIN 	0
+    well2	 PMAX 	0.0  QLIQMIN 10000.0 QLIQMIN- 15.5 WORPLUGPLUS 85 CWLIM 155554
+    ENDCONSTRAINTS''',
+    ({'date': '01/01/2019', 'name': 'well1', 'max_reverse_reservoir_hc_rate': 3884.0, 'min_pressure': 0,
+    'unit_system': UnitSystem.ENGLISH},
+    {'date': '01/01/2019', 'name': 'well2', 'max_pressure': 0, 'min_reservoir_liquid_rate': 10000.0,
+    'min_reverse_reservoir_liquid_rate': 15.5, 'max_wor_plug_plus': 85, 'max_cum_water_prod': 155554,
+    'unit_system': UnitSystem.ENGLISH},)
+    )], ids=['basic_test', 'Change in Time', 'more Keywords'])
 def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'
