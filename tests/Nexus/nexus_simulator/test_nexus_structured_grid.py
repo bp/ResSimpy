@@ -4,8 +4,8 @@ import os
 import pandas as pd
 import pytest
 from ResSimpy.Grid import VariableEntry
-from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
-from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import StructuredGridFile
+from ResSimpy.Nexus.DataModels.StructuredGrid import StructuredGridFile
+from ResSimpy.Nexus.DataModels.StructuredGrid.StructuredGridFile import StructuredGridFile
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
 from tests.multifile_mocker import mock_multiple_files
@@ -45,7 +45,7 @@ def test_load_structured_grid_file_basic_properties(mocker, structured_grid_file
 
     # Act
     simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
-    result = simulation.get_structured_grid()
+    result = simulation.StructuredGrid
 
     # Assert
     assert result.netgrs.value == expected_net_to_gross
@@ -231,7 +231,7 @@ def test_load_structured_grid_file_k_values(mocker, structured_grid_file_content
 
     # Act
     simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', )
-    result = simulation.get_structured_grid()
+    result = simulation.StructuredGrid
 
     # Assert
     assert result.kx.modifier == expected_kx_modifier
@@ -313,7 +313,7 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
 
     # Act
     StructuredGridFile.update_structured_grid_file(new_structured_grid_dictionary, simulation)
-    result = simulation.get_structured_grid()
+    result = simulation.StructuredGrid
 
     # Assert
 
@@ -521,8 +521,7 @@ def test_load_faults(mocker, structured_grid_file_contents, expected_results):
 
     # Act
     simulation = NexusSimulator(origin=fcs_path)
-    new_sim_grid = StructuredGridFile.load_structured_grid_file(simulation.fcs_file.structured_grid_file)
-    faults_df = new_sim_grid.get_faults_df()
+    faults_df = simulation.StructuredGrid.get_faults_df()
 
     if faults_df is not None:
         faults_df = faults_df.astype({'I1': 'int32', 'I2': 'int32', 'J1': 'int32', 'J2': 'int32',

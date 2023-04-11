@@ -6,7 +6,7 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 
 class StructuredGridOperations:
-    def __init__(self, model):
+    def __init__(self, model) -> None:
         self.model = model
 
     @staticmethod

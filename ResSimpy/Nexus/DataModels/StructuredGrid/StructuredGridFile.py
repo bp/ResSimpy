@@ -26,7 +26,7 @@ class PropertyToLoad:
 
 @dataclass(kw_only=True)
 class StructuredGridFile(Grid):
-    __array_functions_list: Optional[list[str]] = None
+    __array_functions_list: Optional[list[list[str]]] = None
     __array_functions_df: Optional[pd.DataFrame] = None
     __array_functions_loaded: bool = False
     __grid_file_contents: Optional[list[str]] = None
@@ -74,11 +74,6 @@ class StructuredGridFile(Grid):
                 Please update structured grid file path")
 
         loaded_structured_grid_file = cls(grid_file_contents=file_as_list)
-
-        # TODO: searching for functions should be an option for the user, as it is time consuming
-        # like an argument as load_functions: True
-        # Load the array functions defined with 'FUNCTION' keyword
-        # structured_grid_file.load_array_functions(file_as_list)
 
         def move_next_value(next_line: str) -> tuple[str, str]:
             """finds the next value and then strips out the value from the line.
@@ -160,7 +155,7 @@ class StructuredGridFile(Grid):
             ValueError: If no structured grid file is in the instance of the Simulator class
         """
         # Convert the dictionary back to a class, and update the properties on our class
-        structured_grid = model.get_structured_grid()
+        structured_grid = model.StructuredGrid
         if structured_grid is None or model.fcs_file.structured_grid_file is None:
             raise ValueError("Model does not contain a structured grid")
         original_structured_grid_file = copy.deepcopy(structured_grid)
@@ -197,24 +192,26 @@ class StructuredGridFile(Grid):
         with open(grid_file_path, "w") as text_file:
             text_file.write(new_file_str)
 
-    def load_array_functions(self):
+    def load_array_functions(self) -> None:
+        if self.__grid_file_contents is None:
+            raise ValueError("Cannot load array functions as grid file cannot not found")
         self.__array_functions_list = afo.collect_all_function_blocks(self.__grid_file_contents)
         self.__array_functions_df = afo.summarize_model_functions(self.__array_functions_list)
         self.__array_functions_loaded = True
 
-    def get_array_functions_list(self):
+    def get_array_functions_list(self) -> Optional[list[list[str]]]:
         """Returns the grid array functions as a dataframe"""
         if not self.__array_functions_loaded:
             self.load_array_functions()
         return self.__array_functions_list
 
-    def get_array_functions_df(self):
+    def get_array_functions_df(self) -> Optional[pd.DataFrame]:
         """Returns the grid array functions as a dataframe"""
         if not self.__array_functions_loaded:
             self.load_array_functions()
         return self.__array_functions_df
 
-    def load_faults(self):
+    def load_faults(self) -> None:
         """Function to read faults in Nexus grid file defined using MULT and FNAME keywords
 
         """

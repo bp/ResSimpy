@@ -234,6 +234,37 @@ def test_load_wells_all_columns_present_structured_grid(mocker):
     # Assert
     assert result_wells == expected_wells
 
+    # Check that each individual property of the completion is accessible and loaded correctly
+    assert result_wells[0].completions[0].measured_depth == expected_wells[0].completions[0].measured_depth
+    assert result_wells[0].completions[0].well_indices == expected_wells[0].completions[0].well_indices
+    assert result_wells[0].completions[0].partial_perf == expected_wells[0].completions[0].partial_perf
+    assert result_wells[0].completions[0].cell_number == expected_wells[0].completions[0].cell_number
+    assert result_wells[0].completions[0].bore_radius == expected_wells[0].completions[0].bore_radius
+    assert result_wells[0].completions[0].portype == expected_wells[0].completions[0].portype
+    assert result_wells[0].completions[0].fracture_mult == expected_wells[0].completions[0].fracture_mult
+    assert result_wells[0].completions[0].sector == expected_wells[0].completions[0].sector
+    assert result_wells[0].completions[0].well_group == expected_wells[0].completions[0].well_group
+    assert result_wells[0].completions[0].zone == expected_wells[0].completions[0].zone
+    assert result_wells[0].completions[0].angle_open_flow == expected_wells[0].completions[0].angle_open_flow
+    assert result_wells[0].completions[0].temperature == expected_wells[0].completions[0].temperature
+    assert result_wells[0].completions[0].flowsector == expected_wells[0].completions[0].flowsector
+    assert result_wells[0].completions[0].parent_node == expected_wells[0].completions[0].parent_node
+    assert result_wells[0].completions[0].mdcon == expected_wells[0].completions[0].mdcon
+    assert result_wells[0].completions[0].pressure_avg_pattern == expected_wells[0].completions[0].pressure_avg_pattern
+    assert result_wells[0].completions[0].length == expected_wells[0].completions[0].length
+    assert result_wells[0].completions[0].permeability == expected_wells[0].completions[0].permeability
+    assert result_wells[0].completions[0].non_darcy_model == expected_wells[0].completions[0].non_darcy_model
+    assert result_wells[0].completions[0].comp_dz == expected_wells[0].completions[0].comp_dz
+    assert result_wells[0].completions[0].layer_assignment == expected_wells[0].completions[0].layer_assignment
+    assert result_wells[0].completions[0].polymer_bore_radius == expected_wells[0].completions[0].polymer_bore_radius
+    assert result_wells[0].completions[0].polymer_well_radius == expected_wells[0].completions[0].polymer_well_radius
+    assert result_wells[0].completions[0].rel_perm_end_point == expected_wells[0].completions[0].rel_perm_end_point
+    assert result_wells[0].completions[0].kh_mult == expected_wells[0].completions[0].kh_mult
+
+
+
+
+
 
 def test_load_wells_all_columns_unstructured_grid(mocker):
     # Arrange

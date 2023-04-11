@@ -1,7 +1,7 @@
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
-from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import StructuredGridFile
+from ResSimpy.Nexus.DataModels.StructuredGrid import StructuredGridFile
+from ResSimpy.Nexus.DataModels.StructuredGrid.StructuredGridFile import StructuredGridFile
 from tests.multifile_mocker import mock_multiple_files
 from pandas.testing import assert_frame_equal
 
