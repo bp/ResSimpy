@@ -2,6 +2,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
 
+from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
+from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnections import NexusNodeConnections
@@ -25,16 +27,20 @@ class NexusNetwork:
     Nodes: NexusNodes
     Connections: NexusNodeConnections
     WellConnections: NexusWellConnections
+    Wellheads: NexusWellheads
+    Wellbores: NexusWellbores
+    Constraints: NexusConstraints
     __has_been_loaded: bool = False
 
     def __init__(self, model: NexusSimulator):
+        self.__has_been_loaded: bool = False
         self.model: NexusSimulator = model
         self.Nodes: NexusNodes = NexusNodes(self)
         self.Connections: NexusNodeConnections = NexusNodeConnections(self)
         self.WellConnections: NexusWellConnections = NexusWellConnections(self)
         self.Wellheads: NexusWellheads = NexusWellheads(self)
         self.Wellbores: NexusWellbores = NexusWellbores(self)
-        self.__has_been_loaded: bool = False
+        self.Constraints: NexusConstraints = NexusConstraints(self)
 
     def get_load_status(self):
         if not self.__has_been_loaded:
@@ -67,6 +73,8 @@ class NexusNetwork:
                           'WELLS': NexusWellConnection,
                           'WELLHEAD': NexusWellhead,
                           'WELLBORE': NexusWellbore,
+                          'CONSTRAINTS': NexusConstraint,
+                          'CONSTRAINT': NexusConstraint,
                           },
                 start_date=self.model.start_date,
                 default_units=self.model.default_units)
@@ -75,5 +83,6 @@ class NexusNetwork:
             self.WellConnections.add_connections(nexus_obj_dict.get('WELLS'))
             self.Wellheads.add_wellheads(nexus_obj_dict.get('WELLHEAD'))
             self.Wellbores.add_wellbores(nexus_obj_dict.get('WELLBORE'))
+            self.Constraints.add_constraints(nexus_obj_dict.get('CONSTRAINTS'))
 
         self.__has_been_loaded = True

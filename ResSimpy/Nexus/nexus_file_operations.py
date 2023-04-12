@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import copy
 from enum import Enum
 from functools import partial
 from io import StringIO
-from typing import Optional, Union, Any, TYPE_CHECKING
+from typing import Optional, Union, Any, TYPE_CHECKING, Type
 import pandas as pd
 from ResSimpy.Grid import VariableEntry
 from string import Template
@@ -17,6 +18,7 @@ from ResSimpy.Nexus.NexusKeywords.nexus_keywords import VALID_NEXUS_KEYWORDS
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+    from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 
 
 def nexus_token_found(line_to_check: str, valid_list: list[str] = VALID_NEXUS_KEYWORDS) -> bool:
@@ -841,16 +843,86 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
         # if we have a complete table to read in start reading it into objects
         if 0 < table_start < table_end:
             property_map = table_object_map[token_found].get_nexus_mapping()
-            list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
-                                                 row_object=table_object_map[token_found],
-                                                 property_map=property_map, current_date=current_date,
-                                                 unit_system=unit_system)
+            if token_found.upper() == 'CONSTRAINTS':
+                list_objects = load_inline_constraints(file_as_list=file_as_list[table_start:table_end],
+                                                       constraint=table_object_map[token_found],
+                                                       current_date=current_date,
+                                                       unit_system=unit_system, property_map=property_map,
+                                                       existing_constraints=nexus_object_results['CONSTRAINTS'])
+            else:
+                list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
+                                                     row_object=table_object_map[token_found],
+                                                     property_map=property_map, current_date=current_date,
+                                                     unit_system=unit_system)
+            # This statement ensures that CONSTRAINT that are found in tables are actually added to the dictionary
+            # under the same key as constraints to preserve their order
+            if token_found == 'CONSTRAINT':
+                token_found = 'CONSTRAINTS'
             nexus_object_results[token_found].extend(list_objects)
             # reset indices for further tables
             table_start = -1
             table_end = -1
             token_found = None
     return nexus_object_results
+
+
+def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConstraint], current_date: Optional[str],
+                            unit_system: UnitSystem, property_map: dict[str, tuple[str, type]],
+                            existing_constraints: list[NexusConstraint]) -> list[NexusConstraint]:
+    """ Loads table of constraints with the wellname/node first and the constraints following inline
+        uses previous set of constraints as still applied to the well.
+    Args:
+        file_as_list (list[str]):
+        constraint (NexusConstraint): object to store the attributes extracted from each row.
+        current_date (str): the current date in the table
+        unit_system (UnitSystem): Unit system enum
+        property_map (dict[str, tuple[str, type]]): Mapping of nexus keywords to attributes
+        existing_constraints (list[NexusConstraint]):
+
+    Returns:
+        list[NexusConstraint]: list of constraint objects for the given timestep/constraint table
+    """
+    # deepcopy to prevent historic constraints from being changed outside the scope of this function
+    existing_constraint_copy = copy.deepcopy(existing_constraints)
+    constraints_dict = {x.name: x for x in existing_constraint_copy}
+    new_constraints: dict[str, NexusConstraint] = {}
+    for line in file_as_list:
+        properties_dict: dict[str, str | float | UnitSystem | None] = {'date': current_date, 'unit_system': unit_system}
+        # first value in the line has to be the node/wellname
+        name = get_next_value(0, [line], )
+        if name is None:
+            continue
+        properties_dict['name'] = name
+        trimmed_line = line.replace(name, "", 1)
+        next_value = get_next_value(0, [trimmed_line], )
+        # loop through the line for each set of constraints
+        while next_value is not None:
+            trimmed_line = trimmed_line.replace(next_value, "", 1)
+            # extract the attribute name for the given nexus constraint token
+            attribute = property_map[next_value.upper()][0]
+            next_value = get_next_value(0, [trimmed_line], )
+            if next_value is None:
+                raise ValueError(f'No value found after last keyword in {line}')
+            properties_dict[attribute] = correct_datatypes(next_value, float)
+            trimmed_line = trimmed_line.replace(next_value, "", 1)
+            next_value = get_next_value(0, [trimmed_line])
+
+        # first check if there are any existing constraints created for the well this timestep
+        nexus_constraint = new_constraints.get(name, None)
+        if nexus_constraint is not None:
+            nexus_constraint.update(properties_dict)
+        else:
+            # otherwise update previous timestep constraints of the same name
+            nexus_constraint = constraints_dict.get(name, None)
+            if nexus_constraint is not None:
+                nexus_constraint.update(properties_dict)
+            else:
+                # create a new one if neither exist
+                nexus_constraint = constraint(properties_dict)
+        # store the constraint:
+        new_constraints.update({name: nexus_constraint})
+
+    return list(new_constraints.values())
 
 
 def correct_datatypes(value: None | int | float | str, dtype: type,

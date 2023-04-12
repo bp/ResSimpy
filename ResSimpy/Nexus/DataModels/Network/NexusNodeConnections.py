@@ -1,6 +1,5 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-import numpy as np
 import pandas as pd
 from typing import Sequence, Optional, TYPE_CHECKING
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -10,6 +9,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConne
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.NodeConnection import NodeConnection
 from ResSimpy.NodeConnections import NodeConnections
+from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
@@ -28,6 +28,7 @@ class NexusNodeConnections(NodeConnections):
         return self.__connections
 
     def get_connection(self, connection_name: str) -> Optional[NodeConnection]:
+        self.__parent_network.get_load_status()
         connections_to_return = filter(lambda x: False if x.name is None else x.name.upper() == connection_name.upper(),
                                        self.__connections)
         return next(connections_to_return, None)
@@ -37,13 +38,8 @@ class NexusNodeConnections(NodeConnections):
         Returns:
             DataFrame: of the properties of the Connections through time with each row representing a node.
         """
-        df_store = pd.DataFrame()
-        for connection in self.__connections:
-            df_row = pd.DataFrame(connection.to_dict(), index=[0])
-            df_store = pd.concat([df_store, df_row], axis=0, ignore_index=True)
-        df_store = df_store.fillna(value=np.nan)
-        df_store = df_store.dropna(axis=1, how='all')
-        return df_store
+        self.__parent_network.get_load_status()
+        return obj_to_dataframe(self.__connections)
 
     def get_connections_overview(self) -> str:
         raise NotImplementedError('To be implemented')
