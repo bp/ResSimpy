@@ -282,3 +282,24 @@ class NexusConstraint(Constraint):
 
     def __repr__(self):
         return generic_repr(self)
+
+    def resolve_qmults(self):
+        """resolves any constraints that we can"""
+        if 'max_qmult_total_reservoir_rate' == 0:
+            # TODO test this interaction when other cards get added on top?
+            self.max_reservoir_oil_rate = 0
+            self.max_reservoir_gas_rate = 0
+            self.max_reservoir_water_rate = 0
+            self.max_reservoir_total_fluids_rate = 0
+            self.max_reservoir_liquid_rate = 0
+            self.max_reservoir_hc_rate = 0
+            return
+        if not self.convert_qmult_to_reservoir_barrels:
+            if self.use_qmult_qoil_surface_rate:
+                self.max_surface_oil_rate = self.qmult_oil_rate
+            if self.use_qmult_qgas_surface_rate:
+                self.max_surface_gas_rate = self.qmult_gas_rate
+            if self.use_qmult_qwater_surface_rate:
+                self.max_surface_water_rate = self.qmult_water_rate
+            if self.use_qmult_qoilqwat_surface_rate:
+                self.max_surface_liquid_rate = self.qmult_oil_rate + self.qmult_water_rate
