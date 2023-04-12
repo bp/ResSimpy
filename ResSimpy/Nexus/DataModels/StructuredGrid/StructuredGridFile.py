@@ -32,8 +32,11 @@ class StructuredGridFile(Grid):
     __grid_file_contents: Optional[list[str]] = None
     __faults_df: Optional[pd.DataFrame] = None
     __grid_faults_loaded: bool = False
+    __grid_properties_loaded: bool = False
+    __grid_nexus_file: Optional[NexusFile] = None
 
-    def __init__(self, data: Optional[dict] = None, grid_file_contents: Optional[list[str]] = None):
+    def __init__(self, data: Optional[dict] = None, grid_file_contents: Optional[list[str]] = None,
+                 grid_nexus_file: Optional[NexusFile] = None):
         super().__init__()
         self.__array_functions_list: Optional[list[str]] = None
         self.__array_functions_df: Optional[pd.DataFrame] = None
@@ -41,11 +44,8 @@ class StructuredGridFile(Grid):
         self.__grid_file_contents: Optional[list[str]] = grid_file_contents
         self.__faults_df: Optional[pd.DataFrame] = None
         self.__grid_faults_loaded: bool = False
-
-        # Use the dict provided to populate the properties
-        if data is not None:
-            for name, value in data.items():
-                setattr(self, name, self.__wrap(value))
+        self.__grid_properties_loaded: bool = False
+        self.__grid_nexus_file: Optional[NexusFile] = grid_nexus_file
 
     def __wrap(self, value):
         if isinstance(value, (tuple, list, set, frozenset)):
@@ -53,28 +53,38 @@ class StructuredGridFile(Grid):
         else:
             return StructuredGridFile(value) if isinstance(value, dict) else value
 
-    @classmethod
-    def load_structured_grid_file(cls: Type[StructuredGridFile], structure_grid_file: NexusFile) -> StructuredGridFile:
-        """Loads in a structured grid file with all grid properties, and the array functions defined with 'FUNCTION'.
-        Other grid modifiers are currently not supported.
-        Args:
-            structure_grid_file (NexusFile): the NexusFile representation of a structured grid file for converting \
-                into a structured grid file class
-        Raises:
-            AttributeError: if no value is found for the structured grid file path
-            ValueError: if when loading the grid no values can be found for the NX NY NZ line.
+    def update_properties_from_dict(self, data: dict[str, int | VariableEntry]) -> None:
         """
-        if structure_grid_file.location is None:
-            raise ValueError(f"No file path given or found for structured grid file path. \
-                Instead got {structure_grid_file.location}")
-        file_as_list = structure_grid_file.get_flat_list_str_file()
+        Allows you to update properties on the class using the provided dict of values
 
-        if file_as_list is None:
-            raise ValueError("No file path given or found for structured grid file path. \
-                Please update structured grid file path")
+        Args:
+                data dict[str, int | VariableEntry]: the dictionary of values to update on the class
+        """
+        # Use the dict provided to populate the properties in the class
+        if data is not None:
+            for name, value in data.items():
+                private_name = '_' + name
+                setattr(self, private_name, self.__wrap(value))
 
-        loaded_structured_grid_file = cls(grid_file_contents=file_as_list)
+        # Prevent reload from disk
+        self.__grid_properties_loaded = True
 
+    def to_dict(self) -> dict[str, Optional[int] | VariableEntry]:
+        self.load_grid_properties_if_not_loaded()
+
+        original_dict = self.__dict__
+        new_dict: dict[str, Optional[int] | VariableEntry] = {}
+        for key in original_dict.keys():
+            new_key = key
+            if new_key[0] == '_':
+                new_key = new_key.replace('_', '', 1)
+            if new_key[0] == '_':
+                new_key = new_key.replace('_', '', 1)
+            new_dict[new_key] = original_dict[key]
+
+        return new_dict
+
+    def load_grid_properties_if_not_loaded(self) -> None:
         def move_next_value(next_line: str) -> tuple[str, str]:
             """finds the next value and then strips out the value from the line.
 
@@ -93,54 +103,89 @@ class StructuredGridFile(Grid):
             next_line = next_line.replace(value, "", 1)
             return value, next_line
 
-        for line in file_as_list:
-            # Load in the basic properties
-            properties_to_load = [
-                PropertyToLoad('NETGRS', ['VALUE', 'CON'], loaded_structured_grid_file.netgrs),
-                PropertyToLoad('POROSITY', ['VALUE', 'CON'], loaded_structured_grid_file.porosity),
-                PropertyToLoad('SW', ['VALUE', 'CON'], loaded_structured_grid_file.sw),
-                PropertyToLoad('KX', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kx),
-                PropertyToLoad('PERMX', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kx),
-                PropertyToLoad('PERMI', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kx),
-                PropertyToLoad('KI', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kx),
-                PropertyToLoad('KY', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.ky),
-                PropertyToLoad('PERMY', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.ky),
-                PropertyToLoad('PERMJ', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.ky),
-                PropertyToLoad('KJ', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.ky),
-                PropertyToLoad('KZ', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kz),
-                PropertyToLoad('PERMZ', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kz),
-                PropertyToLoad('PERMK', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kz),
-                PropertyToLoad('KK', ['VALUE', 'MULT', 'CON'], loaded_structured_grid_file.kz),
-            ]
+        if not self.__grid_properties_loaded:
+            if self.__grid_nexus_file is None or self.__grid_file_contents is None:
+                raise ValueError("Grid file not found, cannot load grid properties")
 
-            for token_property in properties_to_load:
-                for modifier in token_property.modifiers:
-                    StructuredGridOperations.load_token_value_if_present(
-                        token_property.token, modifier, token_property.property, line, file_as_list,
-                        structure_grid_file, ['INCLUDE'])
+            file_as_list = self.__grid_file_contents
+            for line in file_as_list:
+                # Load in the basic properties
+                properties_to_load = [
+                    PropertyToLoad('NETGRS', ['VALUE', 'CON'], self._netgrs),
+                    PropertyToLoad('POROSITY', ['VALUE', 'CON'], self._porosity),
+                    PropertyToLoad('SW', ['VALUE', 'CON'], self._sw),
+                    PropertyToLoad('KX', ['VALUE', 'MULT', 'CON'], self._kx),
+                    PropertyToLoad('PERMX', ['VALUE', 'MULT', 'CON'], self._kx),
+                    PropertyToLoad('PERMI', ['VALUE', 'MULT', 'CON'], self._kx),
+                    PropertyToLoad('KI', ['VALUE', 'MULT', 'CON'], self._kx),
+                    PropertyToLoad('KY', ['VALUE', 'MULT', 'CON'], self._ky),
+                    PropertyToLoad('PERMY', ['VALUE', 'MULT', 'CON'], self._ky),
+                    PropertyToLoad('PERMJ', ['VALUE', 'MULT', 'CON'], self._ky),
+                    PropertyToLoad('KJ', ['VALUE', 'MULT', 'CON'], self._ky),
+                    PropertyToLoad('KZ', ['VALUE', 'MULT', 'CON'], self._kz),
+                    PropertyToLoad('PERMZ', ['VALUE', 'MULT', 'CON'], self._kz),
+                    PropertyToLoad('PERMK', ['VALUE', 'MULT', 'CON'], self._kz),
+                    PropertyToLoad('KK', ['VALUE', 'MULT', 'CON'], self._kz),
+                ]
 
-            # Load in grid dimensions
-            if nfo.check_token('NX', line):
-                # Check that the format of the grid is NX followed by NY followed by NZ
-                current_line = file_as_list[file_as_list.index(line)]
-                remaining_line = current_line[current_line.index('NX') + 2:]
-                if nfo.get_next_value(0, [remaining_line], remaining_line) != 'NY':
-                    continue
-                remaining_line = remaining_line[remaining_line.index('NY') + 2:]
-                if nfo.get_next_value(0, [remaining_line], remaining_line) != 'NZ':
-                    continue
+                for token_property in properties_to_load:
+                    for modifier in token_property.modifiers:
+                        StructuredGridOperations.load_token_value_if_present(
+                            token_property.token, modifier, token_property.property, line, file_as_list,
+                            self.__grid_nexus_file, ['INCLUDE'])
 
-                # Avoid loading in a comment
-                if "!" in line and line.index("!") < line.index('NX'):
-                    continue
-                next_line = file_as_list[file_as_list.index(line) + 1]
-                first_value, next_line = move_next_value(next_line)
-                second_value, next_line = move_next_value(next_line)
-                third_value, next_line = move_next_value(next_line)
+                # Load in grid dimensions
+                if nfo.check_token('NX', line):
+                    # Check that the format of the grid is NX followed by NY followed by NZ
+                    current_line = file_as_list[file_as_list.index(line)]
+                    remaining_line = current_line[current_line.index('NX') + 2:]
+                    if nfo.get_next_value(0, [remaining_line], remaining_line) != 'NY':
+                        continue
+                    remaining_line = remaining_line[remaining_line.index('NY') + 2:]
+                    if nfo.get_next_value(0, [remaining_line], remaining_line) != 'NZ':
+                        continue
 
-                loaded_structured_grid_file.range_x = int(first_value)
-                loaded_structured_grid_file.range_y = int(second_value)
-                loaded_structured_grid_file.range_z = int(third_value)
+                    # Avoid loading in a comment
+                    if "!" in line and line.index("!") < line.index('NX'):
+                        continue
+                    next_line = file_as_list[file_as_list.index(line) + 1]
+                    first_value, next_line = move_next_value(next_line)
+                    second_value, next_line = move_next_value(next_line)
+                    third_value, next_line = move_next_value(next_line)
+
+                    self._range_x = int(first_value)
+                    self._range_y = int(second_value)
+                    self._range_z = int(third_value)
+
+            self.__grid_properties_loaded = True
+
+    @classmethod
+    def load_structured_grid_file(cls: Type[StructuredGridFile], structured_grid_file: NexusFile,
+                                  lazy_loading: bool = True) -> StructuredGridFile:
+        """Loads in a structured grid file with all grid properties, and the array functions defined with 'FUNCTION'.
+        Other grid modifiers are currently not supported.
+        Args:
+            structured_grid_file (NexusFile): the NexusFile representation of a structured grid file for converting \
+                into a structured grid file class
+        Raises:
+            AttributeError: if no value is found for the structured grid file path
+            ValueError: if when loading the grid no values can be found for the NX NY NZ line.
+        """
+        if structured_grid_file.location is None:
+            raise ValueError(f"No file path given or found for structured grid file path. \
+                Instead got {structured_grid_file.location}")
+        file_as_list = structured_grid_file.get_flat_list_str_file()
+
+        if file_as_list is None:
+            raise ValueError("No file path given or found for structured grid file path. \
+                Please update structured grid file path")
+
+        loaded_structured_grid_file = cls(grid_file_contents=file_as_list, grid_nexus_file=structured_grid_file)
+
+        if not lazy_loading:
+            loaded_structured_grid_file.load_grid_properties_if_not_loaded()
+            loaded_structured_grid_file.load_faults()
+            loaded_structured_grid_file.load_array_functions()
 
         return loaded_structured_grid_file
 
@@ -161,8 +206,8 @@ class StructuredGridFile(Grid):
         original_structured_grid_file = copy.deepcopy(structured_grid)
 
         # replace the structured grid with a new object with an updated dictionary
-        structured_grid = StructuredGridFile(grid_dict)
-        model.set_structured_grid(structured_grid)
+        structured_grid.update_properties_from_dict(grid_dict)
+        # model.set_structured_grid(structured_grid)
 
         # change it in the text file for nexus:
         grid_file_path = model.fcs_file.structured_grid_file.location

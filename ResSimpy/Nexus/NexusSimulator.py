@@ -26,7 +26,7 @@ class NexusSimulator(Simulator):
 
     def __init__(self, origin: Optional[str] = None, destination: Optional[str] = None, force_output: bool = False,
                  root_name: Optional[str] = None, nexus_data_name: str = "data", write_times: bool = False,
-                 manual_fcs_tidy_call: bool = False) -> None:
+                 manual_fcs_tidy_call: bool = False, lazy_loading: bool = True) -> None:
         """Nexus simulator class. Inherits from the Simulator super class
 
         Args:
@@ -95,6 +95,7 @@ class NexusSimulator(Simulator):
         self.Reporting: Reporting = Reporting(self)
         self.StructuredGridOperations: StructuredGridOperations = StructuredGridOperations(self)
         self.Logging: Logging = Logging(self)
+        self.__lazy_loading : bool = lazy_loading
 
         # Network file attributes
         self.Network = NexusNetwork(model=self)
@@ -438,7 +439,8 @@ class NexusSimulator(Simulator):
             self.__surface_file_path = list(self.fcs_file.surface_files.values())[0].location
 
         if self.fcs_file.structured_grid_file is not None:
-            self.__structured_grid = StructuredGridFile.load_structured_grid_file(self.fcs_file.structured_grid_file)
+            self.__structured_grid = StructuredGridFile.load_structured_grid_file(self.fcs_file.structured_grid_file,
+                                                                                  lazy_loading=self.__lazy_loading)
 
         # Load in wellspec files
         if self.fcs_file.well_files is not None and \
@@ -601,7 +603,7 @@ class NexusSimulator(Simulator):
 
     def get_structured_grid_dict(self) -> dict[str, Any]:
         """Convert the structured grid info to a dictionary and pass it to the front end"""
-        return self.__structured_grid.__dict__
+        return self.__structured_grid.to_dict()
 
     def set_structured_grid(self, structured_grid: StructuredGridFile):
         """Setter method for the structured grid file for use with modifying functions"""
