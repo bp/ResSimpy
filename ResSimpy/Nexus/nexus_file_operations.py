@@ -737,7 +737,8 @@ def table_line_reader(keyword_store: dict[str, None | int | float | str], header
 
 def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map: dict[str, tuple[str, type]],
                           current_date: Optional[str] = None, unit_system: Optional[UnitSystem] = None,
-                          list_of_objects: Optional[list[Any]] = None) -> list[Any]:
+                          list_of_objects: Optional[list[Any]] = None,
+                          preserve_previous_object_attributes: bool = False) -> list[Any]:
     """ Loads a table row by row to an object provided in the row_object.
 
     Args:
@@ -749,7 +750,9 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
         current_date (Optional[str]): date/time at which the object was found within a recurrent file
         unit_system (Optional[UnitSystem): most recent UnitSystem enum of the file where the object was found
         list_of_objects (Optional[list[Any]]): list of objects to append to. If None creates an empty list to populate.
-
+        preserve_previous_object_attributes (bool): If True the code will find the latest object with a matching name\
+            attribute and will update the object to reflect the latest additional attributes and overriding all \
+            matching attributes. Must have a .update() method implemented and a name
     Returns:
         list[obj]: list of instances of the class provided for the row_object, populated with attributes from the\
             property map dictionary.
@@ -759,6 +762,9 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
     table_as_list = file_as_list[header_index + 1::]
     if list_of_objects is None:
         list_of_objects = []
+    else:
+        list_of_objects = copy.deepcopy(list_of_objects)
+    return_objects = []
     for line in table_as_list:
         keyword_store: dict[str, None | int | float | str] = {x: None for x in property_map.keys()}
         valid_line, keyword_store = table_line_reader(keyword_store, headers, line)
@@ -770,11 +776,21 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
         # generate an object using the properties stored in the keyword dict
         # Use the map to create a kwargs dict for passing to the object
         keyword_store = {keyword_map[x]: y for x, y in keyword_store.items()}
-        new_object = row_object(keyword_store)
+        row_name = keyword_store.get('name', None)
+        if preserve_previous_object_attributes and row_name is not None:
+            all_matching_existing_constraints = [x for x in list_of_objects if x.name == row_name]
+            if len(all_matching_existing_constraints) > 0:
+                # use the previous object to update this
+                new_object = copy.deepcopy(all_matching_existing_constraints.pop())
+                new_object.update(keyword_store)
+            else:
+                new_object = row_object(keyword_store)
+        else:
+            new_object = row_object(keyword_store)
         setattr(new_object, 'date', current_date)
         setattr(new_object, 'unit_system', unit_system)
-        list_of_objects.append(new_object)
-    return list_of_objects
+        return_objects.append(new_object)
+    return return_objects
 
 
 def check_list_tokens(list_tokens: list[str], line: str) -> Optional[str]:
@@ -838,25 +854,33 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
             table_start = index + 1
         if token_found is None:
             continue
+        token_found = token_found.upper()
         if table_start > 0 and check_token('END' + token_found, line):
             table_end = index
         # if we have a complete table to read in start reading it into objects
         if 0 < table_start < table_end:
             property_map = table_object_map[token_found].get_nexus_mapping()
-            if token_found.upper() == 'CONSTRAINTS':
+            if token_found == 'CONSTRAINTS':
                 list_objects = load_inline_constraints(file_as_list=file_as_list[table_start:table_end],
                                                        constraint=table_object_map[token_found],
                                                        current_date=current_date,
                                                        unit_system=unit_system, property_map=property_map,
                                                        existing_constraints=nexus_object_results['CONSTRAINTS'])
+            elif token_found == 'QMULT' or token_found == 'CONSTRAINT':
+                list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
+                                                     row_object=table_object_map[token_found],
+                                                     property_map=property_map, current_date=current_date,
+                                                     unit_system=unit_system,
+                                                     list_of_objects=nexus_object_results['CONSTRAINTS'],
+                                                     preserve_previous_object_attributes=True)
             else:
                 list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
                                                      row_object=table_object_map[token_found],
                                                      property_map=property_map, current_date=current_date,
-                                                     unit_system=unit_system)
+                                                     unit_system=unit_system, list_of_objects=None)
             # This statement ensures that CONSTRAINT that are found in tables are actually added to the dictionary
             # under the same key as constraints to preserve their order
-            if token_found == 'CONSTRAINT':
+            if token_found == 'CONSTRAINT' or token_found == 'QMULT':
                 token_found = 'CONSTRAINTS'
             nexus_object_results[token_found].extend(list_objects)
             # reset indices for further tables
