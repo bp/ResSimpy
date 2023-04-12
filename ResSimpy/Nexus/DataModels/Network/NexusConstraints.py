@@ -24,10 +24,19 @@ class NexusConstraints:
         self.__constraints: list[NexusConstraint] = []
 
     def get_constraints(self) -> list[NexusConstraint]:
+        """Returns: list[NexusConstraint] list of all constraints defined within a model."""
         self.__parent_network.get_load_status()
         return self.__constraints
 
     def get_constraint(self, name: str) -> Optional[list[NexusConstraint]]:
+        """
+
+        Args:
+            name (str): name of the node/well to get the constraints of.
+
+        Returns:
+            list[NexusConstraint]: list of all constraints relating to a well or node.
+        """
         # TODO: make this a date based approach as well or return a list?
         # TODO: improve the usability of this?
         self.__parent_network.get_load_status()
@@ -58,6 +67,12 @@ class NexusConstraints:
         self.add_constraints(new_constraints.get('CONSTRAINTS'))
 
     def add_constraints(self, additional_list: Optional[list[NexusConstraint]]) -> None:
+        """ Adds additional constraints to memory within the NexusConstraints object.
+            If user adds constraints list this will not be reflected in the Nexus deck at this time.
+
+        Args:
+            additional_list (list[NexusConstraint]): additional constraints to add as a list
+        """
         if additional_list is None:
             return
         self.__constraints.extend(additional_list)
