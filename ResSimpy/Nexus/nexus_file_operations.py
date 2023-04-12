@@ -911,11 +911,14 @@ def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConst
         nexus_constraint = new_constraints.get(name, None)
         if nexus_constraint is not None:
             nexus_constraint.update(properties_dict)
-        elif constraints_dict.get(name, None) is not None:
-            nexus_constraint = constraints_dict.get(name, None)
-            nexus_constraint.update(properties_dict)
         else:
-            nexus_constraint = constraint(properties_dict)
+            # otherwise update previous timestep constraints of the same name
+            nexus_constraint = constraints_dict.get(name, None)
+            if nexus_constraint is not None:
+                nexus_constraint.update(properties_dict)
+            else:
+                # create a new one if neither exist
+                nexus_constraint = constraint(properties_dict)
         # store the constraint:
         new_constraints.update({name: nexus_constraint})
 
