@@ -56,7 +56,6 @@ class NexusConstraints:
                                                             start_date=start_date,
                                                             default_units=default_units)
         self.add_constraints(new_constraints.get('CONSTRAINTS'))
-        self.add_constraints(new_constraints.get('CONSTRAINT'))
 
     def add_constraints(self, additional_list: Optional[list[NexusConstraint]]) -> None:
         if additional_list is None:

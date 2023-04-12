@@ -854,6 +854,10 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
                                                      row_object=table_object_map[token_found],
                                                      property_map=property_map, current_date=current_date,
                                                      unit_system=unit_system)
+            # This statement ensures that CONSTRAINT that are found in tables are actually added to the dictionary
+            # under the same key as constraints to preserve their order
+            if token_found == 'CONSTRAINT':
+                token_found = 'CONSTRAINTS'
             nexus_object_results[token_found].extend(list_objects)
             # reset indices for further tables
             table_start = -1
@@ -881,6 +885,7 @@ def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConst
     # deepcopy to prevent historic constraints from being changed outside the scope of this function
     existing_constraint_copy = copy.deepcopy(existing_constraints)
     constraints_dict = {x.name: x for x in existing_constraint_copy}
+    new_constraints: dict[str, NexusConstraint] = {}
     for line in file_as_list:
         properties_dict: dict[str, str | float | UnitSystem | None] = {'date': current_date, 'unit_system': unit_system}
         # first value in the line has to be the node/wellname
@@ -907,9 +912,9 @@ def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConst
             nexus_constraint.update(properties_dict)
         else:
             nexus_constraint = constraint(properties_dict)
-        constraints_dict.update({name: nexus_constraint})
+        new_constraints.update({name: nexus_constraint})
 
-    return list(constraints_dict.values())
+    return list(new_constraints.values())
 
 
 def correct_datatypes(value: None | int | float | str, dtype: type,
