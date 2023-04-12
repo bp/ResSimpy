@@ -435,10 +435,28 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
     'unit_system': UnitSystem.ENGLISH, 'max_wor': 95.0},
     {'date': '01/12/2023', 'name': 'well2', 'max_surface_liquid_rate': 0.0, 'max_surface_water_rate': 10000,
     'unit_system': UnitSystem.ENGLISH},
-
     )),
+(''' CONSTRAINTS
+    well1	 QLIQSMAX 	MULT  QOSMAX 	MULT
+    well2	 QALLRMAX 	0
+    well3   QALLRMAX        MULT 
+    ENDCONSTRAINTS
+    QMULT
+    WELL QOIL QGAS QWATER
+    well1 121.0 53.6 2.5
+    well2 211.0 102.4 35.7
+    well3  10.2 123   203
+    ENDQMULT
+    ''',
+    ({'date': '01/01/2019', 'name': 'well1', 'use_qmult_qoilqwat_surface_rate': True, 'use_qmult_qoil_surface_rate': True,
+    'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 121.0, 'qmult_gas_rate': 53.6, 'qmult_water_rate': 2.5},
+     {'date': '01/01/2019', 'name': 'well2', 'max_qmult_total_reservoir_rate': 0.0, 'unit_system': UnitSystem.ENGLISH,
+     'qmult_oil_rate': 211.0, 'qmult_gas_rate': 102.4, 'qmult_water_rate': 35.7},
+    {'date': '01/01/2019', 'name': 'well3', 'convert_qmult_to_reservoir_barrels': True, 'use_qmult_qoil_surface_rate': True,
+    'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 10.2, 'qmult_gas_rate': 123, 'qmult_water_rate': 203},
+      )),
     ], ids=['basic_test', 'Change in Time', 'more Keywords', 'constraint table', 'multiple constraints on same well',
-    'inline before table'])
+    'inline before table', 'QMULT'])
 def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'
