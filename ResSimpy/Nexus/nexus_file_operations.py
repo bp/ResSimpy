@@ -899,7 +899,7 @@ def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConst
         while next_value is not None:
             trimmed_line = trimmed_line.replace(next_value, "", 1)
             # extract the attribute name for the given nexus constraint token
-            attribute = property_map[next_value][0]
+            attribute = property_map[next_value.upper()][0]
             next_value = get_next_value(0, [trimmed_line], )
             if next_value is None:
                 raise ValueError(f'No value found after last keyword in {line}')
@@ -907,11 +907,16 @@ def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConst
             trimmed_line = trimmed_line.replace(next_value, "", 1)
             next_value = get_next_value(0, [trimmed_line])
 
-        nexus_constraint = constraints_dict.get(name, None)
+        # first check if there are any existing constraints created for the well this timestep
+        nexus_constraint = new_constraints.get(name, None)
         if nexus_constraint is not None:
+            nexus_constraint.update(properties_dict)
+        elif constraints_dict.get(name, None) is not None:
+            nexus_constraint = constraints_dict.get(name, None)
             nexus_constraint.update(properties_dict)
         else:
             nexus_constraint = constraint(properties_dict)
+        # store the constraint:
         new_constraints.update({name: nexus_constraint})
 
     return list(new_constraints.values())
