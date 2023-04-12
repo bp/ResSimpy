@@ -95,7 +95,7 @@ class NexusSimulator(Simulator):
         self.Reporting: Reporting = Reporting(self)
         self.StructuredGridOperations: StructuredGridOperations = StructuredGridOperations(self)
         self.Logging: Logging = Logging(self)
-        self.__lazy_loading : bool = lazy_loading
+        self.__lazy_loading: bool = lazy_loading
 
         # Network file attributes
         self.Network = NexusNetwork(model=self)
@@ -603,6 +603,8 @@ class NexusSimulator(Simulator):
 
     def get_structured_grid_dict(self) -> dict[str, Any]:
         """Convert the structured grid info to a dictionary and pass it to the front end"""
+        if self.__structured_grid is None:
+            return {}
         return self.__structured_grid.to_dict()
 
     def set_structured_grid(self, structured_grid: StructuredGridFile):
