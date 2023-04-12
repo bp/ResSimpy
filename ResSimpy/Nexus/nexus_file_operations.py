@@ -762,10 +762,10 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
     table_as_list = file_as_list[header_index + 1::]
     if list_of_objects is None:
         list_of_objects = []
-    else:
-        list_of_objects = copy.deepcopy(list_of_objects)
+
     return_objects = []
     for line in table_as_list:
+        add_to_return = True
         keyword_store: dict[str, None | int | float | str] = {x: None for x in property_map.keys()}
         valid_line, keyword_store = table_line_reader(keyword_store, headers, line)
         if not valid_line:
@@ -777,11 +777,23 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
         # Use the map to create a kwargs dict for passing to the object
         keyword_store = {keyword_map[x]: y for x, y in keyword_store.items()}
         row_name = keyword_store.get('name', None)
+        if row_name is None:
+            # if there is no name try and get it from the well_name instead and align well_name and name
+            row_name = keyword_store.get('well_name', None)
+            keyword_store['name'] = row_name
         if preserve_previous_object_attributes and row_name is not None:
             all_matching_existing_constraints = [x for x in list_of_objects if x.name == row_name]
             if len(all_matching_existing_constraints) > 0:
                 # use the previous object to update this
-                new_object = copy.deepcopy(all_matching_existing_constraints.pop())
+                new_object = all_matching_existing_constraints.pop()
+                new_object_date = getattr(new_object, 'date', None)
+                if new_object_date is None or new_object_date != current_date:
+                    # take a copy of the object if it has a different date to ensure it doesn't affect\
+                    # previous timesteps
+                    new_object = copy.deepcopy(new_object)
+                else:
+                    # otherwise just update the object inplace and don't add it to the return list
+                    add_to_return = False
                 new_object.update(keyword_store)
             else:
                 new_object = row_object(keyword_store)
@@ -789,7 +801,8 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
             new_object = row_object(keyword_store)
         setattr(new_object, 'date', current_date)
         setattr(new_object, 'unit_system', unit_system)
-        return_objects.append(new_object)
+        if add_to_return:
+            return_objects.append(new_object)
     return return_objects
 
 
@@ -921,13 +934,21 @@ def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConst
         next_value = get_next_value(0, [trimmed_line], )
         # loop through the line for each set of constraints
         while next_value is not None:
+            token_value = next_value.upper()
             trimmed_line = trimmed_line.replace(next_value, "", 1)
             # extract the attribute name for the given nexus constraint token
-            attribute = property_map[next_value.upper()][0]
+            attribute = property_map[token_value][0]
             next_value = get_next_value(0, [trimmed_line], )
             if next_value is None:
-                raise ValueError(f'No value found after last keyword in {line}')
-            properties_dict[attribute] = correct_datatypes(next_value, float)
+                raise ValueError(f'No value found after {token_value} in {line}')
+            elif next_value == 'MULT':
+                try:
+                    attribute = property_map[token_value + '_MULT'][0]
+                except AttributeError:
+                    raise AttributeError(f'Unexpected MULT keyword following ')
+                properties_dict[attribute] = True
+            else:
+                properties_dict[attribute] = correct_datatypes(next_value, float)
             trimmed_line = trimmed_line.replace(next_value, "", 1)
             next_value = get_next_value(0, [trimmed_line])
 
