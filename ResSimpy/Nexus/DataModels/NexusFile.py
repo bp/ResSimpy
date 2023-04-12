@@ -43,9 +43,6 @@ class NexusFile:
         self.file_content_as_list: Optional[list[Union[str, NexusFile]]] = get_empty_list_str_nexus_file() \
             if file_content_as_list is None else file_content_as_list
 
-    def __repr__(self):
-        return generic_repr(self)
-
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True,
                                         skip_arrays: bool = True) -> NexusFile:
