@@ -945,7 +945,7 @@ def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConst
                 try:
                     attribute = property_map[token_value + '_MULT'][0]
                 except AttributeError:
-                    raise AttributeError(f'Unexpected MULT keyword following ')
+                    raise AttributeError(f'Unexpected MULT keyword following {token_value}')
                 properties_dict[attribute] = True
             else:
                 properties_dict[attribute] = correct_datatypes(next_value, float)
