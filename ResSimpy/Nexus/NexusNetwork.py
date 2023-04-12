@@ -84,6 +84,5 @@ class NexusNetwork:
             self.Wellheads.add_wellheads(nexus_obj_dict.get('WELLHEAD'))
             self.Wellbores.add_wellbores(nexus_obj_dict.get('WELLBORE'))
             self.Constraints.add_constraints(nexus_obj_dict.get('CONSTRAINTS'))
-            self.Constraints.add_constraints(nexus_obj_dict.get('CONSTRAINT'))
 
         self.__has_been_loaded = True
