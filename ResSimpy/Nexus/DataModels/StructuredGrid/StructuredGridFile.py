@@ -103,61 +103,64 @@ class StructuredGridFile(Grid):
             next_line = next_line.replace(value, "", 1)
             return value, next_line
 
-        if not self.__grid_properties_loaded:
-            if self.__grid_nexus_file is None or self.__grid_file_contents is None:
-                raise ValueError("Grid file not found, cannot load grid properties")
+        # If we've already loaded the grid properties, don't do so again.
+        if self.__grid_properties_loaded:
+            return
 
-            file_as_list = self.__grid_file_contents
-            for line in file_as_list:
-                # Load in the basic properties
-                properties_to_load = [
-                    PropertyToLoad('NETGRS', ['VALUE', 'CON'], self._netgrs),
-                    PropertyToLoad('POROSITY', ['VALUE', 'CON'], self._porosity),
-                    PropertyToLoad('SW', ['VALUE', 'CON'], self._sw),
-                    PropertyToLoad('KX', ['VALUE', 'MULT', 'CON'], self._kx),
-                    PropertyToLoad('PERMX', ['VALUE', 'MULT', 'CON'], self._kx),
-                    PropertyToLoad('PERMI', ['VALUE', 'MULT', 'CON'], self._kx),
-                    PropertyToLoad('KI', ['VALUE', 'MULT', 'CON'], self._kx),
-                    PropertyToLoad('KY', ['VALUE', 'MULT', 'CON'], self._ky),
-                    PropertyToLoad('PERMY', ['VALUE', 'MULT', 'CON'], self._ky),
-                    PropertyToLoad('PERMJ', ['VALUE', 'MULT', 'CON'], self._ky),
-                    PropertyToLoad('KJ', ['VALUE', 'MULT', 'CON'], self._ky),
-                    PropertyToLoad('KZ', ['VALUE', 'MULT', 'CON'], self._kz),
-                    PropertyToLoad('PERMZ', ['VALUE', 'MULT', 'CON'], self._kz),
-                    PropertyToLoad('PERMK', ['VALUE', 'MULT', 'CON'], self._kz),
-                    PropertyToLoad('KK', ['VALUE', 'MULT', 'CON'], self._kz),
-                ]
+        if self.__grid_nexus_file is None or self.__grid_file_contents is None:
+            raise ValueError("Grid file not found, cannot load grid properties")
 
-                for token_property in properties_to_load:
-                    for modifier in token_property.modifiers:
-                        StructuredGridOperations.load_token_value_if_present(
-                            token_property.token, modifier, token_property.property, line, file_as_list,
-                            self.__grid_nexus_file, ['INCLUDE'])
+        file_as_list = self.__grid_file_contents
+        for line in file_as_list:
+            # Load in the basic properties
+            properties_to_load = [
+                PropertyToLoad('NETGRS', ['VALUE', 'CON'], self._netgrs),
+                PropertyToLoad('POROSITY', ['VALUE', 'CON'], self._porosity),
+                PropertyToLoad('SW', ['VALUE', 'CON'], self._sw),
+                PropertyToLoad('KX', ['VALUE', 'MULT', 'CON'], self._kx),
+                PropertyToLoad('PERMX', ['VALUE', 'MULT', 'CON'], self._kx),
+                PropertyToLoad('PERMI', ['VALUE', 'MULT', 'CON'], self._kx),
+                PropertyToLoad('KI', ['VALUE', 'MULT', 'CON'], self._kx),
+                PropertyToLoad('KY', ['VALUE', 'MULT', 'CON'], self._ky),
+                PropertyToLoad('PERMY', ['VALUE', 'MULT', 'CON'], self._ky),
+                PropertyToLoad('PERMJ', ['VALUE', 'MULT', 'CON'], self._ky),
+                PropertyToLoad('KJ', ['VALUE', 'MULT', 'CON'], self._ky),
+                PropertyToLoad('KZ', ['VALUE', 'MULT', 'CON'], self._kz),
+                PropertyToLoad('PERMZ', ['VALUE', 'MULT', 'CON'], self._kz),
+                PropertyToLoad('PERMK', ['VALUE', 'MULT', 'CON'], self._kz),
+                PropertyToLoad('KK', ['VALUE', 'MULT', 'CON'], self._kz),
+            ]
 
-                # Load in grid dimensions
-                if nfo.check_token('NX', line):
-                    # Check that the format of the grid is NX followed by NY followed by NZ
-                    current_line = file_as_list[file_as_list.index(line)]
-                    remaining_line = current_line[current_line.index('NX') + 2:]
-                    if nfo.get_next_value(0, [remaining_line], remaining_line) != 'NY':
-                        continue
-                    remaining_line = remaining_line[remaining_line.index('NY') + 2:]
-                    if nfo.get_next_value(0, [remaining_line], remaining_line) != 'NZ':
-                        continue
+            for token_property in properties_to_load:
+                for modifier in token_property.modifiers:
+                    StructuredGridOperations.load_token_value_if_present(
+                        token_property.token, modifier, token_property.property, line, file_as_list,
+                        self.__grid_nexus_file, ['INCLUDE'])
 
-                    # Avoid loading in a comment
-                    if "!" in line and line.index("!") < line.index('NX'):
-                        continue
-                    next_line = file_as_list[file_as_list.index(line) + 1]
-                    first_value, next_line = move_next_value(next_line)
-                    second_value, next_line = move_next_value(next_line)
-                    third_value, next_line = move_next_value(next_line)
+            # Load in grid dimensions
+            if nfo.check_token('NX', line):
+                # Check that the format of the grid is NX followed by NY followed by NZ
+                current_line = file_as_list[file_as_list.index(line)]
+                remaining_line = current_line[current_line.index('NX') + 2:]
+                if nfo.get_next_value(0, [remaining_line], remaining_line) != 'NY':
+                    continue
+                remaining_line = remaining_line[remaining_line.index('NY') + 2:]
+                if nfo.get_next_value(0, [remaining_line], remaining_line) != 'NZ':
+                    continue
 
-                    self._range_x = int(first_value)
-                    self._range_y = int(second_value)
-                    self._range_z = int(third_value)
+                # Avoid loading in a comment
+                if "!" in line and line.index("!") < line.index('NX'):
+                    continue
+                next_line = file_as_list[file_as_list.index(line) + 1]
+                first_value, next_line = move_next_value(next_line)
+                second_value, next_line = move_next_value(next_line)
+                third_value, next_line = move_next_value(next_line)
 
-            self.__grid_properties_loaded = True
+                self._range_x = int(first_value)
+                self._range_y = int(second_value)
+                self._range_z = int(third_value)
+
+        self.__grid_properties_loaded = True
 
     @classmethod
     def load_structured_grid_file(cls: Type[StructuredGridFile], structured_grid_file: NexusFile,
