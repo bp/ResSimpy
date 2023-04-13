@@ -183,6 +183,7 @@ class NexusConstraint(Constraint):
         nexus_mapping.update(NexusConstraint.get_limit_constraints_map())
         nexus_mapping.update(NexusConstraint.get_pressure_constraints_map())
         nexus_mapping.update(NexusConstraint.get_rate_constraints())
+        nexus_mapping.update(NexusConstraint.get_alq_constraints_map())
         return nexus_mapping
 
     @staticmethod
@@ -277,6 +278,22 @@ class NexusConstraint(Constraint):
             'CGLIM': ('max_cum_gas_prod', float),
             'CWLIM': ('max_cum_water_prod', float),
             'COLIM': ('max_cum_oil_prod', float),
+        }
+        return nexus_mapping
+
+    @staticmethod
+    def get_alq_constraints_map() -> dict[str, tuple[str, type]]:
+        """ Gets the nexus mapping for artificial lift constraints"""
+        nexus_mapping: dict[str, tuple[str, type]] = {
+            'ALQ': ('artificial_lift_number', int),
+            'SETTING': ('max_choke_setting', float),
+            'GLEFMIN': ('min_gas_lift_efficiency', float),
+            'GLRADD': ('gl_additive_correction', float),
+            'ACTIVATE': ('active', bool),
+            'POWER': ('pump_power', float),
+            'SPEED': ('pump_speed', float),
+            'CHOKELIMIT': ('choke_limit', str),
+            'POSITION': ('manifold_position', int),
         }
         return nexus_mapping
 

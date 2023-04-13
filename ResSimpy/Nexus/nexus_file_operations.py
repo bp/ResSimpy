@@ -942,6 +942,14 @@ def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConst
                 nones_overwrite = True
                 # break out of the while loop as the next value will not be there
                 break
+            elif token_value == 'ACTIVATE' or token_value == 'DEACTIVATE':
+                properties_dict.update({'ACTIVATE': token_value == 'ACTIVATE'})
+                trimmed_line = trimmed_line.replace(next_value, "", 1)
+                next_value = get_next_value(0, [trimmed_line], )
+                if next_value is None:
+                    break
+                token_value = next_value.upper()
+
             trimmed_line = trimmed_line.replace(next_value, "", 1)
             # extract the attribute name for the given nexus constraint token
             attribute = property_map[token_value][0]
