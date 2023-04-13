@@ -482,8 +482,17 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
     {'date': '01/01/2024', 'name': 'well1', 'max_wor': 95.0, 'max_surface_oil_rate': 1.8,
         'unit_system': UnitSystem.ENGLISH},
     )),
+    (''' CONSTRAINTS
+    well1	 QLIQSMAX 	3884.0  ACTIVATE
+    well2	 QWSMAX 	0.0  DEACTIVATE QLIQSMAX 15.5
+    ENDCONSTRAINTS
+    ''',
+    ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'active': True,
+    'unit_system': UnitSystem.ENGLISH},
+     {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'active': False,
+      'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH})),
     ], ids=['basic_test', 'Change in Time', 'more Keywords', 'constraint table', 'multiple constraints on same well',
-    'inline before table', 'QMULT', 'Clearing Constraints'])
+    'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword'])
 def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'

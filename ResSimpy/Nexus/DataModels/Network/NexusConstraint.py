@@ -82,6 +82,18 @@ class NexusConstraint(Constraint):
         max_cum_gas_prod (float): max cum gas prod (CGLIM)
         max_cum_water_prod (float): max cum water prod (CWLIM)
         max_cum_oil_prod (float): max cum oil prod (COLIM)
+
+        artificial_lift_number (int): artificial lift number within the hydraulic table (ALQ)
+        max_choke_setting (float): maximum choke/ICD/valve setting (SETTING)
+        min_gas_lift_efficiency (float): minimum gas lift efficiency below which the connection will be shut in(GLEFMIN)
+        gl_additive_correction (float): additive correction term to value of gas/liquid ratio from optimal gl \
+            tables (GLRADD)
+        active_node (bool): active/inactive node/well (ACTIVATE)
+        pump_power (float): power for the pump (POWER)
+        pump_speed (float): maximum speed of the pump/esp/compressor (SPEED)
+        choke_limit (str): ON/OFF for whether the esp should exceed the choke limit (CHOKELIMIT)
+        manifold_position (int): position in the manifold for the well (POSITION)
+
     """
     name: Optional[str] = None
     well_name: Optional[str] = None
@@ -161,6 +173,16 @@ class NexusConstraint(Constraint):
     use_qmult_qwater_surface_rate: Optional[bool] = None
     use_qmult_qgas_surface_rate: Optional[bool] = None
     use_qmult_qoilqwat_surface_rate: Optional[bool] = None
+
+    artificial_lift_number: Optional[int] = None
+    max_choke_setting: Optional[float] = None
+    min_gas_lift_efficiency: Optional[float] = None
+    gl_additive_correction: Optional[float] = None
+    active_node: Optional[bool] = None
+    pump_power: Optional[float] = None
+    pump_speed: Optional[float] = None
+    choke_limit: Optional[str] = None
+    manifold_position: Optional[int] = None
 
     def __init__(self, properties_dict: dict[str, None | int | str | float | UnitSystem]):
         super().__init__()
@@ -289,7 +311,7 @@ class NexusConstraint(Constraint):
             'SETTING': ('max_choke_setting', float),
             'GLEFMIN': ('min_gas_lift_efficiency', float),
             'GLRADD': ('gl_additive_correction', float),
-            'ACTIVATE': ('active', bool),
+            'ACTIVATE': ('active_node', bool),
             'POWER': ('pump_power', float),
             'SPEED': ('pump_speed', float),
             'CHOKELIMIT': ('choke_limit', str),
