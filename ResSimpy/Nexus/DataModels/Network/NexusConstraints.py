@@ -67,10 +67,6 @@ class NexusConstraints:
                                                             default_units=default_units)
         self.add_constraints(new_constraints.get('CONSTRAINTS'))
 
-    def resolve_qmults(self):
-        """calls the resolve qmults function on each constraint"""
-        map(lambda x: x.resolve_qmults(), self.__constraints)
-
     def add_constraints(self, additional_list: Optional[list[NexusConstraint]]) -> None:
         """ Adds additional constraints to memory within the NexusConstraints object.
             If user adds constraints list this will not be reflected in the Nexus deck at this time.
@@ -81,7 +77,6 @@ class NexusConstraints:
         if additional_list is None:
             return
         self.__constraints.extend(additional_list)
-        self.resolve_qmults()
         # TODO sort by date:
         # # use the compare dates function stored in the runcontrol to sort the constraints
         # sorted(self.__constraints, key=lambda x:
