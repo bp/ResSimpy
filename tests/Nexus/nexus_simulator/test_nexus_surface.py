@@ -455,8 +455,32 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
     {'date': '01/01/2019', 'name': 'well3', 'convert_qmult_to_reservoir_barrels': True,
     'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 10.2, 'qmult_gas_rate': 123, 'qmult_water_rate': 203, 'well_name':'well3'},
       )),
+      ('''
+    CONSTRAINTS
+    well1	 QLIQSMAX 	1000.0    WORMAX 95
+    well2  QLIQSMAX 1.8
+    ENDCONSTRAINTS
+    
+    TIME 01/12/2023
+    CONSTRAINTS
+    well1 CLEARQ
+    ENDCONSTRAINTS
+    
+    TIME 01/01/2024
+    CONSTRAINTS
+    well1  QOSMAX 1.8
+    ENDCONSTRAINTS
+    
+    ''', ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000.0,
+            'unit_system': UnitSystem.ENGLISH, 'max_wor': 95.0},
+    {'date': '01/01/2019', 'name': 'well2', 'max_surface_liquid_rate': 1.8, 'unit_system': UnitSystem.ENGLISH},
+    {'date': '01/12/2023', 'name': 'well1', 'max_surface_liquid_rate': None, 'max_wor': 95.0,
+        'unit_system': UnitSystem.ENGLISH},
+    {'date': '01/01/2024', 'name': 'well1', 'max_wor': 95.0, 'max_surface_oil_rate': 1.8,
+    'unit_system': UnitSystem.ENGLISH},
+    )),
     ], ids=['basic_test', 'Change in Time', 'more Keywords', 'constraint table', 'multiple constraints on same well',
-    'inline before table', 'QMULT'])
+    'inline before table', 'QMULT', 'Clearing Constraints'])
 def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'
