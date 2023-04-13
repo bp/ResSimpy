@@ -487,9 +487,9 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
     well2	 QWSMAX 	0.0  DEACTIVATE QLIQSMAX 15.5
     ENDCONSTRAINTS
     ''',
-    ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'active': True,
+    ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'active_node': True,
     'unit_system': UnitSystem.ENGLISH},
-     {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'active': False,
+     {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'active_node': False,
       'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH})),
     ], ids=['basic_test', 'Change in Time', 'more Keywords', 'constraint table', 'multiple constraints on same well',
     'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword'])
