@@ -188,7 +188,7 @@ class NexusConstraint(Constraint):
     @staticmethod
     def get_rate_constraints() -> dict[str, tuple[str, type]]:
 
-        nexus_mapping = {
+        nexus_mapping: dict[str, tuple[str, type]] = {
             'QALLRMAX': ('max_qmult_total_reservoir_rate', float),
 
             'QOSMAX': ('max_surface_oil_rate', float),
@@ -241,7 +241,7 @@ class NexusConstraint(Constraint):
 
     @staticmethod
     def get_pressure_constraints_map() -> dict[str, tuple[str, type]]:
-        nexus_mapping = {
+        nexus_mapping: dict[str, tuple[str, type]] = {
             'PMIN': ('min_pressure', float),
             'PMAX': ('max_pressure', float),
             'PWMAX': ('max_wag_water_pressure', float),
@@ -253,7 +253,7 @@ class NexusConstraint(Constraint):
 
     @staticmethod
     def get_limit_constraints_map() -> dict[str, tuple[str, type]]:
-        nexus_mapping = {
+        nexus_mapping: dict[str, tuple[str, type]] = {
             'WCUTMAX': ('max_watercut', float),
             'WCUTPLUG': ('max_watercut_plug', float),
             'WCUTPLUGPLUS': ('max_watercut_plugplus', float),
