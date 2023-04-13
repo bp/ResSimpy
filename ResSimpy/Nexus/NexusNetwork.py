@@ -75,6 +75,7 @@ class NexusNetwork:
                           'WELLBORE': NexusWellbore,
                           'CONSTRAINTS': NexusConstraint,
                           'CONSTRAINT': NexusConstraint,
+                          'QMULT': NexusConstraint,
                           },
                 start_date=self.model.start_date,
                 default_units=self.model.default_units)

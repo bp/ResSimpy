@@ -10,10 +10,9 @@ from ResSimpy.Grid import VariableEntry
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_OPERATION_KEYWORDS, GRID_ARRAY_FORMAT_KEYWORDS, \
     GRID_ARRAY_KEYWORDS
 from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_nexus_file, get_empty_list_str_nexus_file
-from ResSimpy.Utils.generic_repr import generic_repr
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, repr=True)
 class NexusFile:
     """ Class to deal with origin and structure of Nexus files and preserve origin of include files
     Attributes:
@@ -42,9 +41,6 @@ class NexusFile:
             if includes_objects is None else includes_objects
         self.file_content_as_list: Optional[list[Union[str, NexusFile]]] = get_empty_list_str_nexus_file() \
             if file_content_as_list is None else file_content_as_list
-
-    def __repr__(self):
-        return generic_repr(self)
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True,

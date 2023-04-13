@@ -737,7 +737,8 @@ def table_line_reader(keyword_store: dict[str, None | int | float | str], header
 
 def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map: dict[str, tuple[str, type]],
                           current_date: Optional[str] = None, unit_system: Optional[UnitSystem] = None,
-                          list_of_objects: Optional[list[Any]] = None) -> list[Any]:
+                          list_of_objects: Optional[list[Any]] = None,
+                          preserve_previous_object_attributes: bool = False) -> list[Any]:
     """ Loads a table row by row to an object provided in the row_object.
 
     Args:
@@ -749,7 +750,9 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
         current_date (Optional[str]): date/time at which the object was found within a recurrent file
         unit_system (Optional[UnitSystem): most recent UnitSystem enum of the file where the object was found
         list_of_objects (Optional[list[Any]]): list of objects to append to. If None creates an empty list to populate.
-
+        preserve_previous_object_attributes (bool): If True the code will find the latest object with a matching name\
+            attribute and will update the object to reflect the latest additional attributes and overriding all \
+            matching attributes. Must have a .update() method implemented and a name
     Returns:
         list[obj]: list of instances of the class provided for the row_object, populated with attributes from the\
             property map dictionary.
@@ -759,7 +762,10 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
     table_as_list = file_as_list[header_index + 1::]
     if list_of_objects is None:
         list_of_objects = []
+
+    return_objects = []
     for line in table_as_list:
+        add_to_return = True
         keyword_store: dict[str, None | int | float | str] = {x: None for x in property_map.keys()}
         valid_line, keyword_store = table_line_reader(keyword_store, headers, line)
         if not valid_line:
@@ -770,11 +776,34 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
         # generate an object using the properties stored in the keyword dict
         # Use the map to create a kwargs dict for passing to the object
         keyword_store = {keyword_map[x]: y for x, y in keyword_store.items()}
-        new_object = row_object(keyword_store)
+        row_name = keyword_store.get('name', None)
+        if row_name is None:
+            # if there is no name try and get it from the well_name instead and align well_name and name
+            row_name = keyword_store.get('well_name', None)
+            keyword_store['name'] = row_name
+        if preserve_previous_object_attributes and row_name is not None:
+            all_matching_existing_constraints = [x for x in list_of_objects if x.name == row_name]
+            if len(all_matching_existing_constraints) > 0:
+                # use the previous object to update this
+                new_object = all_matching_existing_constraints.pop()
+                new_object_date = getattr(new_object, 'date', None)
+                if new_object_date is None or new_object_date != current_date:
+                    # take a copy of the object if it has a different date to ensure it doesn't affect\
+                    # previous timesteps
+                    new_object = copy.deepcopy(new_object)
+                else:
+                    # otherwise just update the object inplace and don't add it to the return list
+                    add_to_return = False
+                new_object.update(keyword_store)
+            else:
+                new_object = row_object(keyword_store)
+        else:
+            new_object = row_object(keyword_store)
         setattr(new_object, 'date', current_date)
         setattr(new_object, 'unit_system', unit_system)
-        list_of_objects.append(new_object)
-    return list_of_objects
+        if add_to_return:
+            return_objects.append(new_object)
+    return return_objects
 
 
 def check_list_tokens(list_tokens: list[str], line: str) -> Optional[str]:
@@ -838,25 +867,33 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
             table_start = index + 1
         if token_found is None:
             continue
+        token_found = token_found.upper()
         if table_start > 0 and check_token('END' + token_found, line):
             table_end = index
         # if we have a complete table to read in start reading it into objects
         if 0 < table_start < table_end:
             property_map = table_object_map[token_found].get_nexus_mapping()
-            if token_found.upper() == 'CONSTRAINTS':
+            if token_found == 'CONSTRAINTS':
                 list_objects = load_inline_constraints(file_as_list=file_as_list[table_start:table_end],
                                                        constraint=table_object_map[token_found],
                                                        current_date=current_date,
                                                        unit_system=unit_system, property_map=property_map,
                                                        existing_constraints=nexus_object_results['CONSTRAINTS'])
+            elif token_found == 'QMULT' or token_found == 'CONSTRAINT':
+                list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
+                                                     row_object=table_object_map[token_found],
+                                                     property_map=property_map, current_date=current_date,
+                                                     unit_system=unit_system,
+                                                     list_of_objects=nexus_object_results['CONSTRAINTS'],
+                                                     preserve_previous_object_attributes=True)
             else:
                 list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
                                                      row_object=table_object_map[token_found],
                                                      property_map=property_map, current_date=current_date,
-                                                     unit_system=unit_system)
+                                                     unit_system=unit_system, list_of_objects=None)
             # This statement ensures that CONSTRAINT that are found in tables are actually added to the dictionary
             # under the same key as constraints to preserve their order
-            if token_found == 'CONSTRAINT':
+            if token_found == 'CONSTRAINT' or token_found == 'QMULT':
                 token_found = 'CONSTRAINTS'
             nexus_object_results[token_found].extend(list_objects)
             # reset indices for further tables
@@ -897,13 +934,21 @@ def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConst
         next_value = get_next_value(0, [trimmed_line], )
         # loop through the line for each set of constraints
         while next_value is not None:
+            token_value = next_value.upper()
             trimmed_line = trimmed_line.replace(next_value, "", 1)
             # extract the attribute name for the given nexus constraint token
-            attribute = property_map[next_value.upper()][0]
+            attribute = property_map[token_value][0]
             next_value = get_next_value(0, [trimmed_line], )
             if next_value is None:
-                raise ValueError(f'No value found after last keyword in {line}')
-            properties_dict[attribute] = correct_datatypes(next_value, float)
+                raise ValueError(f'No value found after {token_value} in {line}')
+            elif next_value == 'MULT':
+                try:
+                    attribute = property_map[token_value + '_MULT'][0]
+                except AttributeError:
+                    raise AttributeError(f'Unexpected MULT keyword following {token_value}')
+                properties_dict[attribute] = True
+            else:
+                properties_dict[attribute] = correct_datatypes(next_value, float)
             trimmed_line = trimmed_line.replace(next_value, "", 1)
             next_value = get_next_value(0, [trimmed_line])
 

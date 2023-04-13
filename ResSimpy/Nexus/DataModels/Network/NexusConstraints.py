@@ -61,7 +61,8 @@ class NexusConstraints:
         # CONSTRAINTS keyword represents a list of semi structured constraints with a well_name and then constraints
         new_constraints = nfo.collect_all_tables_to_objects(surface_file,
                                                             {'CONSTRAINTS': NexusConstraint,
-                                                             'CONSTRAINT': NexusConstraint},
+                                                             'CONSTRAINT': NexusConstraint,
+                                                             'QMULT': NexusConstraint},
                                                             start_date=start_date,
                                                             default_units=default_units)
         self.add_constraints(new_constraints.get('CONSTRAINTS'))

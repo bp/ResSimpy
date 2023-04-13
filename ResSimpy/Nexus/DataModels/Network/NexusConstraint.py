@@ -84,6 +84,7 @@ class NexusConstraint(Constraint):
         max_cum_oil_prod (float): max cum oil prod (COLIM)
     """
     name: Optional[str] = None
+    well_name: Optional[str] = None
     max_surface_oil_rate: Optional[float] = None
     max_surface_gas_rate: Optional[float] = None
     max_surface_water_rate: Optional[float] = None
@@ -151,6 +152,16 @@ class NexusConstraint(Constraint):
     max_cum_water_prod: Optional[float] = None
     max_cum_oil_prod: Optional[float] = None
 
+    max_qmult_total_reservoir_rate: Optional[float] = None
+    convert_qmult_to_reservoir_barrels: Optional[bool] = None
+    qmult_oil_rate: Optional[float] = None
+    qmult_water_rate: Optional[float] = None
+    qmult_gas_rate: Optional[float] = None
+    use_qmult_qoil_surface_rate: Optional[bool] = None
+    use_qmult_qwater_surface_rate: Optional[bool] = None
+    use_qmult_qgas_surface_rate: Optional[bool] = None
+    use_qmult_qoilqwat_surface_rate: Optional[bool] = None
+
     def __init__(self, properties_dict: dict[str, None | int | str | float | UnitSystem]):
         super().__init__()
         for key, prop in properties_dict.items():
@@ -160,6 +171,7 @@ class NexusConstraint(Constraint):
     def get_nexus_mapping() -> dict[str, tuple[str, type]]:
         """gets the mapping of nexus keywords to attribute definitions"""
         nexus_mapping = {
+            'WELL': ('well_name', str),
             'NAME': ('name', str),
             'QOSMAX': ('max_surface_oil_rate', float),
             'QGSMAX': ('max_surface_gas_rate', float),
@@ -235,6 +247,17 @@ class NexusConstraint(Constraint):
             'CGLIM': ('max_cum_gas_prod', float),
             'CWLIM': ('max_cum_water_prod', float),
             'COLIM': ('max_cum_oil_prod', float),
+
+            # Specialkeywords - QMULT
+            'QALLRMAX': ('max_qmult_total_reservoir_rate', float),
+            'QALLRMAX_MULT': ('convert_qmult_to_reservoir_barrels', bool),
+            'QOSMAX_MULT': ('use_qmult_qoil_surface_rate', bool),
+            'QWSMAX_MULT': ('use_qmult_qwater_surface_rate', bool),
+            'QGSMAX_MULT': ('use_qmult_qgas_surface_rate', bool),
+            'QLIQSMAX_MULT': ('use_qmult_qoilqwat_surface_rate', bool),
+            'QOIL': ('qmult_oil_rate', float),
+            'QWATER': ('qmult_water_rate', float),
+            'QGAS': ('qmult_gas_rate', float),
         }
         return nexus_mapping
 
