@@ -998,6 +998,8 @@ def clear_constraints(token_value, constraint) -> dict[str, None]:
             constraint_clearing_dict = constraint.get_limit_constraints_map()
         case 'CLEARP':
             constraint_clearing_dict = constraint.get_pressure_constraints_map()
+        case 'CLEARALQ':
+            constraint_clearing_dict = constraint.get_alq_constraints_map()
         case _:
             constraint_clearing_dict = {}
     return {x[0]: None for x in constraint_clearing_dict.values()}
