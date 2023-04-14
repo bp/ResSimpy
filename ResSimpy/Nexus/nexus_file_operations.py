@@ -989,11 +989,11 @@ def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConst
 def clear_constraints(token_value, constraint) -> dict[str, None]:
     match token_value:
         case 'CLEAR':
-            constraint_clearing_dict = constraint.get_rate_constraints()
+            constraint_clearing_dict = constraint.get_rate_constraints_map()
             constraint_clearing_dict.update(constraint.get_pressure_constraints_map())
             constraint_clearing_dict.update(constraint.get_limit_constraints_map())
         case 'CLEARQ':
-            constraint_clearing_dict = constraint.get_rate_constraints()
+            constraint_clearing_dict = constraint.get_rate_constraints_map()
         case 'CLEARLIMIT':
             constraint_clearing_dict = constraint.get_limit_constraints_map()
         case 'CLEARP':

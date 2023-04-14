@@ -204,12 +204,12 @@ class NexusConstraint(Constraint):
         }
         nexus_mapping.update(NexusConstraint.get_limit_constraints_map())
         nexus_mapping.update(NexusConstraint.get_pressure_constraints_map())
-        nexus_mapping.update(NexusConstraint.get_rate_constraints())
+        nexus_mapping.update(NexusConstraint.get_rate_constraints_map())
         nexus_mapping.update(NexusConstraint.get_alq_constraints_map())
         return nexus_mapping
 
     @staticmethod
-    def get_rate_constraints() -> dict[str, tuple[str, type]]:
+    def get_rate_constraints_map() -> dict[str, tuple[str, type]]:
 
         nexus_mapping: dict[str, tuple[str, type]] = {
             'QALLRMAX': ('max_qmult_total_reservoir_rate', float),
