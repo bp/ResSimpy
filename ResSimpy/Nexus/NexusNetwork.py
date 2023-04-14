@@ -69,6 +69,8 @@ class NexusNetwork:
         Table headers with None next to their name are currently skipped awaiting development
         """
         # TODO implement all objects with Nones next to them in the dictionary below
+        if self.model.fcs_file.surface_files is None:
+            raise FileNotFoundError('Could not find any surface files associated with the fcs file provided.')
         for surface in self.model.fcs_file.surface_files.values():
             nexus_obj_dict = nfo.collect_all_tables_to_objects(
                 surface, {'NODECON': NexusNodeConnection,
