@@ -831,7 +831,7 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
         Args:
             nexus_file (NexusFile): NexusFile representation of the file.
             table_object_map (dict[str, Storage_Object]): dictionary containing the name of the table as keys and \
-                the object type to store the data from each row into. Requires objects to have a get_nexus_mapping \
+                the object type to store the data from each row into. Require objects to have a get_nexus_mapping \
                 function
             start_date (str): Starting date of the run
             default_units (UnitSystem): Units used in case not specified by file.
@@ -859,6 +859,7 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
             current_date = get_expected_token_value(
                 token='TIME', token_line=line, file_list=file_as_list,
                 custom_message=f"Cannot find the date associated with the TIME card in {line=} at line number {index}")
+            continue
         if table_start < 0:
             token_found = check_list_tokens(list(table_object_map.keys()), line)
             if token_found is None:
@@ -872,6 +873,11 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
             table_end = index
         # if we have a complete table to read in start reading it into objects
         if 0 < table_start < table_end:
+            if table_object_map[token_found] is None:
+                table_start = -1
+                table_end = -1
+                token_found = None
+                continue
             property_map = table_object_map[token_found].get_nexus_mapping()
             if token_found == 'CONSTRAINTS':
                 list_objects = load_inline_constraints(file_as_list=file_as_list[table_start:table_end],

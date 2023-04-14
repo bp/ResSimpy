@@ -482,7 +482,8 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
     {'date': '01/01/2024', 'name': 'well1', 'max_wor': 95.0, 'max_surface_oil_rate': 1.8,
         'unit_system': UnitSystem.ENGLISH},
     )),
-    (''' CONSTRAINTS
+    (''' 
+        CONSTRAINTS
     well1	 QLIQSMAX 	3884.0  ACTIVATE
     well2	 QWSMAX 	0.0  DEACTIVATE QLIQSMAX 15.5
     ENDCONSTRAINTS
