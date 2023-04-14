@@ -812,6 +812,7 @@ wellboreprops2, constraint_props1, constraint_props2",
         CONTYPE   TYPE  METHOD
         WELLBORE LUMPED CELLAVG
         ENDCONDEFAULTS
+        WELLCONTROL WELLHEAD
 
          NODECON
             NAME            NODEIN    NODEOUT       TYPE        METHOD    DDEPTH

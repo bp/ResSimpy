@@ -862,13 +862,14 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
             continue
         if table_start < 0:
             token_found = check_list_tokens(list(table_object_map.keys()), line)
-            if token_found is None:
+            if token_found is None or check_token('WELLCONTROL', line):
                 continue
             # if a token is found get the starting index of the table
             table_start = index + 1
         if token_found is None:
             continue
         token_found = token_found.upper()
+
         if table_start > 0 and check_token('END' + token_found, line):
             table_end = index
         # if we have a complete table to read in start reading it into objects
