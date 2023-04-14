@@ -927,6 +927,7 @@ def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConst
         properties_dict: dict[str, str | float | UnitSystem | None] = {'date': current_date, 'unit_system': unit_system}
         # first value in the line has to be the node/wellname
         name = get_next_value(0, [line], )
+        nones_overwrite = False
         if name is None:
             continue
         properties_dict['name'] = name
@@ -935,6 +936,20 @@ def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConst
         # loop through the line for each set of constraints
         while next_value is not None:
             token_value = next_value.upper()
+            if token_value in ['CLEAR', 'CLEARP', 'CLEARQ', 'CLEARLIMIT', 'CLEARALQ']:
+                removing_constraints = clear_constraints(token_value, constraint)
+                properties_dict.update(removing_constraints)
+                nones_overwrite = True
+                # break out of the while loop as the next value will not be there
+                break
+            elif token_value == 'ACTIVATE' or token_value == 'DEACTIVATE':
+                properties_dict.update({'active_node': token_value == 'ACTIVATE'})
+                trimmed_line = trimmed_line.replace(next_value, "", 1)
+                next_value = get_next_value(0, [trimmed_line], )
+                if next_value is None:
+                    break
+                token_value = next_value.upper()
+
             trimmed_line = trimmed_line.replace(next_value, "", 1)
             # extract the attribute name for the given nexus constraint token
             attribute = property_map[token_value][0]
@@ -947,6 +962,7 @@ def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConst
                 except AttributeError:
                     raise AttributeError(f'Unexpected MULT keyword following {token_value}')
                 properties_dict[attribute] = True
+
             else:
                 properties_dict[attribute] = correct_datatypes(next_value, float)
             trimmed_line = trimmed_line.replace(next_value, "", 1)
@@ -955,12 +971,12 @@ def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConst
         # first check if there are any existing constraints created for the well this timestep
         nexus_constraint = new_constraints.get(name, None)
         if nexus_constraint is not None:
-            nexus_constraint.update(properties_dict)
+            nexus_constraint.update(properties_dict, nones_overwrite)
         else:
             # otherwise update previous timestep constraints of the same name
             nexus_constraint = constraints_dict.get(name, None)
             if nexus_constraint is not None:
-                nexus_constraint.update(properties_dict)
+                nexus_constraint.update(properties_dict, nones_overwrite)
             else:
                 # create a new one if neither exist
                 nexus_constraint = constraint(properties_dict)
@@ -968,6 +984,25 @@ def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConst
         new_constraints.update({name: nexus_constraint})
 
     return list(new_constraints.values())
+
+
+def clear_constraints(token_value, constraint) -> dict[str, None]:
+    match token_value:
+        case 'CLEAR':
+            constraint_clearing_dict = constraint.get_rate_constraints_map()
+            constraint_clearing_dict.update(constraint.get_pressure_constraints_map())
+            constraint_clearing_dict.update(constraint.get_limit_constraints_map())
+        case 'CLEARQ':
+            constraint_clearing_dict = constraint.get_rate_constraints_map()
+        case 'CLEARLIMIT':
+            constraint_clearing_dict = constraint.get_limit_constraints_map()
+        case 'CLEARP':
+            constraint_clearing_dict = constraint.get_pressure_constraints_map()
+        case 'CLEARALQ':
+            constraint_clearing_dict = constraint.get_alq_constraints_map()
+        case _:
+            constraint_clearing_dict = {}
+    return {x[0]: None for x in constraint_clearing_dict.values()}
 
 
 def correct_datatypes(value: None | int | float | str, dtype: type,

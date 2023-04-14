@@ -82,6 +82,18 @@ class NexusConstraint(Constraint):
         max_cum_gas_prod (float): max cum gas prod (CGLIM)
         max_cum_water_prod (float): max cum water prod (CWLIM)
         max_cum_oil_prod (float): max cum oil prod (COLIM)
+
+        artificial_lift_number (int): artificial lift number within the hydraulic table (ALQ)
+        max_choke_setting (float): maximum choke/ICD/valve setting (SETTING)
+        min_gas_lift_efficiency (float): minimum gas lift efficiency below which the connection will be shut in(GLEFMIN)
+        gl_additive_correction (float): additive correction term to value of gas/liquid ratio from optimal gl \
+            tables (GLRADD)
+        active_node (bool): active/inactive node/well (ACTIVATE)
+        pump_power (float): power for the pump (POWER)
+        pump_speed (float): maximum speed of the pump/esp/compressor (SPEED)
+        choke_limit (str): ON/OFF for whether the esp should exceed the choke limit (CHOKELIMIT)
+        manifold_position (int): position in the manifold for the well (POSITION)
+
     """
     name: Optional[str] = None
     well_name: Optional[str] = None
@@ -162,6 +174,16 @@ class NexusConstraint(Constraint):
     use_qmult_qgas_surface_rate: Optional[bool] = None
     use_qmult_qoilqwat_surface_rate: Optional[bool] = None
 
+    artificial_lift_number: Optional[int] = None
+    max_choke_setting: Optional[float] = None
+    min_gas_lift_efficiency: Optional[float] = None
+    gl_additive_correction: Optional[float] = None
+    active_node: Optional[bool] = None
+    pump_power: Optional[float] = None
+    pump_speed: Optional[float] = None
+    choke_limit: Optional[str] = None
+    manifold_position: Optional[int] = None
+
     def __init__(self, properties_dict: dict[str, None | int | str | float | UnitSystem]):
         super().__init__()
         for key, prop in properties_dict.items():
@@ -170,15 +192,33 @@ class NexusConstraint(Constraint):
     @staticmethod
     def get_nexus_mapping() -> dict[str, tuple[str, type]]:
         """gets the mapping of nexus keywords to attribute definitions"""
-        nexus_mapping = {
+        nexus_mapping: dict[str, tuple[str, type]] = {
             'WELL': ('well_name', str),
             'NAME': ('name', str),
+            # Specialkeywords - QMULT
+            'QALLRMAX_MULT': ('convert_qmult_to_reservoir_barrels', bool),
+            'QOSMAX_MULT': ('use_qmult_qoil_surface_rate', bool),
+            'QWSMAX_MULT': ('use_qmult_qwater_surface_rate', bool),
+            'QGSMAX_MULT': ('use_qmult_qgas_surface_rate', bool),
+            'QLIQSMAX_MULT': ('use_qmult_qoilqwat_surface_rate', bool),
+        }
+        nexus_mapping.update(NexusConstraint.get_limit_constraints_map())
+        nexus_mapping.update(NexusConstraint.get_pressure_constraints_map())
+        nexus_mapping.update(NexusConstraint.get_rate_constraints_map())
+        nexus_mapping.update(NexusConstraint.get_alq_constraints_map())
+        return nexus_mapping
+
+    @staticmethod
+    def get_rate_constraints_map() -> dict[str, tuple[str, type]]:
+
+        nexus_mapping: dict[str, tuple[str, type]] = {
+            'QALLRMAX': ('max_qmult_total_reservoir_rate', float),
+
             'QOSMAX': ('max_surface_oil_rate', float),
             'QGSMAX': ('max_surface_gas_rate', float),
             'QWSMAX': ('max_surface_water_rate', float),
             'QLIQSMAX': ('max_surface_liquid_rate', float),
             'QMHCMAX': ('max_hc_molar_rate', float),
-
             'QOSMAX-': ('max_reverse_surface_oil_rate', float),
             'QGSMAX-': ('max_reverse_surface_gas_rate', float),
             'QWSMAX-': ('max_reverse_surface_water_rate', float),
@@ -195,14 +235,6 @@ class NexusConstraint(Constraint):
             'QLIQMAX-': ('max_reverse_reservoir_liquid_rate', float),
             'QALLMAX-': ('max_reverse_reservoir_total_fluids_rate', float),
             'QHCMAX-': ('max_reverse_reservoir_hc_rate', float),
-
-            'PMIN': ('min_pressure', float),
-            'PMAX': ('max_pressure', float),
-            'PWMAX': ('max_wag_water_pressure', float),
-            'PGMAX': ('max_wag_gas_pressure', float),
-            'BHP': ('bottom_hole_pressure', float),
-            'THP': ('tubing_head_pressure', float),
-
             'QOSMIN': ('min_surface_oil_rate', float),
             'QGSMIN': ('min_surface_gas_rate', float),
             'QWSMIN': ('min_surface_water_rate', float),
@@ -224,6 +256,27 @@ class NexusConstraint(Constraint):
             'QALLMIN-': ('min_reverse_reservoir_total_fluids_rate', float),
             'QHCMIN-': ('min_reverse_reservoir_hc_rate', float),
 
+            'QOIL': ('qmult_oil_rate', float),
+            'QWATER': ('qmult_water_rate', float),
+            'QGAS': ('qmult_gas_rate', float),
+        }
+        return nexus_mapping
+
+    @staticmethod
+    def get_pressure_constraints_map() -> dict[str, tuple[str, type]]:
+        nexus_mapping: dict[str, tuple[str, type]] = {
+            'PMIN': ('min_pressure', float),
+            'PMAX': ('max_pressure', float),
+            'PWMAX': ('max_wag_water_pressure', float),
+            'PGMAX': ('max_wag_gas_pressure', float),
+            'BHP': ('bottom_hole_pressure', float),
+            'THP': ('tubing_head_pressure', float),
+        }
+        return nexus_mapping
+
+    @staticmethod
+    def get_limit_constraints_map() -> dict[str, tuple[str, type]]:
+        nexus_mapping: dict[str, tuple[str, type]] = {
             'WCUTMAX': ('max_watercut', float),
             'WCUTPLUG': ('max_watercut_plug', float),
             'WCUTPLUGPLUS': ('max_watercut_plugplus', float),
@@ -247,17 +300,22 @@ class NexusConstraint(Constraint):
             'CGLIM': ('max_cum_gas_prod', float),
             'CWLIM': ('max_cum_water_prod', float),
             'COLIM': ('max_cum_oil_prod', float),
+        }
+        return nexus_mapping
 
-            # Specialkeywords - QMULT
-            'QALLRMAX': ('max_qmult_total_reservoir_rate', float),
-            'QALLRMAX_MULT': ('convert_qmult_to_reservoir_barrels', bool),
-            'QOSMAX_MULT': ('use_qmult_qoil_surface_rate', bool),
-            'QWSMAX_MULT': ('use_qmult_qwater_surface_rate', bool),
-            'QGSMAX_MULT': ('use_qmult_qgas_surface_rate', bool),
-            'QLIQSMAX_MULT': ('use_qmult_qoilqwat_surface_rate', bool),
-            'QOIL': ('qmult_oil_rate', float),
-            'QWATER': ('qmult_water_rate', float),
-            'QGAS': ('qmult_gas_rate', float),
+    @staticmethod
+    def get_alq_constraints_map() -> dict[str, tuple[str, type]]:
+        """ Gets the nexus mapping for artificial lift constraints"""
+        nexus_mapping: dict[str, tuple[str, type]] = {
+            'ALQ': ('artificial_lift_number', int),
+            'SETTING': ('max_choke_setting', float),
+            'GLEFMIN': ('min_gas_lift_efficiency', float),
+            'GLRADD': ('gl_additive_correction', float),
+            'ACTIVATE': ('active_node', bool),
+            'POWER': ('pump_power', float),
+            'SPEED': ('pump_speed', float),
+            'CHOKELIMIT': ('choke_limit', str),
+            'POSITION': ('manifold_position', int),
         }
         return nexus_mapping
 
@@ -274,10 +332,10 @@ class NexusConstraint(Constraint):
         result_dict = to_dict_generic.to_dict(self, keys_in_nexus_style, add_date=True, add_units=True)
         return result_dict
 
-    def update(self, new_data: dict[str, None | int | str | float | UnitSystem]):
+    def update(self, new_data: dict[str, None | int | str | float | UnitSystem], nones_overwrite: bool = False):
         """Updates attributes in the object based on the dictionary provided"""
         for k, v in new_data.items():
-            if v is not None:
+            if v is not None or nones_overwrite:
                 setattr(self, k, v)
 
     def __repr__(self):
