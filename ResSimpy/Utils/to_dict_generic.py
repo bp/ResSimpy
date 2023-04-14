@@ -25,14 +25,10 @@ def to_dict(nexus_object: Any, keys_in_nexus_style: bool = False, add_date: bool
     else:
         result_dict = {y[0]: nexus_object.__getattribute__(y[0]) for y in mapping_dict.values()}
 
-    extra_attributes = {}
-    if add_date and getattr(nexus_object, 'date', None) is not None:
-        date = {'date': getattr(nexus_object, 'date', None)}
-        extra_attributes.update(date)
-    if add_units and getattr(nexus_object, 'unit_system', None) is not None:
+    if add_date:
+        result_dict['date'] = getattr(nexus_object, 'date', None)
+    if add_units:
         unit_sys = getattr(nexus_object, 'unit_system', None)
         if isinstance(unit_sys, UnitSystem):
-            units = {'unit_system': unit_sys.value}
-            extra_attributes.update(units)
-    result_dict.update(extra_attributes)
+            result_dict['unit_system'] = unit_sys.value
     return result_dict
