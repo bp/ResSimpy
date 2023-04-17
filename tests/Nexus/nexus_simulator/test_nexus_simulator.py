@@ -1,6 +1,7 @@
 import os
 import pytest
 import pandas as pd
+from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
 from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
@@ -803,10 +804,17 @@ def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
 
 @pytest.mark.parametrize("fcs_file_contents, surface_file_content, node1_props, node2_props, \
 connection1_props, connection2_props, wellconprops1, wellconprops2, wellheadprops1, wellheadprops2, wellboreprops1, \
-wellboreprops2",
+wellboreprops2, constraint_props1, constraint_props2",
      [(
          'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data/surface.inc',
-         '''NODECON
+         '''
+         CONDEFAULTS
+        CONTYPE   TYPE  METHOD
+        WELLBORE LUMPED CELLAVG
+        ENDCONDEFAULTS
+        WELLCONTROL WELLHEAD
+
+         NODECON
             NAME            NODEIN    NODEOUT       TYPE        METHOD    DDEPTH
             CP01            CP01      wh_cp01       PIPE        2          7002.67
             cp01_gaslift    GAS       CP01          GASLIFT     NONE        NA ! Checked NODECON 13/05/2020 
@@ -840,6 +848,16 @@ wellboreprops2",
         WELL METHOD DIAM FLOWSECT ROUGHNESS
         well2 BRILL 3.25 2      0.2002
         ENDWELLBORE
+        METBAR
+        QMULT
+        WELL		QOIL	QGAS	QWATER
+        GUN_P	128.528	13776.669	0
+        ENDQMULT
+        
+        CONSTRAINTS
+        GUN_P	ACTIVATE
+        GUN_P	PMIN 5 QALLRMAX MULT
+        ENDCONSTRAINTS
           ''',
             {'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
                 'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
@@ -860,11 +878,16 @@ wellboreprops2",
  'unit_system': UnitSystem.ENGLISH},
 {'name': 'well2', 'hyd_method': "BRILL", 'diameter': 3.25, 'flowsect': 2, 'roughness': 0.2002,
  'date': '01/03/2025', 'unit_system': UnitSystem.ENGLISH},
+ {'name': 'GUN_P', 'qmult_oil_rate': 128.528, 'qmult_gas_rate': 13776.669, 'qmult_water_rate': 0.0, 'date': '01/03/2025',
+ 'unit_system': UnitSystem.METBAR, 'well_name':'GUN_P'},
+{'name': 'GUN_P', 'qmult_oil_rate': 128.528, 'qmult_gas_rate': 13776.669, 'qmult_water_rate': 0.0, 'date': '01/03/2025',
+'unit_system': UnitSystem.METBAR, 'active_node':True, 'min_pressure': 5.0, 'convert_qmult_to_reservoir_barrels': True,
+'well_name':'GUN_P'},
          ),
      ])
 def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node1_props, node2_props,
     connection1_props, connection2_props, wellconprops1, wellconprops2, wellheadprops1, wellheadprops2,
-    wellboreprops1, wellboreprops2):
+    wellboreprops1, wellboreprops2, constraint_props1, constraint_props2):
     # Arrange
     # Mock out the surface and fcs file
     def mock_open_wrapper(filename, mode):
@@ -886,7 +909,7 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
     expected_wellcons = [NexusWellConnection(wellconprops1), NexusWellConnection(wellconprops2)]
     expected_wellheads = [NexusWellhead(wellheadprops1), NexusWellhead(wellheadprops2)]
     expected_wellbores = [NexusWellbore(wellboreprops1), NexusWellbore(wellboreprops2)]
-
+    expected_constraints = [NexusConstraint(constraint_props1), NexusConstraint(constraint_props2)]
     # create a mocker spy to check the network loader gets called once
     spy = mocker.spy(nexus_sim.Network, 'load')
 
@@ -896,10 +919,12 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
     result_wellcons = nexus_sim.Network.WellConnections.get_well_connections()
     result_wellheads = nexus_sim.Network.Wellheads.get_wellheads()
     result_wellbores = nexus_sim.Network.Wellbores.get_wellbores()
+    result_constraints = nexus_sim.Network.Constraints.get_constraints()
     # Assert
     assert result_nodes == expected_nodes
     assert result_cons == expected_cons
     assert result_wellcons == expected_wellcons
     assert result_wellheads == expected_wellheads
     assert result_wellbores == expected_wellbores
+    assert result_constraints == expected_constraints
     spy.assert_called_once()

@@ -42,9 +42,10 @@ class NexusNetwork:
         self.Wellbores: NexusWellbores = NexusWellbores(self)
         self.Constraints: NexusConstraints = NexusConstraints(self)
 
-    def get_load_status(self):
+    def get_load_status(self) -> bool:
         if not self.__has_been_loaded:
             self.load()
+        return self.__has_been_loaded
 
     def get_surface_file(self, method_number: Optional[int] = None) -> Optional[dict[int, NexusFile] | NexusFile]:
         """ gets a specific surface file object or a dictionary of surface files keyed by method number
@@ -63,9 +64,13 @@ class NexusNetwork:
             return None
         return self.model.fcs_file.surface_files.get(method_number)
 
-    def load(self):
+    def load(self) -> None:
         """ Loads all the objects from the surface files in the Simulator class.
+        Table headers with None next to their name are currently skipped awaiting development
         """
+        # TODO implement all objects with Nones next to them in the dictionary below
+        if self.model.fcs_file.surface_files is None:
+            raise FileNotFoundError('Could not find any surface files associated with the fcs file provided.')
         for surface in self.model.fcs_file.surface_files.values():
             nexus_obj_dict = nfo.collect_all_tables_to_objects(
                 surface, {'NODECON': NexusNodeConnection,
@@ -76,6 +81,8 @@ class NexusNetwork:
                           'CONSTRAINTS': NexusConstraint,
                           'CONSTRAINT': NexusConstraint,
                           'QMULT': NexusConstraint,
+                          'CONDEFAULTS': None,
+                          'TARGET': None,
                           },
                 start_date=self.model.start_date,
                 default_units=self.model.default_units)
