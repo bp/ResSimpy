@@ -874,6 +874,8 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
             table_end = index
         # if we have a complete table to read in start reading it into objects
         if 0 < table_start < table_end:
+            # cover for the case where we aren't currently reading in the table to an object.
+            # if no object is provided by the map for the token found then skip the keyword and reset the tracking vars
             if table_object_map[token_found] is None:
                 table_start = -1
                 table_end = -1
