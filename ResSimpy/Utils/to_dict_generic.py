@@ -26,9 +26,9 @@ def to_dict(nexus_object: Any, keys_in_nexus_style: bool = False, add_date: bool
         result_dict = {y[0]: nexus_object.__getattribute__(y[0]) for y in mapping_dict.values()}
 
     if add_date:
-        result_dict['date'] = getattr(nexus_object, 'date', None)
+        result_dict['date'] = getattr(nexus_object, 'date')
     if add_units:
-        unit_sys = getattr(nexus_object, 'unit_system', None)
+        unit_sys = getattr(nexus_object, 'unit_system')
         if isinstance(unit_sys, UnitSystem):
             result_dict['unit_system'] = unit_sys.value
     return result_dict
