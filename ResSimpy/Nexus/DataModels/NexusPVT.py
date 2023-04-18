@@ -25,7 +25,7 @@ class NexusPVT():
     """
     # General parameters
     file_path: str
-    method_number: int 
+    method_number: int
     pvt_type: Optional[str] = None
     eos_nhc: Optional[int] = None  # Number of hydrocarbon components
     eos_temp: Optional[float] = None  # Default temperature for EOS method
@@ -69,7 +69,7 @@ class NexusPVT():
                     printable_str += f'    {key}: \n'
                     printable_str += pvt_dict[key].to_string()
                     printable_str += '\n\n'
-                elif isinstance(pvt_dict[key],dict):
+                elif isinstance(pvt_dict[key], dict):
                     for subkey in pvt_dict[key].keys():
                         printable_str += f'    {key} - {subkey}\n'
                         printable_str += pvt_dict[key][subkey].to_string()
