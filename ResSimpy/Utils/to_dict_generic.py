@@ -26,9 +26,18 @@ def to_dict(nexus_object: Any, keys_in_nexus_style: bool = False, add_date: bool
         result_dict = {y[0]: nexus_object.__getattribute__(y[0]) for y in mapping_dict.values()}
 
     if add_date:
-        result_dict['date'] = getattr(nexus_object, 'date')
+        try:
+            result_dict['date'] = getattr(nexus_object, 'date')
+        except AttributeError:
+            raise AttributeError('Date was requested from the object but does not have a date associated with it.'
+                                 f'Try setting add_date to False. Full contents of object: {nexus_object}')
     if add_units:
-        unit_sys = getattr(nexus_object, 'unit_system')
+        try:
+            unit_sys = getattr(nexus_object, 'unit_system')
+        except AttributeError:
+            raise AttributeError(
+                'Unit system was requested from the object but does not have a unit system associated with it.'
+                f'Try setting add_units to False. Full contents of the object: {nexus_object}')
         if isinstance(unit_sys, UnitSystem):
             result_dict['unit_system'] = unit_sys.value
     return result_dict
