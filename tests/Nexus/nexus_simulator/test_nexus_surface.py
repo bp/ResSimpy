@@ -498,8 +498,14 @@ def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
-    expected_constraints = [NexusConstraint(x) for x in expected_content]
-    expected_single_name_constraint = [NexusConstraint(x) for x in expected_content if x['name']=='well1']
+    expected_constraints = {}
+    for constraint in expected_content:
+        well_name = constraint['name']
+        if expected_constraints.get(well_name, None) is not None:
+            expected_constraints[well_name].append(NexusConstraint(constraint))
+        else:
+            expected_constraints[well_name] = [NexusConstraint(constraint)]
+    expected_single_name_constraint = expected_constraints['well1']
     mock_nexus_network = mocker.MagicMock()
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
     expected_df = pd.DataFrame(expected_content)
@@ -509,6 +515,13 @@ def test_load_constraints(mocker, file_contents, expected_content):
     result = constraints.get_constraints()
     result_single = constraints.get_constraint('well1')
     result_df = constraints.get_constraint_df()
+
+    # sort the dates for comparing dataframes (order normally wouldn't matter)
+    result_df['date'] = pd.to_datetime(result_df['date'])
+    result_df = result_df.sort_values('date').reset_index(drop=True)
+
+    expected_df['date'] = pd.to_datetime(expected_df['date'])
+    expected_df = expected_df.sort_values('date').reset_index(drop=True)
     # Assert
     assert result == expected_constraints
     assert result_single == expected_single_name_constraint
