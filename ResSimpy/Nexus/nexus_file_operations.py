@@ -566,7 +566,10 @@ def get_multiple_sequential_values(list_of_strings: list[str], number_tokens: in
     return store_values
 
 
-def check_for_common_input_data(file_as_list: list[str], property_dict: dict) -> dict[str, str | list[str] | Enum]:
+def check_for_and_populate_common_input_data(file_as_list: list[str], property_dict:
+                                             dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                                                             dict[str, pd.DataFrame]]]
+                                             ) -> None:
     """Loop through lines of Nexus input file content looking for common input data, e.g.,
     units such as ENGLISH or METRIC, temparure units such as FAHR or CELSIUS, DATEFORMAT, etc.,
     as defined in Nexus manual. If any found, include in provided property_dict and return
@@ -582,10 +585,11 @@ def check_for_common_input_data(file_as_list: list[str], property_dict: dict) ->
         # Check for description
         check_property_in_line(line, property_dict, file_as_list)
 
-    return property_dict
 
-
-def check_property_in_line(line: str, property_dict: dict, file_as_list: list[str]) -> dict:
+def check_property_in_line(line: str,
+                           property_dict: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                                                          dict[str, pd.DataFrame]]],
+                           file_as_list: list[str]) -> None:
     """Given a line of Nexus input file content looking for common input data, e.g.,
         units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
         as defined in Nexus manual. If any found, include in provided property_dict and return
@@ -600,12 +604,14 @@ def check_property_in_line(line: str, property_dict: dict, file_as_list: list[st
         """
     if check_token('DESC', line):
         if 'DESC' in property_dict.keys():
-            property_dict['DESC'].append(line.split('DESC')[1].strip())
+            if isinstance(property_dict['DESC'], list):
+                property_dict['DESC'].append(line.split('DESC')[1].strip())
         else:
             property_dict['DESC'] = [line.split('DESC')[1].strip()]
     # Check for label
     if check_token('LABEL', line):
-        property_dict['LABEL'] = get_token_value('LABEL', line, file_as_list)
+        property_dict['LABEL'] = get_expected_token_value('LABEL', line, file_as_list,
+                                                          custom_message='Invalid file: LABEL value not provided')
     # Check for dateformat
     if check_token('DATEFORMAT', line):
         date_format_value = get_expected_token_value('DATEFORMAT', line, file_as_list)
@@ -644,7 +650,6 @@ def check_property_in_line(line: str, property_dict: dict, file_as_list: list[st
         property_dict['TEMP_UNIT'] = TemperatureUnits.FAHR
     if check_token('CELSIUS', line):
         property_dict['TEMP_UNIT'] = TemperatureUnits.CELSIUS
-    return property_dict
 
 
 def looks_like_grid_array(file_path: str, lines2check: int = 10) -> bool:
