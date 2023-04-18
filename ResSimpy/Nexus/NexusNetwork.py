@@ -75,8 +75,8 @@ class NexusNetwork:
                 raise TypeError(f"Expected a list, instead received a dict: {input}")
             return input
 
-        def type_check_dicts(input: Optional[list[Any] | dict[str, list[NexusConstraint]]]) -> Optional[
-            dict[str, list[NexusConstraint]]]:
+        def type_check_dicts(input: Optional[list[Any] | dict[str, list[NexusConstraint]]]) -> \
+                Optional[dict[str, list[NexusConstraint]]]:
             """Guards against dictionaries coming from the dictionary"""
             if isinstance(input, list):
                 raise TypeError(f"Expected a dict, instead received a list: {input}")

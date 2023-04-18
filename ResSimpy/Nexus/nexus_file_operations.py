@@ -749,7 +749,8 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
             e.g. {'NAME': ('name', str)} for the object obj with attribute obj.name
         current_date (Optional[str]): date/time at which the object was found within a recurrent file
         unit_system (Optional[UnitSystem): most recent UnitSystem enum of the file where the object was found
-        nexus_obj_dict (Optional[dict[str, list[Any]]]): list of objects to append to. If None creates an empty list to populate.
+        nexus_obj_dict (Optional[dict[str, list[Any]]]): list of objects to append to. \
+            If None creates an empty list to populate.
         preserve_previous_object_attributes (bool): If True the code will find the latest object with a matching name\
             attribute and will update the object to reflect the latest additional attributes and overriding all \
             matching attributes. Must have a .update() method implemented and a name
@@ -826,8 +827,8 @@ def check_list_tokens(list_tokens: list[str], line: str) -> Optional[str]:
 
 
 def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[str, Any], start_date: Optional[str],
-                                  default_units: Optional[UnitSystem], ) -> dict[
-    str, list[Any] | dict[str, list[NexusConstraint]]]:
+                                  default_units: Optional[UnitSystem], ) -> \
+        dict[str, list[Any] | dict[str, list[NexusConstraint]]]:
     """ Loads all tables from a given file.
 
         Args:
