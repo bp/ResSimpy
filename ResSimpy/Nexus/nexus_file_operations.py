@@ -839,7 +839,7 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
             start_date (str): Starting date of the run
             default_units (UnitSystem): Units used in case not specified by file.
         Raises:
-            TypeError: if the unit system found in the property check is not a valid enum UnitSystem
+            TypeError: if the unit system found in the property check is not a valid enum UnitSystem.
         Returns:
             dict[str, list[Storage_Object]]: a dictionary of lists of arbitrary objects populated \
                 with properties from the file provided, keyed with the NexusTable name associated with table_object_map.
