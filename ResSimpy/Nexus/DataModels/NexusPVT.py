@@ -151,8 +151,11 @@ class NexusPVT():
             else:
                 table_name = 'UNSATOIL'
                 full_table_name = table_name + '_' + table_key
-        if not table_has_endkeyword and [i for i in single_line.split() if i in PVT_KEYWORDS]:
-            end_flag_found = True
+        # if not table_has_endkeyword and [i for i in single_line.split() if i in PVT_KEYWORDS]:
+        if not table_has_endkeyword:
+            for keyword in PVT_KEYWORDS:
+                if nfo.check_token(keyword, single_line):
+                    end_flag_found = True
         if table_has_endkeyword and nfo.check_token('END' + table_name, single_line):
             end_flag_found = True
         if (full_table_name in table_indices.keys() or full_table_name in table_indices_dict.keys()) and \

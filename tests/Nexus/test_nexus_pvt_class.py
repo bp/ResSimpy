@@ -25,7 +25,7 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits
 
     115. 1.08 25.0 0.045 2.78 0.0109
     ! This is a comment in a table
-    2515 1.25 1.089 0.505 0.99 0.0193 ! This is an inline comment, in a table
+    2515 1.25 1.089 0.505 0.99 0.0193 ! VIP 
     3515 1.33 0.787 0.69 0.79 0.0193
     
     UNSATOIL PSAT 2000.0
