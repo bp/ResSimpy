@@ -377,7 +377,7 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits
              ])
 def test_read_properties_from_file(mocker, file_contents, expected_pvt_properties):
     # Arrange
-    pvt_obj = NexusPVT(file_path='test/file/pvt.dat')
+    pvt_obj = NexusPVT(file_path='test/file/pvt.dat', method_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
