@@ -49,7 +49,10 @@ class NexusWellheads:
         new_wellheads = nfo.collect_all_tables_to_objects(surface_file, {'WELLHEAD': NexusWellhead, },
                                                           start_date=start_date,
                                                           default_units=default_units)
-        self.add_wellheads(new_wellheads.get('WELLHEAD'))
+        wellheads_list = new_wellheads.get('WELLHEAD')
+        if isinstance(wellheads_list, dict):
+            raise ValueError('Incompatible data format for additional wells. Expected type "list" instead got "dict"')
+        self.add_wellheads(wellheads_list)
 
     def add_wellheads(self, additional_list: Optional[list[NexusWellhead]]) -> None:
         """ extends the nodes object by a list of wellheads provided to it.

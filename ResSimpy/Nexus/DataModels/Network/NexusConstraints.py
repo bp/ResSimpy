@@ -54,7 +54,7 @@ class NexusConstraints:
         for well_constraints in self.__constraints.values():
             list_constraints.extend(well_constraints)
         obj_to_dataframe(list_constraints)
-        
+
         return obj_to_dataframe(list_constraints)
 
     def get_constraint_overview(self) -> str:
@@ -69,7 +69,11 @@ class NexusConstraints:
                                                              'QMULT': NexusConstraint},
                                                             start_date=start_date,
                                                             default_units=default_units)
-        self.add_constraints(new_constraints.get('CONSTRAINTS'))
+        cons_list = new_constraints.get('CONSTRAINTS')
+        if isinstance(cons_list, list):
+            raise ValueError(
+                'Incompatible data format for additional constraints. Expected type "dict" instead got "list"')
+        self.add_constraints(cons_list)
 
     def add_constraints(self, additional_constraints: Optional[dict[str, list[NexusConstraint]]]) -> None:
         """ Adds additional constraints to memory within the NexusConstraints object.

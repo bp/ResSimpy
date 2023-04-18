@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Any
 
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
@@ -68,6 +68,20 @@ class NexusNetwork:
         """ Loads all the objects from the surface files in the Simulator class.
         Table headers with None next to their name are currently skipped awaiting development
         """
+
+        def type_check_lists(input: Optional[list[Any] | dict[str, list[NexusConstraint]]]) -> Optional[list[Any]]:
+            """Guards against dictionaries coming from the dictionary"""
+            if isinstance(input, dict):
+                raise TypeError(f"Expected a list, instead received a dict: {input}")
+            return input
+
+        def type_check_dicts(input: Optional[list[Any] | dict[str, list[NexusConstraint]]]) -> Optional[
+            dict[str, list[NexusConstraint]]]:
+            """Guards against dictionaries coming from the dictionary"""
+            if isinstance(input, list):
+                raise TypeError(f"Expected a dict, instead received a list: {input}")
+            return input
+
         # TODO implement all objects with Nones next to them in the dictionary below
         if self.model.fcs_file.surface_files is None:
             raise FileNotFoundError('Could not find any surface files associated with the fcs file provided.')
@@ -86,11 +100,11 @@ class NexusNetwork:
                           },
                 start_date=self.model.start_date,
                 default_units=self.model.default_units)
-            self.Nodes.add_nodes(nexus_obj_dict.get('NODES'))
-            self.Connections.add_connections(nexus_obj_dict.get('NODECON'))
-            self.WellConnections.add_connections(nexus_obj_dict.get('WELLS'))
-            self.Wellheads.add_wellheads(nexus_obj_dict.get('WELLHEAD'))
-            self.Wellbores.add_wellbores(nexus_obj_dict.get('WELLBORE'))
-            self.Constraints.add_constraints(nexus_obj_dict.get('CONSTRAINTS'))
+            self.Nodes.add_nodes(type_check_lists(nexus_obj_dict.get('NODES')))
+            self.Connections.add_connections(type_check_lists(nexus_obj_dict.get('NODECON')))
+            self.WellConnections.add_connections(type_check_lists(nexus_obj_dict.get('WELLS')))
+            self.Wellheads.add_wellheads(type_check_lists(nexus_obj_dict.get('WELLHEAD')))
+            self.Wellbores.add_wellbores(type_check_lists(nexus_obj_dict.get('WELLBORE')))
+            self.Constraints.add_constraints(type_check_dicts(nexus_obj_dict.get('CONSTRAINTS')))
 
         self.__has_been_loaded = True

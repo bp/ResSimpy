@@ -55,7 +55,10 @@ class NexusWellConnections:
         new_well_connections = nfo.collect_all_tables_to_objects(surface_file, {'WELLS': NexusWellConnection, },
                                                                  start_date=start_date,
                                                                  default_units=default_units)
-        self.add_connections(new_well_connections.get('WELLS'))
+        cons_list = new_well_connections.get('WELLS')
+        if isinstance(cons_list, dict):
+            raise ValueError('Incompatible data format for additional wells. Expected type "list" instead got "dict"')
+        self.add_connections(cons_list)
 
     def add_connections(self, additional_list: Optional[list[NexusWellConnection]]) -> None:
         """ extends the nodes object by a list of connections provided to it.

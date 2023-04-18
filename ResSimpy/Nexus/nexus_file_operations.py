@@ -826,7 +826,8 @@ def check_list_tokens(list_tokens: list[str], line: str) -> Optional[str]:
 
 
 def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[str, Any], start_date: Optional[str],
-                                  default_units: Optional[UnitSystem], ) -> dict[str, list[Any]]:
+                                  default_units: Optional[UnitSystem], ) -> dict[
+    str, list[Any] | dict[str, list[NexusConstraint]]]:
     """ Loads all tables from a given file.
 
         Args:
@@ -904,21 +905,22 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
                                                      row_object=table_object_map[token_found],
                                                      property_map=property_map, current_date=current_date,
                                                      unit_system=unit_system, nexus_obj_dict=None)
+
+            # store objects found into right dictionary
+            list_of_token_obj = nexus_object_results[token_found]
             # This statement ensures that CONSTRAINT that are found in tables are actually added to the dictionary
             # under the same key as constraints to preserve their order
             if (token_found == 'CONSTRAINT' or token_found == 'QMULT') and list_objects is not None:
-                token_found = 'CONSTRAINTS'
                 for constraint in list_objects:
                     well_name = constraint.name
-                    if isinstance(nexus_object_results[token_found], dict) and nexus_object_results[token_found].get(
-                            well_name, None) is not None:
-                        nexus_object_results[token_found][well_name].append(constraint)
+                    if nexus_constraints.get(well_name, None) is not None:
+                        nexus_constraints[well_name].append(constraint)
                     else:
-                        nexus_object_results[token_found][well_name] = [constraint]
-            elif list_objects is not None:
-                nexus_object_results[token_found].extend(list_objects)
+                        nexus_constraints[well_name] = [constraint]
+            elif list_objects is not None and isinstance(list_of_token_obj, list):
+                list_of_token_obj.extend(list_objects)
             else:
-                nexus_object_results[token_found] = nexus_constraints
+                list_of_token_obj = nexus_constraints
             # reset indices for further tables
             table_start = -1
             table_end = -1
