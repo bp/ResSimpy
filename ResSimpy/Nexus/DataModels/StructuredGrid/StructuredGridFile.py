@@ -248,7 +248,7 @@ class StructuredGridFile(Grid):
         self.__array_functions_loaded = True
 
     def get_array_functions_list(self) -> Optional[list[list[str]]]:
-        """Returns the grid array functions as a dataframe"""
+        """Returns the grid array functions as a list of function lines"""
         if not self.__array_functions_loaded:
             self.load_array_functions()
         return self.__array_functions_list

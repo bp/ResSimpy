@@ -39,6 +39,7 @@ WORKA3 OUTPUT SWL
 
 some line
 Function IREGION
+! comment line
 8 9 10
 ANALYT     log
 WORKA3    OUTPUT  KX
