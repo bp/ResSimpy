@@ -24,14 +24,14 @@ class NexusWells(Wells):
 
     def get_wells_df(self) -> pd.DataFrame:
         # loop through wells and completions to output a table
-        df_store = pd.DataFrame()
+        store_dictionaries = []
         for well in self.__wells:
             for completion in well.completions:
                 completion_props: dict[str, None | float | int | str] = {'well_name': well.well_name,
                                                                          'units': well.units.name, }
                 completion_props.update(completion.to_dict())
-                df_row = pd.DataFrame(completion_props, index=[0])
-                df_store = pd.concat([df_store, df_row], axis=0, ignore_index=True)
+                store_dictionaries.append(completion_props)
+        df_store = pd.DataFrame(store_dictionaries)
         df_store = df_store.dropna(axis=1, how='all')
         return df_store
 
