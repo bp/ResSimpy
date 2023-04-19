@@ -21,15 +21,14 @@ def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
             function_body = []
             reading_function = True
         if reading_function:
+            # remove all comments following '!'.
+            line = line.rsplit('!', 1)[0]
             function_body.append(line.strip())
             if nfo.check_token('OUTPUT', line) and not nfo.check_token('RANGE', line):
                 function_list.append(function_body)
                 reading_function = False
     # remove null values
     function_list = [list(filter(None, x)) for x in function_list]
-
-    # remove all comments
-
 
     return function_list
 

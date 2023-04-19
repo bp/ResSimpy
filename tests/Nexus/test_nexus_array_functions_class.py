@@ -38,9 +38,9 @@ ANALYT POLYN 1 0
 WORKA3 OUTPUT SWL
 
 some line
-Function IREGION
-! comment line
+Function IREGION ! test comment
 8 9 10
+! test comment
 ANALYT     log
 WORKA3    OUTPUT  KX
 FUNCTION
