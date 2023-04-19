@@ -95,7 +95,12 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                 if len(words) > 2:
                     # remove the first 2 words in line, and set the rest to coefficients
                     function_coefficients = words[2:]
-                    function_coefficients = [float(i) for i in function_coefficients]
+                    # convert string coefficient values to numerical, if possible:
+                    try:
+                        function_coefficients = [float(i) for i in function_coefficients]
+                    except ValueError:
+                        print('ValueError: could not convert string to float.')
+
             if 'GRID' in line:
                 grid_name = words[1]
             if 'RANGE' in line and 'INPUT' in line:
