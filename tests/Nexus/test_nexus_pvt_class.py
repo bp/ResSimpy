@@ -408,3 +408,30 @@ def test_read_properties_from_file(mocker, file_contents, expected_pvt_propertie
         else:
             assert expected_pvt_properties[key] == props[key]
 
+
+def test_nexus_pvt_repr():
+    # Arrange
+    pvt_obj = NexusPVT(file_path='test/file/pvt.dat', method_number=1)
+    pvt_obj.pvt_type = 'BLACKOIL'
+    pvt_obj.properties['SATURATED'] = pd.DataFrame({'PRES': [14.7, 115., 2515, 3515],
+                                     'BO': [1.05, 1.08, 1.25, 1.33],
+                                     'BG': [225, 25, 1.089, 0.787],
+                                     'RS': [0.005, 0.045, 0.505, 0.69],
+                                     'VO': [3.93, 2.78, 0.99, 0.79],
+                                     'VG': [0.0105, 0.0109, 0.0193, 0.0193]
+                                     })
+    expected_output = """
+--------------------------------
+PVT method 1
+--------------------------------
+FILE_PATH: test/file/pvt.dat
+PVT_TYPE: BLACKOIL
+SATURATED: 
+""" + pvt_obj.properties['SATURATED'].to_string() + '\n\n'
+
+    # Act
+    result = pvt_obj.__repr__()
+    print(result)
+
+    # Assert
+    assert result == expected_output
