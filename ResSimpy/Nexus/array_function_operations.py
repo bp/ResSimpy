@@ -22,7 +22,7 @@ def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
             reading_function = True
         if reading_function:
             # remove all comments following '!'.
-            line = line.rsplit('!', 1)[0]
+            line = line.split('!', 1)[0]
             function_body.append(line.strip())
             if nfo.check_token('OUTPUT', line) and not nfo.check_token('RANGE', line):
                 function_list.append(function_body)
