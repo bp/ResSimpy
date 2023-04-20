@@ -21,7 +21,7 @@ def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
             function_body = []
             reading_function = True
         if reading_function:
-            # remove all comments following '!'.
+            # remove all comments following the first '!' in a line.
             line = line.split('!', 1)[0]
             function_body.append(line.strip())
             if nfo.check_token('OUTPUT', line) and not nfo.check_token('RANGE', line):
@@ -99,7 +99,7 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                     try:
                         function_coefficients = [float(i) for i in function_coefficients]
                     except ValueError:
-                        print('ValueError: could not convert string to float.')
+                        print(f'ValueError at function {b+1}: could not convert string to float.')
 
             if 'GRID' in line:
                 grid_name = words[1]
