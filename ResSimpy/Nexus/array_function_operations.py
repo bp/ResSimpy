@@ -86,7 +86,11 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                     else:
                         region_type = words[1]
                         region_number_list = block[li + 1].split()
-                        region_number_list = [round(float(i)) for i in region_number_list]
+                        try:
+                            region_number_list = [round(float(i)) for i in region_number_list]
+                        except ValueError:
+                            print(f'ValueError at function {b + 1}: could not convert string to integer.')
+
                 if len(words) > 2:  # TODO: deal with tabular function option keywords
                     warnings.warn(f'Function {b + 1}:  Function table entries will be excluded from summary df.')
                     function_type = 'function table'
@@ -105,8 +109,18 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                 grid_name = words[1]
             if 'RANGE' in line and 'INPUT' in line:
                 input_arrays_min_max_list = words[2:]
+                # convert string range_input values to numerical, if possible:
+                try:
+                    input_arrays_min_max_list = [float(i) for i in input_arrays_min_max_list]
+                except ValueError:
+                    print(f'ValueError at function {b + 1}: could not convert string to float.')
             if 'RANGE' in line and 'OUTPUT' in line:
                 output_arrays_min_max_list = words[2:]
+                # convert string range_input values to numerical, if possible:
+                try:
+                    output_arrays_min_max_list = [float(i) for i in output_arrays_min_max_list]
+                except ValueError:
+                    print(f'ValueError at function {b + 1}: could not convert string to float.')
             if 'DRANGE' in line:
                 warnings.warn(f'Function {b + 1}: Function table entries will be excluded from summary df.')
                 drange_list = words[1:]
@@ -114,11 +128,12 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
             if 'OUTPUT' in line and 'RANGE' not in line:
                 input_array_list = words[:words.index('OUTPUT')]
                 output_array_list = words[words.index('OUTPUT') + 1:]
-        # TODO: find a safer way to create the new function row
+        # Create the row that holds function data
         function_row = [b + 1, blocks_list, region_type, region_number_list, function_type,
                         function_coefficients,
                         grid_name, input_arrays_min_max_list, output_arrays_min_max_list, drange_list, input_array_list,
                         output_array_list, i1, i2, j1, j2, k1, k2]
+        # Append the function row to the dataframe
         functions_df.loc[len(functions_df)] = function_row
     return functions_df
 
