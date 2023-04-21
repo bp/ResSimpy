@@ -56,8 +56,8 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
         # set the lists as empty strings as well, otherwise they show up as [] on the dataframe.
         region_number_list: Union[str, List[str], List[int]] = ''
         function_coefficients: Union[str, List[str], List[float]] = ''
-        input_arrays_min_max_list: Union[str, List[str]] = ''
-        output_arrays_min_max_list: Union[str, List[str]] = ''
+        input_arrays_min_max_list: Union[str, List[str], List[float]] = ''
+        output_arrays_min_max_list: Union[str, List[str], List[float]] = ''
         input_array_list: Union[str, List[str]] = ''
         output_array_list: Union[str, List[str]] = ''
         drange_list: Union[str, List[str]] = ''
@@ -103,7 +103,7 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                     try:
                         function_coefficients = [float(i) for i in function_coefficients]
                     except ValueError:
-                        print(f'ValueError at function {b+1}: could not convert string to float.')
+                        print(f'ValueError at function {b + 1}: could not convert string to float.')
 
             if 'GRID' in line:
                 grid_name = words[1]
@@ -156,7 +156,7 @@ def summarize_model_functions(function_list_to_parse: List[List[str]]) -> pd.Dat
         formula = row['output_arrays'][0] + ' = '
 
         match row['func_type'].upper():
-        # ANALYT POLYN
+            # ANALYT POLYN
             case 'POLYN':
                 # get number of coefficients, n
                 n = len(row['func_coeff'])
@@ -211,62 +211,62 @@ def summarize_model_functions(function_list_to_parse: List[List[str]]) -> pd.Dat
 
                     formula += f_portion
 
-        # ANALYT ABS
+            # ANALYT ABS
             case 'ABS':
                 formula += f"| {row['input_arrays'][0]} |"
 
-        # ANALYT EXP
+            # ANALYT EXP
             case 'EXP':
                 formula += f"e^{row['input_arrays'][0]}"
 
-        # ANALYT EXP10
+            # ANALYT EXP10
             case 'EXP10':
                 formula += f"10^{row['input_arrays'][0]}"
 
-        # ANALYT LOG
+            # ANALYT LOG
             case 'LOG':
                 formula += f"ln|{row['input_arrays'][0]}|"
 
-        # ANALYT LOG10
+            # ANALYT LOG10
             case 'LOG10':
                 formula += f"log10|{row['input_arrays'][0]}|"
 
-        # ANALYT SQRT
+            # ANALYT SQRT
             case 'SQRT':
                 formula += f"SQRT|{row['input_arrays'][0]}|"
 
-        # ANALYT GE
+            # ANALYT GE
             case 'GE':
                 formula += f"({row['input_arrays'][0]} if {row['input_arrays'][0]} >= {row['func_coeff'][0]}; " \
-                       f"{row['func_coeff'][1]} otherwise)"
+                           f"{row['func_coeff'][1]} otherwise)"
 
-        # ANALYT LE
+            # ANALYT LE
             case 'LE':
                 formula += f"({row['input_arrays'][0]} if {row['input_arrays'][0]} <= {row['func_coeff'][0]}; " \
-                       f"{row['func_coeff'][1]} otherwise)"
+                           f"{row['func_coeff'][1]} otherwise)"
 
-        # ANALYT ADD
+            # ANALYT ADD
             case 'ADD':
                 formula += f"{row['input_arrays'][0]} + {row['input_arrays'][1]}"
 
-        # ANALYT SUBT
+            # ANALYT SUBT
             case 'SUBT':
                 formula += f"{row['input_arrays'][0]} - {row['input_arrays'][1]}"
 
-        # ANALYT DIV
+            # ANALYT DIV
             case 'DIV':
                 formula += f"({row['input_arrays'][0]} / {row['input_arrays'][1]} if {row['input_arrays'][1]} != 0; " \
-                       f"{row['input_arrays'][0]} otherwise)"
+                           f"{row['input_arrays'][0]} otherwise)"
 
-        # ANALYT MULT
+            # ANALYT MULT
             case 'MULT':
                 formula += f"{row['input_arrays'][0]} * {row['input_arrays'][1]}"
 
-        # ANALYT MIN
+            # ANALYT MIN
             case 'MIN':
                 formula += f"min({row['input_arrays'][0]}, {row['input_arrays'][1]})"
 
-        # ANALYT MAX
+            # ANALYT MAX
             case 'MAX':
                 formula += f"max({row['input_arrays'][0]}, {row['input_arrays'][1]})"
 
