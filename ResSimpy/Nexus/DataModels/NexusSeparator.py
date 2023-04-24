@@ -89,7 +89,7 @@ class NexusSeparator():
                     if nfo.check_token(key, line):
                         self.properties[key] = int(str(nfo.get_token_value(key, line, file_as_list)))
 
-            # Find staring index for black oil separator table
+            # Find starting index for black oil separator table
             if self.separator_type == 'BLACKOIL':
                 if nfo.check_token('KVOIL', line):
                     sep_table_indices[0] = line_indx
