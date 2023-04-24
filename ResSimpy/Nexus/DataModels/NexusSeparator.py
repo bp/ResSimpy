@@ -118,5 +118,6 @@ class NexusSeparator():
             line_indx += 1
 
         # Read in separator table
-        self.properties['SEPARATOR_TABLE'] = nfo.read_table_to_df(file_as_list[sep_table_indices[0]:
-                                                                               sep_table_indices[1]])
+        if self.separator_type is not None:
+            self.properties['SEPARATOR_TABLE'] = nfo.read_table_to_df(file_as_list[sep_table_indices[0]:
+                                                                                   sep_table_indices[1]])

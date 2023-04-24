@@ -803,32 +803,39 @@ def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
     assert result == loaded_pvt
 
 
-# @pytest.mark.parametrize("fcs_file_contents", [
-#     ("""
-#        SEPARATOR method 1 my/separator/file1.dat
+@pytest.mark.parametrize("fcs_file_contents", [
+    ("""
+       SEPARATOR method 1 my/separator/file1.dat
 
-#        separator Method 2 my/separator/file2.dat
-#        Separator METHOD 3 my/separator/file3.dat
-#     """)
-# ], ids=['basic case'])
-# def test_get_separator(mocker: MockerFixture, fcs_file_contents: str):
-#     """Testing the functionality to retrieve separator methods from Nexus fcs file"""
-#     # Arrange
-#     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
-#     mocker.patch("builtins.open", fcs_file_open)
+       separator Method 2 my/separator/file2.dat
+       Separator METHOD 3 my/separator/file3.dat
+    """)
+], ids=['basic case'])
+def test_get_separator(mocker: MockerFixture, fcs_file_contents: str):
+    """Testing the functionality to retrieve separator methods from Nexus fcs file"""
+    # Arrange
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            os.path.join('path', 'my/separator/file1.dat'): '',
+            os.path.join('path', 'my/separator/file2.dat'): '',
+            os.path.join('path', 'my/separator/file3.dat'): '',
+            'path/nexus_run.fcs': fcs_file_contents,
+            }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
 
-#     loaded_sep = {1: NexusSeparator(file_path=os.path.join('path', 'my/separator/file1.dat'), method_number=1),
-#                   2: NexusSeparator(file_path=os.path.join('path', 'my/separator/file2.dat'), method_number=2),
-#                   3: NexusSeparator(file_path=os.path.join('path', 'my/separator/file3.dat'), method_number=3),
-#                   }
+    loaded_sep = {1: NexusSeparator(file_path=os.path.join('path', 'my/separator/file1.dat'), method_number=1),
+                  2: NexusSeparator(file_path=os.path.join('path', 'my/separator/file2.dat'), method_number=2),
+                  3: NexusSeparator(file_path=os.path.join('path', 'my/separator/file3.dat'), method_number=3),
+                  }
 
-#     simulation = NexusSimulator(origin='path/nexus_run.fcs')
+    simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
-#     # Act
-#     result = simulation.separator_methods
+    # Act
+    result = simulation.separator_methods
 
-#     # Assert
-#     assert result == loaded_sep
+    # Assert
+    assert result == loaded_sep
 
 
 @pytest.mark.parametrize("fcs_file_contents, surface_file_content, node1_props, node2_props, \
