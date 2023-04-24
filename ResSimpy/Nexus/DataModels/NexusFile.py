@@ -7,8 +7,7 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 import warnings
 
 from ResSimpy.Grid import VariableEntry
-from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_OPERATION_KEYWORDS, GRID_ARRAY_FORMAT_KEYWORDS, \
-    GRID_ARRAY_KEYWORDS
+from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_OPERATION_KEYWORDS, GRID_ARRAY_FORMAT_KEYWORDS
 from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_nexus_file, get_empty_list_str_nexus_file
 
 
@@ -96,7 +95,7 @@ class NexusFile:
                 previous_value = nfo.get_previous_value(file_as_list=file_as_list[0: i + 1], search_before='INCLUDE',
                                                         ignore_values=ignore_keywords)
 
-                keywords_to_skip_include = GRID_ARRAY_FORMAT_KEYWORDS + GRID_ARRAY_KEYWORDS + GRID_OPERATION_KEYWORDS
+                keywords_to_skip_include = GRID_ARRAY_FORMAT_KEYWORDS + GRID_OPERATION_KEYWORDS + ["CORP"]
                 if previous_value is None:
                     skip_next_include = False
 
