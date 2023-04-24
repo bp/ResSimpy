@@ -566,12 +566,12 @@ def get_multiple_sequential_values(list_of_strings: list[str], number_tokens: in
     return store_values
 
 
-def check_for_and_populate_common_input_data(file_as_list: list[str], property_dict:
-                                             dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                                             dict[str, pd.DataFrame]]]
-                                             ) -> None:
+def check_for_and_populate_common_input_data(file_as_list: list[str],
+                                             property_dict: dict[str, Union[
+                                                 str, int, float, Enum, list[str], pd.DataFrame, dict[
+                                                     str, pd.DataFrame]]]) -> None:
     """Loop through lines of Nexus input file content looking for common input data, e.g.,
-    units such as ENGLISH or METRIC, temparure units such as FAHR or CELSIUS, DATEFORMAT, etc.,
+    units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
     as defined in Nexus manual. If any found, include in provided property_dict and return
 
     Args:
@@ -588,7 +588,7 @@ def check_for_and_populate_common_input_data(file_as_list: list[str], property_d
 
 def check_property_in_line(line: str,
                            property_dict: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                                          dict[str, pd.DataFrame]]],
+                           dict[str, pd.DataFrame]]],
                            file_as_list: list[str]) -> None:
     """Given a line of Nexus input file content looking for common input data, e.g.,
         units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
