@@ -427,7 +427,8 @@ class NexusSimulator(Simulator):
                 if pvt_file is None:
                     raise ValueError(f'Unable to find pvt file: {pvt_file}')
                 if os.path.isfile(pvt_file):
-                    self.pvt_methods[table_num] = NexusPVT(file_path=pvt_file)  # Create NexusPVT object
+                    self.pvt_methods[table_num] = NexusPVT(file_path=pvt_file,
+                                                           method_number=table_num)  # Create NexusPVT object
                     self.pvt_methods[table_num].read_properties()  # Populate object with PVT properties in file
 
         # Load in Runcontrol
