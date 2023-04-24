@@ -788,9 +788,9 @@ def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
     mocker.patch("builtins.open", fcs_file_open)
 
-    loaded_pvt = {1: NexusPVT(file_path=os.path.join('path', 'my/pvt/file1.dat')),
-                  2: NexusPVT(file_path=os.path.join('path', 'my/pvt/file2.dat')),
-                  3: NexusPVT(file_path=os.path.join('path', 'my/pvt/file3.dat')),
+    loaded_pvt = {1: NexusPVT(file_path=os.path.join('path', 'my/pvt/file1.dat'), method_number=1),
+                  2: NexusPVT(file_path=os.path.join('path', 'my/pvt/file2.dat'), method_number=2),
+                  3: NexusPVT(file_path=os.path.join('path', 'my/pvt/file3.dat'), method_number=3),
                   }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')

@@ -78,9 +78,12 @@ def test_get_token_value(mocker, line_contents, file_contents, expected_result):
                           ("TOKEN  value", "TOKEN", True),
                           ("TOKEN\n", "TOKEN", True),
                           ("T", "T", True),
+                          ("Brian", "B", False)
                           ], ids=["standard case", "token at start", "token at end", "no token", "token commented out",
                                   "token only part of longer word 1", "token only part of longer word 2",
-                                  "token before comment", "token then tab", "token then newline", "single character"])
+                                  "token before comment", "token then tab", "token then newline", "single character",
+                                  "token in string"
+                                  ])
 def test_check_token(line_string, token, expected_result):
     # Act
     result = nfo.check_token(token=token, line=line_string)

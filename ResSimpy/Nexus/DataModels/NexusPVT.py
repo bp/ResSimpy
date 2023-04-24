@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Optional, Union
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -24,6 +25,7 @@ class NexusPVT():
     """
     # General parameters
     file_path: str
+    method_number: int
     pvt_type: Optional[str] = None
     eos_nhc: Optional[int] = None  # Number of hydrocarbon components
     eos_temp: Optional[float] = None  # Default temperature for EOS method
@@ -32,8 +34,51 @@ class NexusPVT():
         str, int, float, pd.DataFrame, list[str], dict[str, float], tuple[str, dict[str, float]], dict[
             str, pd.DataFrame]]] \
         = field(default_factory=get_empty_eosopt_dict_union)
-    properties: dict[str, Union[str, int, float, pd.DataFrame, dict[str, pd.DataFrame]]] \
+    properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] \
         = field(default_factory=get_empty_dict_union)
+
+    def __repr__(self):
+        """Pretty printing PVT data"""
+        printable_str = ''
+        # for table_num in pvt_data.keys():
+        printable_str += '\n--------------------------------\n'
+        printable_str += f'PVT method {self.method_number}\n'
+        printable_str += '--------------------------------\n'
+        printable_str += f'FILE_PATH: {self.file_path}\n'
+        printable_str += f'PVT_TYPE: {self.pvt_type}\n'
+        pvt_dict = self.properties
+        for key in pvt_dict.keys():
+            if isinstance(pvt_dict[key], pd.DataFrame):
+                printable_str += f'{key}: \n'
+                printable_str += pvt_dict[key].to_string()
+                printable_str += '\n\n'
+            elif isinstance(pvt_dict[key], dict):
+                for subkey in pvt_dict[key].keys():
+                    printable_str += f'{key} - {subkey}\n'
+                    printable_str += pvt_dict[key][subkey].to_string()
+                    printable_str += '\n\n'
+            elif isinstance(pvt_dict[key], Enum):
+                printable_str += f'{key}: {pvt_dict[key].name}\n'
+            else:
+                printable_str += f'{key}: {pvt_dict[key]}\n'
+        if len(self.eos_options.keys()) > 0:
+            pvt_dict = self.eos_options
+            printable_str += 'EOSOPTIONS:\n'
+            for key in pvt_dict.keys():
+                if isinstance(pvt_dict[key], pd.DataFrame):
+                    printable_str += f'    {key}: \n'
+                    printable_str += pvt_dict[key].to_string()
+                    printable_str += '\n\n'
+                elif isinstance(pvt_dict[key], dict):
+                    for subkey in pvt_dict[key].keys():
+                        printable_str += f'    {key} - {subkey}\n'
+                        printable_str += pvt_dict[key][subkey].to_string()
+                        printable_str += '\n\n'
+                elif isinstance(pvt_dict[key], Enum):
+                    printable_str += f'    {key}: {pvt_dict[key].name}\n'
+                else:
+                    printable_str += f'    {key}: {pvt_dict[key]}\n'
+        return printable_str
 
     def __populate_eos_opts_to_tertiary_keys(self, primary_key: str, primary_key_default_val: str, single_line: str,
                                              line_list: list[str], list_of_secondary_keys: list[str]):
@@ -150,8 +195,11 @@ class NexusPVT():
             else:
                 table_name = 'UNSATOIL'
                 full_table_name = table_name + '_' + table_key
-        if not table_has_endkeyword and [i for i in single_line.split() if i in PVT_KEYWORDS]:
-            end_flag_found = True
+        # if not table_has_endkeyword and [i for i in single_line.split() if i in PVT_KEYWORDS]:
+        if not table_has_endkeyword:
+            for keyword in PVT_KEYWORDS:
+                if nfo.check_token(keyword, single_line):
+                    end_flag_found = True
         if table_has_endkeyword and nfo.check_token('END' + table_name, single_line):
             end_flag_found = True
         if (full_table_name in table_indices.keys() or full_table_name in table_indices_dict.keys()) and \
@@ -164,14 +212,14 @@ class NexusPVT():
             reading_flag = False
         return reading_flag
 
-    def read_properties(self):
+    def read_properties(self) -> None:
         """Read Nexus pvt file contents and populate the NexusPVT properties object
         """
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
         file_as_list = file_obj.get_flat_list_str_file()
 
         # Check for common input data
-        self.properties = nfo.check_for_common_input_data(file_as_list, self.properties)
+        nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
 
         # Initialize flags and containers used to record properties as we iterate through pvt file contents
         # Dictionary to record start and ending indices for tables
@@ -252,15 +300,20 @@ class NexusPVT():
             if [i for i in line.split() if i in primary_keys2populate]:
                 trans_flag = True
             if trans_flag:
-                for index, key in enumerate(zip(primary_keys2populate, primary_keys2populate_defaults, secondary_keys)):
-                    self.__populate_eos_opts_to_tertiary_keys(key[0], key[1], line, file_as_list, key[2])
+                for index in range(len(primary_keys2populate)):
+                    pkey = primary_keys2populate[index]
+                    p2key = primary_keys2populate_defaults[index]
+                    sec_key = secondary_keys[index]
+                    self.__populate_eos_opts_to_tertiary_keys(pkey, p2key, line, file_as_list, sec_key)
             # Read TRANS_OPTIMIZATION eos options, if present
             if nfo.check_token('TRANS_OPTIMIZATION', line):
-                self.eos_options['TRANS_OPTIMIZATION'] = {}
+                new_dict: dict[str, float] = {}
                 for tert_key in PVT_EOSOPTIONS_TERTIARY_KEYS:
                     if nfo.check_token(tert_key, line):
-                        self.eos_options['TRANS_OPTIMIZATION'][tert_key] = float(
-                            nfo.get_expected_token_value(tert_key, line, file_as_list))
+                        potential_value = float(nfo.get_expected_token_value(tert_key, line, file_as_list))
+                        if isinstance(potential_value, float):
+                            new_dict[tert_key] = potential_value
+                            self.eos_options['TRANS_OPTIMIZATION'] = new_dict
 
             # Identify beginning and ending line indices for different kinds tables in PVT file
             if start_reading_table:  # Figure out ending line indices for tables

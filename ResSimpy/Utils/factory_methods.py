@@ -1,4 +1,5 @@
 from __future__ import annotations
+from enum import Enum
 from typing import TYPE_CHECKING, Union
 import pandas as pd
 
@@ -13,8 +14,8 @@ def get_empty_list_str() -> list[str]:
 
 
 # Factory method for generating empty dictionary with typing
-def get_empty_dict_union() -> dict[str, Union[str, int, float, pd.DataFrame, dict[str, pd.DataFrame]]]:
-    value: dict[str, Union[str, int, float, pd.DataFrame, dict[str, pd.DataFrame]]] = {}
+def get_empty_dict_union() -> dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]]:
+    value: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] = {}
     return value
 
 
