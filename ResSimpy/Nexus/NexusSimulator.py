@@ -10,6 +10,7 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
+from ResSimpy.Nexus.DataModels.NexusSeparator import NexusSeparator
 from ResSimpy.Nexus.DataModels.StructuredGrid.StructuredGridFile import StructuredGridFile
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -90,6 +91,7 @@ class NexusSimulator(Simulator):
         self.__default_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
         # Model dynamic properties
         self.pvt_methods: dict[int, NexusPVT] = {}
+        self.separator_methods: dict[int, NexusSeparator] = {}
         # Nexus operations modules
         self.Runcontrol: Runcontrol = Runcontrol(self)
         self.Reporting: Reporting = Reporting(self)
@@ -418,7 +420,7 @@ class NexusSimulator(Simulator):
 
         # Load in the other files
 
-        # === Load in dynamic properties
+        # === Load in dynamic properties ===
         # Read in PVT properties from Nexus PVT method files
         if self.fcs_file.pvt_files is not None and \
                 len(self.fcs_file.pvt_files) > 0:  # Check if PVT files exist
@@ -430,6 +432,18 @@ class NexusSimulator(Simulator):
                     self.pvt_methods[table_num] = NexusPVT(file_path=pvt_file,
                                                            method_number=table_num)  # Create NexusPVT object
                     self.pvt_methods[table_num].read_properties()  # Populate object with PVT properties in file
+
+        # Read in separator properties from Nexus separator method files
+        if self.fcs_file.separator_files is not None and \
+                len(self.fcs_file.separator_files) > 0:  # Check if separator files exist
+            for table_num in self.fcs_file.separator_files.keys():  # For each separator method
+                separator_file = self.fcs_file.separator_files[table_num].location
+                if separator_file is None:
+                    raise ValueError(f'Unable to find separator file: {separator_file}')
+                if os.path.isfile(separator_file):
+                    self.separator_methods[table_num] = NexusSeparator(
+                        file_path=separator_file, method_number=table_num)  # Create NexusSeparator object
+                    self.separator_methods[table_num].read_properties()  # Populate object with separator properties
 
         # Load in Runcontrol
         if self.fcs_file.runcontrol_file is not None:

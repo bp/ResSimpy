@@ -20,8 +20,17 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 class NexusPVT():
     """ Class to hold Nexus PVT properties
     Attributes:
-        properties (dict[str, Union[str, dict, int, float, pd.DataFrame]]): Dictionary holding all properties for
-        a specific PVT method. Defaults to empty dictionary.
+        file_path (str): Path to the Nexus PVT file
+        method_number (int): PVT method number in Nexus fcs file
+        pvt_type (Optional[str]): Type of PVT method, e.g., BLACKOIL, GASWATER or EOS. Defaults to None
+        eos_nhc (Optional[int]): Number of hydrocarbon components. Defaults to None
+        eos_temp (Optional[float]): Default temperature for EOS method. Defaults to None
+        eos_components (Optional[list[str]]): Specifies component names
+        eos_options (dict[str, Union[str, int, float, pd.DataFrame, list[str], dict[str, float],
+            tuple[str, dict[str, float]], dict[str, pd.DataFrame]]]): Dictionary containing various EOS options
+            as specified in the PVT file. Defaults to empty dictionary.
+        properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] ):
+            Dictionary holding all properties for a specific PVT method. Defaults to empty dictionary.
     """
     # General parameters
     file_path: str
@@ -40,7 +49,6 @@ class NexusPVT():
     def __repr__(self):
         """Pretty printing PVT data"""
         printable_str = ''
-        # for table_num in pvt_data.keys():
         printable_str += '\n--------------------------------\n'
         printable_str += f'PVT method {self.method_number}\n'
         printable_str += '--------------------------------\n'
@@ -213,7 +221,7 @@ class NexusPVT():
         return reading_flag
 
     def read_properties(self) -> None:
-        """Read Nexus pvt file contents and populate the NexusPVT properties object
+        """Read Nexus PVT file contents and populate the NexusPVT object
         """
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
         file_as_list = file_obj.get_flat_list_str_file()
