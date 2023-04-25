@@ -17,13 +17,13 @@ if TYPE_CHECKING:
 
 @dataclass
 class NexusConstraints:
-    __constraints: list[NexusConstraint] = field(default_factory=lambda: [])
+    __constraints: dict[str, list[NexusConstraint]] = field(default_factory=lambda: {})
 
     def __init__(self, parent_network: NexusNetwork):
         self.__parent_network: NexusNetwork = parent_network
-        self.__constraints: list[NexusConstraint] = []
+        self.__constraints: dict[str, list[NexusConstraint]] = {}
 
-    def get_constraints(self) -> list[NexusConstraint]:
+    def get_constraints(self) -> dict[str, list[NexusConstraint]]:
         """Returns: list[NexusConstraint] list of all constraints defined within a model."""
         self.__parent_network.get_load_status()
         return self.__constraints
@@ -40,9 +40,8 @@ class NexusConstraints:
         # TODO: make this a date based approach as well or return a list?
         # TODO: improve the usability of this?
         self.__parent_network.get_load_status()
-        constraints_to_return = filter(lambda x: False if x.name is None else x.name.upper() == name.upper(),
-                                       self.__constraints)
-        return list(constraints_to_return)
+        constraints_to_return = self.__constraints[name]
+        return constraints_to_return
 
     def get_constraint_df(self) -> pd.DataFrame:
         """ Creates a dataframe representing all processed constraint data in a surface file
@@ -51,7 +50,12 @@ class NexusConstraints:
                 a change in constraint.
         """
         self.__parent_network.get_load_status()
-        return obj_to_dataframe(self.__constraints)
+        list_constraints = []
+        for well_constraints in self.__constraints.values():
+            list_constraints.extend(well_constraints)
+        obj_to_dataframe(list_constraints)
+
+        return obj_to_dataframe(list_constraints)
 
     def get_constraint_overview(self) -> str:
         raise NotImplementedError('To be implemented')
@@ -65,18 +69,22 @@ class NexusConstraints:
                                                              'QMULT': NexusConstraint},
                                                             start_date=start_date,
                                                             default_units=default_units)
-        self.add_constraints(new_constraints.get('CONSTRAINTS'))
+        cons_list = new_constraints.get('CONSTRAINTS')
+        if isinstance(cons_list, list):
+            raise ValueError(
+                'Incompatible data format for additional constraints. Expected type "dict" instead got "list"')
+        self.add_constraints(cons_list)
 
-    def add_constraints(self, additional_list: Optional[list[NexusConstraint]]) -> None:
+    def add_constraints(self, additional_constraints: Optional[dict[str, list[NexusConstraint]]]) -> None:
         """ Adds additional constraints to memory within the NexusConstraints object.
             If user adds constraints list this will not be reflected in the Nexus deck at this time.
 
         Args:
-            additional_list (list[NexusConstraint]): additional constraints to add as a list
+            additional_constraints (list[NexusConstraint]): additional constraints to add as a list
         """
-        if additional_list is None:
+        if additional_constraints is None:
             return
-        self.__constraints.extend(additional_list)
+        self.__constraints.update(additional_constraints)
         # TODO sort by date:
         # # use the compare dates function stored in the runcontrol to sort the constraints
         # sorted(self.__constraints, key=lambda x:

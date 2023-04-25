@@ -375,7 +375,7 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits
      ], ids=['basic black-oil', 'equiv black-oil', 'water-oil',
              'volatile oil', 'gas-water', 'eos_with_tables', 'eos_notables', 'eos_with_visk'
              ])
-def test_read_properties_from_file(mocker, file_contents, expected_pvt_properties):
+def test_read_pvt_properties_from_file(mocker, file_contents, expected_pvt_properties):
     # Arrange
     pvt_obj = NexusPVT(file_path='test/file/pvt.dat', method_number=1)
 
@@ -398,9 +398,9 @@ def test_read_properties_from_file(mocker, file_contents, expected_pvt_propertie
             assert expected_pvt_properties['EOSOPTIONS'][key] == eos_opts[key]
     for key in [key for key in expected_pvt_properties.keys()
                 if key not in ['PVT_TYPE', 'TEMP', 'NHC', 'COMPONENTS', 'EOSOPTIONS']]:
-        if type(expected_pvt_properties[key]) == pd.DataFrame:
+        if isinstance(expected_pvt_properties[key], pd.DataFrame):
             pd.testing.assert_frame_equal(expected_pvt_properties[key], props[key])
-        elif type(expected_pvt_properties[key]) == dict:
+        elif isinstance(expected_pvt_properties[key], dict):
             for subkey in expected_pvt_properties[key].keys():
                 pd.testing.assert_frame_equal(expected_pvt_properties[key][subkey], props[key][subkey])
         elif isinstance(expected_pvt_properties[key], Enum):

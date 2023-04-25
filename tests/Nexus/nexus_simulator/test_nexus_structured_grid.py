@@ -13,7 +13,7 @@ from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 
 
 @pytest.mark.parametrize("structured_grid_file_contents, expected_net_to_gross, expected_porosity, expected_range_x,"
-                         "expected_range_y, expected_range_z",
+                         "expected_range_y, expected_range_z", 
                          [
                              ("! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
                               "\nother text\n\nNETGRS VALUE\n INCLUDE /path_to_netgrs_file/include_net_to_gross.inc\n POROSITY "
@@ -22,7 +22,7 @@ from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
                              ("! Grid dimensions\nNX NY NZ\n111 123 321\ntest string\nPOROSITY VALUE\n!random text\n"
                               "porosity_file.inc\nNETGRS VALUE\n!Comment Line 1\n\n!Comment Line 2\nINCLUDE   "
                               "/path/to/netgrs_file\nother text\n\n",
-                              "/path/to/netgrs_file", "porosity_file.inc", 111, 123, 321)
+                              "/path/to/netgrs_file", "porosity_file.inc", 111, 123, 321) 
                          ])
 def test_load_structured_grid_file_basic_properties(mocker, structured_grid_file_contents,
                                                     expected_net_to_gross, expected_porosity, expected_range_x,

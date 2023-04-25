@@ -50,7 +50,11 @@ class NexusNodeConnections(NodeConnections):
         """
         new_connections = nfo.collect_all_tables_to_objects(surface_file, {'NODECON': NexusNodeConnection, },
                                                             start_date=start_date, default_units=default_units)
-        self.add_connections(new_connections.get('NODECON'))
+        cons_list = new_connections.get('NODECON')
+        if isinstance(cons_list, dict):
+            raise ValueError(
+                'Incompatible data format for additional nodecons. Expected type "list" instead got "dict"')
+        self.add_connections(cons_list)
 
     def add_connections(self, additional_list: Optional[list[NexusNodeConnection]]):
         """ extends the nodes object by a list of nodes provided to it.

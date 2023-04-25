@@ -38,8 +38,9 @@ ANALYT POLYN 1 0
 WORKA3 OUTPUT SWL
 
 some line
-Function IREGION
+Function IREGION ! test comment
 8 9 10
+! test comment
 ANALYT     log
 WORKA3    OUTPUT  KX
 FUNCTION
@@ -86,7 +87,7 @@ ANALYT DIV
 FUNCTION IREGION\n 8 9 10
  GRID ROOT
 BLOCKS 1 20 1  40 1 10
-RANGE  INPUT 1 2  1000 2000
+RANGE  INPUT 1 2  a 2000
 RANGE output 2000 3000
 ANALYT    mult 
 WORKA3 ky OUTPUT KX
@@ -113,7 +114,7 @@ some line
                           ['FUNCTION', 'ANALYT subt', 'KX KY OUTPUT Kz'],
                           ['FUNCTION', 'ANALYT DIV', 'KX KY OUTPUT Kz'],
                           ['FUNCTION IREGION', '8 9 10', 'GRID ROOT', 'BLOCKS 1 20 1  40 1 10',
-                           'RANGE  INPUT 1 2  1000 2000', 'RANGE output 2000 3000', 'ANALYT    mult',
+                           'RANGE  INPUT 1 2  a 2000', 'RANGE output 2000 3000', 'ANALYT    mult',
                            'WORKA3 ky OUTPUT KX'], ['FUNCTION', 'ANALYT min', 'KX KY OUTPUT KY'],
                           ['FUNCTION', 'ANALYT  max', 'KX KY OUTPUT KX KY']]
 
@@ -128,8 +129,8 @@ some line
             'func_type': ['LOG', 'LOG10', 'POLYN', 'ABS', 'EXP', 'EXP10', 'SQRT', 'GE', 'LE', 'ADD', 'SUBT', 'DIV', 'MULT', 'MIN', 'MAX'],
             'func_coeff': ['', '', [1.4, 1.3, 1.2, 1.1, 1.0], '', '', '', '', [1000, 500], [500, 1000], '', '', '', '', '', ''],
             'grid': ['', '', '', '', '', '', '', '', '', '', '', '', 'ROOT', '', ''],
-            'range_input': ['', '', '', '', '', '', '', '', '', '', '', '', ['1', '2', '1000', '2000'], '', ''],
-            'range_output': ['', '', '', '', '', '', '', '', '', '', '', '', ['2000', '3000'], '', ''],
+            'range_input': ['', '', '', '', '', '', '', '', '', '', '', '', ['1', '2', 'A', '2000'], '', ''],
+            'range_output': ['', '', '', '', '', '', '', '', '', '', '', '', [2000, 3000], '', ''],
             'drange': ['', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
             'input_arrays': [['WORKA3'], ['WORKA3'], ['POROSITY'], ['WORKA3'], ['KX'], ['KX'], ['WORKA3'], ['KX'], ['KY'], ['WORKA3', 'KY'], ['KX', 'KY'], ['KX', 'KY'], ['WORKA3', 'KY'], ['KX', 'KY'], ['KX', 'KY']],
             'output_arrays': [['KX'], ['KX'], ['POROSITY'], ['KX'], ['KX'], ['KX'], ['KX'], ['KX'], ['KX'], ['KX'], ['KZ'], ['KZ'], ['KX'], ['KY'], ['KX', 'KY']],
