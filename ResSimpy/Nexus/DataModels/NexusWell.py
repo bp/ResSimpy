@@ -1,3 +1,4 @@
+import warnings
 from dataclasses import dataclass
 from typing import Optional, Tuple, Sequence, Union
 
@@ -87,3 +88,43 @@ class NexusWell(Well):
                 events.append((completion.date, (completion.depth_to_top, completion.depth_to_bottom)))
 
         return events
+
+    def add_completion(self, date: str, perforation_properties: dict[str, str | float | int],
+                       perforation_index: Optional[int] = None) -> None:
+        """ adds a perforation with the properties specified in perforation_properties,
+            if index is none then adds it to the end of the perforation list
+        Args:
+            date (str): date at which the
+            perforation_properties (dict[str, str | float | int]):
+            perforation_index (Optional[int]):
+        """
+        new_completion = NexusCompletion(date=date, **perforation_properties)
+        if perforation_index is None:
+            perforation_index = len(self.__completions)
+        self.__completions.insert(perforation_index, new_completion)
+
+    def remove_completion(self, date: str, perforation_properties: dict[str, str | float | int],
+                          delete_all_that_match: bool = False,
+                          ):
+        # TODO improve comparison of dates with datetime libs
+        """ Removes perforation from the completions list in the well
+        Args:
+            date (str):
+            perforation_properties (dict[str, str | float | int]):
+            delete_all_that_match (bool):
+
+        Returns:
+
+        """
+        matching_completions = [x for x in self.__completions if x.date == date]
+        matching_completions = [x for x in matching_completions for k, v in perforation_properties.items() if
+                                getattr(x, k) == v]
+        if delete_all_that_match:
+            for completion in matching_completions:
+                self.__completions.remove(completion)
+                print(f"Removing completion {completion}")
+        else:
+            if len(matching_completions) == 1:
+                self.__completions.remove(matching_completions[0])
+            else:
+                warnings.warn("No completions removed - multiple completions matched the provided properties")
