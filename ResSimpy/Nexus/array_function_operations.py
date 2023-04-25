@@ -15,11 +15,14 @@ def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
     function_list = []
     function_body: list[str] = []
     reading_function = False
+
     for i, line in enumerate(file_as_list):
         if nfo.check_token('FUNCTION', line):
             function_body = []
             reading_function = True
         if reading_function:
+            # remove all comments following the first '!' in a line.
+            line = line.split('!', 1)[0]
             function_body.append(line.strip())
             if nfo.check_token('OUTPUT', line) and not nfo.check_token('RANGE', line):
                 function_list.append(function_body)
@@ -53,8 +56,8 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
         # set the lists as empty strings as well, otherwise they show up as [] on the dataframe.
         region_number_list: Union[str, List[str], List[int]] = ''
         function_coefficients: Union[str, List[str], List[float]] = ''
-        input_arrays_min_max_list: Union[str, List[str]] = ''
-        output_arrays_min_max_list: Union[str, List[str]] = ''
+        input_arrays_min_max_list: Union[str, List[str], List[float]] = ''
+        output_arrays_min_max_list: Union[str, List[str], List[float]] = ''
         input_array_list: Union[str, List[str]] = ''
         output_array_list: Union[str, List[str]] = ''
         drange_list: Union[str, List[str]] = ''
@@ -78,13 +81,16 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                     continue
                 if len(words) == 2:
                     if words[1] not in GRID_ARRAY_KEYWORDS:
-                        warnings.warn(
-                            f'Function {b + 1}:  Function table entries will be excluded from summary df.')
+                        warnings.warn(f'Function {b + 1}:  Function table entries will be excluded from summary df.')
                         function_type = 'function table'
                     else:
                         region_type = words[1]
                         region_number_list = block[li + 1].split()
-                        region_number_list = [round(float(i)) for i in region_number_list]
+                        try:
+                            region_number_list = [round(float(i)) for i in region_number_list]
+                        except ValueError:
+                            warnings.warn(f'ValueError at function {b + 1}: could not convert string to integer.')
+
                 if len(words) > 2:  # TODO: deal with tabular function option keywords
                     warnings.warn(f'Function {b + 1}:  Function table entries will be excluded from summary df.')
                     function_type = 'function table'
@@ -93,13 +99,28 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                 if len(words) > 2:
                     # remove the first 2 words in line, and set the rest to coefficients
                     function_coefficients = words[2:]
-                    function_coefficients = [float(i) for i in function_coefficients]
+                    # convert string coefficient values to numerical, if possible:
+                    try:
+                        function_coefficients = [float(i) for i in function_coefficients]
+                    except ValueError:
+                        warnings.warn(f'ValueError at function {b + 1}: could not convert string to float.')
+
             if 'GRID' in line:
                 grid_name = words[1]
             if 'RANGE' in line and 'INPUT' in line:
                 input_arrays_min_max_list = words[2:]
+                # convert string range_input values to numerical, if possible:
+                try:
+                    input_arrays_min_max_list = [float(i) for i in input_arrays_min_max_list]
+                except ValueError:
+                    warnings.warn(f'ValueError at function {b + 1}: could not convert string to float.')
             if 'RANGE' in line and 'OUTPUT' in line:
                 output_arrays_min_max_list = words[2:]
+                # convert string range_input values to numerical, if possible:
+                try:
+                    output_arrays_min_max_list = [float(i) for i in output_arrays_min_max_list]
+                except ValueError:
+                    warnings.warn(f'ValueError at function {b + 1}: could not convert string to float.')
             if 'DRANGE' in line:
                 warnings.warn(f'Function {b + 1}: Function table entries will be excluded from summary df.')
                 drange_list = words[1:]
@@ -107,11 +128,12 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
             if 'OUTPUT' in line and 'RANGE' not in line:
                 input_array_list = words[:words.index('OUTPUT')]
                 output_array_list = words[words.index('OUTPUT') + 1:]
-        # TODO: find a safer way to create the new function row
+        # Create the row that holds function data
         function_row = [b + 1, blocks_list, region_type, region_number_list, function_type,
                         function_coefficients,
                         grid_name, input_arrays_min_max_list, output_arrays_min_max_list, drange_list, input_array_list,
                         output_array_list, i1, i2, j1, j2, k1, k2]
+        # Append the function row to the dataframe
         functions_df.loc[len(functions_df)] = function_row
     return functions_df
 
@@ -133,121 +155,120 @@ def summarize_model_functions(function_list_to_parse: List[List[str]]) -> pd.Dat
 
         formula = row['output_arrays'][0] + ' = '
 
-        # ANALYT POLYN
-        if row['func_type'].upper() == 'POLYN':
-            # get number of coefficients, n
-            n = len(row['func_coeff'])
+        match row['func_type'].upper():
+            # ANALYT POLYN
+            case 'POLYN':
+                # get number of coefficients, n
+                n = len(row['func_coeff'])
 
-            # For each coefficient (c), calculate the corresponding exponent -or power (p)
-            # Create polynomial function notation, term by term, for any number of coefficients (n)
-            # using the first item in input arrays list (arr),
-            # and the position (x) of the function term/portion we are creating.
-            for x in range(n):
-                c = row['func_coeff'][x]
-                p = n - x - 1
-                arr = row['input_arrays'][0]
+                # For each coefficient (c), calculate the corresponding exponent -or power (p)
+                # Create polynomial function notation, term by term, for any number of coefficients (n)
+                # using the first item in input arrays list (arr),
+                # and the position (x) of the function term/portion we are creating.
+                for x in range(n):
+                    c = row['func_coeff'][x]
+                    p = n - x - 1
+                    arr = row['input_arrays'][0]
 
-                if n == 1:
-                    f_portion = f'{c}'
-
-                if p == 0 and x > 0:
-                    if c > 0:
-                        f_portion = f' +{c}'
-                    elif c < 0:
+                    if n == 1:
                         f_portion = f'{c}'
-                    else:
-                        continue
 
-                if p == 1 and x > 0:
-                    if c > 0:
-                        f_portion = f' +{c}*{arr}'
-                    elif c < 0:
-                        f_portion = f'{c}*{arr}'
-                    else:
-                        continue
+                    if p == 0 and x > 0:
+                        if c > 0:
+                            f_portion = f' +{c}'
+                        elif c < 0:
+                            f_portion = f'{c}'
+                        else:
+                            continue
 
-                if p == 1 and x == 0:
-                    if c != 0:
-                        f_portion = f'{c}*{arr}'
-                    else:
-                        continue
+                    if p == 1 and x > 0:
+                        if c > 0:
+                            f_portion = f' +{c}*{arr}'
+                        elif c < 0:
+                            f_portion = f'{c}*{arr}'
+                        else:
+                            continue
 
-                if p > 1 and x > 0:
-                    if c > 0:
-                        f_portion = f' +{c}*({arr}^{p})'
-                    elif c < 0:
-                        f_portion = f'{c}*({arr}^{p})'
-                    else:
-                        continue
+                    if p == 1 and x == 0:
+                        if c != 0:
+                            f_portion = f'{c}*{arr}'
+                        else:
+                            continue
 
-                if p > 1 and x == 0:
-                    if c != 0:
-                        f_portion = f'{c}*({arr}^{p})'
-                    else:
-                        continue
+                    if p > 1 and x > 0:
+                        if c > 0:
+                            f_portion = f' +{c}*({arr}^{p})'
+                        elif c < 0:
+                            f_portion = f'{c}*({arr}^{p})'
+                        else:
+                            continue
 
-                formula += f_portion
+                    if p > 1 and x == 0:
+                        if c != 0:
+                            f_portion = f'{c}*({arr}^{p})'
+                        else:
+                            continue
 
-        # ANALYT ABS
-        # TODO: test nexus with multiple input and output arrays
+                    formula += f_portion
 
-        if row['func_type'].upper() == 'ABS':
-            formula += f"| {row['input_arrays'][0]} |"
+            # ANALYT ABS
+            case 'ABS':
+                formula += f"| {row['input_arrays'][0]} |"
 
-        # ANALYT EXP
-        if row['func_type'].upper() == 'EXP':
-            formula += f"e^{row['input_arrays'][0]}"
+            # ANALYT EXP
+            case 'EXP':
+                formula += f"e^{row['input_arrays'][0]}"
 
-        # ANALYT EXP10
-        if row['func_type'].upper() == 'EXP10':
-            formula += f"10^{row['input_arrays'][0]}"
+            # ANALYT EXP10
+            case 'EXP10':
+                formula += f"10^{row['input_arrays'][0]}"
 
-        # ANALYT LOG
-        if row['func_type'].upper() == 'LOG':
-            formula += f"ln|{row['input_arrays'][0]}|"
+            # ANALYT LOG
+            case 'LOG':
+                formula += f"ln|{row['input_arrays'][0]}|"
 
-        # ANALYT LOG10
-        if row['func_type'].upper() == 'LOG10':
-            formula += f"log10|{row['input_arrays'][0]}|"
+            # ANALYT LOG10
+            case 'LOG10':
+                formula += f"log10|{row['input_arrays'][0]}|"
 
-        # ANALYT SQRT
-        if row['func_type'].upper() == 'SQRT':
-            formula += f"SQRT|{row['input_arrays'][0]}|"
+            # ANALYT SQRT
+            case 'SQRT':
+                formula += f"SQRT|{row['input_arrays'][0]}|"
 
-        # ANALYT GE
-        if row['func_type'].upper() == 'GE':
-            formula += f"({row['input_arrays'][0]} if {row['input_arrays'][0]} >= {row['func_coeff'][0]}; " \
-                       f"{row['func_coeff'][1]} otherwise)"
+            # ANALYT GE
+            case 'GE':
+                formula += f"({row['input_arrays'][0]} if {row['input_arrays'][0]} >= {row['func_coeff'][0]}; " \
+                           f"{row['func_coeff'][1]} otherwise)"
 
-        # ANALYT LE
-        if row['func_type'].upper() == 'LE':
-            formula += f"({row['input_arrays'][0]} if {row['input_arrays'][0]} <= {row['func_coeff'][0]}; " \
-                       f"{row['func_coeff'][1]} otherwise)"
+            # ANALYT LE
+            case 'LE':
+                formula += f"({row['input_arrays'][0]} if {row['input_arrays'][0]} <= {row['func_coeff'][0]}; " \
+                           f"{row['func_coeff'][1]} otherwise)"
 
-        # ANALYT ADD
-        if row['func_type'].upper() == 'ADD':
-            formula += f"{row['input_arrays'][0]} + {row['input_arrays'][1]}"
+            # ANALYT ADD
+            case 'ADD':
+                formula += f"{row['input_arrays'][0]} + {row['input_arrays'][1]}"
 
-        # ANALYT SUBT
-        if row['func_type'].upper() == 'SUBT':
-            formula += f"{row['input_arrays'][0]} - {row['input_arrays'][1]}"
+            # ANALYT SUBT
+            case 'SUBT':
+                formula += f"{row['input_arrays'][0]} - {row['input_arrays'][1]}"
 
-        # ANALYT DIV
-        if row['func_type'].upper() == 'DIV':
-            formula += f"({row['input_arrays'][0]} / {row['input_arrays'][1]} if {row['input_arrays'][1]} != 0; " \
-                       f"{row['input_arrays'][0]} otherwise)"
+            # ANALYT DIV
+            case 'DIV':
+                formula += f"({row['input_arrays'][0]} / {row['input_arrays'][1]} if {row['input_arrays'][1]} != 0; " \
+                           f"{row['input_arrays'][0]} otherwise)"
 
-        # ANALYT MULT
-        if row['func_type'].upper() == 'MULT':
-            formula += f"{row['input_arrays'][0]} * {row['input_arrays'][1]}"
+            # ANALYT MULT
+            case 'MULT':
+                formula += f"{row['input_arrays'][0]} * {row['input_arrays'][1]}"
 
-        # ANALYT MIN
-        if row['func_type'].upper() == 'MIN':
-            formula += f"min({row['input_arrays'][0]}, {row['input_arrays'][1]})"
+            # ANALYT MIN
+            case 'MIN':
+                formula += f"min({row['input_arrays'][0]}, {row['input_arrays'][1]})"
 
-        # ANALYT MAX
-        if row['func_type'].upper() == 'MAX':
-            formula += f"max({row['input_arrays'][0]}, {row['input_arrays'][1]})"
+            # ANALYT MAX
+            case 'MAX':
+                formula += f"max({row['input_arrays'][0]}, {row['input_arrays'][1]})"
 
         # fill in the notation value for the row
         function_summary_df.loc[index, 'notation'] = formula
