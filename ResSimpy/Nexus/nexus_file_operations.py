@@ -509,9 +509,8 @@ def read_table_to_df(file_as_list: list[str], keep_comments: bool = False) -> pd
         df.columns = [col.upper() for col in df.columns if isinstance(col, str)]
     else:  # Going to retain comments as a separate column in dataframe
         # Clean of comments
-        cleaned_file_as_list = [re.split(r'(?<!\")!(?!\")', line)[0].strip()
-        if line and line[0] != '!' else line
-            for line in file_as_list]
+        cleaned_file_as_list = [re.split(r'(?<!\")!(?!\")', line)[0].strip() if line and line[0] != '!' else line
+                                for line in file_as_list]
         cleaned_file_as_list = [line if not line.startswith('!') else '' for line in cleaned_file_as_list]
         # Save comments in a list
         comment_column = [line.split('!', 1)[1].strip() if '!' in line else None for line in file_as_list]
@@ -670,7 +669,7 @@ def looks_like_grid_array(file_path: str, lines2check: int = 10) -> bool:
             line = f.readline()
             line_elems = line.split()
             found_keywords = [word for word in line_elems if (word in GRID_ARRAY_KEYWORDS) and
-                                                             check_token(word, line)]
+                              check_token(word, line)]
             if found_keywords:
                 for word in found_keywords:
                     if (line_elems.index(word) < len(line_elems) - 1 and
