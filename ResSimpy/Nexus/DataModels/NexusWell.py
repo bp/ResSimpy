@@ -93,9 +93,9 @@ class NexusWell(Well):
     def add_completion(self, date: str, perforation_properties: dict[str, str | float | int],
                        perforation_index: Optional[int] = None) -> None:
         """ adds a perforation with the properties specified in perforation_properties,
-            if index is none then adds it to the end of the perforation list
+            if index is none then adds it to the end of the perforation list.
         Args:
-            date (str): date at which the
+            date (str): date at which the perforation should be added
             perforation_properties (dict[str, str | float | int]):
             perforation_index (Optional[int]):
         """
@@ -106,16 +106,16 @@ class NexusWell(Well):
 
     def remove_completion(self, date: str, perforation_properties: dict[str, str | float | int],
                           remove_all_that_match: bool = False,
-                          ):
+                          ) -> None:
         # TODO improve comparison of dates with datetime libs
-        """ Removes perforation from the completions list in the well
+        """ Removes perforation from the completions list in the well that match all the properties in the
+        provided dictionary, does not write out to model yet.
         Args:
-            date (str):
-            perforation_properties (dict[str, str | float | int]):
-            remove_all_that_match (bool):
-
-        Returns:
-
+            date (str): the date to remove the perforation from
+            perforation_properties (dict[str, str | float | int]): dictionary containing key value pairs for
+            the properties to match
+            remove_all_that_match (bool): If True removes all the perforations that match the perforation_properties
+            dictionary. Otherwise if multiple perforations match it will not remove any completions.
         """
         matching_completions = [x for x in self.__completions if x.date == date]
         matching_completions = [x for x in matching_completions for k, v in perforation_properties.items() if
