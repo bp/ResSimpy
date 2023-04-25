@@ -4,6 +4,7 @@ from typing import Optional, Tuple, Sequence, Union
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.Well import Well
 
 
@@ -104,14 +105,14 @@ class NexusWell(Well):
         self.__completions.insert(perforation_index, new_completion)
 
     def remove_completion(self, date: str, perforation_properties: dict[str, str | float | int],
-                          delete_all_that_match: bool = False,
+                          remove_all_that_match: bool = False,
                           ):
         # TODO improve comparison of dates with datetime libs
         """ Removes perforation from the completions list in the well
         Args:
             date (str):
             perforation_properties (dict[str, str | float | int]):
-            delete_all_that_match (bool):
+            remove_all_that_match (bool):
 
         Returns:
 
@@ -119,7 +120,7 @@ class NexusWell(Well):
         matching_completions = [x for x in self.__completions if x.date == date]
         matching_completions = [x for x in matching_completions for k, v in perforation_properties.items() if
                                 getattr(x, k) == v]
-        if delete_all_that_match:
+        if remove_all_that_match:
             for completion in matching_completions:
                 self.__completions.remove(completion)
                 print(f"Removing completion {completion}")
@@ -128,3 +129,6 @@ class NexusWell(Well):
                 self.__completions.remove(matching_completions[0])
             else:
                 warnings.warn("No completions removed - multiple completions matched the provided properties")
+
+    def __repr__(self):
+        return generic_repr(self)

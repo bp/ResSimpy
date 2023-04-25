@@ -4,6 +4,7 @@ from typing import Optional, Union
 
 from ResSimpy.Completion import Completion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
+from ResSimpy.Utils.generic_repr import generic_repr
 
 
 @dataclass(kw_only=True)
@@ -96,6 +97,9 @@ class NexusCompletion(Completion):
                          angle_a=angle_a, angle_v=angle_v, grid=grid, depth_to_top=depth_to_top,
                          depth_to_bottom=depth_to_bottom, perm_thickness_ovr=perm_thickness_ovr, dfactor=dfactor,
                          rel_perm_method=rel_perm_method, status=status)
+
+    def __repr__(self):
+        return generic_repr(self)
 
     @property
     def measured_depth(self):
@@ -206,7 +210,7 @@ class NexusCompletion(Completion):
             'bore_radius': self.__bore_radius,
             'portype': self.__portype,
             'fracture_mult': self.__fracture_mult,
-        }
+            }
         attribute_dict.update(super().to_dict())
         if self.rel_perm_end_point is not None:
             attribute_dict.update(self.rel_perm_end_point.to_dict())

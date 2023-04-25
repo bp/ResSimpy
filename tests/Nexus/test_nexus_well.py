@@ -350,3 +350,67 @@ def test_get_completion_events(completions, expected_shutin):
 
     # Assert
     assert result == expected_shutin
+
+
+def test_add_completion():
+    # Arrange
+    new_date = '01/04/2023'
+    existing_completions = [
+        NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+                      well_indices=1),
+        NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1),
+        NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+                      depth_to_bottom=1234),
+        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=3),
+        NexusCompletion(i=1, j=2, date='01/03/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+                      depth_to_bottom=1234),
+        ]
+    new_completion_props = {'i': 3, 'j': 3, 'k': 5, 'well_radius': 1005.2}
+
+    new_nexus_completion = NexusCompletion(date=new_date, i=3, j=3, k=5, well_radius=1005.2)
+
+    expected_completions = [x for x in existing_completions]
+    expected_completions.append(new_nexus_completion)
+
+    expected_well = NexusWell(well_name='test well', completions=expected_completions,
+                              units=UnitSystem.METKGCM2)
+    well = NexusWell(well_name='test well', completions=existing_completions,
+                                    units=UnitSystem.METKGCM2)
+    # Act
+    well.add_completion(date=new_date, perforation_properties=new_completion_props)
+    # Assert
+    assert well == expected_well
+
+def test_remove_completion():
+    # Arrange
+    removal_date = '01/02/2023'
+    existing_completions = [
+        NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+                       well_indices=1),
+        NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1),
+        NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+                       depth_to_bottom=1234),
+        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=3),
+        NexusCompletion(i=1, j=2, date='01/03/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+                       depth_to_bottom=1234),
+        ]
+    expected_completions_after_removal = [
+    NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+                    well_indices=1),
+    NexusCompletion(i=1, j=2, date='01/03/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+                                        depth_to_bottom=1234),
+    ]
+    expected_result = NexusWell(well_name='test well', completions=expected_completions_after_removal,
+                                units=UnitSystem.METKGCM2)
+    perf_to_remove = {'i': 1, 'j': 2,}
+    remove_well = NexusWell(well_name='test well', completions=existing_completions,
+                     units=UnitSystem.METKGCM2)
+    keep_perfs = NexusWell(well_name='test well', completions=existing_completions,
+                           units=UnitSystem.METKGCM2)
+    # Act
+    remove_well.remove_completion(date=removal_date, perforation_properties=perf_to_remove, remove_all_that_match=True)
+    keep_perfs.remove_completion(date=removal_date, perforation_properties=perf_to_remove, remove_all_that_match=False)
+    # Assert
+    assert remove_well == expected_result
+    assert keep_perfs == NexusWell(well_name='test well', completions=existing_completions,
+                                   units=UnitSystem.METKGCM2)
