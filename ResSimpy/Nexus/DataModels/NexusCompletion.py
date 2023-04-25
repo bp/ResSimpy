@@ -237,3 +237,53 @@ class NexusCompletion(Completion):
     def completion_is_shutin(completion: NexusCompletion) -> bool:
         """Determines if the supplied completion is a shut-in or not"""
         return not NexusCompletion.completion_is_perforation(completion)
+
+    @staticmethod
+    def nexus_mapping() -> dict[str, tuple[str, type]]:
+        """returns a dictionary of mapping from nexus keyword to attribute name"""
+
+        nexus_mapping: dict[str, tuple[str, type]] = {
+            'IW': ('iw', float),
+            'JW': ('jw', float),
+            'L': ('kw', float),
+            'MD': ('md', float),
+            'SKIN': ('skin', float),
+            'DEPTH': ('depth', float),
+            'X': ('x_value', float),
+            'Y': ('y_value', float),
+            'ANGLA': ('angla', float),
+            'ANGLV': ('anglv', float),
+            'GRID': ('grid', str),
+            'WI': ('wi', float),
+            'DTOP': ('dtop', float),
+            'DBOT': ('dbot', float),
+            'RADW': ('well_radius', float),
+            'PPERF': ('partial_perf', float),
+            'CELL': ('cell_number', int),
+            'KH': ('perm_thickness_ovr', float),
+            'D': ('dfactor', float),
+            'IRELPM': ('rel_perm_method', int),
+            'STAT': ('status', str),
+            'RADB': ('bore_radius', float),
+            'PORTYPE': ('portype', str),
+            'FM': ('fracture_mult', float),
+            'SECT': ('sector', int),
+            'GROUP': ('well_group', str),
+            'ZONE': ('zone', int),
+            'ANGLE': ('angle_open_flow', float),
+            'TEMP': ('temperature', float),
+            'FLOWSECT': ('flowsector', int),
+            'PARENT': ('parent_node', str),
+            'MDCON': ('mdcon', float),
+            'IPTN': ('pressure_avg_pattern', int),
+            'LENGTH': ('length', float),
+            'K': ('permeability', float),
+            'ND': ('non_darcy_model', str),
+            'DZ': ('comp_dz', float),
+            'LAYER': ('layer_assignment', int),
+            'RADBP': ('polymer_bore_radius', float),
+            'RADWP': ('polymer_well_radius', float),
+            'KHMULT': ('kh_mult', float),
+            }
+
+        return nexus_mapping
