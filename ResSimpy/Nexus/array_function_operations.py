@@ -89,7 +89,7 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                         try:
                             region_number_list = [round(float(i)) for i in region_number_list]
                         except ValueError:
-                            print(f'ValueError at function {b + 1}: could not convert string to integer.')
+                            warnings.warn(f'ValueError at function {b + 1}: could not convert string to integer.')
 
                 if len(words) > 2:  # TODO: deal with tabular function option keywords
                     warnings.warn(f'Function {b + 1}:  Function table entries will be excluded from summary df.')
@@ -103,7 +103,7 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                     try:
                         function_coefficients = [float(i) for i in function_coefficients]
                     except ValueError:
-                        print(f'ValueError at function {b + 1}: could not convert string to float.')
+                        warnings.warn(f'ValueError at function {b + 1}: could not convert string to float.')
 
             if 'GRID' in line:
                 grid_name = words[1]
@@ -113,14 +113,14 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                 try:
                     input_arrays_min_max_list = [float(i) for i in input_arrays_min_max_list]
                 except ValueError:
-                    print(f'ValueError at function {b + 1}: could not convert string to float.')
+                    warnings.warn(f'ValueError at function {b + 1}: could not convert string to float.')
             if 'RANGE' in line and 'OUTPUT' in line:
                 output_arrays_min_max_list = words[2:]
                 # convert string range_input values to numerical, if possible:
                 try:
                     output_arrays_min_max_list = [float(i) for i in output_arrays_min_max_list]
                 except ValueError:
-                    print(f'ValueError at function {b + 1}: could not convert string to float.')
+                    warnings.warn(f'ValueError at function {b + 1}: could not convert string to float.')
             if 'DRANGE' in line:
                 warnings.warn(f'Function {b + 1}: Function table entries will be excluded from summary df.')
                 drange_list = words[1:]
