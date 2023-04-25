@@ -945,7 +945,7 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
     expected_wellcons = [NexusWellConnection(wellconprops1), NexusWellConnection(wellconprops2)]
     expected_wellheads = [NexusWellhead(wellheadprops1), NexusWellhead(wellheadprops2)]
     expected_wellbores = [NexusWellbore(wellboreprops1), NexusWellbore(wellboreprops2)]
-    expected_constraints = [NexusConstraint(constraint_props1), NexusConstraint(constraint_props2)]
+    expected_constraints = {constraint_props1['name']: [NexusConstraint(constraint_props2)]}
     # create a mocker spy to check the network loader gets called once
     spy = mocker.spy(nexus_sim.Network, 'load')
 

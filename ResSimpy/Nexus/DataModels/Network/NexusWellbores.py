@@ -51,7 +51,10 @@ class NexusWellbores:
         new_wellbores = nfo.collect_all_tables_to_objects(surface_file, {'WELLBORE': NexusWellbore, },
                                                           start_date=start_date,
                                                           default_units=default_units)
-        self.add_wellbores(new_wellbores.get('WELLBORE'))
+        cons_list = new_wellbores.get('WELLBORE')
+        if isinstance(cons_list, dict):
+            raise ValueError('Incompatible data format for additional wells. Expected type "list" instead got "dict"')
+        self.add_wellbores(cons_list)
 
     def add_wellbores(self, additional_list: Optional[list[NexusWellbore]]) -> None:
         """ extends the nodes object by a list of wellbores provided to it.

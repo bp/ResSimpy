@@ -509,8 +509,7 @@ def read_table_to_df(file_as_list: list[str], keep_comments: bool = False) -> pd
         df.columns = [col.upper() for col in df.columns if isinstance(col, str)]
     else:  # Going to retain comments as a separate column in dataframe
         # Clean of comments
-        cleaned_file_as_list = [re.split(r'(?<!\")!(?!\")', line)[0].strip()
-                                if line and line[0] != '!' else line
+        cleaned_file_as_list = [re.split(r'(?<!\")!(?!\")', line)[0].strip() if line and line[0] != '!' else line
                                 for line in file_as_list]
         cleaned_file_as_list = [line if not line.startswith('!') else '' for line in cleaned_file_as_list]
         # Save comments in a list
@@ -566,10 +565,10 @@ def get_multiple_sequential_values(list_of_strings: list[str], number_tokens: in
     return store_values
 
 
-def check_for_and_populate_common_input_data(file_as_list: list[str], property_dict:
-                                             dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                                             dict[str, pd.DataFrame]]]
-                                             ) -> None:
+def check_for_and_populate_common_input_data(
+        file_as_list: list[str],
+        property_dict: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]]
+        ) -> None:
     """Loop through lines of Nexus input file content looking for common input data, e.g.,
     units such as ENGLISH or METRIC, temparure units such as FAHR or CELSIUS, DATEFORMAT, etc.,
     as defined in Nexus manual. If any found, include in provided property_dict and return
@@ -586,10 +585,10 @@ def check_for_and_populate_common_input_data(file_as_list: list[str], property_d
         check_property_in_line(line, property_dict, file_as_list)
 
 
-def check_property_in_line(line: str,
-                           property_dict: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                                          dict[str, pd.DataFrame]]],
-                           file_as_list: list[str]) -> None:
+def check_property_in_line(
+        line: str,
+        property_dict: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]],
+        file_as_list: list[str]) -> None:
     """Given a line of Nexus input file content looking for common input data, e.g.,
         units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
         as defined in Nexus manual. If any found, include in provided property_dict and return
@@ -742,7 +741,7 @@ def table_line_reader(keyword_store: dict[str, None | int | float | str], header
 
 def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map: dict[str, tuple[str, type]],
                           current_date: Optional[str] = None, unit_system: Optional[UnitSystem] = None,
-                          list_of_objects: Optional[list[Any]] = None,
+                          nexus_obj_dict: Optional[dict[str, list[Any]]] = None,
                           preserve_previous_object_attributes: bool = False) -> list[Any]:
     """ Loads a table row by row to an object provided in the row_object.
 
@@ -754,7 +753,8 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
             e.g. {'NAME': ('name', str)} for the object obj with attribute obj.name
         current_date (Optional[str]): date/time at which the object was found within a recurrent file
         unit_system (Optional[UnitSystem): most recent UnitSystem enum of the file where the object was found
-        list_of_objects (Optional[list[Any]]): list of objects to append to. If None creates an empty list to populate.
+        nexus_obj_dict (Optional[dict[str, list[Any]]]): list of objects to append to. \
+            If None creates an empty list to populate.
         preserve_previous_object_attributes (bool): If True the code will find the latest object with a matching name\
             attribute and will update the object to reflect the latest additional attributes and overriding all \
             matching attributes. Must have a .update() method implemented and a name
@@ -765,8 +765,8 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
     keyword_map = {x: y[0] for x, y in property_map.items()}
     header_index, headers = get_table_header(file_as_list, keyword_map)
     table_as_list = file_as_list[header_index + 1::]
-    if list_of_objects is None:
-        list_of_objects = []
+    if nexus_obj_dict is None:
+        nexus_obj_dict = {}
 
     return_objects = []
     for line in table_as_list:
@@ -787,19 +787,20 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
             row_name = keyword_store.get('well_name', None)
             keyword_store['name'] = row_name
         if preserve_previous_object_attributes and row_name is not None:
-            all_matching_existing_constraints = [x for x in list_of_objects if x.name == row_name]
-            if len(all_matching_existing_constraints) > 0:
+            all_matching_existing_constraints = nexus_obj_dict.get(str(row_name), None)
+            if all_matching_existing_constraints is not None:
                 # use the previous object to update this
-                new_object = all_matching_existing_constraints.pop()
-                new_object_date = getattr(new_object, 'date', None)
+                existing_constraint = all_matching_existing_constraints[-1]
+                new_object_date = getattr(existing_constraint, 'date', None)
                 if new_object_date is None or new_object_date != current_date:
                     # take a copy of the object if it has a different date to ensure it doesn't affect\
                     # previous timesteps
-                    new_object = copy.deepcopy(new_object)
+                    new_object = copy.deepcopy(existing_constraint)
+                    new_object.update(keyword_store)
                 else:
                     # otherwise just update the object inplace and don't add it to the return list
-                    add_to_return = False
-                new_object.update(keyword_store)
+                    existing_constraint.update(keyword_store)
+                    continue
             else:
                 new_object = row_object(keyword_store)
         else:
@@ -830,7 +831,8 @@ def check_list_tokens(list_tokens: list[str], line: str) -> Optional[str]:
 
 
 def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[str, Any], start_date: Optional[str],
-                                  default_units: Optional[UnitSystem], ) -> dict[str, list[Any]]:
+                                  default_units: Optional[UnitSystem], ) -> \
+        dict[str, list[Any] | dict[str, list[NexusConstraint]]]:
     """ Loads all tables from a given file.
 
         Args:
@@ -841,13 +843,15 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
             start_date (str): Starting date of the run
             default_units (UnitSystem): Units used in case not specified by file.
         Raises:
-            TypeError: if the unit system found in the property check is not a valid enum UnitSystem
+            TypeError: if the unit system found in the property check is not a valid enum UnitSystem.
         Returns:
             dict[str, list[Storage_Object]]: a dictionary of lists of arbitrary objects populated \
                 with properties from the file provided, keyed with the NexusTable name associated with table_object_map.
         """
     current_date = start_date
-    nexus_object_results: dict[str, list[Any]] = {x: [] for x in table_object_map}
+    nexus_object_results: dict[str, list[Any] | dict[str, list[NexusConstraint]]] = {x: [] for x in table_object_map}
+    nexus_constraints: dict[str, list[NexusConstraint]] = {}
+    nexus_object_results['CONSTRAINTS'] = nexus_constraints
     file_as_list: list[str] = nexus_file.get_flat_list_str_file()
     table_start: int = -1
     table_end: int = -1
@@ -886,30 +890,42 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
                 table_end = -1
                 token_found = None
                 continue
+            list_objects = None
             property_map = table_object_map[token_found].get_nexus_mapping()
             if token_found == 'CONSTRAINTS':
-                list_objects = load_inline_constraints(file_as_list=file_as_list[table_start:table_end],
-                                                       constraint=table_object_map[token_found],
-                                                       current_date=current_date,
-                                                       unit_system=unit_system, property_map=property_map,
-                                                       existing_constraints=nexus_object_results['CONSTRAINTS'])
+                load_inline_constraints(file_as_list=file_as_list[table_start:table_end],
+                                        constraint=table_object_map[token_found],
+                                        current_date=current_date,
+                                        unit_system=unit_system, property_map=property_map,
+                                        existing_constraints=nexus_constraints)
             elif token_found == 'QMULT' or token_found == 'CONSTRAINT':
                 list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
                                                      row_object=table_object_map[token_found],
                                                      property_map=property_map, current_date=current_date,
                                                      unit_system=unit_system,
-                                                     list_of_objects=nexus_object_results['CONSTRAINTS'],
+                                                     nexus_obj_dict=nexus_constraints,
                                                      preserve_previous_object_attributes=True)
             else:
                 list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
                                                      row_object=table_object_map[token_found],
                                                      property_map=property_map, current_date=current_date,
-                                                     unit_system=unit_system, list_of_objects=None)
+                                                     unit_system=unit_system, nexus_obj_dict=None)
+
+            # store objects found into right dictionary
+            list_of_token_obj = nexus_object_results[token_found]
             # This statement ensures that CONSTRAINT that are found in tables are actually added to the dictionary
             # under the same key as constraints to preserve their order
-            if token_found == 'CONSTRAINT' or token_found == 'QMULT':
-                token_found = 'CONSTRAINTS'
-            nexus_object_results[token_found].extend(list_objects)
+            if (token_found == 'CONSTRAINT' or token_found == 'QMULT') and list_objects is not None:
+                for constraint in list_objects:
+                    well_name = constraint.name
+                    if nexus_constraints.get(well_name, None) is not None:
+                        nexus_constraints[well_name].append(constraint)
+                    else:
+                        nexus_constraints[well_name] = [constraint]
+            elif list_objects is not None and isinstance(list_of_token_obj, list):
+                list_of_token_obj.extend(list_objects)
+            else:
+                list_of_token_obj = nexus_constraints
             # reset indices for further tables
             table_start = -1
             table_end = -1
@@ -919,7 +935,7 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
 
 def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConstraint], current_date: Optional[str],
                             unit_system: UnitSystem, property_map: dict[str, tuple[str, type]],
-                            existing_constraints: list[NexusConstraint]) -> list[NexusConstraint]:
+                            existing_constraints: dict[str, list[NexusConstraint]]):
     """ Loads table of constraints with the wellname/node first and the constraints following inline
         uses previous set of constraints as still applied to the well.
     Args:
@@ -928,15 +944,11 @@ def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConst
         current_date (str): the current date in the table
         unit_system (UnitSystem): Unit system enum
         property_map (dict[str, tuple[str, type]]): Mapping of nexus keywords to attributes
-        existing_constraints (list[NexusConstraint]):
+        existing_constraints (dict[str, NexusConstraint]):
 
     Returns:
         list[NexusConstraint]: list of constraint objects for the given timestep/constraint table
     """
-    # deepcopy to prevent historic constraints from being changed outside the scope of this function
-    existing_constraint_copy = copy.deepcopy(existing_constraints)
-    constraints_dict = {x.name: x for x in existing_constraint_copy}
-    new_constraints: dict[str, NexusConstraint] = {}
     for line in file_as_list:
         properties_dict: dict[str, str | float | UnitSystem | None] = {'date': current_date, 'unit_system': unit_system}
         # first value in the line has to be the node/wellname
@@ -983,21 +995,18 @@ def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConst
             next_value = get_next_value(0, [trimmed_line])
 
         # first check if there are any existing constraints created for the well this timestep
-        nexus_constraint = new_constraints.get(name, None)
-        if nexus_constraint is not None:
-            nexus_constraint.update(properties_dict, nones_overwrite)
-        else:
-            # otherwise update previous timestep constraints of the same name
-            nexus_constraint = constraints_dict.get(name, None)
-            if nexus_constraint is not None:
-                nexus_constraint.update(properties_dict, nones_overwrite)
+        well_constraints = existing_constraints.get(name, None)
+        if well_constraints is not None:
+            latest_constraint = well_constraints[-1]
+            if latest_constraint.date == current_date:
+                latest_constraint.update(properties_dict, nones_overwrite)
             else:
-                # create a new one if neither exist
-                nexus_constraint = constraint(properties_dict)
-        # store the constraint:
-        new_constraints.update({name: nexus_constraint})
-
-    return list(new_constraints.values())
+                new_constraint = copy.copy(latest_constraint)
+                new_constraint.update(properties_dict, nones_overwrite)
+                well_constraints.append(new_constraint)
+        else:
+            nexus_constraint = constraint(properties_dict)
+            existing_constraints[name] = [nexus_constraint]
 
 
 def clear_constraints(token_value, constraint) -> dict[str, None]:

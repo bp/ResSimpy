@@ -71,7 +71,10 @@ class NexusNodes(Nodes):
         new_nodes = nfo.collect_all_tables_to_objects(surface_file, {'NODES': NexusNode, },
                                                       start_date=start_date,
                                                       default_units=default_units)
-        self.add_nodes(new_nodes.get('NODES'))
+        cons_list = new_nodes.get('NODES')
+        if isinstance(cons_list, dict):
+            raise ValueError('Incompatible data format for additional wells. Expected type "list" instead got "dict"')
+        self.add_nodes(cons_list)
 
     def add_nodes(self, additional_list: Optional[list[NexusNode]]) -> None:
         """ extends the nodes object by a list of nodes provided to it.
