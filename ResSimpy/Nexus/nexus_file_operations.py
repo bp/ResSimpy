@@ -567,8 +567,8 @@ def get_multiple_sequential_values(list_of_strings: list[str], number_tokens: in
 
 
 def check_for_and_populate_common_input_data(file_as_list: list[str], property_dict:
-                                             dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                                             dict[str, pd.DataFrame]]]
+dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+dict[str, pd.DataFrame]]]
                                              ) -> None:
     """Loop through lines of Nexus input file content looking for common input data, e.g.,
     units such as ENGLISH or METRIC, temparure units such as FAHR or CELSIUS, DATEFORMAT, etc.,
@@ -588,7 +588,7 @@ def check_for_and_populate_common_input_data(file_as_list: list[str], property_d
 
 def check_property_in_line(line: str,
                            property_dict: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                                          dict[str, pd.DataFrame]]],
+                           dict[str, pd.DataFrame]]],
                            file_as_list: list[str]) -> None:
     """Given a line of Nexus input file content looking for common input data, e.g.,
         units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
@@ -950,9 +950,6 @@ def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConst
     Returns:
         list[NexusConstraint]: list of constraint objects for the given timestep/constraint table
     """
-    # deepcopy to prevent historic constraints from being changed outside the scope of this function
-    # existing_constraint_copy = copy.deepcopy(existing_constraints)
-    # new_constraints: dict[str, list[NexusConstraint]] = {}
     for line in file_as_list:
         properties_dict: dict[str, str | float | UnitSystem | None] = {'date': current_date, 'unit_system': unit_system}
         # first value in the line has to be the node/wellname
