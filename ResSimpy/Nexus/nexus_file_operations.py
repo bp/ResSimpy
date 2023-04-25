@@ -510,8 +510,8 @@ def read_table_to_df(file_as_list: list[str], keep_comments: bool = False) -> pd
     else:  # Going to retain comments as a separate column in dataframe
         # Clean of comments
         cleaned_file_as_list = [re.split(r'(?<!\")!(?!\")', line)[0].strip()
-                                if line and line[0] != '!' else line
-                                for line in file_as_list]
+        if line and line[0] != '!' else line
+            for line in file_as_list]
         cleaned_file_as_list = [line if not line.startswith('!') else '' for line in cleaned_file_as_list]
         # Save comments in a list
         comment_column = [line.split('!', 1)[1].strip() if '!' in line else None for line in file_as_list]
@@ -566,10 +566,10 @@ def get_multiple_sequential_values(list_of_strings: list[str], number_tokens: in
     return store_values
 
 
-def check_for_and_populate_common_input_data(file_as_list: list[str], property_dict:
-dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-dict[str, pd.DataFrame]]]
-                                             ) -> None:
+def check_for_and_populate_common_input_data(
+        file_as_list: list[str],
+        property_dict: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]]
+        ) -> None:
     """Loop through lines of Nexus input file content looking for common input data, e.g.,
     units such as ENGLISH or METRIC, temparure units such as FAHR or CELSIUS, DATEFORMAT, etc.,
     as defined in Nexus manual. If any found, include in provided property_dict and return
@@ -586,10 +586,10 @@ dict[str, pd.DataFrame]]]
         check_property_in_line(line, property_dict, file_as_list)
 
 
-def check_property_in_line(line: str,
-                           property_dict: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                           dict[str, pd.DataFrame]]],
-                           file_as_list: list[str]) -> None:
+def check_property_in_line(
+        line: str,
+        property_dict: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]],
+        file_as_list: list[str]) -> None:
     """Given a line of Nexus input file content looking for common input data, e.g.,
         units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
         as defined in Nexus manual. If any found, include in provided property_dict and return
@@ -670,7 +670,7 @@ def looks_like_grid_array(file_path: str, lines2check: int = 10) -> bool:
             line = f.readline()
             line_elems = line.split()
             found_keywords = [word for word in line_elems if (word in GRID_ARRAY_KEYWORDS) and
-                              check_token(word, line)]
+                                                             check_token(word, line)]
             if found_keywords:
                 for word in found_keywords:
                     if (line_elems.index(word) < len(line_elems) - 1 and
