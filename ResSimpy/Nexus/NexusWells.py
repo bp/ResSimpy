@@ -56,7 +56,7 @@ class NexusWells(Wells):
 
         return set_dates
 
-    def modify_well(self, well_name: str, date: str, perforations_properties: list[dict[str, None | float | int | str]],
+    def modify_well(self, well_name: str, date: str, perforations_properties: list[dict[str, float | int | str]],
                     how: Literal['add', 'remove'] = 'add', remove_all_that_match: bool = False,
                     write_to_file: bool = True, ) -> None:
         """
@@ -73,6 +73,8 @@ class NexusWells(Wells):
 
         """
         well = self.get_well(well_name)
+        if well is None:
+            raise ValueError(f'No well named {well_name} found in simulator')
         for perf in perforations_properties:
             if how == 'add':
                 well.add_completion(date=date, perforation_properties=perf)
