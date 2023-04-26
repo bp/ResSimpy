@@ -27,8 +27,10 @@ class NexusWells(Wells):
         store_dictionaries = []
         for well in self.__wells:
             for completion in well.completions:
-                completion_props: dict[str, None | float | int | str] = {'well_name': well.well_name,
-                                                                         'units': well.units.name, }
+                completion_props: dict[str, None | float | int | str] = {
+                    'well_name': well.well_name,
+                    'units': well.units.name,
+                    }
                 completion_props.update(completion.to_dict())
                 store_dictionaries.append(completion_props)
         df_store = pd.DataFrame(store_dictionaries)
@@ -46,4 +48,10 @@ class NexusWells(Wells):
 
         return overview
 
-    def
+    def get_wells_dates(self) -> set[str]:
+        """Returns a set of the unique dates in the wellspec file over all wells"""
+        set_dates: set = set()
+        for well in self.__wells:
+            set_dates.update(set(well.dates_of_completions))
+
+        return set_dates

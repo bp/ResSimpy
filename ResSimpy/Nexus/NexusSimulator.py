@@ -644,3 +644,10 @@ class NexusSimulator(Simulator):
     def load_network(self):
         """ Populates nodes and connections from a surface file  """
         self.Network.load()
+
+    def write_wells(self, output_path: str, ) -> None:
+        """creates a new file from a set of wells"""
+        existing_wells = self.Wells.get_wells()
+        # TODO ensure they are ordered by date
+
+        for time in
