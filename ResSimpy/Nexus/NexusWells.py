@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Sequence, Optional
+from typing import Sequence, Optional, Literal
 
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
@@ -50,8 +50,32 @@ class NexusWells(Wells):
 
     def get_wells_dates(self) -> set[str]:
         """Returns a set of the unique dates in the wellspec file over all wells"""
-        set_dates: set = set()
+        set_dates: set[str] = set()
         for well in self.__wells:
             set_dates.update(set(well.dates_of_completions))
 
         return set_dates
+
+    def modify_well(self, well_name: str, date: str, perforations_properties: list[dict[str, None | float | int | str]],
+                    how: Literal['add', 'remove'] = 'add', remove_all_that_match: bool = False,
+                    write_to_file: bool = True, ) -> None:
+        """
+
+        Args:
+            date ():
+            well_name ():
+            perforations_properties ():
+            how ():
+            remove_all_that_match ():
+            write_to_file ():
+
+        Returns:
+
+        """
+        well = self.get_well(well_name)
+        for perf in perforations_properties:
+            if how == 'add':
+                well.add_completion(date=date, perforation_properties=perf)
+            else:
+                well.remove_completion(date=date, perforation_properties=perf,
+                                       remove_all_that_match=remove_all_that_match)

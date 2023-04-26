@@ -92,6 +92,7 @@ class Completion(ABC):
     def i(self):
         return self.__i
 
+    @property
     def j(self):
         return self.__j
 
@@ -171,5 +172,5 @@ class Completion(ABC):
             'dfactor': self.__dfactor,
             'rel_perm_method': self.__rel_perm_method,
             'status': self.__status,
-        }
+            }
         return attribute_dict

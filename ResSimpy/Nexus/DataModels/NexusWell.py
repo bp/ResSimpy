@@ -117,9 +117,19 @@ class NexusWell(Well):
             remove_all_that_match (bool): If True removes all the perforations that match the perforation_properties
             dictionary. Otherwise if multiple perforations match it will not remove any completions.
         """
-        matching_completions = [x for x in self.__completions if x.date == date]
-        matching_completions = [x for x in matching_completions for k, v in perforation_properties.items() if
-                                getattr(x, k) == v]
+        matching_dates = [x for x in self.__completions if x.date == date]
+        matching_completions = []
+        for i, perf in enumerate(matching_dates):
+            for prop, value in perforation_properties.items():
+                if getattr(perf, prop) == value:
+                    # go to the next perf if a value from the dictionary doesn't match
+                    continue
+                else:
+                    break
+            else:
+                # if all the conditions match then append the perf to completions
+                matching_completions.append(perf)
+
         if remove_all_that_match:
             for completion in matching_completions:
                 self.__completions.remove(completion)

@@ -418,23 +418,22 @@ def test_remove_completion():
                                    units=UnitSystem.METKGCM2)
 
 
-
 def test_well_dates(mocker):
     # Arrange
-    well_1_completions = [NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
-                              well_indices=1),
-               NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1),
-               NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
-                              depth_to_bottom=1234),]
+    well_1_completions = [
+        NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+                        well_indices=1),
+        NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1),
+        NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+                        depth_to_bottom=1234),]
 
     well_2_completions = [
-               NexusCompletion(i=1, j=2, k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=3),
-               NexusCompletion(i=1, j=2, date='01/03/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
-                              depth_to_bottom=1234),]
+        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=3),
+        NexusCompletion(i=1, j=2, date='01/03/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+                        depth_to_bottom=1234),
+                        ]
 
     well = NexusWells()
-
-    # with patch.object(NexusWells, '_NexusWells__wells', new_callable=PropertyMock) as mock_method:
 
     well.__setattr__('_NexusWells__wells', [NexusWell(well_name='well1', completions=well_1_completions, units=UnitSystem.METRIC),
                                 NexusWell(well_name='well2', completions=well_2_completions, units=UnitSystem.METRIC)])
@@ -445,3 +444,46 @@ def test_well_dates(mocker):
 
     # Assert
     assert result == expected_result
+
+
+def test_well_modify():
+    # Arrange
+    well_1_completions = [
+        NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+                        well_indices=1),
+        NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1),
+        NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+                        depth_to_bottom=1234),
+                        ]
+
+    well_2_completions = [
+        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=3),
+        NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+                        depth_to_bottom=1234),
+                        ]
+    well_1 = NexusWell(well_name='well1', completions=well_1_completions, units=UnitSystem.METRIC)
+    well_2 = NexusWell(well_name='well2', completions=well_2_completions, units=UnitSystem.METRIC)
+
+    wells = NexusWells()
+
+    wells.__setattr__('_NexusWells__wells', [well_1, well_2])
+    date = '01/02/2023'
+    perf_1_to_add = {'i': 3, 'j': 3, 'k': 5, 'well_radius': 1005.2}
+    perf_2_to_add = {'i': 1, 'j': 2, 'k': 6, 'permeability': 1005.2}
+    perf_to_remove = {'i':1, 'j':2, 'date':'01/02/2023', 'status':'ON', 'partial_perf':1, 'well_indices':0, 'depth_to_top':1156,
+                        'depth_to_bottom':1234}
+
+    new_nexus_completion_1 = NexusCompletion(date=date, i=3, j=3, k=5, well_radius=1005.2)
+    new_nexus_completion_2 = NexusCompletion(date=date, i=1, j=2, k=6, permeability=1005.2)
+    expected_completions = well_1_completions[0:2] + [new_nexus_completion_1, new_nexus_completion_2]
+
+    expected_result = [NexusWell(well_name='well1', completions=expected_completions, units=UnitSystem.METRIC),
+                       NexusWell(well_name='well2', completions=well_2_completions, units=UnitSystem.METRIC)]
+
+    # Act
+    wells.modify_well(well_name='well1', date=date, perforations_properties=[perf_1_to_add, perf_2_to_add],how='add',
+                      write_to_file=False)
+    wells.modify_well(well_name='well1', date=date, perforations_properties=[perf_to_remove], how='remove',
+                      write_to_file=False)
+    # Assert
+    assert wells.get_wells()[0].completions == expected_result[0].completions
