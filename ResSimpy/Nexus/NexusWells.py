@@ -2,6 +2,8 @@ from dataclasses import dataclass, field
 from typing import Sequence, Optional, Literal
 
 import pandas as pd
+
+from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Wells import Wells
@@ -56,7 +58,7 @@ class NexusWells(Wells):
 
         return set_dates
 
-    def modify_well(self, well_name: str, date: str, perforations_properties: list[dict[str, float | int | str]],
+    def modify_well(self, well_name: str, date: str, perforations_properties: list[NexusCompletion.InputDictionary],
                     how: Literal['add', 'remove'] = 'add', remove_all_that_match: bool = False,
                     write_to_file: bool = True, ) -> None:
         """

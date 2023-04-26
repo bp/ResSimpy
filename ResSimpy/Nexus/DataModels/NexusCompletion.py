@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Optional, Union
+from typing import Optional, Union, TypedDict
 
 from ResSimpy.Completion import Completion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
@@ -243,20 +243,20 @@ class NexusCompletion(Completion):
         """returns a dictionary of mapping from nexus keyword to attribute name"""
 
         nexus_mapping: dict[str, tuple[str, type]] = {
-            'IW': ('iw', float),
-            'JW': ('jw', float),
-            'L': ('kw', float),
-            'MD': ('md', float),
+            'IW': ('i', int),
+            'JW': ('j', int),
+            'L': ('k', int),
+            'MD': ('measured_depth', float),
             'SKIN': ('skin', float),
             'DEPTH': ('depth', float),
-            'X': ('x_value', float),
-            'Y': ('y_value', float),
-            'ANGLA': ('angla', float),
-            'ANGLV': ('anglv', float),
+            'X': ('x', float),
+            'Y': ('y', float),
+            'ANGLA': ('angle_a', float),
+            'ANGLV': ('angle_v', float),
             'GRID': ('grid', str),
-            'WI': ('wi', float),
-            'DTOP': ('dtop', float),
-            'DBOT': ('dbot', float),
+            'WI': ('well_indices', float),
+            'DTOP': ('depth_to_top', float),
+            'DBOT': ('depth_to_bottom', float),
             'RADW': ('well_radius', float),
             'PPERF': ('partial_perf', float),
             'CELL': ('cell_number', int),
@@ -287,3 +287,55 @@ class NexusCompletion(Completion):
             }
 
         return nexus_mapping
+
+    class InputDictionary(TypedDict):
+        date: str
+        i: int
+        j: int
+        k: int
+        measured_depth: float
+        skin: float
+        depth: float
+        x: float
+        y: float
+        angle_a: float
+        angle_v: float
+        grid: str
+        well_indices: float
+        depth_to_top: float
+        depth_to_bottom: float
+        well_radius: float
+        partial_perf: float
+        cell_number: int
+        perm_thickness_ovr: float
+        dfactor: float
+        rel_perm_method: int
+        status: str
+        bore_radius: float
+        portype: str
+        fracture_mult: float
+        sector: int
+        well_group: str
+        zone: int
+        angle_open_flow: float
+        temperature: float
+        flowsector: int
+        parent_node: str
+        mdcon: float
+        pressure_avg_pattern: int
+        length: float
+        permeability: float
+        non_darcy_model: str
+        comp_dz: float
+        layer_assignment: int
+        polymer_bore_radius: float
+        polymer_well_radius: float
+        kh_mult: float
+
+    @classmethod
+    def from_dict(cls, input_dictionary: InputDictionary) -> NexusCompletion:
+        """generates a NexusCompletion from a dictionary"""
+        try:
+            return cls(**input_dictionary)
+        except AttributeError:
+            raise AttributeError(f'Unexpected keyword found within {input_dictionary}')

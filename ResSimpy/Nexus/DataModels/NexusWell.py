@@ -90,7 +90,7 @@ class NexusWell(Well):
 
         return events
 
-    def add_completion(self, date: str, perforation_properties: dict[str, str | float | int],
+    def add_completion(self, date: str, perforation_properties: NexusCompletion.InputDictionary,
                        perforation_index: Optional[int] = None) -> None:
         """ adds a perforation with the properties specified in perforation_properties,
             if index is none then adds it to the end of the perforation list.
@@ -99,12 +99,13 @@ class NexusWell(Well):
             perforation_properties (dict[str, str | float | int]):
             perforation_index (Optional[int]):
         """
-        new_completion = NexusCompletion(date=date, **perforation_properties)
+        perforation_properties['date'] = date
+        new_completion = NexusCompletion.from_dict(perforation_properties)
         if perforation_index is None:
             perforation_index = len(self.__completions)
         self.__completions.insert(perforation_index, new_completion)
 
-    def remove_completion(self, date: str, perforation_properties: dict[str, str | float | int],
+    def remove_completion(self, date: str, perforation_properties: NexusCompletion.InputDictionary,
                           remove_all_that_match: bool = False,
                           ) -> None:
         # TODO improve comparison of dates with datetime libs
