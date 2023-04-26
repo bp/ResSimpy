@@ -157,6 +157,9 @@ class NexusConstraint(Constraint):
     max_gor_plug_plus: Optional[float] = None
     max_gor_perf: Optional[float] = None
     max_gor_perfplus: Optional[float] = None
+    gor_limit: Optional[float] = None
+    gor_limit_exponent: Optional[float] = None
+    gor_limit_frequency: Optional[float] = None
     max_lgr: Optional[float] = None
     max_lgr_plug: Optional[float] = None
     max_lgr_plug_plus: Optional[float] = None
@@ -291,6 +294,9 @@ class NexusConstraint(Constraint):
             'WORPLUGPLUS': ('max_wor_plug_plus', float),
             'WORPERF': ('max_wor_perf', float),
             'WORPERFPLUS': ('max_wor_perfplus', float),
+            'GORLIM': ('gor_limit', float),
+            'EXPONENT': ('gor_limit_exponent', float),
+            'FREQUENCY': ('gor_limit_frequency', float),
             'GORMAX': ('max_gor', float),
             'GORPLUG': ('max_gor_plug', float),
             'GORPLUGPLUS': ('max_gor_plug_plus', float),
