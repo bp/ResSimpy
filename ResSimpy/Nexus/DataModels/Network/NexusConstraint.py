@@ -118,14 +118,16 @@ class NexusConstraint(Constraint):
     max_reverse_reservoir_liquid_rate: Optional[float] = None
     max_reverse_reservoir_total_fluids_rate: Optional[float] = None
     max_reverse_reservoir_hc_rate: Optional[float] = None
+    max_avg_comp_dp: Optional[float] = None
+    max_comp_dp: Optional[float] = None
+
     min_pressure: Optional[float] = None
     max_pressure: Optional[float] = None
     max_wag_water_pressure: Optional[float] = None
     max_wag_gas_pressure: Optional[float] = None
     bottom_hole_pressure: Optional[float] = None
     tubing_head_pressure: Optional[float] = None
-    max_avg_comp_dp: Optional[float] = None
-    max_comp_dp: Optional[float] = None
+
     min_surface_oil_rate: Optional[float] = None
     min_surface_gas_rate: Optional[float] = None
     min_surface_water_rate: Optional[float] = None
@@ -264,6 +266,8 @@ class NexusConstraint(Constraint):
             'QOIL': ('qmult_oil_rate', float),
             'QWATER': ('qmult_water_rate', float),
             'QGAS': ('qmult_gas_rate', float),
+            'DPBHAVG': ('max_avg_comp_dp', float),
+            'DPBHMX': ('max_comp_dp', float),
             }
         return nexus_mapping
 
@@ -276,8 +280,6 @@ class NexusConstraint(Constraint):
             'PGMAX': ('max_wag_gas_pressure', float),
             'BHP': ('bottom_hole_pressure', float),
             'THP': ('tubing_head_pressure', float),
-            'DPBHAVG': ('max_avg_comp_dp', float),
-            'DPBHMX': ('max_comp_dp', float),
             }
         return nexus_mapping
 
