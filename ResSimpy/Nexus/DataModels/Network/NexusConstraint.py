@@ -124,6 +124,8 @@ class NexusConstraint(Constraint):
     max_wag_gas_pressure: Optional[float] = None
     bottom_hole_pressure: Optional[float] = None
     tubing_head_pressure: Optional[float] = None
+    max_avg_comp_dp: Optional[float] = None
+    max_comp_dp: Optional[float] = None
     min_surface_oil_rate: Optional[float] = None
     min_surface_gas_rate: Optional[float] = None
     min_surface_water_rate: Optional[float] = None
@@ -201,7 +203,7 @@ class NexusConstraint(Constraint):
             'QWSMAX_MULT': ('use_qmult_qwater_surface_rate', bool),
             'QGSMAX_MULT': ('use_qmult_qgas_surface_rate', bool),
             'QLIQSMAX_MULT': ('use_qmult_qoilqwat_surface_rate', bool),
-        }
+            }
         nexus_mapping.update(NexusConstraint.get_limit_constraints_map())
         nexus_mapping.update(NexusConstraint.get_pressure_constraints_map())
         nexus_mapping.update(NexusConstraint.get_rate_constraints_map())
@@ -259,7 +261,7 @@ class NexusConstraint(Constraint):
             'QOIL': ('qmult_oil_rate', float),
             'QWATER': ('qmult_water_rate', float),
             'QGAS': ('qmult_gas_rate', float),
-        }
+            }
         return nexus_mapping
 
     @staticmethod
@@ -271,7 +273,9 @@ class NexusConstraint(Constraint):
             'PGMAX': ('max_wag_gas_pressure', float),
             'BHP': ('bottom_hole_pressure', float),
             'THP': ('tubing_head_pressure', float),
-        }
+            'DPBHAVG': ('max_avg_comp_dp', float),
+            'DPBHMX': ('max_comp_dp', float),
+            }
         return nexus_mapping
 
     @staticmethod
@@ -300,7 +304,7 @@ class NexusConstraint(Constraint):
             'CGLIM': ('max_cum_gas_prod', float),
             'CWLIM': ('max_cum_water_prod', float),
             'COLIM': ('max_cum_oil_prod', float),
-        }
+            }
         return nexus_mapping
 
     @staticmethod
@@ -316,7 +320,7 @@ class NexusConstraint(Constraint):
             'SPEED': ('pump_speed', float),
             'CHOKELIMIT': ('choke_limit', str),
             'POSITION': ('manifold_position', int),
-        }
+            }
         return nexus_mapping
 
     def to_dict(self, keys_in_nexus_style: bool = False) -> dict[str, None | str | int | float]:
