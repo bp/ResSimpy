@@ -504,9 +504,9 @@ def test_well_modify():
 
     wells.__setattr__('_NexusWells__wells', [well_1, well_2])
     date = '01/02/2023'
-    perf_1_to_add = {'i': 3, 'j': 3, 'k': 5, 'well_radius': 1005.2}
-    perf_2_to_add = {'i': 1, 'j': 2, 'k': 6, 'permeability': 1005.2}
-    perf_to_remove = {'i':1, 'j':2, 'date':'01/02/2023', 'status':'ON', 'partial_perf':1, 'well_indices':0, 'depth_to_top':1156,
+    perf_1_to_add = {'date': date, 'i': 3, 'j': 3, 'k': 5, 'well_radius': 1005.2}
+    perf_2_to_add = {'date': date, 'i': 1, 'j': 2, 'k': 6, 'permeability': 1005.2}
+    perf_to_remove = {'date': date, 'i':1, 'j':2, 'status':'ON', 'partial_perf':1, 'well_indices':0, 'depth_to_top':1156,
                         'depth_to_bottom':1234}
 
     new_nexus_completion_1 = NexusCompletion(date=date, i=3, j=3, k=5, well_radius=1005.2)
@@ -517,9 +517,9 @@ def test_well_modify():
                        NexusWell(well_name='well2', completions=well_2_completions, units=UnitSystem.METRIC)]
 
     # Act
-    wells.modify_well(well_name='well1', date=date, perforations_properties=[perf_1_to_add, perf_2_to_add], 
+    wells.modify_well(well_name='well1', perforations_properties=[perf_1_to_add, perf_2_to_add],
                       how=OperationEnum.ADD, write_to_file=False)
-    wells.modify_well(well_name='well1', date=date, perforations_properties=[perf_to_remove], how=OperationEnum.REMOVE,
+    wells.modify_well(well_name='well1', perforations_properties=[perf_to_remove], how=OperationEnum.REMOVE,
                       write_to_file=False)
     # Assert
     assert wells.get_wells()[0].completions == expected_result[0].completions
