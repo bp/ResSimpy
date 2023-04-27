@@ -105,9 +105,41 @@ class NexusWell(Well):
             perforation_index = len(self.__completions)
         self.__completions.insert(perforation_index, new_completion)
 
-    def remove_completion(self, date: str, perforation_properties: NexusCompletion.InputDictionary,
-                          remove_all_that_match: bool = False,
-                          ) -> None:
+    def find_completions(self, perforation_properties: NexusCompletion.InputDictionary | NexusCompletion) -> \
+            list[NexusCompletion]:
+        matching_completions = []
+        if isinstance(perforation_properties, NexusCompletion):
+            perforation_properties = perforation_properties.to_dict()
+            perforation_properties = {k: v for k, v in perforation_properties.items() if v is not None}
+        for i, perf in enumerate(self.__completions):
+            for prop, value in perforation_properties.items():
+                if getattr(perf, prop) == value:
+                    # go to the next perf if a value from the dictionary doesn't match
+                    continue
+                else:
+                    break
+            else:
+                # if all the conditions match then append the perf to completions
+                matching_completions.append(perf)
+        return matching_completions
+
+    def find_completion(self,
+                        perforation_properties: NexusCompletion.InputDictionary | NexusCompletion) -> NexusCompletion:
+        matching_completions = self.find_completions(perforation_properties)
+        if len(matching_completions) != 1:
+            raise ValueError(f'Could not find single unique completion that matches property provided. Instead found: '
+                             f'{len(matching_completions)} completions')
+        return matching_completions[0]
+
+    def modify_completion(self) -> None:
+        pass
+
+    def modify_completions(self) -> None:
+        pass
+
+    def remove_completions(self, date: str, perforation_properties: NexusCompletion.InputDictionary | NexusCompletion,
+                           remove_all_that_match: bool = False,
+                           ) -> None:
         # TODO improve comparison of dates with datetime libs
         """ Removes perforation from the completions list in the well that match all the properties in the
         provided dictionary, does not write out to model yet.
@@ -118,19 +150,7 @@ class NexusWell(Well):
             remove_all_that_match (bool): If True removes all the perforations that match the perforation_properties
             dictionary. Otherwise if multiple perforations match it will not remove any completions.
         """
-        matching_dates = [x for x in self.__completions if x.date == date]
-        matching_completions = []
-        for i, perf in enumerate(matching_dates):
-            for prop, value in perforation_properties.items():
-                if getattr(perf, prop) == value:
-                    # go to the next perf if a value from the dictionary doesn't match
-                    continue
-                else:
-                    break
-            else:
-                # if all the conditions match then append the perf to completions
-                matching_completions.append(perf)
-
+        matching_completions = self.find_completions(perforation_properties)
         if remove_all_that_match:
             for completion in matching_completions:
                 self.__completions.remove(completion)

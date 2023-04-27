@@ -353,7 +353,35 @@ def test_get_completion_events(completions, expected_shutin):
 
     # Assert
     assert result == expected_shutin
+@pytest.mark.parametrize('existing_completions',[
+([
+        NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+                      well_indices=1),
+        NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1),
+        NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+                      depth_to_bottom=1234),
+        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=3),
+        NexusCompletion(i=1, j=2, date='01/03/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+                      depth_to_bottom=1234),
+        ]),]
+)
+def test_find_completion(mocker, existing_completions):
+    # Arrange
+    completion_to_find = {'date': '01/02/2023', 'i': 1, 'j': 2, 'k': 3,}
+    completion_to_fail = {'date':'01/02/2023'}
+    completion_to_find_as_completion = NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON',)
+    well = NexusWell(well_name='test well', completions=existing_completions, units=UnitSystem.METKGCM2)
+    expected_result = NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1)
 
+    # Act
+    result = well.find_completion(completion_to_find)
+    result_with_completion = well.find_completion(completion_to_find_as_completion)
+
+    # Assert
+    assert result == expected_result
+    assert result_with_completion == expected_result
+    with pytest.raises(ValueError):
+        well.find_completion(completion_to_fail)
 
 def test_add_completion():
     # Arrange
@@ -411,8 +439,8 @@ def test_remove_completion():
     keep_perfs = NexusWell(well_name='test well', completions=existing_completions,
                            units=UnitSystem.METKGCM2)
     # Act
-    remove_well.remove_completion(date=removal_date, perforation_properties=perf_to_remove, remove_all_that_match=True)
-    keep_perfs.remove_completion(date=removal_date, perforation_properties=perf_to_remove, remove_all_that_match=False)
+    remove_well.remove_completions(date=removal_date, perforation_properties=perf_to_remove, remove_all_that_match=True)
+    keep_perfs.remove_completions(date=removal_date, perforation_properties=perf_to_remove, remove_all_that_match=False)
     # Assert
     assert remove_well == expected_result
     assert keep_perfs == NexusWell(well_name='test well', completions=existing_completions,
@@ -488,3 +516,5 @@ def test_well_modify():
                       write_to_file=False)
     # Assert
     assert wells.get_wells()[0].completions == expected_result[0].completions
+
+

@@ -84,8 +84,8 @@ class NexusWells(Wells):
             if how == OperationEnum.ADD:
                 well.add_completion(date=date, perforation_properties=perf)
             elif how == OperationEnum.REMOVE:
-                well.remove_completion(date=date, perforation_properties=perf,
-                                       remove_all_that_match=remove_all_that_match)
+                well.remove_completions(date=date, perforation_properties=perf,
+                                        remove_all_that_match=remove_all_that_match)
             elif how == OperationEnum.MODIFY:
                 raise NotImplementedError('Modify in place not yet available. Please choose one of ADD/REMOVE')
             else:
