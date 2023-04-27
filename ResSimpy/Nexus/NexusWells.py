@@ -61,24 +61,25 @@ class NexusWells(Wells):
     def modify_well(self, well_name: str, date: str, perforations_properties: list[NexusCompletion.InputDictionary],
                     how: Literal['add', 'remove'] = 'add', remove_all_that_match: bool = False,
                     write_to_file: bool = True, ) -> None:
-        """
+        """ Modify the existing wells in memory using a dictionary of properties.
 
         Args:
-            date ():
-            well_name ():
-            perforations_properties ():
-            how ():
-            remove_all_that_match ():
-            write_to_file ():
-
-        Returns:
-
+            date (str): Date at which to modify the well
+            well_name (str): name of the well to modify
+            perforations_properties (list[InputDict]): a dictionary containing the properties to modify with the \
+                attribute as keys and the values as the updated property value. If remove will remove perforation that \
+                matches the values in the dictionary.
+            how (Literal['add', 'remove']):
+            remove_all_that_match (bool): If True will remove all wells that partially match the perforation_properties\
+                provided. If False will remove perforation if only one matches, if several match throws a warning and \
+                does not remove them.
+            write_to_file (bool): If True writes directly to file. (Currently not in use)
         """
         well = self.get_well(well_name)
         if well is None:
             raise ValueError(f'No well named {well_name} found in simulator')
         for perf in perforations_properties:
-            if how == 'add':
+            if how.upper() == 'ADD':
                 well.add_completion(date=date, perforation_properties=perf)
             else:
                 well.remove_completion(date=date, perforation_properties=perf,
