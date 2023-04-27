@@ -1,4 +1,5 @@
 """The base class for all Well Completions"""
+import uuid
 from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
@@ -79,6 +80,7 @@ class Completion(ABC):
         self.__dfactor = dfactor
         self.__rel_perm_method = rel_perm_method
         self.__status = status
+        self.__id: uuid = uuid.uuid4()
 
     @property
     def well_radius(self):
