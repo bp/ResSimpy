@@ -1,5 +1,6 @@
 from unittest.mock import PropertyMock, patch
 import pytest
+from ResSimpy.Enums.HowEnum import OperationEnum
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
@@ -481,9 +482,9 @@ def test_well_modify():
                        NexusWell(well_name='well2', completions=well_2_completions, units=UnitSystem.METRIC)]
 
     # Act
-    wells.modify_well(well_name='well1', date=date, perforations_properties=[perf_1_to_add, perf_2_to_add],how='add',
-                      write_to_file=False)
-    wells.modify_well(well_name='well1', date=date, perforations_properties=[perf_to_remove], how='remove',
+    wells.modify_well(well_name='well1', date=date, perforations_properties=[perf_1_to_add, perf_2_to_add], 
+                      how=OperationEnum.ADD, write_to_file=False)
+    wells.modify_well(well_name='well1', date=date, perforations_properties=[perf_to_remove], how=OperationEnum.REMOVE,
                       write_to_file=False)
     # Assert
     assert wells.get_wells()[0].completions == expected_result[0].completions

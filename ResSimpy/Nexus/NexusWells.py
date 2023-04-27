@@ -1,8 +1,9 @@
 from dataclasses import dataclass, field
-from typing import Sequence, Optional, Literal
+from typing import Sequence, Optional
 
 import pandas as pd
 
+from ResSimpy.Enums.HowEnum import OperationEnum
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -59,7 +60,7 @@ class NexusWells(Wells):
         return set_dates
 
     def modify_well(self, well_name: str, date: str, perforations_properties: list[NexusCompletion.InputDictionary],
-                    how: Literal['add', 'remove'] = 'add', remove_all_that_match: bool = False,
+                    how: OperationEnum = OperationEnum.ADD, remove_all_that_match: bool = False,
                     write_to_file: bool = True, ) -> None:
         """ Modify the existing wells in memory using a dictionary of properties.
 
@@ -69,7 +70,8 @@ class NexusWells(Wells):
             perforations_properties (list[InputDict]): a dictionary containing the properties to modify with the \
                 attribute as keys and the values as the updated property value. If remove will remove perforation that \
                 matches the values in the dictionary.
-            how (Literal['add', 'remove']):
+            how (OperationEnum): operation enum taking the values OperationEnum.ADD, OperationEnum.REMOVE. \
+                Specifies how to modify the existing wells perforations.
             remove_all_that_match (bool): If True will remove all wells that partially match the perforation_properties\
                 provided. If False will remove perforation if only one matches, if several match throws a warning and \
                 does not remove them.
@@ -79,8 +81,12 @@ class NexusWells(Wells):
         if well is None:
             raise ValueError(f'No well named {well_name} found in simulator')
         for perf in perforations_properties:
-            if how.upper() == 'ADD':
+            if how == OperationEnum.ADD:
                 well.add_completion(date=date, perforation_properties=perf)
-            else:
+            elif how == OperationEnum.REMOVE:
                 well.remove_completion(date=date, perforation_properties=perf,
                                        remove_all_that_match=remove_all_that_match)
+            elif how == OperationEnum.MODIFY:
+                raise NotImplementedError('Modify in place not yet available. Please choose one of ADD/REMOVE')
+            else:
+                raise ValueError('Please select one of the valid OperationEnum values: e.g. OperationEnum.ADD')

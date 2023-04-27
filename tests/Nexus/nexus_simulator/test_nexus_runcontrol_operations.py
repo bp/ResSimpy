@@ -148,7 +148,7 @@ def test_modify_times(mocker, date_format, expected_date_format,
     run_control_mock = mocker.mock_open(read_data=run_control_contents)
     include_file_mock = mocker.mock_open(read_data=include_file_contents)
 
-    # Operation parameter required here to handle all calls to open
+    # OperationEnum parameter required here to handle all calls to open
     def mock_open_wrapper(filename, operation=None):
         mock_open = mock_multiple_opens(mocker, filename, fcs_file, run_control_file, include_file,
                                         run_control_mock, include_file_mock).return_value
