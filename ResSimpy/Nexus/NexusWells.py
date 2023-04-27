@@ -59,13 +59,12 @@ class NexusWells(Wells):
 
         return set_dates
 
-    def modify_well(self, well_name: str, date: str, perforations_properties: list[NexusCompletion.InputDictionary],
+    def modify_well(self, well_name: str, perforations_properties: list[NexusCompletion.InputDictionary],
                     how: OperationEnum = OperationEnum.ADD, remove_all_that_match: bool = False,
                     write_to_file: bool = True, ) -> None:
         """ Modify the existing wells in memory using a dictionary of properties.
 
         Args:
-            date (str): Date at which to modify the well
             well_name (str): name of the well to modify
             perforations_properties (list[InputDict]): a dictionary containing the properties to modify with the \
                 attribute as keys and the values as the updated property value. If remove will remove perforation that \
@@ -82,9 +81,17 @@ class NexusWells(Wells):
             raise ValueError(f'No well named {well_name} found in simulator')
         for perf in perforations_properties:
             if how == OperationEnum.ADD:
+                try:
+                    date = perf.get('date')
+                except AttributeError:
+                    raise AttributeError(
+                        f'No date provided in perf: {perf}, please provide a date to add the perforation at.')
+                if date is None:
+                    raise AttributeError(
+                        f'No date provided in perf: {perf}, please provide a date to add the perforation at.')
                 well.add_completion(date=date, perforation_properties=perf)
             elif how == OperationEnum.REMOVE:
-                well.remove_completions(date=date, perforation_properties=perf,
+                well.remove_completions(perforation_properties=perf,
                                         remove_all_that_match=remove_all_that_match)
             elif how == OperationEnum.MODIFY:
                 raise NotImplementedError('Modify in place not yet available. Please choose one of ADD/REMOVE')

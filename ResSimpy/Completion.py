@@ -80,7 +80,7 @@ class Completion(ABC):
         self.__dfactor = dfactor
         self.__rel_perm_method = rel_perm_method
         self.__status = status
-        self.__id: uuid = uuid.uuid4()
+        self.__id: uuid.UUID = uuid.uuid4()
 
     @property
     def well_radius(self):

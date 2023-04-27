@@ -1,6 +1,6 @@
 import warnings
 from dataclasses import dataclass
-from typing import Optional, Tuple, Sequence, Union
+from typing import Optional, Tuple, Sequence, Union, cast
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -109,10 +109,12 @@ class NexusWell(Well):
             list[NexusCompletion]:
         matching_completions = []
         if isinstance(perforation_properties, NexusCompletion):
-            perforation_properties = perforation_properties.to_dict()
-            perforation_properties = {k: v for k, v in perforation_properties.items() if v is not None}
+            temp_perf_dict = {k: v for k, v in perforation_properties.to_dict().items() if v is not None}
+            perf_props: NexusCompletion.InputDictionary = cast(NexusCompletion.InputDictionary, temp_perf_dict)
+        else:
+            perf_props = perforation_properties
         for i, perf in enumerate(self.__completions):
-            for prop, value in perforation_properties.items():
+            for prop, value in perf_props.items():
                 if getattr(perf, prop) == value:
                     # go to the next perf if a value from the dictionary doesn't match
                     continue
@@ -137,19 +139,19 @@ class NexusWell(Well):
     def modify_completions(self) -> None:
         pass
 
-    def remove_completions(self, date: str, perforation_properties: NexusCompletion.InputDictionary | NexusCompletion,
+    def remove_completions(self, perforation_properties: NexusCompletion | NexusCompletion.InputDictionary,
                            remove_all_that_match: bool = False,
                            ) -> None:
         # TODO improve comparison of dates with datetime libs
         """ Removes perforation from the completions list in the well that match all the properties in the
         provided dictionary, does not write out to model yet.
         Args:
-            date (str): the date to remove the perforation from
             perforation_properties (dict[str, str | float | int]): dictionary containing key value pairs for
             the properties to match
             remove_all_that_match (bool): If True removes all the perforations that match the perforation_properties
             dictionary. Otherwise if multiple perforations match it will not remove any completions.
         """
+
         matching_completions = self.find_completions(perforation_properties)
         if remove_all_that_match:
             for completion in matching_completions:

@@ -368,7 +368,13 @@ def test_get_completion_events(completions, expected_shutin):
 def test_find_completion(mocker, existing_completions):
     # Arrange
     completion_to_find = {'date': '01/02/2023', 'i': 1, 'j': 2, 'k': 3,}
-    completion_to_fail = {'date':'01/02/2023'}
+    completion_to_fail = {'date': '01/02/2023'}
+    expected_completions = [
+        NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1),
+        NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+                      depth_to_bottom=1234),
+        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=3),
+        ]
     completion_to_find_as_completion = NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON',)
     well = NexusWell(well_name='test well', completions=existing_completions, units=UnitSystem.METKGCM2)
     expected_result = NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1)
@@ -376,10 +382,12 @@ def test_find_completion(mocker, existing_completions):
     # Act
     result = well.find_completion(completion_to_find)
     result_with_completion = well.find_completion(completion_to_find_as_completion)
+    result_find_completions = well.find_completions(completion_to_fail)
 
     # Assert
     assert result == expected_result
     assert result_with_completion == expected_result
+    assert result_find_completions == expected_completions
     with pytest.raises(ValueError):
         well.find_completion(completion_to_fail)
 
@@ -414,7 +422,6 @@ def test_add_completion():
 
 def test_remove_completion():
     # Arrange
-    removal_date = '01/02/2023'
     existing_completions = [
         NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
                        well_indices=1),
@@ -433,14 +440,14 @@ def test_remove_completion():
     ]
     expected_result = NexusWell(well_name='test well', completions=expected_completions_after_removal,
                                 units=UnitSystem.METKGCM2)
-    perf_to_remove = {'i': 1, 'j': 2,}
+    perf_to_remove = {'date': '01/02/2023', 'i': 1, 'j': 2,}
     remove_well = NexusWell(well_name='test well', completions=existing_completions,
                      units=UnitSystem.METKGCM2)
     keep_perfs = NexusWell(well_name='test well', completions=existing_completions,
                            units=UnitSystem.METKGCM2)
     # Act
-    remove_well.remove_completions(date=removal_date, perforation_properties=perf_to_remove, remove_all_that_match=True)
-    keep_perfs.remove_completions(date=removal_date, perforation_properties=perf_to_remove, remove_all_that_match=False)
+    remove_well.remove_completions(perforation_properties=perf_to_remove, remove_all_that_match=True)
+    keep_perfs.remove_completions(perforation_properties=perf_to_remove, remove_all_that_match=False)
     # Assert
     assert remove_well == expected_result
     assert keep_perfs == NexusWell(well_name='test well', completions=existing_completions,
