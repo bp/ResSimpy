@@ -157,6 +157,7 @@ class NexusWell(Well):
         for completion in self.__completions:
             if completion.id == id:
                 return completion
+        raise ValueError('No completion found for id: {id}')
 
     def modify_completion(self, new_completion_properties: NexusCompletion.InputDictionary,
                           completion_to_modify: NexusCompletion | UUID,
@@ -167,8 +168,14 @@ class NexusWell(Well):
             completion = self.get_completion_by_id(completion_to_modify)
         completion.update(new_completion_properties)
 
-    def modify_completions(self) -> None:
-        pass
+    def modify_completions(self, new_completion_properties: NexusCompletion.InputDictionary,
+                           completions_to_modify: list[NexusCompletion | UUID], ) -> None:
+        for completion in completions_to_modify:
+            if isinstance(completion, UUID):
+                modify_this_completion = self.get_completion_by_id(completion)
+                modify_this_completion.update(new_completion_properties)
+            else:
+                completion.update(new_completion_properties)
 
     def remove_completion(self, completion_to_remove: NexusCompletion | UUID) -> None:
         if isinstance(completion_to_remove, NexusCompletion):
@@ -178,7 +185,7 @@ class NexusWell(Well):
         removed_completion = self.__completions.pop(completion_index_to_remove)
         print(f'Removed completion: {removed_completion}')
 
-    def remove_completions(self, completions_to_remove: list[NexusCompletion | UUID], ) -> None:
+    def remove_completions(self, completions_to_remove: Sequence[NexusCompletion | UUID], ) -> None:
         # TODO improve comparison of dates with datetime libs
         """ Removes completions from a list of completions or completion IDs
         Args:
