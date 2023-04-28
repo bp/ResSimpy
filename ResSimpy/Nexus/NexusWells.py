@@ -71,7 +71,7 @@ class NexusWells(Wells):
                 matches the values in the dictionary.
             how (OperationEnum): operation enum taking the values OperationEnum.ADD, OperationEnum.REMOVE. \
                 Specifies how to modify the existing wells perforations.
-            remove_all_that_match (bool): If True will remove all wells that partially match the perforation_properties\
+            remove_all_that_match (bool): If True will remove all wells that partially match the completion_properties\
                 provided. If False will remove perforation if only one matches, if several match throws a warning and \
                 does not remove them.
             write_to_file (bool): If True writes directly to file. (Currently not in use)
@@ -89,7 +89,7 @@ class NexusWells(Wells):
                 if date is None:
                     raise AttributeError(
                         f'No date provided in perf: {perf}, please provide a date to add the perforation at.')
-                well.add_completion(date=date, perforation_properties=perf)
+                well.add_completion(date=date, completion_properties=perf)
             elif how == OperationEnum.REMOVE:
                 completions_to_remove = well.find_completions(perf)
                 well.remove_completions(completions_to_remove)

@@ -158,6 +158,78 @@ class Completion(ABC):
     def id(self):
         return self.__id
 
+    @well_radius.setter
+    def well_radius(self, value):
+        self.__well_radius = value
+
+    @date.setter
+    def date(self, value):
+        self.__date = value
+
+    @i.setter
+    def i(self, value):
+        self.__i = value
+
+    @j.setter
+    def j(self, value):
+        self.__j = value
+
+    @k.setter
+    def k(self, value):
+        self.__k = value
+
+    @skin.setter
+    def skin(self, value):
+        self.__skin = value
+
+    @depth.setter
+    def depth(self, value):
+        self.__depth = value
+
+    @x.setter
+    def x(self, value):
+        self.__x = value
+
+    @y.setter
+    def y(self, value):
+        self.__y = value
+
+    @angle_a.setter
+    def angle_a(self, value):
+        self.__angle_a = value
+
+    @angle_v.setter
+    def angle_v(self, value):
+        self.__angle_v = value
+
+    @grid.setter
+    def grid(self, value):
+        self.__grid = value
+
+    @depth_to_top.setter
+    def depth_to_top(self, value):
+        self.__depth_to_top = value
+
+    @depth_to_bottom.setter
+    def depth_to_bottom(self, value):
+        self.__depth_to_bottom = value
+
+    @perm_thickness_ovr.setter
+    def perm_thickness_ovr(self, value):
+        self.__perm_thickness_ovr = value
+
+    @dfactor.setter
+    def dfactor(self, value):
+        self.__dfactor = value
+
+    @rel_perm_method.setter
+    def rel_perm_method(self, value):
+        self.__rel_perm_method = value
+
+    @status.setter
+    def status(self, value):
+        self.__status = value
+
     def to_dict(self) -> dict[str, None | float | int | str]:
         attribute_dict = {
             'well_radius': self.__well_radius,

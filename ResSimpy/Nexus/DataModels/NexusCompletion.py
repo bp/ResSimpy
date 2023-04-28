@@ -201,6 +201,94 @@ class NexusCompletion(Completion):
     def kh_mult(self):
         return self.__kh_mult
 
+    @measured_depth.setter
+    def measured_depth(self, value):
+        self.__measured_depth = value
+
+    @well_indices.setter
+    def well_indices(self, value):
+        self.__well_indices = value
+
+    @partial_perf.setter
+    def partial_perf(self, value):
+        self.__partial_perf = value
+
+    @cell_number.setter
+    def cell_number(self, value):
+        self.__cell_number = value
+
+    @bore_radius.setter
+    def bore_radius(self, value):
+        self.__bore_radius = value
+
+    @fracture_mult.setter
+    def fracture_mult(self, value):
+        self.__fracture_mult = value
+
+    @sector.setter
+    def sector(self, value):
+        self.__sector = value
+
+    @well_group.setter
+    def well_group(self, value):
+        self.__well_group = value
+
+    @zone.setter
+    def zone(self, value):
+        self.__zone = value
+
+    @angle_open_flow.setter
+    def angle_open_flow(self, value):
+        self.__angle_open_flow = value
+
+    @temperature.setter
+    def temperature(self, value):
+        self.__temperature = value
+
+    @flowsector.setter
+    def flowsector(self, value):
+        self.__flowsector = value
+
+    @parent_node.setter
+    def parent_node(self, value):
+        self.__parent_node = value
+
+    @mdcon.setter
+    def mdcon(self, value):
+        self.__mdcon = value
+
+    @pressure_avg_pattern.setter
+    def pressure_avg_pattern(self, value):
+        self.__pressure_avg_pattern = value
+
+    @length.setter
+    def length(self, value):
+        self.__length = value
+
+    @permeability.setter
+    def permeability(self, value):
+        self.__permeability = value
+
+    @polymer_bore_radius.setter
+    def polymer_bore_radius(self, value):
+        self.__polymer_bore_radius = value
+
+    @polymer_well_radius.setter
+    def polymer_well_radius(self, value):
+        self.__polymer_well_radius = value
+
+    @portype.setter
+    def portype(self, value):
+        self.__portype = value
+
+    @rel_perm_end_point.setter
+    def rel_perm_end_point(self, value):
+        self.__rel_perm_end_point = value
+
+    @kh_mult.setter
+    def kh_mult(self, value):
+        self.__kh_mult = value
+
     def to_dict(self) -> dict[str, None | float | int | str]:
         attribute_dict: dict[str, None | float | int | str] = {
             'measured_depth': self.__measured_depth,
@@ -339,3 +427,8 @@ class NexusCompletion(Completion):
             return cls(**input_dictionary)
         except AttributeError:
             raise AttributeError(f'Unexpected keyword found within {input_dictionary}')
+
+    def update(self, input_dictionary: InputDictionary) -> None:
+        for k, v in input_dictionary.items():
+            if v is not None:
+                setattr(self, k, v)

@@ -416,7 +416,7 @@ def test_add_completion():
     well = NexusWell(well_name='test well', completions=existing_completions,
                                     units=UnitSystem.METKGCM2)
     # Act
-    well.add_completion(date=new_date, perforation_properties=new_completion_props)
+    well.add_completion(date=new_date, completion_properties=new_completion_props)
     # Assert
     assert well == expected_well
 
@@ -451,6 +451,37 @@ def test_remove_completion():
     assert remove_well == expected_result
 
 
+def test_modify_completion():
+    # Arrange
+    existing_completions = [
+        NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+                       well_indices=1),
+        NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1),
+        NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+                       depth_to_bottom=1234),
+        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=3),
+        NexusCompletion(i=1, j=2, date='01/03/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+                       depth_to_bottom=1234),
+        ]
+
+    changed_completion = NexusCompletion(i=1, j=5, k=6, date='01/03/2023', status='ON', partial_perf=1, well_indices=0,
+                                         depth_to_top=1156, depth_to_bottom=1234, perm_thickness_ovr=10000.4)
+    expected_completions = existing_completions[:-1] + [changed_completion]
+    completion_id = existing_completions[-1].id
+    changes = {'i': 1, 'j': 5, 'k': 6, 'perm_thickness_ovr': 10000.4}
+
+    well = NexusWell(well_name='test well', completions=existing_completions, units=UnitSystem.METKGCM2)
+    expected_well = NexusWell(well_name='test well', completions=expected_completions, units=UnitSystem.METKGCM2)
+
+    # Act
+    well.modify_completion(new_completion_properties=changes, completion_to_modify=completion_id)
+
+    # Assert
+    assert well.completions[-1] == changed_completion
+    # check the id is still the same:
+    assert well.find_completion(NexusCompletion(i=1, j=5, k=6, date='01/03/2023', status='ON', partial_perf=1, well_indices=0,
+                                         depth_to_top=1156, depth_to_bottom=1234, perm_thickness_ovr=10000.4)).id == completion_id
+
 def test_well_dates(mocker):
     # Arrange
     well_1_completions = [
@@ -479,7 +510,7 @@ def test_well_dates(mocker):
     assert result == expected_result
 
 
-def test_well_modify():
+def test_wells_modify():
     # Arrange
     well_1_completions = [
         NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
