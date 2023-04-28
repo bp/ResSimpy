@@ -154,6 +154,10 @@ class Completion(ABC):
     def status(self):
         return self.__status
 
+    @property
+    def id(self):
+        return self.__id
+
     def to_dict(self) -> dict[str, None | float | int | str]:
         attribute_dict = {
             'well_radius': self.__well_radius,

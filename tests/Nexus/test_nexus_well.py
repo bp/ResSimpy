@@ -440,18 +440,15 @@ def test_remove_completion():
     ]
     expected_result = NexusWell(well_name='test well', completions=expected_completions_after_removal,
                                 units=UnitSystem.METKGCM2)
-    perf_to_remove = {'date': '01/02/2023', 'i': 1, 'j': 2,}
+    perfs_to_remove = {'date': '01/02/2023', 'i': 1, 'j': 2,}
     remove_well = NexusWell(well_name='test well', completions=existing_completions,
                      units=UnitSystem.METKGCM2)
-    keep_perfs = NexusWell(well_name='test well', completions=existing_completions,
-                           units=UnitSystem.METKGCM2)
+
     # Act
-    remove_well.remove_completions(perforation_properties=perf_to_remove, remove_all_that_match=True)
-    keep_perfs.remove_completions(perforation_properties=perf_to_remove, remove_all_that_match=False)
+    comp_to_remove = remove_well.find_completions(perfs_to_remove)
+    remove_well.remove_completions(completions_to_remove=comp_to_remove)
     # Assert
     assert remove_well == expected_result
-    assert keep_perfs == NexusWell(well_name='test well', completions=existing_completions,
-                                   units=UnitSystem.METKGCM2)
 
 
 def test_well_dates(mocker):

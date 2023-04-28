@@ -1,6 +1,7 @@
 import warnings
 from dataclasses import dataclass
 from typing import Optional, Tuple, Sequence, Union, cast
+from uuid import UUID
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -139,29 +140,22 @@ class NexusWell(Well):
     def modify_completions(self) -> None:
         pass
 
-    def remove_completions(self, perforation_properties: NexusCompletion | NexusCompletion.InputDictionary,
-                           remove_all_that_match: bool = False,
-                           ) -> None:
-        # TODO improve comparison of dates with datetime libs
-        """ Removes perforation from the completions list in the well that match all the properties in the
-        provided dictionary, does not write out to model yet.
-        Args:
-            perforation_properties (dict[str, str | float | int]): dictionary containing key value pairs for
-            the properties to match
-            remove_all_that_match (bool): If True removes all the perforations that match the perforation_properties
-            dictionary. Otherwise if multiple perforations match it will not remove any completions.
-        """
+    def remove_completion(self, completion_to_remove: NexusCompletion | UUID) -> None:
+        if isinstance(completion_to_remove, NexusCompletion):
+            completion_to_remove = self.find_completion(completion_to_remove)
+            completion_to_remove = completion_to_remove.id
+        completion_index_to_remove = [x.id for x in self.__completions].index(completion_to_remove)
+        removed_completion = self.__completions.pop(completion_index_to_remove)
+        print(f'Removed completion: {removed_completion}')
 
-        matching_completions = self.find_completions(perforation_properties)
-        if remove_all_that_match:
-            for completion in matching_completions:
-                self.__completions.remove(completion)
-                print(f"Removing completion {completion}")
-        else:
-            if len(matching_completions) == 1:
-                self.__completions.remove(matching_completions[0])
-            else:
-                warnings.warn("No completions removed - multiple completions matched the provided properties")
+    def remove_completions(self, completions_to_remove: list[NexusCompletion | UUID], ) -> None:
+        # TODO improve comparison of dates with datetime libs
+        """ Removes completions from a list of completions or completion IDs
+        Args:
+            completions_to_remove (list[NexusCompletion | UUID]): Completions to be removed
+        """
+        for completion in completions_to_remove:
+            self.remove_completion(completion)
 
     def __repr__(self):
         return generic_repr(self)
