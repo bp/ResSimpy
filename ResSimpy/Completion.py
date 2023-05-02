@@ -86,149 +86,149 @@ class Completion(ABC):
     def well_radius(self):
         return self.__well_radius
 
-    @property
-    def date(self):
-        return self.__date
-
-    @property
-    def i(self):
-        return self.__i
-
-    @property
-    def j(self):
-        return self.__j
-
-    @property
-    def k(self):
-        return self.__k
-
-    @property
-    def skin(self):
-        return self.__skin
-
-    @property
-    def depth(self):
-        return self.__depth
-
-    @property
-    def x(self):
-        return self.__x
-
-    @property
-    def y(self):
-        return self.__y
-
-    @property
-    def angle_a(self):
-        return self.__angle_a
-
-    @property
-    def angle_v(self):
-        return self.__angle_v
-
-    @property
-    def grid(self):
-        return self.__grid
-
-    @property
-    def depth_to_top(self):
-        return self.__depth_to_top
-
-    @property
-    def depth_to_bottom(self):
-        return self.__depth_to_bottom
-
-    @property
-    def perm_thickness_ovr(self):
-        return self.__perm_thickness_ovr
-
-    @property
-    def dfactor(self):
-        return self.__dfactor
-
-    @property
-    def rel_perm_method(self):
-        return self.__rel_perm_method
-
-    @property
-    def status(self):
-        return self.__status
-
-    @property
-    def id(self):
-        return self.__id
-
     @well_radius.setter
     def well_radius(self, value):
         self.__well_radius = value
+
+    @property
+    def date(self):
+        return self.__date
 
     @date.setter
     def date(self, value):
         self.__date = value
 
+    @property
+    def i(self):
+        return self.__i
+
     @i.setter
     def i(self, value):
         self.__i = value
+
+    @property
+    def j(self):
+        return self.__j
 
     @j.setter
     def j(self, value):
         self.__j = value
 
+    @property
+    def k(self):
+        return self.__k
+
     @k.setter
     def k(self, value):
         self.__k = value
+
+    @property
+    def skin(self):
+        return self.__skin
 
     @skin.setter
     def skin(self, value):
         self.__skin = value
 
+    @property
+    def depth(self):
+        return self.__depth
+
     @depth.setter
     def depth(self, value):
         self.__depth = value
+
+    @property
+    def x(self):
+        return self.__x
 
     @x.setter
     def x(self, value):
         self.__x = value
 
+    @property
+    def y(self):
+        return self.__y
+
     @y.setter
     def y(self, value):
         self.__y = value
+
+    @property
+    def angle_a(self):
+        return self.__angle_a
 
     @angle_a.setter
     def angle_a(self, value):
         self.__angle_a = value
 
+    @property
+    def angle_v(self):
+        return self.__angle_v
+
     @angle_v.setter
     def angle_v(self, value):
         self.__angle_v = value
+
+    @property
+    def grid(self):
+        return self.__grid
 
     @grid.setter
     def grid(self, value):
         self.__grid = value
 
+    @property
+    def depth_to_top(self):
+        return self.__depth_to_top
+
     @depth_to_top.setter
     def depth_to_top(self, value):
         self.__depth_to_top = value
+
+    @property
+    def depth_to_bottom(self):
+        return self.__depth_to_bottom
 
     @depth_to_bottom.setter
     def depth_to_bottom(self, value):
         self.__depth_to_bottom = value
 
+    @property
+    def perm_thickness_ovr(self):
+        return self.__perm_thickness_ovr
+
     @perm_thickness_ovr.setter
     def perm_thickness_ovr(self, value):
         self.__perm_thickness_ovr = value
+
+    @property
+    def dfactor(self):
+        return self.__dfactor
 
     @dfactor.setter
     def dfactor(self, value):
         self.__dfactor = value
 
+    @property
+    def rel_perm_method(self):
+        return self.__rel_perm_method
+
     @rel_perm_method.setter
     def rel_perm_method(self, value):
         self.__rel_perm_method = value
 
+    @property
+    def status(self):
+        return self.__status
+
     @status.setter
     def status(self, value):
         self.__status = value
+
+    @property
+    def id(self):
+        return self.__id
 
     def to_dict(self) -> dict[str, None | float | int | str]:
         attribute_dict = {
