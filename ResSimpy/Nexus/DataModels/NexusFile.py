@@ -200,13 +200,26 @@ class NexusFile:
 
         return from_list, to_list
 
-    def iterate_line(self, current_read_index: int = 0, max_depth=None) \
-            -> Generator[str, None, None]:
+    @dataclass
+    class FileIndex:
+        index: int
+        # end_index: int
+
+    def iterate_line(self, file_index: Optional[FileIndex] = None, max_depth: Optional[int] = None,
+                     parent: Optional[NexusFile] = None) -> Generator[str, None, None]:
         """Generator object for iterating over a list of strings with nested NexusFile objects in them
 
         Yields:
             str: sequential line from the file.
         """
+
+        if file_index is None:
+            file_index = NexusFile.FileIndex(index=0)
+        if parent is None:
+            parent = self
+
+        parent.line_locations += [(file_index.index, self.file_id)]
+        print(f'starting current read {file_index.index}')
         depth: int = 0
         if max_depth is not None:
             depth = max_depth
@@ -214,18 +227,22 @@ class NexusFile:
             if isinstance(row, NexusFile):
                 if (max_depth is None or depth > 0) and row.file_content_as_list is not None:
                     level_down_max_depth = None if max_depth is None else depth - 1
-                    self.line_locations += [(current_read_index + index, row.file_id)]
-                    yield from row.iterate_line(current_read_index=current_read_index + index,
-                                                max_depth=level_down_max_depth)
+
+                    print(f'{index=} and {file_index.index=}')
+                    yield from row.iterate_line(file_index=file_index, max_depth=level_down_max_depth,
+                                                parent=parent)
+                    parent.line_locations += [(file_index.index, self.file_id)]
                 else:
                     continue
             else:
+                file_index.index += 1
+                print(f'{index=} and {file_index.index=}')
                 yield row
 
     def get_flat_list_str_file(self) -> list[str]:
         if self.file_content_as_list is None:
             raise ValueError(f'No file content found for {self.location}')
-        flat_list = [x for x in self.iterate_line(current_read_index=0)]
+        flat_list = [x for x in self.iterate_line(file_index=None)]
         return flat_list
 
     def get_flat_list_str_until_file(self, start_line_index: int) -> tuple[list[str], Optional[NexusFile]]:

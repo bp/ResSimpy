@@ -175,21 +175,30 @@ def test_generate_file_include_structure_origin_path(mocker):
 
 def test_iterate_line(mocker):
     # Arrange
-    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1','uuid2'])
+    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'parent_file'])
 
-    expected_flat_list = ['fcs_file content', 'hello', 'world', 'footer']
-
+    expected_flat_list = ['fcs_file content', 'hello', 'world', 'extra', 'footer',  'second', 'includefile']
+    '''
+    ['fcs_file content',
+    'hello', 'world', 'extra' 1 - 3
+     'footer',                  4
+     'second', 'includefile'    5 - 6
+     ]
+    '''
     include_file = NexusFile(location='inc_file1.inc', includes=[], origin='test_file.dat',
-                             includes_objects=None, file_content_as_list=['hello', 'world'])
-    nested_list: list[Union[str, NexusFile]] = ['fcs_file content', include_file, 'footer']
+                             includes_objects=None, file_content_as_list=['hello', 'world', 'extra'])
+    include_file_2 = NexusFile(location='inc_file2.inc', includes=[], origin='test_file.dat',
+                             includes_objects=None, file_content_as_list=['second', 'includefile'])
+    nested_list: list[Union[str, NexusFile]] = ['fcs_file content', include_file, 'footer', include_file_2]
+
     nexus_file = NexusFile(location='test_file.dat', includes=['inc_file1.inc'], origin=None,
                            includes_objects=[include_file], file_content_as_list=nested_list)
 
-    expected_line_locations = [(1, 'uuid1')]
+    expected_line_locations = [(0, 'parent_file'), (1, 'uuid1'), (4, 'parent_file'), (5, 'uuid2'), (7, 'parent_file')]
 
     # Act
     store_list = []
-    for line in nexus_file.iterate_line(current_read_index=0):
+    for line in nexus_file.iterate_line(file_index=None):
         store_list.append(line)
 
     # Assert
@@ -215,7 +224,7 @@ def test_iterate_line_nested(max_depth, expected_results):
 
     # Act
     store_results = []
-    for line in nexus_file.iterate_line(max_depth=max_depth, current_read_index=0):
+    for line in nexus_file.iterate_line(max_depth=max_depth):
         store_results.append(line)
     # Assert
     assert store_results == expected_results
@@ -333,7 +342,7 @@ def test_generate_file_include_structure_skip_array(mocker, test_file_contents, 
 )
 def test_file_object_locations(mocker, test_file_contents, expected_results):
     # Arrange
-    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2'])
+    mocker.patch.object(uuid, 'uuid4', side_effect=['file_uuid', 'uuid1', 'uuid2'])
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
