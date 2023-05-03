@@ -1,8 +1,11 @@
 import os
+import uuid
 from typing import Union
 
 import pytest
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.load_wells import load_wells
 
 from tests.multifile_mocker import mock_multiple_files
 
@@ -208,7 +211,7 @@ def test_iterate_line_nested(max_depth, expected_results):
 
     # Act
     store_results = []
-    for line in NexusFile.iterate_line(nexus_file.file_content_as_list, max_depth=max_depth):
+    for line in nexus_file.iterate_line(max_depth=max_depth, current_read_index=0):
         store_results.append(line)
     # Assert
     assert store_results == expected_results
@@ -313,3 +316,34 @@ def test_generate_file_include_structure_skip_array(mocker, test_file_contents, 
     value = nexus_file.get_token_value_nexus_file(token='Value', token_line=token_line, ignore_values=['INCLUDE'])
     # Assert
     assert value == expected_result
+
+
+@pytest.mark.parametrize("test_file_contents, expected_results",
+[('''       WELLSPEC DEV1
+       IW JW L RADW
+       1  2  3  4.5
+       6 7 8   9.11''',
+       {'uuid1': 2,
+        'uuid2': 3}),
+        ]
+)
+def test_file_object_locations(mocker, test_file_contents, expected_results):
+    # Arrange
+    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2'])
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'wells.dat': test_file_contents,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    wells_file = NexusFile.generate_file_include_structure(file_path='wells.dat', skip_arrays=True,)
+
+
+    # Act
+    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH)
+    result = wells_file.object_locations
+
+    # Assert
+    assert result == expected_results

@@ -1,6 +1,7 @@
 from typing import Optional
 
 import ResSimpy.Nexus.nexus_file_operations as nfo
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
@@ -9,10 +10,10 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
 
 
-def load_wells(wellspec_file_path: str, start_date: str, default_units: UnitSystem) -> list[NexusWell]:
+def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem) -> list[NexusWell]:
     """Loads a list of Nexus Well instances and populates it with the wells completions over time from a wells file
     Args:
-        wellspec_file_path (str): file path to the wellspec file to read.
+        nexus_file (NexusFile): NexusFile containing the wellspec files.
         start_date (str): starting date of the wellspec file as a string.
         default_units (UnitSystem): default units to use if no units are found.
     Raises:
@@ -24,7 +25,7 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: UnitSyst
         list[NexusWell]: list of Nexus well classes contained within a wellspec file.
     """
 
-    file_as_list = nfo.load_file_as_list(wellspec_file_path)
+    file_as_list = nexus_file.get_flat_list_str_file()
     well_name: Optional[str] = None
     wellspec_file_units: Optional[UnitSystem] = None
 
@@ -104,13 +105,13 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: UnitSyst
         'PARENT': parent_node, 'MDCON': mdcon, 'IPTN': pressure_avg_pattern, 'LENGTH': length, 'K': permeability,
         'ND': non_darcy_model, 'DZ': comp_dz, 'LAYER': layer_assignment, 'RADBP': polymer_bore_radius,
         'RADWP': polymer_well_radius, 'KHMULT': kh_mult
-    }
+        }
     end_point_scaling_header_values: dict[str, None | int | float | str] = {
         'SWL': swl, 'SWR': swr, 'SWU': swu, 'SGL': sgl, 'SGR': sgr, 'SGU': sgu,
         'SWRO': swro, 'SGRO': sgro, 'SGRW': sgrw, 'KRW_SWRO': krw_swro, 'KRW_SWU': krw_swu, 'KRG_SGRO': krg_sgro,
         'KRG_SGU': krg_sgu, 'KRO_SWL': kro_swl, 'KRO_SWR': kro_swr, 'KRO_SGL': kro_sgl, 'KRO_SGR': kro_sgr,
         'KRW_SGL': krw_sgl, 'KRW_SGR': krw_sgr, 'KRG_SGRW': krg_sgrw, 'SGTR': sgtr, 'SOTR': sotr,
-    }
+        }
     # add end point scaling header to the header values we search for:
     header_values.update(end_point_scaling_header_values)
 
@@ -150,14 +151,14 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: UnitSyst
             continue
 
         if well_name is None:
-            raise ValueError(f"No wells found in file: {wellspec_file_path}")
+            raise ValueError(f"No wells found in file: {nexus_file.location}")
 
         if wellspec_found:
             if current_date is None:
                 current_date = start_date
             # Load in each line of the table
             completions = __load_wellspec_table_completions(
-                file_as_list, header_index, header_values, headers, current_date, end_point_scaling_header_values)
+                nexus_file, header_index, header_values, headers, current_date, end_point_scaling_header_values)
 
             if wellspec_file_units is None:
                 wellspec_file_units = default_units
@@ -172,7 +173,7 @@ def load_wells(wellspec_file_path: str, start_date: str, default_units: UnitSyst
     return wells
 
 
-def __load_wellspec_table_completions(file_as_list: list[str], header_index: int,
+def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
                                       header_values: dict[str, None | int | float | str],
                                       headers: list[str], start_date: str,
                                       end_point_scaling_header_values: dict[str, None | int | float | str],
@@ -181,7 +182,6 @@ def __load_wellspec_table_completions(file_as_list: list[str], header_index: int
         Loads in the next available completions following a WELLSPEC keyword and a header line.
 
     Args:
-        file_as_list (list[str]): File represented as a list of strings
         header_index (int): index number of the header in the file as list parameter
         header_values (dict[str, Union[Optional[int], Optional[float], Optional[str]]]): dictionary of column \
             headings to populate from the table
@@ -205,8 +205,9 @@ def __load_wellspec_table_completions(file_as_list: list[str], header_index: int
         return None if value is None else int(value)
 
     completions: list[NexusCompletion] = []
+    file_as_list: list[str] = nexus_file.get_flat_list_str_file()
 
-    for line in file_as_list[header_index + 1:]:
+    for index, line in enumerate(file_as_list[header_index + 1:]):
         # check for end of table lines:
         # TODO update with a more robust table end checker function
         end_of_table = nfo.nexus_token_found(line, WELLS_KEYWORDS)
@@ -270,7 +271,9 @@ def __load_wellspec_table_completions(file_as_list: list[str], header_index: int
             rel_perm_end_point=new_rel_perm_end_point,
             date=start_date,
             kh_mult=convert_header_value_float('KHMULT')
-        )
+            )
+
+        nexus_file.update_object_locations(new_completion.id, index + header_index + 1)
 
         completions.append(new_completion)
 

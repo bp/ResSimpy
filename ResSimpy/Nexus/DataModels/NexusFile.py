@@ -2,13 +2,15 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 import re
 from typing import Optional, Union, Generator
+from uuid import UUID
 
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import warnings
 
 from ResSimpy.Grid import VariableEntry
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_OPERATION_KEYWORDS, GRID_ARRAY_FORMAT_KEYWORDS
-from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_nexus_file, get_empty_list_str_nexus_file
+from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_nexus_file, get_empty_list_str_nexus_file, \
+    get_empty_dict_uuid_int
 
 
 @dataclass(kw_only=True, repr=True)
@@ -27,6 +29,8 @@ class NexusFile:
     includes_objects: Optional[list[NexusFile]] = field(default_factory=get_empty_list_nexus_file, repr=False)
     file_content_as_list: Optional[list[Union[str, NexusFile]]] = field(default_factory=get_empty_list_str_nexus_file,
                                                                         repr=False)
+    object_locations: Optional[dict[UUID, int]] = None
+    line_locations: list[tuple[int, NexusFile]] = None
 
     def __init__(self, location: Optional[str] = None,
                  includes: Optional[list[str]] = None,
@@ -40,6 +44,10 @@ class NexusFile:
             if includes_objects is None else includes_objects
         self.file_content_as_list: Optional[list[Union[str, NexusFile]]] = get_empty_list_str_nexus_file() \
             if file_content_as_list is None else file_content_as_list
+        if self.object_locations is None:
+            self.object_locations: dict[UUID, int] = get_empty_dict_uuid_int()
+        if self.line_locations is None:
+            self.line_locations: list[tuple[int, NexusFile]] = []
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True,
@@ -164,7 +172,7 @@ class NexusFile:
             origin=origin,
             includes_objects=includes_objects,
             file_content_as_list=modified_file_as_list,
-        )
+            )
 
         return nexus_file_class
 
@@ -189,23 +197,23 @@ class NexusFile:
 
         return from_list, to_list
 
-    @staticmethod
-    def iterate_line(file_content_as_list: list[Union[str, NexusFile]], max_depth=None) \
+    def iterate_line(self, current_read_index: int, max_depth=None) \
             -> Generator[str, None, None]:
         """Generator object for iterating over a list of strings with nested NexusFile objects in them
-        Usage Example: for line in NexusFile.iterate_line(nexus_file.file_content_as_list):
 
         Yields:
             str: sequential line from the file.
         """
+        self.line_locations += (current_read_index, self)
         depth: int = 0
         if max_depth is not None:
             depth = max_depth
-        for row in file_content_as_list:
+        for index, row in enumerate(self.file_content_as_list):
             if isinstance(row, NexusFile):
                 if (max_depth is None or depth > 0) and row.file_content_as_list is not None:
                     level_down_max_depth = None if max_depth is None else depth - 1
-                    yield from NexusFile.iterate_line(row.file_content_as_list, max_depth=level_down_max_depth)
+                    yield from row.iterate_line(current_read_index=current_read_index + index,
+                                                max_depth=level_down_max_depth)
                 else:
                     continue
             else:
@@ -214,7 +222,7 @@ class NexusFile:
     def get_flat_list_str_file(self) -> list[str]:
         if self.file_content_as_list is None:
             raise ValueError(f'No file content found for {self.location}')
-        flat_list = [x for x in self.iterate_line(self.file_content_as_list)]
+        flat_list = [x for x in self.iterate_line(current_read_index=0)]
         return flat_list
 
     def get_flat_list_str_until_file(self, start_line_index: int) -> tuple[list[str], Optional[NexusFile]]:
@@ -313,3 +321,6 @@ class NexusFile:
             raise ValueError(f'{search_string=} was not class or subclass of type NexusFile and not a string.')
         value = self.get_next_value_nexus_file(line_index, search_string, ignore_values, replace_with)
         return value
+
+    def update_object_locations(self, uuid: UUID, line_index: int):
+        self.object_locations[uuid] = line_index
