@@ -197,7 +197,7 @@ class NexusFile:
 
         return from_list, to_list
 
-    def iterate_line(self, current_read_index: int, max_depth=None) \
+    def iterate_line(self, current_read_index: int = 0, max_depth=None) \
             -> Generator[str, None, None]:
         """Generator object for iterating over a list of strings with nested NexusFile objects in them
 

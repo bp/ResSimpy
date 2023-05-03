@@ -185,7 +185,7 @@ def test_iterate_line():
 
     # Act
     store_list = []
-    for line in NexusFile.iterate_line(nexus_file.file_content_as_list):
+    for line in nexus_file.iterate_line(current_read_index=0):
         store_list.append(line)
 
     # Assert
