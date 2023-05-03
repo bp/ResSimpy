@@ -1055,5 +1055,10 @@ def correct_datatypes(value: None | int | float | str, dtype: type,
             return None
         case 'NONE':
             return None
+        case 'OFF':
+            if dtype == str:
+                return 'OFF'
+            else:
+                return None
         case _:
             return dtype(value)
