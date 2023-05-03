@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import uuid
 from dataclasses import dataclass, field
 import re
 from typing import Optional, Union, Generator
@@ -48,6 +50,7 @@ class NexusFile:
             self.object_locations: dict[UUID, int] = get_empty_dict_uuid_int()
         if self.line_locations is None:
             self.line_locations: list[tuple[int, NexusFile]] = []
+        self.file_id = uuid.uuid4()
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True,
@@ -204,7 +207,6 @@ class NexusFile:
         Yields:
             str: sequential line from the file.
         """
-        self.line_locations += (current_read_index, self)
         depth: int = 0
         if max_depth is not None:
             depth = max_depth
@@ -212,6 +214,7 @@ class NexusFile:
             if isinstance(row, NexusFile):
                 if (max_depth is None or depth > 0) and row.file_content_as_list is not None:
                     level_down_max_depth = None if max_depth is None else depth - 1
+                    self.line_locations += [(current_read_index + index, row.file_id)]
                     yield from row.iterate_line(current_read_index=current_read_index + index,
                                                 max_depth=level_down_max_depth)
                 else:

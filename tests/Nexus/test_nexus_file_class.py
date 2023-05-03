@@ -173,8 +173,10 @@ def test_generate_file_include_structure_origin_path(mocker):
     assert nexus_file == expected_nexus_file
 
 
-def test_iterate_line():
+def test_iterate_line(mocker):
     # Arrange
+    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1','uuid2'])
+
     expected_flat_list = ['fcs_file content', 'hello', 'world', 'footer']
 
     include_file = NexusFile(location='inc_file1.inc', includes=[], origin='test_file.dat',
@@ -183,6 +185,8 @@ def test_iterate_line():
     nexus_file = NexusFile(location='test_file.dat', includes=['inc_file1.inc'], origin=None,
                            includes_objects=[include_file], file_content_as_list=nested_list)
 
+    expected_line_locations = [(1, 'uuid1')]
+
     # Act
     store_list = []
     for line in nexus_file.iterate_line(current_read_index=0):
@@ -190,7 +194,7 @@ def test_iterate_line():
 
     # Assert
     assert store_list == expected_flat_list
-
+    assert nexus_file.line_locations == expected_line_locations
 
 @pytest.mark.parametrize("max_depth, expected_results", [
     (0, ['fcs_file content', 'footer']),
