@@ -16,6 +16,9 @@ class NexusWell(Well):
         self.__completions = completions
         super().__init__(well_name=well_name, completions=completions, units=units)
 
+    def __repr__(self):
+        return generic_repr(self)
+
     @property
     def perforations(self) -> Sequence[NexusCompletion]:
         """Returns a list of all of the perforations for the well"""
@@ -192,6 +195,3 @@ class NexusWell(Well):
         """
         for completion in completions_to_remove:
             self.remove_completion(completion)
-
-    def __repr__(self):
-        return generic_repr(self)
