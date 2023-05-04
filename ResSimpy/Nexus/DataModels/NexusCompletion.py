@@ -105,201 +105,101 @@ class NexusCompletion(Completion):
     def measured_depth(self):
         return self.__measured_depth
 
-    @measured_depth.setter
-    def measured_depth(self, value):
-        self.__measured_depth = value
-
     @property
     def well_indices(self):
         return self.__well_indices
-
-    @well_indices.setter
-    def well_indices(self, value):
-        self.__well_indices = value
 
     @property
     def partial_perf(self):
         return self.__partial_perf
 
-    @partial_perf.setter
-    def partial_perf(self, value):
-        self.__partial_perf = value
-
     @property
     def cell_number(self):
         return self.__cell_number
-
-    @cell_number.setter
-    def cell_number(self, value):
-        self.__cell_number = value
 
     @property
     def bore_radius(self):
         return self.__bore_radius
 
-    @bore_radius.setter
-    def bore_radius(self, value):
-        self.__bore_radius = value
-
     @property
     def portype(self):
         return self.__portype
-
-    @portype.setter
-    def portype(self, value):
-        self.__portype = value
 
     @property
     def fracture_mult(self):
         return self.__fracture_mult
 
-    @fracture_mult.setter
-    def fracture_mult(self, value):
-        self.__fracture_mult = value
-
     @property
     def sector(self):
         return self.__sector
-
-    @sector.setter
-    def sector(self, value):
-        self.__sector = value
 
     @property
     def well_group(self):
         return self.__well_group
 
-    @well_group.setter
-    def well_group(self, value):
-        self.__well_group = value
-
     @property
     def zone(self):
         return self.__zone
-
-    @zone.setter
-    def zone(self, value):
-        self.__zone = value
 
     @property
     def angle_open_flow(self):
         return self.__angle_open_flow
 
-    @angle_open_flow.setter
-    def angle_open_flow(self, value):
-        self.__angle_open_flow = value
-
     @property
     def temperature(self):
         return self.__temperature
-
-    @temperature.setter
-    def temperature(self, value):
-        self.__temperature = value
 
     @property
     def flowsector(self):
         return self.__flowsector
 
-    @flowsector.setter
-    def flowsector(self, value):
-        self.__flowsector = value
-
     @property
     def parent_node(self):
         return self.__parent_node
-
-    @parent_node.setter
-    def parent_node(self, value):
-        self.__parent_node = value
 
     @property
     def mdcon(self):
         return self.__mdcon
 
-    @mdcon.setter
-    def mdcon(self, value):
-        self.__mdcon = value
-
     @property
     def pressure_avg_pattern(self):
         return self.__pressure_avg_pattern
-
-    @pressure_avg_pattern.setter
-    def pressure_avg_pattern(self, value):
-        self.__pressure_avg_pattern = value
 
     @property
     def length(self):
         return self.__length
 
-    @length.setter
-    def length(self, value):
-        self.__length = value
-
     @property
     def permeability(self):
         return self.__permeability
-
-    @permeability.setter
-    def permeability(self, value):
-        self.__permeability = value
 
     @property
     def non_darcy_model(self):
         return self.__non_darcy_model
 
-    @non_darcy_model.setter
-    def non_darcy_model(self, value):
-        self.__non_darcy_model = value
-
     @property
     def comp_dz(self):
         return self.__comp_dz
-
-    @comp_dz.setter
-    def comp_dz(self, value):
-        self.__comp_dz = value
 
     @property
     def layer_assignment(self):
         return self.__layer_assignment
 
-    @layer_assignment.setter
-    def layer_assignment(self, value):
-        self.__layer_assignment = value
-
     @property
     def polymer_bore_radius(self):
         return self.__polymer_bore_radius
-
-    @polymer_bore_radius.setter
-    def polymer_bore_radius(self, value):
-        self.__polymer_bore_radius = value
 
     @property
     def polymer_well_radius(self):
         return self.__polymer_well_radius
 
-    @polymer_well_radius.setter
-    def polymer_well_radius(self, value):
-        self.__polymer_well_radius = value
-
     @property
     def rel_perm_end_point(self):
         return self.__rel_perm_end_point
 
-    @rel_perm_end_point.setter
-    def rel_perm_end_point(self, value):
-        self.__rel_perm_end_point = value
-
     @property
     def kh_mult(self):
         return self.__kh_mult
-
-    @kh_mult.setter
-    def kh_mult(self, value):
-        self.__kh_mult = value
 
     def to_dict(self) -> dict[str, None | float | int | str]:
         attribute_dict: dict[str, None | float | int | str] = {
@@ -442,5 +342,9 @@ class NexusCompletion(Completion):
 
     def update(self, input_dictionary: InputDictionary) -> None:
         for k, v in input_dictionary.items():
-            if v is not None:
-                setattr(self, k, v)
+            if v is None:
+                continue
+            if hasattr(self, '_NexusCompletion__' + k):
+                setattr(self, '_NexusCompletion__' + k, v)
+            elif hasattr(super(), '_Completion__' + k):
+                setattr(self, '_Completion__' + k, v)

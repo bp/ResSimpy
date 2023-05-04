@@ -464,11 +464,11 @@ def test_modify_completion():
                        depth_to_bottom=1234),
         ]
 
-    changed_completion = NexusCompletion(i=1, j=5, k=6, date='01/03/2023', status='ON', partial_perf=1, well_indices=0,
+    changed_completion = NexusCompletion(i=1, j=5, k=6, date='01/03/2023', status='ON', partial_perf=0.5, well_indices=0,
                                          depth_to_top=1156, depth_to_bottom=1234, perm_thickness_ovr=10000.4)
     expected_completions = existing_completions[:-1] + [changed_completion]
     completion_id = existing_completions[-1].id
-    changes = {'i': 1, 'j': 5, 'k': 6, 'perm_thickness_ovr': 10000.4}
+    changes = {'i': 1, 'j': 5, 'k': 6, 'perm_thickness_ovr': 10000.4, 'partial_perf': 0.5}
 
     well = NexusWell(well_name='test well', completions=existing_completions, units=UnitSystem.METKGCM2)
     expected_well = NexusWell(well_name='test well', completions=expected_completions, units=UnitSystem.METKGCM2)
@@ -479,7 +479,7 @@ def test_modify_completion():
     # Assert
     assert well.completions[-1] == changed_completion
     # check the id is still the same:
-    assert well.find_completion(NexusCompletion(i=1, j=5, k=6, date='01/03/2023', status='ON', partial_perf=1, well_indices=0,
+    assert well.find_completion(NexusCompletion(i=1, j=5, k=6, date='01/03/2023', status='ON', partial_perf=0.5, well_indices=0,
                                          depth_to_top=1156, depth_to_bottom=1234, perm_thickness_ovr=10000.4)).id == completion_id
 
 def test_well_dates(mocker):
