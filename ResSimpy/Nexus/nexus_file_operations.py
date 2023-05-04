@@ -1030,7 +1030,8 @@ def clear_constraints(token_value, constraint) -> dict[str, None]:
 
 def correct_datatypes(value: None | int | float | str, dtype: type,
                       na_to_none: bool = True) -> None | int | str | float:
-    """ takes a value and returns the value but converted to specified type. if na_to_none True then
+    """ takes a value and returns the value but converted to specified type. if na_to_none True then will
+        reduce a lot of values to none.
 
     Args:
         value (None | int | float | str): value to convert
@@ -1055,5 +1056,10 @@ def correct_datatypes(value: None | int | float | str, dtype: type,
             return None
         case 'NONE':
             return None
+        case 'OFF':
+            if dtype == str:
+                return 'OFF'
+            else:
+                return None
         case _:
             return dtype(value)

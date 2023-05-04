@@ -499,8 +499,15 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
      {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'active_node': False,
       'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
       )),
+(''' 
+          CONSTRAINTS
+      well1	 DPBHAVG 1024.2  DPBHMX OFF  GORLIM NONE EXPONENT 9999
+      ENDCONSTRAINTS
+      ''',
+      ({'date': '01/01/2019', 'name': 'well1', 'max_avg_comp_dp': 1024.2, 'gor_limit_exponent': 9999.0, 'unit_system': UnitSystem.ENGLISH},
+        )),
     ], ids=['basic_test', 'Change in Time', 'more Keywords', 'constraint table', 'multiple constraints on same well',
-    'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword'])
+    'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword', 'GORLIM_drawdowncards'])
 def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'

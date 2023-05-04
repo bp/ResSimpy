@@ -118,12 +118,16 @@ class NexusConstraint(Constraint):
     max_reverse_reservoir_liquid_rate: Optional[float] = None
     max_reverse_reservoir_total_fluids_rate: Optional[float] = None
     max_reverse_reservoir_hc_rate: Optional[float] = None
+    max_avg_comp_dp: Optional[float] = None
+    max_comp_dp: Optional[float] = None
+
     min_pressure: Optional[float] = None
     max_pressure: Optional[float] = None
     max_wag_water_pressure: Optional[float] = None
     max_wag_gas_pressure: Optional[float] = None
     bottom_hole_pressure: Optional[float] = None
     tubing_head_pressure: Optional[float] = None
+
     min_surface_oil_rate: Optional[float] = None
     min_surface_gas_rate: Optional[float] = None
     min_surface_water_rate: Optional[float] = None
@@ -155,6 +159,9 @@ class NexusConstraint(Constraint):
     max_gor_plug_plus: Optional[float] = None
     max_gor_perf: Optional[float] = None
     max_gor_perfplus: Optional[float] = None
+    gor_limit: Optional[float] = None
+    gor_limit_exponent: Optional[float] = None
+    gor_limit_frequency: Optional[float] = None
     max_lgr: Optional[float] = None
     max_lgr_plug: Optional[float] = None
     max_lgr_plug_plus: Optional[float] = None
@@ -201,7 +208,7 @@ class NexusConstraint(Constraint):
             'QWSMAX_MULT': ('use_qmult_qwater_surface_rate', bool),
             'QGSMAX_MULT': ('use_qmult_qgas_surface_rate', bool),
             'QLIQSMAX_MULT': ('use_qmult_qoilqwat_surface_rate', bool),
-        }
+            }
         nexus_mapping.update(NexusConstraint.get_limit_constraints_map())
         nexus_mapping.update(NexusConstraint.get_pressure_constraints_map())
         nexus_mapping.update(NexusConstraint.get_rate_constraints_map())
@@ -259,7 +266,9 @@ class NexusConstraint(Constraint):
             'QOIL': ('qmult_oil_rate', float),
             'QWATER': ('qmult_water_rate', float),
             'QGAS': ('qmult_gas_rate', float),
-        }
+            'DPBHAVG': ('max_avg_comp_dp', float),
+            'DPBHMX': ('max_comp_dp', float),
+            }
         return nexus_mapping
 
     @staticmethod
@@ -271,7 +280,7 @@ class NexusConstraint(Constraint):
             'PGMAX': ('max_wag_gas_pressure', float),
             'BHP': ('bottom_hole_pressure', float),
             'THP': ('tubing_head_pressure', float),
-        }
+            }
         return nexus_mapping
 
     @staticmethod
@@ -287,6 +296,9 @@ class NexusConstraint(Constraint):
             'WORPLUGPLUS': ('max_wor_plug_plus', float),
             'WORPERF': ('max_wor_perf', float),
             'WORPERFPLUS': ('max_wor_perfplus', float),
+            'GORLIM': ('gor_limit', float),
+            'EXPONENT': ('gor_limit_exponent', float),
+            'FREQUENCY': ('gor_limit_frequency', float),
             'GORMAX': ('max_gor', float),
             'GORPLUG': ('max_gor_plug', float),
             'GORPLUGPLUS': ('max_gor_plug_plus', float),
@@ -300,7 +312,7 @@ class NexusConstraint(Constraint):
             'CGLIM': ('max_cum_gas_prod', float),
             'CWLIM': ('max_cum_water_prod', float),
             'COLIM': ('max_cum_oil_prod', float),
-        }
+            }
         return nexus_mapping
 
     @staticmethod
@@ -316,7 +328,7 @@ class NexusConstraint(Constraint):
             'SPEED': ('pump_speed', float),
             'CHOKELIMIT': ('choke_limit', str),
             'POSITION': ('manifold_position', int),
-        }
+            }
         return nexus_mapping
 
     def to_dict(self, keys_in_nexus_style: bool = False) -> dict[str, None | str | int | float]:
