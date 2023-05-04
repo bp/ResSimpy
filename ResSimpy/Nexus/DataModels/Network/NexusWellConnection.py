@@ -152,7 +152,7 @@ class NexusWellConnection:
             'WIMULT': ('water_inj_mult', float),
             'PI': ('productivity_index', float),
             'VIPPI': ('vip_productivity_index', float),
-            'PIPHASE': ('productivity_index_phase', float),
+            'PIPHASE': ('productivity_index_phase', str),
             'D': ('d_factor', float),
             'ND': ('non_darcy_flow_model', str),
             'DPERF': ('non_darcy_flow_method', str),
@@ -165,7 +165,7 @@ class NexusWellConnection:
             'STATION': ('station', str),
             'ASSCDR': ('drill_queue', str),
             'BENEFIT': ('drill_order_benefit', float),
-        }
+            }
         return nexus_mapping
 
     def to_dict(self, keys_in_nexus_style: bool = False) -> dict[str, None | str | int | float]:
