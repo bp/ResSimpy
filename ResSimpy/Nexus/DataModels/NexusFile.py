@@ -219,7 +219,6 @@ class NexusFile:
             parent = self
 
         parent.line_locations += [(file_index.index, self.file_id)]
-        print(f'starting current read {file_index.index}')
         depth: int = 0
         if max_depth is not None:
             depth = max_depth
@@ -228,7 +227,6 @@ class NexusFile:
                 if (max_depth is None or depth > 0) and row.file_content_as_list is not None:
                     level_down_max_depth = None if max_depth is None else depth - 1
 
-                    print(f'{index=} and {file_index.index=}')
                     yield from row.iterate_line(file_index=file_index, max_depth=level_down_max_depth,
                                                 parent=parent)
                     parent.line_locations += [(file_index.index, self.file_id)]
@@ -236,7 +234,6 @@ class NexusFile:
                     continue
             else:
                 file_index.index += 1
-                print(f'{index=} and {file_index.index=}')
                 yield row
 
     def get_flat_list_str_file(self) -> list[str]:
