@@ -406,3 +406,4 @@ second_file INCLUDE inc_file2.inc continuation''')
     flat_file = nexus_file.get_flat_list_str_file()
     # Assert
     assert nexus_file == expected_nexus_file
+
