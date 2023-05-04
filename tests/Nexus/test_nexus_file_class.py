@@ -364,7 +364,9 @@ def test_file_object_locations(mocker, test_file_contents, expected_results):
 
 def test_line_locations_complex(mocker):
     # Arrange
-    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid_inc1', 'uuid_inc2', 'parent_file',])
+    # We need 2 lots of the mocked out uuid one for init of the expected files and one set for the try statement
+    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid_inc1', 'uuid_inc2', 'parent_file',
+                                                    'uuid_inc1', 'uuid_inc2', 'parent_file'])
 
     file_path = 'test_file_path.dat'
     test_file_contents = (
@@ -409,7 +411,10 @@ second_file INCLUDE inc_file2.inc continuation''')
 
 def test_line_locations_nested(mocker):
     # Arrange
-    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid_inc2', 'uuid_inc1', 'parent_file','uuid_inc2', 'uuid_inc1', 'parent_file'])
+    # We need 2 lots of the mocked out uuid one for init of the expected files and one set for the try statement
+
+    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid_inc2', 'uuid_inc1', 'parent_file',
+                                                    'uuid_inc2', 'uuid_inc1', 'parent_file'])
 
     file_path = 'test_file_path.dat'
     test_file_contents = (
