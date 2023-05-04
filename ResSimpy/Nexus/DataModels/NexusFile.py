@@ -11,8 +11,8 @@ import warnings
 
 from ResSimpy.Grid import VariableEntry
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_OPERATION_KEYWORDS, GRID_ARRAY_FORMAT_KEYWORDS
-from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_nexus_file, get_empty_list_str_nexus_file, \
-    get_empty_dict_uuid_int
+from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_nexus_file, \
+    get_empty_list_str_nexus_file, get_empty_dict_uuid_int
 
 
 @dataclass(kw_only=True, repr=True)
@@ -32,7 +32,7 @@ class NexusFile:
     file_content_as_list: Optional[list[Union[str, NexusFile]]] = field(default_factory=get_empty_list_str_nexus_file,
                                                                         repr=False)
     object_locations: Optional[dict[UUID, int]] = None
-    line_locations: list[tuple[int, NexusFile]] = None
+    line_locations: Optional[list[tuple[int, UUID]]] = None
 
     def __init__(self, location: Optional[str] = None,
                  includes: Optional[list[str]] = None,
@@ -49,7 +49,7 @@ class NexusFile:
         if self.object_locations is None:
             self.object_locations: dict[UUID, int] = get_empty_dict_uuid_int()
         if self.line_locations is None:
-            self.line_locations: list[tuple[int, NexusFile]] = []
+            self.line_locations = []
         self.file_id = uuid.uuid4()
 
     @classmethod
@@ -217,12 +217,17 @@ class NexusFile:
             file_index = NexusFile.FileIndex(index=0)
         if parent is None:
             parent = self
+        if parent.line_locations is None:
+            parent.line_locations = []
 
-        parent.line_locations += [(file_index.index, self.file_id)]
+        parent.line_locations.append((file_index.index, self.file_id))
         depth: int = 0
         if max_depth is not None:
             depth = max_depth
-        for index, row in enumerate(self.file_content_as_list):
+        if self.file_content_as_list is None:
+            warnings.warn(f'No file content found for file: {self.location}')
+            return
+        for row in self.file_content_as_list:
             if isinstance(row, NexusFile):
                 if (max_depth is None or depth > 0) and row.file_content_as_list is not None:
                     level_down_max_depth = None if max_depth is None else depth - 1
@@ -340,4 +345,6 @@ class NexusFile:
         return value
 
     def update_object_locations(self, uuid: UUID, line_index: int):
+        if self.object_locations is None:
+            self.object_locations: dict[UUID, int] = get_empty_dict_uuid_int()
         self.object_locations[uuid] = line_index

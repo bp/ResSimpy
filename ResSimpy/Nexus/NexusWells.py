@@ -5,6 +5,7 @@ import pandas as pd
 
 from ResSimpy.Enums.HowEnum import OperationEnum
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Wells import Wells
@@ -14,7 +15,7 @@ from ResSimpy.Nexus.load_wells import load_wells
 @dataclass(kw_only=True)
 class NexusWells(Wells):
     __wells: list[NexusWell] = field(default_factory=lambda: [])
-    wellspec_paths: list[str] = field(default_factory=lambda: [])
+    wellspec_files: list[NexusFile] = field(default_factory=lambda: [])
 
     def get_wells(self) -> Sequence[NexusWell]:
         return self.__wells
@@ -40,8 +41,8 @@ class NexusWells(Wells):
         df_store = df_store.dropna(axis=1, how='all')
         return df_store
 
-    def load_wells(self, well_file: str, start_date: str, default_units: UnitSystem) -> None:
-        new_wells = load_wells(wellspec_file_path=well_file, start_date=start_date, default_units=default_units)
+    def load_wells(self, well_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
+        new_wells = load_wells(nexus_file=well_file, start_date=start_date, default_units=default_units)
         self.__wells += new_wells
 
     def get_wells_overview(self) -> str:
