@@ -86,10 +86,6 @@ class Completion(ABC):
     def well_radius(self):
         return self.__well_radius
 
-    @well_radius.setter
-    def well_radius(self, value):
-        self.__well_radius = value
-
     @property
     def date(self):
         return self.__date
