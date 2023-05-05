@@ -87,7 +87,7 @@ class NexusSimulator(Simulator):
         self.__write_times: bool = write_times
         self.__manual_fcs_tidy_call: bool = manual_fcs_tidy_call
         self.__surface_file_path: Optional[str] = None
-        self.Wells: NexusWells = NexusWells()
+        self.Wells: NexusWells = NexusWells(self)
         self.__default_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
         # Model dynamic properties
         self.pvt_methods: dict[int, NexusPVT] = {}

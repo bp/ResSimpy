@@ -496,8 +496,12 @@ def test_get_previous_value_multiple_lines_specify_search_before(file, search_be
     ('KH \t NAME \t COLUMN1 \t   COLUMN2 COLUMN3 \n\n SOMETHING ELSe',
      0, ['KH', 'NAME', 'COLUMN1', 'COLUMN2', 'COLUMN3']),
     ('! comment first \n KH \t NAME \t COLUMN1 \t   COLUMN2 ! comment \n 10 well1 10 item',
-     1, ['KH', 'NAME', 'COLUMN1', 'COLUMN2'])
-], ids=['basic', 'additional column', 'comments'])
+     1, ['KH', 'NAME', 'COLUMN1', 'COLUMN2']),
+     ('well1\n jw  iw   l    RADB \n\n 1  2   3   1.5',
+     1, ['JW', 'IW', 'L', 'RADB']),
+    ('extra values first \n KH \t NAME \t COLUMN1 \t   COLUMN2 ! comment \n 10 well1 10 item',
+     1, ['KH', 'NAME', 'COLUMN1', 'COLUMN2']),
+], ids=['basic', 'additional column', 'comments', 'well headers', 'extra starting line'])
 def test_get_table_header(file_contents, expected_header_index, expected_header_result):
     # Arrange
     header_values = {
@@ -505,6 +509,10 @@ def test_get_table_header(file_contents, expected_header_index, expected_header_
         'NAME': 'Name',
         'COLUMN1': 'Column',
         'COLUMN2': 'Column',
+        'IW': 'iw',
+        'JW': 'jw',
+        'L': 'l',
+        'RADB': 'RADB',
     }
     file_as_list = file_contents.splitlines()
     # Act

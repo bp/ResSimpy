@@ -1,10 +1,12 @@
-from unittest.mock import PropertyMock, patch
+from unittest.mock import PropertyMock, patch, Mock
 import pytest
 from ResSimpy.Enums.HowEnum import OperationEnum
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from ResSimpy.Nexus.NexusWells import NexusWells
 
 
@@ -553,3 +555,44 @@ def test_wells_modify():
     assert wells.get_wells()[0].completions == expected_result[0].completions
 
 
+def test_add_completion_write(mocker):
+    '''TODO when properties arent present in existing table
+        TODO when wells don't have a completion in that date
+        TODO insert in middle of the file
+        TODO insert into include files
+        TODO insert into different wellspec methods
+    '''
+
+    # Arrange
+    file_as_list = ['well1', 'iw  jw   l    RADB', '1  2   3   1.5']
+    start_date = '01/01/2020'
+    add_perf = ['4 5 6 7.5']
+    expected_result = ['well1', 'iw  jw   l    RADB', '1  2   3   1.5'] + add_perf
+
+    open_mock = mocker.mock_open(read_data='')
+    mocker.patch("builtins.open", open_mock)
+    ls_dir = Mock(side_effect=lambda x: [])
+    mocker.patch('os.listdir', ls_dir)
+    fcs_file_exists = Mock(side_effect=lambda x: True)
+    mocker.patch('os.path.isfile', fcs_file_exists)
+
+    file = NexusFile(location='wells.dat', file_content_as_list=file_as_list, )
+
+    well = NexusWell(well_name='well1', completions=[NexusCompletion(date=start_date, i=1, j=2, k=3, bore_radius=1.5)],
+                     units=UnitSystem.ENGLISH)
+    mock_nexus_sim = NexusSimulator('/path/fcs_file.fcs')
+
+    mock_nexus_sim.fcs_file.well_files = {1: file}
+
+    # mock out open
+    wells_obj = NexusWells(mock_nexus_sim)
+    wells_obj.__setattr__('_NexusWells__wells', [well])
+
+    add_perf_dict = {'date': start_date, 'i': 4, 'j': 5, 'k': 6, 'bore_radius': 7.5}
+
+    # Act
+    wells_obj.add_completion(well_name='well1', completion_properties=add_perf_dict, )
+    result = file.file_content_as_list
+
+    # Assert
+    assert result == expected_result

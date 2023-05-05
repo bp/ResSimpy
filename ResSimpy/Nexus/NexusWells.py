@@ -1,21 +1,29 @@
+from __future__ import annotations
+import warnings
 from dataclasses import dataclass, field
-from typing import Sequence, Optional
+from typing import Sequence, Optional, TYPE_CHECKING
 
 import pandas as pd
 
 from ResSimpy.Enums.HowEnum import OperationEnum
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
-from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Wells import Wells
 from ResSimpy.Nexus.load_wells import load_wells
+import ResSimpy.Nexus.nexus_file_operations as nfo
+
+if TYPE_CHECKING:
+    from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
 
 @dataclass(kw_only=True)
 class NexusWells(Wells):
+    model: NexusSimulator
     __wells: list[NexusWell] = field(default_factory=lambda: [])
-    wellspec_files: list[NexusFile] = field(default_factory=lambda: [])
+
+    def __init__(self, model: NexusSimulator):
+        self.model = model
+        super().__init__()
 
     def get_wells(self) -> Sequence[NexusWell]:
         return self.__wells
@@ -41,9 +49,14 @@ class NexusWells(Wells):
         df_store = df_store.dropna(axis=1, how='all')
         return df_store
 
-    def load_wells(self, well_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
-        new_wells = load_wells(nexus_file=well_file, start_date=start_date, default_units=default_units)
-        self.__wells += new_wells
+    def load_wells(self, ) -> None:
+        for method_number, well_file in self.model.fcs_file.well_files.items():
+            if well_file.location is None:
+                warnings.warn(f'Well file location has not been found for {well_file}')
+                continue
+            new_wells = load_wells(nexus_file=well_file, start_date=self.model.start_date,
+                                   default_units=self.model.default_units)
+            self.__wells += new_wells
 
     def get_wells_overview(self) -> str:
         overview: str = ''
@@ -98,3 +111,23 @@ class NexusWells(Wells):
                 raise NotImplementedError('Modify in place not yet available. Please choose one of ADD/REMOVE')
             else:
                 raise ValueError('Please select one of the valid OperationEnum values: e.g. OperationEnum.ADD')
+
+    def add_completion(self, well_name: str, completion_properties: NexusCompletion.InputDictionary,
+                       ):
+        well = self.get_well(well_name)
+        new_completion = NexusCompletion.from_dict(completion_properties)
+        well.completions.append(new_completion)
+
+        wellspec_file = self.model.fcs_file.well_files[1]
+
+        file_content = wellspec_file.get_flat_list_str_file()
+        nexus_mapping = NexusCompletion.nexus_mapping()
+        keyword_map = {x: y[0] for x, y in nexus_mapping.items()}
+
+        # TODO Pass the right file_content based on the date/well
+        header_index, headers = nfo.get_table_header(file_as_list=file_content, header_values=keyword_map)
+
+        headers_as_common_attribute_names = [nexus_mapping[x.upper()][0] for x in headers]
+        new_completion_string = ' '.join([str(completion_properties[x]) for x in headers_as_common_attribute_names])
+
+        wellspec_file.file_content_as_list.append(new_completion_string)
