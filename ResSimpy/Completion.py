@@ -75,7 +75,6 @@ class Completion(ABC):
         self.__grid = grid
         self.__depth_to_top = depth_to_top
         self.__depth_to_bottom = depth_to_bottom
-
         self.__perm_thickness_ovr = perm_thickness_ovr
         self.__dfactor = dfactor
         self.__rel_perm_method = rel_perm_method
