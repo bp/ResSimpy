@@ -6,6 +6,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConne
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
 from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
 from ResSimpy.Nexus.DataModels.NexusSeparator import NexusSeparator
@@ -691,15 +692,19 @@ def test_get_wells(mocker: MockerFixture, fcs_file_contents: str):
     mock_load_wells = mocker.Mock(return_value=loaded_wells)
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
 
+    # NB file_content_as_list needs to be set as below due to the mocker open re-reading fcs contents
+    expected_well_file = NexusFile(location=os.path.join('path', 'my/wellspec/file.dat'),
+                                   includes=[], origin='path/nexus_run.fcs', file_content_as_list=
+                                   ['\n', '       WelLS sEt 1 my/wellspec/file.dat\n', '    '])
+
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
     result = simulation.Wells.get_wells()
 
-    expected_well_spec_file_path = os.path.join('path', 'my/wellspec/file.dat')
     # Assert
     assert result == loaded_wells
-    mock_load_wells.assert_called_once_with(wellspec_file_path=expected_well_spec_file_path,
+    mock_load_wells.assert_called_once_with(nexus_file=expected_well_file,
                                             default_units=UnitSystem.ENGLISH,
                                             start_date='')
 
@@ -762,15 +767,19 @@ def test_get_well(mocker: MockerFixture, fcs_file_contents: str):
     mock_load_wells = mocker.Mock(return_value=loaded_wells)
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
 
+    # NB file_content_as_list needs to be set as below due to the mocker open re-reading fcs contents
+    expected_well_file = NexusFile(location=os.path.join('path', 'my/wellspec/file.dat'),
+                                   includes=[], origin='path/nexus_run.fcs', file_content_as_list=
+                                   ['\n', '       WelLS set 1 my/wellspec/file.dat\n', '    '])
+
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
     result = simulation.Wells.get_well(well_name='WELL2')
 
-    expected_well_spec_file_path = os.path.join('path', 'my/wellspec/file.dat')
     # Assert
     assert result == loaded_wells[1]
-    mock_load_wells.assert_called_once_with(wellspec_file_path=expected_well_spec_file_path,
+    mock_load_wells.assert_called_once_with(nexus_file=expected_well_file,
                                             default_units=UnitSystem.ENGLISH,
                                             start_date='')
 

@@ -570,7 +570,7 @@ def check_for_and_populate_common_input_data(
         property_dict: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]]
         ) -> None:
     """Loop through lines of Nexus input file content looking for common input data, e.g.,
-    units such as ENGLISH or METRIC, temparure units such as FAHR or CELSIUS, DATEFORMAT, etc.,
+    units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
     as defined in Nexus manual. If any found, include in provided property_dict and return
 
     Args:

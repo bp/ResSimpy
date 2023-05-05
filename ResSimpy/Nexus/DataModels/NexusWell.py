@@ -1,8 +1,10 @@
 from dataclasses import dataclass
-from typing import Optional, Tuple, Sequence, Union
+from typing import Optional, Tuple, Sequence, Union, cast
+from uuid import UUID
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.Well import Well
 
 
@@ -13,6 +15,9 @@ class NexusWell(Well):
     def __init__(self, well_name: str, completions: list[NexusCompletion], units: UnitSystem):
         self.__completions = completions
         super().__init__(well_name=well_name, completions=completions, units=units)
+
+    def __repr__(self):
+        return generic_repr(self)
 
     @property
     def perforations(self) -> Sequence[NexusCompletion]:
@@ -87,3 +92,106 @@ class NexusWell(Well):
                 events.append((completion.date, (completion.depth_to_top, completion.depth_to_bottom)))
 
         return events
+
+    def add_completion(self, date: str, completion_properties: NexusCompletion.InputDictionary,
+                       completion_index: Optional[int] = None) -> None:
+        """ adds a perforation with the properties specified in completion_properties,
+            if index is none then adds it to the end of the perforation list.
+        Args:
+            date (str): date at which the perforation should be added
+            completion_properties (dict[str, str | float | int]):
+            completion_index (Optional[int]):
+        """
+        completion_properties['date'] = date
+        new_completion = NexusCompletion.from_dict(completion_properties)
+        if completion_index is None:
+            completion_index = len(self.__completions)
+        self.__completions.insert(completion_index, new_completion)
+
+    def find_completions(self, completion_properties: NexusCompletion.InputDictionary | NexusCompletion) -> \
+            list[NexusCompletion]:
+        """ returns a list of all completions that match the completion properties provided.
+
+        Args:
+            completion_properties (dict | NexusCompletion): keys as the attributes and values as the value to match \
+            from the well.
+
+        Returns:
+            list[NexusCompletion] that match the completion properties provided
+        """
+        matching_completions = []
+        if isinstance(completion_properties, NexusCompletion):
+            temp_perf_dict = {k: v for k, v in completion_properties.to_dict().items() if v is not None}
+            perf_props: NexusCompletion.InputDictionary = cast(NexusCompletion.InputDictionary, temp_perf_dict)
+        else:
+            perf_props = completion_properties
+        for i, perf in enumerate(self.__completions):
+            for prop, value in perf_props.items():
+                if getattr(perf, prop) == value:
+                    # go to the next perf if a value from the dictionary doesn't match
+                    continue
+                else:
+                    break
+            else:
+                # if all the conditions match then append the perf to completions
+                matching_completions.append(perf)
+        return matching_completions
+
+    def find_completion(self,
+                        completion_properties: NexusCompletion.InputDictionary | NexusCompletion, ) -> NexusCompletion:
+        """ Returns precisely one completion which matches all the properties provided.
+            If several completions match it raise a ValueError
+
+        Args:
+            completion_properties (dict | NexusCompletion):
+
+        Returns:
+            NexusCompletion that matches all completion properties provided.
+        """
+        matching_completions = self.find_completions(completion_properties)
+        if len(matching_completions) != 1:
+            raise ValueError(f'Could not find single unique completion that matches property provided. Instead found: '
+                             f'{len(matching_completions)} completions')
+        return matching_completions[0]
+
+    def get_completion_by_id(self, id: UUID) -> NexusCompletion:
+        """returns the completion that matches the id provided."""
+        for completion in self.__completions:
+            if completion.id == id:
+                return completion
+        raise ValueError('No completion found for id: {id}')
+
+    def modify_completion(self, new_completion_properties: NexusCompletion.InputDictionary,
+                          completion_to_modify: NexusCompletion | UUID,
+                          ) -> None:
+        if isinstance(completion_to_modify, NexusCompletion):
+            completion = self.find_completion(completion_to_modify)
+        else:
+            completion = self.get_completion_by_id(completion_to_modify)
+        completion.update(new_completion_properties)
+
+    def modify_completions(self, new_completion_properties: NexusCompletion.InputDictionary,
+                           completions_to_modify: list[NexusCompletion | UUID], ) -> None:
+        for completion in completions_to_modify:
+            if isinstance(completion, UUID):
+                modify_this_completion = self.get_completion_by_id(completion)
+                modify_this_completion.update(new_completion_properties)
+            else:
+                completion.update(new_completion_properties)
+
+    def remove_completion(self, completion_to_remove: NexusCompletion | UUID) -> None:
+        if isinstance(completion_to_remove, NexusCompletion):
+            completion_to_remove = self.find_completion(completion_to_remove)
+            completion_to_remove = completion_to_remove.id
+        completion_index_to_remove = [x.id for x in self.__completions].index(completion_to_remove)
+        removed_completion = self.__completions.pop(completion_index_to_remove)
+        print(f'Removed completion: {removed_completion}')
+
+    def remove_completions(self, completions_to_remove: Sequence[NexusCompletion | UUID], ) -> None:
+        # TODO improve comparison of dates with datetime libs
+        """ Removes completions from a list of completions or completion IDs
+        Args:
+            completions_to_remove (list[NexusCompletion | UUID]): Completions to be removed
+        """
+        for completion in completions_to_remove:
+            self.remove_completion(completion)

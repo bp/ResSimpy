@@ -1,6 +1,7 @@
 import pytest
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -63,9 +64,9 @@ def test_load_basic_wellspec(mocker, file_contents, expected_name):
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)
-
+    wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
     # Act
-    result_wells = load_wells('test/file/location.dat', start_date=start_date, default_units=UnitSystem.ENGLISH)
+    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH)
 
     # Assert
     # Deep compare expected and received wells
@@ -128,9 +129,10 @@ WELLMOD	RU001	DKH	CON	0
 
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)
+    wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
 
     # Act
-    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=UnitSystem.ENGLISH)
+    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH)
 
     # Assert
     assert result_wells == expected_wells
@@ -190,9 +192,10 @@ def test_load_wells_multiple_wells_multiple_dates(mocker):
 
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)
+    wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
 
     # Act
-    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=UnitSystem.ENGLISH)
+    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH)
 
     # Assert
     assert result_wells == expected_wells
@@ -227,9 +230,10 @@ def test_load_wells_all_columns_present_structured_grid(mocker):
 
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)
+    wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
 
     # Act
-    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=UnitSystem.ENGLISH)
+    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH)
 
     # Assert
     assert result_wells == expected_wells
@@ -293,9 +297,10 @@ def test_load_wells_all_columns_unstructured_grid(mocker):
 
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)
+    wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
 
     # Act
-    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=UnitSystem.ENGLISH)
+    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH)
 
     # Assert
     assert result_wells == expected_wells
@@ -334,9 +339,10 @@ def test_load_wells_rel_perm_tables(mocker):
                               units=UnitSystem.ENGLISH)
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)
+    wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
 
     # Act
-    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=UnitSystem.ENGLISH)
+    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH)
 
     # Assert
     assert result_wells == expected_wells
@@ -371,9 +377,10 @@ def test_load_wells_na_values_converted_to_none(mocker):
 
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)
+    wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
 
     # Act
-    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=UnitSystem.ENGLISH)
+    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH)
 
     # Assert
     assert result_wells == expected_wells
@@ -446,9 +453,10 @@ def test_correct_units_loaded(mocker, file_contents, expected_units):
 
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)
+    wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
 
     # Act
-    result_wells = load_wells('/another/test/file/location.dat', start_date=start_date, default_units=UnitSystem.ENGLISH)
+    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH)
 
     # Assert
     assert result_wells == expected_wells

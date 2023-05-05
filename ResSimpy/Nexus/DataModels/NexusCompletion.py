@@ -1,9 +1,10 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Optional, Union
+from typing import Optional, Union, TypedDict
 
 from ResSimpy.Completion import Completion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
+from ResSimpy.Utils.generic_repr import generic_repr
 
 
 @dataclass(kw_only=True)
@@ -96,6 +97,9 @@ class NexusCompletion(Completion):
                          angle_a=angle_a, angle_v=angle_v, grid=grid, depth_to_top=depth_to_top,
                          depth_to_bottom=depth_to_bottom, perm_thickness_ovr=perm_thickness_ovr, dfactor=dfactor,
                          rel_perm_method=rel_perm_method, status=status)
+
+    def __repr__(self):
+        return generic_repr(self)
 
     @property
     def measured_depth(self):
@@ -206,7 +210,7 @@ class NexusCompletion(Completion):
             'bore_radius': self.__bore_radius,
             'portype': self.__portype,
             'fracture_mult': self.__fracture_mult,
-        }
+            }
         attribute_dict.update(super().to_dict())
         if self.rel_perm_end_point is not None:
             attribute_dict.update(self.rel_perm_end_point.to_dict())
@@ -233,3 +237,114 @@ class NexusCompletion(Completion):
     def completion_is_shutin(completion: NexusCompletion) -> bool:
         """Determines if the supplied completion is a shut-in or not"""
         return not NexusCompletion.completion_is_perforation(completion)
+
+    @staticmethod
+    def nexus_mapping() -> dict[str, tuple[str, type]]:
+        """returns a dictionary of mapping from nexus keyword to attribute name"""
+
+        nexus_mapping: dict[str, tuple[str, type]] = {
+            'IW': ('i', int),
+            'JW': ('j', int),
+            'L': ('k', int),
+            'MD': ('measured_depth', float),
+            'SKIN': ('skin', float),
+            'DEPTH': ('depth', float),
+            'X': ('x', float),
+            'Y': ('y', float),
+            'ANGLA': ('angle_a', float),
+            'ANGLV': ('angle_v', float),
+            'GRID': ('grid', str),
+            'WI': ('well_indices', float),
+            'DTOP': ('depth_to_top', float),
+            'DBOT': ('depth_to_bottom', float),
+            'RADW': ('well_radius', float),
+            'PPERF': ('partial_perf', float),
+            'CELL': ('cell_number', int),
+            'KH': ('perm_thickness_ovr', float),
+            'D': ('dfactor', float),
+            'IRELPM': ('rel_perm_method', int),
+            'STAT': ('status', str),
+            'RADB': ('bore_radius', float),
+            'PORTYPE': ('portype', str),
+            'FM': ('fracture_mult', float),
+            'SECT': ('sector', int),
+            'GROUP': ('well_group', str),
+            'ZONE': ('zone', int),
+            'ANGLE': ('angle_open_flow', float),
+            'TEMP': ('temperature', float),
+            'FLOWSECT': ('flowsector', int),
+            'PARENT': ('parent_node', str),
+            'MDCON': ('mdcon', float),
+            'IPTN': ('pressure_avg_pattern', int),
+            'LENGTH': ('length', float),
+            'K': ('permeability', float),
+            'ND': ('non_darcy_model', str),
+            'DZ': ('comp_dz', float),
+            'LAYER': ('layer_assignment', int),
+            'RADBP': ('polymer_bore_radius', float),
+            'RADWP': ('polymer_well_radius', float),
+            'KHMULT': ('kh_mult', float),
+            }
+
+        return nexus_mapping
+
+    class InputDictionary(TypedDict):
+        date: str
+        i: int
+        j: int
+        k: int
+        measured_depth: float
+        skin: float
+        depth: float
+        x: float
+        y: float
+        angle_a: float
+        angle_v: float
+        grid: str
+        well_indices: float
+        depth_to_top: float
+        depth_to_bottom: float
+        well_radius: float
+        partial_perf: float
+        cell_number: int
+        perm_thickness_ovr: float
+        dfactor: float
+        rel_perm_method: int
+        status: str
+        bore_radius: float
+        portype: str
+        fracture_mult: float
+        sector: int
+        well_group: str
+        zone: int
+        angle_open_flow: float
+        temperature: float
+        flowsector: int
+        parent_node: str
+        mdcon: float
+        pressure_avg_pattern: int
+        length: float
+        permeability: float
+        non_darcy_model: str
+        comp_dz: float
+        layer_assignment: int
+        polymer_bore_radius: float
+        polymer_well_radius: float
+        kh_mult: float
+
+    @classmethod
+    def from_dict(cls, input_dictionary: InputDictionary) -> NexusCompletion:
+        """generates a NexusCompletion from a dictionary"""
+        try:
+            return cls(**input_dictionary)
+        except AttributeError:
+            raise AttributeError(f'Unexpected keyword found within {input_dictionary}')
+
+    def update(self, input_dictionary: InputDictionary) -> None:
+        for k, v in input_dictionary.items():
+            if v is None:
+                continue
+            if hasattr(self, '_NexusCompletion__' + k):
+                setattr(self, '_NexusCompletion__' + k, v)
+            elif hasattr(super(), '_Completion__' + k):
+                setattr(self, '_Completion__' + k, v)

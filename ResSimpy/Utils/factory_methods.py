@@ -1,6 +1,8 @@
 from __future__ import annotations
 from enum import Enum
 from typing import TYPE_CHECKING, Union
+from uuid import UUID
+
 import pandas as pd
 
 if TYPE_CHECKING:
@@ -41,4 +43,9 @@ def get_empty_list_nexus_file() -> list[NexusFile]:
 
 def get_empty_dict_int_nexus_file() -> dict[int, NexusFile]:
     value: dict[int, NexusFile] = {}
+    return value
+
+
+def get_empty_dict_uuid_int() -> dict[UUID, int]:
+    value: dict[UUID, int] = {}
     return value

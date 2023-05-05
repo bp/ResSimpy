@@ -465,8 +465,8 @@ class NexusSimulator(Simulator):
                     warnings.warn(f'Well file location has not been found for {well_file}')
                     continue
                 self.Wells.load_wells(
-                    well_file=well_file.location, start_date=self.start_date, default_units=self.__default_units)
-                self.Wells.wellspec_paths.append(well_file.location)
+                    well_file=well_file, start_date=self.start_date, default_units=self.__default_units)
+                self.Wells.wellspec_files.append(well_file)
 
     @staticmethod
     def update_file_value(file_path: str, token: str, new_value: str, add_to_start: bool = False):

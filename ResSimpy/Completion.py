@@ -1,4 +1,5 @@
 """The base class for all Well Completions"""
+import uuid
 from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
@@ -74,11 +75,11 @@ class Completion(ABC):
         self.__grid = grid
         self.__depth_to_top = depth_to_top
         self.__depth_to_bottom = depth_to_bottom
-
         self.__perm_thickness_ovr = perm_thickness_ovr
         self.__dfactor = dfactor
         self.__rel_perm_method = rel_perm_method
         self.__status = status
+        self.__id: uuid.UUID = uuid.uuid4()
 
     @property
     def well_radius(self):
@@ -92,6 +93,7 @@ class Completion(ABC):
     def i(self):
         return self.__i
 
+    @property
     def j(self):
         return self.__j
 
@@ -151,6 +153,10 @@ class Completion(ABC):
     def status(self):
         return self.__status
 
+    @property
+    def id(self):
+        return self.__id
+
     def to_dict(self) -> dict[str, None | float | int | str]:
         attribute_dict = {
             'well_radius': self.__well_radius,
@@ -171,5 +177,5 @@ class Completion(ABC):
             'dfactor': self.__dfactor,
             'rel_perm_method': self.__rel_perm_method,
             'status': self.__status,
-        }
+            }
         return attribute_dict
