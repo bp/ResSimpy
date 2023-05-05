@@ -75,7 +75,6 @@ class Completion(ABC):
         self.__grid = grid
         self.__depth_to_top = depth_to_top
         self.__depth_to_bottom = depth_to_bottom
-
         self.__perm_thickness_ovr = perm_thickness_ovr
         self.__dfactor = dfactor
         self.__rel_perm_method = rel_perm_method
@@ -89,10 +88,6 @@ class Completion(ABC):
     @property
     def date(self):
         return self.__date
-
-    @date.setter
-    def date(self, value):
-        self.__date = value
 
     @property
     def i(self):
