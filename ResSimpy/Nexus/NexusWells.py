@@ -114,7 +114,15 @@ class NexusWells(Wells):
                 raise ValueError('Please select one of the valid OperationEnum values: e.g. OperationEnum.ADD')
 
     def add_completion(self, well_name: str, completion_properties: NexusCompletion.InputDictionary,
-                       ):
+                       ) -> None:
+        """ Adds a completion to an existing wellspec file.
+
+        Args:
+            well_name (str): well name to update
+            completion_properties (dict[str, float | int | str): properties of the completion you want to update.
+            Must contain date of the completion to be added.
+
+        """
         completion_date = completion_properties['date']
 
         well = self.get_well(well_name)
@@ -131,6 +139,7 @@ class NexusWells(Wells):
         new_completion_index = len(file_content)
         new_completion_string = []
 
+        # if no time cards present in the file just find the name of the well instead
         if not nfo.value_in_file('TIME', file_content):
             new_completion_time_index = 0
 
@@ -139,9 +148,12 @@ class NexusWells(Wells):
                 wellspec_date = nfo.get_token_value('TIME', line, [line])
                 date_comp = self.model.Runcontrol.compare_dates(wellspec_date, completion_date)
                 if date_comp == 0:
+                    # if we've found the date start looking for a wellspec and name card
                     new_completion_time_index = index
                     continue
                 elif date_comp > 0 and header_index == -1:
+                    # if no date is found that is equal and we've found a date that is greater than the specified date
+                    # start to compile a wellspec table from scratch and add in the time cards
                     new_completion_index = index - 1
                     header_index = index - 1
                     new_completion_string += ['', 'TIME ' + completion_date, 'WELLSPEC ' + well_name, ]
@@ -164,7 +176,7 @@ class NexusWells(Wells):
                 new_completion_index = index
                 break
 
-        # construct the new completion
+        # construct the new completion and ensure the order of the values is in the same order as the headers
         headers_as_common_attribute_names = [nexus_mapping[x.upper()][0] for x in headers]
         new_completion_string += [' '.join([str(completion_properties[x]) for x in headers_as_common_attribute_names])]
         wellspec_file.file_content_as_list = wellspec_file.file_content_as_list[:new_completion_index] + \

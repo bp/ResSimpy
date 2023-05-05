@@ -597,6 +597,7 @@ def test_add_completion_write(mocker, file_as_list, add_perf_date, expected_resu
 
     mock_nexus_sim = NexusSimulator('/path/fcs_file.fcs')
 
+    # add the required attributes to the model class
     mock_nexus_sim.fcs_file.well_files = {1: file}
     mock_nexus_sim.date_format = DateFormat.DD_MM_YYYY
     mock_nexus_sim.Runcontrol.date_format_string = "%d/%m/%Y"
