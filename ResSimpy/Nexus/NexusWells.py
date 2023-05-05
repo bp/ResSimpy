@@ -115,7 +115,8 @@ class NexusWells(Wells):
 
     def add_completion(self, well_name: str, completion_properties: NexusCompletion.InputDictionary,
                        ):
-        well_name = well_name.upper()
+        completion_date = completion_properties['date']
+
         well = self.get_well(well_name)
         new_completion = NexusCompletion.from_dict(completion_properties)
         well.completions.append(new_completion)
@@ -128,16 +129,29 @@ class NexusWells(Wells):
         file_content = wellspec_file.get_flat_list_str_file()
 
         new_completion_index = len(file_content)
+        new_completion_string = []
 
         if not nfo.value_in_file('TIME', file_content):
             new_completion_time_index = 0
 
         for index, line in enumerate(file_content):
-            if nfo.check_token('TIME', line) and nfo.get_token_value('TIME', line, [line]) == \
-                    completion_properties['date']:
-                new_completion_time_index = index
-                continue
-            if nfo.check_token('WELLSPEC', line) and nfo.get_token_value('WELLSPEC', line, [line]).upper() == well_name \
+            if nfo.check_token('TIME', line):
+                wellspec_date = nfo.get_token_value('TIME', line, [line])
+                date_comp = self.model.Runcontrol.compare_dates(wellspec_date, completion_date)
+                if date_comp == 0:
+                    new_completion_time_index = index
+                    continue
+                elif date_comp > 0 and header_index == -1:
+                    new_completion_index = index - 1
+                    header_index = index - 1
+                    new_completion_string += ['', 'TIME ' + completion_date, 'WELLSPEC ' + well_name, ]
+                    headers = [k for k, v in nexus_mapping.items() if v[0] in completion_properties]
+                    write_out_headers = [' '.join(headers)]
+                    new_completion_string += write_out_headers
+                else:
+                    continue
+
+            if nfo.check_token('WELLSPEC', line) and nfo.get_token_value('WELLSPEC', line, [line]) == well_name \
                     and new_completion_time_index != -1:
                 # get the header of the wellspec table
                 keyword_map = {x: y[0] for x, y in nexus_mapping.items()}
@@ -152,6 +166,7 @@ class NexusWells(Wells):
 
         # construct the new completion
         headers_as_common_attribute_names = [nexus_mapping[x.upper()][0] for x in headers]
-        new_completion_string = ' '.join([str(completion_properties[x]) for x in headers_as_common_attribute_names])
-
-        wellspec_file.file_content_as_list.insert(new_completion_index, new_completion_string)
+        new_completion_string += [' '.join([str(completion_properties[x]) for x in headers_as_common_attribute_names])]
+        wellspec_file.file_content_as_list = wellspec_file.file_content_as_list[:new_completion_index] + \
+                                             new_completion_string + wellspec_file.file_content_as_list[
+                                                                     new_completion_index:]

@@ -5,6 +5,7 @@ from ResSimpy.Enums.HowEnum import OperationEnum
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from ResSimpy.Nexus.NexusWells import NexusWells
@@ -557,18 +558,28 @@ def test_wells_modify():
 @pytest.mark.parametrize('file_as_list, add_perf_date, expected_result',[
 (['WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5'], '01/01/2020',
 ['WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', '4 5 6 7.5']),
-(['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well1',
-  'iw  jw   l    RADB', '1  2   5   2.5', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+(['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
+'13  12   11   3.14', 'TIME 01/02/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
+'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
   '01/02/2020',
-['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well1',
-  'iw  jw   l    RADB', '1  2   5   2.5', '4 5 6 7.5', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
+['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
+'13  12   11   3.14', 'TIME 01/02/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', '4 5 6 7.5', 'WELLSPEC well2',
+'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
+  ),
+(['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
+'13  12   11   3.14', 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
+'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+  '01/02/2020',
+['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
+'13  12   11   3.14', '', 'TIME 01/02/2020', 'WELLSPEC well1', 'IW JW L RADB', '4 5 6 7.5',
+'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
+'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
   )
-], ids=['basic_test', 'insert in middle of file'])
+], ids=['basic_test', 'insert in middle of file','No time card for new comp'])
 def test_add_completion_write(mocker, file_as_list, add_perf_date, expected_result):
     '''TODO when properties arent present in existing table
         TODO more columns present than provided
         TODO when wells don't have a completion in that date
-        TODO insert in middle of the file
         TODO insert into include files
         TODO insert into different wellspec methods
         TODO test for not having a date in the completion properties dictionary
@@ -587,7 +598,9 @@ def test_add_completion_write(mocker, file_as_list, add_perf_date, expected_resu
     mock_nexus_sim = NexusSimulator('/path/fcs_file.fcs')
 
     mock_nexus_sim.fcs_file.well_files = {1: file}
-
+    mock_nexus_sim.date_format = DateFormat.DD_MM_YYYY
+    mock_nexus_sim.Runcontrol.date_format_string = "%d/%m/%Y"
+    mock_nexus_sim.start_date_set(start_date)
     # mock out open
     wells_obj = NexusWells(mock_nexus_sim)
     wells_obj.load_wells()
