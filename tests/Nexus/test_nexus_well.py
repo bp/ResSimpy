@@ -499,8 +499,9 @@ def test_well_dates(mocker):
         NexusCompletion(i=1, j=2, date='01/03/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
                         depth_to_bottom=1234),
                         ]
-
-    well = NexusWells()
+    mock_sim = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusSimulator.NexusSimulator', mock_sim)
+    well = NexusWells(mock_sim)
 
     well.__setattr__('_NexusWells__wells', [NexusWell(well_name='well1', completions=well_1_completions, units=UnitSystem.METRIC),
                                 NexusWell(well_name='well2', completions=well_2_completions, units=UnitSystem.METRIC)])
@@ -513,7 +514,7 @@ def test_well_dates(mocker):
     assert result == expected_result
 
 
-def test_wells_modify():
+def test_wells_modify(mocker):
     # Arrange
     well_1_completions = [
         NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
@@ -531,7 +532,9 @@ def test_wells_modify():
     well_1 = NexusWell(well_name='well1', completions=well_1_completions, units=UnitSystem.METRIC)
     well_2 = NexusWell(well_name='well2', completions=well_2_completions, units=UnitSystem.METRIC)
 
-    wells = NexusWells()
+    mock_sim = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusSimulator.NexusSimulator', mock_sim)
+    wells = NexusWells(mock_sim)
 
     wells.__setattr__('_NexusWells__wells', [well_1, well_2])
     date = '01/02/2023'
@@ -574,7 +577,8 @@ def test_wells_modify():
 '13  12   11   3.14', '', 'TIME 01/02/2020', 'WELLSPEC well1', 'IW JW L RADB', '4 5 6 7.5',
 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
-  )
+  ),
+
 ], ids=['basic_test', 'insert in middle of file','No time card for new comp'])
 def test_add_completion_write(mocker, file_as_list, add_perf_date, expected_result):
     '''TODO when properties arent present in existing table

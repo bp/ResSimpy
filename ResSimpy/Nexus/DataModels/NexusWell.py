@@ -15,7 +15,6 @@ if TYPE_CHECKING:
 @dataclass
 class NexusWell(Well):
     __completions: list[NexusCompletion]
-    __Wells: NexusWells
 
     def __init__(self, well_name: str, completions: list[NexusCompletion], units: UnitSystem, ):
         self.__completions = completions
