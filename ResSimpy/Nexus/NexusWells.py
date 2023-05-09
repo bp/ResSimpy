@@ -1,6 +1,7 @@
 from __future__ import annotations
 import warnings
 from dataclasses import dataclass, field
+from functools import cmp_to_key
 from typing import Sequence, Optional, TYPE_CHECKING
 
 import pandas as pd
@@ -116,7 +117,7 @@ class NexusWells(Wells):
                 raise ValueError('Please select one of the valid OperationEnum values: e.g. OperationEnum.ADD')
 
     def add_completion(self, well_name: str, completion_properties: NexusCompletion.InputDictionary,
-                       ) -> None:
+                       preserve_previous_completions=False) -> None:
         """ Adds a completion to an existing wellspec file.
 
         Args:
@@ -171,6 +172,31 @@ class NexusWells(Wells):
                     headers = [k for k, v in nexus_mapping.items() if v[0] in completion_properties]
                     write_out_headers = [' '.join(headers)]
                     new_completion_string += write_out_headers
+                    if preserve_previous_completions:
+                        date_list = well.dates_of_completions
+                        previous_dates = [x for x in date_list if
+                                          self.model.Runcontrol.compare_dates(x, completion_date) < 0]
+                        if len(previous_dates) == 0:
+                            warnings.warn(f'No previous completions found for {well_name} at date: {completion_date}')
+                            new_completion_index = index
+                            break
+                        previous_dates = sorted(previous_dates, key=cmp_to_key(self.model.Runcontrol.compare_dates))
+                        last_date = previous_dates[-1]
+                        completion_to_find: NexusCompletion.InputDictionary = {'date': last_date}
+                        previous_completion_list = well.find_completions(completion_to_find)
+
+                        # TODO: extract to a method
+                        for completion in previous_completion_list:
+                            old_completion_properties = completion.to_dict()
+                            # TODO make this invert the nexus_mapping dictionary to a utility function
+                            old_completion_values = []
+                            for header in headers:
+                                attribute_name = nexus_mapping[header][0]
+                                attribute_value = old_completion_properties[attribute_name]
+                                if attribute_value is None:
+                                    attribute_value = 'NA'
+                                old_completion_values.append(attribute_value)
+                            new_completion_string += [' '.join([str(x) for x in old_completion_values])]
                 else:
                     continue
 

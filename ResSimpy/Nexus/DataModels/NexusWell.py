@@ -165,14 +165,6 @@ class NexusWell(Well):
             completion_index = len(self.__completions)
         self.__completions.insert(completion_index, new_completion)
 
-        # TODO deal with the multiple wellspec files
-
-    #
-    # def update_file(self):
-    #     # find the date
-    #     # find which well it should add to
-    #     # add the completion at the end of that table block
-
     def remove_completion(self, completion_to_remove: NexusCompletion | UUID) -> None:
         if isinstance(completion_to_remove, NexusCompletion):
             completion_to_remove = self.find_completion(completion_to_remove)

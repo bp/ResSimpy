@@ -308,7 +308,7 @@ def __load_wellspec_table_headings(header_index: int, header_values: dict[str, N
             header_line = line.upper()
             header_index = index
             # Map the headers
-            next_column_heading = nfo.get_next_value(start_line_index=0, file_as_list=[line])
+            next_column_heading = nfo.get_next_value(start_line_index=0, file_as_list=[line]).upper()
             trimmed_line = header_line
 
             while next_column_heading is not None:

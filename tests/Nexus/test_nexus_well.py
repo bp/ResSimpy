@@ -558,29 +558,49 @@ def test_wells_modify(mocker):
     # Assert
     assert wells.get_wells()[0].completions == expected_result[0].completions
 
-@pytest.mark.parametrize('file_as_list, add_perf_date, expected_result',[
-(['WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5'], '01/01/2020',
+@pytest.mark.parametrize('file_as_list, add_perf_date, preserve_previous_completions, expected_result',[
+(['WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5'], '01/01/2020', False,
 ['WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', '4 5 6 7.5']),
+
 (['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
 '13  12   11   3.14', 'TIME 01/02/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
-  '01/02/2020',
+  '01/02/2020', True,
 ['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
 '13  12   11   3.14', 'TIME 01/02/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', '4 5 6 7.5', 'WELLSPEC well2',
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
   ),
+
 (['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
 '13  12   11   3.14', 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
-  '01/02/2020',
+  '01/02/2020', False,
 ['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
 '13  12   11   3.14', '', 'TIME 01/02/2020', 'WELLSPEC well1', 'IW JW L RADB', '4 5 6 7.5',
 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
   ),
 
-], ids=['basic_test', 'insert in middle of file','No time card for new comp'])
-def test_add_completion_write(mocker, file_as_list, add_perf_date, expected_result):
+(['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
+'13  12   11   3.14', 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
+'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+  '01/02/2020', True,
+['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
+'13  12   11   3.14', '', 'TIME 01/02/2020', 'WELLSPEC well1', 'IW JW L RADB', '1 2 3 1.5', '4 5 6 7.5',
+'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
+'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
+  ),
+
+(['WELLSPEC well2', 'iw  jw   l    RADB', '13  12   11   3.14', 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB',
+'1  2   5   2.5', 'WELLSPEC well2', 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020',
+'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+  '01/02/2020', True,
+['WELLSPEC well2', 'iw  jw   l    RADB', '13  12   11   3.14', '', 'TIME 01/02/2020', 'WELLSPEC well1', 'IW JW L RADB', '4 5 6 7.5',
+'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
+'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
+  ),
+], ids=['basic_test', 'insert in middle of file','No time card for new comp', 'preserve previous completions', 'No previous well'])
+def test_add_completion_write(mocker, file_as_list, add_perf_date, preserve_previous_completions, expected_result):
     '''TODO when properties arent present in existing table
         TODO more columns present than provided
         TODO when wells don't have a completion in that date
@@ -613,7 +633,8 @@ def test_add_completion_write(mocker, file_as_list, add_perf_date, expected_resu
     add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'bore_radius': 7.5}
 
     # Act
-    wells_obj.add_completion(well_name='well1', completion_properties=add_perf_dict, )
+    wells_obj.add_completion(well_name='well1', completion_properties=add_perf_dict,
+                             preserve_previous_completions=preserve_previous_completions)
     result = file.file_content_as_list
 
     # Assert
