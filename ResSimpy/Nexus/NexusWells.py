@@ -51,6 +51,8 @@ class NexusWells(Wells):
         return df_store
 
     def load_wells(self, ) -> None:
+        if self.model.fcs_file.well_files is None:
+            raise FileNotFoundError('No wells files found for current model.')
         for method_number, well_file in self.model.fcs_file.well_files.items():
             if well_file.location is None:
                 warnings.warn(f'Well file location has not been found for {well_file}')
@@ -126,10 +128,19 @@ class NexusWells(Wells):
         completion_date = completion_properties['date']
 
         well = self.get_well(well_name)
+        if well is None:
+            raise ValueError(
+                f"No well found named: {well_name}. Cannot add completion to a well that doesn't exist")
         new_completion = NexusCompletion.from_dict(completion_properties)
         well.completions.append(new_completion)
 
+        if self.model.fcs_file.well_files is None:
+            raise FileNotFoundError('No well file found, cannot modify ')
         wellspec_file = self.model.fcs_file.well_files[1]
+        if wellspec_file.file_content_as_list is None:
+            raise FileNotFoundError(
+                f'No well file content found for specified wellfile at location: {wellspec_file.location}')
+
         nexus_mapping = NexusCompletion.nexus_mapping()
         new_completion_time_index = -1
         header_index = -1
@@ -145,7 +156,7 @@ class NexusWells(Wells):
 
         for index, line in enumerate(file_content):
             if nfo.check_token('TIME', line):
-                wellspec_date = nfo.get_token_value('TIME', line, [line])
+                wellspec_date = nfo.get_expected_token_value('TIME', line, [line])
                 date_comp = self.model.Runcontrol.compare_dates(wellspec_date, completion_date)
                 if date_comp == 0:
                     # if we've found the date start looking for a wellspec and name card
