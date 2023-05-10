@@ -1,15 +1,12 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Optional, Tuple, Sequence, Union, cast, TYPE_CHECKING
+from typing import Optional, Tuple, Sequence, Union, cast
 from uuid import UUID
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.Well import Well
-
-if TYPE_CHECKING:
-    from ResSimpy.Nexus.NexusWells import NexusWells
 
 
 @dataclass

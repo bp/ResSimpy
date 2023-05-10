@@ -233,9 +233,9 @@ class NexusWells(Wells):
         # construct the new completion and ensure the order of the values is in the same order as the headers
         new_completion_string += new_completion.completion_to_wellspec_row(headers)
 
-        wellspec_file.file_content_as_list = wellspec_file.file_content_as_list[:new_completion_index] + \
-                                             new_completion_string + wellspec_file.file_content_as_list[
-                                                                     new_completion_index:]
+        wellspec_file.file_content_as_list = \
+            wellspec_file.file_content_as_list[:new_completion_index] + \
+            new_completion_string + wellspec_file.file_content_as_list[new_completion_index:]
 
     def write_out_existing_wellspec(self, completion_date, completion_properties, date_found, index,
                                     new_completion_index, preserve_previous_completions, well, well_name):
