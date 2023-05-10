@@ -195,7 +195,7 @@ class NexusWells(Wells):
                     new_completion_index = index - 1
                     header_index = index - 1
                     headers, new_completion_index, new_completion_string, found_previous_completions = \
-                        self.write_out_existing_wellspec(
+                        self.__write_out_existing_wellspec(
                             completion_date, completion_properties, date_found, index,
                             new_completion_index, preserve_previous_completions, well, well_name)
                     if not found_previous_completions:
@@ -242,8 +242,11 @@ class NexusWells(Wells):
             wellspec_file.file_content_as_list[:new_completion_index] + \
             new_completion_string + wellspec_file.file_content_as_list[new_completion_index:]
 
-    def write_out_existing_wellspec(self, completion_date, completion_properties, date_found, index,
-                                    new_completion_index, preserve_previous_completions, well, well_name):
+    def __write_out_existing_wellspec(self, completion_date: str,
+                                      completion_properties: NexusCompletion.InputDictionary,
+                                      date_found: bool, index: int, new_completion_index: int,
+                                      preserve_previous_completions: bool, well: NexusWell, well_name: str) -> \
+            tuple[list[str], int, list[str], bool]:
         nexus_mapping = NexusCompletion.nexus_mapping()
         completion_table_as_list = ['']
         if not date_found:
