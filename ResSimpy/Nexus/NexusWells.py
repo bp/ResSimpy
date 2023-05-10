@@ -154,8 +154,11 @@ class NexusWells(Wells):
             raise FileNotFoundError('No well file found, cannot modify ')
 
         # find the correct wellspec file in the model by looking at the ids
-        wellspec_file = [x for x in self.model.fcs_file.well_files.values() if well_id in x.object_locations][0]
-
+        wellspec_files = [x for x in self.model.fcs_file.well_files.values() if x.object_locations is not None and
+                          well_id in x.object_locations]
+        if len(wellspec_files) == 0:
+            raise FileNotFoundError(f'No well file found with an existing well that has completion id: {well_id}')
+        wellspec_file = wellspec_files[0]
         if wellspec_file.file_content_as_list is None:
             raise FileNotFoundError(
                 f'No well file content found for specified wellfile at location: {wellspec_file.location}')
@@ -216,7 +219,8 @@ class NexusWells(Wells):
                         headers.append(inverted_nexus_map[key])
                         additional_headers.append(inverted_nexus_map[key])
                 if len(additional_headers) > 0:
-                    wellspec_file.file_content_as_list[header_index] += ' ' + ' '.join(additional_headers)
+                    wellspec_file.file_content_as_list[header_index] = str(
+                        wellspec_file.file_content_as_list[header_index]) + ' ' + ' '.join(additional_headers)
                 continue
 
             if header_index != -1 and nfo.nexus_token_found(line, WELLS_KEYWORDS) and index > header_index:
@@ -228,7 +232,8 @@ class NexusWells(Wells):
                 valid_line, _ = nfo.table_line_reader(keyword_store={}, headers=headers_original, line=line)
                 if valid_line and len(additional_headers) > 0:
                     additional_na_values = ['NA'] * len(additional_headers)
-                    wellspec_file.file_content_as_list[index] += ' ' + ' '.join(additional_na_values)
+                    wellspec_file.file_content_as_list[index] = str(
+                        wellspec_file.file_content_as_list[index]) + ' ' + ' '.join(additional_na_values)
 
         # construct the new completion and ensure the order of the values is in the same order as the headers
         new_completion_string += new_completion.completion_to_wellspec_row(headers)

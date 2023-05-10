@@ -299,7 +299,7 @@ def __load_wellspec_table_headings(header_index: int, header_values: dict[str, N
         tuple[int, list[str]]: index in the file as list for the header, list of headers found in the file
     """
     headers = [] if headers is None else headers
-
+    next_column_heading: Optional[str]
     if well_name is None:
         return header_index, headers
 
@@ -307,8 +307,8 @@ def __load_wellspec_table_headings(header_index: int, header_values: dict[str, N
         if nfo.check_token(key, line):
             header_line = line.upper()
             header_index = index
-            # Map the headers
-            next_column_heading = nfo.get_next_value(start_line_index=0, file_as_list=[line]).upper()
+            # Map the headers (first time get the expected value as check token guarantees at least 1 value)
+            next_column_heading = nfo.get_expected_next_value(start_line_index=0, file_as_list=[line]).upper()
             trimmed_line = header_line
 
             while next_column_heading is not None:
