@@ -48,6 +48,44 @@ class NexusWater():
         = field(default_factory=get_empty_dict_union)
     parameters: list[NexusWaterParams] = field(default_factory=get_empty_list_nexus_water_params)
 
+    def __repr__(self):
+        """Pretty printing water data"""
+        param_to_nexus_keyword_map = {'density': 'DENW', 'compressibility': 'CW',
+                                      'formation_volume_factor': 'BW', 'viscosity': 'VISW',
+                                      'viscosity_compressibility': 'CVW'}
+        printable_str = ''
+        printable_str += '\n--------------------------------\n'
+        printable_str += f'Water method {self.method_number}\n'
+        printable_str += '--------------------------------\n'
+        printable_str += f'FILE_PATH: {self.file_path}\n'
+        printable_str += f'PREF: {self.reference_pressure}\n'
+        water_dict = self.properties
+        for key in water_dict.keys():
+            if isinstance(water_dict[key], Enum):
+                printable_str += f'{key}: {water_dict[key].name}\n'
+            else:
+                printable_str += f'{key}: {water_dict[key]}\n'
+        water_params = self.parameters
+        temp_val = None
+        sal_val = None
+        for i in range(len(water_params)):
+            water_param_dict = water_params[i].__dict__
+            space_prefix = ''
+            if water_param_dict['temperature']:
+                if water_param_dict['temperature'] != temp_val:
+                    printable_str += f"TEMP: {water_param_dict['temperature']}\n"
+                    temp_val = water_param_dict['temperature']
+                space_prefix += '    '
+            if water_param_dict['salinity']:
+                if water_param_dict['salinity'] != sal_val:
+                    printable_str += f"{space_prefix}SALINITY: {water_param_dict['salinity']}\n"
+                    sal_val = water_param_dict['salinity']
+                space_prefix += '    '
+            for key in param_to_nexus_keyword_map.keys():
+                if water_param_dict[key]:
+                    printable_str += f'{space_prefix}{param_to_nexus_keyword_map[key]}: {water_param_dict[key]}\n'
+        return printable_str
+
     def read_properties(self) -> None:
         """Read Nexus Water file contents and populate NexusWater object
         """

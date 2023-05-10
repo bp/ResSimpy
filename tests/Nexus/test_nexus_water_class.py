@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from ResSimpy.Nexus.DataModels.NexusWater import NexusWater
+from ResSimpy.Nexus.DataModels.NexusWater import NexusWater, NexusWaterParams
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import SUnits, UnitSystem, TemperatureUnits
 
 @pytest.mark.parametrize("file_contents, expected_water_properties",
@@ -159,3 +159,46 @@ def test_read_water_properties_from_file(mocker, file_contents, expected_water_p
         assert params[i].viscosity == expected_water_properties['VISW'][i]
         assert params[i].formation_volume_factor == expected_water_properties['BW'][i]
 
+
+def test_nexus_water_repr():
+    # Arrange
+    water_obj = NexusWater(file_path='test/file/water.dat', method_number=1)
+    water_obj.properties = {'SUNITS': SUnits.PPM, 'TEMP_UNIT': TemperatureUnits.KELVIN}
+    water_obj.reference_pressure = 3600.0
+    water_params1 = NexusWaterParams(temperature=394.3, salinity=100000.0,
+                                     density=62.4, compressibility=3.4,
+                                     formation_volume_factor=1.04, viscosity=0.7, 
+                                     viscosity_compressibility=None
+                                     )
+    water_params2 = NexusWaterParams(temperature=394.3, salinity=200000.0,
+                                     density=65.4, compressibility=4.4,
+                                     formation_volume_factor=1.05, viscosity=0.8, 
+                                     viscosity_compressibility=None
+                                     )
+    water_obj.parameters = [water_params1, water_params2]
+    expected_output = """
+--------------------------------
+Water method 1
+--------------------------------
+FILE_PATH: test/file/water.dat
+PREF: 3600.0
+SUNITS: PPM
+TEMP_UNIT: KELVIN
+TEMP: 394.3
+    SALINITY: 100000.0
+        DENW: 62.4
+        CW: 3.4
+        BW: 1.04
+        VISW: 0.7
+    SALINITY: 200000.0
+        DENW: 65.4
+        CW: 4.4
+        BW: 1.05
+        VISW: 0.8
+"""
+
+    # Act
+    result = water_obj.__repr__()
+
+    # Assert
+    assert result == expected_output
