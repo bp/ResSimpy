@@ -661,3 +661,51 @@ def test_add_completion_write(mocker, file_as_list, add_perf_date, preserve_prev
     # Act 2 / Assert 2 - failure case without a date
     with pytest.raises(AttributeError):
         wells_obj.add_completion(well_name='well1', completion_properties=add_perf_dict_without_date,)
+
+
+def test_add_completion_correct_wellspec(mocker):
+    start_date = '01/01/2020'
+    # Arrange
+    open_mock = mocker.mock_open(read_data='')
+    mocker.patch("builtins.open", open_mock)
+    ls_dir = Mock(side_effect=lambda x: [])
+    mocker.patch('os.listdir', ls_dir)
+    fcs_file_exists = Mock(side_effect=lambda x: True)
+    mocker.patch('os.path.isfile', fcs_file_exists)
+    add_perf_date = '01/03/2020'
+
+    # build 3 files that the add completion will have to find the right completion
+    file_as_list_target = ['TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5']
+    file_as_list_1 = ['TIME 01/02/2020', 'WELLSPEC well2', 'iw  jw   l    RADB', '3  5  41   0.3']
+    file_as_list_2 = ['TIME 01/03/2020', 'WELLSPEC well3', 'iw  jw   l    RADB', '2  4   3   2222']
+
+    file_target = NexusFile(location='wells_target.dat', file_content_as_list=file_as_list_target, )
+    file_1 = NexusFile(location='wells_1.dat', file_content_as_list=file_as_list_1, )
+    file_2 = NexusFile(location='wells_2.dat', file_content_as_list=file_as_list_2, )
+
+    mock_nexus_sim = NexusSimulator('/path/fcs_file.fcs')
+
+    # add the required attributes to the model class
+    mock_nexus_sim.fcs_file.well_files = {1: file_1, 2: file_2, 3: file_target}
+    mock_nexus_sim.date_format = DateFormat.DD_MM_YYYY
+    mock_nexus_sim.Runcontrol.date_format_string = "%d/%m/%Y"
+    mock_nexus_sim.start_date_set(start_date)
+    # mock out open
+    wells_obj = NexusWells(mock_nexus_sim)
+    wells_obj.load_wells()
+
+    add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'bore_radius': 7.5}
+
+    expected_result = ['TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', '4 5 6 7.5']
+    expected_result_file_1 = ['TIME 01/02/2020', 'WELLSPEC well2', 'iw  jw   l    RADB', '3  5  41   0.3']
+    expected_result_file_2 = ['TIME 01/03/2020', 'WELLSPEC well3', 'iw  jw   l    RADB', '2  4   3   2222']
+
+    # Act
+    wells_obj.add_completion(well_name='well1', completion_properties=add_perf_dict,
+                             preserve_previous_completions=True)
+    result = file_target.file_content_as_list
+
+    # Assert
+    assert result == expected_result
+    assert file_1.file_content_as_list == expected_result_file_1
+    assert file_2.file_content_as_list == expected_result_file_2
