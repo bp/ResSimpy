@@ -348,3 +348,24 @@ class NexusCompletion(Completion):
                 setattr(self, '_NexusCompletion__' + k, v)
             elif hasattr(super(), '_Completion__' + k):
                 setattr(self, '_Completion__' + k, v)
+
+    def completion_to_wellspec_row(self, headers: list[str]):
+        """ Takes a completion object and returns the attribute values as a string in the order of headers provided
+
+        Args:
+            headers (list[str]): list of header values in Nexus keyword format
+
+        Returns: string of the values in the order of the headers provided.
+
+        """
+        nexus_mapping = NexusCompletion.nexus_mapping()
+        old_completion_properties = self.to_dict()
+        completion_values = []
+        for header in headers:
+            attribute_name = nexus_mapping[header][0]
+            attribute_value = old_completion_properties[attribute_name]
+            if attribute_value is None:
+                attribute_value = 'NA'
+            completion_values.append(attribute_value)
+        completion_string = [' '.join([str(x) for x in completion_values])]
+        return completion_string

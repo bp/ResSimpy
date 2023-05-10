@@ -15,6 +15,7 @@ from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
 from ResSimpy.Wells import Wells
 from ResSimpy.Nexus.load_wells import load_wells
 import ResSimpy.Nexus.nexus_file_operations as nfo
+from ResSimpy.Utils.invert_nexus_map import invert_nexus_map
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
@@ -130,7 +131,6 @@ class NexusWells(Wells):
             preserve_previous_completions (bool): if true a new perforation added on a TIME card without a \
             wellspec card for that well will preserve the previous completions from the closest TIME card in addition \
             to the new completion
-
         """
         completion_date = completion_properties.get('date', None)
         if completion_date is None:
@@ -146,27 +146,30 @@ class NexusWells(Wells):
             raise ValueError(
                 f"No well found named: {well_name}. Cannot add completion to a well that doesn't exist")
         well_id = well.completions[0].id
-        new_completion = NexusCompletion.from_dict(completion_properties)
-        well.completions.append(new_completion)
+
+        # add completion in memory
+        new_completion = well.add_completion(completion_date, completion_properties)
 
         if self.model.fcs_file.well_files is None:
             raise FileNotFoundError('No well file found, cannot modify ')
 
-        # TODO: WRITE A TEST FOR THIS
+        # find the correct wellspec file in the model by looking at the ids
         wellspec_file = [x for x in self.model.fcs_file.well_files.values() if well_id in x.object_locations][0]
 
         if wellspec_file.file_content_as_list is None:
             raise FileNotFoundError(
                 f'No well file content found for specified wellfile at location: {wellspec_file.location}')
+
         # initialise some storage variables
         nexus_mapping = NexusCompletion.nexus_mapping()
+        inverted_nexus_map = invert_nexus_map(nexus_mapping)
         new_completion_time_index = -1
         header_index = -1
         headers = []
         headers_original = []
         additional_headers = []
         file_content = wellspec_file.get_flat_list_str_file()
-
+        date_found = False
         new_completion_index = len(file_content)
         new_completion_string = []
 
@@ -181,13 +184,17 @@ class NexusWells(Wells):
                 if date_comp == 0:
                     # if we've found the date we're looking for start looking for a wellspec and name card
                     new_completion_time_index = index
+                    date_found = True
                     continue
                 elif date_comp > 0 and header_index == -1:
                     # if no date is found that is equal and we've found a date that is greater than the specified date
                     # start to compile a wellspec table from scratch and add in the time cards
                     new_completion_index = index - 1
                     header_index = index - 1
-                    new_completion_string += ['', 'TIME ' + completion_date, 'WELLSPEC ' + well_name, ]
+                    new_completion_string += ['']
+                    if not date_found:
+                        new_completion_string += ['TIME ' + completion_date]
+                    new_completion_string += ['WELLSPEC ' + well_name, ]
                     headers = [k for k, v in nexus_mapping.items() if v[0] in completion_properties]
                     write_out_headers = [' '.join(headers)]
                     new_completion_string += write_out_headers
@@ -210,18 +217,9 @@ class NexusWells(Wells):
                         previous_completion_list = well.find_completions(completion_to_find)
 
                         # run through the existing completions to duplicate the completion at the new time
-                        # TODO: extract to a method
                         for completion in previous_completion_list:
-                            old_completion_properties = completion.to_dict()
-                            # TODO make this invert the nexus_mapping dictionary to a utility function
-                            old_completion_values = []
-                            for header in headers:
-                                attribute_name = nexus_mapping[header][0]
-                                attribute_value = old_completion_properties[attribute_name]
-                                if attribute_value is None:
-                                    attribute_value = 'NA'
-                                old_completion_values.append(attribute_value)
-                            new_completion_string += [' '.join([str(x) for x in old_completion_values])]
+                            old_completion_values = completion.completion_to_wellspec_row(headers)
+                            new_completion_string += old_completion_values
                 else:
                     continue
 
@@ -229,40 +227,35 @@ class NexusWells(Wells):
                     and new_completion_time_index != -1:
                 # get the header of the wellspec table
                 keyword_map = {x: y[0] for x, y in nexus_mapping.items()}
-                invert_nexus_map = {y: x for x, y in keyword_map.items()}
                 wellspec_table = file_content[index::]
                 header_index, headers = nfo.get_table_header(file_as_list=wellspec_table, header_values=keyword_map)
                 header_index += index
                 headers_original = copy.copy(headers)
-                # work out if there are any headers that are not in the
+                # work out if there are any headers that are not in the new completion
                 for key in completion_properties:
                     if key == 'date':
                         continue
-                    if invert_nexus_map[key] not in headers:
-                        headers.append(invert_nexus_map[key])
-                        additional_headers.append(invert_nexus_map[key])
+                    if inverted_nexus_map[key] not in headers:
+                        headers.append(inverted_nexus_map[key])
+                        additional_headers.append(inverted_nexus_map[key])
                 if len(additional_headers) > 0:
                     wellspec_file.file_content_as_list[header_index] += ' ' + ' '.join(additional_headers)
                 continue
 
             if header_index != -1 and nfo.nexus_token_found(line, WELLS_KEYWORDS) and index > header_index:
+                # if we hit the end of the wellspec table for the given well set the index for the new completion
                 new_completion_index = index
                 break
             elif header_index != -1 and index > header_index:
+                # check the validity of the line, if its valid add as many NA's as required for the new columns
                 valid_line, _ = nfo.table_line_reader(keyword_store={}, headers=headers_original, line=line)
                 if valid_line and len(additional_headers) > 0:
                     additional_na_values = ['NA'] * len(additional_headers)
                     wellspec_file.file_content_as_list[index] += ' ' + ' '.join(additional_na_values)
 
         # construct the new completion and ensure the order of the values is in the same order as the headers
-        headers_as_common_attribute_names = [nexus_mapping[x.upper()][0] for x in headers]
-        list_new_completion_values = []
-        for header in headers_as_common_attribute_names:
-            if header in completion_properties:
-                list_new_completion_values.append(str(completion_properties[header]))
-            else:
-                list_new_completion_values.append('NA')
-        new_completion_string += [' '.join(list_new_completion_values)]
+        new_completion_string += new_completion.completion_to_wellspec_row(headers)
+
         wellspec_file.file_content_as_list = wellspec_file.file_content_as_list[:new_completion_index] + \
                                              new_completion_string + wellspec_file.file_content_as_list[
                                                                      new_completion_index:]

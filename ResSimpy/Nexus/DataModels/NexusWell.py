@@ -151,7 +151,7 @@ class NexusWell(Well):
         raise ValueError('No completion found for id: {id}')
 
     def add_completion(self, date: str, completion_properties: NexusCompletion.InputDictionary,
-                       completion_index: Optional[int] = None, ) -> None:
+                       completion_index: Optional[int] = None, ) -> NexusCompletion:
         """ adds a perforation with the properties specified in completion_properties,
             if index is none then adds it to the end of the perforation list.
         Args:
@@ -164,6 +164,7 @@ class NexusWell(Well):
         if completion_index is None:
             completion_index = len(self.__completions)
         self.__completions.insert(completion_index, new_completion)
+        return new_completion
 
     def remove_completion(self, completion_to_remove: NexusCompletion | UUID) -> None:
         if isinstance(completion_to_remove, NexusCompletion):
