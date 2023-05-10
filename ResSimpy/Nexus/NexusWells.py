@@ -191,35 +191,12 @@ class NexusWells(Wells):
                     # start to compile a wellspec table from scratch and add in the time cards
                     new_completion_index = index - 1
                     header_index = index - 1
-                    new_completion_string += ['']
-                    if not date_found:
-                        new_completion_string += ['TIME ' + completion_date]
-                    new_completion_string += ['WELLSPEC ' + well_name, ]
-                    headers = [k for k, v in nexus_mapping.items() if v[0] in completion_properties]
-                    write_out_headers = [' '.join(headers)]
-                    new_completion_string += write_out_headers
-                    if preserve_previous_completions:
-                        # get all the dates for that well
-                        date_list = well.dates_of_completions
-                        previous_dates = [x for x in date_list if
-                                          self.model.Runcontrol.compare_dates(x, completion_date) < 0]
-                        if len(previous_dates) == 0:
-                            # if no dates that are smaller than the completion date then only add the perforation
-                            # at the current index with a new wellspec card.
-                            warnings.warn(f'No previous completions found for {well_name} at date: {completion_date}')
-                            new_completion_index = index
-                            break
-                        # get the most recent date that is earlier than the new completion date
-                        previous_dates = sorted(previous_dates, key=cmp_to_key(self.model.Runcontrol.compare_dates))
-                        last_date = previous_dates[-1]
-                        completion_to_find: NexusCompletion.InputDictionary = {'date': last_date}
-                        # find all completions at this date
-                        previous_completion_list = well.find_completions(completion_to_find)
-
-                        # run through the existing completions to duplicate the completion at the new time
-                        for completion in previous_completion_list:
-                            old_completion_values = completion.completion_to_wellspec_row(headers)
-                            new_completion_string += old_completion_values
+                    headers, new_completion_index, new_completion_string, found_previous_completions = \
+                        self.write_out_existing_wellspec(
+                            completion_date, completion_properties, date_found, index,
+                            new_completion_index, preserve_previous_completions, well, well_name)
+                    if not found_previous_completions:
+                        break
                 else:
                     continue
 
@@ -259,3 +236,37 @@ class NexusWells(Wells):
         wellspec_file.file_content_as_list = wellspec_file.file_content_as_list[:new_completion_index] + \
                                              new_completion_string + wellspec_file.file_content_as_list[
                                                                      new_completion_index:]
+
+    def write_out_existing_wellspec(self, completion_date, completion_properties, date_found, index,
+                                    new_completion_index, preserve_previous_completions, well, well_name):
+        nexus_mapping = NexusCompletion.nexus_mapping()
+        completion_table_as_list = ['']
+        if not date_found:
+            completion_table_as_list += ['TIME ' + completion_date]
+        completion_table_as_list += ['WELLSPEC ' + well_name, ]
+        headers = [k for k, v in nexus_mapping.items() if v[0] in completion_properties]
+        write_out_headers = [' '.join(headers)]
+        completion_table_as_list += write_out_headers
+        if preserve_previous_completions:
+            # get all the dates for that well
+            date_list = well.dates_of_completions
+            previous_dates = [x for x in date_list if
+                              self.model.Runcontrol.compare_dates(x, completion_date) < 0]
+            if len(previous_dates) == 0:
+                # if no dates that are smaller than the completion date then only add the perforation
+                # at the current index with a new wellspec card.
+                warnings.warn(f'No previous completions found for {well_name} at date: {completion_date}')
+                new_completion_index = index
+                return headers, new_completion_index, completion_table_as_list, False
+
+            # get the most recent date that is earlier than the new completion date
+            previous_dates = sorted(previous_dates, key=cmp_to_key(self.model.Runcontrol.compare_dates))
+            last_date = str(previous_dates[-1])
+            completion_to_find: NexusCompletion.InputDictionary = {'date': last_date}
+            # find all completions at this date
+            previous_completion_list = well.find_completions(completion_to_find)
+
+            # run through the existing completions to duplicate the completion at the new time
+            for completion in previous_completion_list:
+                completion_table_as_list += completion.completion_to_wellspec_row(headers)
+        return headers, new_completion_index, completion_table_as_list, True
