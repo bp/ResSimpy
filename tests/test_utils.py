@@ -7,7 +7,8 @@ import pytest
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Utils import to_dict_generic
 from ResSimpy.Utils.generic_repr import generic_repr
-from ResSimpy.Utils.invert_nexus_map import invert_nexus_map
+from ResSimpy.Utils.invert_nexus_map import invert_nexus_map, attribute_name_to_nexus_keyword, \
+    nexus_keyword_to_attribute_name
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 from ResSimpy.Utils.to_dict_generic import to_dict
 
@@ -138,3 +139,41 @@ def test_invert_nexus_map():
 
     # Assert
     assert result == expected_result
+
+
+def test_nexus_keyword_to_attribute_name():
+    # Arrange
+    @dataclass
+    class NexusClass:
+        date: str
+        depth: float
+        x_pos: Optional[float]
+        y_pos: Optional[float]
+        rand: Optional[str]
+
+        def nexus_mapping(self):
+            nexus_mapping = {
+                'DEPTH': ('depth', float),
+                'X': ('x_pos', float),
+                'Y': ('y_pos', float),
+                'RANDOM': ('rand', str),
+                }
+            return nexus_mapping
+
+    nex_class = NexusClass(date='01/01/2020', depth=10, x_pos=1.5, y_pos=3.14, rand='hello')
+    nexus_map = nex_class.nexus_mapping()
+
+    expected_attr = 'x_pos'
+    expected_nexus_keyword = 'RANDOM'
+
+    # Act
+    result_attr = nexus_keyword_to_attribute_name(nexus_map, 'X')
+    result_nexus_keyword = attribute_name_to_nexus_keyword(nexus_map, 'rand')
+
+    # Assert
+    assert result_attr == expected_attr
+    assert result_nexus_keyword == expected_nexus_keyword
+
+    with pytest.raises(AttributeError):
+        nexus_keyword_to_attribute_name(nexus_map, 'Failure')
+        attribute_name_to_nexus_keyword(nexus_map, 'also fails')
