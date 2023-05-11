@@ -628,13 +628,19 @@ def test_wells_modify(mocker):
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
   ),
 
+(['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well1',
+'iw  jw    KH  PPERF  SKIN  STAT', '!Some comment line', '1  2   2.5   2   3.5  ON !COMMMENT', '', '9  8   6.5   40   32.5  OFF',
+'11  12   4.5   43   394.5  OFF', '', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+  '01/02/2020', True,
+['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well1',
+'iw  jw    KH  PPERF  SKIN  STAT L RADB', '!Some comment line', '1  2   2.5   2   3.5  ON NA NA !COMMMENT', '', '9  8   6.5   40   32.5  OFF NA NA',
+'11  12   4.5   43   394.5  OFF NA NA', '', '4 5 NA NA NA NA 6 7.5', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+  ),
+
 ], ids=['basic_test', 'insert in middle of file','No time card for new comp', 'preserve previous completions', 'No previous well',
-'Not overlapping columns', 'no overlap and multiple rows', 'Time card no comp'])
+'Not overlapping columns', 'no overlap and multiple rows', 'Time card no comp', 'comment with not overlapping columns'])
 def test_add_completion_write(mocker, file_as_list, add_perf_date, preserve_previous_completions, expected_result):
     ''' TODO insert into include files
-        TODO insert into different wellspec methods
-        TODO test for not having a date in the completion properties dictionary
-        TODO with comments inline
     '''
     start_date = '01/01/2020'
     # Arrange

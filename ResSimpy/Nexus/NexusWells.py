@@ -206,21 +206,10 @@ class NexusWells(Wells):
             if nfo.check_token('WELLSPEC', line) and nfo.get_token_value('WELLSPEC', line, [line]) == well_name \
                     and new_completion_time_index != -1:
                 # get the header of the wellspec table
-                keyword_map = {x: y[0] for x, y in nexus_mapping.items()}
-                wellspec_table = file_content[index::]
-                header_index, headers = nfo.get_table_header(file_as_list=wellspec_table, header_values=keyword_map)
-                header_index += index
-                headers_original = copy.copy(headers)
-                # work out if there are any headers that are not in the new completion
-                for key in completion_properties:
-                    if key == 'date':
-                        continue
-                    if inverted_nexus_map[key] not in headers:
-                        headers.append(inverted_nexus_map[key])
-                        additional_headers.append(inverted_nexus_map[key])
-                if len(additional_headers) > 0:
-                    wellspec_file.file_content_as_list[header_index] = str(
-                        wellspec_file.file_content_as_list[header_index]) + ' ' + ' '.join(additional_headers)
+                header_index, headers, headers_original = self.get_wellspec_header(
+                    additional_headers, completion_properties, file_content, headers, headers_original, index,
+                    inverted_nexus_map, nexus_mapping, wellspec_file,
+                    )
                 continue
 
             if header_index != -1 and nfo.nexus_token_found(line, WELLS_KEYWORDS) and index > header_index:
@@ -228,19 +217,48 @@ class NexusWells(Wells):
                 new_completion_index = index
                 break
             elif header_index != -1 and index > header_index:
-                # check the validity of the line, if its valid add as many NA's as required for the new columns
-                valid_line, _ = nfo.table_line_reader(keyword_store={}, headers=headers_original, line=line)
-                if valid_line and len(additional_headers) > 0:
-                    additional_na_values = ['NA'] * len(additional_headers)
-                    wellspec_file.file_content_as_list[index] = str(
-                        wellspec_file.file_content_as_list[index]) + ' ' + ' '.join(additional_na_values)
+                # check for valid rows + fill extra columns with NA
+                self.fill_in_nas(additional_headers, headers_original, index, line, wellspec_file)
 
         # construct the new completion and ensure the order of the values is in the same order as the headers
         new_completion_string += new_completion.completion_to_wellspec_row(headers)
 
+        # write out to the file_content_as_list
         wellspec_file.file_content_as_list = \
             wellspec_file.file_content_as_list[:new_completion_index] + \
             new_completion_string + wellspec_file.file_content_as_list[new_completion_index:]
+
+    def fill_in_nas(self, additional_headers, headers_original, index, line, wellspec_file):
+        """ check the validity of the line, if its valid add as many NA's as required for the new columns """
+        valid_line, _ = nfo.table_line_reader(keyword_store={}, headers=headers_original, line=line)
+        if valid_line and len(additional_headers) > 0:
+            additional_na_values = ['NA'] * len(additional_headers)
+            additional_column_string = ' '.join(additional_na_values)
+            split_comments = str(wellspec_file.file_content_as_list[index]).split('!', 1)
+            if len(split_comments) == 1:
+                new_completion_line = split_comments[0] + ' ' + additional_column_string
+            else:
+                new_completion_line = split_comments[0] + additional_column_string + ' !' + split_comments[1]
+            wellspec_file.file_content_as_list[index] = new_completion_line
+
+    def get_wellspec_header(self, additional_headers, completion_properties, file_content, headers, headers_original,
+                            index, inverted_nexus_map, nexus_mapping, wellspec_file):
+        keyword_map = {x: y[0] for x, y in nexus_mapping.items()}
+        wellspec_table = file_content[index::]
+        header_index, headers = nfo.get_table_header(file_as_list=wellspec_table, header_values=keyword_map)
+        header_index += index
+        headers_original = copy.copy(headers)
+        # work out if there are any headers that are not in the new completion
+        for key in completion_properties:
+            if key == 'date':
+                continue
+            if inverted_nexus_map[key] not in headers:
+                headers.append(inverted_nexus_map[key])
+                additional_headers.append(inverted_nexus_map[key])
+        if len(additional_headers) > 0:
+            wellspec_file.file_content_as_list[header_index] = str(
+                wellspec_file.file_content_as_list[header_index]) + ' ' + ' '.join(additional_headers)
+        return header_index, headers, headers_original
 
     def __write_out_existing_wellspec(self, completion_date: str,
                                       completion_properties: NexusCompletion.InputDictionary,
