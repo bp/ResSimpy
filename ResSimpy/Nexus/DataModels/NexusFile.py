@@ -348,3 +348,34 @@ class NexusFile:
         if self.object_locations is None:
             self.object_locations: dict[UUID, int] = get_empty_dict_uuid_int()
         self.object_locations[uuid] = line_index
+
+    def find_which_include_file(self, index: int) -> tuple[NexusFile, int]:
+        line_locations = [x[0] for x in self.line_locations]
+        line_locations.sort()
+        uuid_index = 0
+        index_in_file = index - line_locations[-1]
+
+        for i, x in enumerate(line_locations):
+            if x <= index:
+                index_in_file = index - x
+                uuid_index = i
+            if x >= index:
+                break
+
+        file_uuid = self.line_locations[uuid_index][1]
+        if file_uuid == self.file_id:
+            return self, index_in_file
+
+        nexus_file = None
+        for file in self.includes_objects:
+            if file.file_id == file_uuid:
+                nexus_file = file
+            elif file.includes_objects is not None:
+                # CURRENTLY THIS ONLY SUPPORTS 2 LEVELS OF INCLUDES
+                for lvl_2_include in file.includes_objects:
+                    if lvl_2_include.file_id == file_uuid:
+                        nexus_file = lvl_2_include
+        if nexus_file is None:
+            raise ValueError(f'No file with {file_uuid=} found within include objects')
+
+        return nexus_file, index_in_file

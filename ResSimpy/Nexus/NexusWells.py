@@ -219,7 +219,7 @@ class NexusWells(Wells):
                 break
             elif header_index != -1 and index > header_index:
                 # check for valid rows + fill extra columns with NA
-                self.fill_in_nas(additional_headers, headers_original, index, line, wellspec_file)
+                self.fill_in_nas(additional_headers, headers_original, index, line, wellspec_file, file_content)
 
         # construct the new completion and ensure the order of the values is in the same order as the headers
         new_completion_string += new_completion.completion_to_wellspec_row(headers)
@@ -230,17 +230,19 @@ class NexusWells(Wells):
             new_completion_string + wellspec_file.file_content_as_list[new_completion_index:]
 
     def fill_in_nas(self, additional_headers: list[str], headers_original: list[str], index: int, line: str,
-                    wellspec_file: NexusFile) -> None:
+                    wellspec_file: NexusFile, file_content: list[str]) -> None:
         """ check the validity of the line, if its valid add as many NA's as required for the new columns """
         valid_line, _ = nfo.table_line_reader(keyword_store={}, headers=headers_original, line=line)
         if valid_line and len(additional_headers) > 0:
             additional_na_values = ['NA'] * len(additional_headers)
             additional_column_string = ' '.join(additional_na_values)
-            split_comments = str(wellspec_file.file_content_as_list[index]).split('!', 1)
+            split_comments = file_content[index].split('!', 1)
             if len(split_comments) == 1:
                 new_completion_line = split_comments[0] + ' ' + additional_column_string
             else:
                 new_completion_line = split_comments[0] + additional_column_string + ' !' + split_comments[1]
+
+            nexusfile_to_write_to, corresponding_index =
             wellspec_file.file_content_as_list[index] = new_completion_line
 
     def get_wellspec_header(self, additional_headers: list[str], completion_properties: NexusCompletion.InputDictionary,
@@ -275,6 +277,7 @@ class NexusWells(Wells):
                                       date_found: bool, index: int, new_completion_index: int,
                                       preserve_previous_completions: bool, well: NexusWell, well_name: str) -> \
             tuple[list[str], int, list[str], bool]:
+        """writes out the existing wellspec for a well at a new time stamp"""
         nexus_mapping = NexusCompletion.nexus_mapping()
         completion_table_as_list = ['']
         if not date_found:

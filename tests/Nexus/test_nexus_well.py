@@ -1,3 +1,4 @@
+import os
 from unittest.mock import PropertyMock, patch, Mock
 import pytest
 from ResSimpy.Enums.HowEnum import OperationEnum
@@ -9,6 +10,7 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from ResSimpy.Nexus.NexusWells import NexusWells
+from multifile_mocker import mock_multiple_files
 
 
 @pytest.mark.parametrize('completions, expected_perforations', [
@@ -736,3 +738,96 @@ def test_add_completion_correct_wellspec(mocker):
     assert result == expected_result
     assert file_1.file_content_as_list == expected_result_file_1
     assert file_2.file_content_as_list == expected_result_file_2
+
+
+@pytest.mark.parametrize('fcs_file_contents, wells_file, include_file_contents, add_perf_date, expected_result', [
+('''DATEFORMAT DD/MM/YYYY
+WelLS sEt 1 /my/wellspec/file.dat''',
+''' ! Wells file:
+TIME 01/01/2020
+WELLSPEC well1
+iw jw l radw
+1  2  3 4.5
+Include include_file.dat
+TIME 01/05/2020
+WELLSPEC well1
+iw jw l radw
+1  2  3 4.5
+''',
+'''! Include File
+TIME 01/03/2020
+WELLSPEC well1
+iw jw l radw
+1  2  3 4.5
+4  5  6 4.2
+
+TIME 01/04/2020
+WELLSPEC well1
+iw jw l radw
+1  2  3 4.5
+4  5  6 4.2
+''',
+'01/03/2020',
+['! Include File',
+'TIME 01/03/2020',
+'WELLSPEC well1',
+'iw jw l radw',
+'1  2  3 4.5',
+'4  5  6 4.2',
+'4 5 6 7.5',
+'TIME 01/04/2020',
+'WELLSPEC well1',
+'iw jw l radw',
+'1  2  3 4.5',
+'4  5  6 4.2',],
+),
+
+], ids=['modify well in includes file'])
+def test_add_completion_include_files(mocker, fcs_file_contents, wells_file, include_file_contents, add_perf_date, expected_result):
+    '''TODO after an include in main file
+        TODO inside an include file
+     '''
+    start_date = '01/01/2020'
+    # Arrange
+    # Mock out the surface and fcs file
+    fcs_file_path = 'fcs_file.fcs'
+    include_file_path = os.path.join('/my/wellspec', 'include_file.dat')
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            fcs_file_path: fcs_file_contents,
+            '/my/wellspec/file.dat': wells_file,
+            include_file_path: include_file_contents,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    ls_dir = Mock(side_effect=lambda x: [])
+    mocker.patch('os.listdir', ls_dir)
+    fcs_file_exists = Mock(side_effect=lambda x: True)
+    mocker.patch('os.path.isfile', fcs_file_exists)
+    add_perf_date = '01/03/2020'
+
+    mock_nexus_sim = NexusSimulator('fcs_file.fcs')
+
+    mock_nexus_sim.start_date_set(start_date)
+    # mock out open
+    wells_obj = NexusWells(mock_nexus_sim)
+    wells_obj.load_wells()
+
+    add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'bore_radius': 7.5}
+
+    expected_include_file = NexusFile(location=include_file_path, includes=[],
+    origin='/my/wellspec/file.dat', includes_objects=None, file_content_as_list=expected_result)
+
+    expected_wells_file_as_list = [x.replace('include_file.dat', '') for x in wells_file.splitlines()]
+    expected_wells_file_as_list.insert(expected_wells_file_as_list.index('Include ')+1, expected_include_file)
+    expected_wells_file = NexusFile(location='/my/wellspec/file.dat', includes_objects=[expected_include_file],
+    includes=[include_file_path], origin=fcs_file_path, file_content_as_list=wells_file.splitlines())
+    # Act
+    wells_obj.add_completion(well_name='well1', completion_properties=add_perf_dict,
+                             preserve_previous_completions=True)
+    result = mock_nexus_sim.fcs_file.well_files[1].includes_objects[0]
+
+    # Assert
+    assert result == expected_include_file
+    assert mock_nexus_sim.fcs_file.well_files[1] == expected_wells_file

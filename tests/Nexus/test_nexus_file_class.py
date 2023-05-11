@@ -458,3 +458,66 @@ continuation''')
     flat_file = nexus_file.get_flat_list_str_file()
     # Assert
     assert nexus_file == expected_nexus_file
+
+@pytest.mark.parametrize('index, expected_file_number, expected_index_in_file',[
+(0, 0, 0),
+(4, 2, 0),
+(7, 1, 1),
+(9, 0, 1),
+
+])
+def test_find_which_include_file(mocker, index, expected_file_number, expected_index_in_file):
+    # Arrange
+    # We need 2 lots of the mocked out uuid one for init of the expected files and one set for the try statement
+
+    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid_inc2', 'uuid_inc1', 'parent_file',
+                                                    'uuid_inc2', 'uuid_inc1', 'parent_file'])
+
+    file_path = 'test_file_path.dat'
+    test_file_contents = (
+        '''basic_file INCLUDE inc_file1.inc
+some random words ! comment
+continuation''')
+    include_file_contents = 'inc file contents\nsecond line in incfile \n include inc_file2.inc end of line \n '
+    include_file_contents_2 = 'inc2 file contents\nmore content'
+    expected_location = 'test_file_path.dat'
+    expected_origin = None
+
+    nexus_file_include2 = NexusFile(location='inc_file2.inc', includes=[], origin='inc_file1.inc',
+                                    includes_objects=None, file_content_as_list=['inc2 file contents\n', 'more content'])
+
+    inc1_file_content_as_list = ['inc file contents\n', 'second line in incfile \n', ' include ', nexus_file_include2,
+                                 'end of line \n', ' ']
+
+    nexus_file_include1 = NexusFile(location='inc_file1.inc', includes=['inc_file2.inc'], origin=file_path,
+                                    includes_objects=[nexus_file_include2], file_content_as_list=inc1_file_content_as_list)
+
+    expected_file_content_as_list = ['basic_file INCLUDE ', nexus_file_include1, 'some random words ! comment\n',
+                                     'continuation']
+
+    expected_line_locations = [(0, 'parent_file'), (1, 'uuid_inc1'), (4, 'uuid_inc2'), (6, 'uuid_inc1'), (8, 'parent_file')]
+
+    expected_nexus_file = NexusFile(location=expected_location, includes=['inc_file1.inc'],
+                                    origin=expected_origin, includes_objects=[nexus_file_include1],
+                                    file_content_as_list=expected_file_content_as_list)
+    expected_nexus_file.__setattr__('line_locations', expected_line_locations)
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'test_file_path.dat': test_file_contents,
+            'inc_file1.inc': include_file_contents,
+            'inc_file2.inc': include_file_contents_2,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    expected_return_file = [expected_nexus_file, nexus_file_include1, nexus_file_include2][expected_file_number]
+
+    # Act
+    nexus_file = NexusFile.generate_file_include_structure(file_path)
+    flat_file = nexus_file.get_flat_list_str_file()
+    nexus_file_result, index_in_file = nexus_file.find_which_include_file(index=index)
+    # Assert
+    assert nexus_file == expected_nexus_file
+    assert nexus_file_result == expected_return_file
+    assert index_in_file == expected_index_in_file
