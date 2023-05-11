@@ -10,6 +10,7 @@ import pandas as pd
 
 from ResSimpy.Enums.HowEnum import OperationEnum
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
 from ResSimpy.Wells import Wells
@@ -169,8 +170,8 @@ class NexusWells(Wells):
         new_completion_time_index = -1
         header_index = -1
         headers: list[str] = []
-        headers_original = []
-        additional_headers = []
+        headers_original: list[str] = []
+        additional_headers: list[str] = []
         file_content = wellspec_file.get_flat_list_str_file()
         date_found = False
         new_completion_index = len(file_content)
@@ -207,7 +208,7 @@ class NexusWells(Wells):
                     and new_completion_time_index != -1:
                 # get the header of the wellspec table
                 header_index, headers, headers_original = self.get_wellspec_header(
-                    additional_headers, completion_properties, file_content, headers, headers_original, index,
+                    additional_headers, completion_properties, file_content, index,
                     inverted_nexus_map, nexus_mapping, wellspec_file,
                     )
                 continue
@@ -228,7 +229,8 @@ class NexusWells(Wells):
             wellspec_file.file_content_as_list[:new_completion_index] + \
             new_completion_string + wellspec_file.file_content_as_list[new_completion_index:]
 
-    def fill_in_nas(self, additional_headers, headers_original, index, line, wellspec_file):
+    def fill_in_nas(self, additional_headers: list[str], headers_original: list[str], index: int, line: str,
+                    wellspec_file: NexusFile) -> None:
         """ check the validity of the line, if its valid add as many NA's as required for the new columns """
         valid_line, _ = nfo.table_line_reader(keyword_store={}, headers=headers_original, line=line)
         if valid_line and len(additional_headers) > 0:
@@ -241,8 +243,11 @@ class NexusWells(Wells):
                 new_completion_line = split_comments[0] + additional_column_string + ' !' + split_comments[1]
             wellspec_file.file_content_as_list[index] = new_completion_line
 
-    def get_wellspec_header(self, additional_headers, completion_properties, file_content, headers, headers_original,
-                            index, inverted_nexus_map, nexus_mapping, wellspec_file):
+    def get_wellspec_header(self, additional_headers: list[str], completion_properties: NexusCompletion.InputDictionary,
+                            file_content: list[str], index: int, inverted_nexus_map: dict[str, str],
+                            nexus_mapping: dict[str, tuple[str, type]],
+                            wellspec_file: NexusFile) -> tuple[int, list[str], list[str]]:
+        """Gets the wellspec header and works out if any additional headers should be added"""
         keyword_map = {x: y[0] for x, y in nexus_mapping.items()}
         wellspec_table = file_content[index::]
         header_index, headers = nfo.get_table_header(file_as_list=wellspec_table, header_values=keyword_map)
@@ -255,9 +260,14 @@ class NexusWells(Wells):
             if inverted_nexus_map[key] not in headers:
                 headers.append(inverted_nexus_map[key])
                 additional_headers.append(inverted_nexus_map[key])
+        additional_column_string = ' '.join(additional_headers)
+        split_comments = str(wellspec_file.file_content_as_list[header_index]).split('!', 1)
+        if len(split_comments) == 1:
+            new_header_line = split_comments[0] + ' ' + additional_column_string
+        else:
+            new_header_line = split_comments[0] + additional_column_string + ' !' + split_comments[1]
         if len(additional_headers) > 0:
-            wellspec_file.file_content_as_list[header_index] = str(
-                wellspec_file.file_content_as_list[header_index]) + ' ' + ' '.join(additional_headers)
+            wellspec_file.file_content_as_list[header_index] = new_header_line
         return header_index, headers, headers_original
 
     def __write_out_existing_wellspec(self, completion_date: str,
