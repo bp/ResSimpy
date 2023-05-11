@@ -142,6 +142,8 @@ class NexusFile:
                     suffix_line = None
 
                 if prefix_line:
+                    if not suffix_line:
+                        prefix_line += '\n'
                     modified_file_as_list.append(prefix_line)
                 modified_file_as_list.append(inc_file)
                 if suffix_line:
@@ -162,6 +164,8 @@ class NexusFile:
                     suffix_line = None
 
                 if prefix_line:
+                    if not suffix_line:
+                        prefix_line += '\n'
                     modified_file_as_list.append(prefix_line)
                 modified_file_as_list.append(inc_file)
                 if suffix_line:
@@ -219,8 +223,9 @@ class NexusFile:
             parent = self
         if parent.line_locations is None:
             parent.line_locations = []
-
-        parent.line_locations.append((file_index.index, self.file_id))
+        new_entry = (file_index.index, self.file_id)
+        if new_entry not in parent.line_locations:
+            parent.line_locations.append(new_entry)
         depth: int = 0
         if max_depth is not None:
             depth = max_depth
@@ -234,7 +239,9 @@ class NexusFile:
 
                     yield from row.iterate_line(file_index=file_index, max_depth=level_down_max_depth,
                                                 parent=parent)
-                    parent.line_locations += [(file_index.index, self.file_id)]
+                    new_entry = (file_index.index, self.file_id)
+                    if new_entry not in parent.line_locations:
+                        parent.line_locations.append(new_entry)
                 else:
                     continue
             else:

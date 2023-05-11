@@ -455,7 +455,11 @@ continuation''')
     mocker.patch("builtins.open", mock_open_wrapper)
     # Act
     nexus_file = NexusFile.generate_file_include_structure(file_path)
-    flat_file = nexus_file.get_flat_list_str_file()
+    # do the generation of the flat file a few times to catch the issue of continually appending duplicate line locations
+    nexus_file.get_flat_list_str_file()
+    nexus_file.get_flat_list_str_file()
+    nexus_file.get_flat_list_str_file()
+
     # Assert
     assert nexus_file == expected_nexus_file
 

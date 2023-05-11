@@ -652,6 +652,7 @@ def test_wells_modify(mocker):
 'comment inline with headers'])
 def test_add_completion_write(mocker, file_as_list, add_perf_date, preserve_previous_completions, expected_result):
     ''' TODO insert into include files
+     TODO write multiple completions in a row
     '''
     start_date = '01/01/2020'
     # Arrange
@@ -768,18 +769,19 @@ iw jw l radw
 4  5  6 4.2
 ''',
 '01/03/2020',
-['! Include File',
-'TIME 01/03/2020',
-'WELLSPEC well1',
-'iw jw l radw',
-'1  2  3 4.5',
-'4  5  6 4.2',
-'4 5 6 7.5',
-'TIME 01/04/2020',
-'WELLSPEC well1',
-'iw jw l radw',
-'1  2  3 4.5',
-'4  5  6 4.2',],
+['! Include File\n',
+'TIME 01/03/2020\n',
+'WELLSPEC well1\n',
+'iw jw l radw\n',
+'1  2  3 4.5\n',
+'4  5  6 4.2\n',
+'\n',
+'4 5 6 7.5\n',
+'TIME 01/04/2020\n',
+'WELLSPEC well1\n',
+'iw jw l radw\n',
+'1  2  3 4.5\n',
+'4  5  6 4.2\n',],
 ),
 
 ], ids=['modify well in includes file'])
@@ -814,20 +816,21 @@ def test_add_completion_include_files(mocker, fcs_file_contents, wells_file, inc
     wells_obj = NexusWells(mock_nexus_sim)
     wells_obj.load_wells()
 
-    add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'bore_radius': 7.5}
+    add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 7.5}
 
     expected_include_file = NexusFile(location=include_file_path, includes=[],
     origin='/my/wellspec/file.dat', includes_objects=None, file_content_as_list=expected_result)
 
-    expected_wells_file_as_list = [x.replace('include_file.dat', '') for x in wells_file.splitlines()]
-    expected_wells_file_as_list.insert(expected_wells_file_as_list.index('Include ')+1, expected_include_file)
+    expected_wells_file_as_list = [x.replace('include_file.dat', '') for x in wells_file.splitlines(keepends=True)]
+    expected_wells_file_as_list.insert(expected_wells_file_as_list.index('Include \n')+1, expected_include_file)
     expected_wells_file = NexusFile(location='/my/wellspec/file.dat', includes_objects=[expected_include_file],
-    includes=[include_file_path], origin=fcs_file_path, file_content_as_list=wells_file.splitlines())
+    includes=[include_file_path], origin=fcs_file_path, file_content_as_list=expected_wells_file_as_list)
     # Act
     wells_obj.add_completion(well_name='well1', completion_properties=add_perf_dict,
                              preserve_previous_completions=True)
     result = mock_nexus_sim.fcs_file.well_files[1].includes_objects[0]
 
     # Assert
+    assert result.file_content_as_list == expected_include_file.file_content_as_list
     assert result == expected_include_file
-    assert mock_nexus_sim.fcs_file.well_files[1] == expected_wells_file
+    assert mock_nexus_sim.fcs_file.well_files[1].file_content_as_list == expected_wells_file.file_content_as_list

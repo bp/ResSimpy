@@ -367,5 +367,5 @@ class NexusCompletion(Completion):
             if attribute_value is None:
                 attribute_value = 'NA'
             completion_values.append(attribute_value)
-        completion_string = [' '.join([str(x) for x in completion_values])]
+        completion_string = [' '.join([str(x) for x in completion_values]) + '\n']
         return completion_string

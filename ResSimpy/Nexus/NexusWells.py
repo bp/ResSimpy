@@ -225,9 +225,10 @@ class NexusWells(Wells):
         new_completion_string += new_completion.completion_to_wellspec_row(headers)
 
         # write out to the file_content_as_list
-        wellspec_file.file_content_as_list = \
-            wellspec_file.file_content_as_list[:new_completion_index] + \
-            new_completion_string + wellspec_file.file_content_as_list[new_completion_index:]
+        nexusfile_to_write_to, index_in_file = wellspec_file.find_which_include_file(new_completion_index)
+        nexusfile_to_write_to.file_content_as_list = \
+            nexusfile_to_write_to.file_content_as_list[:index_in_file] + \
+            new_completion_string + nexusfile_to_write_to.file_content_as_list[index_in_file:]
 
     def fill_in_nas(self, additional_headers: list[str], headers_original: list[str], index: int, line: str,
                     wellspec_file: NexusFile, file_content: list[str]) -> None:
@@ -242,8 +243,8 @@ class NexusWells(Wells):
             else:
                 new_completion_line = split_comments[0] + additional_column_string + ' !' + split_comments[1]
 
-            nexusfile_to_write_to, corresponding_index =
-            wellspec_file.file_content_as_list[index] = new_completion_line
+            nexusfile_to_write_to, index_in_file = wellspec_file.find_which_include_file(index)
+            nexusfile_to_write_to.file_content_as_list[index_in_file] = new_completion_line
 
     def get_wellspec_header(self, additional_headers: list[str], completion_properties: NexusCompletion.InputDictionary,
                             file_content: list[str], index: int, inverted_nexus_map: dict[str, str],
