@@ -168,13 +168,13 @@ class NexusWells(Wells):
         inverted_nexus_map = invert_nexus_map(nexus_mapping)
         new_completion_time_index = -1
         header_index = -1
-        headers = []
+        headers: list[str] = []
         headers_original = []
         additional_headers = []
         file_content = wellspec_file.get_flat_list_str_file()
         date_found = False
         new_completion_index = len(file_content)
-        new_completion_string = []
+        new_completion_string: list[str] = []
 
         # if no time cards present in the file just find the name of the well instead
         if not nfo.value_in_file('TIME', file_content):
