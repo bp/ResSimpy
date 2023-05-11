@@ -179,7 +179,6 @@ SEPARATOR_TABLE:
 
     # Act
     result = sep_obj.__repr__()
-    print(result)
 
     # Assert
     assert result == expected_output
