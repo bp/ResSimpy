@@ -579,7 +579,7 @@ def test_wells_modify(mocker):
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
   '01/02/2020', False,
 ['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
-'13  12   11   3.14', '', 'TIME 01/02/2020', 'WELLSPEC well1', 'IW JW L RADB', '4 5 6 7.5\n',
+'13  12   11   3.14', '\n', 'TIME 01/02/2020\n', 'WELLSPEC well1\n', 'IW JW L RADB\n', '4 5 6 7.5\n', '\n',
 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
   ),
@@ -589,7 +589,7 @@ def test_wells_modify(mocker):
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
   '01/02/2020', True,
 ['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
-'13  12   11   3.14', '', 'TIME 01/02/2020', 'WELLSPEC well1', 'IW JW L RADB', '1 2 3 1.5\n', '4 5 6 7.5\n',
+'13  12   11   3.14', '\n', 'TIME 01/02/2020\n', 'WELLSPEC well1\n', 'IW JW L RADB\n', '1 2 3 1.5\n', '4 5 6 7.5\n', '\n',
 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
   ),
@@ -598,7 +598,8 @@ def test_wells_modify(mocker):
 '1  2   5   2.5', 'WELLSPEC well2', 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020',
 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
   '01/02/2020', True,
-['WELLSPEC well2', 'iw  jw   l    RADB', '13  12   11   3.14', '', 'TIME 01/02/2020', 'WELLSPEC well1', 'IW JW L RADB', '4 5 6 7.5\n',
+['WELLSPEC well2', 'iw  jw   l    RADB', '13  12   11   3.14', '\n',
+'TIME 01/02/2020\n', 'WELLSPEC well1\n', 'IW JW L RADB\n', '4 5 6 7.5\n', '\n',
 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
   ),
@@ -626,7 +627,7 @@ def test_wells_modify(mocker):
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
   '01/02/2020', True,
 ['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB KH', '1  2   3   1.5 5.5',  'TIME 01/02/2020', 'WELLSPEC well2', 'iw  jw   l    RADB KH',
-'13  12   11   3.14 5.2', '', 'WELLSPEC well1', 'IW JW L RADB KH', '1 2 3 1.5 5.5\n', '4 5 6 7.5 NA\n',
+'13  12   11   3.14 5.2', '\n', 'WELLSPEC well1\n', 'IW JW L RADB KH\n', '1 2 3 1.5 5.5\n', '4 5 6 7.5 NA\n', '\n',
 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
   ),
@@ -835,7 +836,7 @@ def test_add_completion_include_files(mocker, fcs_file_contents, wells_file, inc
     assert result == expected_include_file
     assert mock_nexus_sim.fcs_file.well_files[1].file_content_as_list == expected_wells_file.file_content_as_list
 
-def test_add_completion_iraq(mocker):
+def test_add_completion_other(mocker):
     # Arrange
     fcs_file_data= '''RUN_UNITS ENGLISH
 
@@ -849,19 +850,19 @@ def test_add_completion_iraq(mocker):
     TIME 01/01/2020
     
     
-    WELLSPEC RU001
+    WELLSPEC well1
      IW  JW  L KH    RADW  PPERF    SKIN RADB WI
     111 479  3 NA 0.35400   0.5 0.00000   NA NA
     111 479  4 NA 0.35400   0.5 0.00000   NA NA
     
     
-    WELLSPEC RU251
+    WELLSPEC well2
     IW  JW L KH    RADW  PPERF    SKIN RADB WI
     79 340 3 NA 0.35400   1 0.00000   NA NA
     79 340 4 NA 0.35400   1 0.00000   NA NA
     
     
-    WELLSPEC RU002
+    WELLSPEC well3
      IW  JW  L KH    RADW  PPERF    SKIN RADB WI
     137 479  3 NA 0.35400   0.5 0.00000   NA NA
     137 479  4 NA 0.35400   0.5 0.00000   NA NA
@@ -869,13 +870,13 @@ def test_add_completion_iraq(mocker):
     137 479  6 NA 0.35400   1 0.00000   NA NA
     
     TIME 01/02/2020
-    WELLSPEC RU002
+    WELLSPEC well2
      IW  JW  L KH    RADW  PPERF    SKIN RADB WI
     137 479  3 NA 0.35400   0.5 0.00000   NA NA
       
      TIME 01/03/2020
      
-     WELLSPEC RU002
+     WELLSPEC well2
      IW  JW  L KH    RADW  PPERF    SKIN RADB WI
     137 479  3 NA 0.35400   0.5 0.00000   NA NA
     137 479  4 NA 0.35400   0.5 0.00000   NA NA'''
@@ -883,19 +884,19 @@ def test_add_completion_iraq(mocker):
     TIME 01/01/2020
     
     
-    WELLSPEC RU001
+    WELLSPEC well1
      IW  JW  L KH    RADW  PPERF    SKIN RADB WI
     111 479  3 NA 0.35400   0.5 0.00000   NA NA
     111 479  4 NA 0.35400   0.5 0.00000   NA NA
     
     
-    WELLSPEC RU251
+    WELLSPEC well2
     IW  JW L KH    RADW  PPERF    SKIN RADB WI
     79 340 3 NA 0.35400   1 0.00000   NA NA
     79 340 4 NA 0.35400   1 0.00000   NA NA
     
     
-    WELLSPEC RU002
+    WELLSPEC well3
      IW  JW  L KH    RADW  PPERF    SKIN RADB WI
     137 479  3 NA 0.35400   0.5 0.00000   NA NA
     137 479  4 NA 0.35400   0.5 0.00000   NA NA
@@ -903,19 +904,20 @@ def test_add_completion_iraq(mocker):
     137 479  6 NA 0.35400   1 0.00000   NA NA
     
     TIME 01/02/2020
-    WELLSPEC RU002
+    WELLSPEC well2
      IW  JW  L KH    RADW  PPERF    SKIN RADB WI
     137 479  3 NA 0.35400   0.5 0.00000   NA NA
+      
 
-WELLSPEC RU001
+WELLSPEC well1
 IW JW L RADW PPERF SKIN
 111 479 3 0.354 0.5 0.0
 111 479 4 0.354 0.5 0.0
 4 5 6 7.5 NA NA
-      
+
      TIME 01/03/2020
      
-     WELLSPEC RU002
+     WELLSPEC well2
      IW  JW  L KH    RADW  PPERF    SKIN RADB WI
     137 479  3 NA 0.35400   0.5 0.00000   NA NA
     137 479  4 NA 0.35400   0.5 0.00000   NA NA'''
@@ -943,7 +945,7 @@ IW JW L RADW PPERF SKIN
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
     # Act
-    model.Wells.add_completion(well_name='RU001', completion_properties=add_perf_dict)
+    model.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict)
 
     # Assert
 

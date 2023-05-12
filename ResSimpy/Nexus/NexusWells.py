@@ -178,6 +178,7 @@ class NexusWells(Wells):
         new_completion_index = len(file_content)
         new_completion_string: list[str] = []
         last_valid_line_index = -1
+        writing_new_wellspec_table = False
 
         # if no time cards present in the file just find the name of the well instead
         if not nfo.value_in_file('TIME', file_content):
@@ -197,11 +198,12 @@ class NexusWells(Wells):
                     # start to compile a wellspec table from scratch and add in the time cards
                     new_completion_index = index
                     header_index = index - 1
-                    headers, new_completion_index, new_completion_string, found_previous_completions = \
+                    headers, new_completion_index, new_completion_string, found_completion_at_previous_date = \
                         self.__write_out_existing_wellspec(
                             completion_date, completion_properties, date_found, index,
                             new_completion_index, preserve_previous_completions, well, well_name)
-                    if not found_previous_completions:
+                    writing_new_wellspec_table = True
+                    if not found_completion_at_previous_date:
                         break
                 else:
                     continue
@@ -230,7 +232,8 @@ class NexusWells(Wells):
                 last_valid_line_index = line_valid_index if line_valid_index > 0 else last_valid_line_index
         # construct the new completion and ensure the order of the values is in the same order as the headers
         new_completion_string += new_completion.completion_to_wellspec_row(headers)
-
+        if writing_new_wellspec_table:
+            new_completion_string += ['\n']
         # write out to the file_content_as_list
         nexusfile_to_write_to, index_in_file = wellspec_file.find_which_include_file(new_completion_index)
         if nexusfile_to_write_to.file_content_as_list is None:
@@ -298,10 +301,10 @@ class NexusWells(Wells):
             tuple[list[str], int, list[str], bool]:
         """writes out the existing wellspec for a well at a new time stamp"""
         nexus_mapping = NexusCompletion.nexus_mapping()
-        completion_table_as_list = ['']
+        completion_table_as_list = ['\n']
         if not date_found:
-            completion_table_as_list += ['TIME ' + completion_date]
-        completion_table_as_list += ['WELLSPEC ' + well_name, ]
+            completion_table_as_list += ['TIME ' + completion_date + '\n']
+        completion_table_as_list += ['WELLSPEC ' + well_name + '\n']
         headers = [k for k, v in nexus_mapping.items() if v[0] in completion_properties]
         if preserve_previous_completions:
             # get all the dates for that well
@@ -313,7 +316,7 @@ class NexusWells(Wells):
                 # at the current index with a new wellspec card.
                 warnings.warn(f'No previous completions found for {well_name} at date: {completion_date}')
                 new_completion_index = index
-                write_out_headers = [' '.join(headers)]
+                write_out_headers = [' '.join(headers) + '\n']
                 completion_table_as_list += write_out_headers
                 return headers, new_completion_index, completion_table_as_list, False
 
@@ -333,12 +336,12 @@ class NexusWells(Wells):
                     if header_key not in headers:
                         headers.append(header_key)
 
-            write_out_headers = [' '.join(headers)]
+            write_out_headers = [' '.join(headers) + '\n']
             completion_table_as_list += write_out_headers
             # run through the existing completions to duplicate the completion at the new time
             for completion in previous_completion_list:
                 completion_table_as_list += completion.completion_to_wellspec_row(headers)
         else:
-            write_out_headers = [' '.join(headers)]
+            write_out_headers = [' '.join(headers) + '\n']
             completion_table_as_list += write_out_headers
         return headers, new_completion_index, completion_table_as_list, True
