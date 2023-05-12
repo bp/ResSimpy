@@ -209,7 +209,7 @@ class NexusWells(Wells):
                 # get the header of the wellspec table
                 header_index, headers, headers_original = self.get_wellspec_header(
                     additional_headers, completion_properties, file_content, index,
-                    inverted_nexus_map, nexus_mapping, wellspec_file,
+                    inverted_nexus_map, nexus_mapping,
                     )
                 continue
 
@@ -226,6 +226,8 @@ class NexusWells(Wells):
 
         # write out to the file_content_as_list
         nexusfile_to_write_to, index_in_file = wellspec_file.find_which_include_file(new_completion_index)
+        if nexusfile_to_write_to.file_content_as_list is None:
+            raise ValueError(f'No file content to write to in file: {nexusfile_to_write_to}')
         nexusfile_to_write_to.file_content_as_list = \
             nexusfile_to_write_to.file_content_as_list[:index_in_file] + \
             new_completion_string + nexusfile_to_write_to.file_content_as_list[index_in_file:]
@@ -244,12 +246,13 @@ class NexusWells(Wells):
                 new_completion_line = split_comments[0] + additional_column_string + ' !' + split_comments[1]
 
             nexusfile_to_write_to, index_in_file = wellspec_file.find_which_include_file(index)
+            if nexusfile_to_write_to.file_content_as_list is None:
+                raise ValueError(f'No file content to write to in file: {nexusfile_to_write_to}')
             nexusfile_to_write_to.file_content_as_list[index_in_file] = new_completion_line
 
     def get_wellspec_header(self, additional_headers: list[str], completion_properties: NexusCompletion.InputDictionary,
                             file_content: list[str], index: int, inverted_nexus_map: dict[str, str],
-                            nexus_mapping: dict[str, tuple[str, type]],
-                            wellspec_file: NexusFile) -> tuple[int, list[str], list[str]]:
+                            nexus_mapping: dict[str, tuple[str, type]]) -> tuple[int, list[str], list[str]]:
         """Gets the wellspec header and works out if any additional headers should be added"""
         keyword_map = {x: y[0] for x, y in nexus_mapping.items()}
         wellspec_table = file_content[index::]
@@ -264,13 +267,13 @@ class NexusWells(Wells):
                 headers.append(inverted_nexus_map[key])
                 additional_headers.append(inverted_nexus_map[key])
         additional_column_string = ' '.join(additional_headers)
-        split_comments = str(wellspec_file.file_content_as_list[header_index]).split('!', 1)
+        split_comments = str(file_content[header_index]).split('!', 1)
         if len(split_comments) == 1:
             new_header_line = split_comments[0] + ' ' + additional_column_string
         else:
             new_header_line = split_comments[0] + additional_column_string + ' !' + split_comments[1]
         if len(additional_headers) > 0:
-            wellspec_file.file_content_as_list[header_index] = new_header_line
+            file_content[header_index] = new_header_line
         return header_index, headers, headers_original
 
     def __write_out_existing_wellspec(self, completion_date: str,

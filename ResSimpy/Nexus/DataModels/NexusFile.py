@@ -357,6 +357,11 @@ class NexusFile:
         self.object_locations[uuid] = line_index
 
     def find_which_include_file(self, index: int) -> tuple[NexusFile, int]:
+        if self.line_locations is None:
+            self.get_flat_list_str_file()
+            if self.line_locations is None:
+                raise ValueError("No include line locations found.")
+
         line_locations = [x[0] for x in self.line_locations]
         line_locations.sort()
         uuid_index = 0
@@ -370,7 +375,7 @@ class NexusFile:
                 break
 
         file_uuid = self.line_locations[uuid_index][1]
-        if file_uuid == self.file_id:
+        if file_uuid == self.file_id or self.includes_objects is None:
             return self, index_in_file
 
         nexus_file = None
