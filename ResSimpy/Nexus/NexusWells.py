@@ -141,6 +141,7 @@ class NexusWells(Wells):
         for well_coord in ['i', 'j', 'k']:
             if well_coord not in completion_properties:
                 raise ValueError(f'Requires value {well_coord} for new perforation')
+
         well = self.get_well(well_name)
         if well is None:
             # TODO could make this not raise an error and instead initialize a NexusWell and add it to NexusWells
@@ -176,6 +177,7 @@ class NexusWells(Wells):
         date_found = False
         new_completion_index = len(file_content)
         new_completion_string: list[str] = []
+        last_valid_line_index = -1
 
         # if no time cards present in the file just find the name of the well instead
         if not nfo.value_in_file('TIME', file_content):
@@ -215,12 +217,14 @@ class NexusWells(Wells):
 
             if header_index != -1 and nfo.nexus_token_found(line, WELLS_KEYWORDS) and index > header_index:
                 # if we hit the end of the wellspec table for the given well set the index for the new completion
-                new_completion_index = index
+                new_completion_index = last_valid_line_index + 1
+
                 break
             elif header_index != -1 and index > header_index:
                 # check for valid rows + fill extra columns with NA
-                self.fill_in_nas(additional_headers, headers_original, index, line, wellspec_file, file_content)
-
+                line_valid_index = self.fill_in_nas(additional_headers, headers_original, index, line,
+                                                    wellspec_file, file_content)
+                last_valid_line_index = line_valid_index if line_valid_index > 0 else last_valid_line_index
         # construct the new completion and ensure the order of the values is in the same order as the headers
         new_completion_string += new_completion.completion_to_wellspec_row(headers)
 
@@ -232,8 +236,11 @@ class NexusWells(Wells):
             nexusfile_to_write_to.file_content_as_list[:index_in_file] + \
             new_completion_string + nexusfile_to_write_to.file_content_as_list[index_in_file:]
 
+        # write straight to file
+        nexusfile_to_write_to.write_to_file()
+
     def fill_in_nas(self, additional_headers: list[str], headers_original: list[str], index: int, line: str,
-                    wellspec_file: NexusFile, file_content: list[str]) -> None:
+                    wellspec_file: NexusFile, file_content: list[str]) -> int:
         """ check the validity of the line, if its valid add as many NA's as required for the new columns """
         valid_line, _ = nfo.table_line_reader(keyword_store={}, headers=headers_original, line=line)
         if valid_line and len(additional_headers) > 0:
@@ -249,6 +256,10 @@ class NexusWells(Wells):
             if nexusfile_to_write_to.file_content_as_list is None:
                 raise ValueError(f'No file content to write to in file: {nexusfile_to_write_to}')
             nexusfile_to_write_to.file_content_as_list[index_in_file] = new_completion_line
+        if valid_line:
+            return index
+        else:
+            return -1
 
     def get_wellspec_header(self, additional_headers: list[str], completion_properties: NexusCompletion.InputDictionary,
                             file_content: list[str], index: int, inverted_nexus_map: dict[str, str],

@@ -19,3 +19,6 @@ class Wells(ABC):
 
     def get_wells_overview(self) -> str:
         raise NotImplementedError("Implement this in the derived class")
+
+    def add_completion(self, well_name: str, completion_properties: dict, preserve_previous_completions: bool) -> None:
+        raise NotImplementedError("Implement this in the derived class")

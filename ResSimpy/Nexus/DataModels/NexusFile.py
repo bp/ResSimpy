@@ -391,3 +391,18 @@ class NexusFile:
             raise ValueError(f'No file with {file_uuid=} found within include objects')
 
         return nexus_file, index_in_file
+
+    def write_to_file(self):
+        file_str = ''.join(self.file_content_as_list_str)
+        with open(self.location, 'w') as fi:
+            fi.write(file_str)
+
+    @property
+    def file_content_as_list_str(self):
+        file_content_as_list_str = []
+        for line in self.file_content_as_list:
+            if isinstance(line, str):
+                file_content_as_list_str.append(line)
+            else:
+                file_content_as_list_str.append(line.location)
+        return file_content_as_list_str
