@@ -269,8 +269,8 @@ class NexusWells(Wells):
 
     def get_wellspec_header(self, additional_headers: list[str], completion_properties: NexusCompletion.InputDictionary,
                             file_content: list[str], index: int, inverted_nexus_map: dict[str, str],
-                            nexus_mapping: dict[str, tuple[str, type]], wellspec_file: NexusFile) -> tuple[
-        int, list[str], list[str]]:
+                            nexus_mapping: dict[str, tuple[str, type]], wellspec_file: NexusFile) -> \
+            tuple[int, list[str], list[str]]:
         """Gets the wellspec header and works out if any additional headers should be added"""
         keyword_map = {x: y[0] for x, y in nexus_mapping.items()}
         wellspec_table = file_content[index::]
