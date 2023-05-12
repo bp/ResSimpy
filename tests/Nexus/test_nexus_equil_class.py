@@ -225,3 +225,53 @@ def test_read_equil_properties_from_file(mocker, file_contents, expected_equil_p
             pd.testing.assert_frame_equal(expected_equil_properties[key], props[key])
         else:
             assert props[key] == expected_equil_properties[key]
+
+
+def test_nexus_equil_repr():
+    # Arrange
+    equil_obj = NexusEquil(file_path='test/file/equil.dat', method_number=1)
+    equil_obj.properties = {'PINIT': 3600., 'DINIT': 9035., 'GOC': 8800., 'WOC': 9950., 'PCGOC': 0., 'PCWOC': 0.,
+                            'PSAT': 3400., 'X': 50., 'Y': -50., 'VIP_INIT': '3 4 5 7', 'CRINIT': '', 
+                            'AUTOGOC_COMP': 'USE_CLOSEST_OIL', 'OVERREAD': ['SG', 'SW', 'PRESSURE'],
+                            'VAITS': 'MOBILE', 'SORWMN': 0.1, 'SORGMN': 0.1, 'SGCMN': 0.05,
+                            'VAITS_TOLSG': 1.e-3, 'VAITS_TOLSW': 1.e-4, 'POROSITY_INDEPENDENCE': '',
+                            'COMPOSITION': pd.DataFrame({'DEPTH': [8000, 8540, 8740],
+                                                         'PSAT': [2302.3, 2302.3, 1800.],
+                                                         'TEMP': [160, 165, 170],
+                                                         'SALINITY': [10000, 15000, 20000],
+                                                         'C1': [0.5, 0.5, 0.4],
+                                                         'C3': [0.03, 0.03, 0.032],
+                                                         'C6': [0.07, 0.07, 0.075],
+                                                         'C10+': [0.40, 0.40, 0.492]
+                                                         })}
+    expected_output = """
+--------------------------------
+EQUIL method 1
+--------------------------------
+FILE_PATH: test/file/equil.dat
+PINIT: 3600.0
+DINIT: 9035.0
+GOC: 8800.0
+WOC: 9950.0
+PCGOC: 0.0
+PCWOC: 0.0
+PSAT: 3400.0
+VIP_INIT: 3 4 5 7
+CRINIT
+AUTOGOC_COMP: USE_CLOSEST_OIL
+OVERREAD: SG SW PRESSURE
+VAITS: MOBILE
+        SORWMN: 0.1
+        SORGMN: 0.1
+        SGCMN: 0.05
+    VAITS_TOLSG: 0.001
+    VAITS_TOLSW: 0.0001
+POROSITY_INDEPENDENCE
+COMPOSITION: X 50.0 Y -50.0
+""" + equil_obj.properties['COMPOSITION'].to_string() + '\n\n'
+
+    # Act
+    result = equil_obj.__repr__()
+
+    # Assert
+    assert result == expected_output

@@ -27,6 +27,45 @@ class NexusEquil():
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] \
         = field(default_factory=get_empty_dict_union)
 
+    def __repr__(self):
+        """Pretty printing equilibration data"""
+        printable_str = '\n--------------------------------\n'
+        printable_str += f'EQUIL method {self.method_number}\n'
+        printable_str += '--------------------------------\n'
+        printable_str += f'FILE_PATH: {self.file_path}\n'
+        equil_dict = self.properties
+        for key in equil_dict.keys():
+            if isinstance(equil_dict[key], pd.DataFrame):
+                table_text = f'{key}:'
+                if key == 'COMPOSITION':
+                    if 'X' in equil_dict.keys():
+                        table_text += f" X {equil_dict['X']}"
+                    if 'Y' in equil_dict.keys():
+                        table_text += f" Y {equil_dict['Y']}"
+                printable_str += f'{table_text}\n'
+                printable_str += equil_dict[key].to_string()
+                printable_str += '\n\n'
+            elif isinstance(equil_dict[key], Enum):
+                printable_str += f'{key}: {equil_dict[key].name}\n'
+            elif equil_dict[key] == '':
+                printable_str += f'{key}\n'
+            elif key in ['INTSAT', 'VAITS']:
+                if equil_dict[key] == 'MOBILE':
+                    printable_str += f'{key}: MOBILE\n'
+                    for mobkey in ['SORWMN', 'SORGMN', 'SGCMN']:
+                        if mobkey in equil_dict.keys():
+                            printable_str += f'        {mobkey}: {equil_dict[mobkey]}\n'
+                for vaitkey in ['VAITS_TOLSG', 'VAITS_TOLSW']:
+                    if vaitkey in equil_dict.keys():
+                        printable_str += f'    {vaitkey}: {equil_dict[vaitkey]}\n'
+            elif key == 'OVERREAD':
+                printable_str += f"OVERREAD: {' '.join(equil_dict[key])}\n"
+            elif key not in ['SORWMN', 'SORGMN', 'SGCMN', 'VAITS_TOLSG', 'VAITS_TOLSW',
+                             'OVERREAD', 'INTSAT', 'VAITS', 'MOBILE', 'X', 'Y']:
+                printable_str += f'{key}: {equil_dict[key]}\n'
+
+        return printable_str
+
     def read_properties(self) -> None:
         """Read Nexus equilibration file contents and populate NexusEquil object
         """
