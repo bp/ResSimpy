@@ -1,7 +1,7 @@
 import os
-from unittest.mock import PropertyMock, patch, Mock
+from unittest.mock import Mock
 import pytest
-from Nexus.test_nexus_write_file import check_file_read_write_is_correct
+from pytest_mock import MockerFixture
 from ResSimpy.Enums.HowEnum import OperationEnum
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
@@ -12,6 +12,19 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from ResSimpy.Nexus.NexusWells import NexusWells
 from tests.multifile_mocker import mock_multiple_files
+
+
+def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock_open: Mock,
+                                     mocker_fixture: MockerFixture, write_file_name: str):
+    assert len(modifying_mock_open.call_args_list) == 1
+    assert modifying_mock_open.call_args_list[0] == mocker_fixture.call(
+        write_file_name, 'w')
+
+    # Get all the calls to write() and check that the contents are what we expect
+    list_of_writes = [
+        call for call in modifying_mock_open.mock_calls if 'call().write' in str(call)]
+    assert len(list_of_writes) == 1
+    assert list_of_writes[0].args[0] == expected_file_contents
 
 
 @pytest.mark.parametrize('completions, expected_perforations', [

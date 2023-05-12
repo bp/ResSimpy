@@ -122,7 +122,7 @@ class NexusWells(Wells):
                 raise ValueError('Please select one of the valid OperationEnum values: e.g. OperationEnum.ADD')
 
     def add_completion(self, well_name: str, completion_properties: NexusCompletion.InputDictionary,
-                       preserve_previous_completions=True) -> None:
+                       preserve_previous_completions: bool = True) -> None:
         """ Adds a completion to an existing wellspec file.
 
         Args:
@@ -285,13 +285,17 @@ class NexusWells(Wells):
                 headers.append(inverted_nexus_map[key])
                 additional_headers.append(inverted_nexus_map[key])
         additional_column_string = ' '.join(additional_headers)
-        split_comments = str(wellspec_file.file_content_as_list[header_index]).split('!', 1)
+        split_comments = str(file_content[header_index]).split('!', 1)
         if len(split_comments) == 1:
             new_header_line = split_comments[0] + ' ' + additional_column_string
         else:
             new_header_line = split_comments[0] + additional_column_string + ' !' + split_comments[1]
         if len(additional_headers) > 0:
-            wellspec_file.file_content_as_list[header_index] = new_header_line
+            file_to_write_to, index_in_file = wellspec_file.find_which_include_file(header_index)
+            if file_to_write_to.file_content_as_list is None:
+                raise ValueError(
+                    f'No file content found in {file_to_write_to.location}. Cannot write to index {index_in_file}')
+            file_to_write_to.file_content_as_list[index_in_file] = new_header_line
         return header_index, headers, headers_original
 
     def __write_out_existing_wellspec(self, completion_date: str,
