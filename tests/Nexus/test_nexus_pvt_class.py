@@ -431,7 +431,6 @@ SATURATED:
 
     # Act
     result = pvt_obj.__repr__()
-    print(result)
 
     # Assert
     assert result == expected_output

@@ -7,6 +7,7 @@ import pandas as pd
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+    from ResSimpy.Nexus.DataModels.NexusWater import NexusWaterParams
 
 
 # Factory methods for generating empty lists with typing
@@ -48,4 +49,9 @@ def get_empty_dict_int_nexus_file() -> dict[int, NexusFile]:
 
 def get_empty_dict_uuid_int() -> dict[UUID, int]:
     value: dict[UUID, int] = {}
+    return value
+
+
+def get_empty_list_nexus_water_params() -> list[NexusWaterParams]:
+    value: list[NexusWaterParams] = []
     return value

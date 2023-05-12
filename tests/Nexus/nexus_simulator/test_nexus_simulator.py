@@ -10,6 +10,7 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
 from ResSimpy.Nexus.DataModels.NexusSeparator import NexusSeparator
+from ResSimpy.Nexus.DataModels.NexusWater import NexusWater
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
@@ -845,6 +846,41 @@ def test_get_separator(mocker: MockerFixture, fcs_file_contents: str):
 
     # Assert
     assert result == loaded_sep
+
+
+@pytest.mark.parametrize("fcs_file_contents", [
+    ("""
+       WATER method 1 my/water/file1.dat
+
+       water Method 2 my/water/file2.dat
+       Water METHOD 3 my/water/file3.dat
+    """)
+], ids=['basic case'])
+def test_get_water(mocker: MockerFixture, fcs_file_contents: str):
+    """Testing the functionality to retrieve water methods from Nexus fcs file"""
+    # Arrange
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            os.path.join('path', 'my/water/file1.dat'): '',
+            os.path.join('path', 'my/water/file2.dat'): '',
+            os.path.join('path', 'my/water/file3.dat'): '',
+            'path/nexus_run.fcs': fcs_file_contents,
+            }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    loaded_wat = {1: NexusWater(file_path=os.path.join('path', 'my/water/file1.dat'), method_number=1),
+                  2: NexusWater(file_path=os.path.join('path', 'my/water/file2.dat'), method_number=2),
+                  3: NexusWater(file_path=os.path.join('path', 'my/water/file3.dat'), method_number=3),
+                  }
+
+    simulation = NexusSimulator(origin='path/nexus_run.fcs')
+
+    # Act
+    result = simulation.water_methods
+
+    # Assert
+    assert result == loaded_wat
 
 
 @pytest.mark.parametrize("fcs_file_contents, surface_file_content, node1_props, node2_props, \

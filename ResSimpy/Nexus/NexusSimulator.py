@@ -11,6 +11,7 @@ from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
 from ResSimpy.Nexus.DataModels.NexusSeparator import NexusSeparator
+from ResSimpy.Nexus.DataModels.NexusWater import NexusWater
 from ResSimpy.Nexus.DataModels.StructuredGrid.StructuredGridFile import StructuredGridFile
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -92,6 +93,7 @@ class NexusSimulator(Simulator):
         # Model dynamic properties
         self.pvt_methods: dict[int, NexusPVT] = {}
         self.separator_methods: dict[int, NexusSeparator] = {}
+        self.water_methods: dict[int, NexusWater] = {}
         # Nexus operations modules
         self.Runcontrol: Runcontrol = Runcontrol(self)
         self.Reporting: Reporting = Reporting(self)
@@ -444,6 +446,20 @@ class NexusSimulator(Simulator):
                     self.separator_methods[table_num] = NexusSeparator(
                         file_path=separator_file, method_number=table_num)  # Create NexusSeparator object
                     self.separator_methods[table_num].read_properties()  # Populate object with separator properties
+
+        # Read in water properties from Nexus water method files
+        if self.fcs_file.water_files is not None and \
+                len(self.fcs_file.water_files) > 0:  # Check if water files exist
+            for table_num in self.fcs_file.water_files.keys():  # For each water method
+                water_file = self.fcs_file.water_files[table_num].location
+                if water_file is None:
+                    raise ValueError(f'Unable to find water file: {water_file}')
+                if os.path.isfile(water_file):
+                    self.water_methods[table_num] = NexusWater(file_path=water_file,
+                                                               method_number=table_num)  # Create NexusWater object
+                    self.water_methods[table_num].read_properties()  # Populate object with water properties in file
+
+        # === End of dynamic properties loading ===
 
         # Load in Runcontrol
         if self.fcs_file.runcontrol_file is not None:
