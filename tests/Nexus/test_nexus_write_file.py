@@ -7,10 +7,10 @@ from tests.multifile_mocker import mock_multiple_files
 
 
 def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock_open: Mock,
-                                     mocker_fixture: MockerFixture):
+                                     mocker_fixture: MockerFixture, write_file_name: str):
     assert len(modifying_mock_open.call_args_list) == 1
     assert modifying_mock_open.call_args_list[0] == mocker_fixture.call(
-        '/my/wellspec/file.dat', 'w')
+        write_file_name, 'w')
 
     # Get all the calls to write() and check that the contents are what we expect
     list_of_writes = [
@@ -95,4 +95,4 @@ def test_write_to_file(mocker, fcs_file_contents, wells_file, expected_result):
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
                                      modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker)
+                                     mocker_fixture=mocker, write_file_name='/my/wellspec/file.dat')

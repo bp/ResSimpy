@@ -16,7 +16,7 @@ from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
 from ResSimpy.Wells import Wells
 from ResSimpy.Nexus.load_wells import load_wells
 import ResSimpy.Nexus.nexus_file_operations as nfo
-from ResSimpy.Utils.invert_nexus_map import invert_nexus_map
+from ResSimpy.Utils.invert_nexus_map import invert_nexus_map, attribute_name_to_nexus_keyword
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
@@ -195,7 +195,7 @@ class NexusWells(Wells):
                 elif date_comp > 0 and header_index == -1:
                     # if no date is found that is equal and we've found a date that is greater than the specified date
                     # start to compile a wellspec table from scratch and add in the time cards
-                    new_completion_index = index - 1
+                    new_completion_index = index
                     header_index = index - 1
                     headers, new_completion_index, new_completion_string, found_previous_completions = \
                         self.__write_out_existing_wellspec(
@@ -211,17 +211,20 @@ class NexusWells(Wells):
                 # get the header of the wellspec table
                 header_index, headers, headers_original = self.get_wellspec_header(
                     additional_headers, completion_properties, file_content, index,
-                    inverted_nexus_map, nexus_mapping,
+                    inverted_nexus_map, nexus_mapping, wellspec_file
                     )
                 continue
 
             if header_index != -1 and nfo.nexus_token_found(line, WELLS_KEYWORDS) and index > header_index:
                 # if we hit the end of the wellspec table for the given well set the index for the new completion
-                new_completion_index = last_valid_line_index + 1
-
+                if last_valid_line_index != -1:
+                    new_completion_index = last_valid_line_index + 1
                 break
+
             elif header_index != -1 and index > header_index:
                 # check for valid rows + fill extra columns with NA
+                self.fill_in_nas(additional_headers, headers_original, index, line,
+                                 wellspec_file, file_content)
                 line_valid_index = self.fill_in_nas(additional_headers, headers_original, index, line,
                                                     wellspec_file, file_content)
                 last_valid_line_index = line_valid_index if line_valid_index > 0 else last_valid_line_index
@@ -263,7 +266,8 @@ class NexusWells(Wells):
 
     def get_wellspec_header(self, additional_headers: list[str], completion_properties: NexusCompletion.InputDictionary,
                             file_content: list[str], index: int, inverted_nexus_map: dict[str, str],
-                            nexus_mapping: dict[str, tuple[str, type]]) -> tuple[int, list[str], list[str]]:
+                            nexus_mapping: dict[str, tuple[str, type]], wellspec_file: NexusFile) -> tuple[
+        int, list[str], list[str]]:
         """Gets the wellspec header and works out if any additional headers should be added"""
         keyword_map = {x: y[0] for x, y in nexus_mapping.items()}
         wellspec_table = file_content[index::]
@@ -278,13 +282,13 @@ class NexusWells(Wells):
                 headers.append(inverted_nexus_map[key])
                 additional_headers.append(inverted_nexus_map[key])
         additional_column_string = ' '.join(additional_headers)
-        split_comments = str(file_content[header_index]).split('!', 1)
+        split_comments = str(wellspec_file.file_content_as_list[header_index]).split('!', 1)
         if len(split_comments) == 1:
             new_header_line = split_comments[0] + ' ' + additional_column_string
         else:
             new_header_line = split_comments[0] + additional_column_string + ' !' + split_comments[1]
         if len(additional_headers) > 0:
-            file_content[header_index] = new_header_line
+            wellspec_file.file_content_as_list[header_index] = new_header_line
         return header_index, headers, headers_original
 
     def __write_out_existing_wellspec(self, completion_date: str,
@@ -299,8 +303,6 @@ class NexusWells(Wells):
             completion_table_as_list += ['TIME ' + completion_date]
         completion_table_as_list += ['WELLSPEC ' + well_name, ]
         headers = [k for k, v in nexus_mapping.items() if v[0] in completion_properties]
-        write_out_headers = [' '.join(headers)]
-        completion_table_as_list += write_out_headers
         if preserve_previous_completions:
             # get all the dates for that well
             date_list = well.dates_of_completions
@@ -311,6 +313,8 @@ class NexusWells(Wells):
                 # at the current index with a new wellspec card.
                 warnings.warn(f'No previous completions found for {well_name} at date: {completion_date}')
                 new_completion_index = index
+                write_out_headers = [' '.join(headers)]
+                completion_table_as_list += write_out_headers
                 return headers, new_completion_index, completion_table_as_list, False
 
             # get the most recent date that is earlier than the new completion date
@@ -319,8 +323,22 @@ class NexusWells(Wells):
             completion_to_find: NexusCompletion.InputDictionary = {'date': last_date}
             # find all completions at this date
             previous_completion_list = well.find_completions(completion_to_find)
+            if len(previous_completion_list) > 0:
+                prev_completion_properties = {k: v for k, v in previous_completion_list[0].to_dict().items() if
+                                              v is not None}
+                for key in prev_completion_properties:
+                    if key == 'date':
+                        continue
+                    header_key = attribute_name_to_nexus_keyword(nexus_mapping, key)
+                    if header_key not in headers:
+                        headers.append(header_key)
 
+            write_out_headers = [' '.join(headers)]
+            completion_table_as_list += write_out_headers
             # run through the existing completions to duplicate the completion at the new time
             for completion in previous_completion_list:
                 completion_table_as_list += completion.completion_to_wellspec_row(headers)
+        else:
+            write_out_headers = [' '.join(headers)]
+            completion_table_as_list += write_out_headers
         return headers, new_completion_index, completion_table_as_list, True

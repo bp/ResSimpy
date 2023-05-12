@@ -359,11 +359,12 @@ class NexusCompletion(Completion):
 
         """
         nexus_mapping = NexusCompletion.nexus_mapping()
-        old_completion_properties = self.to_dict()
+        completion_properties = self.to_dict()
+
         completion_values = []
         for header in headers:
             attribute_name = nexus_mapping[header][0]
-            attribute_value = old_completion_properties[attribute_name]
+            attribute_value = completion_properties[attribute_name]
             if attribute_value is None:
                 attribute_value = 'NA'
             completion_values.append(attribute_value)

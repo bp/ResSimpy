@@ -1,6 +1,7 @@
 import os
 from unittest.mock import PropertyMock, patch, Mock
 import pytest
+from Nexus.test_nexus_write_file import check_file_read_write_is_correct
 from ResSimpy.Enums.HowEnum import OperationEnum
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
@@ -588,7 +589,7 @@ def test_wells_modify(mocker):
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
   '01/02/2020', True,
 ['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
-'13  12   11   3.14', '', 'TIME 01/02/2020', 'WELLSPEC well1', 'IW JW L RADB', '1 2 3 1.5', '4 5 6 7.5\n',
+'13  12   11   3.14', '', 'TIME 01/02/2020', 'WELLSPEC well1', 'IW JW L RADB', '1 2 3 1.5\n', '4 5 6 7.5\n',
 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
   ),
@@ -602,30 +603,30 @@ def test_wells_modify(mocker):
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
   ),
 
-
 (['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
 '13  12   11   3.14', 'TIME 01/02/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   5   2.5', 'WELLSPEC well2',
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
   '01/02/2020', True,
 ['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
-'13  12   11   3.14', 'TIME 01/02/2020', 'WELLSPEC well1', 'iw  jw   l    KH RADB', '1  2   5   2.5 NA', '4 5 6 NA 7.5', 'WELLSPEC well2',
+'13  12   11   3.14', 'TIME 01/02/2020', 'WELLSPEC well1', 'iw  jw   l    KH RADB', '1  2   5   2.5 NA', '4 5 6 NA 7.5\n', 'WELLSPEC well2',
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
   ),
+
 (['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well1',
 'iw  jw    KH  PPERF  SKIN  STAT', '!Some comment line', '1  2   2.5   2   3.5  ON', '', '9  8   6.5   40   32.5  OFF',
 '11  12   4.5   43   394.5  OFF', '', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
   '01/02/2020', True,
 ['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well1',
 'iw  jw    KH  PPERF  SKIN  STAT L RADB', '!Some comment line', '1  2   2.5   2   3.5  ON NA NA', '', '9  8   6.5   40   32.5  OFF NA NA',
-'11  12   4.5   43   394.5  OFF NA NA', '', '4 5 NA NA NA NA 6 7.5', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+'11  12   4.5   43   394.5  OFF NA NA', '4 5 NA NA NA NA 6 7.5\n', '', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
   ),
 
-(['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well2', 'iw  jw   l    RADB',
-'13  12   11   3.14', 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
+(['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB KH', '1  2   3   1.5 5.5', 'TIME 01/02/2020', 'WELLSPEC well2', 'iw  jw   l    RADB KH',
+'13  12   11   3.14 5.2', 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
-  '01/02/2020', False,
-['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5',  'TIME 01/02/2020', 'WELLSPEC well2', 'iw  jw   l    RADB',
-'13  12   11   3.14', '', 'WELLSPEC well1', 'IW JW L RADB', '4 5 6 7.5\n',
+  '01/02/2020', True,
+['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB KH', '1  2   3   1.5 5.5',  'TIME 01/02/2020', 'WELLSPEC well2', 'iw  jw   l    RADB KH',
+'13  12   11   3.14 5.2', '', 'WELLSPEC well1', 'IW JW L RADB KH', '1 2 3 1.5 5.5\n', '4 5 6 7.5 NA\n',
 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
   ),
@@ -636,7 +637,7 @@ def test_wells_modify(mocker):
   '01/02/2020', True,
 ['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well1',
 'iw  jw    KH  PPERF  SKIN  STAT L RADB', '!Some comment line', '1  2   2.5   2   3.5  ON NA NA !COMMMENT', '', '9  8   6.5   40   32.5  OFF NA NA',
-'11  12   4.5   43   394.5  OFF NA NA', '', '4 5 NA NA NA NA 6 7.5', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+'11  12   4.5   43   394.5  OFF NA NA', '4 5 NA NA NA NA 6 7.5\n', '', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
   ),
 
 (['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well1',
@@ -645,12 +646,12 @@ def test_wells_modify(mocker):
   '01/02/2020', True,
 ['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well1',
 'iw  jw    KH  PPERF  SKIN  STAT L RADB !COmment!', '!Some comment line', '1  2   2.5   2   3.5  ON NA NA !COMMMENT', '', '9  8   6.5   40   32.5  OFF NA NA',
-'11  12   4.5   43   394.5  OFF NA NA', '', '4 5 NA NA NA NA 6 7.5', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+'11  12   4.5   43   394.5  OFF NA NA', '4 5 NA NA NA NA 6 7.5\n', '', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
   ),
 ], ids=['basic_test', 'insert in middle of file','No time card for new comp', 'preserve previous completions', 'No previous well',
 'Not overlapping columns', 'no overlap and multiple rows', 'Time card no comp', 'comment with not overlapping columns',
 'comment inline with headers'])
-def utest_add_completion_write(mocker, file_as_list, add_perf_date, preserve_previous_completions, expected_result):
+def test_add_completion_write(mocker, file_as_list, add_perf_date, preserve_previous_completions, expected_result):
     ''' TODO insert into include files
      TODO write multiple completions in a row
     '''
@@ -833,3 +834,120 @@ def test_add_completion_include_files(mocker, fcs_file_contents, wells_file, inc
     assert result.file_content_as_list == expected_include_file.file_content_as_list
     assert result == expected_include_file
     assert mock_nexus_sim.fcs_file.well_files[1].file_content_as_list == expected_wells_file.file_content_as_list
+
+def test_add_completion_iraq(mocker):
+    # Arrange
+    fcs_file_data= '''RUN_UNITS ENGLISH
+
+    DATEFORMAT DD/MM/YYYY
+
+    RECURRENT_FILES
+    RUNCONTROL ref_runcontrol.dat
+    WELLS Set 1 wells.dat'''
+    runcontrol_data = 'START 01/01/2020'
+    well_file_data = '''
+    TIME 01/01/2020
+    
+    
+    WELLSPEC RU001
+     IW  JW  L KH    RADW  PPERF    SKIN RADB WI
+    111 479  3 NA 0.35400   0.5 0.00000   NA NA
+    111 479  4 NA 0.35400   0.5 0.00000   NA NA
+    
+    
+    WELLSPEC RU251
+    IW  JW L KH    RADW  PPERF    SKIN RADB WI
+    79 340 3 NA 0.35400   1 0.00000   NA NA
+    79 340 4 NA 0.35400   1 0.00000   NA NA
+    
+    
+    WELLSPEC RU002
+     IW  JW  L KH    RADW  PPERF    SKIN RADB WI
+    137 479  3 NA 0.35400   0.5 0.00000   NA NA
+    137 479  4 NA 0.35400   0.5 0.00000   NA NA
+    137 479  5 NA 0.35400   1 0.00000   NA NA
+    137 479  6 NA 0.35400   1 0.00000   NA NA
+    
+    TIME 01/02/2020
+    WELLSPEC RU002
+     IW  JW  L KH    RADW  PPERF    SKIN RADB WI
+    137 479  3 NA 0.35400   0.5 0.00000   NA NA
+      
+     TIME 01/03/2020
+     
+     WELLSPEC RU002
+     IW  JW  L KH    RADW  PPERF    SKIN RADB WI
+    137 479  3 NA 0.35400   0.5 0.00000   NA NA
+    137 479  4 NA 0.35400   0.5 0.00000   NA NA'''
+    expected_result = '''
+    TIME 01/01/2020
+    
+    
+    WELLSPEC RU001
+     IW  JW  L KH    RADW  PPERF    SKIN RADB WI
+    111 479  3 NA 0.35400   0.5 0.00000   NA NA
+    111 479  4 NA 0.35400   0.5 0.00000   NA NA
+    
+    
+    WELLSPEC RU251
+    IW  JW L KH    RADW  PPERF    SKIN RADB WI
+    79 340 3 NA 0.35400   1 0.00000   NA NA
+    79 340 4 NA 0.35400   1 0.00000   NA NA
+    
+    
+    WELLSPEC RU002
+     IW  JW  L KH    RADW  PPERF    SKIN RADB WI
+    137 479  3 NA 0.35400   0.5 0.00000   NA NA
+    137 479  4 NA 0.35400   0.5 0.00000   NA NA
+    137 479  5 NA 0.35400   1 0.00000   NA NA
+    137 479  6 NA 0.35400   1 0.00000   NA NA
+    
+    TIME 01/02/2020
+    WELLSPEC RU002
+     IW  JW  L KH    RADW  PPERF    SKIN RADB WI
+    137 479  3 NA 0.35400   0.5 0.00000   NA NA
+
+WELLSPEC RU001
+IW JW L RADW PPERF SKIN
+111 479 3 0.354 0.5 0.0
+111 479 4 0.354 0.5 0.0
+4 5 6 7.5 NA NA
+      
+     TIME 01/03/2020
+     
+     WELLSPEC RU002
+     IW  JW  L KH    RADW  PPERF    SKIN RADB WI
+    137 479  3 NA 0.35400   0.5 0.00000   NA NA
+    137 479  4 NA 0.35400   0.5 0.00000   NA NA'''
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'fcs_file.dat': fcs_file_data,
+            'wells.dat': well_file_data,
+            'ref_runcontrol.dat': runcontrol_data,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    ls_dir = Mock(side_effect=lambda x: [])
+    mocker.patch('os.listdir', ls_dir)
+    fcs_file_exists = Mock(side_effect=lambda x: True)
+    mocker.patch('os.path.isfile', fcs_file_exists)
+
+
+    model = NexusSimulator('fcs_file.dat')
+
+    add_perf_date = '01/02/2020'
+
+    add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 7.5}
+
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+    # Act
+    model.Wells.add_completion(well_name='RU001', completion_properties=add_perf_dict)
+
+    # Assert
+
+    check_file_read_write_is_correct(expected_file_contents=expected_result,
+                                     modifying_mock_open=writing_mock_open,
+                                     mocker_fixture=mocker, write_file_name='wells.dat')
+
