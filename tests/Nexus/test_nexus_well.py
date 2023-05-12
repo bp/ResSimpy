@@ -10,7 +10,7 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from ResSimpy.Nexus.NexusWells import NexusWells
-from multifile_mocker import mock_multiple_files
+from tests.multifile_mocker import mock_multiple_files
 
 
 @pytest.mark.parametrize('completions, expected_perforations', [
