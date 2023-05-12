@@ -12,6 +12,7 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
 from ResSimpy.Nexus.DataModels.NexusSeparator import NexusSeparator
 from ResSimpy.Nexus.DataModels.NexusWater import NexusWater
+from ResSimpy.Nexus.DataModels.NexusEquil import NexusEquil
 from ResSimpy.Nexus.DataModels.StructuredGrid.StructuredGridFile import StructuredGridFile
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -94,6 +95,7 @@ class NexusSimulator(Simulator):
         self.pvt_methods: dict[int, NexusPVT] = {}
         self.separator_methods: dict[int, NexusSeparator] = {}
         self.water_methods: dict[int, NexusWater] = {}
+        self.equil_methods: dict[int, NexusEquil] = {}
         # Nexus operations modules
         self.Runcontrol: Runcontrol = Runcontrol(self)
         self.Reporting: Reporting = Reporting(self)
@@ -233,8 +235,8 @@ class NexusSimulator(Simulator):
                 model_oilfield_run_units = grid_length_unit == 'ft'
             else:
                 simulator = NexusSimulator(origin=model)
-                model_oilfield_default_units = simulator.default_units() == UnitSystem.ENGLISH
-                model_oilfield_run_units = simulator.run_units() == UnitSystem.ENGLISH
+                model_oilfield_default_units = simulator.default_units == UnitSystem.ENGLISH
+                model_oilfield_run_units = simulator.run_units == UnitSystem.ENGLISH
 
             # If not defined, assign it to model_oilfield_default_units
             if oilfield_default_units is None:
@@ -458,6 +460,18 @@ class NexusSimulator(Simulator):
                     self.water_methods[table_num] = NexusWater(file_path=water_file,
                                                                method_number=table_num)  # Create NexusWater object
                     self.water_methods[table_num].read_properties()  # Populate object with water properties in file
+
+        # Read in equilibration properties from Nexus equil method files
+        if self.fcs_file.equil_files is not None and \
+                len(self.fcs_file.equil_files) > 0:  # Check if equilibration files exist
+            for table_num in self.fcs_file.equil_files.keys():  # For each equilibration method
+                equil_file = self.fcs_file.equil_files[table_num].location
+                if equil_file is None:
+                    raise ValueError(f'Unable to find equilibration file: {equil_file}')
+                if os.path.isfile(equil_file):
+                    self.equil_methods[table_num] = NexusEquil(file_path=equil_file,
+                                                               method_number=table_num)  # Create NexusEquil object
+                    self.equil_methods[table_num].read_properties()  # Populate object with equil properties in file
 
         # === End of dynamic properties loading ===
 
