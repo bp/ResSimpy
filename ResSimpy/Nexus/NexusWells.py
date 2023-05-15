@@ -179,7 +179,7 @@ class NexusWells(Wells):
         new_completion_string: list[str] = []
         last_valid_line_index = -1
         writing_new_wellspec_table = False
-
+        date_comp = 0
         # if no time cards present in the file just find the name of the well instead
         if not nfo.value_in_file('TIME', file_content):
             new_completion_time_index = 0
@@ -229,7 +229,17 @@ class NexusWells(Wells):
                                  wellspec_file, file_content)
                 line_valid_index = self.fill_in_nas(additional_headers, headers_original, index, line,
                                                     wellspec_file, file_content)
+                # set the line to insert the new completion at to be the one after the last valid line
                 last_valid_line_index = line_valid_index if line_valid_index > 0 else last_valid_line_index
+        # If we haven't found a TIME card after the for loop then we haven't got a valid date so add it at the end
+        if date_comp < 0:
+            new_completion_index = len(file_content)
+            headers, new_completion_index, new_completion_string, found_completion_at_previous_date = \
+                self.__write_out_existing_wellspec(
+                    completion_date, completion_properties, date_found, new_completion_index,
+                    new_completion_index, preserve_previous_completions, well, well_name)
+            writing_new_wellspec_table = True
+
         # construct the new completion and ensure the order of the values is in the same order as the headers
         new_completion_string += new_completion.completion_to_wellspec_row(headers)
         if writing_new_wellspec_table:

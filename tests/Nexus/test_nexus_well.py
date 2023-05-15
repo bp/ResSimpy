@@ -670,7 +670,7 @@ def test_wells_modify(mocker):
 ['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well1',
 'iw  jw    KH  PPERF  SKIN  STAT !COmment!', '!Some comment line', '1  2   2.5   2   3.5  ON !COMMMENT', '', '9  8   6.5   40   32.5  OFF',
 '11  12   4.5   43   394.5  OFF', '', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2',
-'\n', 'TIME 01/06/2020\n', 'WELLSPEC well1\n', 'IW JW L RADB\n', '2 3 4 555.2\n', '4 5 6 7.5' ],
+'\n', 'TIME 01/06/2020\n', 'WELLSPEC well1\n', 'IW JW L RADB\n', '2 3 4 555.2\n', '4 5 6 7.5\n', '\n' ],
   ),
 ], ids=['basic_test', 'insert in middle of file','No time card for new comp', 'preserve previous completions', 'No previous well',
 'Not overlapping columns', 'no overlap and multiple rows', 'Time card no comp', 'comment with not overlapping columns',
