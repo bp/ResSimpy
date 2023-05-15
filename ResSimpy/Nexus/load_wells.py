@@ -156,8 +156,9 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
         if wellspec_found:
             if current_date is None:
                 current_date = start_date
-            # Load in each line of the table
+            # reset the storage dictionary to prevent completion properties being carried forward from earlier timestep
             header_values = {k: None for k in header_values}
+            # Load in each line of the table
             completions = __load_wellspec_table_completions(
                 nexus_file, header_index, header_values, headers, current_date, end_point_scaling_header_values)
 

@@ -166,12 +166,18 @@ def test_load_wells_multiple_wells_multiple_dates(mocker):
         IW JW L RADW
     15 28   684 4.500000000001
     18 63 1234            1.00002
+    
+    TIME 15/12/2023
+    WELLSPEC DEV1
+    IW  JW L    RADB   KH! Columns not present above
+    1   2  4    1.55   1.423 
     """
 
     expected_well_1_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/08/2023')
     expected_well_1_completion_2 = NexusCompletion(i=6, j=7, k=8, well_radius=9.11, date='01/08/2023')
     expected_well_1_completion_3 = NexusCompletion(j=8, i=4, k=6, well_radius=23.0, date='15/10/2023')
     expected_well_1_completion_4 = NexusCompletion(j=9, i=5, k=56, well_radius=37.23, date='15/10/2023')
+    expected_well_1_completion_5 = NexusCompletion(j=2, i=1, k=4, bore_radius=1.55, perm_thickness_ovr=1.423, date='15/12/2023')
 
     expected_well_2_completion_1 = NexusCompletion(i=12, j=12, k=13, well_radius=4.50000000000, date='01/08/2023')
     expected_well_2_completion_2 = NexusCompletion(i=14, j=15, k=143243, well_radius=0.00002, date='01/08/2023')
@@ -181,7 +187,8 @@ def test_load_wells_multiple_wells_multiple_dates(mocker):
 
     expected_well_1 = NexusWell(well_name='DEV1',
                                 completions=[expected_well_1_completion_1, expected_well_1_completion_2,
-                                             expected_well_1_completion_3, expected_well_1_completion_4],
+                                             expected_well_1_completion_3, expected_well_1_completion_4,
+                                             expected_well_1_completion_5],
                                 units=UnitSystem.ENGLISH)
     expected_well_2 = NexusWell(well_name='DEV2',
                                 completions=[expected_well_2_completion_1, expected_well_2_completion_2,
