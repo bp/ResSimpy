@@ -207,7 +207,6 @@ class NexusFile:
     @dataclass
     class FileIndex:
         index: int
-        # end_index: int
 
     def iterate_line(self, file_index: Optional[FileIndex] = None, max_depth: Optional[int] = None,
                      parent: Optional[NexusFile] = None) -> Generator[str, None, None]:
@@ -221,8 +220,8 @@ class NexusFile:
             file_index = NexusFile.FileIndex(index=0)
         if parent is None:
             parent = self
-        if parent.line_locations is None:
             parent.line_locations = []
+
         new_entry = (file_index.index, self.file_id)
         if new_entry not in parent.line_locations:
             parent.line_locations.append(new_entry)
