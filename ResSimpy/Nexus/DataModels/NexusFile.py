@@ -221,6 +221,8 @@ class NexusFile:
         if parent is None:
             parent = self
             parent.line_locations = []
+        if parent.line_locations is None:
+            parent.line_locations = []
 
         new_entry = (file_index.index, self.file_id)
         if new_entry not in parent.line_locations:
@@ -363,6 +365,9 @@ class NexusFile:
                 self.object_locations[object_id] = index + number_additional_lines
 
     def remove_object_locations(self, uuid: UUID):
+        if self.object_locations is None:
+            raise ValueError(f'No object locations found for file {self.location}')
+
         if self.object_locations.get(uuid, None) is None:
             raise ValueError(f'No object with {uuid=} found within the object locations')
         self.object_locations.pop(uuid, None)
