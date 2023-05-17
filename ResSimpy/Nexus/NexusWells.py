@@ -242,8 +242,17 @@ class NexusWells(Wells):
 
         # construct the new completion and ensure the order of the values is in the same order as the headers
         new_completion_string += new_completion.completion_to_wellspec_row(headers)
+        new_completion_additional_lines = len(new_completion_string)
         if writing_new_wellspec_table:
             new_completion_string += ['\n']
+            wellspec_file.update_object_locations(line_number=new_completion_index,
+                                                  number_additional_lines=new_completion_additional_lines + 1)
+        else:
+            wellspec_file.update_object_locations(line_number=new_completion_index,
+                                                  number_additional_lines=new_completion_additional_lines)
+
+        wellspec_file.add_object_locations(uuid=new_completion.id,
+                                           line_index=new_completion_index + new_completion_additional_lines - 1)
         # write out to the file_content_as_list
         nexusfile_to_write_to, index_in_file = wellspec_file.find_which_include_file(new_completion_index)
         if nexusfile_to_write_to.file_content_as_list is None:

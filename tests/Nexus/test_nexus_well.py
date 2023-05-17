@@ -1,4 +1,5 @@
 import os
+import uuid
 from unittest.mock import Mock
 import pytest
 from pytest_mock import MockerFixture
@@ -857,22 +858,23 @@ def test_add_completion_include_files(mocker, fcs_file_contents, wells_file, inc
     expected_wells_file = NexusFile(location='/my/wellspec/file.dat', includes_objects=[expected_include_file],
     includes=[include_file_path], origin=fcs_file_path, file_content_as_list=expected_wells_file_as_list)
     # Act
+    # test adding a load of completions sequentially
     mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict,
                                         preserve_previous_completions=True)
     mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_2,
-                                                preserve_previous_completions=True)
+                                        preserve_previous_completions=True)
     mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
-                                            preserve_previous_completions=True)
+                                        preserve_previous_completions=True)
     mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
-                                            preserve_previous_completions=True)
+                                        preserve_previous_completions=True)
     mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
-                                            preserve_previous_completions=True)
+                                        preserve_previous_completions=True)
     mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
-                                            preserve_previous_completions=True)
+                                        preserve_previous_completions=True)
     mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
-                                            preserve_previous_completions=True)
+                                        preserve_previous_completions=True)
     mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
-                                            preserve_previous_completions=True)
+                                        preserve_previous_completions=True)
 
     result = mock_nexus_sim.fcs_file.well_files[1].includes_objects[0]
 
@@ -992,9 +994,96 @@ IW JW L RADW PPERF SKIN
     # Act
     model.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict)
 
+
     # Assert
 
     check_file_read_write_is_correct(expected_file_contents=expected_result,
                                      modifying_mock_open=writing_mock_open,
                                      mocker_fixture=mocker, write_file_name='wells.dat')
 
+@pytest.mark.parametrize('well_file_data, expected_uuid',[
+(''' TIME 01/01/2020
+       WELLSPEC DEV1
+       IW JW L RADW
+       1  2  3  4.5     ! 3
+       6 7 8   9.11     ! 4
+       
+       4 5 6 7.5        ! 6
+       2 4 5 11         ! 7
+       TIME 01/02/2020
+       WELLSPEC DEV1
+       IW JW L RADW
+       !comment           
+       3 4 5 6.5        ! 12
+       ''',
+
+       {'uuid1': 3,
+        'uuid2': 4,
+        'uuid3': 6,
+        'uuid4': 7,
+        'uuid6': 8,
+        'uuid7': 9,
+        'uuid5': 14,
+
+        },
+        ),
+
+
+(''' TIME 01/01/2020
+
+TIME 01/02/2020
+       WELLSPEC DEV1
+       IW JW L RADW
+       !comment           
+       3 4 5 6.5     ! 6
+       
+       ''',
+
+       {'uuid1': 12,
+        'uuid2': 5,
+        'uuid3': 6,
+        },
+        ),
+
+], ids=['basic_test_2_lines', 'multiple_lines_added'])
+def test_object_locations_updating(mocker, well_file_data, expected_uuid):
+    # Arrange
+    fcs_file_data = '''RUN_UNITS ENGLISH
+
+    DATEFORMAT DD/MM/YYYY
+
+    RECURRENT_FILES
+    RUNCONTROL ref_runcontrol.dat
+    WELLS Set 1 wells.dat'''
+    runcontrol_data = 'START 01/01/2020'
+    mocker.patch.object(uuid, 'uuid4', side_effect=['file_uuid', 'runcontrol_uuid','wells_file_uuid',
+                                                    '1', 'wells_file_uuid', 'uuid1','uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6', 'uuid7'])
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'fcs_file.dat': fcs_file_data,
+            'wells.dat': well_file_data,
+            'ref_runcontrol.dat': runcontrol_data,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    ls_dir = Mock(side_effect=lambda x: [])
+    mocker.patch('os.listdir', ls_dir)
+    fcs_file_exists = Mock(side_effect=lambda x: True)
+    mocker.patch('os.path.isfile', fcs_file_exists)
+
+    model = NexusSimulator('fcs_file.dat')
+
+    add_perf_date = '01/01/2020'
+
+    add_perf_dict_1 = {'date': add_perf_date, 'i': 11, 'j': 22, 'k': 33, 'well_radius': 44.5}
+    add_perf_dict_2 = {'date': add_perf_date, 'i': 44, 'j': 55, 'k': 66, 'well_radius': 77.5}
+
+    # Act
+    model.Wells.add_completion(well_name='DEV1', completion_properties=add_perf_dict_1)
+    model.Wells.add_completion(well_name='DEV1', completion_properties=add_perf_dict_2)
+
+    # Assert
+
+    assert model.fcs_file.well_files[1].object_locations == expected_uuid

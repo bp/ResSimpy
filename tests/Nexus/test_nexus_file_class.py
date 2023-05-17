@@ -586,3 +586,48 @@ continuation''')
     assert nexus_file == expected_nexus_file
     assert nexus_file_result == expected_return_file
     assert index_in_file == expected_index_in_file
+
+
+@pytest.mark.parametrize("test_file_contents, expected_results",
+[('''       WELLSPEC DEV1
+       IW JW L RADW
+       1  2  3  4.5     ! 2
+       6 7 8   9.11     ! 3
+       
+       4 5 6 7.5        ! 5
+       2 4 5 11         ! 6
+                       
+       !comment           
+       3 4 5 6.5        ! 9 
+       ''',
+       {'uuid1': 2,
+        'uuid2': 3,
+        'uuid3': 7,
+        'uuid4': 8,
+        'uuid5': 11,
+        }),
+        ],
+        ids = ['basic_test']
+)
+def test_update_object_locations(mocker, test_file_contents, expected_results):
+    # Arrange
+    mocker.patch.object(uuid, 'uuid4', side_effect=['file_uuid', 'uuid1', 'uuid2', 'uuid3','uuid4', 'uuid5'])
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'wells.dat': test_file_contents,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    wells_file = NexusFile.generate_file_include_structure(file_path='wells.dat', skip_arrays=True,)
+    # load the uuids
+    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH)
+
+    # Act
+    # effectively add 2 lines at location 5
+    wells_file.update_object_locations(line_number=5, number_additional_lines=2)
+    result = wells_file.object_locations
+
+    # Assert
+    assert result == expected_results

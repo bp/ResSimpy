@@ -275,7 +275,7 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
             kh_mult=convert_header_value_float('KHMULT')
             )
 
-        nexus_file.update_object_locations(new_completion.id, index + header_index + 1)
+        nexus_file.add_object_locations(new_completion.id, index + header_index + 1)
 
         completions.append(new_completion)
 

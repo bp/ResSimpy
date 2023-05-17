@@ -350,10 +350,22 @@ class NexusFile:
         value = self.get_next_value_nexus_file(line_index, search_string, ignore_values, replace_with)
         return value
 
-    def update_object_locations(self, uuid: UUID, line_index: int):
+    def add_object_locations(self, uuid: UUID, line_index: int):
         if self.object_locations is None:
             self.object_locations: dict[UUID, int] = get_empty_dict_uuid_int()
         self.object_locations[uuid] = line_index
+
+    def update_object_locations(self, line_number: int, number_additional_lines: int):
+        if self.object_locations is None:
+            return
+        for object_id, index in self.object_locations.items():
+            if index >= line_number:
+                self.object_locations[object_id] = index + number_additional_lines
+
+    def remove_object_locations(self, uuid: UUID):
+        if self.object_locations.get(uuid, None) is None:
+            raise ValueError(f'No object with {uuid=} found within the object locations')
+        self.object_locations.pop(uuid, None)
 
     def find_which_include_file(self, index: int) -> tuple[NexusFile, int]:
         if self.line_locations is None:
