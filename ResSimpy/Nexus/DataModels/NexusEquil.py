@@ -34,8 +34,8 @@ class NexusEquil():
         printable_str += '--------------------------------\n'
         printable_str += f'FILE_PATH: {self.file_path}\n'
         equil_dict = self.properties
-        for key in equil_dict.keys():
-            if isinstance(equil_dict[key], pd.DataFrame):
+        for key, value in equil_dict.items():
+            if isinstance(value, pd.DataFrame):
                 table_text = f'{key}:'
                 if key == 'COMPOSITION':
                     if 'X' in equil_dict.keys():
@@ -43,14 +43,14 @@ class NexusEquil():
                     if 'Y' in equil_dict.keys():
                         table_text += f" Y {equil_dict['Y']}"
                 printable_str += f'{table_text}\n'
-                printable_str += equil_dict[key].to_string()
+                printable_str += value.to_string()
                 printable_str += '\n\n'
-            elif isinstance(equil_dict[key], Enum):
-                printable_str += f'{key}: {equil_dict[key].name}\n'
-            elif equil_dict[key] == '':
+            elif isinstance(value, Enum):
+                printable_str += f'{key}: {value.name}\n'
+            elif value == '':
                 printable_str += f'{key}\n'
             elif key in ['INTSAT', 'VAITS']:
-                if equil_dict[key] == 'MOBILE':
+                if value == 'MOBILE':
                     printable_str += f'{key}: MOBILE\n'
                     for mobkey in ['SORWMN', 'SORGMN', 'SGCMN']:
                         if mobkey in equil_dict.keys():
@@ -59,10 +59,11 @@ class NexusEquil():
                     if vaitkey in equil_dict.keys():
                         printable_str += f'    {vaitkey}: {equil_dict[vaitkey]}\n'
             elif key == 'OVERREAD':
-                printable_str += f"OVERREAD: {' '.join(equil_dict[key])}\n"
+                if isinstance(value, list):
+                    printable_str += f"OVERREAD: {' '.join(value)}\n"
             elif key not in ['SORWMN', 'SORGMN', 'SGCMN', 'VAITS_TOLSG', 'VAITS_TOLSW',
                              'OVERREAD', 'INTSAT', 'VAITS', 'MOBILE', 'X', 'Y']:
-                printable_str += f'{key}: {equil_dict[key]}\n'
+                printable_str += f'{key}: {value}\n'
 
         return printable_str
 
@@ -101,7 +102,8 @@ class NexusEquil():
                 while str(nfo.get_token_value(overread_val, line, file_as_list)) in EQUIL_OVERREAD_VALUES:
                     overread_val = str(nfo.get_token_value(overread_val, line, file_as_list))
                     if isinstance(self.properties['OVERREAD'], list):
-                        self.properties['OVERREAD'] += [overread_val]
+                        prop_list: list[str] = self.properties['OVERREAD']
+                        prop_list += [overread_val]
             if nfo.check_token('VIP_INIT', line):
                 self.properties['VIP_INIT'] = ' '.join(line.split('!')[0].split()[1:])
             # Find standalone equilibration keywords

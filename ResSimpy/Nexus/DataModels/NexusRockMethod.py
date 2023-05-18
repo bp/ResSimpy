@@ -40,22 +40,22 @@ class NexusRockMethod(RockMethod):
         """Pretty printing rock properties data"""
         printable_str = f'\nFILE_PATH: {self.file_path}\n'
         rock_dict = self.properties
-        for key in rock_dict.keys():
-            if isinstance(rock_dict[key], pd.DataFrame):
+        for key, value in rock_dict.items():
+            if isinstance(value, pd.DataFrame):
                 printable_str += f'{key}:\n'
-                printable_str += rock_dict[key].to_string()
+                printable_str += value.to_string()
                 printable_str += '\n\n'
-            elif isinstance(rock_dict[key], dict):
-                for subkey in rock_dict[key].keys():
+            elif isinstance(value, dict):
+                for subkey in value.keys():
                     printable_str += f'{key} - {subkey}\n'
-                    printable_str += rock_dict[key][subkey].to_string()
+                    printable_str += value[subkey].to_string()
                     printable_str += '\n\n'
-            elif isinstance(rock_dict[key], Enum):
-                printable_str += f'{key}: {rock_dict[key].name}\n'
-            elif rock_dict[key] == '':
+            elif isinstance(value, Enum):
+                printable_str += f'{key}: {value.name}\n'
+            elif value == '':
                 printable_str += f'{key}\n'
             else:
-                printable_str += f'{key}: {rock_dict[key]}\n'
+                printable_str += f'{key}: {value}\n'
         return printable_str
 
     def read_properties(self) -> None:

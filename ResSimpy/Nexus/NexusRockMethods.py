@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import os
-from typing import Optional
+from typing import Optional, MutableMapping
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusRockMethod import NexusRockMethod
 from ResSimpy.RockMethods import RockMethods
@@ -14,21 +14,21 @@ class NexusRockMethods(RockMethods):
         rock_files (dict[int, NexusFile]): Dictionary collection of rock property files, as defined in Nexus FCS file
     """
 
-    __rock_methods: dict[int, NexusRockMethod]
+    __rock_methods: MutableMapping[int, NexusRockMethod]
     __rock_files: dict[int, NexusFile]
     __properties_loaded: bool = False  # Used in lazy loading
 
-    def __init__(self, rock_methods: Optional[dict[int, NexusRockMethod]] = None,
+    def __init__(self, rock_methods: Optional[MutableMapping[int, NexusRockMethod]] = None,
                  rock_files: Optional[dict[int, NexusFile]] = None):
         if rock_methods:
             self.__rock_methods = rock_methods
         else:
-            self.__rock_methods = {}
+            self.__rock_methods: MutableMapping[int, NexusRockMethod] = {}
         if rock_files:
             self.__rock_files = rock_files
         else:
             self.__rock_files = {}
-        super().__init__(rock_methods=self.__rock_methods)
+        super().__init__()
 
     def __repr__(self) -> str:
         """Pretty printing rock methods"""
@@ -45,7 +45,7 @@ class NexusRockMethods(RockMethods):
         return printable_str
 
     @property
-    def rock_methods(self) -> dict[int, NexusRockMethod]:
+    def rock_methods(self) -> MutableMapping[int, NexusRockMethod]:
         if not self.__properties_loaded:
             self.load_rock_methods()
         return self.__rock_methods
