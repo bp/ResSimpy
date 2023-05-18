@@ -15,7 +15,7 @@ class NexusCompletion(Completion):
         measured_depth (Optional[float]): Measured depth of a completion. 'MD' in Nexus
         well_indices (Optional[float]): Well index used to calculate performance of the completion. 'WI' in Nexus
         partial_perf (Optional[float]): Partial penetration factor. 'PPERF' in Nexus
-        cell_number (Optional[int]): cell number for for the completion in unstructured grids. 'CELL' in Nexus
+        cell_number (Optional[int]): cell number for the completion in unstructured grids. 'CELL' in Nexus
         bore_radius (Optional[float]): Well bore radius. 'RADB' in Nexus
         portype (Optional[str]): indicates the pore type for the completion FRACTURE OR MATRIX. 'PORTYPE' in Nexus
         sector (None | str | int): the section of the wellbore to which this completion flows. 'SECT' in Nexus

@@ -436,7 +436,7 @@ def test_add_completion():
     well = NexusWell(well_name='test well', completions=existing_completions,
                                     units=UnitSystem.METKGCM2)
     # Act
-    well.add_completion(date=new_date, completion_properties=new_completion_props)
+    well._add_completion_to_memory(date=new_date, completion_properties=new_completion_props)
     # Assert
     assert well == expected_well
 
@@ -466,7 +466,7 @@ def test_remove_completion():
 
     # Act
     comp_to_remove = remove_well.find_completions(perfs_to_remove)
-    remove_well.remove_completions(completions_to_remove=comp_to_remove)
+    remove_well._remove_completions_from_memory(completions_to_remove=comp_to_remove)
     # Assert
     assert remove_well == expected_result
 
@@ -494,7 +494,7 @@ def test_modify_completion():
     expected_well = NexusWell(well_name='test well', completions=expected_completions, units=UnitSystem.METKGCM2)
 
     # Act
-    well.modify_completion(new_completion_properties=changes, completion_to_modify=completion_id)
+    well._modify_completion_in_memory(new_completion_properties=changes, completion_to_modify=completion_id)
 
     # Assert
     assert well.completions[-1] == changed_completion
@@ -568,9 +568,9 @@ def test_wells_modify(mocker):
                        NexusWell(well_name='well2', completions=well_2_completions, units=UnitSystem.METRIC)]
 
     # Act
-    wells.modify_well(well_name='well1', perforations_properties=[perf_1_to_add, perf_2_to_add],
+    wells.modify_well(well_name='well1', completion_properties_list=[perf_1_to_add, perf_2_to_add],
                       how=OperationEnum.ADD, write_to_file=False)
-    wells.modify_well(well_name='well1', perforations_properties=[perf_to_remove], how=OperationEnum.REMOVE,
+    wells.modify_well(well_name='well1', completion_properties_list=[perf_to_remove], how=OperationEnum.REMOVE,
                       write_to_file=False)
     # Assert
     assert wells.get_wells()[0].completions == expected_result[0].completions
@@ -1087,3 +1087,4 @@ def test_object_locations_updating(mocker, well_file_data, expected_uuid):
     # Assert
 
     assert model.fcs_file.well_files[1].object_locations == expected_uuid
+

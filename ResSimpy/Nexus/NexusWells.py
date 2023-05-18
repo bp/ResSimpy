@@ -5,6 +5,7 @@ import warnings
 from dataclasses import dataclass, field
 from functools import cmp_to_key
 from typing import Sequence, Optional, TYPE_CHECKING
+from uuid import UUID
 
 import pandas as pd
 
@@ -82,14 +83,14 @@ class NexusWells(Wells):
 
         return set_dates
 
-    def modify_well(self, well_name: str, perforations_properties: list[NexusCompletion.InputDictionary],
+    def modify_well(self, well_name: str, completion_properties_list: list[NexusCompletion.InputDictionary],
                     how: OperationEnum = OperationEnum.ADD, remove_all_that_match: bool = False,
                     write_to_file: bool = True, ) -> None:
         """ Modify the existing wells in memory using a dictionary of properties.
 
         Args:
             well_name (str): name of the well to modify
-            perforations_properties (list[InputDict]): a dictionary containing the properties to modify with the \
+            completion_properties_list (list[InputDict]): a dictionary containing the properties to modify with the \
                 attribute as keys and the values as the updated property value. If remove will remove perforation that \
                 matches the values in the dictionary.
             how (OperationEnum): operation enum taking the values OperationEnum.ADD, OperationEnum.REMOVE. \
@@ -102,7 +103,7 @@ class NexusWells(Wells):
         well = self.get_well(well_name)
         if well is None:
             raise ValueError(f'No well named {well_name} found in simulator')
-        for perf in perforations_properties:
+        for perf in completion_properties_list:
             if how == OperationEnum.ADD:
                 try:
                     date = perf.get('date')
@@ -112,10 +113,10 @@ class NexusWells(Wells):
                 if date is None:
                     raise AttributeError(
                         f'No date provided in perf: {perf}, please provide a date to add the perforation at.')
-                well.add_completion(date=date, completion_properties=perf)
+                self.add_completion(well_name=well_name, completion_properties=perf)
             elif how == OperationEnum.REMOVE:
                 completions_to_remove = well.find_completions(perf)
-                well.remove_completions(completions_to_remove)
+                well._remove_completions_from_memory(completions_to_remove)
             elif how == OperationEnum.MODIFY:
                 raise NotImplementedError('Modify in place not yet available. Please choose one of ADD/REMOVE')
             else:
@@ -136,7 +137,7 @@ class NexusWells(Wells):
         completion_date = completion_properties.get('date', None)
         if completion_date is None:
             raise AttributeError('Completion requires a date. '
-                                 'Please provide a date in the completion_properties dictionary.')
+                                 'Please provide a date in the completion_properties_list dictionary.')
 
         for well_coord in ['i', 'j', 'k']:
             if well_coord not in completion_properties:
@@ -150,20 +151,12 @@ class NexusWells(Wells):
         well_id = well.completions[0].id
 
         # add completion in memory
-        new_completion = well.add_completion(completion_date, completion_properties)
+        new_completion = well._add_completion_to_memory(completion_date, completion_properties)
 
         if self.model.fcs_file.well_files is None:
             raise FileNotFoundError('No well file found, cannot modify ')
 
-        # find the correct wellspec file in the model by looking at the ids
-        wellspec_files = [x for x in self.model.fcs_file.well_files.values() if x.object_locations is not None and
-                          well_id in x.object_locations]
-        if len(wellspec_files) == 0:
-            raise FileNotFoundError(f'No well file found with an existing well that has completion id: {well_id}')
-        wellspec_file = wellspec_files[0]
-        if wellspec_file.file_content_as_list is None:
-            raise FileNotFoundError(
-                f'No well file content found for specified wellfile at location: {wellspec_file.location}')
+        wellspec_file = self.__find_which_wellspec_file_from_id(well_id)
 
         # initialise some storage variables
         nexus_mapping = NexusCompletion.nexus_mapping()
@@ -263,6 +256,18 @@ class NexusWells(Wells):
 
         # write straight to file
         nexusfile_to_write_to.write_to_file()
+
+    def __find_which_wellspec_file_from_completion_id(self, id: UUID):
+        # find the correct wellspec file in the model by looking at the ids
+        wellspec_files = [x for x in self.model.fcs_file.well_files.values() if x.object_locations is not None and
+                          id in x.object_locations]
+        if len(wellspec_files) == 0:
+            raise FileNotFoundError(f'No well file found with an existing well that has completion id: {id}')
+        wellspec_file = wellspec_files[0]
+        if wellspec_file.file_content_as_list is None:
+            raise FileNotFoundError(
+                f'No well file content found for specified wellfile at location: {wellspec_file.location}')
+        return wellspec_file
 
     def fill_in_nas(self, additional_headers: list[str], headers_original: list[str], index: int, line: str,
                     wellspec_file: NexusFile, file_content: list[str]) -> int:
@@ -368,3 +373,31 @@ class NexusWells(Wells):
             write_out_headers = [' '.join(headers) + '\n']
             completion_table_as_list += write_out_headers
         return headers, new_completion_index, completion_table_as_list, True
+
+    def remove_completion(self, well_name: str, completion_properties: Optional[NexusCompletion.InputDictionary] = None,
+                          completion_id: Optional[UUID] = None, preserve_previous_completions: bool = True) -> None:
+
+        completion_date = completion_properties.get('date', None)
+        if completion_date is None:
+            raise AttributeError('Completion requires a date. '
+                                 'Please provide a date in the completion_properties_list dictionary.')
+        well = self.get_well(well_name)
+        if well is None:
+            raise ValueError(f'No well found with name: {well_name}')
+
+        if completion_id is None:
+            well.find_completion(completion_properties)
+        # remove from the well object
+        well._remove_completion_from_memory(completion_to_remove=completion_id)
+        # remove from the file as list
+        wellspec_file = self.__find_which_wellspec_file_from_completion_id(completion_id)
+        completion_index = wellspec_file.object_locations[completion_id]
+        file_with_the_completion, relative_index = wellspec_file.find_which_include_file(completion_index)
+
+        file_with_the_completion.file_content_as_list.pop(relative_index)
+
+        # update the object locations
+        wellspec_file.update_object_locations(line_number=relative_index, number_additional_lines=-1)
+
+        # remove from the file itself
+        file_with_the_completion.write_to_file()
