@@ -156,7 +156,7 @@ class NexusWells(Wells):
         if self.model.fcs_file.well_files is None:
             raise FileNotFoundError('No well file found, cannot modify ')
 
-        wellspec_file = self.__find_which_wellspec_file_from_id(well_id)
+        wellspec_file = self.__find_which_wellspec_file_from_completion_id(well_id)
 
         # initialise some storage variables
         nexus_mapping = NexusCompletion.nexus_mapping()
@@ -257,18 +257,6 @@ class NexusWells(Wells):
         # write straight to file
         nexusfile_to_write_to.write_to_file()
 
-    def __find_which_wellspec_file_from_completion_id(self, id: UUID):
-        # find the correct wellspec file in the model by looking at the ids
-        wellspec_files = [x for x in self.model.fcs_file.well_files.values() if x.object_locations is not None and
-                          id in x.object_locations]
-        if len(wellspec_files) == 0:
-            raise FileNotFoundError(f'No well file found with an existing well that has completion id: {id}')
-        wellspec_file = wellspec_files[0]
-        if wellspec_file.file_content_as_list is None:
-            raise FileNotFoundError(
-                f'No well file content found for specified wellfile at location: {wellspec_file.location}')
-        return wellspec_file
-
     def fill_in_nas(self, additional_headers: list[str], headers_original: list[str], index: int, line: str,
                     wellspec_file: NexusFile, file_content: list[str]) -> int:
         """ check the validity of the line, if its valid add as many NA's as required for the new columns """
@@ -290,6 +278,18 @@ class NexusWells(Wells):
             return index
         else:
             return -1
+
+    def __find_which_wellspec_file_from_completion_id(self, completion_id: UUID) -> NexusFile:
+        # find the correct wellspec file in the model by looking at the ids
+        wellspec_files = [x for x in self.model.fcs_file.well_files.values() if x.object_locations is not None and
+                          completion_id in x.object_locations]
+        if len(wellspec_files) == 0:
+            raise FileNotFoundError(f'No well file found with an existing well that has completion id: {completion_id}')
+        wellspec_file = wellspec_files[0]
+        if wellspec_file.file_content_as_list is None:
+            raise FileNotFoundError(
+                f'No well file content found for specified wellfile at location: {wellspec_file.location}')
+        return wellspec_file
 
     def get_wellspec_header(self, additional_headers: list[str], completion_properties: NexusCompletion.InputDictionary,
                             file_content: list[str], index: int, inverted_nexus_map: dict[str, str],
