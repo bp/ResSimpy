@@ -12,7 +12,7 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
 from ResSimpy.Nexus.DataModels.NexusSeparator import NexusSeparator
 from ResSimpy.Nexus.DataModels.NexusWater import NexusWater
-from ResSimpy.Nexus.DataModels.NexusEquil import NexusEquil
+from ResSimpy.Nexus.NexusEquilMethods import NexusEquilMethods
 from ResSimpy.Nexus.NexusRockMethods import NexusRockMethods
 from ResSimpy.Nexus.DataModels.StructuredGrid.StructuredGridFile import StructuredGridFile
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
@@ -96,7 +96,7 @@ class NexusSimulator(Simulator):
         self.pvt_methods: dict[int, NexusPVT] = {}
         self.separator_methods: dict[int, NexusSeparator] = {}
         self.water_methods: dict[int, NexusWater] = {}
-        self.equil_methods: dict[int, NexusEquil] = {}
+        self.EquilMethods: NexusEquilMethods = NexusEquilMethods()
         self.RockMethods: NexusRockMethods = NexusRockMethods()
         # Nexus operations modules
         self.Runcontrol: Runcontrol = Runcontrol(self)
@@ -465,15 +465,8 @@ class NexusSimulator(Simulator):
 
         # Read in equilibration properties from Nexus equil method files
         if self.fcs_file.equil_files is not None and \
-                len(self.fcs_file.equil_files) > 0:  # Check if equilibration files exist
-            for table_num in self.fcs_file.equil_files.keys():  # For each equilibration method
-                equil_file = self.fcs_file.equil_files[table_num].location
-                if equil_file is None:
-                    raise ValueError(f'Unable to find equilibration file: {equil_file}')
-                if os.path.isfile(equil_file):
-                    self.equil_methods[table_num] = NexusEquil(file_path=equil_file,
-                                                               method_number=table_num)  # Create NexusEquil object
-                    self.equil_methods[table_num].read_properties()  # Populate object with equil properties in file
+                len(self.fcs_file.equil_files) > 0:
+            self.EquilMethods = NexusEquilMethods(equil_files=self.fcs_file.equil_files)
 
         # Read in rock properties from Nexus rock method files
         if self.fcs_file.rock_files is not None and \

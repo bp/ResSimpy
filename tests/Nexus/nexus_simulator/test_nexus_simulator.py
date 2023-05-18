@@ -7,12 +7,12 @@ from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
 from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.Nexus.DataModels.NexusRockMethod import NexusRockMethod
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
 from ResSimpy.Nexus.DataModels.NexusSeparator import NexusSeparator
 from ResSimpy.Nexus.DataModels.NexusWater import NexusWater
-from ResSimpy.Nexus.DataModels.NexusEquil import NexusEquil
+from ResSimpy.Nexus.DataModels.NexusEquilMethod import NexusEquilMethod
+from ResSimpy.Nexus.DataModels.NexusRockMethod import NexusRockMethod
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
@@ -906,15 +906,15 @@ def test_get_equil(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_equil = {1: NexusEquil(file_path=os.path.join('path', 'my/equil/file1.dat'), method_number=1),
-                    2: NexusEquil(file_path=os.path.join('path', 'my/equil/file2.dat'), method_number=2),
-                    3: NexusEquil(file_path=os.path.join('path', 'my/equil/file3.dat'), method_number=3),
+    loaded_equil = {1: NexusEquilMethod(file_path=os.path.join('path', 'my/equil/file1.dat'), method_number=1),
+                    2: NexusEquilMethod(file_path=os.path.join('path', 'my/equil/file2.dat'), method_number=2),
+                    3: NexusEquilMethod(file_path=os.path.join('path', 'my/equil/file3.dat'), method_number=3),
                     }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.equil_methods
+    result = simulation.EquilMethods.equil_methods
 
     # Assert
     assert result == loaded_equil

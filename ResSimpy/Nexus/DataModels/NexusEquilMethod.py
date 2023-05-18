@@ -1,19 +1,20 @@
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Union
+from typing import Union, Optional
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_INTSAT_KEYWORDS, EQUIL_KEYWORDS_VALUE_FLOAT
 from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_TABLE_KEYWORDS, EQUIL_SINGLE_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_OVERREAD_VALUES, EQUIL_COMPOSITION_OPTIONS
 from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_KEYWORDS
+from ResSimpy.EquilMethod import EquilMethod
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
-@dataclass  # Doesn't need to write an _init_, _eq_ methods, etc.
-class NexusEquil():
+@dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
+class NexusEquilMethod(EquilMethod):
     """ Class to hold Nexus Equil properties
     Attributes:
         file_path (str): Path to the Nexus equilibration file
@@ -27,12 +28,19 @@ class NexusEquil():
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] \
         = field(default_factory=get_empty_dict_union)
 
+    def __init__(self, file_path: str, method_number: int,
+                 properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                                                      dict[str, pd.DataFrame]]]] = None):
+        self.file_path = file_path
+        if properties:
+            self.properties = properties
+        else:
+            self.properties = {}
+        super().__init__(method_number=method_number)
+
     def __repr__(self) -> str:
         """Pretty printing equilibration data"""
-        printable_str = '\n--------------------------------\n'
-        printable_str += f'EQUIL method {self.method_number}\n'
-        printable_str += '--------------------------------\n'
-        printable_str += f'FILE_PATH: {self.file_path}\n'
+        printable_str = f'\nFILE_PATH: {self.file_path}\n'
         equil_dict = self.properties
         for key, value in equil_dict.items():
             if isinstance(value, pd.DataFrame):

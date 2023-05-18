@@ -8,10 +8,10 @@ from ResSimpy.RockMethods import RockMethods
 
 @dataclass(kw_only=True)
 class NexusRockMethods(RockMethods):
-    """The abstract base class for rock property methods
+    """Class for collection of Nexus rock property methods
     Attributes:
         rock_methods (dict[int, NexusRockMethod]): Collection of Nexus rock property methods, as a dictionary
-        rock_files (dict[int, NexusFile]): Dictionary collection of rock property files, as defined in Nexus FCS file
+        rock_files (dict[int, NexusFile]): Dictionary collection of rock property files, as defined in Nexus fcs file
     """
 
     __rock_methods: MutableMapping[int, NexusRockMethod]
@@ -63,7 +63,6 @@ class NexusRockMethods(RockMethods):
                     raise ValueError(f'Unable to find rock file: {rock_file}')
                 if os.path.isfile(rock_file):
                     # Create NexusRockMethod object
-                    self.__rock_methods[table_num] = NexusRockMethod(file_path=rock_file,
-                                                                     method_number=table_num)
+                    self.__rock_methods[table_num] = NexusRockMethod(file_path=rock_file, method_number=table_num)
                     self.__rock_methods[table_num].read_properties()  # Populate object with rock properties in file
         self.__properties_loaded = True
