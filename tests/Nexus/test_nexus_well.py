@@ -530,7 +530,7 @@ def test_well_dates(mocker):
     # Assert
     assert result == expected_result
 
-@pytest.skip('skipping test, waiting on full implementation of modify')
+@pytest.mark.skip('skipping test, waiting on full implementation of modify')
 def test_wells_modify(mocker):
     # Arrange
     well_1_completions = [
@@ -1087,4 +1087,3 @@ def test_object_locations_updating(mocker, well_file_data, expected_uuid):
     # Assert
 
     assert model.fcs_file.well_files[1].object_locations == expected_uuid
-

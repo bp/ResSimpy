@@ -5,6 +5,8 @@ import warnings
 from dataclasses import dataclass, field
 from functools import cmp_to_key
 from typing import Sequence, Optional, TYPE_CHECKING
+from functools import cmp_to_key
+from typing import Sequence, Optional, TYPE_CHECKING
 from uuid import UUID
 
 import pandas as pd
