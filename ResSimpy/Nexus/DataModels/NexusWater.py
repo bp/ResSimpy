@@ -48,7 +48,7 @@ class NexusWater():
         = field(default_factory=get_empty_dict_union)
     parameters: list[NexusWaterParams] = field(default_factory=get_empty_list_nexus_water_params)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Pretty printing water data"""
         param_to_nexus_keyword_map = {'density': 'DENW', 'compressibility': 'CW',
                                       'formation_volume_factor': 'BW', 'viscosity': 'VISW',

@@ -13,6 +13,7 @@ from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
 from ResSimpy.Nexus.DataModels.NexusSeparator import NexusSeparator
 from ResSimpy.Nexus.DataModels.NexusWater import NexusWater
 from ResSimpy.Nexus.DataModels.NexusEquil import NexusEquil
+from ResSimpy.Nexus.NexusRockMethods import NexusRockMethods
 from ResSimpy.Nexus.DataModels.StructuredGrid.StructuredGridFile import StructuredGridFile
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -96,6 +97,7 @@ class NexusSimulator(Simulator):
         self.separator_methods: dict[int, NexusSeparator] = {}
         self.water_methods: dict[int, NexusWater] = {}
         self.equil_methods: dict[int, NexusEquil] = {}
+        self.RockMethods: NexusRockMethods = NexusRockMethods()
         # Nexus operations modules
         self.Runcontrol: Runcontrol = Runcontrol(self)
         self.Reporting: Reporting = Reporting(self)
@@ -472,6 +474,11 @@ class NexusSimulator(Simulator):
                     self.equil_methods[table_num] = NexusEquil(file_path=equil_file,
                                                                method_number=table_num)  # Create NexusEquil object
                     self.equil_methods[table_num].read_properties()  # Populate object with equil properties in file
+
+        # Read in rock properties from Nexus rock method files
+        if self.fcs_file.rock_files is not None and \
+                len(self.fcs_file.rock_files) > 0:
+            self.RockMethods = NexusRockMethods(rock_files=self.fcs_file.rock_files)
 
         # === End of dynamic properties loading ===
 

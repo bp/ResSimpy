@@ -17,7 +17,7 @@ class NexusEquil():
     """ Class to hold Nexus Equil properties
     Attributes:
         file_path (str): Path to the Nexus equilibration file
-        method_number (int): PVT method number in Nexus fcs file
+        method_number (int): Equilibration method number in Nexus fcs file
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] ):
             Dictionary holding all properties for a specific equilibration method. Defaults to empty dictionary.
     """
@@ -27,7 +27,7 @@ class NexusEquil():
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] \
         = field(default_factory=get_empty_dict_union)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Pretty printing equilibration data"""
         printable_str = '\n--------------------------------\n'
         printable_str += f'EQUIL method {self.method_number}\n'

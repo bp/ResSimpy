@@ -21,7 +21,7 @@ class NexusSeparator():
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] \
         = field(default_factory=get_empty_dict_union)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Pretty printing separator data"""
         printable_str = ''
         printable_str += '\n--------------------------------\n'
