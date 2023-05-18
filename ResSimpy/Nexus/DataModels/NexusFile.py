@@ -454,6 +454,8 @@ class NexusFile:
 
     def write_to_file(self) -> None:
         """ Writes back to the original file location of the nexusfile"""
+        if self.location is None:
+            raise ValueError(f'No file path to write to, instead found {self.location}')
         file_str = ''.join(self.file_content_as_list_str)
         with open(self.location, 'w') as fi:
             fi.write(file_str)
@@ -461,10 +463,13 @@ class NexusFile:
     @property
     def file_content_as_list_str(self) -> list[str]:
         """The raw equivalent file content represented as a list. Include files are written out with their full path."""
+        if self.file_content_as_list is None:
+            return []
         file_content_as_list_str = []
         for line in self.file_content_as_list:
             if isinstance(line, str):
                 file_content_as_list_str.append(line)
             else:
-                file_content_as_list_str.append(line.location)
+                inc_file_path = line.location if line.location is not None else ''
+                file_content_as_list_str.append(inc_file_path)
         return file_content_as_list_str
