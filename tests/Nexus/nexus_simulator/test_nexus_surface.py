@@ -519,7 +519,15 @@ def test_load_constraints(mocker, file_contents, expected_content):
             expected_constraints[well_name].append(NexusConstraint(constraint))
         else:
             expected_constraints[well_name] = [NexusConstraint(constraint)]
-    expected_single_name_constraint = expected_constraints['well1']
+    expected_date_filtered_constraints = {}
+    for constraint in expected_content:
+        if constraint['date'] == '01/01/2019':
+            well_name = constraint['name']
+            if expected_date_filtered_constraints.get(well_name, None) is not None:
+                expected_date_filtered_constraints[well_name].append(NexusConstraint(constraint))
+            else:
+                expected_date_filtered_constraints[well_name] = [NexusConstraint(constraint)]
+    expected_single_name_constraint = {'well1': expected_constraints['well1']}
     mock_nexus_network = mocker.MagicMock()
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
     expected_df = pd.DataFrame(expected_content)
@@ -527,9 +535,9 @@ def test_load_constraints(mocker, file_contents, expected_content):
     constraints = NexusConstraints(mock_nexus_network)
     constraints.load_constraints(surface_file, start_date, UnitSystem.ENGLISH)
     result = constraints.get_constraints()
-    result_single = constraints.get_constraint('well1')
+    result_single = constraints.get_constraints(object_name='well1')
     result_df = constraints.get_constraint_df()
-
+    result_date_filtered = constraints.get_constraints(date='01/01/2019')
     # sort the dates for comparing dataframes (order normally wouldn't matter)
     result_df['date'] = pd.to_datetime(result_df['date'])
     result_df = result_df.sort_values('date').reset_index(drop=True)
@@ -540,3 +548,4 @@ def test_load_constraints(mocker, file_contents, expected_content):
     assert result == expected_constraints
     assert result_single == expected_single_name_constraint
     pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
+    assert result_date_filtered == expected_date_filtered_constraints
