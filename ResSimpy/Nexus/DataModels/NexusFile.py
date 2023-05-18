@@ -142,6 +142,8 @@ class NexusFile:
                     suffix_line = None
 
                 if prefix_line:
+                    if not suffix_line:
+                        prefix_line += '\n'
                     modified_file_as_list.append(prefix_line)
                 modified_file_as_list.append(inc_file)
                 if suffix_line:
@@ -162,6 +164,8 @@ class NexusFile:
                     suffix_line = None
 
                 if prefix_line:
+                    if not suffix_line:
+                        prefix_line += '\n'
                     modified_file_as_list.append(prefix_line)
                 modified_file_as_list.append(inc_file)
                 if suffix_line:
@@ -203,7 +207,6 @@ class NexusFile:
     @dataclass
     class FileIndex:
         index: int
-        # end_index: int
 
     def iterate_line(self, file_index: Optional[FileIndex] = None, max_depth: Optional[int] = None,
                      parent: Optional[NexusFile] = None) -> Generator[str, None, None]:
@@ -217,10 +220,13 @@ class NexusFile:
             file_index = NexusFile.FileIndex(index=0)
         if parent is None:
             parent = self
+            parent.line_locations = []
         if parent.line_locations is None:
             parent.line_locations = []
 
-        parent.line_locations.append((file_index.index, self.file_id))
+        new_entry = (file_index.index, self.file_id)
+        if new_entry not in parent.line_locations:
+            parent.line_locations.append(new_entry)
         depth: int = 0
         if max_depth is not None:
             depth = max_depth
@@ -234,7 +240,9 @@ class NexusFile:
 
                     yield from row.iterate_line(file_index=file_index, max_depth=level_down_max_depth,
                                                 parent=parent)
-                    parent.line_locations += [(file_index.index, self.file_id)]
+                    new_entry = (file_index.index, self.file_id)
+                    if new_entry not in parent.line_locations:
+                        parent.line_locations.append(new_entry)
                 else:
                     continue
             else:
@@ -292,7 +300,20 @@ class NexusFile:
     def get_next_value_nexus_file(self, start_line_index: int, search_string: Optional[str] = None,
                                   ignore_values: Optional[list[str]] = None,
                                   replace_with: Union[str, VariableEntry, None] = None) -> Optional[str | NexusFile]:
+        """ Gets the next value in a file_as_list object and returns either the next value as a string or the nexusfile
+            if the next value is an include file.
 
+        Args:
+            start_line_index (int): The line index to start search from in the file
+            search_string (Optional[str]): starting string to search from in the starting line index
+            ignore_values (Optional[list[str]]): values to skip over when looking for a valid value
+            replace_with (Union[str, VariableEntry, None]): a value to replace the existing value with. \
+            Defaults to None.
+
+        Returns:
+            Optional[str | NexusFile] the next valid value either a token, value or a NexusFile if the next value
+            would be an include file.
+        """
         file_as_list, nexus_file = self.get_flat_list_str_until_file(start_line_index)
         value = nfo.get_next_value(0, file_as_list, search_string, ignore_values, replace_with)
         if value is None:
@@ -344,7 +365,111 @@ class NexusFile:
         value = self.get_next_value_nexus_file(line_index, search_string, ignore_values, replace_with)
         return value
 
-    def update_object_locations(self, uuid: UUID, line_index: int):
+    def add_object_locations(self, uuid: UUID, line_index: int) -> None:
+        """ adds a uuid to the object_locations dictionary. Used for storing the line numbers where objects are stored
+        within the flattened file_as_list
+
+        Args:
+            uuid (UUID): unique identifier of the object being created/stored
+            line_index (int): line number in the flattened file_content_as_list
+                (i.e. from the get_flat_list_str_file method)
+        """
         if self.object_locations is None:
             self.object_locations: dict[UUID, int] = get_empty_dict_uuid_int()
         self.object_locations[uuid] = line_index
+
+    def update_object_locations(self, line_number: int, number_additional_lines: int) -> None:
+        """ updates the object locations in a nexusfile by the additional lines. Used when files have been modified and
+        an addition/removal of lines has occurred. Ensures that the object locations are correct to the actual lines
+        in the file_as_list
+
+        Args:
+            line_number (int): Line number at which the new lines have been added
+            number_additional_lines (int): number of new lines added.
+        """
+        if self.object_locations is None:
+            return
+        for object_id, index in self.object_locations.items():
+            if index >= line_number:
+                self.object_locations[object_id] = index + number_additional_lines
+
+    def remove_object_locations(self, uuid: UUID) -> None:
+        """ Removes an object location based on the uuid provided. Used when removing objects in the file_as_list
+
+        Args:
+            uuid (UUID): id of the removed object.
+        """
+        if self.object_locations is None:
+            raise ValueError(f'No object locations found for file {self.location}')
+
+        if self.object_locations.get(uuid, None) is None:
+            raise ValueError(f'No object with {uuid=} found within the object locations')
+        self.object_locations.pop(uuid, None)
+
+    def find_which_include_file(self, index: int) -> tuple[NexusFile, int]:
+        """ Given a line index that relates to a position within the flattened file_as_list from the method
+        get_flat_file_as_list
+
+        Args:
+            index (int): index in the flattened file as list structure
+
+        Returns:
+            tuple[NexusFile, int] where the first element is the file that the relevant line is in and the second
+            element is the relative index in that file.
+        """
+        if self.line_locations is None:
+            self.get_flat_list_str_file()
+            if self.line_locations is None:
+                raise ValueError("No include line locations found.")
+
+        line_locations = [x[0] for x in self.line_locations]
+        line_locations.sort()
+        uuid_index = 0
+        index_in_file = index - line_locations[-1]
+
+        for i, x in enumerate(line_locations):
+            if x <= index:
+                index_in_file = index - x
+                uuid_index = i
+            if x >= index:
+                break
+
+        file_uuid = self.line_locations[uuid_index][1]
+        if file_uuid == self.file_id or self.includes_objects is None:
+            return self, index_in_file
+
+        nexus_file = None
+        for file in self.includes_objects:
+            if file.file_id == file_uuid:
+                nexus_file = file
+            elif file.includes_objects is not None:
+                # CURRENTLY THIS ONLY SUPPORTS 2 LEVELS OF INCLUDES
+                for lvl_2_include in file.includes_objects:
+                    if lvl_2_include.file_id == file_uuid:
+                        nexus_file = lvl_2_include
+        if nexus_file is None:
+            raise ValueError(f'No file with {file_uuid=} found within include objects')
+
+        return nexus_file, index_in_file
+
+    def write_to_file(self) -> None:
+        """ Writes back to the original file location of the nexusfile"""
+        if self.location is None:
+            raise ValueError(f'No file path to write to, instead found {self.location}')
+        file_str = ''.join(self.file_content_as_list_str)
+        with open(self.location, 'w') as fi:
+            fi.write(file_str)
+
+    @property
+    def file_content_as_list_str(self) -> list[str]:
+        """The raw equivalent file content represented as a list. Include files are written out with their full path."""
+        if self.file_content_as_list is None:
+            return []
+        file_content_as_list_str = []
+        for line in self.file_content_as_list:
+            if isinstance(line, str):
+                file_content_as_list_str.append(line)
+            else:
+                inc_file_path = line.location if line.location is not None else ''
+                file_content_as_list_str.append(inc_file_path)
+        return file_content_as_list_str

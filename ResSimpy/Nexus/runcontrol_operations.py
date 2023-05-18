@@ -134,7 +134,7 @@ class Runcontrol:
             y (Union[str, float]): second date to compare
 
         Returns:
-            int: the difference between the first and second dates to compare
+            int: -1 if y > x, 0 if y == x, 1 if y < x
         """
         date_comp = self.convert_date_to_number(x) - self.convert_date_to_number(y)
         if date_comp < 0:

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional, Tuple, Sequence, Union, cast
 from uuid import UUID
@@ -12,7 +13,7 @@ from ResSimpy.Well import Well
 class NexusWell(Well):
     __completions: list[NexusCompletion]
 
-    def __init__(self, well_name: str, completions: list[NexusCompletion], units: UnitSystem):
+    def __init__(self, well_name: str, completions: list[NexusCompletion], units: UnitSystem, ):
         self.__completions = completions
         super().__init__(well_name=well_name, completions=completions, units=units)
 
@@ -93,21 +94,6 @@ class NexusWell(Well):
 
         return events
 
-    def add_completion(self, date: str, completion_properties: NexusCompletion.InputDictionary,
-                       completion_index: Optional[int] = None) -> None:
-        """ adds a perforation with the properties specified in completion_properties,
-            if index is none then adds it to the end of the perforation list.
-        Args:
-            date (str): date at which the perforation should be added
-            completion_properties (dict[str, str | float | int]):
-            completion_index (Optional[int]):
-        """
-        completion_properties['date'] = date
-        new_completion = NexusCompletion.from_dict(completion_properties)
-        if completion_index is None:
-            completion_index = len(self.__completions)
-        self.__completions.insert(completion_index, new_completion)
-
     def find_completions(self, completion_properties: NexusCompletion.InputDictionary | NexusCompletion) -> \
             list[NexusCompletion]:
         """ returns a list of all completions that match the completion properties provided.
@@ -161,6 +147,30 @@ class NexusWell(Well):
                 return completion
         raise ValueError('No completion found for id: {id}')
 
+    def add_completion(self, date: str, completion_properties: NexusCompletion.InputDictionary,
+                       completion_index: Optional[int] = None, ) -> NexusCompletion:
+        """ adds a perforation with the properties specified in completion_properties,
+            if index is none then adds it to the end of the perforation list.
+        Args:
+            date (str): date at which the perforation should be added
+            completion_properties (dict[str, str | float | int]):
+            completion_index (Optional[int]):
+        """
+        completion_properties['date'] = date
+        new_completion = NexusCompletion.from_dict(completion_properties)
+        if completion_index is None:
+            completion_index = len(self.__completions)
+        self.__completions.insert(completion_index, new_completion)
+        return new_completion
+
+    def remove_completion(self, completion_to_remove: NexusCompletion | UUID) -> None:
+        if isinstance(completion_to_remove, NexusCompletion):
+            completion_to_remove = self.find_completion(completion_to_remove)
+            completion_to_remove = completion_to_remove.id
+        completion_index_to_remove = [x.id for x in self.__completions].index(completion_to_remove)
+        removed_completion = self.__completions.pop(completion_index_to_remove)
+        print(f'Removed completion: {removed_completion}')
+
     def modify_completion(self, new_completion_properties: NexusCompletion.InputDictionary,
                           completion_to_modify: NexusCompletion | UUID,
                           ) -> None:
@@ -178,14 +188,6 @@ class NexusWell(Well):
                 modify_this_completion.update(new_completion_properties)
             else:
                 completion.update(new_completion_properties)
-
-    def remove_completion(self, completion_to_remove: NexusCompletion | UUID) -> None:
-        if isinstance(completion_to_remove, NexusCompletion):
-            completion_to_remove = self.find_completion(completion_to_remove)
-            completion_to_remove = completion_to_remove.id
-        completion_index_to_remove = [x.id for x in self.__completions].index(completion_to_remove)
-        removed_completion = self.__completions.pop(completion_index_to_remove)
-        print(f'Removed completion: {removed_completion}')
 
     def remove_completions(self, completions_to_remove: Sequence[NexusCompletion | UUID], ) -> None:
         # TODO improve comparison of dates with datetime libs

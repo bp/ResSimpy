@@ -88,7 +88,7 @@ class NexusSimulator(Simulator):
         self.__write_times: bool = write_times
         self.__manual_fcs_tidy_call: bool = manual_fcs_tidy_call
         self.__surface_file_path: Optional[str] = None
-        self.Wells: NexusWells = NexusWells()
+        self.Wells: NexusWells = NexusWells(self)
         self.__default_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
         # Model dynamic properties
         self.pvt_methods: dict[int, NexusPVT] = {}
@@ -480,9 +480,7 @@ class NexusSimulator(Simulator):
                 if well_file.location is None:
                     warnings.warn(f'Well file location has not been found for {well_file}')
                     continue
-                self.Wells.load_wells(
-                    well_file=well_file, start_date=self.start_date, default_units=self.__default_units)
-                self.Wells.wellspec_files.append(well_file)
+                self.Wells.load_wells()
 
     @staticmethod
     def update_file_value(file_path: str, token: str, new_value: str, add_to_start: bool = False):

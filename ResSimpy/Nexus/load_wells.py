@@ -156,6 +156,8 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
         if wellspec_found:
             if current_date is None:
                 current_date = start_date
+            # reset the storage dictionary to prevent completion properties being carried forward from earlier timestep
+            header_values = {k: None for k in header_values}
             # Load in each line of the table
             completions = __load_wellspec_table_completions(
                 nexus_file, header_index, header_values, headers, current_date, end_point_scaling_header_values)
@@ -273,7 +275,7 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
             kh_mult=convert_header_value_float('KHMULT')
             )
 
-        nexus_file.update_object_locations(new_completion.id, index + header_index + 1)
+        nexus_file.add_object_locations(new_completion.id, index + header_index + 1)
 
         completions.append(new_completion)
 
@@ -299,7 +301,7 @@ def __load_wellspec_table_headings(header_index: int, header_values: dict[str, N
         tuple[int, list[str]]: index in the file as list for the header, list of headers found in the file
     """
     headers = [] if headers is None else headers
-
+    next_column_heading: Optional[str]
     if well_name is None:
         return header_index, headers
 
@@ -307,8 +309,8 @@ def __load_wellspec_table_headings(header_index: int, header_values: dict[str, N
         if nfo.check_token(key, line):
             header_line = line.upper()
             header_index = index
-            # Map the headers
-            next_column_heading = nfo.get_next_value(start_line_index=0, file_as_list=[line])
+            # Map the headers (first time get the expected value as check token guarantees at least 1 value)
+            next_column_heading = nfo.get_expected_next_value(start_line_index=0, file_as_list=[line]).upper()
             trimmed_line = header_line
 
             while next_column_heading is not None:

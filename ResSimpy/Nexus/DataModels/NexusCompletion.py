@@ -288,49 +288,49 @@ class NexusCompletion(Completion):
 
         return nexus_mapping
 
-    class InputDictionary(TypedDict):
+    class InputDictionary(TypedDict, total=False):
         date: str
-        i: int
-        j: int
-        k: int
-        measured_depth: float
-        skin: float
-        depth: float
-        x: float
-        y: float
-        angle_a: float
-        angle_v: float
-        grid: str
-        well_indices: float
-        depth_to_top: float
-        depth_to_bottom: float
-        well_radius: float
-        partial_perf: float
-        cell_number: int
-        perm_thickness_ovr: float
-        dfactor: float
-        rel_perm_method: int
-        status: str
-        bore_radius: float
-        portype: str
-        fracture_mult: float
-        sector: int
-        well_group: str
-        zone: int
-        angle_open_flow: float
-        temperature: float
-        flowsector: int
-        parent_node: str
-        mdcon: float
-        pressure_avg_pattern: int
-        length: float
-        permeability: float
-        non_darcy_model: str
-        comp_dz: float
-        layer_assignment: int
-        polymer_bore_radius: float
-        polymer_well_radius: float
-        kh_mult: float
+        i: Optional[int]
+        j: Optional[int]
+        k: Optional[int]
+        measured_depth: Optional[float]
+        skin: Optional[float]
+        depth: Optional[float]
+        x: Optional[float]
+        y: Optional[float]
+        angle_a: Optional[float]
+        angle_v: Optional[float]
+        grid: Optional[str]
+        well_indices: Optional[float]
+        depth_to_top: Optional[float]
+        depth_to_bottom: Optional[float]
+        well_radius: Optional[float]
+        partial_perf: Optional[float]
+        cell_number: Optional[int]
+        perm_thickness_ovr: Optional[float]
+        dfactor: Optional[float]
+        rel_perm_method: Optional[int]
+        status: Optional[str]
+        bore_radius: Optional[float]
+        portype: Optional[str]
+        fracture_mult: Optional[float]
+        sector: Optional[int]
+        well_group: Optional[str]
+        zone: Optional[int]
+        angle_open_flow: Optional[float]
+        temperature: Optional[float]
+        flowsector: Optional[int]
+        parent_node: Optional[str]
+        mdcon: Optional[float]
+        pressure_avg_pattern: Optional[int]
+        length: Optional[float]
+        permeability: Optional[float]
+        non_darcy_model: Optional[str]
+        comp_dz: Optional[float]
+        layer_assignment: Optional[int]
+        polymer_bore_radius: Optional[float]
+        polymer_well_radius: Optional[float]
+        kh_mult: Optional[float]
 
     @classmethod
     def from_dict(cls, input_dictionary: InputDictionary) -> NexusCompletion:
@@ -348,3 +348,25 @@ class NexusCompletion(Completion):
                 setattr(self, '_NexusCompletion__' + k, v)
             elif hasattr(super(), '_Completion__' + k):
                 setattr(self, '_Completion__' + k, v)
+
+    def completion_to_wellspec_row(self, headers: list[str]):
+        """ Takes a completion object and returns the attribute values as a string in the order of headers provided
+
+        Args:
+            headers (list[str]): list of header values in Nexus keyword format
+
+        Returns: string of the values in the order of the headers provided.
+
+        """
+        nexus_mapping = NexusCompletion.nexus_mapping()
+        completion_properties = self.to_dict()
+
+        completion_values = []
+        for header in headers:
+            attribute_name = nexus_mapping[header][0]
+            attribute_value = completion_properties[attribute_name]
+            if attribute_value is None:
+                attribute_value = 'NA'
+            completion_values.append(attribute_value)
+        completion_string = [' '.join([str(x) for x in completion_values]) + '\n']
+        return completion_string

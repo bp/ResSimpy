@@ -686,7 +686,7 @@ def get_table_header(file_as_list: list[str], header_values: dict[str, str]) -> 
     Raises:
         ValueError: if no headers belonging to the header_values dict is found
     Returns:
-        int, list[str]: index in the file provided for the header, list of headers
+        int, list[str]: index in the file provided for the header, list of headers as Nexus keyword format
     """
     headers = []
     header_index = -1
@@ -696,7 +696,7 @@ def get_table_header(file_as_list: list[str], header_values: dict[str, str]) -> 
                 header_line = line.upper()
                 header_index = index
                 # Map the headers
-                next_column_heading = get_next_value(start_line_index=0, file_as_list=[line])
+                next_column_heading = get_next_value(start_line_index=0, file_as_list=[header_line])
                 trimmed_line = header_line
 
                 while next_column_heading is not None:
