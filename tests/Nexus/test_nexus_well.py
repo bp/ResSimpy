@@ -440,7 +440,7 @@ def test_add_completion():
     # Assert
     assert well == expected_well
 
-def test_remove_completion():
+def test_remove_completion_from_memory():
     # Arrange
     existing_completions = [
         NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,

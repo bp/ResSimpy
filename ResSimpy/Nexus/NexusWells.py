@@ -388,11 +388,14 @@ class NexusWells(Wells):
             raise ValueError(f'No well found with name: {well_name}')
 
         if completion_id is None:
-            well.find_completion(completion_properties)
-        # remove from the well object
-        well._remove_completion_from_memory(completion_to_remove=completion_id)
-        # remove from the file as list
+            completion_id = well.find_completion(completion_properties).id
+        # find which wellspec file we should edit
         wellspec_file = self.__find_which_wellspec_file_from_completion_id(completion_id)
+
+        # remove from the well object/wells class
+        well._remove_completion_from_memory(completion_to_remove=completion_id)
+
+        # drop it from the wellspec file or include file if stored in include file
         completion_index = wellspec_file.object_locations[completion_id]
         file_with_the_completion, relative_index = wellspec_file.find_which_include_file(completion_index)
 
