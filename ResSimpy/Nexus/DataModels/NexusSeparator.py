@@ -21,7 +21,7 @@ class NexusSeparator():
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] \
         = field(default_factory=get_empty_dict_union)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Pretty printing separator data"""
         printable_str = ''
         printable_str += '\n--------------------------------\n'
@@ -30,15 +30,15 @@ class NexusSeparator():
         printable_str += f'FILE_PATH: {self.file_path}\n'
         printable_str += f'SEPARATOR_TYPE: {self.separator_type}\n'
         sep_dict = self.properties
-        for key in sep_dict.keys():
-            if isinstance(sep_dict[key], pd.DataFrame):
+        for key, value in sep_dict.items():
+            if isinstance(value, pd.DataFrame):
                 printable_str += f'{key}: \n'
-                printable_str += sep_dict[key].to_string()
+                printable_str += value.to_string()
                 printable_str += '\n\n'
-            elif isinstance(sep_dict[key], Enum):
-                printable_str += f'{key}: {sep_dict[key].name}\n'
+            elif isinstance(value, Enum):
+                printable_str += f'{key}: {value.name}\n'
             else:
-                printable_str += f'{key}: {sep_dict[key]}\n'
+                printable_str += f'{key}: {value}\n'
         return printable_str
 
     def read_properties(self) -> None:

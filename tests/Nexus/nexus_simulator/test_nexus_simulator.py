@@ -11,6 +11,8 @@ from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
 from ResSimpy.Nexus.DataModels.NexusSeparator import NexusSeparator
 from ResSimpy.Nexus.DataModels.NexusWater import NexusWater
+from ResSimpy.Nexus.DataModels.NexusEquilMethod import NexusEquilMethod
+from ResSimpy.Nexus.DataModels.NexusRockMethod import NexusRockMethod
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
@@ -881,6 +883,76 @@ def test_get_water(mocker: MockerFixture, fcs_file_contents: str):
 
     # Assert
     assert result == loaded_wat
+
+
+@pytest.mark.parametrize("fcs_file_contents", [
+    ("""
+       EQUIL method 1 my/equil/file1.dat
+
+       equil Method 2 my/equil/file2.dat
+       Equil METHOD 3 my/equil/file3.dat
+    """)
+], ids=['basic case'])
+def test_get_equil(mocker: MockerFixture, fcs_file_contents: str):
+    """Testing the functionality to retrieve equilibration methods from Nexus fcs file"""
+    # Arrange
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            os.path.join('path', 'my/equil/file1.dat'): '',
+            os.path.join('path', 'my/equil/file2.dat'): '',
+            os.path.join('path', 'my/equil/file3.dat'): '',
+            'path/nexus_run.fcs': fcs_file_contents,
+            }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    loaded_equil = {1: NexusEquilMethod(file_path=os.path.join('path', 'my/equil/file1.dat'), method_number=1),
+                    2: NexusEquilMethod(file_path=os.path.join('path', 'my/equil/file2.dat'), method_number=2),
+                    3: NexusEquilMethod(file_path=os.path.join('path', 'my/equil/file3.dat'), method_number=3),
+                    }
+
+    simulation = NexusSimulator(origin='path/nexus_run.fcs')
+
+    # Act
+    result = simulation.EquilMethods.equil_methods
+
+    # Assert
+    assert result == loaded_equil
+
+
+@pytest.mark.parametrize("fcs_file_contents", [
+    ("""
+       ROCK method 1 my/rock/file1.dat
+
+       rock Method 2 my/rock/file2.dat
+       Rock METHOD 3 my/rock/file3.dat
+    """)
+], ids=['basic case'])
+def test_get_rock(mocker: MockerFixture, fcs_file_contents: str):
+    """Testing the functionality to retrieve rock properties methods from Nexus fcs file"""
+    # Arrange
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            os.path.join('path', 'my/rock/file1.dat'): '',
+            os.path.join('path', 'my/rock/file2.dat'): '',
+            os.path.join('path', 'my/rock/file3.dat'): '',
+            'path/nexus_run.fcs': fcs_file_contents,
+            }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    loaded_rocks = {1: NexusRockMethod(file_path=os.path.join('path', 'my/rock/file1.dat'), method_number=1),
+                    2: NexusRockMethod(file_path=os.path.join('path', 'my/rock/file2.dat'), method_number=2),
+                    3: NexusRockMethod(file_path=os.path.join('path', 'my/rock/file3.dat'), method_number=3),
+                    }
+
+    simulation = NexusSimulator(origin='path/nexus_run.fcs')
+
+    # Act
+    result = simulation.RockMethods.rock_methods
+
+    # Assert
+    assert result == loaded_rocks
 
 
 @pytest.mark.parametrize("fcs_file_contents, surface_file_content, node1_props, node2_props, \
