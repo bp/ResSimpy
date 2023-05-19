@@ -377,18 +377,24 @@ class NexusWells(Wells):
         return headers, new_completion_index, completion_table_as_list, True
 
     def remove_completion(self, well_name: str, completion_properties: Optional[NexusCompletion.InputDictionary] = None,
-                          completion_id: Optional[UUID] = None, preserve_previous_completions: bool = True) -> None:
+                          completion_id: Optional[UUID] = None, ) -> None:
 
-        completion_date = completion_properties.get('date', None)
-        if completion_date is None:
-            raise AttributeError('Completion requires a date. '
-                                 'Please provide a date in the completion_properties_list dictionary.')
         well = self.get_well(well_name)
         if well is None:
             raise ValueError(f'No well found with name: {well_name}')
 
+        if completion_properties is None and completion_id is None:
+            raise ValueError('Must provide one of completion_properties dictionary or completion_id.')
+
+        # check for a date:
+        if completion_properties is not None:
+            completion_date = completion_properties.get('date', None)
+            if completion_date is None:
+                raise AttributeError('Completion requires a date. '
+                                     'Please provide a date in the completion_properties_list dictionary.')
         if completion_id is None:
             completion_id = well.find_completion(completion_properties).id
+
         # find which wellspec file we should edit
         wellspec_file = self.__find_which_wellspec_file_from_completion_id(completion_id)
 
@@ -407,3 +413,24 @@ class NexusWells(Wells):
 
         # remove from the file itself
         file_with_the_completion.write_to_file()
+
+    def modify_completion(self, well_name: str, properties_to_modify: NexusCompletion.InputDictionary,
+                          completion_to_change: Optional[NexusCompletion.InputDictionary] = None,
+                          completion_id: Optional[UUID] = None, ):
+        well = self.get_well(well_name)
+        if well is None:
+            raise ValueError(f'No well found with name: {well_name}')
+
+        if completion_id is None:
+            completion = well.find_completion(completion_to_change)
+            completion_id = completion.id
+        else:
+            completion = well.get_completion_by_id(completion_id)
+
+        update_completion_properties = {k: v for k, v in completion.to_dict().items() if v is not None}
+
+        for prop, value in properties_to_modify.items():
+            update_completion_properties[prop] = value
+
+        self.remove_completion(well_name, completion_id=completion_id)
+        self.add_completion(well_name, update_completion_properties, preserve_previous_completions=True)
