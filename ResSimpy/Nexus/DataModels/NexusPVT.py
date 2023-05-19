@@ -46,7 +46,7 @@ class NexusPVT():
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] \
         = field(default_factory=get_empty_dict_union)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Pretty printing PVT data"""
         printable_str = ''
         printable_str += '\n--------------------------------\n'
@@ -55,37 +55,38 @@ class NexusPVT():
         printable_str += f'FILE_PATH: {self.file_path}\n'
         printable_str += f'PVT_TYPE: {self.pvt_type}\n'
         pvt_dict = self.properties
-        for key in pvt_dict.keys():
-            if isinstance(pvt_dict[key], pd.DataFrame):
+        for key, value in pvt_dict.items():
+            if isinstance(value, pd.DataFrame):
                 printable_str += f'{key}: \n'
-                printable_str += pvt_dict[key].to_string()
+                printable_str += value.to_string()
                 printable_str += '\n\n'
-            elif isinstance(pvt_dict[key], dict):
-                for subkey in pvt_dict[key].keys():
+            elif isinstance(value, dict):
+                for subkey in value.keys():
                     printable_str += f'{key} - {subkey}\n'
-                    printable_str += pvt_dict[key][subkey].to_string()
+                    printable_str += value[subkey].to_string()
                     printable_str += '\n\n'
-            elif isinstance(pvt_dict[key], Enum):
-                printable_str += f'{key}: {pvt_dict[key].name}\n'
+            elif isinstance(value, Enum):
+                printable_str += f'{key}: {value.name}\n'
             else:
-                printable_str += f'{key}: {pvt_dict[key]}\n'
+                printable_str += f'{key}: {value}\n'
         if len(self.eos_options.keys()) > 0:
             pvt_dict = self.eos_options
             printable_str += 'EOSOPTIONS:\n'
-            for key in pvt_dict.keys():
-                if isinstance(pvt_dict[key], pd.DataFrame):
+            for key, value in pvt_dict.items():
+                if isinstance(value, pd.DataFrame):
                     printable_str += f'    {key}: \n'
-                    printable_str += pvt_dict[key].to_string()
+                    printable_str += value.to_string()
                     printable_str += '\n\n'
-                elif isinstance(pvt_dict[key], dict):
-                    for subkey in pvt_dict[key].keys():
+                elif isinstance(value, dict):
+                    for subkey, subvalue in value.items():
                         printable_str += f'    {key} - {subkey}\n'
-                        printable_str += pvt_dict[key][subkey].to_string()
+                        if isinstance(subvalue, pd.DataFrame):
+                            printable_str += subvalue.to_string()
                         printable_str += '\n\n'
-                elif isinstance(pvt_dict[key], Enum):
-                    printable_str += f'    {key}: {pvt_dict[key].name}\n'
+                elif isinstance(value, Enum):
+                    printable_str += f'    {key}: {value.name}\n'
                 else:
-                    printable_str += f'    {key}: {pvt_dict[key]}\n'
+                    printable_str += f'    {key}: {value}\n'
         return printable_str
 
     def __populate_eos_opts_to_tertiary_keys(self, primary_key: str, primary_key_default_val: str, single_line: str,
