@@ -98,7 +98,7 @@ def test_write_to_file(mocker, fcs_file_contents, wells_file, expected_result):
                                      mocker_fixture=mocker, write_file_name='/my/wellspec/file.dat')
 
 
-@pytest.mark.parametrize('fcs_file_contents, wells_file, expected_result', [
+@pytest.mark.parametrize('fcs_file_contents, wells_file, expected_result, expected_removed_completion_line', [
 ('''DATEFORMAT DD/MM/YYYY
 WelLS sEt 1 /my/wellspec/file.dat''',
 
@@ -134,10 +134,11 @@ TIME 01/05/2020
 WELLSPEC well1
 iw jw l radw
 1  2  3 4.5
-''',)
+''',
+10)
 
 ])
-def test_write_to_file(mocker, fcs_file_contents, wells_file, expected_result):
+def test_write_to_file(mocker, fcs_file_contents, wells_file, expected_result, expected_removed_completion_line):
     # Arrange
     start_date = '01/01/2020'
     remove_perf_date = '01/03/2020'
@@ -158,8 +159,13 @@ def test_write_to_file(mocker, fcs_file_contents, wells_file, expected_result):
 
     mock_nexus_sim = NexusSimulator('fcs_file.fcs')
     mock_nexus_sim.start_date_set(start_date)
-    remove_perf_dict = {'date': remove_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius':4.2}
-
+    remove_perf_dict = {'date': remove_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 4.2}
+    well_files = mock_nexus_sim.fcs_file.well_files[1]
+    object_locations = well_files.object_locations
+    object_locations_minus_completion = {k: v for k, v in object_locations.items() if v != expected_removed_completion_line}
+    for k,v in object_locations_minus_completion.items():
+         if v >= expected_removed_completion_line:
+            object_locations_minus_completion[k] = v-1
     # make a mock for the write operation
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
@@ -168,9 +174,10 @@ def test_write_to_file(mocker, fcs_file_contents, wells_file, expected_result):
     # Act
     mock_nexus_sim.Wells.remove_completion(well_name='well1', completion_properties=remove_perf_dict,
                                            preserve_previous_completions=True)
-
+    result_object_ids = mock_nexus_sim.fcs_file.well_files[1].object_locations
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
                                      modifying_mock_open=writing_mock_open,
                                      mocker_fixture=mocker, write_file_name='/my/wellspec/file.dat')
 
+    assert result_object_ids == object_locations_minus_completion

@@ -402,6 +402,7 @@ class NexusWells(Wells):
         file_with_the_completion.file_content_as_list.pop(relative_index)
 
         # update the object locations
+        wellspec_file.remove_object_locations(completion_id)
         wellspec_file.update_object_locations(line_number=relative_index, number_additional_lines=-1)
 
         # remove from the file itself
