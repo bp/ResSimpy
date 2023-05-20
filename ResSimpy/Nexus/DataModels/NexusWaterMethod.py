@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Optional, Union
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.WaterMethod import WaterMethod
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_list_nexus_water_params
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -30,8 +31,8 @@ class NexusWaterParams():
     density: Optional[float] = None
 
 
-@dataclass  # Doesn't need to write an _init_, _eq_ methods, etc.
-class NexusWater():
+@dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
+class NexusWaterMethod(WaterMethod):
     """ Class to hold Nexus Water properties
     Attributes:
         file_path (str): Path to the Nexus water file
@@ -42,22 +43,34 @@ class NexusWater():
         parameters (list[NexusWaterParams]): list of water parameters, such as density, viscosity, etc.
     """
     file_path: str
-    method_number: int
     reference_pressure: Optional[float] = None
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] \
         = field(default_factory=get_empty_dict_union)
     parameters: list[NexusWaterParams] = field(default_factory=get_empty_list_nexus_water_params)
+
+    def __init__(self, file_path: str, method_number: int, reference_pressure: Optional[float] = None,
+                 properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                                                      dict[str, pd.DataFrame]]]] = None,
+                 parameters: Optional[list[NexusWaterParams]] = None):
+        self.file_path = file_path
+        self.reference_pressure = reference_pressure
+        if properties:
+            self.properties = properties
+        else:
+            self.properties = {}
+        if parameters:
+            self.parameters = parameters
+        else:
+            self.parameters = []
+        super().__init__(method_number=method_number)
 
     def __repr__(self) -> str:
         """Pretty printing water data"""
         param_to_nexus_keyword_map = {'density': 'DENW', 'compressibility': 'CW',
                                       'formation_volume_factor': 'BW', 'viscosity': 'VISW',
                                       'viscosity_compressibility': 'CVW'}
-        printable_str = ''
-        printable_str += '\n--------------------------------\n'
-        printable_str += f'Water method {self.method_number}\n'
-        printable_str += '--------------------------------\n'
-        printable_str += f'FILE_PATH: {self.file_path}\n'
+
+        printable_str = f'\nFILE_PATH: {self.file_path}\n'
         printable_str += f'PREF: {self.reference_pressure}\n'
         water_dict = self.properties
         for key, value in water_dict.items():

@@ -1,9 +1,6 @@
-from enum import Enum
-import numpy as np
-import pandas as pd
 import pytest
 
-from ResSimpy.Nexus.DataModels.NexusWater import NexusWater, NexusWaterParams
+from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterMethod, NexusWaterParams
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import SUnits, UnitSystem, TemperatureUnits
 
 @pytest.mark.parametrize("file_contents, expected_water_properties",
@@ -133,7 +130,7 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import SUnits, UnitSystem, TemperatureU
 )
 def test_read_water_properties_from_file(mocker, file_contents, expected_water_properties):
     # Arrange
-    wat_obj = NexusWater(file_path='test/file/water.dat', method_number=1)
+    wat_obj = NexusWaterMethod(file_path='test/file/water.dat', method_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -162,7 +159,7 @@ def test_read_water_properties_from_file(mocker, file_contents, expected_water_p
 
 def test_nexus_water_repr():
     # Arrange
-    water_obj = NexusWater(file_path='test/file/water.dat', method_number=1)
+    water_obj = NexusWaterMethod(file_path='test/file/water.dat', method_number=1)
     water_obj.properties = {'SUNITS': SUnits.PPM, 'TEMP_UNIT': TemperatureUnits.KELVIN}
     water_obj.reference_pressure = 3600.0
     water_params1 = NexusWaterParams(temperature=394.3, salinity=100000.0,
@@ -177,9 +174,6 @@ def test_nexus_water_repr():
                                      )
     water_obj.parameters = [water_params1, water_params2]
     expected_output = """
---------------------------------
-Water method 1
---------------------------------
 FILE_PATH: test/file/water.dat
 PREF: 3600.0
 SUNITS: PPM

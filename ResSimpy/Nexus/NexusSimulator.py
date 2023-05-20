@@ -11,7 +11,7 @@ from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusPVTMethods import NexusPVTMethods
 from ResSimpy.Nexus.DataModels.NexusSeparator import NexusSeparator
-from ResSimpy.Nexus.DataModels.NexusWater import NexusWater
+from ResSimpy.Nexus.NexusWaterMethods import NexusWaterMethods
 from ResSimpy.Nexus.NexusEquilMethods import NexusEquilMethods
 from ResSimpy.Nexus.NexusRockMethods import NexusRockMethods
 from ResSimpy.Nexus.DataModels.StructuredGrid.StructuredGridFile import StructuredGridFile
@@ -95,7 +95,7 @@ class NexusSimulator(Simulator):
         # Model dynamic properties
         self.PVTMethods: NexusPVTMethods = NexusPVTMethods()
         self.separator_methods: dict[int, NexusSeparator] = {}
-        self.water_methods: dict[int, NexusWater] = {}
+        self.WaterMethods: NexusWaterMethods = NexusWaterMethods()
         self.EquilMethods: NexusEquilMethods = NexusEquilMethods()
         self.RockMethods: NexusRockMethods = NexusRockMethods()
         # Nexus operations modules
@@ -446,15 +446,8 @@ class NexusSimulator(Simulator):
 
         # Read in water properties from Nexus water method files
         if self.fcs_file.water_files is not None and \
-                len(self.fcs_file.water_files) > 0:  # Check if water files exist
-            for table_num in self.fcs_file.water_files.keys():  # For each water method
-                water_file = self.fcs_file.water_files[table_num].location
-                if water_file is None:
-                    raise ValueError(f'Unable to find water file: {water_file}')
-                if os.path.isfile(water_file):
-                    self.water_methods[table_num] = NexusWater(file_path=water_file,
-                                                               method_number=table_num)  # Create NexusWater object
-                    self.water_methods[table_num].read_properties()  # Populate object with water properties in file
+                len(self.fcs_file.water_files) > 0:
+            self.WaterMethods = NexusWaterMethods(water_files=self.fcs_file.water_files)
 
         # Read in equilibration properties from Nexus equil method files
         if self.fcs_file.equil_files is not None and \

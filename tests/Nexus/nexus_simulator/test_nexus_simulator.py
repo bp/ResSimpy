@@ -10,7 +10,7 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusPVTMethod import NexusPVTMethod
 from ResSimpy.Nexus.DataModels.NexusSeparator import NexusSeparator
-from ResSimpy.Nexus.DataModels.NexusWater import NexusWater
+from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterMethod
 from ResSimpy.Nexus.DataModels.NexusEquilMethod import NexusEquilMethod
 from ResSimpy.Nexus.DataModels.NexusRockMethod import NexusRockMethod
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
@@ -871,15 +871,15 @@ def test_get_water(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_wat = {1: NexusWater(file_path=os.path.join('path', 'my/water/file1.dat'), method_number=1),
-                  2: NexusWater(file_path=os.path.join('path', 'my/water/file2.dat'), method_number=2),
-                  3: NexusWater(file_path=os.path.join('path', 'my/water/file3.dat'), method_number=3),
+    loaded_wat = {1: NexusWaterMethod(file_path=os.path.join('path', 'my/water/file1.dat'), method_number=1),
+                  2: NexusWaterMethod(file_path=os.path.join('path', 'my/water/file2.dat'), method_number=2),
+                  3: NexusWaterMethod(file_path=os.path.join('path', 'my/water/file3.dat'), method_number=3),
                   }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.water_methods
+    result = simulation.WaterMethods.water_methods
 
     # Assert
     assert result == loaded_wat

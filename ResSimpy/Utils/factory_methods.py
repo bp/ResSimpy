@@ -7,7 +7,7 @@ import pandas as pd
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-    from ResSimpy.Nexus.DataModels.NexusWater import NexusWaterParams
+    from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterParams
 
 
 # Factory methods for generating empty lists with typing
