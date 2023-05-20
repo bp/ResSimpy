@@ -9,7 +9,7 @@ from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusPVTMethod import NexusPVTMethod
-from ResSimpy.Nexus.DataModels.NexusSeparator import NexusSeparator
+from ResSimpy.Nexus.DataModels.NexusSeparatorMethod import NexusSeparatorMethod
 from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterMethod
 from ResSimpy.Nexus.DataModels.NexusEquilMethod import NexusEquilMethod
 from ResSimpy.Nexus.DataModels.NexusRockMethod import NexusRockMethod
@@ -836,15 +836,15 @@ def test_get_separator(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_sep = {1: NexusSeparator(file_path=os.path.join('path', 'my/separator/file1.dat'), method_number=1),
-                  2: NexusSeparator(file_path=os.path.join('path', 'my/separator/file2.dat'), method_number=2),
-                  3: NexusSeparator(file_path=os.path.join('path', 'my/separator/file3.dat'), method_number=3),
+    loaded_sep = {1: NexusSeparatorMethod(file_path=os.path.join('path', 'my/separator/file1.dat'), method_number=1),
+                  2: NexusSeparatorMethod(file_path=os.path.join('path', 'my/separator/file2.dat'), method_number=2),
+                  3: NexusSeparatorMethod(file_path=os.path.join('path', 'my/separator/file3.dat'), method_number=3),
                   }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.separator_methods
+    result = simulation.SeparatorMethods.separator_methods
 
     # Assert
     assert result == loaded_sep

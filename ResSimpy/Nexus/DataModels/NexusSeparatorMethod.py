@@ -5,15 +5,20 @@ import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
-from ResSimpy.Nexus.NexusKeywords.separator_keywords import SEPARATOR_KEYS_INT, SEPARATOR_KEYS_FLOAT, SEPARATOR_KEYWORDS
+from ResSimpy.Nexus.NexusKeywords.separator_keywords import SEPARATOR_KEYS_INT, SEPARATOR_KEYS_FLOAT
+from ResSimpy.Nexus.NexusKeywords.separator_keywords import SEPARATOR_KEYWORDS
+from ResSimpy.SeparatorMethod import SeparatorMethod
 
 
-@dataclass  # Doesn't need to write an _init_, _eq_ methods, etc.
-class NexusSeparator():
+@dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
+class NexusSeparatorMethod(SeparatorMethod):
     """Class to hold data input for a Nexus Separator method
     Attributes:
         file_path (str): Path to the Nexus Separator file
         method_number (int): Separator method number in Nexus fcs file
+        separator_type (Optional[str]): Type of separator method, e.g., BLACKOIL, GASPLANT or EOS. Defaults to None
+        properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] ):
+            Dictionary holding all properties for a specific separator method. Defaults to empty dictionary.
     """
     file_path: str
     method_number: int
@@ -21,13 +26,21 @@ class NexusSeparator():
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] \
         = field(default_factory=get_empty_dict_union)
 
+    def __init__(self, file_path: str, method_number: int, separator_type: Optional[str] = None,
+                 properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                                                      dict[str, pd.DataFrame]]]] = None):
+        self.file_path = file_path
+        if separator_type:
+            self.separator_type = separator_type
+        if properties:
+            self.properties = properties
+        else:
+            self.properties = {}
+        super().__init__(method_number=method_number)
+
     def __repr__(self) -> str:
         """Pretty printing separator data"""
-        printable_str = ''
-        printable_str += '\n--------------------------------\n'
-        printable_str += f'Separator method {self.method_number}\n'
-        printable_str += '--------------------------------\n'
-        printable_str += f'FILE_PATH: {self.file_path}\n'
+        printable_str = f'\nFILE_PATH: {self.file_path}\n'
         printable_str += f'SEPARATOR_TYPE: {self.separator_type}\n'
         sep_dict = self.properties
         for key, value in sep_dict.items():
