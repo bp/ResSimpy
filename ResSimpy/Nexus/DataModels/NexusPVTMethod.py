@@ -11,13 +11,14 @@ from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_EOSOPTIONS_PRIMARY_KEY
 from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_EOSOPTIONS_TRANS_TEST_KEYS, PVT_EOSOPTIONS_PHASEID_KEYS
 from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_EOSOPTIONS_TERTIARY_KEYS, PVT_ALL_TABLE_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_UNSAT_TABLE_INDICES
+from ResSimpy.PVTMethod import PVTMethod
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_list_str, get_empty_eosopt_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
-@dataclass  # Doesn't need to write an _init_, _eq_ methods, etc.
-class NexusPVT():
+@dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
+class NexusPVTMethod(PVTMethod):
     """ Class to hold Nexus PVT properties
     Attributes:
         file_path (str): Path to the Nexus PVT file
@@ -34,7 +35,6 @@ class NexusPVT():
     """
     # General parameters
     file_path: str
-    method_number: int
     pvt_type: Optional[str] = None
     eos_nhc: Optional[int] = None  # Number of hydrocarbon components
     eos_temp: Optional[float] = None  # Default temperature for EOS method
@@ -46,13 +46,37 @@ class NexusPVT():
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] \
         = field(default_factory=get_empty_dict_union)
 
+    def __init__(self, file_path: str, method_number: int, pvt_type: Optional[str] = None,
+                 eos_nhc: Optional[int] = None, eos_temp: Optional[float] = None,
+                 eos_components: Optional[list[str]] = None,
+                 eos_options: Optional[dict[str, Union[str, int, float, pd.DataFrame, list[str], dict[str, float],
+                                                       tuple[str, dict[str, float]], dict[str, pd.DataFrame]]]] = None,
+                 properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                                                      dict[str, pd.DataFrame]]]] = None):
+        self.file_path = file_path
+        if pvt_type:
+            self.pvt_type = pvt_type
+        if eos_nhc:
+            self.eos_nhc = eos_nhc
+        if eos_temp:
+            self.eos_temp = eos_temp
+        if eos_components:
+            self.eos_components = eos_components
+        else:
+            self.eos_components = []
+        if eos_options:
+            self.eos_options = eos_options
+        else:
+            self.eos_options = {}
+        if properties:
+            self.properties = properties
+        else:
+            self.properties = {}
+        super().__init__(method_number=method_number)
+
     def __repr__(self) -> str:
         """Pretty printing PVT data"""
-        printable_str = ''
-        printable_str += '\n--------------------------------\n'
-        printable_str += f'PVT method {self.method_number}\n'
-        printable_str += '--------------------------------\n'
-        printable_str += f'FILE_PATH: {self.file_path}\n'
+        printable_str = f'\nFILE_PATH: {self.file_path}\n'
         printable_str += f'PVT_TYPE: {self.pvt_type}\n'
         pvt_dict = self.properties
         for key, value in pvt_dict.items():

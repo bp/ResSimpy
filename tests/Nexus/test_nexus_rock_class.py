@@ -1,5 +1,3 @@
-from enum import Enum
-import numpy as np
 import pandas as pd
 import pytest
 
@@ -187,6 +185,7 @@ def test_read_rock_properties_from_file(mocker, file_contents, expected_rock_pro
                 pd.testing.assert_frame_equal(expected_rock_properties[key][subkey], props[key][subkey])
         else:
             assert props[key] == expected_rock_properties[key]
+
 
 def test_nexus_rock_repr():
     # Arrange

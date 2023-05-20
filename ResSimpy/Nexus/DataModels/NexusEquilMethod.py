@@ -24,7 +24,6 @@ class NexusEquilMethod(EquilMethod):
     """
     # General parameters
     file_path: str
-    method_number: int
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] \
         = field(default_factory=get_empty_dict_union)
 

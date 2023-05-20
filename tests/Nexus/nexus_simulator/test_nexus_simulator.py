@@ -8,7 +8,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
-from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
+from ResSimpy.Nexus.DataModels.NexusPVTMethod import NexusPVTMethod
 from ResSimpy.Nexus.DataModels.NexusSeparator import NexusSeparator
 from ResSimpy.Nexus.DataModels.NexusWater import NexusWater
 from ResSimpy.Nexus.DataModels.NexusEquilMethod import NexusEquilMethod
@@ -801,15 +801,15 @@ def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
     mocker.patch("builtins.open", fcs_file_open)
 
-    loaded_pvt = {1: NexusPVT(file_path=os.path.join('path', 'my/pvt/file1.dat'), method_number=1),
-                  2: NexusPVT(file_path=os.path.join('path', 'my/pvt/file2.dat'), method_number=2),
-                  3: NexusPVT(file_path=os.path.join('path', 'my/pvt/file3.dat'), method_number=3),
+    loaded_pvt = {1: NexusPVTMethod(file_path=os.path.join('path', 'my/pvt/file1.dat'), method_number=1),
+                  2: NexusPVTMethod(file_path=os.path.join('path', 'my/pvt/file2.dat'), method_number=2),
+                  3: NexusPVTMethod(file_path=os.path.join('path', 'my/pvt/file3.dat'), method_number=3),
                   }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.pvt_methods
+    result = simulation.PVTMethods.pvt_methods
 
     # Assert
     assert result == loaded_pvt
