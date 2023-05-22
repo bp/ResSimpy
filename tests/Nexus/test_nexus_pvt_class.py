@@ -424,7 +424,7 @@ def test_nexus_pvt_repr():
 FILE_PATH: test/file/pvt.dat
 PVT_TYPE: BLACKOIL
 SATURATED: 
-""" + pvt_obj.properties['SATURATED'].to_string() + '\n\n'
+""" + pvt_obj.properties['SATURATED'].to_string(na_rep='') + '\n\n'
 
     # Act
     result = pvt_obj.__repr__()

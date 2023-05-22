@@ -47,7 +47,7 @@ class NexusSeparatorMethod(SeparatorMethod):
         for key, value in sep_dict.items():
             if isinstance(value, pd.DataFrame):
                 printable_str += f'{key}: \n'
-                printable_str += value.to_string()
+                printable_str += value.to_string(na_rep='')
                 printable_str += '\n\n'
             elif isinstance(value, Enum):
                 printable_str += f'{key}: {value.name}\n'

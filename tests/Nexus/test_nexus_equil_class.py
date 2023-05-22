@@ -263,7 +263,7 @@ VAITS: MOBILE
     VAITS_TOLSW: 0.0001
 POROSITY_INDEPENDENCE
 COMPOSITION: X 50.0 Y -50.0
-""" + equil_obj.properties['COMPOSITION'].to_string() + '\n\n'
+""" + equil_obj.properties['COMPOSITION'].to_string(na_rep='') + '\n\n'
 
     # Act
     result = equil_obj.__repr__()

@@ -47,6 +47,106 @@ class NexusRelPermMethod(RelPermMethod):
             self.hysteresis_params = {}
         super().__init__(method_number=method_number)
 
+    def __repr__(self) -> str:
+        """Pretty printing relative permeability and capillary pressure data"""
+        printable_str = f'\nFILE_PATH: {self.file_path}\n'
+        # Handle non-hysteresis relperm and capillary pressure parameters
+        relperm_dict = self.properties
+        for key, value in relperm_dict.items():
+            if isinstance(value, pd.DataFrame):
+                table_text = f'{key}:'
+                if key == 'WOTABLE':
+                    if 'LOW_SAL' in relperm_dict.keys():
+                        table_text += " LOW_SAL"
+                printable_str += f'{table_text}\n'
+                printable_str += value.to_string(na_rep='')
+                printable_str += '\n\n'
+            elif key == 'STONE1':
+                if value == '':
+                    printable_str += f'{key}'
+                else:
+                    printable_str += f'{key}:'
+                for stone1_key in ['SOMOPT1', 'SOMOPT2', 'SOMOPT3', 'ST1EXP', 'ST1EPS', 'ST1NU']:
+                    if stone1_key in relperm_dict.keys():
+                        if relperm_dict[stone1_key] == '':
+                            printable_str += f' {stone1_key}'
+                        else:
+                            printable_str += f' {stone1_key}: {relperm_dict[stone1_key]}'
+                printable_str += '\n'
+            elif key == 'STONE1_WAT':
+                if value == '':
+                    printable_str += f'{key}'
+                else:
+                    printable_str += f'{key}:'
+                for stone1_key in ['SWMOPT1', 'SWMOPT2']:
+                    if stone1_key in relperm_dict.keys():
+                        if relperm_dict[stone1_key] == '':
+                            printable_str += f' {stone1_key}'
+                        else:
+                            printable_str += f' {stone1_key}: {relperm_dict[stone1_key]}'
+                printable_str += '\n'
+            elif key == 'JFUNC':
+                if value == '':
+                    printable_str += f'{key}\n'
+                else:
+                    printable_str += f'{key}: {value}\n'
+                for jfunc_key in ['PERMBASIS', 'PORBASIS']:
+                    if jfunc_key in relperm_dict.keys():
+                        printable_str += f'       {jfunc_key}: {relperm_dict[jfunc_key]}\n'
+            elif key in ['SCALING', 'SCALING_PC', 'IFT', 'NEARCRIT', 'DERIVATIVES']:
+                if value == '':
+                    printable_str += f'{key}\n'
+                else:
+                    printable_str += f'{key}: {value}\n'
+            elif isinstance(value, dict):
+                printable_str += f'{key}:\n'
+                for subkey, subvalue in value.items():
+                    printable_str += f'    {subkey}: {subvalue}\n'
+            elif isinstance(value, Enum):
+                printable_str += f'{key}: {value.name}\n'
+            elif key not in ['LOW_SAL', 'STONE1', 'SOMOPT1', 'SOMOPT2', 'SOMOPT3', 'ST1EXP', 'ST1EPS', 'ST1NU',
+                             'STONE1_WAT', 'SWMOPT1', 'SWMOPT2', 'PERMBASIS', 'PORBASIS']:
+                if value == '':
+                    printable_str += f'{key}\n'
+                else:
+                    printable_str += f'{key}: {value}\n'
+
+        # Handle non-hysteresis relperm and capillary pressure parameters
+        hyst_dict = self.hysteresis_params
+        key_indx = 0
+        for key, value in hyst_dict.items():
+            if key_indx == 0:
+                printable_str += 'HYSTERESIS:'
+            else:
+                printable_str += '           '
+            if value == '':
+                printable_str += f' {key}\n'
+            elif value == 'USER':
+                printable_str += f' {key}: USER\n'
+            elif isinstance(value, dict):
+                if len(value.keys()) == 0:
+                    printable_str += f' {key}'
+                else:
+                    printable_str += f' {key}:'
+                    for subkey, subvalue in value.items():
+                        if isinstance(subvalue, dict):
+                            printable_str += f' {subkey}:'
+                            for subsubkey, subsubvalue in subvalue.items():
+                                if subsubvalue == '':
+                                    printable_str += f' {subsubkey}'
+                                else:
+                                    printable_str += f' {subsubkey}: {subsubvalue}'
+                        else:
+                            if subvalue == '':
+                                printable_str += f' {subkey}'
+                            else:
+                                printable_str += f' {subkey}: {subvalue}'
+                printable_str += '\n'
+            else:
+                printable_str += f' {key}: {value}\n'
+            key_indx += 1
+        return printable_str
+
     def __populate_optional_str_keywords(self, keyword: str, keyword_value_options: list[str], single_line: str,
                                          line_list: list[str]):
         """Utility function to populate rel perm keywords that have optional string values, e.g., IFT, JFUNC, etc.
@@ -119,7 +219,7 @@ class NexusRelPermMethod(RelPermMethod):
                 found_reconstruct = True
             for recon_key in ['NSGDIM', 'NSWDIM']:
                 if nfo.check_token(recon_key, line) and found_reconstruct:
-                    recon_dict[recon_key] = float(str(nfo.get_token_value(recon_key, line, file_as_list)))
+                    recon_dict[recon_key] = int(str(nfo.get_token_value(recon_key, line, file_as_list)))
             if found_reconstruct:
                 self.properties['RECONSTRUCT'] = recon_dict
 
@@ -182,8 +282,10 @@ class NexusRelPermMethod(RelPermMethod):
         # Read hysteresis section, if present
         if len(hysteresis_section_indices) > 0:
             for line in file_as_list[hysteresis_section_indices[0]:hysteresis_section_indices[1]]:
-                if nfo.check_token('NOCHK_HYS', line):
-                    self.hysteresis_params['NOCHK_HYS'] = ''
+                if [i for i in line.split() if i in ['NONE', 'NOCHK_HYS']]:
+                    for hyst_keyword in ['NONE', 'NOCHK_HYS']:
+                        if nfo.check_token(hyst_keyword, line):
+                            self.hysteresis_params[hyst_keyword] = ''
                 if nfo.check_token('KRW', line) and nfo.get_token_value('KRW', line, file_as_list) == 'USER':
                     self.hysteresis_params['KRW'] = 'USER'
                 if [i for i in line.split() if i in ['KRG', 'KROW']]:

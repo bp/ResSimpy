@@ -51,7 +51,7 @@ class NexusEquilMethod(EquilMethod):
                     if 'Y' in equil_dict.keys():
                         table_text += f" Y {equil_dict['Y']}"
                 printable_str += f'{table_text}\n'
-                printable_str += value.to_string()
+                printable_str += value.to_string(na_rep='')
                 printable_str += '\n\n'
             elif isinstance(value, Enum):
                 printable_str += f'{key}: {value.name}\n'

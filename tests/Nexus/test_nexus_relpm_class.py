@@ -3,7 +3,6 @@ import pandas as pd
 import pytest
 
 from ResSimpy.Nexus.DataModels.NexusRelPermMethod import NexusRelPermMethod
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits
 
 @pytest.mark.parametrize("file_contents, expected_relpm_properties",
     [("""
@@ -132,8 +131,10 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits
     IFT METHOD2
     IRELPM_LOWIFT
 
+    RECONSTRUCT
+
     """, {'DESC': ['This is first line of description', 'and this is second line of description'],
-          'JFUNC': '', 'IFT': 'METHOD2', 'IRELPM_LOWIFT': '',
+          'JFUNC': '', 'IFT': 'METHOD2', 'IRELPM_LOWIFT': '','RECONSTRUCT': {},
           'GWTABLE': pd.DataFrame({'SG': [0, 0.05, 0.3, 0.4, 0.5, 0.7, 0.75],
                                    'KRWG': [1, 0.729, 0.064, 0.008, 0, 0, 0],
                                    'KRG': [0, 0.0039, 0.1406, 0.25, 0.3906, 0.7656, 0.8789],
@@ -171,6 +172,8 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits
 
     GW3PHASE
 
+    KRWINT
+
     RECONSTRUCT
 
     JFUNC KX
@@ -187,6 +190,7 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits
     """, {'DESC': ['This is first line of description', 'and this is second line of description'],
           'GW3PHASE': '', 'JFUNC': 'KX', 'PERMBASIS': 100, 'PORBASIS': 0.2, 'NOCHK': '', 'NEARCRIT': '',
           'VIP_INJ_PERF_KR_SCALING': '', 'SCALING': 'TWOPOINT', 'SCALING_PC': 'THREEPOINT', 'RECONSTRUCT': {},
+          'KRWINT': '',
           'WOTABLE': pd.DataFrame({'SW': [0.2, 0.25, 0.35, 0.425, 0.5, 0.6, 0.7],
                                    'KROW': [1.0, 0.729, 0.343, 0.1664, 0.064, 0.008, 0],
                                    'KRW': [0.0, 0.0005, 0.0135, 0.0456, 0.108, 0.256, 0.50],
@@ -324,48 +328,46 @@ def test_read_relpm_properties_from_file(mocker, file_contents, expected_relpm_p
             assert props[key] == expected_relpm_properties[key]
 
 
-# def test_nexus_relpm_repr():
-#     # Arrange
-#     relpm_obj = NexusEquilMethod(file_path='test/file/relpm.dat', method_number=1)
-#     relpm_obj.properties = {'PINIT': 3600., 'DINIT': 9035., 'GOC': 8800., 'WOC': 9950., 'PCGOC': 0., 'PCWOC': 0.,
-#                             'PSAT': 3400., 'X': 50., 'Y': -50., 'VIP_INIT': '3 4 5 7', 'CRINIT': '', 
-#                             'AUTOGOC_COMP': 'USE_CLOSEST_OIL', 'OVERREAD': ['SG', 'SW', 'PRESSURE'],
-#                             'VAITS': 'MOBILE', 'SORWMN': 0.1, 'SORGMN': 0.1, 'SGCMN': 0.05,
-#                             'VAITS_TOLSG': 1.e-3, 'VAITS_TOLSW': 1.e-4, 'POROSITY_INDEPENDENCE': '',
-#                             'COMPOSITION': pd.DataFrame({'DEPTH': [8000, 8540, 8740],
-#                                                          'PSAT': [2302.3, 2302.3, 1800.],
-#                                                          'TEMP': [160, 165, 170],
-#                                                          'SALINITY': [10000, 15000, 20000],
-#                                                          'C1': [0.5, 0.5, 0.4],
-#                                                          'C3': [0.03, 0.03, 0.032],
-#                                                          'C6': [0.07, 0.07, 0.075],
-#                                                          'C10+': [0.40, 0.40, 0.492]
-#                                                          })}
-#     expected_output = """
-# FILE_PATH: test/file/relpm.dat
-# PINIT: 3600.0
-# DINIT: 9035.0
-# GOC: 8800.0
-# WOC: 9950.0
-# PCGOC: 0.0
-# PCWOC: 0.0
-# PSAT: 3400.0
-# VIP_INIT: 3 4 5 7
-# CRINIT
-# AUTOGOC_COMP: USE_CLOSEST_OIL
-# OVERREAD: SG SW PRESSURE
-# VAITS: MOBILE
-#         SORWMN: 0.1
-#         SORGMN: 0.1
-#         SGCMN: 0.05
-#     VAITS_TOLSG: 0.001
-#     VAITS_TOLSW: 0.0001
-# POROSITY_INDEPENDENCE
-# COMPOSITION: X 50.0 Y -50.0
-# """ + relpm_obj.properties['COMPOSITION'].to_string() + '\n\n'
+def test_nexus_relpm_repr():
+    # Arrange
+    relpm_obj = NexusRelPermMethod(file_path='test/file/relpm.dat', method_number=1)
+    relpm_obj.properties = {'DESC': ['This is first line of description', 'and this is second line of description'], 'VIP_RELPM': '',
+          'NONDARCY_GAS': {'BETA': 0.9, 'IFT_THRES': 0.98}, 'RECONSTRUCT': {'NSGDIM': 101, 'NSWDIM': 101},
+          'NONDARCY_OIL': {'BETA0': 0.001, 'BETA1': -0.5, 'BETA2': -5, 'BETA3': -0.5, 'BETA4': -3, 'BETA5': 4.4},
+          'WOTABLE': pd.DataFrame({'SW': [0.2, 0.25, 0.35, 0.425, 0.5, 0.6, 0.7],
+                                   'KROW': [1.0, 0.729, 0.343, 0.1664, 0.064, 0.008, 0],
+                                   'KRW': [0.0, 0.0005, 0.0135, 0.0456, 0.108, 0.256, 0.50],
+                                   'PCWO': [1., np.nan, np.nan, 0.2, np.nan, np.nan, 0.0]
+                                   }),
+          'GOTABLE': pd.DataFrame({'SG': [0, 0.05, 0.2, 0.4, 0.55, 0.65, 0.8],
+                                   'KROG': [1, 0.729, 0.216, 0.008, 0, 0, 0],
+                                   'KRG': [0, 0.0039, 0.0625, 0.25, 0.4727, 0.6602, 1],
+                                   'PCGO': [0., np.nan, np.nan, 1., np.nan, np.nan, 5.0]
+                                   })
+          }
+    expected_output = """
+FILE_PATH: test/file/relpm.dat
+DESC: ['This is first line of description', 'and this is second line of description']
+VIP_RELPM
+NONDARCY_GAS:
+    BETA: 0.9
+    IFT_THRES: 0.98
+RECONSTRUCT:
+    NSGDIM: 101
+    NSWDIM: 101
+NONDARCY_OIL:
+    BETA0: 0.001
+    BETA1: -0.5
+    BETA2: -5
+    BETA3: -0.5
+    BETA4: -3
+    BETA5: 4.4
+WOTABLE:
+""" + relpm_obj.properties['WOTABLE'].to_string(na_rep='') + '\n\n' \
+        + 'GOTABLE:\n' + relpm_obj.properties['GOTABLE'].to_string(na_rep='') + '\n\n'
 
-#     # Act
-#     result = relpm_obj.__repr__()
+    # Act
+    result = relpm_obj.__repr__()
 
-#     # Assert
-#     assert result == expected_output
+    # Assert
+    assert result == expected_output

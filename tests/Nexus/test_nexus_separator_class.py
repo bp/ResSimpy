@@ -173,7 +173,7 @@ def test_nexus_separator_repr():
 FILE_PATH: test/file/separator.dat
 SEPARATOR_TYPE: EOS
 SEPARATOR_TABLE: 
-""" + sep_obj.properties['SEPARATOR_TABLE'].to_string() + '\n\n'
+""" + sep_obj.properties['SEPARATOR_TABLE'].to_string(na_rep='') + '\n\n'
 
     # Act
     result = sep_obj.__repr__()

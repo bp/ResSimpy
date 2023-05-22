@@ -199,7 +199,7 @@ FILE_PATH: test/file/rock.dat
 UNIT_SYSTEM: ENGLISH
 REVERSIBLE
 CMT:
-""" + rock_obj.properties['CMT'].to_string() + '\n\n'
+""" + rock_obj.properties['CMT'].to_string(na_rep='') + '\n\n'
 
     # Act
     result = rock_obj.__repr__()

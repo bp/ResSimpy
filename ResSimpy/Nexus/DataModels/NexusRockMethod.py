@@ -43,14 +43,14 @@ class NexusRockMethod(RockMethod):
         for key, value in rock_dict.items():
             if isinstance(value, pd.DataFrame):
                 printable_str += f'{key}:\n'
-                printable_str += value.to_string()
+                printable_str += value.to_string(na_rep='')
                 printable_str += '\n\n'
             elif isinstance(value, dict):
                 for subkey in value.keys():
                     printable_str += f'{key} - {subkey}\n'
                     df = value[subkey]
                     if isinstance(df, pd.DataFrame):
-                        printable_str += df.to_string()
+                        printable_str += df.to_string(na_rep='')
                     printable_str += '\n\n'
             elif isinstance(value, Enum):
                 printable_str += f'{key}: {value.name}\n'
