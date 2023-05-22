@@ -440,7 +440,9 @@ class NexusWells(Wells):
                                                                          if v is not None}
 
         for prop, value in properties_to_modify.items():
-            update_completion_properties[prop] = value
+            # guarding against prop not being attributable to the InputDictionary
+            if prop in NexusCompletion.InputDictionary.__annotations__:
+                update_completion_properties[prop] = value
 
         # TODO maintain the completion id
 
