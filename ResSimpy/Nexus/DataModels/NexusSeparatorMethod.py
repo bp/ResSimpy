@@ -23,12 +23,13 @@ class NexusSeparatorMethod(SeparatorMethod):
     file_path: str
     method_number: int
     separator_type: Optional[str] = None
-    properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] \
+    properties: dict[str, Union[str, int, float, Enum, list[str],
+                                pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
 
     def __init__(self, file_path: str, method_number: int, separator_type: Optional[str] = None,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                                      dict[str, pd.DataFrame]]]] = None):
+                                                      dict[str, Union[float, pd.DataFrame]]]]] = None):
         self.file_path = file_path
         if separator_type:
             self.separator_type = separator_type
@@ -55,7 +56,7 @@ class NexusSeparatorMethod(SeparatorMethod):
         return printable_str
 
     def read_properties(self) -> None:
-        """Read Nexus Separator file contents and populate NexusSeparator object
+        """Read Nexus Separator file contents and populate NexusSeparatorMethod object
         """
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
         file_as_list = file_obj.get_flat_list_str_file()

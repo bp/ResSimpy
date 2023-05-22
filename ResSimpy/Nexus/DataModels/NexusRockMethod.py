@@ -24,11 +24,11 @@ class NexusRockMethod(RockMethod):
     # General parameters
     file_path: str
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                dict[str, pd.DataFrame]]] = field(default_factory=get_empty_dict_union)
+                                dict[str, Union[float, pd.DataFrame]]]] = field(default_factory=get_empty_dict_union)
 
     def __init__(self, file_path: str, method_number: int,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                                      dict[str, pd.DataFrame]]]] = None):
+                                                      dict[str, Union[float, pd.DataFrame]]]]] = None):
         self.file_path = file_path
         if properties:
             self.properties = properties
@@ -48,7 +48,9 @@ class NexusRockMethod(RockMethod):
             elif isinstance(value, dict):
                 for subkey in value.keys():
                     printable_str += f'{key} - {subkey}\n'
-                    printable_str += value[subkey].to_string()
+                    df = value[subkey]
+                    if isinstance(df, pd.DataFrame):
+                        printable_str += df.to_string()
                     printable_str += '\n\n'
             elif isinstance(value, Enum):
                 printable_str += f'{key}: {value.name}\n'
@@ -59,7 +61,7 @@ class NexusRockMethod(RockMethod):
         return printable_str
 
     def read_properties(self) -> None:
-        """Read Nexus rock properties file contents and populate NexusRock object
+        """Read Nexus rock properties file contents and populate NexusRockMethod object
         """
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
         file_as_list = file_obj.get_flat_list_str_file()

@@ -1,8 +1,27 @@
-# TODO: Not a complete list. Check manual for missing keywords.
-# TODO: Delete the keywords that are not tokens (i.e. that are only values in a table)
+# Currently ignoring functional form rel perm inputs, only tabular keywords are handled.
+# Also currently ignoring spline options
 
-RELPM_KEYWORDS = ['ALL', 'CARLSON', 'GOTABLE', 'GWTABLE', 'HYSTERESIS', 'KRG', 'KROG', 'KROINT', 'KROW', 'KRW', 'KRWG',
-                  'LOW_SAL', 'LOW_SALTAB', 'LOW_SAL_IRR', 'MAXTRAP', 'NOCHK', 'NONE', 'PCGO', 'PCGW', 'PCWO', 'PRSTAB',
-                  'SALINITY', 'SCALING', 'SCALING_PC', 'SG', 'SGL', 'SGR', 'SGRO', 'SGU', 'SOMOPT1', 'SORW', 'STONE1',
-                  'STONE2', 'SW', 'SWL', 'SWR', 'SWRO', 'SWU', 'THREEPOINT', 'TOLHYS', 'TOLREV', 'TWOPOINT',
-                  'USE_SPLINE', 'VIP_INJ_PERF_KR_SCALING', 'WOTABLE']
+RELPM_TABLE_KEYWORDS = ['WOTABLE', 'GOTABLE', 'GWTABLE', 'WOTABLE_IMB', 'GOTABLE_IMB', 'GWTABLE_IMB',
+                        'WAGTABLE_WIMB', 'GRMTABLE_SGTR', 'GRMTABLE', 'GDWTABLE', 'LOW_SALTAB',
+                        'PRSTAB', 'WAGTEST']
+RELPM_SINGLE_KEYWORDS = ['KROINT', 'STONE2', 'STONE1', 'SOMOPT1', 'SOMOPT3', 'LOW_SAL', 'GW3PHASE',
+                         'NOCHK', 'VIP_INJ_PERF_KR_SCALING', 'VEGO', 'VEGO_PC', 'VEWO', 'VEWO_PC',
+                         'IRELPM_LOWIFT', 'KRWING', 'STONE2_WAT', 'STONE1_WAT', 'SWMOPT1',
+                         'FREEZE_PCGO', 'FREEZE_PCWO', 'FREEZE_PCGW', 'LOW_SAL_IRR', 'VIP_RELPM']
+RELPM_HYSTERESIS_PRIMARY_KEYWORDS = ['NONE', 'KRW', 'KRG', 'KROW', 'PCWO', 'PCGO', 'WAG',
+                                     'TOLREV', 'TOLHYS', 'NOCHK_HYS']
+RELPM_KEYWORDS_VALUE_FLOAT = ['SOMOPT2', 'ST1EXP', 'ST1EPS', 'ST1NU', 'GRMDSW', 'PERMBASIS', 'PORBASIS', 'DRELPM',
+                              'TENTHR', 'XEX', 'TENI', 'SWMOPT2']
+RELPM_KEYWORDS_VALUE_STR = ['HYSTERESIS', 'JFUNC', 'SCALING', 'SCALING_PC', 'IFT', 'NEARCRIT', 'DERIVATIVES',
+                            'RECONSTRUCT']
+RELPM_NONDARCY_KEYWORDS = ['NONDARCY_GAS', 'NONDARCY_OIL']
+RELPM_NONDARCY_PARAMS = ['BETA', 'BETA0', 'BETA1', 'BETA2', 'BETA3', 'BETA4', 'BETA5', 'IFT_THRES']
+
+# RELPM_KEYWORDS = ['ALL', 'CARLSON', 'GOTABLE', 'GWTABLE', 'HYSTERESIS', 'KRG', 'KROG', 'KROINT', 'KROW', 'KRW',
+# 'KRWG', 'LOW_SAL', 'LOW_SALTAB', 'LOW_SAL_IRR', 'MAXTRAP', 'NOCHK', 'NONE', 'PCGO', 'PCGW', 'PCWO', 'PRSTAB',
+# 'SALINITY', 'SCALING', 'SCALING_PC', 'SG', 'SGL', 'SGR', 'SGRO', 'SGU', 'SOMOPT1', 'SORW', 'STONE1','STONE2',
+# 'SW', 'SWL', 'SWR', 'SWRO', 'SWU', 'THREEPOINT', 'TOLHYS', 'TOLREV', 'TWOPOINT', 'USE_SPLINE',
+# 'VIP_INJ_PERF_KR_SCALING', 'WOTABLE']
+
+RELPM_KEYWORDS = RELPM_TABLE_KEYWORDS + RELPM_SINGLE_KEYWORDS + RELPM_KEYWORDS_VALUE_FLOAT + \
+    RELPM_KEYWORDS_VALUE_STR + RELPM_NONDARCY_KEYWORDS

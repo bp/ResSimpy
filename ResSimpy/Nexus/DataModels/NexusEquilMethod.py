@@ -24,12 +24,13 @@ class NexusEquilMethod(EquilMethod):
     """
     # General parameters
     file_path: str
-    properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] \
+    properties: dict[str, Union[str, int, float, Enum, list[str],
+                                pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
 
     def __init__(self, file_path: str, method_number: int,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                                      dict[str, pd.DataFrame]]]] = None):
+                                                      dict[str, Union[float, pd.DataFrame]]]]] = None):
         self.file_path = file_path
         if properties:
             self.properties = properties
@@ -75,7 +76,7 @@ class NexusEquilMethod(EquilMethod):
         return printable_str
 
     def read_properties(self) -> None:
-        """Read Nexus equilibration file contents and populate NexusEquil object
+        """Read Nexus equilibration file contents and populate NexusEquilMethod object
         """
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
         file_as_list = file_obj.get_flat_list_str_file()
