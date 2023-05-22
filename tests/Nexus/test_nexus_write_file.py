@@ -87,7 +87,6 @@ def test_write_to_file(mocker, fcs_file_contents, wells_file, expected_result):
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
 
-
     # Act
     mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict,
                                         preserve_previous_completions=True)
@@ -98,7 +97,7 @@ def test_write_to_file(mocker, fcs_file_contents, wells_file, expected_result):
                                      mocker_fixture=mocker, write_file_name='/my/wellspec/file.dat')
 
 
-@pytest.mark.parametrize('fcs_file_contents, wells_file, expected_result, expected_removed_completion_line', [
+@pytest.mark.parametrize('fcs_file_contents, wells_file, expected_result, expected_removed_completion_line, expected_obj_locations', [
 ('''DATEFORMAT DD/MM/YYYY
 WelLS sEt 1 /my/wellspec/file.dat''',
 
@@ -135,10 +134,43 @@ WELLSPEC well1
 iw jw l radw
 1  2  3 4.5
 ''',
-10)
+10, [4, 9, 14]),
 
-])
-def test_remove_completion_write_to_file(mocker, fcs_file_contents, wells_file, expected_result, expected_removed_completion_line):
+
+('''DATEFORMAT DD/MM/YYYY
+WelLS sEt 1 /my/wellspec/file.dat''',
+
+'''
+TIME 01/01/2020
+WELLSPEC well1
+iw jw l radw
+1  2  3 4.5
+
+TIME 01/03/2020
+WELLSPEC well1
+iw jw l radw
+4  5      6 4.2
+
+WELLSPEC well2
+iw jw l radw
+5 6 4 3.2
+''',
+'''
+TIME 01/01/2020
+WELLSPEC well1
+iw jw l radw
+1  2  3 4.5
+
+TIME 01/03/2020
+
+WELLSPEC well2
+iw jw l radw
+5 6 4 3.2
+''',
+9, [4, 10]),
+], ids=['basic_test', 'only 1 completion to remove'] )
+def test_remove_completion_write_to_file(mocker, fcs_file_contents, wells_file, expected_result,
+        expected_removed_completion_line, expected_obj_locations):
     # Arrange
     start_date = '01/01/2020'
     remove_perf_date = '01/03/2020'
@@ -163,13 +195,10 @@ def test_remove_completion_write_to_file(mocker, fcs_file_contents, wells_file, 
     well_files = mock_nexus_sim.fcs_file.well_files[1]
     object_locations = well_files.object_locations
     object_locations_minus_completion = {k: v for k, v in object_locations.items() if v != expected_removed_completion_line}
-    for k,v in object_locations_minus_completion.items():
-         if v >= expected_removed_completion_line:
-            object_locations_minus_completion[k] = v-1
+    object_locations_minus_completion = {k: v for k, v in zip(object_locations_minus_completion, expected_obj_locations)}
     # make a mock for the write operation
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
-
 
     # Act
     mock_nexus_sim.Wells.remove_completion(well_name='well1', completion_properties=remove_perf_dict,

@@ -402,6 +402,7 @@ class NexusWells(Wells):
         wellspec_file = self.__find_which_wellspec_file_from_completion_id(completion_id)
 
         # remove from the well object/wells class
+        completion_date = well.get_completion_by_id(completion_id).date
         well._remove_completion_from_memory(completion_to_remove=completion_id)
 
         # drop it from the wellspec file or include file if stored in include file
@@ -410,13 +411,45 @@ class NexusWells(Wells):
         completion_index = wellspec_file.object_locations[completion_id]
         file_with_the_completion, relative_index = wellspec_file.find_which_include_file(completion_index)
 
+        # remove the line in the file:
         if file_with_the_completion.file_content_as_list is None:
             raise ValueError(f'No file content in the file with the completion {file_with_the_completion.location}')
         file_with_the_completion.file_content_as_list.pop(relative_index)
 
+        # check that we have completions left:
+        find_completions_dict: NexusCompletion.InputDictionary = {'date': completion_date}
+        remaining_completions = well.find_completions(find_completions_dict)
+        if len(remaining_completions) == 0:
+            nexus_mapping = NexusCompletion.nexus_mapping()
+            completion_date_found = False
+            file_content = wellspec_file.get_flat_list_str_file()
+            wellspec_index = -1
+            header_index = -1
+            for index, line in enumerate(file_content):
+                if nfo.check_token('TIME', line) and nfo.get_expected_token_value('TIME', line, [line]) == \
+                        completion_date:
+                    completion_date_found = True
+                if completion_date_found and nfo.check_token('WELLSPEC', line) and \
+                        nfo.get_token_value('WELLSPEC', line, [line]) == well_name:
+                    # get the index in the list as string
+                    wellspec_index = index
+                    keyword_map = {x: y[0] for x, y in nexus_mapping.items()}
+                    wellspec_table = file_content[wellspec_index::]
+                    header_index, _ = nfo.get_table_header(file_as_list=wellspec_table, header_values=keyword_map)
+                    header_index += wellspec_index
+                    break
+            file_with_wellspec, wellspec_relative_index = wellspec_file.find_which_include_file(wellspec_index)
+            file_with_wellspec.file_content_as_list.pop(wellspec_relative_index)
+            file_with_header, header_relative_index = wellspec_file.find_which_include_file(header_index)
+            if file_with_header == file_with_wellspec:
+                file_with_header.file_content_as_list.pop(header_relative_index - 1)
+            else:
+                file_with_header.file_content_as_list.pop(header_relative_index - 1)
+            wellspec_file.update_object_locations(line_number=wellspec_index, number_additional_lines=-1)
+            wellspec_file.update_object_locations(line_number=header_index, number_additional_lines=-1)
         # update the object locations
         wellspec_file.remove_object_locations(completion_id)
-        wellspec_file.update_object_locations(line_number=relative_index, number_additional_lines=-1)
+        wellspec_file.update_object_locations(line_number=completion_index, number_additional_lines=-1)
 
         # remove from the file itself
         file_with_the_completion.write_to_file()
@@ -436,6 +469,7 @@ class NexusWells(Wells):
         else:
             raise ValueError('Must provide one of completion_to_change dictionary or completion_id')
 
+        # start with the existing properties
         update_completion_properties: NexusCompletion.InputDictionary = {k: v for k, v in completion.to_dict().items()
                                                                          if v is not None}
 
