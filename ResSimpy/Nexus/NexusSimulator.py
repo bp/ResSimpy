@@ -15,6 +15,7 @@ from ResSimpy.Nexus.NexusWaterMethods import NexusWaterMethods
 from ResSimpy.Nexus.NexusEquilMethods import NexusEquilMethods
 from ResSimpy.Nexus.NexusRockMethods import NexusRockMethods
 from ResSimpy.Nexus.NexusRelPermMethods import NexusRelPermMethods
+from ResSimpy.Nexus.NexusValveMethods import NexusValveMethods
 from ResSimpy.Nexus.DataModels.StructuredGrid.StructuredGridFile import StructuredGridFile
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -100,6 +101,7 @@ class NexusSimulator(Simulator):
         self.EquilMethods: NexusEquilMethods = NexusEquilMethods()
         self.RockMethods: NexusRockMethods = NexusRockMethods()
         self.RelPermMethods: NexusRelPermMethods = NexusRelPermMethods()
+        self.ValveMethods: NexusValveMethods = NexusValveMethods()
         # Nexus operations modules
         self.Runcontrol: Runcontrol = Runcontrol(self)
         self.Reporting: Reporting = Reporting(self)
@@ -458,6 +460,11 @@ class NexusSimulator(Simulator):
         if self.fcs_file.relperm_files is not None and \
                 len(self.fcs_file.relperm_files) > 0:
             self.RelPermMethods = NexusRelPermMethods(relperm_files=self.fcs_file.relperm_files)
+
+        # Read in valve and choke properties from Nexus valve method files
+        if self.fcs_file.valve_files is not None and \
+                len(self.fcs_file.valve_files) > 0:
+            self.ValveMethods = NexusValveMethods(valve_files=self.fcs_file.valve_files)
 
         # === End of dynamic properties loading ===
 

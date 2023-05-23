@@ -13,6 +13,8 @@ from ResSimpy.Nexus.DataModels.NexusSeparatorMethod import NexusSeparatorMethod
 from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterMethod
 from ResSimpy.Nexus.DataModels.NexusEquilMethod import NexusEquilMethod
 from ResSimpy.Nexus.DataModels.NexusRockMethod import NexusRockMethod
+from ResSimpy.Nexus.DataModels.NexusRelPermMethod import NexusRelPermMethod
+from ResSimpy.Nexus.DataModels.NexusValveMethod import NexusValveMethod
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
@@ -953,6 +955,77 @@ def test_get_rock(mocker: MockerFixture, fcs_file_contents: str):
 
     # Assert
     assert result == loaded_rocks
+
+
+@pytest.mark.parametrize("fcs_file_contents", [
+    ("""
+       RELPM method 1 my/relpm/file1.dat
+
+       relpm Method 2 my/relpm/file2.dat
+       RelPm METHOD 3 my/relpm/file3.dat
+    """)
+], ids=['basic case'])
+def test_get_relperm(mocker: MockerFixture, fcs_file_contents: str):
+    """Testing the functionality to retrieve relative permeability and
+    capillary pressure methods from Nexus fcs file"""
+    # Arrange
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            os.path.join('path', 'my/relpm/file1.dat'): '',
+            os.path.join('path', 'my/relpm/file2.dat'): '',
+            os.path.join('path', 'my/relpm/file3.dat'): '',
+            'path/nexus_run.fcs': fcs_file_contents,
+            }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    loaded_relperms = {1: NexusRelPermMethod(file_path=os.path.join('path', 'my/relpm/file1.dat'), method_number=1),
+                       2: NexusRelPermMethod(file_path=os.path.join('path', 'my/relpm/file2.dat'), method_number=2),
+                       3: NexusRelPermMethod(file_path=os.path.join('path', 'my/relpm/file3.dat'), method_number=3),
+                       }
+
+    simulation = NexusSimulator(origin='path/nexus_run.fcs')
+
+    # Act
+    result = simulation.RelPermMethods.relperm_methods
+
+    # Assert
+    assert result == loaded_relperms
+
+
+@pytest.mark.parametrize("fcs_file_contents", [
+    ("""
+       VALVE method 1 my/valve/file1.dat
+
+       valve Method 2 my/valve/file2.dat
+       Valve METHOD 3 my/valve/file3.dat
+    """)
+], ids=['basic case'])
+def test_get_valve(mocker: MockerFixture, fcs_file_contents: str):
+    """Testing the functionality to retrieve valve methods from Nexus fcs file"""
+    # Arrange
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            os.path.join('path', 'my/valve/file1.dat'): '',
+            os.path.join('path', 'my/valve/file2.dat'): '',
+            os.path.join('path', 'my/valve/file3.dat'): '',
+            'path/nexus_run.fcs': fcs_file_contents,
+            }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    loaded_valves = {1: NexusValveMethod(file_path=os.path.join('path', 'my/valve/file1.dat'), method_number=1),
+                     2: NexusValveMethod(file_path=os.path.join('path', 'my/valve/file2.dat'), method_number=2),
+                     3: NexusValveMethod(file_path=os.path.join('path', 'my/valve/file3.dat'), method_number=3)
+                     }
+
+    simulation = NexusSimulator(origin='path/nexus_run.fcs')
+
+    # Act
+    result = simulation.ValveMethods.valve_methods
+
+    # Assert
+    assert result == loaded_valves
 
 
 @pytest.mark.parametrize("fcs_file_contents, surface_file_content, node1_props, node2_props, \
