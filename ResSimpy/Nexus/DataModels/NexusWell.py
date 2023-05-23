@@ -168,7 +168,7 @@ class NexusWell(Well):
             completion_to_remove = self.find_completion(completion_to_remove)
             completion_to_remove = completion_to_remove.id
         completion_index_to_remove = [x.id for x in self.__completions].index(completion_to_remove)
-        removed_completion = self.__completions.pop(completion_index_to_remove)
+        self.__completions.pop(completion_index_to_remove)
 
     def _modify_completion_in_memory(self, new_completion_properties: NexusCompletion.InputDictionary,
                                      completion_to_modify: NexusCompletion | UUID,
