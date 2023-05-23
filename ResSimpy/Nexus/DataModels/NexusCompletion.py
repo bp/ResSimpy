@@ -5,6 +5,7 @@ from typing import Optional, Union, TypedDict
 from ResSimpy.Completion import Completion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
 from ResSimpy.Utils.generic_repr import generic_repr
+from ResSimpy.Utils.to_dict_generic import to_dict
 
 
 @dataclass(kw_only=True)
@@ -202,15 +203,8 @@ class NexusCompletion(Completion):
         return self.__kh_mult
 
     def to_dict(self) -> dict[str, None | float | int | str]:
-        attribute_dict: dict[str, None | float | int | str] = {
-            'measured_depth': self.__measured_depth,
-            'well_indices': self.__well_indices,
-            'partial_perf': self.__partial_perf,
-            'cell_number': self.__cell_number,
-            'bore_radius': self.__bore_radius,
-            'portype': self.__portype,
-            'fracture_mult': self.__fracture_mult,
-            }
+        attribute_dict: dict[str, None | float | int | str] = to_dict(self, add_units=False)
+
         attribute_dict.update(super().to_dict())
         if self.rel_perm_end_point is not None:
             attribute_dict.update(self.rel_perm_end_point.to_dict())
@@ -239,7 +233,7 @@ class NexusCompletion(Completion):
         return not NexusCompletion.completion_is_perforation(completion)
 
     @staticmethod
-    def nexus_mapping() -> dict[str, tuple[str, type]]:
+    def get_nexus_mapping() -> dict[str, tuple[str, type]]:
         """returns a dictionary of mapping from nexus keyword to attribute name"""
 
         nexus_mapping: dict[str, tuple[str, type]] = {
@@ -358,7 +352,7 @@ class NexusCompletion(Completion):
         Returns: string of the values in the order of the headers provided.
 
         """
-        nexus_mapping = NexusCompletion.nexus_mapping()
+        nexus_mapping = NexusCompletion.get_nexus_mapping()
         completion_properties = self.to_dict()
 
         completion_values = []

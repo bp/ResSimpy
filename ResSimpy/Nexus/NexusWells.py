@@ -161,7 +161,7 @@ class NexusWells(Wells):
         wellspec_file = self.__find_which_wellspec_file_from_completion_id(well_id)
 
         # initialise some storage variables
-        nexus_mapping = NexusCompletion.nexus_mapping()
+        nexus_mapping = NexusCompletion.get_nexus_mapping()
         inverted_nexus_map = invert_nexus_map(nexus_mapping)
         new_completion_time_index = -1
         header_index = -1
@@ -332,7 +332,7 @@ class NexusWells(Wells):
                                       preserve_previous_completions: bool, well: NexusWell, well_name: str) -> \
             tuple[list[str], int, list[str], bool]:
         """writes out the existing wellspec for a well at a new time stamp"""
-        nexus_mapping = NexusCompletion.nexus_mapping()
+        nexus_mapping = NexusCompletion.get_nexus_mapping()
         completion_table_as_list = ['\n']
         if not date_found:
             completion_table_as_list += ['TIME ' + completion_date + '\n']
@@ -420,7 +420,7 @@ class NexusWells(Wells):
         find_completions_dict: NexusCompletion.InputDictionary = {'date': completion_date}
         remaining_completions = well.find_completions(find_completions_dict)
         if len(remaining_completions) == 0:
-            nexus_mapping = NexusCompletion.nexus_mapping()
+            nexus_mapping = NexusCompletion.get_nexus_mapping()
             completion_date_found = False
             file_content = wellspec_file.get_flat_list_str_file()
             wellspec_index = -1
@@ -444,7 +444,7 @@ class NexusWells(Wells):
             if file_with_header == file_with_wellspec:
                 file_with_header.file_content_as_list.pop(header_relative_index - 1)
             else:
-                file_with_header.file_content_as_list.pop(header_relative_index - 1)
+                file_with_header.file_content_as_list.pop(header_relative_index)
             wellspec_file.update_object_locations(line_number=wellspec_index, number_additional_lines=-1)
             wellspec_file.update_object_locations(line_number=header_index, number_additional_lines=-1)
         # update the object locations

@@ -530,14 +530,55 @@ def test_well_dates(mocker):
     # Assert
     assert result == expected_result
 
-@pytest.mark.skip('skipping test, waiting on full implementation of modify')
 def test_wells_modify(mocker):
     # Arrange
+
+    fcs_file_data = '''RUN_UNITS ENGLISH
+
+    DATEFORMAT DD/MM/YYYY
+
+    RECURRENT_FILES
+    RUNCONTROL ref_runcontrol.dat
+    WELLS Set 1 /my/wellspec/file.dat'''
+    runcontrol_data = 'START 01/01/2020'
+    wells_file = '''TIME 01/01/2020
+    well
+    TIME 01/01/2023
+    wellspec well1
+    iw jw l RADW GRID  skin ANGLV WI  
+    1 2 3   4.5  GRID1 NA   NA    1 
+    
+    TIME 01/02/2023
+    wellspec well1
+    iw jw l  skin ANGLV WI  STAT PPERF DTOP  DBOT
+    1 2 3    NA   NA    NA  ON     1     NA    NA
+    1 2   NA    NA    0   NA    1      1156    1234
+    
+    wellsepc well2
+    iw jw l STAT PPerf WI DTOP DBOT
+    1 2 5   ON      1     3    NA NA
+    1 2 NA  ON      1      0  1156 1234
+    '''
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'fcs_file.fcs': fcs_file_data,
+            '/my/wellspec/file.dat': wells_file,
+            'ref_runcontrol.dat': runcontrol_data,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    ls_dir = Mock(side_effect=lambda x: [])
+    mocker.patch('os.listdir', ls_dir)
+    fcs_file_exists = Mock(side_effect=lambda x: True)
+    mocker.patch('os.path.isfile', fcs_file_exists)
+    nexus_sim = NexusSimulator('fcs_file.fcs')
+
     well_1_completions = [
         NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
                         well_indices=1),
         NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1),
-        NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
                         depth_to_bottom=1234),
                         ]
 
@@ -549,16 +590,13 @@ def test_wells_modify(mocker):
     well_1 = NexusWell(well_name='well1', completions=well_1_completions, units=UnitSystem.METRIC)
     well_2 = NexusWell(well_name='well2', completions=well_2_completions, units=UnitSystem.METRIC)
 
-    mock_sim = mocker.MagicMock()
-    mocker.patch('ResSimpy.Nexus.NexusSimulator.NexusSimulator', mock_sim)
-    wells = NexusWells(mock_sim)
+    wells = nexus_sim.Wells
 
-    wells.__setattr__('_NexusWells__wells', [well_1, well_2])
     date = '01/02/2023'
     perf_1_to_add = {'date': date, 'i': 3, 'j': 3, 'k': 5, 'well_radius': 1005.2}
     perf_2_to_add = {'date': date, 'i': 1, 'j': 2, 'k': 6, 'permeability': 1005.2}
     perf_to_remove = {'date': date, 'i':1, 'j':2, 'status':'ON', 'partial_perf':1, 'well_indices':0, 'depth_to_top':1156,
-                        'depth_to_bottom':1234}
+                      'depth_to_bottom':1234}
 
     new_nexus_completion_1 = NexusCompletion(date=date, i=3, j=3, k=5, well_radius=1005.2)
     new_nexus_completion_2 = NexusCompletion(date=date, i=1, j=2, k=6, permeability=1005.2)
@@ -957,9 +995,9 @@ def test_add_completion_other(mocker):
       
 
 WELLSPEC well1
-IW JW L RADW PPERF SKIN
-111 479 3 0.354 0.5 0.0
-111 479 4 0.354 0.5 0.0
+IW JW L RADW SKIN PPERF
+111 479 3 0.354 0.0 0.5
+111 479 4 0.354 0.0 0.5
 4 5 6 7.5 NA NA
 
      TIME 01/03/2020
