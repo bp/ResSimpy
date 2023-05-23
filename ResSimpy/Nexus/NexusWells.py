@@ -4,7 +4,7 @@ import copy
 import warnings
 from dataclasses import dataclass, field
 from functools import cmp_to_key
-from typing import Sequence, Optional, TYPE_CHECKING
+from typing import Sequence, Optional, TYPE_CHECKING, cast, TypedDict
 from functools import cmp_to_key
 from typing import Sequence, Optional, TYPE_CHECKING
 from uuid import UUID
@@ -390,8 +390,8 @@ class NexusWells(Wells):
 
         # check for a date:
         if completion_properties is not None:
-            completion_date = completion_properties.get('date', None)
-            if completion_date is None:
+            completion_date = completion_properties.get('date', 'NO_DATE_PROVIDED')
+            if completion_date == 'NO_DATE_PROVIDED':
                 raise AttributeError('Completion requires a date. '
                                      'Please provide a date in the completion_properties_list dictionary.')
             if completion_id is None:
@@ -479,13 +479,10 @@ class NexusWells(Wells):
             raise ValueError('Must provide one of completion_to_change dictionary or completion_id')
 
         # start with the existing properties
-        update_completion_properties: NexusCompletion.InputDictionary = {k: v for k, v in completion.to_dict().items()
-                                                                         if v is not None}
+        update_completion_properties: NexusCompletion.InputDictionary = cast(
+            NexusCompletion.InputDictionary, {k: v for k, v in completion.to_dict().items() if v is not None})
 
-        for prop, value in properties_to_modify.items():
-            # guarding against prop not being attributable to the InputDictionary
-            if prop in NexusCompletion.InputDictionary.__annotations__:
-                update_completion_properties[prop] = value
+        update_completion_properties.update(properties_to_modify)
 
         # TODO maintain the completion id
 
