@@ -205,7 +205,7 @@ class NexusWells(Wells):
             if nfo.check_token('WELLSPEC', line) and nfo.get_token_value('WELLSPEC', line, [line]) == well_name \
                     and new_completion_time_index != -1:
                 # get the header of the wellspec table
-                header_index, headers, headers_original = self.get_wellspec_header(
+                header_index, headers, headers_original = self.__get_wellspec_header(
                     additional_headers, completion_properties, file_content, index,
                     inverted_nexus_map, nexus_mapping, wellspec_file
                     )
@@ -219,10 +219,10 @@ class NexusWells(Wells):
 
             elif header_index != -1 and index > header_index:
                 # check for valid rows + fill extra columns with NA
-                self.fill_in_nas(additional_headers, headers_original, index, line,
-                                 wellspec_file, file_content)
-                line_valid_index = self.fill_in_nas(additional_headers, headers_original, index, line,
-                                                    wellspec_file, file_content)
+                self.__fill_in_nas(additional_headers, headers_original, index, line,
+                                   wellspec_file, file_content)
+                line_valid_index = self.__fill_in_nas(additional_headers, headers_original, index, line,
+                                                      wellspec_file, file_content)
                 # set the line to insert the new completion at to be the one after the last valid line
                 last_valid_line_index = line_valid_index if line_valid_index > 0 else last_valid_line_index
         # If we haven't found a TIME card after the for loop then we haven't got a valid date so add it at the end
@@ -244,8 +244,8 @@ class NexusWells(Wells):
         wellspec_file.add_to_file_as_list(additional_content=new_completion_string, index=new_completion_index,
                                           additional_objects=new_completion_object_ids)
 
-    def fill_in_nas(self, additional_headers: list[str], headers_original: list[str], index: int, line: str,
-                    wellspec_file: NexusFile, file_content: list[str]) -> int:
+    def __fill_in_nas(self, additional_headers: list[str], headers_original: list[str], index: int, line: str,
+                      wellspec_file: NexusFile, file_content: list[str]) -> int:
         """ check the validity of the line, if its valid add as many NA's as required for the new columns """
         valid_line, _ = nfo.table_line_reader(keyword_store={}, headers=headers_original, line=line)
         if valid_line and len(additional_headers) > 0:
@@ -280,9 +280,10 @@ class NexusWells(Wells):
                 f'No well file content found for specified wellfile at location: {wellspec_file.location}')
         return wellspec_file
 
-    def get_wellspec_header(self, additional_headers: list[str], completion_properties: NexusCompletion.InputDictionary,
-                            file_content: list[str], index: int, inverted_nexus_map: dict[str, str],
-                            nexus_mapping: dict[str, tuple[str, type]], wellspec_file: NexusFile) -> \
+    def __get_wellspec_header(self, additional_headers: list[str],
+                              completion_properties: NexusCompletion.InputDictionary,
+                              file_content: list[str], index: int, inverted_nexus_map: dict[str, str],
+                              nexus_mapping: dict[str, tuple[str, type]], wellspec_file: NexusFile) -> \
             tuple[int, list[str], list[str]]:
         """Gets the wellspec header and works out if any additional headers should be added"""
         keyword_map = {x: y[0] for x, y in nexus_mapping.items()}
