@@ -487,7 +487,8 @@ class NexusFile:
 
         # remove the line in the file:
         if nexusfile_to_write_to.file_content_as_list is None:
-            raise ValueError(f'No file content in the file with the completion {nexusfile_to_write_to.location}')
+            raise ValueError(
+                f'No file content in the file attempting to remove line from {nexusfile_to_write_to.location}')
         if string_to_remove is None:
             nexusfile_to_write_to.file_content_as_list.pop(relative_index)
             self.update_object_locations(line_number=index, number_additional_lines=-1)
@@ -498,6 +499,8 @@ class NexusFile:
         if objects_to_remove is not None:
             for object_id in objects_to_remove:
                 self.remove_object_locations(object_id)
+                
+        nexusfile_to_write_to.write_to_file()
 
     def write_to_file(self) -> None:
         """ Writes back to the original file location of the nexusfile"""

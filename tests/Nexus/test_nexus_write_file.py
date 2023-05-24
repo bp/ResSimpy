@@ -97,7 +97,8 @@ def test_write_to_file(mocker, fcs_file_contents, wells_file, expected_result):
                                      mocker_fixture=mocker, write_file_name='/my/wellspec/file.dat')
 
 
-@pytest.mark.parametrize('fcs_file_contents, wells_file, expected_result, expected_removed_completion_line, expected_obj_locations', [
+@pytest.mark.parametrize('fcs_file_contents, wells_file, expected_result, expected_removed_completion_line, '
+'expected_obj_locations, number_of_writes', [
 ('''DATEFORMAT DD/MM/YYYY
 WelLS sEt 1 /my/wellspec/file.dat''',
 
@@ -134,7 +135,7 @@ WELLSPEC well1
 iw jw l radw
 1  2  3 4.5
 ''',
-10, [4, 9, 14]),
+10, [4, 9, 14], 1),
 
 
 ('''DATEFORMAT DD/MM/YYYY
@@ -167,10 +168,10 @@ WELLSPEC well2
 iw jw l radw
 5 6 4 3.2
 ''',
-9, [4, 10]),
+9, [4, 10], 3),
 ], ids=['basic_test', 'only 1 completion to remove'] )
 def test_remove_completion_write_to_file(mocker, fcs_file_contents, wells_file, expected_result,
-        expected_removed_completion_line, expected_obj_locations):
+        expected_removed_completion_line, expected_obj_locations, number_of_writes):
     # Arrange
     start_date = '01/01/2020'
     remove_perf_date = '01/03/2020'
@@ -207,7 +208,8 @@ def test_remove_completion_write_to_file(mocker, fcs_file_contents, wells_file, 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
                                      modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/my/wellspec/file.dat')
+                                     mocker_fixture=mocker, write_file_name='/my/wellspec/file.dat',
+                                     number_of_writes=number_of_writes)
 
     assert result_object_ids == object_locations_minus_completion
 

@@ -394,12 +394,8 @@ class NexusWells(Wells):
         if wellspec_file.object_locations is None:
             raise ValueError(f'No object locations specified, cannot find completion id: {completion_id}')
         completion_index = wellspec_file.object_locations[completion_id]
-        file_with_the_completion, relative_index = wellspec_file.find_which_include_file(completion_index)
 
-        # remove the line in the file:
-        if file_with_the_completion.file_content_as_list is None:
-            raise ValueError(f'No file content in the file with the completion {file_with_the_completion.location}')
-        file_with_the_completion.file_content_as_list.pop(relative_index)
+        wellspec_file.remove_from_file_as_list(completion_index, [completion_id])
 
         # check that we have completions left:
         find_completions_dict: NexusCompletion.InputDictionary = {'date': completion_date}
@@ -407,12 +403,6 @@ class NexusWells(Wells):
         if len(remaining_completions) == 0:
             # if there are no more completions remaining for that time stamp then remove the wellspec header!
             self.__remove_wellspec_header(completion_date, well_name, wellspec_file)
-        # update the object locations
-        wellspec_file.remove_object_locations(completion_id)
-        wellspec_file.update_object_locations(line_number=completion_index, number_additional_lines=-1)
-
-        # remove from the file itself
-        file_with_the_completion.write_to_file()
 
     def __remove_wellspec_header(self, completion_date: str, well_name: str, wellspec_file: NexusFile) -> None:
         """Removes the wellspec and header if the wellspec table is empty\
@@ -435,19 +425,8 @@ class NexusWells(Wells):
                 header_index, _ = nfo.get_table_header(file_as_list=wellspec_table, header_values=keyword_map)
                 header_index += wellspec_index
                 break
-        file_with_wellspec, wellspec_relative_index = wellspec_file.find_which_include_file(wellspec_index)
-        if file_with_wellspec.file_content_as_list is None:
-            raise ValueError(f'No file content within wellspec file at location: {file_with_wellspec.location}')
-        file_with_wellspec.file_content_as_list.pop(wellspec_relative_index)
-        file_with_header, header_relative_index = wellspec_file.find_which_include_file(header_index)
-        if file_with_header.file_content_as_list is None:
-            raise ValueError(f'No file content within wellspec file at location: {file_with_header.location}')
-        if file_with_header == file_with_wellspec:
-            file_with_header.file_content_as_list.pop(header_relative_index - 1)
-        else:
-            file_with_header.file_content_as_list.pop(header_relative_index)
-        wellspec_file.update_object_locations(line_number=wellspec_index, number_additional_lines=-1)
-        wellspec_file.update_object_locations(line_number=header_index, number_additional_lines=-1)
+        wellspec_file.remove_from_file_as_list(header_index)
+        wellspec_file.remove_from_file_as_list(wellspec_index)
 
     def modify_completion(self, well_name: str, properties_to_modify: NexusCompletion.InputDictionary,
                           completion_to_change: Optional[NexusCompletion.InputDictionary] = None,
