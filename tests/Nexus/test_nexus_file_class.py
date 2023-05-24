@@ -626,7 +626,7 @@ def test_update_object_locations(mocker, test_file_contents, expected_results):
 
     # Act
     # effectively add 2 lines at location 5
-    wells_file.update_object_locations(line_number=5, number_additional_lines=2)
+    wells_file.__update_object_locations(line_number=5, number_additional_lines=2)
     result = wells_file.object_locations
 
     # Assert
