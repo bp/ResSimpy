@@ -505,8 +505,14 @@ class NexusFile:
             nexusfile_to_write_to.file_content_as_list.pop(relative_index)
             self.__update_object_locations(line_number=index, number_additional_lines=-1)
         else:
-            nexusfile_to_write_to.file_content_as_list[relative_index] = nexusfile_to_write_to.file_content_as_list[
-                relative_index].replace(string_to_remove, '', 1)
+            entry_to_replace = nexusfile_to_write_to.file_content_as_list[relative_index]
+            if isinstance(entry_to_replace, str):
+                nexusfile_to_write_to.file_content_as_list[relative_index] = \
+                    entry_to_replace.replace(string_to_remove, '', 1)
+            else:
+                raise ValueError(
+                    f'Tried to replace at non string value at index: {relative_index} in '
+                    f'file_as_list instead got {entry_to_replace}')
 
         if objects_to_remove is not None:
             for object_id in objects_to_remove:
