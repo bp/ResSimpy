@@ -24,11 +24,11 @@ class NexusRockMethod(RockMethod):
     # General parameters
     file_path: str
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-    dict[str, pd.DataFrame]]] = field(default_factory=get_empty_dict_union)
+                                dict[str, pd.DataFrame]]] = field(default_factory=get_empty_dict_union)
 
     def __init__(self, file_path: str, method_number: int,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                 dict[str, pd.DataFrame]]]] = None):
+                                      dict[str, pd.DataFrame]]]] = None):
         self.file_path = file_path
         if properties:
             self.properties = properties

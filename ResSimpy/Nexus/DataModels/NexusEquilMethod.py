@@ -28,9 +28,9 @@ class NexusEquilMethod(EquilMethod):
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] \
         = field(default_factory=get_empty_dict_union)
 
-    def __init__(self, file_path: str, method_number: int,
-                 properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                 dict[str, pd.DataFrame]]]] = None):
+    def __init__(self, file_path: str, method_number: int, properties:
+                 Optional[dict[str, Union[str, int, float, Enum, list[str],
+                          pd.DataFrame, dict[str, pd.DataFrame]]]] = None):
         self.file_path = file_path
         if properties:
             self.properties = properties
@@ -136,7 +136,7 @@ class NexusEquilMethod(EquilMethod):
                         table_being_read = table_keyword
                         start_reading_table = True
                         if table_keyword == 'COMPOSITION' and [i for i in line.split() if i in
-                                                                                          EQUIL_COMPOSITION_OPTIONS]:
+                                                               EQUIL_COMPOSITION_OPTIONS]:
                             for comp_key in EQUIL_COMPOSITION_OPTIONS:
                                 if nfo.check_token(comp_key, line):
                                     self.properties[comp_key] = float(str(nfo.get_token_value(comp_key, line,
