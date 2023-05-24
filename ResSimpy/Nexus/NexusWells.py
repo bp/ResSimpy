@@ -167,7 +167,7 @@ class NexusWells(Wells):
         headers: list[str] = []
         headers_original: list[str] = []
         additional_headers: list[str] = []
-        file_content = wellspec_file.get_flat_list_str_file()
+        file_content = wellspec_file.get_flat_list_str_file
         date_found = False
         new_completion_index = len(file_content)
         new_completion_string: list[str] = []
@@ -239,24 +239,10 @@ class NexusWells(Wells):
         new_completion_additional_lines = len(new_completion_string)
         if writing_new_wellspec_table:
             new_completion_string += ['\n']
-            wellspec_file.update_object_locations(line_number=new_completion_index,
-                                                  number_additional_lines=new_completion_additional_lines + 1)
-        else:
-            wellspec_file.update_object_locations(line_number=new_completion_index,
-                                                  number_additional_lines=new_completion_additional_lines)
-
-        wellspec_file.add_object_locations(uuid=new_completion.id,
-                                           line_index=new_completion_index + new_completion_additional_lines - 1)
         # write out to the file_content_as_list
-        nexusfile_to_write_to, index_in_file = wellspec_file.find_which_include_file(new_completion_index)
-        if nexusfile_to_write_to.file_content_as_list is None:
-            raise ValueError(f'No file content to write to in file: {nexusfile_to_write_to}')
-        nexusfile_to_write_to.file_content_as_list = \
-            nexusfile_to_write_to.file_content_as_list[:index_in_file] + \
-            new_completion_string + nexusfile_to_write_to.file_content_as_list[index_in_file:]
-
-        # write straight to file
-        nexusfile_to_write_to.write_to_file()
+        new_completion_object_ids = {new_completion.id: new_completion_index + new_completion_additional_lines - 1}
+        wellspec_file.add_to_file_as_list(additional_content=new_completion_string, index=new_completion_index,
+                                          additional_objects=new_completion_object_ids)
 
     def fill_in_nas(self, additional_headers: list[str], headers_original: list[str], index: int, line: str,
                     wellspec_file: NexusFile, file_content: list[str]) -> int:
@@ -432,7 +418,7 @@ class NexusWells(Wells):
          must first check for whether the well has any remaining completions in the wellspec table"""
         nexus_mapping = NexusCompletion.get_nexus_mapping()
         completion_date_found = False
-        file_content = wellspec_file.get_flat_list_str_file()
+        file_content = wellspec_file.get_flat_list_str_file
         wellspec_index = -1
         header_index = -1
         for index, line in enumerate(file_content):

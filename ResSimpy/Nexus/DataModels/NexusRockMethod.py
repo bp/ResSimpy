@@ -24,11 +24,11 @@ class NexusRockMethod(RockMethod):
     # General parameters
     file_path: str
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                dict[str, pd.DataFrame]]] = field(default_factory=get_empty_dict_union)
+    dict[str, pd.DataFrame]]] = field(default_factory=get_empty_dict_union)
 
     def __init__(self, file_path: str, method_number: int,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                                      dict[str, pd.DataFrame]]]] = None):
+                 dict[str, pd.DataFrame]]]] = None):
         self.file_path = file_path
         if properties:
             self.properties = properties
@@ -62,7 +62,7 @@ class NexusRockMethod(RockMethod):
         """Read Nexus rock properties file contents and populate NexusRock object
         """
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
-        file_as_list = file_obj.get_flat_list_str_file()
+        file_as_list = file_obj.get_flat_list_str_file
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
@@ -101,7 +101,7 @@ class NexusRockMethod(RockMethod):
                             self.properties[key] = ''
             # Find starting index of rock compaction table
             if nfo.check_token('CMT', line):
-                cmt_indices = [line_indx+1, len(file_as_list)]
+                cmt_indices = [line_indx + 1, len(file_as_list)]
                 table_being_read['CMT'] = True
                 start_reading_table = True
                 line_indx += 1
@@ -127,7 +127,7 @@ class NexusRockMethod(RockMethod):
                 wirct_indices_dict['WIRCT'] = {}
             if nfo.check_token('SWINIT', line):
                 swinit_key = str(nfo.get_token_value('SWINIT', line, file_as_list))
-                wirct_indices_dict['WIRCT'][swinit_key] = [line_indx+1, len(file_as_list)]
+                wirct_indices_dict['WIRCT'][swinit_key] = [line_indx + 1, len(file_as_list)]
                 table_being_read['WIRCT'] = True
                 start_reading_table = True
 

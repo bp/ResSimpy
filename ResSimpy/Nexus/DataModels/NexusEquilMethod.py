@@ -30,7 +30,7 @@ class NexusEquilMethod(EquilMethod):
 
     def __init__(self, file_path: str, method_number: int,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                                      dict[str, pd.DataFrame]]]] = None):
+                 dict[str, pd.DataFrame]]]] = None):
         self.file_path = file_path
         if properties:
             self.properties = properties
@@ -79,7 +79,7 @@ class NexusEquilMethod(EquilMethod):
         """Read Nexus equilibration file contents and populate NexusEquil object
         """
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
-        file_as_list = file_obj.get_flat_list_str_file()
+        file_as_list = file_obj.get_flat_list_str_file
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
@@ -132,11 +132,11 @@ class NexusEquilMethod(EquilMethod):
             if [i for i in line.split() if i in EQUIL_TABLE_KEYWORDS]:
                 for table_keyword in EQUIL_TABLE_KEYWORDS:
                     if nfo.check_token(table_keyword, line):
-                        equil_table_indices[table_keyword] = [line_indx+1, len(file_as_list)]
+                        equil_table_indices[table_keyword] = [line_indx + 1, len(file_as_list)]
                         table_being_read = table_keyword
                         start_reading_table = True
                         if table_keyword == 'COMPOSITION' and [i for i in line.split() if i in
-                                                               EQUIL_COMPOSITION_OPTIONS]:
+                                                                                          EQUIL_COMPOSITION_OPTIONS]:
                             for comp_key in EQUIL_COMPOSITION_OPTIONS:
                                 if nfo.check_token(comp_key, line):
                                     self.properties[comp_key] = float(str(nfo.get_token_value(comp_key, line,
@@ -156,4 +156,5 @@ class NexusEquilMethod(EquilMethod):
         # Read in table if there is one
         if len(equil_table_indices.keys()) > 0:
             self.properties[table_being_read] = nfo.read_table_to_df(file_as_list[
-                equil_table_indices[table_being_read][0]:equil_table_indices[table_being_read][1]])
+                                                                     equil_table_indices[table_being_read][0]:
+                                                                     equil_table_indices[table_being_read][1]])

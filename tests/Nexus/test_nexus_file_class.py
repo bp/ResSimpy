@@ -405,7 +405,7 @@ second_file INCLUDE inc_file2.inc continuation''')
     mocker.patch("builtins.open", mock_open_wrapper)
     # Act
     nexus_file = NexusFile.generate_file_include_structure(file_path)
-    flat_file = nexus_file.get_flat_list_str_file()
+    flat_file = nexus_file.get_flat_list_str_file
     # Assert
     assert nexus_file == expected_nexus_file
     assert nexus_file.line_locations == expected_nexus_file.line_locations
@@ -458,9 +458,9 @@ continuation''')
     # Act
     nexus_file = NexusFile.generate_file_include_structure(file_path)
     # do the generation of the flat file a few times to catch the issue of continually appending duplicate line locations
-    nexus_file.get_flat_list_str_file()
-    nexus_file.get_flat_list_str_file()
-    nexus_file.get_flat_list_str_file()
+    nexus_file.get_flat_list_str_file
+    nexus_file.get_flat_list_str_file
+    nexus_file.get_flat_list_str_file
 
     # Assert
     assert nexus_file == expected_nexus_file
@@ -514,10 +514,10 @@ continuation''')
     # Act
     nexus_file = NexusFile.generate_file_include_structure(file_path)
     # do the generation of the flat file a few times to catch the issue of continually appending duplicate line locations
-    nexus_file.get_flat_list_str_file()
+    nexus_file.get_flat_list_str_file
     nexus_file.file_content_as_list.insert(1, 'New line in here\n')
     nexus_file.includes_objects[0].file_content_as_list.insert(1, 'new line in include\n')
-    nexus_file.get_flat_list_str_file()
+    nexus_file.get_flat_list_str_file
 
     # Assert
     assert nexus_file.file_content_as_list == expected_nexus_file.file_content_as_list
@@ -580,7 +580,7 @@ continuation''')
 
     # Act
     nexus_file = NexusFile.generate_file_include_structure(file_path)
-    flat_file = nexus_file.get_flat_list_str_file()
+    flat_file = nexus_file.get_flat_list_str_file
     nexus_file_result, index_in_file = nexus_file.find_which_include_file(index=index)
     # Assert
     assert nexus_file == expected_nexus_file

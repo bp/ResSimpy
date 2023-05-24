@@ -129,7 +129,7 @@ class StructuredGridFile(Grid):
                 PropertyToLoad('PERMZ', ['VALUE', 'MULT', 'CON'], self._kz),
                 PropertyToLoad('PERMK', ['VALUE', 'MULT', 'CON'], self._kz),
                 PropertyToLoad('KK', ['VALUE', 'MULT', 'CON'], self._kz),
-            ]
+                ]
 
             for token_property in properties_to_load:
                 for modifier in token_property.modifiers:
@@ -177,7 +177,7 @@ class StructuredGridFile(Grid):
         if structured_grid_file.location is None:
             raise ValueError(f"No file path given or found for structured grid file path. \
                 Instead got {structured_grid_file.location}")
-        file_as_list = structured_grid_file.get_flat_list_str_file()
+        file_as_list = structured_grid_file.get_flat_list_str_file
 
         if file_as_list is None:
             raise ValueError("No file path given or found for structured grid file path. \

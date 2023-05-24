@@ -206,7 +206,7 @@ class Runcontrol:
         self.model.check_output_path()
         if self.model.fcs_file.runcontrol_file is None or self.model.fcs_file.runcontrol_file.location is None:
             raise ValueError(f"No file path found for {self.model.fcs_file}")
-        file_content = self.model.fcs_file.runcontrol_file.get_flat_list_str_file()
+        file_content = self.model.fcs_file.runcontrol_file.get_flat_list_str_file
         filename = self.model.fcs_file.runcontrol_file.location
 
         new_file_content = self.model.Runcontrol.delete_times(file_content)
@@ -241,7 +241,7 @@ class Runcontrol:
         if self.model.fcs_file.runcontrol_file is None:
             warnings.warn(f"Run control file path not found for {self.model.fcs_file.location}")
             return
-        run_control_file_content = self.model.fcs_file.runcontrol_file.get_flat_list_str_file()
+        run_control_file_content = self.model.fcs_file.runcontrol_file.get_flat_list_str_file
 
         if (run_control_file_content is None) or (self.model.fcs_file.runcontrol_file.location is None):
             raise ValueError(f"No file path provided for {self.model.fcs_file.runcontrol_file.location=}")

@@ -249,6 +249,7 @@ class NexusFile:
                 file_index.index += 1
                 yield row
 
+    @property
     def get_flat_list_str_file(self) -> list[str]:
         if self.file_content_as_list is None:
             raise ValueError(f'No file content found for {self.location}')
@@ -418,7 +419,7 @@ class NexusFile:
             element is the relative index in that file.
         """
         if self.line_locations is None:
-            self.get_flat_list_str_file()
+            self.get_flat_list_str_file
             if self.line_locations is None:
                 raise ValueError("No include line locations found.")
 
@@ -451,6 +452,34 @@ class NexusFile:
             raise ValueError(f'No file with {file_uuid=} found within include objects')
 
         return nexus_file, index_in_file
+
+    def add_to_file_as_list(self, additional_content: list[str], index: int,
+                            additional_objects: Optional[dict[UUID, int]] = None) -> None:
+        """ To add content to the file as list, also
+
+        Args:
+            additional_content ():
+            index ():
+            additional_objects ():
+
+        Returns:
+
+        """
+        nexusfile_to_write_to, relative_index = self.find_which_include_file(index)
+        if nexusfile_to_write_to.file_content_as_list is None:
+            raise ValueError(f'No file content to write to in file: {nexusfile_to_write_to}')
+        nexusfile_to_write_to.file_content_as_list = \
+            nexusfile_to_write_to.file_content_as_list[:relative_index] + \
+            additional_content + nexusfile_to_write_to.file_content_as_list[relative_index:]
+        # write straight to file
+        nexusfile_to_write_to.write_to_file()
+        # update object locations
+        self.update_object_locations(line_number=index, number_additional_lines=len(additional_content))
+
+        if additional_objects is None:
+            return
+        for object_id, line_index in additional_objects.items():
+            self.add_object_locations(uuid=object_id, line_index=line_index)
 
     def write_to_file(self) -> None:
         """ Writes back to the original file location of the nexusfile"""

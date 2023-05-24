@@ -50,9 +50,11 @@ class NexusWater():
 
     def __repr__(self) -> str:
         """Pretty printing water data"""
-        param_to_nexus_keyword_map = {'density': 'DENW', 'compressibility': 'CW',
-                                      'formation_volume_factor': 'BW', 'viscosity': 'VISW',
-                                      'viscosity_compressibility': 'CVW'}
+        param_to_nexus_keyword_map = {
+            'density': 'DENW', 'compressibility': 'CW',
+            'formation_volume_factor': 'BW', 'viscosity': 'VISW',
+            'viscosity_compressibility': 'CVW'
+            }
         printable_str = ''
         printable_str += '\n--------------------------------\n'
         printable_str += f'Water method {self.method_number}\n'
@@ -90,14 +92,16 @@ class NexusWater():
         """Read Nexus Water file contents and populate NexusWater object
         """
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
-        file_as_list = file_obj.get_flat_list_str_file()
+        file_as_list = file_obj.get_flat_list_str_file
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
 
         # Initialize properties
-        water_props_dict_none: dict[str, Optional[float]] = {'DENW': None, 'CW': None, 'BW': None,
-                                                             'VISW': None, 'CVW': None}
+        water_props_dict_none: dict[str, Optional[float]] = {
+            'DENW': None, 'CW': None, 'BW': None,
+            'VISW': None, 'CVW': None
+            }
         water_props_dict: dict[str, Optional[float]] = water_props_dict_none.copy()
 
         line_indx = 0

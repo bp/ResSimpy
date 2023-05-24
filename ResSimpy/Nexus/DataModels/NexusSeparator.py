@@ -45,7 +45,7 @@ class NexusSeparator():
         """Read Nexus Separator file contents and populate NexusSeparator object
         """
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
-        file_as_list = file_obj.get_flat_list_str_file()
+        file_as_list = file_obj.get_flat_list_str_file
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
@@ -71,7 +71,7 @@ class NexusSeparator():
                 elems = line.split('!')[0].split()
                 cpt_index = elems.index('KEYCPTLIST')
                 if 'KEYCPTLIST' not in self.properties.keys():
-                    self.properties['KEYCPTLIST'] = elems[cpt_index+1:]
+                    self.properties['KEYCPTLIST'] = elems[cpt_index + 1:]
                 line_indx += 1
                 continue
             elif nfo.check_token('BOSEP', line):  # Black oil separator table
@@ -109,7 +109,7 @@ class NexusSeparator():
             # Find starting and ending indices for gas plant separator table
             if self.separator_type == 'GASPLANT':
                 if nfo.check_token('RECFAC_TABLE', line):
-                    sep_table_indices[0] = line_indx+1
+                    sep_table_indices[0] = line_indx + 1
                     start_reading_table = True
                 if nfo.check_token('ENDRECFAC_TABLE', line):
                     sep_table_indices[1] = line_indx

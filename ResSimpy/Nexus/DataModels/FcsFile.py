@@ -75,7 +75,7 @@ class FcsNexusFile(NexusFile):
             adsorption_files: Optional[dict[int, NexusFile]] = None,
             flux_in_files: Optional[dict[int, NexusFile]] = None,
             tracer_init_file: Optional[dict[int, NexusFile]] = None,
-    ):
+            ):
         self.restart_file = restart_file
         self.structured_grid_file = structured_grid_file
         self.options_file = options_file
@@ -135,7 +135,7 @@ class FcsNexusFile(NexusFile):
             'RUNCONTROL': 'runcontrol_file',
             'OVERRIDE': 'override_file',
             'EOS_DEFAULTS': 'eos_default_file',
-        }
+            }
         fcs_keyword_map_multi = {
             'EQUIL': 'equil_files',
             'ROCK': 'rock_files',
@@ -158,14 +158,14 @@ class FcsNexusFile(NexusFile):
             'ADSORPTION': 'adsorption_files',
             'FLUXIN': 'flux_in_files',
             'TRACER_INIT': 'tracer_init_files',
-        }
+            }
 
         # guard against bad links/empty files:
         if not os.path.isfile(fcs_file_path):
             raise FileNotFoundError(f'fcs file not found for path {fcs_file_path}')
         origin_path = fcs_file_path
         flat_fcs_file_content = NexusFile.generate_file_include_structure(
-            fcs_file_path, origin=None).get_flat_list_str_file()
+            fcs_file_path, origin=None).get_flat_list_str_file
         if flat_fcs_file_content is None:
             raise ValueError(f'FCS file not found, no content for {fcs_file_path=}')
         for i, line in enumerate(flat_fcs_file_content):
