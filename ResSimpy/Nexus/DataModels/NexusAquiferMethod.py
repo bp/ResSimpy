@@ -30,7 +30,7 @@ class NexusAquiferMethod(AquiferMethod):
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                                       dict[str, Union[float, pd.DataFrame]]]]] = None):
         self.file_path = file_path
-        if properties:
+        if properties is not None:
             self.properties = properties
         else:
             self.properties = {}
@@ -86,12 +86,12 @@ class NexusAquiferMethod(AquiferMethod):
             if [i for i in line.split() if i in AQUIFER_KEYWORDS_VALUE_FLOAT]:
                 for key in AQUIFER_KEYWORDS_VALUE_FLOAT:
                     if nfo.check_token(key, line):
-                        self.properties[key] = float(str(nfo.get_token_value(key, line, file_as_list)))
+                        self.properties[key] = float(nfo.get_expected_token_value(key, line, file_as_list))
             # Find AQUIFER key-int value pairs, such as ITDPD 1 or IWATER 2
             if [i for i in line.split() if i in AQUIFER_KEYWORDS_VALUE_INT]:
                 for key in AQUIFER_KEYWORDS_VALUE_INT:
                     if nfo.check_token(key, line):
-                        self.properties[key] = int(str(nfo.get_token_value(key, line, file_as_list)))
+                        self.properties[key] = int(nfo.get_expected_token_value(key, line, file_as_list))
 
             # Find beginning and ending indices of tables
             for table_key in AQUIFER_TABLE_KEYWORDS:

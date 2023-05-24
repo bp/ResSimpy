@@ -55,21 +55,21 @@ class NexusPVTMethod(PVTMethod):
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                                       dict[str, Union[float, pd.DataFrame]]]]] = None):
         self.file_path = file_path
-        if pvt_type:
+        if pvt_type is not None:
             self.pvt_type = pvt_type
-        if eos_nhc:
+        if eos_nhc is not None:
             self.eos_nhc = eos_nhc
-        if eos_temp:
+        if eos_temp is not None:
             self.eos_temp = eos_temp
-        if eos_components:
+        if eos_components is not None:
             self.eos_components = eos_components
         else:
             self.eos_components = []
-        if eos_options:
+        if eos_options is not None:
             self.eos_options = eos_options
         else:
             self.eos_options = {}
-        if properties:
+        if properties is not None:
             self.properties = properties
         else:
             self.properties = {}
@@ -130,8 +130,8 @@ class NexusPVTMethod(PVTMethod):
         """
         if nfo.check_token(primary_key, single_line):
             self.eos_options[primary_key] = primary_key_default_val  # Set default value
-            if str(nfo.get_token_value(primary_key, single_line, line_list)) in list_of_secondary_keys:
-                self.eos_options[primary_key] = str(nfo.get_token_value(primary_key, single_line, line_list))
+            if nfo.get_expected_token_value(primary_key, single_line, line_list) in list_of_secondary_keys:
+                self.eos_options[primary_key] = nfo.get_expected_token_value(primary_key, single_line, line_list)
         if [i for i in single_line.split() if i in list_of_secondary_keys]:
             for secondary_key in list_of_secondary_keys:
                 if nfo.check_token(secondary_key, single_line):
@@ -187,7 +187,7 @@ class NexusPVTMethod(PVTMethod):
             if nfo.check_token(table_name, single_line) and nfo.check_token(table_key, single_line):
                 if nfo.get_token_value(table_key, single_line, line_list) is None:
                     raise ValueError(f'Property {table_key} does not have a numerical value.')
-                unsat_obj[table_key].append(str(nfo.get_token_value(table_key, single_line, line_list)))
+                unsat_obj[table_key].append(nfo.get_expected_token_value(table_key, single_line, line_list))
                 if full_table_name in table_indices_dict.keys():
                     table_indices_dict[full_table_name][unsat_obj[table_key][-1]] = [l_index + 1, len(line_list)]
                 else:
@@ -324,11 +324,11 @@ class NexusPVTMethod(PVTMethod):
             if [i for i in line.split() if i in PVT_EOSOPTIONS_PRIMARY_KEYS_FLOAT]:
                 for key in PVT_EOSOPTIONS_PRIMARY_KEYS_FLOAT:
                     if nfo.check_token(key, line):
-                        self.eos_options[key] = float(str(nfo.get_token_value(key, line, file_as_list)))
+                        self.eos_options[key] = float(nfo.get_expected_token_value(key, line, file_as_list))
             if [i for i in line.split() if i in PVT_EOSOPTIONS_PRIMARY_KEYS_INT]:
                 for key in PVT_EOSOPTIONS_PRIMARY_KEYS_INT:
                     if nfo.check_token(key, line):
-                        self.eos_options[key] = int(str(nfo.get_token_value(key, line, file_as_list)))
+                        self.eos_options[key] = int(nfo.get_expected_token_value(key, line, file_as_list))
             # Read TRANSITION, TRANS_TEST and PHASEID eos options, if present
             primary_keys2populate = ['TRANSITION', 'TRANS_TEST', 'PHASEID']
             primary_keys2populate_defaults = ['TEST', 'INCRP', '']

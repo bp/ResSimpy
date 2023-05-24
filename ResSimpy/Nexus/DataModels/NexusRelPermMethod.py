@@ -37,11 +37,11 @@ class NexusRelPermMethod(RelPermMethod):
                                                              dict[str, Union[str, float,
                                                                              dict[str, Union[str, float]]]]]]] = None):
         self.file_path = file_path
-        if properties:
+        if properties is not None:
             self.properties = properties
         else:
             self.properties = {}
-        if hysteresis_params:
+        if hysteresis_params is not None:
             self.hysteresis_params = hysteresis_params
         else:
             self.hysteresis_params = {}
@@ -148,7 +148,7 @@ class NexusRelPermMethod(RelPermMethod):
         return printable_str
 
     def __populate_optional_str_keywords(self, keyword: str, keyword_value_options: list[str], single_line: str,
-                                         line_list: list[str]):
+                                         line_list: list[str]) -> None:
         """Utility function to populate rel perm keywords that have optional string values, e.g., IFT, JFUNC, etc.
 
         Args:
@@ -202,24 +202,23 @@ class NexusRelPermMethod(RelPermMethod):
             if [i for i in line.split() if i in RELPM_KEYWORDS_VALUE_FLOAT]:
                 for key in RELPM_KEYWORDS_VALUE_FLOAT:
                     if nfo.check_token(key, line):
-                        self.properties[key] = float(str(nfo.get_token_value(key, line, file_as_list)))
-            # Handle JFUNC
-            self.__populate_optional_str_keywords('JFUNC', ['KX', 'KY', 'KXKY'], line, file_as_list)
-            # Handle endpt scaling
-            for key in ['SCALING', 'SCALING_PC']:
-                self.__populate_optional_str_keywords(key, ['NONE', 'TWOPOINT', 'THREEPOINT'], line, file_as_list)
-            # Handle interfacial tension
-            self.__populate_optional_str_keywords('IFT', ['METHOD1', 'METHOD2'], line, file_as_list)
-            # Handle near critical adjustment of rel perm
-            self.__populate_optional_str_keywords('NEARCRIT', ['HCSCALE'], line, file_as_list)
-            # Handle derivatives option
-            self.__populate_optional_str_keywords('DERIVATIVES', ['ANALYTICAL', 'NUMERICAL'], line, file_as_list)
+                        self.properties[key] = float(nfo.get_expected_token_value(key, line, file_as_list))
+            # Handle certain specific relperm options
+            optional_keyword_dict = {'JFUNC': ['KX', 'KY', 'KXKY'],
+                                     'SCALING': ['NONE', 'TWOPOINT', 'THREEPOINT'],
+                                     'SCALING_PC': ['NONE', 'TWOPOINT', 'THREEPOINT'],
+                                     'IFT': ['METHOD1', 'METHOD2'],
+                                     'NEARCRIT': ['HCSCALE'],
+                                     'DERIVATIVES': ['ANALYTICAL', 'NUMERICAL']
+                                     }
+            for opt_key, opt_vals in optional_keyword_dict.items():
+                self.__populate_optional_str_keywords(opt_key, opt_vals, line, file_as_list)
             # Handle tabular reconstruction
             if nfo.check_token('RECONSTRUCT', line):
                 found_reconstruct = True
             for recon_key in ['NSGDIM', 'NSWDIM']:
                 if nfo.check_token(recon_key, line) and found_reconstruct:
-                    recon_dict[recon_key] = int(str(nfo.get_token_value(recon_key, line, file_as_list)))
+                    recon_dict[recon_key] = int(nfo.get_expected_token_value(recon_key, line, file_as_list))
             if found_reconstruct:
                 self.properties['RECONSTRUCT'] = recon_dict
 
@@ -259,9 +258,6 @@ class NexusRelPermMethod(RelPermMethod):
                     if nfo.check_token(table_keyword, line):
                         relpm_table_indices[table_keyword] = [line_indx+1, len(file_as_list)]
                         table_being_read[table_keyword] = True
-                        # start_reading_table = True
-                # line_indx += 1
-                # continue
 
             line_indx += 1
 
@@ -276,7 +272,7 @@ class NexusRelPermMethod(RelPermMethod):
             for line in file_as_list[nondarcy_indices[key][0]:nondarcy_indices[key][1]]:
                 for param in RELPM_NONDARCY_PARAMS:
                     if nfo.check_token(param, line):
-                        nondarcy_dict[param] = float(str(nfo.get_token_value(param, line, file_as_list)))
+                        nondarcy_dict[param] = float(nfo.get_expected_token_value(param, line, file_as_list))
             self.properties[key] = nondarcy_dict
 
         # Read hysteresis section, if present
@@ -298,11 +294,12 @@ class NexusRelPermMethod(RelPermMethod):
                                 hyst_dict: dict[str, Union[str, float, dict[str, Union[str, float]]]] = {}
                                 hyst_subdict: dict[str, Union[str, float]] = {}
                                 if nfo.check_token('MAXTRAP', line):
-                                    hyst_subdict['MAXTRAP'] = float(str(nfo.get_token_value('MAXTRAP',
-                                                                                            line, file_as_list)))
+                                    hyst_subdict['MAXTRAP'] = float(nfo.get_expected_token_value('MAXTRAP',
+                                                                                                 line, file_as_list))
                                     hyst_dict[hyst_keyword_primary_key] = hyst_subdict
                                 if nfo.check_token('EXP', line):
-                                    hyst_subdict['EXP'] = float(str(nfo.get_token_value('EXP', line, file_as_list)))
+                                    hyst_subdict['EXP'] = float(nfo.get_expected_token_value('EXP',
+                                                                                             line, file_as_list))
                                     hyst_dict[hyst_keyword_primary_key] = hyst_subdict
                                 if nfo.check_token('NOMOD', line):
                                     hyst_subdict['NOMOD'] = ''
@@ -316,7 +313,8 @@ class NexusRelPermMethod(RelPermMethod):
                             for hyst_keyword_primary_key in ['MAXSW', 'MINSG', 'ETA', 'LAND', 'ALPHA', 'AFAC']:
                                 if nfo.check_token(hyst_keyword_primary_key, line):
                                     hyst_pc_dict[hyst_keyword_primary_key] = \
-                                        float(str(nfo.get_token_value(hyst_keyword_primary_key, line, file_as_list)))
+                                        float(nfo.get_expected_token_value(hyst_keyword_primary_key,
+                                                                           line, file_as_list))
                             # Search for single keyword options
                             for hyst_keyword_primary_key in ['TRAPSCALE', 'NOWATHYS', 'NOGASHYS', 'NOOILHYS']:
                                 if nfo.check_token(hyst_keyword_primary_key, line):
@@ -325,5 +323,5 @@ class NexusRelPermMethod(RelPermMethod):
                 if [i for i in line.split() if i in ['TOLREV', 'TOLHYS']]:
                     for hyst_keyword in ['TOLREV', 'TOLHYS']:
                         if nfo.check_token(hyst_keyword, line):
-                            self.hysteresis_params[hyst_keyword] = float(str(nfo.get_token_value(hyst_keyword,
-                                                                                                 line, file_as_list)))
+                            self.hysteresis_params[hyst_keyword] = float(
+                                nfo.get_expected_token_value(hyst_keyword, line, file_as_list))

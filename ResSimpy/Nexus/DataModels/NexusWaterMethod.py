@@ -7,6 +7,7 @@ from ResSimpy.WaterMethod import WaterMethod
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_list_nexus_water_params
 import ResSimpy.Nexus.nexus_file_operations as nfo
+from ResSimpy.Utils.invert_nexus_map import invert_nexus_map
 
 
 @dataclass  # Doesn't need to write an _init_, _eq_ methods, etc.
@@ -55,21 +56,32 @@ class NexusWaterMethod(WaterMethod):
                  parameters: Optional[list[NexusWaterParams]] = None):
         self.file_path = file_path
         self.reference_pressure = reference_pressure
-        if properties:
+        if properties is not None:
             self.properties = properties
         else:
             self.properties = {}
-        if parameters:
+        if parameters is not None:
             self.parameters = parameters
         else:
             self.parameters = []
         super().__init__(method_number=method_number)
 
+    @staticmethod
+    def nexus_mapping() -> dict[str, tuple[str, type]]:
+        """returns a dictionary of mapping from nexus keyword to attribute name"""
+
+        nexus_mapping: dict[str, tuple[str, type]] = {
+            'DENW': ('density', float),
+            'CW': ('compressibility', float),
+            'BW': ('formation_volume_factor', float),
+            'VISW': ('viscosity', float),
+            'CVW': ('viscosity_compressibility', float)
+        }
+        return nexus_mapping
+
     def __repr__(self) -> str:
         """Pretty printing water data"""
-        param_to_nexus_keyword_map = {'density': 'DENW', 'compressibility': 'CW',
-                                      'formation_volume_factor': 'BW', 'viscosity': 'VISW',
-                                      'viscosity_compressibility': 'CVW'}
+        param_to_nexus_keyword_map = invert_nexus_map(NexusWaterMethod.nexus_mapping())
 
         printable_str = f'\nFILE_PATH: {self.file_path}\n'
         printable_str += f'PREF: {self.reference_pressure}\n'
@@ -123,7 +135,7 @@ class NexusWaterMethod(WaterMethod):
 
             # Read in reference pressure
             if nfo.check_token('PREF', line):  # Reference pressure
-                self.reference_pressure = float(str(nfo.get_token_value('PREF', line, file_as_list)))
+                self.reference_pressure = float(nfo.get_expected_token_value('PREF', line, file_as_list))
 
             # Check if reading properties
             if nfo.check_token('CW', line):
@@ -148,17 +160,16 @@ class NexusWaterMethod(WaterMethod):
 
             # Read in relevant water properties in line
             if nfo.check_token('TEMP', line):
-                temp = float(str(nfo.get_token_value('TEMP', line, file_as_list)))
+                temp = float(nfo.get_expected_token_value('TEMP', line, file_as_list))
             if nfo.check_token('SALINITY', line):
-                sal = float(str(nfo.get_token_value('SALINITY', line, file_as_list)))
+                sal = float(nfo.get_expected_token_value('SALINITY', line, file_as_list))
             for key in water_props_dict.keys():
                 if nfo.check_token(key, line):
                     found_params = True
-                    water_props_dict[key] = float(str(nfo.get_token_value(key, line, file_as_list)))
+                    water_props_dict[key] = float(nfo.get_expected_token_value(key, line, file_as_list))
 
             line_indx += 1
 
-        # if not found_temp_or_sal:  # If no temperature or salinity repeats
         if found_params:
             # Append new parameters to list of water parameters
             params = NexusWaterParams(temperature=temp,

@@ -31,9 +31,9 @@ class NexusSeparatorMethod(SeparatorMethod):
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                                       dict[str, Union[float, pd.DataFrame]]]]] = None):
         self.file_path = file_path
-        if separator_type:
+        if separator_type is not None:
             self.separator_type = separator_type
-        if properties:
+        if properties is not None:
             self.properties = properties
         else:
             self.properties = {}
@@ -97,11 +97,11 @@ class NexusSeparatorMethod(SeparatorMethod):
             if [i for i in line.split() if i in SEPARATOR_KEYS_FLOAT]:
                 for key in SEPARATOR_KEYS_FLOAT:
                     if nfo.check_token(key, line):
-                        self.properties[key] = float(str(nfo.get_token_value(key, line, file_as_list)))
+                        self.properties[key] = float(nfo.get_expected_token_value(key, line, file_as_list))
             if [i for i in line.split() if i in SEPARATOR_KEYS_INT]:
                 for key in SEPARATOR_KEYS_INT:
                     if nfo.check_token(key, line):
-                        self.properties[key] = int(str(nfo.get_token_value(key, line, file_as_list)))
+                        self.properties[key] = int(nfo.get_expected_token_value(key, line, file_as_list))
 
             # Find starting index for black oil separator table
             if self.separator_type == 'BLACKOIL':
