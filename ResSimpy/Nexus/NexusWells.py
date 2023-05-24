@@ -405,6 +405,7 @@ class NexusWells(Wells):
         find_completions_dict: NexusCompletion.InputDictionary = {'date': completion_date}
         remaining_completions = well.find_completions(find_completions_dict)
         if len(remaining_completions) == 0:
+            # if there are no more completions remaining for that time stamp then remove the wellspec header!
             self.__remove_wellspec_header(completion_date, well_name, wellspec_file)
         # update the object locations
         wellspec_file.remove_object_locations(completion_id)
