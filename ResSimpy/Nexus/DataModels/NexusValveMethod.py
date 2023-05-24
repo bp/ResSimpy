@@ -12,12 +12,12 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 
 @dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
 class NexusValveMethod(ValveMethod):
-    """ Class to hold Nexus Rock properties
+    """ Class to hold Nexus Valve properties
     Attributes:
-        file_path (str): Path to the Nexus rock properties file
-        method_number (int): Rock properties method number in Nexus fcs file
+        file_path (str): Path to the Nexus valve properties file
+        method_number (int): Valve properties method number in Nexus fcs file
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] ):
-            Dictionary holding all properties for a specific rock properties method. Defaults to empty dictionary.
+            Dictionary holding all properties for a specific valve properties method. Defaults to empty dictionary.
     """
     # General parameters
     file_path: str

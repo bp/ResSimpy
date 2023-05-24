@@ -6,7 +6,7 @@ from dataclasses import dataclass
 class RelPermMethod(ABC):
     """The abstract base class for relative permeability and capillary pressure methods
     Attributes:
-        method_number (int): Method number in order of rel perm and cap pressure methods in simulator input file
+        method_number (int): Method number in order of rel perm and cap pressure methods in simulator input
     """
 
     method_number: int

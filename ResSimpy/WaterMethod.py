@@ -6,7 +6,7 @@ from dataclasses import dataclass
 class WaterMethod(ABC):
     """The abstract base class for water methods
     Attributes:
-        method_number (int): Method number in order of water methods in simulator input file
+        method_number (int): Method number in order of water methods in simulator input
     """
 
     method_number: int
