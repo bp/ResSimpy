@@ -11,13 +11,14 @@ from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_EOSOPTIONS_PRIMARY_KEY
 from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_EOSOPTIONS_TRANS_TEST_KEYS, PVT_EOSOPTIONS_PHASEID_KEYS
 from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_EOSOPTIONS_TERTIARY_KEYS, PVT_ALL_TABLE_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_UNSAT_TABLE_INDICES
+from ResSimpy.PVTMethod import PVTMethod
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_list_str, get_empty_eosopt_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
-@dataclass  # Doesn't need to write an _init_, _eq_ methods, etc.
-class NexusPVT():
+@dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
+class NexusPVTMethod(PVTMethod):
     """ Class to hold Nexus PVT properties
     Attributes:
         file_path (str): Path to the Nexus PVT file
@@ -34,7 +35,6 @@ class NexusPVT():
     """
     # General parameters
     file_path: str
-    method_number: int
     pvt_type: Optional[str] = None
     eos_nhc: Optional[int] = None  # Number of hydrocarbon components
     eos_temp: Optional[float] = None  # Default temperature for EOS method
@@ -43,27 +43,54 @@ class NexusPVT():
         str, int, float, pd.DataFrame, list[str], dict[str, float], tuple[str, dict[str, float]], dict[
             str, pd.DataFrame]]] \
         = field(default_factory=get_empty_eosopt_dict_union)
-    properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] \
+    properties: dict[str, Union[str, int, float, Enum, list[str],
+                                pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
+
+    def __init__(self, file_path: str, method_number: int, pvt_type: Optional[str] = None,
+                 eos_nhc: Optional[int] = None, eos_temp: Optional[float] = None,
+                 eos_components: Optional[list[str]] = None,
+                 eos_options: Optional[dict[str, Union[str, int, float, pd.DataFrame, list[str], dict[str, float],
+                                                       tuple[str, dict[str, float]], dict[str, pd.DataFrame]]]] = None,
+                 properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                                                      dict[str, Union[float, pd.DataFrame]]]]] = None):
+        self.file_path = file_path
+        if pvt_type is not None:
+            self.pvt_type = pvt_type
+        if eos_nhc is not None:
+            self.eos_nhc = eos_nhc
+        if eos_temp is not None:
+            self.eos_temp = eos_temp
+        if eos_components is not None:
+            self.eos_components = eos_components
+        else:
+            self.eos_components = []
+        if eos_options is not None:
+            self.eos_options = eos_options
+        else:
+            self.eos_options = {}
+        if properties is not None:
+            self.properties = properties
+        else:
+            self.properties = {}
+        super().__init__(method_number=method_number)
 
     def __repr__(self) -> str:
         """Pretty printing PVT data"""
-        printable_str = ''
-        printable_str += '\n--------------------------------\n'
-        printable_str += f'PVT method {self.method_number}\n'
-        printable_str += '--------------------------------\n'
-        printable_str += f'FILE_PATH: {self.file_path}\n'
+        printable_str = f'\nFILE_PATH: {self.file_path}\n'
         printable_str += f'PVT_TYPE: {self.pvt_type}\n'
         pvt_dict = self.properties
         for key, value in pvt_dict.items():
             if isinstance(value, pd.DataFrame):
                 printable_str += f'{key}: \n'
-                printable_str += value.to_string()
+                printable_str += value.to_string(na_rep='')
                 printable_str += '\n\n'
             elif isinstance(value, dict):
                 for subkey in value.keys():
                     printable_str += f'{key} - {subkey}\n'
-                    printable_str += value[subkey].to_string()
+                    df = value[subkey]
+                    if isinstance(df, pd.DataFrame):
+                        printable_str += df.to_string(na_rep='')
                     printable_str += '\n\n'
             elif isinstance(value, Enum):
                 printable_str += f'{key}: {value.name}\n'
@@ -75,13 +102,13 @@ class NexusPVT():
             for key, value in pvt_dict.items():
                 if isinstance(value, pd.DataFrame):
                     printable_str += f'    {key}: \n'
-                    printable_str += value.to_string()
+                    printable_str += value.to_string(na_rep='')
                     printable_str += '\n\n'
                 elif isinstance(value, dict):
                     for subkey, subvalue in value.items():
                         printable_str += f'    {key} - {subkey}\n'
                         if isinstance(subvalue, pd.DataFrame):
-                            printable_str += subvalue.to_string()
+                            printable_str += subvalue.to_string(na_rep='')
                         printable_str += '\n\n'
                 elif isinstance(value, Enum):
                     printable_str += f'    {key}: {value.name}\n'
@@ -103,8 +130,8 @@ class NexusPVT():
         """
         if nfo.check_token(primary_key, single_line):
             self.eos_options[primary_key] = primary_key_default_val  # Set default value
-            if str(nfo.get_token_value(primary_key, single_line, line_list)) in list_of_secondary_keys:
-                self.eos_options[primary_key] = str(nfo.get_token_value(primary_key, single_line, line_list))
+            if nfo.get_expected_token_value(primary_key, single_line, line_list) in list_of_secondary_keys:
+                self.eos_options[primary_key] = nfo.get_expected_token_value(primary_key, single_line, line_list)
         if [i for i in single_line.split() if i in list_of_secondary_keys]:
             for secondary_key in list_of_secondary_keys:
                 if nfo.check_token(secondary_key, single_line):
@@ -160,7 +187,7 @@ class NexusPVT():
             if nfo.check_token(table_name, single_line) and nfo.check_token(table_key, single_line):
                 if nfo.get_token_value(table_key, single_line, line_list) is None:
                     raise ValueError(f'Property {table_key} does not have a numerical value.')
-                unsat_obj[table_key].append(str(nfo.get_token_value(table_key, single_line, line_list)))
+                unsat_obj[table_key].append(nfo.get_expected_token_value(table_key, single_line, line_list))
                 if full_table_name in table_indices_dict.keys():
                     table_indices_dict[full_table_name][unsat_obj[table_key][-1]] = [l_index + 1, len(line_list)]
                 else:
@@ -222,7 +249,7 @@ class NexusPVT():
         return reading_flag
 
     def read_properties(self) -> None:
-        """Read Nexus PVT file contents and populate the NexusPVT object
+        """Read Nexus PVT file contents and populate the NexusPVTMethod object
         """
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
         file_as_list = file_obj.get_flat_list_str_file()
@@ -297,11 +324,11 @@ class NexusPVT():
             if [i for i in line.split() if i in PVT_EOSOPTIONS_PRIMARY_KEYS_FLOAT]:
                 for key in PVT_EOSOPTIONS_PRIMARY_KEYS_FLOAT:
                     if nfo.check_token(key, line):
-                        self.eos_options[key] = float(str(nfo.get_token_value(key, line, file_as_list)))
+                        self.eos_options[key] = float(nfo.get_expected_token_value(key, line, file_as_list))
             if [i for i in line.split() if i in PVT_EOSOPTIONS_PRIMARY_KEYS_INT]:
                 for key in PVT_EOSOPTIONS_PRIMARY_KEYS_INT:
                     if nfo.check_token(key, line):
-                        self.eos_options[key] = int(str(nfo.get_token_value(key, line, file_as_list)))
+                        self.eos_options[key] = int(nfo.get_expected_token_value(key, line, file_as_list))
             # Read TRANSITION, TRANS_TEST and PHASEID eos options, if present
             primary_keys2populate = ['TRANSITION', 'TRANS_TEST', 'PHASEID']
             primary_keys2populate_defaults = ['TEST', 'INCRP', '']

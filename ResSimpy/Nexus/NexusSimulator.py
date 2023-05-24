@@ -9,11 +9,14 @@ import resqpy.model as rq
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
-from ResSimpy.Nexus.DataModels.NexusSeparator import NexusSeparator
-from ResSimpy.Nexus.DataModels.NexusWater import NexusWater
+from ResSimpy.Nexus.NexusPVTMethods import NexusPVTMethods
+from ResSimpy.Nexus.NexusSeparatorMethods import NexusSeparatorMethods
+from ResSimpy.Nexus.NexusWaterMethods import NexusWaterMethods
 from ResSimpy.Nexus.NexusEquilMethods import NexusEquilMethods
 from ResSimpy.Nexus.NexusRockMethods import NexusRockMethods
+from ResSimpy.Nexus.NexusRelPermMethods import NexusRelPermMethods
+from ResSimpy.Nexus.NexusValveMethods import NexusValveMethods
+from ResSimpy.Nexus.NexusAquiferMethods import NexusAquiferMethods
 from ResSimpy.Nexus.DataModels.StructuredGrid.StructuredGridFile import StructuredGridFile
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -93,11 +96,14 @@ class NexusSimulator(Simulator):
         self.Wells: NexusWells = NexusWells(self)
         self.__default_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
         # Model dynamic properties
-        self.pvt_methods: dict[int, NexusPVT] = {}
-        self.separator_methods: dict[int, NexusSeparator] = {}
-        self.water_methods: dict[int, NexusWater] = {}
+        self.PVTMethods: NexusPVTMethods = NexusPVTMethods()
+        self.SeparatorMethods: NexusSeparatorMethods = NexusSeparatorMethods()
+        self.WaterMethods: NexusWaterMethods = NexusWaterMethods()
         self.EquilMethods: NexusEquilMethods = NexusEquilMethods()
         self.RockMethods: NexusRockMethods = NexusRockMethods()
+        self.RelPermMethods: NexusRelPermMethods = NexusRelPermMethods()
+        self.ValveMethods: NexusValveMethods = NexusValveMethods()
+        self.AquiferMethods: NexusAquiferMethods = NexusAquiferMethods()
         # Nexus operations modules
         self.Runcontrol: Runcontrol = Runcontrol(self)
         self.Reporting: Reporting = Reporting(self)
@@ -429,39 +435,18 @@ class NexusSimulator(Simulator):
         # === Load in dynamic properties ===
         # Read in PVT properties from Nexus PVT method files
         if self.fcs_file.pvt_files is not None and \
-                len(self.fcs_file.pvt_files) > 0:  # Check if PVT files exist
-            for table_num in self.fcs_file.pvt_files.keys():  # For each PVT method
-                pvt_file = self.fcs_file.pvt_files[table_num].location
-                if pvt_file is None:
-                    raise ValueError(f'Unable to find pvt file: {pvt_file}')
-                if os.path.isfile(pvt_file):
-                    self.pvt_methods[table_num] = NexusPVT(file_path=pvt_file,
-                                                           method_number=table_num)  # Create NexusPVT object
-                    self.pvt_methods[table_num].read_properties()  # Populate object with PVT properties in file
+                len(self.fcs_file.pvt_files) > 0:
+            self.PVTMethods = NexusPVTMethods(pvt_files=self.fcs_file.pvt_files)
 
         # Read in separator properties from Nexus separator method files
         if self.fcs_file.separator_files is not None and \
-                len(self.fcs_file.separator_files) > 0:  # Check if separator files exist
-            for table_num in self.fcs_file.separator_files.keys():  # For each separator method
-                separator_file = self.fcs_file.separator_files[table_num].location
-                if separator_file is None:
-                    raise ValueError(f'Unable to find separator file: {separator_file}')
-                if os.path.isfile(separator_file):
-                    self.separator_methods[table_num] = NexusSeparator(
-                        file_path=separator_file, method_number=table_num)  # Create NexusSeparator object
-                    self.separator_methods[table_num].read_properties()  # Populate object with separator properties
+                len(self.fcs_file.separator_files) > 0:
+            self.SeparatorMethods = NexusSeparatorMethods(separator_files=self.fcs_file.separator_files)
 
         # Read in water properties from Nexus water method files
         if self.fcs_file.water_files is not None and \
-                len(self.fcs_file.water_files) > 0:  # Check if water files exist
-            for table_num in self.fcs_file.water_files.keys():  # For each water method
-                water_file = self.fcs_file.water_files[table_num].location
-                if water_file is None:
-                    raise ValueError(f'Unable to find water file: {water_file}')
-                if os.path.isfile(water_file):
-                    self.water_methods[table_num] = NexusWater(file_path=water_file,
-                                                               method_number=table_num)  # Create NexusWater object
-                    self.water_methods[table_num].read_properties()  # Populate object with water properties in file
+                len(self.fcs_file.water_files) > 0:
+            self.WaterMethods = NexusWaterMethods(water_files=self.fcs_file.water_files)
 
         # Read in equilibration properties from Nexus equil method files
         if self.fcs_file.equil_files is not None and \
@@ -472,6 +457,21 @@ class NexusSimulator(Simulator):
         if self.fcs_file.rock_files is not None and \
                 len(self.fcs_file.rock_files) > 0:
             self.RockMethods = NexusRockMethods(rock_files=self.fcs_file.rock_files)
+
+        # Read in relative permeability and capillary pressure properties from Nexus relperm method files
+        if self.fcs_file.relperm_files is not None and \
+                len(self.fcs_file.relperm_files) > 0:
+            self.RelPermMethods = NexusRelPermMethods(relperm_files=self.fcs_file.relperm_files)
+
+        # Read in valve and choke properties from Nexus valve method files
+        if self.fcs_file.valve_files is not None and \
+                len(self.fcs_file.valve_files) > 0:
+            self.ValveMethods = NexusValveMethods(valve_files=self.fcs_file.valve_files)
+
+        # Read in aquifer properties from Nexus aquifer method files
+        if self.fcs_file.aquifer_files is not None and \
+                len(self.fcs_file.aquifer_files) > 0:
+            self.AquiferMethods = NexusAquiferMethods(aquifer_files=self.fcs_file.aquifer_files)
 
         # === End of dynamic properties loading ===
 

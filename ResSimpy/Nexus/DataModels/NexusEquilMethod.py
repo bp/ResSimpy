@@ -24,15 +24,15 @@ class NexusEquilMethod(EquilMethod):
     """
     # General parameters
     file_path: str
-    method_number: int
-    properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] \
+    properties: dict[str, Union[str, int, float, Enum, list[str],
+                                pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
 
     def __init__(self, file_path: str, method_number: int,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                                      dict[str, pd.DataFrame]]]] = None):
+                                                      dict[str, Union[float, pd.DataFrame]]]]] = None):
         self.file_path = file_path
-        if properties:
+        if properties is not None:
             self.properties = properties
         else:
             self.properties = {}
@@ -51,7 +51,7 @@ class NexusEquilMethod(EquilMethod):
                     if 'Y' in equil_dict.keys():
                         table_text += f" Y {equil_dict['Y']}"
                 printable_str += f'{table_text}\n'
-                printable_str += value.to_string()
+                printable_str += value.to_string(na_rep='')
                 printable_str += '\n\n'
             elif isinstance(value, Enum):
                 printable_str += f'{key}: {value.name}\n'
@@ -76,7 +76,7 @@ class NexusEquilMethod(EquilMethod):
         return printable_str
 
     def read_properties(self) -> None:
-        """Read Nexus equilibration file contents and populate NexusEquil object
+        """Read Nexus equilibration file contents and populate NexusEquilMethod object
         """
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
         file_as_list = file_obj.get_flat_list_str_file()
@@ -98,17 +98,17 @@ class NexusEquilMethod(EquilMethod):
             if [i for i in line.split() if i in EQUIL_KEYWORDS_VALUE_FLOAT]:
                 for key in EQUIL_KEYWORDS_VALUE_FLOAT:
                     if nfo.check_token(key, line) and 'DEPTH' not in line.split():  # Ensure not a table header
-                        self.properties[key] = float(str(nfo.get_token_value(key, line, file_as_list)))
+                        self.properties[key] = float(nfo.get_expected_token_value(key, line, file_as_list))
             if nfo.check_token('AUTOGOC_COMP', line):
-                self.properties['AUTOGOC_COMP'] = str(nfo.get_token_value('AUTOGOC_COMP', line, file_as_list))
+                self.properties['AUTOGOC_COMP'] = nfo.get_expected_token_value('AUTOGOC_COMP', line, file_as_list)
             if nfo.check_token('OVERREAD', line):
-                overread_val = str(nfo.get_token_value('OVERREAD', line, file_as_list))
+                overread_val = nfo.get_expected_token_value('OVERREAD', line, file_as_list)
                 if 'OVERREAD' in self.properties.keys() and isinstance(self.properties['OVERREAD'], list):
                     self.properties['OVERREAD'] += [overread_val]
                 else:
                     self.properties['OVERREAD'] = [overread_val]
-                while str(nfo.get_token_value(overread_val, line, file_as_list)) in EQUIL_OVERREAD_VALUES:
-                    overread_val = str(nfo.get_token_value(overread_val, line, file_as_list))
+                while nfo.get_expected_token_value(overread_val, line, file_as_list) in EQUIL_OVERREAD_VALUES:
+                    overread_val = nfo.get_expected_token_value(overread_val, line, file_as_list)
                     if isinstance(self.properties['OVERREAD'], list):
                         prop_list: list[str] = self.properties['OVERREAD']
                         prop_list += [overread_val]
@@ -139,8 +139,8 @@ class NexusEquilMethod(EquilMethod):
                                                                EQUIL_COMPOSITION_OPTIONS]:
                             for comp_key in EQUIL_COMPOSITION_OPTIONS:
                                 if nfo.check_token(comp_key, line):
-                                    self.properties[comp_key] = float(str(nfo.get_token_value(comp_key, line,
-                                                                                              file_as_list)))
+                                    self.properties[comp_key] = float(nfo.get_expected_token_value(comp_key,
+                                                                                                   line, file_as_list))
                 line_indx += 1
                 continue
             # Find ending index of an equil-related table. There is usually only one per equil file

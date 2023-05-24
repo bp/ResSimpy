@@ -24,13 +24,13 @@ class NexusRockMethod(RockMethod):
     # General parameters
     file_path: str
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                dict[str, pd.DataFrame]]] = field(default_factory=get_empty_dict_union)
+                                dict[str, Union[float, pd.DataFrame]]]] = field(default_factory=get_empty_dict_union)
 
     def __init__(self, file_path: str, method_number: int,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                                      dict[str, pd.DataFrame]]]] = None):
+                                                      dict[str, Union[float, pd.DataFrame]]]]] = None):
         self.file_path = file_path
-        if properties:
+        if properties is not None:
             self.properties = properties
         else:
             self.properties = {}
@@ -43,12 +43,14 @@ class NexusRockMethod(RockMethod):
         for key, value in rock_dict.items():
             if isinstance(value, pd.DataFrame):
                 printable_str += f'{key}:\n'
-                printable_str += value.to_string()
+                printable_str += value.to_string(na_rep='')
                 printable_str += '\n\n'
             elif isinstance(value, dict):
                 for subkey in value.keys():
                     printable_str += f'{key} - {subkey}\n'
-                    printable_str += value[subkey].to_string()
+                    df = value[subkey]
+                    if isinstance(df, pd.DataFrame):
+                        printable_str += df.to_string(na_rep='')
                     printable_str += '\n\n'
             elif isinstance(value, Enum):
                 printable_str += f'{key}: {value.name}\n'
@@ -59,7 +61,7 @@ class NexusRockMethod(RockMethod):
         return printable_str
 
     def read_properties(self) -> None:
-        """Read Nexus rock properties file contents and populate NexusRock object
+        """Read Nexus rock properties file contents and populate NexusRockMethod object
         """
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
         file_as_list = file_obj.get_flat_list_str_file()
@@ -85,7 +87,7 @@ class NexusRockMethod(RockMethod):
             if [i for i in line.split() if i in ROCK_KEYWORDS_VALUE_FLOAT]:
                 for key in ROCK_KEYWORDS_VALUE_FLOAT:
                     if nfo.check_token(key, line):
-                        self.properties[key] = float(str(nfo.get_token_value(key, line, file_as_list)))
+                        self.properties[key] = float(nfo.get_expected_token_value(key, line, file_as_list))
             # Find standalone rock property keywords, such as COMPR or KPMULT
             if [i for i in line.split() if i in ROCK_SINGLE_KEYWORDS]:
                 for word in ROCK_SINGLE_KEYWORDS:
@@ -96,7 +98,7 @@ class NexusRockMethod(RockMethod):
                 for key in ROCK_KEYWORDS_VALUE_STR:
                     if nfo.check_token(key, line):
                         if nfo.get_token_value(key, line, file_as_list) in ROCK_REV_IRREV_OPTIONS:
-                            self.properties[key] = str(nfo.get_token_value(key, line, file_as_list))
+                            self.properties[key] = nfo.get_expected_token_value(key, line, file_as_list)
                         else:
                             self.properties[key] = ''
             # Find starting index of rock compaction table
@@ -126,7 +128,7 @@ class NexusRockMethod(RockMethod):
             if nfo.check_token('WIRCT', line):
                 wirct_indices_dict['WIRCT'] = {}
             if nfo.check_token('SWINIT', line):
-                swinit_key = str(nfo.get_token_value('SWINIT', line, file_as_list))
+                swinit_key = nfo.get_expected_token_value('SWINIT', line, file_as_list)
                 wirct_indices_dict['WIRCT'][swinit_key] = [line_indx+1, len(file_as_list)]
                 table_being_read['WIRCT'] = True
                 start_reading_table = True

@@ -1,5 +1,3 @@
-from enum import Enum
-import numpy as np
 import pandas as pd
 import pytest
 
@@ -188,6 +186,7 @@ def test_read_rock_properties_from_file(mocker, file_contents, expected_rock_pro
         else:
             assert props[key] == expected_rock_properties[key]
 
+
 def test_nexus_rock_repr():
     # Arrange
     rock_obj = NexusRockMethod(file_path='test/file/rock.dat', method_number=1)
@@ -200,7 +199,7 @@ FILE_PATH: test/file/rock.dat
 UNIT_SYSTEM: ENGLISH
 REVERSIBLE
 CMT:
-""" + rock_obj.properties['CMT'].to_string() + '\n\n'
+""" + rock_obj.properties['CMT'].to_string(na_rep='') + '\n\n'
 
     # Act
     result = rock_obj.__repr__()
