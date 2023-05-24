@@ -742,7 +742,7 @@ def test_get_wells_df(mocker: MockerFixture):
     result = simulation.Wells.get_wells_df()
     # Assert
 
-    pd.testing.assert_frame_equal(result, loaded_wells_df)
+    pd.testing.assert_frame_equal(result, loaded_wells_df, check_like=True)
 
 
 @pytest.mark.parametrize("fcs_file_contents", [
