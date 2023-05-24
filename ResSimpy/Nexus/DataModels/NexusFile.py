@@ -455,15 +455,15 @@ class NexusFile:
 
     def add_to_file_as_list(self, additional_content: list[str], index: int,
                             additional_objects: Optional[dict[UUID, int]] = None) -> None:
-        """ To add content to the file as list, also
+        """ To add content to the file as list, also updates object numbers and optionally allows user \
+        to add several additional new objects
 
         Args:
-            additional_content ():
-            index ():
-            additional_objects ():
-
-        Returns:
-
+            additional_content (list[str]): Additional lines as a list of strings to be added.
+            index (int): index to insert the new lines at
+            additional_objects (Optional[dict[UUID, int]]): defaults to None. Otherwise, a dictionary keyed with the \
+            UUID of the new objects to add as well as the corresponding index of the object in the original \
+            calling NexusFile
         """
         nexusfile_to_write_to, relative_index = self.find_which_include_file(index)
         if nexusfile_to_write_to.file_content_as_list is None:
