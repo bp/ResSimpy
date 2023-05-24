@@ -631,3 +631,32 @@ def test_update_object_locations(mocker, test_file_contents, expected_results):
 
     # Assert
     assert result == expected_results
+
+
+def test_add_to_file_as_list(mocker):
+    # Arrange
+    mocker.patch.object(uuid, 'uuid4', side_effect=['additional_obj_uuid', 'file_uuid', 'file_uuid',])
+
+    additional_content = ['new', 'lines', 'of\n !the', 'file']
+    additional_obj = {uuid.uuid4(): 3}
+    nexus_file = NexusFile(location='somefile.dat', origin=None, file_content_as_list=
+                           ['original', 'file', 'with \n', 'some filler', 'content', 'and object', 'must', 'be', 'more lines !ajf'],
+                           )
+    nexus_file.line_locations = [(0, 'file_uuid')]
+    nexus_file.object_locations = {'uuid_obj': 2, 'another_uuid': 3, 'final_uuid':7}
+
+    expected_line_locations = [(0, 'file_uuid')]
+    expected_object_locations = {'uuid_obj': 2, 'another_uuid': 7, 'final_uuid': 11, 'additional_obj_uuid': 3}
+    expected_file_as_list = ['original', 'file', 'with \n','new', 'lines', 'of\n !the', 'file', 'some filler',
+                             'content', 'and object', 'must', 'be', 'more lines !ajf']
+    expected_result = NexusFile(location='somefile.dat', origin=None, file_content_as_list=expected_file_as_list)
+
+    expected_result.line_locations = expected_line_locations
+    expected_result.object_locations = expected_object_locations
+
+    # Act
+    nexus_file.add_to_file_as_list(additional_content=additional_content, index=3, additional_objects=additional_obj)
+    result = nexus_file
+
+    # Assert
+    assert result == expected_result
