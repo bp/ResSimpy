@@ -541,3 +541,6 @@ class NexusFile:
                 inc_file_path = line.location if line.location is not None else ''
                 file_content_as_list_str.append(inc_file_path)
         return file_content_as_list_str
+
+    def remove_lines_from_file(self):
+        pass

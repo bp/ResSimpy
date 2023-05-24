@@ -280,6 +280,20 @@ class NexusWells(Wells):
                 f'No well file content found for specified wellfile at location: {wellspec_file.location}')
         return wellspec_file
 
+    def __find_which_wellspec_file_from_completion_id(self, completion_id: UUID) -> NexusFile:
+        # find the correct wellspec file in the model by looking at the ids
+        if self.model.fcs_file.well_files is None:
+            raise ValueError(f'No wells file found in fcs file at: {self.model.fcs_file.location}')
+        wellspec_files = [x for x in self.model.fcs_file.well_files.values() if x.object_locations is not None and
+                          completion_id in x.object_locations]
+        if len(wellspec_files) == 0:
+            raise FileNotFoundError(f'No well file found with an existing well that has completion id: {completion_id}')
+        wellspec_file = wellspec_files[0]
+        if wellspec_file.file_content_as_list is None:
+            raise FileNotFoundError(
+                f'No well file content found for specified wellfile at location: {wellspec_file.location}')
+        return wellspec_file
+
     def __get_wellspec_header(self, additional_headers: list[str],
                               completion_properties: NexusCompletion.InputDictionary,
                               file_content: list[str], index: int, inverted_nexus_map: dict[str, str],
