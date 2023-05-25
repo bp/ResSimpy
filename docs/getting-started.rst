@@ -9,7 +9,7 @@ A first step is typically to instantiate a :class:`Simulator` object, passing in
 
 .. code-block:: python
 
-    >>> model = NexusSimulator(origin=r'C:\Work\psvm\PSVM_17_REV38_019.fcs')
+    >>> model = NexusSimulator(origin=r'<address of model>')
 
 You are then able to access and modify parts of the model as you wish. For example, to view an overview of all of the wells in a model you could call:
 
