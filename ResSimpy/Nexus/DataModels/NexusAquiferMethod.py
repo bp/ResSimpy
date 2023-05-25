@@ -61,7 +61,7 @@ class NexusAquiferMethod(AquiferMethod):
         """Read Nexus aquifer file contents and populate the NexusValveMethod object
         """
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
-        file_as_list = file_obj.get_flat_list_str_file()
+        file_as_list = file_obj.get_flat_list_str_file
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
