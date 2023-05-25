@@ -3,18 +3,28 @@ from __future__ import annotations
 import copy
 import warnings
 from dataclasses import dataclass, field
+<<<<<<< HEAD
+from typing import Sequence, Optional, MutableMapping, Dict
+=======
 from typing import cast
 from functools import cmp_to_key
 from typing import Sequence, Optional, TYPE_CHECKING
 from uuid import UUID
+>>>>>>> origin/master
 
 import pandas as pd
 
 from ResSimpy.Enums.HowEnum import OperationEnum
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
+<<<<<<< HEAD
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Well import Well
+=======
 from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
+>>>>>>> origin/master
 from ResSimpy.Wells import Wells
 from ResSimpy.Nexus.load_wells import load_wells
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -33,6 +43,11 @@ class NexusWells(Wells):
         self.model = model
         self.__wells = []
         super().__init__()
+
+    @property
+    def test_property(self) -> NexusWell:
+
+        return {}
 
         # return NexusWell(well_name=" test", completions=[], units=UnitSystem.ENGLISH)
 
@@ -53,7 +68,7 @@ class NexusWells(Wells):
                 completion_props: dict[str, None | float | int | str] = {
                     'well_name': well.well_name,
                     'units': well.units.name,
-                }
+                    }
                 completion_props.update(completion.to_dict())
                 store_dictionaries.append(completion_props)
         df_store = pd.DataFrame(store_dictionaries)
@@ -210,7 +225,7 @@ class NexusWells(Wells):
                 header_index, headers, headers_original = self.__get_wellspec_header(
                     additional_headers, completion_properties, file_content, index,
                     inverted_nexus_map, nexus_mapping, wellspec_file
-                )
+                    )
                 continue
 
             if header_index != -1 and nfo.nexus_token_found(line, WELLS_KEYWORDS) and index > header_index:

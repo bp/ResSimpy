@@ -3,9 +3,8 @@ from abc import ABC
 
 import pandas as pd
 
-from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Well import Well
-from typing import Sequence, Optional, MutableMapping, Dict, Type
+from typing import Sequence, Optional
 
 
 @dataclass(kw_only=True)
