@@ -5,6 +5,7 @@ from typing import Optional, Union, TypedDict
 from ResSimpy.Completion import Completion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
 from ResSimpy.Utils.generic_repr import generic_repr
+from ResSimpy.Utils.to_dict_generic import to_dict
 
 
 @dataclass(kw_only=True)
@@ -15,7 +16,7 @@ class NexusCompletion(Completion):
         measured_depth (Optional[float]): Measured depth of a completion. 'MD' in Nexus
         well_indices (Optional[float]): Well index used to calculate performance of the completion. 'WI' in Nexus
         partial_perf (Optional[float]): Partial penetration factor. 'PPERF' in Nexus
-        cell_number (Optional[int]): cell number for for the completion in unstructured grids. 'CELL' in Nexus
+        cell_number (Optional[int]): cell number for the completion in unstructured grids. 'CELL' in Nexus
         bore_radius (Optional[float]): Well bore radius. 'RADB' in Nexus
         portype (Optional[str]): indicates the pore type for the completion FRACTURE OR MATRIX. 'PORTYPE' in Nexus
         sector (None | str | int): the section of the wellbore to which this completion flows. 'SECT' in Nexus
@@ -202,15 +203,8 @@ class NexusCompletion(Completion):
         return self.__kh_mult
 
     def to_dict(self) -> dict[str, None | float | int | str]:
-        attribute_dict: dict[str, None | float | int | str] = {
-            'measured_depth': self.__measured_depth,
-            'well_indices': self.__well_indices,
-            'partial_perf': self.__partial_perf,
-            'cell_number': self.__cell_number,
-            'bore_radius': self.__bore_radius,
-            'portype': self.__portype,
-            'fracture_mult': self.__fracture_mult,
-            }
+        attribute_dict: dict[str, None | float | int | str] = to_dict(self, add_units=False)
+
         attribute_dict.update(super().to_dict())
         if self.rel_perm_end_point is not None:
             attribute_dict.update(self.rel_perm_end_point.to_dict())
@@ -239,7 +233,7 @@ class NexusCompletion(Completion):
         return not NexusCompletion.completion_is_perforation(completion)
 
     @staticmethod
-    def nexus_mapping() -> dict[str, tuple[str, type]]:
+    def get_nexus_mapping() -> dict[str, tuple[str, type]]:
         """returns a dictionary of mapping from nexus keyword to attribute name"""
 
         nexus_mapping: dict[str, tuple[str, type]] = {
@@ -288,49 +282,49 @@ class NexusCompletion(Completion):
 
         return nexus_mapping
 
-    class InputDictionary(TypedDict):
+    class InputDictionary(TypedDict, total=False):
         date: str
-        i: int
-        j: int
-        k: int
-        measured_depth: float
-        skin: float
-        depth: float
-        x: float
-        y: float
-        angle_a: float
-        angle_v: float
-        grid: str
-        well_indices: float
-        depth_to_top: float
-        depth_to_bottom: float
-        well_radius: float
-        partial_perf: float
-        cell_number: int
-        perm_thickness_ovr: float
-        dfactor: float
-        rel_perm_method: int
-        status: str
-        bore_radius: float
-        portype: str
-        fracture_mult: float
-        sector: int
-        well_group: str
-        zone: int
-        angle_open_flow: float
-        temperature: float
-        flowsector: int
-        parent_node: str
-        mdcon: float
-        pressure_avg_pattern: int
-        length: float
-        permeability: float
-        non_darcy_model: str
-        comp_dz: float
-        layer_assignment: int
-        polymer_bore_radius: float
-        polymer_well_radius: float
-        kh_mult: float
+        i: Optional[int]
+        j: Optional[int]
+        k: Optional[int]
+        measured_depth: Optional[float]
+        skin: Optional[float]
+        depth: Optional[float]
+        x: Optional[float]
+        y: Optional[float]
+        angle_a: Optional[float]
+        angle_v: Optional[float]
+        grid: Optional[str]
+        well_indices: Optional[float]
+        depth_to_top: Optional[float]
+        depth_to_bottom: Optional[float]
+        well_radius: Optional[float]
+        partial_perf: Optional[float]
+        cell_number: Optional[int]
+        perm_thickness_ovr: Optional[float]
+        dfactor: Optional[float]
+        rel_perm_method: Optional[int]
+        status: Optional[str]
+        bore_radius: Optional[float]
+        portype: Optional[str]
+        fracture_mult: Optional[float]
+        sector: Optional[int]
+        well_group: Optional[str]
+        zone: Optional[int]
+        angle_open_flow: Optional[float]
+        temperature: Optional[float]
+        flowsector: Optional[int]
+        parent_node: Optional[str]
+        mdcon: Optional[float]
+        pressure_avg_pattern: Optional[int]
+        length: Optional[float]
+        permeability: Optional[float]
+        non_darcy_model: Optional[str]
+        comp_dz: Optional[float]
+        layer_assignment: Optional[int]
+        polymer_bore_radius: Optional[float]
+        polymer_well_radius: Optional[float]
+        kh_mult: Optional[float]
 
     @classmethod
     def from_dict(cls, input_dictionary: InputDictionary) -> NexusCompletion:
@@ -348,3 +342,25 @@ class NexusCompletion(Completion):
                 setattr(self, '_NexusCompletion__' + k, v)
             elif hasattr(super(), '_Completion__' + k):
                 setattr(self, '_Completion__' + k, v)
+
+    def completion_to_wellspec_row(self, headers: list[str]):
+        """ Takes a completion object and returns the attribute values as a string in the order of headers provided
+
+        Args:
+            headers (list[str]): list of header values in Nexus keyword format
+
+        Returns: string of the values in the order of the headers provided.
+
+        """
+        nexus_mapping = NexusCompletion.get_nexus_mapping()
+        completion_properties = self.to_dict()
+
+        completion_values = []
+        for header in headers:
+            attribute_name = nexus_mapping[header][0]
+            attribute_value = completion_properties[attribute_name]
+            if attribute_value is None:
+                attribute_value = 'NA'
+            completion_values.append(attribute_value)
+        completion_string = [' '.join([str(x) for x in completion_values]) + '\n']
+        return completion_string

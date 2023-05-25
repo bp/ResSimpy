@@ -1,11 +1,31 @@
-from unittest.mock import PropertyMock, patch
+import os
+import uuid
+from unittest.mock import Mock
 import pytest
+from pytest_mock import MockerFixture
 from ResSimpy.Enums.HowEnum import OperationEnum
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from ResSimpy.Nexus.NexusWells import NexusWells
+from tests.multifile_mocker import mock_multiple_files
+
+
+def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock_open: Mock,
+                                     mocker_fixture: MockerFixture, write_file_name: str):
+    assert len(modifying_mock_open.call_args_list) == 1
+    assert modifying_mock_open.call_args_list[0] == mocker_fixture.call(
+        write_file_name, 'w')
+
+    # Get all the calls to write() and check that the contents are what we expect
+    list_of_writes = [
+        call for call in modifying_mock_open.mock_calls if 'call().write' in str(call)]
+    assert len(list_of_writes) == 1
+    assert list_of_writes[0].args[0] == expected_file_contents
 
 
 @pytest.mark.parametrize('completions, expected_perforations', [
@@ -416,11 +436,11 @@ def test_add_completion():
     well = NexusWell(well_name='test well', completions=existing_completions,
                                     units=UnitSystem.METKGCM2)
     # Act
-    well.add_completion(date=new_date, completion_properties=new_completion_props)
+    well._add_completion_to_memory(date=new_date, completion_properties=new_completion_props)
     # Assert
     assert well == expected_well
 
-def test_remove_completion():
+def test_remove_completion_from_memory():
     # Arrange
     existing_completions = [
         NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
@@ -446,7 +466,7 @@ def test_remove_completion():
 
     # Act
     comp_to_remove = remove_well.find_completions(perfs_to_remove)
-    remove_well.remove_completions(completions_to_remove=comp_to_remove)
+    remove_well._remove_completions_from_memory(completions_to_remove=comp_to_remove)
     # Assert
     assert remove_well == expected_result
 
@@ -474,7 +494,7 @@ def test_modify_completion():
     expected_well = NexusWell(well_name='test well', completions=expected_completions, units=UnitSystem.METKGCM2)
 
     # Act
-    well.modify_completion(new_completion_properties=changes, completion_to_modify=completion_id)
+    well._modify_completion_in_memory(new_completion_properties=changes, completion_to_modify=completion_id)
 
     # Assert
     assert well.completions[-1] == changed_completion
@@ -496,8 +516,9 @@ def test_well_dates(mocker):
         NexusCompletion(i=1, j=2, date='01/03/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
                         depth_to_bottom=1234),
                         ]
-
-    well = NexusWells()
+    mock_sim = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusSimulator.NexusSimulator', mock_sim)
+    well = NexusWells(mock_sim)
 
     well.__setattr__('_NexusWells__wells', [NexusWell(well_name='well1', completions=well_1_completions, units=UnitSystem.METRIC),
                                 NexusWell(well_name='well2', completions=well_2_completions, units=UnitSystem.METRIC)])
@@ -509,14 +530,55 @@ def test_well_dates(mocker):
     # Assert
     assert result == expected_result
 
-
-def test_wells_modify():
+def test_wells_modify(mocker):
     # Arrange
+
+    fcs_file_data = '''RUN_UNITS ENGLISH
+
+    DATEFORMAT DD/MM/YYYY
+
+    RECURRENT_FILES
+    RUNCONTROL ref_runcontrol.dat
+    WELLS Set 1 /my/wellspec/file.dat'''
+    runcontrol_data = 'START 01/01/2020'
+    wells_file = '''TIME 01/01/2020
+    well
+    TIME 01/01/2023
+    wellspec well1
+    iw jw l RADW GRID  skin ANGLV WI  
+    1 2 3   4.5  GRID1 NA   NA    1 
+    
+    TIME 01/02/2023
+    wellspec well1
+    iw jw l  skin ANGLV WI  STAT PPERF DTOP  DBOT
+    1 2 3    NA   NA    NA  ON     1     NA    NA
+    1 2   NA    NA    0   NA    1      1156    1234
+    
+    wellsepc well2
+    iw jw l STAT PPerf WI DTOP DBOT
+    1 2 5   ON      1     3    NA NA
+    1 2 NA  ON      1      0  1156 1234
+    '''
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'fcs_file.fcs': fcs_file_data,
+            '/my/wellspec/file.dat': wells_file,
+            'ref_runcontrol.dat': runcontrol_data,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    ls_dir = Mock(side_effect=lambda x: [])
+    mocker.patch('os.listdir', ls_dir)
+    fcs_file_exists = Mock(side_effect=lambda x: True)
+    mocker.patch('os.path.isfile', fcs_file_exists)
+    nexus_sim = NexusSimulator('fcs_file.fcs')
+
     well_1_completions = [
         NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
                         well_indices=1),
         NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1),
-        NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
                         depth_to_bottom=1234),
                         ]
 
@@ -528,14 +590,13 @@ def test_wells_modify():
     well_1 = NexusWell(well_name='well1', completions=well_1_completions, units=UnitSystem.METRIC)
     well_2 = NexusWell(well_name='well2', completions=well_2_completions, units=UnitSystem.METRIC)
 
-    wells = NexusWells()
+    wells = nexus_sim.Wells
 
-    wells.__setattr__('_NexusWells__wells', [well_1, well_2])
     date = '01/02/2023'
     perf_1_to_add = {'date': date, 'i': 3, 'j': 3, 'k': 5, 'well_radius': 1005.2}
     perf_2_to_add = {'date': date, 'i': 1, 'j': 2, 'k': 6, 'permeability': 1005.2}
     perf_to_remove = {'date': date, 'i':1, 'j':2, 'status':'ON', 'partial_perf':1, 'well_indices':0, 'depth_to_top':1156,
-                        'depth_to_bottom':1234}
+                      'depth_to_bottom':1234}
 
     new_nexus_completion_1 = NexusCompletion(date=date, i=3, j=3, k=5, well_radius=1005.2)
     new_nexus_completion_2 = NexusCompletion(date=date, i=1, j=2, k=6, permeability=1005.2)
@@ -545,11 +606,522 @@ def test_wells_modify():
                        NexusWell(well_name='well2', completions=well_2_completions, units=UnitSystem.METRIC)]
 
     # Act
-    wells.modify_well(well_name='well1', perforations_properties=[perf_1_to_add, perf_2_to_add],
+    wells.modify_well(well_name='well1', completion_properties_list=[perf_1_to_add, perf_2_to_add],
                       how=OperationEnum.ADD, write_to_file=False)
-    wells.modify_well(well_name='well1', perforations_properties=[perf_to_remove], how=OperationEnum.REMOVE,
+    wells.modify_well(well_name='well1', completion_properties_list=[perf_to_remove], how=OperationEnum.REMOVE,
                       write_to_file=False)
     # Assert
     assert wells.get_wells()[0].completions == expected_result[0].completions
 
+@pytest.mark.parametrize('file_as_list, add_perf_date, preserve_previous_completions, expected_result',[
+(['WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5'], '01/01/2020', False,
+['WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', '4 5 6 7.5\n']),
 
+(['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
+'13  12   11   3.14', 'TIME 01/02/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
+'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+  '01/02/2020', True,
+['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
+'13  12   11   3.14', 'TIME 01/02/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', '4 5 6 7.5\n', 'WELLSPEC well2',
+'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
+  ),
+
+(['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
+'13  12   11   3.14', 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
+'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+  '01/02/2020', False,
+['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
+'13  12   11   3.14', '\n', 'TIME 01/02/2020\n', 'WELLSPEC well1\n', 'IW JW L RADB\n', '4 5 6 7.5\n', '\n',
+'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
+'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
+  ),
+
+(['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
+'13  12   11   3.14', 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
+'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+  '01/02/2020', True,
+['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
+'13  12   11   3.14', '\n', 'TIME 01/02/2020\n', 'WELLSPEC well1\n', 'IW JW L RADB\n', '1 2 3 1.5\n', '4 5 6 7.5\n', '\n',
+'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
+'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
+  ),
+
+(['WELLSPEC well2', 'iw  jw   l    RADB', '13  12   11   3.14', 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB',
+'1  2   5   2.5', 'WELLSPEC well2', 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020',
+'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+  '01/02/2020', True,
+['WELLSPEC well2', 'iw  jw   l    RADB', '13  12   11   3.14', '\n',
+'TIME 01/02/2020\n', 'WELLSPEC well1\n', 'IW JW L RADB\n', '4 5 6 7.5\n', '\n',
+'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
+'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
+  ),
+
+(['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
+'13  12   11   3.14', 'TIME 01/02/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   5   2.5', 'WELLSPEC well2',
+'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+  '01/02/2020', True,
+['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
+'13  12   11   3.14', 'TIME 01/02/2020', 'WELLSPEC well1', 'iw  jw   l    KH RADB', '1  2   5   2.5 NA', '4 5 6 NA 7.5\n', 'WELLSPEC well2',
+'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
+  ),
+
+(['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well1',
+'iw  jw    KH  PPERF  SKIN  STAT', '!Some comment line', '1  2   2.5   2   3.5  ON', '', '9  8   6.5   40   32.5  OFF',
+'11  12   4.5   43   394.5  OFF', '', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+  '01/02/2020', True,
+['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well1',
+'iw  jw    KH  PPERF  SKIN  STAT L RADB', '!Some comment line', '1  2   2.5   2   3.5  ON NA NA', '', '9  8   6.5   40   32.5  OFF NA NA',
+'11  12   4.5   43   394.5  OFF NA NA', '4 5 NA NA NA NA 6 7.5\n', '', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+  ),
+
+(['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB KH', '1  2   3   1.5 5.5', 'TIME 01/02/2020', 'WELLSPEC well2', 'iw  jw   l    RADB KH',
+'13  12   11   3.14 5.2', 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
+'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+  '01/02/2020', True,
+['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB KH', '1  2   3   1.5 5.5',  'TIME 01/02/2020', 'WELLSPEC well2', 'iw  jw   l    RADB KH',
+'13  12   11   3.14 5.2', '\n', 'WELLSPEC well1\n', 'IW JW L RADB KH\n', '1 2 3 1.5 5.5\n', '4 5 6 7.5 NA\n', '\n',
+'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
+'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
+  ),
+
+(['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well1',
+'iw  jw    KH  PPERF  SKIN  STAT', '!Some comment line', '1  2   2.5   2   3.5  ON !COMMMENT', '', '9  8   6.5   40   32.5  OFF',
+'11  12   4.5   43   394.5  OFF', '', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+  '01/02/2020', True,
+['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well1',
+'iw  jw    KH  PPERF  SKIN  STAT L RADB', '!Some comment line', '1  2   2.5   2   3.5  ON NA NA !COMMMENT', '', '9  8   6.5   40   32.5  OFF NA NA',
+'11  12   4.5   43   394.5  OFF NA NA', '4 5 NA NA NA NA 6 7.5\n', '', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+  ),
+
+(['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well1',
+'iw  jw    KH  PPERF  SKIN  STAT !COmment!', '!Some comment line', '1  2   2.5   2   3.5  ON !COMMMENT', '', '9  8   6.5   40   32.5  OFF',
+'11  12   4.5   43   394.5  OFF', '', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+  '01/02/2020', True,
+['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well1',
+'iw  jw    KH  PPERF  SKIN  STAT L RADB !COmment!', '!Some comment line', '1  2   2.5   2   3.5  ON NA NA !COMMMENT', '', '9  8   6.5   40   32.5  OFF NA NA',
+'11  12   4.5   43   394.5  OFF NA NA', '4 5 NA NA NA NA 6 7.5\n', '', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+  ),
+
+(['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well1',
+'iw  jw    KH  PPERF  SKIN  STAT !COmment!', '!Some comment line', '1  2   2.5   2   3.5  ON !COMMMENT', '', '9  8   6.5   40   32.5  OFF',
+'11  12   4.5   43   394.5  OFF', '', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+  '01/06/2020', True,
+['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well1',
+'iw  jw    KH  PPERF  SKIN  STAT !COmment!', '!Some comment line', '1  2   2.5   2   3.5  ON !COMMMENT', '', '9  8   6.5   40   32.5  OFF',
+'11  12   4.5   43   394.5  OFF', '', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2',
+'\n', 'TIME 01/06/2020\n', 'WELLSPEC well1\n', 'IW JW L RADB\n', '2 3 4 555.2\n', '4 5 6 7.5\n', '\n' ],
+  ),
+], ids=['basic_test', 'insert in middle of file','No time card for new comp', 'preserve previous completions', 'No previous well',
+'Not overlapping columns', 'no overlap and multiple rows', 'Time card no comp', 'comment with not overlapping columns',
+'comment inline with headers', 'date_after_end_of_file'])
+def test_add_completion_write(mocker, file_as_list, add_perf_date, preserve_previous_completions, expected_result):
+    ''' TODO insert into include files
+     TODO write multiple completions in a row
+    '''
+    start_date = '01/01/2020'
+    # Arrange
+    open_mock = mocker.mock_open(read_data='')
+    mocker.patch("builtins.open", open_mock)
+    ls_dir = Mock(side_effect=lambda x: [])
+    mocker.patch('os.listdir', ls_dir)
+    fcs_file_exists = Mock(side_effect=lambda x: True)
+    mocker.patch('os.path.isfile', fcs_file_exists)
+
+    file = NexusFile(location='wells.dat', file_content_as_list=file_as_list, )
+
+    mock_nexus_sim = NexusSimulator('/path/fcs_file.fcs')
+
+    # add the required attributes to the model class
+    mock_nexus_sim.fcs_file.well_files = {1: file}
+    mock_nexus_sim.date_format = DateFormat.DD_MM_YYYY
+    mock_nexus_sim.Runcontrol.date_format_string = "%d/%m/%Y"
+    mock_nexus_sim.start_date_set(start_date)
+    # mock out open
+    wells_obj = NexusWells(mock_nexus_sim)
+    wells_obj.load_wells()
+
+    add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'bore_radius': 7.5}
+
+    add_perf_dict_without_date = {'i': 4, 'j': 5, 'k': 6, 'bore_radius': 7.5}
+
+    # Act
+    wells_obj.add_completion(well_name='well1', completion_properties=add_perf_dict,
+                             preserve_previous_completions=preserve_previous_completions)
+    result = file.file_content_as_list
+
+    # Assert
+    assert result == expected_result
+
+    # Act 2 / Assert 2 - failure case without a date
+    with pytest.raises(AttributeError):
+        wells_obj.add_completion(well_name='well1', completion_properties=add_perf_dict_without_date,)
+
+
+def test_add_completion_correct_wellspec(mocker):
+    start_date = '01/01/2020'
+    # Arrange
+    open_mock = mocker.mock_open(read_data='')
+    mocker.patch("builtins.open", open_mock)
+    ls_dir = Mock(side_effect=lambda x: [])
+    mocker.patch('os.listdir', ls_dir)
+    fcs_file_exists = Mock(side_effect=lambda x: True)
+    mocker.patch('os.path.isfile', fcs_file_exists)
+    add_perf_date = '01/03/2020'
+
+    # build 3 files that the add completion will have to find the right completion
+    file_as_list_target = ['TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5']
+    file_as_list_1 = ['TIME 01/02/2020', 'WELLSPEC well2', 'iw  jw   l    RADB', '3  5  41   0.3']
+    file_as_list_2 = ['TIME 01/03/2020', 'WELLSPEC well3', 'iw  jw   l    RADB', '2  4   3   2222']
+
+    file_target = NexusFile(location='wells_target.dat', file_content_as_list=file_as_list_target, )
+    file_1 = NexusFile(location='wells_1.dat', file_content_as_list=file_as_list_1, )
+    file_2 = NexusFile(location='wells_2.dat', file_content_as_list=file_as_list_2, )
+
+    mock_nexus_sim = NexusSimulator('/path/fcs_file.fcs')
+
+    # add the required attributes to the model class
+    mock_nexus_sim.fcs_file.well_files = {1: file_1, 2: file_2, 3: file_target}
+    mock_nexus_sim.date_format = DateFormat.DD_MM_YYYY
+    mock_nexus_sim.Runcontrol.date_format_string = "%d/%m/%Y"
+    mock_nexus_sim.start_date_set(start_date)
+    # mock out open
+    wells_obj = NexusWells(mock_nexus_sim)
+    wells_obj.load_wells()
+
+    add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'bore_radius': 7.5}
+
+    expected_result = ['TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', '4 5 6 7.5\n']
+    expected_result_file_1 = ['TIME 01/02/2020', 'WELLSPEC well2', 'iw  jw   l    RADB', '3  5  41   0.3']
+    expected_result_file_2 = ['TIME 01/03/2020', 'WELLSPEC well3', 'iw  jw   l    RADB', '2  4   3   2222']
+
+    # Act
+    wells_obj.add_completion(well_name='well1', completion_properties=add_perf_dict,
+                             preserve_previous_completions=True)
+    result = file_target.file_content_as_list
+
+    # Assert
+    assert result == expected_result
+    assert file_1.file_content_as_list == expected_result_file_1
+    assert file_2.file_content_as_list == expected_result_file_2
+
+
+@pytest.mark.parametrize('fcs_file_contents, wells_file, include_file_contents, add_perf_date, expected_result', [
+('''DATEFORMAT DD/MM/YYYY
+WelLS sEt 1 /my/wellspec/file.dat''',
+''' ! Wells file:
+TIME 01/01/2020
+WELLSPEC well1
+iw jw l radw
+1  2  3 4.5
+Include include_file.dat
+TIME 01/05/2020
+WELLSPEC well1
+iw jw l radw
+1  2  3 4.5
+''',
+'''! Include File
+TIME 01/03/2020
+WELLSPEC well1
+iw jw l radw
+1  2  3 4.5
+4  5  6 4.2
+
+TIME 01/04/2020
+WELLSPEC well1
+iw jw l radw
+1  2  3 4.5
+4  5  6 4.2
+''',
+'01/03/2020',
+['! Include File\n',
+'TIME 01/03/2020\n',
+'WELLSPEC well1\n',
+'iw jw l radw\n',
+'1  2  3 4.5\n',
+'4  5  6 4.2\n',
+'4 5 6 7.5\n',
+'7 8 9 10.5\n',
+'20 20 20 5.5\n',
+'20 20 20 5.5\n',
+'20 20 20 5.5\n',
+'20 20 20 5.5\n',
+'20 20 20 5.5\n',
+'20 20 20 5.5\n',
+'\n',
+'TIME 01/04/2020\n',
+'WELLSPEC well1\n',
+'iw jw l radw\n',
+'1  2  3 4.5\n',
+'4  5  6 4.2\n',],
+),
+
+
+], ids=['modify well in includes file'])
+def test_add_completion_include_files(mocker, fcs_file_contents, wells_file, include_file_contents, add_perf_date, expected_result):
+    '''TODO after an include in main file
+        TODO inside an include file
+     '''
+    start_date = '01/01/2020'
+    # Arrange
+    # Mock out the surface and fcs file
+    fcs_file_path = 'fcs_file.fcs'
+    include_file_path = os.path.join('/my/wellspec', 'include_file.dat')
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            fcs_file_path: fcs_file_contents,
+            '/my/wellspec/file.dat': wells_file,
+            include_file_path: include_file_contents,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    ls_dir = Mock(side_effect=lambda x: [])
+    mocker.patch('os.listdir', ls_dir)
+    fcs_file_exists = Mock(side_effect=lambda x: True)
+    mocker.patch('os.path.isfile', fcs_file_exists)
+
+    mock_nexus_sim = NexusSimulator('fcs_file.fcs')
+
+    mock_nexus_sim.start_date_set(start_date)
+    # mock out open
+    add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 7.5}
+    add_perf_dict_2 = {'date': add_perf_date, 'i': 7, 'j': 8, 'k': 9, 'well_radius': 10.5}
+    add_perf_dict_3 = {'date': add_perf_date, 'i': 20, 'j': 20, 'k': 20, 'well_radius': 5.5}
+
+    expected_include_file = NexusFile(location=include_file_path, includes=[],
+    origin='/my/wellspec/file.dat', includes_objects=None, file_content_as_list=expected_result)
+
+    expected_wells_file_as_list = [x.replace('include_file.dat', '') for x in wells_file.splitlines(keepends=True)]
+    expected_wells_file_as_list.insert(expected_wells_file_as_list.index('Include \n')+1, expected_include_file)
+    expected_wells_file = NexusFile(location='/my/wellspec/file.dat', includes_objects=[expected_include_file],
+    includes=[include_file_path], origin=fcs_file_path, file_content_as_list=expected_wells_file_as_list)
+    # Act
+    # test adding a load of completions sequentially
+    mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict,
+                                        preserve_previous_completions=True)
+    mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_2,
+                                        preserve_previous_completions=True)
+    mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
+                                        preserve_previous_completions=True)
+    mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
+                                        preserve_previous_completions=True)
+    mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
+                                        preserve_previous_completions=True)
+    mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
+                                        preserve_previous_completions=True)
+    mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
+                                        preserve_previous_completions=True)
+    mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
+                                        preserve_previous_completions=True)
+
+    result = mock_nexus_sim.fcs_file.well_files[1].includes_objects[0]
+
+    # Assert
+    assert result.file_content_as_list == expected_include_file.file_content_as_list
+    assert result == expected_include_file
+    assert mock_nexus_sim.fcs_file.well_files[1].file_content_as_list == expected_wells_file.file_content_as_list
+
+def test_add_completion_other(mocker):
+    # Arrange
+    fcs_file_data= '''RUN_UNITS ENGLISH
+
+    DATEFORMAT DD/MM/YYYY
+
+    RECURRENT_FILES
+    RUNCONTROL ref_runcontrol.dat
+    WELLS Set 1 wells.dat'''
+    runcontrol_data = 'START 01/01/2020'
+    well_file_data = '''
+    TIME 01/01/2020
+    
+    
+    WELLSPEC well1
+     IW  JW  L KH    RADW  PPERF    SKIN RADB WI
+    111 479  3 NA 0.35400   0.5 0.00000   NA NA
+    111 479  4 NA 0.35400   0.5 0.00000   NA NA
+    
+    
+    WELLSPEC well2
+    IW  JW L KH    RADW  PPERF    SKIN RADB WI
+    79 340 3 NA 0.35400   1 0.00000   NA NA
+    79 340 4 NA 0.35400   1 0.00000   NA NA
+    
+    
+    WELLSPEC well3
+     IW  JW  L KH    RADW  PPERF    SKIN RADB WI
+    137 479  3 NA 0.35400   0.5 0.00000   NA NA
+    137 479  4 NA 0.35400   0.5 0.00000   NA NA
+    137 479  5 NA 0.35400   1 0.00000   NA NA
+    137 479  6 NA 0.35400   1 0.00000   NA NA
+    
+    TIME 01/02/2020
+    WELLSPEC well2
+     IW  JW  L KH    RADW  PPERF    SKIN RADB WI
+    137 479  3 NA 0.35400   0.5 0.00000   NA NA
+      
+     TIME 01/03/2020
+     
+     WELLSPEC well2
+     IW  JW  L KH    RADW  PPERF    SKIN RADB WI
+    137 479  3 NA 0.35400   0.5 0.00000   NA NA
+    137 479  4 NA 0.35400   0.5 0.00000   NA NA'''
+    expected_result = '''
+    TIME 01/01/2020
+    
+    
+    WELLSPEC well1
+     IW  JW  L KH    RADW  PPERF    SKIN RADB WI
+    111 479  3 NA 0.35400   0.5 0.00000   NA NA
+    111 479  4 NA 0.35400   0.5 0.00000   NA NA
+    
+    
+    WELLSPEC well2
+    IW  JW L KH    RADW  PPERF    SKIN RADB WI
+    79 340 3 NA 0.35400   1 0.00000   NA NA
+    79 340 4 NA 0.35400   1 0.00000   NA NA
+    
+    
+    WELLSPEC well3
+     IW  JW  L KH    RADW  PPERF    SKIN RADB WI
+    137 479  3 NA 0.35400   0.5 0.00000   NA NA
+    137 479  4 NA 0.35400   0.5 0.00000   NA NA
+    137 479  5 NA 0.35400   1 0.00000   NA NA
+    137 479  6 NA 0.35400   1 0.00000   NA NA
+    
+    TIME 01/02/2020
+    WELLSPEC well2
+     IW  JW  L KH    RADW  PPERF    SKIN RADB WI
+    137 479  3 NA 0.35400   0.5 0.00000   NA NA
+      
+
+WELLSPEC well1
+IW JW L RADW SKIN PPERF
+111 479 3 0.354 0.0 0.5
+111 479 4 0.354 0.0 0.5
+4 5 6 7.5 NA NA
+
+     TIME 01/03/2020
+     
+     WELLSPEC well2
+     IW  JW  L KH    RADW  PPERF    SKIN RADB WI
+    137 479  3 NA 0.35400   0.5 0.00000   NA NA
+    137 479  4 NA 0.35400   0.5 0.00000   NA NA'''
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'fcs_file.dat': fcs_file_data,
+            'wells.dat': well_file_data,
+            'ref_runcontrol.dat': runcontrol_data,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    ls_dir = Mock(side_effect=lambda x: [])
+    mocker.patch('os.listdir', ls_dir)
+    fcs_file_exists = Mock(side_effect=lambda x: True)
+    mocker.patch('os.path.isfile', fcs_file_exists)
+
+
+    model = NexusSimulator('fcs_file.dat')
+
+    add_perf_date = '01/02/2020'
+
+    add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 7.5}
+
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+    # Act
+    model.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict)
+
+
+    # Assert
+
+    check_file_read_write_is_correct(expected_file_contents=expected_result,
+                                     modifying_mock_open=writing_mock_open,
+                                     mocker_fixture=mocker, write_file_name='wells.dat')
+
+@pytest.mark.parametrize('well_file_data, expected_uuid',[
+(''' TIME 01/01/2020
+       WELLSPEC DEV1
+       IW JW L RADW
+       1  2  3  4.5     ! 3
+       6 7 8   9.11     ! 4
+       
+       4 5 6 7.5        ! 6
+       2 4 5 11         ! 7
+       TIME 01/02/2020
+       WELLSPEC DEV1
+       IW JW L RADW
+       !comment           
+       3 4 5 6.5        ! 12
+       ''',
+
+       {'uuid1': 3,
+        'uuid2': 4,
+        'uuid3': 6,
+        'uuid4': 7,
+        'uuid6': 8,
+        'uuid7': 9,
+        'uuid5': 14,
+
+        },
+        ),
+
+
+(''' TIME 01/01/2020
+
+TIME 01/02/2020
+       WELLSPEC DEV1
+       IW JW L RADW
+       !comment           
+       3 4 5 6.5     ! 6
+       
+       ''',
+
+       {'uuid1': 12,
+        'uuid2': 5,
+        'uuid3': 6,
+        },
+        ),
+
+], ids=['basic_test_2_lines', 'multiple_lines_added'])
+def test_object_locations_updating(mocker, well_file_data, expected_uuid):
+    # Arrange
+    fcs_file_data = '''RUN_UNITS ENGLISH
+
+    DATEFORMAT DD/MM/YYYY
+
+    RECURRENT_FILES
+    RUNCONTROL ref_runcontrol.dat
+    WELLS Set 1 wells.dat'''
+    runcontrol_data = 'START 01/01/2020'
+    mocker.patch.object(uuid, 'uuid4', side_effect=['file_uuid', 'runcontrol_uuid','wells_file_uuid',
+                                                    '1', 'wells_file_uuid', 'uuid1','uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6', 'uuid7'])
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'fcs_file.dat': fcs_file_data,
+            'wells.dat': well_file_data,
+            'ref_runcontrol.dat': runcontrol_data,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    ls_dir = Mock(side_effect=lambda x: [])
+    mocker.patch('os.listdir', ls_dir)
+    fcs_file_exists = Mock(side_effect=lambda x: True)
+    mocker.patch('os.path.isfile', fcs_file_exists)
+
+    model = NexusSimulator('fcs_file.dat')
+
+    add_perf_date = '01/01/2020'
+
+    add_perf_dict_1 = {'date': add_perf_date, 'i': 11, 'j': 22, 'k': 33, 'well_radius': 44.5}
+    add_perf_dict_2 = {'date': add_perf_date, 'i': 44, 'j': 55, 'k': 66, 'well_radius': 77.5}
+
+    # Act
+    model.Wells.add_completion(well_name='DEV1', completion_properties=add_perf_dict_1)
+    model.Wells.add_completion(well_name='DEV1', completion_properties=add_perf_dict_2)
+
+    # Assert
+
+    assert model.fcs_file.well_files[1].object_locations == expected_uuid

@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from ResSimpy.Nexus.DataModels.NexusSeparator import NexusSeparator
+from ResSimpy.Nexus.DataModels.NexusSeparatorMethod import NexusSeparatorMethod
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits
 
 @pytest.mark.parametrize("file_contents, expected_separator_properties",
@@ -12,6 +12,7 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits
     DESC and this is second line of description
 
     ENGLISH
+    FAHR
 
     ! This is a comment
     TEMP PRES METHOD
@@ -21,12 +22,12 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits
 
     WATERMETHOD 1
     """, {'SEPARATOR_TYPE': 'EOS', 'WATERMETHOD': 1,
-          'UNIT_SYSTEM': UnitSystem.ENGLISH, 'DESC': ['This is first line of description',
-                                             'and this is second line of description'
-                                             ],
+          'UNIT_SYSTEM': UnitSystem.ENGLISH, 'TEMP_UNIT': TemperatureUnits.FAHR,
+          'DESC': ['This is first line of description',
+                   'and this is second line of description'],
           'SEPARATOR_TABLE': pd.DataFrame({'TEMP': [150.0, 60.0],
                                            'PRES': [500.0, 14.7],
-                                           'METHOD': [1,2]    
+                                           'METHOD': [1, 2]
                                           }),
           }
     ),
@@ -134,7 +135,7 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits
 )
 def test_read_seperator_properties_from_file(mocker, file_contents, expected_separator_properties):
     # Arrange
-    sep_obj = NexusSeparator(file_path='test/file/sep.dat', method_number=1)
+    sep_obj = NexusSeparatorMethod(file_path='test/file/sep.dat', method_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -155,7 +156,7 @@ def test_read_seperator_properties_from_file(mocker, file_contents, expected_sep
 
 def test_nexus_separator_repr():
     # Arrange
-    sep_obj = NexusSeparator(file_path='test/file/separator.dat', method_number=1)
+    sep_obj = NexusSeparatorMethod(file_path='test/file/separator.dat', method_number=1)
     sep_obj.separator_type = 'EOS'
     sep_obj.properties['SEPARATOR_TABLE'] = pd.DataFrame({'STAGE': [1, 2],
                                                       'METHOD': [1, 2],
@@ -169,17 +170,13 @@ def test_nexus_separator_repr():
                                                       'FDV1': [1., 1.]
                                                       })
     expected_output = """
---------------------------------
-Separator method 1
---------------------------------
 FILE_PATH: test/file/separator.dat
 SEPARATOR_TYPE: EOS
 SEPARATOR_TABLE: 
-""" + sep_obj.properties['SEPARATOR_TABLE'].to_string() + '\n\n'
+""" + sep_obj.properties['SEPARATOR_TABLE'].to_string(na_rep='') + '\n\n'
 
     # Act
     result = sep_obj.__repr__()
-    print(result)
 
     # Assert
     assert result == expected_output

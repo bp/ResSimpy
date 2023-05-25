@@ -23,25 +23,31 @@ class NexusConstraints:
         self.__parent_network: NexusNetwork = parent_network
         self.__constraints: dict[str, list[NexusConstraint]] = {}
 
-    def get_constraints(self) -> dict[str, list[NexusConstraint]]:
-        """Returns: list[NexusConstraint] list of all constraints defined within a model."""
-        self.__parent_network.get_load_status()
-        return self.__constraints
-
-    def get_constraint(self, name: str) -> Optional[list[NexusConstraint]]:
-        """
-
+    def get_constraints(self, object_name: Optional[str] = None, date: Optional[str] = None) -> \
+            dict[str, list[NexusConstraint]]:
+        """ Get the constraints of the existing model with optional parameters to filter for name and date
         Args:
-            name (str): name of the node/well to get the constraints of.
-
-        Returns:
-            list[NexusConstraint]: list of all constraints relating to a well or node.
+            object_name (Optional[str]): name of the connection, node or wellname to return. Defaults to None.
+            date (Optional[str]): date in model format to filter the dates to in the constraints
+        Returns: dict[str, list[NexusConstraint]] dictionary of all constraints defined within a model, keyed by the \
+            name of the well/node
         """
-        # TODO: make this a date based approach as well or return a list?
-        # TODO: improve the usability of this?
         self.__parent_network.get_load_status()
-        constraints_to_return = self.__constraints[name]
-        return constraints_to_return
+
+        if object_name is None:
+            constraints_to_return = self.__constraints
+        else:
+            constraints_to_return = {k: v for k, v in self.__constraints.items() if k == object_name}
+
+        if date is None:
+            return constraints_to_return
+
+        date_filtered_constraints = {}
+        for constraint_name, constraint_list in constraints_to_return.items():
+            new_constraint_list = [x for x in constraint_list if x.date == date]
+            if len(new_constraint_list) > 0:
+                date_filtered_constraints[constraint_name] = new_constraint_list
+        return date_filtered_constraints
 
     def get_constraint_df(self) -> pd.DataFrame:
         """ Creates a dataframe representing all processed constraint data in a surface file
@@ -64,9 +70,11 @@ class NexusConstraints:
         # CONSTRAINT keyword represents a table with a header and columns.
         # CONSTRAINTS keyword represents a list of semi structured constraints with a well_name and then constraints
         new_constraints = nfo.collect_all_tables_to_objects(surface_file,
-                                                            {'CONSTRAINTS': NexusConstraint,
-                                                             'CONSTRAINT': NexusConstraint,
-                                                             'QMULT': NexusConstraint},
+                                                            {
+                                                                'CONSTRAINTS': NexusConstraint,
+                                                                'CONSTRAINT': NexusConstraint,
+                                                                'QMULT': NexusConstraint
+                                                                },
                                                             start_date=start_date,
                                                             default_units=default_units)
         cons_list = new_constraints.get('CONSTRAINTS')

@@ -5,47 +5,61 @@ import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
-from ResSimpy.Nexus.NexusKeywords.separator_keywords import SEPARATOR_KEYS_INT, SEPARATOR_KEYS_FLOAT, SEPARATOR_KEYWORDS
+from ResSimpy.Nexus.NexusKeywords.separator_keywords import SEPARATOR_KEYS_INT, SEPARATOR_KEYS_FLOAT
+from ResSimpy.Nexus.NexusKeywords.separator_keywords import SEPARATOR_KEYWORDS
+from ResSimpy.SeparatorMethod import SeparatorMethod
 
 
-@dataclass  # Doesn't need to write an _init_, _eq_ methods, etc.
-class NexusSeparator():
+@dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
+class NexusSeparatorMethod(SeparatorMethod):
     """Class to hold data input for a Nexus Separator method
     Attributes:
         file_path (str): Path to the Nexus Separator file
         method_number (int): Separator method number in Nexus fcs file
+        separator_type (Optional[str]): Type of separator method, e.g., BLACKOIL, GASPLANT or EOS. Defaults to None
+        properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] ):
+            Dictionary holding all properties for a specific separator method. Defaults to empty dictionary.
     """
     file_path: str
     method_number: int
     separator_type: Optional[str] = None
-    properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] \
+    properties: dict[str, Union[str, int, float, Enum, list[str],
+                     pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
 
-    def __repr__(self):
+    def __init__(self, file_path: str, method_number: int, separator_type: Optional[str] = None,
+                 properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                                      dict[str, Union[float, pd.DataFrame]]]]] = None):
+        self.file_path = file_path
+        if separator_type is not None:
+            self.separator_type = separator_type
+        if properties is not None:
+            self.properties = properties
+        else:
+            self.properties = {}
+        super().__init__(method_number=method_number)
+
+    def __repr__(self) -> str:
         """Pretty printing separator data"""
-        printable_str = ''
-        printable_str += '\n--------------------------------\n'
-        printable_str += f'Separator method {self.method_number}\n'
-        printable_str += '--------------------------------\n'
-        printable_str += f'FILE_PATH: {self.file_path}\n'
+        printable_str = f'\nFILE_PATH: {self.file_path}\n'
         printable_str += f'SEPARATOR_TYPE: {self.separator_type}\n'
         sep_dict = self.properties
-        for key in sep_dict.keys():
-            if isinstance(sep_dict[key], pd.DataFrame):
+        for key, value in sep_dict.items():
+            if isinstance(value, pd.DataFrame):
                 printable_str += f'{key}: \n'
-                printable_str += sep_dict[key].to_string()
+                printable_str += value.to_string(na_rep='')
                 printable_str += '\n\n'
-            elif isinstance(sep_dict[key], Enum):
-                printable_str += f'{key}: {sep_dict[key].name}\n'
+            elif isinstance(value, Enum):
+                printable_str += f'{key}: {value.name}\n'
             else:
-                printable_str += f'{key}: {sep_dict[key]}\n'
+                printable_str += f'{key}: {value}\n'
         return printable_str
 
     def read_properties(self) -> None:
-        """Read Nexus Separator file contents and populate NexusSeparator object
+        """Read Nexus Separator file contents and populate NexusSeparatorMethod object
         """
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
-        file_as_list = file_obj.get_flat_list_str_file()
+        file_as_list = file_obj.get_flat_list_str_file
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
@@ -71,7 +85,7 @@ class NexusSeparator():
                 elems = line.split('!')[0].split()
                 cpt_index = elems.index('KEYCPTLIST')
                 if 'KEYCPTLIST' not in self.properties.keys():
-                    self.properties['KEYCPTLIST'] = elems[cpt_index+1:]
+                    self.properties['KEYCPTLIST'] = elems[cpt_index + 1:]
                 line_indx += 1
                 continue
             elif nfo.check_token('BOSEP', line):  # Black oil separator table
@@ -83,11 +97,11 @@ class NexusSeparator():
             if [i for i in line.split() if i in SEPARATOR_KEYS_FLOAT]:
                 for key in SEPARATOR_KEYS_FLOAT:
                     if nfo.check_token(key, line):
-                        self.properties[key] = float(str(nfo.get_token_value(key, line, file_as_list)))
+                        self.properties[key] = float(nfo.get_expected_token_value(key, line, file_as_list))
             if [i for i in line.split() if i in SEPARATOR_KEYS_INT]:
                 for key in SEPARATOR_KEYS_INT:
                     if nfo.check_token(key, line):
-                        self.properties[key] = int(str(nfo.get_token_value(key, line, file_as_list)))
+                        self.properties[key] = int(nfo.get_expected_token_value(key, line, file_as_list))
 
             # Find starting index for black oil separator table
             if self.separator_type == 'BLACKOIL':
@@ -109,7 +123,7 @@ class NexusSeparator():
             # Find starting and ending indices for gas plant separator table
             if self.separator_type == 'GASPLANT':
                 if nfo.check_token('RECFAC_TABLE', line):
-                    sep_table_indices[0] = line_indx+1
+                    sep_table_indices[0] = line_indx + 1
                     start_reading_table = True
                 if nfo.check_token('ENDRECFAC_TABLE', line):
                     sep_table_indices[1] = line_indx
