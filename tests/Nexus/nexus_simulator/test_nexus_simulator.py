@@ -8,11 +8,14 @@ from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
-from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
-from ResSimpy.Nexus.DataModels.NexusSeparator import NexusSeparator
-from ResSimpy.Nexus.DataModels.NexusWater import NexusWater
+from ResSimpy.Nexus.DataModels.NexusPVTMethod import NexusPVTMethod
+from ResSimpy.Nexus.DataModels.NexusSeparatorMethod import NexusSeparatorMethod
+from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterMethod
 from ResSimpy.Nexus.DataModels.NexusEquilMethod import NexusEquilMethod
 from ResSimpy.Nexus.DataModels.NexusRockMethod import NexusRockMethod
+from ResSimpy.Nexus.DataModels.NexusRelPermMethod import NexusRelPermMethod
+from ResSimpy.Nexus.DataModels.NexusValveMethod import NexusValveMethod
+from ResSimpy.Nexus.DataModels.NexusAquiferMethod import NexusAquiferMethod
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
@@ -801,15 +804,15 @@ def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
     mocker.patch("builtins.open", fcs_file_open)
 
-    loaded_pvt = {1: NexusPVT(file_path=os.path.join('path', 'my/pvt/file1.dat'), method_number=1),
-                  2: NexusPVT(file_path=os.path.join('path', 'my/pvt/file2.dat'), method_number=2),
-                  3: NexusPVT(file_path=os.path.join('path', 'my/pvt/file3.dat'), method_number=3),
+    loaded_pvt = {1: NexusPVTMethod(file_path=os.path.join('path', 'my/pvt/file1.dat'), method_number=1),
+                  2: NexusPVTMethod(file_path=os.path.join('path', 'my/pvt/file2.dat'), method_number=2),
+                  3: NexusPVTMethod(file_path=os.path.join('path', 'my/pvt/file3.dat'), method_number=3),
                   }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.pvt_methods
+    result = simulation.PVTMethods.pvt_methods
 
     # Assert
     assert result == loaded_pvt
@@ -836,15 +839,15 @@ def test_get_separator(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_sep = {1: NexusSeparator(file_path=os.path.join('path', 'my/separator/file1.dat'), method_number=1),
-                  2: NexusSeparator(file_path=os.path.join('path', 'my/separator/file2.dat'), method_number=2),
-                  3: NexusSeparator(file_path=os.path.join('path', 'my/separator/file3.dat'), method_number=3),
+    loaded_sep = {1: NexusSeparatorMethod(file_path=os.path.join('path', 'my/separator/file1.dat'), method_number=1),
+                  2: NexusSeparatorMethod(file_path=os.path.join('path', 'my/separator/file2.dat'), method_number=2),
+                  3: NexusSeparatorMethod(file_path=os.path.join('path', 'my/separator/file3.dat'), method_number=3),
                   }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.separator_methods
+    result = simulation.SeparatorMethods.separator_methods
 
     # Assert
     assert result == loaded_sep
@@ -871,15 +874,15 @@ def test_get_water(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_wat = {1: NexusWater(file_path=os.path.join('path', 'my/water/file1.dat'), method_number=1),
-                  2: NexusWater(file_path=os.path.join('path', 'my/water/file2.dat'), method_number=2),
-                  3: NexusWater(file_path=os.path.join('path', 'my/water/file3.dat'), method_number=3),
+    loaded_wat = {1: NexusWaterMethod(file_path=os.path.join('path', 'my/water/file1.dat'), method_number=1),
+                  2: NexusWaterMethod(file_path=os.path.join('path', 'my/water/file2.dat'), method_number=2),
+                  3: NexusWaterMethod(file_path=os.path.join('path', 'my/water/file3.dat'), method_number=3),
                   }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.water_methods
+    result = simulation.WaterMethods.water_methods
 
     # Assert
     assert result == loaded_wat
@@ -953,6 +956,111 @@ def test_get_rock(mocker: MockerFixture, fcs_file_contents: str):
 
     # Assert
     assert result == loaded_rocks
+
+
+@pytest.mark.parametrize("fcs_file_contents", [
+    ("""
+       RELPM method 1 my/relpm/file1.dat
+
+       relpm Method 2 my/relpm/file2.dat
+       RelPm METHOD 3 my/relpm/file3.dat
+    """)
+], ids=['basic case'])
+def test_get_relperm(mocker: MockerFixture, fcs_file_contents: str):
+    """Testing the functionality to retrieve relative permeability and
+    capillary pressure methods from Nexus fcs file"""
+    # Arrange
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            os.path.join('path', 'my/relpm/file1.dat'): '',
+            os.path.join('path', 'my/relpm/file2.dat'): '',
+            os.path.join('path', 'my/relpm/file3.dat'): '',
+            'path/nexus_run.fcs': fcs_file_contents,
+            }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    loaded_relperms = {1: NexusRelPermMethod(file_path=os.path.join('path', 'my/relpm/file1.dat'), method_number=1),
+                       2: NexusRelPermMethod(file_path=os.path.join('path', 'my/relpm/file2.dat'), method_number=2),
+                       3: NexusRelPermMethod(file_path=os.path.join('path', 'my/relpm/file3.dat'), method_number=3),
+                       }
+
+    simulation = NexusSimulator(origin='path/nexus_run.fcs')
+
+    # Act
+    result = simulation.RelPermMethods.relperm_methods
+
+    # Assert
+    assert result == loaded_relperms
+
+
+@pytest.mark.parametrize("fcs_file_contents", [
+    ("""
+       VALVE method 1 my/valve/file1.dat
+
+       valve Method 2 my/valve/file2.dat
+       Valve METHOD 3 my/valve/file3.dat
+    """)
+], ids=['basic case'])
+def test_get_valve(mocker: MockerFixture, fcs_file_contents: str):
+    """Testing the functionality to retrieve valve methods from Nexus fcs file"""
+    # Arrange
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            os.path.join('path', 'my/valve/file1.dat'): '',
+            os.path.join('path', 'my/valve/file2.dat'): '',
+            os.path.join('path', 'my/valve/file3.dat'): '',
+            'path/nexus_run.fcs': fcs_file_contents,
+            }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    loaded_valves = {1: NexusValveMethod(file_path=os.path.join('path', 'my/valve/file1.dat'), method_number=1),
+                     2: NexusValveMethod(file_path=os.path.join('path', 'my/valve/file2.dat'), method_number=2),
+                     3: NexusValveMethod(file_path=os.path.join('path', 'my/valve/file3.dat'), method_number=3)
+                     }
+
+    simulation = NexusSimulator(origin='path/nexus_run.fcs')
+
+    # Act
+    result = simulation.ValveMethods.valve_methods
+
+    # Assert
+    assert result == loaded_valves
+
+
+@pytest.mark.parametrize("fcs_file_contents", [
+    ("""
+       AQUIFER method 1 my/aquifer/file1.dat
+       aquifer Method 2 my/aquifer/file2.dat
+       Aquifer METHOD 3 my/aquifer/file3.dat
+    """)
+], ids=['basic case'])
+def test_get_aquifer(mocker: MockerFixture, fcs_file_contents: str):
+    """Testing the functionality to retrieve aquifer methods from Nexus fcs file"""
+    # Arrange
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            os.path.join('path', 'my/aquifer/file1.dat'): '',
+            os.path.join('path', 'my/aquifer/file2.dat'): '',
+            os.path.join('path', 'my/aquifer/file3.dat'): '',
+            'path/nexus_run.fcs': fcs_file_contents,
+            }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    loaded_aquifers = {1: NexusAquiferMethod(file_path=os.path.join('path', 'my/aquifer/file1.dat'), method_number=1),
+                       2: NexusAquiferMethod(file_path=os.path.join('path', 'my/aquifer/file2.dat'), method_number=2),
+                       3: NexusAquiferMethod(file_path=os.path.join('path', 'my/aquifer/file3.dat'), method_number=3)
+                       }
+
+    simulation = NexusSimulator(origin='path/nexus_run.fcs')
+
+    # Act
+    result = simulation.AquiferMethods.aquifer_methods
+
+    # Assert
+    assert result == loaded_aquifers
 
 
 @pytest.mark.parametrize("fcs_file_contents, surface_file_content, node1_props, node2_props, \
