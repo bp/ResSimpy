@@ -7,7 +7,7 @@ import pandas as pd
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-    from ResSimpy.Nexus.DataModels.NexusWater import NexusWaterParams
+    from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterParams
 
 
 # Factory methods for generating empty lists with typing
@@ -17,8 +17,9 @@ def get_empty_list_str() -> list[str]:
 
 
 # Factory method for generating empty dictionary with typing
-def get_empty_dict_union() -> dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]]:
-    value: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] = {}
+def get_empty_dict_union() -> dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                                              dict[str, Union[float, pd.DataFrame]]]]:
+    value: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] = {}
     return value
 
 
@@ -29,6 +30,13 @@ def get_empty_eosopt_dict_union() -> \
     value: dict[str, Union[
         str, int, float, pd.DataFrame, list[str], dict[str, float], tuple[str, dict[str, float]], dict[
             str, pd.DataFrame]]] = {}
+    return value
+
+
+# Factory method for generating empty dictionary for hysteresis parameters
+def get_empty_hysteresis_dict() -> dict[str, Union[str, float, dict[str,
+                                                                    Union[str, float, dict[str, Union[str, float]]]]]]:
+    value: dict[str, Union[str, float, dict[str, Union[str, float, dict[str, Union[str, float]]]]]] = {}
     return value
 
 
