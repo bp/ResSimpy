@@ -1,20 +1,13 @@
 Installation
 ============
 
-resqpy is written for Python 3.
+resqpy is written for Python 3.10+.
 
-It is recommended to use a conda environment for each new project.
-
-.. code-block:: bash
-
-    $ conda create -n my_env python=3
-    $ conda activate my_env
-
-Install using pip:
+You can install the library using pip:
 
 .. code-block:: bash
 
-    $ pip install resqpy
+    $ pip install ResSimpy
 
 To install a development version on your local machine, use:
 
@@ -22,14 +15,10 @@ To install a development version on your local machine, use:
 
     $ pip install -e /path/to/working/copy
 
-To run unit tests (requires pytest):
-
-.. code-block:: bash
-
-    $ python -m pytest tests/
-
 To build the documentation locally (requires sphinx):
 
 .. code-block:: bash
 
-    $ sphinx-build docs docs/html
+    $ sphinx-apidoc -f -o docs/source ResSimpy
+	$ cd docs 
+	$ .\make html

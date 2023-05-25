@@ -1,31 +1,14 @@
-Contributing to resqpy
-======================
+Contributing to ResSimpy
+========================
 
-Resqpy is an open source project released under the MIT license. Contributions
+ResSimpy is an open source project released under the Apache license. Contributions
 of all forms are most welcome!
-
-Resqpy was created by Andy Beer.
-
-All contributors (alphabetical order):
-
-* Andrew Ediriscoriya
-* Andy Beer
-* Casey Warshauer
-* Chris Flynn
-* Connor Tann
-* Duncan Hunter
-* Emma Nesbit
-* Jeremy Tillay
-* Kadija Hassanali
-* Max Maunder
-* Nathan Lane
-* Nirjhor Chakraborty
 
 Ways of contributing
 --------------------
 
-* Submitting bug reports and feature requests (using the `GitHub issue tracker <https://github.com/bp/resqpy/issues>`_)
-* Contributing code (in the form of `Pull requests <https://github.com/bp/resqpy/pulls>`_)
+* Submitting bug reports and feature requests (using the `GitHub issue tracker <https://github.com/bp/ResSimpy/issues>`_)
+* Contributing code (in the form of `Pull requests <https://github.com/bp/ResSimpy/pulls>`_)
 * Documentation or test improvements
 * Publicity and support
 
@@ -36,8 +19,7 @@ Checklist for pull requests
 2. Follow the PEP8 style guide as far as possible (with caveats below).
 3. All public functions and classes should have
    `Google-style docstrings <https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html>`_ 
-4. Code should be formatted with ``yapf``
-5. All GitHub checks should pass
+4. All GitHub checks should pass
 
 Development environment setup
 -----------------------------
@@ -54,7 +36,7 @@ Development environment setup
       cd resqpy
 
 2. Set up a Python environment
-   **Note: due to a requirement of one of the dependencies, you will need to use a 64-bit installation of Python when working with RESQPY.**
+   **Note: due to a requirement of one of the dependencies, you will need to use a 64-bit installation of Python when working with ResSimpy.**
    The RESQPY project uses `Poetry <https://python-poetry.org/>`_ for dependency management and environment setup. Please `install Poetry <https://python-poetry.org/docs/master/#installing-with-pip>`_ first if you have not already done so.
    With Poetry installed, please then install the `Poetry Dynamic Versioning Plugin <https://github.com/mtkennerly/poetry-dynamic-versioning>`_.
 
@@ -93,16 +75,6 @@ Development environment setup
 
 Code Style
 ----------
-
-We use the yapf auto-formatter with the style configured in the repository. 
-Most IDEs allow you to configure a formatter to run automatically when you save
-a file. Alternatively, you can run the following command before commiting any
-changes:
-
-.. code-block:: bash
-
-   # Reformat all python files in the repository
-   yapf -ir .
 
 Please try to write code according to the
 `PEP8 Python style guide <https://www.python.org/dev/peps/pep-0008/>`_, which
@@ -156,11 +128,11 @@ Running tests
 
 The easiest way to run the tests is simply to open a Pull Request on GitHub.
 This automatically triggers the unit tests, run in several different Python
-environments. Note that if your MR references an outside fork of the repo, then
+environments. Note that if your PR references an outside fork of the repo, then
 a maintainer may need to manually approve the CI suite to run.
 
 Alternatively, you can run the tests against your local clone of the code base
-from the command line:
+from the command line when running inside the Poetry shell:
 
 .. code:: bash
 
@@ -173,138 +145,7 @@ There are several command line options that can be appended, for example:
     pytest -k foobar  # selects just tests with "foobar" in the name
     pytest -rA        # prints summary of all executed tests at end
 
-Static analysis
-^^^^^^^^^^^^^^^
-
-We use `flake8 <https://flake8.pycqa.org/en/latest/user/invocation.html>`_ to
-scan for obvious code errors. This is automatically run part as part of the CI
-tests, and can also be run locally with:
-
-.. code:: bash
-
-    flake8 .
-
-The configuration of which
-`error codes <https://gist.github.com/sharkykh/c76c80feadc8f33b129d846999210ba3>`_
-are checked by default is configured in the repo in
-`setup.cfg <https://github.com/bp/resqpy/blob/master/setup.cfg>`_.
-
-By default in resqpy:
-
-* ``F-`` Logical errors (i.e. bugs) are enabled
-* ``E-`` Style checks (i.e. PEP8 compliance) are disabled
-
-You can test for PEP8 compliance by running flake8 with further error codes:
-
-.. code:: bash
-
-    flake8 . –select=F,E2,E3,E4,E7
-
-Documentation
--------------
-
-The docs are built automatically when code is merged into master, and are hosted
-at `readthedocs <https://resqpy.readthedocs.io/>`_.
-
-There a few different versions of the documentation available, tied to different
-versions of the code:
-
-+------------------------------------------+------------------------------+--------+
-| URL                                      | Version                      | Hidden |
-+==========================================+==============================+========+
-| https://resqpy.readthedocs.io/en/latest/ | The `master` branch, default | No     |
-+------------------------------------------+------------------------------+--------+
-| https://resqpy.readthedocs.io/en/stable/ | The most recent git tag      | No     |
-+------------------------------------------+------------------------------+--------+
-| https://resqpy.readthedocs.io/en/docs/   | The `docs` branch            | Yes    |
-+------------------------------------------+------------------------------+--------+
-
-These automatically re-build when the relevant branch is updated, or when a new
-tag is pushed.
-
-The `docs` version is intended for previewing changes to documentation. Just
-create a new feature branch called `docs` and push changes there; you can then
-use the link above to check it renders correctly. One can delete the `docs` git
-branch as usual when closing a PR, and re-create it when needed.
-
-You may find it helpful to run a linter to check that the syntax of your
-ReStructured text is correct: the python package `restructuredtext-lint` is
-pretty good for this purpose. Similarly, many IDEs or plugins have a "rewrap"
-function that inserts line endings for uniform line lengths, which can make text
-more readable and visually pleasing.
-
-You can also build the docs locally, providing you have installed all required
-dependencies as described above:
-
-.. code:: bash
-
-   sphinx-build docs docs/html
-
-The autoclasstoc extension is used to group some of the most commonly-used methods
-together at the top of the class summary tables. To make a method appear in this list,
-add `:meta common:` to the bottom of the method docstring.
-
-Making a release
-----------------
-
-To make a release at a given commit, simply make a git tag:
-
-.. code:: bash
-
-   # Make a tag
-   git tag -a v0.0.1 -m "Incremental release with some bugfixes"
-
-   # Push tag to github
-   git push origin v0.0.1
-
-The tag must have the prefix ``v`` and have the form ``MAJOR.MINOR.PATCH``.
-
-Following [semantic versioning](https://semver.org/), increment the:
-
-* ``MAJOR`` version when you make incompatible API changes,
-* ``MINOR`` version when you add functionality in a backwards compatible manner, and
-* ``PATCH`` version when you make backwards compatible bug fixes.
-
-Interpreting version numbers
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The version number is made available to users as an attribute of the module:
-
-.. code:: python
-
-   >>> import resqpy
-   >>> print(resqpy.__version__)
-   '1.6.1'
-
-When working with a development version of the code that does not correspond to
-a tagged release, the version number will look a little different, for example
-``1.6.2.dev301+gddfbf6c``.
-
-This can be interpreted as:
-
-* ``1.6.2`` : is the *next* expected release. The previous release would be ``1.6.1``.
-* ``dev301`` : 301 commits added since the previous release.
-* ``+gddfbf6c`` : a ``+g`` prefix followed by current commit ID: ``ddfbf6c``.
-
-How the version is retrieved
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The git history defines the version, and consequently the version number cannot
-be written in a file that is itself under source control.
-
-The Poetry plugin [poetry-dynamic-versioning](https://pypi.org/project/poetry-dynamic-versioning/) is used to
-extract the version number from the git history.
-
 Get in touch
 ------------
 
 For bug reports and feature requests, please use the GitHub issue page.
-
-For other queries about resqpy please feel free to get in touch at Nathan.Lane@bp.com
-
-Code of Conduct
----------------
-
-We abide by the Contributor-covenant standard:
-
-https://www.contributor-covenant.org/version/1/4/code-of-conduct/code_of_conduct.md
