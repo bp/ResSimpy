@@ -28,7 +28,7 @@ class NexusAquiferMethod(AquiferMethod):
 
     def __init__(self, file_path: str, method_number: int,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                                      dict[str, Union[float, pd.DataFrame]]]]] = None):
+                                      dict[str, Union[float, pd.DataFrame]]]]] = None):
         self.file_path = file_path
         if properties is not None:
             self.properties = properties
@@ -61,7 +61,7 @@ class NexusAquiferMethod(AquiferMethod):
         """Read Nexus aquifer file contents and populate the NexusValveMethod object
         """
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
-        file_as_list = file_obj.get_flat_list_str_file()
+        file_as_list = file_obj.get_flat_list_str_file
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
@@ -95,14 +95,15 @@ class NexusAquiferMethod(AquiferMethod):
 
             # Find beginning and ending indices of tables
             for table_key in AQUIFER_TABLE_KEYWORDS:
-                if (table_key == 'TRACER' and table_being_read[table_key] and nfo.check_token('END'+table_key, line)) \
-                    or (table_key == 'TDPD' and table_being_read[table_key] and
-                        [i for i in line.split() if nfo.check_token(i, line) and i in AQUIFER_KEYWORDS]):
+                if (table_key == 'TRACER' and table_being_read[table_key] and nfo.check_token('END' + table_key,
+                                                                                              line)) \
+                        or (table_key == 'TDPD' and table_being_read[table_key] and
+                            [i for i in line.split() if nfo.check_token(i, line) and i in AQUIFER_KEYWORDS]):
                     table_being_read[table_key] = False
                     aquifer_table_indices[table_key][1] = line_indx
                 if nfo.check_token(table_key, line):
                     table_being_read[table_key] = True
-                    aquifer_table_indices[table_key] = [line_indx+1, len(file_as_list)]
+                    aquifer_table_indices[table_key] = [line_indx + 1, len(file_as_list)]
 
             line_indx += 1
 

@@ -18,7 +18,7 @@ def get_empty_list_str() -> list[str]:
 
 # Factory method for generating empty dictionary with typing
 def get_empty_dict_union() -> dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                              dict[str, Union[float, pd.DataFrame]]]]:
+                                   dict[str, Union[float, pd.DataFrame]]]]:
     value: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] = {}
     return value
 
@@ -35,7 +35,7 @@ def get_empty_eosopt_dict_union() -> \
 
 # Factory method for generating empty dictionary for hysteresis parameters
 def get_empty_hysteresis_dict() -> dict[str, Union[str, float, dict[str,
-                                                                    Union[str, float, dict[str, Union[str, float]]]]]]:
+                                        Union[str, float, dict[str, Union[str, float]]]]]]:
     value: dict[str, Union[str, float, dict[str, Union[str, float, dict[str, Union[str, float]]]]]] = {}
     return value
 

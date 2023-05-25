@@ -249,6 +249,7 @@ class NexusFile:
                 file_index.index += 1
                 yield row
 
+    @property
     def get_flat_list_str_file(self) -> list[str]:
         if self.file_content_as_list is None:
             raise ValueError(f'No file content found for {self.location}')
@@ -378,7 +379,7 @@ class NexusFile:
             self.object_locations: dict[UUID, int] = get_empty_dict_uuid_int()
         self.object_locations[uuid] = line_index
 
-    def update_object_locations(self, line_number: int, number_additional_lines: int) -> None:
+    def __update_object_locations(self, line_number: int, number_additional_lines: int) -> None:
         """ updates the object locations in a nexusfile by the additional lines. Used when files have been modified and
         an addition/removal of lines has occurred. Ensures that the object locations are correct to the actual lines
         in the file_as_list
@@ -393,7 +394,7 @@ class NexusFile:
             if index >= line_number:
                 self.object_locations[object_id] = index + number_additional_lines
 
-    def remove_object_locations(self, uuid: UUID) -> None:
+    def __remove_object_locations(self, uuid: UUID) -> None:
         """ Removes an object location based on the uuid provided. Used when removing objects in the file_as_list
 
         Args:
@@ -418,7 +419,8 @@ class NexusFile:
             element is the relative index in that file.
         """
         if self.line_locations is None:
-            self.get_flat_list_str_file()
+            # call get_flat_list_str_file to ensure line locations are updated
+            self.get_flat_list_str_file
             if self.line_locations is None:
                 raise ValueError("No include line locations found.")
 
@@ -451,6 +453,72 @@ class NexusFile:
             raise ValueError(f'No file with {file_uuid=} found within include objects')
 
         return nexus_file, index_in_file
+
+    def add_to_file_as_list(self, additional_content: list[str], index: int,
+                            additional_objects: Optional[dict[UUID, int]] = None) -> None:
+        """ To add content to the file as list, also updates object numbers and optionally allows user \
+        to add several additional new objects
+
+        Args:
+            additional_content (list[str]): Additional lines as a list of strings to be added.
+            index (int): index to insert the new lines at in the calling flat_file_as_list
+            additional_objects (Optional[dict[UUID, int]]): defaults to None. Otherwise, a dictionary keyed with the \
+            UUID of the new objects to add as well as the corresponding index of the object in the original \
+            calling NexusFile
+        """
+        nexusfile_to_write_to, relative_index = self.find_which_include_file(index)
+        if nexusfile_to_write_to.file_content_as_list is None:
+            raise ValueError(f'No file content to write to in file: {nexusfile_to_write_to}')
+        nexusfile_to_write_to.file_content_as_list = \
+            nexusfile_to_write_to.file_content_as_list[:relative_index] + \
+            additional_content + nexusfile_to_write_to.file_content_as_list[relative_index:]
+        # write straight to file
+        nexusfile_to_write_to.write_to_file()
+        # update object locations
+        self.__update_object_locations(line_number=index, number_additional_lines=len(additional_content))
+
+        if additional_objects is None:
+            return
+        for object_id, line_index in additional_objects.items():
+            self.add_object_locations(uuid=object_id, line_index=line_index)
+
+    def remove_from_file_as_list(self, index: int, objects_to_remove: Optional[list[UUID]] = None,
+                                 string_to_remove: Optional[str] = None) -> None:
+        """ remove an entry from the file as list. Also updates existing object locations and removes any \
+        specified objects from the object locations dictionary
+
+        Args:
+            index (int): index n the calling flat_file_as_list to remove the entry from
+            objects_to_remove (Optional[list[UUID]]): list of object id's to remove from the object locations. \
+            Defaults to None
+            string_to_remove (Optional[str]): if specified will only remove the listed string from the entry \
+            at the index. Defaults to None, which removes the entire entry.
+
+        """
+        nexusfile_to_write_to, relative_index = self.find_which_include_file(index)
+
+        # remove the line in the file:
+        if nexusfile_to_write_to.file_content_as_list is None:
+            raise ValueError(
+                f'No file content in the file attempting to remove line from {nexusfile_to_write_to.location}')
+        if string_to_remove is None:
+            nexusfile_to_write_to.file_content_as_list.pop(relative_index)
+            self.__update_object_locations(line_number=index, number_additional_lines=-1)
+        else:
+            entry_to_replace = nexusfile_to_write_to.file_content_as_list[relative_index]
+            if isinstance(entry_to_replace, str):
+                nexusfile_to_write_to.file_content_as_list[relative_index] = \
+                    entry_to_replace.replace(string_to_remove, '', 1)
+            else:
+                raise ValueError(
+                    f'Tried to replace at non string value at index: {relative_index} in '
+                    f'file_as_list instead got {entry_to_replace}')
+
+        if objects_to_remove is not None:
+            for object_id in objects_to_remove:
+                self.__remove_object_locations(object_id)
+
+        nexusfile_to_write_to.write_to_file()
 
     def write_to_file(self) -> None:
         """ Writes back to the original file location of the nexusfile"""

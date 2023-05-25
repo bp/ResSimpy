@@ -25,17 +25,15 @@ class NexusRelPermMethod(RelPermMethod):
     # General parameters
     file_path: str
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                dict[str, Union[float, pd.DataFrame]]]] \
-        = field(default_factory=get_empty_dict_union)
+                     dict[str, Union[float, pd.DataFrame]]]] = field(default_factory=get_empty_dict_union)
     hysteresis_params: dict[str, Union[str, float, dict[str, Union[str, float, dict[str, Union[str, float]]]]]] \
         = field(default_factory=get_empty_hysteresis_dict)
 
     def __init__(self, file_path: str, method_number: int,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                                      dict[str, Union[float, pd.DataFrame]]]]] = None,
-                 hysteresis_params: Optional[dict[str, Union[str, float,
-                                                             dict[str, Union[str, float,
-                                                                             dict[str, Union[str, float]]]]]]] = None):
+                                      dict[str, Union[float, pd.DataFrame]]]]] = None,
+                 hysteresis_params: Optional[dict[str, Union[str, float, dict[str, Union[str, float,
+                                             dict[str, Union[str, float]]]]]]] = None):
         self.file_path = file_path
         if properties is not None:
             self.properties = properties
@@ -168,7 +166,7 @@ class NexusRelPermMethod(RelPermMethod):
         """Read Nexus rel perm file contents and populate the NexusRelPermMethod object
         """
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
-        file_as_list = file_obj.get_flat_list_str_file()
+        file_as_list = file_obj.get_flat_list_str_file
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
@@ -204,13 +202,14 @@ class NexusRelPermMethod(RelPermMethod):
                     if nfo.check_token(key, line):
                         self.properties[key] = float(nfo.get_expected_token_value(key, line, file_as_list))
             # Handle certain specific relperm options
-            optional_keyword_dict = {'JFUNC': ['KX', 'KY', 'KXKY'],
-                                     'SCALING': ['NONE', 'TWOPOINT', 'THREEPOINT'],
-                                     'SCALING_PC': ['NONE', 'TWOPOINT', 'THREEPOINT'],
-                                     'IFT': ['METHOD1', 'METHOD2'],
-                                     'NEARCRIT': ['HCSCALE'],
-                                     'DERIVATIVES': ['ANALYTICAL', 'NUMERICAL']
-                                     }
+            optional_keyword_dict = {
+                'JFUNC': ['KX', 'KY', 'KXKY'],
+                'SCALING': ['NONE', 'TWOPOINT', 'THREEPOINT'],
+                'SCALING_PC': ['NONE', 'TWOPOINT', 'THREEPOINT'],
+                'IFT': ['METHOD1', 'METHOD2'],
+                'NEARCRIT': ['HCSCALE'],
+                'DERIVATIVES': ['ANALYTICAL', 'NUMERICAL']
+                }
             for opt_key, opt_vals in optional_keyword_dict.items():
                 self.__populate_optional_str_keywords(opt_key, opt_vals, line, file_as_list)
             # Handle tabular reconstruction
@@ -229,7 +228,7 @@ class NexusRelPermMethod(RelPermMethod):
             if len(line.split()) > 0 and hysteresis_being_read:
                 possible_token = line.split()[0]
                 if nfo.check_token(possible_token, line) and possible_token not in \
-                        ['HYSTERESIS']+RELPM_HYSTERESIS_PRIMARY_KEYWORDS:
+                        ['HYSTERESIS'] + RELPM_HYSTERESIS_PRIMARY_KEYWORDS:
                     hysteresis_being_read = False
                     hysteresis_section_indices[1] = line_indx
 
@@ -237,8 +236,8 @@ class NexusRelPermMethod(RelPermMethod):
             for nondarcy_key in RELPM_NONDARCY_KEYWORDS:
                 if nfo.check_token(nondarcy_key, line):
                     nondarcy_being_read = True
-                    nondarcy_indices[nondarcy_key] = [line_indx+1, len(file_as_list)]
-                if nondarcy_being_read and nfo.check_token('END'+nondarcy_key, line):
+                    nondarcy_indices[nondarcy_key] = [line_indx + 1, len(file_as_list)]
+                if nondarcy_being_read and nfo.check_token('END' + nondarcy_key, line):
                     nondarcy_being_read = False
                     nondarcy_indices[nondarcy_key][1] = line_indx
 
@@ -256,7 +255,7 @@ class NexusRelPermMethod(RelPermMethod):
             if [i for i in line.split() if i in RELPM_TABLE_KEYWORDS]:
                 for table_keyword in RELPM_TABLE_KEYWORDS:
                     if nfo.check_token(table_keyword, line):
-                        relpm_table_indices[table_keyword] = [line_indx+1, len(file_as_list)]
+                        relpm_table_indices[table_keyword] = [line_indx + 1, len(file_as_list)]
                         table_being_read[table_keyword] = True
 
             line_indx += 1

@@ -79,7 +79,7 @@ class NexusEquilMethod(EquilMethod):
         """Read Nexus equilibration file contents and populate NexusEquilMethod object
         """
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
-        file_as_list = file_obj.get_flat_list_str_file()
+        file_as_list = file_obj.get_flat_list_str_file
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
@@ -132,7 +132,7 @@ class NexusEquilMethod(EquilMethod):
             if [i for i in line.split() if i in EQUIL_TABLE_KEYWORDS]:
                 for table_keyword in EQUIL_TABLE_KEYWORDS:
                     if nfo.check_token(table_keyword, line):
-                        equil_table_indices[table_keyword] = [line_indx+1, len(file_as_list)]
+                        equil_table_indices[table_keyword] = [line_indx + 1, len(file_as_list)]
                         table_being_read = table_keyword
                         start_reading_table = True
                         if table_keyword == 'COMPOSITION' and [i for i in line.split() if i in

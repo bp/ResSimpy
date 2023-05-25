@@ -568,7 +568,7 @@ def get_multiple_sequential_values(list_of_strings: list[str], number_tokens: in
 def check_for_and_populate_common_input_data(
         file_as_list: list[str],
         property_dict: dict[str, Union[str, int, float, Enum, list[str],
-                                       pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]]
+                            pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]]
         ) -> None:
     """Loop through lines of Nexus input file content looking for common input data, e.g.,
     units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
@@ -589,7 +589,7 @@ def check_for_and_populate_common_input_data(
 def check_property_in_line(
         line: str,
         property_dict: dict[str, Union[str, int, float, Enum, list[str],
-                                       pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]],
+                            pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]],
         file_as_list: list[str]) -> None:
     """Given a line of Nexus input file content looking for common input data, e.g.,
         units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
@@ -854,7 +854,7 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
     nexus_object_results: dict[str, list[Any] | dict[str, list[NexusConstraint]]] = {x: [] for x in table_object_map}
     nexus_constraints: dict[str, list[NexusConstraint]] = {}
     nexus_object_results['CONSTRAINTS'] = nexus_constraints
-    file_as_list: list[str] = nexus_file.get_flat_list_str_file()
+    file_as_list: list[str] = nexus_file.get_flat_list_str_file
     table_start: int = -1
     table_end: int = -1
     property_dict: dict = {}

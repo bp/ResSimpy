@@ -405,7 +405,7 @@ second_file INCLUDE inc_file2.inc continuation''')
     mocker.patch("builtins.open", mock_open_wrapper)
     # Act
     nexus_file = NexusFile.generate_file_include_structure(file_path)
-    flat_file = nexus_file.get_flat_list_str_file()
+    flat_file = nexus_file.get_flat_list_str_file
     # Assert
     assert nexus_file == expected_nexus_file
     assert nexus_file.line_locations == expected_nexus_file.line_locations
@@ -458,9 +458,9 @@ continuation''')
     # Act
     nexus_file = NexusFile.generate_file_include_structure(file_path)
     # do the generation of the flat file a few times to catch the issue of continually appending duplicate line locations
-    nexus_file.get_flat_list_str_file()
-    nexus_file.get_flat_list_str_file()
-    nexus_file.get_flat_list_str_file()
+    nexus_file.get_flat_list_str_file
+    nexus_file.get_flat_list_str_file
+    nexus_file.get_flat_list_str_file
 
     # Assert
     assert nexus_file == expected_nexus_file
@@ -514,10 +514,10 @@ continuation''')
     # Act
     nexus_file = NexusFile.generate_file_include_structure(file_path)
     # do the generation of the flat file a few times to catch the issue of continually appending duplicate line locations
-    nexus_file.get_flat_list_str_file()
+    nexus_file.get_flat_list_str_file
     nexus_file.file_content_as_list.insert(1, 'New line in here\n')
     nexus_file.includes_objects[0].file_content_as_list.insert(1, 'new line in include\n')
-    nexus_file.get_flat_list_str_file()
+    nexus_file.get_flat_list_str_file
 
     # Assert
     assert nexus_file.file_content_as_list == expected_nexus_file.file_content_as_list
@@ -580,7 +580,7 @@ continuation''')
 
     # Act
     nexus_file = NexusFile.generate_file_include_structure(file_path)
-    flat_file = nexus_file.get_flat_list_str_file()
+    flat_file = nexus_file.get_flat_list_str_file
     nexus_file_result, index_in_file = nexus_file.find_which_include_file(index=index)
     # Assert
     assert nexus_file == expected_nexus_file
@@ -626,8 +626,69 @@ def test_update_object_locations(mocker, test_file_contents, expected_results):
 
     # Act
     # effectively add 2 lines at location 5
-    wells_file.update_object_locations(line_number=5, number_additional_lines=2)
+    wells_file._NexusFile__update_object_locations(line_number=5, number_additional_lines=2)
     result = wells_file.object_locations
 
     # Assert
     assert result == expected_results
+
+
+def test_add_to_file_as_list(mocker):
+    # Arrange
+    mocker.patch.object(uuid, 'uuid4', side_effect=['additional_obj_uuid', 'file_uuid', 'file_uuid',])
+
+    additional_content = ['new', 'lines', 'of\n !the', 'file']
+    additional_obj = {uuid.uuid4(): 3}
+    nexus_file = NexusFile(location='somefile.dat', origin=None, file_content_as_list=
+                           ['original', 'file', 'with \n', 'some filler', 'content', 'and object', 'must', 'be', 'more lines !ajf'],
+                           )
+    nexus_file.line_locations = [(0, 'file_uuid')]
+    nexus_file.object_locations = {'uuid_obj': 2, 'another_uuid': 3, 'final_uuid':7}
+
+    expected_line_locations = [(0, 'file_uuid')]
+    expected_object_locations = {'uuid_obj': 2, 'another_uuid': 7, 'final_uuid': 11, 'additional_obj_uuid': 3}
+    expected_file_as_list = ['original', 'file', 'with \n','new', 'lines', 'of\n !the', 'file', 'some filler',
+                             'content', 'and object', 'must', 'be', 'more lines !ajf']
+    expected_result = NexusFile(location='somefile.dat', origin=None, file_content_as_list=expected_file_as_list)
+
+    expected_result.line_locations = expected_line_locations
+    expected_result.object_locations = expected_object_locations
+
+    # mock out the write method to ensure it isn't making new files.
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+    # Act
+    nexus_file.add_to_file_as_list(additional_content=additional_content, index=3, additional_objects=additional_obj)
+    result = nexus_file
+
+    # Assert
+    assert result == expected_result
+
+def test_remove_from_file_as_list(mocker):
+    # Arrange
+    mocker.patch.object(uuid, 'uuid4', side_effect=['remove_obj_uuid', 'file_uuid', 'file_uuid',])
+
+    remove_obj = {uuid.uuid4(): 3}
+    nexus_file = NexusFile(location='somefile.dat', origin=None, file_content_as_list=
+                           ['original', 'file', 'with \n', 'some filler', 'content', 'and object', 'must', 'be', 'more lines !ajf'],
+                           )
+    nexus_file.line_locations = [(0, 'file_uuid')]
+    nexus_file.object_locations = {'uuid1': 2, 'remove_obj_uuid': 3, 'final_uuid': 7}
+
+    expected_object_locations = {'uuid1': 2, 'final_uuid': 6}
+    expected_file_as_list = ['original', 'file', 'with \n', 'content', ' object', 'must', 'be', 'more lines !ajf']
+    expected_result = NexusFile(location='somefile.dat', origin=None, file_content_as_list=expected_file_as_list)
+
+    expected_result.line_locations = [(0, 'file_uuid')]
+    expected_result.object_locations = expected_object_locations
+
+    # mock out the write method to ensure it isn't making new files.
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+    # Act
+    nexus_file.remove_from_file_as_list(index=3, objects_to_remove=remove_obj)
+    nexus_file.remove_from_file_as_list(index=4, string_to_remove='and')
+
+    # Assert
+    assert nexus_file.file_content_as_list == expected_result.file_content_as_list
+    assert nexus_file == expected_result

@@ -278,7 +278,7 @@ class NexusSimulator(Simulator):
         fluid_type = None
         for model in models:
             model_fluid_type = None
-            fcs_file = NexusFile.generate_file_include_structure(model).get_flat_list_str_file()
+            fcs_file = NexusFile.generate_file_include_structure(model).get_flat_list_str_file
             surface_filename = None
             if fcs_file is None:
                 warnings.warn(UserWarning(f'No file found for {model}'))
@@ -408,7 +408,7 @@ class NexusSimulator(Simulator):
         # fcs properties only. The FcsFile structure is then generated and stored in the object (with all the nesting of
         # the NexusFiles as self.fcs_file (e.g. STRUCTURED_GRID, RUNCONTROL etc)
         fcs_content_with_includes = NexusFile.generate_file_include_structure(
-            self.__new_fcs_file_path).get_flat_list_str_file()
+            self.__new_fcs_file_path).get_flat_list_str_file
         self.fcs_file = FcsNexusFile.generate_fcs_structure(self.__new_fcs_file_path)
         if fcs_content_with_includes is None:
             raise ValueError(f'FCS file not found, no content for {self.__new_fcs_file_path}')

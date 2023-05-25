@@ -64,7 +64,7 @@ class NexusRockMethod(RockMethod):
         """Read Nexus rock properties file contents and populate NexusRockMethod object
         """
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
-        file_as_list = file_obj.get_flat_list_str_file()
+        file_as_list = file_obj.get_flat_list_str_file
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
@@ -103,7 +103,7 @@ class NexusRockMethod(RockMethod):
                             self.properties[key] = ''
             # Find starting index of rock compaction table
             if nfo.check_token('CMT', line):
-                cmt_indices = [line_indx+1, len(file_as_list)]
+                cmt_indices = [line_indx + 1, len(file_as_list)]
                 table_being_read['CMT'] = True
                 start_reading_table = True
                 line_indx += 1

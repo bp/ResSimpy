@@ -25,7 +25,7 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
         list[NexusWell]: list of Nexus well classes contained within a wellspec file.
     """
 
-    file_as_list = nexus_file.get_flat_list_str_file()
+    file_as_list = nexus_file.get_flat_list_str_file
     well_name: Optional[str] = None
     wellspec_file_units: Optional[UnitSystem] = None
 
@@ -207,7 +207,7 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
         return None if value is None else int(value)
 
     completions: list[NexusCompletion] = []
-    file_as_list: list[str] = nexus_file.get_flat_list_str_file()
+    file_as_list: list[str] = nexus_file.get_flat_list_str_file
 
     for index, line in enumerate(file_as_list[header_index + 1:]):
         # check for end of table lines:
