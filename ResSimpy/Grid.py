@@ -17,12 +17,12 @@ class Grid(ABC):
     _range_y: Optional[int]
     _range_z: Optional[int]
 
-    _netgrs: VariableEntry = VariableEntry()
-    _porosity: VariableEntry = VariableEntry()
-    _sw: VariableEntry = VariableEntry()
-    _kx: VariableEntry = VariableEntry()
-    _ky: VariableEntry = VariableEntry()
-    _kz: VariableEntry = VariableEntry()
+    _netgrs: VariableEntry
+    _porosity: VariableEntry
+    _sw: VariableEntry
+    _kx: VariableEntry
+    _ky: VariableEntry
+    _kz: VariableEntry
 
     def __init__(self) -> None:
         self._netgrs = VariableEntry()
