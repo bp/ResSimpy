@@ -22,11 +22,11 @@ class NexusValveMethod(ValveMethod):
     # General parameters
     file_path: str
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                dict[str, Union[float, pd.DataFrame]]]] = field(default_factory=get_empty_dict_union)
+    dict[str, Union[float, pd.DataFrame]]]] = field(default_factory=get_empty_dict_union)
 
     def __init__(self, file_path: str, method_number: int,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                                      dict[str, Union[float, pd.DataFrame]]]]] = None):
+                 dict[str, Union[float, pd.DataFrame]]]]] = None):
         self.file_path = file_path
         if properties is not None:
             self.properties = properties
@@ -79,12 +79,12 @@ class NexusValveMethod(ValveMethod):
             for table_key in VALVE_TABLE_KEYWORDS:
                 if nfo.check_token(table_key, line):
                     table_being_read[table_key] = True
-                    valve_table_indices[table_key] = [line_indx+1, len(file_as_list)]
+                    valve_table_indices[table_key] = [line_indx + 1, len(file_as_list)]
                     # Find rate keyword if present
                     for rate_key in VALVE_RATE_KEYWORDS:
                         if nfo.check_token(rate_key, line):
                             self.properties['DP_RATE'] = rate_key  # Rate used to determine pressure drop across valve
-                if table_being_read[table_key] and nfo.check_token('END'+table_key, line):
+                if table_being_read[table_key] and nfo.check_token('END' + table_key, line):
                     table_being_read[table_key] = False
                     valve_table_indices[table_key][1] = line_indx
 

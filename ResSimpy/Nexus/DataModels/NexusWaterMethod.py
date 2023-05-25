@@ -46,13 +46,13 @@ class NexusWaterMethod(WaterMethod):
     file_path: str
     reference_pressure: Optional[float] = None
     properties: dict[str, Union[str, int, float, Enum, list[str],
-                                pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
+    pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
     parameters: list[NexusWaterParams] = field(default_factory=get_empty_list_nexus_water_params)
 
     def __init__(self, file_path: str, method_number: int, reference_pressure: Optional[float] = None,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                                      dict[str, Union[float, pd.DataFrame]]]]] = None,
+                 dict[str, Union[float, pd.DataFrame]]]]] = None,
                  parameters: Optional[list[NexusWaterParams]] = None):
         self.file_path = file_path
         self.reference_pressure = reference_pressure
@@ -76,7 +76,7 @@ class NexusWaterMethod(WaterMethod):
             'BW': ('formation_volume_factor', float),
             'VISW': ('viscosity', float),
             'CVW': ('viscosity_compressibility', float)
-        }
+            }
         return nexus_mapping
 
     def __repr__(self) -> str:
