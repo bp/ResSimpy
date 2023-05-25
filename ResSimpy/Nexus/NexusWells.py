@@ -1,13 +1,15 @@
 from dataclasses import dataclass, field
-from typing import Sequence, Optional
+from typing import Sequence, Optional, MutableMapping, Dict
 
 import pandas as pd
 
 from ResSimpy.Enums.HowEnum import OperationEnum
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.DataModels.NexusPVT import NexusPVT
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Well import Well
 from ResSimpy.Wells import Wells
 from ResSimpy.Nexus.load_wells import load_wells
 
@@ -16,6 +18,13 @@ from ResSimpy.Nexus.load_wells import load_wells
 class NexusWells(Wells):
     __wells: list[NexusWell] = field(default_factory=lambda: [])
     wellspec_files: list[NexusFile] = field(default_factory=lambda: [])
+
+    @property
+    def test_property(self) -> NexusWell:
+
+        return {}
+
+        # return NexusWell(well_name=" test", completions=[], units=UnitSystem.ENGLISH)
 
     def get_wells(self) -> Sequence[NexusWell]:
         return self.__wells

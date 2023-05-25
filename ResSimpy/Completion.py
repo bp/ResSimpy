@@ -13,7 +13,7 @@ class Completion(ABC):
     IMPORTANT: if modifying this class, make sure to update the relevant tests in test_load_wells, as well as updating
     the constructor calls in the derived classes.
 
-    Attributes:
+    Args:
         date (str): The starting date of the completion. Applies until changed.
         i (Optional[int]): The structured grid cell location in the x direction. 'IW' in Nexus
         j (Optional[int]): The structured grid cell location in the y direction. 'JW' in Nexus

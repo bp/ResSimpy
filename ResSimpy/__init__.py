@@ -1,3 +1,16 @@
-"""ResSimpy base Module, containing the base classes and Simulator specific modules."""
+"""A library to help read and manipulate input decks for reservoir simulators.
 
-__all__ = ['Nexus', 'BaseClasses', 'Enums']
+.. autosummary::
+    :toctree: _autosummary
+    :caption: API Reference
+    :template: custom-module-template.rst
+    :recursive:
+
+    Nexus
+    Utils
+    Enums
+"""
+
+# __all__ = ['Nexus', 'Utils', 'Enums']
+
+
