@@ -20,8 +20,3 @@ class Wells(ABC):
 
     def get_wells_overview(self) -> str:
         raise NotImplementedError("Implement this in the derived class")
-
-    @property
-    def test_property(self) -> Well:
-
-        raise NotImplementedError("test")
