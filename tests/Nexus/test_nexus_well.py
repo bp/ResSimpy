@@ -856,7 +856,7 @@ iw jw l radw
 ),
 
 
-], ids=['modify well in includes file'])
+], ids=['modify well in include_locations file'])
 def test_add_completion_include_files(mocker, fcs_file_contents, wells_file, include_file_contents, add_perf_date, expected_result):
     '''TODO after an include in main file
         TODO inside an include file
@@ -888,13 +888,13 @@ def test_add_completion_include_files(mocker, fcs_file_contents, wells_file, inc
     add_perf_dict_2 = {'date': add_perf_date, 'i': 7, 'j': 8, 'k': 9, 'well_radius': 10.5}
     add_perf_dict_3 = {'date': add_perf_date, 'i': 20, 'j': 20, 'k': 20, 'well_radius': 5.5}
 
-    expected_include_file = NexusFile(location=include_file_path, includes=[],
-    origin='/my/wellspec/file.dat', includes_objects=None, file_content_as_list=expected_result)
+    expected_include_file = NexusFile(location=include_file_path, include_locations=[],
+    origin='/my/wellspec/file.dat', include_objects=None, file_content_as_list=expected_result)
 
     expected_wells_file_as_list = [x.replace('include_file.dat', '') for x in wells_file.splitlines(keepends=True)]
     expected_wells_file_as_list.insert(expected_wells_file_as_list.index('Include \n')+1, expected_include_file)
-    expected_wells_file = NexusFile(location='/my/wellspec/file.dat', includes_objects=[expected_include_file],
-    includes=[include_file_path], origin=fcs_file_path, file_content_as_list=expected_wells_file_as_list)
+    expected_wells_file = NexusFile(location='/my/wellspec/file.dat', include_objects=[expected_include_file],
+    include_locations=[include_file_path], origin=fcs_file_path, file_content_as_list=expected_wells_file_as_list)
     # Act
     # test adding a load of completions sequentially
     mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict,
@@ -914,7 +914,7 @@ def test_add_completion_include_files(mocker, fcs_file_contents, wells_file, inc
     mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
                                         preserve_previous_completions=True)
 
-    result = mock_nexus_sim.fcs_file.well_files[1].includes_objects[0]
+    result = mock_nexus_sim.fcs_file.well_files[1].include_objects[0]
 
     # Assert
     assert result.file_content_as_list == expected_include_file.file_content_as_list

@@ -27,19 +27,19 @@ GRID_FILES
     options_file_path = os.path.join(root_folder, 'nexus_data/nexus_data/mp2020_ref_options_reg_update.dat')
     expected_includes = [ structured_grid_path, options_file_path]
     expected_structured_grid_file = NexusFile(location=structured_grid_path,
-                                              origin=fcs_path, includes=None,
-                                              includes_objects=None, file_content_as_list=None)
+                                              origin=fcs_path, include_locations=None,
+                                              include_objects=None, file_content_as_list=None)
     
     expected_options_file = NexusFile(location=options_file_path,
-                                      includes=None, origin=fcs_path, includes_objects=None, file_content_as_list=None)
+                                      include_locations=None, origin=fcs_path, include_objects=None, file_content_as_list=None)
     expected_fcs_file = FcsNexusFile(location=fcs_path, origin=None,
-                                     includes_objects=[expected_structured_grid_file, expected_options_file],
+                                     include_objects=[expected_structured_grid_file, expected_options_file],
                                      file_content_as_list=[
                                          'DESC reservoir1', 'RUN_UNITS ENGLISH', 'DATEFORMAT DD/MM/YYYY',
                                          'GRID_FILES', '	 STRUCTURED_GRID ', expected_structured_grid_file, '',
                                          '	 OPTIONS ', expected_options_file, '', ],
                                      structured_grid_file=expected_structured_grid_file,
-                                     options_file=expected_options_file, includes=expected_includes,
+                                     options_file=expected_options_file, include_locations=expected_includes,
                                      )
 
     # Act
@@ -71,24 +71,24 @@ def test_fcs_file_multiple_methods(mocker):
                          'nexus_data/nexus_data/mp2017hm_ref_equil_02.dat',
 	                     'nexus_data/nexus_data/mp2017hm_ref_equil_03.dat', ]
     expected_equil_1 = NexusFile(location='nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',
-                                 origin=fcs_path, includes=None,
-                                 includes_objects=None, file_content_as_list=None)
+                                 origin=fcs_path, include_locations=None,
+                                 include_objects=None, file_content_as_list=None)
     expected_equil_2 = NexusFile(location='nexus_data/nexus_data/mp2017hm_ref_equil_02.dat',
-                                 origin=fcs_path, includes=None,
-                                 includes_objects=None, file_content_as_list=None)
+                                 origin=fcs_path, include_locations=None,
+                                 include_objects=None, file_content_as_list=None)
     expected_equil_3 = NexusFile(location='nexus_data/nexus_data/mp2017hm_ref_equil_03.dat',
-                                 origin=fcs_path, includes=None,
-                                 includes_objects=None, file_content_as_list=None)
+                                 origin=fcs_path, include_locations=None,
+                                 include_objects=None, file_content_as_list=None)
     expected_fcs_file = FcsNexusFile(
         location=fcs_path, origin=None,
-        includes_objects=[expected_equil_1, expected_equil_2, expected_equil_3],
+        include_objects=[expected_equil_1, expected_equil_2, expected_equil_3],
         file_content_as_list=[
             'DESC reservoir1', '    RUN_UNITS ENGLISH', '    DATEFORMAT DD/MM/YYYY',
             '    INITIALIZATION_FILES', '	 EQUIL Method 1 ', expected_equil_1, '',
             '	 EQUIL Method 2 ', expected_equil_2, '', '	 EQUIL Method 3 ',
             expected_equil_3, ''],
         equil_files={1: expected_equil_1, 2: expected_equil_2, 3: expected_equil_3},
-        includes=expected_includes,
+        include_locations=expected_includes,
     )
     # Act
     result = FcsNexusFile.generate_fcs_structure(fcs_path)
@@ -128,20 +128,20 @@ def test_fcs_file_all_methods(mocker):
                          'wells.dat',
                          'hyd.dat']
     expected_equil_1 = NexusFile(location='nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',
-                                 origin=fcs_path, includes=None,
-                                 includes_objects=None, file_content_as_list=None)
+                                 origin=fcs_path, include_locations=None,
+                                 include_objects=None, file_content_as_list=None)
     expected_equil_2 = NexusFile(location='nexus_data/nexus_data/mp2017hm_ref_equil_02.dat',
-                                 origin=fcs_path, includes=None,
-                                 includes_objects=None, file_content_as_list=None)
+                                 origin=fcs_path, include_locations=None,
+                                 include_objects=None, file_content_as_list=None)
     expected_structured_grid_file = NexusFile(location='nexus_data/mp2020_structured_grid_1_reg_update.dat',
-                                              origin=fcs_path, includes=None,
-                                              includes_objects=None, file_content_as_list=None)
-    expected_options_file = NexusFile(location='nexus_data/nexus_data/mp2020_ref_options_reg_update.dat', includes=None,
-                                      origin=fcs_path, includes_objects=None, file_content_as_list=None)
-    expected_wells_file = NexusFile(location='wells.dat', origin=fcs_path, includes=None, includes_objects=None,
+                                              origin=fcs_path, include_locations=None,
+                                              include_objects=None, file_content_as_list=None)
+    expected_options_file = NexusFile(location='nexus_data/nexus_data/mp2020_ref_options_reg_update.dat', include_locations=None,
+                                      origin=fcs_path, include_objects=None, file_content_as_list=None)
+    expected_wells_file = NexusFile(location='wells.dat', origin=fcs_path, include_locations=None, include_objects=None,
                                     file_content_as_list=None)
-    expected_hyd_method_file = NexusFile(location='hyd.dat', origin=fcs_path, includes=None,
-                                         includes_objects=None, file_content_as_list=None)
+    expected_hyd_method_file = NexusFile(location='hyd.dat', origin=fcs_path, include_locations=None,
+                                         include_objects=None, file_content_as_list=None)
 
     equil_files = {1: expected_equil_1, 2: expected_equil_2, }
     include_objects = [expected_equil_1, expected_equil_2, expected_structured_grid_file, expected_options_file,
@@ -170,11 +170,11 @@ def test_fcs_file_all_methods(mocker):
                                      expected_hyd_method_file,
                                      '',
                                      ]
-    expected_fcs_file = FcsNexusFile(location=fcs_path, origin=None, includes_objects=include_objects,
+    expected_fcs_file = FcsNexusFile(location=fcs_path, origin=None, include_objects=include_objects,
                                      equil_files=equil_files, structured_grid_file=expected_structured_grid_file, 
                                      options_file=expected_options_file, well_files={1: expected_wells_file},
                                      hyd_files={3: expected_hyd_method_file},
-                                     file_content_as_list=expected_fcs_contents_as_list, includes=expected_includes)
+                                     file_content_as_list=expected_fcs_contents_as_list, include_locations=expected_includes)
     # Act
     result = FcsNexusFile.generate_fcs_structure(fcs_file_path=fcs_path)
     
@@ -195,8 +195,8 @@ def test_fcs_file_all_methods(mocker):
 def test_line_as_nexus_list(input_line, expected_result):
     # Arrange
     path = "nexus_data/mp2020_structured_grid_1_reg_update.dat"
-    structured_grid_file = NexusFile(location=path, origin=None, includes=None,
-                                     includes_objects=None, file_content_as_list=None)
+    structured_grid_file = NexusFile(location=path, origin=None, include_locations=None,
+                                     include_objects=None, file_content_as_list=None)
     expected_result = [x if x != 'NEXUSFILE' else structured_grid_file for x in expected_result]
     # Act
     result = FcsNexusFile.line_as_nexus_list(input_line, path, structured_grid_file)
@@ -262,20 +262,20 @@ def test_get_full_network(mocker):
     ]
 
     equil1 = NexusFile(location='nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',
-                       origin=fcs_path, includes=None,
-                       includes_objects=None, file_content_as_list=None)
+                       origin=fcs_path, include_locations=None,
+                       include_objects=None, file_content_as_list=None)
     equil_2 = NexusFile(location='nexus_data/nexus_data/mp2017hm_ref_equil_02.dat',
-                        origin=fcs_path, includes=None,
-                        includes_objects=None, file_content_as_list=None)
+                        origin=fcs_path, include_locations=None,
+                        include_objects=None, file_content_as_list=None)
     structured_grid_file = NexusFile(location='nexus_data/mp2020_structured_grid_1_reg_update.dat',
-                                     origin=fcs_path, includes=None,
-                                     includes_objects=None, file_content_as_list=None)
-    options_file = NexusFile(location='nexus_data/nexus_data/mp2020_ref_options_reg_update.dat', includes=None,
-                             origin=fcs_path, includes_objects=None, file_content_as_list=None)
-    wells_file = NexusFile(location='wells.dat', origin=fcs_path, includes=None, includes_objects=None,
+                                     origin=fcs_path, include_locations=None,
+                                     include_objects=None, file_content_as_list=None)
+    options_file = NexusFile(location='nexus_data/nexus_data/mp2020_ref_options_reg_update.dat', include_locations=None,
+                             origin=fcs_path, include_objects=None, file_content_as_list=None)
+    wells_file = NexusFile(location='wells.dat', origin=fcs_path, include_locations=None, include_objects=None,
                            file_content_as_list=None)
-    hyd_method_file = NexusFile(location='hyd.dat', origin=fcs_path, includes=None,
-                                includes_objects=None, file_content_as_list=None)
+    hyd_method_file = NexusFile(location='hyd.dat', origin=fcs_path, include_locations=None,
+                                include_objects=None, file_content_as_list=None)
 
     equil_files = {1: equil1, 2: equil_2, }
     include_objects = [equil1, equil_2, structured_grid_file, options_file,
@@ -305,11 +305,11 @@ def test_get_full_network(mocker):
                             hyd_method_file,
                             '',
                             ]
-    compiled_fcs_file = FcsNexusFile(location=fcs_path, origin=None, includes_objects=include_objects,
+    compiled_fcs_file = FcsNexusFile(location=fcs_path, origin=None, include_objects=include_objects,
                                      equil_files=equil_files, structured_grid_file=structured_grid_file, 
                                      options_file=options_file, well_files={1: wells_file},
                                      hyd_files={3: hyd_method_file},
-                                     file_content_as_list=fcs_contents_as_list, includes=[])
+                                     file_content_as_list=fcs_contents_as_list, include_locations=[])
 
     # Act
     from_list, to_list = compiled_fcs_file.get_full_network()

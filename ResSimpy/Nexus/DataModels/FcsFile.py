@@ -45,9 +45,9 @@ class FcsNexusFile(NexusFile):
 
     def __init__(
             self, location: Optional[str] = None,
-            includes: Optional[list[str]] = None,
+            include_locations: Optional[list[str]] = None,
             origin: Optional[str] = None,
-            includes_objects: Optional[list[NexusFile]] = None,
+            include_objects: Optional[list[NexusFile]] = None,
             file_content_as_list: Optional[list[Union[str, NexusFile]]] = None,
             restart_file: Optional[NexusFile] = None,
             structured_grid_file: Optional[NexusFile] = None,
@@ -106,7 +106,7 @@ class FcsNexusFile(NexusFile):
         self.polymer_files = polymer_files if polymer_files is not None else get_empty_dict_int_nexus_file()
         self.adsorption_files = adsorption_files if adsorption_files is not None else get_empty_dict_int_nexus_file()
         self.flux_in_files = flux_in_files if flux_in_files is not None else get_empty_dict_int_nexus_file()
-        super().__init__(location=location, includes=includes, origin=origin, includes_objects=includes_objects,
+        super().__init__(location=location, include_locations=include_locations, origin=origin, include_objects=include_objects,
                          file_content_as_list=file_content_as_list)
 
     def __repr__(self):
@@ -128,9 +128,9 @@ class FcsNexusFile(NexusFile):
             FcsNexusFile: instance of a FcsNexusFile for a given fcs file path
         """
         fcs_file = cls(location=fcs_file_path)
-        fcs_file.includes_objects = get_empty_list_nexus_file()
+        fcs_file.include_objects = get_empty_list_nexus_file()
         fcs_file.file_content_as_list = get_empty_list_str_nexus_file()
-        fcs_file.includes = get_empty_list_str()
+        fcs_file.include_locations = get_empty_list_str()
 
         fcs_keyword_map_single = {
             'STRUCTURED_GRID': 'structured_grid_file',
@@ -204,16 +204,16 @@ class FcsNexusFile(NexusFile):
                     # set the attribute in the fcs_file instance
                     setattr(fcs_file, fcs_keyword_map_multi[key], fcs_property_list)
                     fcs_file.file_content_as_list.extend(cls.line_as_nexus_list(line, value, nexus_file))
-                    fcs_file.includes_objects.append(nexus_file)
-                    fcs_file.includes.append(sub_file_path)
+                    fcs_file.include_objects.append(nexus_file)
+                    fcs_file.include_locations.append(sub_file_path)
                 elif key in fcs_keyword_map_single:
                     sub_file_path = nfo.get_full_file_path(value, origin_path)
                     nexus_file = NexusFile.generate_file_include_structure(
                         sub_file_path, origin=fcs_file_path, recursive=recursive)
                     setattr(fcs_file, fcs_keyword_map_single[key], nexus_file)
                     fcs_file.file_content_as_list.extend(cls.line_as_nexus_list(line, value, nexus_file))
-                    fcs_file.includes_objects.append(nexus_file)
-                    fcs_file.includes.append(sub_file_path)
+                    fcs_file.include_objects.append(nexus_file)
+                    fcs_file.include_locations.append(sub_file_path)
                 else:
                     fcs_file.file_content_as_list.append(line.replace('\n', ''))
                     continue

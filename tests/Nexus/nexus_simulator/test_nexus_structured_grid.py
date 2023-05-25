@@ -388,11 +388,11 @@ def test_view_command(mocker, structured_grid_file_contents, expected_text):
                                  'RUNControl run_control.inc\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_grid\n structured/grid.dat',
                                  'testpath1', 'structured/grid.dat'),
                              (
-                                 'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nStructured_GRID\n path/to/includes/grid.dat',
-                                 'testpath1', 'path/to/includes/grid.dat'),
+                                 'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nStructured_GRID\n path/to/include_locations/grid.dat',
+                                 'testpath1', 'path/to/include_locations/grid.dat'),
                              (
-                                 'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nstructured_grid\n path/to/includes/grid.dat',
-                                 'testpath1', 'path/to/includes/grid.dat'),
+                                 'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nstructured_grid\n path/to/include_locations/grid.dat',
+                                 'testpath1', 'path/to/include_locations/grid.dat'),
                          ])
 def test_get_abs_structured_grid_path(mocker, fcs_file, expected_root, expected_extracted_path):
     # Arrange

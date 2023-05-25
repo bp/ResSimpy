@@ -273,10 +273,10 @@ class Runcontrol:
         # If we don't want to write the times, return here.
         if not self.model.write_times:
             return
-        if self.model.fcs_file.runcontrol_file.includes is None:
+        if self.model.fcs_file.runcontrol_file.include_locations is None:
             warnings.warn(f'No includes files found in {self.model.fcs_file.runcontrol_file.location}')
             return
-        for file in self.model.fcs_file.runcontrol_file.includes:
+        for file in self.model.fcs_file.runcontrol_file.include_locations:
             if self.model.destination is not None:
                 self.remove_times_from_file(run_control_file_content, file)
 
