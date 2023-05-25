@@ -4,7 +4,7 @@ import uuid
 from dataclasses import dataclass, field
 from typing import Optional, Generator
 from uuid import UUID
-
+import re
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import warnings
 
@@ -179,7 +179,8 @@ class NexusFile:
         index: int
 
     def iterate_line(self, file_index: Optional[FileIndex] = None, max_depth: Optional[int] = None,
-                     parent: Optional[NexusFile] = None) -> Generator[str, None, None]:
+                     parent: Optional[NexusFile] = None, prefix_line: Optional[str] = None) -> \
+            Generator[str, None, None]:
         """Generator object for iterating over a list of strings with nested NexusFile objects in them
 
         Yields:
@@ -193,6 +194,9 @@ class NexusFile:
             parent.line_locations = []
         if parent.line_locations is None:
             parent.line_locations = []
+        if prefix_line is not None:
+            file_index.index += 1
+            yield prefix_line
 
         new_entry = (file_index.index, self.file_id)
         if new_entry not in parent.line_locations:
@@ -208,13 +212,25 @@ class NexusFile:
                 incfile_location = nfo.get_token_value('INCLUDE', row, self.file_content_as_list)
                 if incfile_location is None:
                     continue
+                try:
+                    prefix_line, suffix_line = re.split(incfile_location, row, maxsplit=1, flags=re.IGNORECASE)
+                    prefix_line = re.sub('INCLUDE', '', prefix_line, flags=re.IGNORECASE)
+                    prefix_line = prefix_line.rstrip() + ' '
+                    suffix_line = suffix_line.lstrip()
+                except ValueError:
+                    prefix_line = row.replace(incfile_location, '')
+                    suffix_line = None
+
                 include_files = [x for x in self.include_objects if x.location == incfile_location]
                 if (max_depth is None or depth > 0) and len(include_files) > 0:
                     include_file = include_files[0]
                     level_down_max_depth = None if max_depth is None else depth - 1
 
                     yield from include_file.iterate_line(file_index=file_index, max_depth=level_down_max_depth,
-                                                         parent=parent)
+                                                         parent=parent, prefix_line=prefix_line)
+                    if suffix_line:
+                        yield suffix_line
+
                     new_entry = (file_index.index, self.file_id)
                     if new_entry not in parent.line_locations:
                         parent.line_locations.append(new_entry)

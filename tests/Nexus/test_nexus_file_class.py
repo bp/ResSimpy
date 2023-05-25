@@ -275,7 +275,8 @@ def test_generate_file_include_structure_skip_array(mocker, test_file_contents, 
        6 7 8   9.11''',
        {'uuid1': 2,
         'uuid2': 3}),
-        ]
+        ],
+        ids=['basic_test']
 )
 def test_file_object_locations(mocker, test_file_contents, expected_results):
     # Arrange
@@ -321,8 +322,8 @@ second_file INCLUDE inc_file2.inc continuation''')
                                     include_objects=None, file_content_as_list=['inc file contents\n', 'second line in incfile'])
     nexus_file_include2 = NexusFile(location='inc_file2.inc', include_locations=[], origin=file_path,
                                     include_objects=None, file_content_as_list=['inc2 file contents\n', 'more content'])
-    expected_file_content_as_list = ['basic_file INCLUDE \n', nexus_file_include1, 'some random words ! comment\n', 'second_file INCLUDE ',
-        nexus_file_include2, 'continuation']
+    expected_file_content_as_list = ['basic_file INCLUDE inc_file1.inc\n', 'some random words ! comment\n',
+        'second_file INCLUDE inc_file2.inc continuation',]
 
     expected_line_locations = [(0, 'parent_file'), (1, 'uuid_inc1'), (3, 'parent_file'), (5, 'uuid_inc2'), (7, 'parent_file')]
 
@@ -330,6 +331,16 @@ second_file INCLUDE inc_file2.inc continuation''')
                                     origin=expected_origin, include_objects=[nexus_file_include1, nexus_file_include2],
                                     file_content_as_list=expected_file_content_as_list)
     expected_nexus_file.__setattr__('line_locations', expected_line_locations)
+
+    expected_flat_file_as_list = [
+        'basic_file ',                          #0: parent
+        'inc file contents\n',                  #1: include
+        'second line in incfile',
+        'some random words ! comment\n',        #3: parent
+        'second_file ',
+        'inc2 file contents\n',                 #5: 2nd include
+        'more content',
+        'continuation']                         #7: parent
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -343,6 +354,7 @@ second_file INCLUDE inc_file2.inc continuation''')
     nexus_file = NexusFile.generate_file_include_structure(file_path)
     flat_file = nexus_file.get_flat_list_str_file
     # Assert
+    assert flat_file == expected_flat_file_as_list
     assert nexus_file == expected_nexus_file
     assert nexus_file.line_locations == expected_nexus_file.line_locations
 
