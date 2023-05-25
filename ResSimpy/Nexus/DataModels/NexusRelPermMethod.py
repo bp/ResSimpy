@@ -25,17 +25,15 @@ class NexusRelPermMethod(RelPermMethod):
     # General parameters
     file_path: str
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-    dict[str, Union[float, pd.DataFrame]]]] \
-        = field(default_factory=get_empty_dict_union)
+                     dict[str, Union[float, pd.DataFrame]]]] = field(default_factory=get_empty_dict_union)
     hysteresis_params: dict[str, Union[str, float, dict[str, Union[str, float, dict[str, Union[str, float]]]]]] \
         = field(default_factory=get_empty_hysteresis_dict)
 
     def __init__(self, file_path: str, method_number: int,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                 dict[str, Union[float, pd.DataFrame]]]]] = None,
-                 hysteresis_params: Optional[dict[str, Union[str, float,
-                 dict[str, Union[str, float,
-                 dict[str, Union[str, float]]]]]]] = None):
+                                      dict[str, Union[float, pd.DataFrame]]]]] = None,
+                 hysteresis_params: Optional[dict[str, Union[str, float, dict[str, Union[str, float,
+                                             dict[str, Union[str, float]]]]]]] = None):
         self.file_path = file_path
         if properties is not None:
             self.properties = properties

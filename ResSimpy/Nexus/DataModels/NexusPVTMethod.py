@@ -44,16 +44,16 @@ class NexusPVTMethod(PVTMethod):
             str, pd.DataFrame]]] \
         = field(default_factory=get_empty_eosopt_dict_union)
     properties: dict[str, Union[str, int, float, Enum, list[str],
-    pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
+                                pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
 
     def __init__(self, file_path: str, method_number: int, pvt_type: Optional[str] = None,
                  eos_nhc: Optional[int] = None, eos_temp: Optional[float] = None,
                  eos_components: Optional[list[str]] = None,
                  eos_options: Optional[dict[str, Union[str, int, float, pd.DataFrame, list[str], dict[str, float],
-                 tuple[str, dict[str, float]], dict[str, pd.DataFrame]]]] = None,
+                                       tuple[str, dict[str, float]], dict[str, pd.DataFrame]]]] = None,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                 dict[str, Union[float, pd.DataFrame]]]]] = None):
+                                      dict[str, Union[float, pd.DataFrame]]]]] = None):
         self.file_path = file_path
         if pvt_type is not None:
             self.pvt_type = pvt_type
