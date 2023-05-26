@@ -194,7 +194,7 @@ class NexusFile:
             parent.line_locations = []
         if parent.line_locations is None:
             parent.line_locations = []
-        if prefix_line is not None:
+        if prefix_line is not None and prefix_line != ' ':
             file_index.index += 1
             yield prefix_line
 
@@ -228,12 +228,13 @@ class NexusFile:
 
                     yield from include_file.iterate_line(file_index=file_index, max_depth=level_down_max_depth,
                                                          parent=parent, prefix_line=prefix_line)
-                    if suffix_line:
-                        yield suffix_line
 
                     new_entry = (file_index.index, self.file_id)
                     if new_entry not in parent.line_locations:
                         parent.line_locations.append(new_entry)
+                    if suffix_line:
+                        file_index.index += 1
+                        yield suffix_line
                 else:
                     continue
             else:
