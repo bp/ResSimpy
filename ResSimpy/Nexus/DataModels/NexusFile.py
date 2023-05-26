@@ -234,6 +234,8 @@ class NexusFile:
                         parent.line_locations.append(new_entry)
                     if suffix_line:
                         file_index.index += 1
+                        # Add in space between include location and the rest of the line
+                        suffix_line = ' ' + suffix_line
                         yield suffix_line
                 else:
                     continue

@@ -436,7 +436,7 @@ continuation''')
     nexus_file_include2 = NexusFile(location='inc_file2.inc', include_locations=[], origin='inc_file1.inc',
                                     include_objects=None, file_content_as_list=['inc2 file contents\n', 'more content'])
 
-    inc1_file_content_as_list = ['inc file contents\n', 'new line in include\n', 'second line in incfile \n',
+    inc1_file_content_as_list = ['inc file contents\n', 'new line in include_file\n', 'second line in incfile \n',
                                  ' include inc_file2.inc end of line \n', ' ']
 
     nexus_file_include1 = NexusFile(location='inc_file1.inc', include_locations=['inc_file2.inc'], origin=file_path,
@@ -452,7 +452,7 @@ continuation''')
                                     file_content_as_list=expected_file_content_as_list)
     expected_nexus_file.__setattr__('line_locations', expected_line_locations)
 
-    expected_flat_file = ['basic_file \n', 'New line in here\n', 'inc file contents\n', 'new line in include\n', 'second line in incfile \n',
+    expected_flat_file = ['basic_file \n', 'New line in here\n', 'inc file contents\n', 'new line in include_file\n', 'second line in incfile \n',
                           'inc2 file contents\n', 'more content',' end of line \n', ' ', 'some random words ! comment\n', 'continuation']
 
     def mock_open_wrapper(filename, mode):
@@ -466,9 +466,9 @@ continuation''')
     # Act
     nexus_file = NexusFile.generate_file_include_structure(file_path)
     # do the generation of the flat file a few times to catch the issue of continually appending duplicate line locations
-    nexus_file.get_flat_list_str_file
+    # nexus_file.get_flat_list_str_file
     nexus_file.file_content_as_list.insert(1, 'New line in here\n')
-    nexus_file.include_objects[0].file_content_as_list.insert(1, 'new line in include\n')
+    nexus_file.include_objects[0].file_content_as_list.insert(1, 'new line in include_file\n')
     flat_file = nexus_file.get_flat_list_str_file
 
     # Assert
