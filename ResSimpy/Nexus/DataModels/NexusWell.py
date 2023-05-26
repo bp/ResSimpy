@@ -13,8 +13,10 @@ from ResSimpy.Well import Well
 class NexusWell(Well):
     __completions: list[NexusCompletion]
 
-    def __init__(self, well_name: str, completions: list[NexusCompletion], units: UnitSystem, ) -> None:
-        self.__completions = completions
+    def __init__(self, well_name: str, completions: Sequence[NexusCompletion], units: UnitSystem, ) -> None:
+        if not isinstance(completions, list):
+            completions = list(completions)
+        self.__completions: list[NexusCompletion] = completions
         super().__init__(well_name=well_name, completions=completions, units=units)
 
     def __repr__(self) -> str:

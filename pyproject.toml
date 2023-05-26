@@ -37,8 +37,10 @@ build-backend = "poetry.core.masonry.api"
 [tool.ruff]
 line-length = 120
 select = ["E", "F", "W", "C90", "N",  "UP", "YTT", "ANN", "S", "BLE"] # To add later: "D",
-ignore = ["UP007",  "ANN101", "N999", "UP035", "S105", "N802",
+ignore = ["UP007",  "ANN101", "N999", "UP035", "S105", "N802", "S106", "S107", "UP015", "ANN401", "ANN102",
     # To fix later:
-   "ANN201",
-   "ANN202"
+    "ANN001", # Types
+   "ANN201", # Types
+   "ANN202", # Types
+    "C901" # Complexity
     ]

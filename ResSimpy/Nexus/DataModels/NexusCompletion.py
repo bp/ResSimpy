@@ -2,6 +2,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional, Union, TypedDict
 
+# Use correct Self type depending upon Python version
+import sys
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
+
 from ResSimpy.Completion import Completion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
 from ResSimpy.Utils.generic_repr import generic_repr
@@ -327,7 +334,7 @@ class NexusCompletion(Completion):
         kh_mult: Optional[float]
 
     @classmethod
-    def from_dict(cls, input_dictionary: InputDictionary) -> NexusCompletion:
+    def from_dict(cls, input_dictionary: InputDictionary) -> Self:
         """generates a NexusCompletion from a dictionary"""
         try:
             return cls(**input_dictionary)

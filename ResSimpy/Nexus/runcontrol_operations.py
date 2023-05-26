@@ -75,7 +75,7 @@ class Runcontrol:
         return new_file
 
     @staticmethod
-    def remove_times_from_file(file_content: list[str], output_file_path: str):
+    def remove_times_from_file(file_content: list[str], output_file_path: str) -> None:
         """Removes the times from a file - used for replacing with new times
         Args:
             file_content (list[str]): a list of strings containing each line of the file as a new entry

@@ -60,7 +60,8 @@ class Completion(ABC):
                  x: Optional[float] = None, y: Optional[float] = None, angle_a: Optional[float] = None,
                  angle_v: Optional[float] = None, grid: Optional[str] = None, depth_to_top: Optional[float] = None,
                  depth_to_bottom: Optional[float] = None, perm_thickness_ovr: Optional[float] = None,
-                 dfactor: Optional[float] = None, rel_perm_method: Optional[int] = None, status: Optional[str] = None) -> None:
+                 dfactor: Optional[float] = None, rel_perm_method: Optional[int] = None,
+                 status: Optional[str] = None) -> None:
         self.__well_radius = well_radius
         self.__date = date
         self.__i = i
@@ -177,5 +178,5 @@ class Completion(ABC):
             'dfactor': self.__dfactor,
             'rel_perm_method': self.__rel_perm_method,
             'status': self.__status,
-            }
+        }
         return attribute_dict

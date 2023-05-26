@@ -5,6 +5,14 @@ import warnings
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from typing import Optional, Union
+
+# Use correct Self type depending upon Python version
+import sys
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
+
 from ResSimpy.Utils.factory_methods import get_empty_dict_int_nexus_file, get_empty_list_str, \
     get_empty_list_nexus_file, get_empty_list_str_nexus_file
 from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
@@ -113,7 +121,7 @@ class FcsNexusFile(NexusFile):
         return generic_repr(self)
 
     @classmethod
-    def generate_fcs_structure(cls, fcs_file_path: str, recursive: bool = True) -> FcsNexusFile:
+    def generate_fcs_structure(cls, fcs_file_path: str, recursive: bool = True) -> Self:
         """Creates an instance of the FcsNexusFile, populates it through looking through the different keywords \
             in the FCS and assigning the paths to objects.
 

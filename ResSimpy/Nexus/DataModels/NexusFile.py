@@ -4,6 +4,14 @@ import uuid
 from dataclasses import dataclass, field
 import re
 from typing import Optional, Union, Generator
+
+# Use correct Self type depending upon Python version
+import sys
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
+
 from uuid import UUID
 
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -54,7 +62,7 @@ class NexusFile:
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True,
-                                        skip_arrays: bool = True) -> NexusFile:
+                                        skip_arrays: bool = True) -> Self:
         """generates a nexus file instance for a provided text file with information storing the included files
 
         Args:

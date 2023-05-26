@@ -91,7 +91,7 @@ class StructuredGridOperations:
                 file_as_list[line_index] = new_line
 
     @staticmethod
-    def append_include_to_grid_file(include_file_location: str, structured_grid_file_path: str):
+    def append_include_to_grid_file(include_file_location: str, structured_grid_file_path: str) -> None:
         # TODO: change append to be an optional parameter
         """Appends an include file to the end of a grid for adding LGRs
 

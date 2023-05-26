@@ -4,7 +4,7 @@ import copy
 from enum import Enum
 from functools import partial
 from io import StringIO
-from typing import Optional, Union, Any, TYPE_CHECKING, Type
+from typing import Optional, Union, Any, TYPE_CHECKING
 import pandas as pd
 from ResSimpy.Grid import VariableEntry
 from string import Template
@@ -935,7 +935,7 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
     return nexus_object_results
 
 
-def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConstraint], current_date: Optional[str],
+def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConstraint], current_date: Optional[str],
                             unit_system: UnitSystem, property_map: dict[str, tuple[str, type]],
                             existing_constraints: dict[str, list[NexusConstraint]]):
     """ Loads table of constraints with the wellname/node first and the constraints following inline

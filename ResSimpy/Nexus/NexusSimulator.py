@@ -497,7 +497,7 @@ class NexusSimulator(Simulator):
                 self.Wells.load_wells()
 
     @staticmethod
-    def update_file_value(file_path: str, token: str, new_value: str, add_to_start: bool = False):
+    def update_file_value(file_path: str, token: str, new_value: str, add_to_start: bool = False) -> None:
         """Updates a value in a file if it is present and in the format {TOKEN} {VALUE}. If the token
         isn't present, it will add the token + value to either the start or end of the file
 
