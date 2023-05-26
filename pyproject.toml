@@ -39,6 +39,6 @@ line-length = 120
 select = ["E", "F", "W", "C90", "N",  "UP", "YTT", "ANN", "S", "BLE"] # To add later: "D",
 ignore = ["UP007",  "ANN101", "N999", "UP035", "S105", "N802",
     # To fix later:
-    "ANN201",
-    "ANN202"
+   "ANN201",
+   "ANN202"
     ]

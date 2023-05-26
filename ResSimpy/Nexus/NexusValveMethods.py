@@ -19,7 +19,7 @@ class NexusValveMethods(ValveMethods):
     __properties_loaded: bool = False  # Used in lazy loading
 
     def __init__(self, valve_methods: Optional[MutableMapping[int, NexusValveMethod]] = None,
-                 valve_files: Optional[dict[int, NexusFile]] = None):
+                 valve_files: Optional[dict[int, NexusFile]] = None) -> None:
         if valve_methods:
             self.__valve_methods = valve_methods
         else:

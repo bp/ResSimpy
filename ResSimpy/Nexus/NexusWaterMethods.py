@@ -19,7 +19,7 @@ class NexusWaterMethods(WaterMethods):
     __properties_loaded: bool = False  # Used in lazy loading
 
     def __init__(self, water_methods: Optional[MutableMapping[int, NexusWaterMethod]] = None,
-                 water_files: Optional[dict[int, NexusFile]] = None):
+                 water_files: Optional[dict[int, NexusFile]] = None) -> None:
         if water_methods:
             self.__water_methods = water_methods
         else:

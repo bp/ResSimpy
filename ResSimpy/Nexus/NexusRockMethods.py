@@ -19,7 +19,7 @@ class NexusRockMethods(RockMethods):
     __properties_loaded: bool = False  # Used in lazy loading
 
     def __init__(self, rock_methods: Optional[MutableMapping[int, NexusRockMethod]] = None,
-                 rock_files: Optional[dict[int, NexusFile]] = None):
+                 rock_files: Optional[dict[int, NexusFile]] = None) -> None:
         if rock_methods:
             self.__rock_methods = rock_methods
         else:

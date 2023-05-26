@@ -19,7 +19,7 @@ class NexusEquilMethods(EquilMethods):
     __properties_loaded: bool = False  # Used in lazy loading
 
     def __init__(self, equil_methods: Optional[MutableMapping[int, NexusEquilMethod]] = None,
-                 equil_files: Optional[dict[int, NexusFile]] = None):
+                 equil_files: Optional[dict[int, NexusFile]] = None) -> None:
         if equil_methods:
             self.__equil_methods = equil_methods
         else:

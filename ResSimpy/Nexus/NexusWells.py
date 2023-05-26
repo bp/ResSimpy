@@ -29,7 +29,7 @@ class NexusWells(Wells):
     model: NexusSimulator
     __wells: list[NexusWell] = field(default_factory=lambda: [])
 
-    def __init__(self, model: NexusSimulator):
+    def __init__(self, model: NexusSimulator) -> None:
         self.model = model
         self.__wells = []
         super().__init__()

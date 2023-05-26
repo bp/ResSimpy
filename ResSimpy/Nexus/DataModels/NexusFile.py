@@ -38,7 +38,7 @@ class NexusFile:
                  includes: Optional[list[str]] = None,
                  origin: Optional[str] = None,
                  includes_objects: Optional[list[NexusFile]] = None,
-                 file_content_as_list: Optional[list[Union[str, NexusFile]]] = None):
+                 file_content_as_list: Optional[list[Union[str, NexusFile]]] = None) -> None:
         self.location: Optional[str] = location
         self.includes: Optional[list[str]] = get_empty_list_str() if includes is None else includes
         self.origin: Optional[str] = origin

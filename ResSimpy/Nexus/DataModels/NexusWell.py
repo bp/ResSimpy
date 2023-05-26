@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Optional, Tuple, Sequence, Union, cast
+from typing import Optional, Sequence, Union, cast
 from uuid import UUID
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
@@ -13,11 +13,11 @@ from ResSimpy.Well import Well
 class NexusWell(Well):
     __completions: list[NexusCompletion]
 
-    def __init__(self, well_name: str, completions: list[NexusCompletion], units: UnitSystem, ):
+    def __init__(self, well_name: str, completions: list[NexusCompletion], units: UnitSystem, ) -> None:
         self.__completions = completions
         super().__init__(well_name=well_name, completions=completions, units=units)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return generic_repr(self)
 
     @property
@@ -76,7 +76,7 @@ class NexusWell(Well):
         return well_info
 
     @property
-    def completion_events(self) -> list[Tuple[str, Union[int, Tuple[float, float]]]]:
+    def completion_events(self) -> list[tuple[str, Union[int, tuple[float, float]]]]:
         """Returns a list of dates and values representing either the layer, or the depths of each perforation"""
         events = []
         using_k_values: Optional[bool] = None

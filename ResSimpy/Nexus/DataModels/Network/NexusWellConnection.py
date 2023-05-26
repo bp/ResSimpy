@@ -106,14 +106,14 @@ class NexusWellConnection:
     drill_queue: Optional[str] = None
     drill_order_benefit: Optional[float] = None
 
-    def __init__(self, properties_dict: dict[str, None | int | str | float]):
+    def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)
         if self.name is not None:
             self.bh_node_name = self.name + '%bh'
             self.wh_node_name = self.name + '%wh'
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return generic_repr(self)
 
     @staticmethod

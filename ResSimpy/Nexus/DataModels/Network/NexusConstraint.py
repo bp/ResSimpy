@@ -191,7 +191,7 @@ class NexusConstraint(Constraint):
     choke_limit: Optional[str] = None
     manifold_position: Optional[int] = None
 
-    def __init__(self, properties_dict: dict[str, None | int | str | float | UnitSystem]):
+    def __init__(self, properties_dict: dict[str, None | int | str | float | UnitSystem]) -> None:
         super().__init__()
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)
@@ -350,5 +350,5 @@ class NexusConstraint(Constraint):
             if v is not None or nones_overwrite:
                 setattr(self, k, v)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return generic_repr(self)

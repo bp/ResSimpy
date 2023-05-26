@@ -53,7 +53,7 @@ class NexusWaterMethod(WaterMethod):
     def __init__(self, file_path: str, method_number: int, reference_pressure: Optional[float] = None,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None,
-                 parameters: Optional[list[NexusWaterParams]] = None):
+                 parameters: Optional[list[NexusWaterParams]] = None) -> None:
         self.file_path = file_path
         self.reference_pressure = reference_pressure
         if properties is not None:

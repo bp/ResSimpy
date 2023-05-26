@@ -15,12 +15,12 @@ class NexusNode(Node):
     temp: Optional[float] = None
     station: Optional[str] = None
 
-    def __init__(self, properties_dict: dict[str, None | int | str | float]):
+    def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
         super().__init__()
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return generic_repr(self)
 
     @staticmethod

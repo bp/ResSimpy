@@ -11,5 +11,5 @@ class WaterMethod(ABC):
 
     method_number: int
 
-    def __init__(self, method_number):
+    def __init__(self, method_number) -> None:
         self.method_number = method_number

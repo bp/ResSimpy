@@ -77,7 +77,7 @@ class FcsNexusFile(NexusFile):
             polymer_files: Optional[dict[int, NexusFile]] = None,
             adsorption_files: Optional[dict[int, NexusFile]] = None,
             flux_in_files: Optional[dict[int, NexusFile]] = None,
-            ):
+            ) -> None:
         self.restart_file = restart_file
         self.structured_grid_file = structured_grid_file
         self.options_file = options_file
@@ -109,7 +109,7 @@ class FcsNexusFile(NexusFile):
         super().__init__(location=location, includes=includes, origin=origin, includes_objects=includes_objects,
                          file_content_as_list=file_content_as_list)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return generic_repr(self)
 
     @classmethod

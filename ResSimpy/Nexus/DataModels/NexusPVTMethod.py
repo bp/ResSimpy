@@ -53,7 +53,7 @@ class NexusPVTMethod(PVTMethod):
                  eos_options: Optional[dict[str, Union[str, int, float, pd.DataFrame, list[str], dict[str, float],
                                        tuple[str, dict[str, float]], dict[str, pd.DataFrame]]]] = None,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                      dict[str, Union[float, pd.DataFrame]]]]] = None):
+                                      dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
         self.file_path = file_path
         if pvt_type is not None:
             self.pvt_type = pvt_type

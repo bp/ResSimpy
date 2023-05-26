@@ -66,7 +66,7 @@ class NexusCompletion(Completion):
                  polymer_bore_radius: Optional[float] = None, polymer_well_radius: Optional[float] = None,
                  portype: Optional[str] = None, rel_perm_end_point: Optional[NexusRelPermEndPoint] = None,
                  kh_mult: Optional[float] = None
-                 ):
+                 ) -> None:
         self.__measured_depth = measured_depth
         self.__well_indices = well_indices
         self.__partial_perf = partial_perf
@@ -99,7 +99,7 @@ class NexusCompletion(Completion):
                          depth_to_bottom=depth_to_bottom, perm_thickness_ovr=perm_thickness_ovr, dfactor=dfactor,
                          rel_perm_method=rel_perm_method, status=status)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return generic_repr(self)
 
     @property

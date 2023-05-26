@@ -33,7 +33,7 @@ class NexusRelPermMethod(RelPermMethod):
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None,
                  hysteresis_params: Optional[dict[str, Union[str, float, dict[str, Union[str, float,
-                                             dict[str, Union[str, float]]]]]]] = None):
+                                             dict[str, Union[str, float]]]]]]] = None) -> None:
         self.file_path = file_path
         if properties is not None:
             self.properties = properties

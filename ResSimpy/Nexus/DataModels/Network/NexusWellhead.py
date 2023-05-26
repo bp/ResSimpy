@@ -65,7 +65,7 @@ class NexusWellhead:
     heat_transfer_coeff: Optional[float] = None
     dt_add: Optional[float] = None
 
-    def __init__(self, properties_dict: dict[str, None | int | str | float]):
+    def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)
 
@@ -114,5 +114,5 @@ class NexusWellhead:
         result_dict = to_dict_generic.to_dict(self, keys_in_nexus_style, add_date=True, add_units=True)
         return result_dict
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return generic_repr(self)

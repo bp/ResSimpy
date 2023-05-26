@@ -42,7 +42,7 @@ class NexusWellbore:
     pvt_method: Optional[int] = None
     water_method: Optional[int] = None
 
-    def __init__(self, properties_dict: dict[str, None | int | str | float]):
+    def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)
 
@@ -79,5 +79,5 @@ class NexusWellbore:
         result_dict = to_dict_generic.to_dict(self, keys_in_nexus_style, add_date=True, add_units=True)
         return result_dict
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return generic_repr(self)

@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 import pandas as pd
 from dataclasses import dataclass
-from typing import Optional, Type, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 from ResSimpy.Grid import Grid, VariableEntry
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -36,7 +36,7 @@ class StructuredGridFile(Grid):
     __grid_nexus_file: Optional[NexusFile] = None
 
     def __init__(self, data: Optional[dict] = None, grid_file_contents: Optional[list[str]] = None,
-                 grid_nexus_file: Optional[NexusFile] = None):
+                 grid_nexus_file: Optional[NexusFile] = None) -> None:
         super().__init__()
         self.__array_functions_list: Optional[list[str]] = None
         self.__array_functions_df: Optional[pd.DataFrame] = None
@@ -48,7 +48,7 @@ class StructuredGridFile(Grid):
         self.__grid_nexus_file: Optional[NexusFile] = grid_nexus_file
 
     def __wrap(self, value):
-        if isinstance(value, (tuple, list, set, frozenset)):
+        if isinstance(value, tuple | list | set | frozenset):
             return type(value)([self.__wrap(v) for v in value])
         else:
             return StructuredGridFile(value) if isinstance(value, dict) else value
@@ -163,7 +163,7 @@ class StructuredGridFile(Grid):
         self.__grid_properties_loaded = True
 
     @classmethod
-    def load_structured_grid_file(cls: Type[StructuredGridFile], structured_grid_file: NexusFile,
+    def load_structured_grid_file(cls: type[StructuredGridFile], structured_grid_file: NexusFile,
                                   lazy_loading: bool = True) -> StructuredGridFile:
         """Loads in a structured grid file with all grid properties, and the array functions defined with 'FUNCTION'.
         Other grid modifiers are currently not supported.

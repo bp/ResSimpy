@@ -19,7 +19,7 @@ class NexusRelPermMethods(RelPermMethods):
     __properties_loaded: bool = False  # Used in lazy loading
 
     def __init__(self, relperm_methods: Optional[MutableMapping[int, NexusRelPermMethod]] = None,
-                 relperm_files: Optional[dict[int, NexusFile]] = None):
+                 relperm_files: Optional[dict[int, NexusFile]] = None) -> None:
         if relperm_methods:
             self.__relperm_methods = relperm_methods
         else:

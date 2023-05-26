@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class NexusWellheads:
     __wellheads: list[NexusWellhead] = field(default_factory=list)
 
-    def __init__(self, parent_network: NexusNetwork):
+    def __init__(self, parent_network: NexusNetwork) -> None:
         self.__parent_network: NexusNetwork = parent_network
         self.__wellheads: list[NexusWellhead] = []
 

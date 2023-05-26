@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 class NexusWellbores:
     __wellbores: list[NexusWellbore] = field(default_factory=list)
 
-    def __init__(self, parent_network: NexusNetwork):
+    def __init__(self, parent_network: NexusNetwork) -> None:
         self.__parent_network: NexusNetwork = parent_network
         self.__wellbores: list[NexusWellbore] = []
 

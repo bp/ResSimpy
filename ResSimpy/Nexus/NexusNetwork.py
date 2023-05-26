@@ -32,7 +32,7 @@ class NexusNetwork:
     Constraints: NexusConstraints
     __has_been_loaded: bool = False
 
-    def __init__(self, model: NexusSimulator):
+    def __init__(self, model: NexusSimulator) -> None:
         self.__has_been_loaded: bool = False
         self.model: NexusSimulator = model
         self.Nodes: NexusNodes = NexusNodes(self)

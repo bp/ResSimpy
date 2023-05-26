@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class FcsConfig:
-    def __init__(self, destination, nexus_data_name="data"):
+    def __init__(self, destination, nexus_data_name="data") -> None:
         self.output_dir = destination
         self.use_reservoir_names = True
         self.abs_paths_to_keep = []

@@ -19,7 +19,7 @@ class NexusSeparatorMethods(SeparatorMethods):
     __properties_loaded: bool = False  # Used in lazy loading
 
     def __init__(self, separator_methods: Optional[MutableMapping[int, NexusSeparatorMethod]] = None,
-                 separator_files: Optional[dict[int, NexusFile]] = None):
+                 separator_files: Optional[dict[int, NexusFile]] = None) -> None:
         if separator_methods:
             self.__separator_methods = separator_methods
         else:

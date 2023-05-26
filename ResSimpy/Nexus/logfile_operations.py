@@ -236,7 +236,7 @@ class Logging:
 
         total_difference = (end_date - start_date)
         days = int(total_difference.days)
-        hours = int((total_difference.seconds / (60 * 60)))
+        hours = int(total_difference.seconds / (60 * 60))
         minutes = int((total_difference.seconds / 60) - (hours * 60))
         seconds = int(total_difference.seconds -
                       (hours * 60 * 60) - (minutes * 60))

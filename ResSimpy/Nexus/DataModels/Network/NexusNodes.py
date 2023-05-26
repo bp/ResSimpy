@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 class NexusNodes(Nodes):
     __nodes: list[NexusNode] = field(default_factory=lambda: [])
 
-    def __init__(self, parent_network: NexusNetwork):
+    def __init__(self, parent_network: NexusNetwork) -> None:
         self.__parent_network: NexusNetwork = parent_network
         self.__nodes: list[NexusNode] = []
 

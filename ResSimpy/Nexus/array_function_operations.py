@@ -1,6 +1,6 @@
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import pandas as pd
-from typing import Union, List
+from typing import Union
 import warnings
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEYWORDS
 
@@ -54,14 +54,14 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
         # or repeat the last value for each row.
         i1 = i2 = j1 = j2 = k1 = k2 = region_type = function_type = grid_name = ''
         # set the lists as empty strings as well, otherwise they show up as [] on the dataframe.
-        region_number_list: Union[str, List[str], List[int]] = ''
-        function_coefficients: Union[str, List[str], List[float]] = ''
-        input_arrays_min_max_list: Union[str, List[str], List[float]] = ''
-        output_arrays_min_max_list: Union[str, List[str], List[float]] = ''
-        input_array_list: Union[str, List[str]] = ''
-        output_array_list: Union[str, List[str]] = ''
-        drange_list: Union[str, List[str]] = ''
-        blocks_list: Union[str, List[str], List[int]] = ''
+        region_number_list: Union[str, list[str], list[int]] = ''
+        function_coefficients: Union[str, list[str], list[float]] = ''
+        input_arrays_min_max_list: Union[str, list[str], list[float]] = ''
+        output_arrays_min_max_list: Union[str, list[str], list[float]] = ''
+        input_array_list: Union[str, list[str]] = ''
+        output_array_list: Union[str, list[str]] = ''
+        drange_list: Union[str, list[str]] = ''
+        blocks_list: Union[str, list[str], list[int]] = ''
 
         for li, line in enumerate(block):
             line = line.upper()
@@ -138,7 +138,7 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
     return functions_df
 
 
-def summarize_model_functions(function_list_to_parse: List[List[str]]) -> pd.DataFrame:
+def summarize_model_functions(function_list_to_parse: list[list[str]]) -> pd.DataFrame:
     """ Extracts all function parameters into a df, with an added column of human-readable notations for each function:
       Args:
           function_list_to_parse (list[list[str]]): list of functions extracted as list of lines.

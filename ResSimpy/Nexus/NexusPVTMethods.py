@@ -19,7 +19,7 @@ class NexusPVTMethods(PVTMethods):
     __properties_loaded: bool = False  # Used in lazy loading
 
     def __init__(self, pvt_methods: Optional[MutableMapping[int, NexusPVTMethod]] = None,
-                 pvt_files: Optional[dict[int, NexusFile]] = None):
+                 pvt_files: Optional[dict[int, NexusFile]] = None) -> None:
         if pvt_methods:
             self.__pvt_methods = pvt_methods
         else:

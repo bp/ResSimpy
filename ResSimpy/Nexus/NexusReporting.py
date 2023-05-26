@@ -2,7 +2,7 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
 class Reporting:
-    def __init__(self, model):
+    def __init__(self, model) -> None:
         self.model = model
 
     def add_map_properties_to_start_of_grid_file(self):
