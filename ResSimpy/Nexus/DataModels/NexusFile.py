@@ -36,7 +36,12 @@ class NexusFile:
                  origin: Optional[str] = None,
                  include_objects: Optional[list[NexusFile]] = None,
                  file_content_as_list: Optional[list[str]] = None):
-        self.location: Optional[str] = location
+
+        if origin is not None:
+            self.location = nfo.get_full_file_path(location, origin)
+        else:
+            self.location = location
+        self.input_file_location: Optional[str] = location
         self.include_locations: Optional[list[str]] = get_empty_list_str() if include_locations is None else \
             include_locations
         self.origin: Optional[str] = origin
@@ -76,12 +81,14 @@ class NexusFile:
         #     return nexus_file_class
 
         try:
-            file_as_list = nfo.load_file_as_list(file_path)
+            full_file_path = file_path
+            if origin is not None:
+                full_file_path = nfo.get_full_file_path(file_path, origin)
+            file_as_list = nfo.load_file_as_list(full_file_path)
         except FileNotFoundError:
             # handle if a file can't be found
             location = file_path
-            if origin is not None:
-                location = nfo.get_full_file_path(file_path, origin)
+
             nexus_file_class = cls(location=location,
                                    include_locations=None,
                                    origin=origin,
@@ -117,15 +124,15 @@ class NexusFile:
             inc_file_path = nfo.get_token_value('INCLUDE', line, file_as_list)
             if inc_file_path is None:
                 continue
-            inc_full_path = nfo.get_full_file_path(inc_file_path, origin=file_path)
+            inc_full_path = nfo.get_full_file_path(inc_file_path, origin=full_file_path)
             # store the included files as files inside the object
             inc_file_list.append(inc_full_path)
             if not recursive:
                 continue
             elif skip_arrays and skip_next_include:
-                inc_file = cls(location=inc_full_path,
+                inc_file = cls(location=inc_file_path,
                                include_locations=None,
-                               origin=file_path,
+                               origin=full_file_path,
                                include_objects=None,
                                file_content_as_list=None, )
                 if includes_objects is None:
@@ -133,7 +140,7 @@ class NexusFile:
                 includes_objects.append(inc_file)
                 skip_next_include = False
             else:
-                inc_file = cls.generate_file_include_structure(inc_full_path, origin=file_path, recursive=True,
+                inc_file = cls.generate_file_include_structure(inc_file_path, origin=full_file_path, recursive=True,
                                                                skip_arrays=skip_arrays)
                 if includes_objects is None:
                     raise ValueError('include_objects is None - recursion failure.')

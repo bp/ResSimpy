@@ -173,6 +173,8 @@ def test_generate_file_include_structure_origin_path(mocker):
     nexus_file = NexusFile.generate_file_include_structure(file_path)
 
     # Assert
+    assert nexus_file.include_objects[0].include_objects[0] == nexus_file_include2
+    assert nexus_file.include_objects == [nexus_file_include1]
     assert nexus_file.file_content_as_list == expected_nexus_file.file_content_as_list
     assert nexus_file == expected_nexus_file
 
