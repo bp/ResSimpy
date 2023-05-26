@@ -110,9 +110,9 @@ class Logging:
         """
         error_warning = ""
         for line in log_file_line_list:
-            line = line.lower()
-            if "errors" in line and "warnings" in line:
-                error_warning = line
+            modified_line = line.lower()
+            if "errors" in modified_line and "warnings" in modified_line:
+                error_warning = modified_line
 
         error_warning_list = [x for x in error_warning.split(" ") if x != ""]
 

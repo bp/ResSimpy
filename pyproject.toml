@@ -37,9 +37,9 @@ build-backend = "poetry.core.masonry.api"
 [tool.ruff]
 line-length = 120
 # Rule codes for ruff can be found at: https://beta.ruff.rs/docs/rules/
-select = ["E", "F", "W", "C90", "N",  "UP", "YTT", "ANN", "S", "BLE", "D"]
+select = ["E", "F", "W", "C90", "N",  "UP", "YTT", "ANN", "S", "BLE", "D", "PLE", "PLW", "RUF", "BLE"]
 ignore = ["UP007",  "ANN101", "N999", "UP035", "S105", "N802", "S106", "S107", "UP015", "ANN401", "ANN102", "D202",
-    "D105", "D203", "D213",
+    "D105", "D203", "D213", "RUF010",
     # To fix later:
     "ANN001", # Types
    "ANN201", # Types

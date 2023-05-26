@@ -35,12 +35,15 @@ jobs:
           mypy: true
           mypy_command_prefix: poetry run
           mypy_args: ResSimpy --config-file ./.config/mypy
+        run: |
+          poetry run ruff ResSimpy
 
       # Alternative step that works with forked repo
       - name: Run linters (without annotations)
         if: github.event.pull_request.head.repo.full_name != github.repository
         run: |
           poetry run ruff ResSimpy
+          poetry run flake8 ResSimpy --append-config ./.config/flake8
           poetry run mypy ResSimpy --config-file ./.config/mypy
 
       - name: Code formatting

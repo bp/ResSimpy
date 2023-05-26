@@ -4,9 +4,9 @@ from ResSimpy.Grid import VariableEntry
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
-
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+
 
 class StructuredGridOperations:
     def __init__(self, model: NexusSimulator) -> None:

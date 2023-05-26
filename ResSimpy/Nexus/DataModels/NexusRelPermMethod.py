@@ -229,7 +229,7 @@ class NexusRelPermMethod(RelPermMethod):
             if len(line.split()) > 0 and hysteresis_being_read:
                 possible_token = line.split()[0]
                 if nfo.check_token(possible_token, line) and possible_token not in \
-                        ['HYSTERESIS'] + RELPM_HYSTERESIS_PRIMARY_KEYWORDS:
+                        ["HYSTERESIS", *RELPM_HYSTERESIS_PRIMARY_KEYWORDS]:
                     hysteresis_being_read = False
                     hysteresis_section_indices[1] = line_indx
 
