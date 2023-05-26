@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os.path
 import uuid
 from dataclasses import dataclass, field
 from typing import Optional, Generator
@@ -7,7 +8,6 @@ from uuid import UUID
 import re
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import warnings
-
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_OPERATION_KEYWORDS, GRID_ARRAY_FORMAT_KEYWORDS
 from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_nexus_file, \
     get_empty_dict_uuid_int
@@ -37,8 +37,6 @@ class NexusFile:
                  include_objects: Optional[list[NexusFile]] = None,
                  file_content_as_list: Optional[list[str]] = None):
         self.location: Optional[str] = location
-        # TODO make this relative path consistent
-        #self.relative_path: Optional[str] = location if origin is None else location.replace(origin, '')
         self.include_locations: Optional[list[str]] = get_empty_list_str() if include_locations is None else \
             include_locations
         self.origin: Optional[str] = origin
@@ -221,9 +219,20 @@ class NexusFile:
                     prefix_line = row.replace(incfile_location, '')
                     suffix_line = None
 
-                include_files = [x for x in self.include_objects if x.location == incfile_location]
-                if (max_depth is None or depth > 0) and len(include_files) > 0:
-                    include_file = include_files[0]
+                include_file = None
+                for obj in self.include_objects:
+                    if obj.location == incfile_location:
+                        include_file = obj
+                        break
+                    if self.origin is not None and \
+                            obj.location == nfo.get_full_file_path(incfile_location, self.origin):
+                        include_file = obj
+                        break
+                    if os.path.basename(obj.location) == os.path.basename(incfile_location):
+                        include_file = obj
+                        break
+
+                if (max_depth is None or depth > 0) and include_file is not None:
                     level_down_max_depth = None if max_depth is None else depth - 1
 
                     yield from include_file.iterate_line(file_index=file_index, max_depth=level_down_max_depth,
@@ -282,18 +291,18 @@ class NexusFile:
                     to_list.extend(temp_to_list)
         return from_list, to_list
 
-    def add_object_locations(self, uuid: UUID, line_index: int) -> None:
+    def add_object_locations(self, obj_uuid: UUID, line_index: int) -> None:
         """ adds a uuid to the object_locations dictionary. Used for storing the line numbers where objects are stored
         within the flattened file_as_list
 
         Args:
-            uuid (UUID): unique identifier of the object being created/stored
+            obj_uuid (UUID): unique identifier of the object being created/stored
             line_index (int): line number in the flattened file_content_as_list
                 (i.e. from the get_flat_list_str_file method)
         """
         if self.object_locations is None:
             self.object_locations: dict[UUID, int] = get_empty_dict_uuid_int()
-        self.object_locations[uuid] = line_index
+        self.object_locations[obj_uuid] = line_index
 
     def __update_object_locations(self, line_number: int, number_additional_lines: int) -> None:
         """ updates the object locations in a nexusfile by the additional lines. Used when files have been modified and
@@ -310,18 +319,18 @@ class NexusFile:
             if index >= line_number:
                 self.object_locations[object_id] = index + number_additional_lines
 
-    def __remove_object_locations(self, uuid: UUID) -> None:
-        """ Removes an object location based on the uuid provided. Used when removing objects in the file_as_list
+    def __remove_object_locations(self, obj_uuid: UUID) -> None:
+        """ Removes an object location based on the obj_uuid provided. Used when removing objects in the file_as_list
 
         Args:
-            uuid (UUID): id of the removed object.
+            obj_uuid (UUID): id of the removed object.
         """
         if self.object_locations is None:
             raise ValueError(f'No object locations found for file {self.location}')
 
-        if self.object_locations.get(uuid, None) is None:
-            raise ValueError(f'No object with {uuid=} found within the object locations')
-        self.object_locations.pop(uuid, None)
+        if self.object_locations.get(obj_uuid, None) is None:
+            raise ValueError(f'No object with {obj_uuid=} found within the object locations')
+        self.object_locations.pop(obj_uuid, None)
 
     def find_which_include_file(self, flattened_index: int) -> tuple[NexusFile, int]:
         """ Given a line index that relates to a position within the flattened file_as_list from the method
@@ -422,7 +431,7 @@ class NexusFile:
         if additional_objects is None:
             return
         for object_id, line_index in additional_objects.items():
-            self.add_object_locations(uuid=object_id, line_index=line_index)
+            self.add_object_locations(obj_uuid=object_id, line_index=line_index)
 
     def remove_from_file_as_list(self, index: int, objects_to_remove: Optional[list[UUID]] = None,
                                  string_to_remove: Optional[str] = None) -> None:

@@ -819,7 +819,7 @@ WELLSPEC well1
 iw jw l radw
 1  2  3 4.5
 ''',
-'''! Include File
+'''! Inc File
 TIME 01/03/2020
 WELLSPEC well1
 iw jw l radw
@@ -833,7 +833,7 @@ iw jw l radw
 4  5  6 4.2
 ''',
 '01/03/2020',
-['! Include File\n',
+['! Inc File\n',
 'TIME 01/03/2020\n',
 'WELLSPEC well1\n',
 'iw jw l radw\n',
@@ -889,12 +889,11 @@ def test_add_completion_include_files(mocker, fcs_file_contents, wells_file, inc
     add_perf_dict_3 = {'date': add_perf_date, 'i': 20, 'j': 20, 'k': 20, 'well_radius': 5.5}
 
     expected_include_file = NexusFile(location=include_file_path, include_locations=[],
-    origin='/my/wellspec/file.dat', include_objects=None, file_content_as_list=expected_result)
+        origin='/my/wellspec/file.dat', include_objects=None, file_content_as_list=expected_result)
 
-    expected_wells_file_as_list = [x.replace('include_file.dat', '') for x in wells_file.splitlines(keepends=True)]
-    expected_wells_file_as_list.insert(expected_wells_file_as_list.index('Include \n')+1, expected_include_file)
+    expected_wells_file_as_list =  wells_file.splitlines(keepends=True)
     expected_wells_file = NexusFile(location='/my/wellspec/file.dat', include_objects=[expected_include_file],
-    include_locations=[include_file_path], origin=fcs_file_path, file_content_as_list=expected_wells_file_as_list)
+        include_locations=[include_file_path], origin=fcs_file_path, file_content_as_list=expected_wells_file_as_list)
     # Act
     # test adding a load of completions sequentially
     mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict,
