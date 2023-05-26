@@ -32,3 +32,10 @@ pytest-cov = "^4.0.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 120
+select = ["E", "F", "W", "C90", "N",  "UP", "YTT", "ANN", "S", "BLE", "FBT"] # To add later: "D",
+ignore = ["UP007",  "ANN101", "N999"
+    # To fix later:
+    ]

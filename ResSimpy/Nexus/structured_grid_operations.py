@@ -1,13 +1,16 @@
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from ResSimpy.Grid import VariableEntry
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 
+if TYPE_CHECKING:
+    from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+
 class StructuredGridOperations:
-    def __init__(self, model) -> None:
-        self.model = model
+    def __init__(self, model: NexusSimulator) -> None:
+        self.model: NexusSimulator = model
 
     @staticmethod
     def load_token_value_if_present(token: str, modifier: str, token_property: VariableEntry,

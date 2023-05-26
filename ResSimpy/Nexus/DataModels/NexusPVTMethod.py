@@ -142,7 +142,7 @@ class NexusPVTMethod(PVTMethod):
                                 self.eos_options[primary_key] = (secondary_key, {})
 
                             secondary_eos_option = self.eos_options[primary_key]
-                            if not type(secondary_eos_option) is tuple or not type(secondary_eos_option[1]) is dict:
+                            if type(secondary_eos_option) is not tuple or type(secondary_eos_option[1]) is not dict:
                                 raise ValueError(f"EOS secondary key invalid: {secondary_key}")
                             secondary_eos_option[1][tertiary_key] = float(
                                 nfo.get_expected_token_value(tertiary_key, single_line, line_list))
