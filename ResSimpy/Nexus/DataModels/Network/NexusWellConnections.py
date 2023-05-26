@@ -23,17 +23,19 @@ class NexusWellConnections:
         self.__well_connections: list[NexusWellConnection] = []
 
     def get_well_connections(self) -> list[NexusWellConnection]:
-        """ Returns a list of well connections loaded from the simulator"""
+        """Returns a list of well connections loaded from the simulator."""
         self.__parent_network.get_load_status()
         return self.__well_connections
 
     def get_well_connection(self, name: str) -> Optional[NexusWellConnection]:
-        """ Returns a single well connection with the provided name loaded from the simulator
+        """Returns a single well connection with the provided name loaded from the simulator.
 
         Args:
+        ----
             name (str): name of the requested well connection
 
         Returns:
+        -------
             NexusWellConnection: which has the same name as requested
         """
         to_return = filter(lambda x: False if x.name is None else x.name.upper() == name.upper(),
@@ -41,10 +43,10 @@ class NexusWellConnections:
         return next(to_return, None)
 
     def get_well_connections_df(self) -> pd.DataFrame:
-        """ Creates a dataframe representing all processed well connections data in a surface file
+        """Creates a dataframe representing all processed well connections data in a surface file
         Returns:
             DataFrame: of the properties of the well connections through time with each row representing a single well \
-            connection
+            connection.
         """
         return obj_to_dataframe(self.__well_connections)
 
@@ -61,12 +63,14 @@ class NexusWellConnections:
         self.add_connections(cons_list)
 
     def add_connections(self, additional_list: Optional[list[NexusWellConnection]]) -> None:
-        """ extends the nodes object by a list of connections provided to it.
+        """Extends the nodes object by a list of connections provided to it.
 
         Args:
+        ----
             additional_list (Sequence[NexusWellConnection]): list of nexus connections to add to the nodes list.
 
         Returns:
+        -------
             None
         """
         if additional_list is None:

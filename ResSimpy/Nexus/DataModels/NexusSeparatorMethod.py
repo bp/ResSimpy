@@ -20,6 +20,7 @@ class NexusSeparatorMethod(SeparatorMethod):
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] ):
             Dictionary holding all properties for a specific separator method. Defaults to empty dictionary.
     """
+
     file_path: str
     method_number: int
     separator_type: Optional[str] = None
@@ -40,7 +41,7 @@ class NexusSeparatorMethod(SeparatorMethod):
         super().__init__(method_number=method_number)
 
     def __repr__(self) -> str:
-        """Pretty printing separator data"""
+        """Pretty printing separator data."""
         printable_str = f'\nFILE_PATH: {self.file_path}\n'
         printable_str += f'SEPARATOR_TYPE: {self.separator_type}\n'
         sep_dict = self.properties
@@ -56,8 +57,7 @@ class NexusSeparatorMethod(SeparatorMethod):
         return printable_str
 
     def read_properties(self) -> None:
-        """Read Nexus Separator file contents and populate NexusSeparatorMethod object
-        """
+        """Read Nexus Separator file contents and populate NexusSeparatorMethod object."""
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
         file_as_list = file_obj.get_flat_list_str_file
 

@@ -1,12 +1,14 @@
 def invert_nexus_map(nexus_mapping: dict[str, tuple[str, type]]) -> dict[str, str]:
-    """ takes a nexus map of the form {NEXUS KEYWORD: ('attribute_name', type), ...} and reverses it to \
-    give a map from attribute names to Nexus Keywords
+    r"""Takes a nexus map of the form {NEXUS KEYWORD: ('attribute_name', type), ...} and reverses it to
+    give a map from attribute names to Nexus Keywords.
 
     Args:
+    ----
         nexus_mapping (dict[str, tuple[str, type]]): dictionary of the form \n
         {NEXUS KEYWORD: ('attribute_name', type), ...}
 
     Returns:
+    -------
         dict[str, str] of the form {'attribute_name': 'NEXUS_KEYWORD'}
 
     """
@@ -15,7 +17,7 @@ def invert_nexus_map(nexus_mapping: dict[str, tuple[str, type]]) -> dict[str, st
 
 
 def nexus_keyword_to_attribute_name(nexus_mapping: dict[str, tuple[str, type]], nexus_keyword: str) -> str:
-    """takes a Nexus Keyword and maps to the corresponding attribute name from a given nexus mapping"""
+    """Takes a Nexus Keyword and maps to the corresponding attribute name from a given nexus mapping."""
     attribute_name_tuple = nexus_mapping.get(nexus_keyword.upper(), None)
     if attribute_name_tuple is None:
         raise AttributeError(f'No nexus keyword found named "{nexus_keyword.upper()}" in the provided nexus mapping')
@@ -23,7 +25,7 @@ def nexus_keyword_to_attribute_name(nexus_mapping: dict[str, tuple[str, type]], 
 
 
 def attribute_name_to_nexus_keyword(nexus_mapping: dict[str, tuple[str, type]], attribute_name: str) -> str:
-    """takes an attribute name and maps to the corresponding nexus keyword from a given nexus mapping"""
+    """Takes an attribute name and maps to the corresponding nexus keyword from a given nexus mapping."""
 
     invert_map = invert_nexus_map(nexus_mapping)
     nexus_keyword = invert_map.get(attribute_name.lower(), None)

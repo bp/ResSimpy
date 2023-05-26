@@ -13,15 +13,18 @@ from ResSimpy.Utils.invert_nexus_map import invert_nexus_map
 @dataclass  # Doesn't need to write an _init_, _eq_ methods, etc.
 class NexusWaterParams():
     """Class to hold a single set of water property parameters, i.e., density, compressibility, etc.
-    Attributes:
+
+    Attributes
+    ----------
         temperature (Optional[float]): Temperature at which the rest of the water property parameters apply
         salinity (Optional[float]): Salinity at which the rest of the water property parameters apply
         density (Optional[float]): Water density at standard conditions
         compressibility (float): Water compressibility
         formation_volume_factor (float): Water formation volume factor at the given temperature and reference pressure
         viscosity (float): Water viscosity at the given temperature and reference pressure
-        viscosity_compressibility (Optional[float]): Water viscosity compressibility
+        viscosity_compressibility (Optional[float]): Water viscosity compressibility.
     """
+
     # General parameters
     compressibility: Optional[float] = None
     formation_volume_factor: Optional[float] = None
@@ -34,7 +37,7 @@ class NexusWaterParams():
 
 @dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
 class NexusWaterMethod(WaterMethod):
-    """ Class to hold Nexus Water properties
+    """Class to hold Nexus Water properties
     Attributes:
         file_path (str): Path to the Nexus water file
         method_number (int): Water method number in Nexus fcs file
@@ -43,6 +46,7 @@ class NexusWaterMethod(WaterMethod):
             Dictionary holding properties for generic dynamic method. Defaults to empty dictionary.
         parameters (list[NexusWaterParams]): list of water parameters, such as density, viscosity, etc.
     """
+
     file_path: str
     reference_pressure: Optional[float] = None
     properties: dict[str, Union[str, int, float, Enum, list[str],
@@ -68,7 +72,7 @@ class NexusWaterMethod(WaterMethod):
 
     @staticmethod
     def nexus_mapping() -> dict[str, tuple[str, type]]:
-        """returns a dictionary of mapping from nexus keyword to attribute name"""
+        """Returns a dictionary of mapping from nexus keyword to attribute name."""
 
         nexus_mapping: dict[str, tuple[str, type]] = {
             'DENW': ('density', float),
@@ -80,7 +84,7 @@ class NexusWaterMethod(WaterMethod):
         return nexus_mapping
 
     def __repr__(self) -> str:
-        """Pretty printing water data"""
+        """Pretty printing water data."""
         param_to_nexus_keyword_map = invert_nexus_map(NexusWaterMethod.nexus_mapping())
 
         printable_str = f'\nFILE_PATH: {self.file_path}\n'
@@ -113,8 +117,7 @@ class NexusWaterMethod(WaterMethod):
         return printable_str
 
     def read_properties(self) -> None:
-        """Read Nexus Water file contents and populate NexusWaterMethod object
-        """
+        """Read Nexus Water file contents and populate NexusWaterMethod object."""
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
         file_as_list = file_obj.get_flat_list_str_file
 

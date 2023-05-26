@@ -34,7 +34,7 @@ class NexusNodeConnections(NodeConnections):
         return next(connections_to_return, None)
 
     def get_connection_df(self) -> pd.DataFrame:
-        """ Creates a dataframe representing all processed node connection data in a surface file
+        """Creates a dataframe representing all processed node connection data in a surface file
         Returns:
             DataFrame: of the properties of the Connections through time with each row representing a node.
         """
@@ -45,8 +45,8 @@ class NexusNodeConnections(NodeConnections):
         raise NotImplementedError('To be implemented')
 
     def load_connections(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
-        """ Calls load connections and appends the list of discovered NodeConnections into the NexusNodeConnection \
-            object
+        """Calls load connections and appends the list of discovered NodeConnections into the NexusNodeConnection \
+            object.
         """
         new_connections = nfo.collect_all_tables_to_objects(surface_file, {'NODECON': NexusNodeConnection, },
                                                             start_date=start_date, default_units=default_units)
@@ -57,12 +57,14 @@ class NexusNodeConnections(NodeConnections):
         self.add_connections(cons_list)
 
     def add_connections(self, additional_list: Optional[list[NexusNodeConnection]]):
-        """ extends the nodes object by a list of nodes provided to it.
+        """Extends the nodes object by a list of nodes provided to it.
 
         Args:
+        ----
             additional_list (Sequence[NexusNodeConnection]): list of nexus connections to add to the connection list.
 
         Returns:
+        -------
             None
         """
         if additional_list is None:

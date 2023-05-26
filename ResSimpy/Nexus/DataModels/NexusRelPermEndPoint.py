@@ -20,7 +20,7 @@ class NexusRelPermEndPoint(RelPermEndPoint):
 
     @staticmethod
     def nexus_mapping() -> dict[str, tuple[str, type]]:
-        """returns a dictionary of mapping from nexus keyword to attribute name"""
+        """Returns a dictionary of mapping from nexus keyword to attribute name."""
         nexus_mapping: dict[str, tuple[str, type]] = {
             'SWL': ('swl', float),
             'SWR': ('swr', float),

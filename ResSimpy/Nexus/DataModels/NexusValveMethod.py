@@ -12,13 +12,14 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 
 @dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
 class NexusValveMethod(ValveMethod):
-    """ Class to hold Nexus Valve properties
+    """Class to hold Nexus Valve properties
     Attributes:
         file_path (str): Path to the Nexus valve properties file
         method_number (int): Valve properties method number in Nexus fcs file
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] ):
             Dictionary holding all properties for a specific valve properties method. Defaults to empty dictionary.
     """
+
     # General parameters
     file_path: str
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
@@ -35,7 +36,7 @@ class NexusValveMethod(ValveMethod):
         super().__init__(method_number=method_number)
 
     def __repr__(self) -> str:
-        """Pretty printing valve data"""
+        """Pretty printing valve data."""
         printable_str = f'\nFILE_PATH: {self.file_path}\n'
         valve_dict = self.properties
         for key, value in valve_dict.items():
@@ -56,8 +57,7 @@ class NexusValveMethod(ValveMethod):
         return printable_str
 
     def read_properties(self) -> None:
-        """Read Nexus valve file contents and populate the NexusValveMethod object
-        """
+        """Read Nexus valve file contents and populate the NexusValveMethod object."""
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
         file_as_list = file_obj.get_flat_list_str_file
 

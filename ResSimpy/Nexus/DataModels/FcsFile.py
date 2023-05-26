@@ -126,13 +126,17 @@ class FcsNexusFile(NexusFile):
             in the FCS and assigning the paths to objects.
 
         Args:
+        ----
             fcs_file_path (str): path to the fcs file of interest
             recursive (bool, optional): Whether the NexusFile structure will be recursively created. Defaults to True.
+
         Raises:
+        ------
             FileNotFoundError: if the fcs file cannot be found
             ValueError: if no content can be found within the fcsfile
 
         Returns:
+        -------
             FcsNexusFile: instance of a FcsNexusFile for a given fcs file path
         """
         fcs_file = cls(location=fcs_file_path)
@@ -231,14 +235,16 @@ class FcsNexusFile(NexusFile):
 
     @staticmethod
     def line_as_nexus_list(line: str, path: str, nexus_obj: NexusFile) -> list[Union[str, NexusFile]]:
-        """split out a line into the start and finish and inserts a NexusFile object into the place of the path.
+        """Split out a line into the start and finish and inserts a NexusFile object into the place of the path.
 
         Args:
+        ----
             line (str): line to split apart (containing path)
             path (str): path to remove from the line
             nexus_obj (NexusFile): NexusFile instance to replace the path with
 
         Returns:
+        -------
             list[Union[str, NexusFile]]: list of the format [prefix, NexusFile, suffix] where the NexusFile object is \
             in place of the path provided
         """

@@ -10,7 +10,7 @@ from abc import ABC
 class ValveMethods(ABC):
     """The abstract base class for a collection of valve property methods
     Attributes:
-        valve_methods (dict[int, ValveMethod]): Collection of valve property methods, as a dictionary
+        valve_methods (dict[int, ValveMethod]): Collection of valve property methods, as a dictionary.
     """
 
     @property

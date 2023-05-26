@@ -15,13 +15,14 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 
 @dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
 class NexusRelPermMethod(RelPermMethod):
-    """ Class to hold Nexus relative permeability and capillary pressure properties
+    """Class to hold Nexus relative permeability and capillary pressure properties
     Attributes:
         file_path (str): Path to the Nexus relperm file
         method_number (int): RELPM method number in Nexus fcs file
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] ):
             Dictionary holding all properties for a specific PVT method. Defaults to empty dictionary.
     """
+
     # General parameters
     file_path: str
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
@@ -46,7 +47,7 @@ class NexusRelPermMethod(RelPermMethod):
         super().__init__(method_number=method_number)
 
     def __repr__(self) -> str:
-        """Pretty printing relative permeability and capillary pressure data"""
+        """Pretty printing relative permeability and capillary pressure data."""
         printable_str = f'\nFILE_PATH: {self.file_path}\n'
         # Handle non-hysteresis relperm and capillary pressure parameters
         relperm_dict = self.properties
@@ -150,6 +151,7 @@ class NexusRelPermMethod(RelPermMethod):
         """Utility function to populate rel perm keywords that have optional string values, e.g., IFT, JFUNC, etc.
 
         Args:
+        ----
             keyword (str): primary keyword, e.g., IFT or JFUNC
             keyword_value_options (list[str]): primary keyword optional values, e.g., [METHOD1, METHOD2] for IFT
             single_line (str): single line as read from input RELPM file
@@ -163,8 +165,7 @@ class NexusRelPermMethod(RelPermMethod):
                 self.properties[keyword] = ''
 
     def read_properties(self) -> None:
-        """Read Nexus rel perm file contents and populate the NexusRelPermMethod object
-        """
+        """Read Nexus rel perm file contents and populate the NexusRelPermMethod object."""
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
         file_as_list = file_obj.get_flat_list_str_file
 

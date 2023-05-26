@@ -1,4 +1,4 @@
-"""The abstract base class for all simulators"""
+"""The abstract base class for all simulators."""
 
 from abc import ABC, abstractmethod
 from typing import Optional

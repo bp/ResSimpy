@@ -24,14 +24,14 @@ class NexusWell(Well):
 
     @property
     def perforations(self) -> Sequence[NexusCompletion]:
-        """Returns a list of all of the perforations for the well"""
+        """Returns a list of all of the perforations for the well."""
 
         activations = filter(NexusCompletion.completion_is_perforation, self.__completions)
         return list(activations)
 
     @property
     def first_perforation(self) -> Optional[NexusCompletion]:
-        """Returns the first perforation for the well"""
+        """Returns the first perforation for the well."""
         if len(self.perforations) == 0:
             return None
 
@@ -39,14 +39,14 @@ class NexusWell(Well):
 
     @property
     def shutins(self) -> Sequence[NexusCompletion]:
-        """Returns a list of all of the shut-ins for the well"""
+        """Returns a list of all of the shut-ins for the well."""
 
         shutins = filter(NexusCompletion.completion_is_shutin, self.__completions)
         return list(shutins)
 
     @property
     def last_shutin(self) -> Optional[NexusCompletion]:
-        """Returns the last shut-in for the well in the Wellspec file"""
+        """Returns the last shut-in for the well in the Wellspec file."""
         if len(self.shutins) == 0:
             return None
 
@@ -54,7 +54,7 @@ class NexusWell(Well):
 
     @property
     def dates_of_completions(self) -> list[str]:
-        """Returns a list of dates that the well was changed using a completion"""
+        """Returns a list of dates that the well was changed using a completion."""
 
         dates_changed: list[str] = []
         for completion in self.__completions:
@@ -65,7 +65,7 @@ class NexusWell(Well):
 
     @property
     def printable_well_info(self) -> str:
-        """Returns some printable well information in string format"""
+        """Returns some printable well information in string format."""
         printable_dates_of_completions = ", ".join(self.dates_of_completions)
         well_info = \
             f"""
@@ -79,7 +79,7 @@ class NexusWell(Well):
 
     @property
     def completion_events(self) -> list[tuple[str, Union[int, tuple[float, float]]]]:
-        """Returns a list of dates and values representing either the layer, or the depths of each perforation"""
+        """Returns a list of dates and values representing either the layer, or the depths of each perforation."""
         events = []
         using_k_values: Optional[bool] = None
 
@@ -98,13 +98,15 @@ class NexusWell(Well):
 
     def find_completions(self, completion_properties: NexusCompletion.InputDictionary | NexusCompletion) -> \
             list[NexusCompletion]:
-        """ returns a list of all completions that match the completion properties provided.
+        """Returns a list of all completions that match the completion properties provided.
 
         Args:
+        ----
             completion_properties (dict | NexusCompletion): keys as the attributes and values as the value to match \
             from the well.
 
         Returns:
+        -------
             list[NexusCompletion] that match the completion properties provided
         """
         matching_completions = []
@@ -127,13 +129,15 @@ class NexusWell(Well):
 
     def find_completion(self,
                         completion_properties: NexusCompletion.InputDictionary | NexusCompletion, ) -> NexusCompletion:
-        """ Returns precisely one completion which matches all the properties provided.
-            If several completions match it raise a ValueError
+        """Returns precisely one completion which matches all the properties provided.
+            If several completions match it raise a ValueError.
 
         Args:
+        ----
             completion_properties (dict | NexusCompletion):
 
         Returns:
+        -------
             NexusCompletion that matches all completion properties provided.
         """
         matching_completions = self.find_completions(completion_properties)
@@ -143,7 +147,7 @@ class NexusWell(Well):
         return matching_completions[0]
 
     def get_completion_by_id(self, id: UUID) -> NexusCompletion:
-        """returns the completion that matches the id provided."""
+        """Returns the completion that matches the id provided."""
         for completion in self.__completions:
             if completion.id == id:
                 return completion
@@ -151,9 +155,11 @@ class NexusWell(Well):
 
     def _add_completion_to_memory(self, date: str, completion_properties: NexusCompletion.InputDictionary,
                                   completion_index: Optional[int] = None, ) -> NexusCompletion:
-        """ adds a perforation with the properties specified in completion_properties_list,
+        """Adds a perforation with the properties specified in completion_properties_list,
             if index is none then adds it to the end of the perforation list.
+
         Args:
+        ----
             date (str): date at which the perforation should be added
             completion_properties (dict[str, str | float | int]):
             completion_index (Optional[int]):
@@ -192,9 +198,9 @@ class NexusWell(Well):
 
     def _remove_completions_from_memory(self, completions_to_remove: Sequence[NexusCompletion | UUID], ) -> None:
         # TODO improve comparison of dates with datetime libs
-        """ Removes completions from a list of completions or completion IDs
+        """Removes completions from a list of completions or completion IDs
         Args:
-            completions_to_remove (list[NexusCompletion | UUID]): Completions to be removed
+            completions_to_remove (list[NexusCompletion | UUID]): Completions to be removed.
         """
         for completion in completions_to_remove:
             self._remove_completion_from_memory(completion)

@@ -19,7 +19,7 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 
 @dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
 class NexusPVTMethod(PVTMethod):
-    """ Class to hold Nexus PVT properties
+    """Class to hold Nexus PVT properties
     Attributes:
         file_path (str): Path to the Nexus PVT file
         method_number (int): PVT method number in Nexus fcs file
@@ -33,6 +33,7 @@ class NexusPVTMethod(PVTMethod):
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] ):
             Dictionary holding all properties for a specific PVT method. Defaults to empty dictionary.
     """
+
     # General parameters
     file_path: str
     pvt_type: Optional[str] = None
@@ -76,7 +77,7 @@ class NexusPVTMethod(PVTMethod):
         super().__init__(method_number=method_number)
 
     def __repr__(self) -> str:
-        """Pretty printing PVT data"""
+        """Pretty printing PVT data."""
         printable_str = f'\nFILE_PATH: {self.file_path}\n'
         printable_str += f'PVT_TYPE: {self.pvt_type}\n'
         pvt_dict = self.properties
@@ -122,6 +123,7 @@ class NexusPVTMethod(PVTMethod):
         Applies to TRANSITION, TRANS_TEST and PHASEID Nexus EOS options.
 
         Args:
+        ----
             primary_key (str): primary keyword, e.g., TRANSITION or PHASEID
             primary_key_default_val (str): default secondary keyword, or primary key value, e.g., TEST
             single_line (str): single line as read from input PVT file
@@ -152,9 +154,10 @@ class NexusPVTMethod(PVTMethod):
                                         table_indices_dict: dict[str, dict[str, list[int]]],
                                         table_flag: dict[str, bool], l_index: int,
                                         unsat_obj: dict[str, list[str]] = {}) -> Optional[int]:
-        """Utility function to find the starting line index of a specified PVT table
+        """Utility function to find the starting line index of a specified PVT table.
 
         Args:
+        ----
             table_key (str): specified PVT table name or undersaturated index, such as, PSAT or RSSAT or PRES
             single_line (str): single line as read from input PVT file
             line_list (list[str]): list of strings that comprise input PVT file
@@ -167,9 +170,11 @@ class NexusPVTMethod(PVTMethod):
             unsat_obj (dict[str, list[str]]): track saturation pressures from which undersaturated branches emanate
 
         Raises:
+        ------
             ValueError: If a property table key does not have a numerical value
 
         Returns:
+        -------
             int: Updated line index
         """
         if table_key not in PVT_UNSAT_TABLE_INDICES:  # All tables except undersaturated tables
@@ -202,9 +207,10 @@ class NexusPVTMethod(PVTMethod):
                                       l_index: int, table_flag: dict[str, bool],
                                       table_has_endkeyword: bool, reading_flag: bool,
                                       unsat_obj: dict[str, list[str]] = {}) -> bool:
-        """Utility function to find the ending line index of a specified PVT table
+        """Utility function to find the ending line index of a specified PVT table.
 
         Args:
+        ----
             table_key (str): specified PVT table name or undersaturated index, such as, PSAT or RSSAT or PRES
             single_line (str): single line as read from input PVT file
             table_indices ([dict[str, list[int]]): dictionary to store the
@@ -218,6 +224,7 @@ class NexusPVTMethod(PVTMethod):
             unsat_obj (dict[str, list[str]]): track saturation pressures from which undersaturated branches emanate
 
         Returns:
+        -------
             bool: True if still reading table, but if identified the ending line index, return False
         """
         end_flag_found = False
@@ -249,8 +256,7 @@ class NexusPVTMethod(PVTMethod):
         return reading_flag
 
     def read_properties(self) -> None:
-        """Read Nexus PVT file contents and populate the NexusPVTMethod object
-        """
+        """Read Nexus PVT file contents and populate the NexusPVTMethod object."""
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
         file_as_list = file_obj.get_flat_list_str_file
 

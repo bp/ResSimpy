@@ -1,4 +1,4 @@
-"""The base class for all Well Completions"""
+"""The base class for all Well Completions."""
 import uuid
 from abc import ABC
 from dataclasses import dataclass
@@ -7,13 +7,13 @@ from typing import Optional
 
 @dataclass(kw_only=True)
 class Completion(ABC):
-    """
-    A class representing well completions.
+    """A class representing well completions.
 
     IMPORTANT: if modifying this class, make sure to update the relevant tests in test_load_wells, as well as updating
     the constructor calls in the derived classes.
 
     Args:
+    ----
         date (str): The starting date of the completion. Applies until changed.
         i (Optional[int]): The structured grid cell location in the x direction. 'IW' in Nexus
         j (Optional[int]): The structured grid cell location in the y direction. 'JW' in Nexus
@@ -36,6 +36,7 @@ class Completion(ABC):
 
 
     """
+
     __date: str
     __i: Optional[int] = None
     __j: Optional[int] = None

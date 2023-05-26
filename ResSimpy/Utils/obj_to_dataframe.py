@@ -5,7 +5,7 @@ import pandas as pd
 
 
 def obj_to_dataframe(list_objs: list[Any]) -> pd.DataFrame:
-    """returns a dataframe representing the attributes of the object as rows of the dataframe
+    """Returns a dataframe representing the attributes of the object as rows of the dataframe
     Requires a "to_dict" method for each object.
     """
     df_store = pd.DataFrame([x.to_dict() for x in list_objs])

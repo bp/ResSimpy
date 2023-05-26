@@ -48,13 +48,15 @@ class NexusNetwork:
         return self.__has_been_loaded
 
     def get_surface_file(self, method_number: Optional[int] = None) -> Optional[dict[int, NexusFile] | NexusFile]:
-        """ gets a specific surface file object or a dictionary of surface files keyed by method number
+        """Gets a specific surface file object or a dictionary of surface files keyed by method number.
 
         Args:
+        ----
             method_number (int): Method number for selection of a specific surface file.
                 If None then returns a dictionary of method, surface file object
 
         Returns:
+        -------
             Optional[dict[int, NexusFile] | NexusFile]: returns a specific surface file object or a dictionary of \
                 surface files keyed by method number
         """
@@ -65,19 +67,19 @@ class NexusNetwork:
         return self.model.fcs_file.surface_files.get(method_number)
 
     def load(self) -> None:
-        """ Loads all the objects from the surface files in the Simulator class.
-        Table headers with None next to their name are currently skipped awaiting development
+        """Loads all the objects from the surface files in the Simulator class.
+        Table headers with None next to their name are currently skipped awaiting development.
         """
 
         def type_check_lists(input: Optional[list[Any] | dict[str, list[NexusConstraint]]]) -> Optional[list[Any]]:
-            """Guards against dictionaries coming from the dictionary"""
+            """Guards against dictionaries coming from the dictionary."""
             if isinstance(input, dict):
                 raise TypeError(f"Expected a list, instead received a dict: {input}")
             return input
 
         def type_check_dicts(input: Optional[list[Any] | dict[str, list[NexusConstraint]]]) -> \
                 Optional[dict[str, list[NexusConstraint]]]:
-            """Guards against dictionaries coming from the dictionary"""
+            """Guards against dictionaries coming from the dictionary."""
             if isinstance(input, list):
                 raise TypeError(f"Expected a dict, instead received a list: {input}")
             return input

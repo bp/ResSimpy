@@ -1,4 +1,3 @@
-"""Module containing generic Enums
-"""
+"""Module containing generic Enums."""
 
 __all__ = ['HowEnum']

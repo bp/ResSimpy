@@ -11,7 +11,7 @@ class NexusValveMethods(ValveMethods):
     """Class for collection of Nexus valve property methods
     Attributes:
         valve_methods (dict[int, NexusValveMethod]): Collection of Nexus valve property methods, as a dictionary
-        valve_files (dict[int, NexusFile]): Dictionary collection of valve property files, as defined in Nexus fcs file
+        valve_files (dict[int, NexusFile]): Dictionary collection of valve property files, as defined in Nexus fcs file.
     """
 
     __valve_methods: MutableMapping[int, NexusValveMethod]
@@ -31,7 +31,7 @@ class NexusValveMethods(ValveMethods):
         super().__init__()
 
     def __repr__(self) -> str:
-        """Pretty printing valve methods"""
+        """Pretty printing valve methods."""
         if not self.__properties_loaded:
             self.load_valve_methods()
         printable_str = ''

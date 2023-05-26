@@ -8,7 +8,7 @@ from abc import ABC
 class RockMethods(ABC):
     """The abstract base class for a collection of rock property methods
     Attributes:
-        rock_methods (dict[int, RockMethod]): Collection of rock property methods, as a dictionary
+        rock_methods (dict[int, RockMethod]): Collection of rock property methods, as a dictionary.
     """
 
     @property

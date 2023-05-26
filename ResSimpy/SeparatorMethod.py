@@ -6,7 +6,7 @@ from dataclasses import dataclass
 class SeparatorMethod(ABC):
     """The abstract base class for separator property methods
     Attributes:
-        method_number (int): Method number in order of separator methods in simulator input
+        method_number (int): Method number in order of separator methods in simulator input.
     """
 
     method_number: int

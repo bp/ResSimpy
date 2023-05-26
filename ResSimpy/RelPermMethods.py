@@ -10,7 +10,7 @@ from abc import ABC
 class RelPermMethods(ABC):
     """The abstract base class for a collection of relative permeability and capillary pressure property methods
     Attributes:
-        relperm_methods (dict[int, RelPermMethod]): Dictionary collection of relperm and cap pressure property methods
+        relperm_methods (dict[int, RelPermMethod]): Dictionary collection of relperm and cap pressure property methods.
     """
 
     @property

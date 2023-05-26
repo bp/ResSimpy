@@ -11,7 +11,7 @@ class NexusPVTMethods(PVTMethods):
     """Class for collection of Nexus PVT property methods
     Attributes:
         pvt_methods (dict[int, NexusPVTMethod]): Collection of Nexus PVT property methods, as a dictionary
-        pvt_files (dict[int, NexusFile]): Dictionary collection of PVT property files, as defined in Nexus fcs file
+        pvt_files (dict[int, NexusFile]): Dictionary collection of PVT property files, as defined in Nexus fcs file.
     """
 
     __pvt_methods: MutableMapping[int, NexusPVTMethod]
@@ -31,7 +31,7 @@ class NexusPVTMethods(PVTMethods):
         super().__init__()
 
     def __repr__(self) -> str:
-        """Pretty printing pvt methods"""
+        """Pretty printing pvt methods."""
         if not self.__properties_loaded:
             self.load_pvt_methods()
         printable_str = ''

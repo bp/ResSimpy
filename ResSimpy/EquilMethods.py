@@ -8,7 +8,7 @@ from abc import ABC
 class EquilMethods(ABC):
     """The abstract base class for a collection of equilibration methods
     Attributes:
-        equil_methods (dict[int, EquilMethod]): Collection of equilibration methods, as a dictionary
+        equil_methods (dict[int, EquilMethod]): Collection of equilibration methods, as a dictionary.
     """
 
     @property

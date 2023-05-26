@@ -14,13 +14,14 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 
 @dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
 class NexusRockMethod(RockMethod):
-    """ Class to hold Nexus Rock properties
+    """Class to hold Nexus Rock properties
     Attributes:
         file_path (str): Path to the Nexus rock properties file
         method_number (int): Rock properties method number in Nexus fcs file
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] ):
             Dictionary holding all properties for a specific rock properties method. Defaults to empty dictionary.
     """
+
     # General parameters
     file_path: str
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
@@ -37,7 +38,7 @@ class NexusRockMethod(RockMethod):
         super().__init__(method_number=method_number)
 
     def __repr__(self) -> str:
-        """Pretty printing rock properties data"""
+        """Pretty printing rock properties data."""
         printable_str = f'\nFILE_PATH: {self.file_path}\n'
         rock_dict = self.properties
         for key, value in rock_dict.items():
@@ -61,8 +62,7 @@ class NexusRockMethod(RockMethod):
         return printable_str
 
     def read_properties(self) -> None:
-        """Read Nexus rock properties file contents and populate NexusRockMethod object
-        """
+        """Read Nexus rock properties file contents and populate NexusRockMethod object."""
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
         file_as_list = file_obj.get_flat_list_str_file
 

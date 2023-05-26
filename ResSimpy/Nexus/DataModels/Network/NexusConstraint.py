@@ -9,92 +9,92 @@ from ResSimpy.Utils.generic_repr import generic_repr
 
 @dataclass
 class NexusConstraint(Constraint):
-    """
-    Attributes:
-        name (str): name of the well (NAME)
-        max_surface_oil_rate (float): max surface oil rate (QOSMAX)
-        max_surface_gas_rate (float): max surface gas rate (QGSMAX)
-        max_surface_water_rate (float): max surface (QWSMAX)
-        max_surface_liquid_rate (float): max surface liquid rate (QLIQSMAX)
-        max_hc_molar_rate (float): Max hc molar rate (QMHCMAX)
-        max_reverse_surface_oil_rate (float): max reverse surface oil rate (QOSMAX-)
-        max_reverse_surface_gas_rate (float): max reverse surface gas rate (QGSMAX-)
-        max_reverse_surface_water_rate (float): max reverse surface water rate (QWSMAX-)
-        max_reverse_surface_liquid_rate (float): max reverse surface liquid rate (QLIQSMAX-)
-        max_reservoir_oil_rate (float): max reservoir oil rate (QOMAX)
-        max_reservoir_gas_rate (float): max reservoir gas rate (QGMAX)
-        max_reservoir_water_rate (float): max reservoir water rate (QWMAX)
-        max_reservoir_liquid_rate (float): max reservoir liquid rate (QLIQMAX)
-        max_reservoir_total_fluids_rate (float): max reservoir total fluids rate (QALLMAX)
-        max_reservoir_hc_rate (float): max reservoir hc rate (QHCMAX)
-        max_reverse_reservoir_oil_rate (float): max reverse reservoir oil rate (QOMAX-)
-        max_reverse_reservoir_gas_rate (float): max reverse reservoir gas rate (QGMAX-)
-        max_reverse_reservoir_water_rate (float): max reverse reservoir water rate (QWMAX-)
-        max_reverse_reservoir_liquid_rate (float): max reverse reservoir liquid rate (QLIQMAX-)
-        max_reverse_reservoir_total_fluids_rate (float): max reverse reservoir total fluids rate (QALLMAX-)
-        max_reverse_reservoir_hc_rate (float): max reverse reservoir hc rate (QHCMAX-)
-        min_pressure (float): min pressure (PMIN)
-        max_pressure (float): max pressure (PMAX)
-        max_wag_water_pressure (float): max wag water pressure (PWMAX)
-        max_wag_gas_pressure (float): max wag gas pressure (PGMAX)
-        bottom_hole_pressure (float): bottom hole pressure (BHP)
-        tubing_head_pressure (float): tubing head pressure (THP)
-        min_surface_oil_rate (float): min surface oil rate (QOSMIN)
-        min_surface_gas_rate (float): min surface gas rate (QGSMIN)
-        min_surface_water_rate (float): min surface water rate (QWSMIN)
-        min_surface_liquid_rate (float): min surface liquid rate (QLIQSMIN)
-        min_reservoir_oil_rate (float): min reservoir oil rate (QOMIN)
-        min_reservoir_gas_rate (float): min reservoir gas rate (QGMIN)
-        min_reservoir_water_rate (float): min reservoir water rate (QWMIN)
-        min_reservoir_liquid_rate (float): min reservoir liquid rate (QLIQMIN)
-        min_reservoir_total_fluids_rate (float): min reservoir total fluids rate (QALLMIN)
-        min_reservoir_hc_rate (float): min reservoir hc rate (QHCMIN)
-        min_reservoir_oil_rate (float): min reservoir oil rate (QOSMIN-)
-        min_reservoir_gas_rate (float): min reservoir gas rate (QGSMIN-)
-        min_reservoir_water_rate (float): min reservoir water rate (QWSMIN-)
-        min_reservoir_liquid_rate (float): min reservoir liquid rate (QLIQSMIN-)
-        min_reverse_reservoir_oil_rate (float): min reverse reservoir oil rate (QOMIN-)
-        min_reverse_reservoir_gas_rate (float): min reverse reservoir gas rate (QGMIN-)
-        min_reverse_reservoir_water_rate (float): min reverse reservoir water rate (QWMIN-)
-        min_reverse_reservoir_liquid_rate (float): min reverse reservoir liquid rate (QLIQMIN-)
-        min_reverse_reservoir_total_fluids_rate (float): min reverse reservoir total fluids rate (QALLMIN-)
-        min_reverse_reservoir_hc_rate (float): min reverse reservoir hc rate (QHCMIN-)
-        max_watercut (float): max watercut (WCUTMAX)
-        max_watercut_plug (float): max watercut plug (WCUTPLUG)
-        max_watercut_plugplus (float): max watercut plugplus (WCUTPLUGPLUS)
-        max_watercut_perf (float): max watercut perf (WCUTPERF)
-        max_watercut_perfplus (float): max watercut perfplus (WCUTPERFPLUS)
-        max_wor (float): max wor (WORMAX)
-        max_wor_plug (float): max wor plug (WORPLUG)
-        max_wor_plug_plus (float): max wor plug plus (WORPLUGPLUS)
-        max_wor_perf (float): max wor perf (WORPERF)
-        max_wor_perfplus (float): max wor perfplus (WORPERFPLUS)
-        max_gor (float): max gor (GORMAX)
-        max_gor_plug (float): max gor plug (GORPLUG)
-        max_gor_plug_plus (float): max gor plug plus (GORPLUGPLUS)
-        max_gor_perf (float): max gor perf (GORPERF)
-        max_gor_perfplus (float): max gor perfplus (GORPERFPLUS)
-        max_lgr (float): max lgr (LGRMAX)
-        max_lgr_plug (float): max lgr plug (LGRPLUG)
-        max_lgr_plug_plus (float): max lgr plug plus (LGRPLUGPLUS)
-        max_lgr_perf (float): max lgr perf (LGRPERF)
-        max_lgr_perfplus (float): max lgr perfplus (LGRPERFPLUS)
-        max_cum_gas_prod (float): max cum gas prod (CGLIM)
-        max_cum_water_prod (float): max cum water prod (CWLIM)
-        max_cum_oil_prod (float): max cum oil prod (COLIM)
+    """Attributes
+    name (str): name of the well (NAME)
+    max_surface_oil_rate (float): max surface oil rate (QOSMAX)
+    max_surface_gas_rate (float): max surface gas rate (QGSMAX)
+    max_surface_water_rate (float): max surface (QWSMAX)
+    max_surface_liquid_rate (float): max surface liquid rate (QLIQSMAX)
+    max_hc_molar_rate (float): Max hc molar rate (QMHCMAX)
+    max_reverse_surface_oil_rate (float): max reverse surface oil rate (QOSMAX-)
+    max_reverse_surface_gas_rate (float): max reverse surface gas rate (QGSMAX-)
+    max_reverse_surface_water_rate (float): max reverse surface water rate (QWSMAX-)
+    max_reverse_surface_liquid_rate (float): max reverse surface liquid rate (QLIQSMAX-)
+    max_reservoir_oil_rate (float): max reservoir oil rate (QOMAX)
+    max_reservoir_gas_rate (float): max reservoir gas rate (QGMAX)
+    max_reservoir_water_rate (float): max reservoir water rate (QWMAX)
+    max_reservoir_liquid_rate (float): max reservoir liquid rate (QLIQMAX)
+    max_reservoir_total_fluids_rate (float): max reservoir total fluids rate (QALLMAX)
+    max_reservoir_hc_rate (float): max reservoir hc rate (QHCMAX)
+    max_reverse_reservoir_oil_rate (float): max reverse reservoir oil rate (QOMAX-)
+    max_reverse_reservoir_gas_rate (float): max reverse reservoir gas rate (QGMAX-)
+    max_reverse_reservoir_water_rate (float): max reverse reservoir water rate (QWMAX-)
+    max_reverse_reservoir_liquid_rate (float): max reverse reservoir liquid rate (QLIQMAX-)
+    max_reverse_reservoir_total_fluids_rate (float): max reverse reservoir total fluids rate (QALLMAX-)
+    max_reverse_reservoir_hc_rate (float): max reverse reservoir hc rate (QHCMAX-)
+    min_pressure (float): min pressure (PMIN)
+    max_pressure (float): max pressure (PMAX)
+    max_wag_water_pressure (float): max wag water pressure (PWMAX)
+    max_wag_gas_pressure (float): max wag gas pressure (PGMAX)
+    bottom_hole_pressure (float): bottom hole pressure (BHP)
+    tubing_head_pressure (float): tubing head pressure (THP)
+    min_surface_oil_rate (float): min surface oil rate (QOSMIN)
+    min_surface_gas_rate (float): min surface gas rate (QGSMIN)
+    min_surface_water_rate (float): min surface water rate (QWSMIN)
+    min_surface_liquid_rate (float): min surface liquid rate (QLIQSMIN)
+    min_reservoir_oil_rate (float): min reservoir oil rate (QOMIN)
+    min_reservoir_gas_rate (float): min reservoir gas rate (QGMIN)
+    min_reservoir_water_rate (float): min reservoir water rate (QWMIN)
+    min_reservoir_liquid_rate (float): min reservoir liquid rate (QLIQMIN)
+    min_reservoir_total_fluids_rate (float): min reservoir total fluids rate (QALLMIN)
+    min_reservoir_hc_rate (float): min reservoir hc rate (QHCMIN)
+    min_reservoir_oil_rate (float): min reservoir oil rate (QOSMIN-)
+    min_reservoir_gas_rate (float): min reservoir gas rate (QGSMIN-)
+    min_reservoir_water_rate (float): min reservoir water rate (QWSMIN-)
+    min_reservoir_liquid_rate (float): min reservoir liquid rate (QLIQSMIN-)
+    min_reverse_reservoir_oil_rate (float): min reverse reservoir oil rate (QOMIN-)
+    min_reverse_reservoir_gas_rate (float): min reverse reservoir gas rate (QGMIN-)
+    min_reverse_reservoir_water_rate (float): min reverse reservoir water rate (QWMIN-)
+    min_reverse_reservoir_liquid_rate (float): min reverse reservoir liquid rate (QLIQMIN-)
+    min_reverse_reservoir_total_fluids_rate (float): min reverse reservoir total fluids rate (QALLMIN-)
+    min_reverse_reservoir_hc_rate (float): min reverse reservoir hc rate (QHCMIN-)
+    max_watercut (float): max watercut (WCUTMAX)
+    max_watercut_plug (float): max watercut plug (WCUTPLUG)
+    max_watercut_plugplus (float): max watercut plugplus (WCUTPLUGPLUS)
+    max_watercut_perf (float): max watercut perf (WCUTPERF)
+    max_watercut_perfplus (float): max watercut perfplus (WCUTPERFPLUS)
+    max_wor (float): max wor (WORMAX)
+    max_wor_plug (float): max wor plug (WORPLUG)
+    max_wor_plug_plus (float): max wor plug plus (WORPLUGPLUS)
+    max_wor_perf (float): max wor perf (WORPERF)
+    max_wor_perfplus (float): max wor perfplus (WORPERFPLUS)
+    max_gor (float): max gor (GORMAX)
+    max_gor_plug (float): max gor plug (GORPLUG)
+    max_gor_plug_plus (float): max gor plug plus (GORPLUGPLUS)
+    max_gor_perf (float): max gor perf (GORPERF)
+    max_gor_perfplus (float): max gor perfplus (GORPERFPLUS)
+    max_lgr (float): max lgr (LGRMAX)
+    max_lgr_plug (float): max lgr plug (LGRPLUG)
+    max_lgr_plug_plus (float): max lgr plug plus (LGRPLUGPLUS)
+    max_lgr_perf (float): max lgr perf (LGRPERF)
+    max_lgr_perfplus (float): max lgr perfplus (LGRPERFPLUS)
+    max_cum_gas_prod (float): max cum gas prod (CGLIM)
+    max_cum_water_prod (float): max cum water prod (CWLIM)
+    max_cum_oil_prod (float): max cum oil prod (COLIM).
 
-        artificial_lift_number (int): artificial lift number within the hydraulic table (ALQ)
-        max_choke_setting (float): maximum choke/ICD/valve setting (SETTING)
-        min_gas_lift_efficiency (float): minimum gas lift efficiency below which the connection will be shut in(GLEFMIN)
-        gl_additive_correction (float): additive correction term to value of gas/liquid ratio from optimal gl \
+    artificial_lift_number (int): artificial lift number within the hydraulic table (ALQ)
+    max_choke_setting (float): maximum choke/ICD/valve setting (SETTING)
+    min_gas_lift_efficiency (float): minimum gas lift efficiency below which the connection will be shut in(GLEFMIN)
+    gl_additive_correction (float): additive correction term to value of gas/liquid ratio from optimal gl \
             tables (GLRADD)
-        active_node (bool): active/inactive node/well (ACTIVATE)
-        pump_power (float): power for the pump (POWER)
-        pump_speed (float): maximum speed of the pump/esp/compressor (SPEED)
-        choke_limit (str): ON/OFF for whether the esp should exceed the choke limit (CHOKELIMIT)
-        manifold_position (int): position in the manifold for the well (POSITION)
+    active_node (bool): active/inactive node/well (ACTIVATE)
+    pump_power (float): power for the pump (POWER)
+    pump_speed (float): maximum speed of the pump/esp/compressor (SPEED)
+    choke_limit (str): ON/OFF for whether the esp should exceed the choke limit (CHOKELIMIT)
+    manifold_position (int): position in the manifold for the well (POSITION)
 
     """
+
     name: Optional[str] = None
     well_name: Optional[str] = None
     max_surface_oil_rate: Optional[float] = None
@@ -198,7 +198,7 @@ class NexusConstraint(Constraint):
 
     @staticmethod
     def get_nexus_mapping() -> dict[str, tuple[str, type]]:
-        """gets the mapping of nexus keywords to attribute definitions"""
+        """Gets the mapping of nexus keywords to attribute definitions."""
         nexus_mapping: dict[str, tuple[str, type]] = {
             'WELL': ('well_name', str),
             'NAME': ('name', str),
@@ -317,7 +317,7 @@ class NexusConstraint(Constraint):
 
     @staticmethod
     def get_alq_constraints_map() -> dict[str, tuple[str, type]]:
-        """ Gets the nexus mapping for artificial lift constraints"""
+        """Gets the nexus mapping for artificial lift constraints."""
         nexus_mapping: dict[str, tuple[str, type]] = {
             'ALQ': ('artificial_lift_number', int),
             'SETTING': ('max_choke_setting', float),
@@ -332,20 +332,20 @@ class NexusConstraint(Constraint):
         return nexus_mapping
 
     def to_dict(self, keys_in_nexus_style: bool = False) -> dict[str, None | str | int | float]:
-        """
-            Returns a dictionary of the attributes of the Constraint
+        """Returns a dictionary of the attributes of the Constraint
         Args:
             keys_in_nexus_style (bool): if True returns the key values in Nexus keywords, otherwise returns the \
-                attribute name as stored by ressimpy
+                attribute name as stored by ressimpy.
 
-        Returns:
+        Returns
+        -------
             a dictionary keyed by attributes and values as the value of the attribute
         """
         result_dict = to_dict_generic.to_dict(self, keys_in_nexus_style, add_date=True, add_units=True)
         return result_dict
 
     def update(self, new_data: dict[str, None | int | str | float | UnitSystem], nones_overwrite: bool = False):
-        """Updates attributes in the object based on the dictionary provided"""
+        """Updates attributes in the object based on the dictionary provided."""
         for k, v in new_data.items():
             if v is not None or nones_overwrite:
                 setattr(self, k, v)

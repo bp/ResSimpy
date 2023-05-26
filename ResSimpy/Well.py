@@ -1,4 +1,4 @@
-"""The abstract base class for all wells"""
+"""The abstract base class for all wells."""
 from abc import ABC
 from dataclasses import dataclass
 from typing import Optional, Sequence, Union
@@ -32,30 +32,30 @@ class Well(ABC):
 
     @property
     def perforations(self) -> Sequence[Completion]:
-        """Returns a list of all of the perforations for the well"""
+        """Returns a list of all of the perforations for the well."""
         raise NotImplementedError("This method has not been implemented for this simulator yet")
 
     @property
     def first_perforation(self) -> Optional[Completion]:
-        """Returns the first perforation for the well"""
+        """Returns the first perforation for the well."""
         raise NotImplementedError("This method has not been implemented for this simulator yet")
 
     @property
     def shutins(self) -> Sequence[Completion]:
-        """Returns a list of all of the perforations for the well"""
+        """Returns a list of all of the perforations for the well."""
         raise NotImplementedError("This method has not been implemented for this simulator yet")
 
     @property
     def last_shutin(self) -> Optional[Completion]:
-        """Returns the first perforation for the well"""
+        """Returns the first perforation for the well."""
         raise NotImplementedError("This method has not been implemented for this simulator yet")
 
     @property
     def printable_well_info(self) -> str:
-        """Returns some printable well information in string format"""
+        """Returns some printable well information in string format."""
         raise NotImplementedError("This method has not been implemented for this simulator yet")
 
     @property
     def completion_events(self) -> list[tuple[str, Union[int, tuple[float, float]]]]:
-        """Returns a list of dates and values representing either the layer, or the depths of each perforation"""
+        """Returns a list of dates and values representing either the layer, or the depths of each perforation."""
         raise NotImplementedError("This method has not been implemented for this simulator yet")
