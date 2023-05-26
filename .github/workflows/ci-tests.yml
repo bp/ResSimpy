@@ -40,7 +40,7 @@ jobs:
       - name: Run linters (without annotations)
         if: github.event.pull_request.head.repo.full_name != github.repository
         run: |
-          poetry run flake8 ResSimpy --append-config ./.config/flake8
+          poetry run ruff ResSimpy
           poetry run mypy ResSimpy --config-file ./.config/mypy
 
       - name: Code formatting
