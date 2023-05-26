@@ -13,7 +13,7 @@ class Well(ABC):
     __well_name: str
     __units: UnitSystem
 
-    def __init__(self, well_name, completions, units) -> None:
+    def __init__(self, well_name: str, completions: list[Completion], units: UnitSystem) -> None:
         self.__well_name = well_name
         self.__completions = completions
         self.__units = units

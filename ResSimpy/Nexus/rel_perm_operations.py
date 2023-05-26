@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Optional
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
@@ -99,11 +99,11 @@ def load_nexus_relperm_table(relperm_file_path: str) -> dict[str, list[tuple[flo
         next_column_heading = nfo.get_next_value(0, [next_line], next_line)
 
     # Load in each row from the table
-    all_values: list[Optional[Dict[str, str]]] = []
+    all_values: list[Optional[dict[str, str]]] = []
 
     for line in file_as_list[header_index + 1:]:
         trimmed_line = line
-        line_values: Optional[Dict[str, str]] = {}
+        line_values: Optional[dict[str, str]] = {}
         for column in columns:
             value = nfo.get_next_value(0, [trimmed_line], trimmed_line)
 

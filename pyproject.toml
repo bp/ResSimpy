@@ -28,6 +28,7 @@ flake8 = "^6"
 mypy = "^1.2"
 pycodestyle = "^2.9.1"
 pytest-cov = "^4.0.0"
+ruff = "^0.0.270"
 
 [build-system]
 requires = ["poetry-core"]
@@ -35,7 +36,9 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
 line-length = 120
-select = ["E", "F", "W", "C90", "N",  "UP", "YTT", "ANN", "S", "BLE", "FBT"] # To add later: "D",
-ignore = ["UP007",  "ANN101", "N999"
+select = ["E", "F", "W", "C90", "N",  "UP", "YTT", "ANN", "S", "BLE"] # To add later: "D",
+ignore = ["UP007",  "ANN101", "N999", "UP035", "S105", "N802",
     # To fix later:
+    "ANN201",
+    "ANN202"
     ]
