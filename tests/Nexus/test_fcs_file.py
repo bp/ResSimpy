@@ -162,7 +162,7 @@ def test_fcs_file_all_methods(mocker):
                                      '	 OPTIONS ',
                                      expected_options_file,
                                      '',
-                                     '     INCLUDE ',
+                                     # '     INCLUDE ',
                                      'WELLS SET 1 ',
                                      expected_wells_file,
                                      '',

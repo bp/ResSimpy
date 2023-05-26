@@ -323,12 +323,12 @@ class NexusFile:
             raise ValueError(f'No object with {uuid=} found within the object locations')
         self.object_locations.pop(uuid, None)
 
-    def find_which_include_file(self, index: int) -> tuple[NexusFile, int]:
+    def find_which_include_file(self, flattened_index: int) -> tuple[NexusFile, int]:
         """ Given a line index that relates to a position within the flattened file_as_list from the method
         get_flat_file_as_list
 
         Args:
-            index (int): index in the flattened file as list structure
+            flattened_index (int): index in the flattened file as list structure
 
         Returns:
             tuple[NexusFile, int] where the first element is the file that the relevant line is in and the second
@@ -342,33 +342,59 @@ class NexusFile:
 
         line_locations = [x[0] for x in self.line_locations]
         line_locations.sort()
-        uuid_index = 0
-        index_in_file = index - line_locations[-1]
+        uuid_index: Optional[UUID] = None
+        index_in_included_file = 0 # flattened_index - line_locations[-1]
 
-        for i, x in enumerate(line_locations):
-            if x <= index:
-                index_in_file = index - x
-                uuid_index = i
-            if x >= index:
+        # Find the Nexusfile containing the line we are looking for
+        for numlines, id in self.line_locations:
+            if numlines <= flattened_index:
+                uuid_index = id
+            if numlines >= flattened_index:
                 break
 
-        file_uuid = self.line_locations[uuid_index][1]
-        if file_uuid == self.file_id or self.include_objects is None:
-            return self, index_in_file
+
+        get_next_line_count = False
+        lines_already_included = 0
+        previous_lines_value = 0
+
+        # Add the previously included lines from the file (if any) to the location after it has been split
+        for numlines, id in self.line_locations:
+            if id == uuid_index:
+                get_next_line_count = True
+                previous_lines_value = numlines
+                continue
+            else:
+                # If we have gone beyond where the line is, calculate the location in the relevant file
+                if numlines >= flattened_index:
+                    lines_already_included += flattened_index - previous_lines_value
+                    break
+
+                if get_next_line_count:
+                    lines_already_included += numlines - previous_lines_value
+                    get_next_line_count = False
+                previous_lines_value = numlines
+
+        if flattened_index > line_locations[-1]:
+            lines_already_included += flattened_index - line_locations[-1]
+
+        index_in_included_file += lines_already_included
+
+        if uuid_index == self.file_id or self.include_objects is None:
+            return self, index_in_included_file
 
         nexus_file = None
         for file in self.include_objects:
-            if file.file_id == file_uuid:
+            if file.file_id == uuid_index:
                 nexus_file = file
             elif file.include_objects is not None:
                 # CURRENTLY THIS ONLY SUPPORTS 2 LEVELS OF INCLUDES
                 for lvl_2_include in file.include_objects:
-                    if lvl_2_include.file_id == file_uuid:
+                    if lvl_2_include.file_id == uuid_index:
                         nexus_file = lvl_2_include
         if nexus_file is None:
-            raise ValueError(f'No file with {file_uuid=} found within include objects')
+            raise ValueError(f'No file with {uuid_index=} found within include objects')
 
-        return nexus_file, index_in_file
+        return nexus_file, index_in_included_file
 
     def add_to_file_as_list(self, additional_content: list[str], index: int,
                             additional_objects: Optional[dict[UUID, int]] = None) -> None:

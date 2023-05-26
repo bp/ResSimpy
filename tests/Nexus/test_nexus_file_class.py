@@ -340,7 +340,7 @@ second_file INCLUDE inc_file2.inc continuation''')
         'second_file ',
         'inc2 file contents\n',                 #5: 2nd include
         'more content',
-        'continuation']                         #7: parent
+        ' continuation']                         #7: parent
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -376,7 +376,7 @@ continuation''')
     expected_location = 'test_file_path.dat'
     expected_origin = None
     expected_flat_file = ['basic_file ','inc file contents\n','second line in incfile \n',
-    'inc2 file contents\n','more content', 'end of line \n', ' abc', 'some random words ! comment\n', 'continuation']
+    'inc2 file contents\n','more content', ' end of line \n', ' abc', 'some random words ! comment\n', 'continuation']
     nexus_file_include2 = NexusFile(location='inc_file2.inc', include_locations=[], origin='inc_file1.inc',
                                     include_objects=None, file_content_as_list=['inc2 file contents\n', 'more content'])
 
@@ -479,10 +479,14 @@ continuation''')
 
 @pytest.mark.parametrize('index, expected_file_number, expected_index_in_file',[
 (0, 0, 0),
-(4, 2, 0),
-(7, 1, 1),
-(9, 0, 1),
-
+(4, 2, 1),
+(1, 1, 0),
+(6, 1, 3),
+(7, 0, 1),
+(8, 0, 2),
+(3, 2, 0),
+(5, 1, 2),
+(2, 1, 1),
 ])
 def test_find_which_include_file(mocker, index, expected_file_number, expected_index_in_file):
     # Arrange
@@ -504,16 +508,23 @@ continuation''')
     nexus_file_include2 = NexusFile(location='inc_file2.inc', include_locations=[], origin='inc_file1.inc',
                                     include_objects=None, file_content_as_list=['inc2 file contents\n', 'more content'])
 
-    inc1_file_content_as_list = ['inc file contents\n', 'second line in incfile \n', ' include ', nexus_file_include2,
-                                 'end of line \n', ' ']
+    inc1_file_content_as_list = ['inc file contents\n', 'second line in incfile \n', ' include inc_file2.inc end of line \n',
+                                 ' ']
 
     nexus_file_include1 = NexusFile(location='inc_file1.inc', include_locations=['inc_file2.inc'], origin=file_path,
                                     include_objects=[nexus_file_include2], file_content_as_list=inc1_file_content_as_list)
 
-    expected_file_content_as_list = ['basic_file INCLUDE \n', nexus_file_include1, 'some random words ! comment\n',
+    expected_file_content_as_list = ['basic_file INCLUDE inc_file1.inc\n',  'some random words ! comment\n',
                                      'continuation']
 
-    expected_line_locations = [(0, 'parent_file'), (1, 'uuid_inc1'), (4, 'uuid_inc2'), (6, 'uuid_inc1'), (8, 'parent_file')]
+    expected_flat_list_str = ['basic_file ', 'inc file contents\n', 'second line in incfile \n',
+                              'inc2 file contents\n', 'more content',
+                              ' end of line \n',
+                              ' ',
+                              'some random words ! comment\n',
+                              'continuation']
+
+    expected_line_locations = [(0, 'parent_file'), (1, 'uuid_inc1'), (3, 'uuid_inc2'), (5, 'uuid_inc1'), (7, 'parent_file')]
 
     expected_nexus_file = NexusFile(location=expected_location, include_locations=['inc_file1.inc'],
                                     origin=expected_origin, include_objects=[nexus_file_include1],
@@ -534,8 +545,11 @@ continuation''')
     # Act
     nexus_file = NexusFile.generate_file_include_structure(file_path)
     flat_file = nexus_file.get_flat_list_str_file
-    nexus_file_result, index_in_file = nexus_file.find_which_include_file(index=index)
+    nexus_file_result, index_in_file = nexus_file.find_which_include_file(flattened_index=index)
+
     # Assert
+    assert flat_file == expected_flat_list_str
+    assert nexus_file.file_content_as_list == expected_file_content_as_list
     assert nexus_file == expected_nexus_file
     assert nexus_file_result == expected_return_file
     assert index_in_file == expected_index_in_file
