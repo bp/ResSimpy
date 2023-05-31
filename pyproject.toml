@@ -8,6 +8,7 @@ keywords = ["ResSimpy", "Reservoir Engineering"]
 classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Development Status :: 3 - Alpha",
     "Topic :: Scientific/Engineering",
     "Topic :: System :: Filesystems",
@@ -15,7 +16,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.10, <3.11"
+python = ">=3.10, <3.12"
 resqpy = "^4.7"
 numpy = "^1.23"
 pandas = "^1.5"
