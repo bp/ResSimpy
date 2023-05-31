@@ -190,9 +190,9 @@ class FcsNexusFile(NexusFile):
                     _, method_string, method_number, value = (
                         nfo.get_multiple_sequential_values(flat_fcs_file_content[i::], 4)
                     )
-                    sub_file_path = nfo.get_full_file_path(value, origin_path)
+                    full_file_path = nfo.get_full_file_path(value, origin_path)
                     nexus_file = NexusFile.generate_file_include_structure(
-                        sub_file_path, origin=fcs_file_path, recursive=recursive)
+                        value, origin=fcs_file_path, recursive=recursive)
                     fcs_property = getattr(fcs_file, fcs_keyword_map_multi[key])
                     # manually initialise if the property is still a None after class instantiation
                     if fcs_property is None:
@@ -205,15 +205,15 @@ class FcsNexusFile(NexusFile):
                     setattr(fcs_file, fcs_keyword_map_multi[key], fcs_property_list)
                     fcs_file.file_content_as_list.extend(cls.line_as_nexus_list(line, value, nexus_file))
                     fcs_file.include_objects.append(nexus_file)
-                    fcs_file.include_locations.append(sub_file_path)
+                    fcs_file.include_locations.append(full_file_path)
                 elif key in fcs_keyword_map_single:
-                    sub_file_path = nfo.get_full_file_path(value, origin_path)
+                    full_file_path = nfo.get_full_file_path(value, origin_path)
                     nexus_file = NexusFile.generate_file_include_structure(
-                        sub_file_path, origin=fcs_file_path, recursive=recursive)
+                        value, origin=fcs_file_path, recursive=recursive)
                     setattr(fcs_file, fcs_keyword_map_single[key], nexus_file)
                     fcs_file.file_content_as_list.extend(cls.line_as_nexus_list(line, value, nexus_file))
                     fcs_file.include_objects.append(nexus_file)
-                    fcs_file.include_locations.append(sub_file_path)
+                    fcs_file.include_locations.append(full_file_path)
                 else:
                     fcs_file.file_content_as_list.append(line.replace('\n', ''))
                     continue
