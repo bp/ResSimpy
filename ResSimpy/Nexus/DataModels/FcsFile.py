@@ -4,7 +4,7 @@ import os
 import warnings
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from typing import Optional, Union
+from typing import Optional
 
 # Use correct Self type depending upon Python version
 import sys
@@ -14,7 +14,7 @@ else:
     from typing_extensions import Self
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_int_nexus_file, get_empty_list_str, \
-    get_empty_list_nexus_file, get_empty_list_str_nexus_file
+    get_empty_list_nexus_file
 from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Utils.generic_repr import generic_repr
