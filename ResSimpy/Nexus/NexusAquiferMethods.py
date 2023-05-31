@@ -19,7 +19,7 @@ class NexusAquiferMethods(AquiferMethods):
     __properties_loaded: bool = False  # Used in lazy loading
 
     def __init__(self, aquifer_methods: Optional[MutableMapping[int, NexusAquiferMethod]] = None,
-                 aquifer_files: Optional[dict[int, NexusFile]] = None) -> None:
+                 aquifer_files: Optional[dict[int, NexusFile]] = None):
         if aquifer_methods:
             self.__aquifer_methods = aquifer_methods
         else:

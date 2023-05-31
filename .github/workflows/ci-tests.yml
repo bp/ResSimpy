@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies
         uses: ./.github/actions/prepare-poetry
         with:
-          python-version: "3.10"
+          python-version: "3.11"
 
       # Post in-line comments for any issues found
       # Do not run if coming from a forked repo
@@ -36,9 +36,18 @@ jobs:
           mypy_command_prefix: poetry run
           mypy_args: ResSimpy --config-file ./.config/mypy
 
+      - name: Ruff checks
+        uses: jpetrucciani/ruff-check@main
+        with:
+          path: 'ResSimpy'
+
+      - name: Install ruff from pypi
+        run: |
+          pip install ruff
+
       # Checks using ruff
       - name: Run checks using Ruff
-        uses: EnriqueSoria/annotate_pr_with_ruff@v0.1.20
+        uses: EnriqueSoria/annotate_pr_with_ruff@v1.0.0
 
       # Alternative step that works with forked repo
       - name: Run linters (without annotations)
