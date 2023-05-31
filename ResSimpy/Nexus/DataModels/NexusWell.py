@@ -13,7 +13,7 @@ from ResSimpy.Well import Well
 class NexusWell(Well):
     __completions: list[NexusCompletion]
 
-    def __init__(self, well_name: str, completions: Sequence[NexusCompletion], units: UnitSystem, ) -> None:
+    def __init__(self, well_name: str, completions: Sequence[NexusCompletion], units: UnitSystem ) -> None:
         if not isinstance(completions, list):
             completions = list(completions)
         self.__completions: list[NexusCompletion] = completions
@@ -128,7 +128,7 @@ class NexusWell(Well):
         return matching_completions
 
     def find_completion(self,
-                        completion_properties: NexusCompletion.InputDictionary | NexusCompletion, ) -> NexusCompletion:
+                        completion_properties: NexusCompletion.InputDictionary | NexusCompletion ) -> NexusCompletion:
         """Returns precisely one completion which matches all the properties provided.
             If several completions match it raise a ValueError.
 
@@ -154,7 +154,7 @@ class NexusWell(Well):
         raise ValueError('No completion found for id: {id}')
 
     def _add_completion_to_memory(self, date: str, completion_properties: NexusCompletion.InputDictionary,
-                                  completion_index: Optional[int] = None, ) -> NexusCompletion:
+                                  completion_index: Optional[int] = None ) -> NexusCompletion:
         """Adds a perforation with the properties specified in completion_properties_list,
             if index is none then adds it to the end of the perforation list.
 
@@ -188,7 +188,7 @@ class NexusWell(Well):
         completion.update(new_completion_properties)
 
     def _modify_completions_in_memory(self, new_completion_properties: NexusCompletion.InputDictionary,
-                                      completions_to_modify: list[NexusCompletion | UUID], ) -> None:
+                                      completions_to_modify: list[NexusCompletion | UUID] ) -> None:
         for completion in completions_to_modify:
             if isinstance(completion, UUID):
                 modify_this_completion = self.get_completion_by_id(completion)
@@ -196,7 +196,7 @@ class NexusWell(Well):
             else:
                 completion.update(new_completion_properties)
 
-    def _remove_completions_from_memory(self, completions_to_remove: Sequence[NexusCompletion | UUID], ) -> None:
+    def _remove_completions_from_memory(self, completions_to_remove: Sequence[NexusCompletion | UUID] ) -> None:
         # TODO improve comparison of dates with datetime libs
         """Removes completions from a list of completions or completion IDs
         Args:

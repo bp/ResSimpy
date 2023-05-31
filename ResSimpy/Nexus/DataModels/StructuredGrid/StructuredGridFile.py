@@ -35,7 +35,7 @@ class StructuredGridFile(Grid):
     __grid_properties_loaded: bool = False
     __grid_nexus_file: Optional[NexusFile] = None
 
-    def __init__(self, data: Optional[dict] = None, grid_file_contents: Optional[list[str]] = None,
+    def __init__(self, grid_file_contents: Optional[list[str]] = None,
                  grid_nexus_file: Optional[NexusFile] = None) -> None:
         super().__init__()
         self.__array_functions_list: Optional[list[str]] = None
@@ -51,7 +51,7 @@ class StructuredGridFile(Grid):
         if isinstance(value, tuple | list | set | frozenset):
             return type(value)([self.__wrap(v) for v in value])
         else:
-            return StructuredGridFile(value) if isinstance(value, dict) else value
+            return value
 
     def update_properties_from_dict(self, data: dict[str, int | VariableEntry]) -> None:
         """Allows you to update properties on the class using the provided dict of values.

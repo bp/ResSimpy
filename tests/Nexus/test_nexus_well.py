@@ -607,9 +607,8 @@ def test_wells_modify(mocker):
 
     # Act
     wells.modify_well(well_name='well1', completion_properties_list=[perf_1_to_add, perf_2_to_add],
-                      how=OperationEnum.ADD, write_to_file=False)
-    wells.modify_well(well_name='well1', completion_properties_list=[perf_to_remove], how=OperationEnum.REMOVE,
-                      write_to_file=False)
+                      how=OperationEnum.ADD)
+    wells.modify_well(well_name='well1', completion_properties_list=[perf_to_remove], how=OperationEnum.REMOVE)
     # Assert
     assert wells.get_wells()[0].completions == expected_result[0].completions
 

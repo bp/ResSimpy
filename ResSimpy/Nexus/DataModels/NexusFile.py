@@ -99,7 +99,7 @@ class NexusFile:
                                    includes=None,
                                    origin=origin,
                                    includes_objects=None,
-                                   file_content_as_list=None, )
+                                   file_content_as_list=None )
             warnings.warn(UserWarning(f'No file found for: {file_path} while loading {origin}'))
             return nexus_file_class
 
@@ -141,7 +141,7 @@ class NexusFile:
                                includes=None,
                                origin=file_path,
                                includes_objects=None,
-                               file_content_as_list=None, )
+                               file_content_as_list=None )
                 if includes_objects is None:
                     raise ValueError('includes_objects is None - recursion failure.')
                 includes_objects.append(inc_file)
@@ -266,7 +266,7 @@ class NexusFile:
     def get_flat_list_str_file(self) -> list[str]:
         if self.file_content_as_list is None:
             raise ValueError(f'No file content found for {self.location}')
-        flat_list = [x for x in self.iterate_line(file_index=None)]
+        flat_list = list(self.iterate_line(file_index=None))
         return flat_list
 
     def get_flat_list_str_until_file(self, start_line_index: int) -> tuple[list[str], Optional[NexusFile]]:

@@ -242,7 +242,7 @@ class Runcontrol:
         with open(filename, "w") as text_file:
             text_file.write(new_file_str)
 
-    def load_run_control_file(self, ):
+    def load_run_control_file(self ):
         """Loads the run control information into the class instance. \
             If the write_times attribute is True then it expands out any INCLUDE files with the times found within
         Raises:
@@ -311,7 +311,7 @@ class Runcontrol:
             self.check_date_format(time)
 
         new_times = self.sort_remove_duplicate_times(content)
-        if len(new_times) > 0 > self.compare_dates(new_times[0], self.model.start_date, ):
+        if len(new_times) > 0 > self.compare_dates(new_times[0], self.model.start_date ):
             raise ValueError(
                 f"The supplied date of {new_times[0]} precedes the start date of {self.model.start_date}")
         operation = operation.lower()
