@@ -2,6 +2,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional, Union, TypedDict
 
+# Use correct Self type depending upon Python version
+import sys
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
+
 from ResSimpy.Completion import Completion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
 from ResSimpy.Utils.generic_repr import generic_repr
@@ -10,8 +17,7 @@ from ResSimpy.Utils.to_dict_generic import to_dict
 
 @dataclass(kw_only=True)
 class NexusCompletion(Completion):
-    """
-    A class representing a completion specific to a Nexus Model. Inherits from Completion
+    """A class representing a completion specific to a Nexus Model. Inherits from Completion
     Additional Attributes:
         measured_depth (Optional[float]): Measured depth of a completion. 'MD' in Nexus
         well_indices (Optional[float]): Well index used to calculate performance of the completion. 'WI' in Nexus
@@ -20,8 +26,9 @@ class NexusCompletion(Completion):
         bore_radius (Optional[float]): Well bore radius. 'RADB' in Nexus
         portype (Optional[str]): indicates the pore type for the completion FRACTURE OR MATRIX. 'PORTYPE' in Nexus
         sector (None | str | int): the section of the wellbore to which this completion flows. 'SECT' in Nexus
-        khmult (Optional[float]): the multiplier that is applied to the permeability-thickness. 'KHMULT' in Nexus
+        khmult (Optional[float]): the multiplier that is applied to the permeability-thickness. 'KHMULT' in Nexus.
     """
+
     __measured_depth: Optional[float] = None
     __well_indices: Optional[float] = None
     __partial_perf: Optional[float] = None
@@ -66,7 +73,7 @@ class NexusCompletion(Completion):
                  polymer_bore_radius: Optional[float] = None, polymer_well_radius: Optional[float] = None,
                  portype: Optional[str] = None, rel_perm_end_point: Optional[NexusRelPermEndPoint] = None,
                  kh_mult: Optional[float] = None
-                 ):
+                 ) -> None:
         self.__measured_depth = measured_depth
         self.__well_indices = well_indices
         self.__partial_perf = partial_perf
@@ -99,7 +106,7 @@ class NexusCompletion(Completion):
                          depth_to_bottom=depth_to_bottom, perm_thickness_ovr=perm_thickness_ovr, dfactor=dfactor,
                          rel_perm_method=rel_perm_method, status=status)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return generic_repr(self)
 
     @property
@@ -212,7 +219,7 @@ class NexusCompletion(Completion):
 
     @staticmethod
     def completion_is_perforation(completion: NexusCompletion) -> bool:
-        """Determines if the supplied completion is a perforation or not"""
+        """Determines if the supplied completion is a perforation or not."""
 
         # If we don't have any non-none values for these properties, assume the default values, which mean that the
         # layer is perforated
@@ -229,12 +236,12 @@ class NexusCompletion(Completion):
 
     @staticmethod
     def completion_is_shutin(completion: NexusCompletion) -> bool:
-        """Determines if the supplied completion is a shut-in or not"""
+        """Determines if the supplied completion is a shut-in or not."""
         return not NexusCompletion.completion_is_perforation(completion)
 
     @staticmethod
     def get_nexus_mapping() -> dict[str, tuple[str, type]]:
-        """returns a dictionary of mapping from nexus keyword to attribute name"""
+        """Returns a dictionary of mapping from nexus keyword to attribute name."""
 
         nexus_mapping: dict[str, tuple[str, type]] = {
             'IW': ('i', int),
@@ -327,8 +334,8 @@ class NexusCompletion(Completion):
         kh_mult: Optional[float]
 
     @classmethod
-    def from_dict(cls, input_dictionary: InputDictionary) -> NexusCompletion:
-        """generates a NexusCompletion from a dictionary"""
+    def from_dict(cls, input_dictionary: InputDictionary) -> Self:
+        """Generates a NexusCompletion from a dictionary."""
         try:
             return cls(**input_dictionary)
         except AttributeError:
@@ -344,9 +351,10 @@ class NexusCompletion(Completion):
                 setattr(self, '_Completion__' + k, v)
 
     def completion_to_wellspec_row(self, headers: list[str]):
-        """ Takes a completion object and returns the attribute values as a string in the order of headers provided
+        """Takes a completion object and returns the attribute values as a string in the order of headers provided.
 
         Args:
+        ----
             headers (list[str]): list of header values in Nexus keyword format
 
         Returns: string of the values in the order of the headers provided.

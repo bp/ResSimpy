@@ -29,16 +29,18 @@ class NexusWells(Wells):
     model: NexusSimulator
     __wells: list[NexusWell] = field(default_factory=lambda: [])
 
-    def __init__(self, model: NexusSimulator):
+    def __init__(self, model: NexusSimulator) -> None:
         self.model = model
         self.__wells = []
         super().__init__()
+
+        # return NexusWell(well_name=" test", completions=[], units=UnitSystem.ENGLISH)
 
     def get_wells(self) -> Sequence[NexusWell]:
         return self.__wells
 
     def get_well(self, well_name: str) -> Optional[NexusWell]:
-        """Returns a specific well requested, or None if that well cannot be found"""
+        """Returns a specific well requested, or None if that well cannot be found."""
         wells_to_return = filter(lambda x: x.well_name.upper() == well_name.upper(), self.__wells)
 
         return next(wells_to_return, None)
@@ -51,7 +53,7 @@ class NexusWells(Wells):
                 completion_props: dict[str, None | float | int | str] = {
                     'well_name': well.well_name,
                     'units': well.units.name,
-                    }
+                }
                 completion_props.update(completion.to_dict())
                 store_dictionaries.append(completion_props)
         df_store = pd.DataFrame(store_dictionaries)
@@ -77,7 +79,7 @@ class NexusWells(Wells):
         return overview
 
     def get_wells_dates(self) -> set[str]:
-        """Returns a set of the unique dates in the wellspec file over all wells"""
+        """Returns a set of the unique dates in the wellspec file over all wells."""
         set_dates: set[str] = set()
         for well in self.__wells:
             set_dates.update(set(well.dates_of_completions))
@@ -87,9 +89,10 @@ class NexusWells(Wells):
     def modify_well(self, well_name: str, completion_properties_list: list[NexusCompletion.InputDictionary],
                     how: OperationEnum = OperationEnum.ADD, remove_all_that_match: bool = False,
                     write_to_file: bool = True, ) -> None:
-        """ Modify the existing wells in memory using a dictionary of properties.
+        """Modify the existing wells in memory using a dictionary of properties.
 
         Args:
+        ----
             well_name (str): name of the well to modify
             completion_properties_list (list[InputDict]): a dictionary containing the properties to modify with the \
                 attribute as keys and the values as the updated property value. If remove will remove perforation that \
@@ -125,9 +128,10 @@ class NexusWells(Wells):
 
     def add_completion(self, well_name: str, completion_properties: NexusCompletion.InputDictionary,
                        preserve_previous_completions: bool = True) -> None:
-        """ Adds a completion to an existing wellspec file.
+        """Adds a completion to an existing wellspec file.
 
         Args:
+        ----
             well_name (str): well name to update
             completion_properties (dict[str, float | int | str): properties of the completion you want to update.
             Must contain date of the completion to be added.
@@ -204,7 +208,7 @@ class NexusWells(Wells):
                 header_index, headers, headers_original = self.__get_wellspec_header(
                     additional_headers, completion_properties, file_content, index,
                     inverted_nexus_map, nexus_mapping, wellspec_file
-                    )
+                )
                 continue
 
             if header_index != -1 and nfo.nexus_token_found(line, WELLS_KEYWORDS) and index > header_index:
@@ -242,7 +246,7 @@ class NexusWells(Wells):
 
     def __fill_in_nas(self, additional_headers: list[str], headers_original: list[str], index: int, line: str,
                       wellspec_file: NexusFile, file_content: list[str]) -> int:
-        """ check the validity of the line, if its valid add as many NA's as required for the new columns """
+        """Check the validity of the line, if its valid add as many NA's as required for the new columns."""
         valid_line, _ = nfo.table_line_reader(keyword_store={}, headers=headers_original, line=line)
         if valid_line and len(additional_headers) > 0:
             additional_na_values = ['NA'] * len(additional_headers)
@@ -281,7 +285,7 @@ class NexusWells(Wells):
                               file_content: list[str], index: int, inverted_nexus_map: dict[str, str],
                               nexus_mapping: dict[str, tuple[str, type]], wellspec_file: NexusFile) -> \
             tuple[int, list[str], list[str]]:
-        """Gets the wellspec header and works out if any additional headers should be added"""
+        """Gets the wellspec header and works out if any additional headers should be added."""
         keyword_map = {x: y[0] for x, y in nexus_mapping.items()}
         wellspec_table = file_content[index::]
         header_index, headers = nfo.get_table_header(file_as_list=wellspec_table, header_values=keyword_map)
@@ -313,7 +317,7 @@ class NexusWells(Wells):
                                       date_found: bool, index: int, new_completion_index: int,
                                       preserve_previous_completions: bool, well: NexusWell, well_name: str) -> \
             tuple[list[str], int, list[str], bool]:
-        """writes out the existing wellspec for a well at a new time stamp"""
+        """Writes out the existing wellspec for a well at a new time stamp."""
         nexus_mapping = NexusCompletion.get_nexus_mapping()
         completion_table_as_list = ['\n']
         if not date_found:
@@ -403,7 +407,8 @@ class NexusWells(Wells):
 
     def __remove_wellspec_header(self, completion_date: str, well_name: str, wellspec_file: NexusFile) -> None:
         """Removes the wellspec and header if the wellspec table is empty\
-         must first check for whether the well has any remaining completions in the wellspec table"""
+        must first check for whether the well has any remaining completions in the wellspec table.
+        """
         nexus_mapping = NexusCompletion.get_nexus_mapping()
         completion_date_found = False
         file_content = wellspec_file.get_flat_list_str_file

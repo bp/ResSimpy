@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from abc import ABC
 
 import pandas as pd
+
 from ResSimpy.Well import Well
 from typing import Sequence, Optional
 

@@ -12,7 +12,7 @@ class NexusRelPermEndPoint(RelPermEndPoint):
                  krg_sgu: Optional[float] = None, kro_swl: Optional[float] = None, kro_swr: Optional[float] = None,
                  kro_sgl: Optional[float] = None, kro_sgr: Optional[float] = None, krw_sgl: Optional[float] = None,
                  krw_sgr: Optional[float] = None, krg_sgrw: Optional[float] = None, sgtr: Optional[float] = None,
-                 sotr: Optional[float] = None, ):
+                 sotr: Optional[float] = None, ) -> None:
         super().__init__(swl=swl, swr=swr, swu=swu, sgl=sgl, sgr=sgr, sgu=sgu, swro=swro, sgro=sgro,
                          sgrw=sgrw, krw_swro=krw_swro, krw_swu=krw_swu, krg_sgro=krg_sgro, krg_sgu=krg_sgu,
                          kro_swl=kro_swl, kro_swr=kro_swr, kro_sgl=kro_sgl, kro_sgr=kro_sgr, krw_sgl=krw_sgl,
@@ -20,7 +20,7 @@ class NexusRelPermEndPoint(RelPermEndPoint):
 
     @staticmethod
     def nexus_mapping() -> dict[str, tuple[str, type]]:
-        """returns a dictionary of mapping from nexus keyword to attribute name"""
+        """Returns a dictionary of mapping from nexus keyword to attribute name."""
         nexus_mapping: dict[str, tuple[str, type]] = {
             'SWL': ('swl', float),
             'SWR': ('swr', float),

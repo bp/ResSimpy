@@ -1,3 +1,3 @@
-"""Nexus enums Module, containing the Nexus specific enums"""
+"""Nexus enums Module, containing the Nexus specific enums."""
 
-__all__ = ['SUnitsEnum']
+__all__ = ['DateFormatEnum', 'UnitsEnum']

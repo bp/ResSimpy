@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 import pandas as pd
 from dataclasses import dataclass
-from typing import Optional, Type, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 from ResSimpy.Grid import Grid, VariableEntry
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -35,7 +35,7 @@ class StructuredGridFile(Grid):
     __grid_properties_loaded: bool = False
     __grid_nexus_file: Optional[NexusFile] = None
 
-    def __init__(self, data: Optional[dict] = None, grid_nexus_file: Optional[NexusFile] = None):
+    def __init__(self, data: Optional[dict] = None, grid_nexus_file: Optional[NexusFile] = None) -> None:
         super().__init__()
         self.__array_functions_list: Optional[list[str]] = None
         self.__array_functions_df: Optional[pd.DataFrame] = None
@@ -47,16 +47,16 @@ class StructuredGridFile(Grid):
         self.__grid_nexus_file: Optional[NexusFile] = grid_nexus_file
 
     def __wrap(self, value):
-        if isinstance(value, (tuple, list, set, frozenset)):
+        if isinstance(value, tuple | list | set | frozenset):
             return type(value)([self.__wrap(v) for v in value])
         else:
             return StructuredGridFile(value) if isinstance(value, dict) else value
 
     def update_properties_from_dict(self, data: dict[str, int | VariableEntry]) -> None:
-        """
-        Allows you to update properties on the class using the provided dict of values
+        """Allows you to update properties on the class using the provided dict of values.
 
         Args:
+        ----
                 data dict[str, int | VariableEntry]: the dictionary of values to update on the class
         """
         # Use the dict provided to populate the properties in the class
@@ -85,15 +85,18 @@ class StructuredGridFile(Grid):
 
     def load_grid_properties_if_not_loaded(self) -> None:
         def move_next_value(next_line: str) -> tuple[str, str]:
-            """finds the next value and then strips out the value from the line.
+            """Finds the next value and then strips out the value from the line.
 
             Args:
+            ----
                 next_line (str): the line to search through for the value
 
             Raises:
+            ------
                 ValueError: if no value is found within the line provided
 
             Returns:
+            -------
                 tuple[str, str]: the next value found in the line, the line with the value stripped out.
             """
             value = nfo.get_next_value(0, [next_line], next_line)
@@ -162,11 +165,13 @@ class StructuredGridFile(Grid):
         self.__grid_properties_loaded = True
 
     @classmethod
-    def load_structured_grid_file(cls: Type[StructuredGridFile], structured_grid_file: NexusFile,
+    def load_structured_grid_file(cls: type[StructuredGridFile], structured_grid_file: NexusFile,
                                   lazy_loading: bool = True) -> StructuredGridFile:
         """Loads in a structured grid file with all grid properties, and the array functions defined with 'FUNCTION'.
         Other grid modifiers are currently not supported.
+
         Args:
+        ----
             structured_grid_file (NexusFile): the NexusFile representation of a structured grid file for converting \
                 into a structured grid file class
         Raises:
@@ -193,9 +198,10 @@ class StructuredGridFile(Grid):
 
     @staticmethod
     def update_structured_grid_file(grid_dict: dict[str, VariableEntry | int], model: NexusSimulator) -> None:
-        """Save values passed from the front end to the structured grid file and update the class
+        """Save values passed from the front end to the structured grid file and update the class.
 
         Args:
+        ----
             grid_dict (dict[str, Union[VariableEntry, int]]): dictionary containing grid properties to be replaced
             model (NexusSimulator): an instance of a NexusSimulator object
         Raises:
@@ -247,21 +253,19 @@ class StructuredGridFile(Grid):
         self.__array_functions_loaded = True
 
     def get_array_functions_list(self) -> Optional[list[list[str]]]:
-        """Returns the grid array functions as a list of function lines"""
+        """Returns the grid array functions as a list of function lines."""
         if not self.__array_functions_loaded:
             self.load_array_functions()
         return self.__array_functions_list
 
     def get_array_functions_df(self) -> Optional[pd.DataFrame]:
-        """Returns the grid array functions as a dataframe"""
+        """Returns the grid array functions as a dataframe."""
         if not self.__array_functions_loaded:
             self.load_array_functions()
         return self.__array_functions_df
 
     def load_faults(self) -> None:
-        """Function to read faults in Nexus grid file defined using MULT and FNAME keywords
-
-        """
+        """Function to read faults in Nexus grid file defined using MULT and FNAME keywords."""
         if self.__grid_file_contents is None:
             raise ValueError('Grid file contents have not been loaded')
         file_content_as_list = self.__grid_file_contents
@@ -293,7 +297,7 @@ class StructuredGridFile(Grid):
         self.__grid_faults_loaded = True
 
     def get_faults_df(self) -> Optional[pd.DataFrame]:
-        """Returns the fault definition and transmissility multiplier information as a dataframe"""
+        """Returns the fault definition and transmissility multiplier information as a dataframe."""
 
         if not self.__grid_faults_loaded:
             self.load_faults()

@@ -5,6 +5,14 @@ import warnings
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from typing import Optional, Union
+
+# Use correct Self type depending upon Python version
+import sys
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
+
 from ResSimpy.Utils.factory_methods import get_empty_dict_int_nexus_file, get_empty_list_str, \
     get_empty_list_nexus_file, get_empty_list_str_nexus_file
 from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
@@ -77,7 +85,7 @@ class FcsNexusFile(NexusFile):
             polymer_files: Optional[dict[int, NexusFile]] = None,
             adsorption_files: Optional[dict[int, NexusFile]] = None,
             flux_in_files: Optional[dict[int, NexusFile]] = None,
-            ):
+            ) -> None:
         self.restart_file = restart_file
         self.structured_grid_file = structured_grid_file
         self.options_file = options_file
@@ -109,22 +117,26 @@ class FcsNexusFile(NexusFile):
         super().__init__(location=location, include_locations=include_locations, origin=origin, include_objects=include_objects,
                          file_content_as_list=file_content_as_list)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return generic_repr(self)
 
     @classmethod
-    def generate_fcs_structure(cls, fcs_file_path: str, recursive: bool = True) -> FcsNexusFile:
+    def generate_fcs_structure(cls, fcs_file_path: str, recursive: bool = True) -> Self:
         """Creates an instance of the FcsNexusFile, populates it through looking through the different keywords \
             in the FCS and assigning the paths to objects.
 
         Args:
+        ----
             fcs_file_path (str): path to the fcs file of interest
             recursive (bool, optional): Whether the NexusFile structure will be recursively created. Defaults to True.
+
         Raises:
+        ------
             FileNotFoundError: if the fcs file cannot be found
             ValueError: if no content can be found within the fcsfile
 
         Returns:
+        -------
             FcsNexusFile: instance of a FcsNexusFile for a given fcs file path
         """
         fcs_file = cls(location=fcs_file_path)
@@ -223,14 +235,16 @@ class FcsNexusFile(NexusFile):
 
     @staticmethod
     def line_as_nexus_list(line: str, path: str, nexus_obj: NexusFile) -> list[Union[str, NexusFile]]:
-        """split out a line into the start and finish and inserts a NexusFile object into the place of the path.
+        """Split out a line into the start and finish and inserts a NexusFile object into the place of the path.
 
         Args:
+        ----
             line (str): line to split apart (containing path)
             path (str): path to remove from the line
             nexus_obj (NexusFile): NexusFile instance to replace the path with
 
         Returns:
+        -------
             list[Union[str, NexusFile]]: list of the format [prefix, NexusFile, suffix] where the NexusFile object is \
             in place of the path provided
         """

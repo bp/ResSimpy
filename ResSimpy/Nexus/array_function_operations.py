@@ -1,17 +1,21 @@
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import pandas as pd
-from typing import Union, List
+from typing import Union
 import warnings
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEYWORDS
 
 
 def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
-    """ Collects all the function blocks within a grid file.
-      Args:
-          file_as_list (list[str] | NexusFile): a list of strings containing each line of the file as an item,
-      Returns:
-          list[list[str]]: list of function block lines as a list of strings
-      """
+    """Collects all the function blocks within a grid file.
+
+    Args:
+    ----
+    file_as_list (list[str] | NexusFile): a list of strings containing each line of the file as an item,
+
+    Returns:
+    -------
+    list[list[str]]: list of function block lines as a list of strings.
+    """
     function_list = []
     function_body: list[str] = []
     reading_function = False
@@ -22,9 +26,9 @@ def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
             reading_function = True
         if reading_function:
             # remove all comments following the first '!' in a line.
-            line = line.split('!', 1)[0]
-            function_body.append(line.strip())
-            if nfo.check_token('OUTPUT', line) and not nfo.check_token('RANGE', line):
+            modified_line = line.split('!', 1)[0]
+            function_body.append(modified_line.strip())
+            if nfo.check_token('OUTPUT', modified_line) and not nfo.check_token('RANGE', modified_line):
                 function_list.append(function_body)
                 reading_function = False
     # remove null values
@@ -34,12 +38,14 @@ def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
 
 
 def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd.DataFrame:
-    """ Creates a dataframe to hold all the function properties and parameters:
-      Args:
-          function_list_to_parse (list[list[str]]): list of functions extracted as list of lines.
-      Returns:
-          pandas.DataFrame: a dataframe holding each function's parameters in a row.
-      """
+    """Creates a dataframe to hold all the function properties and parameters:
+    Args:
+    function_list_to_parse (list[list[str]]): list of functions extracted as list of lines.
+
+    Returns
+    -------
+    pandas.DataFrame: a dataframe holding each function's parameters in a row.
+    """
 
     functions_df = pd.DataFrame(
         columns=['FUNCTION #', 'blocks [i1,i2,j1,j2,k1,k2]', 'region_type',
@@ -54,19 +60,19 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
         # or repeat the last value for each row.
         i1 = i2 = j1 = j2 = k1 = k2 = region_type = function_type = grid_name = ''
         # set the lists as empty strings as well, otherwise they show up as [] on the dataframe.
-        region_number_list: Union[str, List[str], List[int]] = ''
-        function_coefficients: Union[str, List[str], List[float]] = ''
-        input_arrays_min_max_list: Union[str, List[str], List[float]] = ''
-        output_arrays_min_max_list: Union[str, List[str], List[float]] = ''
-        input_array_list: Union[str, List[str]] = ''
-        output_array_list: Union[str, List[str]] = ''
-        drange_list: Union[str, List[str]] = ''
-        blocks_list: Union[str, List[str], List[int]] = ''
+        region_number_list: Union[str, list[str], list[int]] = ''
+        function_coefficients: Union[str, list[str], list[float]] = ''
+        input_arrays_min_max_list: Union[str, list[str], list[float]] = ''
+        output_arrays_min_max_list: Union[str, list[str], list[float]] = ''
+        input_array_list: Union[str, list[str]] = ''
+        output_array_list: Union[str, list[str]] = ''
+        drange_list: Union[str, list[str]] = ''
+        blocks_list: Union[str, list[str], list[int]] = ''
 
         for li, line in enumerate(block):
-            line = line.upper()
-            words = line.split()
-            if 'BLOCKS' in line:
+            modified_line = line.upper()
+            words = modified_line.split()
+            if 'BLOCKS' in modified_line:
                 i1 = words[1]
                 i2 = words[2]
                 j1 = words[3]
@@ -76,7 +82,7 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                 blocks_list = words[1:7]
                 blocks_list = [round(float(i)) for i in blocks_list]
 
-            if 'FUNCTION' in line:
+            if 'FUNCTION' in modified_line:
                 if len(words) == 1:
                     continue
                 if len(words) == 2:
@@ -94,7 +100,7 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                 if len(words) > 2:  # TODO: deal with tabular function option keywords
                     warnings.warn(f'Function {b + 1}:  Function table entries will be excluded from summary df.')
                     function_type = 'function table'
-            if 'ANALYT' in line:
+            if 'ANALYT' in modified_line:
                 function_type = words[1]
                 if len(words) > 2:
                     # remove the first 2 words in line, and set the rest to coefficients
@@ -105,27 +111,27 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                     except ValueError:
                         warnings.warn(f'ValueError at function {b + 1}: could not convert string to float.')
 
-            if 'GRID' in line:
+            if 'GRID' in modified_line:
                 grid_name = words[1]
-            if 'RANGE' in line and 'INPUT' in line:
+            if 'RANGE' in modified_line and 'INPUT' in modified_line:
                 input_arrays_min_max_list = words[2:]
                 # convert string range_input values to numerical, if possible:
                 try:
                     input_arrays_min_max_list = [float(i) for i in input_arrays_min_max_list]
                 except ValueError:
                     warnings.warn(f'ValueError at function {b + 1}: could not convert string to float.')
-            if 'RANGE' in line and 'OUTPUT' in line:
+            if 'RANGE' in modified_line and 'OUTPUT' in modified_line:
                 output_arrays_min_max_list = words[2:]
                 # convert string range_input values to numerical, if possible:
                 try:
                     output_arrays_min_max_list = [float(i) for i in output_arrays_min_max_list]
                 except ValueError:
                     warnings.warn(f'ValueError at function {b + 1}: could not convert string to float.')
-            if 'DRANGE' in line:
+            if 'DRANGE' in modified_line:
                 warnings.warn(f'Function {b + 1}: Function table entries will be excluded from summary df.')
                 drange_list = words[1:]
                 function_type = 'function table'
-            if 'OUTPUT' in line and 'RANGE' not in line:
+            if 'OUTPUT' in modified_line and 'RANGE' not in modified_line:
                 input_array_list = words[:words.index('OUTPUT')]
                 output_array_list = words[words.index('OUTPUT') + 1:]
         # Create the row that holds function data
@@ -138,13 +144,15 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
     return functions_df
 
 
-def summarize_model_functions(function_list_to_parse: List[List[str]]) -> pd.DataFrame:
-    """ Extracts all function parameters into a df, with an added column of human-readable notations for each function:
-      Args:
-          function_list_to_parse (list[list[str]]): list of functions extracted as list of lines.
-      Returns:
-          pandas.DataFrame: a dataframe holding each function's translation/summary in a row.
-      """
+def summarize_model_functions(function_list_to_parse: list[list[str]]) -> pd.DataFrame:
+    """Extracts all function parameters into a df, with an added column of human-readable notations for each function:
+    Args:
+    function_list_to_parse (list[list[str]]): list of functions extracted as list of lines.
+
+    Returns
+    -------
+    pandas.DataFrame: a dataframe holding each function's translation/summary in a row.
+    """
 
     # get the df from create_function_parameters_df, add a new column, and populate based on ANALYT function type:
 

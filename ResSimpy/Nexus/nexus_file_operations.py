@@ -4,7 +4,7 @@ import copy
 from enum import Enum
 from functools import partial
 from io import StringIO
-from typing import Optional, Union, Any, TYPE_CHECKING, Type
+from typing import Optional, Union, Any, TYPE_CHECKING
 import pandas as pd
 from ResSimpy.Grid import VariableEntry
 from string import Template
@@ -22,14 +22,15 @@ if TYPE_CHECKING:
 
 
 def nexus_token_found(line_to_check: str, valid_list: list[str] = VALID_NEXUS_KEYWORDS) -> bool:
-    """
-    Checks if a valid Nexus token has been found  in the supplied line
+    """Checks if a valid Nexus token has been found  in the supplied line.
 
     Args:
+    ----
         line_to_check (str):  The string to search for a Nexus keyword
         valid_list (list[str]): list of keywords to search from (e.g. from nexus_constants)
 
     Returns:
+    -------
         token_found (bool): A boolean value stating whether the token is found or not
 
     """
@@ -44,13 +45,15 @@ def nexus_token_found(line_to_check: str, valid_list: list[str] = VALID_NEXUS_KE
 
 
 def value_in_file(token: str, file: list[str]) -> bool:
-    """Returns true if a token is found in the specified file
+    """Returns true if a token is found in the specified file.
 
     Args:
+    ----
         token (str): the token being searched for.
         file (list[str]): a list of strings containing each line of the file as a new entry
 
     Returns:
+    -------
         bool: True if the token is found and False otherwise
     """
     token_found = any(map(partial(check_token, token), file))
@@ -59,12 +62,12 @@ def value_in_file(token: str, file: list[str]) -> bool:
 
 
 def check_token(token: str, line: str) -> bool:
-    """ Checks if the text line contains the supplied token and is not commented out
+    """Checks if the text line contains the supplied token and is not commented out
     Args:
         token (str): keyword value to search the line for
         line (str): string to search the token in
     Returns:
-        bool: True if the text line contains the supplied token, False otherwise
+        bool: True if the text line contains the supplied token, False otherwise.
     """
     token_separator_chars = [" ", '\n', '\t', '!']
     uppercase_line = line.upper()
@@ -96,18 +99,20 @@ def check_token(token: str, line: str) -> bool:
 
 def get_previous_value(file_as_list: list[str], search_before: Optional[str] = None,
                        ignore_values: Optional[list[str]] = None) -> Optional[str]:
-    """Gets the previous non blank value in a list of lines. Starts from the last line working backwards
+    """Gets the previous non blank value in a list of lines. Starts from the last line working backwards.
 
-        Args:
-            file_as_list (list[str]): a list of strings containing each line of the file as a new entry,
-            ending with the line to start searching from.
-            search_before (Optional[str]): The string to start the search from in a backwards direction
-            ignore_values (Optional[list[str]], optional): a list of values that should be ignored if found. \
+    Args:
+    ----
+    file_as_list (list[str]): a list of strings containing each line of the file as a new entry,
+    ending with the line to start searching from.
+    search_before (Optional[str]): The string to start the search from in a backwards direction
+    ignore_values (Optional[list[str]], optional): a list of values that should be ignored if found. \
                 Defaults to None.
 
-        Returns:
-            Optional[str]: Next non blank value from the list, if none found returns None
-        """
+    Returns:
+    -------
+    Optional[str]: Next non blank value from the list, if none found returns None
+    """
 
     # Reverse the order of the lines
     file_as_list.reverse()
@@ -141,9 +146,10 @@ def get_previous_value(file_as_list: list[str], search_before: Optional[str] = N
 def get_next_value(start_line_index: int, file_as_list: list[str], search_string: Optional[str] = None,
                    ignore_values: Optional[list[str]] = None,
                    replace_with: Union[str, VariableEntry, None] = None) -> Optional[str]:
-    """Gets the next non blank value in a list of lines
+    """Gets the next non blank value in a list of lines.
 
     Args:
+    ----
         start_line_index (int): line number to start reading file_as_list from
         file_as_list (list[str]): a list of strings containing each line of the file as a new entry
         search_string (str): string to search from within the first indexed line
@@ -153,6 +159,7 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
             Defaults to None.
 
     Returns:
+    -------
         Optional[str]: Next non blank value from the list, if none found returns None
     """
     invalid_characters = ["\n", "\t", " ", "!", ","]
@@ -252,9 +259,10 @@ def get_expected_next_value(start_line_index: int, file_as_list: list[str], sear
                             ignore_values: Optional[list[str]] = None,
                             replace_with: Union[str, VariableEntry, None] = None,
                             custom_message: Optional[str] = None) -> str:
-    """Gets the next non blank value in a list of lines
+    """Gets the next non blank value in a list of lines.
 
     Args:
+    ----
         start_line_index (int): line number to start reading file_as_list from
         file_as_list (list[str]): a list of strings containing each line of the file as a new entry
         search_string (str): string to search from within the first indexed line
@@ -265,6 +273,7 @@ def get_expected_next_value(start_line_index: int, file_as_list: list[str], sear
         custom_message Optional[str]: A custom error message if no value is found
 
     Returns:
+    -------
         str: Next non blank value from the list, if none found raises ValueError
     """
     value = get_next_value(start_line_index, file_as_list, search_string, ignore_values, replace_with)
@@ -283,7 +292,8 @@ def get_token_value(token: str, token_line: str, file_list: list[str],
                     replace_with: Union[str, VariableEntry, None] = None) -> Optional[str]:
     """Gets the value following a token if supplied with a line containing the token.
 
-    arguments:
+    Arguments:
+    ---------
         token (str): the token being searched for.
         token_line (str): string value of the line that the token was found in.
         file_list (list[str]): a list of strings containing each line of the file as a new entry
@@ -292,7 +302,8 @@ def get_token_value(token: str, token_line: str, file_list: list[str],
         replace_with (Union[str, VariableEntry, None], optional):  a value to replace the existing value with. \
             Defaults to None.
 
-    returns:
+    Returns:
+    -------
         Optional[str]: The value following the supplied token, if it is present.
     """
 
@@ -332,9 +343,10 @@ def get_expected_token_value(token: str, token_line: str, file_list: list[str],
             Defaults to None.
         replace_with (Union[str, VariableEntry, None], optional):  a value to replace the existing value with. \
             Defaults to None.
-        custom_message Optional[str]: A custom error message if no value is found
+        custom_message Optional[str]: A custom error message if no value is found.
 
-    returns:
+    Returns
+    -------
         str:  The value following the supplied token, if it is present.
 
     raises: ValueError if a value is not found
@@ -352,12 +364,15 @@ def get_expected_token_value(token: str, token_line: str, file_list: list[str],
 
 def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False) -> list[str]:
     """Strips all of the inline, single and multi line comments out of a file.
-    Comment characters assumed are: ! and square brackets. Escaped characters are ones wrapped in quotation marks
+    Comment characters assumed are: ! and square brackets. Escaped characters are ones wrapped in quotation marks.
 
     Args:
+    ----
         file_as_list (list[str]): a list of strings containing each line of the file as a new entry
         strip_str (bool, optional): if True strips the lines of whitespace. Defaults to False.
+
     Returns:
+    -------
         list[str]: a list of strings containing each line of the file as a new entry without comments
     """
     # TODO: support VIP comment out single C character
@@ -382,16 +397,17 @@ def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False) -> 
 
 
 def load_file_as_list(file_path: str, strip_comments: bool = False, strip_str: bool = False) -> list[str]:
-    """ Reads the text file into a variable
+    """Reads the text file into a variable
     Args:
         file_path (str): string containing a path pointing towards a text file
         strip_comments (bool, optional): If set to True removes all inline/single line comments from \
             the passed in file. Defaults to False.
         strip_str (bool, optional): if True strips the lines of whitespace. Defaults to False.
 
-    Returns:
+    Returns
+    -------
         list[str]: list of strings with each line from the file a new entry in the list
-     """
+    """
     try:
         with open(file_path, 'r') as f:
             file_content = list(f)
@@ -409,6 +425,7 @@ def create_templated_file(template_location: str, substitutions: dict, output_fi
     """Creates a new text file at the requested destination substituting the supplied values.
 
     Args:
+    ----
         template_location (str): path to the template file
         substitutions (dict): dictionary of substitutions to be made {variable: subsistuted_value,}
         output_file_name (str): path/name of the file to write out to
@@ -431,10 +448,12 @@ def expand_include(file_as_list: list[str], recursive: bool = True) -> tuple[lis
     """Expands out include files. If recursive set to True will expand all include_locations including nested
 
     Args:
+    ----
         file_as_list (list[str]): a list of strings containing each line of the file as a new entry
         recursive (bool): If recursive set to True will expand all include_locations including nested include_locations
 
     Raises:
+    ------
         ValueError: if no value found after INCLUDE keyword in file
 
     Returns:
@@ -477,9 +496,10 @@ def expand_include(file_as_list: list[str], recursive: bool = True) -> tuple[lis
 
 
 def get_full_file_path(file_path: str, origin: str):
-    """Returns the full file path including the base directories if they aren't present in the string
+    """Returns the full file path including the base directories if they aren't present in the string.
 
     Args:
+    ----
         file_path (str): the initial file path found in a file
         origin (str): the initial origin of the file
     """
@@ -491,13 +511,15 @@ def get_full_file_path(file_path: str, origin: str):
 
 
 def read_table_to_df(file_as_list: list[str], keep_comments: bool = False) -> pd.DataFrame:
-    """From a list of strings that represents a table, generate a Pandas dataframe representation of the table
+    """From a list of strings that represents a table, generate a Pandas dataframe representation of the table.
 
     Args:
+    ----
         file_as_list (list[str]): List of strings representing a single table to be read
         keep_comments (bool): Boolean to determine if we keep comments as a separate column or not
 
     Returns:
+    -------
         pd.DataFrame: Created Pandas DataFrame representation of table to be read
     """
     df = pd.DataFrame()
@@ -524,12 +546,14 @@ def read_table_to_df(file_as_list: list[str], keep_comments: bool = False) -> pd
 
 
 def clean_up_string(value: str) -> str:
-    """Removes unwanted characters from a string
-        unwanted characters: ("\\n", "\\t", "!")
+    r"""Removes unwanted characters from a string
+        unwanted characters: ("\\n", "\\t", "!").
+
     Args:
+    ----
         value (str): string to clean up
     Returns:
-        str: string with unwanted characters removed
+        str: string with unwanted characters removed.
     """
     value = value.replace("\n", "")
     value = value.replace("!", "")
@@ -541,13 +565,16 @@ def get_multiple_sequential_values(list_of_strings: list[str], number_tokens: in
     """Returns a sequential list of values as long as the number of tokens requested.
 
     Args:
+    ----
         list_of_strings (list[str]): list of strings to represent the file with a new entry per line in the file.
         number_tokens (int): number of tokens to return values of
 
     Raises:
+    ------
         ValueError: if too many tokens are requested compared to the file provided
 
     Returns:
+    -------
         list[str]: list of strings comprised of the token values in order.
     """
     store_values = []
@@ -572,13 +599,15 @@ def check_for_and_populate_common_input_data(
         ) -> None:
     """Loop through lines of Nexus input file content looking for common input data, e.g.,
     units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
-    as defined in Nexus manual. If any found, include in provided property_dict and return
+    as defined in Nexus manual. If any found, include in provided property_dict and return.
 
     Args:
+    ----
         file_as_list (list[str]): Nexus input file content
         property_dict (dict): Dictionary in which to include common input data if found
 
     Returns:
+    -------
         dict: Dictionary including found common input data
     """
     for line in file_as_list:
@@ -592,17 +621,19 @@ def check_property_in_line(
                             pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]],
         file_as_list: list[str]) -> None:
     """Given a line of Nexus input file content looking for common input data, e.g.,
-        units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
-        as defined in Nexus manual. If any found, include in provided property_dict and return
+    units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
+    as defined in Nexus manual. If any found, include in provided property_dict and return.
 
-        Args:
-            line (str): line to search for the common input data
-            file_as_list (list[str]): Nexus input file content
-            property_dict (dict): Dictionary in which to include common input data if found
+    Args:
+    ----
+    line (str): line to search for the common input data
+    file_as_list (list[str]): Nexus input file content
+    property_dict (dict): Dictionary in which to include common input data if found
 
-        Returns:
-            dict: Dictionary including found common input data
-        """
+    Returns:
+    -------
+    dict: Dictionary including found common input data
+    """
     if check_token('DESC', line):
         if 'DESC' in property_dict.keys():
             if isinstance(property_dict['DESC'], list):
@@ -658,11 +689,13 @@ def looks_like_grid_array(file_path: str, lines2check: int = 10) -> bool:
     Nexus grid array keywords.
 
     Args:
+    ----
         file_path (str): Path to Nexus include file
         lines2check (int): First number of lines in file to check, looking for
         a Nexus grid array keyword. Default: first 10 lines of file
 
     Returns:
+    -------
         bool: True if file begins with one of Nexus grid array keywords
     """
     with open(file_path, 'r') as f:
@@ -681,14 +714,16 @@ def looks_like_grid_array(file_path: str, lines2check: int = 10) -> bool:
 
 
 def get_table_header(file_as_list: list[str], header_values: dict[str, str]) -> tuple[int, list[str]]:
-    """ Gets the table headers for a given line in a file.
+    """Gets the table headers for a given line in a file.
+
     Args:
+    ----
         file_as_list (list[str]): file represented as a list of strings
         header_values (dict[str, str]): dictionary of column headings to populate from the table
     Raises:
         ValueError: if no headers belonging to the header_values dict is found
     Returns:
-        int, list[str]: index in the file provided for the header, list of headers as Nexus keyword format
+        int, list[str]: index in the file provided for the header, list of headers as Nexus keyword format.
     """
     headers = []
     header_index = -1
@@ -717,15 +752,17 @@ def get_table_header(file_as_list: list[str], header_values: dict[str, str]) -> 
 
 def table_line_reader(keyword_store: dict[str, None | int | float | str], headers: list[str], line: str) -> \
         tuple[bool, dict[str, None | int | float | str]]:
-    """ reads in a line from a nexus table with a given set of headers and populates each of those values into a \
-    corresponding dictionary
+    """Reads in a line from a nexus table with a given set of headers and populates each of those values into a \
+    corresponding dictionary.
 
     Args:
+    ----
         keyword_store (dict[str, None | int | float | str]):
         headers (list[str]):
         line (str):
 
     Returns:
+    -------
         tuple[bool, dict[str, None | int | float | str]]: a dictionary with the found set of
     """
     trimmed_line = line
@@ -745,9 +782,10 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
                           current_date: Optional[str] = None, unit_system: Optional[UnitSystem] = None,
                           nexus_obj_dict: Optional[dict[str, list[Any]]] = None,
                           preserve_previous_object_attributes: bool = False) -> list[Any]:
-    """ Loads a table row by row to an object provided in the row_object.
+    """Loads a table row by row to an object provided in the row_object.
 
     Args:
+    ----
         file_as_list (list[str]): file represented as a list of strings.
         row_object (Any): class to populate, should take a dictionary of attributes as an argument to the __init__
         property_map (dict[str, tuple[str, type]]): map of the Nexus keywords as keys to the dictionary and the names\
@@ -815,13 +853,15 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
 
 
 def check_list_tokens(list_tokens: list[str], line: str) -> Optional[str]:
-    """ Checks a list of tokens for whether it exists in a string and returns the token that matched
+    """Checks a list of tokens for whether it exists in a string and returns the token that matched.
 
     Args:
+    ----
         list_tokens (list[str]): list of tokens to search for within the line
         line (str): line to search for tokens
 
     Returns:
+    -------
         Optional[str]: returns the token which was found otherwise returns None.
 
     """
@@ -835,21 +875,26 @@ def check_list_tokens(list_tokens: list[str], line: str) -> Optional[str]:
 def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[str, Any], start_date: Optional[str],
                                   default_units: Optional[UnitSystem], ) -> \
         dict[str, list[Any] | dict[str, list[NexusConstraint]]]:
-    """ Loads all tables from a given file.
+    """Loads all tables from a given file.
 
-        Args:
-            nexus_file (NexusFile): NexusFile representation of the file.
-            table_object_map (dict[str, Storage_Object]): dictionary containing the name of the table as keys and \
+    Args:
+    ----
+    nexus_file (NexusFile): NexusFile representation of the file.
+    table_object_map (dict[str, Storage_Object]): dictionary containing the name of the table as keys and \
                 the object type to store the data from each row into. Require objects to have a get_nexus_mapping \
                 function
-            start_date (str): Starting date of the run
-            default_units (UnitSystem): Units used in case not specified by file.
-        Raises:
-            TypeError: if the unit system found in the property check is not a valid enum UnitSystem.
-        Returns:
-            dict[str, list[Storage_Object]]: a dictionary of lists of arbitrary objects populated \
+    start_date (str): Starting date of the run
+    default_units (UnitSystem): Units used in case not specified by file.
+
+    Raises:
+    ------
+    TypeError: if the unit system found in the property check is not a valid enum UnitSystem.
+
+    Returns:
+    -------
+    dict[str, list[Storage_Object]]: a dictionary of lists of arbitrary objects populated \
                 with properties from the file provided, keyed with the NexusTable name associated with table_object_map.
-        """
+    """
     current_date = start_date
     nexus_object_results: dict[str, list[Any] | dict[str, list[NexusConstraint]]] = {x: [] for x in table_object_map}
     nexus_constraints: dict[str, list[NexusConstraint]] = {}
@@ -935,12 +980,14 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
     return nexus_object_results
 
 
-def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConstraint], current_date: Optional[str],
+def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConstraint], current_date: Optional[str],
                             unit_system: UnitSystem, property_map: dict[str, tuple[str, type]],
                             existing_constraints: dict[str, list[NexusConstraint]]):
-    """ Loads table of constraints with the wellname/node first and the constraints following inline
+    """Loads table of constraints with the wellname/node first and the constraints following inline
         uses previous set of constraints as still applied to the well.
+
     Args:
+    ----
         file_as_list (list[str]):
         constraint (NexusConstraint): object to store the attributes extracted from each row.
         current_date (str): the current date in the table
@@ -949,6 +996,7 @@ def load_inline_constraints(file_as_list: list[str], constraint: Type[NexusConst
         existing_constraints (dict[str, NexusConstraint]):
 
     Returns:
+    -------
         list[NexusConstraint]: list of constraint objects for the given timestep/constraint table
     """
     for line in file_as_list:
@@ -1032,15 +1080,17 @@ def clear_constraints(token_value, constraint) -> dict[str, None]:
 
 def correct_datatypes(value: None | int | float | str, dtype: type,
                       na_to_none: bool = True) -> None | int | str | float:
-    """ takes a value and returns the value but converted to specified type. if na_to_none True then will
+    """Takes a value and returns the value but converted to specified type. if na_to_none True then will
         reduce a lot of values to none.
 
     Args:
+    ----
         value (None | int | float | str): value to convert
         dtype (type): one of (int, float, str)
         na_to_none (bool): if True NA strings are sent to None
 
     Returns:
+    -------
         None | int | str | float: value but cast to the requested type
     """
     if value is None:

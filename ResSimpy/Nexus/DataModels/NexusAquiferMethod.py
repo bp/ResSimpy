@@ -14,13 +14,14 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 
 @dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
 class NexusAquiferMethod(AquiferMethod):
-    """ Class to hold Nexus Aquifer properties
+    """Class to hold Nexus Aquifer properties
     Attributes:
         file_path (str): Path to the Nexus aquifer properties file
         method_number (int): Aquifer properties method number in Nexus fcs file
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] ):
             Dictionary holding all properties for a specific aquifer properties method. Defaults to empty dictionary.
     """
+
     # General parameters
     file_path: str
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
@@ -28,7 +29,7 @@ class NexusAquiferMethod(AquiferMethod):
 
     def __init__(self, file_path: str, method_number: int,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                      dict[str, Union[float, pd.DataFrame]]]]] = None):
+                                      dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
         self.file_path = file_path
         if properties is not None:
             self.properties = properties
@@ -37,7 +38,7 @@ class NexusAquiferMethod(AquiferMethod):
         super().__init__(method_number=method_number)
 
     def __repr__(self) -> str:
-        """Pretty printing aquifer data"""
+        """Pretty printing aquifer data."""
         printable_str = f'\nFILE_PATH: {self.file_path}\n'
         aquifer_dict = self.properties
         for aq_type in AQUIFER_TYPE_KEYWORDS:
@@ -58,8 +59,7 @@ class NexusAquiferMethod(AquiferMethod):
         return printable_str
 
     def read_properties(self) -> None:
-        """Read Nexus aquifer file contents and populate the NexusValveMethod object
-        """
+        """Read Nexus aquifer file contents and populate the NexusValveMethod object."""
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
         file_as_list = file_obj.get_flat_list_str_file
 

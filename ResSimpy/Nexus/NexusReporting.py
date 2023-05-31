@@ -2,14 +2,15 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
 class Reporting:
-    def __init__(self, model):
+    def __init__(self, model) -> None:
         self.model = model
 
     def add_map_properties_to_start_of_grid_file(self):
         """Adds 'map' statements to the start of the grid file to ensure standalone outputs all the required \
         properties. Writes out to the same structured grid file path provided.
 
-        Raises:
+        Raises
+        ------
             ValueError: if no structured grid file path is specified in the class instance
         """
         structured_grid_path = self.model.structured_grid_path

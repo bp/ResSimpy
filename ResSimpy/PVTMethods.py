@@ -10,7 +10,7 @@ from abc import ABC
 class PVTMethods(ABC):
     """The abstract base class for a collection of PVT methods
     Attributes:
-        pvt_methods (dict[int, PVTMethod]): Collection of PVT methods, as a dictionary
+        pvt_methods (dict[int, PVTMethod]): Collection of PVT methods, as a dictionary.
     """
 
     @property
