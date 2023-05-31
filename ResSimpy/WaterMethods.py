@@ -10,7 +10,7 @@ from abc import ABC
 class WaterMethods(ABC):
     """The abstract base class for a collection of water property methods
     Attributes:
-        water_methods (dict[int, WaterMethod]): Collection of water property methods, as a dictionary
+        water_methods (dict[int, WaterMethod]): Collection of water property methods, as a dictionary.
     """
 
     @property

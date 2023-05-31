@@ -11,11 +11,11 @@ from ResSimpy.Nexus.constants import DATE_WITH_TIME_LENGTH
 
 class Runcontrol:
     def __init__(self, model) -> None:
-        """ class for controlling all runcontrol and time related functionality
+        """Class for controlling all runcontrol and time related functionality
         Args:
             model: NexusSimulator instance
             __times (Optional[list[str]]): list of times to be included in the runcontrol file
-            __date_format_string (str): How the dates should formatted based on date_format
+            __date_format_string (str): How the dates should formatted based on date_format.
 
         """
         self.model = model
@@ -36,9 +36,10 @@ class Runcontrol:
 
     @staticmethod
     def get_times(times_file: list[str]) -> list[str]:
-        """Retrieves a list of TIMES from the supplied Runcontrol / Include file
+        """Retrieves a list of TIMES from the supplied Runcontrol / Include file.
 
         Args:
+        ----
             times_file (list[str]): list of strings with each line from the file a new entry in the list
         Returns:
             list[str]: list of all the values following the TIME keyword in supplied file, \
@@ -55,11 +56,12 @@ class Runcontrol:
 
     @staticmethod
     def delete_times(file_content: list[str]) -> list[str]:
-        """ Deletes times from file contents
+        """Deletes times from file contents
         Args:
-            file_content (list[str]):  list of strings with each line from the file a new entry in the list
+            file_content (list[str]):  list of strings with each line from the file a new entry in the list.
 
-        Returns:
+        Returns
+        -------
             list[str]: the modified file without any TIME cards in
         """
         new_file: list[str] = []
@@ -75,11 +77,11 @@ class Runcontrol:
         return new_file
 
     @staticmethod
-    def remove_times_from_file(file_content: list[str], output_file_path: str):
+    def remove_times_from_file(file_content: list[str], output_file_path: str) -> None:
         """Removes the times from a file - used for replacing with new times
         Args:
             file_content (list[str]): a list of strings containing each line of the file as a new entry
-            output_file_path (str): path to the file to output to
+            output_file_path (str): path to the file to output to.
         """
         new_file_content = Runcontrol.delete_times(file_content)
 
@@ -89,14 +91,16 @@ class Runcontrol:
             text_file.write(new_file_str)
 
     def convert_date_to_number(self, date: Union[str, int, float]) -> float:
-        """Converts a date to a number designating number of days from the start date
+        """Converts a date to a number designating number of days from the start date.
 
         Args:
+        ----
             date (Union[str, int, float]): a date or time stamp from a Nexus simulation
         Raises:
             ValueError: if supplied incorrect type for 'date' parameter
 
         Returns:
+        -------
             float: the difference between the supplied date and the start date of the simulator
         """
         # If we can retrieve a number of days from date, use that, otherwise convert the string date to a number of days
@@ -127,13 +131,15 @@ class Runcontrol:
         return difference.total_seconds() / timedelta(days=1).total_seconds()
 
     def compare_dates(self, x: Union[str, float], y: Union[str, float]) -> int:
-        """Comparator for two supplied dates or numbers
+        """Comparator for two supplied dates or numbers.
 
         Args:
+        ----
             x (Union[str, float]): first date to compare
             y (Union[str, float]): second date to compare
 
         Returns:
+        -------
             int: -1 if y > x, 0 if y == x, 1 if y < x
         """
         date_comp = self.convert_date_to_number(x) - self.convert_date_to_number(y)
@@ -147,12 +153,14 @@ class Runcontrol:
         return date_comp_int
 
     def sort_remove_duplicate_times(self, times: list[str]) -> list[str]:
-        """ Removes duplicates and nans from the times list, then sorts them
+        """Removes duplicates and nans from the times list, then sorts them.
 
         Args:
+        ----
             times (list[str]): list of times to remove duplicates from
 
         Returns:
+        -------
             list[str]: list of times without duplicates
         """
         new_times = []
@@ -165,9 +173,10 @@ class Runcontrol:
         return new_times
 
     def check_date_format(self, date: Union[str, float]) -> None:
-        """Checks that a supplied date is in the correct format
+        """Checks that a supplied date is in the correct format.
 
         Args:
+        ----
             date (Union[str, float]): date to check the format of
         Raises:
             ValueError: If a date provided isn't in a date format that the model expects
@@ -189,7 +198,7 @@ class Runcontrol:
     @staticmethod
     def get_date_format(date_format: DateFormat) -> str:
         """Returns the date format being used by the model
-        formats used: ('MM/DD/YYYY', 'DD/MM/YYYY')
+        formats used: ('MM/DD/YYYY', 'DD/MM/YYYY').
         """
 
         if date_format is DateFormat.MM_DD_YYYY:
@@ -198,9 +207,10 @@ class Runcontrol:
             return 'DD/MM/YYYY'
 
     def __update_times_in_file(self) -> None:
-        """Updates the list of times in the Runcontrol file to the current stored values in __times
+        """Updates the list of times in the Runcontrol file to the current stored values in __times.
 
-        Returns:
+        Returns
+        -------
             None: writes out a file at the same path as the existing runcontrol file
         """
         self.model.check_output_path()
@@ -236,7 +246,7 @@ class Runcontrol:
         """Loads the run control information into the class instance. \
             If the write_times attribute is True then it expands out any INCLUDE files with the times found within
         Raises:
-            ValueError: if the run_control_file attribute is None
+            ValueError: if the run_control_file attribute is None.
         """
         if self.model.fcs_file.runcontrol_file is None:
             warnings.warn(f"Run control file path not found for {self.model.fcs_file.location}")
@@ -283,14 +293,16 @@ class Runcontrol:
         self.modify_times(content=times, operation='replace')
 
     def modify_times(self, content: Optional[list[str]] = None, operation: str = 'merge'):
-        """Modifies the output times in the simulation
+        """Modifies the output times in the simulation.
 
         Args:
+        ----
             content (list[str]], optional): The content to modify using the above operation, \
             represented as a list of strings with a new entry per line of the file. Defaults to None.
             operation (str, optional): operation to perform on the content provided (e.g. 'merge'). Defaults to 'merge'.
 
         Raises:
+        ------
             ValueError: if the supplied dates are before the start date of the simulation
         """
         if content is None:

@@ -8,53 +8,53 @@ from ResSimpy.Utils.generic_repr import generic_repr
 
 @dataclass(kw_only=True)
 class NexusWellConnection:
+    """Attributes
+    stream (str): COMMENT (STREAM)
+    number (int): COMMENT (NUMBER)
+    scale (float): COMMENT (SCALE)
+    bhdepth (float): COMMENT (BHDEPTH)
+    datum_depth (float): COMMENT (DATUM)
+    x_pos (float): COMMENT (X)
+    y_pos (float): COMMENT (Y)
+    gradient_calc (str): COMMENT (DATGRAD)
+    length (float): COMMENT (LENGTH)
+    bottomhole_measured_depth (float): COMMENT (BHMD)
+    add_tubing (int): COMMENT (ADDTUBING)
+    diameter (float): COMMENT (DIAM)
+    inner_diameter (float): COMMENT (INNERDIAM)
+    roughness (float): COMMENT (ROUGHNESS)
+    tracer (str): COMMENT (TRACERS)
+    con_type (str): COMMENT (TYPE)
+    hyd_method (str): COMMENT (METHOD)
+    pvt_method (int): COMMENT (IPVT)
+    water_method (int): COMMENT (IWAT)
+    bat_method (int): COMMENT (IBAT)
+    temperature (float): COMMENT (TEMP)
+    elevation_profile (str): COMMENT (ELEVPR)
+    temperature_profile (str): COMMENT (TEMPPR)
+    inj_mobility (str): COMMENT (INJMOB)
+    crossshut_method (str): COMMENT (CROSS_SHUT)
+    crossflow (str): COMMENT (CROSSFLOW)
+    on_time (float): COMMENT (ONTIME)
+    heat_transfer_coeff (float): COMMENT (HTC)
+    water_inj_mult (float): COMMENT (WIMULT)
+    productivity_index (float): COMMENT (PI)
+    vip_productivity_index (float): COMMENT (VIPPI)
+    productivity_index_phase (float): COMMENT (PIPHASE)
+    d_factor (float): COMMENT (D)
+    non_darcy_flow_model (str): COMMENT (ND)
+    non_darcy_flow_method (str): COMMENT (DPERF)
+    gas_mobility (float): COMMENT (GASMOB)
+    capillary_number_model (str): COMMENT (CN)
+    dp_add (float): COMMENT (DPADD)
+    dt_add (float): COMMENT (DTADD)
+    rate_mult (float): COMMENT (RATEMULT)
+    polymer (str): COMMENT (POLYMER)
+    station (str): COMMENT (STATION)
+    drill_queue (str): COMMENT (ASSCDR)
+    drill_order_benefit (float): COMMENT (BENEFIT).
     """
-    Attributes:
-        stream (str): COMMENT (STREAM)
-        number (int): COMMENT (NUMBER)
-        scale (float): COMMENT (SCALE)
-        bhdepth (float): COMMENT (BHDEPTH)
-        datum_depth (float): COMMENT (DATUM)
-        x_pos (float): COMMENT (X)
-        y_pos (float): COMMENT (Y)
-        gradient_calc (str): COMMENT (DATGRAD)
-        length (float): COMMENT (LENGTH)
-        bottomhole_measured_depth (float): COMMENT (BHMD)
-        add_tubing (int): COMMENT (ADDTUBING)
-        diameter (float): COMMENT (DIAM)
-        inner_diameter (float): COMMENT (INNERDIAM)
-        roughness (float): COMMENT (ROUGHNESS)
-        tracer (str): COMMENT (TRACERS)
-        con_type (str): COMMENT (TYPE)
-        hyd_method (str): COMMENT (METHOD)
-        pvt_method (int): COMMENT (IPVT)
-        water_method (int): COMMENT (IWAT)
-        bat_method (int): COMMENT (IBAT)
-        temperature (float): COMMENT (TEMP)
-        elevation_profile (str): COMMENT (ELEVPR)
-        temperature_profile (str): COMMENT (TEMPPR)
-        inj_mobility (str): COMMENT (INJMOB)
-        crossshut_method (str): COMMENT (CROSS_SHUT)
-        crossflow (str): COMMENT (CROSSFLOW)
-        on_time (float): COMMENT (ONTIME)
-        heat_transfer_coeff (float): COMMENT (HTC)
-        water_inj_mult (float): COMMENT (WIMULT)
-        productivity_index (float): COMMENT (PI)
-        vip_productivity_index (float): COMMENT (VIPPI)
-        productivity_index_phase (float): COMMENT (PIPHASE)
-        d_factor (float): COMMENT (D)
-        non_darcy_flow_model (str): COMMENT (ND)
-        non_darcy_flow_method (str): COMMENT (DPERF)
-        gas_mobility (float): COMMENT (GASMOB)
-        capillary_number_model (str): COMMENT (CN)
-        dp_add (float): COMMENT (DPADD)
-        dt_add (float): COMMENT (DTADD)
-        rate_mult (float): COMMENT (RATEMULT)
-        polymer (str): COMMENT (POLYMER)
-        station (str): COMMENT (STATION)
-        drill_queue (str): COMMENT (ASSCDR)
-        drill_order_benefit (float): COMMENT (BENEFIT)
-    """
+
     name: Optional[str] = None
     date: Optional[str] = None
     unit_system: Optional[UnitSystem] = None
@@ -106,19 +106,19 @@ class NexusWellConnection:
     drill_queue: Optional[str] = None
     drill_order_benefit: Optional[float] = None
 
-    def __init__(self, properties_dict: dict[str, None | int | str | float]):
+    def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)
         if self.name is not None:
             self.bh_node_name = self.name + '%bh'
             self.wh_node_name = self.name + '%wh'
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return generic_repr(self)
 
     @staticmethod
     def get_nexus_mapping() -> dict[str, tuple[str, type]]:
-        """gets the mapping of nexus keywords to attribute definitions"""
+        """Gets the mapping of nexus keywords to attribute definitions."""
         nexus_mapping = {
             'NAME': ('name', str),
             'STREAM': ('stream', str),
@@ -169,13 +169,13 @@ class NexusWellConnection:
         return nexus_mapping
 
     def to_dict(self, keys_in_nexus_style: bool = False) -> dict[str, None | str | int | float]:
-        """
-            Returns a dictionary of the attributes of the well connection
+        """Returns a dictionary of the attributes of the well connection
         Args:
             keys_in_nexus_style (bool): if True returns the key values in Nexus keywords, otherwise returns the \
-                attribute name as stored by ressimpy
+                attribute name as stored by ressimpy.
 
-        Returns:
+        Returns
+        -------
             a dictionary keyed by attributes and values as the value of the attribute
         """
         result_dict = to_dict_generic.to_dict(self, keys_in_nexus_style, add_date=True, add_units=True)

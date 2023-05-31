@@ -6,10 +6,10 @@ from dataclasses import dataclass
 class PVTMethod(ABC):
     """The abstract base class for PVT methods
     Attributes:
-        method_number (int): Method number in order of PVT methods in simulator input
+        method_number (int): Method number in order of PVT methods in simulator input.
     """
 
     method_number: int
 
-    def __init__(self, method_number):
+    def __init__(self, method_number) -> None:
         self.method_number = method_number

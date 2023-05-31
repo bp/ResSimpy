@@ -19,22 +19,24 @@ if TYPE_CHECKING:
 class NexusWellbores:
     __wellbores: list[NexusWellbore] = field(default_factory=list)
 
-    def __init__(self, parent_network: NexusNetwork):
+    def __init__(self, parent_network: NexusNetwork) -> None:
         self.__parent_network: NexusNetwork = parent_network
         self.__wellbores: list[NexusWellbore] = []
 
     def get_wellbores(self) -> list[NexusWellbore]:
-        """ Returns a list of wellbores loaded from the simulator"""
+        """Returns a list of wellbores loaded from the simulator."""
         self.__parent_network.get_load_status()
         return self.__wellbores
 
     def get_wellbore(self, name: str) -> Optional[NexusWellbore]:
-        """ Returns a single well connection with the provided name loaded from the simulator
+        """Returns a single well connection with the provided name loaded from the simulator.
 
         Args:
+        ----
             name (str): name of the requested well connection
 
         Returns:
+        -------
             NexusWellbore: which has the same name as requested
         """
         to_return = filter(lambda x: False if x.name is None else x.name.upper() == name.upper(),
@@ -57,9 +59,10 @@ class NexusWellbores:
         self.add_wellbores(cons_list)
 
     def add_wellbores(self, additional_list: Optional[list[NexusWellbore]]) -> None:
-        """ extends the nodes object by a list of wellbores provided to it.
+        """Extends the nodes object by a list of wellbores provided to it.
 
         Args:
+        ----
             additional_list (list[NexusWellbore]): list of nexus wellbores to add to the nodes list.
         """
         if additional_list is None:

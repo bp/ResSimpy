@@ -10,7 +10,7 @@ from abc import ABC
 class SeparatorMethods(ABC):
     """The abstract base class for a collection of separator property methods
     Attributes:
-        separator_methods (dict[int, SeparatorMethod]): Collection of separator property methods, as a dictionary
+        separator_methods (dict[int, SeparatorMethod]): Collection of separator property methods, as a dictionary.
     """
 
     @property

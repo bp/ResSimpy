@@ -11,7 +11,7 @@ class NexusWaterMethods(WaterMethods):
     """Class for collection of Nexus water property methods
     Attributes:
         water_methods (dict[int, NexusWaterMethod]): Collection of Nexus water property methods, as a dictionary
-        water_files (dict[int, NexusFile]): Dictionary collection of water property files, as defined in Nexus fcs file
+        water_files (dict[int, NexusFile]): Dictionary collection of water property files, as defined in Nexus fcs file.
     """
 
     __water_methods: MutableMapping[int, NexusWaterMethod]
@@ -19,7 +19,7 @@ class NexusWaterMethods(WaterMethods):
     __properties_loaded: bool = False  # Used in lazy loading
 
     def __init__(self, water_methods: Optional[MutableMapping[int, NexusWaterMethod]] = None,
-                 water_files: Optional[dict[int, NexusFile]] = None):
+                 water_files: Optional[dict[int, NexusFile]] = None) -> None:
         if water_methods:
             self.__water_methods = water_methods
         else:
@@ -31,7 +31,7 @@ class NexusWaterMethods(WaterMethods):
         super().__init__()
 
     def __repr__(self) -> str:
-        """Pretty printing water methods"""
+        """Pretty printing water methods."""
         if not self.__properties_loaded:
             self.load_water_methods()
         printable_str = ''

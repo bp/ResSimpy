@@ -11,14 +11,14 @@ if TYPE_CHECKING:
 
 class Logging:
     def __init__(self, model: NexusSimulator) -> None:
-        """ class for controlling all logging and logfile (*.log) related functionality
+        """Class for controlling all logging and logfile (*.log) related functionality
         Args:
             model: NexusSimulator instance
             __job_id (int): Run job ID for executed runs
             __simulation_start_time (Optional[str]): Execution start time of the simulation when submitted \
                 to calculation engine
             __simulation_end_time (Optional[str]): Execution end time of the last time the simulation was run
-            __previous_run_time (Optional[str]): Difference between simulation execution start time and end time
+            __previous_run_time (Optional[str]): Difference between simulation execution start time and end time.
         """
         self.model = model
         self.__job_id: int = -1
@@ -28,15 +28,18 @@ class Logging:
 
     @staticmethod
     def get_simulation_time(line: str) -> str:
-        """searches for the simulation time in a line
+        """Searches for the simulation time in a line.
 
         Args:
+        ----
             line (str): line to search for the simulation time
 
         Raises:
+        ------
             ValueError: Throws error if get_next_value doesn't find any subsequent value in the line
 
         Returns:
+        -------
             str: value found after TIME card in a line
         """
         value_found = False
@@ -66,12 +69,14 @@ class Logging:
 
     @staticmethod
     def convert_server_date(original_date: str) -> datetime:
-        """Convert a datetime string from the server for when the simulation was started to a strptime object
+        """Convert a datetime string from the server for when the simulation was started to a strptime object.
 
         Args:
+        ----
             original_date (str): string of a date with format: "Mon Jan 01 00:00:00 CST 2020"
 
         Returns:
+        -------
             datetime: datetime object derived from the input string
         """
 
@@ -91,21 +96,23 @@ class Logging:
     @staticmethod
     def get_errors_warnings_string(log_file_line_list: list[str]) -> Optional[str]:
         """Retrieves the number of warnings and errors from the simulation log output,
-        and formats them as a string
+        and formats them as a string.
 
         Args:
+        ----
             log_file_line_list (list[str]): log file formatted as a list of strings with \
                 a new list entry per line
 
         Returns:
+        -------
             Optional[str]: string containing the errors and warnings from the simulation log. \
                 None if error/warning set is too short
         """
         error_warning = ""
         for line in log_file_line_list:
-            line = line.lower()
-            if "errors" in line and "warnings" in line:
-                error_warning = line
+            modified_line = line.lower()
+            if "errors" in modified_line and "warnings" in modified_line:
+                error_warning = modified_line
 
         error_warning_list = [x for x in error_warning.split(" ") if x != ""]
 
@@ -121,7 +128,7 @@ class Logging:
         return error_warning_str
 
     def get_simulation_start_time(self) -> str:
-        """Get the start time of an executed simulation run, if no simulation start time returns '-'"""
+        """Get the start time of an executed simulation run, if no simulation start time returns '-'."""
         self.get_simulation_status()
         if self.__simulation_start_time is not None:
             return self.__simulation_start_time
@@ -129,7 +136,7 @@ class Logging:
             return '-'
 
     def get_simulation_end_time(self) -> str:
-        """Get the end time of an executed simulation run if it has completed, if no simulation end time returns '-'"""
+        """Get the end time of an executed simulation run if it has completed, if no simulation end time returns '-'."""
         self.get_simulation_status()
         if self.__simulation_end_time is not None:
             return self.__simulation_end_time
@@ -137,18 +144,20 @@ class Logging:
             return '-'
 
     def get_job_id(self) -> int:
-        """Get the job Id of a simulation run"""
+        """Get the job Id of a simulation run."""
         return self.__job_id
 
     def __get_log_path(self, from_startup: bool = False) -> Optional[str]:
-        """Returns the path of the log file for the simulation
+        """Returns the path of the log file for the simulation.
 
         Args:
+        ----
             from_startup (bool, optional): Searches the same directory as the original_fcs_file_path if True. \
             Otherwise searches the destination folder path, failing this then searches the \
             original_fcs_file_path if False. Defaults to False.
 
         Returns:
+        -------
             Optional[str]: The path of the .log file from the simulation if found. If not found returns None.
         """
         folder_path = os.path.dirname(
@@ -170,9 +179,10 @@ class Logging:
             return None
 
     def __update_simulation_start_and_end_times(self, log_file_line_list: list[str]) -> None:
-        """Updates the stored simulation execution start and end times from the log files
+        """Updates the stored simulation execution start and end times from the log files.
 
         Args:
+        ----
             log_file_line_list (list[str]): log file information represented with a new entry per line of the file.
         """
         for line in log_file_line_list:
@@ -188,14 +198,17 @@ class Logging:
         """Gets the run status of the latest simulation run.
 
         Args:
+        ----
             from_startup (bool, optional): Searches the same directory as the original_fcs_file_path if True. \
             Otherwise searches the destination folder path, failing this then searches the \
             original_fcs_file_path if False. Defaults to False.
 
         Raises:
+        ------
             NotImplementedError: If log file is not found - only supporting simulation status from log files
 
         Returns:
+        -------
             Optional[str]: the error/warning string if the simulation has finished, otherwise \
                 returns the running job ID. Empty string if a logfile is not found and from_start up is True
         """
@@ -223,9 +236,10 @@ class Logging:
         return None
 
     def __get_start_end_difference(self) -> Optional[str]:
-        """Returns a string with the previous time taken when the base case was run
+        """Returns a string with the previous time taken when the base case was run.
 
-        Returns:
+        Returns
+        -------
             Optional[str]: returns a human readable string of how long the simulation took to run
         """
         if self.__simulation_start_time is None or self.__simulation_end_time is None:
@@ -236,7 +250,7 @@ class Logging:
 
         total_difference = (end_date - start_date)
         days = int(total_difference.days)
-        hours = int((total_difference.seconds / (60 * 60)))
+        hours = int(total_difference.seconds / (60 * 60))
         minutes = int((total_difference.seconds / 60) - (hours * 60))
         seconds = int(total_difference.seconds -
                       (hours * 60 * 60) - (minutes * 60))
@@ -251,13 +265,15 @@ class Logging:
             return '-'
 
     def get_simulation_progress(self) -> float:
-        """Returns the simulation progress from log files
+        """Returns the simulation progress from log files.
 
-        Raises:
+        Raises
+        ------
             NotImplementedError: Only retrieving status from a log file is supported at the moment
             ValueError: if no times from the runcontrol file are read in
 
-        Returns:
+        Returns
+        -------
             Optional[float]: how long through a simulation run as a proportion of the number of days \
                 simulated as stated in the runcontrol
         """

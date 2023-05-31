@@ -19,22 +19,24 @@ if TYPE_CHECKING:
 class NexusNodes(Nodes):
     __nodes: list[NexusNode] = field(default_factory=lambda: [])
 
-    def __init__(self, parent_network: NexusNetwork):
+    def __init__(self, parent_network: NexusNetwork) -> None:
         self.__parent_network: NexusNetwork = parent_network
         self.__nodes: list[NexusNode] = []
 
     def get_nodes(self) -> Sequence[NexusNode]:
-        """ Returns a list of nodes loaded from the simulator"""
+        """Returns a list of nodes loaded from the simulator."""
         self.__parent_network.get_load_status()
         return self.__nodes
 
     def get_node(self, node_name: str) -> Optional[NexusNode]:
-        """ Returns a single node with the provided name loaded from the simulator
+        """Returns a single node with the provided name loaded from the simulator.
 
         Args:
+        ----
             node_name (str): name of the requested node
 
         Returns:
+        -------
             NexusNode: which has the same name as the requested node_name
 
         """
@@ -43,7 +45,7 @@ class NexusNodes(Nodes):
         return next(nodes_to_return, None)
 
     def get_node_df(self) -> pd.DataFrame:
-        """ Creates a dataframe representing all processed node data in a surface file
+        """Creates a dataframe representing all processed node data in a surface file
         Returns:
             DataFrame: of the properties of the nodes through time with each row representing a node.
         """
@@ -59,13 +61,15 @@ class NexusNodes(Nodes):
         raise NotImplementedError('To be implemented')
 
     def load_nodes(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
-        """ Calls load nodes and appends the list of discovered nodes into the NexusNodes object
+        """Calls load nodes and appends the list of discovered nodes into the NexusNodes object
         Args:
             surface_file (NexusFile): NexusFile representation of the surface file.
             start_date (str): Starting date of the run
             default_units (UnitSystem): Units used in case not specified by surface file.
-        Raises:
-            TypeError: if the unit system found in the property check is not a valid enum UnitSystem
+
+        Raises
+        ------
+            TypeError: if the unit system found in the property check is not a valid enum UnitSystem.
 
         """
         new_nodes = nfo.collect_all_tables_to_objects(surface_file, {'NODES': NexusNode, },
@@ -77,12 +81,14 @@ class NexusNodes(Nodes):
         self.add_nodes(cons_list)
 
     def add_nodes(self, additional_list: Optional[list[NexusNode]]) -> None:
-        """ extends the nodes object by a list of nodes provided to it.
+        """Extends the nodes object by a list of nodes provided to it.
 
         Args:
+        ----
             additional_list (Sequence[NexusNode]): list of nexus nodes to add to the nodes list.
 
         Returns:
+        -------
             None
         """
         if additional_list is None:

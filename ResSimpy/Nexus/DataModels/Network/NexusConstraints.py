@@ -19,18 +19,18 @@ if TYPE_CHECKING:
 class NexusConstraints:
     __constraints: dict[str, list[NexusConstraint]] = field(default_factory=lambda: {})
 
-    def __init__(self, parent_network: NexusNetwork):
+    def __init__(self, parent_network: NexusNetwork) -> None:
         self.__parent_network: NexusNetwork = parent_network
         self.__constraints: dict[str, list[NexusConstraint]] = {}
 
     def get_constraints(self, object_name: Optional[str] = None, date: Optional[str] = None) -> \
             dict[str, list[NexusConstraint]]:
-        """ Get the constraints of the existing model with optional parameters to filter for name and date
+        """Get the constraints of the existing model with optional parameters to filter for name and date
         Args:
             object_name (Optional[str]): name of the connection, node or wellname to return. Defaults to None.
             date (Optional[str]): date in model format to filter the dates to in the constraints
         Returns: dict[str, list[NexusConstraint]] dictionary of all constraints defined within a model, keyed by the \
-            name of the well/node
+            name of the well/node.
         """
         self.__parent_network.get_load_status()
 
@@ -50,7 +50,7 @@ class NexusConstraints:
         return date_filtered_constraints
 
     def get_constraint_df(self) -> pd.DataFrame:
-        """ Creates a dataframe representing all processed constraint data in a surface file
+        """Creates a dataframe representing all processed constraint data in a surface file
         Returns:
             DataFrame: of the properties of the constraint through time with each row representing \
                 a change in constraint.
@@ -84,10 +84,11 @@ class NexusConstraints:
         self.add_constraints(cons_list)
 
     def add_constraints(self, additional_constraints: Optional[dict[str, list[NexusConstraint]]]) -> None:
-        """ Adds additional constraints to memory within the NexusConstraints object.
+        """Adds additional constraints to memory within the NexusConstraints object.
             If user adds constraints list this will not be reflected in the Nexus deck at this time.
 
         Args:
+        ----
             additional_constraints (list[NexusConstraint]): additional constraints to add as a list
         """
         if additional_constraints is None:

@@ -1,4 +1,4 @@
-"""The base class for all Well Completions"""
+"""The base class for all Well Completions."""
 import uuid
 from abc import ABC
 from dataclasses import dataclass
@@ -7,13 +7,13 @@ from typing import Optional
 
 @dataclass(kw_only=True)
 class Completion(ABC):
-    """
-    A class representing well completions.
+    """A class representing well completions.
 
     IMPORTANT: if modifying this class, make sure to update the relevant tests in test_load_wells, as well as updating
     the constructor calls in the derived classes.
 
     Args:
+    ----
         date (str): The starting date of the completion. Applies until changed.
         i (Optional[int]): The structured grid cell location in the x direction. 'IW' in Nexus
         j (Optional[int]): The structured grid cell location in the y direction. 'JW' in Nexus
@@ -36,6 +36,7 @@ class Completion(ABC):
 
 
     """
+
     __date: str
     __i: Optional[int] = None
     __j: Optional[int] = None
@@ -60,7 +61,8 @@ class Completion(ABC):
                  x: Optional[float] = None, y: Optional[float] = None, angle_a: Optional[float] = None,
                  angle_v: Optional[float] = None, grid: Optional[str] = None, depth_to_top: Optional[float] = None,
                  depth_to_bottom: Optional[float] = None, perm_thickness_ovr: Optional[float] = None,
-                 dfactor: Optional[float] = None, rel_perm_method: Optional[int] = None, status: Optional[str] = None):
+                 dfactor: Optional[float] = None, rel_perm_method: Optional[int] = None,
+                 status: Optional[str] = None) -> None:
         self.__well_radius = well_radius
         self.__date = date
         self.__i = i
@@ -177,5 +179,5 @@ class Completion(ABC):
             'dfactor': self.__dfactor,
             'rel_perm_method': self.__rel_perm_method,
             'status': self.__status,
-            }
+        }
         return attribute_dict

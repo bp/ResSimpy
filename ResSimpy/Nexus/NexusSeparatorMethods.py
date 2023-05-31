@@ -11,7 +11,7 @@ class NexusSeparatorMethods(SeparatorMethods):
     """Class for collection of Nexus separator property methods
     Attributes:
         separator_methods (dict[int, NexusSeparatorMethod]): Dictionary collection of Nexus separator property methods
-        separator_files (dict[int, NexusFile]): Dictionary collection of separator property files, defined in Nexus fcs
+        separator_files (dict[int, NexusFile]): Dictionary collection of separator property files, defined in Nexus fcs.
     """
 
     __separator_methods: MutableMapping[int, NexusSeparatorMethod]
@@ -19,7 +19,7 @@ class NexusSeparatorMethods(SeparatorMethods):
     __properties_loaded: bool = False  # Used in lazy loading
 
     def __init__(self, separator_methods: Optional[MutableMapping[int, NexusSeparatorMethod]] = None,
-                 separator_files: Optional[dict[int, NexusFile]] = None):
+                 separator_files: Optional[dict[int, NexusFile]] = None) -> None:
         if separator_methods:
             self.__separator_methods = separator_methods
         else:
@@ -31,7 +31,7 @@ class NexusSeparatorMethods(SeparatorMethods):
         super().__init__()
 
     def __repr__(self) -> str:
-        """Pretty printing separator methods"""
+        """Pretty printing separator methods."""
         if not self.__properties_loaded:
             self.load_separator_methods()
         printable_str = ''

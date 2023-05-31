@@ -11,7 +11,7 @@ class NexusRockMethods(RockMethods):
     """Class for collection of Nexus rock property methods
     Attributes:
         rock_methods (dict[int, NexusRockMethod]): Collection of Nexus rock property methods, as a dictionary
-        rock_files (dict[int, NexusFile]): Dictionary collection of rock property files, as defined in Nexus fcs file
+        rock_files (dict[int, NexusFile]): Dictionary collection of rock property files, as defined in Nexus fcs file.
     """
 
     __rock_methods: MutableMapping[int, NexusRockMethod]
@@ -19,7 +19,7 @@ class NexusRockMethods(RockMethods):
     __properties_loaded: bool = False  # Used in lazy loading
 
     def __init__(self, rock_methods: Optional[MutableMapping[int, NexusRockMethod]] = None,
-                 rock_files: Optional[dict[int, NexusFile]] = None):
+                 rock_files: Optional[dict[int, NexusFile]] = None) -> None:
         if rock_methods:
             self.__rock_methods = rock_methods
         else:
@@ -31,7 +31,7 @@ class NexusRockMethods(RockMethods):
         super().__init__()
 
     def __repr__(self) -> str:
-        """Pretty printing rock methods"""
+        """Pretty printing rock methods."""
         if not self.__properties_loaded:
             self.load_rock_methods()
         printable_str = ''

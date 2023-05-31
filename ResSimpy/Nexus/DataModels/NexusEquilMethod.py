@@ -15,13 +15,14 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 
 @dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
 class NexusEquilMethod(EquilMethod):
-    """ Class to hold Nexus Equil properties
+    """Class to hold Nexus Equil properties
     Attributes:
         file_path (str): Path to the Nexus equilibration file
         method_number (int): Equilibration method number in Nexus fcs file
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] ):
             Dictionary holding all properties for a specific equilibration method. Defaults to empty dictionary.
     """
+
     # General parameters
     file_path: str
     properties: dict[str, Union[str, int, float, Enum, list[str],
@@ -30,7 +31,7 @@ class NexusEquilMethod(EquilMethod):
 
     def __init__(self, file_path: str, method_number: int,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                                      dict[str, Union[float, pd.DataFrame]]]]] = None):
+                                                      dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
         self.file_path = file_path
         if properties is not None:
             self.properties = properties
@@ -39,7 +40,7 @@ class NexusEquilMethod(EquilMethod):
         super().__init__(method_number=method_number)
 
     def __repr__(self) -> str:
-        """Pretty printing equilibration data"""
+        """Pretty printing equilibration data."""
         printable_str = f'\nFILE_PATH: {self.file_path}\n'
         equil_dict = self.properties
         for key, value in equil_dict.items():
@@ -76,8 +77,7 @@ class NexusEquilMethod(EquilMethod):
         return printable_str
 
     def read_properties(self) -> None:
-        """Read Nexus equilibration file contents and populate NexusEquilMethod object
-        """
+        """Read Nexus equilibration file contents and populate NexusEquilMethod object."""
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
         file_as_list = file_obj.get_flat_list_str_file
 

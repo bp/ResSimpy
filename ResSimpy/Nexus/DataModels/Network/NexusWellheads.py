@@ -17,22 +17,24 @@ if TYPE_CHECKING:
 class NexusWellheads:
     __wellheads: list[NexusWellhead] = field(default_factory=list)
 
-    def __init__(self, parent_network: NexusNetwork):
+    def __init__(self, parent_network: NexusNetwork) -> None:
         self.__parent_network: NexusNetwork = parent_network
         self.__wellheads: list[NexusWellhead] = []
 
     def get_wellheads(self) -> list[NexusWellhead]:
-        """ Returns a list of wellheads loaded from the simulator"""
+        """Returns a list of wellheads loaded from the simulator."""
         self.__parent_network.get_load_status()
         return self.__wellheads
 
     def get_wellhead(self, name: str) -> Optional[NexusWellhead]:
-        """ Returns a single well connection with the provided name loaded from the simulator
+        """Returns a single well connection with the provided name loaded from the simulator.
 
         Args:
+        ----
             name (str): name of the requested well connection
 
         Returns:
+        -------
             NexusWellConnection: which has the same name as requested
         """
         to_return = filter(lambda x: False if x.name is None else x.name.upper() == name.upper(),
@@ -55,9 +57,10 @@ class NexusWellheads:
         self.add_wellheads(wellheads_list)
 
     def add_wellheads(self, additional_list: Optional[list[NexusWellhead]]) -> None:
-        """ extends the nodes object by a list of wellheads provided to it.
+        """Extends the nodes object by a list of wellheads provided to it.
 
         Args:
+        ----
             additional_list (list[NexusWellhead]): list of nexus wellheads to add to the nodes list.
         """
         if additional_list is None:

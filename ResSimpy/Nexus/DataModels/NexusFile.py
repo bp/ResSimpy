@@ -4,6 +4,14 @@ import uuid
 from dataclasses import dataclass, field
 import re
 from typing import Optional, Union, Generator
+
+# Use correct Self type depending upon Python version
+import sys
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
+
 from uuid import UUID
 
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -17,7 +25,7 @@ from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_ne
 
 @dataclass(kw_only=True, repr=True)
 class NexusFile:
-    """ Class to deal with origin and structure of Nexus files and preserve origin of include files
+    """Class to deal with origin and structure of Nexus files and preserve origin of include files
     Attributes:
         location (Optional[str]): Path to the original file being opened. Defaults to None.
         includes (Optional[list[str]]): list of file paths that the file contains. Defaults to None.
@@ -25,6 +33,7 @@ class NexusFile:
         includes_objects (Optional[list[NexusFile]]): The include files but generated as a NexusFile instance. \
             Defaults to None.
     """
+
     location: Optional[str] = None
     includes: Optional[list[str]] = field(default_factory=get_empty_list_str)
     origin: Optional[str] = None
@@ -38,7 +47,7 @@ class NexusFile:
                  includes: Optional[list[str]] = None,
                  origin: Optional[str] = None,
                  includes_objects: Optional[list[NexusFile]] = None,
-                 file_content_as_list: Optional[list[Union[str, NexusFile]]] = None):
+                 file_content_as_list: Optional[list[Union[str, NexusFile]]] = None) -> None:
         self.location: Optional[str] = location
         self.includes: Optional[list[str]] = get_empty_list_str() if includes is None else includes
         self.origin: Optional[str] = origin
@@ -54,16 +63,18 @@ class NexusFile:
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True,
-                                        skip_arrays: bool = True) -> NexusFile:
-        """generates a nexus file instance for a provided text file with information storing the included files
+                                        skip_arrays: bool = True) -> Self:
+        """Generates a nexus file instance for a provided text file with information storing the included files.
 
         Args:
+        ----
             file_path (str): path to a file
             origin (Optional[str], optional): Where the file was opened from. Defaults to None.
             recursive (bool): Whether the method should recursively drill down multiple layers of includes.
             skip_arrays (bool): If set True skips the INCLUDE arrays that come after property array and VALUE
 
         Returns:
+        -------
             NexusFile: a class instance for NexusFile with knowledge of include files
         """
         # load file as list and clean up file
@@ -184,9 +195,10 @@ class NexusFile:
         return nexus_file_class
 
     def export_network_lists(self):
-        """ Exports lists of connections from and to for use in network graphs
+        """Exports lists of connections from and to for use in network graphs.
 
-        Raises:
+        Raises
+        ------
             ValueError: If the from and to lists are not the same length
         Returns:
             tuple[list]: list of to and from file paths where the equivalent indexes relate to a connection
@@ -210,9 +222,10 @@ class NexusFile:
 
     def iterate_line(self, file_index: Optional[FileIndex] = None, max_depth: Optional[int] = None,
                      parent: Optional[NexusFile] = None) -> Generator[str, None, None]:
-        """Generator object for iterating over a list of strings with nested NexusFile objects in them
+        """Generator object for iterating over a list of strings with nested NexusFile objects in them.
 
-        Yields:
+        Yields
+        ------
             str: sequential line from the file.
         """
 
@@ -268,13 +281,15 @@ class NexusFile:
 
     # TODO write an output function using the iterate_line method
     def get_full_network(self, max_depth: Optional[int] = None) -> tuple[list[str | None], list[str | None]]:
-        """ recursively constructs two lists of from and to nodes representing the connections between files.
+        """Recursively constructs two lists of from and to nodes representing the connections between files.
 
         Args:
+        ----
             max_depth (Optional[int], optional): depth of the iteration to construct the network down to. \
                 Defaults to None.
 
         Returns:
+        -------
             tuple[list[str | None], list[str | None]]: two lists of from and to nodes where corresponding \
                 indices create an edge within a graph network. e.g. (from_list[i], to_list[i]) \
                 is a connection between two files.
@@ -301,10 +316,11 @@ class NexusFile:
     def get_next_value_nexus_file(self, start_line_index: int, search_string: Optional[str] = None,
                                   ignore_values: Optional[list[str]] = None,
                                   replace_with: Union[str, VariableEntry, None] = None) -> Optional[str | NexusFile]:
-        """ Gets the next value in a file_as_list object and returns either the next value as a string or the nexusfile
+        """Gets the next value in a file_as_list object and returns either the next value as a string or the nexusfile
             if the next value is an include file.
 
         Args:
+        ----
             start_line_index (int): The line index to start search from in the file
             search_string (Optional[str]): starting string to search from in the starting line index
             ignore_values (Optional[list[str]]): values to skip over when looking for a valid value
@@ -312,6 +328,7 @@ class NexusFile:
             Defaults to None.
 
         Returns:
+        -------
             Optional[str | NexusFile] the next valid value either a token, value or a NexusFile if the next value
             would be an include file.
         """
@@ -329,13 +346,16 @@ class NexusFile:
         If no token is found and the next item in the list is a NexusFile it will then return the NexusFile.
 
         Args:
+        ----
             token (str): the token being searched for.
             token_line (str): string value of the line that the token was found in.
             ignore_values (Optional[list[str]]): a list of values that should be ignored if found. \
                 Defaults to None.
             replace_with (Union[str, VariableEntry, None]): a value to replace the existing value with. \
                 Defaults to None.
+
         Raises:
+        ------
             ValueError: if no file content is found in the NexusFile or if the search string is not found
         Returns:
             None | str | NexusFile: value of the string if a string is found, the next NexusFile in the list after the \
@@ -367,10 +387,11 @@ class NexusFile:
         return value
 
     def add_object_locations(self, uuid: UUID, line_index: int) -> None:
-        """ adds a uuid to the object_locations dictionary. Used for storing the line numbers where objects are stored
-        within the flattened file_as_list
+        """Adds a uuid to the object_locations dictionary. Used for storing the line numbers where objects are stored
+        within the flattened file_as_list.
 
         Args:
+        ----
             uuid (UUID): unique identifier of the object being created/stored
             line_index (int): line number in the flattened file_content_as_list
                 (i.e. from the get_flat_list_str_file method)
@@ -380,11 +401,12 @@ class NexusFile:
         self.object_locations[uuid] = line_index
 
     def __update_object_locations(self, line_number: int, number_additional_lines: int) -> None:
-        """ updates the object locations in a nexusfile by the additional lines. Used when files have been modified and
+        """Updates the object locations in a nexusfile by the additional lines. Used when files have been modified and
         an addition/removal of lines has occurred. Ensures that the object locations are correct to the actual lines
-        in the file_as_list
+        in the file_as_list.
 
         Args:
+        ----
             line_number (int): Line number at which the new lines have been added
             number_additional_lines (int): number of new lines added.
         """
@@ -395,9 +417,10 @@ class NexusFile:
                 self.object_locations[object_id] = index + number_additional_lines
 
     def __remove_object_locations(self, uuid: UUID) -> None:
-        """ Removes an object location based on the uuid provided. Used when removing objects in the file_as_list
+        """Removes an object location based on the uuid provided. Used when removing objects in the file_as_list.
 
         Args:
+        ----
             uuid (UUID): id of the removed object.
         """
         if self.object_locations is None:
@@ -408,13 +431,15 @@ class NexusFile:
         self.object_locations.pop(uuid, None)
 
     def find_which_include_file(self, index: int) -> tuple[NexusFile, int]:
-        """ Given a line index that relates to a position within the flattened file_as_list from the method
-        get_flat_file_as_list
+        """Given a line index that relates to a position within the flattened file_as_list from the method
+        get_flat_file_as_list.
 
         Args:
+        ----
             index (int): index in the flattened file as list structure
 
         Returns:
+        -------
             tuple[NexusFile, int] where the first element is the file that the relevant line is in and the second
             element is the relative index in that file.
         """
@@ -456,10 +481,11 @@ class NexusFile:
 
     def add_to_file_as_list(self, additional_content: list[str], index: int,
                             additional_objects: Optional[dict[UUID, int]] = None) -> None:
-        """ To add content to the file as list, also updates object numbers and optionally allows user \
-        to add several additional new objects
+        """To add content to the file as list, also updates object numbers and optionally allows user \
+        to add several additional new objects.
 
         Args:
+        ----
             additional_content (list[str]): Additional lines as a list of strings to be added.
             index (int): index to insert the new lines at in the calling flat_file_as_list
             additional_objects (Optional[dict[UUID, int]]): defaults to None. Otherwise, a dictionary keyed with the \
@@ -484,10 +510,11 @@ class NexusFile:
 
     def remove_from_file_as_list(self, index: int, objects_to_remove: Optional[list[UUID]] = None,
                                  string_to_remove: Optional[str] = None) -> None:
-        """ remove an entry from the file as list. Also updates existing object locations and removes any \
-        specified objects from the object locations dictionary
+        """Remove an entry from the file as list. Also updates existing object locations and removes any \
+        specified objects from the object locations dictionary.
 
         Args:
+        ----
             index (int): index n the calling flat_file_as_list to remove the entry from
             objects_to_remove (Optional[list[UUID]]): list of object id's to remove from the object locations. \
             Defaults to None
@@ -521,7 +548,7 @@ class NexusFile:
         nexusfile_to_write_to.write_to_file()
 
     def write_to_file(self) -> None:
-        """ Writes back to the original file location of the nexusfile"""
+        """Writes back to the original file location of the nexusfile."""
         if self.location is None:
             raise ValueError(f'No file path to write to, instead found {self.location}')
         file_str = ''.join(self.file_content_as_list_str)

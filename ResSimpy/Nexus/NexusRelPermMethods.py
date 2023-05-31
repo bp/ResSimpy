@@ -11,7 +11,7 @@ class NexusRelPermMethods(RelPermMethods):
     """Class for collection of Nexus relative permeability and capillary pressure property methods
     Attributes:
         relperm_methods (dict[int, NexusRelPermMethod]): Collection of Nexus relperm property methods, as a dictionary
-        relperm_files (dict[int, NexusFile]): Dictionary collection of relperm property files, as defined in Nexus fcs
+        relperm_files (dict[int, NexusFile]): Dictionary collection of relperm property files, as defined in Nexus fcs.
     """
 
     __relperm_methods: MutableMapping[int, NexusRelPermMethod]
@@ -19,7 +19,7 @@ class NexusRelPermMethods(RelPermMethods):
     __properties_loaded: bool = False  # Used in lazy loading
 
     def __init__(self, relperm_methods: Optional[MutableMapping[int, NexusRelPermMethod]] = None,
-                 relperm_files: Optional[dict[int, NexusFile]] = None):
+                 relperm_files: Optional[dict[int, NexusFile]] = None) -> None:
         if relperm_methods:
             self.__relperm_methods = relperm_methods
         else:
@@ -31,7 +31,7 @@ class NexusRelPermMethods(RelPermMethods):
         super().__init__()
 
     def __repr__(self) -> str:
-        """Pretty printing relative permeability and capillary pressure methods"""
+        """Pretty printing relative permeability and capillary pressure methods."""
         if not self.__properties_loaded:
             self.load_relperm_methods()
         printable_str = ''

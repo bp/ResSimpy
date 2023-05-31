@@ -34,9 +34,10 @@ class NexusSimulator(Simulator):
     def __init__(self, origin: Optional[str] = None, destination: Optional[str] = None, force_output: bool = False,
                  root_name: Optional[str] = None, nexus_data_name: str = "data", write_times: bool = False,
                  manual_fcs_tidy_call: bool = False, lazy_loading: bool = True) -> None:
-        """Nexus simulator class. Inherits from the Simulator super class
+        """Nexus simulator class. Inherits from the Simulator super class.
 
         Args:
+        ----
             origin (Optional[str], optional): file path to the fcs file. Defaults to None.
             force_output (bool, optional): sets force_output parameter - unused. Defaults to False.
             root_name (Optional[str], optional): Root file name of the fcs. Defaults to None.
@@ -45,7 +46,9 @@ class NexusSimulator(Simulator):
                 cards in. Defaults to True.
             manual_fcs_tidy_call (bool, optional): Determines whether fcs_tidy should be called - Currently not used. \
                 Defaults to False.
+
         Attributes:
+        ----------
             run_control_file_path (Optional[str]): file path to the run control file - derived from the fcs file
             __destination (Optional[str]): output path for the simulation. Currently not used.
             date_format (DateFormat): Enum value representing the date format.
@@ -69,7 +72,9 @@ class NexusSimulator(Simulator):
             __manual_fcs_tidy_call (bool): private attribute for manual_fcs_tidy_call. Determines whether fcs_tidy \
                 should be called
             __surface_file_path (Optional[str]): File path to the surface file. Derived from the fcs file.
+
         Raises:
+        ------
             ValueError: If the FCS file path is not given
         """
         if origin is None:
@@ -128,7 +133,7 @@ class NexusSimulator(Simulator):
         """Updates model values if the files are moved from a temp directory
         Replaces the first instance of temp/ in the file paths in the nexus simulation file paths
         Raises:
-            ValueError: if any of [__structured_grid_file_path, __new_fcs_file_path, __surface_file_path] are None
+            ValueError: if any of [__structured_grid_file_path, __new_fcs_file_path, __surface_file_path] are None.
         """
         if self.fcs_file.structured_grid_file.location is None:
             raise ValueError(
@@ -155,27 +160,27 @@ class NexusSimulator(Simulator):
 
     @property
     def model_location(self):
-        """Returns the location of the model"""
+        """Returns the location of the model."""
         return os.path.dirname(self.__origin)
 
     @property
     def structured_grid_path(self):
-        """Returns the location of the structured grid file"""
+        """Returns the location of the structured grid file."""
         return self.fcs_file.structured_grid_file.location
 
     @property
     def default_units(self):
-        """Returns the default units"""
+        """Returns the default units."""
         return self.__default_units
 
     @property
     def run_units(self):
-        """Returns the run units"""
+        """Returns the run units."""
         return self.__run_units
 
     @property
     def new_fcs_name(self):
-        """Returns the new name for the FCS file without the fcs extension"""
+        """Returns the new name for the FCS file without the fcs extension."""
         return self.__root_name
 
     @property
@@ -196,9 +201,9 @@ class NexusSimulator(Simulator):
 
     @root_name.setter
     def root_name(self, value: str) -> None:
-        """ Returns the name of the fcs file without the .fcs extension
+        """Returns the name of the fcs file without the .fcs extension
         Returns:
-            str: string of the fcs file without the .fcs extension
+            str: string of the fcs file without the .fcs extension.
         """
         if value is not None:
             rootname = value
@@ -221,9 +226,9 @@ class NexusSimulator(Simulator):
             ValueError: if a model in the list is using inconcistent run/default units
         Returns:
             Tuple[Optional[Bool], Optional[Bool]]: If all units are consistent between models,
-                Returns (True, True) if 'ft' is the length unit in an epc or Nexus specifies "ENGLISH" as the \
-                (RUN_UNITS,DEFAULT_UNITS) respectively and False, False otherwise. \
-                Returns (None, None) if it can't find a (RUN_UNITS, DEFAULT_UNITS) in the supplied files\
+                Returns (True, True) if 'ft' is the length unit in an epc or Nexus specifies "ENGLISH" as the
+                (RUN_UNITS,DEFAULT_UNITS) respectively and False, False otherwise.
+                Returns (None, None) if it can't find a (RUN_UNITS, DEFAULT_UNITS) in the supplied files.
         """
         oilfield_run_units: Optional[bool] = None
         oilfield_default_units: Optional[bool] = None
@@ -267,12 +272,14 @@ class NexusSimulator(Simulator):
         """Checks for fluid types within a list of paths to models.
         Currently limited to checking for the first SURFACE network in a file
         Args:
-            models (list[str]): a list of paths to models to check for fluid types
+            models (list[str]): a list of paths to models to check for fluid types.
 
-        Raises:
+        Raises
+        ------
             ValueError: If fluid types are inconsistent between models
 
-        Returns:
+        Returns
+        -------
             Optional[str]: The fluid type used for the model for the first surface network
         """
         fluid_type = None
@@ -305,12 +312,14 @@ class NexusSimulator(Simulator):
 
     @staticmethod
     def get_eos_details(surface_file: list[str]) -> str:
-        """Gets all the information about an EOS from a Nexus model
+        """Gets all the information about an EOS from a Nexus model.
 
         Args:
+        ----
             surface_file (list[str]): path to the surface file in a Nexus model
 
         Returns:
+        -------
             str: a concatenated string of EOS components
         """
         eos_string: str = ''
@@ -328,15 +337,18 @@ class NexusSimulator(Simulator):
 
     @staticmethod
     def get_fluid_type(surface_file_name: str) -> str:
-        """gets the fluid type for a single model from a surface file
+        """Gets the fluid type for a single model from a surface file.
 
         Args:
+        ----
             surface_file_name (str): path to the surface file in a Nexus model
 
         Raises:
+        ------
             ValueError: if no fluid type is found within the provided file path
 
         Returns:
+        -------
             str: fluid type as one of [BLACKOIL, WATEROIL, GASWATER,] or the full details from an EOS model
         """
         surface_file = nfo.load_file_as_list(surface_file_name)
@@ -361,12 +373,14 @@ class NexusSimulator(Simulator):
         return fluid_type
 
     def get_model_oil_type(self) -> str:
-        """Returns the get_fluid_type method on the existing NexusSimulator instance
+        """Returns the get_fluid_type method on the existing NexusSimulator instance.
 
-        Raises:
+        Raises
+        ------
             ValueError: If no file path is provided for the surface file path
 
-        Returns:
+        Returns
+        -------
             str: fluid type as one of [BLACKOIL, WATEROIL, GASWATER,] or the full details from an EOS model
         """
         if self.__surface_file_path is None:
@@ -374,10 +388,12 @@ class NexusSimulator(Simulator):
         return NexusSimulator.get_fluid_type(self.__surface_file_path)
 
     def check_output_path(self) -> None:
-        """ Confirms that the output path has been set (used to stop accidental writing operations in the original
-        directory)
-        Raises:
-            ValueError: if the destination provided is set to None
+        """Confirms that the output path has been set (used to stop accidental writing operations in the original
+        directory).
+
+        Raises
+        ------
+            ValueError: if the destination provided is set to None.
         """
         if self.__destination is None:
             raise ValueError("Destination is required for this operation. Currently set to: ", self.__destination)
@@ -387,20 +403,20 @@ class NexusSimulator(Simulator):
         return self.__destination
 
     def set_output_path(self, path: str) -> None:
-        """ Initialises the output to the declared output location. \
-            If the file is a different directory to the origin path location the function will set the origin \
-            to the new destination.
+        """Initialises the output to the declared output location.
+        If the file is a different directory to the origin path location the function will set the origin
+        to the new destination.
         """
         self.__destination = path
         if self.__destination is not None and os.path.dirname(self.__origin) != os.path.dirname(self.__destination):
             self.__origin = self.__destination + "/" + os.path.basename(self.__original_fcs_file_path)
 
     def __load_fcs_file(self):
-        """ Loads in the information from the supplied FCS file into the class instance.
-            Loads in the paths for runcontrol, structured grid and the first surface network.
-            Loads in the values for dateformat and run units.
-            Attempts to load the run_control_file.
-            Loads the wellspec and dynamic property files.
+        """Loads in the information from the supplied FCS file into the class instance.
+        Loads in the paths for runcontrol, structured grid and the first surface network.
+        Loads in the values for dateformat and run units.
+        Attempts to load the run_control_file.
+        Loads the wellspec and dynamic property files.
         """
         # self.get_simulation_status(True)
         # fcs_content_with_includes is used to scan only the fcs file and files specifically called with the INCLUDE
@@ -497,17 +513,19 @@ class NexusSimulator(Simulator):
                 self.Wells.load_wells()
 
     @staticmethod
-    def update_file_value(file_path: str, token: str, new_value: str, add_to_start: bool = False):
+    def update_file_value(file_path: str, token: str, new_value: str, add_to_start: bool = False) -> None:
         """Updates a value in a file if it is present and in the format {TOKEN} {VALUE}. If the token
-        isn't present, it will add the token + value to either the start or end of the file
+        isn't present, it will add the token + value to either the start or end of the file.
 
         Args:
+        ----
             file_path (str): path to a file to update the token/value pair in
             token (str): Keyword token to find in the given file (e.g. KX)
             new_value (str): Value following the TOKEN to be replaced
             add_to_start (bool, optional): Inserts the token/value pair to the start of the file. Defaults to False.
 
         Raises:
+        ------
             ValueError: If no value is found after the token
         """
 
@@ -547,14 +565,15 @@ class NexusSimulator(Simulator):
             text_file.write(new_file_str)
 
     def update_fcs_file_value(self, token, new_value, add_to_start=False):
-        """Updates a value in the FCS file"""
+        """Updates a value in the FCS file."""
         self.update_file_value(self.__new_fcs_file_path, token=token, new_value=new_value, add_to_start=add_to_start)
 
     @staticmethod
     def comment_out_file_value(token: str, file_path: str) -> None:
-        """Comments out an uncommented line containing the specified token
+        """Comments out an uncommented line containing the specified token.
 
         Args:
+        ----
             token (str): Keyword token to find in the given file (e.g. KX)
             file_path (str): path to a file containing the token
         """
@@ -578,15 +597,16 @@ class NexusSimulator(Simulator):
 
     def get_date_format(self) -> str:
         """Returns the date format being used by the model
-        formats used: ('MM/DD/YYYY', 'DD/MM/YYYY')
+        formats used: ('MM/DD/YYYY', 'DD/MM/YYYY').
         """
         return self.Runcontrol.get_date_format(self.date_format)
 
     def modify(self, operation: str, section: str, keyword: str, content: list[str]):
         """Generic modify method to modify part of the input deck. \
-        Operations are dependent on the section being modified
+        Operations are dependent on the section being modified.
 
         Args:
+        ----
             operation (str): operation to perform on the section of the input deck (e.g. 'merge')
             section (str): file type from the input deck provided (e.g. RUNCONTROL)
             keyword (str): which keyword/token to find within the deck provided (e.g. TIME)
@@ -594,6 +614,7 @@ class NexusSimulator(Simulator):
             represented as a list of strings with a new entry per line of the file
 
         Raises:
+        ------
             NotImplementedError: if the functionality is not yet implemented
         """
         section = section.upper()
@@ -609,16 +630,19 @@ class NexusSimulator(Simulator):
             raise NotImplementedError(section, "not yet implemented")
 
     def get_content(self, section: str, keyword: str) -> Union[list[str], None]:
-        """Returns the requested input information
+        """Returns the requested input information.
 
         Args:
+        ----
             section (str): Section to retreive information from
             keyword (str): Keyword/token to retrieve the information for
 
         Raises:
+        ------
             NotImplementedError: if the functionality is not yet implemented
 
         Returns:
+        -------
             Union[list[str], None]: the requested information
         """
         section = section.upper()
@@ -632,30 +656,31 @@ class NexusSimulator(Simulator):
             raise NotImplementedError(section, "not yet implemented")
 
     def change_force_output(self, force_output: bool = True) -> None:
-        """Sets the force output parameter to the supplied value
+        """Sets the force output parameter to the supplied value.
 
         Args:
+        ----
             force_output (bool, optional): sets the force_output parameter in the class instance. Defaults to True.
         """
         self.__force_output = force_output
 
     @property
     def StructuredGrid(self) -> Optional[StructuredGridFile]:
-        """Pass the structured grid information to the front end"""
+        """Pass the structured grid information to the front end."""
         return self.__structured_grid
 
     def get_structured_grid_dict(self) -> dict[str, Any]:
-        """Convert the structured grid info to a dictionary and pass it to the front end"""
+        """Convert the structured grid info to a dictionary and pass it to the front end."""
         if self.__structured_grid is None:
             return {}
         return self.__structured_grid.to_dict()
 
     def set_structured_grid(self, structured_grid: StructuredGridFile):
-        """Setter method for the structured grid file for use with modifying functions"""
+        """Setter method for the structured grid file for use with modifying functions."""
         self.__structured_grid = structured_grid
 
     def get_abs_structured_grid_path(self, filename: str):
-        """Returns the absolute path to the Structured Grid file"""
+        """Returns the absolute path to the Structured Grid file."""
         if self.fcs_file.structured_grid_file is None:
             raise ValueError(
                 f"No structured grid file found within simulator class: {self.fcs_file.structured_grid_file}")
@@ -666,9 +691,9 @@ class NexusSimulator(Simulator):
         return os.path.dirname(grid_path) + '/' + filename
 
     def get_surface_file_path(self):
-        """Get the surface file path"""
+        """Get the surface file path."""
         return self.__surface_file_path
 
     def load_network(self):
-        """ Populates nodes and connections from a surface file  """
+        """Populates nodes and connections from a surface file."""
         self.Network.load()

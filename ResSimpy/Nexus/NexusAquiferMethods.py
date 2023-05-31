@@ -11,7 +11,7 @@ class NexusAquiferMethods(AquiferMethods):
     """Class for collection of Nexus aquifer methods
     Attributes:
         aquifer_methods (dict[int, NexusAquiferMethod]): Collection of Nexus aquifer methods, as a dictionary
-        aquifer_files (dict[int, NexusFile]): Dictionary collection of aquifer files, as defined in Nexus fcs file
+        aquifer_files (dict[int, NexusFile]): Dictionary collection of aquifer files, as defined in Nexus fcs file.
     """
 
     __aquifer_methods: MutableMapping[int, NexusAquiferMethod]
@@ -19,7 +19,7 @@ class NexusAquiferMethods(AquiferMethods):
     __properties_loaded: bool = False  # Used in lazy loading
 
     def __init__(self, aquifer_methods: Optional[MutableMapping[int, NexusAquiferMethod]] = None,
-                 aquifer_files: Optional[dict[int, NexusFile]] = None):
+                 aquifer_files: Optional[dict[int, NexusFile]] = None) -> None:
         if aquifer_methods:
             self.__aquifer_methods = aquifer_methods
         else:
@@ -31,7 +31,7 @@ class NexusAquiferMethods(AquiferMethods):
         super().__init__()
 
     def __repr__(self) -> str:
-        """Pretty printing aquifer methods"""
+        """Pretty printing aquifer methods."""
         if not self.__properties_loaded:
             self.load_aquifer_methods()
         printable_str = ''
