@@ -56,7 +56,7 @@ class FcsNexusFile(NexusFile):
             include_locations: Optional[list[str]] = None,
             origin: Optional[str] = None,
             include_objects: Optional[list[NexusFile]] = None,
-            file_content_as_list: Optional[list[Union[str, NexusFile]]] = None,
+            file_content_as_list: Optional[list[str]] = None,
             restart_file: Optional[NexusFile] = None,
             structured_grid_file: Optional[NexusFile] = None,
             options_file: Optional[NexusFile] = None,
@@ -141,7 +141,7 @@ class FcsNexusFile(NexusFile):
         """
         fcs_file = cls(location=fcs_file_path)
         fcs_file.include_objects = get_empty_list_nexus_file()
-        fcs_file.file_content_as_list = get_empty_list_str_nexus_file()
+        fcs_file.file_content_as_list = get_empty_list_str()
         fcs_file.include_locations = get_empty_list_str()
 
         fcs_keyword_map_single = {
@@ -182,76 +182,51 @@ class FcsNexusFile(NexusFile):
         origin_path = fcs_file_path
         flat_fcs_file_content = NexusFile.generate_file_include_structure(
             fcs_file_path, origin=None).get_flat_list_str_file
-        if flat_fcs_file_content is None:
+        if flat_fcs_file_content is None or fcs_file.file_content_as_list is None:
             raise ValueError(f'FCS file not found, no content for {fcs_file_path=}')
+        fcs_file.file_content_as_list = flat_fcs_file_content
         for i, line in enumerate(flat_fcs_file_content):
-            if nfo.nexus_token_found(line, valid_list=FCS_KEYWORDS):
-                key = nfo.get_next_value(start_line_index=i, file_as_list=flat_fcs_file_content, search_string=line)
-                if key is None:
-                    warnings.warn(f'get next value failed to find a suitable token in {line}')
-                    continue
-                key = key.upper()
-                value = nfo.get_token_value(key, line, flat_fcs_file_content[i::])
-                if value is None:
-                    warnings.warn(f'No value found for {key}, skipping file')
-                    continue
-                # TODO handle methods / sets instead of getting full file path
-                if key in fcs_keyword_map_multi:
-                    # for keywords that have multiple methods we store the value in a dictionary
-                    # with the method number and the NexusFile object
-                    _, method_string, method_number, value = (
-                        nfo.get_multiple_sequential_values(flat_fcs_file_content[i::], 4)
+            if not nfo.nexus_token_found(line, valid_list=FCS_KEYWORDS):
+                continue
+            key = nfo.get_next_value(start_line_index=i, file_as_list=flat_fcs_file_content, search_string=line)
+            if key is None:
+                warnings.warn(f'get next value failed to find a suitable token in {line}')
+                continue
+            key = key.upper()
+            value = nfo.get_token_value(key, line, flat_fcs_file_content[i::])
+            if value is None:
+                warnings.warn(f'No value found for {key}, skipping file')
+                continue
+            # TODO handle methods / sets instead of getting full file path
+            if key in fcs_keyword_map_multi:
+                # for keywords that have multiple methods we store the value in a dictionary
+                # with the method number and the NexusFile object
+                _, method_string, method_number, value = (
+                    nfo.get_multiple_sequential_values(flat_fcs_file_content[i::], 4)
                     )
-                    full_file_path = nfo.get_full_file_path(value, origin_path)
-                    nexus_file = NexusFile.generate_file_include_structure(
-                        value, origin=fcs_file_path, recursive=recursive)
-                    fcs_property = getattr(fcs_file, fcs_keyword_map_multi[key])
-                    # manually initialise if the property is still a None after class instantiation
-                    if fcs_property is None:
-                        fcs_property = get_empty_dict_int_nexus_file()
-                    # shallow copy to maintain list elements pointing to nexus_file that are
-                    # stored in the file_content_as_list
-                    fcs_property_list = fcs_property.copy()
-                    fcs_property_list.update({int(method_number): nexus_file})
-                    # set the attribute in the fcs_file instance
-                    setattr(fcs_file, fcs_keyword_map_multi[key], fcs_property_list)
-                    fcs_file.file_content_as_list.extend(cls.line_as_nexus_list(line, value, nexus_file))
-                    fcs_file.include_objects.append(nexus_file)
-                    fcs_file.include_locations.append(full_file_path)
-                elif key in fcs_keyword_map_single:
-                    full_file_path = nfo.get_full_file_path(value, origin_path)
-                    nexus_file = NexusFile.generate_file_include_structure(
-                        value, origin=fcs_file_path, recursive=recursive)
-                    setattr(fcs_file, fcs_keyword_map_single[key], nexus_file)
-                    fcs_file.file_content_as_list.extend(cls.line_as_nexus_list(line, value, nexus_file))
-                    fcs_file.include_objects.append(nexus_file)
-                    fcs_file.include_locations.append(full_file_path)
-                else:
-                    fcs_file.file_content_as_list.append(line.replace('\n', ''))
-                    continue
+                full_file_path = nfo.get_full_file_path(value, origin_path)
+                nexus_file = NexusFile.generate_file_include_structure(
+                    value, origin=fcs_file_path, recursive=recursive)
+                fcs_property = getattr(fcs_file, fcs_keyword_map_multi[key])
+                # manually initialise if the property is still a None after class instantiation
+                if fcs_property is None:
+                    fcs_property = get_empty_dict_int_nexus_file()
+                # shallow copy to maintain list elements pointing to nexus_file that are
+                # stored in the file_content_as_list
+                fcs_property_list = fcs_property.copy()
+                fcs_property_list.update({int(method_number): nexus_file})
+                # set the attribute in the fcs_file instance
+                setattr(fcs_file, fcs_keyword_map_multi[key], fcs_property_list)
+                fcs_file.include_objects.append(nexus_file)
+                fcs_file.include_locations.append(full_file_path)
+            elif key in fcs_keyword_map_single:
+                full_file_path = nfo.get_full_file_path(value, origin_path)
+                nexus_file = NexusFile.generate_file_include_structure(
+                    value, origin=fcs_file_path, recursive=recursive)
+                setattr(fcs_file, fcs_keyword_map_single[key], nexus_file)
+                fcs_file.include_objects.append(nexus_file)
+                fcs_file.include_locations.append(full_file_path)
             else:
-                fcs_file.file_content_as_list.append(line.replace('\n', ''))
+                continue
+
         return fcs_file
-
-    @staticmethod
-    def line_as_nexus_list(line: str, path: str, nexus_obj: NexusFile) -> list[Union[str, NexusFile]]:
-        """Split out a line into the start and finish and inserts a NexusFile object into the place of the path.
-
-        Args:
-        ----
-            line (str): line to split apart (containing path)
-            path (str): path to remove from the line
-            nexus_obj (NexusFile): NexusFile instance to replace the path with
-
-        Returns:
-        -------
-            list[Union[str, NexusFile]]: list of the format [prefix, NexusFile, suffix] where the NexusFile object is \
-            in place of the path provided
-        """
-        new_list: list[Union[str, NexusFile]] = []
-        prefix = line.split(path, 1)[0]
-        new_list.append(prefix)
-        new_list.append(nexus_obj)
-        suffix = line.split(path, 1)[-1]
-        new_list.append(suffix.replace('\n', ''))
-        return new_list

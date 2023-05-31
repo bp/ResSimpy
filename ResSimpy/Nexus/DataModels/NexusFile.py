@@ -47,7 +47,7 @@ class NexusFile:
                  include_objects: Optional[list[NexusFile]] = None,
                  file_content_as_list: Optional[list[str]] = None) -> None:
 
-        if origin is not None:
+        if origin is not None and location is not None:
             self.location = nfo.get_full_file_path(location, origin)
         else:
             self.location = location
@@ -231,6 +231,9 @@ class NexusFile:
                     suffix_line = None
 
                 include_file = None
+                if self.include_objects is None:
+                    raise ValueError(f'No include objects found in the nexusfile to expand over for file: '
+                                     f'{self.location}')
                 for obj in self.include_objects:
                     if obj.location == incfile_location:
                         include_file = obj
@@ -239,7 +242,7 @@ class NexusFile:
                             obj.location == nfo.get_full_file_path(incfile_location, self.origin):
                         include_file = obj
                         break
-                    if os.path.basename(obj.location) == os.path.basename(incfile_location):
+                    if obj.location is not None and os.path.basename(obj.location) == os.path.basename(incfile_location):
                         include_file = obj
                         break
 
@@ -495,6 +498,8 @@ class NexusFile:
         """Writes back to the original file location of the nexusfile."""
         if self.location is None:
             raise ValueError(f'No file path to write to, instead found {self.location}')
+        if self.file_content_as_list is None:
+            raise ValueError(f'No file data to write out, instead found {self.file_content_as_list}')
         file_str = ''.join(self.file_content_as_list)
         with open(self.location, 'w') as fi:
             fi.write(file_str)

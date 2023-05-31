@@ -40,7 +40,8 @@ class StructuredGridFile(Grid):
         self.__array_functions_list: Optional[list[str]] = None
         self.__array_functions_df: Optional[pd.DataFrame] = None
         self.__array_functions_loaded: bool = False
-        self.__grid_file_contents: Optional[list[str]] = grid_nexus_file.file_content_as_list
+        self.__grid_file_contents: Optional[list[str]] = None if grid_nexus_file is None else \
+            grid_nexus_file.file_content_as_list
         self.__faults_df: Optional[pd.DataFrame] = None
         self.__grid_faults_loaded: bool = False
         self.__grid_properties_loaded: bool = False
