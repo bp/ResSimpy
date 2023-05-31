@@ -114,8 +114,8 @@ class FcsNexusFile(NexusFile):
         self.polymer_files = polymer_files if polymer_files is not None else get_empty_dict_int_nexus_file()
         self.adsorption_files = adsorption_files if adsorption_files is not None else get_empty_dict_int_nexus_file()
         self.flux_in_files = flux_in_files if flux_in_files is not None else get_empty_dict_int_nexus_file()
-        super().__init__(location=location, include_locations=include_locations, origin=origin, include_objects=include_objects,
-                         file_content_as_list=file_content_as_list)
+        super().__init__(location=location, include_locations=include_locations, origin=origin,
+                         include_objects=include_objects, file_content_as_list=file_content_as_list)
 
     def __repr__(self) -> str:
         return generic_repr(self)

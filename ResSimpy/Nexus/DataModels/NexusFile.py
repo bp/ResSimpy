@@ -45,7 +45,7 @@ class NexusFile:
                  include_locations: Optional[list[str]] = None,
                  origin: Optional[str] = None,
                  include_objects: Optional[list[NexusFile]] = None,
-                 file_content_as_list: Optional[list[str]] = None):
+                 file_content_as_list: Optional[list[str]] = None) -> None:
 
         if origin is not None:
             self.location = nfo.get_full_file_path(location, origin)
@@ -189,7 +189,7 @@ class NexusFile:
     def iterate_line(self, file_index: Optional[FileIndex] = None, max_depth: Optional[int] = None,
                      parent: Optional[NexusFile] = None, prefix_line: Optional[str] = None) -> \
             Generator[str, None, None]:
-        """Generator object for iterating over a list of strings with nested NexusFile objects in them
+        """Generator object for iterating over a list of strings with nested NexusFile objects in them.
 
         Yields
         ------
@@ -335,7 +335,7 @@ class NexusFile:
                 self.object_locations[object_id] = index + number_additional_lines
 
     def __remove_object_locations(self, obj_uuid: UUID) -> None:
-        """ Removes an object location based on the obj_uuid provided. Used when removing objects in the file_as_list.
+        """Removes an object location based on the obj_uuid provided. Used when removing objects in the file_as_list.
 
         Args:
         ----

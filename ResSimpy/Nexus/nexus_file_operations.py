@@ -445,7 +445,7 @@ def create_templated_file(template_location: str, substitutions: dict, output_fi
 
 
 def expand_include(file_as_list: list[str], recursive: bool = True) -> tuple[list[str], Optional[str]]:
-    """Expands out include files. If recursive set to True will expand all include_locations including nested
+    """Expands out include files. If recursive set to True will expand all include_locations including nested.
 
     Args:
     ----
@@ -457,8 +457,9 @@ def expand_include(file_as_list: list[str], recursive: bool = True) -> tuple[lis
         ValueError: if no value found after INCLUDE keyword in file
 
     Returns:
-        list[str]: list of strings containing each line of the file as a new entry but with files following include_locations \
-            expanded out
+    -------
+        list[str]: list of strings containing each line of the file as a new entry but with files following \
+            include_locations expanded out
     """
     no_comment_file = strip_file_of_comments(file_as_list, strip_str=True)
 
