@@ -80,10 +80,10 @@ class NexusFile:
         #     warnings.warn(UserWarning(f'File skipped due to looking like an array {file_path}'))
         #     return nexus_file_class
 
+        full_file_path = file_path
+        if origin is not None:
+            full_file_path = nfo.get_full_file_path(file_path, origin)
         try:
-            full_file_path = file_path
-            if origin is not None:
-                full_file_path = nfo.get_full_file_path(file_path, origin)
             file_as_list = nfo.load_file_as_list(full_file_path)
         except FileNotFoundError:
             # handle if a file can't be found
