@@ -78,15 +78,6 @@ class NexusFile:
             NexusFile: a class instance for NexusFile with knowledge of include files
         """
         # load file as list and clean up file
-        # if skip_arrays and nfo.looks_like_grid_array(file_path):
-        #     location = file_path
-        #     nexus_file_class = cls(location=location,
-        #                            includes=None,
-        #                            origin=origin,
-        #                            includes_objects=None,
-        #                            file_content_as_list=None, )
-        #     warnings.warn(UserWarning(f'File skipped due to looking like an array {file_path}'))
-        #     return nexus_file_class
 
         try:
             file_as_list = nfo.load_file_as_list(file_path)

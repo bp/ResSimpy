@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from abc import ABC
 
 
-# from typing import MutableMapping
-# from ResSimpy.SeparatorMethod import SeparatorMethod
 
 
 @dataclass(kw_only=True)

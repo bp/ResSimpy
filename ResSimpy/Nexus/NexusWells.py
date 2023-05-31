@@ -34,7 +34,6 @@ class NexusWells(Wells):
         self.__wells = []
         super().__init__()
 
-        # return NexusWell(well_name=" test", completions=[], units=UnitSystem.ENGLISH)
 
     def get_wells(self) -> Sequence[NexusWell]:
         return self.__wells

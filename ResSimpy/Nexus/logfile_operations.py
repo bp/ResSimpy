@@ -231,7 +231,6 @@ class Logging:
                     x for x in log_file_line_list if 'Job number:' in x]
                 if len(job_number_line) > 0:
                     self.__job_id = int(job_number_line[0].split(":")[1])
-                    # self.__get_job_status()
                     return f"Job Running, ID: {self.__job_id}"
         return None
 

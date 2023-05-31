@@ -216,7 +216,6 @@ class StructuredGridFile(Grid):
 
         # replace the structured grid with a new object with an updated dictionary
         structured_grid.update_properties_from_dict(grid_dict)
-        # model.set_structured_grid(structured_grid)
 
         # change it in the text file for nexus:
         grid_file_path = model.fcs_file.structured_grid_file.location
