@@ -322,7 +322,7 @@ class Logging:
             days_completed = self.model.Runcontrol.convert_date_to_number(last_time)
             if self.model.Runcontrol.times is None:
                 raise ValueError("No times provided in the instance - please read them in from runcontrol file")
-            total_days = self.model.Runcontrol.convert_date_to_number(self.model.Runcontrol.times[-1] )
+            total_days = self.model.Runcontrol.convert_date_to_number(self.model.Runcontrol.times[-1])
             return round((days_completed / total_days) * 100, 1)
 
         return 0

@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from abc import ABC
 
 
-
-
 @dataclass(kw_only=True)
 class SeparatorMethods(ABC):
     """The abstract base class for a collection of separator property methods

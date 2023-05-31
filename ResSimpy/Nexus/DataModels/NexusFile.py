@@ -7,6 +7,7 @@ from typing import Optional, Union, Generator
 
 # Use correct Self type depending upon Python version
 import sys
+
 if sys.version_info >= (3, 11):
     from typing import Self
 else:
@@ -90,7 +91,7 @@ class NexusFile:
                                    includes=None,
                                    origin=origin,
                                    includes_objects=None,
-                                   file_content_as_list=None )
+                                   file_content_as_list=None)
             warnings.warn(UserWarning(f'No file found for: {file_path} while loading {origin}'))
             return nexus_file_class
 
@@ -132,7 +133,7 @@ class NexusFile:
                                includes=None,
                                origin=file_path,
                                includes_objects=None,
-                               file_content_as_list=None )
+                               file_content_as_list=None)
                 if includes_objects is None:
                     raise ValueError('includes_objects is None - recursion failure.')
                 includes_objects.append(inc_file)
@@ -181,7 +182,7 @@ class NexusFile:
             origin=origin,
             includes_objects=includes_objects,
             file_content_as_list=modified_file_as_list,
-            )
+        )
 
         return nexus_file_class
 

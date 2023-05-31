@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from abc import ABC
 
 
-
-
 @dataclass(kw_only=True)
 class RelPermMethods(ABC):
     """The abstract base class for a collection of relative permeability and capillary pressure property methods

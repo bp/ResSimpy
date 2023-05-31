@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from abc import ABC
 
 
-
-
 @dataclass(kw_only=True)
 class ValveMethods(ABC):
     """The abstract base class for a collection of valve property methods

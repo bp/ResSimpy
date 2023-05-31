@@ -34,7 +34,6 @@ class NexusWells(Wells):
         self.__wells = []
         super().__init__()
 
-
     def get_wells(self) -> Sequence[NexusWell]:
         return self.__wells
 
@@ -59,7 +58,7 @@ class NexusWells(Wells):
         df_store = df_store.dropna(axis=1, how='all')
         return df_store
 
-    def load_wells(self ) -> None:
+    def load_wells(self) -> None:
         if self.model.fcs_file.well_files is None:
             raise FileNotFoundError('No wells files found for current model.')
         for method_number, well_file in self.model.fcs_file.well_files.items():
@@ -367,7 +366,7 @@ class NexusWells(Wells):
         return headers, new_completion_index, completion_table_as_list, True
 
     def remove_completion(self, well_name: str, completion_properties: Optional[NexusCompletion.InputDictionary] = None,
-                          completion_id: Optional[UUID] = None ) -> None:
+                          completion_id: Optional[UUID] = None) -> None:
 
         well = self.get_well(well_name)
         if well is None:
@@ -434,7 +433,7 @@ class NexusWells(Wells):
 
     def modify_completion(self, well_name: str, properties_to_modify: NexusCompletion.InputDictionary,
                           completion_to_change: Optional[NexusCompletion.InputDictionary] = None,
-                          completion_id: Optional[UUID] = None ) -> None:
+                          completion_id: Optional[UUID] = None) -> None:
         well = self.get_well(well_name)
         if well is None:
             raise ValueError(f'No well found with name: {well_name}')

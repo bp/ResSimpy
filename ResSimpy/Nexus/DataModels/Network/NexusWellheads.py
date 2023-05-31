@@ -48,7 +48,7 @@ class NexusWellheads:
         raise NotImplementedError('To be implemented')
 
     def load_wellheads(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
-        new_wellheads = nfo.collect_all_tables_to_objects(surface_file, {'WELLHEAD': NexusWellhead },
+        new_wellheads = nfo.collect_all_tables_to_objects(surface_file, {'WELLHEAD': NexusWellhead},
                                                           start_date=start_date,
                                                           default_units=default_units)
         wellheads_list = new_wellheads.get('WELLHEAD')
