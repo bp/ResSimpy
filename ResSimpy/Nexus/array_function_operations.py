@@ -286,6 +286,6 @@ def summarize_model_functions(function_list_to_parse: list[list[str]]) -> pd.Dat
     function_summary_df.insert(1, 'notation', second_column)
 
     # set FUNCTION number as the index colum:
-    function_summary_df.set_index('FUNCTION #', inplace=True)
+    function_summary_df = function_summary_df.set_index('FUNCTION #')
 
     return function_summary_df
