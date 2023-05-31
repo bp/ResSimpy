@@ -36,10 +36,10 @@ jobs:
           mypy_command_prefix: poetry run
           mypy_args: ResSimpy --config-file ./.config/mypy
 
-      - name: Ruff checks
-        uses: jpetrucciani/ruff-check@main
-        with:
-          path: 'ResSimpy'
+#      - name: Ruff checks
+#        uses: jpetrucciani/ruff-check@main
+#        with:
+#          path: 'ResSimpy'
 
       - name: Install ruff from pypi
         run: |
