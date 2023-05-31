@@ -374,23 +374,22 @@ class NexusFile:
         line_locations = [x[0] for x in self.line_locations]
         line_locations.sort()
         uuid_index: Optional[UUID] = None
-        index_in_included_file = 0 # flattened_index - line_locations[-1]
+        index_in_included_file = 0
 
         # Find the Nexusfile containing the line we are looking for
-        for numlines, id in self.line_locations:
+        for numlines, obj_id in self.line_locations:
             if numlines <= flattened_index:
-                uuid_index = id
+                uuid_index = obj_id
             if numlines >= flattened_index:
                 break
-
 
         get_next_line_count = False
         lines_already_included = 0
         previous_lines_value = 0
 
         # Add the previously included lines from the file (if any) to the location after it has been split
-        for numlines, id in self.line_locations:
-            if id == uuid_index:
+        for numlines, obj_id in self.line_locations:
+            if obj_id == uuid_index:
                 get_next_line_count = True
                 previous_lines_value = numlines
                 continue
