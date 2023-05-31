@@ -38,7 +38,7 @@ jobs:
 
       # Checks using ruff
       - name: Run checks using Ruff
-        uses: EnriqueSoria/annotate_pr_with_ruff
+        uses: EnriqueSoria/annotate_pr_with_ruff@v0.1.20
 
       # Alternative step that works with forked repo
       - name: Run linters (without annotations)
