@@ -1,3 +1,4 @@
+import uuid
 from dataclasses import dataclass
 from typing import Optional
 
@@ -195,6 +196,7 @@ class NexusConstraint(Constraint):
         super().__init__()
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)
+        self.__id: uuid.UUID = uuid.uuid4()
 
     @staticmethod
     def get_nexus_mapping() -> dict[str, tuple[str, type]]:
@@ -352,3 +354,7 @@ class NexusConstraint(Constraint):
 
     def __repr__(self) -> str:
         return generic_repr(self)
+
+    @property
+    def id(self) -> uuid.UUID:
+        return self.__id

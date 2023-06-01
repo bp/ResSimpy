@@ -5,6 +5,8 @@ from enum import Enum
 from functools import partial
 from io import StringIO
 from typing import Optional, Union, Any, TYPE_CHECKING
+from uuid import UUID
+
 import pandas as pd
 from ResSimpy.Grid import VariableEntry
 from string import Template
@@ -941,11 +943,15 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
             list_objects = None
             property_map = table_object_map[token_found].get_nexus_mapping()
             if token_found == 'CONSTRAINTS':
-                load_inline_constraints(file_as_list=file_as_list[table_start:table_end],
-                                        constraint=table_object_map[token_found],
-                                        current_date=current_date,
-                                        unit_system=unit_system, property_map=property_map,
-                                        existing_constraints=nexus_constraints)
+                object_locations = load_inline_constraints(file_as_list=file_as_list[table_start:table_end],
+                                                           constraint=table_object_map[token_found],
+                                                           current_date=current_date,
+                                                           unit_system=unit_system, property_map=property_map,
+                                                           existing_constraints=nexus_constraints)
+                # update the object locations from the inline table
+                for obj_id, line_number in object_locations.items():
+                    nexus_file.add_object_locations(obj_id, line_number + index)
+
             elif token_found == 'QMULT' or token_found == 'CONSTRAINT':
                 list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
                                                      row_object=table_object_map[token_found],
@@ -983,7 +989,7 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
 
 def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConstraint], current_date: Optional[str],
                             unit_system: UnitSystem, property_map: dict[str, tuple[str, type]],
-                            existing_constraints: dict[str, list[NexusConstraint]]):
+                            existing_constraints: dict[str, list[NexusConstraint]]) -> dict[UUID, int]:
     """Loads table of constraints with the wellname/node first and the constraints following inline
         uses previous set of constraints as still applied to the well.
 
@@ -998,9 +1004,11 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
 
     Returns:
     -------
-        list[NexusConstraint]: list of constraint objects for the given timestep/constraint table
+        dict[UUID, int]: dictionary of object locations derived from inline table.
     """
-    for line in file_as_list:
+    object_locations: dict[UUID, int] = {}
+
+    for index, line in enumerate(file_as_list):
         properties_dict: dict[str, str | float | UnitSystem | None] = {'date': current_date, 'unit_system': unit_system}
         # first value in the line has to be the node/wellname
         name = get_next_value(0, [line])
@@ -1051,13 +1059,19 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
             latest_constraint = well_constraints[-1]
             if latest_constraint.date == current_date:
                 latest_constraint.update(properties_dict, nones_overwrite)
+                object_locations[latest_constraint.id] = index
             else:
+                # otherwise take a copy of the previous constraint and add the additional properties
                 new_constraint = copy.copy(latest_constraint)
                 new_constraint.update(properties_dict, nones_overwrite)
                 well_constraints.append(new_constraint)
+                object_locations[new_constraint.id] = index
         else:
             nexus_constraint = constraint(properties_dict)
+
             existing_constraints[name] = [nexus_constraint]
+            object_locations[nexus_constraint.id] = index
+    return object_locations
 
 
 def clear_constraints(token_value, constraint) -> dict[str, None]:

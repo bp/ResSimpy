@@ -95,10 +95,18 @@ class NexusConstraints:
         if additional_constraints is None:
             return
         self.__constraints.update(additional_constraints)
-        # TODO sort by date:
-        # # use the compare dates function stored in the runcontrol to sort the constraints
-        # sorted(self.__constraints, key=lambda x:
-        # self.__parent_network.model.Runcontrol.convert_date_to_number(x.date))
 
-    def remove_constraint(self, constraint_id: UUID) -> None:
+    def find_constraint(self, constraint_dict: dict[str, float | str | int]) -> NexusConstraint:
+        # get the name, filter by name, then filter by properties, check for uniqueness as an option?
+
+        nexus_constraint: NexusConstraint = NexusConstraint(constraint_dict)
+
+        return nexus_constraint
+
+    def remove_constraint(self, constraint_dict: Optional[dict[str, float | str | int]] = None,
+                          constraint_id: Optional[UUID] = None) -> None:
+        if constraint_dict is None and constraint_id is None:
+            raise ValueError('no options provided for both constraint_id and constraint_dict')
+        if constraint_dict is not None:
+            self.find_constraint(constraint_dict)
         pass
