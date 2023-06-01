@@ -221,12 +221,13 @@ class NexusFile:
                 incfile_location = nfo.get_token_value('INCLUDE', row, self.file_content_as_list)
                 if incfile_location is None:
                     continue
-                try:
-                    prefix_line, suffix_line = re.split(incfile_location, row, maxsplit=1, flags=re.IGNORECASE)
+                split_line = re.split(incfile_location, row, maxsplit=1, flags=re.IGNORECASE)
+                if len(split_line) == 2:
+                    prefix_line, suffix_line = split_line
                     prefix_line = re.sub('INCLUDE', '', prefix_line, flags=re.IGNORECASE)
                     prefix_line = prefix_line.rstrip() + ' '
                     suffix_line = suffix_line.lstrip()
-                except ValueError:
+                else:
                     prefix_line = row.replace(incfile_location, '')
                     suffix_line = None
 
