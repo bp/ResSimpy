@@ -36,12 +36,12 @@ class StructuredGridFile(Grid):
     __grid_nexus_file: Optional[NexusFile] = None
 
     def __init__(self, grid_file_contents: Optional[list[str]] = None,
-                 grid_nexus_file: Optional[NexusFile] = None) -> None:
         super().__init__()
         self.__array_functions_list: Optional[list[str]] = None
         self.__array_functions_df: Optional[pd.DataFrame] = None
         self.__array_functions_loaded: bool = False
-        self.__grid_file_contents: Optional[list[str]] = grid_file_contents
+        self.__grid_file_contents: Optional[list[str]] = None if grid_nexus_file is None else \
+            grid_nexus_file.file_content_as_list
         self.__faults_df: Optional[pd.DataFrame] = None
         self.__grid_faults_loaded: bool = False
         self.__grid_properties_loaded: bool = False
@@ -188,7 +188,7 @@ class StructuredGridFile(Grid):
             raise ValueError("No file path given or found for structured grid file path. \
                 Please update structured grid file path")
 
-        loaded_structured_grid_file = cls(grid_file_contents=file_as_list, grid_nexus_file=structured_grid_file)
+        loaded_structured_grid_file = cls(grid_nexus_file=structured_grid_file)
 
         if not lazy_loading:
             loaded_structured_grid_file.load_grid_properties_if_not_loaded()
