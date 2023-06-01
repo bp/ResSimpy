@@ -35,7 +35,7 @@ class StructuredGridFile(Grid):
     __grid_properties_loaded: bool = False
     __grid_nexus_file: Optional[NexusFile] = None
 
-    def __init__(self, grid_file_contents: Optional[list[str]] = None,
+    def __init__(self, grid_nexus_file: Optional[NexusFile] = None) -> None:
         super().__init__()
         self.__array_functions_list: Optional[list[str]] = None
         self.__array_functions_df: Optional[pd.DataFrame] = None
@@ -137,8 +137,7 @@ class StructuredGridFile(Grid):
             for token_property in properties_to_load:
                 for modifier in token_property.modifiers:
                     StructuredGridOperations.load_token_value_if_present(
-                        token_property.token, modifier, token_property.property, line, file_as_list,
-                        self.__grid_nexus_file, ['INCLUDE'])
+                        token_property.token, modifier, token_property.property, line, file_as_list, ['INCLUDE'])
 
             # Load in grid dimensions
             if nfo.check_token('NX', line):

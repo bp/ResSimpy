@@ -2,7 +2,6 @@ from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 from ResSimpy.Grid import VariableEntry
 import ResSimpy.Nexus.nexus_file_operations as nfo
-from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
@@ -14,7 +13,7 @@ class StructuredGridOperations:
 
     @staticmethod
     def load_token_value_if_present(token: str, modifier: str, token_property: VariableEntry,
-                                    line: str, file_as_list: list[str], grid_file: NexusFile,
+                                    line: str, file_as_list: list[str],
                                     ignore_values: Optional[list[str]] = None) -> None:
         """Gets a token's value if there is one and loads it into the token_property.
 
@@ -24,7 +23,6 @@ class StructuredGridOperations:
             modifier (str): any modifiers applied to the token e.g. 'MULT'
             token_property (VariableEntry): VariableEntry object to store the modifier and value pair into
             line (str): line to search for the token in
-            grid_file (list[str] | NexusFile): a list of strings containing each line of the file as a new entry
             ignore_values (Optional[list[str]], optional): values to be ignored. Defaults to None.
 
         Raises:
