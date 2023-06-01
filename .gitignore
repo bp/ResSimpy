@@ -14,3 +14,5 @@ pytest.xml
 .coverage
 coverage.xml
 tests/scratch_test.py
+
+*.orig

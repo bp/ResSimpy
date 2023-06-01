@@ -101,7 +101,7 @@ def test_generic_repr():
         y_pos: Optional[float]
         temp: Optional[float]
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return generic_repr(self)
 
     obj = MyClass(

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Optional
+from uuid import UUID
 
 import pandas as pd
 
@@ -98,3 +99,6 @@ class NexusConstraints:
         # # use the compare dates function stored in the runcontrol to sort the constraints
         # sorted(self.__constraints, key=lambda x:
         # self.__parent_network.model.Runcontrol.convert_date_to_number(x.date))
+
+    def remove_constraint(self, constraint_id: UUID) -> None:
+        pass
