@@ -249,7 +249,6 @@ class NexusRelPermMethod(RelPermMethod):
                     for potential_endkeyword in RELPM_KEYWORDS:
                         if nfo.check_token(potential_endkeyword, line):
                             relpm_table_indices[table_keyword][1] = line_indx
-                            # start_reading_table = False
                             table_being_read[table_keyword] = False
                             break
             # Find the starting index of relperm tables

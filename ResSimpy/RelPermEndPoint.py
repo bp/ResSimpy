@@ -35,7 +35,7 @@ class RelPermEndPoint(ABC):
                  krg_sgu: Optional[float] = None, kro_swl: Optional[float] = None, kro_swr: Optional[float] = None,
                  kro_sgl: Optional[float] = None, kro_sgr: Optional[float] = None, krw_sgl: Optional[float] = None,
                  krw_sgr: Optional[float] = None, krg_sgrw: Optional[float] = None, sgtr: Optional[float] = None,
-                 sotr: Optional[float] = None, ) -> None:
+                 sotr: Optional[float] = None) -> None:
         self.__swl = swl
         self.__swr = swr
         self.__swu = swu

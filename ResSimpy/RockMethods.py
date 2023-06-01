@@ -1,7 +1,5 @@
 from dataclasses import dataclass
 from abc import ABC
-# from typing import MutableMapping
-# from ResSimpy.RockMethod import RockMethod
 
 
 @dataclass(kw_only=True)

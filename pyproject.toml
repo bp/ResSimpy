@@ -8,6 +8,7 @@ keywords = ["ResSimpy", "Reservoir Engineering"]
 classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Development Status :: 3 - Alpha",
     "Topic :: Scientific/Engineering",
     "Topic :: System :: Filesystems",
@@ -15,7 +16,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.10, <3.11"
+python = ">=3.10, <3.12"
 resqpy = "^4.7"
 numpy = "^1.23"
 pandas = "^1.5"
@@ -37,9 +38,10 @@ build-backend = "poetry.core.masonry.api"
 [tool.ruff]
 line-length = 120
 # Rule codes for ruff can be found at: https://beta.ruff.rs/docs/rules/
-select = ["E", "F", "W", "C90", "N",  "UP", "YTT", "ANN", "S", "BLE", "D", "PLE", "PLW", "RUF", "BLE"]
+select = ["E", "F", "W", "C90", "N",  "UP", "YTT", "ANN", "S", "BLE", "D", "PLE", "PLW", "RUF", "BLE", "ARG", "I",
+    "COM", "C4", "FA100", "PIE", "T20", "PYI", "TID", "INT", "ERA", "PD", "FLY", "NPY"] # To add later: PL, PLR
 ignore = ["UP007",  "ANN101", "N999", "UP035", "S105", "N802", "S106", "S107", "UP015", "ANN401", "ANN102", "D202",
-    "D105", "D203", "D213", "RUF010",
+    "D105", "D203", "D213", "RUF010", "I001", "B028", "COM812", "PD901",
     # To fix later:
     "ANN001", # Types
    "ANN201", # Types

@@ -50,7 +50,7 @@ class NexusWellbores:
         raise NotImplementedError('To be implemented')
 
     def load_wellbores(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
-        new_wellbores = nfo.collect_all_tables_to_objects(surface_file, {'WELLBORE': NexusWellbore, },
+        new_wellbores = nfo.collect_all_tables_to_objects(surface_file, {'WELLBORE': NexusWellbore},
                                                           start_date=start_date,
                                                           default_units=default_units)
         cons_list = new_wellbores.get('WELLBORE')

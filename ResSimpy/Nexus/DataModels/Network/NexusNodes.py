@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class NexusNodes(Nodes):
-    __nodes: list[NexusNode] = field(default_factory=lambda: [])
+    __nodes: list[NexusNode] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork) -> None:
         self.__parent_network: NexusNetwork = parent_network
@@ -72,7 +72,7 @@ class NexusNodes(Nodes):
             TypeError: if the unit system found in the property check is not a valid enum UnitSystem.
 
         """
-        new_nodes = nfo.collect_all_tables_to_objects(surface_file, {'NODES': NexusNode, },
+        new_nodes = nfo.collect_all_tables_to_objects(surface_file, {'NODES': NexusNode},
                                                       start_date=start_date,
                                                       default_units=default_units)
         cons_list = new_nodes.get('NODES')
