@@ -596,8 +596,8 @@ def get_multiple_sequential_values(list_of_strings: list[str], number_tokens: in
 def check_for_and_populate_common_input_data(
         file_as_list: list[str],
         property_dict: dict[str, Union[str, int, float, Enum, list[str],
-                            pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]]
-        ) -> None:
+                                       pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]]
+) -> None:
     """Loop through lines of Nexus input file content looking for common input data, e.g.,
     units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
     as defined in Nexus manual. If any found, include in provided property_dict and return.
@@ -619,7 +619,7 @@ def check_for_and_populate_common_input_data(
 def check_property_in_line(
         line: str,
         property_dict: dict[str, Union[str, int, float, Enum, list[str],
-                            pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]],
+                                       pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]],
         file_as_list: list[str]) -> None:
     """Given a line of Nexus input file content looking for common input data, e.g.,
     units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
@@ -874,7 +874,7 @@ def check_list_tokens(list_tokens: list[str], line: str) -> Optional[str]:
 
 
 def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[str, Any], start_date: Optional[str],
-                                  default_units: Optional[UnitSystem], ) -> \
+                                  default_units: Optional[UnitSystem]) -> \
         dict[str, list[Any] | dict[str, list[NexusConstraint]]]:
     """Loads all tables from a given file.
 
@@ -1003,13 +1003,13 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
     for line in file_as_list:
         properties_dict: dict[str, str | float | UnitSystem | None] = {'date': current_date, 'unit_system': unit_system}
         # first value in the line has to be the node/wellname
-        name = get_next_value(0, [line], )
+        name = get_next_value(0, [line])
         nones_overwrite = False
         if name is None:
             continue
         properties_dict['name'] = name
         trimmed_line = line.replace(name, "", 1)
-        next_value = get_next_value(0, [trimmed_line], )
+        next_value = get_next_value(0, [trimmed_line])
         # loop through the line for each set of constraints
         while next_value is not None:
             token_value = next_value.upper()
@@ -1022,7 +1022,7 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
             elif token_value == 'ACTIVATE' or token_value == 'DEACTIVATE':
                 properties_dict.update({'active_node': token_value == 'ACTIVATE'})
                 trimmed_line = trimmed_line.replace(next_value, "", 1)
-                next_value = get_next_value(0, [trimmed_line], )
+                next_value = get_next_value(0, [trimmed_line])
                 if next_value is None:
                     break
                 token_value = next_value.upper()
@@ -1030,7 +1030,7 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
             trimmed_line = trimmed_line.replace(next_value, "", 1)
             # extract the attribute name for the given nexus constraint token
             attribute = property_map[token_value][0]
-            next_value = get_next_value(0, [trimmed_line], )
+            next_value = get_next_value(0, [trimmed_line])
             if next_value is None:
                 raise ValueError(f'No value found after {token_value} in {line}')
             elif next_value == 'MULT':

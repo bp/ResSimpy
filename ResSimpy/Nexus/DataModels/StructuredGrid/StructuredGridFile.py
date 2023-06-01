@@ -35,7 +35,7 @@ class StructuredGridFile(Grid):
     __grid_properties_loaded: bool = False
     __grid_nexus_file: Optional[NexusFile] = None
 
-    def __init__(self, data: Optional[dict] = None, grid_nexus_file: Optional[NexusFile] = None) -> None:
+    def __init__(self, grid_nexus_file: Optional[NexusFile] = None) -> None:
         super().__init__()
         self.__array_functions_list: Optional[list[str]] = None
         self.__array_functions_df: Optional[pd.DataFrame] = None
@@ -51,7 +51,7 @@ class StructuredGridFile(Grid):
         if isinstance(value, tuple | list | set | frozenset):
             return type(value)([self.__wrap(v) for v in value])
         else:
-            return StructuredGridFile(value) if isinstance(value, dict) else value
+            return value
 
     def update_properties_from_dict(self, data: dict[str, int | VariableEntry]) -> None:
         """Allows you to update properties on the class using the provided dict of values.
@@ -137,8 +137,7 @@ class StructuredGridFile(Grid):
             for token_property in properties_to_load:
                 for modifier in token_property.modifiers:
                     StructuredGridOperations.load_token_value_if_present(
-                        token_property.token, modifier, token_property.property, line, file_as_list,
-                        self.__grid_nexus_file, ['INCLUDE'])
+                        token_property.token, modifier, token_property.property, line, file_as_list, ['INCLUDE'])
 
             # Load in grid dimensions
             if nfo.check_token('NX', line):
@@ -216,7 +215,6 @@ class StructuredGridFile(Grid):
 
         # replace the structured grid with a new object with an updated dictionary
         structured_grid.update_properties_from_dict(grid_dict)
-        # model.set_structured_grid(structured_grid)
 
         # change it in the text file for nexus:
         grid_file_path = model.fcs_file.structured_grid_file.location

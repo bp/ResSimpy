@@ -418,7 +418,6 @@ class NexusSimulator(Simulator):
         Attempts to load the run_control_file.
         Loads the wellspec and dynamic property files.
         """
-        # self.get_simulation_status(True)
         # fcs_content_with_includes is used to scan only the fcs file and files specifically called with the INCLUDE
         # token in front of it to prevent it from reading through all the other files. We need this here to extract the
         # fcs properties only. The FcsFile structure is then generated and stored in the object (with all the nesting of

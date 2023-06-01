@@ -7,6 +7,7 @@ from typing import Optional, Generator
 
 # Use correct Self type depending upon Python version
 import sys
+
 if sys.version_info >= (3, 11):
     from typing import Self
 else:
@@ -95,7 +96,7 @@ class NexusFile:
                                    include_locations=None,
                                    origin=origin,
                                    include_objects=None,
-                                   file_content_as_list=None, )
+                                   file_content_as_list=None)
             warnings.warn(UserWarning(f'No file found for: {file_path} while loading {origin}'))
             return nexus_file_class
 
@@ -136,7 +137,7 @@ class NexusFile:
                                include_locations=None,
                                origin=full_file_path,
                                include_objects=None,
-                               file_content_as_list=None, )
+                               file_content_as_list=None)
                 if includes_objects is None:
                     raise ValueError('include_objects is None - recursion failure.')
                 includes_objects.append(inc_file)
@@ -156,7 +157,7 @@ class NexusFile:
             origin=origin,
             include_objects=includes_objects,
             file_content_as_list=modified_file_as_list,
-            )
+        )
 
         return nexus_file_class
 
@@ -272,7 +273,7 @@ class NexusFile:
     def get_flat_list_str_file(self) -> list[str]:
         if self.file_content_as_list is None:
             raise ValueError(f'No file content found for {self.location}')
-        flat_list = [x for x in self.iterate_line(file_index=None)]
+        flat_list = list(self.iterate_line(file_index=None))
         return flat_list
 
     # TODO write an output function using the iterate_line method

@@ -2,10 +2,6 @@ from dataclasses import dataclass
 from abc import ABC
 
 
-# from typing import MutableMapping
-# from ResSimpy.ValveMethod import ValveMethod
-
-
 @dataclass(kw_only=True)
 class ValveMethods(ABC):
     """The abstract base class for a collection of valve property methods
