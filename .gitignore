@@ -15,4 +15,5 @@ pytest.xml
 coverage.xml
 tests/scratch_test.py
 
+# kdiff files
 *.orig

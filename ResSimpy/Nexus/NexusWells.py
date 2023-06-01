@@ -144,10 +144,6 @@ class NexusWells(Wells):
             raise AttributeError('Completion requires a date. '
                                  'Please provide a date in the completion_properties_list dictionary.')
 
-        for well_coord in ['i', 'j', 'k']:
-            if well_coord not in completion_properties:
-                raise ValueError(f'Requires value {well_coord} for new perforation')
-
         well = self.get_well(well_name)
         if well is None:
             # TODO could make this not raise an error and instead initialize a NexusWell and add it to NexusWells

@@ -51,14 +51,11 @@ class StructuredGridOperations:
                     token_property.modifier = 'MULT'
                     token_property.value = f"{numerical_value} {value_to_multiply}"
             else:
-                value = grid_file.get_token_value_nexus_file(token_modifier, line, ignore_values=ignore_values)
+                value = nfo.get_expected_token_value(token_modifier, line, file_as_list, ignore_values=ignore_values)
                 if value is None:
                     raise ValueError(
                         f'No value found after {token_modifier} in line: {line}')
-                if isinstance(value, NexusFile):
-                    token_property.value = value.location
-                else:
-                    token_property.value = value
+                token_property.value = value
                 token_property.modifier = modifier
 
     @staticmethod
