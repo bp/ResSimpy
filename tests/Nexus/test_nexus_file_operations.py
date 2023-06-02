@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import ResSimpy.Nexus.nexus_collect_tables
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import pytest
 import pandas as pd
@@ -744,7 +745,7 @@ def test_collect_all_tables_to_objects(mocker, file_contents, node1_props, node2
 
     # Act
 
-    result_dict = nfo.collect_all_tables_to_objects(surface_file, {'NODES': NexusNode, 'WELLS': NexusNode}, start_date,
+    result_dict = ResSimpy.Nexus.nexus_collect_tables.collect_all_tables_to_objects(surface_file, {'NODES': NexusNode, 'WELLS': NexusNode}, start_date,
                                                default_units=UnitSystem.ENGLISH)
     result = result_dict.get('NODES')
     if result_dict.get('WELLS') is not None:

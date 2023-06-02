@@ -2,6 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional, Any
 
+import ResSimpy.Nexus.nexus_collect_tables
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
@@ -88,7 +89,7 @@ class NexusNetwork:
         if self.model.fcs_file.surface_files is None:
             raise FileNotFoundError('Could not find any surface files associated with the fcs file provided.')
         for surface in self.model.fcs_file.surface_files.values():
-            nexus_obj_dict = nfo.collect_all_tables_to_objects(
+            nexus_obj_dict = ResSimpy.Nexus.nexus_collect_tables.collect_all_tables_to_objects(
                 surface, {'NODECON': NexusNodeConnection,
                           'NODES': NexusNode,
                           'WELLS': NexusWellConnection,

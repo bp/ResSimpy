@@ -1,3 +1,5 @@
+import uuid
+from unittest.mock import Mock
 import numpy as np
 import pandas as pd
 import pytest
@@ -15,6 +17,8 @@ from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConne
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnections import NexusNodeConnections
 from ResSimpy.Nexus.DataModels.Network.NexusNodes import NexusNodes
+from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+from tests.multifile_mocker import mock_multiple_files
 
 
 @pytest.mark.parametrize('file_contents, node1_props, node2_props',[
@@ -369,6 +373,7 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
     'unit_system': UnitSystem.ENGLISH},
      {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
       'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH})),
+
     ('''CONSTRAINTS
     well1	 QLIQSMAX 	3884.0  QWSMAX 	0
     well2	 QWSMAX 	0.0  QLIQSMAX- 10000.0 QLIQSMAX 15.5
@@ -385,6 +390,7 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
    {'date': '01/01/2020', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
    'max_surface_liquid_rate': 20.5, 'unit_system': UnitSystem.ENGLISH}
      )),
+
      ('''CONSTRAINTS
     well1	 QHCMAX- 	3884.0  PMIN 	0
     well2	 PMAX 	0.0  QLIQMIN 10000.0 QLIQMIN- 15.5 WORPLUGPLUS 85 CWLIM 155554
@@ -394,6 +400,7 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
     {'date': '01/01/2019', 'name': 'well2', 'max_pressure': 0, 'min_reservoir_liquid_rate': 10000.0,
     'min_reverse_reservoir_liquid_rate': 15.5, 'max_wor_plug_plus': 85, 'max_cum_water_prod': 155554,
     'unit_system': UnitSystem.ENGLISH})),
+
     ('''CONSTRAINT
     NAME    QLIQSMAX    QWSMAX 
     well1	  	3884.0   	0
@@ -410,6 +417,7 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
     {'date': '01/12/2023', 'name': 'well1', 'max_surface_liquid_rate': 1000.0, 'max_surface_water_rate': 0.0,
             'unit_system': UnitSystem.ENGLISH},
     )),
+
     ('''CONSTRAINTS
     well1	 QLIQSMAX 	1000.0
     well1   pmin    1700
@@ -418,6 +426,7 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
     ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000.0, 'min_pressure': 1700.0,
     'tubing_head_pressure': 2000.0, 'unit_system': UnitSystem.ENGLISH},)
     ),
+
 ('''
     CONSTRAINTS
     well1	 QLIQSMAX 	1000.0    WORMAX 95
@@ -549,3 +558,88 @@ def test_load_constraints(mocker, file_contents, expected_content):
     assert result_single == expected_single_name_constraint
     pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
     assert result_date_filtered == expected_date_filtered_constraints
+
+@pytest.mark.parametrize('file_contents, object_locations',[
+        ('''CONSTRAINTS
+        ! comment
+            well1	 QLIQSMAX 	3884.0  QWSMAX 	0
+
+            well2	 QWSMAX 	0.0  QLIQSMAX- 10000.0 QLIQSMAX 15.5
+    ENDCONSTRAINTS
+        ''',
+        {'uuid1': [2],
+         'uuid2': [4]}
+        ),
+
+('''CONSTRAINTS
+        ! comment
+            well1	 QLIQSMAX 	3884.0  QWSMAX 	0
+
+            well2	 QWSMAX 	0.0  QLIQSMAX- 10000.0 QLIQSMAX 15.5
+    ENDCONSTRAINTS
+    
+    CONSTRAINTS
+            ! comment
+            well3	 QLIQSMAX 	3884.0  QWSMAX 	0
+
+            well4	 QWSMAX 	0.0  QLIQSMAX- 10000.0
+    ENDCONSTRAINTS
+        ''',
+        {'uuid1': [2],
+         'uuid2': [4],
+         'uuid3': [9],
+         'uuid4': [11]}
+        ),
+
+('''CONSTRAINTS
+        ! comment
+            well1	 QLIQSMAX 	3884.0  QWSMAX 	0
+
+            well1	 QWSMAX 	0.0  QLIQSMAX- 10000.0 QLIQSMAX 15.5
+    ENDCONSTRAINTS
+
+    CONSTRAINTS
+            ! comment
+            well1	 QOSMAX 	1234  QWSMAX 	0
+
+            well1	 QWSMAX 	12334  QLIQSMAX- 10000.0
+    ENDCONSTRAINTS
+        ''',
+        {'uuid1': [2, 4, 9, 11],
+ }
+        ),
+        ], ids=['basic_test', 'two tables', 'several constraints for one well'])
+def test_constraint_ids(mocker, file_contents, object_locations):
+    # Arrange
+    fcs_file_data = '''RUN_UNITS ENGLISH
+
+    DATEFORMAT DD/MM/YYYY
+
+    RECURRENT_FILES
+    RUNCONTROL ref_runcontrol.dat
+    SURFACE Network 1 surface.dat'''
+    runcontrol_data = 'START 01/01/2020'
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'fcs_file.dat': fcs_file_data,
+            'surface.dat': file_contents,
+            'ref_runcontrol.dat': runcontrol_data,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    ls_dir = Mock(side_effect=lambda x: [])
+    mocker.patch('os.listdir', ls_dir)
+    fcs_file_exists = Mock(side_effect=lambda x: True)
+    mocker.patch('os.path.isfile', fcs_file_exists)
+    model = NexusSimulator('fcs_file.dat')
+
+    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
+                                                    'uuid4', 'uuid5', 'uuid6', 'uuid7'])
+    # Act
+    model.Network.Constraints.get_constraints()
+
+    result = model.fcs_file.surface_files[1].object_locations
+    # Assert
+    assert result == object_locations

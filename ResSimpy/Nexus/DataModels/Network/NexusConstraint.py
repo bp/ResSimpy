@@ -358,3 +358,7 @@ class NexusConstraint(Constraint):
     @property
     def id(self) -> uuid.UUID:
         return self.__id
+
+    def new_id(self):
+        """Refreshes the id on the object."""
+        self.__id = uuid.uuid4()

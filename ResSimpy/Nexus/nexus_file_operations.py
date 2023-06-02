@@ -5,7 +5,6 @@ from enum import Enum
 from functools import partial
 from io import StringIO
 from typing import Optional, Union, Any, TYPE_CHECKING
-from uuid import UUID
 
 import pandas as pd
 from ResSimpy.Grid import VariableEntry
@@ -19,8 +18,7 @@ from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEY
 from ResSimpy.Nexus.NexusKeywords.nexus_keywords import VALID_NEXUS_KEYWORDS
 
 if TYPE_CHECKING:
-    from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-    from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
+    pass
 
 
 def nexus_token_found(line_to_check: str, valid_list: list[str] = VALID_NEXUS_KEYWORDS) -> bool:
@@ -598,8 +596,8 @@ def get_multiple_sequential_values(list_of_strings: list[str], number_tokens: in
 def check_for_and_populate_common_input_data(
         file_as_list: list[str],
         property_dict: dict[str, Union[str, int, float, Enum, list[str],
-                                       pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]]
-) -> None:
+        pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]]
+        ) -> None:
     """Loop through lines of Nexus input file content looking for common input data, e.g.,
     units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
     as defined in Nexus manual. If any found, include in provided property_dict and return.
@@ -621,7 +619,7 @@ def check_for_and_populate_common_input_data(
 def check_property_in_line(
         line: str,
         property_dict: dict[str, Union[str, int, float, Enum, list[str],
-                                       pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]],
+        pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]],
         file_as_list: list[str]) -> None:
     """Given a line of Nexus input file content looking for common input data, e.g.,
     units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
@@ -873,224 +871,6 @@ def check_list_tokens(list_tokens: list[str], line: str) -> Optional[str]:
         if token_found:
             return x
     return None
-
-
-def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[str, Any], start_date: Optional[str],
-                                  default_units: Optional[UnitSystem]) -> \
-        dict[str, list[Any] | dict[str, list[NexusConstraint]]]:
-    """Loads all tables from a given file.
-
-    Args:
-    ----
-    nexus_file (NexusFile): NexusFile representation of the file.
-    table_object_map (dict[str, Storage_Object]): dictionary containing the name of the table as keys and \
-                the object type to store the data from each row into. Require objects to have a get_nexus_mapping \
-                function
-    start_date (str): Starting date of the run
-    default_units (UnitSystem): Units used in case not specified by file.
-
-    Raises:
-    ------
-    TypeError: if the unit system found in the property check is not a valid enum UnitSystem.
-
-    Returns:
-    -------
-    dict[str, list[Storage_Object]]: a dictionary of lists of arbitrary objects populated \
-                with properties from the file provided, keyed with the NexusTable name associated with table_object_map.
-    """
-    current_date = start_date
-    nexus_object_results: dict[str, list[Any] | dict[str, list[NexusConstraint]]] = {x: [] for x in table_object_map}
-    nexus_constraints: dict[str, list[NexusConstraint]] = {}
-    nexus_object_results['CONSTRAINTS'] = nexus_constraints
-    file_as_list: list[str] = nexus_file.get_flat_list_str_file
-    table_start: int = -1
-    table_end: int = -1
-    property_dict: dict = {}
-    token_found: Optional[str] = None
-    for index, line in enumerate(file_as_list):
-        # check for changes in unit system
-        check_property_in_line(line, property_dict, file_as_list)
-        unit_system = property_dict.get('UNIT_SYSTEM', default_units)
-        if not isinstance(unit_system, UnitSystem):
-            raise TypeError(f"Value found for {unit_system=} of type {type(unit_system)} \
-                                not compatible, expected type UnitSystem Enum")
-        if check_token('TIME', line):
-            current_date = get_expected_token_value(
-                token='TIME', token_line=line, file_list=file_as_list,
-                custom_message=f"Cannot find the date associated with the TIME card in {line=} at line number {index}")
-            continue
-        if table_start < 0:
-            token_found = check_list_tokens(list(table_object_map.keys()), line)
-            if token_found is None or check_token('WELLCONTROL', line):
-                continue
-            # if a token is found get the starting index of the table
-            table_start = index + 1
-        if token_found is None:
-            continue
-        token_found = token_found.upper()
-
-        if table_start > 0 and check_token('END' + token_found, line):
-            table_end = index
-        # if we have a complete table to read in start reading it into objects
-        if 0 < table_start <= table_end:
-            # cover for the case where we aren't currently reading in the table to an object.
-            # if no object is provided by the map for the token found then skip the keyword and reset the tracking vars
-            if table_object_map[token_found] is None:
-                table_start = -1
-                table_end = -1
-                token_found = None
-                continue
-            list_objects = None
-            property_map = table_object_map[token_found].get_nexus_mapping()
-            if token_found == 'CONSTRAINTS':
-                object_locations = load_inline_constraints(file_as_list=file_as_list[table_start:table_end],
-                                                           constraint=table_object_map[token_found],
-                                                           current_date=current_date,
-                                                           unit_system=unit_system, property_map=property_map,
-                                                           existing_constraints=nexus_constraints)
-                # update the object locations from the inline table
-                for obj_id, line_number in object_locations.items():
-                    nexus_file.add_object_locations(obj_id, line_number + index)
-
-            elif token_found == 'QMULT' or token_found == 'CONSTRAINT':
-                list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
-                                                     row_object=table_object_map[token_found],
-                                                     property_map=property_map, current_date=current_date,
-                                                     unit_system=unit_system,
-                                                     nexus_obj_dict=nexus_constraints,
-                                                     preserve_previous_object_attributes=True)
-            else:
-                list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
-                                                     row_object=table_object_map[token_found],
-                                                     property_map=property_map, current_date=current_date,
-                                                     unit_system=unit_system, nexus_obj_dict=None)
-
-            # store objects found into right dictionary
-            list_of_token_obj = nexus_object_results[token_found]
-            # This statement ensures that CONSTRAINT that are found in tables are actually added to the dictionary
-            # under the same key as constraints to preserve their order
-            if (token_found == 'CONSTRAINT' or token_found == 'QMULT') and list_objects is not None:
-                for constraint in list_objects:
-                    well_name = constraint.name
-                    if nexus_constraints.get(well_name, None) is not None:
-                        nexus_constraints[well_name].append(constraint)
-                    else:
-                        nexus_constraints[well_name] = [constraint]
-            elif list_objects is not None and isinstance(list_of_token_obj, list):
-                list_of_token_obj.extend(list_objects)
-            else:
-                list_of_token_obj = nexus_constraints
-            # reset indices for further tables
-            table_start = -1
-            table_end = -1
-            token_found = None
-    return nexus_object_results
-
-
-def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConstraint], current_date: Optional[str],
-                            unit_system: UnitSystem, property_map: dict[str, tuple[str, type]],
-                            existing_constraints: dict[str, list[NexusConstraint]]) -> dict[UUID, int]:
-    """Loads table of constraints with the wellname/node first and the constraints following inline
-        uses previous set of constraints as still applied to the well.
-
-    Args:
-    ----
-        file_as_list (list[str]):
-        constraint (NexusConstraint): object to store the attributes extracted from each row.
-        current_date (str): the current date in the table
-        unit_system (UnitSystem): Unit system enum
-        property_map (dict[str, tuple[str, type]]): Mapping of nexus keywords to attributes
-        existing_constraints (dict[str, NexusConstraint]):
-
-    Returns:
-    -------
-        dict[UUID, int]: dictionary of object locations derived from inline table.
-    """
-    object_locations: dict[UUID, int] = {}
-
-    for index, line in enumerate(file_as_list):
-        properties_dict: dict[str, str | float | UnitSystem | None] = {'date': current_date, 'unit_system': unit_system}
-        # first value in the line has to be the node/wellname
-        name = get_next_value(0, [line])
-        nones_overwrite = False
-        if name is None:
-            continue
-        properties_dict['name'] = name
-        trimmed_line = line.replace(name, "", 1)
-        next_value = get_next_value(0, [trimmed_line])
-        # loop through the line for each set of constraints
-        while next_value is not None:
-            token_value = next_value.upper()
-            if token_value in ['CLEAR', 'CLEARP', 'CLEARQ', 'CLEARLIMIT', 'CLEARALQ']:
-                removing_constraints = clear_constraints(token_value, constraint)
-                properties_dict.update(removing_constraints)
-                nones_overwrite = True
-                # break out of the while loop as the next value will not be there
-                break
-            elif token_value == 'ACTIVATE' or token_value == 'DEACTIVATE':
-                properties_dict.update({'active_node': token_value == 'ACTIVATE'})
-                trimmed_line = trimmed_line.replace(next_value, "", 1)
-                next_value = get_next_value(0, [trimmed_line])
-                if next_value is None:
-                    break
-                token_value = next_value.upper()
-
-            trimmed_line = trimmed_line.replace(next_value, "", 1)
-            # extract the attribute name for the given nexus constraint token
-            attribute = property_map[token_value][0]
-            next_value = get_next_value(0, [trimmed_line])
-            if next_value is None:
-                raise ValueError(f'No value found after {token_value} in {line}')
-            elif next_value == 'MULT':
-                try:
-                    attribute = property_map[token_value + '_MULT'][0]
-                except AttributeError:
-                    raise AttributeError(f'Unexpected MULT keyword following {token_value}')
-                properties_dict[attribute] = True
-
-            else:
-                properties_dict[attribute] = correct_datatypes(next_value, float)
-            trimmed_line = trimmed_line.replace(next_value, "", 1)
-            next_value = get_next_value(0, [trimmed_line])
-
-        # first check if there are any existing constraints created for the well this timestep
-        well_constraints = existing_constraints.get(name, None)
-        if well_constraints is not None:
-            latest_constraint = well_constraints[-1]
-            if latest_constraint.date == current_date:
-                latest_constraint.update(properties_dict, nones_overwrite)
-                object_locations[latest_constraint.id] = index
-            else:
-                # otherwise take a copy of the previous constraint and add the additional properties
-                new_constraint = copy.copy(latest_constraint)
-                new_constraint.update(properties_dict, nones_overwrite)
-                well_constraints.append(new_constraint)
-                object_locations[new_constraint.id] = index
-        else:
-            nexus_constraint = constraint(properties_dict)
-
-            existing_constraints[name] = [nexus_constraint]
-            object_locations[nexus_constraint.id] = index
-    return object_locations
-
-
-def clear_constraints(token_value, constraint) -> dict[str, None]:
-    match token_value:
-        case 'CLEAR':
-            constraint_clearing_dict = constraint.get_rate_constraints_map()
-            constraint_clearing_dict.update(constraint.get_pressure_constraints_map())
-            constraint_clearing_dict.update(constraint.get_limit_constraints_map())
-        case 'CLEARQ':
-            constraint_clearing_dict = constraint.get_rate_constraints_map()
-        case 'CLEARLIMIT':
-            constraint_clearing_dict = constraint.get_limit_constraints_map()
-        case 'CLEARP':
-            constraint_clearing_dict = constraint.get_pressure_constraints_map()
-        case 'CLEARALQ':
-            constraint_clearing_dict = constraint.get_alq_constraints_map()
-        case _:
-            constraint_clearing_dict = {}
-    return {x[0]: None for x in constraint_clearing_dict.values()}
 
 
 def correct_datatypes(value: None | int | float | str, dtype: type,

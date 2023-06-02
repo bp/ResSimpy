@@ -391,9 +391,10 @@ class NexusWells(Wells):
         # drop it from the wellspec file or include file if stored in include file
         if wellspec_file.object_locations is None:
             raise ValueError(f'No object locations specified, cannot find completion id: {completion_id}')
-        completion_index = wellspec_file.object_locations[completion_id]
-
-        wellspec_file.remove_from_file_as_list(completion_index, [completion_id])
+        completion_indices = wellspec_file.object_locations[completion_id]
+        if len(completion_indices) > 0:
+            for comp_index in completion_indices:
+                wellspec_file.remove_from_file_as_list(comp_index, [completion_id])
 
         # check that we have completions left:
         find_completions_dict: NexusCompletion.InputDictionary = {'date': completion_date}

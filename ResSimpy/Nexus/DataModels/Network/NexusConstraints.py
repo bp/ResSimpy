@@ -6,6 +6,7 @@ from uuid import UUID
 
 import pandas as pd
 
+import ResSimpy.Nexus.nexus_collect_tables
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -70,14 +71,14 @@ class NexusConstraints:
     def load_constraints(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
         # CONSTRAINT keyword represents a table with a header and columns.
         # CONSTRAINTS keyword represents a list of semi structured constraints with a well_name and then constraints
-        new_constraints = nfo.collect_all_tables_to_objects(surface_file,
-                                                            {
+        new_constraints = ResSimpy.Nexus.nexus_collect_tables.collect_all_tables_to_objects(surface_file,
+                                                                                            {
                                                                 'CONSTRAINTS': NexusConstraint,
                                                                 'CONSTRAINT': NexusConstraint,
                                                                 'QMULT': NexusConstraint
                                                                 },
-                                                            start_date=start_date,
-                                                            default_units=default_units)
+                                                                                            start_date=start_date,
+                                                                                            default_units=default_units)
         cons_list = new_constraints.get('CONSTRAINTS')
         if isinstance(cons_list, list):
             raise ValueError(
