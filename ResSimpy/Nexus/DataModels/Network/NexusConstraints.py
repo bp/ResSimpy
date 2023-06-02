@@ -99,7 +99,9 @@ class NexusConstraints:
 
     def find_constraint(self, constraint_dict: dict[str, float | str | int]) -> NexusConstraint:
         # get the name, filter by name, then filter by properties, check for uniqueness as an option?
-
+        # TODO implement this with tests. Give it a dictionary and then filter out the constraints to give one
+        #  that matches
+        # implement a fuzzy matching (i.e. will work when not all the dictionary parameters are present
         nexus_constraint: NexusConstraint = NexusConstraint(constraint_dict)
 
         return nexus_constraint
