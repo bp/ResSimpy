@@ -26,6 +26,8 @@ from test_utils import check_file_read_write_is_correct
 )
 def test_remove_constraint(mocker, file_contents, expected_result_file, expected_constraints):
     # Arrange
+    remove_constraint = {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
+      'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH}
     NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
     mock_nexus_network = mocker.MagicMock()
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
@@ -35,7 +37,7 @@ def test_remove_constraint(mocker, file_contents, expected_result_file, expected
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
     # Act
-    constraints.remove_constraint()
+    constraints.remove_constraint(remove_constraint)
     result = constraints.get_constraints()
 
     # Assert

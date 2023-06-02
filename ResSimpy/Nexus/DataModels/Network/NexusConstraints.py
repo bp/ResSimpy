@@ -109,5 +109,29 @@ class NexusConstraints:
         if constraint_dict is None and constraint_id is None:
             raise ValueError('no options provided for both constraint_id and constraint_dict')
         if constraint_dict is not None:
-            self.find_constraint(constraint_dict)
-        pass
+            constraint_to_remove = self.find_constraint(constraint_dict)
+            constraint_id = constraint_to_remove.id
+        if constraint_id is None:
+            raise ValueError(f'No constraint found with {constraint_id=}')
+        surface_file = self.__find_which_surface_file_from_id(constraint_id)
+        surface_file.remove_object_from_file_as_list([constraint_id])
+        for name, list_constraints in self.__constraints:
+            for i, constraint in enumerate(list_constraints):
+                if constraint.id == constraint_id:
+                    list_constraints.pop(i)
+
+    def __find_which_surface_file_from_id(self, constraint_id: UUID) -> NexusFile:
+        """Finds the surface file with the object id requested."""
+        # TODO: make this generic with the find_which_wellspec_file_from_completion_id.
+
+        if self.__parent_network.model.fcs_file.surface_files is None:
+            raise ValueError(f'No surface file found in fcs file at {self.__parent_network.model.fcs_file.location}')
+        surface_files = [x for x in self.__parent_network.model.fcs_file.surface_files.values() if
+                         x.object_locations is not None and constraint_id in x.object_locations]
+        if len(surface_files) == 0:
+            raise FileNotFoundError(f'No surface file found with an existing constraint that has: {constraint_id=}')
+        surface_file = surface_files[0]
+        if surface_file.file_content_as_list is None:
+            raise FileNotFoundError(f'No file content found in file: {surface_file.location} '
+                                    f'with an existing constraint that has: {constraint_id=}')
+        return surface_file
