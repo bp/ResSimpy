@@ -12,7 +12,7 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
     ENGLISH
 
     ! Comment
-    QOIL 1.0 1000. 3000.
+    QOIL 1.0 1000. 3000. ! GOR
     GOR 0.0 0.5     !  comment ! Gas oil ratio
     ! Another comment
     WCUT 0.0
@@ -162,7 +162,8 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
     WCUT 0.0
     ALQ     GASRATE     0.0     50.0
     THP 100. 500. 900. 1400. 2000.
-    IGOR IWCUT  IALQ  IQOIL  BHP(ITHP)
+    IGOR IWCUT  IALQ  IQOIL  >
+    BHP(ITHP)
        1     1     1      1  2470. 2545. >
                              2600. 2820. >
                              3070.
@@ -236,3 +237,46 @@ def test_read_hydraulics_properties_from_file(mocker, file_contents, expected_hy
             assert props[key] == expected_hydraulics_properties[key]
 
 
+def test_nexus_hydraulics_repr():
+    # Arrange
+    hyd_obj = NexusHydraulicsMethod(file_path='test/file/hyd.dat', method_number=1)
+    hyd_obj.properties = {'DESC': ['Hydraulics Data'],
+                          'UNIT_SYSTEM': UnitSystem.ENGLISH,
+                          'QOIL': '1.0 1000. 3000.',
+                          'GOR': '0.0 0.5',
+                          'WCUT': '0.0',
+                          'ALQ': '0.0 50.0',
+                          'ALQ_PARAM': 'GASRATE',
+                          'THP': '100. 500. 900. 1400. 2000.',
+                          'HYD_TABLE': pd.DataFrame({'IGOR': [1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2],
+                                                     'IWCUT': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                                                     'IALQ': [1, 1, 1, 2, 2, 2, 1, 1, 1, 2, 2, 2],
+                                                     'IQOIL': [1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3],
+                                                     'BHP0': [2470., 2478., 2493., 2535., 2541., 2555.,
+                                                              1860., 1881., 1947., 1990., 2004., 2033.],
+                                                     'BHP1': [2545., 2548., 2569., 2600., 2608., 2631.,
+                                                             1990., 2002., 2039., 2100., 2109., 2130.],
+                                                     'BHP2': [2600., 2613., 2638., 2650., 2673., 2703.,
+                                                             2090., 2101., 2131., 2190., 2206., 2224.],
+                                                     'BHP3': [2820., 2824., 2870., 2852., 2884., 2931.,
+                                                             2435., 2438., 2448., 2530., 2537., 2548.],
+                                                     'BHP4': [3070., 3081., 3138., 3130., 3141., 3197.,
+                                                             2830., 2836., 2848., 2916., 2926., 2946.]
+                                                     })}
+    expected_output = """
+FILE_PATH: test/file/hyd.dat
+DESC: ['Hydraulics Data']
+UNIT_SYSTEM: ENGLISH
+QOIL: 1.0 1000. 3000.
+GOR: 0.0 0.5
+WCUT: 0.0
+ALQ GASRATE: 0.0 50.0
+THP: 100. 500. 900. 1400. 2000.
+HYD_TABLE:
+""" + hyd_obj.properties['HYD_TABLE'].to_string() + '\n\n'
+
+    # Act
+    result = hyd_obj.__repr__()
+
+    # Assert
+    assert result == expected_output

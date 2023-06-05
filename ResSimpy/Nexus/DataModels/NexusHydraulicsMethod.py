@@ -39,6 +39,36 @@ class NexusHydraulicsMethod(HydraulicsMethod):
             self.properties = {}
         super().__init__(method_number=method_number)
 
+    def __repr__(self) -> str:
+        """Pretty printing hydraulics data."""
+        printable_str = f'\nFILE_PATH: {self.file_path}\n'
+        hyd_dict = self.properties
+        for key, value in hyd_dict.items():
+            if isinstance(value, pd.DataFrame):
+                printable_str += f'{key}:\n'
+                printable_str += value.to_string(na_rep='')
+                printable_str += '\n\n'
+            elif isinstance(value, dict):
+                for subkey in value.keys():
+                    printable_str += f'{key} - {subkey}\n'
+                    df = value[subkey]
+                    if isinstance(df, pd.DataFrame):
+                        printable_str += df.to_string(na_rep='')
+                    printable_str += '\n\n'
+            elif isinstance(value, Enum):
+                printable_str += f'{key}: {value.name}\n'
+            elif key == 'ALQ':
+                printable_str += f'{key}'
+                if 'ALQ_PARAM' in hyd_dict.keys():
+                    printable_str += f" {hyd_dict['ALQ_PARAM']}"
+                printable_str += f': {value}\n'
+            elif key not in ['ALQ', 'ALQ_PARAM']:
+                if value == '':
+                    printable_str += f'{key}\n'
+                else:
+                    printable_str += f'{key}: {value}\n'
+        return printable_str
+
     def read_properties(self) -> None:
         """Read Nexus hydraulics file contents and populate the NexusHydraulicsMethod object."""
         file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
