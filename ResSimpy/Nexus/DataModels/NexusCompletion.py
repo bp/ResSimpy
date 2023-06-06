@@ -1,6 +1,8 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional, Union, TypedDict
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
+from datetime import datetime, timedelta
 
 # Use correct Self type depending upon Python version
 import sys
@@ -208,6 +210,10 @@ class NexusCompletion(Completion):
     @property
     def kh_mult(self):
         return self.__kh_mult
+    
+    @property
+    def date_ISO(self):
+        return self.convert_to_iso()
 
     def to_dict(self) -> dict[str, None | float | int | str]:
         attribute_dict: dict[str, None | float | int | str] = to_dict(self, add_units=False)
@@ -372,3 +378,49 @@ class NexusCompletion(Completion):
             completion_values.append(attribute_value)
         completion_string = [' '.join([str(x) for x in completion_values]) + '\n']
         return completion_string
+
+    
+    #def __repr__(self) -> str:
+    #        return self.convert_to_iso().isoformat()
+    
+    
+    def convert_to_iso(self):
+        # TBC: get the dateformat from the FCS File - DATEFORMAT DD/MM/YYYY
+        date_format = DateFormat.MM_DD_YYYY
+
+        if date_format == DateFormat.DD_MM_YYYY:
+            converted_date = datetime.strptime(self.date, '%d/%m/%Y')
+        elif date_format == DateFormat.MM_DD_YYYY:
+            converted_date = DateTime.strptime(self.date, '%m/%d/%Y')
+        else:    
+            start_date = datetime(2023, 1, 1)  # TBC: Replace with simulation start date
+            converted_date = start_date + timedelta(days=self.date)
+        
+        #conv_date = DateTime(converted_date)
+
+        return converted_date
+    
+class DateTime(datetime):
+
+    def __init__(self) -> None:
+        super().__init__(self)
+
+    def __repr__(self):
+        """Convert to formal string, for repr()."""
+        L = [self._year, self._month, self._day,  # These are never zero
+            self._hour, self._minute, self._second, self._microsecond]
+        if L[-1] == 0:
+            del L[-1]
+        if L[-1] == 0:
+            del L[-1]
+        s = "%s.%s(%s)" % (self.__class__.__module__,
+                        self.__class__.__qualname__,
+                        ",T".join(map(str, L)))
+        if self._tzinfo is not None:
+            assert s[-1:] == ")"
+            s = s[:-1] + ", tzinfo=%r" % self._tzinfo + ")"
+        if self._fold:
+            assert s[-1:] == ")"
+            s = s[:-1] + ", fold=1)"
+        return s
+

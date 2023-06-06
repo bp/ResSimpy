@@ -5,3 +5,4 @@ from enum import Enum
 class DateFormat(Enum):
     DD_MM_YYYY = 1
     MM_DD_YYYY = 2
+    NO_OF_DAYS = 3
