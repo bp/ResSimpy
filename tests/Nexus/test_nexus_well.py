@@ -587,8 +587,6 @@ def test_wells_modify(mocker):
         NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
                         depth_to_bottom=1234),
                         ]
-    well_1 = NexusWell(well_name='well1', completions=well_1_completions, units=UnitSystem.METRIC)
-    well_2 = NexusWell(well_name='well2', completions=well_2_completions, units=UnitSystem.METRIC)
 
     wells = nexus_sim.Wells
 
