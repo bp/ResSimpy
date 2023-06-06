@@ -191,19 +191,20 @@ def test_remove_completion_write_to_file(mocker, fcs_file_contents, wells_file, 
     mocker.patch('os.path.isfile', fcs_file_exists)
 
     mock_nexus_sim = NexusSimulator('fcs_file.fcs')
+    mock_nexus_sim.Wells.load_wells() # Manually call load_wells to simulate loading in wells before we change the open mock.
     mock_nexus_sim.start_date_set(start_date)
     remove_perf_dict = {'date': remove_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 4.2}
     well_files = mock_nexus_sim.fcs_file.well_files[1]
     object_locations = well_files.object_locations
     object_locations_minus_completion = {k: v for k, v in object_locations.items() if v != expected_removed_completion_line}
     object_locations_minus_completion = {k: v for k, v in zip(object_locations_minus_completion, expected_obj_locations)}
+
     # make a mock for the write operation
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    mock_nexus_sim.Wells.remove_completion(well_name='well1', completion_properties=remove_perf_dict,
-                                           )
+    mock_nexus_sim.Wells.remove_completion(well_name='well1', completion_properties=remove_perf_dict)
     result_object_ids = mock_nexus_sim.fcs_file.well_files[1].object_locations
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
