@@ -105,17 +105,16 @@ class NexusHydraulicsMethod(HydraulicsMethod):
         for line in file_as_list:
 
             # Find arrays of parameters, e.g., QOIL 1.0 10. 100., or GOR 0.0 0.5 1.0
-            if [i for i in line.split() if i in HYD_ARRAY_KEYWORDS + HYD_ALQ_KEYWORD]:
-                for word in HYD_ARRAY_KEYWORDS + HYD_ALQ_KEYWORD:
-                    if nfo.check_token(word, line) and not table_being_read['LIMITS']:
-                        line_elems = line.split('!')[0].split()
-                        next_val = nfo.get_expected_token_value(word, line, file_as_list)
-                        if word == 'ALQ' and next_val in HYD_ALQ_OPTIONS:
-                            self.properties['ALQ_PARAM'] = next_val
-                            keyword_index = line_elems.index(next_val)
-                        else:
-                            keyword_index = line_elems.index(word)
-                        self.properties[word] = ' '.join(line_elems[keyword_index+1:])
+            potential_keyword = nfo.check_list_tokens(HYD_ARRAY_KEYWORDS + HYD_ALQ_KEYWORD, line)
+            if potential_keyword is not None and not table_being_read['LIMITS']:
+                line_elems = line.split('!')[0].split()
+                next_val = nfo.get_expected_token_value(potential_keyword, line, file_as_list)
+                if potential_keyword == 'ALQ' and next_val in HYD_ALQ_OPTIONS:
+                    self.properties['ALQ_PARAM'] = next_val
+                    keyword_index = line_elems.index(next_val)
+                else:
+                    keyword_index = line_elems.index(potential_keyword)
+                self.properties[potential_keyword] = ' '.join(line_elems[keyword_index+1:])
 
             # Create WATINJ property if needed
             if nfo.check_token('WATINJ', line):
@@ -126,19 +125,19 @@ class NexusHydraulicsMethod(HydraulicsMethod):
                 self.properties['DATGRAD'] = nfo.get_expected_token_value('DATGRAD', line, file_as_list)
 
             # Find HYD key-value pairs, such as LENGTH 3000, DATUM 7000 or DATGRAD GRAD
-            if [i for i in line.split() if i in HYD_KEYWORDS_VALUE_FLOAT + HYD_WATINJ_KEYWORDS_VALUE_FLOAT]:
-                for key in HYD_KEYWORDS_VALUE_FLOAT + HYD_WATINJ_KEYWORDS_VALUE_FLOAT:
-                    if nfo.check_token(key, line):
-                        if found_waterinj and key in HYD_WATINJ_KEYWORDS_VALUE_FLOAT:
-                            watinj_dict[key] = float(nfo.get_expected_token_value(key, line, file_as_list))
-                        elif key in HYD_KEYWORDS_VALUE_FLOAT:
-                            self.properties[key] = float(nfo.get_expected_token_value(key, line, file_as_list))
+            potential_keyword = nfo.check_list_tokens(HYD_KEYWORDS_VALUE_FLOAT + HYD_WATINJ_KEYWORDS_VALUE_FLOAT, line)
+            if potential_keyword is not None:
+                if found_waterinj and potential_keyword in HYD_WATINJ_KEYWORDS_VALUE_FLOAT:
+                    watinj_dict[potential_keyword] = float(
+                        nfo.get_expected_token_value(potential_keyword, line, file_as_list))
+                elif potential_keyword in HYD_KEYWORDS_VALUE_FLOAT:
+                    self.properties[potential_keyword] = float(
+                        nfo.get_expected_token_value(potential_keyword, line, file_as_list))
 
             # Find standalone hydraulics keywords
-            if [i for i in line.split() if i in HYD_SINGLE_KEYWORDS]:
-                for word in HYD_SINGLE_KEYWORDS:
-                    if nfo.check_token(word, line):
-                        self.properties[word] = ''
+            potential_keyword = nfo.check_list_tokens(HYD_SINGLE_KEYWORDS, line)
+            if potential_keyword is not None:
+                self.properties[potential_keyword] = ''
 
             # Find starting and ending indices for hydraulic limits table
             if nfo.check_token('LIMITS', line):
