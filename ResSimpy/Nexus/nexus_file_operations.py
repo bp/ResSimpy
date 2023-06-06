@@ -511,25 +511,30 @@ def get_full_file_path(file_path: str, origin: str):
     return return_path
 
 
-def read_table_to_df(file_as_list: list[str], keep_comments: bool = False) -> pd.DataFrame:
+def read_table_to_df(file_as_list: list[str], keep_comments: bool = False, noheader: bool = False) -> pd.DataFrame:
     """From a list of strings that represents a table, generate a Pandas dataframe representation of the table.
 
     Args:
     ----
         file_as_list (list[str]): List of strings representing a single table to be read
         keep_comments (bool): Boolean to determine if we keep comments as a separate column or not
+        noheader (bool): Boolean signaling if the input has a header or not
 
     Returns:
     -------
         pd.DataFrame: Created Pandas DataFrame representation of table to be read
     """
     df = pd.DataFrame()
+    header: Union[str, None] = 'infer'
+    if noheader:
+        header = None
     if not keep_comments:
         # Clean of comments
         cleaned_file_as_list = strip_file_of_comments(file_as_list, strip_str=True)
         # Create dataframe
-        df = pd.read_csv(StringIO('\n'.join(cleaned_file_as_list)), sep=r'\s+')
-        df.columns = [col.upper() for col in df.columns if isinstance(col, str)]
+        df = pd.read_csv(StringIO('\n'.join(cleaned_file_as_list)), sep=r'\s+', header=header)
+        if header is not None:
+            df.columns = [col.upper() for col in df.columns if isinstance(col, str)]
     else:  # Going to retain comments as a separate column in dataframe
         # Clean of comments
         cleaned_file_as_list = [re.split(r'(?<!\")!(?!\")', line)[0].strip() if line and line[0] != '!' else line
@@ -538,8 +543,10 @@ def read_table_to_df(file_as_list: list[str], keep_comments: bool = False) -> pd
         # Save comments in a list
         comment_column = [line.split('!', 1)[1].strip() if '!' in line else None for line in file_as_list]
         # Create dataframe
-        df = pd.read_csv(StringIO('\n'.join(cleaned_file_as_list) + '\n'), sep=r'\s+', skip_blank_lines=False)
-        df.columns = [col.upper() for col in df.columns if isinstance(col, str)]
+        df = pd.read_csv(StringIO('\n'.join(cleaned_file_as_list) + '\n'), sep=r'\s+', skip_blank_lines=False,
+                         header=header)
+        if header is not None:
+            df.columns = [col.upper() for col in df.columns if isinstance(col, str)]
         if any(x is not None for x in comment_column):  # If comment column isn't a full column of Nones
             df['COMMENT'] = comment_column[1:]
         df = df.convert_dtypes().dropna(axis=0, how='all').reset_index(drop=True)

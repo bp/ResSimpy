@@ -16,6 +16,7 @@ from ResSimpy.Nexus.DataModels.NexusRockMethod import NexusRockMethod
 from ResSimpy.Nexus.DataModels.NexusRelPermMethod import NexusRelPermMethod
 from ResSimpy.Nexus.DataModels.NexusValveMethod import NexusValveMethod
 from ResSimpy.Nexus.DataModels.NexusAquiferMethod import NexusAquiferMethod
+from ResSimpy.Nexus.DataModels.NexusHydraulicsMethod import NexusHydraulicsMethod
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
@@ -754,7 +755,7 @@ def test_get_wells_df(mocker: MockerFixture):
     """)
 ], ids=['basic case'])
 def test_get_well(mocker: MockerFixture, fcs_file_contents: str):
-    """Testing the functionality to load in and retrieve a single wells"""
+    """Testing the functionality to load in and retrieve a single wells."""
     # Arrange
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
     mocker.patch("builtins.open", fcs_file_open)
@@ -799,7 +800,7 @@ def test_get_well(mocker: MockerFixture, fcs_file_contents: str):
     """)
 ], ids=['basic case'])
 def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
-    """Testing the functionality to retrieve pvt methods from Nexus fcs file"""
+    """Testing the functionality to retrieve pvt methods from Nexus fcs file."""
     # Arrange
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
     mocker.patch("builtins.open", fcs_file_open)
@@ -827,7 +828,7 @@ def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
     """)
 ], ids=['basic case'])
 def test_get_separator(mocker: MockerFixture, fcs_file_contents: str):
-    """Testing the functionality to retrieve separator methods from Nexus fcs file"""
+    """Testing the functionality to retrieve separator methods from Nexus fcs file."""
     # Arrange
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -862,7 +863,7 @@ def test_get_separator(mocker: MockerFixture, fcs_file_contents: str):
     """)
 ], ids=['basic case'])
 def test_get_water(mocker: MockerFixture, fcs_file_contents: str):
-    """Testing the functionality to retrieve water methods from Nexus fcs file"""
+    """Testing the functionality to retrieve water methods from Nexus fcs file."""
     # Arrange
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -897,7 +898,7 @@ def test_get_water(mocker: MockerFixture, fcs_file_contents: str):
     """)
 ], ids=['basic case'])
 def test_get_equil(mocker: MockerFixture, fcs_file_contents: str):
-    """Testing the functionality to retrieve equilibration methods from Nexus fcs file"""
+    """Testing the functionality to retrieve equilibration methods from Nexus fcs file."""
     # Arrange
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -932,7 +933,7 @@ def test_get_equil(mocker: MockerFixture, fcs_file_contents: str):
     """)
 ], ids=['basic case'])
 def test_get_rock(mocker: MockerFixture, fcs_file_contents: str):
-    """Testing the functionality to retrieve rock properties methods from Nexus fcs file"""
+    """Testing the functionality to retrieve rock properties methods from Nexus fcs file."""
     # Arrange
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -968,7 +969,8 @@ def test_get_rock(mocker: MockerFixture, fcs_file_contents: str):
 ], ids=['basic case'])
 def test_get_relperm(mocker: MockerFixture, fcs_file_contents: str):
     """Testing the functionality to retrieve relative permeability and
-    capillary pressure methods from Nexus fcs file"""
+    capillary pressure methods from Nexus fcs file.
+    """
     # Arrange
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -1003,7 +1005,7 @@ def test_get_relperm(mocker: MockerFixture, fcs_file_contents: str):
     """)
 ], ids=['basic case'])
 def test_get_valve(mocker: MockerFixture, fcs_file_contents: str):
-    """Testing the functionality to retrieve valve methods from Nexus fcs file"""
+    """Testing the functionality to retrieve valve methods from Nexus fcs file."""
     # Arrange
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -1037,7 +1039,7 @@ def test_get_valve(mocker: MockerFixture, fcs_file_contents: str):
     """)
 ], ids=['basic case'])
 def test_get_aquifer(mocker: MockerFixture, fcs_file_contents: str):
-    """Testing the functionality to retrieve aquifer methods from Nexus fcs file"""
+    """Testing the functionality to retrieve aquifer methods from Nexus fcs file."""
     # Arrange
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -1061,6 +1063,40 @@ def test_get_aquifer(mocker: MockerFixture, fcs_file_contents: str):
 
     # Assert
     assert result == loaded_aquifers
+
+
+@pytest.mark.parametrize("fcs_file_contents", [
+    ("""
+       HYD method 1 my/hyd/file1.dat
+       hyd Method 2 my/hyd/file2.dat
+       Hyd METHOD 3 my/hyd/file3.dat
+    """)
+], ids=['basic case'])
+def test_get_hydraulics(mocker: MockerFixture, fcs_file_contents: str):
+    """Testing the functionality to retrieve hydraulics methods from Nexus fcs file."""
+    # Arrange
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            os.path.join('path', 'my/hyd/file1.dat'): '',
+            os.path.join('path', 'my/hyd/file2.dat'): '',
+            os.path.join('path', 'my/hyd/file3.dat'): '',
+            'path/nexus_run.fcs': fcs_file_contents,
+            }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    loaded_hyds = {1: NexusHydraulicsMethod(file_path=os.path.join('path', 'my/hyd/file1.dat'), method_number=1),
+                   2: NexusHydraulicsMethod(file_path=os.path.join('path', 'my/hyd/file2.dat'), method_number=2),
+                   3: NexusHydraulicsMethod(file_path=os.path.join('path', 'my/hyd/file3.dat'), method_number=3)
+                   }
+
+    simulation = NexusSimulator(origin='path/nexus_run.fcs')
+
+    # Act
+    result = simulation.HydraulicsMethods.hydraulics_methods
+
+    # Assert
+    assert result == loaded_hyds
 
 
 @pytest.mark.parametrize("fcs_file_contents, surface_file_content, node1_props, node2_props, \
