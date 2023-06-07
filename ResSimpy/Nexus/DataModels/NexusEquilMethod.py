@@ -154,6 +154,6 @@ class NexusEquilMethod(EquilMethod):
             line_indx += 1
 
         # Read in table if there is one
-        if len(equil_table_indices.keys()) > 0:
-            self.properties[table_being_read] = nfo.read_table_to_df(file_as_list[
-                equil_table_indices[table_being_read][0]:equil_table_indices[table_being_read][1]])
+        for key in equil_table_indices.keys():
+            self.properties[key] = nfo.read_table_to_df(file_as_list[
+                equil_table_indices[key][0]:equil_table_indices[key][1]])
