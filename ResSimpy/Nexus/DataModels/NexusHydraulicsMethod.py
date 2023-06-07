@@ -20,7 +20,8 @@ class NexusHydraulicsMethod(HydraulicsMethod):
     Attributes:
         file_path (str): Path to the Nexus hydraulics properties file
         method_number (int): Hydraulics properties method number in Nexus fcs file
-        properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] ):
+        properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                    dict[str, Union[float, pd.DataFrame]]]]):
             Dictionary holding all properties for a specific hydraulics properties method. Defaults to empty dictionary.
     """
 
@@ -48,13 +49,6 @@ class NexusHydraulicsMethod(HydraulicsMethod):
                 printable_str += f'{key}:\n'
                 printable_str += value.to_string(na_rep='')
                 printable_str += '\n\n'
-            elif isinstance(value, dict):
-                for subkey in value.keys():
-                    printable_str += f'{key} - {subkey}\n'
-                    df = value[subkey]
-                    if isinstance(df, pd.DataFrame):
-                        printable_str += df.to_string(na_rep='')
-                    printable_str += '\n\n'
             elif isinstance(value, Enum):
                 printable_str += f'{key}: {value.name}\n'
             elif key == 'ALQ':

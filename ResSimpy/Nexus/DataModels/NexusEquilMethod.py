@@ -19,7 +19,8 @@ class NexusEquilMethod(EquilMethod):
     Attributes:
         file_path (str): Path to the Nexus equilibration file
         method_number (int): Equilibration method number in Nexus fcs file
-        properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] ):
+        properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                    dict[str, Union[float, pd.DataFrame]]]]):
             Dictionary holding all properties for a specific equilibration method. Defaults to empty dictionary.
     """
 

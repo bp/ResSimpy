@@ -17,7 +17,8 @@ class NexusSeparatorMethod(SeparatorMethod):
         file_path (str): Path to the Nexus Separator file
         method_number (int): Separator method number in Nexus fcs file
         separator_type (Optional[str]): Type of separator method, e.g., BLACKOIL, GASPLANT or EOS. Defaults to None
-        properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] ):
+        properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                    dict[str, Union[float, pd.DataFrame]]]]):
             Dictionary holding all properties for a specific separator method. Defaults to empty dictionary.
     """
 
