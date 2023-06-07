@@ -30,7 +30,8 @@ class NexusPVTMethod(PVTMethod):
         eos_options (dict[str, Union[str, int, float, pd.DataFrame, list[str], dict[str, float],
             tuple[str, dict[str, float]], dict[str, pd.DataFrame]]]): Dictionary containing various EOS options
             as specified in the PVT file. Defaults to empty dictionary.
-        properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] ):
+        properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                    dict[str, Union[float, pd.DataFrame]]]]):
             Dictionary holding all properties for a specific PVT method. Defaults to empty dictionary.
     """
 
