@@ -1112,6 +1112,7 @@ wellboreprops2, constraint_props1, constraint_props2",
         WELLCONTROL WELLHEAD
 
          NODECON
+C          node1         NA        NA    80    100.5 200.8   1     station         (commented out using C) 
             NAME            NODEIN    NODEOUT       TYPE        METHOD    DDEPTH
             CP01            CP01      wh_cp01       PIPE        2          7002.67
             cp01_gaslift    GAS       CP01          GASLIFT     NONE        NA ! Checked NODECON 13/05/2020 

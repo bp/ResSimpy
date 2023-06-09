@@ -30,7 +30,8 @@ from unittest.mock import Mock
        SG         KRG        KROG        PCGO
   0.000000     0.000000     1.000000     0.000000
   0.085260     0.011210     0.681265     0.000000
-  ! Test comment in the middle of the table          
+  ! Test comment in the middle of the table    
+C Another comment using 'C'        
   0.100598     0.014109     0.625140     0.000000
   ANOTHERTOKEN 6
 MYTESTTOKEN 
