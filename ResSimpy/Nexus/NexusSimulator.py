@@ -103,16 +103,16 @@ class NexusSimulator(Simulator):
         self.Wells: NexusWells = NexusWells(self)
         self.__default_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
         # Model dynamic properties
-        self.PVTMethods: NexusPVTMethods = NexusPVTMethods()
-        self.SeparatorMethods: NexusSeparatorMethods = NexusSeparatorMethods()
-        self.WaterMethods: NexusWaterMethods = NexusWaterMethods()
-        self.EquilMethods: NexusEquilMethods = NexusEquilMethods()
-        self.RockMethods: NexusRockMethods = NexusRockMethods()
-        self.RelPermMethods: NexusRelPermMethods = NexusRelPermMethods()
-        self.ValveMethods: NexusValveMethods = NexusValveMethods()
-        self.AquiferMethods: NexusAquiferMethods = NexusAquiferMethods()
-        self.HydraulicsMethods: NexusHydraulicsMethods = NexusHydraulicsMethods()
-        self.GasliftMethods: NexusGasliftMethods = NexusGasliftMethods()
+        self.PVT: NexusPVTMethods = NexusPVTMethods()
+        self.Separator: NexusSeparatorMethods = NexusSeparatorMethods()
+        self.Water: NexusWaterMethods = NexusWaterMethods()
+        self.Equil: NexusEquilMethods = NexusEquilMethods()
+        self.Rock: NexusRockMethods = NexusRockMethods()
+        self.RelPerm: NexusRelPermMethods = NexusRelPermMethods()
+        self.Valve: NexusValveMethods = NexusValveMethods()
+        self.Aquifer: NexusAquiferMethods = NexusAquiferMethods()
+        self.Hydraulics: NexusHydraulicsMethods = NexusHydraulicsMethods()
+        self.Gaslift: NexusGasliftMethods = NexusGasliftMethods()
         # Nexus operations modules
         self.Runcontrol: Runcontrol = Runcontrol(self)
         self.Reporting: Reporting = Reporting(self)
@@ -455,52 +455,52 @@ class NexusSimulator(Simulator):
         # Read in PVT properties from Nexus PVT method files
         if self.fcs_file.pvt_files is not None and \
                 len(self.fcs_file.pvt_files) > 0:
-            self.PVTMethods = NexusPVTMethods(pvt_files=self.fcs_file.pvt_files)
+            self.PVT = NexusPVTMethods(files=self.fcs_file.pvt_files)
 
         # Read in separator properties from Nexus separator method files
         if self.fcs_file.separator_files is not None and \
                 len(self.fcs_file.separator_files) > 0:
-            self.SeparatorMethods = NexusSeparatorMethods(separator_files=self.fcs_file.separator_files)
+            self.Separator = NexusSeparatorMethods(files=self.fcs_file.separator_files)
 
         # Read in water properties from Nexus water method files
         if self.fcs_file.water_files is not None and \
                 len(self.fcs_file.water_files) > 0:
-            self.WaterMethods = NexusWaterMethods(water_files=self.fcs_file.water_files)
+            self.Water = NexusWaterMethods(files=self.fcs_file.water_files)
 
         # Read in equilibration properties from Nexus equil method files
         if self.fcs_file.equil_files is not None and \
                 len(self.fcs_file.equil_files) > 0:
-            self.EquilMethods = NexusEquilMethods(equil_files=self.fcs_file.equil_files)
+            self.Equil = NexusEquilMethods(files=self.fcs_file.equil_files)
 
         # Read in rock properties from Nexus rock method files
         if self.fcs_file.rock_files is not None and \
                 len(self.fcs_file.rock_files) > 0:
-            self.RockMethods = NexusRockMethods(rock_files=self.fcs_file.rock_files)
+            self.Rock = NexusRockMethods(files=self.fcs_file.rock_files)
 
         # Read in relative permeability and capillary pressure properties from Nexus relperm method files
         if self.fcs_file.relperm_files is not None and \
                 len(self.fcs_file.relperm_files) > 0:
-            self.RelPermMethods = NexusRelPermMethods(relperm_files=self.fcs_file.relperm_files)
+            self.RelPerm = NexusRelPermMethods(files=self.fcs_file.relperm_files)
 
         # Read in valve and choke properties from Nexus valve method files
         if self.fcs_file.valve_files is not None and \
                 len(self.fcs_file.valve_files) > 0:
-            self.ValveMethods = NexusValveMethods(valve_files=self.fcs_file.valve_files)
+            self.Valve = NexusValveMethods(files=self.fcs_file.valve_files)
 
         # Read in aquifer properties from Nexus aquifer method files
         if self.fcs_file.aquifer_files is not None and \
                 len(self.fcs_file.aquifer_files) > 0:
-            self.AquiferMethods = NexusAquiferMethods(aquifer_files=self.fcs_file.aquifer_files)
+            self.Aquifer = NexusAquiferMethods(files=self.fcs_file.aquifer_files)
 
         # Read in hydraulics properties from Nexus hyd method files
         if self.fcs_file.hyd_files is not None and \
                 len(self.fcs_file.hyd_files) > 0:
-            self.HydraulicsMethods = NexusHydraulicsMethods(hydraulics_files=self.fcs_file.hyd_files)
+            self.Hydraulics = NexusHydraulicsMethods(files=self.fcs_file.hyd_files)
 
         # Read in gaslift properties from Nexus gaslift method files
         if self.fcs_file.gas_lift_files is not None and \
                 len(self.fcs_file.gas_lift_files) > 0:
-            self.GasliftMethods = NexusGasliftMethods(gaslift_files=self.fcs_file.gas_lift_files)
+            self.Gaslift = NexusGasliftMethods(files=self.fcs_file.gas_lift_files)
 
         # === End of dynamic properties loading ===
 

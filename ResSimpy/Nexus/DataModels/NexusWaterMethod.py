@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Optional, Union
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.WaterMethod import WaterMethod
+from ResSimpy.DynamicProperty import DynamicProperty
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_list_nexus_water_params
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -36,11 +36,13 @@ class NexusWaterParams():
 
 
 @dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
-class NexusWaterMethod(WaterMethod):
-    """Class to hold Nexus Water properties
-    Attributes:
+class NexusWaterMethod(DynamicProperty):
+    """Class to hold Nexus Water properties.
+
+    Attributes
+    ----------
         file_path (str): Path to the Nexus water file
-        method_number (int): Water method number in Nexus fcs file
+        input_number (int): Water method number in Nexus fcs file
         reference_pressure (float): Reference pressure for BW and, if CVW is present, for VISW
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                     dict[str, Union[float, pd.DataFrame]]]]):
@@ -55,7 +57,7 @@ class NexusWaterMethod(WaterMethod):
         = field(default_factory=get_empty_dict_union)
     parameters: list[NexusWaterParams] = field(default_factory=get_empty_list_nexus_water_params)
 
-    def __init__(self, file_path: str, method_number: int, reference_pressure: Optional[float] = None,
+    def __init__(self, file_path: str, input_number: int, reference_pressure: Optional[float] = None,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None,
                  parameters: Optional[list[NexusWaterParams]] = None) -> None:
@@ -69,7 +71,7 @@ class NexusWaterMethod(WaterMethod):
             self.parameters = parameters
         else:
             self.parameters = []
-        super().__init__(method_number=method_number)
+        super().__init__(input_number=input_number)
 
     @staticmethod
     def nexus_mapping() -> dict[str, tuple[str, type]]:

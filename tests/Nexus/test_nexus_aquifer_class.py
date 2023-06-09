@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import pytest
 
@@ -113,7 +112,7 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits
 )
 def test_read_aquifer_properties_from_file(mocker, file_contents, expected_aquifer_properties):
     # Arrange
-    aquifer_obj = NexusAquiferMethod(file_path='test/file/aquifer.dat', method_number=1)
+    aquifer_obj = NexusAquiferMethod(file_path='test/file/aquifer.dat', input_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -133,7 +132,7 @@ def test_read_aquifer_properties_from_file(mocker, file_contents, expected_aquif
 
 def test_nexus_aquifer_repr():
     # Arrange
-    aquifer_obj = NexusAquiferMethod(file_path='test/file/aquifer.dat', method_number=1)
+    aquifer_obj = NexusAquiferMethod(file_path='test/file/aquifer.dat', input_number=1)
     aquifer_obj.properties = {'DESC': ['This is first line of description', 'and this is second line of description'],
                               'FETKOVICH': '', 'LABEL': 'FETTY_V',
                               'UNIT_SYSTEM': UnitSystem.ENGLISH, 'SUNITS': SUnits.PPM, 'IWATER': 2, 'SALINITY': 300000,
@@ -162,6 +161,7 @@ NOFLOW
 WAQI: 500000000.0
 PAQI: 4800
 DAQI: 9600
+
 """
 
     # Act

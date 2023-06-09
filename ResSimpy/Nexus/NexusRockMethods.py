@@ -3,31 +3,33 @@ import os
 from typing import Optional, MutableMapping
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusRockMethod import NexusRockMethod
-from ResSimpy.RockMethods import RockMethods
+from ResSimpy.Rock import Rock
 
 
 @dataclass(kw_only=True)
-class NexusRockMethods(RockMethods):
-    """Class for collection of Nexus rock property methods
-    Attributes:
-        rock_methods (dict[int, NexusRockMethod]): Collection of Nexus rock property methods, as a dictionary
-        rock_files (dict[int, NexusFile]): Dictionary collection of rock property files, as defined in Nexus fcs file.
+class NexusRockMethods(Rock):
+    """Class for collection of Nexus rock property methods.
+
+    Attributes
+    ----------
+        inputs (dict[int, NexusRockMethod]): Collection of Nexus rock property methods, as a dictionary
+        files (dict[int, NexusFile]): Dictionary collection of rock property files, as defined in Nexus fcs file.
     """
 
-    __rock_methods: MutableMapping[int, NexusRockMethod]
-    __rock_files: dict[int, NexusFile]
+    __inputs: MutableMapping[int, NexusRockMethod]
+    __files: dict[int, NexusFile]
     __properties_loaded: bool = False  # Used in lazy loading
 
-    def __init__(self, rock_methods: Optional[MutableMapping[int, NexusRockMethod]] = None,
-                 rock_files: Optional[dict[int, NexusFile]] = None) -> None:
-        if rock_methods:
-            self.__rock_methods = rock_methods
+    def __init__(self, inputs: Optional[MutableMapping[int, NexusRockMethod]] = None,
+                 files: Optional[dict[int, NexusFile]] = None) -> None:
+        if inputs:
+            self.__inputs = inputs
         else:
-            self.__rock_methods: MutableMapping[int, NexusRockMethod] = {}
-        if rock_files:
-            self.__rock_files = rock_files
+            self.__inputs: MutableMapping[int, NexusRockMethod] = {}
+        if files:
+            self.__files = files
         else:
-            self.__rock_files = {}
+            self.__files = {}
         super().__init__()
 
     def __repr__(self) -> str:
@@ -35,34 +37,34 @@ class NexusRockMethods(RockMethods):
         if not self.__properties_loaded:
             self.load_rock_methods()
         printable_str = ''
-        for table_num in self.__rock_methods.keys():
+        for table_num in self.__inputs.keys():
             printable_str += '\n--------------------------------\n'
             printable_str += f'ROCK method {table_num}\n'
             printable_str += '--------------------------------\n'
-            printable_str += self.__rock_methods[table_num].__repr__()
+            printable_str += self.__inputs[table_num].__repr__()
             printable_str += '\n'
 
         return printable_str
 
     @property
-    def rock_methods(self) -> MutableMapping[int, NexusRockMethod]:
+    def inputs(self) -> MutableMapping[int, NexusRockMethod]:
         if not self.__properties_loaded:
             self.load_rock_methods()
-        return self.__rock_methods
+        return self.__inputs
 
     @property
-    def rock_files(self) -> dict[int, NexusFile]:
-        return self.__rock_files
+    def files(self) -> dict[int, NexusFile]:
+        return self.__files
 
     def load_rock_methods(self):
         # Read in rock properties from Nexus rock method files
-        if self.__rock_files is not None and len(self.__rock_files) > 0:  # Check if rock files exist
-            for table_num in self.__rock_files.keys():  # For each rock property method
-                rock_file = self.__rock_files[table_num].location
+        if self.__files is not None and len(self.__files) > 0:  # Check if rock files exist
+            for table_num in self.__files.keys():  # For each rock property method
+                rock_file = self.__files[table_num].location
                 if rock_file is None:
                     raise ValueError(f'Unable to find rock file: {rock_file}')
                 if os.path.isfile(rock_file):
                     # Create NexusRockMethod object
-                    self.__rock_methods[table_num] = NexusRockMethod(file_path=rock_file, method_number=table_num)
-                    self.__rock_methods[table_num].read_properties()  # Populate object with rock properties in file
+                    self.__inputs[table_num] = NexusRockMethod(file_path=rock_file, input_number=table_num)
+                    self.__inputs[table_num].read_properties()  # Populate object with rock properties in file
         self.__properties_loaded = True

@@ -7,15 +7,17 @@ from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.NexusKeywords.separator_keywords import SEPARATOR_KEYS_INT, SEPARATOR_KEYS_FLOAT
 from ResSimpy.Nexus.NexusKeywords.separator_keywords import SEPARATOR_KEYWORDS
-from ResSimpy.SeparatorMethod import SeparatorMethod
+from ResSimpy.DynamicProperty import DynamicProperty
 
 
 @dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
-class NexusSeparatorMethod(SeparatorMethod):
-    """Class to hold data input for a Nexus Separator method
-    Attributes:
+class NexusSeparatorMethod(DynamicProperty):
+    """Class to hold data input for a Nexus Separator method.
+
+    Attributes
+    ----------
         file_path (str): Path to the Nexus Separator file
-        method_number (int): Separator method number in Nexus fcs file
+        input_number (int): Separator method number in Nexus fcs file
         separator_type (Optional[str]): Type of separator method, e.g., BLACKOIL, GASPLANT or EOS. Defaults to None
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                     dict[str, Union[float, pd.DataFrame]]]]):
@@ -23,13 +25,13 @@ class NexusSeparatorMethod(SeparatorMethod):
     """
 
     file_path: str
-    method_number: int
+    input_number: int
     separator_type: Optional[str] = None
     properties: dict[str, Union[str, int, float, Enum, list[str],
                      pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
 
-    def __init__(self, file_path: str, method_number: int, separator_type: Optional[str] = None,
+    def __init__(self, file_path: str, input_number: int, separator_type: Optional[str] = None,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
         self.file_path = file_path
@@ -39,7 +41,7 @@ class NexusSeparatorMethod(SeparatorMethod):
             self.properties = properties
         else:
             self.properties = {}
-        super().__init__(method_number=method_number)
+        super().__init__(input_number=input_number)
 
     def __repr__(self) -> str:
         """Pretty printing separator data."""

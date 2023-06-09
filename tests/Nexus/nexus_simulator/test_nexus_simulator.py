@@ -806,15 +806,15 @@ def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
     mocker.patch("builtins.open", fcs_file_open)
 
-    loaded_pvt = {1: NexusPVTMethod(file_path=os.path.join('path', 'my/pvt/file1.dat'), method_number=1),
-                  2: NexusPVTMethod(file_path=os.path.join('path', 'my/pvt/file2.dat'), method_number=2),
-                  3: NexusPVTMethod(file_path=os.path.join('path', 'my/pvt/file3.dat'), method_number=3),
+    loaded_pvt = {1: NexusPVTMethod(file_path=os.path.join('path', 'my/pvt/file1.dat'), input_number=1),
+                  2: NexusPVTMethod(file_path=os.path.join('path', 'my/pvt/file2.dat'), input_number=2),
+                  3: NexusPVTMethod(file_path=os.path.join('path', 'my/pvt/file3.dat'), input_number=3),
                   }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.PVTMethods.pvt_methods
+    result = simulation.PVT.inputs
 
     # Assert
     assert result == loaded_pvt
@@ -841,15 +841,15 @@ def test_get_separator(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_sep = {1: NexusSeparatorMethod(file_path=os.path.join('path', 'my/separator/file1.dat'), method_number=1),
-                  2: NexusSeparatorMethod(file_path=os.path.join('path', 'my/separator/file2.dat'), method_number=2),
-                  3: NexusSeparatorMethod(file_path=os.path.join('path', 'my/separator/file3.dat'), method_number=3),
+    loaded_sep = {1: NexusSeparatorMethod(file_path=os.path.join('path', 'my/separator/file1.dat'), input_number=1),
+                  2: NexusSeparatorMethod(file_path=os.path.join('path', 'my/separator/file2.dat'), input_number=2),
+                  3: NexusSeparatorMethod(file_path=os.path.join('path', 'my/separator/file3.dat'), input_number=3),
                   }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.SeparatorMethods.separator_methods
+    result = simulation.Separator.inputs
 
     # Assert
     assert result == loaded_sep
@@ -876,15 +876,15 @@ def test_get_water(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_wat = {1: NexusWaterMethod(file_path=os.path.join('path', 'my/water/file1.dat'), method_number=1),
-                  2: NexusWaterMethod(file_path=os.path.join('path', 'my/water/file2.dat'), method_number=2),
-                  3: NexusWaterMethod(file_path=os.path.join('path', 'my/water/file3.dat'), method_number=3),
+    loaded_wat = {1: NexusWaterMethod(file_path=os.path.join('path', 'my/water/file1.dat'), input_number=1),
+                  2: NexusWaterMethod(file_path=os.path.join('path', 'my/water/file2.dat'), input_number=2),
+                  3: NexusWaterMethod(file_path=os.path.join('path', 'my/water/file3.dat'), input_number=3),
                   }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.WaterMethods.water_methods
+    result = simulation.Water.inputs
 
     # Assert
     assert result == loaded_wat
@@ -911,15 +911,15 @@ def test_get_equil(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_equil = {1: NexusEquilMethod(file_path=os.path.join('path', 'my/equil/file1.dat'), method_number=1),
-                    2: NexusEquilMethod(file_path=os.path.join('path', 'my/equil/file2.dat'), method_number=2),
-                    3: NexusEquilMethod(file_path=os.path.join('path', 'my/equil/file3.dat'), method_number=3),
+    loaded_equil = {1: NexusEquilMethod(file_path=os.path.join('path', 'my/equil/file1.dat'), input_number=1),
+                    2: NexusEquilMethod(file_path=os.path.join('path', 'my/equil/file2.dat'), input_number=2),
+                    3: NexusEquilMethod(file_path=os.path.join('path', 'my/equil/file3.dat'), input_number=3),
                     }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.EquilMethods.equil_methods
+    result = simulation.Equil.inputs
 
     # Assert
     assert result == loaded_equil
@@ -946,15 +946,15 @@ def test_get_rock(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_rocks = {1: NexusRockMethod(file_path=os.path.join('path', 'my/rock/file1.dat'), method_number=1),
-                    2: NexusRockMethod(file_path=os.path.join('path', 'my/rock/file2.dat'), method_number=2),
-                    3: NexusRockMethod(file_path=os.path.join('path', 'my/rock/file3.dat'), method_number=3),
+    loaded_rocks = {1: NexusRockMethod(file_path=os.path.join('path', 'my/rock/file1.dat'), input_number=1),
+                    2: NexusRockMethod(file_path=os.path.join('path', 'my/rock/file2.dat'), input_number=2),
+                    3: NexusRockMethod(file_path=os.path.join('path', 'my/rock/file3.dat'), input_number=3),
                     }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.RockMethods.rock_methods
+    result = simulation.Rock.inputs
 
     # Assert
     assert result == loaded_rocks
@@ -983,15 +983,15 @@ def test_get_relperm(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_relperms = {1: NexusRelPermMethod(file_path=os.path.join('path', 'my/relpm/file1.dat'), method_number=1),
-                       2: NexusRelPermMethod(file_path=os.path.join('path', 'my/relpm/file2.dat'), method_number=2),
-                       3: NexusRelPermMethod(file_path=os.path.join('path', 'my/relpm/file3.dat'), method_number=3),
+    loaded_relperms = {1: NexusRelPermMethod(file_path=os.path.join('path', 'my/relpm/file1.dat'), input_number=1),
+                       2: NexusRelPermMethod(file_path=os.path.join('path', 'my/relpm/file2.dat'), input_number=2),
+                       3: NexusRelPermMethod(file_path=os.path.join('path', 'my/relpm/file3.dat'), input_number=3),
                        }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.RelPermMethods.relperm_methods
+    result = simulation.RelPerm.inputs
 
     # Assert
     assert result == loaded_relperms
@@ -1018,15 +1018,15 @@ def test_get_valve(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_valves = {1: NexusValveMethod(file_path=os.path.join('path', 'my/valve/file1.dat'), method_number=1),
-                     2: NexusValveMethod(file_path=os.path.join('path', 'my/valve/file2.dat'), method_number=2),
-                     3: NexusValveMethod(file_path=os.path.join('path', 'my/valve/file3.dat'), method_number=3)
+    loaded_valves = {1: NexusValveMethod(file_path=os.path.join('path', 'my/valve/file1.dat'), input_number=1),
+                     2: NexusValveMethod(file_path=os.path.join('path', 'my/valve/file2.dat'), input_number=2),
+                     3: NexusValveMethod(file_path=os.path.join('path', 'my/valve/file3.dat'), input_number=3)
                      }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.ValveMethods.valve_methods
+    result = simulation.Valve.inputs
 
     # Assert
     assert result == loaded_valves
@@ -1052,15 +1052,15 @@ def test_get_aquifer(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_aquifers = {1: NexusAquiferMethod(file_path=os.path.join('path', 'my/aquifer/file1.dat'), method_number=1),
-                       2: NexusAquiferMethod(file_path=os.path.join('path', 'my/aquifer/file2.dat'), method_number=2),
-                       3: NexusAquiferMethod(file_path=os.path.join('path', 'my/aquifer/file3.dat'), method_number=3)
+    loaded_aquifers = {1: NexusAquiferMethod(file_path=os.path.join('path', 'my/aquifer/file1.dat'), input_number=1),
+                       2: NexusAquiferMethod(file_path=os.path.join('path', 'my/aquifer/file2.dat'), input_number=2),
+                       3: NexusAquiferMethod(file_path=os.path.join('path', 'my/aquifer/file3.dat'), input_number=3)
                        }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.AquiferMethods.aquifer_methods
+    result = simulation.Aquifer.inputs
 
     # Assert
     assert result == loaded_aquifers
@@ -1086,15 +1086,15 @@ def test_get_hydraulics(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_hyds = {1: NexusHydraulicsMethod(file_path=os.path.join('path', 'my/hyd/file1.dat'), method_number=1),
-                   2: NexusHydraulicsMethod(file_path=os.path.join('path', 'my/hyd/file2.dat'), method_number=2),
-                   3: NexusHydraulicsMethod(file_path=os.path.join('path', 'my/hyd/file3.dat'), method_number=3)
+    loaded_hyds = {1: NexusHydraulicsMethod(file_path=os.path.join('path', 'my/hyd/file1.dat'), input_number=1),
+                   2: NexusHydraulicsMethod(file_path=os.path.join('path', 'my/hyd/file2.dat'), input_number=2),
+                   3: NexusHydraulicsMethod(file_path=os.path.join('path', 'my/hyd/file3.dat'), input_number=3)
                    }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.HydraulicsMethods.hydraulics_methods
+    result = simulation.Hydraulics.inputs
 
     # Assert
     assert result == loaded_hyds
@@ -1120,15 +1120,15 @@ def test_get_gaslift(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_gaslift = {1: NexusGasliftMethod(file_path=os.path.join('path', 'my/gaslift/file1.dat'), method_number=1),
-                      2: NexusGasliftMethod(file_path=os.path.join('path', 'my/gaslift/file2.dat'), method_number=2),
-                      3: NexusGasliftMethod(file_path=os.path.join('path', 'my/gaslift/file3.dat'), method_number=3)
+    loaded_gaslift = {1: NexusGasliftMethod(file_path=os.path.join('path', 'my/gaslift/file1.dat'), input_number=1),
+                      2: NexusGasliftMethod(file_path=os.path.join('path', 'my/gaslift/file2.dat'), input_number=2),
+                      3: NexusGasliftMethod(file_path=os.path.join('path', 'my/gaslift/file3.dat'), input_number=3)
                       }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.GasliftMethods.gaslift_methods
+    result = simulation.Gaslift.inputs
 
     # Assert
     assert result == loaded_gaslift
