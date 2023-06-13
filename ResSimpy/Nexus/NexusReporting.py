@@ -9,8 +9,7 @@ class Reporting:
         """Adds 'map' statements to the start of the grid file to ensure standalone outputs all the required \
         properties. Writes out to the same structured grid file path provided.
 
-        Raises
-        ------
+        Raises:
             ValueError: if no structured grid file path is specified in the class instance
         """
         structured_grid_path = self.model.structured_grid_path

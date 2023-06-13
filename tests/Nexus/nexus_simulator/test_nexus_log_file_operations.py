@@ -219,7 +219,7 @@ def test_get_base_case_run_time(mocker, log_file_contents, run_time):
     mocker.patch("builtins.open", new_open_mock)
 
     # Act
-    result = simulation.Logging.get_base_case_run_time()
+    result = simulation.logging.get_base_case_run_time()
 
     # Assert
     initial_listdir_mock.assert_called_once_with('testpath1')
@@ -260,7 +260,7 @@ def test_get_simulation_start_time(mocker, log_file_contents, start_time):
     mocker.patch("builtins.open", log_file_mock)
 
     # Act
-    result = simulation.Logging.get_simulation_start_time()
+    result = simulation.logging.get_simulation_start_time()
 
     # Assert
     assert result == start_time
@@ -297,7 +297,7 @@ def test_get_simulation_end_time(mocker, log_file_contents, end_time):
     mocker.patch("builtins.open", log_file_mock)
 
     # Act
-    result = simulation.Logging.get_simulation_end_time()
+    result = simulation.logging.get_simulation_end_time()
 
     # Assert
     assert result == end_time
@@ -342,8 +342,8 @@ def test_get_simulation_start_end_time(mocker, log_file_contents, expected_start
     mocker.patch("builtins.open", log_file_mock)
 
     # Act
-    result_start_time = simulation.Logging.get_simulation_start_time()
-    result_end_time = simulation.Logging.get_simulation_end_time()
+    result_start_time = simulation.logging.get_simulation_start_time()
+    result_end_time = simulation.logging.get_simulation_end_time()
 
     # Assert
     assert result_start_time == expected_start_time

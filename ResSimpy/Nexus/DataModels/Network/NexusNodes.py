@@ -61,14 +61,14 @@ class NexusNodes(Nodes):
         raise NotImplementedError('To be implemented')
 
     def load_nodes(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
-        """Calls load nodes and appends the list of discovered nodes into the NexusNodes object
+        """Calls load nodes and appends the list of discovered nodes into the NexusNodes object.
+
         Args:
             surface_file (NexusFile): NexusFile representation of the surface file.
             start_date (str): Starting date of the run
             default_units (UnitSystem): Units used in case not specified by surface file.
 
-        Raises
-        ------
+        Raises:
             TypeError: if the unit system found in the property check is not a valid enum UnitSystem.
 
         """
