@@ -179,7 +179,7 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
             for character in search_string:
                 # move lines once we hit a comment character or new line character,or are at the end of search string
                 if character == "!" or character == "\n" or (character_location == 0 and character == "C" and
-                                                        (len(search_string) == 1 or search_string[
+                                                                (len(search_string) == 1 or search_string[
                                                                 character_location + 1] == ' ')):
                     line_index += 1
                     line_already_skipped = True
