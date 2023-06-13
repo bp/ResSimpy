@@ -6,8 +6,7 @@ from abc import ABC
 class Aquifer(ABC):
     """The abstract base class for a collection of aquifer inputs.
 
-    Attributes
-    ----------
+    Attributes:
         inputs (dict[int, DynamicProperty]): Collection of aquifer inputs, as a dictionary.
     """
 
