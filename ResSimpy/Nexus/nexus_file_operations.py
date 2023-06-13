@@ -167,7 +167,7 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
     value = ''
     if search_string is None:
         search_string = file_as_list[start_line_index]
-    line_index = start_line_index        
+    line_index = start_line_index
     while value_found is False and line_index <= len(file_as_list):
         character_location = 0
         new_search_string = False
@@ -177,7 +177,7 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
             value_found=True
         else:
             for character in search_string:
-                # move lines once we hit a comment character or new line character, or are at the end of the search string
+                #move lines once we hit a comment character or new line character,or are at the end of the search string
                 if character == "!" or character == "\n" or(character_location==0 and character=="C" and
                                                             (len(search_string)==1 or search_string[
                                                                 character_location + 1] == ' ')):
