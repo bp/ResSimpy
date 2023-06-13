@@ -3,7 +3,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
-from test_utils import check_file_read_write_is_correct
+from tests.utility_for_tests import check_file_read_write_is_correct
 
 
 @pytest.mark.parametrize("file_contents, expected_result_file, expected_constraints",[

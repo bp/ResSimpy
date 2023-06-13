@@ -1,4 +1,5 @@
-# TODO: Not a complete list. Check manual for missing keywords.
-# TODO: Delete the keywords that are not tokens (i.e. that are only values in a table)
+GL_ARRAY_KEYWORDS = ['QLIQ', 'QOIL', 'WCUT', 'PRESSURE']
 
-GASLIFT_KEYWORDS = ['GLR', 'IPRES', 'IQLIQ', 'IWCUT', 'PRESSURE', 'QLIQ', 'WCUT']
+GL_TABLE_HEADER_COLS = ['IWCUT', 'IQLIQ', 'IQOIL', 'IPRES', 'GLR', 'GOR']
+
+GASLIFT_KEYWORDS = GL_ARRAY_KEYWORDS

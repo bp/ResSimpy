@@ -1,18 +1,19 @@
 from dataclasses import dataclass
 from typing import Optional
-from unittest.mock import Mock
 
 import pandas as pd
 import pytest
 from pytest_mock import MockerFixture
 
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from ResSimpy.Utils import to_dict_generic
 from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.Utils.invert_nexus_map import invert_nexus_map, attribute_name_to_nexus_keyword, \
     nexus_keyword_to_attribute_name
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 from ResSimpy.Utils.to_dict_generic import to_dict
+from unittest.mock import Mock
 
 
 def test_to_dict():
@@ -31,7 +32,7 @@ def test_to_dict():
                 'ATTR_1': ('attr_1', str),
                 'ATTR_2': ('attr_2', int),
                 'ATTR_3': ('attr_3', float),
-                }
+            }
             return mapping_dict
 
     class_inst = GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=UnitSystem.METRIC,
@@ -41,7 +42,7 @@ def test_to_dict():
     expected_nexus_style = {
         'ATTR_1': 'hello', 'ATTR_2': 10, 'ATTR_3': 43020.2, 'unit_system': 'METRIC',
         'date': '01/01/2030'
-        }
+    }
     # Act
     result = to_dict(class_inst )
     result_no_date_no_units = to_dict(class_inst, add_units=False, add_date=False)
@@ -69,7 +70,7 @@ def test_obj_to_dataframe():
                 'ATTR_1': ('attr_1', str),
                 'ATTR_2': ('attr_2', int),
                 'ATTR_3': ('attr_3', float),
-                }
+            }
             return mapping_dict
 
         def to_dict(self):
@@ -87,7 +88,7 @@ def test_obj_to_dataframe():
         'attr_3': [43020.2, 2.2],
         'unit_system': ['METRIC', 'ENGLISH'],
         'date': ['01/01/2030', '01/01/2033'],
-        })
+    })
     # Act
     result = obj_to_dataframe(list_class)
     # Assert
@@ -112,7 +113,7 @@ def test_generic_repr():
         x_pos=50.0,
         y_pos=75.0,
         temp=None
-        )
+    )
     expected = "MyClass(well='my_well', depth=100, x_pos=50.0, y_pos=75.0)"
     assert repr(obj) == expected
 
@@ -129,7 +130,7 @@ def test_invert_nexus_map():
             nexus_mapping = {
                 'DEPTH': ('depth', float),
                 'X': ('x_pos', float)
-                }
+            }
             return nexus_mapping
 
     nex_class = NexusClass(date='01/01/2020', depth=10, x_pos=1.5)
@@ -159,7 +160,7 @@ def test_nexus_keyword_to_attribute_name():
                 'X': ('x_pos', float),
                 'Y': ('y_pos', float),
                 'RANDOM': ('rand', str),
-                }
+            }
             return nexus_mapping
 
     nex_class = NexusClass(date='01/01/2020', depth=10, x_pos=1.5, y_pos=3.14, rand='hello')
@@ -180,15 +181,3 @@ def test_nexus_keyword_to_attribute_name():
         nexus_keyword_to_attribute_name(nexus_map, 'Failure')
         attribute_name_to_nexus_keyword(nexus_map, 'also fails')
 
-
-def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock_open: Mock,
-                                     mocker_fixture: MockerFixture, write_file_name: str, number_of_writes=1):
-    assert len(modifying_mock_open.call_args_list) == number_of_writes
-    assert modifying_mock_open.call_args_list[0] == mocker_fixture.call(
-        write_file_name, 'w')
-
-    # Get all the calls to write() and check that the contents are what we expect
-    list_of_writes = [
-        call for call in modifying_mock_open.mock_calls if 'call().write' in str(call)]
-    assert len(list_of_writes) == number_of_writes
-    assert list_of_writes[-1].args[0] == expected_file_contents

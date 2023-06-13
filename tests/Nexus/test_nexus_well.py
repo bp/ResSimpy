@@ -10,9 +10,9 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
-from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from ResSimpy.Nexus.NexusWells import NexusWells
 from tests.multifile_mocker import mock_multiple_files
+from tests.utility_for_tests import get_fake_nexus_simulator
 
 
 def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock_open: Mock,
@@ -568,11 +568,7 @@ def test_wells_modify(mocker):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    ls_dir = Mock(side_effect=lambda x: [])
-    mocker.patch('os.listdir', ls_dir)
-    fcs_file_exists = Mock(side_effect=lambda x: True)
-    mocker.patch('os.path.isfile', fcs_file_exists)
-    nexus_sim = NexusSimulator('fcs_file.fcs')
+    nexus_sim = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='fcs_file.fcs', mock_open=False)
 
     well_1_completions = [
         NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
@@ -587,8 +583,6 @@ def test_wells_modify(mocker):
         NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
                         depth_to_bottom=1234),
                         ]
-    well_1 = NexusWell(well_name='well1', completions=well_1_completions, units=UnitSystem.METRIC)
-    well_2 = NexusWell(well_name='well2', completions=well_2_completions, units=UnitSystem.METRIC)
 
     wells = nexus_sim.Wells
 
@@ -719,24 +713,17 @@ def test_add_completion_write(mocker, file_as_list, add_perf_date, preserve_prev
     '''
     start_date = '01/01/2020'
     # Arrange
-    open_mock = mocker.mock_open(read_data='')
-    mocker.patch("builtins.open", open_mock)
-    ls_dir = Mock(side_effect=lambda x: [])
-    mocker.patch('os.listdir', ls_dir)
-    fcs_file_exists = Mock(side_effect=lambda x: True)
-    mocker.patch('os.path.isfile', fcs_file_exists)
-
     file = NexusFile(location='wells.dat', file_content_as_list=file_as_list, )
 
-    mock_nexus_sim = NexusSimulator('/path/fcs_file.fcs')
+    fake_nexus_sim = get_fake_nexus_simulator(mocker)
 
     # add the required attributes to the model class
-    mock_nexus_sim.fcs_file.well_files = {1: file}
-    mock_nexus_sim.date_format = DateFormat.DD_MM_YYYY
-    mock_nexus_sim.Runcontrol.date_format_string = "%d/%m/%Y"
-    mock_nexus_sim.start_date_set(start_date)
+    fake_nexus_sim.fcs_file.well_files = {1: file}
+    fake_nexus_sim.date_format = DateFormat.DD_MM_YYYY
+    fake_nexus_sim.Runcontrol.date_format_string = "%d/%m/%Y"
+    fake_nexus_sim.start_date_set(start_date)
     # mock out open
-    wells_obj = NexusWells(mock_nexus_sim)
+    wells_obj = NexusWells(fake_nexus_sim)
     wells_obj.load_wells()
 
     add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'bore_radius': 7.5}
@@ -759,12 +746,6 @@ def test_add_completion_write(mocker, file_as_list, add_perf_date, preserve_prev
 def test_add_completion_correct_wellspec(mocker):
     start_date = '01/01/2020'
     # Arrange
-    open_mock = mocker.mock_open(read_data='')
-    mocker.patch("builtins.open", open_mock)
-    ls_dir = Mock(side_effect=lambda x: [])
-    mocker.patch('os.listdir', ls_dir)
-    fcs_file_exists = Mock(side_effect=lambda x: True)
-    mocker.patch('os.path.isfile', fcs_file_exists)
     add_perf_date = '01/03/2020'
 
     # build 3 files that the add completion will have to find the right completion
@@ -776,7 +757,7 @@ def test_add_completion_correct_wellspec(mocker):
     file_1 = NexusFile(location='wells_1.dat', file_content_as_list=file_as_list_1, )
     file_2 = NexusFile(location='wells_2.dat', file_content_as_list=file_as_list_2, )
 
-    mock_nexus_sim = NexusSimulator('/path/fcs_file.fcs')
+    mock_nexus_sim = get_fake_nexus_simulator(mocker)
 
     # add the required attributes to the model class
     mock_nexus_sim.fcs_file.well_files = {1: file_1, 2: file_2, 3: file_target}
@@ -874,12 +855,7 @@ def test_add_completion_include_files(mocker, fcs_file_contents, wells_file, inc
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    ls_dir = Mock(side_effect=lambda x: [])
-    mocker.patch('os.listdir', ls_dir)
-    fcs_file_exists = Mock(side_effect=lambda x: True)
-    mocker.patch('os.path.isfile', fcs_file_exists)
-
-    mock_nexus_sim = NexusSimulator('fcs_file.fcs')
+    mock_nexus_sim = get_fake_nexus_simulator(mocker=mocker, fcs_file_path=fcs_file_path, mock_open=False)
 
     mock_nexus_sim.start_date_set(start_date)
     # mock out open
@@ -1013,13 +989,7 @@ IW JW L RADW SKIN PPERF
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    ls_dir = Mock(side_effect=lambda x: [])
-    mocker.patch('os.listdir', ls_dir)
-    fcs_file_exists = Mock(side_effect=lambda x: True)
-    mocker.patch('os.path.isfile', fcs_file_exists)
-
-
-    model = NexusSimulator('fcs_file.dat')
+    model = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='fcs_file.dat', mock_open=False)
 
     add_perf_date = '01/02/2020'
 
@@ -1104,12 +1074,7 @@ def test_object_locations_updating(mocker, well_file_data, expected_uuid):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    ls_dir = Mock(side_effect=lambda x: [])
-    mocker.patch('os.listdir', ls_dir)
-    fcs_file_exists = Mock(side_effect=lambda x: True)
-    mocker.patch('os.path.isfile', fcs_file_exists)
-
-    model = NexusSimulator('fcs_file.dat')
+    model = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='fcs_file.dat', mock_open=False)
 
     add_perf_date = '01/01/2020'
 

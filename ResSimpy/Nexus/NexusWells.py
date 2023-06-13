@@ -28,6 +28,7 @@ if TYPE_CHECKING:
 class NexusWells(Wells):
     model: NexusSimulator
     __wells: list[NexusWell] = field(default_factory=list)
+    __wells_loaded: bool = False
 
     def __init__(self, model: NexusSimulator) -> None:
         self.model = model
@@ -35,16 +36,24 @@ class NexusWells(Wells):
         super().__init__()
 
     def get_wells(self) -> Sequence[NexusWell]:
+        if not self.__wells_loaded:
+            self.load_wells()
         return self.__wells
 
     def get_well(self, well_name: str) -> Optional[NexusWell]:
         """Returns a specific well requested, or None if that well cannot be found."""
+        if not self.__wells_loaded:
+            self.load_wells()
+
         wells_to_return = filter(lambda x: x.well_name.upper() == well_name.upper(), self.__wells)
 
         return next(wells_to_return, None)
 
     def get_wells_df(self) -> pd.DataFrame:
         # loop through wells and completions to output a table
+        if not self.__wells_loaded:
+            self.load_wells()
+
         store_dictionaries = []
         for well in self.__wells:
             for completion in well.completions:
@@ -68,8 +77,12 @@ class NexusWells(Wells):
             new_wells = load_wells(nexus_file=well_file, start_date=self.model.start_date,
                                    default_units=self.model.default_units)
             self.__wells += new_wells
+        self.__wells_loaded = True
 
     def get_wells_overview(self) -> str:
+        if not self.__wells_loaded:
+            self.load_wells()
+
         overview: str = ''
         for well in self.__wells:
             overview += well.printable_well_info
@@ -78,6 +91,9 @@ class NexusWells(Wells):
 
     def get_wells_dates(self) -> set[str]:
         """Returns a set of the unique dates in the wellspec file over all wells."""
+        if not self.__wells_loaded:
+            self.load_wells()
+
         set_dates: set[str] = set()
         for well in self.__wells:
             set_dates.update(set(well.dates_of_completions))

@@ -17,6 +17,8 @@ from ResSimpy.Nexus.NexusRockMethods import NexusRockMethods
 from ResSimpy.Nexus.NexusRelPermMethods import NexusRelPermMethods
 from ResSimpy.Nexus.NexusValveMethods import NexusValveMethods
 from ResSimpy.Nexus.NexusAquiferMethods import NexusAquiferMethods
+from ResSimpy.Nexus.NexusHydraulicsMethods import NexusHydraulicsMethods
+from ResSimpy.Nexus.NexusGasliftMethods import NexusGasliftMethods
 from ResSimpy.Nexus.DataModels.StructuredGrid.StructuredGridFile import StructuredGridFile
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -109,6 +111,8 @@ class NexusSimulator(Simulator):
         self.RelPermMethods: NexusRelPermMethods = NexusRelPermMethods()
         self.ValveMethods: NexusValveMethods = NexusValveMethods()
         self.AquiferMethods: NexusAquiferMethods = NexusAquiferMethods()
+        self.HydraulicsMethods: NexusHydraulicsMethods = NexusHydraulicsMethods()
+        self.GasliftMethods: NexusGasliftMethods = NexusGasliftMethods()
         # Nexus operations modules
         self.Runcontrol: Runcontrol = Runcontrol(self)
         self.Reporting: Reporting = Reporting(self)
@@ -488,6 +492,16 @@ class NexusSimulator(Simulator):
                 len(self.fcs_file.aquifer_files) > 0:
             self.AquiferMethods = NexusAquiferMethods(aquifer_files=self.fcs_file.aquifer_files)
 
+        # Read in hydraulics properties from Nexus hyd method files
+        if self.fcs_file.hyd_files is not None and \
+                len(self.fcs_file.hyd_files) > 0:
+            self.HydraulicsMethods = NexusHydraulicsMethods(hydraulics_files=self.fcs_file.hyd_files)
+
+        # Read in gaslift properties from Nexus gaslift method files
+        if self.fcs_file.gas_lift_files is not None and \
+                len(self.fcs_file.gas_lift_files) > 0:
+            self.GasliftMethods = NexusGasliftMethods(gaslift_files=self.fcs_file.gas_lift_files)
+
         # === End of dynamic properties loading ===
 
         # Load in Runcontrol
@@ -509,7 +523,6 @@ class NexusSimulator(Simulator):
                 if well_file.location is None:
                     warnings.warn(f'Well file location has not been found for {well_file}')
                     continue
-                self.Wells.load_wells()
 
     @staticmethod
     def update_file_value(file_path: str, token: str, new_value: str, add_to_start: bool = False) -> None:

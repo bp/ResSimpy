@@ -19,7 +19,8 @@ class NexusRelPermMethod(RelPermMethod):
     Attributes:
         file_path (str): Path to the Nexus relperm file
         method_number (int): RELPM method number in Nexus fcs file
-        properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] ):
+        properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                    dict[str, Union[float, pd.DataFrame]]]]):
             Dictionary holding all properties for a specific PVT method. Defaults to empty dictionary.
     """
 
