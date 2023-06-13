@@ -10,8 +10,7 @@ from ResSimpy.Aquifer import Aquifer
 class NexusAquiferMethods(Aquifer):
     """Class for collection of Nexus aquifer methods.
 
-    Attributes
-    ----------
+    Attributes:
         inputs (dict[int, NexusAquiferMethod]): Collection of Nexus aquifer methods, as a dictionary
         files (dict[int, NexusFile]): Dictionary collection of aquifer files, as defined in Nexus fcs file.
     """

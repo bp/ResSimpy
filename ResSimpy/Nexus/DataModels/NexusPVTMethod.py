@@ -21,8 +21,7 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 class NexusPVTMethod(DynamicProperty):
     """Class to hold Nexus PVT properties.
 
-    Attributes
-    ----------
+    Attributes:
         file_path (str): Path to the Nexus PVT file
         input_number (int): PVT method number in Nexus fcs file
         pvt_type (Optional[str]): Type of PVT method, e.g., BLACKOIL, GASWATER or EOS. Defaults to None
@@ -126,7 +125,6 @@ class NexusPVTMethod(DynamicProperty):
         Applies to TRANSITION, TRANS_TEST and PHASEID Nexus EOS options.
 
         Args:
-        ----
             primary_key (str): primary keyword, e.g., TRANSITION or PHASEID
             primary_key_default_val (str): default secondary keyword, or primary key value, e.g., TEST
             single_line (str): single line as read from input PVT file
@@ -160,7 +158,6 @@ class NexusPVTMethod(DynamicProperty):
         """Utility function to find the starting line index of a specified PVT table.
 
         Args:
-        ----
             table_key (str): specified PVT table name or undersaturated index, such as, PSAT or RSSAT or PRES
             single_line (str): single line as read from input PVT file
             line_list (list[str]): list of strings that comprise input PVT file
@@ -173,11 +170,9 @@ class NexusPVTMethod(DynamicProperty):
             unsat_obj (dict[str, list[str]]): track saturation pressures from which undersaturated branches emanate
 
         Raises:
-        ------
             ValueError: If a property table key does not have a numerical value
 
         Returns:
-        -------
             int: Updated line index
         """
         if table_key not in PVT_UNSAT_TABLE_INDICES:  # All tables except undersaturated tables
@@ -213,7 +208,6 @@ class NexusPVTMethod(DynamicProperty):
         """Utility function to find the ending line index of a specified PVT table.
 
         Args:
-        ----
             table_key (str): specified PVT table name or undersaturated index, such as, PSAT or RSSAT or PRES
             single_line (str): single line as read from input PVT file
             table_indices ([dict[str, list[int]]): dictionary to store the
@@ -227,7 +221,6 @@ class NexusPVTMethod(DynamicProperty):
             unsat_obj (dict[str, list[str]]): track saturation pressures from which undersaturated branches emanate
 
         Returns:
-        -------
             bool: True if still reading table, but if identified the ending line index, return False
         """
         end_flag_found = False

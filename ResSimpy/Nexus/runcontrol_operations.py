@@ -56,12 +56,12 @@ class Runcontrol:
 
     @staticmethod
     def delete_times(file_content: list[str]) -> list[str]:
-        """Deletes times from file contents
+        """Deletes times from file contents.
+
         Args:
             file_content (list[str]):  list of strings with each line from the file a new entry in the list.
 
-        Returns
-        -------
+        Returns:
             list[str]: the modified file without any TIME cards in
         """
         new_file: list[str] = []
@@ -209,8 +209,7 @@ class Runcontrol:
     def __update_times_in_file(self) -> None:
         """Updates the list of times in the Runcontrol file to the current stored values in __times.
 
-        Returns
-        -------
+        Returns:
             None: writes out a file at the same path as the existing runcontrol file
         """
         self.model.check_output_path()
@@ -219,7 +218,7 @@ class Runcontrol:
         file_content = self.model.fcs_file.runcontrol_file.get_flat_list_str_file
         filename = self.model.fcs_file.runcontrol_file.location
 
-        new_file_content = self.model.Runcontrol.delete_times(file_content)
+        new_file_content = self.model.runcontrol.delete_times(file_content)
 
         time_list = self.times
         stop_string = 'STOP\n'

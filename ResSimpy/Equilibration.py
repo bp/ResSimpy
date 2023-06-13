@@ -6,8 +6,7 @@ from abc import ABC
 class Equilibration(ABC):
     """The abstract base class for a collection of equilibration inputs.
 
-    Attributes
-    ----------
+    Attributes:
         inputs (dict[int, DynamicProperty]): Collection of equilibration inputs, as a dictionary.
     """
 

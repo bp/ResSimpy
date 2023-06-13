@@ -10,8 +10,7 @@ from ResSimpy.Valve import Valve
 class NexusValveMethods(Valve):
     """Class for collection of Nexus valve property inputs.
 
-    Attributes
-    ----------
+    Attributes:
         inputs (dict[int, NexusValveMethod]): Collection of Nexus valve property methods, as a dictionary
         files (dict[int, NexusFile]): Dictionary collection of valve property files, as defined in Nexus fcs file.
     """

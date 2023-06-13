@@ -6,8 +6,7 @@ from abc import ABC
 class Valve(ABC):
     """The abstract base class for a collection of valve property inputs.
 
-    Attributes
-    ----------
+    Attributes:
         inputs (dict[int, DynamicProperty]): Collection of valve property inputs, as a dictionary.
     """
 

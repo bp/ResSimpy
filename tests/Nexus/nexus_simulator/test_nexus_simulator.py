@@ -669,7 +669,7 @@ PLOTBINARY
     mocker.patch("builtins.open", modifying_mock_open)
 
     # Act
-    simulation.Reporting.add_map_properties_to_start_of_grid_file()
+    simulation.reporting.add_map_properties_to_start_of_grid_file()
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
@@ -814,7 +814,7 @@ def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.PVT.inputs
+    result = simulation.pvt.inputs
 
     # Assert
     assert result == loaded_pvt
@@ -849,7 +849,7 @@ def test_get_separator(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.Separator.inputs
+    result = simulation.separator.inputs
 
     # Assert
     assert result == loaded_sep
@@ -884,7 +884,7 @@ def test_get_water(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.Water.inputs
+    result = simulation.water.inputs
 
     # Assert
     assert result == loaded_wat
@@ -919,7 +919,7 @@ def test_get_equil(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.Equil.inputs
+    result = simulation.equil.inputs
 
     # Assert
     assert result == loaded_equil
@@ -954,7 +954,7 @@ def test_get_rock(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.Rock.inputs
+    result = simulation.rock.inputs
 
     # Assert
     assert result == loaded_rocks
@@ -991,7 +991,7 @@ def test_get_relperm(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.RelPerm.inputs
+    result = simulation.relperm.inputs
 
     # Assert
     assert result == loaded_relperms
@@ -1026,7 +1026,7 @@ def test_get_valve(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.Valve.inputs
+    result = simulation.valve.inputs
 
     # Assert
     assert result == loaded_valves
@@ -1060,7 +1060,7 @@ def test_get_aquifer(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.Aquifer.inputs
+    result = simulation.aquifer.inputs
 
     # Assert
     assert result == loaded_aquifers
@@ -1094,7 +1094,7 @@ def test_get_hydraulics(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.Hydraulics.inputs
+    result = simulation.hydraulics.inputs
 
     # Assert
     assert result == loaded_hyds
@@ -1128,7 +1128,7 @@ def test_get_gaslift(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.Gaslift.inputs
+    result = simulation.gaslift.inputs
 
     # Assert
     assert result == loaded_gaslift
@@ -1243,15 +1243,15 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
     expected_wellbores = [NexusWellbore(wellboreprops1), NexusWellbore(wellboreprops2)]
     expected_constraints = {constraint_props1['name']: [NexusConstraint(constraint_props2)]}
     # create a mocker spy to check the network loader gets called once
-    spy = mocker.spy(nexus_sim.Network, 'load')
+    spy = mocker.spy(nexus_sim.network, 'load')
 
     # Act
-    result_nodes = nexus_sim.Network.Nodes.get_nodes()
-    result_cons = nexus_sim.Network.Connections.get_connections()
-    result_wellcons = nexus_sim.Network.WellConnections.get_well_connections()
-    result_wellheads = nexus_sim.Network.Wellheads.get_wellheads()
-    result_wellbores = nexus_sim.Network.Wellbores.get_wellbores()
-    result_constraints = nexus_sim.Network.Constraints.get_constraints()
+    result_nodes = nexus_sim.network.Nodes.get_nodes()
+    result_cons = nexus_sim.network.Connections.get_connections()
+    result_wellcons = nexus_sim.network.WellConnections.get_well_connections()
+    result_wellheads = nexus_sim.network.Wellheads.get_wellheads()
+    result_wellbores = nexus_sim.network.Wellbores.get_wellbores()
+    result_constraints = nexus_sim.network.Constraints.get_constraints()
     # Assert
     assert result_nodes == expected_nodes
     assert result_cons == expected_cons

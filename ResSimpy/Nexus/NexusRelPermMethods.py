@@ -10,8 +10,7 @@ from ResSimpy.RelPerm import RelPerm
 class NexusRelPermMethods(RelPerm):
     """Class for collection of Nexus relative permeability and capillary pressure property inputs.
 
-    Attributes
-    ----------
+    Attributes:
         inputs (dict[int, NexusRelPermMethod]): Collection of Nexus relperm property inputs, as a dictionary
         files (dict[int, NexusFile]): Dictionary collection of relperm property files, as defined in Nexus fcs.
     """

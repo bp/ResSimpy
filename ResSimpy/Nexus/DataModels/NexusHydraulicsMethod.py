@@ -18,8 +18,7 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 class NexusHydraulicsMethod(DynamicProperty):
     """Class to hold Nexus Hydraulics properties.
 
-    Attributes
-    ----------
+    Attributes:
         file_path (str): Path to the Nexus hydraulics properties file
         input_number (int): Hydraulics properties method number in Nexus fcs file
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,

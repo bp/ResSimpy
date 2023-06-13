@@ -10,8 +10,7 @@ from ResSimpy.Equilibration import Equilibration
 class NexusEquilMethods(Equilibration):
     """Class for collection of Nexus equilibration methods.
 
-    Attributes
-    ----------
+    Attributes:
         inputs (dict[int, NexusEquilMethod]): Collection of Nexus equilibration methods, as a dictionary
         files (dict[int, NexusFile]): Dictionary collection of equilibration files, as defined in Nexus fcs file.
     """

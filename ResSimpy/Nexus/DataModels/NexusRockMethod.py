@@ -16,8 +16,7 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 class NexusRockMethod(DynamicProperty):
     """Class to hold Nexus Rock properties.
 
-    Attributes
-    ----------
+    Attributes:
         file_path (str): Path to the Nexus rock properties file
         input_number (int): Rock properties method number in Nexus fcs file
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,

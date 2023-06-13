@@ -6,8 +6,7 @@ from abc import ABC
 class Water(ABC):
     """The abstract base class for a collection of water property inputs.
 
-    Attributes
-    ----------
+    Attributes:
         inputs (dict[int, DynamicProperty]): Collection of water property methods, as a dictionary.
     """
 

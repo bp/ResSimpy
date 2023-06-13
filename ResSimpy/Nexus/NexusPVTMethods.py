@@ -10,8 +10,7 @@ from ResSimpy.PVT import PVT
 class NexusPVTMethods(PVT):
     """Class for collection of Nexus PVT property methods.
 
-    Attributes
-    ----------
+    Attributes:
         inputs (dict[int, NexusPVTMethod]): Collection of Nexus PVT property methods, as a dictionary
         files (dict[int, NexusFile]): Dictionary collection of PVT property files, as defined in Nexus fcs file.
     """

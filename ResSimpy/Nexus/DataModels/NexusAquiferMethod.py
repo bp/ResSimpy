@@ -16,8 +16,7 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 class NexusAquiferMethod(DynamicProperty):
     """Class to hold Nexus Aquifer properties.
 
-    Attributes
-    ----------
+    Attributes:
         file_path (str): Path to the Nexus aquifer properties file
         input_number (int): Aquifer properties method number in Nexus fcs file
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,

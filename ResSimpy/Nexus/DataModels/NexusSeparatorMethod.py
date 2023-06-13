@@ -14,8 +14,7 @@ from ResSimpy.DynamicProperty import DynamicProperty
 class NexusSeparatorMethod(DynamicProperty):
     """Class to hold data input for a Nexus Separator method.
 
-    Attributes
-    ----------
+    Attributes:
         file_path (str): Path to the Nexus Separator file
         input_number (int): Separator method number in Nexus fcs file
         separator_type (Optional[str]): Type of separator method, e.g., BLACKOIL, GASPLANT or EOS. Defaults to None

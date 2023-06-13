@@ -6,8 +6,7 @@ from abc import ABC
 class Rock(ABC):
     """The abstract base class for a collection of rock property inputs.
 
-    Attributes
-    ----------
+    Attributes:
         inputs (dict[int, DynamicProperty]): Collection of rock property inputs, as a dictionary.
     """
 

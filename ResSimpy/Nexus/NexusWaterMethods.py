@@ -10,8 +10,7 @@ from ResSimpy.Water import Water
 class NexusWaterMethods(Water):
     """Class for collection of Nexus water property methods.
 
-    Attributes
-    ----------
+    Attributes:
         inputs (dict[int, NexusWaterMethod]): Collection of Nexus water property methods, as a dictionary
         files (dict[int, NexusFile]): Dictionary collection of water property files, as defined in Nexus fcs file.
     """

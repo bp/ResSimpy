@@ -6,8 +6,7 @@ from abc import ABC
 class PVT(ABC):
     """The abstract base class for a collection of PVT inputs.
 
-    Attributes
-    ----------
+    Attributes:
         inputs (dict[int, DynamicProperty]): Collection of PVT inputs, as a dictionary.
     """
 

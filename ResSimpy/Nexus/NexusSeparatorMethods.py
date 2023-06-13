@@ -10,8 +10,7 @@ from ResSimpy.Separator import Separator
 class NexusSeparatorMethods(Separator):
     """Class for collection of Nexus separator property methods.
 
-    Attributes
-    ----------
+    Attributes:
         inputs (dict[int, NexusSeparatorMethod]): Dictionary collection of Nexus separator property methods
         files (dict[int, NexusFile]): Dictionary collection of separator property files, defined in Nexus fcs.
     """

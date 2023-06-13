@@ -11,20 +11,19 @@ from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
 
 
 def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem) -> list[NexusWell]:
-    """Loads a list of Nexus Well instances and populates it with the wells completions over time from a wells file
+    """Loads a list of Nexus Well instances and populates it with the wells completions over time from a wells file.
+
     Args:
         nexus_file (NexusFile): NexusFile containing the wellspec files.
         start_date (str): starting date of the wellspec file as a string.
         default_units (UnitSystem): default units to use if no units are found.
 
-    Raises
-    ------
+    Raises:
         ValueError: If no value is found after a TIME card.
         ValueError: If no well name is found after a WELLSPEC keyword.
         ValueError: If no valid wells are found in the wellspec file.
 
-    Returns
-    -------
+    Returns:
         list[NexusWell]: list of Nexus well classes contained within a wellspec file.
     """
 
@@ -187,7 +186,6 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
         Loads in the next available completions following a WELLSPEC keyword and a header line.
 
     Args:
-    ----
         header_index (int): index number of the header in the file as list parameter
         header_values (dict[str, Union[Optional[int], Optional[float], Optional[str]]]): dictionary of column \
             headings to populate from the table
@@ -195,7 +193,6 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
         start_date (str): date to populate the completion class with.
 
     Returns:
-    -------
         list[NexusCompletion]: list of nexus completions for a given table.
     """
 
@@ -293,7 +290,6 @@ def __load_wellspec_table_headings(header_index: int, header_values: dict[str, N
     """Loads in the wellspec headers from a line in a file.
 
     Args:
-    ----
         header_index (int): index of the header
         header_values (dict[str, Union[Optional[int], Optional[float], Optional[str]]]): dictionary of column \
             headings to populate from the table
@@ -304,7 +300,6 @@ def __load_wellspec_table_headings(header_index: int, header_values: dict[str, N
             Defaults to None and will create a new list to return if None.
 
     Returns:
-    -------
         tuple[int, list[str]]: index in the file as list for the header, list of headers found in the file
     """
     headers = [] if headers is None else headers

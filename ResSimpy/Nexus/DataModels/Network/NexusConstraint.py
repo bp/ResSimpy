@@ -9,7 +9,7 @@ from ResSimpy.Utils.generic_repr import generic_repr
 
 @dataclass
 class NexusConstraint(Constraint):
-    """Attributes
+    """Attributes:
     name (str): name of the well (NAME)
     max_surface_oil_rate (float): max surface oil rate (QOSMAX)
     max_surface_gas_rate (float): max surface gas rate (QGSMAX)
@@ -332,13 +332,13 @@ class NexusConstraint(Constraint):
         return nexus_mapping
 
     def to_dict(self, keys_in_nexus_style: bool = False) -> dict[str, None | str | int | float]:
-        """Returns a dictionary of the attributes of the Constraint
+        """Returns a dictionary of the attributes of the Constraint.
+
         Args:
             keys_in_nexus_style (bool): if True returns the key values in Nexus keywords, otherwise returns the \
                 attribute name as stored by ressimpy.
 
-        Returns
-        -------
+        Returns:
             a dictionary keyed by attributes and values as the value of the attribute
         """
         result_dict = to_dict_generic.to_dict(self, keys_in_nexus_style, add_date=True, add_units=True)

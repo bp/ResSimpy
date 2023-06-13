@@ -14,8 +14,7 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 class NexusValveMethod(DynamicProperty):
     """Class to hold Nexus Valve properties.
 
-    Attributes
-    ----------
+    Attributes:
         file_path (str): Path to the Nexus valve properties file
         input_number (int): Valve properties method number in Nexus fcs file
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,

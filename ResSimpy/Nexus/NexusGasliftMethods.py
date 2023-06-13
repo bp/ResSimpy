@@ -10,8 +10,7 @@ from ResSimpy.Gaslift import Gaslift
 class NexusGasliftMethods(Gaslift):
     """Class for collection of Nexus gaslift methods.
 
-    Attributes
-    ----------
+    Attributes:
         inputs (dict[int, NexusGasliftMethod]): Collection of Nexus gaslift methods, as a dictionary
         files (dict[int, NexusFile]): Dictionary collection of gaslift files, as defined in Nexus fcs file.
     """

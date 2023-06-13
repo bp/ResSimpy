@@ -6,8 +6,7 @@ from abc import ABC
 class Gaslift(ABC):
     """The abstract base class for a collection of gaslift property inputs.
 
-    Attributes
-    ----------
+    Attributes:
         inputs (dict[int, DynamicProperty]): Collection of gaslift property inputs, as a dictionary.
     """
 

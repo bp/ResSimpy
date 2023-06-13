@@ -6,8 +6,7 @@ from abc import ABC
 class RelPerm(ABC):
     """The abstract base class for a collection of relative permeability and capillary pressure property inputs.
 
-    Attributes
-    ----------
+    Attributes:
         inputs (dict[int, DynamicProperty]): Dictionary collection of relperm and capillary pressure property inputs.
     """
 

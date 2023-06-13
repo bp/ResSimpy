@@ -10,8 +10,7 @@ from ResSimpy.Hydraulics import Hydraulics
 class NexusHydraulicsMethods(Hydraulics):
     """Class for collection of Nexus hydraulics methods.
 
-    Attributes
-    ----------
+    Attributes:
         inputs (dict[int, NexusHydraulicsMethod]): Collection of Nexus hydraulics methods, as a dictionary
         files (dict[int, NexusFile]): Dictionary collection of hydraulics files, in Nexus fcs file.
     """

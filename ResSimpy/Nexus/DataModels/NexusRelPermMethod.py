@@ -17,8 +17,7 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 class NexusRelPermMethod(DynamicProperty):
     """Class to hold Nexus relative permeability and capillary pressure properties.
 
-    Attributes
-    ----------
+    Attributes:
         file_path (str): Path to the Nexus relperm file
         input_number (int): RELPM method number in Nexus fcs file
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,

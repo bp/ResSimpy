@@ -10,8 +10,7 @@ from ResSimpy.Rock import Rock
 class NexusRockMethods(Rock):
     """Class for collection of Nexus rock property methods.
 
-    Attributes
-    ----------
+    Attributes:
         inputs (dict[int, NexusRockMethod]): Collection of Nexus rock property methods, as a dictionary
         files (dict[int, NexusFile]): Dictionary collection of rock property files, as defined in Nexus fcs file.
     """

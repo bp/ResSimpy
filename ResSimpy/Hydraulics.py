@@ -6,8 +6,7 @@ from abc import ABC
 class Hydraulics(ABC):
     """The abstract base class for a collection of hydraulics inputs.
 
-    Attributes
-    ----------
+    Attributes:
         inputs (dict[int, DynamicProperty]): Collection of hydraulics inputs, as a dictionary.
     """
 

@@ -14,8 +14,7 @@ from ResSimpy.Utils.invert_nexus_map import invert_nexus_map
 class NexusWaterParams():
     """Class to hold a single set of water property parameters, i.e., density, compressibility, etc.
 
-    Attributes
-    ----------
+    Attributes:
         temperature (Optional[float]): Temperature at which the rest of the water property parameters apply
         salinity (Optional[float]): Salinity at which the rest of the water property parameters apply
         density (Optional[float]): Water density at standard conditions
@@ -39,8 +38,7 @@ class NexusWaterParams():
 class NexusWaterMethod(DynamicProperty):
     """Class to hold Nexus Water properties.
 
-    Attributes
-    ----------
+    Attributes:
         file_path (str): Path to the Nexus water file
         input_number (int): Water method number in Nexus fcs file
         reference_pressure (float): Reference pressure for BW and, if CVW is present, for VISW
