@@ -181,11 +181,6 @@ class StructuredGridFile(Grid):
         if structured_grid_file.location is None:
             raise ValueError(f"No file path given or found for structured grid file path. \
                 Instead got {structured_grid_file.location}")
-        file_as_list = structured_grid_file.get_flat_list_str_file
-
-        if file_as_list is None:
-            raise ValueError("No file path given or found for structured grid file path. \
-                Please update structured grid file path")
 
         loaded_structured_grid_file = cls(grid_nexus_file=structured_grid_file)
 
