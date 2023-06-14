@@ -377,7 +377,7 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits
              ])
 def test_read_pvt_properties_from_file(mocker, file_contents, expected_pvt_properties):
     # Arrange
-    pvt_obj = NexusPVTMethod(file_path='test/file/pvt.dat', method_number=1)
+    pvt_obj = NexusPVTMethod(file_path='test/file/pvt.dat', input_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -411,7 +411,7 @@ def test_read_pvt_properties_from_file(mocker, file_contents, expected_pvt_prope
 
 def test_nexus_pvt_repr():
     # Arrange
-    pvt_obj = NexusPVTMethod(file_path='test/file/pvt.dat', method_number=1)
+    pvt_obj = NexusPVTMethod(file_path='test/file/pvt.dat', input_number=1)
     pvt_obj.pvt_type = 'BLACKOIL'
     pvt_obj.properties['SATURATED'] = pd.DataFrame({'PRES': [14.7, 115., 2515, 3515],
                                      'BO': [1.05, 1.08, 1.25, 1.33],

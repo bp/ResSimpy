@@ -11,18 +11,19 @@ from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_EOSOPTIONS_PRIMARY_KEY
 from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_EOSOPTIONS_TRANS_TEST_KEYS, PVT_EOSOPTIONS_PHASEID_KEYS
 from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_EOSOPTIONS_TERTIARY_KEYS, PVT_ALL_TABLE_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_UNSAT_TABLE_INDICES
-from ResSimpy.PVTMethod import PVTMethod
+from ResSimpy.DynamicProperty import DynamicProperty
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_list_str, get_empty_eosopt_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
 @dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
-class NexusPVTMethod(PVTMethod):
-    """Class to hold Nexus PVT properties
+class NexusPVTMethod(DynamicProperty):
+    """Class to hold Nexus PVT properties.
+
     Attributes:
         file_path (str): Path to the Nexus PVT file
-        method_number (int): PVT method number in Nexus fcs file
+        input_number (int): PVT method number in Nexus fcs file
         pvt_type (Optional[str]): Type of PVT method, e.g., BLACKOIL, GASWATER or EOS. Defaults to None
         eos_nhc (Optional[int]): Number of hydrocarbon components. Defaults to None
         eos_temp (Optional[float]): Default temperature for EOS method. Defaults to None
@@ -49,7 +50,7 @@ class NexusPVTMethod(PVTMethod):
                                 pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
 
-    def __init__(self, file_path: str, method_number: int, pvt_type: Optional[str] = None,
+    def __init__(self, file_path: str, input_number: int, pvt_type: Optional[str] = None,
                  eos_nhc: Optional[int] = None, eos_temp: Optional[float] = None,
                  eos_components: Optional[list[str]] = None,
                  eos_options: Optional[dict[str, Union[str, int, float, pd.DataFrame, list[str], dict[str, float],
@@ -75,7 +76,7 @@ class NexusPVTMethod(PVTMethod):
             self.properties = properties
         else:
             self.properties = {}
-        super().__init__(method_number=method_number)
+        super().__init__(input_number=input_number)
 
     def __repr__(self) -> str:
         """Pretty printing PVT data."""
@@ -124,7 +125,6 @@ class NexusPVTMethod(PVTMethod):
         Applies to TRANSITION, TRANS_TEST and PHASEID Nexus EOS options.
 
         Args:
-        ----
             primary_key (str): primary keyword, e.g., TRANSITION or PHASEID
             primary_key_default_val (str): default secondary keyword, or primary key value, e.g., TEST
             single_line (str): single line as read from input PVT file
@@ -158,7 +158,6 @@ class NexusPVTMethod(PVTMethod):
         """Utility function to find the starting line index of a specified PVT table.
 
         Args:
-        ----
             table_key (str): specified PVT table name or undersaturated index, such as, PSAT or RSSAT or PRES
             single_line (str): single line as read from input PVT file
             line_list (list[str]): list of strings that comprise input PVT file
@@ -171,11 +170,9 @@ class NexusPVTMethod(PVTMethod):
             unsat_obj (dict[str, list[str]]): track saturation pressures from which undersaturated branches emanate
 
         Raises:
-        ------
             ValueError: If a property table key does not have a numerical value
 
         Returns:
-        -------
             int: Updated line index
         """
         if table_key not in PVT_UNSAT_TABLE_INDICES:  # All tables except undersaturated tables
@@ -211,7 +208,6 @@ class NexusPVTMethod(PVTMethod):
         """Utility function to find the ending line index of a specified PVT table.
 
         Args:
-        ----
             table_key (str): specified PVT table name or undersaturated index, such as, PSAT or RSSAT or PRES
             single_line (str): single line as read from input PVT file
             table_indices ([dict[str, list[int]]): dictionary to store the
@@ -225,7 +221,6 @@ class NexusPVTMethod(PVTMethod):
             unsat_obj (dict[str, list[str]]): track saturation pressures from which undersaturated branches emanate
 
         Returns:
-        -------
             bool: True if still reading table, but if identified the ending line index, return False
         """
         end_flag_found = False

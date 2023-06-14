@@ -47,7 +47,7 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 )
 def test_read_gaslift_properties_from_file(mocker, file_contents, expected_gaslift_properties):
     # Arrange
-    gaslift_obj = NexusGasliftMethod(file_path='test/file/gaslift.dat', method_number=1)
+    gaslift_obj = NexusGasliftMethod(file_path='test/file/gaslift.dat', input_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -67,7 +67,7 @@ def test_read_gaslift_properties_from_file(mocker, file_contents, expected_gasli
 
 def test_nexus_gaslift_repr():
     # Arrange
-    gaslift_obj = NexusGasliftMethod(file_path='test/file/gaslift.dat', method_number=1)
+    gaslift_obj = NexusGasliftMethod(file_path='test/file/gaslift.dat', input_number=1)
     gaslift_obj.properties = {'DESC': ['Optimal Gaslift Data'],
                               'UNIT_SYSTEM': UnitSystem.ENGLISH,
                               'WCUT': '0.0 0.2 0.4',

@@ -11,7 +11,8 @@ if TYPE_CHECKING:
 
 class Logging:
     def __init__(self, model: NexusSimulator) -> None:
-        """Class for controlling all logging and logfile (*.log) related functionality
+        """Class for controlling all logging and logfile (*.log) related functionality.
+
         Args:
             model: NexusSimulator instance
             __job_id (int): Run job ID for executed runs
@@ -31,15 +32,12 @@ class Logging:
         """Searches for the simulation time in a line.
 
         Args:
-        ----
             line (str): line to search for the simulation time
 
         Raises:
-        ------
             ValueError: Throws error if get_next_value doesn't find any subsequent value in the line
 
         Returns:
-        -------
             str: value found after TIME card in a line
         """
         value_found = False
@@ -72,11 +70,9 @@ class Logging:
         """Convert a datetime string from the server for when the simulation was started to a strptime object.
 
         Args:
-        ----
             original_date (str): string of a date with format: "Mon Jan 01 00:00:00 CST 2020"
 
         Returns:
-        -------
             datetime: datetime object derived from the input string
         """
 
@@ -99,12 +95,10 @@ class Logging:
         and formats them as a string.
 
         Args:
-        ----
             log_file_line_list (list[str]): log file formatted as a list of strings with \
                 a new list entry per line
 
         Returns:
-        -------
             Optional[str]: string containing the errors and warnings from the simulation log. \
                 None if error/warning set is too short
         """
@@ -151,13 +145,11 @@ class Logging:
         """Returns the path of the log file for the simulation.
 
         Args:
-        ----
             from_startup (bool, optional): Searches the same directory as the original_fcs_file_path if True. \
             Otherwise searches the destination folder path, failing this then searches the \
             original_fcs_file_path if False. Defaults to False.
 
         Returns:
-        -------
             Optional[str]: The path of the .log file from the simulation if found. If not found returns None.
         """
         folder_path = os.path.dirname(
@@ -182,7 +174,6 @@ class Logging:
         """Updates the stored simulation execution start and end times from the log files.
 
         Args:
-        ----
             log_file_line_list (list[str]): log file information represented with a new entry per line of the file.
         """
         for line in log_file_line_list:
@@ -198,17 +189,14 @@ class Logging:
         """Gets the run status of the latest simulation run.
 
         Args:
-        ----
             from_startup (bool, optional): Searches the same directory as the original_fcs_file_path if True. \
             Otherwise searches the destination folder path, failing this then searches the \
             original_fcs_file_path if False. Defaults to False.
 
         Raises:
-        ------
             NotImplementedError: If log file is not found - only supporting simulation status from log files
 
         Returns:
-        -------
             Optional[str]: the error/warning string if the simulation has finished, otherwise \
                 returns the running job ID. Empty string if a logfile is not found and from_start up is True
         """
@@ -237,8 +225,7 @@ class Logging:
     def __get_start_end_difference(self) -> Optional[str]:
         """Returns a string with the previous time taken when the base case was run.
 
-        Returns
-        -------
+        Returns:
             Optional[str]: returns a human readable string of how long the simulation took to run
         """
         if self.__simulation_start_time is None or self.__simulation_end_time is None:
@@ -266,13 +253,11 @@ class Logging:
     def get_simulation_progress(self) -> float:
         """Returns the simulation progress from log files.
 
-        Raises
-        ------
+        Raises:
             NotImplementedError: Only retrieving status from a log file is supported at the moment
             ValueError: if no times from the runcontrol file are read in
 
-        Returns
-        -------
+        Returns:
             Optional[float]: how long through a simulation run as a proportion of the number of days \
                 simulated as stated in the runcontrol
         """
@@ -319,10 +304,10 @@ class Logging:
                             last_time = next_value
 
         if last_time is not None:
-            days_completed = self.model.Runcontrol.convert_date_to_number(last_time)
-            if self.model.Runcontrol.times is None:
+            days_completed = self.model.runcontrol.convert_date_to_number(last_time)
+            if self.model.runcontrol.times is None:
                 raise ValueError("No times provided in the instance - please read them in from runcontrol file")
-            total_days = self.model.Runcontrol.convert_date_to_number(self.model.Runcontrol.times[-1])
+            total_days = self.model.runcontrol.convert_date_to_number(self.model.runcontrol.times[-1])
             return round((days_completed / total_days) * 100, 1)
 
         return 0

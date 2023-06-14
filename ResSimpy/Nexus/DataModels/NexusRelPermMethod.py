@@ -7,18 +7,19 @@ from ResSimpy.Nexus.NexusKeywords.relpm_keywords import RELPM_TABLE_KEYWORDS, RE
 from ResSimpy.Nexus.NexusKeywords.relpm_keywords import RELPM_SINGLE_KEYWORDS, RELPM_HYSTERESIS_PRIMARY_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.relpm_keywords import RELPM_KEYWORDS, RELPM_NONDARCY_KEYWORDS, RELPM_NONDARCY_PARAMS
 
-from ResSimpy.RelPermMethod import RelPermMethod
+from ResSimpy.DynamicProperty import DynamicProperty
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_hysteresis_dict
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
 @dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
-class NexusRelPermMethod(RelPermMethod):
-    """Class to hold Nexus relative permeability and capillary pressure properties
+class NexusRelPermMethod(DynamicProperty):
+    """Class to hold Nexus relative permeability and capillary pressure properties.
+
     Attributes:
         file_path (str): Path to the Nexus relperm file
-        method_number (int): RELPM method number in Nexus fcs file
+        input_number (int): RELPM method number in Nexus fcs file
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                     dict[str, Union[float, pd.DataFrame]]]]):
             Dictionary holding all properties for a specific PVT method. Defaults to empty dictionary.
@@ -31,7 +32,7 @@ class NexusRelPermMethod(RelPermMethod):
     hysteresis_params: dict[str, Union[str, float, dict[str, Union[str, float, dict[str, Union[str, float]]]]]] \
         = field(default_factory=get_empty_hysteresis_dict)
 
-    def __init__(self, file_path: str, method_number: int,
+    def __init__(self, file_path: str, input_number: int,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None,
                  hysteresis_params: Optional[dict[str, Union[str, float, dict[str, Union[str, float,
@@ -45,7 +46,7 @@ class NexusRelPermMethod(RelPermMethod):
             self.hysteresis_params = hysteresis_params
         else:
             self.hysteresis_params = {}
-        super().__init__(method_number=method_number)
+        super().__init__(input_number=input_number)
 
     def __repr__(self) -> str:
         """Pretty printing relative permeability and capillary pressure data."""
