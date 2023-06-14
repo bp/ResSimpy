@@ -3,31 +3,32 @@ import os
 from typing import Optional, MutableMapping
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusSeparatorMethod import NexusSeparatorMethod
-from ResSimpy.SeparatorMethods import SeparatorMethods
+from ResSimpy.Separator import Separator
 
 
 @dataclass(kw_only=True)
-class NexusSeparatorMethods(SeparatorMethods):
-    """Class for collection of Nexus separator property methods
+class NexusSeparatorMethods(Separator):
+    """Class for collection of Nexus separator property methods.
+
     Attributes:
-        separator_methods (dict[int, NexusSeparatorMethod]): Dictionary collection of Nexus separator property methods
-        separator_files (dict[int, NexusFile]): Dictionary collection of separator property files, defined in Nexus fcs.
+        inputs (dict[int, NexusSeparatorMethod]): Dictionary collection of Nexus separator property methods
+        files (dict[int, NexusFile]): Dictionary collection of separator property files, defined in Nexus fcs.
     """
 
-    __separator_methods: MutableMapping[int, NexusSeparatorMethod]
-    __separator_files: dict[int, NexusFile]
+    __inputs: MutableMapping[int, NexusSeparatorMethod]
+    __files: dict[int, NexusFile]
     __properties_loaded: bool = False  # Used in lazy loading
 
-    def __init__(self, separator_methods: Optional[MutableMapping[int, NexusSeparatorMethod]] = None,
-                 separator_files: Optional[dict[int, NexusFile]] = None) -> None:
-        if separator_methods:
-            self.__separator_methods = separator_methods
+    def __init__(self, inputs: Optional[MutableMapping[int, NexusSeparatorMethod]] = None,
+                 files: Optional[dict[int, NexusFile]] = None) -> None:
+        if inputs:
+            self.__inputs = inputs
         else:
-            self.__separator_methods: MutableMapping[int, NexusSeparatorMethod] = {}
-        if separator_files:
-            self.__separator_files = separator_files
+            self.__inputs: MutableMapping[int, NexusSeparatorMethod] = {}
+        if files:
+            self.__files = files
         else:
-            self.__separator_files = {}
+            self.__files = {}
         super().__init__()
 
     def __repr__(self) -> str:
@@ -35,36 +36,35 @@ class NexusSeparatorMethods(SeparatorMethods):
         if not self.__properties_loaded:
             self.load_separator_methods()
         printable_str = ''
-        for table_num in self.__separator_methods.keys():
+        for table_num in self.__inputs.keys():
             printable_str += '\n--------------------------------\n'
             printable_str += f'SEPARATOR method {table_num}\n'
             printable_str += '--------------------------------\n'
-            printable_str += self.__separator_methods[table_num].__repr__()
+            printable_str += self.__inputs[table_num].__repr__()
             printable_str += '\n'
 
         return printable_str
 
     @property
-    def separator_methods(self) -> MutableMapping[int, NexusSeparatorMethod]:
+    def inputs(self) -> MutableMapping[int, NexusSeparatorMethod]:
         if not self.__properties_loaded:
             self.load_separator_methods()
-        return self.__separator_methods
+        return self.__inputs
 
     @property
-    def separator_files(self) -> dict[int, NexusFile]:
-        return self.__separator_files
+    def files(self) -> dict[int, NexusFile]:
+        return self.__files
 
     def load_separator_methods(self):
         # Read in separator properties from Nexus separator method files
-        if self.__separator_files is not None and len(self.__separator_files) > 0:  # Check if separator files exist
-            for table_num in self.__separator_files.keys():  # For each separator property method
-                separator_file = self.__separator_files[table_num].location
+        if self.__files is not None and len(self.__files) > 0:  # Check if separator files exist
+            for table_num in self.__files.keys():  # For each separator property method
+                separator_file = self.__files[table_num].location
                 if separator_file is None:
                     raise ValueError(f'Unable to find separator file: {separator_file}')
                 if os.path.isfile(separator_file):
                     # Create NexusSeparatorMethod object
-                    self.__separator_methods[table_num] = NexusSeparatorMethod(file_path=separator_file,
-                                                                               method_number=table_num)
+                    self.__inputs[table_num] = NexusSeparatorMethod(file_path=separator_file, input_number=table_num)
                     # Populate object with separator properties in input file
-                    self.__separator_methods[table_num].read_properties()
+                    self.__inputs[table_num].read_properties()
         self.__properties_loaded = True

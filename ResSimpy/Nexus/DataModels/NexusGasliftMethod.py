@@ -4,18 +4,19 @@ from typing import Optional, Union
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusKeywords.gaslift_keywords import GL_ARRAY_KEYWORDS, GASLIFT_KEYWORDS, GL_TABLE_HEADER_COLS
-from ResSimpy.GasliftMethod import GasliftMethod
+from ResSimpy.DynamicProperty import DynamicProperty
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
 @dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
-class NexusGasliftMethod(GasliftMethod):
-    """Class to hold Nexus gaslift properties
+class NexusGasliftMethod(DynamicProperty):
+    """Class to hold Nexus gaslift properties.
+
     Attributes:
         file_path (str): Path to the Nexus gaslift properties file
-        method_number (int): Gaslift properties method number in Nexus fcs file
+        input_number (int): Gaslift properties method number in Nexus fcs file
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                     dict[str, Union[float, pd.DataFrame]]]]):
             Dictionary holding all properties for a specific gaslift properties method. Defaults to empty dictionary.
@@ -26,7 +27,7 @@ class NexusGasliftMethod(GasliftMethod):
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                      dict[str, Union[float, pd.DataFrame]]]] = field(default_factory=get_empty_dict_union)
 
-    def __init__(self, file_path: str, method_number: int,
+    def __init__(self, file_path: str, input_number: int,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
         self.file_path = file_path
@@ -34,7 +35,7 @@ class NexusGasliftMethod(GasliftMethod):
             self.properties = properties
         else:
             self.properties = {}
-        super().__init__(method_number=method_number)
+        super().__init__(input_number=input_number)
 
     def __repr__(self) -> str:
         """Pretty printing gaslift data."""
