@@ -638,7 +638,7 @@ def test_constraint_ids(mocker, file_contents, object_locations):
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
                                                     'uuid4', 'uuid5', 'uuid6', 'uuid7'])
     # Act
-    model.Network.Constraints.get_constraints()
+    model.network.Constraints.get_constraints()
 
     result = model.fcs_file.surface_files[1].object_locations
     # Assert

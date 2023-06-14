@@ -9,7 +9,7 @@ from tests.multifile_mocker import mock_multiple_files
 ('''DATEFORMAT DD/MM/YYYY
 WelLS sEt 1 /my/wellspec/file.dat''',
 
-''' ! Wells file:
+''' ! wells file:
 TIME 01/01/2020
 WELLSPEC well1
 iw jw l radw
@@ -26,7 +26,7 @@ WELLSPEC well1
 iw jw l radw
 1  2  3 4.5
 ''',
-''' ! Wells file:
+''' ! wells file:
 TIME 01/01/2020
 WELLSPEC well1
 iw jw l radw
@@ -74,7 +74,7 @@ def test_write_to_file(mocker, fcs_file_contents, wells_file, expected_result):
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict,
+    mock_nexus_sim.wells.add_completion(well_name='well1', completion_properties=add_perf_dict,
                                         preserve_previous_completions=True)
 
     # Assert
@@ -88,7 +88,7 @@ def test_write_to_file(mocker, fcs_file_contents, wells_file, expected_result):
 ('''DATEFORMAT DD/MM/YYYY
 WelLS sEt 1 /my/wellspec/file.dat''',
 
-''' ! Wells file:
+''' ! wells file:
 TIME 01/01/2020
 WELLSPEC well1
 iw jw l radw
@@ -105,7 +105,7 @@ WELLSPEC well1
 iw jw l radw
 1  2  3 4.5
 ''',
-''' ! Wells file:
+''' ! wells file:
 TIME 01/01/2020
 WELLSPEC well1
 iw jw l radw
@@ -177,7 +177,7 @@ def test_remove_completion_write_to_file(mocker, fcs_file_contents, wells_file, 
     mocker.patch('os.path.isfile', fcs_file_exists)
 
     mock_nexus_sim = NexusSimulator('fcs_file.fcs')
-    mock_nexus_sim.Wells.load_wells() # Manually call load_wells to simulate loading in wells before we change the open mock.
+    mock_nexus_sim.wells.load_wells() # Manually call load_wells to simulate loading in wells before we change the open mock.
     mock_nexus_sim.start_date_set(start_date)
     remove_perf_dict = {'date': remove_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 4.2}
     well_files = mock_nexus_sim.fcs_file.well_files[1]
@@ -190,7 +190,7 @@ def test_remove_completion_write_to_file(mocker, fcs_file_contents, wells_file, 
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    mock_nexus_sim.Wells.remove_completion(well_name='well1', completion_properties=remove_perf_dict)
+    mock_nexus_sim.wells.remove_completion(well_name='well1', completion_properties=remove_perf_dict)
     result_object_ids = mock_nexus_sim.fcs_file.well_files[1].object_locations
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
@@ -204,7 +204,7 @@ def test_remove_completion_write_to_file(mocker, fcs_file_contents, wells_file, 
 ('''DATEFORMAT DD/MM/YYYY
 WelLS sEt 1 /my/wellspec/file.dat''',
 
-''' ! Wells file:
+''' ! wells file:
 TIME 01/01/2020
 WELLSPEC well1
 iw jw l radw
@@ -221,7 +221,7 @@ WELLSPEC well1
 iw jw l radw
 1  2  3 4.5
 ''',
-''' ! Wells file:
+''' ! wells file:
 TIME 01/01/2020
 WELLSPEC well1
 iw jw l radw
@@ -270,7 +270,7 @@ def test_modify_completion_write_to_file(mocker, fcs_file_contents, wells_file, 
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    mock_nexus_sim.Wells.modify_completion(well_name='well1', properties_to_modify=modify_perf_new_properties,
+    mock_nexus_sim.wells.modify_completion(well_name='well1', properties_to_modify=modify_perf_new_properties,
                                            completion_to_change=modify_perf_target )
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,

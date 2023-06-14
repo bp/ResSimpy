@@ -584,7 +584,7 @@ def test_wells_modify(mocker):
                         depth_to_bottom=1234),
                         ]
 
-    wells = nexus_sim.Wells
+    wells = nexus_sim.wells
 
     date = '01/02/2023'
     perf_1_to_add = {'date': date, 'i': 3, 'j': 3, 'k': 5, 'well_radius': 1005.2}
@@ -788,7 +788,7 @@ def test_add_completion_correct_wellspec(mocker):
 @pytest.mark.parametrize('fcs_file_contents, wells_file, include_file_contents, add_perf_date, expected_result', [
 ('''DATEFORMAT DD/MM/YYYY
 WelLS sEt 1 /my/wellspec/file.dat''',
-''' ! Wells file:
+''' ! wells file:
 TIME 01/01/2020
 WELLSPEC well1
 iw jw l radw
@@ -871,21 +871,21 @@ def test_add_completion_include_files(mocker, fcs_file_contents, wells_file, inc
         include_locations=[include_file_path], origin=fcs_file_path, file_content_as_list=expected_wells_file_as_list)
     # Act
     # test adding a load of completions sequentially
-    mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict,
+    mock_nexus_sim.wells.add_completion(well_name='well1', completion_properties=add_perf_dict,
                                         preserve_previous_completions=True)
-    mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_2,
+    mock_nexus_sim.wells.add_completion(well_name='well1', completion_properties=add_perf_dict_2,
                                         preserve_previous_completions=True)
-    mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
+    mock_nexus_sim.wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
                                         preserve_previous_completions=True)
-    mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
+    mock_nexus_sim.wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
                                         preserve_previous_completions=True)
-    mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
+    mock_nexus_sim.wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
                                         preserve_previous_completions=True)
-    mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
+    mock_nexus_sim.wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
                                         preserve_previous_completions=True)
-    mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
+    mock_nexus_sim.wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
                                         preserve_previous_completions=True)
-    mock_nexus_sim.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
+    mock_nexus_sim.wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
                                         preserve_previous_completions=True)
 
     result = mock_nexus_sim.fcs_file.well_files[1].include_objects[0]
@@ -998,7 +998,7 @@ IW JW L RADW SKIN PPERF
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
     # Act
-    model.Wells.add_completion(well_name='well1', completion_properties=add_perf_dict)
+    model.wells.add_completion(well_name='well1', completion_properties=add_perf_dict)
 
 
     # Assert
@@ -1082,8 +1082,8 @@ def test_object_locations_updating(mocker, well_file_data, expected_uuid):
     add_perf_dict_2 = {'date': add_perf_date, 'i': 44, 'j': 55, 'k': 66, 'well_radius': 77.5}
 
     # Act
-    model.Wells.add_completion(well_name='DEV1', completion_properties=add_perf_dict_1)
-    model.Wells.add_completion(well_name='DEV1', completion_properties=add_perf_dict_2)
+    model.wells.add_completion(well_name='DEV1', completion_properties=add_perf_dict_1)
+    model.wells.add_completion(well_name='DEV1', completion_properties=add_perf_dict_2)
 
     # Assert
 
