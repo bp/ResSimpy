@@ -107,12 +107,12 @@ class NexusFile:
         previous_line: str
 
         for i, line in enumerate(file_as_list):
-            if len(modified_file_as_list)>=1:
+            if len(modified_file_as_list) >= 1:
                 previous_line = modified_file_as_list[len(modified_file_as_list)-1].rstrip('\n')
                 if previous_line.endswith('>'):
                     modified_file_as_list[len(modified_file_as_list)-1] = previous_line[:-1] + line
                 else:
-                     modified_file_as_list.append(line)
+                    modified_file_as_list.append(line)
             else:
                 modified_file_as_list.append(line)
             if line.rstrip('\n').endswith('>'):
