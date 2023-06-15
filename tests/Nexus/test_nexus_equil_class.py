@@ -202,8 +202,23 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits, TemperatureU
                                        'C10+': [0.40, 0.40, 0.492]
                                        })
           }
+    ),
+    ("""
+    DESC This is first line of description >
+and continuation for the first line  
+    ENGLISH
+
+    ! This is a comment
+    PINIT 3600 DINIT 9035
+    GOC 8800 WOC 9950
+    PSAT 3600
+
+    """, {'UNIT_SYSTEM': UnitSystem.ENGLISH,
+          'DESC': ['This is first line of description and continuation for the first line'],
+          'PINIT': 3600, 'DINIT': 9035, 'GOC': 8800, 'WOC': 9950, 'PSAT': 3600
+          }
     )
-    ], ids=['basic_equil', 'adv_equil', 'intsat_equil', 'vaits_equil', 'depthvar', 'oilmf', 'compvar']
+    ], ids=['basic_equil', 'adv_equil', 'intsat_equil', 'vaits_equil', 'depthvar', 'oilmf', 'compvar','line_continuation']
 )
 def test_read_equil_properties_from_file(mocker, file_contents, expected_equil_properties):
     # Arrange
