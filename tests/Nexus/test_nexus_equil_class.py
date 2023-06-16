@@ -219,11 +219,16 @@ and continuation for the first line
           'PINIT': 3600, 'DINIT': 9035, 'GOC': 8800, 'WOC': 9950, 'PSAT': 3600
           }
     )
-    ], ids=['basic_equil', 'adv_equil', 'intsat_equil', 'vaits_equil', 'depthvar', 'oilmf', 'compvar','line_continuation']
+    ], ids=['basic_equil', 'adv_equil', 'intsat_equil', 'vaits_equil', 'depthvar', 'oilmf', 'compvar', 'line_continuation']
 )
 def test_read_equil_properties_from_file(mocker, file_contents, expected_equil_properties):
     # Arrange
-    eq_file = NexusFile(file_content_as_list=file_contents.splitlines())
+    file_contents_as_list = file_contents.splitlines()
+    if '>' in file_contents_as_list[1]:
+        file_contents_as_list[1] = file_contents_as_list[1].split('>')[0] + file_contents_as_list[2]
+        del file_contents_as_list[2]
+
+    eq_file = NexusFile(file_content_as_list=file_contents_as_list)
     equil_obj = NexusEquilMethod(file=eq_file, input_number=1)
 
     # mock out open to return our test file contents
