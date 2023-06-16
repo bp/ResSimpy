@@ -220,35 +220,37 @@ WelLS sEt 1 /my/wellspec/file.dat''',
 
 ''' ! Wells file:
 TIME 01/01/2020
-WELLSPEC well1
+WELLSPEC well1Dev
 iw jw l radw
 1  2  3 4.5
 
 TIME 01/03/2020
-WELLSPEC well1
+WELLSPEC well1Dev
 iw jw l radw
 1  2  3 4.5
 4  5  6 4.2
 
 TIME 01/05/2020
-WELLSPEC well1
+WELLSPEC well1>
+Dev
 iw jw l radw
-1  2  3 4.5
+1  2  >
+3 4.5
 ''',
 ''' ! Wells file:
 TIME 01/01/2020
-WELLSPEC well1
+WELLSPEC well1Dev
 iw jw l radw
 1  2  3 4.5
 
 TIME 01/03/2020
-WELLSPEC well1
+WELLSPEC well1Dev
 iw jw l radw
 1  2  3 4.5
 4 8 6 10.2
 
 TIME 01/05/2020
-WELLSPEC well1
+WELLSPEC well1Dev
 iw jw l radw
 1  2  3 4.5
 ''',)
@@ -284,7 +286,7 @@ def test_modify_completion_write_to_file(mocker, fcs_file_contents, wells_file, 
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    mock_nexus_sim.Wells.modify_completion(well_name='well1', properties_to_modify=modify_perf_new_properties,
+    mock_nexus_sim.Wells.modify_completion(well_name='well1Dev', properties_to_modify=modify_perf_new_properties,
                                            completion_to_change=modify_perf_target, )
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
