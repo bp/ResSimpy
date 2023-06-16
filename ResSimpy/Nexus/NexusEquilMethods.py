@@ -59,11 +59,11 @@ class NexusEquilMethods(Equilibration):
         # Read in equil properties from Nexus equil method files
         if self.__files is not None and len(self.__files) > 0:  # Check if equil files exist
             for table_num in self.__files.keys():  # For each equil property method
-                equil_file = self.__files[table_num].location
-                if equil_file is None:
+                equil_file = self.__files[table_num]
+                if equil_file.location is None:
                     raise ValueError(f'Unable to find equil file: {equil_file}')
-                if os.path.isfile(equil_file):
+                if os.path.isfile(equil_file.location):
                     # Create NexusEquilMethod object
-                    self.__inputs[table_num] = NexusEquilMethod(file_path=equil_file, input_number=table_num)
+                    self.__inputs[table_num] = NexusEquilMethod(file=equil_file, input_number=table_num)
                     self.__inputs[table_num].read_properties()  # Populate object with equil properties in file
         self.__properties_loaded = True

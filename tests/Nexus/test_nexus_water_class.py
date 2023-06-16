@@ -1,4 +1,5 @@
 import pytest
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterMethod, NexusWaterParams
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import SUnits, UnitSystem, TemperatureUnits
@@ -130,7 +131,8 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import SUnits, UnitSystem, TemperatureU
 )
 def test_read_water_properties_from_file(mocker, file_contents, expected_water_properties):
     # Arrange
-    wat_obj = NexusWaterMethod(file_path='test/file/water.dat', input_number=1)
+    wat_file = NexusFile(file_content_as_list=file_contents.splitlines())
+    wat_obj = NexusWaterMethod(file=wat_file, input_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -159,7 +161,8 @@ def test_read_water_properties_from_file(mocker, file_contents, expected_water_p
 
 def test_nexus_water_repr():
     # Arrange
-    water_obj = NexusWaterMethod(file_path='test/file/water.dat', input_number=1)
+    water_file = NexusFile(location='test/file/water.dat')
+    water_obj = NexusWaterMethod(file=water_file, input_number=1)
     water_obj.properties = {'SUNITS': SUnits.PPM, 'TEMP_UNIT': TemperatureUnits.KELVIN}
     water_obj.reference_pressure = 3600.0
     water_params1 = NexusWaterParams(temperature=394.3, salinity=100000.0,

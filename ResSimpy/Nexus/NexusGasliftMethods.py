@@ -59,11 +59,11 @@ class NexusGasliftMethods(Gaslift):
         # Read in gaslift properties from Nexus gaslift method files
         if self.__files is not None and len(self.__files) > 0:  # Check if gaslift files exist
             for table_num in self.__files.keys():  # For each gaslift property method
-                gaslift_file = self.__files[table_num].location
-                if gaslift_file is None:
+                gaslift_file = self.__files[table_num]
+                if gaslift_file.location is None:
                     raise ValueError(f'Unable to find gaslift file: {gaslift_file}')
-                if os.path.isfile(gaslift_file):
+                if os.path.isfile(gaslift_file.location):
                     # Create NexusGasliftMethod object
-                    self.__inputs[table_num] = NexusGasliftMethod(file_path=gaslift_file, input_number=table_num)
+                    self.__inputs[table_num] = NexusGasliftMethod(file=gaslift_file, input_number=table_num)
                     self.__inputs[table_num].read_properties()  # Populate object with gaslift props in file
         self.__properties_loaded = True

@@ -59,12 +59,12 @@ class NexusSeparatorMethods(Separator):
         # Read in separator properties from Nexus separator method files
         if self.__files is not None and len(self.__files) > 0:  # Check if separator files exist
             for table_num in self.__files.keys():  # For each separator property method
-                separator_file = self.__files[table_num].location
-                if separator_file is None:
+                separator_file = self.__files[table_num]
+                if separator_file.location is None:
                     raise ValueError(f'Unable to find separator file: {separator_file}')
-                if os.path.isfile(separator_file):
+                if os.path.isfile(separator_file.location):
                     # Create NexusSeparatorMethod object
-                    self.__inputs[table_num] = NexusSeparatorMethod(file_path=separator_file, input_number=table_num)
+                    self.__inputs[table_num] = NexusSeparatorMethod(file=separator_file, input_number=table_num)
                     # Populate object with separator properties in input file
                     self.__inputs[table_num].read_properties()
         self.__properties_loaded = True

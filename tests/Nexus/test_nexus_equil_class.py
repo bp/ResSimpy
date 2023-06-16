@@ -2,6 +2,7 @@ import pandas as pd
 import pytest
 
 from ResSimpy.Nexus.DataModels.NexusEquilMethod import NexusEquilMethod
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 
 @pytest.mark.parametrize("file_contents, expected_equil_properties",
@@ -207,7 +208,8 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits, TemperatureU
 )
 def test_read_equil_properties_from_file(mocker, file_contents, expected_equil_properties):
     # Arrange
-    equil_obj = NexusEquilMethod(file_path='test/file/equil.dat', input_number=1)
+    eq_file = NexusFile(file_content_as_list=file_contents.splitlines())
+    equil_obj = NexusEquilMethod(file=eq_file, input_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -227,7 +229,8 @@ def test_read_equil_properties_from_file(mocker, file_contents, expected_equil_p
 
 def test_nexus_equil_repr():
     # Arrange
-    equil_obj = NexusEquilMethod(file_path='test/file/equil.dat', input_number=1)
+    eq_file = NexusFile(location='test/file/equil.dat')
+    equil_obj = NexusEquilMethod(file=eq_file, input_number=1)
     equil_obj.properties = {'PINIT': 3600., 'DINIT': 9035., 'GOC': 8800., 'WOC': 9950., 'PCGOC': 0., 'PCWOC': 0.,
                             'PSAT': 3400., 'X': 50., 'Y': -50., 'VIP_INIT': '3 4 5 7', 'CRINIT': '', 
                             'AUTOGOC_COMP': 'USE_CLOSEST_OIL', 'OVERREAD': ['SG', 'SW', 'PRESSURE'],

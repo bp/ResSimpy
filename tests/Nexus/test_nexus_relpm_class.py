@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from ResSimpy.Nexus.DataModels.NexusRelPermMethod import NexusRelPermMethod
 
@@ -306,7 +307,8 @@ from ResSimpy.Nexus.DataModels.NexusRelPermMethod import NexusRelPermMethod
 )
 def test_read_relpm_properties_from_file(mocker, file_contents, expected_relpm_properties):
     # Arrange
-    relpm_obj = NexusRelPermMethod(file_path='test/file/relpm.dat', input_number=1)
+    rp_file = NexusFile(file_content_as_list=file_contents.splitlines())
+    relpm_obj = NexusRelPermMethod(file=rp_file, input_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -330,7 +332,8 @@ def test_read_relpm_properties_from_file(mocker, file_contents, expected_relpm_p
 
 def test_nexus_relpm_repr():
     # Arrange
-    relpm_obj = NexusRelPermMethod(file_path='test/file/relpm.dat', input_number=1)
+    rp_file = NexusFile(location='test/file/relpm.dat')
+    relpm_obj = NexusRelPermMethod(file=rp_file, input_number=1)
     relpm_obj.properties = {'DESC': ['This is first line of description', 'and this is second line of description'], 'VIP_RELPM': '',
           'NONDARCY_GAS': {'BETA': 0.9, 'IFT_THRES': 0.98}, 'RECONSTRUCT': {'NSGDIM': 101, 'NSWDIM': 101},
           'NONDARCY_OIL': {'BETA0': 0.001, 'BETA1': -0.5, 'BETA2': -5, 'BETA3': -0.5, 'BETA4': -3, 'BETA5': 4.4},

@@ -34,12 +34,12 @@ class NexusWaterParams():
     density: Optional[float] = None
 
 
-@dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
+@dataclass(kw_only=True, repr=False)  # Doesn't need to write an _init_, _eq_ methods, etc.
 class NexusWaterMethod(DynamicProperty):
     """Class to hold Nexus Water properties.
 
     Attributes:
-        file_path (str): Path to the Nexus water file
+        file (NexusFile): Nexus water file object
         input_number (int): Water method number in Nexus fcs file
         reference_pressure (float): Reference pressure for BW and, if CVW is present, for VISW
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
@@ -48,18 +48,17 @@ class NexusWaterMethod(DynamicProperty):
         parameters (list[NexusWaterParams]): list of water parameters, such as density, viscosity, etc.
     """
 
-    file_path: str
+    file: NexusFile
     reference_pressure: Optional[float] = None
     properties: dict[str, Union[str, int, float, Enum, list[str],
                      pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
     parameters: list[NexusWaterParams] = field(default_factory=get_empty_list_nexus_water_params)
 
-    def __init__(self, file_path: str, input_number: int, reference_pressure: Optional[float] = None,
+    def __init__(self, file: NexusFile, input_number: int, reference_pressure: Optional[float] = None,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None,
                  parameters: Optional[list[NexusWaterParams]] = None) -> None:
-        self.file_path = file_path
         self.reference_pressure = reference_pressure
         if properties is not None:
             self.properties = properties
@@ -69,7 +68,7 @@ class NexusWaterMethod(DynamicProperty):
             self.parameters = parameters
         else:
             self.parameters = []
-        super().__init__(input_number=input_number)
+        super().__init__(input_number=input_number, file=file)
 
     @staticmethod
     def nexus_mapping() -> dict[str, tuple[str, type]]:
@@ -88,7 +87,7 @@ class NexusWaterMethod(DynamicProperty):
         """Pretty printing water data."""
         param_to_nexus_keyword_map = invert_nexus_map(NexusWaterMethod.nexus_mapping())
 
-        printable_str = f'\nFILE_PATH: {self.file_path}\n'
+        printable_str = f'\nFILE_PATH: {self.file.location}\n'
         printable_str += f'PREF: {self.reference_pressure}\n'
         water_dict = self.properties
         for key, value in water_dict.items():
@@ -119,8 +118,7 @@ class NexusWaterMethod(DynamicProperty):
 
     def read_properties(self) -> None:
         """Read Nexus Water file contents and populate NexusWaterMethod object."""
-        file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
-        file_as_list = file_obj.get_flat_list_str_file
+        file_as_list = self.file.get_flat_list_str_file
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)

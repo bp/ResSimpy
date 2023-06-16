@@ -1,5 +1,6 @@
 import pandas as pd
 import pytest
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from ResSimpy.Nexus.DataModels.NexusRockMethod import NexusRockMethod
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -166,7 +167,8 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 )
 def test_read_rock_properties_from_file(mocker, file_contents, expected_rock_properties):
     # Arrange
-    rock_obj = NexusRockMethod(file_path='test/file/rock.dat', input_number=1)
+    rock_file = NexusFile(file_content_as_list=file_contents.splitlines())
+    rock_obj = NexusRockMethod(file=rock_file, input_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -189,7 +191,8 @@ def test_read_rock_properties_from_file(mocker, file_contents, expected_rock_pro
 
 def test_nexus_rock_repr():
     # Arrange
-    rock_obj = NexusRockMethod(file_path='test/file/rock.dat', input_number=1)
+    rock_file = NexusFile(location='test/file/rock.dat')
+    rock_obj = NexusRockMethod(file=rock_file, input_number=1)
     rock_obj.properties = {'UNIT_SYSTEM': UnitSystem.ENGLISH, 'REVERSIBLE': '',
                            'CMT': pd.DataFrame({'P': [1500, 2000, 3500],
                                                 'PVMULT': [0.76, 0.81, 0.85]

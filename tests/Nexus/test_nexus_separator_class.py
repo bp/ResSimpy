@@ -2,6 +2,7 @@ from enum import Enum
 import numpy as np
 import pandas as pd
 import pytest
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from ResSimpy.Nexus.DataModels.NexusSeparatorMethod import NexusSeparatorMethod
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits
@@ -135,7 +136,8 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits
 )
 def test_read_seperator_properties_from_file(mocker, file_contents, expected_separator_properties):
     # Arrange
-    sep_obj = NexusSeparatorMethod(file_path='test/file/sep.dat', input_number=1)
+    sep_file = NexusFile(file_content_as_list=file_contents.splitlines())
+    sep_obj = NexusSeparatorMethod(file=sep_file, input_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -156,7 +158,8 @@ def test_read_seperator_properties_from_file(mocker, file_contents, expected_sep
 
 def test_nexus_separator_repr():
     # Arrange
-    sep_obj = NexusSeparatorMethod(file_path='test/file/separator.dat', input_number=1)
+    sep_file = NexusFile(location='test/file/separator.dat')
+    sep_obj = NexusSeparatorMethod(file=sep_file, input_number=1)
     sep_obj.separator_type = 'EOS'
     sep_obj.properties['SEPARATOR_TABLE'] = pd.DataFrame({'STAGE': [1, 2],
                                                       'METHOD': [1, 2],

@@ -14,12 +14,12 @@ from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
-@dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
+@dataclass(kw_only=True, repr=False)  # Doesn't need to write an _init_, _eq_ methods, etc.
 class NexusHydraulicsMethod(DynamicProperty):
     """Class to hold Nexus Hydraulics properties.
 
     Attributes:
-        file_path (str): Path to the Nexus hydraulics properties file
+        file (NexusFile): Nexus hydraulics properties file object
         input_number (int): Hydraulics properties method number in Nexus fcs file
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                     dict[str, Union[float, pd.DataFrame]]]]):
@@ -27,23 +27,22 @@ class NexusHydraulicsMethod(DynamicProperty):
     """
 
     # General parameters
-    file_path: str
+    file: NexusFile
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                      dict[str, Union[float, pd.DataFrame]]]] = field(default_factory=get_empty_dict_union)
 
-    def __init__(self, file_path: str, input_number: int,
+    def __init__(self, file: NexusFile, input_number: int,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
-        self.file_path = file_path
         if properties is not None:
             self.properties = properties
         else:
             self.properties = {}
-        super().__init__(input_number=input_number)
+        super().__init__(input_number=input_number, file=file)
 
     def __repr__(self) -> str:
         """Pretty printing hydraulics data."""
-        printable_str = f'\nFILE_PATH: {self.file_path}\n'
+        printable_str = f'\nFILE_PATH: {self.file.location}\n'
         hyd_dict = self.properties
         for key, value in hyd_dict.items():
             if isinstance(value, pd.DataFrame):
@@ -66,8 +65,7 @@ class NexusHydraulicsMethod(DynamicProperty):
 
     def read_properties(self) -> None:
         """Read Nexus hydraulics file contents and populate the NexusHydraulicsMethod object."""
-        file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
-        file_as_list0 = file_obj.get_flat_list_str_file
+        file_as_list0 = self.file.get_flat_list_str_file
 
         # Loop through file_as_list and fix any line continuations that use '>' at the end of the line
         file_as_list: list[str] = []

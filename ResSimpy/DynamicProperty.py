@@ -1,5 +1,7 @@
 from abc import ABC
 from dataclasses import dataclass
+from typing import Optional
+from ResSimpy.File import File
 
 
 @dataclass
@@ -11,6 +13,36 @@ class DynamicProperty(ABC):
     """
 
     input_number: int
+    file: File
 
-    def __init__(self, input_number: int) -> None:
+    def __init__(self, input_number: int, file: File) -> None:
         self.input_number: int = input_number
+        self.file: File = file
+
+    def __repr__(self) -> str:
+        """Pretty printing aquifer data."""
+        printable_str = f'\nFILE_PATH: {self.file.location}\n'
+        printable_str += self.to_string()
+        return printable_str
+
+    def to_string(self) -> str:
+        """Write dynamic property data to string."""
+        raise NotImplementedError('Implement in the derived class.')
+
+    def write_to_file(self, overwrite_existing: bool = False, new_file_location: Optional[str] = None) -> None:
+        """Write aquifer data to file."""
+        printable_str = self.to_string()
+        new_file_contents = printable_str.splitlines(keepends=True)
+        if overwrite_existing and new_file_location is not None:
+            raise ValueError('Please specify only one of either overwrite_existing or new_file_location.')
+
+        if new_file_location is not None:
+            new_file = File(file_content_as_list=new_file_contents, location=new_file_location)
+            new_file.write_to_file()
+            return
+        elif not overwrite_existing:
+            raise ValueError('Please specify either overwrite_existing or new_file location.')
+
+        # Overwriting existing file contents
+        self.file.file_content_as_list = new_file_contents
+        self.file.write_to_file()

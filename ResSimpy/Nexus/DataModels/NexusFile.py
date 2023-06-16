@@ -20,10 +20,11 @@ import warnings
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_OPERATION_KEYWORDS, GRID_ARRAY_FORMAT_KEYWORDS
 from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_nexus_file, \
     get_empty_dict_uuid_int
+from ResSimpy.File import File
 
 
 @dataclass(kw_only=True, repr=True)
-class NexusFile:
+class NexusFile(File):
     """Class to deal with origin and structure of Nexus files and preserve origin of include files.
 
     Attributes:
@@ -34,11 +35,9 @@ class NexusFile:
             Defaults to None.
     """
 
-    location: Optional[str] = None
     include_locations: Optional[list[str]] = field(default=None)
     origin: Optional[str] = None
     include_objects: Optional[list[NexusFile]] = field(default=None, repr=False)
-    file_content_as_list: Optional[list[str]] = field(default=None, repr=False)
     object_locations: Optional[dict[UUID, int]] = None
     line_locations: Optional[list[tuple[int, UUID]]] = None
 
@@ -47,7 +46,7 @@ class NexusFile:
                  origin: Optional[str] = None,
                  include_objects: Optional[list[NexusFile]] = None,
                  file_content_as_list: Optional[list[str]] = None) -> None:
-
+        super().__init__(location=location, file_content_as_list=file_content_as_list)
         if origin is not None and location is not None:
             self.location = nfo.get_full_file_path(location, origin)
         else:
@@ -58,8 +57,6 @@ class NexusFile:
         self.origin: Optional[str] = origin
         self.include_objects: Optional[list[NexusFile]] = get_empty_list_nexus_file() \
             if include_objects is None else include_objects
-        self.file_content_as_list: Optional[list[str]] = get_empty_list_str() \
-            if file_content_as_list is None else file_content_as_list
         if self.object_locations is None:
             self.object_locations: dict[UUID, int] = get_empty_dict_uuid_int()
         if self.line_locations is None:
@@ -483,13 +480,3 @@ class NexusFile:
                 self.__remove_object_locations(object_id)
 
         nexusfile_to_write_to.write_to_file()
-
-    def write_to_file(self) -> None:
-        """Writes back to the original file location of the nexusfile."""
-        if self.location is None:
-            raise ValueError(f'No file path to write to, instead found {self.location}')
-        if self.file_content_as_list is None:
-            raise ValueError(f'No file data to write out, instead found {self.file_content_as_list}')
-        file_str = ''.join(self.file_content_as_list)
-        with open(self.location, 'w') as fi:
-            fi.write(file_str)

@@ -17,12 +17,12 @@ from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_list_
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
-@dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
+@dataclass(kw_only=True, repr=False)  # Doesn't need to write an _init_, _eq_ methods, etc.
 class NexusPVTMethod(DynamicProperty):
     """Class to hold Nexus PVT properties.
 
     Attributes:
-        file_path (str): Path to the Nexus PVT file
+        file (NexusFile): Nexus PVT file object
         input_number (int): PVT method number in Nexus fcs file
         pvt_type (Optional[str]): Type of PVT method, e.g., BLACKOIL, GASWATER or EOS. Defaults to None
         eos_nhc (Optional[int]): Number of hydrocarbon components. Defaults to None
@@ -37,7 +37,7 @@ class NexusPVTMethod(DynamicProperty):
     """
 
     # General parameters
-    file_path: str
+    file: NexusFile
     pvt_type: Optional[str] = None
     eos_nhc: Optional[int] = None  # Number of hydrocarbon components
     eos_temp: Optional[float] = None  # Default temperature for EOS method
@@ -50,14 +50,13 @@ class NexusPVTMethod(DynamicProperty):
                                 pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
 
-    def __init__(self, file_path: str, input_number: int, pvt_type: Optional[str] = None,
+    def __init__(self, file: NexusFile, input_number: int, pvt_type: Optional[str] = None,
                  eos_nhc: Optional[int] = None, eos_temp: Optional[float] = None,
                  eos_components: Optional[list[str]] = None,
                  eos_options: Optional[dict[str, Union[str, int, float, pd.DataFrame, list[str], dict[str, float],
                                        tuple[str, dict[str, float]], dict[str, pd.DataFrame]]]] = None,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
-        self.file_path = file_path
         if pvt_type is not None:
             self.pvt_type = pvt_type
         if eos_nhc is not None:
@@ -76,11 +75,11 @@ class NexusPVTMethod(DynamicProperty):
             self.properties = properties
         else:
             self.properties = {}
-        super().__init__(input_number=input_number)
+        super().__init__(input_number=input_number, file=file)
 
     def __repr__(self) -> str:
         """Pretty printing PVT data."""
-        printable_str = f'\nFILE_PATH: {self.file_path}\n'
+        printable_str = f'\nFILE_PATH: {self.file.location}\n'
         printable_str += f'PVT_TYPE: {self.pvt_type}\n'
         pvt_dict = self.properties
         for key, value in pvt_dict.items():
@@ -253,8 +252,7 @@ class NexusPVTMethod(DynamicProperty):
 
     def read_properties(self) -> None:
         """Read Nexus PVT file contents and populate the NexusPVTMethod object."""
-        file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
-        file_as_list = file_obj.get_flat_list_str_file
+        file_as_list = self.file.get_flat_list_str_file
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
