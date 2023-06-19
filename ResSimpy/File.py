@@ -25,7 +25,7 @@ class File(ABC):
             self.file_content_as_list = file_content_as_list
 
     def write_to_file(self) -> None:
-        """Writes back to the original file location of the nexusfile."""
+        """Writes to file specified in self.location the strings contained in the list self.file_content_as_list."""
         if self.location is None:
             raise ValueError(f'No file path to write to, instead found {self.location}')
         if self.file_content_as_list is None:

@@ -267,26 +267,27 @@ def test_nexus_equil_repr():
                                                          })}
     expected_output = """
 FILE_PATH: test/file/equil.dat
-PINIT: 3600.0
-DINIT: 9035.0
-GOC: 8800.0
-WOC: 9950.0
-PCGOC: 0.0
-PCWOC: 0.0
-PSAT: 3400.0
-VIP_INIT: 3 4 5 7
+PINIT 3600.0
+DINIT 9035.0
+GOC 8800.0
+WOC 9950.0
+PCGOC 0.0
+PCWOC 0.0
+PSAT 3400.0
+VIP_INIT 3 4 5 7
 CRINIT
-AUTOGOC_COMP: USE_CLOSEST_OIL
-OVERREAD: SG SW PRESSURE
-VAITS: MOBILE
-        SORWMN: 0.1
-        SORGMN: 0.1
-        SGCMN: 0.05
-    VAITS_TOLSG: 0.001
-    VAITS_TOLSW: 0.0001
+AUTOGOC_COMP USE_CLOSEST_OIL
+OVERREAD SG SW PRESSURE
+VAITS
+    MOBILE
+        SORWMN 0.1
+        SORGMN 0.1
+        SGCMN 0.05
+    VAITS_TOLSG 0.001
+    VAITS_TOLSW 0.0001
 POROSITY_INDEPENDENCE
-COMPOSITION: X 50.0 Y -50.0
-""" + equil_obj.properties['COMPOSITION'].to_string(na_rep='') + '\n\n'
+COMPOSITION X 50.0 Y -50.0
+""" + equil_obj.properties['COMPOSITION'].to_string(na_rep='', index=False) + '\n\n'
 
     # Act
     result = equil_obj.__repr__()

@@ -40,7 +40,7 @@ class NexusAquiferMethod(DynamicProperty):
         super().__init__(input_number=input_number, file=file)
 
     def to_string(self) -> str:
-        """Write aquifer data to string."""
+        """Create string with aquifer data in Nexus file format."""
         printable_str = ''
         aquifer_dict = self.properties
         for key, value in aquifer_dict.items():

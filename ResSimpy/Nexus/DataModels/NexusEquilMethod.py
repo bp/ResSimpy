@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Union, Optional
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import SUnits, TemperatureUnits, UnitSystem
 from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_INTSAT_KEYWORDS, EQUIL_KEYWORDS_VALUE_FLOAT
 from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_TABLE_KEYWORDS, EQUIL_SINGLE_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_COMPOSITION_OPTIONS
@@ -40,41 +41,43 @@ class NexusEquilMethod(DynamicProperty):
             self.properties = {}
         super().__init__(input_number=input_number, file=file)
 
-    def __repr__(self) -> str:
-        """Pretty printing equilibration data."""
-        printable_str = f'\nFILE_PATH: {self.file.location}\n'
+    def to_string(self) -> str:
+        """Create string with equilibration data in Nexus file format."""
+        printable_str = ''
         equil_dict = self.properties
         for key, value in equil_dict.items():
             if isinstance(value, pd.DataFrame):
-                table_text = f'{key}:'
+                table_text = f'{key}'
                 if key == 'COMPOSITION':
                     if 'X' in equil_dict.keys():
                         table_text += f" X {equil_dict['X']}"
                     if 'Y' in equil_dict.keys():
                         table_text += f" Y {equil_dict['Y']}"
                 printable_str += f'{table_text}\n'
-                printable_str += value.to_string(na_rep='')
-                printable_str += '\n\n'
+                printable_str += value.to_string(na_rep='', index=False) + '\n'
             elif isinstance(value, Enum):
-                printable_str += f'{key}: {value.name}\n'
+                if isinstance(value, UnitSystem) or isinstance(value, TemperatureUnits):
+                    printable_str += f'{value.value}\n'
+                elif isinstance(value, SUnits):
+                    printable_str += f'SUNITS {value.value}\n'
             elif value == '':
                 printable_str += f'{key}\n'
             elif key in ['INTSAT', 'VAITS']:
                 if value == 'MOBILE':
-                    printable_str += f'{key}: MOBILE\n'
+                    printable_str += f'{key}\n    MOBILE\n'
                     for mobkey in ['SORWMN', 'SORGMN', 'SGCMN']:
                         if mobkey in equil_dict.keys():
-                            printable_str += f'        {mobkey}: {equil_dict[mobkey]}\n'
+                            printable_str += f'        {mobkey} {equil_dict[mobkey]}\n'
                 for vaitkey in ['VAITS_TOLSG', 'VAITS_TOLSW']:
                     if vaitkey in equil_dict.keys():
-                        printable_str += f'    {vaitkey}: {equil_dict[vaitkey]}\n'
+                        printable_str += f'    {vaitkey} {equil_dict[vaitkey]}\n'
             elif key == 'OVERREAD':
                 if isinstance(value, list):
-                    printable_str += f"OVERREAD: {' '.join(value)}\n"
+                    printable_str += f"OVERREAD {' '.join(value)}\n"
             elif key not in ['SORWMN', 'SORGMN', 'SGCMN', 'VAITS_TOLSG', 'VAITS_TOLSW',
                              'OVERREAD', 'INTSAT', 'VAITS', 'MOBILE', 'X', 'Y']:
-                printable_str += f'{key}: {value}\n'
-
+                printable_str += f'{key} {value}\n'
+        printable_str += '\n'
         return printable_str
 
     def read_properties(self) -> None:

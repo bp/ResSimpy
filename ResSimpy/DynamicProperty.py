@@ -20,7 +20,7 @@ class DynamicProperty(ABC):
         self.file: File = file
 
     def __repr__(self) -> str:
-        """Pretty printing aquifer data."""
+        """Pretty printing dynamic property data."""
         printable_str = f'\nFILE_PATH: {self.file.location}\n'
         printable_str += self.to_string()
         return printable_str
@@ -30,7 +30,7 @@ class DynamicProperty(ABC):
         raise NotImplementedError('Implement in the derived class.')
 
     def write_to_file(self, overwrite_existing: bool = False, new_file_location: Optional[str] = None) -> None:
-        """Write aquifer data to file."""
+        """Write dynamic property data to file."""
         printable_str = self.to_string()
         new_file_contents = printable_str.splitlines(keepends=True)
         if overwrite_existing and new_file_location is not None:
