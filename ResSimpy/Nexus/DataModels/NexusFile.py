@@ -463,6 +463,9 @@ class NexusFile:
 
     def remove_object_from_file_as_list(self, objects_to_remove: list[UUID]) -> None:
         """Removes all associated lines relating to an object"""
+        if self.object_locations is None:
+            raise ValueError('Cannot remove object from object_locations as object_locations is None. '
+                             'Check object locations is being populated properly.')
         for obj_to_remove in objects_to_remove:
             obj_locs = self.object_locations.get(obj_to_remove, None)
             if obj_locs is None:

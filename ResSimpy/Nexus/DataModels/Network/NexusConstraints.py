@@ -6,7 +6,7 @@ from uuid import UUID
 
 import pandas as pd
 
-import ResSimpy.Nexus.nexus_collect_tables
+from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -71,14 +71,14 @@ class NexusConstraints:
     def load_constraints(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
         # CONSTRAINT keyword represents a table with a header and columns.
         # CONSTRAINTS keyword represents a list of semi structured constraints with a well_name and then constraints
-        new_constraints = ResSimpy.Nexus.nexus_collect_tables.collect_all_tables_to_objects(surface_file,
-                                                                                            {
-                                                                'CONSTRAINTS': NexusConstraint,
-                                                                'CONSTRAINT': NexusConstraint,
-                                                                'QMULT': NexusConstraint
-                                                                },
-                                                                                            start_date=start_date,
-                                                                                            default_units=default_units)
+        new_constraints = collect_all_tables_to_objects(surface_file,
+                                                        {
+                                                            'CONSTRAINTS': NexusConstraint,
+                                                            'CONSTRAINT': NexusConstraint,
+                                                            'QMULT': NexusConstraint
+                                                            },
+                                                        start_date=start_date,
+                                                        default_units=default_units)
         cons_list = new_constraints.get('CONSTRAINTS')
         if isinstance(cons_list, list):
             raise ValueError(
@@ -97,27 +97,41 @@ class NexusConstraints:
             return
         self.__constraints.update(additional_constraints)
 
-    def find_constraint(self, constraint_dict: dict[str, float | str | int]) -> NexusConstraint:
+    def find_constraint(self, object_name: str, constraint_dict: dict[str, float | str | int]) -> NexusConstraint:
         # get the name, filter by name, then filter by properties, check for uniqueness as an option?
         # TODO implement this with tests. Give it a dictionary and then filter out the constraints to give one
         #  that matches
         # implement a fuzzy matching (i.e. will work when not all the dictionary parameters are present
-        nexus_constraint: NexusConstraint = NexusConstraint(constraint_dict)
+        constraints = self.__constraints[object_name]
 
-        return nexus_constraint
+        matching_constraints = []
+        for constraint in constraints:
+            for prop, value in constraint_dict.items():
+                if getattr(constraint, prop) == value:
+                    continue
+                else:
+                    break
+            else:
+                matching_constraints.append(constraint)
+
+        if len(matching_constraints) == 1:
+            return matching_constraints[0]
+        else:
+            raise ValueError(f'No unique matching constraints with the properties provided.'
+                             f'Instead found: {len(matching_constraints)} matching constraints.')
 
     def remove_constraint(self, constraint_dict: Optional[dict[str, float | str | int]] = None,
                           constraint_id: Optional[UUID] = None) -> None:
         if constraint_dict is None and constraint_id is None:
             raise ValueError('no options provided for both constraint_id and constraint_dict')
         if constraint_dict is not None:
-            constraint_to_remove = self.find_constraint(constraint_dict)
+            constraint_to_remove = self.find_constraint(str(constraint_dict['name']), constraint_dict)
             constraint_id = constraint_to_remove.id
         if constraint_id is None:
             raise ValueError(f'No constraint found with {constraint_id=}')
         surface_file = self.__find_which_surface_file_from_id(constraint_id)
         surface_file.remove_object_from_file_as_list([constraint_id])
-        for name, list_constraints in self.__constraints:
+        for name, list_constraints in self.__constraints.items():
             for i, constraint in enumerate(list_constraints):
                 if constraint.id == constraint_id:
                     list_constraints.pop(i)

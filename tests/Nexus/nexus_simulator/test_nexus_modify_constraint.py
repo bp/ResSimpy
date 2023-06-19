@@ -3,7 +3,8 @@ from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
-from tests.utility_for_tests import check_file_read_write_is_correct
+from tests.multifile_mocker import mock_multiple_files
+from tests.utility_for_tests import check_file_read_write_is_correct, get_fake_nexus_simulator
 
 
 @pytest.mark.parametrize("file_contents, expected_result_file, expected_constraints",[
@@ -28,16 +29,31 @@ def test_remove_constraint(mocker, file_contents, expected_result_file, expected
     # Arrange
     remove_constraint = {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
       'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH}
-    NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
-    mock_nexus_network = mocker.MagicMock()
-    mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
-    constraints = NexusConstraints(mock_nexus_network)
-    expected_nexus_constraints = [NexusConstraint(x) for x in expected_constraints]
+
+    fcs_file_contents = '''RUN_UNITS ENGLISH
+    DATEFORMAT DD/MM/YYYY
+    RECURRENT_FILES
+    RUNCONTROL nexus_data/runcontrol.dat
+    SURFACE Network 1  /surface_file_01.dat'''
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            '/path/fcs_file.fcs': fcs_file_contents,
+            '/surface_file_01.dat': file_contents,
+            }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
+
     # make a mock for the write operation
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
+
+    expected_nexus_constraints = [NexusConstraint(x) for x in expected_constraints]
     # Act
-    constraints.remove_constraint(remove_constraint)
+    constraints = nexus_sim.network.Constraints.get_constraints()
+    nexus_sim.network.Constraints.remove_constraint(remove_constraint)
     result = constraints.get_constraints()
 
     # Assert
@@ -46,3 +62,31 @@ def test_remove_constraint(mocker, file_contents, expected_result_file, expected
                                      modifying_mock_open=writing_mock_open,
                                      mocker_fixture=mocker, write_file_name='/my/wellspec/file.dat',
                                      number_of_writes=1)
+
+def test_find_constraint(mocker):
+    # Arrange
+    mock_nexus_network = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
+    constraints = NexusConstraints(mock_nexus_network)
+    well1_constraint_props = ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000.0,
+                    'unit_system': UnitSystem.ENGLISH, 'max_wor': 95.0},
+            {'date': '01/12/2023', 'name': 'well1', 'max_surface_liquid_rate': None, 'max_wor': 95.0,
+                'unit_system': UnitSystem.ENGLISH},
+            {'date': '01/01/2024', 'name': 'well1', 'max_wor': 95.0, 'max_surface_oil_rate': 1.8,
+                'unit_system': UnitSystem.ENGLISH},
+            )
+    well2_constraint_props = ({'date': '01/01/2019', 'name': 'well2', 'max_surface_liquid_rate': 1.8, 'max_pressure': 10000.2,
+                                'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True,},
+    {'date': '01/12/2023', 'name': 'well2', 'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True,},)
+
+    existing_constraints = {'well1': [NexusConstraint(x) for x in well1_constraint_props],
+                            'well2': [NexusConstraint(x) for x in well2_constraint_props]}
+
+    constraints.__setattr__('_NexusConstraints__constraints', existing_constraints)
+    expected_constraint = NexusConstraint(well1_constraint_props[2])
+    find_constraint_dict = {'date': '01/01/2024', 'name': 'well1', 'max_wor': 95.0,}
+    # Act
+    result = constraints.find_constraint('well1', find_constraint_dict)
+
+    # Assert
+    assert result == expected_constraint
