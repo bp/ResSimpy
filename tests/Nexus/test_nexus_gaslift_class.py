@@ -83,13 +83,12 @@ def test_nexus_gaslift_repr():
                                                         })}
     expected_output = """
 FILE_PATH: test/file/gaslift.dat
-DESC: ['Optimal Gaslift Data']
-UNIT_SYSTEM: ENGLISH
-WCUT: 0.0 0.2 0.4
-QLIQ: 1000 3500
-PRESSURE: 2500 4500
-GL_TABLE:
-""" + gaslift_obj.properties['GL_TABLE'].to_string() + '\n\n'
+DESC Optimal Gaslift Data
+ENGLISH
+WCUT 0.0 0.2 0.4
+QLIQ 1000 3500
+PRESSURE 2500 4500
+""" + gaslift_obj.properties['GL_TABLE'].to_string(na_rep='', index=False) + '\n\n'
 
     # Act
     result = gaslift_obj.__repr__()

@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Optional, Union
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import SUnits, TemperatureUnits, UnitSystem
 from ResSimpy.Nexus.NexusKeywords.gaslift_keywords import GL_ARRAY_KEYWORDS, GASLIFT_KEYWORDS, GL_TABLE_HEADER_COLS
 from ResSimpy.DynamicProperty import DynamicProperty
 
@@ -36,21 +37,26 @@ class NexusGasliftMethod(DynamicProperty):
             self.properties = {}
         super().__init__(input_number=input_number, file=file)
 
-    def __repr__(self) -> str:
-        """Pretty printing gaslift data."""
-        printable_str = f'\nFILE_PATH: {self.file.location}\n'
+    def to_string(self) -> str:
+        """Create string with gaslift data in Nexus file format."""
+        printable_str = ''
         gl_dict = self.properties
         for key, value in gl_dict.items():
             if isinstance(value, pd.DataFrame):
-                printable_str += f'{key}:\n'
-                printable_str += value.to_string(na_rep='')
-                printable_str += '\n\n'
+                printable_str += value.to_string(na_rep='', index=False) + '\n'
             elif isinstance(value, Enum):
-                printable_str += f'{key}: {value.name}\n'
+                if isinstance(value, UnitSystem) or isinstance(value, TemperatureUnits):
+                    printable_str += f'{value.value}\n'
+                elif isinstance(value, SUnits):
+                    printable_str += f'SUNITS {value.value}\n'
+            elif key == 'DESC' and isinstance(value, list):
+                for desc_line in value:
+                    printable_str += 'DESC ' + desc_line + '\n'
             elif value == '':
                 printable_str += f'{key}\n'
             else:
-                printable_str += f'{key}: {value}\n'
+                printable_str += f'{key} {value}\n'
+        printable_str += '\n'
         return printable_str
 
     def read_properties(self) -> None:

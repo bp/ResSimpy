@@ -8,6 +8,7 @@ from ResSimpy.Nexus.NexusKeywords.hyd_keywords import HYD_ARRAY_KEYWORDS, HYD_TA
 from ResSimpy.Nexus.NexusKeywords.hyd_keywords import HYD_PRESSURE_KEYWORDS, HYD_SINGLE_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.hyd_keywords import HYD_KEYWORDS_VALUE_FLOAT, HYD_WATINJ_KEYWORDS_VALUE_FLOAT
 from ResSimpy.Nexus.NexusKeywords.hyd_keywords import HYD_ALQ_KEYWORD, HYD_ALQ_OPTIONS
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 from ResSimpy.DynamicProperty import DynamicProperty
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
@@ -40,27 +41,43 @@ class NexusHydraulicsMethod(DynamicProperty):
             self.properties = {}
         super().__init__(input_number=input_number, file=file)
 
-    def __repr__(self) -> str:
-        """Pretty printing hydraulics data."""
-        printable_str = f'\nFILE_PATH: {self.file.location}\n'
+    def to_string(self) -> str:
+        """Create string with hydraulics data in Nexus file format."""
+        printable_str = ''
         hyd_dict = self.properties
         for key, value in hyd_dict.items():
             if isinstance(value, pd.DataFrame):
-                printable_str += f'{key}:\n'
-                printable_str += value.to_string(na_rep='')
-                printable_str += '\n\n'
+                if key == 'HYD_TABLE':
+                    printable_str += ''
+                else:
+                    printable_str += f'{key}\n'
+                printable_str += value.to_string(na_rep='', index=False) + '\n'
+                if key == 'LIMITS':
+                    printable_str += 'ENDLIMITS\n'
+                printable_str += '\n'
+            elif key == 'DESC' and isinstance(value, list):
+                for desc_line in value:
+                    printable_str += 'DESC ' + desc_line + '\n'
             elif isinstance(value, Enum):
-                printable_str += f'{key}: {value.name}\n'
+                if isinstance(value, UnitSystem) or isinstance(value, TemperatureUnits):
+                    printable_str += f'{value.value}\n'
+                elif isinstance(value, SUnits):
+                    printable_str += f'SUNITS {value.value}\n'
             elif key == 'ALQ':
                 printable_str += f'{key}'
                 if 'ALQ_PARAM' in hyd_dict.keys():
                     printable_str += f" {hyd_dict['ALQ_PARAM']}"
-                printable_str += f': {value}\n'
-            elif key not in ['ALQ', 'ALQ_PARAM']:
+                printable_str += f' {value}\n'
+            elif key == 'WATINJ' and isinstance(value, dict):
+                printable_str += f'{key}\n'
+                for watinj_key in value.keys():
+                    printable_str += f'    {watinj_key} {value[watinj_key]}\n'
+            elif key not in ['ALQ', 'ALQ_PARAM', 'WATINJ']:
                 if value == '':
                     printable_str += f'{key}\n'
                 else:
-                    printable_str += f'{key}: {value}\n'
+                    printable_str += f'{key} {value}\n'
+        printable_str += '\n'
         return printable_str
 
     def read_properties(self) -> None:
