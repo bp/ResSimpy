@@ -52,7 +52,13 @@ MYTESTTOKEN
      C
      Ctoken_value''',
      'Ctoken_value'),
-], ids=['basic case', 'multiple lines', 'value on next line', 'Comment character C', 'complex C comment', ])
+     ("MYTESTTOKEN",
+     '''MYTESTTOKEN
+     C Comment line
+     "token value"''',
+     'token value'),
+     
+], ids=['basic case', 'multiple lines', 'value on next line', 'Comment character C', 'complex C comment','get value in double quotes' ])
 def test_get_token_value(mocker, line_contents, file_contents, expected_result):
     # Arrange
     dummy_file_as_list = [y for y in (x.strip() for x in file_contents.splitlines()) if y]
@@ -421,7 +427,10 @@ def test_get_multiple_sequential_tokens_fail_case():
     ("   \t   ", None),
     ("", None),
     ("\t   a", 'a'),
-    ("a", 'a')
+    ("a", 'a'),
+    ("\"a a\"",'a a'),
+    ("\"ABCD   \"",'ABCD   '),
+    ('"ABCD"',"ABCD")
 ])
 def test_get_next_value_single_line(line, expected_result):
     # Act
@@ -433,7 +442,8 @@ def test_get_next_value_single_line(line, expected_result):
 @pytest.mark.parametrize("file, expected_result", [
     (['\t ', '1'], '1'),
     (['\t ', '\n', '\n', '\n', '\n', '1'], '1'),
-    (['!Comment Line 1', '\n', '\n', '\t', ' !Comment Line 2 ', '\n', ' ABCDEFG '], 'ABCDEFG')
+    (['!Comment Line 1', '\n', '\n', '\t', ' !Comment Line 2 ', '\n', ' ABCDEFG '], 'ABCDEFG'),
+    (['!"First Value"','"Second Value"'],'Second Value')
 ])
 def test_get_next_value_multiple_lines(file, expected_result):
     # Act
