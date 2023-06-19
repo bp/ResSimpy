@@ -266,7 +266,7 @@ class NexusWells(Wells):
             additional_column_string = ' '.join(additional_na_values)
             split_comments = file_content[index].split('!', 1)
             if len(split_comments) == 1:
-                new_completion_line = split_comments[0] + ' ' + additional_column_string
+                new_completion_line = split_comments[0].replace('\n', '', 1) + ' ' + additional_column_string + '\n'
             else:
                 new_completion_line = split_comments[0] + additional_column_string + ' !' + split_comments[1]
 
@@ -314,7 +314,7 @@ class NexusWells(Wells):
         additional_column_string = ' '.join(additional_headers)
         split_comments = str(file_content[header_index]).split('!', 1)
         if len(split_comments) == 1:
-            new_header_line = split_comments[0] + ' ' + additional_column_string
+            new_header_line = split_comments[0].replace('\n', '', 1) + ' ' + additional_column_string + '\n'
         else:
             new_header_line = split_comments[0] + additional_column_string + ' !' + split_comments[1]
         if len(additional_headers) > 0:
