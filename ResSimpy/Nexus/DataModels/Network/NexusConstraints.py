@@ -122,15 +122,16 @@ class NexusConstraints:
 
     def remove_constraint(self, constraint_dict: Optional[dict[str, float | str | int]] = None,
                           constraint_id: Optional[UUID] = None) -> None:
-        """ Remove a constraint based on closest matching constraint, requires node name and date.\
+        """Remove a constraint based on closest matching constraint, requires node name and date.\
         Needs one of at least constraint dict or constraint id.
 
-       Args:
+        Args:
             constraint_dict (Optional[dict[str, float | str | int]]): Constraint matching these attributes will be
                 removed. Defaults to None.
             constraint_id (Optional[UUID]): Constraint matching this id will be removed.
                 Will not be used if constraint dict is provided. Defaults to None.
         """
+
         if constraint_dict is None and constraint_id is None:
             raise ValueError('no options provided for both constraint_id and constraint_dict')
         if constraint_dict is not None:

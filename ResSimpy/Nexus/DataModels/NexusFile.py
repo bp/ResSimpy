@@ -471,8 +471,11 @@ class NexusFile:
             if obj_locs is None:
                 continue
             sorted_obj_locs = sorted(obj_locs, reverse=True)
-            for index in sorted_obj_locs:
-                self.remove_from_file_as_list(index, objects_to_remove=[obj_to_remove])
+            for i, index in enumerate(sorted_obj_locs):
+                if i == 0:
+                    self.remove_from_file_as_list(index, objects_to_remove=[obj_to_remove])
+                else:
+                    self.remove_from_file_as_list(index)
 
     def remove_from_file_as_list(self, index: int, objects_to_remove: Optional[list[UUID]] = None,
                                  string_to_remove: Optional[str] = None) -> None:
