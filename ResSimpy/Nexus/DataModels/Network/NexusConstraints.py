@@ -122,6 +122,15 @@ class NexusConstraints:
 
     def remove_constraint(self, constraint_dict: Optional[dict[str, float | str | int]] = None,
                           constraint_id: Optional[UUID] = None) -> None:
+        """ Remove a constraint based on closest matching constraint, requires node name and date.\
+        Needs one of at least constraint dict or constraint id.
+
+       Args:
+            constraint_dict (Optional[dict[str, float | str | int]]): Constraint matching these attributes will be
+                removed. Defaults to None.
+            constraint_id (Optional[UUID]): Constraint matching this id will be removed.
+                Will not be used if constraint dict is provided. Defaults to None.
+        """
         if constraint_dict is None and constraint_id is None:
             raise ValueError('no options provided for both constraint_id and constraint_dict')
         if constraint_dict is not None:
@@ -129,8 +138,10 @@ class NexusConstraints:
             constraint_id = constraint_to_remove.id
         if constraint_id is None:
             raise ValueError(f'No constraint found with {constraint_id=}')
+        # find which file and remove from the file as list
         surface_file = self.__find_which_surface_file_from_id(constraint_id)
         surface_file.remove_object_from_file_as_list([constraint_id])
+        # remove from memory
         for name, list_constraints in self.__constraints.items():
             for i, constraint in enumerate(list_constraints):
                 if constraint.id == constraint_id:
