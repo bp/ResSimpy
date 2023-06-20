@@ -11,6 +11,7 @@ from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_EOSOPTIONS_PRIMARY_KEY
 from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_EOSOPTIONS_TRANS_TEST_KEYS, PVT_EOSOPTIONS_PHASEID_KEYS
 from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_EOSOPTIONS_TERTIARY_KEYS, PVT_ALL_TABLE_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_UNSAT_TABLE_INDICES
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 from ResSimpy.DynamicProperty import DynamicProperty
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_list_str, get_empty_eosopt_dict_union
@@ -77,45 +78,80 @@ class NexusPVTMethod(DynamicProperty):
             self.properties = {}
         super().__init__(input_number=input_number, file=file)
 
-    def __repr__(self) -> str:
-        """Pretty printing PVT data."""
-        printable_str = f'\nFILE_PATH: {self.file.location}\n'
-        printable_str += f'PVT_TYPE: {self.pvt_type}\n'
+    def to_string(self) -> str:
+        """Create string with PVT data in Nexus file format."""
+        printable_str = ''
         pvt_dict = self.properties
+        # Print description if present
+        if 'DESC' in pvt_dict.keys() and isinstance(pvt_dict['DESC'], list):
+            for desc_line in pvt_dict['DESC']:
+                printable_str += 'DESC ' + desc_line + '\n'
+        # Print PVT type and associated properties
+        printable_str += f'{self.pvt_type}'
+        if self.eos_nhc is not None:
+            printable_str += f' NHC {self.eos_nhc}'
+        for pvt_key in PVT_BLACKOIL_PRIMARY_KEYWORDS:
+            if pvt_key in pvt_dict.keys():
+                printable_str += f' {pvt_key} {pvt_dict[pvt_key]}'
+        printable_str += '\n'
+        if 'DRYGAS_MFP' in pvt_dict.keys():
+            printable_str += 'DRYGAS_MFP\n'
+        # Print EOS-specific required parameters, if present
+        if self.eos_components is not None:
+            if len(self.eos_components) > 0:
+                printable_str += f"COMPONENTS {' '.join(self.eos_components)}\n"
+        if self.eos_temp is not None:
+            printable_str += f'TEMP {self.eos_temp}\n'
         for key, value in pvt_dict.items():
             if isinstance(value, pd.DataFrame):
-                printable_str += f'{key}: \n'
-                printable_str += value.to_string(na_rep='')
-                printable_str += '\n\n'
+                printable_str += f'{key}\n'
+                if key == 'IGS_CP':
+                    printable_str += value.to_string(na_rep='', index=False, header=False) + '\n'
+                else:
+                    printable_str += value.to_string(na_rep='', index=False) + '\n'
+                if key in PVT_TABLES_WITH_ENDWORDS:
+                    printable_str += 'END'+key+'\n'
+                printable_str += '\n'
             elif isinstance(value, dict):
                 for subkey in value.keys():
-                    printable_str += f'{key} - {subkey}\n'
+                    printable_str += f"{key.replace('_',' ')} {subkey}\n"
                     df = value[subkey]
                     if isinstance(df, pd.DataFrame):
-                        printable_str += df.to_string(na_rep='')
-                    printable_str += '\n\n'
+                        printable_str += df.to_string(na_rep='', index=False) + '\n'
+                    printable_str += '\n'
             elif isinstance(value, Enum):
-                printable_str += f'{key}: {value.name}\n'
-            else:
-                printable_str += f'{key}: {value}\n'
+                if isinstance(value, UnitSystem) or isinstance(value, TemperatureUnits):
+                    printable_str += f'{value.value}\n'
+                elif isinstance(value, SUnits):
+                    printable_str += f'SUNITS {value.value}\n'
+            elif key not in [*PVT_BLACKOIL_PRIMARY_KEYWORDS, 'NHC', 'DESC', 'DRYGAS_MFP']:
+                if value == '':
+                    printable_str += f'{key}\n'
+                else:
+                    printable_str += f'{key} {value}\n'
         if len(self.eos_options.keys()) > 0:
             pvt_dict = self.eos_options
-            printable_str += 'EOSOPTIONS:\n'
+            printable_str += 'EOSOPTIONS'
+            if 'EOS_METHOD' in pvt_dict.keys():
+                printable_str += f" {pvt_dict['EOS_METHOD']}"
+            printable_str += '\n'
             for key, value in pvt_dict.items():
-                if isinstance(value, pd.DataFrame):
-                    printable_str += f'    {key}: \n'
-                    printable_str += value.to_string(na_rep='')
-                    printable_str += '\n\n'
+                if key == 'EOS_OPT_PRIMARY_LIST' and isinstance(value, list):
+                    for token in value:
+                        printable_str += f'    {token}\n'
+                elif isinstance(value, tuple):
+                    printable_str += f'    {key} {value[0]}'
+                    val_dict: dict[str, float] = value[1]
+                    for val_key, val_val in val_dict.items():
+                        printable_str += f' {val_key} {val_val}'
+                    printable_str += '\n'
                 elif isinstance(value, dict):
+                    printable_str += f'    {key}'
                     for subkey, subvalue in value.items():
-                        printable_str += f'    {key} - {subkey}\n'
-                        if isinstance(subvalue, pd.DataFrame):
-                            printable_str += subvalue.to_string(na_rep='')
-                        printable_str += '\n\n'
-                elif isinstance(value, Enum):
-                    printable_str += f'    {key}: {value.name}\n'
-                else:
-                    printable_str += f'    {key}: {value}\n'
+                        printable_str += f' {subkey} {subvalue}'
+                    printable_str += '\n'
+                elif key not in ['EOS_METHOD']:
+                    printable_str += f'    {key} {value}\n'
         return printable_str
 
     def __populate_eos_opts_to_tertiary_keys(self, primary_key: str, primary_key_default_val: str, single_line: str,
@@ -182,7 +218,7 @@ class NexusPVTMethod(DynamicProperty):
         else:  # Handle undersaturated tables
             if table_key == 'PRES':
                 table_name = 'UNSATGAS'
-                full_table_name = table_name
+                full_table_name = table_name + '_PRES'
             else:
                 table_name = 'UNSATOIL'
                 full_table_name = table_name + '_' + table_key
@@ -229,7 +265,7 @@ class NexusPVTMethod(DynamicProperty):
         else:  # Handle undersaturated tables
             if table_key == 'PRES':
                 table_name = 'UNSATGAS'
-                full_table_name = table_name
+                full_table_name = table_name + '_PRES'
             else:
                 table_name = 'UNSATOIL'
                 full_table_name = table_name + '_' + table_key
@@ -402,8 +438,12 @@ class NexusPVTMethod(DynamicProperty):
 
         # Read in tables
         for key in pvt_table_indices.keys():
-            self.properties[key] = nfo.read_table_to_df(file_as_list[
-                                                        pvt_table_indices[key][0]:pvt_table_indices[key][1]])
+            if key == 'IGS_CP':
+                self.properties[key] = nfo.read_table_to_df(file_as_list[
+                    pvt_table_indices[key][0]:pvt_table_indices[key][1]], noheader=True)
+            else:
+                self.properties[key] = nfo.read_table_to_df(file_as_list[
+                    pvt_table_indices[key][0]:pvt_table_indices[key][1]])
         for key in pvt_table_indices_dict.keys():
             self.properties[key] = {}
             for subkey in pvt_table_indices_dict[key].keys():

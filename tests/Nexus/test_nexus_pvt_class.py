@@ -149,10 +149,10 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits
                                                     'BO': [1.25, 1.24],
                                                     'VO': [0.99, 0.98]
                                                     })},
-          'UNSATGAS': {'3515.0': pd.DataFrame({'RV': [0.0],
-                                               'BG': [0.787],
-                                               'VG': [0.0193]
-                                            })}
+          'UNSATGAS_PRES': {'3515.0': pd.DataFrame({'RV': [0.0],
+                                                     'BG': [0.787],
+                                                     'VG': [0.0193]
+                                                     })}
           }),
     ("""
     GASWATER SPECG 0.6
@@ -411,23 +411,148 @@ def test_read_pvt_properties_from_file(mocker, file_contents, expected_pvt_prope
             assert expected_pvt_properties[key] == props[key]
 
 
-def test_nexus_pvt_repr():
+def test_nexus_blackoil_pvt_repr():
     # Arrange
     pvt_file = NexusFile(location='test/file/pvt.dat')
     pvt_obj = NexusPVTMethod(file=pvt_file, input_number=1)
     pvt_obj.pvt_type = 'BLACKOIL'
-    pvt_obj.properties['SATURATED'] = pd.DataFrame({'PRES': [14.7, 115., 2515, 3515],
+    pvt_obj.properties = {'API': 30.0, 'SPECG': 0.6,
+          'UNIT_SYSTEM': UnitSystem.ENGLISH, 'DESC': ['This is first line of description',
+                                             'and this is second line of description'
+                                             ],
+          'SATURATED': pd.DataFrame({'PRES': [14.7, 115., 2515, 3515],
                                      'BO': [1.05, 1.08, 1.25, 1.33],
                                      'BG': [225, 25, 1.089, 0.787],
                                      'RS': [0.005, 0.045, 0.505, 0.69],
                                      'VO': [3.93, 2.78, 0.99, 0.79],
                                      'VG': [0.0105, 0.0109, 0.0193, 0.0193]
-                                     })
+                                     }),
+          'UNSATOIL_PSAT': {'2000.0': pd.DataFrame({'PRES': [2515, 3515],
+                                                    'BO': [1.25, 1.24],
+                                                    'VO': [0.99, 0.98]
+                                                    }),
+                            '1900.0': pd.DataFrame({'PRES': [2515, 3515],
+                                                    'BO': [1.25, 1.24],
+                                                    'VO': [0.99, 0.98]
+                                                    })
+                            },
+          'UNSATGAS_PRES': {'3515.0': pd.DataFrame({'RV': [0.0],
+                                                     'BG': [0.787],
+                                                     'VG': [0.0193]
+                                                  }),
+                             '3415.0': pd.DataFrame({'RV': [0.0],
+                                                     'BG': [0.787],
+                                                     'VG': [0.0193]
+                                                  })
+                              }
+          }
     expected_output = """
 FILE_PATH: test/file/pvt.dat
-PVT_TYPE: BLACKOIL
-SATURATED: 
-""" + pvt_obj.properties['SATURATED'].to_string(na_rep='') + '\n\n'
+DESC This is first line of description
+DESC and this is second line of description
+BLACKOIL API 30.0 SPECG 0.6
+ENGLISH
+SATURATED
+""" + pvt_obj.properties['SATURATED'].to_string(na_rep='', index=False) + '\n' + \
+"""
+UNSATOIL PSAT 2000.0
+""" + pvt_obj.properties['UNSATOIL_PSAT']['2000.0'].to_string(na_rep='', index=False) + '\n' + \
+"""
+UNSATOIL PSAT 1900.0
+""" + pvt_obj.properties['UNSATOIL_PSAT']['1900.0'].to_string(na_rep='', index=False) + '\n' + \
+"""
+UNSATGAS PRES 3515.0
+""" + pvt_obj.properties['UNSATGAS_PRES']['3515.0'].to_string(na_rep='', index=False) + '\n' + \
+"""
+UNSATGAS PRES 3415.0
+""" + pvt_obj.properties['UNSATGAS_PRES']['3415.0'].to_string(na_rep='', index=False) + '\n\n'
+
+    # Act
+    result = pvt_obj.__repr__()
+
+    # Assert
+    assert result == expected_output
+
+
+def test_nexus_eos_pvt_repr():
+    # Arrange
+    pvt_file = NexusFile(location='test/file/pvt.dat')
+    pvt_obj = NexusPVTMethod(file=pvt_file, input_number=1)
+    pvt_obj.pvt_type = 'EOS'
+    pvt_obj.eos_nhc = 6
+    pvt_obj.eos_components = ['C1', 'C3', 'C6', 'C10', 'C15', 'C20']
+    pvt_obj.eos_temp = 160.
+    pvt_obj.eos_options = {'EOS_METHOD': 'PR',
+                           'EOS_OPT_PRIMARY_LIST': ['ZGIBBS', 'FLASH_GIBBS_ON', 'STKATZOFF', 'CAPILLARYFLASH', 'VISPE'],
+                           'FUGERR': 6,
+                           'TRANSITION': 'NEIGHBOR',
+                           'PHASEID': 'FLASH',
+                           'TRANS_OPTIMIZATION': {'TDELP': 1, 'TDELZ': 0.001, },
+                           'TRANS_TEST': 'GIBBS',
+                           'TOL': 0.0001,
+                           'TOLSS': 0.01
+                           }
+    pvt_obj.properties = {'DESC': ['This is a', 'long EOS test case'],
+                          'UNIT_SYSTEM': UnitSystem.ENGLISH,
+                          'TEMP_UNIT': TemperatureUnits.FAHR,
+                          'PROPS': pd.DataFrame({'COMPONENT': ['C1', 'C3', 'C6', 'C10', 'C15', 'C20'],
+                                                  'MOLWT': [16.04, 44.01, 86.18, 142.29, 206, 282],
+                                                  'OMEGAA': [0.4572355, 0.4572355, 0.4572355, 0.4572355, 0.4572355, 0.4572355],
+                                                  'OMEGAB': [0.0777961, 0.0777961, 0.0777961, 0.0777961, 0.0777961, 0.0777961],
+                                                  'TC': [-116.67, 206.03, 453.73, 652.13, 810.33, 920.33],
+                                                  'PC': [667.8, 616.3, 436.99, 304, 200, 162],
+                                                  'VC': [1.598, 3.129, 5.922, 10.09, 16.69, 21.48],
+                                                  'ACENTR': [0.013, 0.1524, 0.3007, 0.4885, 0.65, 0.85]
+                                                  }),
+                          'BINA': pd.DataFrame({'COMPONENT': ['C3', 'C6', 'C10', 'C15', 'C20'],
+                                                  'C1':  [0.0,    0.0,    0.0,    0.05,   0.05],
+                                                  'C3':  [np.nan, 0.0,    0.0,    0.005,  0.005],
+                                                  'C6':  [np.nan, np.nan, 0.0,    0.0,    0.0],
+                                                  'C10': [np.nan, np.nan, np.nan, 0.0,    0.0],
+                                                  'C15': [np.nan, np.nan, np.nan, np.nan, 0.0]
+                                                  }),
+                          'PEDTUNE': pd.DataFrame({'INDEX': [1, 2, 3, 4, 5, 6],
+                                                  'COEFF': [1, 1, 1.847, 0.5173, 0.007378, 0.031]
+                                                  })
+                            }
+    expected_output = """
+FILE_PATH: test/file/pvt.dat
+DESC This is a
+DESC long EOS test case
+EOS NHC 6
+COMPONENTS C1 C3 C6 C10 C15 C20
+TEMP 160.0
+ENGLISH
+FAHR
+PROPS
+""" + pvt_obj.properties['PROPS'].to_string(na_rep='', index=False) + \
+"""
+ENDPROPS
+
+BINA
+""" + pvt_obj.properties['BINA'].to_string(na_rep='', index=False) + \
+"""
+ENDBINA
+
+PEDTUNE
+""" + pvt_obj.properties['PEDTUNE'].to_string(na_rep='', index=False) + \
+"""
+ENDPEDTUNE
+
+EOSOPTIONS PR
+    ZGIBBS
+    FLASH_GIBBS_ON
+    STKATZOFF
+    CAPILLARYFLASH
+    VISPE
+    FUGERR 6
+    TRANSITION NEIGHBOR
+    PHASEID FLASH
+    TRANS_OPTIMIZATION TDELP 1 TDELZ 0.001
+    TRANS_TEST GIBBS
+    TOL 0.0001
+    TOLSS 0.01
+"""
 
     # Act
     result = pvt_obj.__repr__()

@@ -33,16 +33,17 @@ class DynamicProperty(ABC):
         """Write dynamic property data to file."""
         printable_str = self.to_string()
         new_file_contents = printable_str.splitlines(keepends=True)
-        if overwrite_existing and new_file_location is not None:
+        if overwrite_existing is True and new_file_location is not None:
             raise ValueError('Please specify only one of either overwrite_existing or new_file_location.')
 
         if new_file_location is not None:
             new_file = File(file_content_as_list=new_file_contents, location=new_file_location)
             new_file.write_to_file()
             return
-        elif not overwrite_existing:
-            raise ValueError('Please specify either overwrite_existing or new_file location.')
+        elif overwrite_existing is False:
+            raise ValueError('Please specify either overwrite_existing as True or provide new_file_location.')
 
         # Overwriting existing file contents
-        self.file.file_content_as_list = new_file_contents
-        self.file.write_to_file()
+        if overwrite_existing is True:
+            self.file.file_content_as_list = new_file_contents
+            self.file.write_to_file()
