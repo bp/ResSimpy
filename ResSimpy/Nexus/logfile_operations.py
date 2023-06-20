@@ -21,7 +21,7 @@ class Logging:
             __simulation_end_time (Optional[str]): Execution end time of the last time the simulation was run
             __previous_run_time (Optional[str]): Difference between simulation execution start time and end time.
         """
-        self.model = model
+        self.__model = model
         self.__job_id: int = -1
         self.__simulation_start_time: Optional[str] = None
         self.__simulation_end_time: Optional[str] = None
@@ -153,17 +153,17 @@ class Logging:
             Optional[str]: The path of the .log file from the simulation if found. If not found returns None.
         """
         folder_path = os.path.dirname(
-            self.model.original_fcs_file_path) if from_startup else os.path.dirname(self.model.origin)
+            self.__model.original_fcs_file_path) if from_startup else os.path.dirname(self.__model.origin)
         files = os.listdir(folder_path)
-        original_fcs_file_location = os.path.basename(self.model.original_fcs_file_path)
+        original_fcs_file_location = os.path.basename(self.__model.original_fcs_file_path)
         log_file_name = os.path.splitext(original_fcs_file_location)[
-                            0] + ".log" if from_startup else self.model.root_name + ".log"
+                            0] + ".log" if from_startup else self.__model.root_name + ".log"
 
         if log_file_name in files:
             if from_startup:
                 file_location = folder_path
             else:
-                file_location = self.model.destination if self.model.destination is not None else folder_path
+                file_location = self.__model.destination if self.__model.destination is not None else folder_path
 
             log_file_path = file_location + "/" + log_file_name
             return log_file_path
@@ -270,7 +270,7 @@ class Logging:
         time_heading_location = None
         last_time = None
         for line in log_file:
-            case_name_string = f"Case Name = {self.model.root_name}"
+            case_name_string = f"Case Name = {self.__model.root_name}"
             if case_name_string in line:
                 read_in_times = True
                 continue
@@ -304,10 +304,10 @@ class Logging:
                             last_time = next_value
 
         if last_time is not None:
-            days_completed = self.model.runcontrol.convert_date_to_number(last_time)
-            if self.model.runcontrol.times is None:
+            days_completed = self.__model.runcontrol.convert_date_to_number(last_time)
+            if self.__model.runcontrol.times is None:
                 raise ValueError("No times provided in the instance - please read them in from runcontrol file")
-            total_days = self.model.runcontrol.convert_date_to_number(self.model.runcontrol.times[-1])
+            total_days = self.__model.runcontrol.convert_date_to_number(self.__model.runcontrol.times[-1])
             return round((days_completed / total_days) * 100, 1)
 
         return 0
