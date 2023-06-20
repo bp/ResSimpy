@@ -68,7 +68,39 @@ def test_find_constraint(mocker):
     [{'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
     'unit_system': UnitSystem.ENGLISH}], 2),
 
-    ], ids=['basic_test', 'over multiple lines'])
+    (''' TIME 01/01/2019
+    CONSTRAINTS
+    well2    QLIQSMAX- 10000.0 QLIQSMAX 15.5
+    well1	 QLIQSMAX 	3884.0  QWSMAX 	0
+    well2	 QWSMAX 	0.0
+    ENDCONSTRAINTS
+    TIME 01/02/2019
+    CONSTRAINTS
+    well2    QLIQSMAX 10000.0 WORMAX 15.5
+    well1	 QLIQSMAX 	1000  QWSMAX 	10
+    well2	 QWSMAX 	0.0
+    ENDCONSTRAINTS
+    ''',
+    ''' TIME 01/01/2019
+    CONSTRAINTS
+    well1	 QLIQSMAX 	3884.0  QWSMAX 	0
+    ENDCONSTRAINTS
+    TIME 01/02/2019
+    CONSTRAINTS
+    well2    QLIQSMAX 10000.0 WORMAX 15.5
+    well1	 QLIQSMAX 	1000  QWSMAX 	10
+    well2	 QWSMAX 	0.0
+    ENDCONSTRAINTS
+    ''',
+    [{'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
+    'unit_system': UnitSystem.ENGLISH},
+    {'date': '01/02/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000, 'max_surface_water_rate': 10,
+    'unit_system': UnitSystem.ENGLISH},
+    {'date': '01/02/2019', 'name': 'well2', 'max_surface_liquid_rate': 10000.0, 'max_surface_water_rate': 0,
+           'max_wor': 15.5, 'unit_system': UnitSystem.ENGLISH}
+    ], 2),
+
+    ], ids=['basic_test', 'over multiple lines', 'multiple_dates'])
 def test_remove_constraint(mocker, file_contents, expected_result_file, expected_constraints, expected_number_writes):
     # Arrange
     remove_constraint = {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
@@ -109,6 +141,8 @@ def test_remove_constraint(mocker, file_contents, expected_result_file, expected
 
     # Assert
     assert result == expected_constraint_dict
+    assert result['well1'] == expected_constraint_dict['well1']
+    assert result['well2'] == expected_constraint_dict['well2']
     check_file_read_write_is_correct(expected_file_contents=expected_result_file,
                                      modifying_mock_open=writing_mock_open,
                                      mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
