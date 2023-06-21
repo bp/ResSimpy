@@ -807,15 +807,12 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
                 # use the previous object to update this
                 existing_constraint = all_matching_existing_constraints[-1]
                 new_object_date = getattr(existing_constraint, 'date', None)
-                if new_object_date is None or new_object_date != current_date:
-                    # take a copy of the object if it has a different date to ensure it doesn't affect\
-                    # previous timesteps
-                    new_object = copy.deepcopy(existing_constraint)
-                    new_object.update(keyword_store)
-                else:
+                if new_object_date is not None and new_object_date == current_date:
                     # otherwise just update the object inplace and don't add it to the return list
                     existing_constraint.update(keyword_store)
                     continue
+                else:
+                    new_object = row_object(keyword_store)
             else:
                 new_object = row_object(keyword_store)
         else:
