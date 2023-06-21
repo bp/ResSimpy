@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 from typing import Optional, TYPE_CHECKING
 
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
