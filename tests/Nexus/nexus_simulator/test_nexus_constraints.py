@@ -7,7 +7,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
-from multifile_mocker import mock_multiple_files
+from tests.multifile_mocker import mock_multiple_files
 @pytest.mark.parametrize("file_contents, expected_content",[
     #'basic_test'
     (''' CONSTRAINTS

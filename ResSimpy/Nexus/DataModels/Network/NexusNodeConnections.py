@@ -3,8 +3,7 @@ from dataclasses import dataclass, field
 import pandas as pd
 from typing import Sequence, Optional, TYPE_CHECKING
 
-import ResSimpy.Nexus.nexus_collect_tables
-import ResSimpy.Nexus.nexus_file_operations as nfo
+from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
@@ -50,8 +49,8 @@ class NexusNodeConnections(NodeConnections):
         """Calls load connections and appends the list of discovered NodeConnections into the NexusNodeConnection \
             object.
         """
-        new_connections = ResSimpy.Nexus.nexus_collect_tables.collect_all_tables_to_objects(surface_file, {'NODECON': NexusNodeConnection},
-                                                                                            start_date=start_date, default_units=default_units)
+        new_connections = collect_all_tables_to_objects(surface_file, {'NODECON': NexusNodeConnection},
+                                                        start_date=start_date, default_units=default_units)
         cons_list = new_connections.get('NODECON')
         if isinstance(cons_list, dict):
             raise ValueError(

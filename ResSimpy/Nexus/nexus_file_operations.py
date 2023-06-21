@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 from enum import Enum
 from functools import partial
 from io import StringIO

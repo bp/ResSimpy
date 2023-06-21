@@ -11,19 +11,20 @@ from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
-import ResSimpy.Nexus.nexus_file_operations as nfo
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
+    from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
 
 @dataclass
 class NexusConstraints:
     __constraints: dict[str, list[NexusConstraint]] = field(default_factory=lambda: {})
 
-    def __init__(self, parent_network: NexusNetwork) -> None:
+    def __init__(self, parent_network: NexusNetwork, model: NexusSimulator) -> None:
         self.__parent_network: NexusNetwork = parent_network
         self.__constraints: dict[str, list[NexusConstraint]] = {}
+        self.__model: NexusSimulator = model
 
     def get_constraints(self, object_name: Optional[str] = None, date: Optional[str] = None) -> \
             dict[str, list[NexusConstraint]]:
@@ -152,9 +153,9 @@ class NexusConstraints:
         """Finds the surface file with the object id requested."""
         # TODO: make this generic with the find_which_wellspec_file_from_completion_id.
 
-        if self.__parent_network.model.fcs_file.surface_files is None:
-            raise ValueError(f'No surface file found in fcs file at {self.__parent_network.model.fcs_file.location}')
-        surface_files = [x for x in self.__parent_network.model.fcs_file.surface_files.values() if
+        if self.__model.fcs_file.surface_files is None:
+            raise ValueError(f'No surface file found in fcs file at {self.__model.fcs_file.location}')
+        surface_files = [x for x in self.__model.fcs_file.surface_files.values() if
                          x.object_locations is not None and constraint_id in x.object_locations]
         if len(surface_files) == 0:
             raise FileNotFoundError(f'No surface file found with an existing constraint that has: {constraint_id=}')

@@ -3,11 +3,10 @@ from dataclasses import dataclass, field
 from typing import Optional, TYPE_CHECKING
 import pandas as pd
 
-import ResSimpy.Nexus.nexus_collect_tables
+from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
-import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 
 if TYPE_CHECKING:
@@ -49,9 +48,9 @@ class NexusWellheads:
         raise NotImplementedError('To be implemented')
 
     def load_wellheads(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
-        new_wellheads = ResSimpy.Nexus.nexus_collect_tables.collect_all_tables_to_objects(surface_file, {'WELLHEAD': NexusWellhead},
-                                                                                          start_date=start_date,
-                                                                                          default_units=default_units)
+        new_wellheads = collect_all_tables_to_objects(surface_file, {'WELLHEAD': NexusWellhead},
+                                                      start_date=start_date,
+                                                      default_units=default_units)
         wellheads_list = new_wellheads.get('WELLHEAD')
         if isinstance(wellheads_list, dict):
             raise ValueError('Incompatible data format for additional wells. Expected type "list" instead got "dict"')
