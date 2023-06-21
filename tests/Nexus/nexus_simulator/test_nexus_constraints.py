@@ -8,6 +8,8 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.multifile_mocker import mock_multiple_files
+from tests.utility_for_tests import get_fake_nexus_simulator
+
 @pytest.mark.parametrize("file_contents, expected_content",[
     #'basic_test'
     (''' CONSTRAINTS
@@ -196,8 +198,11 @@ def test_load_constraints(mocker, file_contents, expected_content):
     mock_nexus_network = mocker.MagicMock()
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
     expected_df = pd.DataFrame(expected_content)
+
+    mock_nexus_sim = get_fake_nexus_simulator(mocker)
+
     # Act
-    constraints = NexusConstraints(mock_nexus_network)
+    constraints = NexusConstraints(mock_nexus_network, mock_nexus_sim)
     constraints.load_constraints(surface_file, start_date, UnitSystem.ENGLISH)
     result = constraints.get_constraints()
     result_single = constraints.get_constraints(object_name='well1')

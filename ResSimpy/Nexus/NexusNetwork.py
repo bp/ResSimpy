@@ -40,7 +40,7 @@ class NexusNetwork:
         self.WellConnections: NexusWellConnections = NexusWellConnections(self)
         self.Wellheads: NexusWellheads = NexusWellheads(self)
         self.Wellbores: NexusWellbores = NexusWellbores(self)
-        self.Constraints: NexusConstraints = NexusConstraints(self)
+        self.Constraints: NexusConstraints = NexusConstraints(self, model)
 
     def get_load_status(self) -> bool:
         if not self.__has_been_loaded:
