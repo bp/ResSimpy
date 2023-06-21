@@ -8,6 +8,7 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.NexusKeywords.separator_keywords import SEPARATOR_KEYS_INT, SEPARATOR_KEYS_FLOAT
 from ResSimpy.Nexus.NexusKeywords.separator_keywords import SEPARATOR_KEYWORDS
 from ResSimpy.DynamicProperty import DynamicProperty
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 
 
 @dataclass(kw_only=True, repr=False)  # Doesn't need to write an _init_, _eq_ methods, etc.
@@ -40,20 +41,32 @@ class NexusSeparatorMethod(DynamicProperty):
             self.properties = {}
         super().__init__(input_number=input_number, file=file)
 
-    def __repr__(self) -> str:
-        """Pretty printing separator data."""
-        printable_str = f'\nFILE_PATH: {self.file.location}\n'
-        printable_str += f'SEPARATOR_TYPE: {self.separator_type}\n'
+    def to_string(self) -> str:
+        """Create string with separator data in Nexus file format."""
+        printable_str = ''
         sep_dict = self.properties
         for key, value in sep_dict.items():
-            if isinstance(value, pd.DataFrame):
-                printable_str += f'{key}: \n'
-                printable_str += value.to_string(na_rep='')
-                printable_str += '\n\n'
+            if key == 'DESC' and isinstance(value, list):
+                for desc_line in value:
+                    printable_str += 'DESC ' + desc_line + '\n'
+            elif key == 'SEPARATOR_TABLE' and isinstance(value, pd.DataFrame):
+                if self.separator_type == 'GASPLANT':
+                    printable_str += 'RECFAC_TABLE\n'
+                printable_str += value.to_string(na_rep='', index=False) + '\n'
+                if self.separator_type == 'GASPLANT':
+                    printable_str += 'ENDRECFAC_TABLE\n'
+                printable_str += '\n'
             elif isinstance(value, Enum):
-                printable_str += f'{key}: {value.name}\n'
+                if isinstance(value, UnitSystem) or isinstance(value, TemperatureUnits):
+                    printable_str += f'{value.value}\n'
+                elif isinstance(value, SUnits):
+                    printable_str += f'SUNITS {value.value}\n'
+            elif key == 'KEYCPTLIST' and isinstance(value, list):
+                printable_str += f"{key} {' '.join(value)}\n"
+            elif value == '':
+                printable_str += f'{key}\n'
             else:
-                printable_str += f'{key}: {value}\n'
+                printable_str += f'{key} {value}\n'
         return printable_str
 
     def read_properties(self) -> None:
@@ -89,6 +102,7 @@ class NexusSeparatorMethod(DynamicProperty):
                 continue
             elif nfo.check_token('BOSEP', line):  # Black oil separator table
                 self.separator_type = 'BLACKOIL'
+                self.properties['BOSEP'] = ''
                 line_indx += 1
                 continue
 

@@ -272,6 +272,7 @@ def test_nexus_hydraulics_repr():
                           'NOCHK': ''}
     expected_output = """
 FILE_PATH: test/file/hyd.dat
+
 DESC Hydraulics Data
 ENGLISH
 QOIL 1.0 1000. 3000.

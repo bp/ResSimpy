@@ -373,6 +373,7 @@ def test_nexus_relpm_repr():
           }
     expected_output = """
 FILE_PATH: test/file/relpm.dat
+
 DESC This is first line of description
 DESC and this is second line of description
 WOTABLE LOW_SAL

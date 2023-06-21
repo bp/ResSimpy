@@ -40,6 +40,7 @@ class NexusSeparatorMethods(Separator):
             printable_str += '\n--------------------------------\n'
             printable_str += f'SEPARATOR method {table_num}\n'
             printable_str += '--------------------------------\n'
+            printable_str += f'\nSEPARATOR_TYPE: {self.__inputs[table_num].separator_type}\n'
             printable_str += self.__inputs[table_num].__repr__()
             printable_str += '\n'
 

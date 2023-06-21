@@ -83,6 +83,7 @@ def test_nexus_gaslift_repr():
                                                         })}
     expected_output = """
 FILE_PATH: test/file/gaslift.dat
+
 DESC Optimal Gaslift Data
 ENGLISH
 WCUT 0.0 0.2 0.4

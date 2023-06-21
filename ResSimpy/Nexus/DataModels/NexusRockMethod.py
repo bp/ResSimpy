@@ -7,7 +7,7 @@ from ResSimpy.Nexus.NexusKeywords.rock_keywords import ROCK_ALL_TABLE_KEYWORDS, 
 from ResSimpy.Nexus.NexusKeywords.rock_keywords import ROCK_SINGLE_KEYWORDS, ROCK_KEYWORDS_VALUE_STR
 from ResSimpy.Nexus.NexusKeywords.rock_keywords import ROCK_KEYWORDS, ROCK_REV_IRREV_OPTIONS
 from ResSimpy.DynamicProperty import DynamicProperty
-
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
@@ -38,28 +38,34 @@ class NexusRockMethod(DynamicProperty):
             self.properties = {}
         super().__init__(input_number=input_number, file=file)
 
-    def __repr__(self) -> str:
-        """Pretty printing rock properties data."""
-        printable_str = f'\nFILE_PATH: {self.file.location}\n'
+    def to_string(self) -> str:
+        """Create string with rock properties data, in Nexus file format."""
+        printable_str = ''
         rock_dict = self.properties
         for key, value in rock_dict.items():
-            if isinstance(value, pd.DataFrame):
-                printable_str += f'{key}:\n'
-                printable_str += value.to_string(na_rep='')
-                printable_str += '\n\n'
+            if key == 'DESC' and isinstance(value, list):
+                for desc_line in value:
+                    printable_str += 'DESC ' + desc_line + '\n'
+            elif isinstance(value, pd.DataFrame):
+                printable_str += f'{key}\n'
+                printable_str += value.to_string(na_rep='', index=False) + '\n\n'
             elif isinstance(value, dict):
+                printable_str += f"{key.replace('_',' ')}\n"
                 for subkey in value.keys():
-                    printable_str += f'{key} - {subkey}\n'
+                    printable_str += f"SWINIT {subkey}\n"
                     df = value[subkey]
                     if isinstance(df, pd.DataFrame):
-                        printable_str += df.to_string(na_rep='')
-                    printable_str += '\n\n'
+                        printable_str += df.to_string(na_rep='', index=False) + '\n'
+                    printable_str += '\n'
             elif isinstance(value, Enum):
-                printable_str += f'{key}: {value.name}\n'
+                if isinstance(value, UnitSystem) or isinstance(value, TemperatureUnits):
+                    printable_str += f'{value.value}\n'
+                elif isinstance(value, SUnits):
+                    printable_str += f'SUNITS {value.value}\n'
             elif value == '':
                 printable_str += f'{key}\n'
             else:
-                printable_str += f'{key}: {value}\n'
+                printable_str += f'{key} {value}\n'
         return printable_str
 
     def read_properties(self) -> None:

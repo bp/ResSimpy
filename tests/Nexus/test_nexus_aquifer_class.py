@@ -144,6 +144,7 @@ def test_nexus_aquifer_repr():
           }
     expected_output = """
 FILE_PATH: test/file/aquifer.dat
+
 DESC This is first line of description
 DESC and this is second line of description
 FETKOVICH

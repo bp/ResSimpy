@@ -21,7 +21,7 @@ class DynamicProperty(ABC):
 
     def __repr__(self) -> str:
         """Pretty printing dynamic property data."""
-        printable_str = f'\nFILE_PATH: {self.file.location}\n'
+        printable_str = f'\nFILE_PATH: {self.file.location}\n\n'
         printable_str += self.to_string()
         return printable_str
 

@@ -52,9 +52,6 @@ class NexusRelPermMethod(DynamicProperty):
         printable_str = ''
         # Handle non-hysteresis relperm and capillary pressure parameters
         relperm_dict = self.properties
-        if 'DESC' in relperm_dict.keys() and isinstance(relperm_dict['DESC'], list):
-            for desc_line in relperm_dict['DESC']:
-                printable_str += 'DESC ' + desc_line + '\n'
         stone1_options = {'STONE1': ['SOMOPT1', 'SOMOPT2', 'SOMOPT3', 'ST1EXP', 'ST1EPS', 'ST1NU'],
                           'STONE1_WAT': ['SWMOPT1', 'SWMOPT2']}
         for key, value in relperm_dict.items():
@@ -93,6 +90,9 @@ class NexusRelPermMethod(DynamicProperty):
                     printable_str += f'    {subkey} {subvalue}\n'
                 if key in RELPM_NONDARCY_KEYWORDS:
                     printable_str += 'END'+key+'\n'
+            elif key == 'DESC' and isinstance(value, list):
+                for desc_line in value:
+                    printable_str += 'DESC ' + desc_line + '\n'
             elif isinstance(value, Enum):
                 if isinstance(value, UnitSystem) or isinstance(value, TemperatureUnits):
                     printable_str += f'{value.value}\n'

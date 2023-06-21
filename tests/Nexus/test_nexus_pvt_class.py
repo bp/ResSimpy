@@ -448,6 +448,7 @@ def test_nexus_blackoil_pvt_repr():
           }
     expected_output = """
 FILE_PATH: test/file/pvt.dat
+
 DESC This is first line of description
 DESC and this is second line of description
 BLACKOIL API 30.0 SPECG 0.6
@@ -517,6 +518,7 @@ def test_nexus_eos_pvt_repr():
                             }
     expected_output = """
 FILE_PATH: test/file/pvt.dat
+
 DESC This is a
 DESC long EOS test case
 EOS NHC 6

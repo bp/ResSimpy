@@ -267,6 +267,7 @@ def test_nexus_equil_repr():
                                                          })}
     expected_output = """
 FILE_PATH: test/file/equil.dat
+
 PINIT 3600.0
 DINIT 9035.0
 GOC 8800.0
