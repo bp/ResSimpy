@@ -129,10 +129,9 @@ from multifile_mocker import mock_multiple_files
             'unit_system': UnitSystem.ENGLISH, 'max_wor': 95.0},
     {'date': '01/01/2019', 'name': 'well2', 'max_surface_liquid_rate': 1.8, 'max_pressure': 10000.2,
         'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True,},
-    {'date': '01/12/2023', 'name': 'well1', 'max_surface_liquid_rate': None, 'max_wor': 95.0,
-        'unit_system': UnitSystem.ENGLISH},
-    {'date': '01/12/2023', 'name': 'well2', 'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True,},
-    {'date': '01/01/2024', 'name': 'well1', 'max_wor': 95.0, 'max_surface_oil_rate': 1.8,
+    {'date': '01/12/2023', 'name': 'well1', 'unit_system': UnitSystem.ENGLISH, 'clear_q': True},
+    {'date': '01/12/2023', 'name': 'well2', 'unit_system': UnitSystem.ENGLISH, 'clear_all': True},
+    {'date': '01/01/2024', 'name': 'well1', 'max_surface_oil_rate': 1.8,
         'unit_system': UnitSystem.ENGLISH},
     )),
 

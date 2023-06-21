@@ -6,6 +6,7 @@ from typing import Optional, TYPE_CHECKING
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.nexus_file_operations import get_next_value, correct_datatypes
+from ResSimpy.Utils.invert_nexus_map import nexus_keyword_to_attribute_name
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -46,8 +47,7 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
         while next_value is not None:
             token_value = next_value.upper()
             if token_value in ['CLEAR', 'CLEARP', 'CLEARQ', 'CLEARLIMIT', 'CLEARALQ']:
-                removing_constraints = clear_constraints(token_value, constraint)
-                properties_dict.update(removing_constraints)
+                properties_dict[nexus_keyword_to_attribute_name(constraint.get_nexus_mapping(), token_value)] = True
                 nones_overwrite = True
                 # break out of the while loop as the next value will not be there
                 break
