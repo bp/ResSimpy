@@ -5,7 +5,7 @@ import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusKeywords.valve_keywords import VALVE_TABLE_KEYWORDS, VALVE_RATE_KEYWORDS
 from ResSimpy.DynamicProperty import DynamicProperty
-
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
@@ -36,25 +36,34 @@ class NexusValveMethod(DynamicProperty):
             self.properties = {}
         super().__init__(input_number=input_number, file=file)
 
-    def __repr__(self) -> str:
-        """Pretty printing valve data."""
-        printable_str = f'\nFILE_PATH: {self.file.location}\n'
+    def to_string(self) -> str:
+        """Create string with valve data in Nexus file format."""
+        printable_str = ''
         valve_dict = self.properties
         for key, value in valve_dict.items():
-            if isinstance(value, pd.DataFrame):
-                table_text = f'{key}:'
+            if key == 'DESC' and isinstance(value, list):
+                for desc_line in value:
+                    printable_str += 'DESC ' + desc_line + '\n'
+            elif isinstance(value, pd.DataFrame):
+                table_text = f'{key}'
                 if key in ['VALVE', 'ICV']:
                     for rate_key in VALVE_RATE_KEYWORDS:
                         if 'DP_RATE' in valve_dict.keys() and rate_key == valve_dict['DP_RATE']:
                             table_text += f' {rate_key}'
                 printable_str += f'{table_text}\n'
-                printable_str += value.to_string(na_rep='')
-                printable_str += '\n\n'
+                printable_str += value.to_string(na_rep='', index=False) + '\n'
+                printable_str += 'END'+key+'\n'
+                printable_str += '\n'
+            elif isinstance(value, Enum):
+                if isinstance(value, UnitSystem) or isinstance(value, TemperatureUnits):
+                    printable_str += f'{value.value}\n'
+                elif isinstance(value, SUnits):
+                    printable_str += f'SUNITS {value.value}\n'
             elif key not in ['DP_RATE']:
                 if value == '':
                     printable_str += f'{key}\n'
                 else:
-                    printable_str += f'{key}: {value}\n'
+                    printable_str += f'{key} {value}\n'
         return printable_str
 
     def read_properties(self) -> None:

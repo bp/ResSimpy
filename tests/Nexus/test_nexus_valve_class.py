@@ -98,9 +98,15 @@ def test_nexus_valve_repr():
                                                    })}
     expected_output = """
 FILE_PATH: test/file/valve.dat
-DESC: ['This is first line of description', 'and this is second line of description']
-VALVE: QALL
-""" + valve_obj.properties['VALVE'].to_string(na_rep='') + '\n\n'
+
+DESC This is first line of description
+DESC and this is second line of description
+VALVE QALL
+""" + valve_obj.properties['VALVE'].to_string(na_rep='', index=False) + \
+"""
+ENDVALVE
+
+"""
 
     # Act
     result = valve_obj.__repr__()

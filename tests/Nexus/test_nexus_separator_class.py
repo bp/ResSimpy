@@ -134,7 +134,7 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits
     )
     ], ids=['basic eos separator', 'complex eos separator', 'gas plant', 'black oil separator']
 )
-def test_read_seperator_properties_from_file(mocker, file_contents, expected_separator_properties):
+def test_read_separator_properties_from_file(mocker, file_contents, expected_separator_properties):
     # Arrange
     sep_file = NexusFile(file_content_as_list=file_contents.splitlines())
     sep_obj = NexusSeparatorMethod(file=sep_file, input_number=1)

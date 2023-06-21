@@ -4,14 +4,14 @@ from typing import Optional, Union
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.DynamicProperty import DynamicProperty
-
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_list_nexus_water_params
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Utils.invert_nexus_map import invert_nexus_map
 
 
 @dataclass  # Doesn't need to write an _init_, _eq_ methods, etc.
-class NexusWaterParams():
+class NexusWaterParams:
     """Class to hold a single set of water property parameters, i.e., density, compressibility, etc.
 
     Attributes:
@@ -83,18 +83,29 @@ class NexusWaterMethod(DynamicProperty):
             }
         return nexus_mapping
 
-    def __repr__(self) -> str:
-        """Pretty printing water data."""
+    def to_string(self) -> str:
+        """Create string with water data, in Nexus file format."""
         param_to_nexus_keyword_map = invert_nexus_map(NexusWaterMethod.nexus_mapping())
 
-        printable_str = f'\nFILE_PATH: {self.file.location}\n'
-        printable_str += f'PREF: {self.reference_pressure}\n'
+        printable_str = ''
         water_dict = self.properties
+        # Print description if present
+        if 'DESC' in water_dict.keys() and isinstance(water_dict['DESC'], list):
+            for desc_line in water_dict['DESC']:
+                printable_str += 'DESC ' + desc_line + '\n'
+        if self.reference_pressure is not None:
+            printable_str += f'PREF {self.reference_pressure}\n'
         for key, value in water_dict.items():
             if isinstance(value, Enum):
-                printable_str += f'{key}: {value.name}\n'
-            else:
-                printable_str += f'{key}: {value}\n'
+                if isinstance(value, UnitSystem) or isinstance(value, TemperatureUnits):
+                    printable_str += f'{value.value}\n'
+                elif isinstance(value, SUnits):
+                    printable_str += f'SUNITS {value.value}\n'
+            elif key not in ['DESC']:
+                if value == '':
+                    printable_str += f'{key}\n'
+                else:
+                    printable_str += f'{key} {value}\n'
         water_params = self.parameters
         temp_val = None
         sal_val = None
@@ -103,17 +114,17 @@ class NexusWaterMethod(DynamicProperty):
             space_prefix = ''
             if water_param_dict['temperature']:
                 if water_param_dict['temperature'] != temp_val:
-                    printable_str += f"TEMP: {water_param_dict['temperature']}\n"
+                    printable_str += f"TEMP {water_param_dict['temperature']}\n"
                     temp_val = water_param_dict['temperature']
                 space_prefix += '    '
             if water_param_dict['salinity']:
                 if water_param_dict['salinity'] != sal_val:
-                    printable_str += f"{space_prefix}SALINITY: {water_param_dict['salinity']}\n"
+                    printable_str += f"{space_prefix}SALINITY {water_param_dict['salinity']}\n"
                     sal_val = water_param_dict['salinity']
                 space_prefix += '    '
             for key in param_to_nexus_keyword_map.keys():
                 if water_param_dict[key]:
-                    printable_str += f'{space_prefix}{param_to_nexus_keyword_map[key]}: {water_param_dict[key]}\n'
+                    printable_str += f'{space_prefix}{param_to_nexus_keyword_map[key]} {water_param_dict[key]}\n'
         return printable_str
 
     def read_properties(self) -> None:
