@@ -49,3 +49,7 @@ ignore = ["UP007",  "ANN101", "N999", "UP035", "S105", "N802", "S106", "S107", "
     "C901", # Complexity
     "D102", "D100", "D103", "D107", "D101", "D205", "D401", "D417", "D104", "D106" # Docstrings
     ]
+
+[tool.ruff.pydocstyle]
+# Use Google-style docstrings.
+convention = "google"

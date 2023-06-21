@@ -67,7 +67,7 @@ from ResSimpy.Nexus.DataModels.NexusValveMethod import NexusValveMethod
 )
 def test_read_valve_properties_from_file(mocker, file_contents, expected_valve_properties):
     # Arrange
-    valve_obj = NexusValveMethod(file_path='test/file/valve.dat', method_number=1)
+    valve_obj = NexusValveMethod(file_path='test/file/valve.dat', input_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -87,7 +87,7 @@ def test_read_valve_properties_from_file(mocker, file_contents, expected_valve_p
 
 def test_nexus_valve_repr():
     # Arrange
-    valve_obj = NexusValveMethod(file_path='test/file/valve.dat', method_number=1)
+    valve_obj = NexusValveMethod(file_path='test/file/valve.dat', input_number=1)
     valve_obj.properties = {'DESC': ['This is first line of description', 'and this is second line of description'],
                             'DP_RATE': 'QALL',
                             'VALVE': pd.DataFrame({'SETTING': [1, 2, 3, 4, 5],

@@ -24,9 +24,9 @@ from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_ne
 
 @dataclass(kw_only=True, repr=True)
 class NexusFile:
-    """Class to deal with origin and structure of Nexus files and preserve origin of include files
+    """Class to deal with origin and structure of Nexus files and preserve origin of include files.
+
     Attributes:
-    ----------
         location (Optional[str]): Path to the original file being opened. Defaults to None.
         include_locations (Optional[list[str]]): list of file paths that the file contains. Defaults to None.
         origin (Optional[str]): Where the file was opened from. Defaults to None.
@@ -72,14 +72,12 @@ class NexusFile:
         """Generates a nexus file instance for a provided text file with information storing the included files.
 
         Args:
-        ----
             file_path (str): path to a file
             origin (Optional[str], optional): Where the file was opened from. Defaults to None.
             recursive (bool): Whether the method should recursively drill down multiple layers of include_locations.
             skip_arrays (bool): If set True skips the INCLUDE arrays that come after property array and VALUE
 
         Returns:
-        -------
             NexusFile: a class instance for NexusFile with knowledge of include files
         """
 
@@ -106,9 +104,19 @@ class NexusFile:
         inc_file_list: list[str] = []
         includes_objects: Optional[list[NexusFile]] = []
         skip_next_include = False
+        previous_line: str
 
         for i, line in enumerate(file_as_list):
-            modified_file_as_list.append(line)
+            if len(modified_file_as_list) >= 1:
+                previous_line = modified_file_as_list[len(modified_file_as_list)-1].rstrip('\n')
+                if previous_line.endswith('>'):
+                    modified_file_as_list[len(modified_file_as_list)-1] = previous_line[:-1] + line
+                else:
+                    modified_file_as_list.append(line)
+            else:
+                modified_file_as_list.append(line)
+            if line.rstrip('\n').endswith('>'):
+                continue
             if nfo.check_token("INCLUDE", line):
                 # Include found, check if we should skip loading it in (e.g. if it is a large array file)
                 ignore_keywords = ['NOLIST']
@@ -164,9 +172,9 @@ class NexusFile:
     def export_network_lists(self):
         """Exports lists of connections from and to for use in network graphs.
 
-        Raises
-        ------
+        Raises:
             ValueError: If the from and to lists are not the same length
+
         Returns:
             tuple[list]: list of to and from file paths where the equivalent indexes relate to a connection
         """
@@ -192,8 +200,7 @@ class NexusFile:
             Generator[str, None, None]:
         """Generator object for iterating over a list of strings with nested NexusFile objects in them.
 
-        Yields
-        ------
+        Yields:
             str: sequential line from the file.
         """
 
@@ -281,12 +288,10 @@ class NexusFile:
         """Recursively constructs two lists of from and to nodes representing the connections between files.
 
         Args:
-        ----
             max_depth (Optional[int], optional): depth of the iteration to construct the network down to. \
                 Defaults to None.
 
         Returns:
-        -------
             tuple[list[str | None], list[str | None]]: two lists of from and to nodes where corresponding \
                 indices create an edge within a graph network. e.g. (from_list[i], to_list[i]) \
                 is a connection between two files.
@@ -315,7 +320,6 @@ class NexusFile:
         within the flattened file_as_list.
 
         Args:
-        ----
             obj_uuid (UUID): unique identifier of the object being created/stored.
             line_index (int): line number in the flattened file_content_as_list
                 (i.e. from the get_flat_list_str_file method).
@@ -330,7 +334,6 @@ class NexusFile:
         in the file_as_list.
 
         Args:
-        ----
             line_number (int): Line number at which the new lines have been added
             number_additional_lines (int): number of new lines added.
         """
@@ -344,7 +347,6 @@ class NexusFile:
         """Removes an object location based on the obj_uuid provided. Used when removing objects in the file_as_list.
 
         Args:
-        ----
             obj_uuid (UUID): id of the removed object.
         """
         if self.object_locations is None:
@@ -359,11 +361,9 @@ class NexusFile:
         get_flat_file_as_list.
 
         Args:
-        ----
             flattened_index (int): index in the flattened file as list structure
 
         Returns:
-        -------
             tuple[NexusFile, int] where the first element is the file that the relevant line is in and the second
             element is the relative index in that file.
         """
@@ -434,7 +434,6 @@ class NexusFile:
         to add several additional new objects.
 
         Args:
-        ----
             additional_content (list[str]): Additional lines as a list of strings to be added.
             index (int): index to insert the new lines at in the calling flat_file_as_list
             additional_objects (Optional[dict[UUID, int]]): defaults to None. Otherwise, a dictionary keyed with the \
@@ -463,7 +462,6 @@ class NexusFile:
         specified objects from the object locations dictionary.
 
         Args:
-        ----
             index (int): index n the calling flat_file_as_list to remove the entry from
             objects_to_remove (Optional[list[UUID]]): list of object id's to remove from the object locations. \
             Defaults to None

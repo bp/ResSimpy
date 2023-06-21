@@ -5,21 +5,23 @@ import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_INTSAT_KEYWORDS, EQUIL_KEYWORDS_VALUE_FLOAT
 from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_TABLE_KEYWORDS, EQUIL_SINGLE_KEYWORDS
-from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_OVERREAD_VALUES, EQUIL_COMPOSITION_OPTIONS
+from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_COMPOSITION_OPTIONS
 from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_KEYWORDS
-from ResSimpy.EquilMethod import EquilMethod
+from ResSimpy.DynamicProperty import DynamicProperty
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
 @dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
-class NexusEquilMethod(EquilMethod):
-    """Class to hold Nexus Equil properties
+class NexusEquilMethod(DynamicProperty):
+    """Class to hold Nexus Equil properties.
+
     Attributes:
         file_path (str): Path to the Nexus equilibration file
-        method_number (int): Equilibration method number in Nexus fcs file
-        properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] ):
+        input_number (int): Equilibration method number in Nexus fcs file
+        properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                    dict[str, Union[float, pd.DataFrame]]]]):
             Dictionary holding all properties for a specific equilibration method. Defaults to empty dictionary.
     """
 
@@ -29,7 +31,7 @@ class NexusEquilMethod(EquilMethod):
                                 pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
 
-    def __init__(self, file_path: str, method_number: int,
+    def __init__(self, file_path: str, input_number: int,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
         self.file_path = file_path
@@ -37,7 +39,7 @@ class NexusEquilMethod(EquilMethod):
             self.properties = properties
         else:
             self.properties = {}
-        super().__init__(method_number=method_number)
+        super().__init__(input_number=input_number)
 
     def __repr__(self) -> str:
         """Pretty printing equilibration data."""
@@ -102,16 +104,11 @@ class NexusEquilMethod(EquilMethod):
             if nfo.check_token('AUTOGOC_COMP', line):
                 self.properties['AUTOGOC_COMP'] = nfo.get_expected_token_value('AUTOGOC_COMP', line, file_as_list)
             if nfo.check_token('OVERREAD', line):
-                overread_val = nfo.get_expected_token_value('OVERREAD', line, file_as_list)
+                overread_vals = line.split('!')[0].split('OVERREAD')[1].split()
                 if 'OVERREAD' in self.properties.keys() and isinstance(self.properties['OVERREAD'], list):
-                    self.properties['OVERREAD'] += [overread_val]
+                    self.properties['OVERREAD'] += overread_vals
                 else:
-                    self.properties['OVERREAD'] = [overread_val]
-                while nfo.get_expected_token_value(overread_val, line, file_as_list) in EQUIL_OVERREAD_VALUES:
-                    overread_val = nfo.get_expected_token_value(overread_val, line, file_as_list)
-                    if isinstance(self.properties['OVERREAD'], list):
-                        prop_list: list[str] = self.properties['OVERREAD']
-                        prop_list += [overread_val]
+                    self.properties['OVERREAD'] = overread_vals
             if nfo.check_token('VIP_INIT', line):
                 self.properties['VIP_INIT'] = ' '.join(line.split('!')[0].split()[1:])
             # Find standalone equilibration keywords

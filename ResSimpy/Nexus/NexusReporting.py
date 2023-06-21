@@ -3,18 +3,17 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 
 class Reporting:
     def __init__(self, model) -> None:
-        self.model = model
+        self.__model = model
 
     def add_map_properties_to_start_of_grid_file(self):
         """Adds 'map' statements to the start of the grid file to ensure standalone outputs all the required \
         properties. Writes out to the same structured grid file path provided.
 
-        Raises
-        ------
+        Raises:
             ValueError: if no structured grid file path is specified in the class instance
         """
-        structured_grid_path = self.model.structured_grid_path
-        if self.model.structured_grid_path is None:
+        structured_grid_path = self.__model.structured_grid_path
+        if self.__model.structured_grid_path is None:
             raise ValueError("No file path given or found for structured grid file path. \
                 Please update structured grid file path")
         file = nfo.load_file_as_list(structured_grid_path)

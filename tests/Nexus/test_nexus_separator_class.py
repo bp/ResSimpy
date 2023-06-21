@@ -135,7 +135,7 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits
 )
 def test_read_seperator_properties_from_file(mocker, file_contents, expected_separator_properties):
     # Arrange
-    sep_obj = NexusSeparatorMethod(file_path='test/file/sep.dat', method_number=1)
+    sep_obj = NexusSeparatorMethod(file_path='test/file/sep.dat', input_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -156,7 +156,7 @@ def test_read_seperator_properties_from_file(mocker, file_contents, expected_sep
 
 def test_nexus_separator_repr():
     # Arrange
-    sep_obj = NexusSeparatorMethod(file_path='test/file/separator.dat', method_number=1)
+    sep_obj = NexusSeparatorMethod(file_path='test/file/separator.dat', input_number=1)
     sep_obj.separator_type = 'EOS'
     sep_obj.properties['SEPARATOR_TABLE'] = pd.DataFrame({'STAGE': [1, 2],
                                                       'METHOD': [1, 2],

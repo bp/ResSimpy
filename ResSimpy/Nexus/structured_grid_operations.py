@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 class StructuredGridOperations:
     def __init__(self, model: NexusSimulator) -> None:
-        self.model: NexusSimulator = model
+        self.__model: NexusSimulator = model
 
     @staticmethod
     def load_token_value_if_present(token: str, modifier: str, token_property: VariableEntry,
@@ -169,8 +169,8 @@ class StructuredGridOperations:
             Optional[str]: the string associated with the supplied property from within the structured grid. \
                 If the field is not found in the structured grid returns None.
         """
-        structured_grid_dict = self.model.get_structured_grid_dict()
-        structured_grid_path = self.model.structured_grid_path
+        structured_grid_dict = self.__model.get_structured_grid_dict()
+        structured_grid_path = self.__model.structured_grid_path
         command_token = f"{field.upper()} {structured_grid_dict[field.lower()].modifier}"
         if structured_grid_path is None:
             raise ValueError("No path found for structured grid file path. \

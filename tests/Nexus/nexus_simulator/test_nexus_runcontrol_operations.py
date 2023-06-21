@@ -58,7 +58,7 @@ def test_load_run_control_file_times_in_include_file(mocker, date_format, expect
 
     # Act
     simulation = NexusSimulator(origin=fcs_file_name)
-    result_times = simulation.Runcontrol.times
+    result_times = simulation.runcontrol.times
 
     # Assert
     assert result_times == expected_times

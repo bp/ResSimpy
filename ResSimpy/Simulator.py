@@ -3,7 +3,6 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 from ResSimpy.Wells import Wells
-from ResSimpy.RockMethods import RockMethods
 
 
 class Simulator(ABC):
@@ -11,7 +10,6 @@ class Simulator(ABC):
     def __init__(self, start_date: str = '') -> None:
         self.__start_date: str = start_date
         self.__Wells: Wells = Wells()
-        self.__RockMethods: RockMethods = RockMethods()
 
     """Class Properties"""
 
@@ -31,17 +29,6 @@ class Simulator(ABC):
         if not isinstance(cls, Wells):
             raise ValueError(f"Wells must take a valid Wells type. Instead got provided class of {type(cls)}")
         self.__Wells = cls
-
-    @property
-    def RockMethods(self) -> RockMethods:
-        return self.__RockMethods
-
-    @RockMethods.setter
-    def RockMethods(self, cls):
-        if not isinstance(cls, RockMethods):
-            raise ValueError(
-                f"RockMethods must take a valid RockMethods type. Instead got provided class of {type(cls)}")
-        self.__RockMethods = cls
 
     """ Class Methods """
 

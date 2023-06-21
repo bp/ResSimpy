@@ -213,7 +213,7 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 )
 def test_read_hydraulics_properties_from_file(mocker, file_contents, expected_hydraulics_properties):
     # Arrange
-    hydraulics_obj = NexusHydraulicsMethod(file_path='test/file/hydraulics.dat', method_number=1)
+    hydraulics_obj = NexusHydraulicsMethod(file_path='test/file/hydraulics.dat', input_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -239,7 +239,7 @@ def test_read_hydraulics_properties_from_file(mocker, file_contents, expected_hy
 
 def test_nexus_hydraulics_repr():
     # Arrange
-    hyd_obj = NexusHydraulicsMethod(file_path='test/file/hyd.dat', method_number=1)
+    hyd_obj = NexusHydraulicsMethod(file_path='test/file/hyd.dat', input_number=1)
     hyd_obj.properties = {'DESC': ['Hydraulics Data'],
                           'UNIT_SYSTEM': UnitSystem.ENGLISH,
                           'QOIL': '1.0 1000. 3000.',

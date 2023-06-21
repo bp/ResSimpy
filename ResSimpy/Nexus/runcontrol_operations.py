@@ -18,7 +18,7 @@ class Runcontrol:
             __date_format_string (str): How the dates should formatted based on date_format.
 
         """
-        self.model = model
+        self.__model = model
         self.__times: Optional[list[str]] = None
         self.__date_format_string: str = ''
 
@@ -56,12 +56,12 @@ class Runcontrol:
 
     @staticmethod
     def delete_times(file_content: list[str]) -> list[str]:
-        """Deletes times from file contents
+        """Deletes times from file contents.
+
         Args:
             file_content (list[str]):  list of strings with each line from the file a new entry in the list.
 
-        Returns
-        -------
+        Returns:
             list[str]: the modified file without any TIME cards in
         """
         new_file: list[str] = []
@@ -113,19 +113,19 @@ class Runcontrol:
 
         if isinstance(converted_date, float):
             date_format = self.date_format_string
-            if len(self.model.start_date) == DATE_WITH_TIME_LENGTH:
+            if len(self.__model.start_date) == DATE_WITH_TIME_LENGTH:
                 date_format += "(%H:%M:%S)"
-            start_date_as_datetime = datetime.strptime(self.model.start_date, date_format)
+            start_date_as_datetime = datetime.strptime(self.__model.start_date, date_format)
             date_as_datetime = start_date_as_datetime + timedelta(days=converted_date)
         else:
             start_date_format = self.date_format_string
-            if len(self.model.start_date) == DATE_WITH_TIME_LENGTH:
+            if len(self.__model.start_date) == DATE_WITH_TIME_LENGTH:
                 start_date_format += "(%H:%M:%S)"
             end_date_format = self.date_format_string
             if len(converted_date) == DATE_WITH_TIME_LENGTH:
                 end_date_format += "(%H:%M:%S)"
             date_as_datetime = datetime.strptime(converted_date, end_date_format)
-            start_date_as_datetime = datetime.strptime(self.model.start_date, start_date_format)
+            start_date_as_datetime = datetime.strptime(self.__model.start_date, start_date_format)
 
         difference = date_as_datetime - start_date_as_datetime
         return difference.total_seconds() / timedelta(days=1).total_seconds()
@@ -191,7 +191,7 @@ class Runcontrol:
                     date_format += "(%H:%M:%S)"
                 datetime.strptime(str(date), date_format)
             except ValueError:
-                current_date_format = self.get_date_format(self.model.date_format)
+                current_date_format = self.get_date_format(self.__model.date_format)
                 raise ValueError(
                     "Invalid date format " + str(date) + " the model is using " + current_date_format + " date format.")
 
@@ -209,17 +209,16 @@ class Runcontrol:
     def __update_times_in_file(self) -> None:
         """Updates the list of times in the Runcontrol file to the current stored values in __times.
 
-        Returns
-        -------
+        Returns:
             None: writes out a file at the same path as the existing runcontrol file
         """
-        self.model.check_output_path()
-        if self.model.fcs_file.runcontrol_file is None or self.model.fcs_file.runcontrol_file.location is None:
-            raise ValueError(f"No file path found for {self.model.fcs_file}")
-        file_content = self.model.fcs_file.runcontrol_file.get_flat_list_str_file
-        filename = self.model.fcs_file.runcontrol_file.location
+        self.__model.check_output_path()
+        if self.__model.fcs_file.runcontrol_file is None or self.__model.fcs_file.runcontrol_file.location is None:
+            raise ValueError(f"No file path found for {self.__model.fcs_file}")
+        file_content = self.__model.fcs_file.runcontrol_file.get_flat_list_str_file
+        filename = self.__model.fcs_file.runcontrol_file.location
 
-        new_file_content = self.model.Runcontrol.delete_times(file_content)
+        new_file_content = self.__model.runcontrol.delete_times(file_content)
 
         time_list = self.times
         stop_string = 'STOP\n'
@@ -248,32 +247,32 @@ class Runcontrol:
         Raises:
             ValueError: if the run_control_file attribute is None.
         """
-        if self.model.fcs_file.runcontrol_file is None:
-            warnings.warn(f"Run control file path not found for {self.model.fcs_file.location}")
+        if self.__model.fcs_file.runcontrol_file is None:
+            warnings.warn(f"Run control file path not found for {self.__model.fcs_file.location}")
             return
-        run_control_file_content = self.model.fcs_file.runcontrol_file.get_flat_list_str_file
+        run_control_file_content = self.__model.fcs_file.runcontrol_file.get_flat_list_str_file
 
-        if (run_control_file_content is None) or (self.model.fcs_file.runcontrol_file.location is None):
-            raise ValueError(f"No file path provided for {self.model.fcs_file.runcontrol_file.location=}")
+        if (run_control_file_content is None) or (self.__model.fcs_file.runcontrol_file.location is None):
+            raise ValueError(f"No file path provided for {self.__model.fcs_file.runcontrol_file.location=}")
 
         # set the start date
         for line in run_control_file_content:
             if nfo.check_token('START', line):
                 value = nfo.get_expected_token_value('START', line, run_control_file_content)
                 if value is not None:
-                    self.model.start_date_set(value)
+                    self.__model.start_date_set(value)
 
         times = []
         run_control_times = self.get_times(run_control_file_content)
         times.extend(run_control_times)
-        if self.model.start_date is None or self.model.start_date == '':
+        if self.__model.start_date is None or self.__model.start_date == '':
             try:
-                self.model.start_date_set(times[0])
+                self.__model.start_date_set(times[0])
             except IndexError:
                 for line in run_control_file_content:
                     if nfo.check_token('TIME', line):
                         value = nfo.get_expected_token_value('TIME', line, run_control_file_content)
-                        self.model.start_date_set(value)
+                        self.__model.start_date_set(value)
                         warnings.warn(f'Setting start date to first time card found in the runcontrol file as: {value}')
                         break
                 warnings.warn('No value found for start date explicitly with START or TIME card')
@@ -281,13 +280,13 @@ class Runcontrol:
         self.__times = self.sort_remove_duplicate_times(times)
 
         # If we don't want to write the times, return here.
-        if not self.model.write_times:
+        if not self.__model.write_times:
             return
-        if self.model.fcs_file.runcontrol_file.include_locations is None:
-            warnings.warn(f'No includes files found in {self.model.fcs_file.runcontrol_file.location}')
+        if self.__model.fcs_file.runcontrol_file.include_locations is None:
+            warnings.warn(f'No includes files found in {self.__model.fcs_file.runcontrol_file.location}')
             return
-        for file in self.model.fcs_file.runcontrol_file.include_locations:
-            if self.model.destination is not None:
+        for file in self.__model.fcs_file.runcontrol_file.include_locations:
+            if self.__model.destination is not None:
                 self.remove_times_from_file(run_control_file_content, file)
 
         self.modify_times(content=times, operation='replace')
@@ -311,9 +310,9 @@ class Runcontrol:
             self.check_date_format(time)
 
         new_times = self.sort_remove_duplicate_times(content)
-        if len(new_times) > 0 > self.compare_dates(new_times[0], self.model.start_date):
+        if len(new_times) > 0 > self.compare_dates(new_times[0], self.__model.start_date):
             raise ValueError(
-                f"The supplied date of {new_times[0]} precedes the start date of {self.model.start_date}")
+                f"The supplied date of {new_times[0]} precedes the start date of {self.__model.start_date}")
         operation = operation.lower()
         self.__times = self.__times if self.__times is not None else []
 
@@ -330,5 +329,5 @@ class Runcontrol:
 
         self.__times = self.sort_remove_duplicate_times(self.__times)
 
-        if self.model.destination is not None:
+        if self.__model.destination is not None:
             self.__update_times_in_file()
