@@ -11,7 +11,7 @@ from ResSimpy.Utils.invert_nexus_map import invert_nexus_map
 
 
 @dataclass  # Doesn't need to write an _init_, _eq_ methods, etc.
-class NexusWaterParams():
+class NexusWaterParams:
     """Class to hold a single set of water property parameters, i.e., density, compressibility, etc.
 
     Attributes:
