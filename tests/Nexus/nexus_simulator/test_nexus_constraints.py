@@ -31,9 +31,9 @@ from multifile_mocker import mock_multiple_files
     ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,'unit_system': UnitSystem.ENGLISH},
      {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
       'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
-     {'date': '01/01/2020', 'name': 'well1', 'max_surface_liquid_rate': 5000.0, 'max_surface_water_rate': 0, 'unit_system': UnitSystem.ENGLISH},
-   {'date': '01/01/2020', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
-   'max_surface_liquid_rate': 20.5, 'unit_system': UnitSystem.ENGLISH}
+     {'date': '01/01/2020', 'name': 'well1', 'max_surface_liquid_rate': 5000.0, 'unit_system': UnitSystem.ENGLISH},
+   {'date': '01/01/2020', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_surface_liquid_rate': 20.5,
+    'unit_system': UnitSystem.ENGLISH}
      )),
 
      ('''CONSTRAINTS
@@ -59,8 +59,7 @@ from multifile_mocker import mock_multiple_files
     'unit_system': UnitSystem.ENGLISH},
     {'date': '01/01/2019', 'name': 'well2', 'max_surface_liquid_rate': 0.0, 'max_surface_water_rate': 10000,
     'unit_system': UnitSystem.ENGLISH},
-    {'date': '01/12/2023', 'name': 'well1', 'max_surface_liquid_rate': 1000.0, 'max_surface_water_rate': 0.0,
-            'unit_system': UnitSystem.ENGLISH},
+    {'date': '01/12/2023', 'name': 'well1', 'max_surface_liquid_rate': 1000.0, 'unit_system': UnitSystem.ENGLISH},
     )),
 
     ('''CONSTRAINTS
@@ -136,6 +135,7 @@ from multifile_mocker import mock_multiple_files
     {'date': '01/01/2024', 'name': 'well1', 'max_wor': 95.0, 'max_surface_oil_rate': 1.8,
         'unit_system': UnitSystem.ENGLISH},
     )),
+
     (''' 
         CONSTRAINTS
     well1	 QLIQSMAX 	3884.0  ACTIVATE
@@ -153,6 +153,7 @@ from multifile_mocker import mock_multiple_files
      {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'active_node': False,
       'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
       )),
+
 (''' 
           CONSTRAINTS
       well1	 DPBHAVG 1024.2  DPBHMX OFF  GORLIM NONE EXPONENT 9999

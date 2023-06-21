@@ -86,8 +86,7 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
                 nexus_file.add_object_locations(latest_constraint.id, index + start_line_index)
             else:
                 # otherwise take a copy of the previous constraint and add the additional properties
-                new_constraint = copy.copy(latest_constraint)
-                new_constraint.update(properties_dict, nones_overwrite)
+                new_constraint = constraint(properties_dict)
                 well_constraints.append(new_constraint)
                 nexus_file.add_object_locations(new_constraint.id, index + start_line_index)
         else:
