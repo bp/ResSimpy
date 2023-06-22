@@ -47,9 +47,7 @@ class NexusHydraulicsMethod(DynamicProperty):
         hyd_dict = self.properties
         for key, value in hyd_dict.items():
             if isinstance(value, pd.DataFrame):
-                if key == 'HYD_TABLE':
-                    printable_str += ''
-                else:
+                if key not in ['HYD_TABLE']:
                     printable_str += f'{key}\n'
                 printable_str += value.to_string(na_rep='', index=False) + '\n'
                 if key == 'LIMITS':
