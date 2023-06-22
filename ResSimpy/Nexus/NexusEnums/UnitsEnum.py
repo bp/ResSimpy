@@ -2,16 +2,16 @@ from enum import Enum
 
 
 # Enum representing the Nexus Salinity Units
-class SUnits(Enum):
-    MEQ_ML = 1
-    PPM = 2
+class SUnits(str, Enum):
+    MEQ_ML = 'MEQ/ML'
+    PPM = 'PPM'
 
 
-class TemperatureUnits(Enum):
-    FAHR = 1
-    CELSIUS = 2
-    RANKINE = 3
-    KELVIN = 4
+class TemperatureUnits(str, Enum):
+    FAHR = 'FAHR'
+    CELSIUS = 'CELSIUS'
+    RANKINE = 'RANKINE'
+    KELVIN = 'KELVIN'
 
 
 class UnitSystem(str, Enum):

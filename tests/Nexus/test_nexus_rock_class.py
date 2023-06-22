@@ -1,5 +1,6 @@
 import pandas as pd
 import pytest
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from ResSimpy.Nexus.DataModels.NexusRockMethod import NexusRockMethod
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -166,7 +167,8 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 )
 def test_read_rock_properties_from_file(mocker, file_contents, expected_rock_properties):
     # Arrange
-    rock_obj = NexusRockMethod(file_path='test/file/rock.dat', input_number=1)
+    rock_file = NexusFile(file_content_as_list=file_contents.splitlines())
+    rock_obj = NexusRockMethod(file=rock_file, input_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -189,17 +191,42 @@ def test_read_rock_properties_from_file(mocker, file_contents, expected_rock_pro
 
 def test_nexus_rock_repr():
     # Arrange
-    rock_obj = NexusRockMethod(file_path='test/file/rock.dat', input_number=1)
-    rock_obj.properties = {'UNIT_SYSTEM': UnitSystem.ENGLISH, 'REVERSIBLE': '',
+    rock_file = NexusFile(location='test/file/rock.dat')
+    rock_obj = NexusRockMethod(file=rock_file, input_number=1)
+    rock_obj.properties = {'UNIT_SYSTEM': UnitSystem.ENGLISH, 
                            'CMT': pd.DataFrame({'P': [1500, 2000, 3500],
                                                 'PVMULT': [0.76, 0.81, 0.85]
-                                                })}
+                                                }),
+                           'REVERSIBLE': 'CMTONLY', 'TOLREV_P': 2.5,
+                           'WIRCT': {'0.10': pd.DataFrame({'DSW': [0.0, 0.02, 0.12, 0.22, 0.32, 0.42],
+                                                           'PVMULT': [1., 1., 0.94, 0.88, 0.82, 0.76],
+                                                           'TAMULT': [1., 1., 0.40, 0.25, 0.09, 0.09]
+                                                           }),
+                                     '0.50': pd.DataFrame({'DSW': [0.02, 0.12, 0.35],
+                                                           'TAMULT': [1., 0.9, 0.8]
+                                                           })
+                                     },
+                            'IRREVERSIBLE': 'WIRCTONLY', 'TOLREV_SW': 0.01
+                            }
     expected_output = """
 FILE_PATH: test/file/rock.dat
-UNIT_SYSTEM: ENGLISH
-REVERSIBLE
-CMT:
-""" + rock_obj.properties['CMT'].to_string(na_rep='') + '\n\n'
+
+ENGLISH
+CMT
+""" + rock_obj.properties['CMT'].to_string(na_rep='', index=False) + '\n' + \
+"""
+REVERSIBLE CMTONLY
+TOLREV_P 2.5
+WIRCT
+SWINIT 0.10
+""" + rock_obj.properties['WIRCT']['0.10'].to_string(na_rep='', index=False) + '\n' + \
+"""
+SWINIT 0.50
+""" + rock_obj.properties['WIRCT']['0.50'].to_string(na_rep='', index=False) + '\n' + \
+"""
+IRREVERSIBLE WIRCTONLY
+TOLREV_SW 0.01
+"""
 
     # Act
     result = rock_obj.__repr__()
