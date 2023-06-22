@@ -37,7 +37,7 @@ def test_find_constraint(mocker):
     assert result == expected_constraint
 
 
-@pytest.mark.parametrize("file_contents, expected_result_file, expected_constraints, expected_number_writes",[
+@pytest.mark.parametrize("file_contents, expected_result_file, constraint_to_remove, expected_constraints, expected_number_writes",[
     (''' TIME 01/01/2019
     CONSTRAINTS
     well1	 QLIQSMAX 	3884.0  QWSMAX 	0
@@ -49,6 +49,9 @@ def test_find_constraint(mocker):
     well1	 QLIQSMAX 	3884.0  QWSMAX 	0
     ENDCONSTRAINTS
     ''',
+    {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0,
+                         'max_reverse_surface_liquid_rate': 10000.0,
+                         'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
     [{'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
     'unit_system': UnitSystem.ENGLISH}
     ], 1),
@@ -66,6 +69,9 @@ def test_find_constraint(mocker):
     well1	 QLIQSMAX 	3884.0  QWSMAX 	0
     ENDCONSTRAINTS
     ''',
+    {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0,
+                         'max_reverse_surface_liquid_rate': 10000.0,
+                         'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
     [{'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
     'unit_system': UnitSystem.ENGLISH}], 2),
 
@@ -93,6 +99,9 @@ def test_find_constraint(mocker):
     well2	 QWSMAX 	0.0
     ENDCONSTRAINTS
     ''',
+    {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0,
+                         'max_reverse_surface_liquid_rate': 10000.0,
+                         'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
     [{'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
     'unit_system': UnitSystem.ENGLISH},
     {'date': '01/02/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000, 'max_surface_water_rate': 10,
@@ -101,11 +110,57 @@ def test_find_constraint(mocker):
            'max_wor': 15.5, 'unit_system': UnitSystem.ENGLISH}
     ], 2),
 
-    ], ids=['basic_test', 'over multiple lines', 'multiple_dates'])
-def test_remove_constraint(mocker, file_contents, expected_result_file, expected_constraints, expected_number_writes):
+    (''' TIME 01/01/2019
+    CONSTRAINT
+    NAME    QLIQSMAX    QWSMAX  QLIQSMAX-
+    well1	3884.0   	0       NA
+    well2   15.5        0       10000
+    ENDCONSTRAINT
+    ''',
+    ''' TIME 01/01/2019
+    CONSTRAINT
+    NAME    QLIQSMAX    QWSMAX  QLIQSMAX-
+    well1	3884.0   	0       NA
+    ENDCONSTRAINT
+    ''',
+    {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0,
+                         'max_reverse_surface_liquid_rate': 10000.0,
+                         'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
+    [{'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
+    'unit_system': UnitSystem.ENGLISH},
+    ], 1),
+
+    (''' TIME 01/01/2019
+    CONSTRAINTS
+    well1	 QLIQSMAX 	MULT  QOSMAX 	MULT
+    well2	 QALLRMAX 	0
+    ENDCONSTRAINTS
+    QMULT
+    WELL QOIL QGAS QWATER
+    well1 121.0 53.6 2.5
+    well2 211.0 102.4 35.7
+    ENDQMULT
+    ''',
+''' TIME 01/01/2019
+    CONSTRAINTS
+    well1	 QLIQSMAX 	MULT  QOSMAX 	MULT
+    ENDCONSTRAINTS
+    QMULT
+    WELL QOIL QGAS QWATER
+    well1 121.0 53.6 2.5
+    ENDQMULT
+    ''',
+    {'date': '01/01/2019', 'name': 'well2', 'max_qmult_total_reservoir_rate': 0.0, 'unit_system': UnitSystem.ENGLISH,
+     'qmult_oil_rate': 211.0, 'qmult_gas_rate': 102.4, 'qmult_water_rate': 35.7, 'well_name':'well2'},
+    [{'date': '01/01/2019', 'name': 'well1', 'use_qmult_qoilqwat_surface_rate': True, 'use_qmult_qoil_surface_rate': True,
+    'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 121.0, 'qmult_gas_rate': 53.6, 'qmult_water_rate': 2.5, 'well_name':'well1'}
+    ], 2),
+
+
+    ], ids=['basic_test', 'over multiple lines', 'multiple_dates', 'constraint_table','qmult_table'])
+def test_remove_constraint(mocker, file_contents, expected_result_file, constraint_to_remove, expected_constraints, expected_number_writes):
     # Arrange
-    remove_constraint = {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
-      'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH}
+
 
     fcs_file_contents = '''RUN_UNITS ENGLISH
     DATEFORMAT DD/MM/YYYY
@@ -137,7 +192,7 @@ def test_remove_constraint(mocker, file_contents, expected_result_file, expected
 
     # Act
     constraints = nexus_sim.network.Constraints.get_constraints()
-    nexus_sim.network.Constraints.remove_constraint(remove_constraint)
+    nexus_sim.network.Constraints.remove_constraint(constraint_to_remove)
     result = nexus_sim.network.Constraints.get_constraints()
 
     # Assert

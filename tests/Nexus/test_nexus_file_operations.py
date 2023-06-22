@@ -597,7 +597,7 @@ def test_load_table_to_objects_basic():
     expected_dict_2 = {'name': 'well2', 'kh': 20, 'k': 7.501}
     expected_obj_1 = TestClass(expected_dict_1)
     expected_obj_2 = TestClass(expected_dict_2)
-    expected_result = [expected_obj_1, expected_obj_2]
+    expected_result = [(expected_obj_1, 2), (expected_obj_2, 4)]
 
     # Act
     result = nfo.load_table_to_objects(file_as_list, TestClass, property_map, )
@@ -643,14 +643,14 @@ def test_load_table_to_objects_date_units():
     # create expected testclass examples where they shouldn't get the name, date attribute
     expected_obj_1 = TestClass(expected_dict_1)
     expected_obj_2 = TestClass(expected_dict_2)
-    expected_result = [expected_obj_1, expected_obj_2]
+    expected_result = [(expected_obj_1, 2), (expected_obj_2, 4)]
 
     # add in the date and unit systems to the kwargs dict
     unit_date_dict = {'date': date, 'unit_system': units}
     expected_dict_1.update(unit_date_dict)
     expected_dict_2.update(unit_date_dict)
     # create a new set of objects that should get the date and unit system
-    expected_result_unit_date = [TestClassUnitDates(expected_dict_1), TestClassUnitDates(expected_dict_2)]
+    expected_result_unit_date = [(TestClassUnitDates(expected_dict_1), 2), (TestClassUnitDates(expected_dict_2), 4)]
     # Act
     result = nfo.load_table_to_objects(file_as_list, TestClass, property_map, date, units)
     result_unit_date = nfo.load_table_to_objects(file_as_list, TestClassUnitDates, property_map, date, units)
@@ -670,8 +670,10 @@ def test_load_table_to_objects_date_units():
      {'name': 'node1', 'type': None, 'depth': None, 'temp': None, 'date': '01/01/2023',
       'unit_system': UnitSystem.ENGLISH},
      {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/01/2023',
-      'unit_system': UnitSystem.ENGLISH}
+      'unit_system': UnitSystem.ENGLISH},
      ),
+
+
     ('''NODES
   NAME       TYPE       DEPTH   TemP    X     Y       NUMBER  StatiON
  ! Riser Nodes
@@ -685,8 +687,9 @@ def test_load_table_to_objects_date_units():
       'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
      {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': 10.21085, 'y_pos': 3524.23,
       'number': 2,
-      'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH}
+      'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
      ),
+
     ('''NODES
   NAME                           TYPE       DEPTH   TEMP
  ! Riser Nodes
@@ -702,7 +705,7 @@ def test_load_table_to_objects_date_units():
      {'name': 'node1', 'type': None, 'depth': None, 'temp': None, 'date': '01/01/2023',
       'unit_system': UnitSystem.ENGLISH},
      {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/02/2023',
-      'unit_system': UnitSystem.ENGLISH}
+      'unit_system': UnitSystem.ENGLISH},
      ),
     ('''NODES
   NAME                           TYPE       DEPTH   TEMP
@@ -720,8 +723,9 @@ def test_load_table_to_objects_date_units():
      {'name': 'node1', 'type': None, 'depth': None, 'temp': None, 'date': '01/01/2023',
       'unit_system': UnitSystem.ENGLISH},
      {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/02/2023',
-      'unit_system': UnitSystem.METRIC}
+      'unit_system': UnitSystem.METRIC},
      ),
+
     ('''NODES
   NAME       TYPE       DEPTH   TemP    X     Y       NUMBER  StatiON
  ! Riser Nodes
@@ -737,7 +741,7 @@ ENDWELLS
      {'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
       'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
      {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': None, 'y_pos': None, 'number': 2,
-      'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH}
+      'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
      ),
 ],
                          ids=['basic', 'all columns', 'times', 'units', 'two tables']
@@ -751,6 +755,7 @@ def test_collect_all_tables_to_objects(mocker, file_contents, node1_props, node2
     node_1 = NexusNode(node1_props)
     node_2 = NexusNode(node2_props)
 
+    # line locs for this part of the code refers to line loc relative to the table
     expected_result = [node_1, node_2]
 
     # Act

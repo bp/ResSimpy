@@ -266,9 +266,39 @@ def test_load_constraints(mocker, file_contents, expected_content):
     ENDCONSTRAINTS
         ''',
         {'uuid1': [2, 4, 9, 11],
- }
-        ),
-        ], ids=['basic_test', 'two tables', 'several constraints for one well'])
+     }
+            ),
+
+            ('''CONSTRAINT
+        NAME    QLIQSMAX    QWSMAX  QLIQSMAX-
+        
+        well1	3884.0   	0       NA
+        
+        
+        well2   15.5        0       10000
+        
+        
+        ENDCONSTRAINT
+        ''',
+    {'uuid1': [3],
+    'uuid2': [6]
+     }
+    ),
+
+    (''' TIME 01/01/2019
+    CONSTRAINTS
+    well1	 QLIQSMAX 	MULT  QOSMAX 	MULT
+    well2	 QALLRMAX 	0
+    ENDCONSTRAINTS
+    QMULT
+    WELL QOIL QGAS QWATER
+    well1 121.0 53.6 2.5
+    well2 211.0 102.4 35.7
+    ENDQMULT''',
+    {'uuid1': [2, 7],
+     'uuid2': [3, 8]}
+    ),
+        ], ids=['basic_test', 'two tables', 'several constraints for one well', 'constraint_table', 'qmults'])
 def test_constraint_ids(mocker, file_contents, object_locations):
     # Arrange
     fcs_file_data = '''RUN_UNITS ENGLISH
