@@ -61,13 +61,20 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
     constraints.__setattr__('_NexusConstraints__constraints', existing_constraints)
     find_constraint_dict = {'name': 'well1', 'max_wor': 95.0}
     no_matching_constraints_dict = {'name': 'well1', 'max_wor': 100000}
+    too_many_constraints = {'name': 'well1', 'max_wor': 95.0, 'max_surface_liquid_rate': 1000, 'date': '01/01/2019',
+                            'max_pressure': 10}
+
     # Act
     with pytest.raises(ValueError) as ve:
-        result = constraints.find_constraint('well1', find_constraint_dict)
+        constraints.find_constraint('well1', find_constraint_dict)
         assert "Instead found: 3 matching constraints" in str(ve.value)
 
     with pytest.raises(ValueError) as ve:
-        result = constraints.find_constraint('well1', no_matching_constraints_dict)
+        constraints.find_constraint('well1', no_matching_constraints_dict)
+        assert "Instead found: 0 matching constraints" in str(ve.value)
+
+    with pytest.raises(ValueError) as ve:
+        constraints.find_constraint('well1', too_many_constraints)
         assert "Instead found: 0 matching constraints" in str(ve.value)
 
 
