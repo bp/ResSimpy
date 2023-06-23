@@ -59,11 +59,11 @@ class NexusValveMethods(Valve):
         # Read in valve properties from Nexus valve method files
         if self.__files is not None and len(self.__files) > 0:  # Check if valve files exist
             for table_num in self.__files.keys():  # For each valve property method
-                valve_file = self.__files[table_num].location
-                if valve_file is None:
+                valve_file = self.__files[table_num]
+                if valve_file.location is None:
                     raise ValueError(f'Unable to find valve file: {valve_file}')
-                if os.path.isfile(valve_file):
+                if os.path.isfile(valve_file.location):
                     # Create NexusValveMethod object
-                    self.__inputs[table_num] = NexusValveMethod(file_path=valve_file, input_number=table_num)
+                    self.__inputs[table_num] = NexusValveMethod(file=valve_file, input_number=table_num)
                     self.__inputs[table_num].read_properties()  # Populate object with valve properties in file
         self.__properties_loaded = True

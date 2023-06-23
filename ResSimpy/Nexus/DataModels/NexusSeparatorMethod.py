@@ -8,14 +8,15 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.NexusKeywords.separator_keywords import SEPARATOR_KEYS_INT, SEPARATOR_KEYS_FLOAT
 from ResSimpy.Nexus.NexusKeywords.separator_keywords import SEPARATOR_KEYWORDS
 from ResSimpy.DynamicProperty import DynamicProperty
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 
 
-@dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
+@dataclass(kw_only=True, repr=False)  # Doesn't need to write an _init_, _eq_ methods, etc.
 class NexusSeparatorMethod(DynamicProperty):
     """Class to hold data input for a Nexus Separator method.
 
     Attributes:
-        file_path (str): Path to the Nexus Separator file
+        file (NexusFile): Nexus Separator file object
         input_number (int): Separator method number in Nexus fcs file
         separator_type (Optional[str]): Type of separator method, e.g., BLACKOIL, GASPLANT or EOS. Defaults to None
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
@@ -23,45 +24,54 @@ class NexusSeparatorMethod(DynamicProperty):
             Dictionary holding all properties for a specific separator method. Defaults to empty dictionary.
     """
 
-    file_path: str
-    input_number: int
+    file: NexusFile
     separator_type: Optional[str] = None
     properties: dict[str, Union[str, int, float, Enum, list[str],
                      pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
 
-    def __init__(self, file_path: str, input_number: int, separator_type: Optional[str] = None,
+    def __init__(self, file: NexusFile, input_number: int, separator_type: Optional[str] = None,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
-        self.file_path = file_path
         if separator_type is not None:
             self.separator_type = separator_type
         if properties is not None:
             self.properties = properties
         else:
             self.properties = {}
-        super().__init__(input_number=input_number)
+        super().__init__(input_number=input_number, file=file)
 
-    def __repr__(self) -> str:
-        """Pretty printing separator data."""
-        printable_str = f'\nFILE_PATH: {self.file_path}\n'
-        printable_str += f'SEPARATOR_TYPE: {self.separator_type}\n'
+    def to_string(self) -> str:
+        """Create string with separator data in Nexus file format."""
+        printable_str = ''
         sep_dict = self.properties
         for key, value in sep_dict.items():
-            if isinstance(value, pd.DataFrame):
-                printable_str += f'{key}: \n'
-                printable_str += value.to_string(na_rep='')
-                printable_str += '\n\n'
+            if key == 'DESC' and isinstance(value, list):
+                for desc_line in value:
+                    printable_str += 'DESC ' + desc_line + '\n'
+            elif key == 'SEPARATOR_TABLE' and isinstance(value, pd.DataFrame):
+                if self.separator_type == 'GASPLANT':
+                    printable_str += 'RECFAC_TABLE\n'
+                printable_str += value.to_string(na_rep='', index=False) + '\n'
+                if self.separator_type == 'GASPLANT':
+                    printable_str += 'ENDRECFAC_TABLE\n'
+                printable_str += '\n'
             elif isinstance(value, Enum):
-                printable_str += f'{key}: {value.name}\n'
+                if isinstance(value, UnitSystem) or isinstance(value, TemperatureUnits):
+                    printable_str += f'{value.value}\n'
+                elif isinstance(value, SUnits):
+                    printable_str += f'SUNITS {value.value}\n'
+            elif key == 'KEYCPTLIST' and isinstance(value, list):
+                printable_str += f"{key} {' '.join(value)}\n"
+            elif value == '':
+                printable_str += f'{key}\n'
             else:
-                printable_str += f'{key}: {value}\n'
+                printable_str += f'{key} {value}\n'
         return printable_str
 
     def read_properties(self) -> None:
         """Read Nexus Separator file contents and populate NexusSeparatorMethod object."""
-        file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
-        file_as_list = file_obj.get_flat_list_str_file
+        file_as_list = self.file.get_flat_list_str_file
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
@@ -92,6 +102,7 @@ class NexusSeparatorMethod(DynamicProperty):
                 continue
             elif nfo.check_token('BOSEP', line):  # Black oil separator table
                 self.separator_type = 'BLACKOIL'
+                self.properties['BOSEP'] = ''
                 line_indx += 1
                 continue
 

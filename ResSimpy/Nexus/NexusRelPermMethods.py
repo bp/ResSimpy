@@ -59,12 +59,12 @@ class NexusRelPermMethods(RelPerm):
         # Read in relperm properties from Nexus relperm method files
         if self.__files is not None and len(self.__files) > 0:  # Check if relperm files exist
             for table_num in self.__files.keys():  # For each relperm property method
-                relperm_file = self.__files[table_num].location
-                if relperm_file is None:
+                relperm_file = self.__files[table_num]
+                if relperm_file.location is None:
                     raise ValueError(f'Unable to find relperm file: {relperm_file}')
-                if os.path.isfile(relperm_file):
+                if os.path.isfile(relperm_file.location):
                     # Create NexusRelPermMethod object
-                    self.__inputs[table_num] = NexusRelPermMethod(file_path=relperm_file, input_number=table_num)
+                    self.__inputs[table_num] = NexusRelPermMethod(file=relperm_file, input_number=table_num)
                     # Populate object with relperm properties in file
                     self.__inputs[table_num].read_properties()
         self.__properties_loaded = True

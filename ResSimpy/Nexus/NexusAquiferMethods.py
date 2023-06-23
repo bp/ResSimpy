@@ -59,11 +59,11 @@ class NexusAquiferMethods(Aquifer):
         # Read in aquifer properties from Nexus aquifer method files
         if self.__files is not None and len(self.__files) > 0:  # Check if aquifer files exist
             for table_num in self.__files.keys():  # For each aquifer property method
-                aquifer_file = self.__files[table_num].location
-                if aquifer_file is None:
-                    raise ValueError(f'Unable to find aquifer file: {aquifer_file}')
-                if os.path.isfile(aquifer_file):
+                aquifer_file = self.__files[table_num]
+                if aquifer_file.location is None:
+                    raise ValueError(f'Unable to find aquifer file: {aquifer_file.location}')
+                if os.path.isfile(aquifer_file.location):
                     # Create NexusAquifer object
-                    self.__inputs[table_num] = NexusAquiferMethod(file_path=aquifer_file, input_number=table_num)
+                    self.__inputs[table_num] = NexusAquiferMethod(file=aquifer_file, input_number=table_num)
                     self.__inputs[table_num].read_properties()  # Populate object with aquifer properties from file
         self.__properties_loaded = True

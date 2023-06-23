@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from ResSimpy.Nexus.DataModels.NexusValveMethod import NexusValveMethod
 
@@ -67,7 +68,8 @@ from ResSimpy.Nexus.DataModels.NexusValveMethod import NexusValveMethod
 )
 def test_read_valve_properties_from_file(mocker, file_contents, expected_valve_properties):
     # Arrange
-    valve_obj = NexusValveMethod(file_path='test/file/valve.dat', input_number=1)
+    valve_file = NexusFile(file_content_as_list=file_contents.splitlines())
+    valve_obj = NexusValveMethod(file=valve_file, input_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -87,7 +89,8 @@ def test_read_valve_properties_from_file(mocker, file_contents, expected_valve_p
 
 def test_nexus_valve_repr():
     # Arrange
-    valve_obj = NexusValveMethod(file_path='test/file/valve.dat', input_number=1)
+    valve_file = NexusFile(location='test/file/valve.dat')
+    valve_obj = NexusValveMethod(file=valve_file, input_number=1)
     valve_obj.properties = {'DESC': ['This is first line of description', 'and this is second line of description'],
                             'DP_RATE': 'QALL',
                             'VALVE': pd.DataFrame({'SETTING': [1, 2, 3, 4, 5],
@@ -95,9 +98,15 @@ def test_nexus_valve_repr():
                                                    })}
     expected_output = """
 FILE_PATH: test/file/valve.dat
-DESC: ['This is first line of description', 'and this is second line of description']
-VALVE: QALL
-""" + valve_obj.properties['VALVE'].to_string(na_rep='') + '\n\n'
+
+DESC This is first line of description
+DESC and this is second line of description
+VALVE QALL
+""" + valve_obj.properties['VALVE'].to_string(na_rep='', index=False) + \
+"""
+ENDVALVE
+
+"""
 
     # Act
     result = valve_obj.__repr__()
