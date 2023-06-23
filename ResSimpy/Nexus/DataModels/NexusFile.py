@@ -459,19 +459,23 @@ class NexusFile(File):
             self.add_object_locations(obj_uuid=object_id, line_index=line_index)
 
     def remove_object_from_file_as_list(self, objects_to_remove: list[UUID]) -> None:
-        """Removes all associated lines relating to an object."""
+        """Removes all associated lines in the file as well as the object locations relating to a list of objects."""
         if self.object_locations is None:
             raise ValueError('Cannot remove object from object_locations as object_locations is None. '
                              'Check object locations is being populated properly.')
         for obj_to_remove in objects_to_remove:
+            # find all locations in the code that relate to the object
             obj_locs = self.object_locations.get(obj_to_remove, None)
             if obj_locs is None:
                 continue
+            # sort from highest to lowest to ensure line indices are not affected by removal of lines
             sorted_obj_locs = sorted(obj_locs, reverse=True)
             for i, index in enumerate(sorted_obj_locs):
                 if i == 0:
+                    # for the first removal remove the object location
                     self.remove_from_file_as_list(index, objects_to_remove=[obj_to_remove])
                 else:
+                    # the remaining iterations remove just the lines
                     self.remove_from_file_as_list(index)
 
     def remove_from_file_as_list(self, index: int, objects_to_remove: Optional[list[UUID]] = None,
