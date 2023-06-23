@@ -219,6 +219,8 @@ def test_load_constraints(mocker, file_contents, expected_content):
     assert result_single == expected_single_name_constraint
     pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
     assert result_date_filtered == expected_date_filtered_constraints
+
+
 @pytest.mark.parametrize('file_contents, object_locations',[
         ('''CONSTRAINTS
         ! comment

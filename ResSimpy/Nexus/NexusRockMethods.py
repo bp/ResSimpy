@@ -59,11 +59,11 @@ class NexusRockMethods(Rock):
         # Read in rock properties from Nexus rock method files
         if self.__files is not None and len(self.__files) > 0:  # Check if rock files exist
             for table_num in self.__files.keys():  # For each rock property method
-                rock_file = self.__files[table_num].location
-                if rock_file is None:
+                rock_file = self.__files[table_num]
+                if rock_file.location is None:
                     raise ValueError(f'Unable to find rock file: {rock_file}')
-                if os.path.isfile(rock_file):
+                if os.path.isfile(rock_file.location):
                     # Create NexusRockMethod object
-                    self.__inputs[table_num] = NexusRockMethod(file_path=rock_file, input_number=table_num)
+                    self.__inputs[table_num] = NexusRockMethod(file=rock_file, input_number=table_num)
                     self.__inputs[table_num].read_properties()  # Populate object with rock properties in file
         self.__properties_loaded = True

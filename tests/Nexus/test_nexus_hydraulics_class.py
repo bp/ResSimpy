@@ -1,5 +1,6 @@
 import pandas as pd
 import pytest
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from ResSimpy.Nexus.DataModels.NexusHydraulicsMethod import NexusHydraulicsMethod
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -213,7 +214,8 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 )
 def test_read_hydraulics_properties_from_file(mocker, file_contents, expected_hydraulics_properties):
     # Arrange
-    hydraulics_obj = NexusHydraulicsMethod(file_path='test/file/hydraulics.dat', input_number=1)
+    hyd_file = NexusFile(file_content_as_list=file_contents.splitlines())
+    hydraulics_obj = NexusHydraulicsMethod(file=hyd_file, input_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -239,7 +241,8 @@ def test_read_hydraulics_properties_from_file(mocker, file_contents, expected_hy
 
 def test_nexus_hydraulics_repr():
     # Arrange
-    hyd_obj = NexusHydraulicsMethod(file_path='test/file/hyd.dat', input_number=1)
+    hyd_file = NexusFile(location='test/file/hyd.dat')
+    hyd_obj = NexusHydraulicsMethod(file=hyd_file, input_number=1)
     hyd_obj.properties = {'DESC': ['Hydraulics Data'],
                           'UNIT_SYSTEM': UnitSystem.ENGLISH,
                           'QOIL': '1.0 1000. 3000.',
@@ -262,18 +265,34 @@ def test_nexus_hydraulics_repr():
                                                              2435., 2438., 2448., 2530., 2537., 2548.],
                                                      'BHP4': [3070., 3081., 3138., 3130., 3141., 3197.,
                                                              2830., 2836., 2848., 2916., 2926., 2946.]
-                                                     })}
+                                                     }),
+                          'DATGRAD': 'GRAD',
+                          'WATINJ': {'GRAD': 0.433, 'VISC': 0.7, 'LENGTH': 9000,
+                                     'ROUGHNESS': 1e-5, 'DZ': 8000, 'DIAM': 7},
+                          'NOCHK': ''}
     expected_output = """
 FILE_PATH: test/file/hyd.dat
-DESC: ['Hydraulics Data']
-UNIT_SYSTEM: ENGLISH
-QOIL: 1.0 1000. 3000.
-GOR: 0.0 0.5
-WCUT: 0.0
-ALQ GASRATE: 0.0 50.0
-THP: 100. 500. 900. 1400. 2000.
-HYD_TABLE:
-""" + hyd_obj.properties['HYD_TABLE'].to_string() + '\n\n'
+
+DESC Hydraulics Data
+ENGLISH
+QOIL 1.0 1000. 3000.
+GOR 0.0 0.5
+WCUT 0.0
+ALQ GASRATE 0.0 50.0
+THP 100. 500. 900. 1400. 2000.
+""" + hyd_obj.properties['HYD_TABLE'].to_string(na_rep='', index=False) + '\n' + \
+"""
+DATGRAD GRAD
+WATINJ
+    GRAD 0.433
+    VISC 0.7
+    LENGTH 9000
+    ROUGHNESS 1e-05
+    DZ 8000
+    DIAM 7
+NOCHK
+
+"""
 
     # Act
     result = hyd_obj.__repr__()

@@ -6,19 +6,19 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusKeywords.relpm_keywords import RELPM_TABLE_KEYWORDS, RELPM_KEYWORDS_VALUE_FLOAT
 from ResSimpy.Nexus.NexusKeywords.relpm_keywords import RELPM_SINGLE_KEYWORDS, RELPM_HYSTERESIS_PRIMARY_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.relpm_keywords import RELPM_KEYWORDS, RELPM_NONDARCY_KEYWORDS, RELPM_NONDARCY_PARAMS
-
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 from ResSimpy.DynamicProperty import DynamicProperty
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_hysteresis_dict
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
-@dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
+@dataclass(kw_only=True, repr=False)  # Doesn't need to write an _init_, _eq_ methods, etc.
 class NexusRelPermMethod(DynamicProperty):
     """Class to hold Nexus relative permeability and capillary pressure properties.
 
     Attributes:
-        file_path (str): Path to the Nexus relperm file
+        file (NexusFile): Nexus relperm file object
         input_number (int): RELPM method number in Nexus fcs file
         properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                     dict[str, Union[float, pd.DataFrame]]]]):
@@ -26,18 +26,17 @@ class NexusRelPermMethod(DynamicProperty):
     """
 
     # General parameters
-    file_path: str
+    file: NexusFile
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                      dict[str, Union[float, pd.DataFrame]]]] = field(default_factory=get_empty_dict_union)
     hysteresis_params: dict[str, Union[str, float, dict[str, Union[str, float, dict[str, Union[str, float]]]]]] \
         = field(default_factory=get_empty_hysteresis_dict)
 
-    def __init__(self, file_path: str, input_number: int,
+    def __init__(self, file: NexusFile, input_number: int,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None,
                  hysteresis_params: Optional[dict[str, Union[str, float, dict[str, Union[str, float,
                                              dict[str, Union[str, float]]]]]]] = None) -> None:
-        self.file_path = file_path
         if properties is not None:
             self.properties = properties
         else:
@@ -46,105 +45,96 @@ class NexusRelPermMethod(DynamicProperty):
             self.hysteresis_params = hysteresis_params
         else:
             self.hysteresis_params = {}
-        super().__init__(input_number=input_number)
+        super().__init__(input_number=input_number, file=file)
 
-    def __repr__(self) -> str:
-        """Pretty printing relative permeability and capillary pressure data."""
-        printable_str = f'\nFILE_PATH: {self.file_path}\n'
+    def to_string(self) -> str:
+        """Create string with relative permeability and capillary pressure data, in Nexus file format."""
+        printable_str = ''
         # Handle non-hysteresis relperm and capillary pressure parameters
         relperm_dict = self.properties
+        stone1_options = {'STONE1': ['SOMOPT1', 'SOMOPT2', 'SOMOPT3', 'ST1EXP', 'ST1EPS', 'ST1NU'],
+                          'STONE1_WAT': ['SWMOPT1', 'SWMOPT2']}
         for key, value in relperm_dict.items():
             if isinstance(value, pd.DataFrame):
-                table_text = f'{key}:'
+                table_text = f'{key}'
                 if key == 'WOTABLE':
                     if 'LOW_SAL' in relperm_dict.keys():
                         table_text += " LOW_SAL"
                 printable_str += f'{table_text}\n'
-                printable_str += value.to_string(na_rep='')
-                printable_str += '\n\n'
-            elif key == 'STONE1':
-                if value == '':
-                    printable_str += f'{key}'
-                else:
-                    printable_str += f'{key}:'
-                for stone1_key in ['SOMOPT1', 'SOMOPT2', 'SOMOPT3', 'ST1EXP', 'ST1EPS', 'ST1NU']:
+                printable_str += value.to_string(na_rep='', index=False) + '\n\n'
+            elif key in ['STONE1', 'STONE1_WAT']:
+                printable_str += f'{key}'
+                for stone1_key in stone1_options[key]:
                     if stone1_key in relperm_dict.keys():
                         if relperm_dict[stone1_key] == '':
                             printable_str += f' {stone1_key}'
                         else:
-                            printable_str += f' {stone1_key}: {relperm_dict[stone1_key]}'
-                printable_str += '\n'
-            elif key == 'STONE1_WAT':
-                if value == '':
-                    printable_str += f'{key}'
-                else:
-                    printable_str += f'{key}:'
-                for stone1_key in ['SWMOPT1', 'SWMOPT2']:
-                    if stone1_key in relperm_dict.keys():
-                        if relperm_dict[stone1_key] == '':
-                            printable_str += f' {stone1_key}'
-                        else:
-                            printable_str += f' {stone1_key}: {relperm_dict[stone1_key]}'
+                            printable_str += f' {stone1_key} {relperm_dict[stone1_key]}'
                 printable_str += '\n'
             elif key == 'JFUNC':
                 if value == '':
                     printable_str += f'{key}\n'
                 else:
-                    printable_str += f'{key}: {value}\n'
+                    printable_str += f'{key} {value}\n'
                 for jfunc_key in ['PERMBASIS', 'PORBASIS']:
                     if jfunc_key in relperm_dict.keys():
-                        printable_str += f'       {jfunc_key}: {relperm_dict[jfunc_key]}\n'
+                        printable_str += f'       {jfunc_key} {relperm_dict[jfunc_key]}\n'
             elif key in ['SCALING', 'SCALING_PC', 'IFT', 'NEARCRIT', 'DERIVATIVES']:
                 if value == '':
                     printable_str += f'{key}\n'
                 else:
-                    printable_str += f'{key}: {value}\n'
+                    printable_str += f'{key} {value}\n'
             elif isinstance(value, dict):
-                printable_str += f'{key}:\n'
+                printable_str += f'{key}\n'
                 for subkey, subvalue in value.items():
-                    printable_str += f'    {subkey}: {subvalue}\n'
+                    printable_str += f'    {subkey} {subvalue}\n'
+                if key in RELPM_NONDARCY_KEYWORDS:
+                    printable_str += 'END'+key+'\n'
+            elif key == 'DESC' and isinstance(value, list):
+                for desc_line in value:
+                    printable_str += 'DESC ' + desc_line + '\n'
             elif isinstance(value, Enum):
-                printable_str += f'{key}: {value.name}\n'
-            elif key not in ['LOW_SAL', 'STONE1', 'SOMOPT1', 'SOMOPT2', 'SOMOPT3', 'ST1EXP', 'ST1EPS', 'ST1NU',
+                if isinstance(value, UnitSystem) or isinstance(value, TemperatureUnits):
+                    printable_str += f'{value.value}\n'
+                elif isinstance(value, SUnits):
+                    printable_str += f'SUNITS {value.value}\n'
+            elif key not in ['DESC', 'LOW_SAL', 'STONE1', 'SOMOPT1', 'SOMOPT2', 'SOMOPT3', 'ST1EXP', 'ST1EPS', 'ST1NU',
                              'STONE1_WAT', 'SWMOPT1', 'SWMOPT2', 'PERMBASIS', 'PORBASIS']:
                 if value == '':
                     printable_str += f'{key}\n'
                 else:
-                    printable_str += f'{key}: {value}\n'
+                    printable_str += f'{key} {value}\n'
 
         # Handle non-hysteresis relperm and capillary pressure parameters
         hyst_dict = self.hysteresis_params
         key_indx = 0
         for key, value in hyst_dict.items():
             if key_indx == 0:
-                printable_str += 'HYSTERESIS:'
+                printable_str += 'HYSTERESIS'
             else:
-                printable_str += '           '
+                printable_str += '          '
             if value == '':
                 printable_str += f' {key}\n'
             elif value == 'USER':
-                printable_str += f' {key}: USER\n'
+                printable_str += f' {key} USER\n'
             elif isinstance(value, dict):
-                if len(value.keys()) == 0:
-                    printable_str += f' {key}'
-                else:
-                    printable_str += f' {key}:'
-                    for subkey, subvalue in value.items():
-                        if isinstance(subvalue, dict):
-                            printable_str += f' {subkey}:'
-                            for subsubkey, subsubvalue in subvalue.items():
-                                if subsubvalue == '':
-                                    printable_str += f' {subsubkey}'
-                                else:
-                                    printable_str += f' {subsubkey}: {subsubvalue}'
-                        else:
-                            if subvalue == '':
-                                printable_str += f' {subkey}'
+                printable_str += f' {key}'
+                for subkey, subvalue in value.items():
+                    if isinstance(subvalue, dict):
+                        printable_str += f' {subkey}'
+                        for subsubkey, subsubvalue in subvalue.items():
+                            if subsubvalue == '':
+                                printable_str += f' {subsubkey}'
                             else:
-                                printable_str += f' {subkey}: {subvalue}'
+                                printable_str += f' {subsubkey} {subsubvalue}'
+                    else:
+                        if subvalue == '':
+                            printable_str += f' {subkey}'
+                        else:
+                            printable_str += f' {subkey} {subvalue}'
                 printable_str += '\n'
             else:
-                printable_str += f' {key}: {value}\n'
+                printable_str += f' {key} {value}\n'
             key_indx += 1
         return printable_str
 
@@ -168,8 +158,7 @@ class NexusRelPermMethod(DynamicProperty):
 
     def read_properties(self) -> None:
         """Read Nexus rel perm file contents and populate the NexusRelPermMethod object."""
-        file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
-        file_as_list = file_obj.get_flat_list_str_file
+        file_as_list = self.file.get_flat_list_str_file
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)

@@ -760,8 +760,8 @@ def test_collect_all_tables_to_objects(mocker, file_contents, node1_props, node2
 
     # Act
 
-    result_dict = ResSimpy.Nexus.nexus_collect_tables.collect_all_tables_to_objects(surface_file, {'NODES': NexusNode, 'WELLS': NexusNode}, start_date,
-                                               default_units=UnitSystem.ENGLISH)
+    result_dict = ResSimpy.Nexus.nexus_collect_tables.collect_all_tables_to_objects(surface_file,
+        {'NODES': NexusNode, 'WELLS': NexusNode}, start_date, default_units=UnitSystem.ENGLISH)
     result = result_dict.get('NODES')
     if result_dict.get('WELLS') is not None:
         result.extend(result_dict.get('WELLS'))

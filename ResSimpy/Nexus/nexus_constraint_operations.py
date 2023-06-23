@@ -95,7 +95,10 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
             nexus_file.add_object_locations(nexus_constraint.id, index + start_line_index)
 
 
-def clear_constraints(token_value, constraint) -> dict[str, None]:
+def __clear_constraints(token_value, constraint) -> dict[str, None]:
+    """Replicates behaviour of the clear keyword in nexus constraints by creating a dictionary filled with
+    Nones for the relevant parameters.
+    """
     match token_value:
         case 'CLEAR':
             constraint_clearing_dict = constraint.get_rate_constraints_map()

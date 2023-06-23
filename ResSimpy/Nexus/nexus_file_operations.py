@@ -18,6 +18,7 @@ from ResSimpy.Nexus.NexusKeywords.nexus_keywords import VALID_NEXUS_KEYWORDS
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+    from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 
 
 def nexus_token_found(line_to_check: str, valid_list: list[str] = VALID_NEXUS_KEYWORDS) -> bool:
