@@ -37,6 +37,40 @@ def test_find_constraint(mocker):
     assert result == expected_constraint
 
 
+def test_find_constraint_too_many_too_few_constraints_found(mocker):
+    # Arrange
+    mock_nexus_network = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
+    mock_nexus_sim = get_fake_nexus_simulator(mocker)
+
+    constraints = NexusConstraints(mock_nexus_network, mock_nexus_sim)
+    well1_constraint_props = ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000.0,
+                    'unit_system': UnitSystem.ENGLISH, 'max_wor': 95.0},
+            {'date': '01/12/2023', 'name': 'well1', 'max_surface_liquid_rate': None, 'max_wor': 95.0,
+                'unit_system': UnitSystem.ENGLISH},
+            {'date': '01/01/2024', 'name': 'well1', 'max_wor': 95.0, 'max_surface_oil_rate': 1.8,
+                'unit_system': UnitSystem.ENGLISH},
+            )
+    well2_constraint_props = ({'date': '01/01/2019', 'name': 'well2', 'max_surface_liquid_rate': 1.8, 'max_pressure': 10000.2,
+                                'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True,},
+    {'date': '01/12/2023', 'name': 'well2', 'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True,},)
+
+    existing_constraints = {'well1': [NexusConstraint(x) for x in well1_constraint_props],
+                            'well2': [NexusConstraint(x) for x in well2_constraint_props]}
+
+    constraints.__setattr__('_NexusConstraints__constraints', existing_constraints)
+    find_constraint_dict = {'name': 'well1', 'max_wor': 95.0}
+    no_matching_constraints_dict = {'name': 'well1', 'max_wor': 100000}
+    # Act
+    with pytest.raises(ValueError) as ve:
+        result = constraints.find_constraint('well1', find_constraint_dict)
+        assert "Instead found: 3 matching constraints" in str(ve.value)
+
+    with pytest.raises(ValueError) as ve:
+        result = constraints.find_constraint('well1', no_matching_constraints_dict)
+        assert "Instead found: 0 matching constraints" in str(ve.value)
+
+
 @pytest.mark.parametrize("file_contents, expected_result_file, expected_constraints, expected_number_writes",[
     (''' TIME 01/01/2019
     CONSTRAINTS
