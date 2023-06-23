@@ -108,10 +108,9 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
             if (token_found == 'CONSTRAINT' or token_found == 'QMULT') and list_objects is not None:
                 for constraint, id_index in list_objects:
                     if isinstance(constraint, UUID) or isinstance(constraint, str):
-                        correct_line_index = id_index + table_start
-                        nexus_file.add_object_locations(constraint, correct_line_index)
-                        continue
-                    obj_id = constraint.id
+                        obj_id = constraint
+                    else:
+                        obj_id = constraint.id
                     correct_line_index = id_index + table_start
                     nexus_file.add_object_locations(obj_id, correct_line_index)
                     well_name = constraint.name
@@ -121,6 +120,13 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
                         nexus_constraints[well_name] = [constraint]
             elif list_objects is not None and isinstance(list_of_token_obj, list):
                 list_of_token_obj.extend([x[0] for x in list_objects])
+                # for obj, id_index in list_objects:
+                #     if isinstance(obj, UUID) or isinstance(obj, str):
+                #         obj_id = obj
+                #     else:
+                #         obj_id = obj.id
+                #     correct_line_index = id_index + table_start
+                #     nexus_file.add_object_locations(obj_id, correct_line_index)
             else:
                 list_of_token_obj = nexus_constraints
 
