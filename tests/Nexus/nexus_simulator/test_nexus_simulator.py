@@ -709,7 +709,7 @@ def test_get_wells(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.Wells.get_wells()
+    result = simulation.wells.get_wells()
 
     # Assert
     assert result == loaded_wells
@@ -745,7 +745,7 @@ def test_get_wells_df(mocker: MockerFixture):
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
     simulation = NexusSimulator(origin='nexus_run.fcs')
     # Act
-    result = simulation.Wells.get_wells_df()
+    result = simulation.wells.get_wells_df()
     # Assert
 
     pd.testing.assert_frame_equal(result, loaded_wells_df, check_like=True)
@@ -784,7 +784,7 @@ def test_get_well(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.Wells.get_well(well_name='WELL2')
+    result = simulation.wells.get_well(well_name='WELL2')
 
     # Assert
     assert result == loaded_wells[1]

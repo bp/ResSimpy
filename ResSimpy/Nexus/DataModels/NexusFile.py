@@ -19,7 +19,7 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 import warnings
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_OPERATION_KEYWORDS, GRID_ARRAY_FORMAT_KEYWORDS
 from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_nexus_file, \
-    get_empty_dict_uuid_int
+    get_empty_dict_uuid_list_int
 from ResSimpy.File import File
 
 
@@ -38,7 +38,7 @@ class NexusFile(File):
     include_locations: Optional[list[str]] = field(default=None)
     origin: Optional[str] = None
     include_objects: Optional[list[NexusFile]] = field(default=None, repr=False)
-    object_locations: Optional[dict[UUID, int]] = None
+    object_locations: Optional[dict[UUID, list[int]]] = None
     line_locations: Optional[list[tuple[int, UUID]]] = None
 
     def __init__(self, location: Optional[str] = None,
@@ -58,7 +58,7 @@ class NexusFile(File):
         self.include_objects: Optional[list[NexusFile]] = get_empty_list_nexus_file() \
             if include_objects is None else include_objects
         if self.object_locations is None:
-            self.object_locations: dict[UUID, int] = get_empty_dict_uuid_int()
+            self.object_locations: dict[UUID, list[int]] = get_empty_dict_uuid_list_int()
         if self.line_locations is None:
             self.line_locations = []
         self.file_id = uuid.uuid4()
@@ -322,8 +322,12 @@ class NexusFile(File):
                 (i.e. from the get_flat_list_str_file method).
         """
         if self.object_locations is None:
-            self.object_locations: dict[UUID, int] = get_empty_dict_uuid_int()
-        self.object_locations[obj_uuid] = line_index
+            self.object_locations: dict[UUID, list[int]] = get_empty_dict_uuid_list_int()
+        existing_line_locations = self.object_locations.get(obj_uuid, None)
+        if existing_line_locations is not None:
+            existing_line_locations.append(line_index)
+        else:
+            self.object_locations[obj_uuid] = [line_index]
 
     def __update_object_locations(self, line_number: int, number_additional_lines: int) -> None:
         """Updates the object locations in a nexusfile by the additional lines. Used when files have been modified and
@@ -336,9 +340,10 @@ class NexusFile(File):
         """
         if self.object_locations is None:
             return
-        for object_id, index in self.object_locations.items():
-            if index >= line_number:
-                self.object_locations[object_id] = index + number_additional_lines
+        for object_id, list_indices in self.object_locations.items():
+            for i, obj_index in enumerate(list_indices):
+                if obj_index >= line_number:
+                    self.object_locations[object_id][i] = obj_index + number_additional_lines
 
     def __remove_object_locations(self, obj_uuid: UUID) -> None:
         """Removes an object location based on the obj_uuid provided. Used when removing objects in the file_as_list.
@@ -453,6 +458,26 @@ class NexusFile(File):
         for object_id, line_index in additional_objects.items():
             self.add_object_locations(obj_uuid=object_id, line_index=line_index)
 
+    def remove_object_from_file_as_list(self, objects_to_remove: list[UUID]) -> None:
+        """Removes all associated lines in the file as well as the object locations relating to a list of objects."""
+        if self.object_locations is None:
+            raise ValueError('Cannot remove object from object_locations as object_locations is None. '
+                             'Check object locations is being populated properly.')
+        for obj_to_remove in objects_to_remove:
+            # find all locations in the code that relate to the object
+            obj_locs = self.object_locations.get(obj_to_remove, None)
+            if obj_locs is None:
+                continue
+            # sort from highest to lowest to ensure line indices are not affected by removal of lines
+            sorted_obj_locs = sorted(obj_locs, reverse=True)
+            for i, index in enumerate(sorted_obj_locs):
+                if i == 0:
+                    # for the first removal remove the object location
+                    self.remove_from_file_as_list(index, objects_to_remove=[obj_to_remove])
+                else:
+                    # the remaining iterations remove just the lines
+                    self.remove_from_file_as_list(index)
+
     def remove_from_file_as_list(self, index: int, objects_to_remove: Optional[list[UUID]] = None,
                                  string_to_remove: Optional[str] = None) -> None:
         """Remove an entry from the file as list. Also updates existing object locations and removes any \
@@ -472,6 +497,7 @@ class NexusFile(File):
         if nexusfile_to_write_to.file_content_as_list is None:
             raise ValueError(
                 f'No file content in the file attempting to remove line from {nexusfile_to_write_to.location}')
+
         if string_to_remove is None:
             nexusfile_to_write_to.file_content_as_list.pop(relative_index)
             self.__update_object_locations(line_number=index, number_additional_lines=-1)

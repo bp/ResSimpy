@@ -1,3 +1,4 @@
+import uuid
 from dataclasses import dataclass
 from typing import Optional
 
@@ -191,10 +192,17 @@ class NexusConstraint(Constraint):
     choke_limit: Optional[str] = None
     manifold_position: Optional[int] = None
 
+    clear_all: Optional[bool] = None
+    clear_q: Optional[bool] = None
+    clear_limit: Optional[bool] = None
+    clear_alq: Optional[bool] = None
+    clear_p: Optional[bool] = None
+
     def __init__(self, properties_dict: dict[str, None | int | str | float | UnitSystem]) -> None:
         super().__init__()
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)
+        self.__id: uuid.UUID = uuid.uuid4()
 
     @staticmethod
     def get_nexus_mapping() -> dict[str, tuple[str, type]]:
@@ -208,6 +216,12 @@ class NexusConstraint(Constraint):
             'QWSMAX_MULT': ('use_qmult_qwater_surface_rate', bool),
             'QGSMAX_MULT': ('use_qmult_qgas_surface_rate', bool),
             'QLIQSMAX_MULT': ('use_qmult_qoilqwat_surface_rate', bool),
+            # SpecialClearkeywords
+            'CLEAR': ('clear_all', bool),
+            'CLEARQ': ('clear_q', bool),
+            'CLEARP': ('clear_p', bool),
+            'CLEARLIMIT': ('clear_limit', bool),
+            'CLEARALQ': ('clear_alq', bool),
             }
         nexus_mapping.update(NexusConstraint.get_limit_constraints_map())
         nexus_mapping.update(NexusConstraint.get_pressure_constraints_map())
@@ -352,3 +366,11 @@ class NexusConstraint(Constraint):
 
     def __repr__(self) -> str:
         return generic_repr(self)
+
+    @property
+    def id(self) -> uuid.UUID:
+        return self.__id
+
+    def new_id(self):
+        """Refreshes the id on the object."""
+        self.__id = uuid.uuid4()

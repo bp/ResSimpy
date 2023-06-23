@@ -38,13 +38,13 @@ def test_to_dict():
     class_inst = GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=UnitSystem.METRIC,
                              date='01/01/2030')
     expected = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'unit_system': 'METRIC', 'date': '01/01/2030'}
-    expected_no_date_no_units = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, }
+    expected_no_date_no_units = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2 }
     expected_nexus_style = {
         'ATTR_1': 'hello', 'ATTR_2': 10, 'ATTR_3': 43020.2, 'unit_system': 'METRIC',
         'date': '01/01/2030'
     }
     # Act
-    result = to_dict(class_inst, )
+    result = to_dict(class_inst )
     result_no_date_no_units = to_dict(class_inst, add_units=False, add_date=False)
     result_nexus_style = to_dict(class_inst, keys_in_nexus_style=True)
 
@@ -104,7 +104,7 @@ def test_generic_repr():
         y_pos: Optional[float]
         temp: Optional[float]
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return generic_repr(self)
 
     obj = MyClass(
@@ -181,19 +181,3 @@ def test_nexus_keyword_to_attribute_name():
         nexus_keyword_to_attribute_name(nexus_map, 'Failure')
         attribute_name_to_nexus_keyword(nexus_map, 'also fails')
 
-
-def get_fake_nexus_simulator(mocker: MockerFixture, fcs_file_path: str = '/path/fcs_file.fcs',
-                             mock_open: bool = True) -> NexusSimulator:
-    """Returns a set up NexusSimulator object that can then be used for testing. Note that if mock_open is set to True,
-    it mocks out the builtin open method, which may then have to be overwritten by the calling code."""
-    if mock_open:
-        open_mock = mocker.mock_open(read_data='')
-        mocker.patch("builtins.open", open_mock)
-    ls_dir = Mock(side_effect=lambda x: [])
-    mocker.patch('os.listdir', ls_dir)
-    fcs_file_exists = Mock(side_effect=lambda x: True)
-    mocker.patch('os.path.isfile', fcs_file_exists)
-
-    fake_nexus_sim = NexusSimulator(fcs_file_path)
-
-    return fake_nexus_sim
