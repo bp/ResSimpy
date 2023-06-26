@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import Any, Optional
-from uuid import UUID
 
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -123,13 +122,6 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
                         nexus_constraints[well_name] = [constraint]
             elif list_objects is not None and isinstance(list_of_token_obj, list):
                 list_of_token_obj.extend([x[0] for x in list_objects])
-                # for obj, id_index in list_objects:
-                #     if isinstance(obj, UUID) or isinstance(obj, str):
-                #         obj_id = obj
-                #     else:
-                #         obj_id = obj.id
-                #     correct_line_index = id_index + table_start
-                #     nexus_file.add_object_locations(obj_id, correct_line_index)
             else:
                 list_of_token_obj = nexus_constraints
 
