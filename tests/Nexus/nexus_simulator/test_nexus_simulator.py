@@ -1,4 +1,5 @@
 import os
+import uuid
 import pytest
 import pandas as pd
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
@@ -944,7 +945,7 @@ def test_get_wells(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.Wells.get_wells()
+    result = simulation.wells.get_wells()
 
     # Assert
     assert result == loaded_wells
@@ -1018,7 +1019,7 @@ def test_get_wells_df(mocker: MockerFixture):
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
     simulation = NexusSimulator(origin='nexus_run.fcs')
     # Act
-    result = simulation.Wells.get_wells_df()
+    result = simulation.wells.get_wells_df()
     # Assert
 
     pd.testing.assert_frame_equal(result, loaded_wells_df, check_like=True)
@@ -1057,7 +1058,7 @@ def test_get_well(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.Wells.get_well(well_name='WELL2')
+    result = simulation.wells.get_well(well_name='WELL2')
 
     # Assert
     assert result == loaded_wells[1]
@@ -1117,12 +1118,27 @@ def test_get_well_windows(mocker: MockerFixture, fcs_file_contents: str):
 def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
     """Testing the functionality to retrieve pvt methods from Nexus fcs file."""
     # Arrange
-    fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
-    mocker.patch("builtins.open", fcs_file_open)
+    mocker.patch.object(uuid, 'uuid4', return_value='uuid')
 
-    loaded_pvt = {1: NexusPVTMethod(file_path=os.path.join('path', 'my/pvt/file1.dat'), input_number=1),
-                  2: NexusPVTMethod(file_path=os.path.join('path', 'my/pvt/file2.dat'), input_number=2),
-                  3: NexusPVTMethod(file_path=os.path.join('path', 'my/pvt/file3.dat'), input_number=3),
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            os.path.join('path', 'my/pvt/file1.dat'): '',
+            os.path.join('path', 'my/pvt/file2.dat'): '',
+            os.path.join('path', 'my/pvt/file3.dat'): '',
+            'path/nexus_run.fcs': fcs_file_contents,
+            }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    pvt_files = []
+    for i in range(3):
+        pvt_file = NexusFile(location=f'my/pvt/file{i+1}.dat', origin='path/nexus_run.fcs')
+        pvt_file.line_locations = [(0, uuid.uuid4())]
+        pvt_files.append(pvt_file)
+
+    loaded_pvt = {1: NexusPVTMethod(file=pvt_files[0], input_number=1),
+                  2: NexusPVTMethod(file=pvt_files[1], input_number=2),
+                  3: NexusPVTMethod(file=pvt_files[2], input_number=3),
                   }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1144,6 +1160,8 @@ def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
 def test_get_separator(mocker: MockerFixture, fcs_file_contents: str):
     """Testing the functionality to retrieve separator methods from Nexus fcs file."""
     # Arrange
+    mocker.patch.object(uuid, 'uuid4', return_value='uuid')
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             os.path.join('path', 'my/separator/file1.dat'): '',
@@ -1154,9 +1172,15 @@ def test_get_separator(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_sep = {1: NexusSeparatorMethod(file_path=os.path.join('path', 'my/separator/file1.dat'), input_number=1),
-                  2: NexusSeparatorMethod(file_path=os.path.join('path', 'my/separator/file2.dat'), input_number=2),
-                  3: NexusSeparatorMethod(file_path=os.path.join('path', 'my/separator/file3.dat'), input_number=3),
+    sep_files = []
+    for i in range(3):
+        sep_file = NexusFile(location=f'my/separator/file{i+1}.dat', origin='path/nexus_run.fcs')
+        sep_file.line_locations = [(0, uuid.uuid4())]
+        sep_files.append(sep_file)
+
+    loaded_sep = {1: NexusSeparatorMethod(file=sep_files[0], input_number=1),
+                  2: NexusSeparatorMethod(file=sep_files[1], input_number=2),
+                  3: NexusSeparatorMethod(file=sep_files[2], input_number=3),
                   }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1179,6 +1203,8 @@ def test_get_separator(mocker: MockerFixture, fcs_file_contents: str):
 def test_get_water(mocker: MockerFixture, fcs_file_contents: str):
     """Testing the functionality to retrieve water methods from Nexus fcs file."""
     # Arrange
+    mocker.patch.object(uuid, 'uuid4', return_value='uuid')
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             os.path.join('path', 'my/water/file1.dat'): '',
@@ -1189,9 +1215,15 @@ def test_get_water(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_wat = {1: NexusWaterMethod(file_path=os.path.join('path', 'my/water/file1.dat'), input_number=1),
-                  2: NexusWaterMethod(file_path=os.path.join('path', 'my/water/file2.dat'), input_number=2),
-                  3: NexusWaterMethod(file_path=os.path.join('path', 'my/water/file3.dat'), input_number=3),
+    wat_files = []
+    for i in range(3):
+        wat_file = NexusFile(location=f'my/water/file{i+1}.dat', origin='path/nexus_run.fcs')
+        wat_file.line_locations = [(0, uuid.uuid4())]
+        wat_files.append(wat_file)
+
+    loaded_wat = {1: NexusWaterMethod(file=wat_files[0], input_number=1),
+                  2: NexusWaterMethod(file=wat_files[1], input_number=2),
+                  3: NexusWaterMethod(file=wat_files[2], input_number=3),
                   }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1214,6 +1246,8 @@ def test_get_water(mocker: MockerFixture, fcs_file_contents: str):
 def test_get_equil(mocker: MockerFixture, fcs_file_contents: str):
     """Testing the functionality to retrieve equilibration methods from Nexus fcs file."""
     # Arrange
+    mocker.patch.object(uuid, 'uuid4', return_value='uuid')
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             os.path.join('path', 'my/equil/file1.dat'): '',
@@ -1224,9 +1258,15 @@ def test_get_equil(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_equil = {1: NexusEquilMethod(file_path=os.path.join('path', 'my/equil/file1.dat'), input_number=1),
-                    2: NexusEquilMethod(file_path=os.path.join('path', 'my/equil/file2.dat'), input_number=2),
-                    3: NexusEquilMethod(file_path=os.path.join('path', 'my/equil/file3.dat'), input_number=3),
+    eq_files = []
+    for i in range(3):
+        eq_file = NexusFile(location=f'my/equil/file{i+1}.dat', origin='path/nexus_run.fcs')
+        eq_file.line_locations = [(0, uuid.uuid4())]
+        eq_files.append(eq_file)
+
+    loaded_equil = {1: NexusEquilMethod(file=eq_files[0], input_number=1),
+                    2: NexusEquilMethod(file=eq_files[1], input_number=2),
+                    3: NexusEquilMethod(file=eq_files[2], input_number=3)
                     }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1249,6 +1289,8 @@ def test_get_equil(mocker: MockerFixture, fcs_file_contents: str):
 def test_get_rock(mocker: MockerFixture, fcs_file_contents: str):
     """Testing the functionality to retrieve rock properties methods from Nexus fcs file."""
     # Arrange
+    mocker.patch.object(uuid, 'uuid4', return_value='uuid')
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             os.path.join('path', 'my/rock/file1.dat'): '',
@@ -1259,9 +1301,15 @@ def test_get_rock(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_rocks = {1: NexusRockMethod(file_path=os.path.join('path', 'my/rock/file1.dat'), input_number=1),
-                    2: NexusRockMethod(file_path=os.path.join('path', 'my/rock/file2.dat'), input_number=2),
-                    3: NexusRockMethod(file_path=os.path.join('path', 'my/rock/file3.dat'), input_number=3),
+    rock_files = []
+    for i in range(3):
+        rock_file = NexusFile(location=f'my/rock/file{i+1}.dat', origin='path/nexus_run.fcs')
+        rock_file.line_locations = [(0, uuid.uuid4())]
+        rock_files.append(rock_file)
+
+    loaded_rocks = {1: NexusRockMethod(file=rock_files[0], input_number=1),
+                    2: NexusRockMethod(file=rock_files[1], input_number=2),
+                    3: NexusRockMethod(file=rock_files[2], input_number=3),
                     }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1286,6 +1334,8 @@ def test_get_relperm(mocker: MockerFixture, fcs_file_contents: str):
     capillary pressure methods from Nexus fcs file.
     """
     # Arrange
+    mocker.patch.object(uuid, 'uuid4', return_value='uuid')
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             os.path.join('path', 'my/relpm/file1.dat'): '',
@@ -1296,9 +1346,15 @@ def test_get_relperm(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_relperms = {1: NexusRelPermMethod(file_path=os.path.join('path', 'my/relpm/file1.dat'), input_number=1),
-                       2: NexusRelPermMethod(file_path=os.path.join('path', 'my/relpm/file2.dat'), input_number=2),
-                       3: NexusRelPermMethod(file_path=os.path.join('path', 'my/relpm/file3.dat'), input_number=3),
+    relpm_files = []
+    for i in range(3):
+        relpm_file = NexusFile(location=f'my/relpm/file{i+1}.dat', origin='path/nexus_run.fcs')
+        relpm_file.line_locations = [(0, uuid.uuid4())]
+        relpm_files.append(relpm_file)
+
+    loaded_relperms = {1: NexusRelPermMethod(file=relpm_files[0], input_number=1),
+                       2: NexusRelPermMethod(file=relpm_files[1], input_number=2),
+                       3: NexusRelPermMethod(file=relpm_files[2], input_number=3),
                        }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1321,6 +1377,8 @@ def test_get_relperm(mocker: MockerFixture, fcs_file_contents: str):
 def test_get_valve(mocker: MockerFixture, fcs_file_contents: str):
     """Testing the functionality to retrieve valve methods from Nexus fcs file."""
     # Arrange
+    mocker.patch.object(uuid, 'uuid4', return_value='uuid')
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             os.path.join('path', 'my/valve/file1.dat'): '',
@@ -1331,9 +1389,15 @@ def test_get_valve(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_valves = {1: NexusValveMethod(file_path=os.path.join('path', 'my/valve/file1.dat'), input_number=1),
-                     2: NexusValveMethod(file_path=os.path.join('path', 'my/valve/file2.dat'), input_number=2),
-                     3: NexusValveMethod(file_path=os.path.join('path', 'my/valve/file3.dat'), input_number=3)
+    valve_files = []
+    for i in range(3):
+        valve_file = NexusFile(location=f'my/valve/file{i+1}.dat', origin='path/nexus_run.fcs')
+        valve_file.line_locations = [(0, uuid.uuid4())]
+        valve_files.append(valve_file)
+
+    loaded_valves = {1: NexusValveMethod(file=valve_files[0], input_number=1),
+                     2: NexusValveMethod(file=valve_files[1], input_number=2),
+                     3: NexusValveMethod(file=valve_files[2], input_number=3),
                      }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1355,6 +1419,8 @@ def test_get_valve(mocker: MockerFixture, fcs_file_contents: str):
 def test_get_aquifer(mocker: MockerFixture, fcs_file_contents: str):
     """Testing the functionality to retrieve aquifer methods from Nexus fcs file."""
     # Arrange
+    mocker.patch.object(uuid, 'uuid4', return_value='uuid')
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             os.path.join('path', 'my/aquifer/file1.dat'): '',
@@ -1365,9 +1431,15 @@ def test_get_aquifer(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_aquifers = {1: NexusAquiferMethod(file_path=os.path.join('path', 'my/aquifer/file1.dat'), input_number=1),
-                       2: NexusAquiferMethod(file_path=os.path.join('path', 'my/aquifer/file2.dat'), input_number=2),
-                       3: NexusAquiferMethod(file_path=os.path.join('path', 'my/aquifer/file3.dat'), input_number=3)
+    aq_files = []
+    for i in range(3):
+        aq_file = NexusFile(location=f'my/aquifer/file{i+1}.dat', origin='path/nexus_run.fcs')
+        aq_file.line_locations = [(0, uuid.uuid4())]
+        aq_files.append(aq_file)
+
+    loaded_aquifers = {1: NexusAquiferMethod(file=aq_files[0], input_number=1),
+                       2: NexusAquiferMethod(file=aq_files[1], input_number=2),
+                       3: NexusAquiferMethod(file=aq_files[2], input_number=3)
                        }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1389,6 +1461,8 @@ def test_get_aquifer(mocker: MockerFixture, fcs_file_contents: str):
 def test_get_hydraulics(mocker: MockerFixture, fcs_file_contents: str):
     """Testing the functionality to retrieve hydraulics methods from Nexus fcs file."""
     # Arrange
+    mocker.patch.object(uuid, 'uuid4', return_value='uuid')
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             os.path.join('path', 'my/hyd/file1.dat'): '',
@@ -1399,9 +1473,15 @@ def test_get_hydraulics(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_hyds = {1: NexusHydraulicsMethod(file_path=os.path.join('path', 'my/hyd/file1.dat'), input_number=1),
-                   2: NexusHydraulicsMethod(file_path=os.path.join('path', 'my/hyd/file2.dat'), input_number=2),
-                   3: NexusHydraulicsMethod(file_path=os.path.join('path', 'my/hyd/file3.dat'), input_number=3)
+    hyd_files = []
+    for i in range(3):
+        hyd_file = NexusFile(location=f'my/hyd/file{i+1}.dat', origin='path/nexus_run.fcs')
+        hyd_file.line_locations = [(0, uuid.uuid4())]
+        hyd_files.append(hyd_file)
+
+    loaded_hyds = {1: NexusHydraulicsMethod(file=hyd_files[0], input_number=1),
+                   2: NexusHydraulicsMethod(file=hyd_files[1], input_number=2),
+                   3: NexusHydraulicsMethod(file=hyd_files[2], input_number=3)
                    }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1423,6 +1503,8 @@ def test_get_hydraulics(mocker: MockerFixture, fcs_file_contents: str):
 def test_get_gaslift(mocker: MockerFixture, fcs_file_contents: str):
     """Testing the functionality to retrieve gaslift methods from Nexus fcs file."""
     # Arrange
+    mocker.patch.object(uuid, 'uuid4', return_value='uuid')
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             os.path.join('path', 'my/gaslift/file1.dat'): '',
@@ -1433,9 +1515,15 @@ def test_get_gaslift(mocker: MockerFixture, fcs_file_contents: str):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    loaded_gaslift = {1: NexusGasliftMethod(file_path=os.path.join('path', 'my/gaslift/file1.dat'), input_number=1),
-                      2: NexusGasliftMethod(file_path=os.path.join('path', 'my/gaslift/file2.dat'), input_number=2),
-                      3: NexusGasliftMethod(file_path=os.path.join('path', 'my/gaslift/file3.dat'), input_number=3)
+    gl_files = []
+    for i in range(3):
+        gl_file = NexusFile(location=f'my/gaslift/file{i+1}.dat', origin='path/nexus_run.fcs')
+        gl_file.line_locations = [(0, uuid.uuid4())]
+        gl_files.append(gl_file)
+
+    loaded_gaslift = {1: NexusGasliftMethod(file=gl_files[0], input_number=1),
+                      2: NexusGasliftMethod(file=gl_files[1], input_number=2),
+                      3: NexusGasliftMethod(file=gl_files[2], input_number=3)
                       }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')

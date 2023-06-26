@@ -59,11 +59,11 @@ class NexusHydraulicsMethods(Hydraulics):
         # Read in hydraulics properties from Nexus hydraulics method files
         if self.__files is not None and len(self.__files) > 0:  # Check if hydraulics files exist
             for table_num in self.__files.keys():  # For each hydraulics property method
-                hydraulics_file = self.__files[table_num].location
-                if hydraulics_file is None:
+                hydraulics_file = self.__files[table_num]
+                if hydraulics_file.location is None:
                     raise ValueError(f'Unable to find hydraulics file: {hydraulics_file}')
-                if os.path.isfile(hydraulics_file):
+                if os.path.isfile(hydraulics_file.location):
                     # Create NexusHydraulicsMethod object
-                    self.__inputs[table_num] = NexusHydraulicsMethod(file_path=hydraulics_file, input_number=table_num)
+                    self.__inputs[table_num] = NexusHydraulicsMethod(file=hydraulics_file, input_number=table_num)
                     self.__inputs[table_num].read_properties()  # Populate object with hydraulics props
         self.__properties_loaded = True
