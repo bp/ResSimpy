@@ -93,6 +93,7 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
                                                      unit_system=unit_system,
                                                      nexus_obj_dict=nexus_constraints,
                                                      preserve_previous_object_attributes=True)
+
             else:
                 list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
                                                      row_object=table_object_map[token_found],
@@ -104,16 +105,26 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
             # This statement ensures that CONSTRAINT that are found in tables are actually added to the dictionary
             # under the same key as constraints to preserve their order
             if (token_found == 'CONSTRAINT' or token_found == 'QMULT') and list_objects is not None:
-                for constraint in list_objects:
-                    well_name = constraint.name
+                for constraint, id_index in list_objects:
+                    if isinstance(constraint, NexusConstraint):
+                        obj_id = constraint.id
+                        well_name = constraint.name
+                    else:
+                        obj_id = constraint
+                        well_name = None
+                    correct_line_index = id_index + table_start
+                    nexus_file.add_object_locations(obj_id, correct_line_index)
+                    if well_name is None:
+                        continue
                     if nexus_constraints.get(well_name, None) is not None:
                         nexus_constraints[well_name].append(constraint)
                     else:
                         nexus_constraints[well_name] = [constraint]
             elif list_objects is not None and isinstance(list_of_token_obj, list):
-                list_of_token_obj.extend(list_objects)
+                list_of_token_obj.extend([x[0] for x in list_objects])
             else:
                 list_of_token_obj = nexus_constraints
+
             # reset indices for further tables
             table_start = -1
             table_end = -1
