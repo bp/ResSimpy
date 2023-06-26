@@ -983,7 +983,7 @@ def test_get_wells_windows(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path\nexus_run.fcs')
 
     # Act
-    result = simulation.Wells.get_wells()
+    result = simulation.wells.get_wells()
 
     # Assert
     assert result == loaded_wells
@@ -1098,7 +1098,7 @@ def test_get_well_windows(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path\nexus_run.fcs')
 
     # Act
-    result = simulation.Wells.get_well(well_name='WELL2')
+    result = simulation.wells.get_well(well_name='WELL2')
 
     # Assert
     assert result == loaded_wells[1]
