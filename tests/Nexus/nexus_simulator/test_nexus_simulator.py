@@ -141,7 +141,7 @@ def test_load_fcs_file_no_output_no_include_file_windows(mocker, run_control_pat
     mocker.patch("builtins.open", open_mock)
     expected_full_path = os.path.join(expected_root, expected_run_control_path)
     # Act
-    simulation = NexusSimulator(origin='testpath1\Path.fcs')
+    simulation = NexusSimulator(origin='testpath1\\Path.fcs')
 
     # Assert
     assert simulation.run_control_file_path == expected_full_path
@@ -189,7 +189,7 @@ def test_load_fcs_space_in_filename_windows(mocker, run_control_path, expected_r
     expected_full_path = os.path.join(expected_root, expected_run_control_path)
 
     # Act
-    simulation = NexusSimulator(origin='testpath1/Path.fcs')
+    simulation = NexusSimulator(origin='testpath1\\Path.fcs')
 
     # Assert
     assert simulation.run_control_file_path == expected_full_path
