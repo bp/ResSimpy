@@ -128,7 +128,7 @@ def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expec
         # Providing an absolute path to the fcs file + USA date format
         ("c:\run\control\path", "", "c:\run\control\path", "MM/DD/YYYY", DateFormat.MM_DD_YYYY),
         # Providing a relative path to the fcs file + Non-USA date format
-        ("run\control\path", "testpath1", "run\control\path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
+        ("run\\control\\path", "testpath1", "run\\control\\path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
         # check for windows path
         
         
@@ -176,7 +176,7 @@ def test_load_fcs_space_in_filename(mocker, run_control_path, expected_root, exp
         # Providing an absolute path to the fcs file + USA date format
         ("c:\run\control\path", "", "c:\run\control\path", "MM/DD/YYYY", DateFormat.MM_DD_YYYY),
         # Providing a relative path to the fcs file + Non-USA date format
-        ("run\control\path", "testpath1", "run\control\path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
+        ("run\\control\\path", "testpath1", "run\\control\\path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
         # check for windows path    
         
     ])
