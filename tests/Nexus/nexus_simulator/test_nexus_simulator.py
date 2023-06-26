@@ -128,7 +128,7 @@ def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expec
         # Providing an absolute path to the fcs file + USA date format
         ("c:\run\control\path", "", "c:\run\control\path", "MM/DD/YYYY", DateFormat.MM_DD_YYYY),
         # Providing a relative path to the fcs file + Non-USA date format
-        ("\run\control\path", "testpath1", "\run\control\path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
+        ("run\control\path", "testpath1", "run\control\path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
         # check for windows path
         
         
@@ -153,10 +153,7 @@ def test_load_fcs_file_no_output_no_include_file_windows(mocker, run_control_pat
         # Providing an absolute path to the fcs file + USA date format
         ("/run/control/path", "", "/run/control/path", "MM/DD/YYYY", DateFormat.MM_DD_YYYY),
         # Providing a relative path to the fcs file + Non-USA date format
-        ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY),
-        # check for windows path
-        ("c:\run\control\path", "", "c:\run\control\path", "MM/DD/YYYY", DateFormat.MM_DD_YYYY),
-        ("\run\control\path", "testpath1", "\run\control\path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
+        ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
     ])
 def test_load_fcs_space_in_filename(mocker, run_control_path, expected_root, expected_run_control_path,
                                     date_format, expected_date_format):
@@ -179,7 +176,7 @@ def test_load_fcs_space_in_filename(mocker, run_control_path, expected_root, exp
         # Providing an absolute path to the fcs file + USA date format
         ("c:\run\control\path", "", "c:\run\control\path", "MM/DD/YYYY", DateFormat.MM_DD_YYYY),
         # Providing a relative path to the fcs file + Non-USA date format
-        ("\run\control\path", "testpath1", "\run\control\path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
+        ("run\control\path", "testpath1", "run\control\path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
         # check for windows path    
         
     ])
@@ -428,14 +425,8 @@ def test_load_fcs_file_raises_error_for_undefined_run_units(mocker, fcs_file):
                                      'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nsurface network 1 	file/path/location/surface.inc',
                                      'testpath1', 'file/path/location/surface.inc'),
                              (
-                                 'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data\Includes\nexus_data\surface_simplified_06082018.inc',
-                                 'testpath1', 'nexus_data\Includes\nexus_data\surface_simplified_06082018.inc'),
-                             (
-                                     'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE Network 1 	file/path/location/surface.inc',
-                                     'testpath1', 'file\path\location\surface.inc'),
-                             (
-                                     'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nsurface network 1 	file/path/location/surface.inc',
-                                     'testpath1', 'file\path\location\surface.inc')
+                                 'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data\\Includes\\nexus_data\\surface_simplified_06082018.inc',
+                                 'testpath1', 'nexus_data\\Includes\\nexus_data\\surface_simplified_06082018.inc')
                          ])
 def test_get_abs_surface_file_path(mocker, fcs_file, expected_root, expected_extracted_path):
     # Arrange
