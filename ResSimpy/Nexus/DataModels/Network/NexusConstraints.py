@@ -11,6 +11,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
+import ResSimpy.Nexus.nexus_file_operations as nfo
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
@@ -166,15 +167,68 @@ class NexusConstraints:
                                     f'with an existing constraint that has: {constraint_id=}')
         return surface_file
 
-    def add_constraints(self, constraint_dict: dict[str, float | int | str]) -> None:
-        """Adds a constraint to the network and corresponding surface file
+    def add_constraints(self,
+                        name: str,
+                        constraint_to_add: dict[str, float | int | str | UnitSystem] | NexusConstraint) -> None:
+        """Adds a constraint to the network and corresponding surface file.
         # TODO implement tests
         # TODO add constraint to an inline constraint table
         # TODO add a constraint at a new datetime
         # TODO add correct value for special cases
         # TODO add QMULT tables
         # TODO decide what to do if constraints already exist in the table
-
         """
+        #
         self.__parent_network.get_load_status()
-        pass
+
+        # add to memory
+        if isinstance(constraint_to_add, dict):
+            new_constraint = NexusConstraint(constraint_to_add)
+        else:
+            new_constraint = constraint_to_add
+
+        self.add_constraints_to_memory({name: [new_constraint]})
+
+        # add to the file (for now add to the first surface file
+        # TODO: add to specified surface file
+        if self.__model.fcs_file.surface_files is None:
+            raise FileNotFoundError('No well file found, cannot modify ')
+
+        file_to_add_to = self.__model.fcs_file.surface_files[1]
+
+        file_as_list = file_to_add_to.file_content_as_list
+        if file_as_list is None:
+            raise ValueError(f'No file content found in the surface file specified at {file_to_add_to.location}')
+
+        constraint_date = new_constraint.date
+        if constraint_date is None:
+            raise ValueError(f'Require date for adding constraint to, instead got {new_constraint.date}')
+        new_constraint_time_index = -1
+        new_constraint_text = []
+        skip_attributes = ['date', 'unit_system', 'NAME']
+        date_comparison = -1
+        for index, line in enumerate(file_as_list):
+            if nfo.check_token('TIME', line):
+                constraint_date_from_file = nfo.get_expected_token_value('TIME', line, [line])
+                date_comparison = self.__model.runcontrol.compare_dates(constraint_date_from_file, constraint_date)
+                if date_comparison == 0:
+                    continue
+                # elif date_comparison > 0 and new_constraint_time_index > 0:
+                    # if a date that is greater than the additional constraint then we have overshot and need to
+                else:
+                    continue
+            if nfo.check_token('ENDCONSTRAINTS', line) and date_comparison == 0:
+                constraint_string = name + ' '
+                new_constraint_index = index
+                for attribute, value in new_constraint.to_dict(keys_in_nexus_style=True).items():
+                    if value is None or attribute in skip_attributes:
+                        continue
+                    constraint_string += (attribute + ' ' + str(value))
+                constraint_string += '\n'
+                new_constraint_text.append(constraint_string)
+                new_constraint_additional_lines = len(new_constraint_text)
+                new_constraint_object_ids = {
+                    new_constraint.id: new_constraint_index + new_constraint_additional_lines - 1
+                    }
+                file_to_add_to.add_to_file_as_list(additional_content=new_constraint_text, index=new_constraint_index,
+                                                  additional_objects=new_constraint_object_ids)

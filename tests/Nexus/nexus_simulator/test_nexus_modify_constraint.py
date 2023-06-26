@@ -259,7 +259,7 @@ def test_remove_constraint(mocker, file_contents, expected_result_file, constrai
         well2    QLIQSMAX- 10000.0 QLIQSMAX 15.5
         well1	 QLIQSMAX 	3884.0  QWSMAX 	0
         well2	 QWSMAX 	0.0
-        well3    QOSMAX     100.0
+well3 QOSMAX 100
         ENDCONSTRAINTS''',
     {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH},
     1
@@ -271,15 +271,17 @@ def test_add_constraint(mocker, file_contents, expected_file_contents, new_const
         RUN_UNITS ENGLISH
         DATEFORMAT DD/MM/YYYY
         RECURRENT_FILES
-        RUNCONTROL nexus_data/runcontrol.dat
+        RUNCONTROL /nexus_data/runcontrol.dat
         SURFACE Network 1  /surface_file_01.dat
         '''
+    runcontrol_contents = '''START 01/01/2019'''
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             '/path/fcs_file.fcs': fcs_file_contents,
             '/surface_file_01.dat': file_contents,
-            }).return_value
+            '/nexus_data/runcontrol.dat': runcontrol_contents}
+            ).return_value
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
@@ -287,8 +289,9 @@ def test_add_constraint(mocker, file_contents, expected_file_contents, new_const
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
     # Act
-    nexus_sim.network.Constraints.add_constraints(new_constraint)
+    nexus_sim.network.Constraints.add_constraints('well3', new_constraint)
     # Assert
+    assert nexus_sim.fcs_file.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
     check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
                                      modifying_mock_open=writing_mock_open,
                                      mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
