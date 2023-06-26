@@ -84,9 +84,9 @@ class NexusConstraints:
         if isinstance(cons_list, list):
             raise ValueError(
                 'Incompatible data format for additional constraints. Expected type "dict" instead got "list"')
-        self.add_constraints(cons_list)
+        self.add_constraints_to_memory(cons_list)
 
-    def add_constraints(self, additional_constraints: Optional[dict[str, list[NexusConstraint]]]) -> None:
+    def add_constraints_to_memory(self, additional_constraints: Optional[dict[str, list[NexusConstraint]]]) -> None:
         """Adds additional constraints to memory within the NexusConstraints object.
             If user adds constraints list this will not be reflected in the Nexus deck at this time.
 
@@ -132,6 +132,7 @@ class NexusConstraints:
             constraint_id (Optional[UUID]): Constraint matching this id will be removed.
                 Will not be used if constraint dict is provided. Defaults to None.
         """
+        self.__parent_network.get_load_status()
 
         if constraint_dict is None and constraint_id is None:
             raise ValueError('no options provided for both constraint_id and constraint_dict')
@@ -164,3 +165,16 @@ class NexusConstraints:
             raise FileNotFoundError(f'No file content found in file: {surface_file.location} '
                                     f'with an existing constraint that has: {constraint_id=}')
         return surface_file
+
+    def add_constraints(self, constraint_dict: dict[str, float | int | str]) -> None:
+        """Adds a constraint to the network and corresponding surface file
+        # TODO implement tests
+        # TODO add constraint to an inline constraint table
+        # TODO add a constraint at a new datetime
+        # TODO add correct value for special cases
+        # TODO add QMULT tables
+        # TODO decide what to do if constraints already exist in the table
+
+        """
+        self.__parent_network.get_load_status()
+        pass
