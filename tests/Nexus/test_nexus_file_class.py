@@ -295,7 +295,7 @@ def test_file_object_locations(mocker, test_file_contents, expected_results):
 
 
     # Act
-    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH)
+    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH, date_format='DD/MM/YYYY')
     result = wells_file.object_locations
 
     # Assert
@@ -591,7 +591,7 @@ def test_update_object_locations(mocker, test_file_contents, expected_results):
 
     wells_file = NexusFile.generate_file_include_structure(file_path='wells.dat', skip_arrays=True,)
     # load the uuids
-    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH)
+    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH, date_format='DD/MM/YYYY')
 
     # Act
     # effectively add 2 lines at location 5

@@ -1,11 +1,14 @@
 from __future__ import annotations
 from dataclasses import dataclass
+from datetime import date, datetime, timedelta
+
 from typing import Optional, Union, TypedDict
-from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from datetime import datetime, timedelta
+
 
 # Use correct Self type depending upon Python version
 import sys
+
+from ResSimpy.Nexus.NexusEnums import DateFormatEnum
 
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -57,6 +60,7 @@ class NexusCompletion(Completion):
     __polymer_well_radius: Optional[float] = None
     __rel_perm_end_point: Optional[NexusRelPermEndPoint] = None
     __kh_mult: Optional[float] = None
+   
 
     def __init__(self, date: str, i: Optional[int] = None, j: Optional[int] = None, k: Optional[int] = None,
                  skin: Optional[float] = None, depth: Optional[float] = None, well_radius: Optional[float] = None,
@@ -75,7 +79,9 @@ class NexusCompletion(Completion):
                  comp_dz: Optional[float] = None, layer_assignment: Optional[int] = None,
                  polymer_bore_radius: Optional[float] = None, polymer_well_radius: Optional[float] = None,
                  portype: Optional[str] = None, rel_perm_end_point: Optional[NexusRelPermEndPoint] = None,
-                 kh_mult: Optional[float] = None
+                 kh_mult: Optional[float] = None,
+                 date_format: Optional[DateFormatEnum.DateFormat] = None,
+                 no_of_days: Optional[str] = None
                  ) -> None:
         self.__measured_depth = measured_depth
         self.__well_indices = well_indices
@@ -103,6 +109,8 @@ class NexusCompletion(Completion):
         self.__portype = portype
         self.__rel_perm_end_point = rel_perm_end_point
         self.__kh_mult = kh_mult
+        self.date_format = date_format
+        self.no_of_days = no_of_days        
 
         super().__init__(date=date, i=i, j=j, k=k, skin=skin, depth=depth, well_radius=well_radius, x=x, y=y,
                          angle_a=angle_a, angle_v=angle_v, grid=grid, depth_to_top=depth_to_top,
@@ -212,9 +220,7 @@ class NexusCompletion(Completion):
     def kh_mult(self):
         return self.__kh_mult
 
-    @property
-    def date_ISO(self):
-        return self.convert_to_iso()
+
 
     def to_dict(self) -> dict[str, None | float | int | str]:
         attribute_dict: dict[str, None | float | int | str] = to_dict(self, add_units=False)
@@ -378,32 +384,4 @@ class NexusCompletion(Completion):
                 attribute_value = 'NA'
             completion_values.append(attribute_value)
         completion_string = [' '.join([str(x) for x in completion_values]) + '\n']
-        return completion_string
-
-    def convert_to_iso(self):
-        # TBC: get the dateformat from the FCS File - DATEFORMAT DD/MM/YYYY
-        date_format = DateFormat.MM_DD_YYYY
-
-        if date_format == DateFormat.DD_MM_YYYY:
-            converted_date = ISODateTime.strptime(self.date, '%d/%m/%Y')
-        elif date_format == DateFormat.MM_DD_YYYY:
-            converted_date = ISODateTime.strptime(self.date, '%m/%d/%Y')
-        else:
-            start_date = datetime(2023, 1, 1)  # TBC: Replace with simulation start date
-            converted_date = start_date + timedelta(days=self.date)
-
-        return converted_date
-
-
-class ISODateTime(datetime):
-    def __repr__(self):
-        """Return the string representation, but formatted in ISO format."""
-        basic_string = super().__repr__()
-        iso_string = basic_string.replace(' ', 'T')
-        return iso_string
-
-    def __str__(self):
-        """Return the string representation, but formatted in ISO format."""
-        basic_string = super().__str__()
-        iso_string = basic_string.replace(' ', 'T')
-        return iso_string
+        return completion_string    

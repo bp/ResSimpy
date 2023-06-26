@@ -66,7 +66,7 @@ class NexusWells(Wells):
                 warnings.warn(f'Well file location has not been found for {well_file}')
                 continue
             new_wells = load_wells(nexus_file=well_file, start_date=self.model.start_date,
-                                   default_units=self.model.default_units)
+                                   default_units=self.model.default_units, date_format = self.model.date_format)
             self.__wells += new_wells
 
     def get_wells_overview(self) -> str:

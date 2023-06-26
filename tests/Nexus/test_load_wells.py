@@ -54,6 +54,7 @@ from ResSimpy.Nexus.load_wells import load_wells
 def test_load_basic_wellspec(mocker, file_contents, expected_name):
     # Arrange
     start_date = '01/01/2023'
+    date_format = 'DD/MM/YYYY'
 
     expected_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date=start_date, grid=None, skin=None,
                                             angle_v=None)
@@ -66,7 +67,7 @@ def test_load_basic_wellspec(mocker, file_contents, expected_name):
     mocker.patch("builtins.open", open_mock)
     wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
     # Act
-    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH)
+    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH, date_format=date_format)
 
     # Assert
     # Deep compare expected and received wells
@@ -81,6 +82,8 @@ def test_load_basic_wellspec(mocker, file_contents, expected_name):
 def test_load_wells_multiple_wells(mocker):
     # Arrange
     start_date = '01/01/2023'
+
+    date_format = 'DD/MM/YYYY'
 
     file_contents = """
     WELLSPEC DEV1
@@ -132,7 +135,7 @@ WELLMOD	RU001	DKH	CON	0
     wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
 
     # Act
-    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH)
+    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH, date_format=date_format) 
 
     # Assert
     assert result_wells == expected_wells
@@ -141,6 +144,7 @@ WELLMOD	RU001	DKH	CON	0
 def test_load_wells_multiple_wells_multiple_dates(mocker):
     # Arrange
     start_date = '01/01/2023'
+    date_format = 'DD/MM/YYYY'
 
     file_contents = """
     
@@ -202,7 +206,7 @@ def test_load_wells_multiple_wells_multiple_dates(mocker):
     wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
 
     # Act
-    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH)
+    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH, date_format=date_format)
 
     # Assert
     assert result_wells == expected_wells
@@ -211,6 +215,7 @@ def test_load_wells_multiple_wells_multiple_dates(mocker):
 def test_load_wells_all_columns_present_structured_grid(mocker):
     # Arrange
     start_date = '01/01/2023'
+    date_format = 'DD/MM/YYYY'
 
     file_contents = """
     TIME 01/03/2023 !658 days
@@ -240,7 +245,7 @@ def test_load_wells_all_columns_present_structured_grid(mocker):
     wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
 
     # Act
-    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH)
+    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH, date_format=date_format)
 
     # Assert
     assert result_wells == expected_wells
@@ -280,6 +285,7 @@ def test_load_wells_all_columns_present_structured_grid(mocker):
 def test_load_wells_all_columns_unstructured_grid(mocker):
     # Arrange
     start_date = '01/01/2023'
+    date_format = 'DD/MM/YYYY'
 
     # FM and PORTYPE can't appear in the same file in Nexus but we don't care, just store either
     file_contents = """
@@ -307,7 +313,7 @@ def test_load_wells_all_columns_unstructured_grid(mocker):
     wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
 
     # Act
-    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH)
+    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH, date_format=date_format)
 
     # Assert
     assert result_wells == expected_wells
@@ -316,6 +322,7 @@ def test_load_wells_all_columns_unstructured_grid(mocker):
 def test_load_wells_rel_perm_tables(mocker):
     # Arrange
     start_date = '01/01/2023'
+    date_format = 'DD/MM/YYYY'
 
     file_contents = """WELLSPEC WELL_3
 
@@ -349,7 +356,7 @@ def test_load_wells_rel_perm_tables(mocker):
     wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
 
     # Act
-    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH)
+    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH, date_format=date_format)
 
     # Assert
     assert result_wells == expected_wells
@@ -358,6 +365,7 @@ def test_load_wells_rel_perm_tables(mocker):
 def test_load_wells_na_values_converted_to_none(mocker):
     # Arrange
     start_date = '01/01/2023'
+    date_format = 'DD/MM/YYYY'
 
     file_contents = """
     TIME 01/03/2023 !658 days
@@ -387,7 +395,7 @@ def test_load_wells_na_values_converted_to_none(mocker):
     wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
 
     # Act
-    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH)
+    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH, date_format=date_format)
 
     # Assert
     assert result_wells == expected_wells
@@ -450,6 +458,7 @@ TIME 01/08/2023 !232 days
 def test_correct_units_loaded(mocker, file_contents, expected_units):
     # Arrange
     start_date = '01/08/2023'
+    date_format = 'DD/MM/YYYY'
 
     expected_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date=start_date, grid=None, skin=None,
                                             angle_v=None)
@@ -463,7 +472,7 @@ def test_correct_units_loaded(mocker, file_contents, expected_units):
     wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
 
     # Act
-    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH)
+    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH, date_format=date_format)
 
     # Assert
     assert result_wells == expected_wells
