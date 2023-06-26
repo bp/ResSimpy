@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from functools import partial
 from io import StringIO
-from typing import Optional, Union, Any, TYPE_CHECKING
+from typing import Optional, Union, Any
 
 import pandas as pd
 from ResSimpy.Grid import VariableEntry
@@ -15,9 +15,6 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits, SUnits
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.nexus_keywords import VALID_NEXUS_KEYWORDS
-
-if TYPE_CHECKING:
-    pass
 
 
 def nexus_token_found(line_to_check: str, valid_list: list[str] = VALID_NEXUS_KEYWORDS) -> bool:
@@ -755,7 +752,8 @@ def table_line_reader(keyword_store: dict[str, None | int | float | str], header
 def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map: dict[str, tuple[str, type]],
                           current_date: Optional[str] = None, unit_system: Optional[UnitSystem] = None,
                           nexus_obj_dict: Optional[dict[str, list[Any]]] = None,
-                          preserve_previous_object_attributes: bool = False) -> list[Any]:
+                          preserve_previous_object_attributes: bool = False,
+                          ) -> list[tuple[Any, int]]:
     """Loads a table row by row to an object provided in the row_object.
 
     Args:
@@ -771,10 +769,9 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
         preserve_previous_object_attributes (bool): If True the code will find the latest object with a matching name\
             attribute and will update the object to reflect the latest additional attributes and overriding all \
             matching attributes. Must have a .update() method implemented and a name
-
     Returns:
-        list[obj]: list of instances of the class provided for the row_object, populated with attributes from the\
-            property map dictionary.
+        list[obj]: list of tuples containing instances of the class provided for the row_object,
+        populated with attributes from the property map dictionary and the line index where it was found
     """
     keyword_map = {x: y[0] for x, y in property_map.items()}
     header_index, headers = get_table_header(file_as_list, keyword_map)
@@ -783,8 +780,7 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
         nexus_obj_dict = {}
 
     return_objects = []
-    for line in table_as_list:
-        add_to_return = True
+    for index, line in enumerate(table_as_list, start=header_index+1):
         keyword_store: dict[str, None | int | float | str] = {x: None for x in property_map.keys()}
         valid_line, keyword_store = table_line_reader(keyword_store, headers, line)
         if not valid_line:
@@ -809,6 +805,8 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
                 if new_object_date is not None and new_object_date == current_date:
                     # otherwise just update the object inplace and don't add it to the return list
                     existing_constraint.update(keyword_store)
+                    # add just the id back in to track the lines where it came from in the file
+                    return_objects.append((existing_constraint.id, index))
                     continue
                 else:
                     new_object = row_object(keyword_store)
@@ -818,8 +816,7 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
             new_object = row_object(keyword_store)
         setattr(new_object, 'date', current_date)
         setattr(new_object, 'unit_system', unit_system)
-        if add_to_return:
-            return_objects.append(new_object)
+        return_objects.append((new_object, index))
     return return_objects
 
 
