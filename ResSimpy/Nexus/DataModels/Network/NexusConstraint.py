@@ -405,4 +405,31 @@ class NexusConstraint(Constraint):
         return constraint_string
 
     def write_qmult_table(self) -> list[str]:
-        pass
+        """Writes out a QMULT table from a constraint that uses the following attributes.
+        'QOIL': ('qmult_oil_rate', float).
+        'QWATER': ('qmult_water_rate', float).
+        'QGAS': ('qmult_gas_rate', float).
+
+        Returns:
+            list[str] with a representation of the QMULT table with a new line as a new entry in the list.
+        """
+        table_to_return = ['QMULT\n']
+        table_to_return.append('WELL QOIL QGAS QWATER\n')
+        qmult_values = self.write_qmult_values()
+        table_to_return.append(qmult_values)
+        table_to_return.append('ENDQMULT\n')
+
+        return table_to_return
+
+    def write_qmult_values(self) -> str:
+        """Writes out the values for a QMULT table, callable on its own or using the write_qmult_table method."""
+        qmult_values_keywords = ['qmult_oil_rate', 'qmult_gas_rate', 'qmult_water_rate']
+        string_to_return = self.name
+        for keyword in qmult_values_keywords:
+            value = getattr(self, keyword, None)
+            if value is None:
+                string_to_return += ' NA'
+            else:
+                string_to_return += f' {str(value)}'
+        string_to_return += '\n'
+        return string_to_return

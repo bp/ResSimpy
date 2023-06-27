@@ -383,3 +383,19 @@ def test_constraint_to_string(constraint, expected_string):
     constraint_string = new_constraint.to_string()
     # Assert
     assert constraint_string == expected_string
+
+
+def test_write_qmult_table():
+    # Arrange
+    constraint_props = {'name': 'node#2', 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
+        'use_qmult_qoilqwat_surface_rate': True, 'qmult_oil_rate': 200.0, 'qmult_water_rate': 4052.12}
+    constraint = NexusConstraint(constraint_props)
+    expected_qmult_table = ['QMULT\n',
+                            'WELL QOIL QGAS QWATER\n',
+                            'node#2 200.0 NA 4052.12\n',
+                            'ENDQMULT\n'
+    ]
+    # Act
+    result_qmult_table = constraint.write_qmult_table()
+    # Assert
+    assert result_qmult_table == expected_qmult_table
