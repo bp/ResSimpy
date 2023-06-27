@@ -4,6 +4,8 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
 
+from ResSimpy.ISODateTime import ISODateTime
+
 
 @dataclass(kw_only=True)
 class Completion(ABC):
@@ -90,6 +92,10 @@ class Completion(ABC):
     @property
     def date(self):
         return self.__date
+
+    @property
+    def date_ISO(self):
+        return ISODateTime.convert_to_iso(self)
 
     @property
     def i(self):
