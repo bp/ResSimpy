@@ -387,7 +387,7 @@ class NexusConstraint(Constraint):
 
         for attribute, value in self.to_dict(keys_in_nexus_style=True).items():
             if value and attribute in qmult_control_key_words:
-                constraint_string += (' ' + attribute.replace('_MULT', '') +' MULT')
+                constraint_string += (' ' + attribute.replace('_MULT', '') + ' MULT')
             elif value is None or attribute in skip_attributes:
                 continue
             elif value and attribute in clear_attributes:

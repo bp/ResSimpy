@@ -267,4 +267,3 @@ class NexusConstraints:
                 file_to_add_to.add_to_file_as_list(additional_content=new_constraint_text, index=new_constraint_index,
                                                    additional_objects=new_constraint_object_ids)
                 break
-
