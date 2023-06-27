@@ -25,9 +25,9 @@ class ISODateTime(datetime):
 
         if no_of_days is not None and no_of_days.isnumeric():
             if date_format == DateFormat.DD_MM_YYYY:
-                converted_date = datetime.strptime(start_date, '%d/%m/%Y') + timedelta(days=int(no_of_days))
+                converted_date = ISODateTime.strptime(start_date, '%d/%m/%Y') + timedelta(days=int(no_of_days))
             elif date_format == DateFormat.MM_DD_YYYY:
-                converted_date = datetime.strptime(start_date, '%m/%d/%Y') + timedelta(days=int(no_of_days))
+                converted_date = ISODateTime.strptime(start_date, '%m/%d/%Y') + timedelta(days=int(no_of_days))
 
         elif date_format == DateFormat.DD_MM_YYYY:
             converted_date = ISODateTime.strptime(start_date, '%d/%m/%Y')
