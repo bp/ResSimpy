@@ -169,7 +169,7 @@ class NexusConstraints:
 
     def add_constraints(self,
                         name: str,
-                        constraint_to_add: dict[str, float | int | str | UnitSystem] | NexusConstraint,
+                        constraint_to_add: dict[str, None | float | int | str | UnitSystem] | NexusConstraint,
                         ) -> None:
         """Adds a constraint to the network and corresponding surface file.
 
@@ -206,7 +206,7 @@ class NexusConstraints:
         date_comparison = -1
         date_index = -1
         new_constraint_index = -1
-        id_line_locs = -1
+        id_line_locs = []
         new_table_needed = False
         new_date_needed = False
 

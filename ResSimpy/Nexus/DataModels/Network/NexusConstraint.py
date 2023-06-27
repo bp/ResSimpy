@@ -383,7 +383,13 @@ class NexusConstraint(Constraint):
         qmult_control_key_words = ['QALLRMAX_MULT', 'QOSMAX_MULT', 'QWSMAX_MULT', 'QGSMAX_MULT', 'QLIQSMAX_MULT']
         skip_attributes = ['date', 'unit_system', 'NAME', 'ACTIVATE', 'QOIL', 'QWATER', 'QGAS']
         clear_attributes = ['CLEAR', 'CLEARQ', 'CLEARP', 'CLEARLIMIT', 'CLEARALQ']
-        constraint_string = self.name
+
+        if self.name is not None:
+            constraint_string = self.name
+        elif self.well_name is not None:
+            constraint_string = self.well_name
+        else:
+            raise ValueError('Must have a well or node name for returning a constraint to a string')
 
         for attribute, value in self.to_dict(keys_in_nexus_style=True).items():
             if value and attribute in qmult_control_key_words:
@@ -423,7 +429,13 @@ class NexusConstraint(Constraint):
     def write_qmult_values(self) -> str:
         """Writes out the values for a QMULT table, callable on its own or using the write_qmult_table method."""
         qmult_values_keywords = ['qmult_oil_rate', 'qmult_gas_rate', 'qmult_water_rate']
-        string_to_return = self.name
+        if self.name is not None:
+            string_to_return = self.name
+        elif self.well_name is not None:
+            string_to_return = self.well_name
+        else:
+            raise ValueError('Must have a well or node name for returning a qmult table')
+
         for keyword in qmult_values_keywords:
             value = getattr(self, keyword, None)
             if value is None:
