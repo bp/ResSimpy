@@ -23,7 +23,8 @@ from ResSimpy.Utils.to_dict_generic import to_dict
 
 @dataclass(kw_only=True)
 class NexusCompletion(Completion):
-    """A class representing a completion specific to a Nexus Model. Inherits from Completion
+    """A class representing a completion specific to a Nexus Model. Inherits from Completion.
+
     Additional Attributes:
         measured_depth (Optional[float]): Measured depth of a completion. 'MD' in Nexus
         well_indices (Optional[float]): Well index used to calculate performance of the completion. 'WI' in Nexus
@@ -367,10 +368,10 @@ class NexusCompletion(Completion):
         """Takes a completion object and returns the attribute values as a string in the order of headers provided.
 
         Args:
-        ----
             headers (list[str]): list of header values in Nexus keyword format
 
-        Returns: string of the values in the order of the headers provided.
+        Returns:
+            string of the values in the order of the headers provided.
 
         """
         nexus_mapping = NexusCompletion.get_nexus_mapping()

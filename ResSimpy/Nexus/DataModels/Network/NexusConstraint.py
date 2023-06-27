@@ -1,3 +1,4 @@
+import uuid
 from dataclasses import dataclass
 from typing import Optional
 
@@ -9,7 +10,7 @@ from ResSimpy.Utils.generic_repr import generic_repr
 
 @dataclass
 class NexusConstraint(Constraint):
-    """Attributes
+    """Attributes:
     name (str): name of the well (NAME)
     max_surface_oil_rate (float): max surface oil rate (QOSMAX)
     max_surface_gas_rate (float): max surface gas rate (QGSMAX)
@@ -191,10 +192,17 @@ class NexusConstraint(Constraint):
     choke_limit: Optional[str] = None
     manifold_position: Optional[int] = None
 
+    clear_all: Optional[bool] = None
+    clear_q: Optional[bool] = None
+    clear_limit: Optional[bool] = None
+    clear_alq: Optional[bool] = None
+    clear_p: Optional[bool] = None
+
     def __init__(self, properties_dict: dict[str, None | int | str | float | UnitSystem]) -> None:
         super().__init__()
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)
+        self.__id: uuid.UUID = uuid.uuid4()
 
     @staticmethod
     def get_nexus_mapping() -> dict[str, tuple[str, type]]:
@@ -208,6 +216,12 @@ class NexusConstraint(Constraint):
             'QWSMAX_MULT': ('use_qmult_qwater_surface_rate', bool),
             'QGSMAX_MULT': ('use_qmult_qgas_surface_rate', bool),
             'QLIQSMAX_MULT': ('use_qmult_qoilqwat_surface_rate', bool),
+            # SpecialClearkeywords
+            'CLEAR': ('clear_all', bool),
+            'CLEARQ': ('clear_q', bool),
+            'CLEARP': ('clear_p', bool),
+            'CLEARLIMIT': ('clear_limit', bool),
+            'CLEARALQ': ('clear_alq', bool),
             }
         nexus_mapping.update(NexusConstraint.get_limit_constraints_map())
         nexus_mapping.update(NexusConstraint.get_pressure_constraints_map())
@@ -332,13 +346,13 @@ class NexusConstraint(Constraint):
         return nexus_mapping
 
     def to_dict(self, keys_in_nexus_style: bool = False) -> dict[str, None | str | int | float]:
-        """Returns a dictionary of the attributes of the Constraint
+        """Returns a dictionary of the attributes of the Constraint.
+
         Args:
             keys_in_nexus_style (bool): if True returns the key values in Nexus keywords, otherwise returns the \
                 attribute name as stored by ressimpy.
 
-        Returns
-        -------
+        Returns:
             a dictionary keyed by attributes and values as the value of the attribute
         """
         result_dict = to_dict_generic.to_dict(self, keys_in_nexus_style, add_date=True, add_units=True)
@@ -352,3 +366,11 @@ class NexusConstraint(Constraint):
 
     def __repr__(self) -> str:
         return generic_repr(self)
+
+    @property
+    def id(self) -> uuid.UUID:
+        return self.__id
+
+    def new_id(self):
+        """Refreshes the id on the object."""
+        self.__id = uuid.uuid4()

@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from ResSimpy.Nexus.DataModels.NexusRelPermMethod import NexusRelPermMethod
 
@@ -306,7 +307,8 @@ from ResSimpy.Nexus.DataModels.NexusRelPermMethod import NexusRelPermMethod
 )
 def test_read_relpm_properties_from_file(mocker, file_contents, expected_relpm_properties):
     # Arrange
-    relpm_obj = NexusRelPermMethod(file_path='test/file/relpm.dat', method_number=1)
+    rp_file = NexusFile(file_content_as_list=file_contents.splitlines())
+    relpm_obj = NexusRelPermMethod(file=rp_file, input_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -330,41 +332,98 @@ def test_read_relpm_properties_from_file(mocker, file_contents, expected_relpm_p
 
 def test_nexus_relpm_repr():
     # Arrange
-    relpm_obj = NexusRelPermMethod(file_path='test/file/relpm.dat', method_number=1)
-    relpm_obj.properties = {'DESC': ['This is first line of description', 'and this is second line of description'], 'VIP_RELPM': '',
-          'NONDARCY_GAS': {'BETA': 0.9, 'IFT_THRES': 0.98}, 'RECONSTRUCT': {'NSGDIM': 101, 'NSWDIM': 101},
-          'NONDARCY_OIL': {'BETA0': 0.001, 'BETA1': -0.5, 'BETA2': -5, 'BETA3': -0.5, 'BETA4': -3, 'BETA5': 4.4},
-          'WOTABLE': pd.DataFrame({'SW': [0.2, 0.25, 0.35, 0.425, 0.5, 0.6, 0.7],
-                                   'KROW': [1.0, 0.729, 0.343, 0.1664, 0.064, 0.008, 0],
-                                   'KRW': [0.0, 0.0005, 0.0135, 0.0456, 0.108, 0.256, 0.50],
-                                   'PCWO': [1., np.nan, np.nan, 0.2, np.nan, np.nan, 0.0]
-                                   }),
-          'GOTABLE': pd.DataFrame({'SG': [0, 0.05, 0.2, 0.4, 0.55, 0.65, 0.8],
-                                   'KROG': [1, 0.729, 0.216, 0.008, 0, 0, 0],
-                                   'KRG': [0, 0.0039, 0.0625, 0.25, 0.4727, 0.6602, 1],
-                                   'PCGO': [0., np.nan, np.nan, 1., np.nan, np.nan, 5.0]
-                                   })
+    rp_file = NexusFile(location='test/file/relpm.dat')
+    relpm_obj = NexusRelPermMethod(file=rp_file, input_number=1)
+    relpm_obj.hysteresis_params = {'KRG': {'LINEAR': {'MAXTRAP': 0.2, 'NOMOD': ''}},
+                                   'KRW': 'USER',
+                                   'KROW': {'KILLOUGH': {'MAXTRAP': 0.2, 'EXP': 1.1}},
+                                   'PCWO': {'MAXSW': 0.8, 'ETA': 0.15, 'TRAPSCALE': ''},
+                                   'PCGO': {},
+                                   'WAG': {'LAND': 1.1, 'NOOILHYS': ''},
+                                   'TOLREV': 0.05, 'NOCHK_HYS': ''
+                                   }
+    relpm_obj.properties = {'DESC': ['This is first line of description', 'and this is second line of description'],
+                            'WOTABLE': pd.DataFrame({'SW': [0.2, 0.25, 0.35, 0.425, 0.5, 0.6, 0.7],
+                                                     'KROW': [1.0, 0.729, 0.343, 0.1664, 0.064, 0.008, 0],
+                                                     'KRW': [0.0, 0.0005, 0.0135, 0.0456, 0.108, 0.256, 0.50],
+                                                     'PCWO': [1., np.nan, np.nan, 0.2, np.nan, np.nan, 0.0]
+                                                     }),
+                            'GOTABLE': pd.DataFrame({'SG': [0, 0.05, 0.2, 0.4, 0.55, 0.65, 0.8],
+                                                     'KROG': [1, 0.729, 0.216, 0.008, 0, 0, 0],
+                                                     'KRG': [0, 0.0039, 0.0625, 0.25, 0.4727, 0.6602, 1],
+                                                     'PCGO': [0., np.nan, np.nan, 1., np.nan, np.nan, 5.0]
+                                                     }),
+                            'WOTABLE_IMB': pd.DataFrame({'SW': [0.2, 0.25, 0.35, 0.425, 0.5, 0.6, 0.7],
+                                                         'KROW': [1.0, 0.729, 0.343, 0.1664, 0.064, 0.008, 0],
+                                                         'KRW': [0.0, 0.0005, 0.0135, 0.0456, 0.108, 0.256, 0.50],
+                                                         'PCWO': [1., np.nan, np.nan, 0.2, np.nan, np.nan, 0.0]
+                                                         }),
+                            'PRSTAB': pd.DataFrame({'SWL': [0.1, 0.15],
+                                                    'SWR': [0.2, 0.25],
+                                                    'SWRO': [0.6, 0.7],
+                                                    'SWU': [1., 0.9],
+                                                    'KRO_SWL': [0.55, 0.65]
+                                                     }),
+                            'STONE1': '', 'SOMOPT2': 0.05, 'STONE2_WAT': '', 'LOW_SAL': '', 'SCALING': 'TWOPOINT', 'VEGO_PC': '',
+                            'VEWO': '', 'DRELPM': 0.9, 'IFT': '', 'TENTHR': 0.005, 'XEX': 0.3, 'TENI': 0.005,
+                            'FREEZE_PCGO': '', 'FREEZE_PCWO': '', 'DERIVATIVES': 'NUMERICAL',
+                            'NONDARCY_GAS': {},
+                            'NONDARCY_OIL': {'BETA0': 0.001, 'BETA1': -0.5, 'BETA2': -5, 'BETA3': -0.5, 'BETA4': -3, 'BETA5': 4.4},
+                            'RECONSTRUCT': {'NSGDIM': 101, 'NSWDIM': 101}, 'VIP_RELPM': ''
           }
     expected_output = """
 FILE_PATH: test/file/relpm.dat
-DESC: ['This is first line of description', 'and this is second line of description']
+
+DESC This is first line of description
+DESC and this is second line of description
+WOTABLE LOW_SAL
+""" + relpm_obj.properties['WOTABLE'].to_string(na_rep='', index=False) + '\n' + \
+"""
+GOTABLE
+""" + relpm_obj.properties['GOTABLE'].to_string(na_rep='', index=False) + '\n' + \
+"""
+WOTABLE_IMB
+""" + relpm_obj.properties['WOTABLE_IMB'].to_string(na_rep='', index=False) + '\n' + \
+"""
+PRSTAB
+""" + relpm_obj.properties['PRSTAB'].to_string(na_rep='', index=False) + '\n' + \
+"""
+STONE1 SOMOPT2 0.05
+STONE2_WAT
+SCALING TWOPOINT
+VEGO_PC
+VEWO
+DRELPM 0.9
+IFT
+TENTHR 0.005
+XEX 0.3
+TENI 0.005
+FREEZE_PCGO
+FREEZE_PCWO
+DERIVATIVES NUMERICAL
+NONDARCY_GAS
+ENDNONDARCY_GAS
+NONDARCY_OIL
+    BETA0 0.001
+    BETA1 -0.5
+    BETA2 -5
+    BETA3 -0.5
+    BETA4 -3
+    BETA5 4.4
+ENDNONDARCY_OIL
+RECONSTRUCT
+    NSGDIM 101
+    NSWDIM 101
 VIP_RELPM
-NONDARCY_GAS:
-    BETA: 0.9
-    IFT_THRES: 0.98
-RECONSTRUCT:
-    NSGDIM: 101
-    NSWDIM: 101
-NONDARCY_OIL:
-    BETA0: 0.001
-    BETA1: -0.5
-    BETA2: -5
-    BETA3: -0.5
-    BETA4: -3
-    BETA5: 4.4
-WOTABLE:
-""" + relpm_obj.properties['WOTABLE'].to_string(na_rep='') + '\n\n' \
-        + 'GOTABLE:\n' + relpm_obj.properties['GOTABLE'].to_string(na_rep='') + '\n\n'
+HYSTERESIS KRG LINEAR MAXTRAP 0.2 NOMOD
+           KRW USER
+           KROW KILLOUGH MAXTRAP 0.2 EXP 1.1
+           PCWO MAXSW 0.8 ETA 0.15 TRAPSCALE
+           PCGO
+           WAG LAND 1.1 NOOILHYS
+           TOLREV 0.05
+           NOCHK_HYS
+"""
 
     # Act
     result = relpm_obj.__repr__()

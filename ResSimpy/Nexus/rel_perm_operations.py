@@ -3,12 +3,12 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
 def get_relperm_combined_fluid_column_heading(table_heading: str) -> str:
-    """Returns the combined rel perm fluid perm heading for a Nexus Relperm table
+    """Returns the combined rel perm fluid perm heading for a Nexus Relperm table.
+
     Args:
         table_heading (str): heading for the rel perm table, expects one of (WOTABLE, GOTABLE, GWTABLE).
 
-    Returns
-    -------
+    Returns:
         str: one of (KROW, KROG, KRWG) defaults to KRWG if one of the expected table_headings is not given
     """
     rel_perm_header_map = {
@@ -25,11 +25,9 @@ def get_relperm_single_fluid_column_heading(table_heading: str) -> str:
     """Returns the single fluid heading for a Nexus Relperm table.
 
     Args:
-    ----
         table_heading (str): heading for the rel perm table, expects one of (WOTABLE, GOTABLE, GWTABLE)
 
     Returns:
-    -------
         str: heading for the single fluid rel perm header one of (KRG, KRW)
     """
     if table_heading == 'GOTABLE':
@@ -44,11 +42,9 @@ def get_relperm_base_saturation_column_heading(table_heading: str) -> str:
     """Returns the column heading for the base saturation column.
 
     Args:
-    ----
         table_heading (str): heading for the rel perm table, expects one of (WOTABLE, GOTABLE, GWTABLE)
 
     Returns:
-    -------
         str: heading for the saturation based on the table header one of (SG, SW)
     """
 
@@ -62,16 +58,15 @@ def get_relperm_base_saturation_column_heading(table_heading: str) -> str:
 
 def load_nexus_relperm_table(relperm_file_path: str) -> dict[str, list[tuple[float, float]]]:
     """Loads in a Nexus relperm table and returns a dictionary with two lists, one with the relperm values for the
-    single fluid, and the other with the values for combined fluids
+    single fluid, and the other with the values for combined fluids.
+
     Args:
         relperm_file_path (str): path to a single Nexus rel perm file.
 
-    Raises
-    ------
+    Raises:
         ValueError: if the table header cannot be found for the rel perm table
 
-    Returns
-    -------
+    Returns:
         dict[str, list[tuple[float, float]]]: dictionary containing two entries one for the column (KRG, KRW)
         and one for one of (KROW, KROG, KRWG) depending on the type of table read.
         Each list entry consists of a tuple of (saturation, relperm value)

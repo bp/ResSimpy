@@ -1,4 +1,5 @@
 import pytest
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterMethod, NexusWaterParams
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import SUnits, UnitSystem, TemperatureUnits
@@ -130,7 +131,8 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import SUnits, UnitSystem, TemperatureU
 )
 def test_read_water_properties_from_file(mocker, file_contents, expected_water_properties):
     # Arrange
-    wat_obj = NexusWaterMethod(file_path='test/file/water.dat', method_number=1)
+    wat_file = NexusFile(file_content_as_list=file_contents.splitlines())
+    wat_obj = NexusWaterMethod(file=wat_file, input_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -157,10 +159,49 @@ def test_read_water_properties_from_file(mocker, file_contents, expected_water_p
         assert params[i].formation_volume_factor == expected_water_properties['BW'][i]
 
 
-def test_nexus_water_repr():
+def test_basic_nexus_water_repr():
     # Arrange
-    water_obj = NexusWaterMethod(file_path='test/file/water.dat', method_number=1)
-    water_obj.properties = {'SUNITS': SUnits.PPM, 'TEMP_UNIT': TemperatureUnits.KELVIN}
+    water_file = NexusFile(location='test/file/water.dat')
+    water_obj = NexusWaterMethod(file=water_file, input_number=1)
+    water_obj.properties = {'DESC': ['This is first line of description',
+                                     'and this is second line of description'],
+                            'UNIT_SYSTEM': UnitSystem.ENGLISH}
+    water_obj.reference_pressure = 3600.0
+    water_params1 = NexusWaterParams(density=62.4, compressibility=3.4,
+                                     formation_volume_factor=1.04, viscosity=0.7,
+                                     viscosity_compressibility=1e-3
+                                     )
+    water_obj.parameters = [water_params1]
+    expected_output = """
+FILE_PATH: test/file/water.dat
+
+DESC This is first line of description
+DESC and this is second line of description
+PREF 3600.0
+ENGLISH
+DENW 62.4
+CW 3.4
+BW 1.04
+VISW 0.7
+CVW 0.001
+"""
+
+    # Act
+    result = water_obj.__repr__()
+
+    # Assert
+    assert result == expected_output
+
+
+def test_complex_nexus_water_repr():
+    # Arrange
+    water_file = NexusFile(location='test/file/water.dat')
+    water_obj = NexusWaterMethod(file=water_file, input_number=1)
+    water_obj.properties = {'DESC': ['This is first line of description',
+                                     'and this is second line of description'],
+                            'UNIT_SYSTEM': UnitSystem.ENGLISH,
+                            'SUNITS': SUnits.PPM,
+                            'TEMP_UNIT': TemperatureUnits.KELVIN}
     water_obj.reference_pressure = 3600.0
     water_params1 = NexusWaterParams(temperature=394.3, salinity=100000.0,
                                      density=62.4, compressibility=3.4,
@@ -172,23 +213,48 @@ def test_nexus_water_repr():
                                      formation_volume_factor=1.05, viscosity=0.8, 
                                      viscosity_compressibility=None
                                      )
-    water_obj.parameters = [water_params1, water_params2]
+    water_params3 = NexusWaterParams(temperature=384.3, salinity=100000.0,
+                                     density=62.4, compressibility=3.4,
+                                     formation_volume_factor=1.04, viscosity=0.7, 
+                                     viscosity_compressibility=None
+                                     )
+    water_params4 = NexusWaterParams(temperature=384.3, salinity=200000.0,
+                                     density=65.4, compressibility=4.4,
+                                     formation_volume_factor=1.05, viscosity=0.8, 
+                                     viscosity_compressibility=None
+                                     )
+    water_obj.parameters = [water_params1, water_params2, water_params3, water_params4]
     expected_output = """
 FILE_PATH: test/file/water.dat
-PREF: 3600.0
-SUNITS: PPM
-TEMP_UNIT: KELVIN
-TEMP: 394.3
-    SALINITY: 100000.0
-        DENW: 62.4
-        CW: 3.4
-        BW: 1.04
-        VISW: 0.7
-    SALINITY: 200000.0
-        DENW: 65.4
-        CW: 4.4
-        BW: 1.05
-        VISW: 0.8
+
+DESC This is first line of description
+DESC and this is second line of description
+PREF 3600.0
+ENGLISH
+SUNITS PPM
+KELVIN
+TEMP 394.3
+    SALINITY 100000.0
+        DENW 62.4
+        CW 3.4
+        BW 1.04
+        VISW 0.7
+    SALINITY 200000.0
+        DENW 65.4
+        CW 4.4
+        BW 1.05
+        VISW 0.8
+TEMP 384.3
+    SALINITY 100000.0
+        DENW 62.4
+        CW 3.4
+        BW 1.04
+        VISW 0.7
+    SALINITY 200000.0
+        DENW 65.4
+        CW 4.4
+        BW 1.05
+        VISW 0.8
 """
 
     # Act

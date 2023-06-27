@@ -3,14 +3,17 @@ from typing import Optional
 
 import pandas as pd
 import pytest
+from pytest_mock import MockerFixture
 
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from ResSimpy.Utils import to_dict_generic
 from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.Utils.invert_nexus_map import invert_nexus_map, attribute_name_to_nexus_keyword, \
     nexus_keyword_to_attribute_name
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 from ResSimpy.Utils.to_dict_generic import to_dict
+from unittest.mock import Mock
 
 
 def test_to_dict():
@@ -29,19 +32,19 @@ def test_to_dict():
                 'ATTR_1': ('attr_1', str),
                 'ATTR_2': ('attr_2', int),
                 'ATTR_3': ('attr_3', float),
-                }
+            }
             return mapping_dict
 
     class_inst = GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=UnitSystem.METRIC,
                              date='01/01/2030')
     expected = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'unit_system': 'METRIC', 'date': '01/01/2030'}
-    expected_no_date_no_units = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, }
+    expected_no_date_no_units = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2 }
     expected_nexus_style = {
         'ATTR_1': 'hello', 'ATTR_2': 10, 'ATTR_3': 43020.2, 'unit_system': 'METRIC',
         'date': '01/01/2030'
-        }
+    }
     # Act
-    result = to_dict(class_inst, )
+    result = to_dict(class_inst )
     result_no_date_no_units = to_dict(class_inst, add_units=False, add_date=False)
     result_nexus_style = to_dict(class_inst, keys_in_nexus_style=True)
 
@@ -67,7 +70,7 @@ def test_obj_to_dataframe():
                 'ATTR_1': ('attr_1', str),
                 'ATTR_2': ('attr_2', int),
                 'ATTR_3': ('attr_3', float),
-                }
+            }
             return mapping_dict
 
         def to_dict(self):
@@ -85,7 +88,7 @@ def test_obj_to_dataframe():
         'attr_3': [43020.2, 2.2],
         'unit_system': ['METRIC', 'ENGLISH'],
         'date': ['01/01/2030', '01/01/2033'],
-        })
+    })
     # Act
     result = obj_to_dataframe(list_class)
     # Assert
@@ -101,7 +104,7 @@ def test_generic_repr():
         y_pos: Optional[float]
         temp: Optional[float]
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return generic_repr(self)
 
     obj = MyClass(
@@ -110,7 +113,7 @@ def test_generic_repr():
         x_pos=50.0,
         y_pos=75.0,
         temp=None
-        )
+    )
     expected = "MyClass(well='my_well', depth=100, x_pos=50.0, y_pos=75.0)"
     assert repr(obj) == expected
 
@@ -127,7 +130,7 @@ def test_invert_nexus_map():
             nexus_mapping = {
                 'DEPTH': ('depth', float),
                 'X': ('x_pos', float)
-                }
+            }
             return nexus_mapping
 
     nex_class = NexusClass(date='01/01/2020', depth=10, x_pos=1.5)
@@ -157,7 +160,7 @@ def test_nexus_keyword_to_attribute_name():
                 'X': ('x_pos', float),
                 'Y': ('y_pos', float),
                 'RANDOM': ('rand', str),
-                }
+            }
             return nexus_mapping
 
     nex_class = NexusClass(date='01/01/2020', depth=10, x_pos=1.5, y_pos=3.14, rand='hello')
@@ -177,3 +180,4 @@ def test_nexus_keyword_to_attribute_name():
     with pytest.raises(AttributeError):
         nexus_keyword_to_attribute_name(nexus_map, 'Failure')
         attribute_name_to_nexus_keyword(nexus_map, 'also fails')
+

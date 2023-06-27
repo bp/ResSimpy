@@ -2,13 +2,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional, Any
 
+from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnections import NexusNodeConnections
 from ResSimpy.Nexus.DataModels.Network.NexusNodes import NexusNodes
-import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnections import NexusWellConnections
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class NexusNetwork:
-    model: NexusSimulator
+    __model: NexusSimulator
     Nodes: NexusNodes
     Connections: NexusNodeConnections
     WellConnections: NexusWellConnections
@@ -34,13 +34,13 @@ class NexusNetwork:
 
     def __init__(self, model: NexusSimulator) -> None:
         self.__has_been_loaded: bool = False
-        self.model: NexusSimulator = model
+        self.__model: NexusSimulator = model
         self.Nodes: NexusNodes = NexusNodes(self)
         self.Connections: NexusNodeConnections = NexusNodeConnections(self)
         self.WellConnections: NexusWellConnections = NexusWellConnections(self)
         self.Wellheads: NexusWellheads = NexusWellheads(self)
         self.Wellbores: NexusWellbores = NexusWellbores(self)
-        self.Constraints: NexusConstraints = NexusConstraints(self)
+        self.Constraints: NexusConstraints = NexusConstraints(self, model)
 
     def get_load_status(self) -> bool:
         if not self.__has_been_loaded:
@@ -61,10 +61,10 @@ class NexusNetwork:
                 surface files keyed by method number
         """
         if method_number is None:
-            return self.model.fcs_file.surface_files
-        if self.model.fcs_file.surface_files is None:
+            return self.__model.fcs_file.surface_files
+        if self.__model.fcs_file.surface_files is None:
             return None
-        return self.model.fcs_file.surface_files.get(method_number)
+        return self.__model.fcs_file.surface_files.get(method_number)
 
     def load(self) -> None:
         """Loads all the objects from the surface files in the Simulator class.
@@ -85,10 +85,10 @@ class NexusNetwork:
             return input
 
         # TODO implement all objects with Nones next to them in the dictionary below
-        if self.model.fcs_file.surface_files is None:
+        if self.__model.fcs_file.surface_files is None:
             raise FileNotFoundError('Could not find any surface files associated with the fcs file provided.')
-        for surface in self.model.fcs_file.surface_files.values():
-            nexus_obj_dict = nfo.collect_all_tables_to_objects(
+        for surface in self.__model.fcs_file.surface_files.values():
+            nexus_obj_dict = collect_all_tables_to_objects(
                 surface, {'NODECON': NexusNodeConnection,
                           'NODES': NexusNode,
                           'WELLS': NexusWellConnection,
@@ -100,8 +100,8 @@ class NexusNetwork:
                           'CONDEFAULTS': None,
                           'TARGET': None,
                           },
-                start_date=self.model.start_date,
-                default_units=self.model.default_units)
+                start_date=self.__model.start_date,
+                default_units=self.__model.default_units)
             self.Nodes.add_nodes(type_check_lists(nexus_obj_dict.get('NODES')))
             self.Connections.add_connections(type_check_lists(nexus_obj_dict.get('NODECON')))
             self.WellConnections.add_connections(type_check_lists(nexus_obj_dict.get('WELLS')))

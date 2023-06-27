@@ -1,8 +1,8 @@
-import numpy as np
 import pandas as pd
 import pytest
 
 from ResSimpy.Nexus.DataModels.NexusAquiferMethod import NexusAquiferMethod
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits
 
 @pytest.mark.parametrize("file_contents, expected_aquifer_properties",
@@ -113,7 +113,8 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits
 )
 def test_read_aquifer_properties_from_file(mocker, file_contents, expected_aquifer_properties):
     # Arrange
-    aquifer_obj = NexusAquiferMethod(file_path='test/file/aquifer.dat', method_number=1)
+    aq_file = NexusFile(file_content_as_list=file_contents.splitlines())
+    aquifer_obj = NexusAquiferMethod(file=aq_file, input_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -133,7 +134,8 @@ def test_read_aquifer_properties_from_file(mocker, file_contents, expected_aquif
 
 def test_nexus_aquifer_repr():
     # Arrange
-    aquifer_obj = NexusAquiferMethod(file_path='test/file/aquifer.dat', method_number=1)
+    aq_file = NexusFile(location='test/file/aquifer.dat')
+    aquifer_obj = NexusAquiferMethod(file=aq_file, input_number=1)
     aquifer_obj.properties = {'DESC': ['This is first line of description', 'and this is second line of description'],
                               'FETKOVICH': '', 'LABEL': 'FETTY_V',
                               'UNIT_SYSTEM': UnitSystem.ENGLISH, 'SUNITS': SUnits.PPM, 'IWATER': 2, 'SALINITY': 300000,
@@ -143,25 +145,27 @@ def test_nexus_aquifer_repr():
     expected_output = """
 FILE_PATH: test/file/aquifer.dat
 
+DESC This is first line of description
+DESC and this is second line of description
 FETKOVICH
-DESC: ['This is first line of description', 'and this is second line of description']
-LABEL: FETTY_V
-UNIT_SYSTEM: ENGLISH
-SUNITS: PPM
-IWATER: 2
-SALINITY: 300000
-LINFAC: 2.5
+LABEL FETTY_V
+ENGLISH
+SUNITS PPM
+IWATER 2
+SALINITY 300000
+LINFAC 2.5
 RADIAL
-VISC: 1.1
-CT: 1e-06
-H: 50
-RO: 5000
-S: 0.3333
-RE: 10000
+VISC 1.1
+CT 1e-06
+H 50
+RO 5000
+S 0.3333
+RE 10000
 NOFLOW
-WAQI: 500000000.0
-PAQI: 4800
-DAQI: 9600
+WAQI 500000000.0
+PAQI 4800
+DAQI 9600
+
 """
 
     # Act

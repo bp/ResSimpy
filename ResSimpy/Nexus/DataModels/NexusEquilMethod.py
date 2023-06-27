@@ -3,83 +3,86 @@ from enum import Enum
 from typing import Union, Optional
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import SUnits, TemperatureUnits, UnitSystem
 from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_INTSAT_KEYWORDS, EQUIL_KEYWORDS_VALUE_FLOAT
 from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_TABLE_KEYWORDS, EQUIL_SINGLE_KEYWORDS
-from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_OVERREAD_VALUES, EQUIL_COMPOSITION_OPTIONS
+from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_COMPOSITION_OPTIONS
 from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_KEYWORDS
-from ResSimpy.EquilMethod import EquilMethod
+from ResSimpy.DynamicProperty import DynamicProperty
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
-@dataclass(kw_only=True)  # Doesn't need to write an _init_, _eq_ methods, etc.
-class NexusEquilMethod(EquilMethod):
-    """Class to hold Nexus Equil properties
+@dataclass(kw_only=True, repr=False)  # Doesn't need to write an _init_, _eq_ methods, etc.
+class NexusEquilMethod(DynamicProperty):
+    """Class to hold Nexus Equil properties.
+
     Attributes:
-        file_path (str): Path to the Nexus equilibration file
-        method_number (int): Equilibration method number in Nexus fcs file
-        properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, pd.DataFrame]]] ):
+        file (NexusFile): Nexus equilibration file object
+        input_number (int): Equilibration method number in Nexus fcs file
+        properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                    dict[str, Union[float, pd.DataFrame]]]]):
             Dictionary holding all properties for a specific equilibration method. Defaults to empty dictionary.
     """
 
     # General parameters
-    file_path: str
+    file: NexusFile
     properties: dict[str, Union[str, int, float, Enum, list[str],
                                 pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
 
-    def __init__(self, file_path: str, method_number: int,
+    def __init__(self, file: NexusFile, input_number: int,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
-        self.file_path = file_path
         if properties is not None:
             self.properties = properties
         else:
             self.properties = {}
-        super().__init__(method_number=method_number)
+        super().__init__(input_number=input_number, file=file)
 
-    def __repr__(self) -> str:
-        """Pretty printing equilibration data."""
-        printable_str = f'\nFILE_PATH: {self.file_path}\n'
+    def to_string(self) -> str:
+        """Create string with equilibration data in Nexus file format."""
+        printable_str = ''
         equil_dict = self.properties
         for key, value in equil_dict.items():
             if isinstance(value, pd.DataFrame):
-                table_text = f'{key}:'
+                table_text = f'{key}'
                 if key == 'COMPOSITION':
                     if 'X' in equil_dict.keys():
                         table_text += f" X {equil_dict['X']}"
                     if 'Y' in equil_dict.keys():
                         table_text += f" Y {equil_dict['Y']}"
                 printable_str += f'{table_text}\n'
-                printable_str += value.to_string(na_rep='')
-                printable_str += '\n\n'
+                printable_str += value.to_string(na_rep='', index=False) + '\n'
             elif isinstance(value, Enum):
-                printable_str += f'{key}: {value.name}\n'
+                if isinstance(value, UnitSystem) or isinstance(value, TemperatureUnits):
+                    printable_str += f'{value.value}\n'
+                elif isinstance(value, SUnits):
+                    printable_str += f'SUNITS {value.value}\n'
             elif value == '':
                 printable_str += f'{key}\n'
             elif key in ['INTSAT', 'VAITS']:
                 if value == 'MOBILE':
-                    printable_str += f'{key}: MOBILE\n'
+                    printable_str += f'{key}\n    MOBILE\n'
                     for mobkey in ['SORWMN', 'SORGMN', 'SGCMN']:
                         if mobkey in equil_dict.keys():
-                            printable_str += f'        {mobkey}: {equil_dict[mobkey]}\n'
+                            printable_str += f'        {mobkey} {equil_dict[mobkey]}\n'
                 for vaitkey in ['VAITS_TOLSG', 'VAITS_TOLSW']:
                     if vaitkey in equil_dict.keys():
-                        printable_str += f'    {vaitkey}: {equil_dict[vaitkey]}\n'
+                        printable_str += f'    {vaitkey} {equil_dict[vaitkey]}\n'
             elif key == 'OVERREAD':
                 if isinstance(value, list):
-                    printable_str += f"OVERREAD: {' '.join(value)}\n"
+                    printable_str += f"OVERREAD {' '.join(value)}\n"
             elif key not in ['SORWMN', 'SORGMN', 'SGCMN', 'VAITS_TOLSG', 'VAITS_TOLSW',
                              'OVERREAD', 'INTSAT', 'VAITS', 'MOBILE', 'X', 'Y']:
-                printable_str += f'{key}: {value}\n'
-
+                printable_str += f'{key} {value}\n'
+        printable_str += '\n'
         return printable_str
 
     def read_properties(self) -> None:
         """Read Nexus equilibration file contents and populate NexusEquilMethod object."""
-        file_obj = NexusFile.generate_file_include_structure(self.file_path, origin=None)
-        file_as_list = file_obj.get_flat_list_str_file
+        file_as_list = self.file.get_flat_list_str_file
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
@@ -102,16 +105,11 @@ class NexusEquilMethod(EquilMethod):
             if nfo.check_token('AUTOGOC_COMP', line):
                 self.properties['AUTOGOC_COMP'] = nfo.get_expected_token_value('AUTOGOC_COMP', line, file_as_list)
             if nfo.check_token('OVERREAD', line):
-                overread_val = nfo.get_expected_token_value('OVERREAD', line, file_as_list)
+                overread_vals = line.split('!')[0].split('OVERREAD')[1].split()
                 if 'OVERREAD' in self.properties.keys() and isinstance(self.properties['OVERREAD'], list):
-                    self.properties['OVERREAD'] += [overread_val]
+                    self.properties['OVERREAD'] += overread_vals
                 else:
-                    self.properties['OVERREAD'] = [overread_val]
-                while nfo.get_expected_token_value(overread_val, line, file_as_list) in EQUIL_OVERREAD_VALUES:
-                    overread_val = nfo.get_expected_token_value(overread_val, line, file_as_list)
-                    if isinstance(self.properties['OVERREAD'], list):
-                        prop_list: list[str] = self.properties['OVERREAD']
-                        prop_list += [overread_val]
+                    self.properties['OVERREAD'] = overread_vals
             if nfo.check_token('VIP_INIT', line):
                 self.properties['VIP_INIT'] = ' '.join(line.split('!')[0].split()[1:])
             # Find standalone equilibration keywords
@@ -154,6 +152,6 @@ class NexusEquilMethod(EquilMethod):
             line_indx += 1
 
         # Read in table if there is one
-        if len(equil_table_indices.keys()) > 0:
-            self.properties[table_being_read] = nfo.read_table_to_df(file_as_list[
-                equil_table_indices[table_being_read][0]:equil_table_indices[table_being_read][1]])
+        for key in equil_table_indices.keys():
+            self.properties[key] = nfo.read_table_to_df(file_as_list[
+                equil_table_indices[key][0]:equil_table_indices[key][1]])

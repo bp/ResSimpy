@@ -17,6 +17,8 @@ from ResSimpy.Nexus.NexusRockMethods import NexusRockMethods
 from ResSimpy.Nexus.NexusRelPermMethods import NexusRelPermMethods
 from ResSimpy.Nexus.NexusValveMethods import NexusValveMethods
 from ResSimpy.Nexus.NexusAquiferMethods import NexusAquiferMethods
+from ResSimpy.Nexus.NexusHydraulicsMethods import NexusHydraulicsMethods
+from ResSimpy.Nexus.NexusGasliftMethods import NexusGasliftMethods
 from ResSimpy.Nexus.DataModels.StructuredGrid.StructuredGridFile import StructuredGridFile
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -37,7 +39,6 @@ class NexusSimulator(Simulator):
         """Nexus simulator class. Inherits from the Simulator super class.
 
         Args:
-        ----
             origin (Optional[str], optional): file path to the fcs file. Defaults to None.
             force_output (bool, optional): sets force_output parameter - unused. Defaults to False.
             root_name (Optional[str], optional): Root file name of the fcs. Defaults to None.
@@ -48,7 +49,6 @@ class NexusSimulator(Simulator):
                 Defaults to False.
 
         Attributes:
-        ----------
             run_control_file_path (Optional[str]): file path to the run control file - derived from the fcs file
             __destination (Optional[str]): output path for the simulation. Currently not used.
             date_format (DateFormat): Enum value representing the date format.
@@ -74,7 +74,6 @@ class NexusSimulator(Simulator):
             __surface_file_path (Optional[str]): File path to the surface file. Derived from the fcs file.
 
         Raises:
-        ------
             ValueError: If the FCS file path is not given
         """
         if origin is None:
@@ -98,26 +97,28 @@ class NexusSimulator(Simulator):
         self.__write_times: bool = write_times
         self.__manual_fcs_tidy_call: bool = manual_fcs_tidy_call
         self.__surface_file_path: Optional[str] = None
-        self.Wells: NexusWells = NexusWells(self)
+        self.wells: NexusWells = NexusWells(self)
         self.__default_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
         # Model dynamic properties
-        self.PVTMethods: NexusPVTMethods = NexusPVTMethods()
-        self.SeparatorMethods: NexusSeparatorMethods = NexusSeparatorMethods()
-        self.WaterMethods: NexusWaterMethods = NexusWaterMethods()
-        self.EquilMethods: NexusEquilMethods = NexusEquilMethods()
-        self.RockMethods: NexusRockMethods = NexusRockMethods()
-        self.RelPermMethods: NexusRelPermMethods = NexusRelPermMethods()
-        self.ValveMethods: NexusValveMethods = NexusValveMethods()
-        self.AquiferMethods: NexusAquiferMethods = NexusAquiferMethods()
+        self.pvt: NexusPVTMethods = NexusPVTMethods()
+        self.separator: NexusSeparatorMethods = NexusSeparatorMethods()
+        self.water: NexusWaterMethods = NexusWaterMethods()
+        self.equil: NexusEquilMethods = NexusEquilMethods()
+        self.rock: NexusRockMethods = NexusRockMethods()
+        self.relperm: NexusRelPermMethods = NexusRelPermMethods()
+        self.valve: NexusValveMethods = NexusValveMethods()
+        self.aquifer: NexusAquiferMethods = NexusAquiferMethods()
+        self.hydraulics: NexusHydraulicsMethods = NexusHydraulicsMethods()
+        self.gaslift: NexusGasliftMethods = NexusGasliftMethods()
         # Nexus operations modules
-        self.Runcontrol: Runcontrol = Runcontrol(self)
-        self.Reporting: Reporting = Reporting(self)
-        self.StructuredGridOperations: StructuredGridOperations = StructuredGridOperations(self)
-        self.Logging: Logging = Logging(self)
+        self.runcontrol: Runcontrol = Runcontrol(self)
+        self.reporting: Reporting = Reporting(self)
+        self.structured_grid_operations: StructuredGridOperations = StructuredGridOperations(self)
+        self.logging: Logging = Logging(self)
         self.__lazy_loading: bool = lazy_loading
 
         # Network file attributes
-        self.Network = NexusNetwork(model=self)
+        self.network = NexusNetwork(model=self)
 
         if destination is not None and destination != '':
             self.set_output_path(path=destination.strip())
@@ -131,7 +132,8 @@ class NexusSimulator(Simulator):
 
     def remove_temp_from_properties(self):
         """Updates model values if the files are moved from a temp directory
-        Replaces the first instance of temp/ in the file paths in the nexus simulation file paths
+        Replaces the first instance of temp/ in the file paths in the nexus simulation file paths.
+
         Raises:
             ValueError: if any of [__structured_grid_file_path, __new_fcs_file_path, __surface_file_path] are None.
         """
@@ -153,10 +155,10 @@ class NexusSimulator(Simulator):
         self.__surface_file_path = self.__surface_file_path.replace('temp/', '', 1)
 
     def get_simulation_status(self, from_startup: bool = False) -> Optional[str]:
-        return self.Logging.get_simulation_status(from_startup)
+        return self.logging.get_simulation_status(from_startup)
 
     def get_simulation_progress(self) -> float:
-        return self.Logging.get_simulation_progress()
+        return self.logging.get_simulation_progress()
 
     @property
     def model_location(self):
@@ -201,7 +203,8 @@ class NexusSimulator(Simulator):
 
     @root_name.setter
     def root_name(self, value: str) -> None:
-        """Returns the name of the fcs file without the .fcs extension
+        """Returns the name of the fcs file without the .fcs extension.
+
         Returns:
             str: string of the fcs file without the .fcs extension.
         """
@@ -216,14 +219,19 @@ class NexusSimulator(Simulator):
     def get_check_run_input_units_for_models(models: list[str]) -> tuple[Optional[bool], Optional[bool]]:
         # TODO: add LAB units
         """Returns the run and input unit formats for all the supplied models.
+
         Supported model formats:
             RESQML type epc files ending in ".epc"
-            Nexus files containing a line identifying the "RUN_UNITS" or "DEFAULT_UNITS"
+            Nexus files containing a line identifying the "RUN_UNITS" or "DEFAULT_UNITS".
+
         Supported units: ENGLISH, METRIC
+
         Args:
             models (list[str]): list of paths to supported reservoir models
+
         Raises:
             ValueError: if a model in the list is using inconcistent run/default units
+
         Returns:
             Tuple[Optional[Bool], Optional[Bool]]: If all units are consistent between models,
                 Returns (True, True) if 'ft' is the length unit in an epc or Nexus specifies "ENGLISH" as the
@@ -270,16 +278,15 @@ class NexusSimulator(Simulator):
     @staticmethod
     def get_check_oil_gas_types_for_models(models: list[str]) -> Optional[str]:
         """Checks for fluid types within a list of paths to models.
-        Currently limited to checking for the first SURFACE network in a file
+        Currently limited to checking for the first SURFACE network in a file.
+
         Args:
             models (list[str]): a list of paths to models to check for fluid types.
 
-        Raises
-        ------
+        Raises:
             ValueError: If fluid types are inconsistent between models
 
-        Returns
-        -------
+        Returns:
             Optional[str]: The fluid type used for the model for the first surface network
         """
         fluid_type = None
@@ -315,11 +322,9 @@ class NexusSimulator(Simulator):
         """Gets all the information about an EOS from a Nexus model.
 
         Args:
-        ----
             surface_file (list[str]): path to the surface file in a Nexus model
 
         Returns:
-        -------
             str: a concatenated string of EOS components
         """
         eos_string: str = ''
@@ -340,15 +345,12 @@ class NexusSimulator(Simulator):
         """Gets the fluid type for a single model from a surface file.
 
         Args:
-        ----
             surface_file_name (str): path to the surface file in a Nexus model
 
         Raises:
-        ------
             ValueError: if no fluid type is found within the provided file path
 
         Returns:
-        -------
             str: fluid type as one of [BLACKOIL, WATEROIL, GASWATER,] or the full details from an EOS model
         """
         surface_file = nfo.load_file_as_list(surface_file_name)
@@ -375,12 +377,10 @@ class NexusSimulator(Simulator):
     def get_model_oil_type(self) -> str:
         """Returns the get_fluid_type method on the existing NexusSimulator instance.
 
-        Raises
-        ------
+        Raises:
             ValueError: If no file path is provided for the surface file path
 
-        Returns
-        -------
+        Returns:
             str: fluid type as one of [BLACKOIL, WATEROIL, GASWATER,] or the full details from an EOS model
         """
         if self.__surface_file_path is None:
@@ -391,8 +391,7 @@ class NexusSimulator(Simulator):
         """Confirms that the output path has been set (used to stop accidental writing operations in the original
         directory).
 
-        Raises
-        ------
+        Raises:
             ValueError: if the destination provided is set to None.
         """
         if self.__destination is None:
@@ -434,7 +433,7 @@ class NexusSimulator(Simulator):
                 if value is not None:
                     self.date_format = DateFormat.DD_MM_YYYY if value == 'DD/MM/YYYY' else DateFormat.MM_DD_YYYY
 
-                self.Runcontrol.date_format_string = "%m/%d/%Y" if self.date_format is DateFormat.MM_DD_YYYY \
+                self.runcontrol.date_format_string = "%m/%d/%Y" if self.date_format is DateFormat.MM_DD_YYYY \
                     else "%d/%m/%Y"
             elif nfo.check_token('RUN_UNITS', line):
                 value = nfo.get_token_value('RUN_UNITS', line, fcs_content_with_includes)
@@ -451,49 +450,59 @@ class NexusSimulator(Simulator):
         # Read in PVT properties from Nexus PVT method files
         if self.fcs_file.pvt_files is not None and \
                 len(self.fcs_file.pvt_files) > 0:
-            self.PVTMethods = NexusPVTMethods(pvt_files=self.fcs_file.pvt_files)
+            self.pvt = NexusPVTMethods(files=self.fcs_file.pvt_files)
 
         # Read in separator properties from Nexus separator method files
         if self.fcs_file.separator_files is not None and \
                 len(self.fcs_file.separator_files) > 0:
-            self.SeparatorMethods = NexusSeparatorMethods(separator_files=self.fcs_file.separator_files)
+            self.separator = NexusSeparatorMethods(files=self.fcs_file.separator_files)
 
         # Read in water properties from Nexus water method files
         if self.fcs_file.water_files is not None and \
                 len(self.fcs_file.water_files) > 0:
-            self.WaterMethods = NexusWaterMethods(water_files=self.fcs_file.water_files)
+            self.water = NexusWaterMethods(files=self.fcs_file.water_files)
 
         # Read in equilibration properties from Nexus equil method files
         if self.fcs_file.equil_files is not None and \
                 len(self.fcs_file.equil_files) > 0:
-            self.EquilMethods = NexusEquilMethods(equil_files=self.fcs_file.equil_files)
+            self.equil = NexusEquilMethods(files=self.fcs_file.equil_files)
 
         # Read in rock properties from Nexus rock method files
         if self.fcs_file.rock_files is not None and \
                 len(self.fcs_file.rock_files) > 0:
-            self.RockMethods = NexusRockMethods(rock_files=self.fcs_file.rock_files)
+            self.rock = NexusRockMethods(files=self.fcs_file.rock_files)
 
         # Read in relative permeability and capillary pressure properties from Nexus relperm method files
         if self.fcs_file.relperm_files is not None and \
                 len(self.fcs_file.relperm_files) > 0:
-            self.RelPermMethods = NexusRelPermMethods(relperm_files=self.fcs_file.relperm_files)
+            self.relperm = NexusRelPermMethods(files=self.fcs_file.relperm_files)
 
         # Read in valve and choke properties from Nexus valve method files
         if self.fcs_file.valve_files is not None and \
                 len(self.fcs_file.valve_files) > 0:
-            self.ValveMethods = NexusValveMethods(valve_files=self.fcs_file.valve_files)
+            self.valve = NexusValveMethods(files=self.fcs_file.valve_files)
 
         # Read in aquifer properties from Nexus aquifer method files
         if self.fcs_file.aquifer_files is not None and \
                 len(self.fcs_file.aquifer_files) > 0:
-            self.AquiferMethods = NexusAquiferMethods(aquifer_files=self.fcs_file.aquifer_files)
+            self.aquifer = NexusAquiferMethods(files=self.fcs_file.aquifer_files)
+
+        # Read in hydraulics properties from Nexus hyd method files
+        if self.fcs_file.hyd_files is not None and \
+                len(self.fcs_file.hyd_files) > 0:
+            self.hydraulics = NexusHydraulicsMethods(files=self.fcs_file.hyd_files)
+
+        # Read in gaslift properties from Nexus gaslift method files
+        if self.fcs_file.gas_lift_files is not None and \
+                len(self.fcs_file.gas_lift_files) > 0:
+            self.gaslift = NexusGasliftMethods(files=self.fcs_file.gas_lift_files)
 
         # === End of dynamic properties loading ===
 
         # Load in Runcontrol
         if self.fcs_file.runcontrol_file is not None:
             self.run_control_file_path = self.fcs_file.runcontrol_file.location
-            self.Runcontrol.load_run_control_file()
+            self.runcontrol.load_run_control_file()
         if self.fcs_file.surface_files is not None:
             # TODO support multiple surface file paths
             self.__surface_file_path = list(self.fcs_file.surface_files.values())[0].location
@@ -509,7 +518,6 @@ class NexusSimulator(Simulator):
                 if well_file.location is None:
                     warnings.warn(f'Well file location has not been found for {well_file}')
                     continue
-                self.Wells.load_wells()
 
     @staticmethod
     def update_file_value(file_path: str, token: str, new_value: str, add_to_start: bool = False) -> None:
@@ -517,14 +525,12 @@ class NexusSimulator(Simulator):
         isn't present, it will add the token + value to either the start or end of the file.
 
         Args:
-        ----
             file_path (str): path to a file to update the token/value pair in
             token (str): Keyword token to find in the given file (e.g. KX)
             new_value (str): Value following the TOKEN to be replaced
             add_to_start (bool, optional): Inserts the token/value pair to the start of the file. Defaults to False.
 
         Raises:
-        ------
             ValueError: If no value is found after the token
         """
 
@@ -572,7 +578,6 @@ class NexusSimulator(Simulator):
         """Comments out an uncommented line containing the specified token.
 
         Args:
-        ----
             token (str): Keyword token to find in the given file (e.g. KX)
             file_path (str): path to a file containing the token
         """
@@ -598,14 +603,13 @@ class NexusSimulator(Simulator):
         """Returns the date format being used by the model
         formats used: ('MM/DD/YYYY', 'DD/MM/YYYY').
         """
-        return self.Runcontrol.get_date_format(self.date_format)
+        return self.runcontrol.get_date_format(self.date_format)
 
     def modify(self, operation: str, section: str, keyword: str, content: list[str]):
         """Generic modify method to modify part of the input deck. \
         Operations are dependent on the section being modified.
 
         Args:
-        ----
             operation (str): operation to perform on the section of the input deck (e.g. 'merge')
             section (str): file type from the input deck provided (e.g. RUNCONTROL)
             keyword (str): which keyword/token to find within the deck provided (e.g. TIME)
@@ -613,7 +617,6 @@ class NexusSimulator(Simulator):
             represented as a list of strings with a new entry per line of the file
 
         Raises:
-        ------
             NotImplementedError: if the functionality is not yet implemented
         """
         section = section.upper()
@@ -622,7 +625,7 @@ class NexusSimulator(Simulator):
 
         if section == "RUNCONTROL":
             if keyword == "TIME":
-                self.Runcontrol.modify_times(content=content, operation=operation)
+                self.runcontrol.modify_times(content=content, operation=operation)
             else:
                 raise NotImplementedError(keyword, "not yet implemented")
         else:
@@ -632,23 +635,20 @@ class NexusSimulator(Simulator):
         """Returns the requested input information.
 
         Args:
-        ----
             section (str): Section to retreive information from
             keyword (str): Keyword/token to retrieve the information for
 
         Raises:
-        ------
             NotImplementedError: if the functionality is not yet implemented
 
         Returns:
-        -------
             Union[list[str], None]: the requested information
         """
         section = section.upper()
         keyword = keyword.upper()
         if section == "RUNCONTROL":
             if keyword == "TIME":
-                return self.Runcontrol.times
+                return self.runcontrol.times
             else:
                 raise NotImplementedError(keyword, "not yet implemented")
         else:
@@ -658,7 +658,6 @@ class NexusSimulator(Simulator):
         """Sets the force output parameter to the supplied value.
 
         Args:
-        ----
             force_output (bool, optional): sets the force_output parameter in the class instance. Defaults to True.
         """
         self.__force_output = force_output
@@ -695,4 +694,4 @@ class NexusSimulator(Simulator):
 
     def load_network(self):
         """Populates nodes and connections from a surface file."""
-        self.Network.load()
+        self.network.load()

@@ -55,8 +55,8 @@ def get_empty_dict_int_nexus_file() -> dict[int, NexusFile]:
     return value
 
 
-def get_empty_dict_uuid_int() -> dict[UUID, int]:
-    value: dict[UUID, int] = {}
+def get_empty_dict_uuid_list_int() -> dict[UUID, list[int]]:
+    value: dict[UUID, list[int]] = {}
     return value
 
 

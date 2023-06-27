@@ -2,6 +2,7 @@ from enum import Enum
 import numpy as np
 import pandas as pd
 import pytest
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from ResSimpy.Nexus.DataModels.NexusSeparatorMethod import NexusSeparatorMethod
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits
@@ -133,9 +134,10 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits
     )
     ], ids=['basic eos separator', 'complex eos separator', 'gas plant', 'black oil separator']
 )
-def test_read_seperator_properties_from_file(mocker, file_contents, expected_separator_properties):
+def test_read_separator_properties_from_file(mocker, file_contents, expected_separator_properties):
     # Arrange
-    sep_obj = NexusSeparatorMethod(file_path='test/file/sep.dat', method_number=1)
+    sep_file = NexusFile(file_content_as_list=file_contents.splitlines())
+    sep_obj = NexusSeparatorMethod(file=sep_file, input_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -154,26 +156,126 @@ def test_read_seperator_properties_from_file(mocker, file_contents, expected_sep
             assert expected_separator_properties[key] == props[key]
 
 
-def test_nexus_separator_repr():
+def test_nexus_eos_separator_repr():
     # Arrange
-    sep_obj = NexusSeparatorMethod(file_path='test/file/separator.dat', method_number=1)
+    sep_file = NexusFile(location='test/file/separator.dat')
+    sep_obj = NexusSeparatorMethod(file=sep_file, input_number=1)
     sep_obj.separator_type = 'EOS'
-    sep_obj.properties['SEPARATOR_TABLE'] = pd.DataFrame({'STAGE': [1, 2],
-                                                      'METHOD': [1, 2],
-                                                      'PRES': [500.0, 14.7],
-                                                      'TEMP': [150.0, 60.0],
-                                                      'IDL1': ['2', 'OIL'],
-                                                      'IDL2': [np.nan, np.nan],
-                                                      'IDV1': ['GAS', 'VENT'],
-                                                      'IDV2': [np.nan, np.nan],
-                                                      'FDL1': [1., 1.],
-                                                      'FDV1': [1., 1.]
-                                                      })
+    sep_obj.properties = {'DESC': ['This is first line of description',
+                                   'and this is second line of description'
+                                   ],
+                          'UNIT_SYSTEM': UnitSystem.ENGLISH,
+                          'TEMP_UNIT': TemperatureUnits.FAHR,
+                          'SEPARATOR_TABLE': pd.DataFrame({'STAGE': [1, 2],
+                                                           'METHOD': [1, 2],
+                                                           'PRES': [500.0, 14.7],
+                                                           'TEMP': [150.0, 60.0],
+                                                           'IDL1': ['2', 'OIL'],
+                                                           'IDL2': [np.nan, np.nan],  
+                                                           'IDV1': ['GAS', 'VENT'],
+                                                           'IDV2': [np.nan, np.nan],
+                                                           'FDL1': [1., 1.],
+                                                           'FDV1': [1., 1.]
+                                                           }),
+                          'WATERMETHOD': 1
+          }
     expected_output = """
 FILE_PATH: test/file/separator.dat
-SEPARATOR_TYPE: EOS
-SEPARATOR_TABLE: 
-""" + sep_obj.properties['SEPARATOR_TABLE'].to_string(na_rep='') + '\n\n'
+
+DESC This is first line of description
+DESC and this is second line of description
+ENGLISH
+FAHR
+""" + sep_obj.properties['SEPARATOR_TABLE'].to_string(na_rep='', index=False) + '\n' + \
+"""
+WATERMETHOD 1
+""" 
+
+    # Act
+    result = sep_obj.__repr__()
+
+    # Assert
+    assert result == expected_output
+
+
+def test_nexus_gas_plant_separator_repr():
+    # Arrange
+    sep_file = NexusFile(location='test/file/separator.dat')
+    sep_obj = NexusSeparatorMethod(file=sep_file, input_number=1)
+    sep_obj.separator_type = 'GASPLANT'
+    sep_obj.properties = {'DESC': ['This is first line of description',
+                                   'and this is second line of description'],
+                          'UNIT_SYSTEM': UnitSystem.ENGLISH,
+                          'TEMP_UNIT': TemperatureUnits.FAHR,
+                          'KEYCPTLIST': ['C8', 'C10', 'PS1', 'PS2'],
+                          'PRES_STD': 20., 'TEMP_STD': 100.,
+                          'EOSMETHOD': 1, 'WATERMETHOD': 5,
+                          'SEPARATOR_TABLE': pd.DataFrame({'KEYCPTMF': ['C1', 'C2', 'C3', 'C4', 'C5', 'C7', 'C10'],
+                                                           '0': [0.005, 0.001, 0.008, 0.030, 0.090, 1.0, 1.0],
+                                                           '0.25': [0.012, 0.002, 0.020, 0.050, 0.130, 1.0, 1.0],
+                                                           '0.50': [0.031, 0.002, 0.052, 0.078, 0.22, 1.0, 1.0],
+                                                           '0.75': [0.049, 0.003, 0.075, 0.11, 0.44, 1.0, 1.0],
+                                                           '0.95': [0.05, 0.004, 0.08, 0.15, 0.55, 1.0, 1.0]
+                                                           }),
+          }
+    expected_output = """
+FILE_PATH: test/file/separator.dat
+
+DESC This is first line of description
+DESC and this is second line of description
+ENGLISH
+FAHR
+KEYCPTLIST C8 C10 PS1 PS2
+PRES_STD 20.0
+TEMP_STD 100.0
+EOSMETHOD 1
+WATERMETHOD 5
+RECFAC_TABLE
+""" + sep_obj.properties['SEPARATOR_TABLE'].to_string(na_rep='', index=False) + \
+"""
+ENDRECFAC_TABLE
+
+"""
+
+    # Act
+    result = sep_obj.__repr__()
+
+    # Assert
+    assert result == expected_output
+
+
+def test_nexus_blackoil_separator_repr():
+    # Arrange
+    sep_file = NexusFile(location='test/file/separator.dat')
+    sep_obj = NexusSeparatorMethod(file=sep_file, input_number=1)
+    sep_obj.separator_type = 'BLACKOIL'
+    sep_obj.properties = {'DESC': ['This is first line of description',
+                                   'and this is second line of description'
+                                   ],
+                          'UNIT_SYSTEM': UnitSystem.ENGLISH,
+                          'TEMP_UNIT': TemperatureUnits.FAHR,
+                          'BOSEP': '', 'MWOIL': 180., 'MWGAS': 10., 'ZOIL': 0.009,
+                          'SEPARATOR_TABLE': pd.DataFrame({'STAGE': [1],
+                                                           'KVOIL': [6.0e-11],
+                                                           'KVGAS': [8.1e9],
+                                                           'IDL1': ['OIL'],
+                                                           'FDL1': [1.0],
+                                                           'IDV1': ['GAS'],
+                                                           'FDV1': [1.0]
+                                                           })
+          }
+    expected_output = """
+FILE_PATH: test/file/separator.dat
+
+DESC This is first line of description
+DESC and this is second line of description
+ENGLISH
+FAHR
+BOSEP
+MWOIL 180.0
+MWGAS 10.0
+ZOIL 0.009
+""" + sep_obj.properties['SEPARATOR_TABLE'].to_string(na_rep='', index=False) + '\n\n'
 
     # Act
     result = sep_obj.__repr__()

@@ -2,6 +2,7 @@ import pandas as pd
 import pytest
 
 from ResSimpy.Nexus.DataModels.NexusEquilMethod import NexusEquilMethod
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 
 @pytest.mark.parametrize("file_contents, expected_equil_properties",
@@ -63,7 +64,6 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits, TemperatureU
     WOC_PALEO 10000
     PSAT 3600
     SALINITY 300000
-    OVERREAD SW
     HONOR_GZONE
     HONOR_GASPRESSURE_GWC
 
@@ -76,6 +76,7 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits, TemperatureU
                   SORGMN 0.1
                   SGCMN 0.05
 
+    OVERREAD SW
     """, {'UNIT_SYSTEM': UnitSystem.ENGLISH, 'SUNITS': SUnits.PPM,
           'DESC': ['This is first line of description', 'and this is second line of description'],
           'PINIT': 3600, 'DINIT': 9035, 'GOC': 8800, 'WOC': 9950, 'PSAT': 3600, 'SALINITY': 300000,
@@ -202,12 +203,33 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits, TemperatureU
                                        'C10+': [0.40, 0.40, 0.492]
                                        })
           }
+    ),
+    ("""
+    DESC This is first line of description >
+and continuation for the first line  
+    ENGLISH
+
+    ! This is a comment
+    PINIT 3600 DINIT 9035
+    GOC 8800 WOC 9950
+    PSAT 3600
+
+    """, {'UNIT_SYSTEM': UnitSystem.ENGLISH,
+          'DESC': ['This is first line of description and continuation for the first line'],
+          'PINIT': 3600, 'DINIT': 9035, 'GOC': 8800, 'WOC': 9950, 'PSAT': 3600
+          }
     )
-    ], ids=['basic_equil', 'adv_equil', 'intsat_equil', 'vaits_equil', 'depthvar', 'oilmf', 'compvar']
+    ], ids=['basic_equil', 'adv_equil', 'intsat_equil', 'vaits_equil', 'depthvar', 'oilmf', 'compvar', 'line_continuation']
 )
 def test_read_equil_properties_from_file(mocker, file_contents, expected_equil_properties):
     # Arrange
-    equil_obj = NexusEquilMethod(file_path='test/file/equil.dat', method_number=1)
+    file_contents_as_list = file_contents.splitlines()
+    if '>' in file_contents_as_list[1]:
+        file_contents_as_list[1] = file_contents_as_list[1].split('>')[0] + file_contents_as_list[2]
+        del file_contents_as_list[2]
+
+    eq_file = NexusFile(file_content_as_list=file_contents_as_list)
+    equil_obj = NexusEquilMethod(file=eq_file, input_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -227,7 +249,8 @@ def test_read_equil_properties_from_file(mocker, file_contents, expected_equil_p
 
 def test_nexus_equil_repr():
     # Arrange
-    equil_obj = NexusEquilMethod(file_path='test/file/equil.dat', method_number=1)
+    eq_file = NexusFile(location='test/file/equil.dat')
+    equil_obj = NexusEquilMethod(file=eq_file, input_number=1)
     equil_obj.properties = {'PINIT': 3600., 'DINIT': 9035., 'GOC': 8800., 'WOC': 9950., 'PCGOC': 0., 'PCWOC': 0.,
                             'PSAT': 3400., 'X': 50., 'Y': -50., 'VIP_INIT': '3 4 5 7', 'CRINIT': '', 
                             'AUTOGOC_COMP': 'USE_CLOSEST_OIL', 'OVERREAD': ['SG', 'SW', 'PRESSURE'],
@@ -244,26 +267,28 @@ def test_nexus_equil_repr():
                                                          })}
     expected_output = """
 FILE_PATH: test/file/equil.dat
-PINIT: 3600.0
-DINIT: 9035.0
-GOC: 8800.0
-WOC: 9950.0
-PCGOC: 0.0
-PCWOC: 0.0
-PSAT: 3400.0
-VIP_INIT: 3 4 5 7
+
+PINIT 3600.0
+DINIT 9035.0
+GOC 8800.0
+WOC 9950.0
+PCGOC 0.0
+PCWOC 0.0
+PSAT 3400.0
+VIP_INIT 3 4 5 7
 CRINIT
-AUTOGOC_COMP: USE_CLOSEST_OIL
-OVERREAD: SG SW PRESSURE
-VAITS: MOBILE
-        SORWMN: 0.1
-        SORGMN: 0.1
-        SGCMN: 0.05
-    VAITS_TOLSG: 0.001
-    VAITS_TOLSW: 0.0001
+AUTOGOC_COMP USE_CLOSEST_OIL
+OVERREAD SG SW PRESSURE
+VAITS
+    MOBILE
+        SORWMN 0.1
+        SORGMN 0.1
+        SGCMN 0.05
+    VAITS_TOLSG 0.001
+    VAITS_TOLSW 0.0001
 POROSITY_INDEPENDENCE
-COMPOSITION: X 50.0 Y -50.0
-""" + equil_obj.properties['COMPOSITION'].to_string(na_rep='') + '\n\n'
+COMPOSITION X 50.0 Y -50.0
+""" + equil_obj.properties['COMPOSITION'].to_string(na_rep='', index=False) + '\n\n'
 
     # Act
     result = equil_obj.__repr__()

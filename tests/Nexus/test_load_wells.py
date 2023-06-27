@@ -102,7 +102,15 @@ def test_load_wells_multiple_wells(mocker):
 	126	504	3	1	0.354	0
 	
 	126	504	4	1	0.354	0
-
+    
+    WELLSPEC LINE>
+APPENDTOFIRSTLINE
+    IW JW L RADW
+    1  2  3  >
+    4.5
+    6 7 8   9.11>
+    !this is a comment
+    
 WELLMOD	RU001	DKH	CON	0
     """
 
@@ -118,6 +126,9 @@ WELLMOD	RU001	DKH	CON	0
     expected_well_3_completion_2 = NexusCompletion(i=126, j=504, k=4, well_radius=0.354, skin=0, date=start_date,
                                                    partial_perf=1)
 
+    expected_well_4_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date=start_date)
+    expected_well_4_completion_2 = NexusCompletion(i=6, j=7, k=8, well_radius=9.11, date=start_date)
+    
     expected_well_1 = NexusWell(well_name='DEV1',
                                 completions=[expected_well_1_completion_1, expected_well_1_completion_2],
                                 units=UnitSystem.ENGLISH)
@@ -127,8 +138,11 @@ WELLMOD	RU001	DKH	CON	0
     expected_well_3 = NexusWell(well_name='WEL1234',
                                 completions=[expected_well_3_completion_1, expected_well_3_completion_2],
                                 units=UnitSystem.ENGLISH)
+    expected_well_4 = NexusWell(well_name='LINEAPPENDTOFIRSTLINE',
+                                completions=[expected_well_4_completion_1, expected_well_4_completion_2],
+                                units=UnitSystem.ENGLISH)
 
-    expected_wells = [expected_well_1, expected_well_2, expected_well_3]
+    expected_wells = [expected_well_1, expected_well_2, expected_well_3, expected_well_4]
 
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)

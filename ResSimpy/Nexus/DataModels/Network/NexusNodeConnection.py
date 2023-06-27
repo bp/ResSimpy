@@ -94,13 +94,13 @@ class NexusNodeConnection(NodeConnection):
         return nexus_mapping
 
     def to_dict(self, keys_in_nexus_style: bool = False) -> dict[str, None | str | int | float]:
-        """Returns a dictionary of the attributes of the Node
+        """Returns a dictionary of the attributes of the Node.
+
         Args:
             keys_in_nexus_style (bool): if True returns the key values in Nexus keywords, otherwise returns the \
                 attribute name as stored by ressimpy.
 
-        Returns
-        -------
+        Returns:
             a dictionary keyed by attributes and values as the value of the attribute
         """
         result_dict = to_dict_generic.to_dict(self, keys_in_nexus_style, add_date=True, add_units=True)

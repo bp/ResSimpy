@@ -9,11 +9,9 @@ def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
     """Collects all the function blocks within a grid file.
 
     Args:
-    ----
     file_as_list (list[str] | NexusFile): a list of strings containing each line of the file as an item,
 
     Returns:
-    -------
     list[list[str]]: list of function block lines as a list of strings.
     """
     function_list = []
@@ -38,13 +36,13 @@ def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
 
 
 def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd.DataFrame:
-    """Creates a dataframe to hold all the function properties and parameters:
-    Args:
-    function_list_to_parse (list[list[str]]): list of functions extracted as list of lines.
+    """Creates a dataframe to hold all the function properties and parameters.
 
-    Returns
-    -------
-    pandas.DataFrame: a dataframe holding each function's parameters in a row.
+    Args:
+        function_list_to_parse (list[list[str]]): list of functions extracted as list of lines.
+
+    Returns:
+        pandas.DataFrame: a dataframe holding each function's parameters in a row.
     """
 
     functions_df = pd.DataFrame(
@@ -145,13 +143,13 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
 
 
 def summarize_model_functions(function_list_to_parse: list[list[str]]) -> pd.DataFrame:
-    """Extracts all function parameters into a df, with an added column of human-readable notations for each function:
-    Args:
-    function_list_to_parse (list[list[str]]): list of functions extracted as list of lines.
+    """Extracts all function parameters into a df, with an added column of human-readable notations for each function.
 
-    Returns
-    -------
-    pandas.DataFrame: a dataframe holding each function's translation/summary in a row.
+    Args:
+        function_list_to_parse (list[list[str]]): list of functions extracted as list of lines.
+
+    Returns:
+        pandas.DataFrame: a dataframe holding each function's translation/summary in a row.
     """
 
     # get the df from create_function_parameters_df, add a new column, and populate based on ANALYT function type:

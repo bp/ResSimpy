@@ -26,25 +26,34 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class NexusWells(Wells):
-    model: NexusSimulator
+    __model: NexusSimulator
     __wells: list[NexusWell] = field(default_factory=list)
+    __wells_loaded: bool = False
 
     def __init__(self, model: NexusSimulator) -> None:
-        self.model = model
+        self.__model = model
         self.__wells = []
         super().__init__()
 
     def get_wells(self) -> Sequence[NexusWell]:
+        if not self.__wells_loaded:
+            self.load_wells()
         return self.__wells
 
     def get_well(self, well_name: str) -> Optional[NexusWell]:
         """Returns a specific well requested, or None if that well cannot be found."""
+        if not self.__wells_loaded:
+            self.load_wells()
+
         wells_to_return = filter(lambda x: x.well_name.upper() == well_name.upper(), self.__wells)
 
         return next(wells_to_return, None)
 
     def get_wells_df(self) -> pd.DataFrame:
         # loop through wells and completions to output a table
+        if not self.__wells_loaded:
+            self.load_wells()
+
         store_dictionaries = []
         for well in self.__wells:
             for completion in well.completions:
@@ -59,17 +68,21 @@ class NexusWells(Wells):
         return df_store
 
     def load_wells(self) -> None:
-        if self.model.fcs_file.well_files is None:
+        if self.__model.fcs_file.well_files is None:
             raise FileNotFoundError('No wells files found for current model.')
-        for method_number, well_file in self.model.fcs_file.well_files.items():
+        for method_number, well_file in self.__model.fcs_file.well_files.items():
             if well_file.location is None:
                 warnings.warn(f'Well file location has not been found for {well_file}')
                 continue
-            new_wells = load_wells(nexus_file=well_file, start_date=self.model.start_date,
-                                   default_units=self.model.default_units, date_format = self.model.date_format)
+            new_wells = load_wells(nexus_file=well_file, start_date=self.__model.start_date,
+                                   default_units=self.__model.default_units, date_format = self.__model.date_format)
             self.__wells += new_wells
+        self.__wells_loaded = True
 
     def get_wells_overview(self) -> str:
+        if not self.__wells_loaded:
+            self.load_wells()
+
         overview: str = ''
         for well in self.__wells:
             overview += well.printable_well_info
@@ -78,6 +91,9 @@ class NexusWells(Wells):
 
     def get_wells_dates(self) -> set[str]:
         """Returns a set of the unique dates in the wellspec file over all wells."""
+        if not self.__wells_loaded:
+            self.load_wells()
+
         set_dates: set[str] = set()
         for well in self.__wells:
             set_dates.update(set(well.dates_of_completions))
@@ -151,7 +167,7 @@ class NexusWells(Wells):
         # add completion in memory
         new_completion = well._add_completion_to_memory(completion_date, completion_properties)
 
-        if self.model.fcs_file.well_files is None:
+        if self.__model.fcs_file.well_files is None:
             raise FileNotFoundError('No well file found, cannot modify ')
 
         wellspec_file = self.__find_which_wellspec_file_from_completion_id(well_id)
@@ -178,7 +194,7 @@ class NexusWells(Wells):
         for index, line in enumerate(file_content):
             if header_index == -1 and nfo.check_token('TIME', line):
                 wellspec_date = nfo.get_expected_token_value('TIME', line, [line])
-                date_comp = self.model.Runcontrol.compare_dates(wellspec_date, completion_date)
+                date_comp = self.__model.runcontrol.compare_dates(wellspec_date, completion_date)
                 if date_comp == 0:
                     # if we've found the date we're looking for start looking for a wellspec and name card
                     new_completion_time_index = index
@@ -250,7 +266,7 @@ class NexusWells(Wells):
             additional_column_string = ' '.join(additional_na_values)
             split_comments = file_content[index].split('!', 1)
             if len(split_comments) == 1:
-                new_completion_line = split_comments[0] + ' ' + additional_column_string
+                new_completion_line = split_comments[0].replace('\n', '', 1) + ' ' + additional_column_string + '\n'
             else:
                 new_completion_line = split_comments[0] + additional_column_string + ' !' + split_comments[1]
 
@@ -265,9 +281,9 @@ class NexusWells(Wells):
 
     def __find_which_wellspec_file_from_completion_id(self, completion_id: UUID) -> NexusFile:
         # find the correct wellspec file in the model by looking at the ids
-        if self.model.fcs_file.well_files is None:
-            raise ValueError(f'No wells file found in fcs file at: {self.model.fcs_file.location}')
-        wellspec_files = [x for x in self.model.fcs_file.well_files.values() if x.object_locations is not None and
+        if self.__model.fcs_file.well_files is None:
+            raise ValueError(f'No wells file found in fcs file at: {self.__model.fcs_file.location}')
+        wellspec_files = [x for x in self.__model.fcs_file.well_files.values() if x.object_locations is not None and
                           completion_id in x.object_locations]
         if len(wellspec_files) == 0:
             raise FileNotFoundError(f'No well file found with an existing well that has completion id: {completion_id}')
@@ -298,7 +314,7 @@ class NexusWells(Wells):
         additional_column_string = ' '.join(additional_headers)
         split_comments = str(file_content[header_index]).split('!', 1)
         if len(split_comments) == 1:
-            new_header_line = split_comments[0] + ' ' + additional_column_string
+            new_header_line = split_comments[0].replace('\n', '', 1) + ' ' + additional_column_string + '\n'
         else:
             new_header_line = split_comments[0] + additional_column_string + ' !' + split_comments[1]
         if len(additional_headers) > 0:
@@ -325,7 +341,7 @@ class NexusWells(Wells):
             # get all the dates for that well
             date_list = well.dates_of_completions
             previous_dates = [x for x in date_list if
-                              self.model.Runcontrol.compare_dates(x, completion_date) < 0]
+                              self.__model.runcontrol.compare_dates(x, completion_date) < 0]
             if len(previous_dates) == 0:
                 # if no dates that are smaller than the completion date then only add the perforation
                 # at the current index with a new wellspec card.
@@ -336,7 +352,7 @@ class NexusWells(Wells):
                 return headers, new_completion_index, completion_table_as_list, False
 
             # get the most recent date that is earlier than the new completion date
-            previous_dates = sorted(previous_dates, key=cmp_to_key(self.model.Runcontrol.compare_dates))
+            previous_dates = sorted(previous_dates, key=cmp_to_key(self.__model.runcontrol.compare_dates))
             last_date = str(previous_dates[-1])
             completion_to_find: NexusCompletion.InputDictionary = {'date': last_date}
             # find all completions at this date
@@ -391,9 +407,10 @@ class NexusWells(Wells):
         # drop it from the wellspec file or include file if stored in include file
         if wellspec_file.object_locations is None:
             raise ValueError(f'No object locations specified, cannot find completion id: {completion_id}')
-        completion_index = wellspec_file.object_locations[completion_id]
-
-        wellspec_file.remove_from_file_as_list(completion_index, [completion_id])
+        completion_indices = wellspec_file.object_locations[completion_id]
+        if len(completion_indices) > 0:
+            for comp_index in completion_indices:
+                wellspec_file.remove_from_file_as_list(comp_index, [completion_id])
 
         # check that we have completions left:
         find_completions_dict: NexusCompletion.InputDictionary = {'date': completion_date}
