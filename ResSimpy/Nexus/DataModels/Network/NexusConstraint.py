@@ -49,10 +49,10 @@ class NexusConstraint(Constraint):
     min_reservoir_liquid_rate (float): min reservoir liquid rate (QLIQMIN)
     min_reservoir_total_fluids_rate (float): min reservoir total fluids rate (QALLMIN)
     min_reservoir_hc_rate (float): min reservoir hc rate (QHCMIN)
-    min_reservoir_oil_rate (float): min reservoir oil rate (QOSMIN-)
-    min_reservoir_gas_rate (float): min reservoir gas rate (QGSMIN-)
-    min_reservoir_water_rate (float): min reservoir water rate (QWSMIN-)
-    min_reservoir_liquid_rate (float): min reservoir liquid rate (QLIQSMIN-)
+    min_reverse_surface_oil_rate (float): min reservoir oil rate (QOSMIN-)
+    min_reverse_surface_gas_rate (float): min reservoir gas rate (QGSMIN-)
+    min_reverse_surface_water_rate (float): min reservoir water rate (QWSMIN-)
+    min_reverse_surface_liquid_rate (float): min reservoir liquid rate (QLIQSMIN-)
     min_reverse_reservoir_oil_rate (float): min reverse reservoir oil rate (QOMIN-)
     min_reverse_reservoir_gas_rate (float): min reverse reservoir gas rate (QGMIN-)
     min_reverse_reservoir_water_rate (float): min reverse reservoir water rate (QWMIN-)
@@ -128,7 +128,10 @@ class NexusConstraint(Constraint):
     max_wag_gas_pressure: Optional[float] = None
     bottom_hole_pressure: Optional[float] = None
     tubing_head_pressure: Optional[float] = None
-
+    min_reverse_surface_oil_rate: Optional[float] = None
+    min_reverse_surface_gas_rate: Optional[float] = None
+    min_reverse_surface_water_rate: Optional[float] = None
+    min_reverse_surface_liquid_rate: Optional[float] = None
     min_surface_oil_rate: Optional[float] = None
     min_surface_gas_rate: Optional[float] = None
     min_surface_water_rate: Optional[float] = None
@@ -266,10 +269,10 @@ class NexusConstraint(Constraint):
             'QLIQMIN': ('min_reservoir_liquid_rate', float),
             'QALLMIN': ('min_reservoir_total_fluids_rate', float),
             'QHCMIN': ('min_reservoir_hc_rate', float),
-            'QOSMIN-': ('min_reservoir_oil_rate', float),
-            'QGSMIN-': ('min_reservoir_gas_rate', float),
-            'QWSMIN-': ('min_reservoir_water_rate', float),
-            'QLIQSMIN-': ('min_reservoir_liquid_rate', float),
+            'QOSMIN-': ('min_reverse_surface_oil_rate', float),
+            'QGSMIN-': ('min_reverse_surface_gas_rate', float),
+            'QWSMIN-': ('min_reverse_surface_water_rate', float),
+            'QLIQSMIN-': ('min_reverse_surface_liquid_rate', float),
             'QOMIN-': ('min_reverse_reservoir_oil_rate', float),
             'QGMIN-': ('min_reverse_reservoir_gas_rate', float),
             'QWMIN-': ('min_reverse_reservoir_water_rate', float),
@@ -374,3 +377,23 @@ class NexusConstraint(Constraint):
     def new_id(self):
         """Refreshes the id on the object."""
         self.__id = uuid.uuid4()
+
+    def to_string(self) -> str:
+        """String representation of the constraint for entry to an inline constraint table."""
+
+        skip_attributes = ['date', 'unit_system', 'NAME', 'ACTIVATE']
+
+        constraint_string = self.name
+        for attribute, value in self.to_dict(keys_in_nexus_style=True).items():
+            if value is None or attribute in skip_attributes:
+                continue
+            constraint_string += (' ' + attribute + ' ' + str(value))
+
+        if self.active_node:
+            constraint_string += ' ACTIVATE'
+        elif self.active_node is not None:
+            # equivalent to active node being False
+            constraint_string += ' DEACTIVATE'
+
+        constraint_string += '\n'
+        return constraint_string

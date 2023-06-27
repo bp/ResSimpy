@@ -1,3 +1,4 @@
+import uuid
 import pytest
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
@@ -21,15 +22,15 @@ def test_find_constraint(mocker):
                 'unit_system': UnitSystem.ENGLISH},
             )
     well2_constraint_props = ({'date': '01/01/2019', 'name': 'well2', 'max_surface_liquid_rate': 1.8, 'max_pressure': 10000.2,
-                                'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True,},
-    {'date': '01/12/2023', 'name': 'well2', 'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True,},)
+                                'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True},
+    {'date': '01/12/2023', 'name': 'well2', 'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True})
 
     existing_constraints = {'well1': [NexusConstraint(x) for x in well1_constraint_props],
                             'well2': [NexusConstraint(x) for x in well2_constraint_props]}
 
     constraints.__setattr__('_NexusConstraints__constraints', existing_constraints)
     expected_constraint = NexusConstraint(well1_constraint_props[2])
-    find_constraint_dict = {'date': '01/01/2024', 'name': 'well1', 'max_wor': 95.0,}
+    find_constraint_dict = {'date': '01/01/2024', 'name': 'well1', 'max_wor': 95.0}
     # Act
     result = constraints.find_constraint('well1', find_constraint_dict)
 
@@ -52,8 +53,8 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
                 'unit_system': UnitSystem.ENGLISH},
             )
     well2_constraint_props = ({'date': '01/01/2019', 'name': 'well2', 'max_surface_liquid_rate': 1.8, 'max_pressure': 10000.2,
-                                'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True,},
-    {'date': '01/12/2023', 'name': 'well2', 'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True,},)
+                                'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True},
+    {'date': '01/12/2023', 'name': 'well2', 'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True})
 
     existing_constraints = {'well1': [NexusConstraint(x) for x in well1_constraint_props],
                             'well2': [NexusConstraint(x) for x in well2_constraint_props]}
@@ -233,7 +234,7 @@ def test_remove_constraint(mocker, file_contents, expected_result_file, constrai
             expected_constraint_dict[node_name].append(NexusConstraint(constraint_dict))
 
     # Act
-    constraints = nexus_sim.network.Constraints.get_constraints()
+    nexus_sim.network.Constraints.get_constraints()
     nexus_sim.network.Constraints.remove_constraint(constraint_to_remove)
     result = nexus_sim.network.Constraints.get_constraints()
 
@@ -246,7 +247,7 @@ def test_remove_constraint(mocker, file_contents, expected_result_file, constrai
                                      mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
                                      number_of_writes=expected_number_writes)
 
-@pytest.mark.parametrize("file_contents, expected_file_contents, new_constraint, expected_number_writes", [
+@pytest.mark.parametrize("file_contents, expected_file_contents, new_constraint, expected_number_writes, expected_uuid", [
     # basic_test
     ('''TIME 01/01/2019
         CONSTRAINTS
@@ -262,10 +263,27 @@ def test_remove_constraint(mocker, file_contents, expected_result_file, constrai
 well3 QOSMAX 100
         ENDCONSTRAINTS''',
     {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH},
-    1
+    1,
+    {'uuid1': [2, 4], 'uuid2': [3],'uuid3': [5]}
     ),
-], ids=['basic_test'])
-def test_add_constraint(mocker, file_contents, expected_file_contents, new_constraint, expected_number_writes):
+
+    # add new table
+    ('''TIME 01/01/2019
+
+''',
+    '''TIME 01/01/2019
+CONSTRAINTS
+well3 QOSMAX 100
+ENDCONSTRAINTS
+
+''',
+    {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH},
+    1,
+    {'uuid1': [2]}
+    ),
+], ids=['basic_test', 'add new table'])
+def test_add_constraint(mocker, file_contents, expected_file_contents, new_constraint, expected_number_writes,
+                        expected_uuid):
     # Arrange
     fcs_file_contents = '''
         RUN_UNITS ENGLISH
@@ -288,6 +306,10 @@ def test_add_constraint(mocker, file_contents, expected_file_contents, new_const
     # make a mock for the write operation
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
+
+    # patch in uuids for the constraints
+    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
+                                                    'uuid4', 'uuid5', 'uuid6', 'uuid7'])
     # Act
     nexus_sim.network.Constraints.add_constraints('well3', new_constraint)
     # Assert
@@ -296,3 +318,36 @@ def test_add_constraint(mocker, file_contents, expected_file_contents, new_const
                                      modifying_mock_open=writing_mock_open,
                                      mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
                                      number_of_writes=expected_number_writes)
+    assert nexus_sim.fcs_file.surface_files[1].object_locations == expected_uuid
+
+
+@pytest.mark.parametrize("constraint, expected_string", [
+# basic_test
+({'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH},
+'well3 QOSMAX 100\n'
+),
+# more columns
+({'name': 'well_2933', 'max_reservoir_liquid_rate': 100.14, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
+'min_reservoir_oil_rate': 150.27, 'max_gor': 21020, 'max_reservoir_total_fluids_rate': 123.13},
+'well_2933 GORMAX 21020 QLIQMAX 100.14 QALLMAX 123.13 QOMIN 150.27\n'
+),
+
+# Activate
+({'name': 'well_2933', 'max_reservoir_liquid_rate': 100.14, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
+'active_node': True},
+'well_2933 QLIQMAX 100.14 ACTIVATE\n'
+),
+
+# deactivate
+({'name': 'well_2933', 'max_reservoir_liquid_rate': 100.14, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
+'active_node': False},
+'well_2933 QLIQMAX 100.14 DEACTIVATE\n'
+),
+], ids=['basic_test', 'more columns', 'Activate', 'Deactivate'])
+def test_constraint_to_string(constraint, expected_string):
+    # Arrange
+    new_constraint = NexusConstraint(constraint)
+    # Act
+    constraint_string = new_constraint.to_string()
+    # Assert
+    assert constraint_string == expected_string

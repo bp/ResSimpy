@@ -176,7 +176,7 @@ class NexusConstraints:
         # TODO add a constraint at a new datetime
         # TODO add correct value for special cases
         # TODO add QMULT tables
-        # TODO decide what to do if constraints already exist in the table
+        # TODO decide what to do if constraints already exist in the table.
         """
         #
         self.__parent_network.get_load_status()
@@ -203,32 +203,53 @@ class NexusConstraints:
         constraint_date = new_constraint.date
         if constraint_date is None:
             raise ValueError(f'Require date for adding constraint to, instead got {new_constraint.date}')
-        new_constraint_time_index = -1
         new_constraint_text = []
-        skip_attributes = ['date', 'unit_system', 'NAME']
         date_comparison = -1
+        date_index = -1
+        new_constraint_index = -1
+        new_table_needed = False
+        new_date_needed = False
+
         for index, line in enumerate(file_as_list):
             if nfo.check_token('TIME', line):
                 constraint_date_from_file = nfo.get_expected_token_value('TIME', line, [line])
                 date_comparison = self.__model.runcontrol.compare_dates(constraint_date_from_file, constraint_date)
                 if date_comparison == 0:
+                    date_index = index
                     continue
-                # elif date_comparison > 0 and new_constraint_time_index > 0:
                     # if a date that is greater than the additional constraint then we have overshot and need to
+                elif date_comparison > 0 and date_index >= 0:
+                    # this is the case where we don't need to write a new time card and have gone slightly too far
+                    new_table_needed = True
+                    new_constraint_index = index - 1
                 else:
                     continue
             if nfo.check_token('ENDCONSTRAINTS', line) and date_comparison == 0:
-                constraint_string = name + ' '
+                # find the end of a constraint table and add the new constraint
                 new_constraint_index = index
-                for attribute, value in new_constraint.to_dict(keys_in_nexus_style=True).items():
-                    if value is None or attribute in skip_attributes:
-                        continue
-                    constraint_string += (attribute + ' ' + str(value))
-                constraint_string += '\n'
+                constraint_string = new_constraint.to_string()
                 new_constraint_text.append(constraint_string)
-                new_constraint_additional_lines = len(new_constraint_text)
+                id_line_loc = new_constraint_index
+
+            elif index == len(file_as_list) - 1 and date_index >= 0:
+                # if we're on the final line of the file and we haven't yet set a constraint index
+                new_table_needed = True
+                new_constraint_index = index
+
+            if new_date_needed:
+                new_constraint_text.append(f'TIME {constraint_date}')
+
+            if new_table_needed:
+                new_constraint_text.append('CONSTRAINTS\n')
+                new_constraint_text.append(new_constraint.to_string())
+                new_constraint_text.append('ENDCONSTRAINTS\n')
+                id_line_loc = new_constraint_index + len(new_constraint_text) - 2
+            if new_constraint_index >= 0:
+                # once we have found where to add constraint then add the constraint to file and update file ids
                 new_constraint_object_ids = {
-                    new_constraint.id: new_constraint_index + new_constraint_additional_lines - 1
+                    new_constraint.id: id_line_loc
                     }
                 file_to_add_to.add_to_file_as_list(additional_content=new_constraint_text, index=new_constraint_index,
                                                   additional_objects=new_constraint_object_ids)
+                break
+
