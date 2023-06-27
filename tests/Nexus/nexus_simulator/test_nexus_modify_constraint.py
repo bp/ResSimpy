@@ -306,7 +306,27 @@ ENDCONSTRAINTS
     {'uuid1': [6]}
     ),
 
-], ids=['basic_test', 'add new table', 'add to new date'])
+# add QMULT table
+    ('''TIME 01/01/2019
+
+''',
+    '''TIME 01/01/2019
+CONSTRAINTS
+node#2 QLIQSMAX MULT
+ENDCONSTRAINTS
+QMULT
+WELL QOIL QGAS QWATER
+node#2 200.0 NA 4052.12
+ENDQMULT
+
+''',
+    {'name': 'node#2', 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
+                'use_qmult_qoilqwat_surface_rate': True, 'qmult_oil_rate': 200.0, 'qmult_water_rate': 4052.12},
+    1,
+    {'uuid1': [2, 6]}
+    ),
+
+], ids=['basic_test', 'add new table', 'add to new date', 'add QMULT table'])
 def test_add_constraint(mocker, file_contents, expected_file_contents, new_constraint, expected_number_writes,
                         expected_uuid):
     # Arrange

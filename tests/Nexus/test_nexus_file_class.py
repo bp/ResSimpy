@@ -607,7 +607,7 @@ def test_add_to_file_as_list(mocker):
     mocker.patch.object(uuid, 'uuid4', side_effect=['additional_obj_uuid', 'file_uuid', 'file_uuid',])
 
     additional_content = ['new', 'lines', 'of\n !the', 'file']
-    additional_obj = {uuid.uuid4(): 3}
+    additional_obj = {uuid.uuid4(): [3]}
     nexus_file = NexusFile(location='somefile.dat', origin=None, file_content_as_list=
                            ['original', 'file', 'with \n', 'some filler', 'content', 'and object', 'must', 'be', 'more lines !ajf'],
                            )

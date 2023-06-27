@@ -169,12 +169,15 @@ class NexusConstraints:
 
     def add_constraints(self,
                         name: str,
-                        constraint_to_add: dict[str, float | int | str | UnitSystem] | NexusConstraint) -> None:
+                        constraint_to_add: dict[str, float | int | str | UnitSystem] | NexusConstraint,
+                        ) -> None:
         """Adds a constraint to the network and corresponding surface file.
-        # TODO add QMULT tables
-        # TODO decide what to do if constraints already exist in the table.
+
+        Args:
+            name (str): name of the node to apply constraints to
+            constraint_to_add (dict[str, float | int | str | UnitSystem] | NexusConstraint): properties of \
+            the constraints or a constraint object
         """
-        #
         self.__parent_network.get_load_status()
 
         # add to memory
@@ -203,9 +206,14 @@ class NexusConstraints:
         date_comparison = -1
         date_index = -1
         new_constraint_index = -1
-        id_line_loc = -1
+        id_line_locs = -1
         new_table_needed = False
         new_date_needed = False
+
+        # check for need to add qmult table
+        qmult_keywords = ['qmult_oil_rate', 'qmult_gas_rate', 'qmult_water_rate']
+        # if any of the qmults are defined in the new constraint then add a qmult table
+        add_qmults = any(getattr(new_constraint, x, None) for x in qmult_keywords)
 
         for index, line in enumerate(file_as_list):
             if nfo.check_token('TIME', line):
@@ -230,27 +238,33 @@ class NexusConstraints:
                 new_constraint_index = index
                 constraint_string = new_constraint.to_string()
                 new_constraint_text.append(constraint_string)
-                id_line_loc = new_constraint_index
-
+                id_line_locs = [new_constraint_index]
             elif index == len(file_as_list) - 1 and date_index >= 0:
                 # if we're on the final line of the file and we haven't yet set a constraint index
                 new_table_needed = True
                 new_constraint_index = index
 
             if new_date_needed:
+                # if the date card doesn't exist then add it to the file first
                 new_constraint_text.append(f'TIME {constraint_date}\n')
 
             if new_table_needed:
                 new_constraint_text.append('CONSTRAINTS\n')
                 new_constraint_text.append(new_constraint.to_string())
                 new_constraint_text.append('ENDCONSTRAINTS\n')
-                id_line_loc = new_constraint_index + len(new_constraint_text) - 2
+                id_line_locs = [new_constraint_index + len(new_constraint_text) - 2]
+
+                if add_qmults:
+                    new_constraint_text.extend(new_constraint.write_qmult_table())
+                    # add id location for the qmult table as well
+                    id_line_locs.append(new_constraint_index + len(new_constraint_text) - 2)
+
             if new_constraint_index >= 0:
                 # once we have found where to add constraint then add the constraint to file and update file ids
                 new_constraint_object_ids = {
-                    new_constraint.id: id_line_loc
+                    new_constraint.id: id_line_locs
                     }
                 file_to_add_to.add_to_file_as_list(additional_content=new_constraint_text, index=new_constraint_index,
-                                                  additional_objects=new_constraint_object_ids)
+                                                   additional_objects=new_constraint_object_ids)
                 break
 

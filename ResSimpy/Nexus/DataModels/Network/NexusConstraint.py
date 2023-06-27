@@ -381,7 +381,7 @@ class NexusConstraint(Constraint):
     def to_string(self) -> str:
         """String representation of the constraint for entry to an inline constraint table."""
         qmult_control_key_words = ['QALLRMAX_MULT', 'QOSMAX_MULT', 'QWSMAX_MULT', 'QGSMAX_MULT', 'QLIQSMAX_MULT']
-        skip_attributes = ['date', 'unit_system', 'NAME', 'ACTIVATE']
+        skip_attributes = ['date', 'unit_system', 'NAME', 'ACTIVATE', 'QOIL', 'QWATER', 'QGAS']
         clear_attributes = ['CLEAR', 'CLEARQ', 'CLEARP', 'CLEARLIMIT', 'CLEARALQ']
         constraint_string = self.name
 
@@ -413,8 +413,7 @@ class NexusConstraint(Constraint):
         Returns:
             list[str] with a representation of the QMULT table with a new line as a new entry in the list.
         """
-        table_to_return = ['QMULT\n']
-        table_to_return.append('WELL QOIL QGAS QWATER\n')
+        table_to_return = ['QMULT\n', 'WELL QOIL QGAS QWATER\n']
         qmult_values = self.write_qmult_values()
         table_to_return.append(qmult_values)
         table_to_return.append('ENDQMULT\n')
