@@ -62,7 +62,7 @@ class NexusCompletion(Completion):
     __kh_mult: Optional[float] = None
 
     def __init__(self, date: str, i: Optional[int] = None, j: Optional[int] = None, k: Optional[int] = None,
-                 skin: Optional[float] = None, depth: Optional[float] = None,well_radius: Optional[float] = None,
+                 skin: Optional[float] = None, depth: Optional[float] = None, well_radius: Optional[float] = None,
                  x: Optional[float] = None, y: Optional[float] = None, angle_a: Optional[float] = None,
                  angle_v: Optional[float] = None, grid: Optional[str] = None, measured_depth: Optional[float] = None,
                  well_indices: Optional[float] = None, depth_to_top: Optional[float] = None,
@@ -111,12 +111,11 @@ class NexusCompletion(Completion):
         self.date_format = date_format
         self.no_of_days = no_of_days
 
-
         super().__init__(date=date, i=i, j=j, k=k, skin=skin, depth=depth, well_radius=well_radius, x=x, y=y,
                          angle_a=angle_a, angle_v=angle_v, grid=grid, depth_to_top=depth_to_top,
                          depth_to_bottom=depth_to_bottom, perm_thickness_ovr=perm_thickness_ovr, dfactor=dfactor,
                          rel_perm_method=rel_perm_method, status=status)
-        
+
     def __repr__(self) -> str:
         return generic_repr(self)
 
