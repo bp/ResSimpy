@@ -380,14 +380,20 @@ class NexusConstraint(Constraint):
 
     def to_string(self) -> str:
         """String representation of the constraint for entry to an inline constraint table."""
-
+        qmult_control_key_words = ['QALLRMAX_MULT', 'QOSMAX_MULT', 'QWSMAX_MULT', 'QGSMAX_MULT', 'QLIQSMAX_MULT']
         skip_attributes = ['date', 'unit_system', 'NAME', 'ACTIVATE']
-
+        clear_attributes = ['CLEAR', 'CLEARQ', 'CLEARP', 'CLEARLIMIT', 'CLEARALQ']
         constraint_string = self.name
+
         for attribute, value in self.to_dict(keys_in_nexus_style=True).items():
-            if value is None or attribute in skip_attributes:
+            if value and attribute in qmult_control_key_words:
+                constraint_string += (' ' + attribute.replace('_MULT', '') +' MULT')
+            elif value is None or attribute in skip_attributes:
                 continue
-            constraint_string += (' ' + attribute + ' ' + str(value))
+            elif value and attribute in clear_attributes:
+                constraint_string += ' ' + attribute
+            else:
+                constraint_string += (' ' + attribute + ' ' + str(value))
 
         if self.active_node:
             constraint_string += ' ACTIVATE'
@@ -397,3 +403,6 @@ class NexusConstraint(Constraint):
 
         constraint_string += '\n'
         return constraint_string
+
+    def write_qmult_table(self) -> list[str]:
+        pass

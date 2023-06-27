@@ -368,7 +368,14 @@ def test_add_constraint(mocker, file_contents, expected_file_contents, new_const
 'active_node': False},
 'well_2933 QLIQMAX 100.14 DEACTIVATE\n'
 ),
-], ids=['basic_test', 'more columns', 'Activate', 'Deactivate'])
+
+# clear and special keywords
+({'name': 'node#2', 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH, 'clear_p': True,
+'convert_qmult_to_reservoir_barrels': True,
+},
+'node#2 QALLRMAX MULT CLEARP\n'
+),
+], ids=['basic_test', 'more columns', 'Activate', 'Deactivate', 'clear and special keywords'])
 def test_constraint_to_string(constraint, expected_string):
     # Arrange
     new_constraint = NexusConstraint(constraint)

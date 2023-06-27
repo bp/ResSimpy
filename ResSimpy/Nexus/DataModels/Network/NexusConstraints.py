@@ -171,8 +171,6 @@ class NexusConstraints:
                         name: str,
                         constraint_to_add: dict[str, float | int | str | UnitSystem] | NexusConstraint) -> None:
         """Adds a constraint to the network and corresponding surface file.
-        # TODO add a constraint at a new datetime
-        # TODO add correct value for special cases
         # TODO add QMULT tables
         # TODO decide what to do if constraints already exist in the table.
         """
