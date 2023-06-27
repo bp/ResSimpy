@@ -171,8 +171,6 @@ class NexusConstraints:
                         name: str,
                         constraint_to_add: dict[str, float | int | str | UnitSystem] | NexusConstraint) -> None:
         """Adds a constraint to the network and corresponding surface file.
-        # TODO implement tests
-        # TODO add constraint to an inline constraint table
         # TODO add a constraint at a new datetime
         # TODO add correct value for special cases
         # TODO add QMULT tables
@@ -207,6 +205,7 @@ class NexusConstraints:
         date_comparison = -1
         date_index = -1
         new_constraint_index = -1
+        id_line_loc = -1
         new_table_needed = False
         new_date_needed = False
 
@@ -222,6 +221,10 @@ class NexusConstraints:
                     # this is the case where we don't need to write a new time card and have gone slightly too far
                     new_table_needed = True
                     new_constraint_index = index - 1
+                elif date_comparison > 0:
+                    new_table_needed = True
+                    new_date_needed = True
+                    new_constraint_index = index
                 else:
                     continue
             if nfo.check_token('ENDCONSTRAINTS', line) and date_comparison == 0:
@@ -237,7 +240,7 @@ class NexusConstraints:
                 new_constraint_index = index
 
             if new_date_needed:
-                new_constraint_text.append(f'TIME {constraint_date}')
+                new_constraint_text.append(f'TIME {constraint_date}\n')
 
             if new_table_needed:
                 new_constraint_text.append('CONSTRAINTS\n')

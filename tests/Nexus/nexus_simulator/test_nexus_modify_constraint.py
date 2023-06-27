@@ -281,7 +281,32 @@ ENDCONSTRAINTS
     1,
     {'uuid1': [2]}
     ),
-], ids=['basic_test', 'add new table'])
+
+# add new table
+    ('''TIME 01/01/2019
+    TIME 01/02/2019
+
+    TIME 01/03/2019
+    TIME 01/01/2020
+    TIME 01/02/2020
+''',
+    '''TIME 01/01/2019
+    TIME 01/02/2019
+
+    TIME 01/03/2019
+TIME 01/04/2019
+CONSTRAINTS
+well3 QOSMAX 100
+ENDCONSTRAINTS
+    TIME 01/01/2020
+    TIME 01/02/2020
+''',
+    {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/04/2019', 'unit_system': UnitSystem.ENGLISH},
+    1,
+    {'uuid1': [6]}
+    ),
+
+], ids=['basic_test', 'add new table', 'add to new date'])
 def test_add_constraint(mocker, file_contents, expected_file_contents, new_constraint, expected_number_writes,
                         expected_uuid):
     # Arrange
