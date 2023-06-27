@@ -1,6 +1,5 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
 
 from typing import Optional, Union, TypedDict
 
@@ -61,10 +60,9 @@ class NexusCompletion(Completion):
     __polymer_well_radius: Optional[float] = None
     __rel_perm_end_point: Optional[NexusRelPermEndPoint] = None
     __kh_mult: Optional[float] = None
-   
 
     def __init__(self, date: str, i: Optional[int] = None, j: Optional[int] = None, k: Optional[int] = None,
-                 skin: Optional[float] = None, depth: Optional[float] = None, well_radius: Optional[float] = None,
+                 skin: Optional[float] = None, depth: Optional[float] = None,well_radius: Optional[float] = None,
                  x: Optional[float] = None, y: Optional[float] = None, angle_a: Optional[float] = None,
                  angle_v: Optional[float] = None, grid: Optional[str] = None, measured_depth: Optional[float] = None,
                  well_indices: Optional[float] = None, depth_to_top: Optional[float] = None,
@@ -111,13 +109,14 @@ class NexusCompletion(Completion):
         self.__rel_perm_end_point = rel_perm_end_point
         self.__kh_mult = kh_mult
         self.date_format = date_format
-        self.no_of_days = no_of_days        
+        self.no_of_days = no_of_days
+
 
         super().__init__(date=date, i=i, j=j, k=k, skin=skin, depth=depth, well_radius=well_radius, x=x, y=y,
                          angle_a=angle_a, angle_v=angle_v, grid=grid, depth_to_top=depth_to_top,
                          depth_to_bottom=depth_to_bottom, perm_thickness_ovr=perm_thickness_ovr, dfactor=dfactor,
                          rel_perm_method=rel_perm_method, status=status)
-
+        
     def __repr__(self) -> str:
         return generic_repr(self)
 
@@ -220,8 +219,6 @@ class NexusCompletion(Completion):
     @property
     def kh_mult(self):
         return self.__kh_mult
-
-
 
     def to_dict(self) -> dict[str, None | float | int | str]:
         attribute_dict: dict[str, None | float | int | str] = to_dict(self, add_units=False)
@@ -385,4 +382,4 @@ class NexusCompletion(Completion):
                 attribute_value = 'NA'
             completion_values.append(attribute_value)
         completion_string = [' '.join([str(x) for x in completion_values]) + '\n']
-        return completion_string    
+        return completion_string

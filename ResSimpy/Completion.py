@@ -3,10 +3,9 @@ import uuid
 from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
-from datetime import datetime, timedelta
 
 from ResSimpy.ISODateTime import ISODateTime
-from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
+
 
 @dataclass(kw_only=True)
 class Completion(ABC):
@@ -94,11 +93,9 @@ class Completion(ABC):
     def date(self):
         return self.__date
 
-
     @property
     def date_ISO(self):
         return ISODateTime.convert_to_iso(self)
-
 
     @property
     def i(self):
@@ -189,4 +186,4 @@ class Completion(ABC):
             'rel_perm_method': self.__rel_perm_method,
             'status': self.__status,
         }
-        return attribute_dict      
+        return attribute_dict
