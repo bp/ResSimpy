@@ -932,7 +932,7 @@ def test_get_wells(mocker: MockerFixture, fcs_file_contents: str):
     assert result == loaded_wells
     mock_load_wells.assert_called_once_with(nexus_file=expected_well_file,
                                             default_units=UnitSystem.ENGLISH,
-                                            start_date='')
+                                            start_date='', date_format= DateFormat.MM_DD_YYYY)
 
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
@@ -1045,7 +1045,7 @@ def test_get_well(mocker: MockerFixture, fcs_file_contents: str):
     assert result == loaded_wells[1]
     mock_load_wells.assert_called_once_with(nexus_file=expected_well_file,
                                             default_units=UnitSystem.ENGLISH,
-                                            start_date='')
+                                            start_date='', date_format = DateFormat.MM_DD_YYYY)
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
        WelLS set 1 my\wellspec\file.dat
