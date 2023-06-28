@@ -222,12 +222,15 @@ class NexusConstraints:
                 if date_comparison == 0:
                     date_index = index
                     continue
-                    # if a date that is greater than the additional constraint then we have overshot and need to
+
                 elif date_comparison > 0 and date_index >= 0:
-                    # this is the case where we don't need to write a new time card and have gone slightly too far
+                    # if a date that is greater than the additional constraint then we have overshot and need to
+                    # add in a new table or time card
+                    # this is the case where we don't need to write a new time card
                     new_table_needed = True
                     new_constraint_index = index - 1
                 elif date_comparison > 0:
+                    # this is where we need a new date card and a new table
                     new_table_needed = True
                     new_date_needed = True
                     new_constraint_index = index
