@@ -82,17 +82,17 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
             latest_constraint = well_constraints[-1]
             if latest_constraint.date == current_date:
                 latest_constraint.update(properties_dict, nones_overwrite)
-                nexus_file.add_object_locations(latest_constraint.id, index + start_line_index)
+                nexus_file.add_object_locations(latest_constraint.id, [index + start_line_index])
             else:
                 # otherwise take a copy of the previous constraint and add the additional properties
                 new_constraint = constraint(properties_dict)
                 well_constraints.append(new_constraint)
-                nexus_file.add_object_locations(new_constraint.id, index + start_line_index)
+                nexus_file.add_object_locations(new_constraint.id, [index + start_line_index])
         else:
             nexus_constraint = constraint(properties_dict)
 
             existing_constraints[name] = [nexus_constraint]
-            nexus_file.add_object_locations(nexus_constraint.id, index + start_line_index)
+            nexus_file.add_object_locations(nexus_constraint.id, [index + start_line_index])
 
 
 def __clear_constraints(token_value, constraint) -> dict[str, None]:

@@ -49,10 +49,10 @@ class NexusConstraint(Constraint):
     min_reservoir_liquid_rate (float): min reservoir liquid rate (QLIQMIN)
     min_reservoir_total_fluids_rate (float): min reservoir total fluids rate (QALLMIN)
     min_reservoir_hc_rate (float): min reservoir hc rate (QHCMIN)
-    min_reservoir_oil_rate (float): min reservoir oil rate (QOSMIN-)
-    min_reservoir_gas_rate (float): min reservoir gas rate (QGSMIN-)
-    min_reservoir_water_rate (float): min reservoir water rate (QWSMIN-)
-    min_reservoir_liquid_rate (float): min reservoir liquid rate (QLIQSMIN-)
+    min_reverse_surface_oil_rate (float): min reservoir oil rate (QOSMIN-)
+    min_reverse_surface_gas_rate (float): min reservoir gas rate (QGSMIN-)
+    min_reverse_surface_water_rate (float): min reservoir water rate (QWSMIN-)
+    min_reverse_surface_liquid_rate (float): min reservoir liquid rate (QLIQSMIN-)
     min_reverse_reservoir_oil_rate (float): min reverse reservoir oil rate (QOMIN-)
     min_reverse_reservoir_gas_rate (float): min reverse reservoir gas rate (QGMIN-)
     min_reverse_reservoir_water_rate (float): min reverse reservoir water rate (QWMIN-)
@@ -128,7 +128,10 @@ class NexusConstraint(Constraint):
     max_wag_gas_pressure: Optional[float] = None
     bottom_hole_pressure: Optional[float] = None
     tubing_head_pressure: Optional[float] = None
-
+    min_reverse_surface_oil_rate: Optional[float] = None
+    min_reverse_surface_gas_rate: Optional[float] = None
+    min_reverse_surface_water_rate: Optional[float] = None
+    min_reverse_surface_liquid_rate: Optional[float] = None
     min_surface_oil_rate: Optional[float] = None
     min_surface_gas_rate: Optional[float] = None
     min_surface_water_rate: Optional[float] = None
@@ -266,10 +269,10 @@ class NexusConstraint(Constraint):
             'QLIQMIN': ('min_reservoir_liquid_rate', float),
             'QALLMIN': ('min_reservoir_total_fluids_rate', float),
             'QHCMIN': ('min_reservoir_hc_rate', float),
-            'QOSMIN-': ('min_reservoir_oil_rate', float),
-            'QGSMIN-': ('min_reservoir_gas_rate', float),
-            'QWSMIN-': ('min_reservoir_water_rate', float),
-            'QLIQSMIN-': ('min_reservoir_liquid_rate', float),
+            'QOSMIN-': ('min_reverse_surface_oil_rate', float),
+            'QGSMIN-': ('min_reverse_surface_gas_rate', float),
+            'QWSMIN-': ('min_reverse_surface_water_rate', float),
+            'QLIQSMIN-': ('min_reverse_surface_liquid_rate', float),
             'QOMIN-': ('min_reverse_reservoir_oil_rate', float),
             'QGMIN-': ('min_reverse_reservoir_gas_rate', float),
             'QWMIN-': ('min_reverse_reservoir_water_rate', float),
@@ -374,3 +377,70 @@ class NexusConstraint(Constraint):
     def new_id(self):
         """Refreshes the id on the object."""
         self.__id = uuid.uuid4()
+
+    def to_string(self) -> str:
+        """String representation of the constraint for entry to an inline constraint table."""
+        qmult_control_key_words = ['QALLRMAX_MULT', 'QOSMAX_MULT', 'QWSMAX_MULT', 'QGSMAX_MULT', 'QLIQSMAX_MULT']
+        skip_attributes = ['date', 'unit_system', 'NAME', 'ACTIVATE', 'QOIL', 'QWATER', 'QGAS']
+        clear_attributes = ['CLEAR', 'CLEARQ', 'CLEARP', 'CLEARLIMIT', 'CLEARALQ']
+
+        if self.name is not None:
+            constraint_string = self.name
+        elif self.well_name is not None:
+            constraint_string = self.well_name
+        else:
+            raise ValueError('Must have a well or node name for returning a constraint to a string')
+
+        for attribute, value in self.to_dict(keys_in_nexus_style=True).items():
+            if value and attribute in qmult_control_key_words:
+                constraint_string += (' ' + attribute.replace('_MULT', '') + ' MULT')
+            elif value is None or attribute in skip_attributes:
+                continue
+            elif value and attribute in clear_attributes:
+                constraint_string += ' ' + attribute
+            else:
+                constraint_string += (' ' + attribute + ' ' + str(value))
+
+        if self.active_node:
+            constraint_string += ' ACTIVATE'
+        elif self.active_node is not None:
+            # equivalent to active node being False
+            constraint_string += ' DEACTIVATE'
+
+        constraint_string += '\n'
+        return constraint_string
+
+    def write_qmult_table(self) -> list[str]:
+        """Writes out a QMULT table from a constraint that uses the following attributes.
+        'QOIL': ('qmult_oil_rate', float).
+        'QWATER': ('qmult_water_rate', float).
+        'QGAS': ('qmult_gas_rate', float).
+
+        Returns:
+            list[str] with a representation of the QMULT table with a new line as a new entry in the list.
+        """
+        table_to_return = ['QMULT\n', 'WELL QOIL QGAS QWATER\n']
+        qmult_values = self.write_qmult_values()
+        table_to_return.append(qmult_values)
+        table_to_return.append('ENDQMULT\n')
+
+        return table_to_return
+
+    def write_qmult_values(self) -> str:
+        """Writes out the values for a QMULT table, callable on its own or using the write_qmult_table method."""
+        qmult_values_keywords = ['qmult_oil_rate', 'qmult_gas_rate', 'qmult_water_rate']
+        if self.name is not None:
+            string_to_return = self.name
+        elif self.well_name is not None:
+            string_to_return = self.well_name
+        else:
+            raise ValueError('Must have a well or node name for returning a qmult table')
+
+        for keyword in qmult_values_keywords:
+            value = getattr(self, keyword, None)
+            if value is None:
+                string_to_return += ' NA'
+            else:
+                string_to_return += f' {str(value)}'
+        string_to_return += '\n'
+        return string_to_return

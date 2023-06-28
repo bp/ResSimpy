@@ -107,6 +107,6 @@ class NexusNetwork:
             self.WellConnections.add_connections(type_check_lists(nexus_obj_dict.get('WELLS')))
             self.Wellheads.add_wellheads(type_check_lists(nexus_obj_dict.get('WELLHEAD')))
             self.Wellbores.add_wellbores(type_check_lists(nexus_obj_dict.get('WELLBORE')))
-            self.Constraints.add_constraints(type_check_dicts(nexus_obj_dict.get('CONSTRAINTS')))
+            self.Constraints.add_constraints_to_memory(type_check_dicts(nexus_obj_dict.get('CONSTRAINTS')))
 
         self.__has_been_loaded = True

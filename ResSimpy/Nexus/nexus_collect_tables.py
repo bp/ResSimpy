@@ -113,7 +113,7 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
                         obj_id = constraint
                         well_name = None
                     correct_line_index = id_index + table_start
-                    nexus_file.add_object_locations(obj_id, correct_line_index)
+                    nexus_file.add_object_locations(obj_id, [correct_line_index])
                     if well_name is None:
                         continue
                     if nexus_constraints.get(well_name, None) is not None:
