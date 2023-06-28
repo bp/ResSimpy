@@ -970,7 +970,7 @@ def test_get_wells_windows(mocker: MockerFixture, fcs_file_contents: str):
     assert result == loaded_wells
     mock_load_wells.assert_called_once_with(nexus_file=expected_well_file,
                                             default_units=UnitSystem.ENGLISH,
-                                            start_date='')
+                                            start_date='', date_format = DateFormat.MM_DD_YYYY)
 
 
 def test_get_wells_df(mocker: MockerFixture):
@@ -1048,7 +1048,7 @@ def test_get_well(mocker: MockerFixture, fcs_file_contents: str):
                                             start_date='', date_format = DateFormat.MM_DD_YYYY)
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
-       WelLS set 1 my\wellspec\file.dat
+       WelLS set 1 my\\wellspec\\file.dat
     """)
 ], ids=['basic case'])
 def test_get_well_windows(mocker: MockerFixture, fcs_file_contents: str):
@@ -1072,11 +1072,11 @@ def test_get_well_windows(mocker: MockerFixture, fcs_file_contents: str):
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
 
     # NB file_content_as_list needs to be set as below due to the mocker open re-reading fcs contents
-    expected_well_file = NexusFile(location='my\wellspec\file.dat',
-                                   include_locations=[], origin='path\nexus_run.fcs', file_content_as_list=
-                                   ['\n', '       WelLS set 1 my\wellspec\file.dat\n', '    '])
+    expected_well_file = NexusFile(location='my\\wellspec\\file.dat',
+                                   include_locations=[], origin='path\\nexus_run.fcs', file_content_as_list=
+                                   ['\n', '       WelLS set 1 my\\wellspec\\file.dat\n', '    '])
 
-    simulation = NexusSimulator(origin='path\nexus_run.fcs')
+    simulation = NexusSimulator(origin='path\\nexus_run.fcs')
 
     # Act
     result = simulation.wells.get_well(well_name='WELL2')
@@ -1085,7 +1085,7 @@ def test_get_well_windows(mocker: MockerFixture, fcs_file_contents: str):
     assert result == loaded_wells[1]
     mock_load_wells.assert_called_once_with(nexus_file=expected_well_file,
                                             default_units=UnitSystem.ENGLISH,
-                                            start_date='')
+                                            start_date='', date_format = DateFormat.MM_DD_YYYY)
 
 
 @pytest.mark.parametrize("fcs_file_contents", [
