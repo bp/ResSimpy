@@ -261,7 +261,7 @@ class NexusConstraints:
                 # add id location for the qmult table as well
                 id_line_locs.append(new_constraint_index + len(new_constraint_text) - 2)
                 add_qmults = False
-            elif add_qmults and nfo.check_token('ENDQMULT', line):
+            elif add_qmults and nfo.check_token('ENDQMULT', line) and date_comparison == 0:
                 # find the end of the table of qmults that already exist
                 new_qmult_index = index
                 qmult_string = new_constraint.write_qmult_values()
