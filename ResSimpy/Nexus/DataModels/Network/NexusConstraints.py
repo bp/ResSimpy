@@ -209,7 +209,7 @@ class NexusConstraints:
         id_line_locs = []
         new_table_needed = False
         new_date_needed = False
-
+        new_qmults_table_needed = False
         # check for need to add qmult table
         qmult_keywords = ['qmult_oil_rate', 'qmult_gas_rate', 'qmult_water_rate']
         # if any of the qmults are defined in the new constraint then add a qmult table
@@ -239,10 +239,12 @@ class NexusConstraints:
                 constraint_string = new_constraint.to_string()
                 new_constraint_text.append(constraint_string)
                 id_line_locs = [new_constraint_index]
-            elif index == len(file_as_list) - 1 and date_index >= 0:
+            elif index == len(file_as_list) - 1 and date_index >= 0 and not nfo.check_token('ENDQMULT', line):
                 # if we're on the final line of the file and we haven't yet set a constraint index
                 new_table_needed = True
                 new_constraint_index = index
+                if add_qmults:
+                    new_qmults_table_needed = True
 
             if new_date_needed:
                 # if the date card doesn't exist then add it to the file first
@@ -254,12 +256,21 @@ class NexusConstraints:
                 new_constraint_text.append('ENDCONSTRAINTS\n')
                 id_line_locs = [new_constraint_index + len(new_constraint_text) - 2]
 
-                if add_qmults:
-                    new_constraint_text.extend(new_constraint.write_qmult_table())
-                    # add id location for the qmult table as well
-                    id_line_locs.append(new_constraint_index + len(new_constraint_text) - 2)
+            if add_qmults and new_qmults_table_needed:
+                new_constraint_text.extend(new_constraint.write_qmult_table())
+                # add id location for the qmult table as well
+                id_line_locs.append(new_constraint_index + len(new_constraint_text) - 2)
+                add_qmults = False
+            elif add_qmults and nfo.check_token('ENDQMULT', line):
+                # find the end of the table of qmults that already exist
+                new_qmult_index = index
+                qmult_string = new_constraint.write_qmult_values()
+                new_qmult_object_ids = {new_constraint.id: [new_qmult_index]}
+                file_to_add_to.add_to_file_as_list(additional_content=[qmult_string], index=new_qmult_index,
+                                                   additional_objects=new_qmult_object_ids)
+                add_qmults = False
 
-            if new_constraint_index >= 0:
+            if new_constraint_index >= 0 and not add_qmults:
                 # once we have found where to add constraint then add the constraint to file and update file ids
                 new_constraint_object_ids = {
                     new_constraint.id: id_line_locs

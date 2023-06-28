@@ -326,6 +326,7 @@ class NexusFile(File):
         existing_line_locations = self.object_locations.get(obj_uuid, None)
         if existing_line_locations is not None:
             existing_line_locations.extend(line_indices)
+            existing_line_locations.sort()
         else:
             self.object_locations[obj_uuid] = line_indices
 
