@@ -126,31 +126,6 @@ def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expec
 @pytest.mark.parametrize(
     "run_control_path, expected_root, expected_run_control_path, date_format, expected_date_format", [
         # Providing an absolute path to the fcs file + USA date format
-        ("c:\run\control\path", "", "c:\run\control\path", "MM/DD/YYYY", DateFormat.MM_DD_YYYY),
-        # Providing a relative path to the fcs file + Non-USA date format
-        ("run\\control\\path", "testpath1", "run\\control\\path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
-        # check for windows path
-        
-        
-    ])
-def test_load_fcs_file_no_output_no_include_file_windows(mocker, run_control_path, expected_root, expected_run_control_path,
-                                                 date_format, expected_date_format):
-    # Arrange
-    fcs_file = f"RUNCONTROL {run_control_path}\nDATEFORMAT {date_format}\n"
-    open_mock = mocker.mock_open(read_data=fcs_file)
-    mocker.patch("builtins.open", open_mock)
-    expected_full_path = os.path.join(expected_root, expected_run_control_path)
-    # Act
-    simulation = NexusSimulator(origin='testpath1\\Path.fcs')
-
-    # Assert
-    assert simulation.run_control_file_path == expected_full_path
-    assert simulation.date_format is expected_date_format
-    open_mock.assert_called_with(expected_full_path, 'r')
-
-@pytest.mark.parametrize(
-    "run_control_path, expected_root, expected_run_control_path, date_format, expected_date_format", [
-        # Providing an absolute path to the fcs file + USA date format
         ("/run/control/path", "", "/run/control/path", "MM/DD/YYYY", DateFormat.MM_DD_YYYY),
         # Providing a relative path to the fcs file + Non-USA date format
         ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
@@ -170,32 +145,6 @@ def test_load_fcs_space_in_filename(mocker, run_control_path, expected_root, exp
     assert simulation.run_control_file_path == expected_full_path
     assert simulation.date_format is expected_date_format
     open_mock.assert_called_with(expected_full_path, 'r')
-
-@pytest.mark.parametrize(
-    "run_control_path, expected_root, expected_run_control_path, date_format, expected_date_format", [
-        # Providing an absolute path to the fcs file + USA date format
-        (r"c:\run\control\path", "", r"c:\run\control\path", "MM/DD/YYYY", DateFormat.MM_DD_YYYY),
-        # Providing a relative path to the fcs file + Non-USA date format
-        ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
-        # check for windows path    
-        
-    ])
-def test_load_fcs_space_in_filename_windows(mocker, run_control_path, expected_root, expected_run_control_path,
-                                    date_format, expected_date_format):
-    # Arrange
-    fcs_file = f"RUNCONTROL {run_control_path}\nDATEFORMAT {date_format}\n"
-    open_mock = mocker.mock_open(read_data=fcs_file)
-    mocker.patch("builtins.open", open_mock)
-    expected_full_path = os.path.join(expected_root, expected_run_control_path)
-
-    # Act
-    simulation = NexusSimulator(origin='testpath1\\Path.fcs')
-
-    # Assert
-    assert simulation.run_control_file_path == expected_full_path
-    assert simulation.date_format is expected_date_format
-    open_mock.assert_called_with(expected_full_path, 'r')
-# Check that DATE_FORMAT is read in correctly (not documented, but still works in Nexus)
 @pytest.mark.parametrize(
     "fcs_file_contents, expected_date_format", [
         ("RUNCONTROL /path/to/run/control\n  DATE_FORMAT MM/DD/YYYY", DateFormat.MM_DD_YYYY),
