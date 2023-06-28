@@ -355,7 +355,7 @@ ENDQMULT
 ),
 
 # more time cards with qmult
-    ('''TIME 01/01/2018
+    ('''TIME 01/01/2019
 CONSTRAINTS
 well1 QOSMAX 1025 
 ENDCONSTRAINTS
@@ -363,7 +363,7 @@ ENDCONSTRAINTS
 WELL QOIL QGAS QWATER
 well1 10 20 30
 ENDQMULT
-    TIME 01/01/2019
+    TIME 01/01/2020
 CONSTRAINTS
 node#2 QLIQSMAX MULT
 ENDCONSTRAINTS
@@ -371,11 +371,11 @@ QMULT
 WELL QOIL QGAS QWATER  ! Comment
 node#2 200.0 NA 4052.12 ! Comment
 ENDQMULT
-TIME 01/02/2019
+TIME 01/02/2020
 !comment
-TIME 01/03/2019
+TIME 01/03/2020
 ''',
-    '''TIME 01/01/2018
+    '''TIME 01/01/2019
 CONSTRAINTS
 well1 QOSMAX 1025 
 ENDCONSTRAINTS
@@ -383,7 +383,7 @@ ENDCONSTRAINTS
 WELL QOIL QGAS QWATER
 well1 10 20 30
 ENDQMULT
-    TIME 01/01/2019
+    TIME 01/01/2020
 CONSTRAINTS
 node#2 QLIQSMAX MULT
 new_well QLIQSMAX MULT
@@ -393,11 +393,11 @@ WELL QOIL QGAS QWATER  ! Comment
 node#2 200.0 NA 4052.12 ! Comment
 new_well 3.14 50.2 420.232
 ENDQMULT
-TIME 01/02/2019
+TIME 01/02/2020
 !comment
-TIME 01/03/2019
+TIME 01/03/2020
 ''',
-    {'name': 'new_well', 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
+    {'name': 'new_well', 'date': '01/01/2020', 'unit_system': UnitSystem.ENGLISH,
      'use_qmult_qoilqwat_surface_rate': True, 'qmult_oil_rate': 3.14, 'qmult_gas_rate': 50.2,
      'qmult_water_rate': 420.232},
     2,
