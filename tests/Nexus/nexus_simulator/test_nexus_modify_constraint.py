@@ -326,7 +326,86 @@ ENDQMULT
     {'uuid1': [2, 6]}
     ),
 
-], ids=['basic_test', 'add new table', 'add to new date', 'add QMULT table'])
+# add QMULT table to existing QMULT
+    ('''TIME 01/01/2019
+CONSTRAINTS
+node#2 QLIQSMAX MULT
+ENDCONSTRAINTS
+QMULT
+WELL QOIL QGAS QWATER
+node#2 200.0 NA 4052.12
+ENDQMULT
+''',
+    '''TIME 01/01/2019
+CONSTRAINTS
+node#2 QLIQSMAX MULT
+new_well QLIQSMAX MULT
+ENDCONSTRAINTS
+QMULT
+WELL QOIL QGAS QWATER
+node#2 200.0 NA 4052.12
+new_well 3.14 50.2 420.232
+ENDQMULT
+''',
+{'name': 'new_well', 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
+ 'use_qmult_qoilqwat_surface_rate': True, 'qmult_oil_rate': 3.14, 'qmult_gas_rate': 50.2,
+ 'qmult_water_rate': 420.232},
+2,
+{'uuid1': [2, 7], 'uuid2': [3, 8]}
+),
+
+# more time cards with qmult
+    ('''TIME 01/01/2019
+CONSTRAINTS
+well1 QOSMAX 1025 
+ENDCONSTRAINTS
+    QMULT
+WELL QOIL QGAS QWATER
+well1 10 20 30
+ENDQMULT
+    TIME 01/01/2020
+CONSTRAINTS
+node#2 QLIQSMAX MULT
+ENDCONSTRAINTS
+QMULT
+WELL QOIL QGAS QWATER  ! Comment
+node#2 200.0 NA 4052.12 ! Comment
+ENDQMULT
+TIME 01/02/2020
+!comment
+TIME 01/03/2020
+''',
+    '''TIME 01/01/2019
+CONSTRAINTS
+well1 QOSMAX 1025 
+ENDCONSTRAINTS
+    QMULT
+WELL QOIL QGAS QWATER
+well1 10 20 30
+ENDQMULT
+    TIME 01/01/2020
+CONSTRAINTS
+node#2 QLIQSMAX MULT
+new_well QLIQSMAX MULT
+ENDCONSTRAINTS
+QMULT
+WELL QOIL QGAS QWATER  ! Comment
+node#2 200.0 NA 4052.12 ! Comment
+new_well 3.14 50.2 420.232
+ENDQMULT
+TIME 01/02/2020
+!comment
+TIME 01/03/2020
+''',
+    {'name': 'new_well', 'date': '01/01/2020', 'unit_system': UnitSystem.ENGLISH,
+     'use_qmult_qoilqwat_surface_rate': True, 'qmult_oil_rate': 3.14, 'qmult_gas_rate': 50.2,
+     'qmult_water_rate': 420.232},
+    2,
+    {'uuid1': [2, 6], 'uuid2': [10, 15], 'uuid3': [11, 16]}
+    ),
+
+], ids=['basic_test', 'add new table', 'add to new date', 'add QMULT table', 'add QMULT table to existing QMULT',
+        'more time cards with qmult'])
 def test_add_constraint(mocker, file_contents, expected_file_contents, new_constraint, expected_number_writes,
                         expected_uuid):
     # Arrange
@@ -354,7 +433,7 @@ def test_add_constraint(mocker, file_contents, expected_file_contents, new_const
 
     # patch in uuids for the constraints
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
-                                                    'uuid4', 'uuid5', 'uuid6', 'uuid7'])
+                                                    'uuid4', 'uuid5', 'uuid6'])
     # Act
     nexus_sim.network.Constraints.add_constraints('well3', new_constraint)
     # Assert
