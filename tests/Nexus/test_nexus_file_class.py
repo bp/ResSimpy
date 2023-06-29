@@ -275,8 +275,8 @@ def test_generate_file_include_structure_skip_array(mocker, test_file_contents, 
        IW JW L RADW
        1  2  3  4.5
        6 7 8   9.11''',
-       {'uuid1': 2,
-        'uuid2': 3}),
+       {'uuid1': [2],
+        'uuid2': [3]}),
         ],
         ids=['basic_test']
 )
@@ -295,7 +295,7 @@ def test_file_object_locations(mocker, test_file_contents, expected_results):
 
 
     # Act
-    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH)
+    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH, date_format='DD/MM/YYYY')
     result = wells_file.object_locations
 
     # Assert
@@ -569,11 +569,11 @@ continuation''')
        !comment           
        3 4 5 6.5        ! 9 
        ''',
-       {'uuid1': 2,
-        'uuid2': 3,
-        'uuid3': 7,
-        'uuid4': 8,
-        'uuid5': 11,
+       {'uuid1': [2],
+        'uuid2': [3],
+        'uuid3': [7],
+        'uuid4': [8],
+        'uuid5': [11],
         }),
         ],
         ids = ['basic_test']
@@ -591,7 +591,7 @@ def test_update_object_locations(mocker, test_file_contents, expected_results):
 
     wells_file = NexusFile.generate_file_include_structure(file_path='wells.dat', skip_arrays=True,)
     # load the uuids
-    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH)
+    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH, date_format='DD/MM/YYYY')
 
     # Act
     # effectively add 2 lines at location 5
@@ -607,15 +607,15 @@ def test_add_to_file_as_list(mocker):
     mocker.patch.object(uuid, 'uuid4', side_effect=['additional_obj_uuid', 'file_uuid', 'file_uuid',])
 
     additional_content = ['new', 'lines', 'of\n !the', 'file']
-    additional_obj = {uuid.uuid4(): 3}
+    additional_obj = {uuid.uuid4(): [3]}
     nexus_file = NexusFile(location='somefile.dat', origin=None, file_content_as_list=
                            ['original', 'file', 'with \n', 'some filler', 'content', 'and object', 'must', 'be', 'more lines !ajf'],
                            )
     nexus_file.line_locations = [(0, 'file_uuid')]
-    nexus_file.object_locations = {'uuid_obj': 2, 'another_uuid': 3, 'final_uuid':7}
+    nexus_file.object_locations = {'uuid_obj': [2], 'another_uuid': [3], 'final_uuid': [7]}
 
     expected_line_locations = [(0, 'file_uuid')]
-    expected_object_locations = {'uuid_obj': 2, 'another_uuid': 7, 'final_uuid': 11, 'additional_obj_uuid': 3}
+    expected_object_locations = {'uuid_obj': [2], 'another_uuid': [7], 'final_uuid': [11], 'additional_obj_uuid': [3]}
     expected_file_as_list = ['original', 'file', 'with \n','new', 'lines', 'of\n !the', 'file', 'some filler',
                              'content', 'and object', 'must', 'be', 'more lines !ajf']
     expected_result = NexusFile(location='somefile.dat', origin=None, file_content_as_list=expected_file_as_list)
@@ -642,9 +642,9 @@ def test_remove_from_file_as_list(mocker):
                            ['original', 'file', 'with \n', 'some filler', 'content', 'and object', 'must', 'be', 'more lines !ajf'],
                            )
     nexus_file.line_locations = [(0, 'file_uuid')]
-    nexus_file.object_locations = {'uuid1': 2, 'remove_obj_uuid': 3, 'final_uuid': 7}
+    nexus_file.object_locations = {'uuid1': [2], 'remove_obj_uuid': [3], 'final_uuid': [7]}
 
-    expected_object_locations = {'uuid1': 2, 'final_uuid': 6}
+    expected_object_locations = {'uuid1': [2], 'final_uuid': [6]}
     expected_file_as_list = ['original', 'file', 'with \n', 'content', ' object', 'must', 'be', 'more lines !ajf']
     expected_result = NexusFile(location='somefile.dat', origin=None, file_content_as_list=expected_file_as_list)
 
@@ -655,7 +655,7 @@ def test_remove_from_file_as_list(mocker):
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
     # Act
-    nexus_file.remove_from_file_as_list(index=3, objects_to_remove=remove_obj)
+    nexus_file.remove_from_file_as_list(index=3, objects_to_remove=list(remove_obj.keys()))
     nexus_file.remove_from_file_as_list(index=4, string_to_remove='and')
 
     # Assert

@@ -1,9 +1,14 @@
 from __future__ import annotations
 from dataclasses import dataclass
+
 from typing import Optional, Union, TypedDict
+
 
 # Use correct Self type depending upon Python version
 import sys
+
+from ResSimpy.Nexus.NexusEnums import DateFormatEnum
+
 if sys.version_info >= (3, 11):
     from typing import Self
 else:
@@ -73,7 +78,9 @@ class NexusCompletion(Completion):
                  comp_dz: Optional[float] = None, layer_assignment: Optional[int] = None,
                  polymer_bore_radius: Optional[float] = None, polymer_well_radius: Optional[float] = None,
                  portype: Optional[str] = None, rel_perm_end_point: Optional[NexusRelPermEndPoint] = None,
-                 kh_mult: Optional[float] = None
+                 kh_mult: Optional[float] = None,
+                 date_format: Optional[DateFormatEnum.DateFormat] = None,
+                 no_of_days: Optional[str] = None
                  ) -> None:
         self.__measured_depth = measured_depth
         self.__well_indices = well_indices
@@ -101,6 +108,8 @@ class NexusCompletion(Completion):
         self.__portype = portype
         self.__rel_perm_end_point = rel_perm_end_point
         self.__kh_mult = kh_mult
+        self.date_format = date_format
+        self.no_of_days = no_of_days
 
         super().__init__(date=date, i=i, j=j, k=k, skin=skin, depth=depth, well_radius=well_radius, x=x, y=y,
                          angle_a=angle_a, angle_v=angle_v, grid=grid, depth_to_top=depth_to_top,
@@ -286,7 +295,7 @@ class NexusCompletion(Completion):
             'RADBP': ('polymer_bore_radius', float),
             'RADWP': ('polymer_well_radius', float),
             'KHMULT': ('kh_mult', float),
-            }
+        }
 
         return nexus_mapping
 

@@ -3,11 +3,10 @@ from dataclasses import dataclass, field
 
 import numpy as np
 import pandas as pd
-
+from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
-import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nodes import Nodes
 from typing import Sequence, Optional, TYPE_CHECKING
 
@@ -72,9 +71,9 @@ class NexusNodes(Nodes):
             TypeError: if the unit system found in the property check is not a valid enum UnitSystem.
 
         """
-        new_nodes = nfo.collect_all_tables_to_objects(surface_file, {'NODES': NexusNode},
-                                                      start_date=start_date,
-                                                      default_units=default_units)
+        new_nodes = collect_all_tables_to_objects(surface_file, {'NODES': NexusNode},
+                                                  start_date=start_date,
+                                                  default_units=default_units)
         cons_list = new_nodes.get('NODES')
         if isinstance(cons_list, dict):
             raise ValueError('Incompatible data format for additional wells. Expected type "list" instead got "dict"')

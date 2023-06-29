@@ -59,11 +59,11 @@ class NexusWaterMethods(Water):
         # Read in water properties from Nexus water method files
         if self.__files is not None and len(self.__files) > 0:  # Check if water files exist
             for table_num in self.__files.keys():  # For each water property method
-                water_file = self.__files[table_num].location
-                if water_file is None:
+                water_file = self.__files[table_num]
+                if water_file.location is None:
                     raise ValueError(f'Unable to find water file: {water_file}')
-                if os.path.isfile(water_file):
+                if os.path.isfile(water_file.location):
                     # Create NexusWaterMethod object
-                    self.__inputs[table_num] = NexusWaterMethod(file_path=water_file, input_number=table_num)
+                    self.__inputs[table_num] = NexusWaterMethod(file=water_file, input_number=table_num)
                     self.__inputs[table_num].read_properties()  # Populate object with water properties in file
         self.__properties_loaded = True

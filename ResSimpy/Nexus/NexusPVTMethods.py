@@ -59,11 +59,11 @@ class NexusPVTMethods(PVT):
         # Read in pvt properties from Nexus pvt method files
         if self.__files is not None and len(self.__files) > 0:  # Check if pvt files exist
             for table_num in self.__files.keys():  # For each pvt property method
-                pvt_file = self.__files[table_num].location
-                if pvt_file is None:
+                pvt_file = self.__files[table_num]
+                if pvt_file.location is None:
                     raise ValueError(f'Unable to find pvt file: {pvt_file}')
-                if os.path.isfile(pvt_file):
+                if os.path.isfile(pvt_file.location):
                     # Create NexusPVTMethod object
-                    self.__inputs[table_num] = NexusPVTMethod(file_path=pvt_file, input_number=table_num)
+                    self.__inputs[table_num] = NexusPVTMethod(file=pvt_file, input_number=table_num)
                     self.__inputs[table_num].read_properties()  # Populate object with pvt properties in file
         self.__properties_loaded = True

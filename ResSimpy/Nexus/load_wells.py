@@ -1,4 +1,5 @@
 from typing import Optional
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -10,13 +11,15 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
 
 
-def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem) -> list[NexusWell]:
+def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem,
+               date_format: DateFormat) -> list[NexusWell]:
     """Loads a list of Nexus Well instances and populates it with the wells completions over time from a wells file.
 
     Args:
         nexus_file (NexusFile): NexusFile containing the wellspec files.
         start_date (str): starting date of the wellspec file as a string.
         default_units (UnitSystem): default units to use if no units are found.
+        date_format (DateFormat): Date format specified in the FCS file.
 
     Raises:
         ValueError: If no value is found after a TIME card.
@@ -162,7 +165,8 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
             header_values = {k: None for k in header_values}
             # Load in each line of the table
             completions = __load_wellspec_table_completions(
-                nexus_file, header_index, header_values, headers, current_date, end_point_scaling_header_values)
+                nexus_file, header_index, header_values, headers, current_date, end_point_scaling_header_values,
+                date_format)
 
             if wellspec_file_units is None:
                 wellspec_file_units = default_units
@@ -181,6 +185,7 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
                                       header_values: dict[str, None | int | float | str],
                                       headers: list[str], start_date: str,
                                       end_point_scaling_header_values: dict[str, None | int | float | str],
+                                      date_format: DateFormat
                                       ) -> list[NexusCompletion]:
     """Loads a completion table in for a single WELLSPEC keyword. \
         Loads in the next available completions following a WELLSPEC keyword and a header line.
@@ -274,10 +279,11 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
             polymer_well_radius=convert_header_value_float('RADWP'),
             rel_perm_end_point=new_rel_perm_end_point,
             date=start_date,
-            kh_mult=convert_header_value_float('KHMULT')
+            kh_mult=convert_header_value_float('KHMULT'),
+            date_format=date_format
             )
 
-        nexus_file.add_object_locations(new_completion.id, index + header_index + 1)
+        nexus_file.add_object_locations(new_completion.id, [index + header_index + 1])
 
         completions.append(new_completion)
 

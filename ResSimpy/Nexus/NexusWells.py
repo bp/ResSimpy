@@ -75,7 +75,7 @@ class NexusWells(Wells):
                 warnings.warn(f'Well file location has not been found for {well_file}')
                 continue
             new_wells = load_wells(nexus_file=well_file, start_date=self.__model.start_date,
-                                   default_units=self.__model.default_units)
+                                   default_units=self.__model.default_units, date_format=self.__model.date_format)
             self.__wells += new_wells
         self.__wells_loaded = True
 
@@ -253,7 +253,7 @@ class NexusWells(Wells):
         if writing_new_wellspec_table:
             new_completion_string += ['\n']
         # write out to the file_content_as_list
-        new_completion_object_ids = {new_completion.id: new_completion_index + new_completion_additional_lines - 1}
+        new_completion_object_ids = {new_completion.id: [new_completion_index + new_completion_additional_lines - 1]}
         wellspec_file.add_to_file_as_list(additional_content=new_completion_string, index=new_completion_index,
                                           additional_objects=new_completion_object_ids)
 
@@ -407,9 +407,10 @@ class NexusWells(Wells):
         # drop it from the wellspec file or include file if stored in include file
         if wellspec_file.object_locations is None:
             raise ValueError(f'No object locations specified, cannot find completion id: {completion_id}')
-        completion_index = wellspec_file.object_locations[completion_id]
-
-        wellspec_file.remove_from_file_as_list(completion_index, [completion_id])
+        completion_indices = wellspec_file.object_locations[completion_id]
+        if len(completion_indices) > 0:
+            for comp_index in completion_indices:
+                wellspec_file.remove_from_file_as_list(comp_index, [completion_id])
 
         # check that we have completions left:
         find_completions_dict: NexusCompletion.InputDictionary = {'date': completion_date}

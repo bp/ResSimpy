@@ -2,13 +2,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional, Any
 
+from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnections import NexusNodeConnections
 from ResSimpy.Nexus.DataModels.Network.NexusNodes import NexusNodes
-import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnections import NexusWellConnections
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
@@ -40,7 +40,7 @@ class NexusNetwork:
         self.WellConnections: NexusWellConnections = NexusWellConnections(self)
         self.Wellheads: NexusWellheads = NexusWellheads(self)
         self.Wellbores: NexusWellbores = NexusWellbores(self)
-        self.Constraints: NexusConstraints = NexusConstraints(self)
+        self.Constraints: NexusConstraints = NexusConstraints(self, model)
 
     def get_load_status(self) -> bool:
         if not self.__has_been_loaded:
@@ -88,7 +88,7 @@ class NexusNetwork:
         if self.__model.fcs_file.surface_files is None:
             raise FileNotFoundError('Could not find any surface files associated with the fcs file provided.')
         for surface in self.__model.fcs_file.surface_files.values():
-            nexus_obj_dict = nfo.collect_all_tables_to_objects(
+            nexus_obj_dict = collect_all_tables_to_objects(
                 surface, {'NODECON': NexusNodeConnection,
                           'NODES': NexusNode,
                           'WELLS': NexusWellConnection,
@@ -107,6 +107,6 @@ class NexusNetwork:
             self.WellConnections.add_connections(type_check_lists(nexus_obj_dict.get('WELLS')))
             self.Wellheads.add_wellheads(type_check_lists(nexus_obj_dict.get('WELLHEAD')))
             self.Wellbores.add_wellbores(type_check_lists(nexus_obj_dict.get('WELLBORE')))
-            self.Constraints.add_constraints(type_check_dicts(nexus_obj_dict.get('CONSTRAINTS')))
+            self.Constraints.add_constraints_to_memory(type_check_dicts(nexus_obj_dict.get('CONSTRAINTS')))
 
         self.__has_been_loaded = True

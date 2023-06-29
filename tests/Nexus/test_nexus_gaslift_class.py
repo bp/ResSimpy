@@ -1,5 +1,6 @@
 import pandas as pd
 import pytest
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from ResSimpy.Nexus.DataModels.NexusGasliftMethod import NexusGasliftMethod
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
@@ -47,7 +48,8 @@ from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 )
 def test_read_gaslift_properties_from_file(mocker, file_contents, expected_gaslift_properties):
     # Arrange
-    gaslift_obj = NexusGasliftMethod(file_path='test/file/gaslift.dat', input_number=1)
+    gl_file = NexusFile(file_content_as_list=file_contents.splitlines())
+    gaslift_obj = NexusGasliftMethod(file=gl_file, input_number=1)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -67,7 +69,8 @@ def test_read_gaslift_properties_from_file(mocker, file_contents, expected_gasli
 
 def test_nexus_gaslift_repr():
     # Arrange
-    gaslift_obj = NexusGasliftMethod(file_path='test/file/gaslift.dat', input_number=1)
+    gl_file = NexusFile(location='test/file/gaslift.dat')
+    gaslift_obj = NexusGasliftMethod(file=gl_file, input_number=1)
     gaslift_obj.properties = {'DESC': ['Optimal Gaslift Data'],
                               'UNIT_SYSTEM': UnitSystem.ENGLISH,
                               'WCUT': '0.0 0.2 0.4',
@@ -80,13 +83,13 @@ def test_nexus_gaslift_repr():
                                                         })}
     expected_output = """
 FILE_PATH: test/file/gaslift.dat
-DESC: ['Optimal Gaslift Data']
-UNIT_SYSTEM: ENGLISH
-WCUT: 0.0 0.2 0.4
-QLIQ: 1000 3500
-PRESSURE: 2500 4500
-GL_TABLE:
-""" + gaslift_obj.properties['GL_TABLE'].to_string() + '\n\n'
+
+DESC Optimal Gaslift Data
+ENGLISH
+WCUT 0.0 0.2 0.4
+QLIQ 1000 3500
+PRESSURE 2500 4500
+""" + gaslift_obj.properties['GL_TABLE'].to_string(na_rep='', index=False) + '\n\n'
 
     # Act
     result = gaslift_obj.__repr__()
