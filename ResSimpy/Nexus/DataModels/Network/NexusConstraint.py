@@ -381,7 +381,7 @@ class NexusConstraint(Constraint):
     def to_string(self) -> str:
         """String representation of the constraint for entry to an inline constraint table."""
         qmult_control_key_words = ['QALLRMAX_MULT', 'QOSMAX_MULT', 'QWSMAX_MULT', 'QGSMAX_MULT', 'QLIQSMAX_MULT']
-        skip_attributes = ['date', 'unit_system', 'NAME', 'ACTIVATE', 'QOIL', 'QWATER', 'QGAS']
+        skip_attributes = ['date', 'unit_system', 'NAME', 'ACTIVATE', 'QOIL', 'QWATER', 'QGAS', 'WELL']
         clear_attributes = ['CLEAR', 'CLEARQ', 'CLEARP', 'CLEARLIMIT', 'CLEARALQ']
 
         if self.name is not None:

@@ -515,7 +515,32 @@ well1 QWSMAX 1000.0 QLIQSMAX 3884.0
     {'name': 'well1', 'date': '01/01/2019', 'max_surface_water_rate': 1000.0},
     2,
     {'uuid1': [2], 'uuid3': [3]}
-    )],ids=['basic_test'])
+    ),
+   # qmult_test
+    ('''TIME 01/01/2019
+        CONSTRAINTS
+well1 QLIQSMAX MULT
+ENDCONSTRAINTS
+QMULT
+WELL QOIL QGAS QWATER
+well1 200.0 NA 4052.12
+ENDQMULT
+''',
+'''TIME 01/01/2019
+        CONSTRAINTS
+well1 QLIQSMAX MULT
+ENDCONSTRAINTS
+QMULT
+WELL QOIL QGAS QWATER
+well1 1000.0 10 1.31
+ENDQMULT
+''',
+    {'name': 'well1', 'date': '01/01/2019'},
+    {'name': 'well1', 'date': '01/01/2019', 'qmult_oil_rate': 1000.0, 'qmult_water_rate': 1.31, 'qmult_gas_rate': 10},
+    4,
+    {'uuid2': [2,6]}
+    )
+    ],ids=['basic_test', 'qmult_test'])
 def test_modify_constraints(mocker, file_contents, expected_file_contents, current_constraint, new_constraint,
                             expected_number_writes, expected_uuid):
     # Arrange
