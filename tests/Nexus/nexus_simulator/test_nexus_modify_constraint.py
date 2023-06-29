@@ -419,3 +419,60 @@ def test_write_qmult_table():
     result_qmult_table = constraint.write_qmult_table()
     # Assert
     assert result_qmult_table == expected_qmult_table
+
+@pytest.mark.parametrize("file_contents, expected_file_contents, current_constraint, new_constraint, expected_number_writes, expected_uuid", [
+    # basic_test
+    ('''TIME 01/01/2019
+        CONSTRAINTS
+        well2    QLIQSMAX- 10000.0 QLIQSMAX 15.5
+        well1	 QLIQSMAX 	3884.0  QWSMAX 	0
+        ENDCONSTRAINTS''',
+    '''TIME 01/01/2019
+        CONSTRAINTS
+        well2    QLIQSMAX- 10000.0 QLIQSMAX 15.5
+well1 QWSMAX 1000.0 QLIQSMAX 3884.0
+        ENDCONSTRAINTS''',
+    {'name': 'well1', 'date': '01/01/2019', 'max_surface_water_rate': 0},
+    {'name': 'well1', 'date': '01/01/2019', 'max_surface_water_rate': 1000.0},
+    2,
+    {'uuid1': [2], 'uuid3': [3]}
+    )],ids=['basic_test'])
+def test_modify_constraints(mocker, file_contents, expected_file_contents, current_constraint, new_constraint,
+                            expected_number_writes, expected_uuid):
+    # Arrange
+    fcs_file_contents = '''
+        RUN_UNITS ENGLISH
+        DATEFORMAT DD/MM/YYYY
+        RECURRENT_FILES
+        RUNCONTROL /nexus_data/runcontrol.dat
+        SURFACE Network 1  /surface_file_01.dat
+        '''
+    runcontrol_contents = '''START 01/01/2019'''
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            '/path/fcs_file.fcs': fcs_file_contents,
+            '/surface_file_01.dat': file_contents,
+            '/nexus_data/runcontrol.dat': runcontrol_contents}
+            ).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+    nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
+    # make a mock for the write operation
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+
+    # patch in uuids for the constraints
+    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
+                                                    'uuid4', 'uuid5', 'uuid6', 'uuid7'])
+    # Act
+    nexus_sim.network.Constraints.modify_constraint('well1', current_constraint, new_constraint)
+    # Assert
+    assert nexus_sim.fcs_file.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
+    check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
+                                     modifying_mock_open=writing_mock_open,
+                                     mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
+                                     number_of_writes=expected_number_writes)
+    assert nexus_sim.fcs_file.surface_files[1].object_locations == expected_uuid
+
+
