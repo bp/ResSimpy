@@ -32,19 +32,6 @@ class Simulator(ABC):
 
     """ Class Methods """
 
-    @staticmethod
-    @abstractmethod
-    def get_fluid_type(surface_file_name: str) -> str:
-        raise NotImplementedError("This method has not been implemented for this simulator yet")
-
-    @abstractmethod
-    def get_simulation_status(self) -> Optional[str]:
-        raise NotImplementedError("This method has not been implemented for this simulator yet")
-
-    @abstractmethod
-    def get_simulation_progress(self) -> float:
-        raise NotImplementedError("This method has not been implemented for this simulator yet")
-
     @abstractmethod
     def model_location(self) -> str:
         raise NotImplementedError("This method has not been implemented for this simulator yet")
