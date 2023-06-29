@@ -304,7 +304,7 @@ class NexusConstraints:
         """
 
         def clean_constraint_inputs(constraint: dict[str, None | float | int | str | UnitSystem] | NexusConstraint) -> \
-                                    dict[str, float | int | str | UnitSystem]:
+                dict[str, float | int | str | UnitSystem]:
             """Cleans up an input removing Nones and ensures consistent type is returned."""
             if isinstance(constraint, NexusConstraint):
                 cleaned_dict = {k: v for k, v in constraint.to_dict().items() if v is not None}
