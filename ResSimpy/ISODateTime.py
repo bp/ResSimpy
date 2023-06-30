@@ -47,5 +47,3 @@ class ISODateTime(datetime):
             converted_date = ISODateTime.strptime(start_date, '%m/%d/%Y')
 
         return converted_date
-
-
