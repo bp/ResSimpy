@@ -112,7 +112,10 @@ class NexusConstraints:
             constraint_dict constraint
         """
         self.__parent_network.get_load_status()
-        constraints = self.__constraints[object_name]
+
+        constraints = self.__constraints.get(object_name, None)
+        if constraints is None or len(constraints) == 0:
+            raise ValueError(f'No constraints found with {object_name=}')
 
         matching_constraints = []
         for constraint in constraints:
