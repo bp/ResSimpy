@@ -579,8 +579,18 @@ def test_modify_constraints(mocker, file_contents, expected_file_contents, curre
                                      number_of_writes=expected_number_writes)
     assert nexus_sim.fcs_file.surface_files[1].object_locations == expected_uuid
 
+@pytest.mark.parametrize('current_constraint, new_constraint',[
+# well name not found
+({'name': 'well1', 'date': '01/01/2019', 'max_surface_oil_rate': 10},
+{'name': 'well1', 'date': '01/01/2019', 'max_surface_oil_rate': 1000.0}),
 
-def test_modify_constraint_no_constraint_found(mocker):
+# constraint not matching
+({'name': 'well_not_found', 'date': '01/01/2019', 'max_surface_oil_rate': 10},
+{'name': 'well_not_found', 'date': '01/01/2019', 'max_surface_oil_rate': 1000.0}),
+
+], ids=['well name not', 'constraint not matching']
+)
+def test_modify_constraint_no_constraint_found(mocker, current_constraint, new_constraint):
     # Arrange
     fcs_file_contents = '''
         RUN_UNITS ENGLISH
@@ -608,14 +618,9 @@ def test_modify_constraint_no_constraint_found(mocker):
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
 
-    # constraints
-    current_constraint = {'name': 'well1', 'date': '01/01/2019', 'max_surface_oil_rate': 10}
-    new_constraint = {'name': 'well1', 'date': '01/01/2019', 'max_surface_oil_rate': 1000.0}
-
     # patch in uuids for the constraints
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
                                                     'uuid4', 'uuid5', 'uuid6', 'uuid7'])
     # Act
-
     with pytest.raises(ValueError) as ve:
         nexus_sim.network.Constraints.modify_constraint('well1', current_constraint, new_constraint)
