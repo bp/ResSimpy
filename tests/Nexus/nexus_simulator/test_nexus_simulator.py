@@ -474,6 +474,45 @@ def test_get_check_oil_gas_types_for_models_same_types(mocker, fcs_file_contents
     assert result == expected_type
 
 
+@pytest.mark.parametrize("fcs_file_contents_1, fcs_file_contents_2, surface_file_contents_1, surface_file_contents_2,"
+                         " expected_type",
+                         [
+                             ("Line 1\nAnother LIne\nSURFACE Network 1	Includes/nexus_data/surface_1.dat",
+                              "SURFACE Network 1	Includes/nexus_data/surface_2.dat",
+                              "line 1\nline 2\nBLAKOIL",
+                              "line 1\nBLACKOIL",
+                              ""
+                              ),
+                             ("Line 1\nAnother LIne\nSURFACE Network 1	Includes/nexus_data/surface_1.dat",
+                              "SURFACE Network 1	Includes/nexus_data/surface_2.dat",
+                              "line 1\nline 2\nWATEROIL",
+                              "line 1\nWATER",
+                              ""
+                              ),
+                             ("Line 1\nAnother LIne\nSURFACE Network 1	Includes/nexus_data/surface_1.dat",
+                              "SURFACE Network 1	Includes/nexus_data/surface_2.dat",
+                              "line 1\nline 2\nGASWATER",
+                              "line 1\nGAWATER",
+                              ""
+                              )
+                         ])
+def test_get_check_oil_gas_types_for_models_no_type_found(mocker, fcs_file_contents_1, fcs_file_contents_2,
+                                                          surface_file_contents_1, surface_file_contents_2,
+                                                          expected_type):
+    # Checks that the correct oil / gas type is returned.
+    # Arrange
+    models = ['path/to/model1.fcs', 'path/to/another/model2.fcs']
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_different_model_opens(mocker, filename, fcs_file_contents_1, fcs_file_contents_2,
+                                               surface_file_contents_1, surface_file_contents_2).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act / Assert
+    with pytest.raises(ValueError):
+        NexusSimulator.get_check_oil_gas_types_for_models(models)
 
 def test_get_check_oil_gas_types_for_models_different_types(mocker):
     # Checks that a Value error is raised if the surface files contain different oil / gas types
