@@ -253,7 +253,7 @@ class NexusWells(Wells):
         if writing_new_wellspec_table:
             new_completion_string += ['\n']
         # write out to the file_content_as_list
-        new_completion_object_ids = {new_completion.id: new_completion_index + new_completion_additional_lines - 1}
+        new_completion_object_ids = {new_completion.id: [new_completion_index + new_completion_additional_lines - 1]}
         wellspec_file.add_to_file_as_list(additional_content=new_completion_string, index=new_completion_index,
                                           additional_objects=new_completion_object_ids)
 

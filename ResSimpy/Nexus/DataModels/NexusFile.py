@@ -312,22 +312,23 @@ class NexusFile(File):
                     to_list.extend(temp_to_list)
         return from_list, to_list
 
-    def add_object_locations(self, obj_uuid: UUID, line_index: int) -> None:
+    def add_object_locations(self, obj_uuid: UUID, line_indices: list[int]) -> None:
         """Adds a uuid to the object_locations dictionary. Used for storing the line numbers where objects are stored
         within the flattened file_as_list.
 
         Args:
             obj_uuid (UUID): unique identifier of the object being created/stored.
-            line_index (int): line number in the flattened file_content_as_list
+            line_indices (list[int]): line number in the flattened file_content_as_list
                 (i.e. from the get_flat_list_str_file method).
         """
         if self.object_locations is None:
             self.object_locations: dict[UUID, list[int]] = get_empty_dict_uuid_list_int()
         existing_line_locations = self.object_locations.get(obj_uuid, None)
         if existing_line_locations is not None:
-            existing_line_locations.append(line_index)
+            existing_line_locations.extend(line_indices)
+            existing_line_locations.sort()
         else:
-            self.object_locations[obj_uuid] = [line_index]
+            self.object_locations[obj_uuid] = line_indices
 
     def __update_object_locations(self, line_number: int, number_additional_lines: int) -> None:
         """Updates the object locations in a nexusfile by the additional lines. Used when files have been modified and
@@ -431,7 +432,7 @@ class NexusFile(File):
         return nexus_file, index_in_included_file
 
     def add_to_file_as_list(self, additional_content: list[str], index: int,
-                            additional_objects: Optional[dict[UUID, int]] = None) -> None:
+                            additional_objects: Optional[dict[UUID, list[int]]] = None) -> None:
         """To add content to the file as list, also updates object numbers and optionally allows user \
         to add several additional new objects.
 
@@ -456,7 +457,7 @@ class NexusFile(File):
         if additional_objects is None:
             return
         for object_id, line_index in additional_objects.items():
-            self.add_object_locations(obj_uuid=object_id, line_index=line_index)
+            self.add_object_locations(obj_uuid=object_id, line_indices=line_index)
 
     def remove_object_from_file_as_list(self, objects_to_remove: list[UUID]) -> None:
         """Removes all associated lines in the file as well as the object locations relating to a list of objects."""

@@ -283,7 +283,7 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
             date_format=date_format
             )
 
-        nexus_file.add_object_locations(new_completion.id, index + header_index + 1)
+        nexus_file.add_object_locations(new_completion.id, [index + header_index + 1])
 
         completions.append(new_completion)
 
