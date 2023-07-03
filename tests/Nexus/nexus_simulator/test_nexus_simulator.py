@@ -87,6 +87,20 @@ def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock
     assert list_of_writes[0].args[0] == expected_file_contents
 
 
+def check_file_read_write_is_correct_for_windows(expected_file_contents: str, modifying_mock_open: Mock,
+                                     mocker_fixture: MockerFixture):
+    assert len(modifying_mock_open.call_args_list) == 2
+    assert modifying_mock_open.call_args_list[0] == mocker_fixture.call(
+        "\my\file\path", 'r')
+    assert modifying_mock_open.call_args_list[1] == mocker_fixture.call(
+        "\my\file\path", 'w')
+
+    # Get all the calls to write() and check that the contents are what we expect
+    list_of_writes = [
+        call for call in modifying_mock_open.mock_calls if 'call().write' in str(call)]
+    assert len(list_of_writes) == 1
+    assert list_of_writes[0].args[0] == expected_file_contents
+
 @pytest.mark.parametrize(
     "run_control_path, expected_root, expected_run_control_path, date_format, expected_date_format", [
         # Providing an absolute path to the fcs file + USA date format
@@ -108,7 +122,6 @@ def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expec
     assert simulation.run_control_file_path == expected_full_path
     assert simulation.date_format is expected_date_format
     open_mock.assert_called_with(expected_full_path, 'r')
-
 
 @pytest.mark.parametrize(
     "run_control_path, expected_root, expected_run_control_path, date_format, expected_date_format", [
@@ -132,15 +145,15 @@ def test_load_fcs_space_in_filename(mocker, run_control_path, expected_root, exp
     assert simulation.run_control_file_path == expected_full_path
     assert simulation.date_format is expected_date_format
     open_mock.assert_called_with(expected_full_path, 'r')
-
-
-# Check that DATE_FORMAT is read in correctly (not documented, but still works in Nexus)
 @pytest.mark.parametrize(
     "fcs_file_contents, expected_date_format", [
         ("RUNCONTROL /path/to/run/control\n  DATE_FORMAT MM/DD/YYYY", DateFormat.MM_DD_YYYY),
         ("RUNCONTROL /path/to/run/control\n  DATE_FORMAT DD/MM/YYYY", DateFormat.DD_MM_YYYY),
         ("RUNCONTROL /path/to/run/control\n", DateFormat.MM_DD_YYYY),
-    ], ids=['US date format', 'non-us date format', 'default (us format)'])
+        ("RUNCONTROL c:\path\to\run\control\n  DATE_FORMAT MM/DD/YYYY", DateFormat.MM_DD_YYYY),
+        ("RUNCONTROL c:\path\to\run\control\n  DATE_FORMAT DD/MM/YYYY", DateFormat.DD_MM_YYYY),
+        ("RUNCONTROL c:\path\to\run\control\n", DateFormat.MM_DD_YYYY),
+    ], ids=['US date format', 'non-us date format', 'default (us format)', 'Win US Date Format', 'Win non-us date format', 'Win default (us format)', ])
 def test_load_fcs_date_format(mocker, fcs_file_contents, expected_date_format):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file_contents)
@@ -174,7 +187,11 @@ def test_load_fcs_file_comment_after_declaration(mocker):
     # Providing an absolute path to the fcs file + USA date format
     ("/run/control/path", "/run/control/path", "MM/DD/YYYY", True),
     # Providing a relative path to the fcs file + Non-USA date format
-    ("run/control/path", "original_output_path/run/control/path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
+    ("run/control/path", "original_output_path/run/control/path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY),
+    # Providing an absolute path to the fcs file + USA date format Windows
+    ("C:\run\control\path", "C:\run\control\path", "MM/DD/YYYY", True),
+    # Providing a relative path to the fcs file + Non-USA date format Windows
+    ("\run\control\path", "original_output_path\run\control\path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
 ])
 def test_output_destination_missing(mocker, run_control_path, expected_run_control_path, date_format,
                                     expected_date_format):
@@ -201,6 +218,12 @@ def test_output_destination_missing(mocker, run_control_path, expected_run_contr
                               "/run/control/path", "MM/DD/YYYY", True),
                              # Providing an absolute path to the fcs file + USA date format
                              ("run/control/path", "original_output_path/run/control/path",
+                              "DD/MM/YYYY", False),
+                             # Providing a relative path to the fcs file + Non-USA date format
+                             ("c:\run\control\path",
+                              "c:\run\control\path", "MM/DD/YYYY", True),
+                             # Providing an absolute path to the fcs file + USA date format
+                             ("run\control\path", "original_output_path\run\control\path",
                               "DD/MM/YYYY", False)
                              # Providing a relative path to the fcs file + Non-USA date format
                          ])
@@ -220,17 +243,29 @@ def test_origin_missing(mocker, run_control_path, expected_run_control_path, dat
 @pytest.mark.skip("re-enable once model moving has been implemented")
 def test_output_to_existing_directory(mocker):
     """Testing output to directory with existing files"""
-    # Arrange
+    # Arrange 
     fcs_file = "RUNCONTROL path/to/run/control\nDATEFORMAT DD/MM/YYYYY"
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
 
     exists_mock = mocker.Mock(return_value=True)
     mocker.patch("os.path.exists", exists_mock)
+    
+     # Act + Assert
+    with pytest.raises(FileExistsError):
+        NexusSimulator(origin='test/Path.fcs',
+                       destination='original_output_path')
+    # Arrange for windows
+    fcs_file_win = "RUNCONTROL path\to\run\control\nDATEFORMAT DD/MM/YYYYY"
+    open_mock_win = mocker.mock_open(read_data=fcs_file)
+    mocker.patch("builtins.open", open_mock_win)
+
+    exists_mock = mocker.Mock(return_value=True)
+    mocker.patch("os.path.exists", exists_mock)
 
     # Act + Assert
     with pytest.raises(FileExistsError):
-        NexusSimulator(origin='test/Path.fcs',
+        NexusSimulator(origin='test\Path.fcs',
                        destination='original_output_path')
 
 
@@ -338,6 +373,9 @@ def test_load_fcs_file_raises_error_for_undefined_run_units(mocker, fcs_file):
                              (
                                      'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nsurface network 1 	file/path/location/surface.inc',
                                      'testpath1', 'file/path/location/surface.inc'),
+                             (
+                                 'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data\\Includes\\nexus_data\\surface_simplified_06082018.inc',
+                                 'testpath1', 'nexus_data\\Includes\\nexus_data\\surface_simplified_06082018.inc')
                          ])
 def test_get_abs_surface_file_path(mocker, fcs_file, expected_root, expected_extracted_path):
     # Arrange
@@ -348,11 +386,12 @@ def test_get_abs_surface_file_path(mocker, fcs_file, expected_root, expected_ext
     # Act
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
     result = simulation.get_surface_file_path()
+    
 
     # Assert
     assert result == expected_result
 
-
+    
 @pytest.mark.skip("Re-enable once the run code has been established")
 def test_run_simulator(mocker):
     """Testing the Simulator run code"""
@@ -475,6 +514,26 @@ def test_get_check_oil_gas_types_for_models_no_type_found(mocker, fcs_file_conte
     with pytest.raises(ValueError):
         NexusSimulator.get_check_oil_gas_types_for_models(models)
 
+def test_get_check_oil_gas_types_for_models_different_types(mocker):
+    # Checks that a Value error is raised if the surface files contain different oil / gas types
+    # Arrange
+    models = ['path/to/model1.fcs', 'path/to/another/model2.fcs']
+
+    fcs_file_contents_1 = "Line 1\nAnother LIne\nSURFACE Network 1	Includes/nexus_data/surface_1.dat"
+    fcs_file_contents_2 = "SURFACE Network 1	Includes/nexus_data/surface_2.dat"
+    surface_file_contents_1 = "line 1\nline 2\nGASWATER"
+    surface_file_contents_2 = "line 1\nBLACKOIL"
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_different_model_opens(mocker, filename, fcs_file_contents_1, fcs_file_contents_2,
+                                               surface_file_contents_1, surface_file_contents_2).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act / Assert
+    with pytest.raises(ValueError):
+        NexusSimulator.get_check_oil_gas_types_for_models(models)
 
 @pytest.mark.parametrize("original_file_contents, expected_file_contents, token, new_value, add_to_start",
                          [("test 3", "test ABC3", "TEST", "ABC3", False),
@@ -576,6 +635,105 @@ def test_update_token_file_value(mocker, original_file_contents, expected_file_c
                                      modifying_mock_open=modifying_mock_open,
                                      mocker_fixture=mocker)
 
+@pytest.mark.parametrize("original_file_contents, expected_file_contents, token, new_value, add_to_start",
+                         [("test 3", "test ABC3", "TEST", "ABC3", False),
+                          ("""!     Fluid model for network
+BLACKOIL
+!     Network default temperature
+NETTEMP 100.  !Comment after value
+
+!     lumped wellbore default to better match vip wellbore behaviour
+!     Connection defaults""",
+
+                           """!     Fluid model for network
+BLACKOIL
+!     Network default temperature
+NETTEMP 50.  !Comment after value
+
+!     lumped wellbore default to better match vip wellbore behaviour
+!     Connection defaults""",
+                           "NeTtEMp", "50.",
+                           False),
+                          ("""!     Fluid model for network
+BLACKOIL
+!     Network default temperature
+NETTEMP 100.  !Comment after value
+
+!     lumped wellbore default to better match vip wellbore behaviour
+!     Connection defaults""",
+
+                           """MYTOKEN new value
+!     Fluid model for network
+BLACKOIL
+!     Network default temperature
+NETTEMP 100.  !Comment after value
+
+!     lumped wellbore default to better match vip wellbore behaviour
+!     Connection defaults""",
+                           "MYTOKEN", "new value",
+                           True),
+                          ("""!     Fluid model for network
+BLACKOIL
+!     Network default temperature
+NETTEMP 100.  !Comment after value
+
+!     lumped wellbore default to better match vip wellbore behaviour
+!     Connection defaults""",
+
+                           """!     Fluid model for network
+BLACKOIL
+!     Network default temperature
+NETTEMP 100.  !Comment after value
+
+!     lumped wellbore default to better match vip wellbore behaviour
+!     Connection defaults
+MYTOKEN new value""",
+                           "MYTOKEN", "new value",
+                           False),
+                          ("""!     Fluid model for network
+BLACKOIL
+!     Network default temperature
+NETTEMP 100.  !Comment after value
+
+!     lumped wellbore default to better match vip wellbore behaviour
+!     Connection defaults""",
+
+                           """!     Fluid model for network
+BLACKOIL
+!     Network default temperature
+NETTEMP 100.  !Comment after value
+
+!     lumped wellbore default to better match vip wellbore behaviour
+!     Connection defaults
+TOKENNOVALUE """,
+                           "TOKENNOVALUE", "",
+                           False)
+                          ],
+                         ids=["basic case", "standard value change", "token not present (add to start)",
+                              "token not present (add to end)",
+                              "token not present and has no value"])
+def test_update_token_file_value(mocker, original_file_contents, expected_file_contents, token, new_value,
+                                 add_to_start):
+    """Test the update token value functionality"""
+    # Arrange
+
+    mock_original_opens = mocker.mock_open()
+    mocker.patch("builtins.open", mock_original_opens)
+
+    simulation = NexusSimulator(
+        origin='testpath1\nexus_run.fcs', destination="new_destination")
+
+    modifying_mock_open = mocker.mock_open(read_data=original_file_contents)
+    mocker.patch("builtins.open", modifying_mock_open)
+
+    # Act
+    simulation.update_file_value(
+        file_path='\my\file\path', token=token, new_value=new_value, add_to_start=add_to_start)
+
+    # Assert
+    check_file_read_write_is_correct_for_windows(expected_file_contents=expected_file_contents,
+                                     modifying_mock_open=modifying_mock_open,
+                                     mocker_fixture=mocker)
 
 @pytest.mark.parametrize("original_file_contents, expected_file_contents, token",
                          [
@@ -623,6 +781,52 @@ def test_comment_out_file_value(mocker, original_file_contents, expected_file_co
                                      modifying_mock_open=modifying_mock_open,
                                      mocker_fixture=mocker)
 
+
+@pytest.mark.parametrize("original_file_contents, expected_file_contents, token",
+                         [
+                             ("test 3", "! test 3", "TEST"),
+                             ("""START 11/01/1992
+
+!     Timestepping method
+METHOD IMPLICIT
+!     Current optimized default for facilities
+SOLVER FACILITIES EXTENDED
+GRIDSOLVER IMPLICIT_COUPLING NONE
+
+!     Use vip units for output to vdb
+VIPUNITS""",
+
+                              """START 11/01/1992
+
+!     Timestepping method
+! METHOD IMPLICIT
+!     Current optimized default for facilities
+SOLVER FACILITIES EXTENDED
+GRIDSOLVER IMPLICIT_COUPLING NONE
+
+!     Use vip units for output to vdb
+VIPUNITS""",
+                              "METHOD")
+                         ], ids=["standard comment out", "Larger file"])
+def test_comment_out_file_value(mocker, original_file_contents, expected_file_contents, token):
+    """Testing the functionality to comment out a line containing a specific token"""
+    # Arrange
+    mock_original_opens = mocker.mock_open()
+    mocker.patch("builtins.open", mock_original_opens)
+
+    simulation = NexusSimulator(
+        origin='testpath1\nexus_run.fcs', destination="new_destination")
+
+    modifying_mock_open = mocker.mock_open(read_data=original_file_contents)
+    mocker.patch("builtins.open", modifying_mock_open)
+
+    # Act
+    simulation.comment_out_file_value(file_path='\my\file\path', token=token)
+
+    # Assert
+    check_file_read_write_is_correct_for_windows(expected_file_contents=expected_file_contents,
+                                     modifying_mock_open=modifying_mock_open,
+                                     mocker_fixture=mocker)
 
 def test_add_map_statements(mocker):
     """Testing the functionality to comment out a line containing a specific token"""
@@ -677,6 +881,58 @@ PLOTBINARY
                                      modifying_mock_open=modifying_mock_open,
                                      mocker_fixture=mocker)
 
+def test_add_map_statements_windows(mocker):
+    """Testing the functionality to comment out a line containing a specific token"""
+    # Arrange
+
+    original_file_contents = """START 11/01/1992
+
+!     Timestepping method
+METHOD IMPLICIT
+!     Current optimized default for facilities
+SOLVER FACILITIES EXTENDED
+GRIDSOLVER IMPLICIT_COUPLING NONE
+
+!     Use vip units for output to vdb
+VIPUNITS
+
+MAPBINARY
+PLOTBINARY    
+    """
+
+    expected_file_contents = """MAPVDB
+MAPOUT ALL
+START 11/01/1992
+
+!     Timestepping method
+METHOD IMPLICIT
+!     Current optimized default for facilities
+SOLVER FACILITIES EXTENDED
+GRIDSOLVER IMPLICIT_COUPLING NONE
+
+!     Use vip units for output to vdb
+VIPUNITS
+
+MAPBINARY
+PLOTBINARY    
+    """
+
+    mock_original_opens = mocker.mock_open(
+        read_data="STRUCTURED_GRID \my\file\path")
+    mocker.patch("builtins.open", mock_original_opens)
+
+    simulation = NexusSimulator(origin='nexus_run.fcs')
+
+    modifying_mock_open = mocker.mock_open(read_data=original_file_contents)
+    mocker.patch("builtins.open", modifying_mock_open)
+
+    # Act
+    simulation.reporting.add_map_properties_to_start_of_grid_file()
+
+    # Assert
+    check_file_read_write_is_correct_for_windows(expected_file_contents=expected_file_contents,
+                                     modifying_mock_open=modifying_mock_open,
+                                     mocker_fixture=mocker)
 
 # TODO: move these methods to a separate WELLS test file
 @pytest.mark.parametrize("fcs_file_contents", [
@@ -716,6 +972,44 @@ def test_get_wells(mocker: MockerFixture, fcs_file_contents: str):
     mock_load_wells.assert_called_once_with(nexus_file=expected_well_file,
                                             default_units=UnitSystem.ENGLISH,
                                             start_date='', date_format= DateFormat.MM_DD_YYYY)
+
+@pytest.mark.parametrize("fcs_file_contents", [
+    ("""
+       WelLS sEt 1 my\wellspec\file.dat
+    """)
+], ids=['path_after_set'])
+def test_get_wells_windows(mocker: MockerFixture, fcs_file_contents: str):
+    """Testing the functionality to load in and retrieve a set of wells"""
+    # Arrange
+    fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
+    mocker.patch("builtins.open", fcs_file_open)
+
+    loaded_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid=None, skin=None,
+                                          angle_v=None)
+    loaded_completion_2 = NexusCompletion(
+        i=6, j=7, k=8, well_radius=9.11, date='01/01/2023')
+    loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
+                              units=UnitSystem.ENGLISH)]
+
+    # mock out the load_wells function as that is tested elsewhere
+    mock_load_wells = mocker.Mock(return_value=loaded_wells)
+    mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
+
+    # NB file_content_as_list needs to be set as below due to the mocker open re-reading fcs contents
+    expected_well_file = NexusFile(location='my\wellspec\file.dat',
+                                   include_locations=[], origin='path\nexus_run.fcs', file_content_as_list=
+                                   ['\n', '       WelLS sEt 1 my\wellspec\file.dat\n', '    '])
+
+    simulation = NexusSimulator(origin='path\nexus_run.fcs')
+
+    # Act
+    result = simulation.wells.get_wells()
+
+    # Assert
+    assert result == loaded_wells
+    mock_load_wells.assert_called_once_with(nexus_file=expected_well_file,
+                                            default_units=UnitSystem.ENGLISH,
+                                            start_date='', date_format = DateFormat.MM_DD_YYYY)
 
 
 def test_get_wells_df(mocker: MockerFixture):
@@ -791,6 +1085,46 @@ def test_get_well(mocker: MockerFixture, fcs_file_contents: str):
     mock_load_wells.assert_called_once_with(nexus_file=expected_well_file,
                                             default_units=UnitSystem.ENGLISH,
                                             start_date='', date_format = DateFormat.MM_DD_YYYY)
+@pytest.mark.parametrize("fcs_file_contents", [
+    ("""
+       WelLS set 1 my\\wellspec\\file.dat
+    """)
+], ids=['basic case'])
+def test_get_well_windows(mocker: MockerFixture, fcs_file_contents: str):
+    """Testing the functionality to load in and retrieve a single wells."""
+    # Arrange
+    fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
+    mocker.patch("builtins.open", fcs_file_open)
+
+    loaded_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid=None, skin=None,
+                                          angle_v=None)
+    loaded_completion_2 = NexusCompletion(
+        i=6, j=7, k=8, well_radius=9.11, date='01/01/2023')
+    loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
+                              units=UnitSystem.ENGLISH),
+                    NexusWell(well_name='WELL2', completions=[loaded_completion_1, loaded_completion_2],
+                              units=UnitSystem.ENGLISH)
+                    ]
+
+    # mock out the load_wells function as that is tested elsewhere
+    mock_load_wells = mocker.Mock(return_value=loaded_wells)
+    mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
+
+    # NB file_content_as_list needs to be set as below due to the mocker open re-reading fcs contents
+    expected_well_file = NexusFile(location='my\\wellspec\\file.dat',
+                                   include_locations=[], origin='path\\nexus_run.fcs', file_content_as_list=
+                                   ['\n', '       WelLS set 1 my\\wellspec\\file.dat\n', '    '])
+
+    simulation = NexusSimulator(origin='path\\nexus_run.fcs')
+
+    # Act
+    result = simulation.wells.get_well(well_name='WELL2')
+
+    # Assert
+    assert result == loaded_wells[1]
+    mock_load_wells.assert_called_once_with(nexus_file=expected_well_file,
+                                            default_units=UnitSystem.ENGLISH,
+                                            start_date='', date_format = DateFormat.MM_DD_YYYY)
 
 
 @pytest.mark.parametrize("fcs_file_contents", [
@@ -834,7 +1168,6 @@ def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
 
     # Assert
     assert result == loaded_pvt
-
 
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""

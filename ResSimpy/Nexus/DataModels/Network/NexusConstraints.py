@@ -100,11 +100,22 @@ class NexusConstraints:
         self.__constraints.update(additional_constraints)
 
     def find_constraint(self, object_name: str, constraint_dict: dict[str, float | str | int]) -> NexusConstraint:
-        # get the name, filter by name, then filter by properties, check for uniqueness as an option?
-        # TODO implement this with tests. Give it a dictionary and then filter out the constraints to give one
-        #  that matches
-        # implement a fuzzy matching (i.e. will work when not all the dictionary parameters are present
-        constraints = self.__constraints[object_name]
+        """Finds a uniquely matching constraint from a given set of properties in a dictionary of attributes.
+
+        Args:
+            object_name (str): name of the node to which the constraint is applied (node name/well name)
+            constraint_dict (dict[str, float | str | int]): dictionary of attributes to match on. \
+            Allows for partial matches if it finds a unique constraint.
+
+        Returns:
+            NexusConstraint of an existing constraint in the model that uniquely matches the provided \
+            constraint_dict constraint
+        """
+        self.__parent_network.get_load_status()
+
+        constraints = self.__constraints.get(object_name, None)
+        if constraints is None or len(constraints) == 0:
+            raise ValueError(f'No constraints found with {object_name=}')
 
         matching_constraints = []
         for constraint in constraints:
@@ -188,8 +199,7 @@ class NexusConstraints:
 
         self.add_constraints_to_memory({name: [new_constraint]})
 
-        # add to the file (for now add to the first surface file
-        # TODO: add to specified surface file
+        # add to the file
         if self.__model.fcs_file.surface_files is None:
             raise FileNotFoundError('No well file found, cannot modify ')
 
@@ -280,3 +290,37 @@ class NexusConstraints:
                 file_to_add_to.add_to_file_as_list(additional_content=new_constraint_text, index=new_constraint_index,
                                                    additional_objects=new_constraint_object_ids)
                 break
+
+    def modify_constraint(self, name: str,
+                          current_constraint: dict[str, None | float | int | str] | NexusConstraint,
+                          new_constraint_props: dict[str, None | float | int | str | UnitSystem] | NexusConstraint) \
+            -> None:
+        """Modify an existing constraint. Retains existing constraint values that are not overridden by the new \
+        constraint properties.
+
+        Args:
+            name (str):
+            current_constraint (dict[str, None | float | int | str] | NexusConstraint): dictionary or constraint object\
+                with enough attributes to identify a unique existing constraint in the model.
+            new_constraint_props (dict[str, None | float | int | str] | NexusConstraint): dictionary or constraint to \
+            update the constraint with.
+        """
+
+        def clean_constraint_inputs(constraint: dict[str, None | float | int | str | UnitSystem] | NexusConstraint) -> \
+                dict[str, float | int | str | UnitSystem]:
+            """Cleans up an input removing Nones and ensures consistent type is returned."""
+            if isinstance(constraint, NexusConstraint):
+                cleaned_dict = {k: v for k, v in constraint.to_dict().items() if v is not None}
+            else:
+                cleaned_dict = {k: v for k, v in constraint.items() if v is not None}
+            return cleaned_dict
+
+        cleaned_current_constraint = clean_constraint_inputs(current_constraint)
+        cleaned_new_constraint = clean_constraint_inputs(new_constraint_props)
+
+        existing_constraint_obj = self.find_constraint(name, cleaned_current_constraint)
+        self.remove_constraint(constraint_id=existing_constraint_obj.id)
+        combination_of_constraints = existing_constraint_obj.to_dict()
+        combination_of_constraints.update(cleaned_new_constraint)
+
+        self.add_constraints(name, combination_of_constraints)

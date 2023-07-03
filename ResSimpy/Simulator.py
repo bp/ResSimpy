@@ -9,7 +9,7 @@ class Simulator(ABC):
 
     def __init__(self, start_date: str = '') -> None:
         self.__start_date: str = start_date
-        self.__Wells: Wells = Wells()
+        self.__wells: Wells = Wells()
 
     """Class Properties"""
 
@@ -21,14 +21,14 @@ class Simulator(ABC):
         self.__start_date = value
 
     @property
-    def Wells(self) -> Wells:
-        return self.__Wells
+    def wells(self) -> Wells:
+        return self.__wells
 
-    @Wells.setter
-    def Wells(self, cls):
+    @wells.setter
+    def wells(self, cls):
         if not isinstance(cls, Wells):
             raise ValueError(f"Wells must take a valid Wells type. Instead got provided class of {type(cls)}")
-        self.__Wells = cls
+        self.__wells = cls
 
     """ Class Methods """
 
