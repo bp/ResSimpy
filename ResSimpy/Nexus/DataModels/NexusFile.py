@@ -145,14 +145,14 @@ class NexusFile(File):
                                file_content_as_list=None)
                 if includes_objects is None:
                     raise ValueError('include_objects is None - recursion failure.')
-                includes_objects.append(inc_file)
                 skip_next_include = False
             else:
                 inc_file = cls.generate_file_include_structure(inc_file_path, origin=full_file_path, recursive=True,
                                                                skip_arrays=skip_arrays)
                 if includes_objects is None:
                     raise ValueError('include_objects is None - recursion failure.')
-                includes_objects.append(inc_file)
+
+            includes_objects.append(inc_file)
 
         includes_objects = None if not includes_objects else includes_objects
 
