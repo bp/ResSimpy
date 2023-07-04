@@ -25,7 +25,10 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
         current_date (str): the current date in the table
         unit_system (UnitSystem): Unit system enum
         property_map (dict[str, tuple[str, type]]): Mapping of nexus keywords to attributes
-        existing_constraints (dict[str, NexusConstraint]):
+        existing_constraints (dict[str, NexusConstraint]): all existing constraints from previous lines of the \
+            surface file
+        network_names (Optional[list[str]]): list of names for all nodes, wells and connections in a nexus network.
+            Used in deriving constraints from wildcards. Defaults to None
 
     Returns:
     -------
