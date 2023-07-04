@@ -41,6 +41,8 @@ class StructuredGridFile(Grid):
         self.__array_functions_df: Optional[pd.DataFrame] = None
         self.__array_functions_loaded: bool = False
         self.__grid_file_contents: Optional[list[str]] = None if grid_nexus_file is None else \
+            grid_nexus_file.get_flat_list_str_file
+        self.__grid_file_nested: Optional[list[str]] = None if grid_nexus_file is None else \
             grid_nexus_file.file_content_as_list
         self.__faults_df: Optional[pd.DataFrame] = None
         self.__grid_faults_loaded: bool = False
@@ -110,10 +112,10 @@ class StructuredGridFile(Grid):
         if self.__grid_properties_loaded:
             return
 
-        if self.__grid_nexus_file is None or self.__grid_file_contents is None:
+        if self.__grid_nexus_file is None or self.__grid_file_contents is None or self.__grid_file_nested is None:
             raise ValueError("Grid file not found, cannot load grid properties")
 
-        file_as_list = self.__grid_file_contents
+        file_as_list = self.__grid_file_nested
         for line in file_as_list:
             # Load in the basic properties
             properties_to_load = [
@@ -260,9 +262,9 @@ class StructuredGridFile(Grid):
 
     def load_faults(self) -> None:
         """Function to read faults in Nexus grid file defined using MULT and FNAME keywords."""
-        if self.__grid_file_contents is None:
-            raise ValueError('Grid file contents have not been loaded')
         file_content_as_list = self.__grid_file_contents
+        if file_content_as_list is None:
+            raise ValueError('Grid file contents have not been loaded')
         df = load_nexus_fault_mult_table_from_list(file_content_as_list)
 
         if not df.empty:
