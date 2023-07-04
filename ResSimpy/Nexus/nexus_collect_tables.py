@@ -11,7 +11,7 @@ from ResSimpy.Nexus.nexus_file_operations import check_property_in_line, check_t
 
 
 def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[str, Any], start_date: Optional[str],
-                                  default_units: Optional[UnitSystem]) -> \
+                                  default_units: Optional[UnitSystem], network_names: Optional[list[str]] = None) -> \
         dict[str, list[Any] | dict[str, list[NexusConstraint]]]:
     """Loads all tables from a given file.
 
@@ -21,8 +21,7 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
     table_object_map (dict[str, Storage_Object]): dictionary containing the name of the table as keys and \
                 the object type to store the data from each row into. Require objects to have a get_nexus_mapping \
                 function
-    start_date (str): Starting date of the run
-    default_units (UnitSystem): Units used in case not specified by file.
+    model: (NexusSimulator): main simulator object
 
     Raises:
     ------
@@ -77,14 +76,16 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
                 continue
             list_objects = None
             property_map = table_object_map[token_found].get_nexus_mapping()
-            if token_found == 'CONSTRAINTS':
+            if token_found == 'CONSTRAINTS' and table_object_map[token_found] is not None:
                 load_inline_constraints(file_as_list=file_as_list[table_start:table_end],
                                         constraint=table_object_map[token_found],
                                         current_date=current_date,
                                         unit_system=unit_system, property_map=property_map,
                                         existing_constraints=nexus_constraints,
                                         nexus_file=nexus_file,
-                                        start_line_index=table_start)
+                                        start_line_index=table_start,
+                                        network_names=network_names
+                                        )
 
             elif token_found == 'QMULT' or token_found == 'CONSTRAINT':
                 list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
@@ -98,7 +99,7 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
                 list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
                                                      row_object=table_object_map[token_found],
                                                      property_map=property_map, current_date=current_date,
-                                                     unit_system=unit_system, nexus_obj_dict=None)
+                                                     unit_system=unit_system)
 
             # store objects found into right dictionary
             list_of_token_obj = nexus_object_results[token_found]

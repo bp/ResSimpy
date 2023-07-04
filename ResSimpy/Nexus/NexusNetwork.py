@@ -43,6 +43,7 @@ class NexusNetwork:
         self.Constraints: NexusConstraints = NexusConstraints(self, model)
 
     def get_load_status(self) -> bool:
+        """Checks load status and loads the network if it hasn't already been loaded."""
         if not self.__has_been_loaded:
             self.load()
         return self.__has_been_loaded
@@ -87,6 +88,7 @@ class NexusNetwork:
         # TODO implement all objects with Nones next to them in the dictionary below
         if self.__model.fcs_file.surface_files is None:
             raise FileNotFoundError('Could not find any surface files associated with the fcs file provided.')
+
         for surface in self.__model.fcs_file.surface_files.values():
             nexus_obj_dict = collect_all_tables_to_objects(
                 surface, {'NODECON': NexusNodeConnection,
@@ -94,19 +96,53 @@ class NexusNetwork:
                           'WELLS': NexusWellConnection,
                           'WELLHEAD': NexusWellhead,
                           'WELLBORE': NexusWellbore,
-                          'CONSTRAINTS': NexusConstraint,
+                          'CONSTRAINTS': None,
+                          'CONSTRAINT': None,
+                          'QMULT': None,
+                          'CONDEFAULTS': None,
+                          'TARGET': None,
+                          },
+                start_date=self.__model.start_date,
+                default_units=self.__model.default_units,
+                )
+            self.Nodes.add_nodes(type_check_lists(nexus_obj_dict.get('NODES')))
+            self.Connections.add_connections(type_check_lists(nexus_obj_dict.get('NODECON')))
+            self.WellConnections.add_connections(type_check_lists(nexus_obj_dict.get('WELLS')))
+            self.Wellheads.add_wellheads(type_check_lists(nexus_obj_dict.get('WELLHEAD')))
+            self.Wellbores.add_wellbores(type_check_lists(nexus_obj_dict.get('WELLBORE')))
+        self.__has_been_loaded = True
+
+        network_names = self.get_unique_names_in_network()
+
+        for surface in self.__model.fcs_file.surface_files.values():
+            nexus_obj_dict = collect_all_tables_to_objects(
+                surface, {'CONSTRAINTS': NexusConstraint,
                           'CONSTRAINT': NexusConstraint,
                           'QMULT': NexusConstraint,
                           'CONDEFAULTS': None,
                           'TARGET': None,
                           },
                 start_date=self.__model.start_date,
-                default_units=self.__model.default_units)
-            self.Nodes.add_nodes(type_check_lists(nexus_obj_dict.get('NODES')))
-            self.Connections.add_connections(type_check_lists(nexus_obj_dict.get('NODECON')))
-            self.WellConnections.add_connections(type_check_lists(nexus_obj_dict.get('WELLS')))
-            self.Wellheads.add_wellheads(type_check_lists(nexus_obj_dict.get('WELLHEAD')))
-            self.Wellbores.add_wellbores(type_check_lists(nexus_obj_dict.get('WELLBORE')))
+                default_units=self.__model.default_units,
+                network_names=network_names,
+                )
+
             self.Constraints.add_constraints_to_memory(type_check_dicts(nexus_obj_dict.get('CONSTRAINTS')))
 
-        self.__has_been_loaded = True
+    def get_unique_names_in_network(self) -> list[str]:
+        """Extracts all names from a network including of all the nodes and connecting.
+
+        Returns:
+            list[str]: list of all the unique names from the network including nodes, wells and connections
+
+        """
+        constraint_names_to_add = []
+        constraint_names_to_add.extend([x.name for x in self.Nodes.get_nodes() if x.name is not None])
+        constraint_names_to_add.extend([x.name for x in self.WellConnections.get_well_connections()
+                                        if x.name is not None])
+        constraint_names_to_add.extend([x.name for x in self.Connections.get_connections() if x.name is not None])
+        constraint_names_to_add.extend([x.name for x in self.Wellbores.get_wellbores() if x.name is not None])
+        constraint_names_to_add.extend([x.name for x in self.Wellheads.get_wellheads() if x.name is not None])
+        constraint_names_to_add = list(set(constraint_names_to_add))
+
+        return constraint_names_to_add

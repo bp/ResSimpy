@@ -1,5 +1,6 @@
 import pytest
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
+from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator
 
@@ -14,8 +15,8 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     CONSTRAINTS
     well_*   QWSMAX 100
     ENDCONSTRAINTS''',
-    [{'name': 'well_prod', 'date': '01/01/2019', 'max_surface_water_rate': 100, 'UnitSystem': 'ENGLISH'},
-    {'name': 'well_inj', 'date': '01/01/2019', 'max_surface_water_rate': 100, 'UnitSystem': 'ENGLISH'}],
+    [{'name': 'well_prod', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'unit_system': UnitSystem.ENGLISH},
+    {'name': 'well_inj', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'unit_system': UnitSystem.ENGLISH}],
     ),
 
     # with extra constraints
@@ -32,7 +33,14 @@ def test_read_wildcard(mocker, file_contents, expected_constraints):
         '''
     runcontrol_contents = '''START 01/01/2019'''
 
-    expected_result = [NexusConstraint(x) for x in expected_constraints]
+    # set up expected constraint dict
+    expected_result = {}
+    for constraint in expected_constraints:
+        well_name = constraint['name']
+        if expected_result.get(well_name, None) is not None:
+            expected_result[well_name].append(NexusConstraint(constraint))
+        else:
+            expected_result[well_name] = [NexusConstraint(constraint)]
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
