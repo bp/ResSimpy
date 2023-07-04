@@ -435,7 +435,7 @@ def test_add_constraint(mocker, file_contents, expected_file_contents, new_const
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
                                                     'uuid4', 'uuid5', 'uuid6'])
     # Act
-    nexus_sim.network.Constraints.add_constraints('well3', new_constraint)
+    nexus_sim.network.Constraints.add_constraint('well3', new_constraint)
     # Assert
     assert nexus_sim.fcs_file.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
     check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
