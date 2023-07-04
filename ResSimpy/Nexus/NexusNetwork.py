@@ -115,7 +115,7 @@ class NexusNetwork:
         self.__has_been_loaded = True
 
     def get_unique_names_in_network(self) -> list[str]:
-        """Extracts all names from a network including of all the nodes and connecting.
+        """Extracts all names from a network including all the nodes, wells and connections.
 
         Returns:
             list[str]: list of all the unique names from the network including nodes, wells and connections
