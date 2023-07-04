@@ -96,9 +96,9 @@ class NexusNetwork:
                           'WELLS': NexusWellConnection,
                           'WELLHEAD': NexusWellhead,
                           'WELLBORE': NexusWellbore,
-                          'CONSTRAINTS': None,
-                          'CONSTRAINT': None,
-                          'QMULT': None,
+                          'CONSTRAINTS': NexusConstraint,
+                          'CONSTRAINT': NexusConstraint,
+                          'QMULT': NexusConstraint,
                           'CONDEFAULTS': None,
                           'TARGET': None,
                           },
@@ -110,24 +110,9 @@ class NexusNetwork:
             self.WellConnections.add_connections(type_check_lists(nexus_obj_dict.get('WELLS')))
             self.Wellheads.add_wellheads(type_check_lists(nexus_obj_dict.get('WELLHEAD')))
             self.Wellbores.add_wellbores(type_check_lists(nexus_obj_dict.get('WELLBORE')))
-        self.__has_been_loaded = True
-
-        network_names = self.get_unique_names_in_network()
-
-        for surface in self.__model.fcs_file.surface_files.values():
-            nexus_obj_dict = collect_all_tables_to_objects(
-                surface, {'CONSTRAINTS': NexusConstraint,
-                          'CONSTRAINT': NexusConstraint,
-                          'QMULT': NexusConstraint,
-                          'CONDEFAULTS': None,
-                          'TARGET': None,
-                          },
-                start_date=self.__model.start_date,
-                default_units=self.__model.default_units,
-                network_names=network_names,
-                )
-
             self.Constraints.add_constraints_to_memory(type_check_dicts(nexus_obj_dict.get('CONSTRAINTS')))
+
+        self.__has_been_loaded = True
 
     def get_unique_names_in_network(self) -> list[str]:
         """Extracts all names from a network including of all the nodes and connecting.

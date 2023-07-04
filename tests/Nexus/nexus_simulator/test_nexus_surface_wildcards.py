@@ -19,9 +19,92 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     {'name': 'well_inj', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'unit_system': UnitSystem.ENGLISH}],
     ),
 
-    # with extra constraints
+    # with extra nodes
 
-    ], ids=['basic_test'])
+    ('''TIME 01/01/2019
+    WELLS
+    NAME    STREAM   NUMBER   DATUM   CROSSFLOW   CROSS_SHUT
+    well_prod   PRODUCER   94     4039.3     ON        CELLGRAD
+    well_inj   WATER      95     4039.3     OFF        CALC
+    dont_add_to_well PRODUCER 96 3000.2     OFF     CELlgrad
+    ENDWELLS
+    CONSTRAINTS
+    well_*   QWSMAX 100
+    ENDCONSTRAINTS''',
+    [{'name': 'well_prod', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'unit_system': UnitSystem.ENGLISH},
+    {'name': 'well_inj', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'unit_system': UnitSystem.ENGLISH}],
+    ),
+
+    # with extra constraints
+    ('''TIME 01/01/2019
+    WELLS
+    NAME    STREAM   NUMBER   DATUM   CROSSFLOW   CROSS_SHUT
+    well_prod   PRODUCER   94     4039.3     ON        CELLGRAD
+    well_inj   WATER      95     4039.3     OFF        CALC
+    dont_add_to_well PRODUCER 96 3000.2     OFF     CELlgrad
+    ENDWELLS
+    CONSTRAINTS
+    well_*   QWSMAX 100
+    well_prod   QOSMAX 102.2
+    ENDCONSTRAINTS''',
+    [{'name': 'well_prod', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'max_surface_oil_rate': 102.2,
+      'unit_system': UnitSystem.ENGLISH},
+    {'name': 'well_inj', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'unit_system': UnitSystem.ENGLISH}],
+    ),
+
+    # wildcard in the middle + case sensitivity
+    ('''TIME 01/01/2019
+    NODECON
+	NAME            NODEIN    NODEOUT       TYPE        METHOD    DDEPTH
+	CP01            CP01      wh_cp01       PIPE        2          2060.7
+	cp01_gaslift    GAS       CP01          GASLIFT     NONE        NA ! Checked NODECON 13/05/2020 
+	CP-234          GAS       CP-234          GASLIFT     NONE        NA
+	ENDNODECON
+    CONSTRAINTS
+    C*1  QWSMAX 100 QOSMAX 2.02
+    ENDCONSTRAINTS''',
+    [{'name': 'CP01', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'max_surface_oil_rate': 2.02,
+      'unit_system': UnitSystem.ENGLISH},
+    ],
+    ),
+
+    # previous time card
+    ('''TIME 01/01/2019
+    NODECON
+	NAME            NODEIN    NODEOUT       TYPE        METHOD    DDEPTH
+    node_1            node_1      wh_node_1       PIPE        2          7334
+    node_2            node_2      wh_node_2       PIPE        2          555
+    well_1          well_1        wh_well_2     PIPE          2     23040.2
+	ENDNODECON
+	TIME 01/01/2020
+    CONSTRAINTS
+    node*  QWSMAX 100 QOSMAX 2.02
+    ENDCONSTRAINTS
+    TIME 01/02/2020
+    NODECON
+	NAME            NODEIN    NODEOUT       TYPE        METHOD    DDEPTH
+    node_3            node_3      wh_node_3      PIPE        2          7334
+	ENDNODECON
+    
+    CONSTRAINTS
+    node* QWSMAX 200 QOSMAX 300
+    ENDCONSTRAINTS
+    ''',
+    [{'name': 'node_1', 'date': '01/01/2020', 'max_surface_water_rate': 100.0, 'max_surface_oil_rate': 2.02,
+      'unit_system': UnitSystem.ENGLISH},
+    {'name': 'node_2', 'date': '01/01/2020', 'max_surface_water_rate': 100.0, 'max_surface_oil_rate': 2.02,
+      'unit_system': UnitSystem.ENGLISH},
+
+    {'name': 'node_1', 'date': '01/02/2020', 'max_surface_water_rate': 200.0, 'max_surface_oil_rate': 300.0,
+      'unit_system': UnitSystem.ENGLISH},
+    {'name': 'node_2', 'date': '01/02/2020', 'max_surface_water_rate': 200.0, 'max_surface_oil_rate': 300.0,
+      'unit_system': UnitSystem.ENGLISH},
+    {'name': 'node_3', 'date': '01/02/2020', 'max_surface_water_rate': 200.0, 'max_surface_oil_rate': 300.0,
+      'unit_system': UnitSystem.ENGLISH},
+    ],
+    ),
+    ], ids=['basic_test', 'with extra nodes', 'with extra constraints', 'wildcard in the middle + case sensitivity',
+            'previous time card'])
 def test_read_wildcard(mocker, file_contents, expected_constraints):
     # Arrange
     fcs_file_contents = '''
@@ -56,4 +139,3 @@ def test_read_wildcard(mocker, file_contents, expected_constraints):
     result = nexus_sim.network.Constraints.get_constraints()
     # Assert
     assert result == expected_result
-

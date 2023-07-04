@@ -6,10 +6,9 @@ from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.nexus_file_operations import get_next_value, correct_datatypes
 from ResSimpy.Utils.invert_nexus_map import nexus_keyword_to_attribute_name
-
+import fnmatch
 if TYPE_CHECKING:
     from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-    from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
 def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConstraint], current_date: Optional[str],
                             unit_system: UnitSystem, property_map: dict[str, tuple[str, type]],
@@ -45,7 +44,8 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
             if network_names is None:
                 raise ValueError('No existing nodes found to add wildcards to')
             else:
-                constraint_names_to_add = network_names
+                # filter names that match the pattern
+                constraint_names_to_add = fnmatch.filter(network_names, name)
         else:
             constraint_names_to_add.append(name)
 
