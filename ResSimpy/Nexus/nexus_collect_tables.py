@@ -21,8 +21,7 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
     table_object_map (dict[str, Storage_Object]): dictionary containing the name of the table as keys and \
                 the object type to store the data from each row into. Require objects to have a get_nexus_mapping \
                 function
-    start_date (str): Starting date of the run
-    default_units (UnitSystem): Units used in case not specified by file.
+    model: (NexusSimulator): main simulator object
 
     Raises:
     ------
@@ -42,6 +41,7 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
     table_end: int = -1
     property_dict: dict = {}
     token_found: Optional[str] = None
+    network_names: list[str] = []
     for index, line in enumerate(file_as_list):
         # check for changes in unit system
         check_property_in_line(line, property_dict, file_as_list)
@@ -81,15 +81,19 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
                 load_inline_constraints(file_as_list=file_as_list[table_start:table_end],
                                         constraint=table_object_map[token_found],
                                         current_date=current_date,
-                                        unit_system=unit_system, property_map=property_map,
+                                        unit_system=unit_system,
+                                        property_map=property_map,
                                         existing_constraints=nexus_constraints,
                                         nexus_file=nexus_file,
-                                        start_line_index=table_start)
+                                        start_line_index=table_start,
+                                        network_names=network_names,
+                                        )
 
             elif token_found == 'QMULT' or token_found == 'CONSTRAINT':
                 list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
                                                      row_object=table_object_map[token_found],
-                                                     property_map=property_map, current_date=current_date,
+                                                     property_map=property_map,
+                                                     current_date=current_date,
                                                      unit_system=unit_system,
                                                      nexus_obj_dict=nexus_constraints,
                                                      preserve_previous_object_attributes=True)
@@ -97,8 +101,9 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
             else:
                 list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
                                                      row_object=table_object_map[token_found],
-                                                     property_map=property_map, current_date=current_date,
-                                                     unit_system=unit_system, nexus_obj_dict=None)
+                                                     property_map=property_map,
+                                                     current_date=current_date,
+                                                     unit_system=unit_system)
 
             # store objects found into right dictionary
             list_of_token_obj = nexus_object_results[token_found]
@@ -122,9 +127,10 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
                         nexus_constraints[well_name] = [constraint]
             elif list_objects is not None and isinstance(list_of_token_obj, list):
                 list_of_token_obj.extend([x[0] for x in list_objects])
+                # add the names from the nodes into the network names for wildcards
+                network_names.extend([x.name for x in list_of_token_obj])
             else:
                 list_of_token_obj = nexus_constraints
-
             # reset indices for further tables
             table_start = -1
             table_end = -1
