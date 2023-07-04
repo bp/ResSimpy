@@ -221,7 +221,7 @@ def test_load_constraints(mocker, file_contents, expected_content):
     assert result_date_filtered == expected_date_filtered_constraints
 
 
-@pytest.mark.parametrize('file_contents, object_locations',[
+@pytest.mark.parametrize('file_contents, object_locations', [
         ('''CONSTRAINTS
         ! comment
             well1	 QLIQSMAX 	3884.0  QWSMAX 	0

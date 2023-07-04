@@ -6,7 +6,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.nexus_file_operations import get_next_value, correct_datatypes
 from ResSimpy.Utils.invert_nexus_map import nexus_keyword_to_attribute_name
-
+import fnmatch
 if TYPE_CHECKING:
     from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConstraint], current_date: Optional[str],
                             unit_system: UnitSystem, property_map: dict[str, tuple[str, type]],
                             existing_constraints: dict[str, list[NexusConstraint]], nexus_file: NexusFile,
-                            start_line_index: int) -> None:
+                            start_line_index: int, network_names: Optional[list[str]] = None) -> None:
     """Loads table of constraints with the wellname/node first and the constraints following inline
         uses previous set of constraints as still applied to the well.
 
@@ -25,7 +25,10 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
         current_date (str): the current date in the table
         unit_system (UnitSystem): Unit system enum
         property_map (dict[str, tuple[str, type]]): Mapping of nexus keywords to attributes
-        existing_constraints (dict[str, NexusConstraint]):
+        existing_constraints (dict[str, NexusConstraint]): all existing constraints from previous lines of the \
+            surface file
+        network_names (Optional[list[str]]): list of names for all nodes, wells and connections in a nexus network.
+            Used in deriving constraints from wildcards. Defaults to None
 
     Returns:
     -------
@@ -37,9 +40,19 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
         # first value in the line has to be the node/wellname
         name = get_next_value(0, [line])
         nones_overwrite = False
+        constraint_names_to_add: list[str] = []
         if name is None:
             continue
         properties_dict['name'] = name
+        if '*' in name:
+            if network_names is None:
+                raise ValueError('No existing nodes found to add wildcards to')
+            else:
+                # filter names that match the pattern
+                constraint_names_to_add = fnmatch.filter(network_names, name)
+        else:
+            constraint_names_to_add.append(name)
+
         trimmed_line = line.replace(name, "", 1)
         next_value = get_next_value(0, [trimmed_line])
         # loop through the line for each set of constraints
@@ -77,22 +90,24 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
             next_value = get_next_value(0, [trimmed_line])
 
         # first check if there are any existing constraints created for the well this timestep
-        well_constraints = existing_constraints.get(name, None)
-        if well_constraints is not None:
-            latest_constraint = well_constraints[-1]
-            if latest_constraint.date == current_date:
-                latest_constraint.update(properties_dict, nones_overwrite)
-                nexus_file.add_object_locations(latest_constraint.id, [index + start_line_index])
+        for name_of_node in constraint_names_to_add:
+            properties_dict['name'] = name_of_node
+            well_constraints = existing_constraints.get(name_of_node, None)
+            if well_constraints is not None:
+                latest_constraint = well_constraints[-1]
+                if latest_constraint.date == current_date:
+                    latest_constraint.update(properties_dict, nones_overwrite)
+                    nexus_file.add_object_locations(latest_constraint.id, [index + start_line_index])
+                else:
+                    # otherwise take a copy of the previous constraint and add the additional properties
+                    new_constraint = constraint(properties_dict)
+                    well_constraints.append(new_constraint)
+                    nexus_file.add_object_locations(new_constraint.id, [index + start_line_index])
             else:
-                # otherwise take a copy of the previous constraint and add the additional properties
-                new_constraint = constraint(properties_dict)
-                well_constraints.append(new_constraint)
-                nexus_file.add_object_locations(new_constraint.id, [index + start_line_index])
-        else:
-            nexus_constraint = constraint(properties_dict)
+                nexus_constraint = constraint(properties_dict)
 
-            existing_constraints[name] = [nexus_constraint]
-            nexus_file.add_object_locations(nexus_constraint.id, [index + start_line_index])
+                existing_constraints[name_of_node] = [nexus_constraint]
+                nexus_file.add_object_locations(nexus_constraint.id, [index + start_line_index])
 
 
 def __clear_constraints(token_value, constraint) -> dict[str, None]:
