@@ -10,6 +10,7 @@ import fnmatch
 if TYPE_CHECKING:
     from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
+
 def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConstraint], current_date: Optional[str],
                             unit_system: UnitSystem, property_map: dict[str, tuple[str, type]],
                             existing_constraints: dict[str, list[NexusConstraint]], nexus_file: NexusFile,
