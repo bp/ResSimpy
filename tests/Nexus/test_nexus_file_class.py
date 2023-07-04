@@ -2,6 +2,8 @@ import os
 import uuid
 
 import pytest
+from pytest_mock import MockerFixture
+
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.load_wells import load_wells
@@ -241,7 +243,7 @@ def test_iterate_line_nested(max_depth, expected_results):
 
 
 @pytest.mark.parametrize("test_file_contents", [
-    ('basic_file KH VAlUE INCLUDE nexus_data/inc_file1.inc'),
+    ('basic_file KH VAlUE Include nexus_data/inc_file1.inc'),
     ('basic_file KH VAlUE\n\n INCLUDE nexus_data/inc_file1.inc'),
     ('basic_file KH VAlUE !comment\n\n INCLUDE nexus_data/inc_file1.inc'),
     ('basic_file KH VAlUE\n\n INCLUDE nexus_data/inc_file1.inc\n\nVALUE 10'),
@@ -278,6 +280,71 @@ def test_generate_file_include_structure_skip_array(mocker, test_file_contents):
     assert len(nexus_file.include_objects) == 1
     assert nexus_file.include_objects[0] == expected_result
 
+@pytest.mark.parametrize("file_with_nested_grid_array_contents, expected_file_contents", [
+    ("""C Corner point grid layout
+C
+NX     NY     NZ
+178    91     181
+RIGHTHANDED
+C Origin (UTM coords)
+C (X,Y)=(0.000000,0.000000)
+C
+C
+ARRAYS
+C
+C Size of corner point grid (cols,rows,layers)
+C 178  91 181
+C
+CORP VALUE
+C    
+1 2 3 234234 12313""",
+
+"""C Corner point grid layout
+C
+NX     NY     NZ
+178    91     181
+RIGHTHANDED
+C Origin (UTM coords)
+C (X,Y)=(0.000000,0.000000)
+C
+C
+ARRAYS
+C
+C Size of corner point grid (cols,rows,layers)
+C 178  91 181
+C
+CORP VALUE
+"""),
+], ids=['basic_test'])
+def test_generate_file_include_structure_skip_file_with_nested_array(mocker: MockerFixture,
+                                                                     file_with_nested_grid_array_contents: str,
+                                                                     expected_file_contents: str):
+    # Arrange
+    file_path = '/origin/path/test_file_path.dat'
+    parent_file_contents = 'INCLUDE nexus_data/inc_file1.inc'
+    expected_include_file_path = os.path.join('/origin/path', 'nexus_data/inc_file1.inc')
+    expected_file_contents_as_list = expected_file_contents.splitlines(keepends=True)
+
+    expected_included_file = NexusFile(location=expected_include_file_path, include_locations=None,
+                                    origin=file_path, include_objects=None,
+                                    file_content_as_list=expected_file_contents_as_list)
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            file_path: parent_file_contents,
+            expected_include_file_path: file_with_nested_grid_array_contents,
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act
+    nexus_file = NexusFile.generate_file_include_structure(file_path, skip_arrays=True)
+
+    # Assert
+    assert len(nexus_file.include_objects) == 1
+    assert nexus_file.include_objects[0].file_content_as_list == expected_included_file.file_content_as_list
+    assert nexus_file.include_objects[0] == expected_included_file
 
 @pytest.mark.parametrize("test_file_contents, expected_results",
                          [('''       WELLSPEC DEV1
