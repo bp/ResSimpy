@@ -596,10 +596,14 @@ def test_included_fault_tables(mocker):
         'NAME': ['F1', 'F1', 'F1', 'F1', 'F2', 'F2', 'F2', 'F2'],
         'FACE': ['I', 'I', 'J', 'J', 'I-', 'I-', 'J', 'J']}
         )
-    expected_df = expected_df.astype({'I1': 'int64', 'I2': 'int64', 'J1': 'int64', 'J2': 'int64',
-                                      'K1': 'int64', 'K2': 'int64'})
+
+    comparison_types = {'I1': 'int32', 'I2': 'int32', 'J1': 'int32', 'J2': 'int32',
+                        'K1': 'int32', 'K2': 'int32'}
+
+    expected_df = expected_df.astype(comparison_types)
     # Act
     simulation = NexusSimulator(origin=fcs_path)
     faults_df = simulation.StructuredGrid.get_faults_df()
+    faults_df = faults_df.astype(comparison_types)
     # Assert
     pd.testing.assert_frame_equal(expected_df, faults_df)
