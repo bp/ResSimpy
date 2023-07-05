@@ -21,17 +21,17 @@ class Simulator(ABC):
 
     def __init__(self, start_date: str = '') -> None:
         self.__start_date: str = start_date
-        self.__wells: Wells = Wells()
-        self.pvt: PVT = PVT()
-        self.separator: Separator = Separator()
-        self.water: Water = Water()
-        self.equil: Equilibration = Equilibration()
-        self.rock: Rock = Rock()
-        self.relperm: RelPerm = RelPerm()
-        self.valve: Valve = Valve()
-        self.aquifer: Aquifer = Aquifer()
-        self.hydraulics: Hydraulics = Hydraulics()
-        self.gaslift: Gaslift = Gaslift()
+        self._wells: Wells = Wells()
+        self._pvt: PVT = PVT()
+        self._separator: Separator = Separator()
+        self._water: Water = Water()
+        self._equil: Equilibration = Equilibration()
+        self._rock: Rock = Rock()
+        self._relperm: RelPerm = RelPerm()
+        self._valve: Valve = Valve()
+        self._aquifer: Aquifer = Aquifer()
+        self._hydraulics: Hydraulics = Hydraulics()
+        self._gaslift: Gaslift = Gaslift()
 
     """Class Properties"""
 
@@ -44,121 +44,47 @@ class Simulator(ABC):
 
     @property
     def wells(self) -> Wells:
-        return self.__wells
-
-    @wells.setter
-    def wells(self, cls):
-        if not isinstance(cls, Wells):
-            raise ValueError(f"Wells must take a valid Wells type. Instead got provided class of {type(cls)}")
-        self.__wells = cls
+        return self._wells
 
     @property
     def pvt(self) -> PVT:
-        return self.pvt
-
-    @pvt.setter
-    def pvt(self, cls):
-        if not isinstance(cls, PVT):
-            raise ValueError(f"pvt must take a valid pvt type."
-                             f"Instead got provided class of {type(cls)}")
-        self.pvt = cls
+        return self._pvt
 
     @property
     def separator(self) -> Separator:
-        return self.separator
-
-    @separator.setter
-    def separator(self, cls):
-        if not isinstance(cls, Separator):
-            raise ValueError(f"separator must take a valid separator type."
-                             F"Instead got provided class of {type(cls)}")
-        self.separator = cls
+        return self._separator
 
     @property
     def water(self) -> Water:
-        return self.water
-
-    @water.setter
-    def water(self, cls):
-        if not isinstance(cls, Water):
-            raise ValueError(f"water must take a valid water type."
-                             f"Instead got provided class of {type(cls)}")
-        self.water = cls
+        return self._water
 
     @property
     def equil(self) -> Equilibration:
-        return self.equil
-
-    @equil.setter
-    def equil(self, cls):
-        if not isinstance(cls, Equilibration):
-            raise ValueError(f"equil must take a valid equil type."
-                             f"Instead got provided class of {type(cls)}")
-        self.equil = cls
+        return self._equil
 
     @property
     def rock(self) -> Rock:
-        return self.rock
-
-    @rock.setter
-    def rock(self, cls):
-        if not isinstance(cls, Rock):
-            raise ValueError(f"rock must take a valid rock type."
-                             f"Instead got provided class of {type(cls)}")
-        self.rock = cls
+        return self._rock
 
     @property
     def relperm(self) -> RelPerm:
-        return self.relperm
-
-    @relperm.setter
-    def relperm(self, cls):
-        if not isinstance(cls, RelPerm):
-            raise ValueError(f"relperm must take a valid relperm type."
-                             f"Instead got provided class of {type(cls)}")
-        self.relperm = cls
+        return self._relperm
 
     @property
     def valve(self) -> Valve:
-        return self.valve
-
-    @valve.setter
-    def valve(self, cls):
-        if not isinstance(cls, Valve):
-            raise ValueError(f"valve must take a valid valve type."
-                             f"Instead got provided class of {type(cls)}")
-        self.valve = cls
+        return self._valve
 
     @property
     def aquifer(self) -> Aquifer:
-        return self.aquifer
-
-    @aquifer.setter
-    def aquifer(self, cls):
-        if not isinstance(cls, Aquifer):
-            raise ValueError(f"aquifer must take a valid aquifer type."
-                             f"Instead got provided class of {type(cls)}")
-        self.aquifer = cls
+        return self._aquifer
 
     @property
     def hydraulics(self) -> Hydraulics:
-        return self.hydraulics
-
-    @hydraulics.setter
-    def hydraulics(self, cls):
-        if not isinstance(cls, Hydraulics):
-            raise ValueError(f"hydraulics must take a valid hydraulics type. Instead got provided class of {type(cls)}")
-        self.hydraulics = cls
+        return self._hydraulics
 
     @property
     def gaslift(self) -> Gaslift:
-        return self.gaslift
-
-    @gaslift.setter
-    def gaslift(self, cls):
-        if not isinstance(cls, Gaslift):
-            raise ValueError(f"gaslift must take a valid gaslift type. Instead got provided class of {type(cls)}")
-        self.gaslift = cls
+        return self._gaslift
 
     """ Class Methods """
 
@@ -170,5 +96,3 @@ class Simulator(ABC):
     @abstractmethod
     def model_location(self) -> str:
         raise NotImplementedError("This method has not been implemented for this simulator yet")
-
-

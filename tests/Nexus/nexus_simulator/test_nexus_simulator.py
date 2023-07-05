@@ -965,7 +965,7 @@ def test_get_wells(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.wells.get_wells()
+    result = simulation._wells.get_wells()
 
     # Assert
     assert result == loaded_wells
@@ -1003,7 +1003,7 @@ def test_get_wells_windows(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path\nexus_run.fcs')
 
     # Act
-    result = simulation.wells.get_wells()
+    result = simulation._wells.get_wells()
 
     # Assert
     assert result == loaded_wells
@@ -1039,7 +1039,7 @@ def test_get_wells_df(mocker: MockerFixture):
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
     simulation = NexusSimulator(origin='nexus_run.fcs')
     # Act
-    result = simulation.wells.get_wells_df()
+    result = simulation._wells.get_wells_df()
     # Assert
 
     pd.testing.assert_frame_equal(result, loaded_wells_df, check_like=True)
@@ -1078,7 +1078,7 @@ def test_get_well(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.wells.get_well(well_name='WELL2')
+    result = simulation._wells.get_well(well_name='WELL2')
 
     # Assert
     assert result == loaded_wells[1]
@@ -1118,7 +1118,7 @@ def test_get_well_windows(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path\\nexus_run.fcs')
 
     # Act
-    result = simulation.wells.get_well(well_name='WELL2')
+    result = simulation._wells.get_well(well_name='WELL2')
 
     # Assert
     assert result == loaded_wells[1]
@@ -1164,7 +1164,7 @@ def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.pvt.inputs
+    result = simulation._pvt.inputs
 
     # Assert
     assert result == loaded_pvt
@@ -1465,7 +1465,7 @@ def test_get_aquifer(mocker: MockerFixture, fcs_file_contents: str):
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.aquifer.inputs
+    result = simulation._aquifer.inputs
 
     # Assert
     assert result == loaded_aquifers

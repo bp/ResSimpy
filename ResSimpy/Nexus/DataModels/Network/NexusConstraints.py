@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Mapping, Sequence
 from uuid import UUID
 
 import pandas as pd
 
+from ResSimpy.Constraints import Constraints
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -19,7 +20,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class NexusConstraints:
+class NexusConstraints(Constraints):
     __constraints: dict[str, list[NexusConstraint]] = field(default_factory=lambda: {})
 
     def __init__(self, parent_network: NexusNetwork, model: NexusSimulator) -> None:
@@ -28,7 +29,7 @@ class NexusConstraints:
         self.__model: NexusSimulator = model
 
     def get_constraints(self, object_name: Optional[str] = None, date: Optional[str] = None) -> \
-            dict[str, list[NexusConstraint]]:
+            Mapping[str, Sequence[NexusConstraint]]:
         """Get the constraints of the existing model with optional parameters to filter for name and date
         Args:
             object_name (Optional[str]): name of the connection, node or wellname to return. Defaults to None.

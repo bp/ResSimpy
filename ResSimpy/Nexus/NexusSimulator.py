@@ -96,20 +96,19 @@ class NexusSimulator(Simulator):
         self.use_american_input_units: bool = False
         self.__write_times: bool = write_times
         self.__manual_fcs_tidy_call: bool = manual_fcs_tidy_call
-        self.__surface_file_path: Optional[str] = None
-        self.wells: NexusWells = NexusWells(self)
+        self._wells: NexusWells = NexusWells(self)
         self.__default_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
         # Model dynamic properties
-        self.pvt: NexusPVTMethods = NexusPVTMethods()
-        self.separator: NexusSeparatorMethods = NexusSeparatorMethods()
-        self.water: NexusWaterMethods = NexusWaterMethods()
-        self.equil: NexusEquilMethods = NexusEquilMethods()
-        self.rock: NexusRockMethods = NexusRockMethods()
-        self.relperm: NexusRelPermMethods = NexusRelPermMethods()
-        self.valve: NexusValveMethods = NexusValveMethods()
-        self.aquifer: NexusAquiferMethods = NexusAquiferMethods()
-        self.hydraulics: NexusHydraulicsMethods = NexusHydraulicsMethods()
-        self.gaslift: NexusGasliftMethods = NexusGasliftMethods()
+        self._pvt: NexusPVTMethods = NexusPVTMethods()
+        self._separator: NexusSeparatorMethods = NexusSeparatorMethods()
+        self._water: NexusWaterMethods = NexusWaterMethods()
+        self._equil: NexusEquilMethods = NexusEquilMethods()
+        self._rock: NexusRockMethods = NexusRockMethods()
+        self._relperm: NexusRelPermMethods = NexusRelPermMethods()
+        self._valve: NexusValveMethods = NexusValveMethods()
+        self._aquifer: NexusAquiferMethods = NexusAquiferMethods()
+        self._hydraulics: NexusHydraulicsMethods = NexusHydraulicsMethods()
+        self._gaslift: NexusGasliftMethods = NexusGasliftMethods()
         # Nexus operations modules
         self.sim_controls: SimControls = SimControls(self)
         self.reporting: Reporting = Reporting(self)
@@ -143,7 +142,7 @@ class NexusSimulator(Simulator):
         if self.__new_fcs_file_path is None:
             raise ValueError(
                 "No __new_fcs_file_path found, can't remove temporary properties from file path")
-        if self.__surface_file_path is None:
+        if self.model_files.surface_files[1] is None or self.model_files.surface_files[1].location is None:
             raise ValueError(
                 "No __surface_file_path found, can't remove temporary properties from file path")
 
@@ -152,7 +151,7 @@ class NexusSimulator(Simulator):
         self.model_files.structured_grid_file.location = \
             self.model_files.structured_grid_file.location.replace('temp/', '', 1)
         self.__new_fcs_file_path = self.__new_fcs_file_path.replace('temp/', '', 1)
-        self.__surface_file_path = self.__surface_file_path.replace('temp/', '', 1)
+        self.model_files.surface_files[1].location = self.model_files.surface_files[1].location.replace('temp/', '', 1)
 
     def get_simulation_status(self, from_startup: bool = False) -> Optional[str]:
         return self.logging.get_simulation_status(from_startup)
@@ -383,9 +382,9 @@ class NexusSimulator(Simulator):
         Returns:
             str: fluid type as one of [BLACKOIL, WATEROIL, GASWATER,] or the full details from an EOS model
         """
-        if self.__surface_file_path is None:
-            raise ValueError("No value provided for the __surface_file_path")
-        return NexusSimulator.get_fluid_type(self.__surface_file_path)
+        if self.model_files.surface_files is None or self.model_files.surface_files[1].location is None:
+            raise ValueError("No value found for the path to the surface file")
+        return NexusSimulator.get_fluid_type(self.model_files.surface_files[1].location)
 
     def check_output_path(self) -> None:
         """Confirms that the output path has been set (used to stop accidental writing operations in the original
@@ -450,52 +449,52 @@ class NexusSimulator(Simulator):
         # Read in PVT properties from Nexus PVT method files
         if self.model_files.pvt_files is not None and \
                 len(self.model_files.pvt_files) > 0:
-            self.pvt = NexusPVTMethods(files=self.model_files.pvt_files)
+            self._pvt = NexusPVTMethods(files=self.model_files.pvt_files)
 
         # Read in separator properties from Nexus separator method files
         if self.model_files.separator_files is not None and \
                 len(self.model_files.separator_files) > 0:
-            self.separator = NexusSeparatorMethods(files=self.model_files.separator_files)
+            self._separator = NexusSeparatorMethods(files=self.model_files.separator_files)
 
         # Read in water properties from Nexus water method files
         if self.model_files.water_files is not None and \
                 len(self.model_files.water_files) > 0:
-            self.water = NexusWaterMethods(files=self.model_files.water_files)
+            self._water = NexusWaterMethods(files=self.model_files.water_files)
 
         # Read in equilibration properties from Nexus equil method files
         if self.model_files.equil_files is not None and \
                 len(self.model_files.equil_files) > 0:
-            self.equil = NexusEquilMethods(files=self.model_files.equil_files)
+            self._equil = NexusEquilMethods(files=self.model_files.equil_files)
 
         # Read in rock properties from Nexus rock method files
         if self.model_files.rock_files is not None and \
                 len(self.model_files.rock_files) > 0:
-            self.rock = NexusRockMethods(files=self.model_files.rock_files)
+            self._rock = NexusRockMethods(files=self.model_files.rock_files)
 
         # Read in relative permeability and capillary pressure properties from Nexus relperm method files
         if self.model_files.relperm_files is not None and \
                 len(self.model_files.relperm_files) > 0:
-            self.relperm = NexusRelPermMethods(files=self.model_files.relperm_files)
+            self._relperm = NexusRelPermMethods(files=self.model_files.relperm_files)
 
         # Read in valve and choke properties from Nexus valve method files
         if self.model_files.valve_files is not None and \
                 len(self.model_files.valve_files) > 0:
-            self.valve = NexusValveMethods(files=self.model_files.valve_files)
+            self._valve = NexusValveMethods(files=self.model_files.valve_files)
 
         # Read in aquifer properties from Nexus aquifer method files
         if self.model_files.aquifer_files is not None and \
                 len(self.model_files.aquifer_files) > 0:
-            self.aquifer = NexusAquiferMethods(files=self.model_files.aquifer_files)
+            self._aquifer = NexusAquiferMethods(files=self.model_files.aquifer_files)
 
         # Read in hydraulics properties from Nexus hyd method files
         if self.model_files.hyd_files is not None and \
                 len(self.model_files.hyd_files) > 0:
-            self.hydraulics = NexusHydraulicsMethods(files=self.model_files.hyd_files)
+            self._hydraulics = NexusHydraulicsMethods(files=self.model_files.hyd_files)
 
         # Read in gaslift properties from Nexus gaslift method files
         if self.model_files.gas_lift_files is not None and \
                 len(self.model_files.gas_lift_files) > 0:
-            self.gaslift = NexusGasliftMethods(files=self.model_files.gas_lift_files)
+            self._gaslift = NexusGasliftMethods(files=self.model_files.gas_lift_files)
 
         # === End of dynamic properties loading ===
 
@@ -503,9 +502,6 @@ class NexusSimulator(Simulator):
         if self.model_files.runcontrol_file is not None:
             self.run_control_file_path = self.model_files.runcontrol_file.location
             self.sim_controls.load_run_control_file()
-        if self.model_files.surface_files is not None:
-            # TODO support multiple surface file paths
-            self.__surface_file_path = list(self.model_files.surface_files.values())[0].location
 
         if self.model_files.structured_grid_file is not None:
             self.__structured_grid = StructuredGridFile.load_structured_grid_file(self.model_files.structured_grid_file,
@@ -690,7 +686,9 @@ class NexusSimulator(Simulator):
 
     def get_surface_file_path(self):
         """Get the surface file path."""
-        return self.__surface_file_path
+        if self.model_files.surface_files is None or self.model_files.surface_files[1] is None:
+            raise ValueError('No path found for surface file.')
+        return self.model_files.surface_files[1].location
 
     def load_network(self):
         """Populates nodes and connections from a surface file."""
