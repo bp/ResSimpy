@@ -234,9 +234,9 @@ def test_remove_constraint(mocker, file_contents, expected_result_file, constrai
             expected_constraint_dict[node_name].append(NexusConstraint(constraint_dict))
 
     # Act
-    nexus_sim.network.Constraints.get_constraints()
-    nexus_sim.network.Constraints.remove_constraint(constraint_to_remove)
-    result = nexus_sim.network.Constraints.get_constraints()
+    nexus_sim.network.constraints.get_constraints()
+    nexus_sim.network.constraints.remove_constraint(constraint_to_remove)
+    result = nexus_sim.network.constraints.get_constraints()
 
     # Assert
     assert result == expected_constraint_dict
@@ -435,7 +435,7 @@ def test_add_constraint(mocker, file_contents, expected_file_contents, new_const
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
                                                     'uuid4', 'uuid5', 'uuid6'])
     # Act
-    nexus_sim.network.Constraints.add_constraint('well3', new_constraint)
+    nexus_sim.network.constraints.add_constraint('well3', new_constraint)
     # Assert
     assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
     check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
@@ -570,7 +570,7 @@ def test_modify_constraints(mocker, file_contents, expected_file_contents, curre
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
                                                     'uuid4', 'uuid5', 'uuid6', 'uuid7'])
     # Act
-    nexus_sim.network.Constraints.modify_constraint('well1', current_constraint, new_constraint)
+    nexus_sim.network.constraints.modify_constraint('well1', current_constraint, new_constraint)
     # Assert
     assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
     check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
@@ -623,4 +623,4 @@ def test_modify_constraint_no_constraint_found(mocker, current_constraint, new_c
                                                     'uuid4', 'uuid5', 'uuid6', 'uuid7'])
     # Act
     with pytest.raises(ValueError) as ve:
-        nexus_sim.network.Constraints.modify_constraint('well1', current_constraint, new_constraint)
+        nexus_sim.network.constraints.modify_constraint('well1', current_constraint, new_constraint)
