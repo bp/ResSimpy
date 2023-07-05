@@ -62,10 +62,10 @@ class NexusNetwork:
                 surface files keyed by method number
         """
         if method_number is None:
-            return self.__model.fcs_file.surface_files
-        if self.__model.fcs_file.surface_files is None:
+            return self.__model.model_files.surface_files
+        if self.__model.model_files.surface_files is None:
             return None
-        return self.__model.fcs_file.surface_files.get(method_number)
+        return self.__model.model_files.surface_files.get(method_number)
 
     def load(self) -> None:
         """Loads all the objects from the surface files in the Simulator class.
@@ -86,10 +86,10 @@ class NexusNetwork:
             return input
 
         # TODO implement all objects with Nones next to them in the dictionary below
-        if self.__model.fcs_file.surface_files is None:
+        if self.__model.model_files.surface_files is None:
             raise FileNotFoundError('Could not find any surface files associated with the fcs file provided.')
 
-        for surface in self.__model.fcs_file.surface_files.values():
+        for surface in self.__model.model_files.surface_files.values():
             nexus_obj_dict = collect_all_tables_to_objects(
                 surface, {'NODECON': NexusNodeConnection,
                           'NODES': NexusNode,

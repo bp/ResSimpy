@@ -213,10 +213,10 @@ class Runcontrol:
             None: writes out a file at the same path as the existing runcontrol file
         """
         self.__model.check_output_path()
-        if self.__model.fcs_file.runcontrol_file is None or self.__model.fcs_file.runcontrol_file.location is None:
-            raise ValueError(f"No file path found for {self.__model.fcs_file}")
-        file_content = self.__model.fcs_file.runcontrol_file.get_flat_list_str_file
-        filename = self.__model.fcs_file.runcontrol_file.location
+        if self.__model.model_files.runcontrol_file is None or self.__model.model_files.runcontrol_file.location is None:
+            raise ValueError(f"No file path found for {self.__model.model_files}")
+        file_content = self.__model.model_files.runcontrol_file.get_flat_list_str_file
+        filename = self.__model.model_files.runcontrol_file.location
 
         new_file_content = self.__model.runcontrol.delete_times(file_content)
 
@@ -247,13 +247,13 @@ class Runcontrol:
         Raises:
             ValueError: if the run_control_file attribute is None.
         """
-        if self.__model.fcs_file.runcontrol_file is None:
-            warnings.warn(f"Run control file path not found for {self.__model.fcs_file.location}")
+        if self.__model.model_files.runcontrol_file is None:
+            warnings.warn(f"Run control file path not found for {self.__model.model_files.location}")
             return
-        run_control_file_content = self.__model.fcs_file.runcontrol_file.get_flat_list_str_file
+        run_control_file_content = self.__model.model_files.runcontrol_file.get_flat_list_str_file
 
-        if (run_control_file_content is None) or (self.__model.fcs_file.runcontrol_file.location is None):
-            raise ValueError(f"No file path provided for {self.__model.fcs_file.runcontrol_file.location=}")
+        if (run_control_file_content is None) or (self.__model.model_files.runcontrol_file.location is None):
+            raise ValueError(f"No file path provided for {self.__model.model_files.runcontrol_file.location=}")
 
         # set the start date
         for line in run_control_file_content:
@@ -282,10 +282,10 @@ class Runcontrol:
         # If we don't want to write the times, return here.
         if not self.__model.write_times:
             return
-        if self.__model.fcs_file.runcontrol_file.include_locations is None:
-            warnings.warn(f'No includes files found in {self.__model.fcs_file.runcontrol_file.location}')
+        if self.__model.model_files.runcontrol_file.include_locations is None:
+            warnings.warn(f'No includes files found in {self.__model.model_files.runcontrol_file.location}')
             return
-        for file in self.__model.fcs_file.runcontrol_file.include_locations:
+        for file in self.__model.model_files.runcontrol_file.include_locations:
             if self.__model.destination is not None:
                 self.remove_times_from_file(run_control_file_content, file)
 

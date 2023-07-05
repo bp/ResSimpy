@@ -68,9 +68,9 @@ class NexusWells(Wells):
         return df_store
 
     def load_wells(self) -> None:
-        if self.__model.fcs_file.well_files is None:
+        if self.__model.model_files.well_files is None:
             raise FileNotFoundError('No wells files found for current model.')
-        for method_number, well_file in self.__model.fcs_file.well_files.items():
+        for method_number, well_file in self.__model.model_files.well_files.items():
             if well_file.location is None:
                 warnings.warn(f'Well file location has not been found for {well_file}')
                 continue
@@ -167,7 +167,7 @@ class NexusWells(Wells):
         # add completion in memory
         new_completion = well._add_completion_to_memory(completion_date, completion_properties)
 
-        if self.__model.fcs_file.well_files is None:
+        if self.__model.model_files.well_files is None:
             raise FileNotFoundError('No well file found, cannot modify ')
 
         wellspec_file = self.__find_which_wellspec_file_from_completion_id(well_id)
@@ -281,9 +281,9 @@ class NexusWells(Wells):
 
     def __find_which_wellspec_file_from_completion_id(self, completion_id: UUID) -> NexusFile:
         # find the correct wellspec file in the model by looking at the ids
-        if self.__model.fcs_file.well_files is None:
-            raise ValueError(f'No wells file found in fcs file at: {self.__model.fcs_file.location}')
-        wellspec_files = [x for x in self.__model.fcs_file.well_files.values() if x.object_locations is not None and
+        if self.__model.model_files.well_files is None:
+            raise ValueError(f'No wells file found in fcs file at: {self.__model.model_files.location}')
+        wellspec_files = [x for x in self.__model.model_files.well_files.values() if x.object_locations is not None and
                           completion_id in x.object_locations]
         if len(wellspec_files) == 0:
             raise FileNotFoundError(f'No well file found with an existing well that has completion id: {completion_id}')

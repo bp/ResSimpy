@@ -437,12 +437,12 @@ def test_add_constraint(mocker, file_contents, expected_file_contents, new_const
     # Act
     nexus_sim.network.Constraints.add_constraint('well3', new_constraint)
     # Assert
-    assert nexus_sim.fcs_file.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
+    assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
     check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
                                      modifying_mock_open=writing_mock_open,
                                      mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
                                      number_of_writes=expected_number_writes)
-    assert nexus_sim.fcs_file.surface_files[1].object_locations == expected_uuid
+    assert nexus_sim.model_files.surface_files[1].object_locations == expected_uuid
 
 
 @pytest.mark.parametrize("constraint, expected_string", [
@@ -572,12 +572,12 @@ def test_modify_constraints(mocker, file_contents, expected_file_contents, curre
     # Act
     nexus_sim.network.Constraints.modify_constraint('well1', current_constraint, new_constraint)
     # Assert
-    assert nexus_sim.fcs_file.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
+    assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
     check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
                                      modifying_mock_open=writing_mock_open,
                                      mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
                                      number_of_writes=expected_number_writes)
-    assert nexus_sim.fcs_file.surface_files[1].object_locations == expected_uuid
+    assert nexus_sim.model_files.surface_files[1].object_locations == expected_uuid
 
 @pytest.mark.parametrize('current_constraint, new_constraint',[
 # well name not found

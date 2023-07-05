@@ -332,6 +332,6 @@ def test_constraint_ids(mocker, file_contents, object_locations):
     # Act
     model.network.Constraints.get_constraints()
 
-    result = model.fcs_file.surface_files[1].object_locations
+    result = model.model_files.surface_files[1].object_locations
     # Assert
     assert result == object_locations

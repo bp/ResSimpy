@@ -126,7 +126,7 @@ class NexusSimulator(Simulator):
         # Check the status of any existing or completed runs related to this model
         self.get_simulation_status(from_startup=True)
 
-        self.fcs_file: FcsNexusFile
+        self.model_files: FcsNexusFile
         # Load in the model
         self.__load_fcs_file()
 
@@ -137,7 +137,7 @@ class NexusSimulator(Simulator):
         Raises:
             ValueError: if any of [__structured_grid_file_path, __new_fcs_file_path, __surface_file_path] are None.
         """
-        if self.fcs_file.structured_grid_file.location is None:
+        if self.model_files.structured_grid_file.location is None:
             raise ValueError(
                 "No structured_grid_file_path found, can't remove temporary properties from file path")
         if self.__new_fcs_file_path is None:
@@ -149,8 +149,8 @@ class NexusSimulator(Simulator):
 
         self.__origin = self.__origin.replace('temp/', '', 1)
         self.__root_name = self.__root_name.replace('temp/', '', 1)
-        self.fcs_file.structured_grid_file.location = self.fcs_file.structured_grid_file.location.replace('temp/', '',
-                                                                                                          1)
+        self.model_files.structured_grid_file.location = self.model_files.structured_grid_file.location.replace('temp/', '',
+                                                                                                                1)
         self.__new_fcs_file_path = self.__new_fcs_file_path.replace('temp/', '', 1)
         self.__surface_file_path = self.__surface_file_path.replace('temp/', '', 1)
 
@@ -168,7 +168,7 @@ class NexusSimulator(Simulator):
     @property
     def structured_grid_path(self):
         """Returns the location of the structured grid file."""
-        return self.fcs_file.structured_grid_file.location
+        return self.model_files.structured_grid_file.location
 
     @property
     def default_units(self):
@@ -420,10 +420,10 @@ class NexusSimulator(Simulator):
         # fcs_content_with_includes is used to scan only the fcs file and files specifically called with the INCLUDE
         # token in front of it to prevent it from reading through all the other files. We need this here to extract the
         # fcs properties only. The FcsFile structure is then generated and stored in the object (with all the nesting of
-        # the NexusFiles as self.fcs_file (e.g. STRUCTURED_GRID, RUNCONTROL etc)
+        # the NexusFiles as self.model_files (e.g. STRUCTURED_GRID, RUNCONTROL etc)
         fcs_content_with_includes = NexusFile.generate_file_include_structure(
             self.__new_fcs_file_path).get_flat_list_str_file
-        self.fcs_file = FcsNexusFile.generate_fcs_structure(self.__new_fcs_file_path)
+        self.model_files = FcsNexusFile.generate_fcs_structure(self.__new_fcs_file_path)
         if fcs_content_with_includes is None:
             raise ValueError(f'FCS file not found, no content for {self.__new_fcs_file_path}')
         for line in fcs_content_with_includes:
@@ -448,73 +448,73 @@ class NexusSimulator(Simulator):
 
         # === Load in dynamic properties ===
         # Read in PVT properties from Nexus PVT method files
-        if self.fcs_file.pvt_files is not None and \
-                len(self.fcs_file.pvt_files) > 0:
-            self.pvt = NexusPVTMethods(files=self.fcs_file.pvt_files)
+        if self.model_files.pvt_files is not None and \
+                len(self.model_files.pvt_files) > 0:
+            self.pvt = NexusPVTMethods(files=self.model_files.pvt_files)
 
         # Read in separator properties from Nexus separator method files
-        if self.fcs_file.separator_files is not None and \
-                len(self.fcs_file.separator_files) > 0:
-            self.separator = NexusSeparatorMethods(files=self.fcs_file.separator_files)
+        if self.model_files.separator_files is not None and \
+                len(self.model_files.separator_files) > 0:
+            self.separator = NexusSeparatorMethods(files=self.model_files.separator_files)
 
         # Read in water properties from Nexus water method files
-        if self.fcs_file.water_files is not None and \
-                len(self.fcs_file.water_files) > 0:
-            self.water = NexusWaterMethods(files=self.fcs_file.water_files)
+        if self.model_files.water_files is not None and \
+                len(self.model_files.water_files) > 0:
+            self.water = NexusWaterMethods(files=self.model_files.water_files)
 
         # Read in equilibration properties from Nexus equil method files
-        if self.fcs_file.equil_files is not None and \
-                len(self.fcs_file.equil_files) > 0:
-            self.equil = NexusEquilMethods(files=self.fcs_file.equil_files)
+        if self.model_files.equil_files is not None and \
+                len(self.model_files.equil_files) > 0:
+            self.equil = NexusEquilMethods(files=self.model_files.equil_files)
 
         # Read in rock properties from Nexus rock method files
-        if self.fcs_file.rock_files is not None and \
-                len(self.fcs_file.rock_files) > 0:
-            self.rock = NexusRockMethods(files=self.fcs_file.rock_files)
+        if self.model_files.rock_files is not None and \
+                len(self.model_files.rock_files) > 0:
+            self.rock = NexusRockMethods(files=self.model_files.rock_files)
 
         # Read in relative permeability and capillary pressure properties from Nexus relperm method files
-        if self.fcs_file.relperm_files is not None and \
-                len(self.fcs_file.relperm_files) > 0:
-            self.relperm = NexusRelPermMethods(files=self.fcs_file.relperm_files)
+        if self.model_files.relperm_files is not None and \
+                len(self.model_files.relperm_files) > 0:
+            self.relperm = NexusRelPermMethods(files=self.model_files.relperm_files)
 
         # Read in valve and choke properties from Nexus valve method files
-        if self.fcs_file.valve_files is not None and \
-                len(self.fcs_file.valve_files) > 0:
-            self.valve = NexusValveMethods(files=self.fcs_file.valve_files)
+        if self.model_files.valve_files is not None and \
+                len(self.model_files.valve_files) > 0:
+            self.valve = NexusValveMethods(files=self.model_files.valve_files)
 
         # Read in aquifer properties from Nexus aquifer method files
-        if self.fcs_file.aquifer_files is not None and \
-                len(self.fcs_file.aquifer_files) > 0:
-            self.aquifer = NexusAquiferMethods(files=self.fcs_file.aquifer_files)
+        if self.model_files.aquifer_files is not None and \
+                len(self.model_files.aquifer_files) > 0:
+            self.aquifer = NexusAquiferMethods(files=self.model_files.aquifer_files)
 
         # Read in hydraulics properties from Nexus hyd method files
-        if self.fcs_file.hyd_files is not None and \
-                len(self.fcs_file.hyd_files) > 0:
-            self.hydraulics = NexusHydraulicsMethods(files=self.fcs_file.hyd_files)
+        if self.model_files.hyd_files is not None and \
+                len(self.model_files.hyd_files) > 0:
+            self.hydraulics = NexusHydraulicsMethods(files=self.model_files.hyd_files)
 
         # Read in gaslift properties from Nexus gaslift method files
-        if self.fcs_file.gas_lift_files is not None and \
-                len(self.fcs_file.gas_lift_files) > 0:
-            self.gaslift = NexusGasliftMethods(files=self.fcs_file.gas_lift_files)
+        if self.model_files.gas_lift_files is not None and \
+                len(self.model_files.gas_lift_files) > 0:
+            self.gaslift = NexusGasliftMethods(files=self.model_files.gas_lift_files)
 
         # === End of dynamic properties loading ===
 
         # Load in Runcontrol
-        if self.fcs_file.runcontrol_file is not None:
-            self.run_control_file_path = self.fcs_file.runcontrol_file.location
+        if self.model_files.runcontrol_file is not None:
+            self.run_control_file_path = self.model_files.runcontrol_file.location
             self.runcontrol.load_run_control_file()
-        if self.fcs_file.surface_files is not None:
+        if self.model_files.surface_files is not None:
             # TODO support multiple surface file paths
-            self.__surface_file_path = list(self.fcs_file.surface_files.values())[0].location
+            self.__surface_file_path = list(self.model_files.surface_files.values())[0].location
 
-        if self.fcs_file.structured_grid_file is not None:
-            self.__structured_grid = StructuredGridFile.load_structured_grid_file(self.fcs_file.structured_grid_file,
+        if self.model_files.structured_grid_file is not None:
+            self.__structured_grid = StructuredGridFile.load_structured_grid_file(self.model_files.structured_grid_file,
                                                                                   lazy_loading=self.__lazy_loading)
 
         # Load in wellspec files
-        if self.fcs_file.well_files is not None and \
-                len(self.fcs_file.well_files) > 0:
-            for well_file in self.fcs_file.well_files.values():
+        if self.model_files.well_files is not None and \
+                len(self.model_files.well_files) > 0:
+            for well_file in self.model_files.well_files.values():
                 if well_file.location is None:
                     warnings.warn(f'Well file location has not been found for {well_file}')
                     continue
@@ -679,10 +679,10 @@ class NexusSimulator(Simulator):
 
     def get_abs_structured_grid_path(self, filename: str):
         """Returns the absolute path to the Structured Grid file."""
-        if self.fcs_file.structured_grid_file is None:
+        if self.model_files.structured_grid_file is None:
             raise ValueError(
-                f"No structured grid file found within simulator class: {self.fcs_file.structured_grid_file}")
-        grid_path = self.fcs_file.structured_grid_file.location
+                f"No structured grid file found within simulator class: {self.model_files.structured_grid_file}")
+        grid_path = self.model_files.structured_grid_file.location
         if grid_path is None:
             raise ValueError("No path found for structured grid file path. \
                 Please provide a path to the structured grid")
