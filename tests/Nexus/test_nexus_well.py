@@ -720,7 +720,7 @@ def test_add_completion_write(mocker, file_as_list, add_perf_date, preserve_prev
     # add the required attributes to the model class
     fake_nexus_sim.model_files.well_files = {1: file}
     fake_nexus_sim.date_format = DateFormat.DD_MM_YYYY
-    fake_nexus_sim.runcontrol.date_format_string = "%d/%m/%Y"
+    fake_nexus_sim.sim_controls.date_format_string = "%d/%m/%Y"
     fake_nexus_sim.start_date_set(start_date)
     # mock out open
     wells_obj = NexusWells(fake_nexus_sim)
@@ -762,7 +762,7 @@ def test_add_completion_correct_wellspec(mocker):
     # add the required attributes to the model class
     mock_nexus_sim.model_files.well_files = {1: file_1, 2: file_2, 3: file_target}
     mock_nexus_sim.date_format = DateFormat.DD_MM_YYYY
-    mock_nexus_sim.runcontrol.date_format_string = "%d/%m/%Y"
+    mock_nexus_sim.sim_controls.date_format_string = "%d/%m/%Y"
     mock_nexus_sim.start_date_set(start_date)
     # mock out open
     wells_obj = NexusWells(mock_nexus_sim)

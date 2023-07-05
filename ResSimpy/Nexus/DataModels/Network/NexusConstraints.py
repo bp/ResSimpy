@@ -238,7 +238,7 @@ class NexusConstraints:
         for index, line in enumerate(file_as_list):
             if nfo.check_token('TIME', line):
                 constraint_date_from_file = nfo.get_expected_token_value('TIME', line, [line])
-                date_comparison = self.__model.runcontrol.compare_dates(constraint_date_from_file, constraint_date)
+                date_comparison = self.__model.sim_controls.compare_dates(constraint_date_from_file, constraint_date)
                 if date_comparison == 0:
                     date_index = index
                     continue
