@@ -603,9 +603,3 @@ def test_included_fault_tables(mocker):
     faults_df = simulation.StructuredGrid.get_faults_df()
     # Assert
     pd.testing.assert_frame_equal(expected_df, faults_df)
-
-
-
-
-
-
