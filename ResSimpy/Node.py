@@ -3,7 +3,7 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
 
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 
 
 @dataclass

@@ -21,7 +21,7 @@ from ResSimpy.Nexus.NexusHydraulicsMethods import NexusHydraulicsMethods
 from ResSimpy.Nexus.NexusGasliftMethods import NexusGasliftMethods
 from ResSimpy.Nexus.DataModels.StructuredGrid.StructuredGridFile import StructuredGridFile
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from ResSimpy.Nexus.NexusReporting import Reporting
 from ResSimpy.Nexus.NexusWells import NexusWells

@@ -3,7 +3,7 @@ import pytest
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from ResSimpy.Nexus.DataModels.NexusGasliftMethod import NexusGasliftMethod
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 
 @pytest.mark.parametrize("file_contents, expected_gaslift_properties",
     [(

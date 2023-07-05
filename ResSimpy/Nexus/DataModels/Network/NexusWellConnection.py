@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 import ResSimpy.Utils.to_dict_generic as to_dict_generic
 from ResSimpy.Utils.generic_repr import generic_repr
 

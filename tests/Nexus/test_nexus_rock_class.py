@@ -3,7 +3,7 @@ import pytest
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from ResSimpy.Nexus.DataModels.NexusRockMethod import NexusRockMethod
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 
 @pytest.mark.parametrize("file_contents, expected_rock_properties",
     [(
