@@ -100,7 +100,7 @@ def test_load_structured_grid_file_dict_basic_properties(mocker, structured_grid
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', )
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs' )
     result = simulation.get_structured_grid_dict()
 
     # Assert
@@ -168,7 +168,7 @@ def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', )
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs' )
     result = simulation.get_structured_grid_dict()
 
     # Assert
@@ -230,7 +230,7 @@ def test_load_structured_grid_file_k_values(mocker, structured_grid_file_content
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', )
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs' )
     result = simulation.StructuredGrid
 
     # Assert
@@ -308,7 +308,7 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
 
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', )
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs' )
     mocker.patch("builtins.open", structured_grid_mock)
 
     # Act
@@ -369,7 +369,7 @@ def test_view_command(mocker, structured_grid_file_contents, expected_text):
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    result = NexusSimulator(origin='testpath1/nexus_run.fcs', )
+    result = NexusSimulator(origin='testpath1/nexus_run.fcs' )
 
     # Assert
     value = result.structured_grid_operations.view_command(field='netgrs')
@@ -531,3 +531,79 @@ def test_load_faults(mocker, structured_grid_file_contents, expected_results):
         assert expected_results == faults_df
     else:
         pd.testing.assert_frame_equal(expected_results, faults_df)
+
+
+def test_included_fault_tables(mocker):
+    # Arrange
+    fcs_path = 'testpath1/nexus_run.fcs'
+    fcs_file = "DESC test fcs file\nDATEFORMAT MM/DD/YYYY\nGRID_FILES\n\tSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_path = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents = '''KX VALUE
+        INCLUDE kx_file.dat
+        
+        MULT TX ALL PLUS MULT
+       FNAME F1
+       1 5 2 2 1 10 1.0
+       6 9 2 2 1 10 0.1
+       
+       INCLUDE faults_inc.inc
+       !something else 
+         
+    '''
+    kx_file_content = '0 1 0 2 0 3 0 4 100 1200\n 102023 9014 109 1293 2727'
+    kx_path = os.path.join('testpath1', 'kx_file.dat')
+    include_file_path = os.path.join('testpath1', 'faults_inc.inc')
+    include_file = '''     MULT TY ALL PLUS MULT
+       FNAME F1
+       1 1 2 5 1 10 1.0
+       1 1 6 9 1 10 0.0
+
+      MULT TX ALL MINUS MULT
+       FNAME F2
+       1 5 4 4 1 10 1.0
+       6 9 4 4 1 10 1.0
+
+      MULT TY ALL PLUS MULT
+       FNAME F2
+       3 3 2 5 1 10 1.0
+       3 3 6 9 1 10 1.0
+
+      MULTFL F1 0.0
+
+      MULTFL F2 0.1
+
+      MULTFL F2 0.2'''
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {fcs_path: fcs_file,
+                                         structured_grid_path: structured_grid_file_contents,
+                                         include_file_path: include_file,
+                                         kx_path: kx_file_content,
+                                         }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    expected_df = pd.DataFrame({
+        'I1': [1, 6, 1, 1, 1, 6, 3, 3],
+        'I2': [5, 9, 1, 1, 5, 9, 3, 3],
+        'J1': [2, 2, 2, 6, 4, 4, 2, 6],
+        'J2': [2, 2, 5, 9, 4, 4, 5, 9],
+        'K1': [1, 1, 1, 1, 1, 1, 1, 1],
+        'K2': [10, 10, 10, 10, 10, 10, 10, 10],
+        'MULT': [0.0, 0.0, 0.0, 0.0, 0.02, 0.02, 0.02, 0.02],
+        'GRID': ['ROOT', 'ROOT', 'ROOT', 'ROOT', 'ROOT', 'ROOT', 'ROOT', 'ROOT'],
+        'NAME': ['F1', 'F1', 'F1', 'F1', 'F2', 'F2', 'F2', 'F2'],
+        'FACE': ['I', 'I', 'J', 'J', 'I-', 'I-', 'J', 'J']}
+        )
+
+    comparison_types = {'I1': 'int32', 'I2': 'int32', 'J1': 'int32', 'J2': 'int32',
+                        'K1': 'int32', 'K2': 'int32'}
+
+    expected_df = expected_df.astype(comparison_types)
+    # Act
+    simulation = NexusSimulator(origin=fcs_path)
+    faults_df = simulation.StructuredGrid.get_faults_df()
+    faults_df = faults_df.astype(comparison_types)
+    # Assert
+    pd.testing.assert_frame_equal(expected_df, faults_df)
