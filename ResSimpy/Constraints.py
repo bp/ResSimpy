@@ -5,6 +5,8 @@ import pandas as pd
 from ResSimpy.Constraint import Constraint
 from typing import Optional, Mapping, Sequence
 
+from ResSimpy.Enums.UnitsEnum import UnitSystem
+
 
 @dataclass(kw_only=True)
 class Constraints(ABC):
@@ -24,9 +26,10 @@ class Constraints(ABC):
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
-    def remove_constraint(self):
+    def remove_constraint(self) -> None:
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
-    def add_constraint(self):
+    def add_constraint(self, name: str,
+                       constraint_to_add: dict[str, None | float | int | str | UnitSystem] | Constraint) -> None:
         raise NotImplementedError("Implement this in the derived class")

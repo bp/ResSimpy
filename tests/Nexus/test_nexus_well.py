@@ -721,7 +721,7 @@ def test_add_completion_write(mocker, file_as_list, add_perf_date, preserve_prev
     fake_nexus_sim.model_files.well_files = {1: file}
     fake_nexus_sim.date_format = DateFormat.DD_MM_YYYY
     fake_nexus_sim.sim_controls.date_format_string = "%d/%m/%Y"
-    fake_nexus_sim.start_date_set(start_date)
+    fake_nexus_sim.start_date = start_date
     # mock out open
     wells_obj = NexusWells(fake_nexus_sim)
     wells_obj.load_wells()
@@ -763,7 +763,7 @@ def test_add_completion_correct_wellspec(mocker):
     mock_nexus_sim.model_files.well_files = {1: file_1, 2: file_2, 3: file_target}
     mock_nexus_sim.date_format = DateFormat.DD_MM_YYYY
     mock_nexus_sim.sim_controls.date_format_string = "%d/%m/%Y"
-    mock_nexus_sim.start_date_set(start_date)
+    mock_nexus_sim.start_date = start_date
     # mock out open
     wells_obj = NexusWells(mock_nexus_sim)
     wells_obj.load_wells()
@@ -857,7 +857,7 @@ def test_add_completion_include_files(mocker, fcs_file_contents, wells_file, inc
 
     mock_nexus_sim = get_fake_nexus_simulator(mocker=mocker, fcs_file_path=fcs_file_path, mock_open=False)
 
-    mock_nexus_sim.start_date_set(start_date)
+    mock_nexus_sim.start_date = start_date
     # mock out open
     add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 7.5}
     add_perf_dict_2 = {'date': add_perf_date, 'i': 7, 'j': 8, 'k': 9, 'well_radius': 10.5}

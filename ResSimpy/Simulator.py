@@ -1,12 +1,13 @@
 """The abstract base class for all simulators."""
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ResSimpy.Aquifer import Aquifer
 from ResSimpy.Equilibration import Equilibration
 from ResSimpy.Gaslift import Gaslift
 from ResSimpy.Hydraulics import Hydraulics
+from ResSimpy.Network import Network
 from ResSimpy.PVT import PVT
 from ResSimpy.RelPerm import RelPerm
 from ResSimpy.Rock import Rock
@@ -16,31 +17,31 @@ from ResSimpy.Water import Water
 from ResSimpy.Wells import Wells
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, init=False)
 class Simulator(ABC):
-
-    def __init__(self, start_date: str = '') -> None:
-        self.__start_date: str = start_date
-        self._wells: Wells = Wells()
-        self._pvt: PVT = PVT()
-        self._separator: Separator = Separator()
-        self._water: Water = Water()
-        self._equil: Equilibration = Equilibration()
-        self._rock: Rock = Rock()
-        self._relperm: RelPerm = RelPerm()
-        self._valve: Valve = Valve()
-        self._aquifer: Aquifer = Aquifer()
-        self._hydraulics: Hydraulics = Hydraulics()
-        self._gaslift: Gaslift = Gaslift()
+    _start_date: str
+    _wells: Wells
+    _pvt: PVT
+    _separator: Separator
+    _water: Water
+    _equil: Equilibration
+    _rock: Rock
+    _relperm: RelPerm
+    _valve: Valve
+    _aquifer: Aquifer
+    _hydraulics: Hydraulics
+    _gaslift: Gaslift
+    _network: Network
 
     """Class Properties"""
 
     @property
     def start_date(self) -> str:
-        return self.__start_date
+        return self._start_date
 
-    def start_date_set(self, value) -> None:
-        self.__start_date = value
+    @start_date.setter
+    def start_date(self, value) -> None:
+        self._start_date = value
 
     @property
     def wells(self) -> Wells:

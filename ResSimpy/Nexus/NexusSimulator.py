@@ -78,9 +78,7 @@ class NexusSimulator(Simulator):
         """
         if origin is None:
             raise ValueError("FCS File Path is required")
-
-        super().__init__()
-
+        self._start_date: str = ''
         self.run_control_file_path: Optional[str] = ''
         self.__destination: Optional[str] = None
         self.date_format: DateFormat = DateFormat.MM_DD_YYYY  # Nexus default

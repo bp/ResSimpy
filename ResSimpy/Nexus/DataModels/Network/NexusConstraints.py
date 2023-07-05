@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Optional, Mapping, Sequence
+from typing import TYPE_CHECKING, Optional, Mapping, Sequence, cast
 from uuid import UUID
 
 import pandas as pd
 
+from ResSimpy.Constraint import Constraint
 from ResSimpy.Constraints import Constraints
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
@@ -188,7 +189,7 @@ class NexusConstraints(Constraints):
 
     def add_constraint(self,
                        name: str,
-                       constraint_to_add: dict[str, None | float | int | str | UnitSystem] | NexusConstraint,
+                       constraint_to_add: dict[str, None | float | int | str | UnitSystem] | Constraint,
                        ) -> None:
         """Adds a constraint to the network and corresponding surface file.
 
@@ -206,7 +207,7 @@ class NexusConstraints(Constraints):
         if isinstance(constraint_to_add, dict):
             new_constraint = NexusConstraint(constraint_to_add)
         else:
-            new_constraint = constraint_to_add
+            new_constraint = cast(NexusConstraint, constraint_to_add)
 
         self.add_constraints_to_memory({name: [new_constraint]})
 

@@ -66,7 +66,7 @@ def test_write_to_file(mocker, fcs_file_contents, wells_file, expected_result):
     mocker.patch('os.path.isfile', fcs_file_exists)
 
     mock_nexus_sim = NexusSimulator('fcs_file.fcs')
-    mock_nexus_sim.start_date_set(start_date)
+    mock_nexus_sim.start_date = start_date
     add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 7.5}
 
     # make a mock for the write operation
@@ -178,7 +178,7 @@ def test_remove_completion_write_to_file(mocker, fcs_file_contents, wells_file, 
 
     mock_nexus_sim = NexusSimulator('fcs_file.fcs')
     mock_nexus_sim._wells.load_wells() # Manually call load_wells to simulate loading in wells before we change the open mock.
-    mock_nexus_sim.start_date_set(start_date)
+    mock_nexus_sim.start_date = start_date
     remove_perf_dict = {'date': remove_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 4.2}
     well_files = mock_nexus_sim.model_files.well_files[1]
     object_locations = well_files.object_locations
@@ -262,7 +262,7 @@ def test_modify_completion_write_to_file(mocker, fcs_file_contents, wells_file, 
     mocker.patch('os.path.isfile', fcs_file_exists)
 
     mock_nexus_sim = NexusSimulator('fcs_file.fcs')
-    mock_nexus_sim.start_date_set(start_date)
+    mock_nexus_sim.start_date = start_date
     modify_perf_target = {'date': modify_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 4.2}
     modify_perf_new_properties = {'date': modify_perf_date, 'j': 8, 'well_radius': 10.2}
 

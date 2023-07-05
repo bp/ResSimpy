@@ -6,7 +6,7 @@ from ResSimpy.NodeConnections import NodeConnections
 from ResSimpy.Nodes import Nodes
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, init=False)
 class Network(ABC):
     nodes: Nodes
     connections: NodeConnections
