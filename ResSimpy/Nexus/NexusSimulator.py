@@ -149,8 +149,8 @@ class NexusSimulator(Simulator):
 
         self.__origin = self.__origin.replace('temp/', '', 1)
         self.__root_name = self.__root_name.replace('temp/', '', 1)
-        self.model_files.structured_grid_file.location = self.model_files.structured_grid_file.location.replace('temp/', '',
-                                                                                                                1)
+        self.model_files.structured_grid_file.location = \
+            self.model_files.structured_grid_file.location.replace('temp/', '', 1)
         self.__new_fcs_file_path = self.__new_fcs_file_path.replace('temp/', '', 1)
         self.__surface_file_path = self.__surface_file_path.replace('temp/', '', 1)
 

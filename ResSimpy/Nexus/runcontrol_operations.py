@@ -213,7 +213,8 @@ class SimControls:
             None: writes out a file at the same path as the existing runcontrol file
         """
         self.__model.check_output_path()
-        if self.__model.model_files.runcontrol_file is None or self.__model.model_files.runcontrol_file.location is None:
+        if self.__model.model_files.runcontrol_file is None or \
+                self.__model.model_files.runcontrol_file.location is None:
             raise ValueError(f"No file path found for {self.__model.model_files}")
         file_content = self.__model.model_files.runcontrol_file.get_flat_list_str_file
         filename = self.__model.model_files.runcontrol_file.location
