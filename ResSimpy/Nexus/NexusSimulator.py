@@ -156,6 +156,10 @@ class NexusSimulator(Simulator):
         return self.logging.get_simulation_progress()
 
     @property
+    def model_files(self) -> FcsNexusFile:
+        return self._model_files
+
+    @property
     def structured_grid_path(self):
         """Returns the location of the structured grid file."""
         return self.model_files.structured_grid_file.location
@@ -409,7 +413,7 @@ class NexusSimulator(Simulator):
         # the NexusFiles as self.model_files (e.g. STRUCTURED_GRID, RUNCONTROL etc)
         fcs_content_with_includes = NexusFile.generate_file_include_structure(
             self.__new_fcs_file_path).get_flat_list_str_file
-        self.model_files = FcsNexusFile.generate_fcs_structure(self.__new_fcs_file_path)
+        self._model_files = FcsNexusFile.generate_fcs_structure(self.__new_fcs_file_path)
         if fcs_content_with_includes is None:
             raise ValueError(f'FCS file not found, no content for {self.__new_fcs_file_path}')
         for line in fcs_content_with_includes:
