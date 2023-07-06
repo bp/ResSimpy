@@ -1,7 +1,6 @@
 """The abstract base class for all simulators."""
 
 from abc import ABC, abstractmethod
-from typing import Optional
 from ResSimpy.Wells import Wells
 
 
