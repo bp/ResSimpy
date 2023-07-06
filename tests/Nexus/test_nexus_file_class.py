@@ -284,7 +284,7 @@ def test_generate_file_include_structure_skip_array(mocker, test_file_contents):
     ("""C Corner point grid layout
 C
 NX     NY     NZ
-178    91     181
+112    95     233
 RIGHTHANDED
 C Origin (UTM coords)
 C (X,Y)=(0.000000,0.000000)
@@ -293,8 +293,10 @@ C
 ARRAYS
 C
 C Size of corner point grid (cols,rows,layers)
-C 178  91 181
+C 112    95     233
 C
+KX ZVAR
+500 50 200
 CORP VALUE
 C    
 1 2 3 234234 12313""",
@@ -302,7 +304,7 @@ C
 """C Corner point grid layout
 C
 NX     NY     NZ
-178    91     181
+112    95     233
 RIGHTHANDED
 C Origin (UTM coords)
 C (X,Y)=(0.000000,0.000000)
@@ -311,11 +313,20 @@ C
 ARRAYS
 C
 C Size of corner point grid (cols,rows,layers)
-C 178  91 181
+C 112    95     233
 C
+KX ZVAR
+500 50 200
 CORP VALUE
 """),
-], ids=['basic_test'])
+
+("""porosity value
+12 38923 7439327 7234923723 9274
+KX ZVAR
+500 50 200
+""",
+ """porosity value\n""")
+], ids=['basic case', 'exclude from start of file'])
 def test_generate_file_include_structure_skip_file_with_nested_array(mocker: MockerFixture,
                                                                      file_with_nested_grid_array_contents: str,
                                                                      expected_file_contents: str):
@@ -345,6 +356,54 @@ def test_generate_file_include_structure_skip_file_with_nested_array(mocker: Moc
     assert len(nexus_file.include_objects) == 1
     assert nexus_file.include_objects[0].file_content_as_list == expected_included_file.file_content_as_list
     assert nexus_file.include_objects[0] == expected_included_file
+
+def test_generate_file_include_structure_not_skipping_file(mocker: MockerFixture):
+    # Arrange
+    file_contents = """POROSITY CON 0.31012
+CORP VALUE INCLUDE nested/include/file/path.dat
+
+KX ZVAR
+500 50 200
+
+KY MULT
+1.1 KX
+
+KZ CON 1
+"""
+    file_path = '/origin/path/test_file_path.dat'
+    parent_file_contents = 'INCLUDE nexus_data/inc_file1.inc'
+    expected_include_file_path = os.path.join('/origin/path', 'nexus_data/inc_file1.inc')
+    nested_include_file_contents = 'another file'
+    nested_include_file_location = 'nested/include/file/path.dat'
+    expected_nested_include_file_path = os.path.join('/origin/path', 'nexus_data', nested_include_file_location)
+    expected_nested_included_file = NexusFile(location=nested_include_file_location, include_locations=None,
+                                    origin=expected_include_file_path, include_objects=None,
+                                    file_content_as_list=[])
+
+    expected_included_file = NexusFile(location=expected_include_file_path, include_locations=[expected_nested_include_file_path],
+                                    origin=file_path, include_objects=[expected_nested_included_file],
+                                    file_content_as_list=file_contents.splitlines(keepends=True))
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            file_path: parent_file_contents,
+            expected_include_file_path: file_contents,
+            expected_nested_include_file_path: nested_include_file_contents
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act
+    nexus_file = NexusFile.generate_file_include_structure(file_path, skip_arrays=True)
+
+    # Assert
+    assert len(nexus_file.include_objects) == 1
+    assert nexus_file.include_objects[0].file_content_as_list == expected_included_file.file_content_as_list
+    assert nexus_file.include_objects[0].include_objects[0] == expected_nested_included_file
+    assert nexus_file.include_objects[0] == expected_included_file
+
+
 
 @pytest.mark.parametrize("test_file_contents, expected_results",
                          [('''       WELLSPEC DEV1
