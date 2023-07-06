@@ -1,11 +1,13 @@
 """The abstract base class for all simulators."""
-
+import os
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from typing import Optional
 
 from ResSimpy.Aquifer import Aquifer
 from ResSimpy.Equilibration import Equilibration
 from ResSimpy.Gaslift import Gaslift
+from ResSimpy.Grid import Grid
 from ResSimpy.Hydraulics import Hydraulics
 from ResSimpy.Network import Network
 from ResSimpy.PVT import PVT
@@ -20,6 +22,7 @@ from ResSimpy.Wells import Wells
 @dataclass(kw_only=True, init=False)
 class Simulator(ABC):
     _start_date: str
+    _origin: str
     _wells: Wells
     _pvt: PVT
     _separator: Separator
@@ -32,7 +35,7 @@ class Simulator(ABC):
     _hydraulics: Hydraulics
     _gaslift: Gaslift
     _network: Network
-
+    _grid: Optional[Grid]
 
     """Class Properties"""
 
@@ -92,6 +95,25 @@ class Simulator(ABC):
     def network(self) -> Network:
         return self._network
 
+    @property
+    def grid(self) -> Optional[Grid]:
+        return self._grid
+
+    @property
+    def origin(self) -> str:
+        return self._origin
+
+    @origin.setter
+    def origin(self, value: Optional[str]) -> None:
+        if value is None:
+            raise ValueError(f'Origin path to model is required. Instead got {value}.')
+        self._origin: str = value.strip()
+
+    @property
+    def model_location(self):
+        """Returns the location of the model."""
+        return os.path.dirname(self._origin)
+
     """ Class Methods """
 
     @staticmethod
@@ -100,5 +122,5 @@ class Simulator(ABC):
         raise NotImplementedError("This method has not been implemented for this simulator yet")
 
     @abstractmethod
-    def model_location(self) -> str:
-        raise NotImplementedError("This method has not been implemented for this simulator yet")
+    def set_output_path(self, path: str) -> None:
+        raise NotImplementedError("Implement this method on the derived class")
