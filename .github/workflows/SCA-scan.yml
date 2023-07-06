@@ -1,0 +1,22 @@
+name: Test SCA branch scan action
+on: workflow_dispatch
+env:
+  RELEASE_BRANCHES: ("master")
+jobs:
+    sast_scan_on_branch:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v3
+        - name: Run SCA scan
+          uses: ./.github/actions/sca/branch-scan
+          with:
+            release_branches: ${{toJSON(env.RELEASE_BRANCHES)}}
+            snow_pkg_number: "SPKG0018720"
+            snow_pkg_name: "Bifrost"
+            project_informal_name: "Ressimpy"
+            app_or_microservice_name: "Ressimpy"
+            it_service_number: "ITSVC0022115"
+            it_service_name: "Bifrost"
+            is_a_microservice: 'false'
+            sca_username: ${{ secrets.SCA_USERNAME }}
+            sca_password: ${{ secrets.SCA_PASSWORD }}

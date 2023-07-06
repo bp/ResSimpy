@@ -1,0 +1,23 @@
+name: Test SAST scan action 
+on: [push, pull_request, workflow_dispatch]
+env:
+  RELEASE_BRANCHES: ("master")
+jobs:
+    sast_scan_on_branch:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v3
+        - name: Run Sast scan
+          uses: ./.github/actions/sast/branch-scan
+          with:
+            release_branches: ${{toJSON(env.RELEASE_BRANCHES)}}
+            snow_pkg_number: "SPKG0018720"
+            snow_pkg_name: "Bifrost"
+            project_informal_name: "ResSimpy"
+            app_or_microservice_name: "ResSimpy"
+            it_service_number: "ITSVC0022115"
+            it_service_name: "Bifrost"
+            is_a_microservice: 'false'
+            sca_username: ${{ secrets.SCA_USERNAME }}
+            sca_password: ${{ secrets.SCA_PASSWORD }}
+            sast_preset: "ASA-Premium"
