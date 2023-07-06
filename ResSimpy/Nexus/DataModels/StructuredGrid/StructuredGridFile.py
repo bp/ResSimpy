@@ -30,6 +30,7 @@ class StructuredGridFile(Grid):
     __array_functions_df: Optional[pd.DataFrame] = None
     __array_functions_loaded: bool = False
     __grid_file_contents: Optional[list[str]] = None
+    __grid_file_nested: Optional[list[str]] = None
     __faults_df: Optional[pd.DataFrame] = None
     __grid_faults_loaded: bool = False
     __grid_properties_loaded: bool = False
@@ -115,7 +116,7 @@ class StructuredGridFile(Grid):
         if self.__grid_nexus_file is None or self.__grid_file_contents is None or self.__grid_file_nested is None:
             raise ValueError("Grid file not found, cannot load grid properties")
 
-        file_as_list = self.__grid_file_nested
+        file_as_list = self.__grid_file_contents
         for line in file_as_list:
             # Load in the basic properties
             properties_to_load = [
@@ -271,7 +272,7 @@ class StructuredGridFile(Grid):
             # Ensure resulting dataframe has uppercase column names
             df.columns = [col.upper() for col in df.columns]
 
-            # Check if any multfl's have been used in grid file and update fault trans multipliers accordingly
+            # Check if any multfls have been used in grid file and update fault trans multipliers accordingly
             f_names = df['NAME'].unique()
             f_mults = [1.] * len(f_names)
             mult_dict = dict(zip(f_names, f_mults))
