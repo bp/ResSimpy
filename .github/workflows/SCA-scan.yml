@@ -1,5 +1,9 @@
 name: Test SCA branch scan action
-on: workflow_dispatch
+on:
+  push:
+    branches:
+      - master
+
 env:
   RELEASE_BRANCHES: ("master")
 jobs:

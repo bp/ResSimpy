@@ -1,5 +1,9 @@
 name: Test SAST scan action 
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches:
+      - master
+
 env:
   RELEASE_BRANCHES: ("master")
 jobs:
