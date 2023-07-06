@@ -18,6 +18,6 @@ jobs:
             it_service_number: "ITSVC0022115"
             it_service_name: "Bifrost"
             is_a_microservice: 'false'
-            sca_username: ${{ secrets.SCA_USERNAME }}
-            sca_password: ${{ secrets.SCA_PASSWORD }}
+            sast_username: ${{ secrets.SCA_USERNAME }}
+            sast_password: ${{ secrets.SCA_PASSWORD }}
             sast_preset: "ASA-Premium"
