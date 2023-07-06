@@ -1,8 +1,5 @@
 name: Test SCA branch scan action
-on:
-  push:
-    branches:
-      - master
+on: [push, pull_request]
 
 env:
   RELEASE_BRANCHES: ("master")
