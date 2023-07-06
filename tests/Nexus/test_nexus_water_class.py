@@ -2,7 +2,7 @@ import pytest
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterMethod, NexusWaterParams
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import SUnits, UnitSystem, TemperatureUnits
+from ResSimpy.Enums.UnitsEnum import SUnits, UnitSystem, TemperatureUnits
 
 @pytest.mark.parametrize("file_contents, expected_water_properties",
     [("""

@@ -4,7 +4,7 @@ from typing import Optional, Sequence, Union, cast
 from uuid import UUID
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.Well import Well
 

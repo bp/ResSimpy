@@ -215,7 +215,7 @@ class FcsNexusFile(NexusFile):
                 # stored in the file_content_as_list
                 fcs_property_list = fcs_property.copy()
                 fcs_property_list.update({int(method_number): nexus_file})
-                # set the attribute in the fcs_file instance
+                # set the attribute in the FcsNexusFile instance
                 setattr(fcs_file, fcs_keyword_map_multi[key], fcs_property_list)
                 fcs_file.include_objects.append(nexus_file)
                 fcs_file.include_locations.append(full_file_path)

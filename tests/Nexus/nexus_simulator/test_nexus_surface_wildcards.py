@@ -1,6 +1,8 @@
 import pytest
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
+from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator
 
@@ -57,7 +59,7 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     NODECON
 	NAME            NODEIN    NODEOUT       TYPE        METHOD    DDEPTH
 	CP01            CP01      wh_cp01       PIPE        2          2060.7
-	cp01_gaslift    GAS       CP01          GASLIFT     NONE        NA ! Checked NODECON 13/05/2020 
+	cp01_gaslift    GAS       CP01          GASLIFT     NONE        NA ! Checked NODECON 13/05/2020
 	CP-234          GAS       CP-234          GASLIFT     NONE        NA
 	ENDNODECON
     CONSTRAINTS
@@ -85,7 +87,7 @@ from tests.utility_for_tests import get_fake_nexus_simulator
 	NAME            NODEIN    NODEOUT       TYPE        METHOD    DDEPTH
     node_3            node_3      wh_node_3      PIPE        2          7334
 	ENDNODECON
-    
+
     CONSTRAINTS
     node* QWSMAX 200 QOSMAX 300
     ENDCONSTRAINTS
@@ -136,6 +138,23 @@ def test_read_wildcard(mocker, file_contents, expected_constraints):
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
 
     # Act
-    result = nexus_sim.network.Constraints.get_constraints()
+    result = nexus_sim.network.constraints.get_constraints()
     # Assert
     assert result == expected_result
+
+def test_add_remove_wildcard_well(mocker):
+    # Arrange
+    model = get_fake_nexus_simulator(mocker)
+    parent_network = NexusNetwork(model)
+    parent_network.__setattr__('_NexusNetwork__has_been_loaded', True)
+    constraints = NexusConstraints(parent_network, model)
+    constraint_props = {'name': 'P*', 'date': '01/01/2020', 'max_surface_oil_rate': 100.2}
+    # Act Assert
+    with pytest.raises(NotImplementedError) as error_msg:
+        constraints.add_constraint(name='P*', constraint_to_add=constraint_props)
+        assert 'unsupported' in error_msg
+
+    with pytest.raises(NotImplementedError) as error_msg:
+        constraints.remove_constraint(constraint_dict=constraint_props)
+        assert 'unsupported' in error_msg
+

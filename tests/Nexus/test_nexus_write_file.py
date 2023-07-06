@@ -180,7 +180,7 @@ def test_remove_completion_write_to_file(mocker, fcs_file_contents, wells_file, 
     mock_nexus_sim.wells.load_wells() # Manually call load_wells to simulate loading in wells before we change the open mock.
     mock_nexus_sim.start_date_set(start_date)
     remove_perf_dict = {'date': remove_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 4.2}
-    well_files = mock_nexus_sim.fcs_file.well_files[1]
+    well_files = mock_nexus_sim.model_files.well_files[1]
     object_locations = well_files.object_locations
     object_locations_minus_completion = {k: v for k, v in object_locations.items() if v != [expected_removed_completion_line]}
     object_locations_minus_completion = dict(zip(object_locations_minus_completion, expected_obj_locations))
@@ -191,7 +191,7 @@ def test_remove_completion_write_to_file(mocker, fcs_file_contents, wells_file, 
 
     # Act
     mock_nexus_sim.wells.remove_completion(well_name='well1', completion_properties=remove_perf_dict)
-    result_object_ids = mock_nexus_sim.fcs_file.well_files[1].object_locations
+    result_object_ids = mock_nexus_sim.model_files.well_files[1].object_locations
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
                                      modifying_mock_open=writing_mock_open,
@@ -266,7 +266,7 @@ def test_modify_completion_write_to_file(mocker, fcs_file_contents, wells_file, 
     modify_perf_target = {'date': modify_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 4.2}
     modify_perf_new_properties = {'date': modify_perf_date, 'j': 8, 'well_radius': 10.2}
 
-    mock_nexus_sim.fcs_file.well_files[1]
+    mock_nexus_sim.model_files.well_files[1]
     # make a mock for the write operation
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)

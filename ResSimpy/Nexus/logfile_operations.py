@@ -304,10 +304,10 @@ class Logging:
                             last_time = next_value
 
         if last_time is not None:
-            days_completed = self.__model.runcontrol.convert_date_to_number(last_time)
-            if self.__model.runcontrol.times is None:
+            days_completed = self.__model.sim_controls.convert_date_to_number(last_time)
+            if self.__model.sim_controls.times is None:
                 raise ValueError("No times provided in the instance - please read them in from runcontrol file")
-            total_days = self.__model.runcontrol.convert_date_to_number(self.__model.runcontrol.times[-1])
+            total_days = self.__model.sim_controls.convert_date_to_number(self.__model.sim_controls.times[-1])
             return round((days_completed / total_days) * 100, 1)
 
         return 0

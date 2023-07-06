@@ -5,7 +5,7 @@ import pytest
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from ResSimpy.Nexus.DataModels.NexusSeparatorMethod import NexusSeparatorMethod
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits
+from ResSimpy.Enums.UnitsEnum import UnitSystem, TemperatureUnits
 
 @pytest.mark.parametrize("file_contents, expected_separator_properties",
     [("""

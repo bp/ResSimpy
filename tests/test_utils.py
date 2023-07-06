@@ -3,17 +3,14 @@ from typing import Optional
 
 import pandas as pd
 import pytest
-from pytest_mock import MockerFixture
 
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
-from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Utils import to_dict_generic
 from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.Utils.invert_nexus_map import invert_nexus_map, attribute_name_to_nexus_keyword, \
     nexus_keyword_to_attribute_name
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 from ResSimpy.Utils.to_dict_generic import to_dict
-from unittest.mock import Mock
 
 
 def test_to_dict():
