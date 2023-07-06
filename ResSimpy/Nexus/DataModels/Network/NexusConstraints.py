@@ -9,7 +9,7 @@ import pandas as pd
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
@@ -173,9 +173,9 @@ class NexusConstraints:
         """Finds the surface file with the object id requested."""
         # TODO: make this generic with the find_which_wellspec_file_from_completion_id.
 
-        if self.__model.fcs_file.surface_files is None:
-            raise ValueError(f'No surface file found in fcs file at {self.__model.fcs_file.location}')
-        surface_files = [x for x in self.__model.fcs_file.surface_files.values() if
+        if self.__model.model_files.surface_files is None:
+            raise ValueError(f'No surface file found in fcs file at {self.__model.model_files.location}')
+        surface_files = [x for x in self.__model.model_files.surface_files.values() if
                          x.object_locations is not None and constraint_id in x.object_locations]
         if len(surface_files) == 0:
             raise FileNotFoundError(f'No surface file found with an existing constraint that has: {constraint_id=}')
@@ -210,10 +210,10 @@ class NexusConstraints:
         self.add_constraints_to_memory({name: [new_constraint]})
 
         # add to the file
-        if self.__model.fcs_file.surface_files is None:
+        if self.__model.model_files.surface_files is None:
             raise FileNotFoundError('No well file found, cannot modify ')
 
-        file_to_add_to = self.__model.fcs_file.surface_files[1]
+        file_to_add_to = self.__model.model_files.surface_files[1]
 
         file_as_list = file_to_add_to.file_content_as_list
         if file_as_list is None:
@@ -238,7 +238,7 @@ class NexusConstraints:
         for index, line in enumerate(file_as_list):
             if nfo.check_token('TIME', line):
                 constraint_date_from_file = nfo.get_expected_token_value('TIME', line, [line])
-                date_comparison = self.__model.runcontrol.compare_dates(constraint_date_from_file, constraint_date)
+                date_comparison = self.__model.sim_controls.compare_dates(constraint_date_from_file, constraint_date)
                 if date_comparison == 0:
                     date_index = index
                     continue

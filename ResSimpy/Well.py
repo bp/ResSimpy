@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Optional, Sequence, Union
 
 from ResSimpy.Completion import Completion
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 
 
 @dataclass

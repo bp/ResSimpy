@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-# Enum representing the Nexus Salinity Units
+# Enum representing the Salinity Units
 class SUnits(str, Enum):
     MEQ_ML = 'MEQ/ML'
     PPM = 'PPM'

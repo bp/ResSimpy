@@ -1,7 +1,7 @@
 import pytest
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator
@@ -138,7 +138,7 @@ def test_read_wildcard(mocker, file_contents, expected_constraints):
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
 
     # Act
-    result = nexus_sim.network.Constraints.get_constraints()
+    result = nexus_sim.network.constraints.get_constraints()
     # Assert
     assert result == expected_result
 

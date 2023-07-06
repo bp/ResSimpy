@@ -7,7 +7,7 @@ from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.NodeConnection import NodeConnection
 from ResSimpy.NodeConnections import NodeConnections
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
@@ -37,7 +37,7 @@ class NexusNodeConnections(NodeConnections):
     def get_connection_df(self) -> pd.DataFrame:
         """Creates a dataframe representing all processed node connection data in a surface file
         Returns:
-            DataFrame: of the properties of the Connections through time with each row representing a node.
+            DataFrame: of the properties of the connections through time with each row representing a node.
         """
         self.__parent_network.get_load_status()
         return obj_to_dataframe(self.__connections)

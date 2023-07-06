@@ -211,7 +211,7 @@ class StructuredGridFile(Grid):
         """
         # Convert the dictionary back to a class, and update the properties on our class
         structured_grid = model.StructuredGrid
-        if structured_grid is None or model.fcs_file.structured_grid_file is None:
+        if structured_grid is None or model.model_files.structured_grid_file is None:
             raise ValueError("Model does not contain a structured grid")
         original_structured_grid_file = copy.deepcopy(structured_grid)
 
@@ -219,7 +219,7 @@ class StructuredGridFile(Grid):
         structured_grid.update_properties_from_dict(grid_dict)
 
         # change it in the text file for nexus:
-        grid_file_path = model.fcs_file.structured_grid_file.location
+        grid_file_path = model.model_files.structured_grid_file.location
         if grid_file_path is None:
             raise ValueError("No path found for structured grid file path.")
         structured_grid_contents = nfo.load_file_as_list(grid_file_path)

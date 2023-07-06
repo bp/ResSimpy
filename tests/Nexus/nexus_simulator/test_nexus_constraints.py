@@ -5,7 +5,7 @@ import pytest
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator
@@ -330,8 +330,8 @@ def test_constraint_ids(mocker, file_contents, object_locations):
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
                                                     'uuid4', 'uuid5', 'uuid6', 'uuid7'])
     # Act
-    model.network.Constraints.get_constraints()
+    model.network.constraints.get_constraints()
 
-    result = model.fcs_file.surface_files[1].object_locations
+    result = model.model_files.surface_files[1].object_locations
     # Assert
     assert result == object_locations

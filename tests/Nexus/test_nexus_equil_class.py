@@ -3,7 +3,7 @@ import pytest
 
 from ResSimpy.Nexus.DataModels.NexusEquilMethod import NexusEquilMethod
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
+from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 
 @pytest.mark.parametrize("file_contents, expected_equil_properties",
     [("""

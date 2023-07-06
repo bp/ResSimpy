@@ -9,7 +9,7 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.constants import DATE_WITH_TIME_LENGTH
 
 
-class Runcontrol:
+class SimControls:
     def __init__(self, model) -> None:
         """Class for controlling all runcontrol and time related functionality
         Args:
@@ -83,7 +83,7 @@ class Runcontrol:
             file_content (list[str]): a list of strings containing each line of the file as a new entry
             output_file_path (str): path to the file to output to.
         """
-        new_file_content = Runcontrol.delete_times(file_content)
+        new_file_content = SimControls.delete_times(file_content)
 
         new_file_str = "".join(new_file_content)
 
@@ -213,12 +213,13 @@ class Runcontrol:
             None: writes out a file at the same path as the existing runcontrol file
         """
         self.__model.check_output_path()
-        if self.__model.fcs_file.runcontrol_file is None or self.__model.fcs_file.runcontrol_file.location is None:
-            raise ValueError(f"No file path found for {self.__model.fcs_file}")
-        file_content = self.__model.fcs_file.runcontrol_file.get_flat_list_str_file
-        filename = self.__model.fcs_file.runcontrol_file.location
+        if self.__model.model_files.runcontrol_file is None or \
+                self.__model.model_files.runcontrol_file.location is None:
+            raise ValueError(f"No file path found for {self.__model.model_files}")
+        file_content = self.__model.model_files.runcontrol_file.get_flat_list_str_file
+        filename = self.__model.model_files.runcontrol_file.location
 
-        new_file_content = self.__model.runcontrol.delete_times(file_content)
+        new_file_content = self.__model.sim_controls.delete_times(file_content)
 
         time_list = self.times
         stop_string = 'STOP\n'
@@ -247,13 +248,13 @@ class Runcontrol:
         Raises:
             ValueError: if the run_control_file attribute is None.
         """
-        if self.__model.fcs_file.runcontrol_file is None:
-            warnings.warn(f"Run control file path not found for {self.__model.fcs_file.location}")
+        if self.__model.model_files.runcontrol_file is None:
+            warnings.warn(f"Run control file path not found for {self.__model.model_files.location}")
             return
-        run_control_file_content = self.__model.fcs_file.runcontrol_file.get_flat_list_str_file
+        run_control_file_content = self.__model.model_files.runcontrol_file.get_flat_list_str_file
 
-        if (run_control_file_content is None) or (self.__model.fcs_file.runcontrol_file.location is None):
-            raise ValueError(f"No file path provided for {self.__model.fcs_file.runcontrol_file.location=}")
+        if (run_control_file_content is None) or (self.__model.model_files.runcontrol_file.location is None):
+            raise ValueError(f"No file path provided for {self.__model.model_files.runcontrol_file.location=}")
 
         # set the start date
         for line in run_control_file_content:
@@ -282,10 +283,10 @@ class Runcontrol:
         # If we don't want to write the times, return here.
         if not self.__model.write_times:
             return
-        if self.__model.fcs_file.runcontrol_file.include_locations is None:
-            warnings.warn(f'No includes files found in {self.__model.fcs_file.runcontrol_file.location}')
+        if self.__model.model_files.runcontrol_file.include_locations is None:
+            warnings.warn(f'No includes files found in {self.__model.model_files.runcontrol_file.location}')
             return
-        for file in self.__model.fcs_file.runcontrol_file.include_locations:
+        for file in self.__model.model_files.runcontrol_file.include_locations:
             if self.__model.destination is not None:
                 self.remove_times_from_file(run_control_file_content, file)
 

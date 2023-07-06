@@ -12,7 +12,7 @@ import re
 import os
 
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits, SUnits
+from ResSimpy.Enums.UnitsEnum import UnitSystem, TemperatureUnits, SUnits
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.nexus_keywords import VALID_NEXUS_KEYWORDS
 

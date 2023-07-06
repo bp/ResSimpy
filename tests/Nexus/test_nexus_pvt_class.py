@@ -5,7 +5,7 @@ import pytest
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from ResSimpy.Nexus.DataModels.NexusPVTMethod import NexusPVTMethod
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, TemperatureUnits
+from ResSimpy.Enums.UnitsEnum import UnitSystem, TemperatureUnits
 
 
 

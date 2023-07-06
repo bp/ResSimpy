@@ -24,23 +24,23 @@ if TYPE_CHECKING:
 @dataclass(kw_only=True)
 class NexusNetwork:
     __model: NexusSimulator
-    Nodes: NexusNodes
-    Connections: NexusNodeConnections
-    WellConnections: NexusWellConnections
-    Wellheads: NexusWellheads
-    Wellbores: NexusWellbores
-    Constraints: NexusConstraints
+    nodes: NexusNodes
+    connections: NexusNodeConnections
+    well_connections: NexusWellConnections
+    wellheads: NexusWellheads
+    wellbores: NexusWellbores
+    constraints: NexusConstraints
     __has_been_loaded: bool = False
 
     def __init__(self, model: NexusSimulator) -> None:
         self.__has_been_loaded: bool = False
         self.__model: NexusSimulator = model
-        self.Nodes: NexusNodes = NexusNodes(self)
-        self.Connections: NexusNodeConnections = NexusNodeConnections(self)
-        self.WellConnections: NexusWellConnections = NexusWellConnections(self)
-        self.Wellheads: NexusWellheads = NexusWellheads(self)
-        self.Wellbores: NexusWellbores = NexusWellbores(self)
-        self.Constraints: NexusConstraints = NexusConstraints(self, model)
+        self.nodes: NexusNodes = NexusNodes(self)
+        self.connections: NexusNodeConnections = NexusNodeConnections(self)
+        self.well_connections: NexusWellConnections = NexusWellConnections(self)
+        self.wellheads: NexusWellheads = NexusWellheads(self)
+        self.wellbores: NexusWellbores = NexusWellbores(self)
+        self.constraints: NexusConstraints = NexusConstraints(self, model)
 
     def get_load_status(self) -> bool:
         """Checks load status and loads the network if it hasn't already been loaded."""
@@ -62,10 +62,10 @@ class NexusNetwork:
                 surface files keyed by method number
         """
         if method_number is None:
-            return self.__model.fcs_file.surface_files
-        if self.__model.fcs_file.surface_files is None:
+            return self.__model.model_files.surface_files
+        if self.__model.model_files.surface_files is None:
             return None
-        return self.__model.fcs_file.surface_files.get(method_number)
+        return self.__model.model_files.surface_files.get(method_number)
 
     def load(self) -> None:
         """Loads all the objects from the surface files in the Simulator class.
@@ -86,10 +86,10 @@ class NexusNetwork:
             return input
 
         # TODO implement all objects with Nones next to them in the dictionary below
-        if self.__model.fcs_file.surface_files is None:
+        if self.__model.model_files.surface_files is None:
             raise FileNotFoundError('Could not find any surface files associated with the fcs file provided.')
 
-        for surface in self.__model.fcs_file.surface_files.values():
+        for surface in self.__model.model_files.surface_files.values():
             nexus_obj_dict = collect_all_tables_to_objects(
                 surface, {'NODECON': NexusNodeConnection,
                           'NODES': NexusNode,
@@ -105,12 +105,12 @@ class NexusNetwork:
                 start_date=self.__model.start_date,
                 default_units=self.__model.default_units,
                 )
-            self.Nodes.add_nodes(type_check_lists(nexus_obj_dict.get('NODES')))
-            self.Connections.add_connections(type_check_lists(nexus_obj_dict.get('NODECON')))
-            self.WellConnections.add_connections(type_check_lists(nexus_obj_dict.get('WELLS')))
-            self.Wellheads.add_wellheads(type_check_lists(nexus_obj_dict.get('WELLHEAD')))
-            self.Wellbores.add_wellbores(type_check_lists(nexus_obj_dict.get('WELLBORE')))
-            self.Constraints.add_constraints_to_memory(type_check_dicts(nexus_obj_dict.get('CONSTRAINTS')))
+            self.nodes.add_nodes(type_check_lists(nexus_obj_dict.get('NODES')))
+            self.connections.add_connections(type_check_lists(nexus_obj_dict.get('NODECON')))
+            self.well_connections.add_connections(type_check_lists(nexus_obj_dict.get('WELLS')))
+            self.wellheads.add_wellheads(type_check_lists(nexus_obj_dict.get('WELLHEAD')))
+            self.wellbores.add_wellbores(type_check_lists(nexus_obj_dict.get('WELLBORE')))
+            self.constraints.add_constraints_to_memory(type_check_dicts(nexus_obj_dict.get('CONSTRAINTS')))
 
         self.__has_been_loaded = True
 
@@ -122,12 +122,12 @@ class NexusNetwork:
 
         """
         constraint_names_to_add = []
-        constraint_names_to_add.extend([x.name for x in self.Nodes.get_nodes() if x.name is not None])
-        constraint_names_to_add.extend([x.name for x in self.WellConnections.get_well_connections()
+        constraint_names_to_add.extend([x.name for x in self.nodes.get_nodes() if x.name is not None])
+        constraint_names_to_add.extend([x.name for x in self.well_connections.get_well_connections()
                                         if x.name is not None])
-        constraint_names_to_add.extend([x.name for x in self.Connections.get_connections() if x.name is not None])
-        constraint_names_to_add.extend([x.name for x in self.Wellbores.get_wellbores() if x.name is not None])
-        constraint_names_to_add.extend([x.name for x in self.Wellheads.get_wellheads() if x.name is not None])
+        constraint_names_to_add.extend([x.name for x in self.connections.get_connections() if x.name is not None])
+        constraint_names_to_add.extend([x.name for x in self.wellbores.get_wellbores() if x.name is not None])
+        constraint_names_to_add.extend([x.name for x in self.wellheads.get_wellheads() if x.name is not None])
         constraint_names_to_add = list(set(constraint_names_to_add))
 
         return constraint_names_to_add

@@ -3,7 +3,7 @@ import pytest
 
 from ResSimpy.Nexus.DataModels.NexusAquiferMethod import NexusAquiferMethod
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem, SUnits
+from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits
 
 @pytest.mark.parametrize("file_contents, expected_aquifer_properties",
     [("""

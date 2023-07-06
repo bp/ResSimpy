@@ -25,7 +25,7 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from pytest_mock import MockerFixture
 from unittest.mock import Mock
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from tests.multifile_mocker import mock_multiple_files
 
 
@@ -1667,12 +1667,12 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
     spy = mocker.spy(nexus_sim.network, 'load')
 
     # Act
-    result_nodes = nexus_sim.network.Nodes.get_nodes()
-    result_cons = nexus_sim.network.Connections.get_connections()
-    result_wellcons = nexus_sim.network.WellConnections.get_well_connections()
-    result_wellheads = nexus_sim.network.Wellheads.get_wellheads()
-    result_wellbores = nexus_sim.network.Wellbores.get_wellbores()
-    result_constraints = nexus_sim.network.Constraints.get_constraints()
+    result_nodes = nexus_sim.network.nodes.get_nodes()
+    result_cons = nexus_sim.network.connections.get_connections()
+    result_wellcons = nexus_sim.network.well_connections.get_well_connections()
+    result_wellheads = nexus_sim.network.wellheads.get_wellheads()
+    result_wellbores = nexus_sim.network.wellbores.get_wellbores()
+    result_constraints = nexus_sim.network.constraints.get_constraints()
     # Assert
     assert result_nodes == expected_nodes
     assert result_cons == expected_cons

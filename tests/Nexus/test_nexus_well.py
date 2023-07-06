@@ -9,7 +9,7 @@ from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from ResSimpy.Nexus.NexusEnums.UnitsEnum import UnitSystem
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusWells import NexusWells
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator
@@ -718,9 +718,9 @@ def test_add_completion_write(mocker, file_as_list, add_perf_date, preserve_prev
     fake_nexus_sim = get_fake_nexus_simulator(mocker)
 
     # add the required attributes to the model class
-    fake_nexus_sim.fcs_file.well_files = {1: file}
+    fake_nexus_sim.model_files.well_files = {1: file}
     fake_nexus_sim.date_format = DateFormat.DD_MM_YYYY
-    fake_nexus_sim.runcontrol.date_format_string = "%d/%m/%Y"
+    fake_nexus_sim.sim_controls.date_format_string = "%d/%m/%Y"
     fake_nexus_sim.start_date_set(start_date)
     # mock out open
     wells_obj = NexusWells(fake_nexus_sim)
@@ -760,9 +760,9 @@ def test_add_completion_correct_wellspec(mocker):
     mock_nexus_sim = get_fake_nexus_simulator(mocker)
 
     # add the required attributes to the model class
-    mock_nexus_sim.fcs_file.well_files = {1: file_1, 2: file_2, 3: file_target}
+    mock_nexus_sim.model_files.well_files = {1: file_1, 2: file_2, 3: file_target}
     mock_nexus_sim.date_format = DateFormat.DD_MM_YYYY
-    mock_nexus_sim.runcontrol.date_format_string = "%d/%m/%Y"
+    mock_nexus_sim.sim_controls.date_format_string = "%d/%m/%Y"
     mock_nexus_sim.start_date_set(start_date)
     # mock out open
     wells_obj = NexusWells(mock_nexus_sim)
@@ -888,12 +888,12 @@ def test_add_completion_include_files(mocker, fcs_file_contents, wells_file, inc
     mock_nexus_sim.wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
                                         preserve_previous_completions=True)
 
-    result = mock_nexus_sim.fcs_file.well_files[1].include_objects[0]
+    result = mock_nexus_sim.model_files.well_files[1].include_objects[0]
 
     # Assert
     assert result.file_content_as_list == expected_include_file.file_content_as_list
     assert result == expected_include_file
-    assert mock_nexus_sim.fcs_file.well_files[1].file_content_as_list == expected_wells_file.file_content_as_list
+    assert mock_nexus_sim.model_files.well_files[1].file_content_as_list == expected_wells_file.file_content_as_list
 
 def test_add_completion_other(mocker):
     # Arrange
@@ -1087,4 +1087,4 @@ def test_object_locations_updating(mocker, well_file_data, expected_uuid):
 
     # Assert
 
-    assert model.fcs_file.well_files[1].object_locations == expected_uuid
+    assert model.model_files.well_files[1].object_locations == expected_uuid
