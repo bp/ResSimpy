@@ -33,6 +33,7 @@ class Simulator(ABC):
     _gaslift: Gaslift
     _network: Network
 
+
     """Class Properties"""
 
     @property
@@ -86,6 +87,10 @@ class Simulator(ABC):
     @property
     def gaslift(self) -> Gaslift:
         return self._gaslift
+
+    @property
+    def network(self) -> Network:
+        return self._network
 
     """ Class Methods """
 

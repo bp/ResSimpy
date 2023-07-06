@@ -25,7 +25,7 @@ class PropertyToLoad:
 
 
 @dataclass(kw_only=True)
-class StructuredGridFile(Grid):
+class StructuredGrid(Grid):
     __array_functions_list: Optional[list[list[str]]] = None
     __array_functions_df: Optional[pd.DataFrame] = None
     __array_functions_loaded: bool = False
@@ -167,8 +167,8 @@ class StructuredGridFile(Grid):
         self.__grid_properties_loaded = True
 
     @classmethod
-    def load_structured_grid_file(cls: type[StructuredGridFile], structured_grid_file: NexusFile,
-                                  lazy_loading: bool = True) -> StructuredGridFile:
+    def load_structured_grid_file(cls: type[StructuredGrid], structured_grid_file: NexusFile,
+                                  lazy_loading: bool = True) -> StructuredGrid:
         """Loads in a structured grid file with all grid properties, and the array functions defined with 'FUNCTION'.
         Other grid modifiers are currently not supported.
 

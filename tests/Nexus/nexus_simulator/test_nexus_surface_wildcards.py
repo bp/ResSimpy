@@ -138,7 +138,7 @@ def test_read_wildcard(mocker, file_contents, expected_constraints):
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
 
     # Act
-    result = nexus_sim.network.constraints.get_constraints()
+    result = nexus_sim._network.constraints.get_constraints()
     # Assert
     assert result == expected_result
 

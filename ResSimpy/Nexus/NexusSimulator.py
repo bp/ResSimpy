@@ -19,7 +19,7 @@ from ResSimpy.Nexus.NexusValveMethods import NexusValveMethods
 from ResSimpy.Nexus.NexusAquiferMethods import NexusAquiferMethods
 from ResSimpy.Nexus.NexusHydraulicsMethods import NexusHydraulicsMethods
 from ResSimpy.Nexus.NexusGasliftMethods import NexusGasliftMethods
-from ResSimpy.Nexus.DataModels.StructuredGrid.StructuredGridFile import StructuredGridFile
+from ResSimpy.Nexus.DataModels.StructuredGrid.StructuredGrid import StructuredGrid
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
@@ -60,7 +60,7 @@ class NexusSimulator(Simulator):
             __nexus_data_name (str): private attribute of nexus_data_name. Folder name for the nexus data files to be \
                 stored in.
             __structured_grid_file_path (Optional[str]): file path to the structured grid.
-            __structured_grid_file (Optional[StructuredGridFile]): StructuredGridFile object representing the \
+            __structured_grid_file (Optional[StructuredGrid]): StructuredGridFile object representing the \
                 structured grid used in Nexus
             __run_units (Optional[str]): Unit system used in the Nexus model
             use_american_run_units (bool): True if an American unit system is used equivalent to 'ENGLISH'. \
@@ -87,15 +87,18 @@ class NexusSimulator(Simulator):
         self.__force_output: bool = force_output
         self.__origin: str = origin.strip()  # this is the fcs file path
         self.__nexus_data_name: str = nexus_data_name
-        self.__structured_grid: Optional[StructuredGridFile] = None
         self.__run_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
         self.root_name: str = root_name
         self.use_american_run_units: bool = False
         self.use_american_input_units: bool = False
         self.__write_times: bool = write_times
         self.__manual_fcs_tidy_call: bool = manual_fcs_tidy_call
-        self._wells: NexusWells = NexusWells(self)
+
         self.__default_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
+        #
+        self._wells: NexusWells = NexusWells(self)
+        self._structured_grid: Optional[StructuredGrid] = None
+        self._network: NexusNetwork = NexusNetwork(model=self)
         # Model dynamic properties
         self._pvt: NexusPVTMethods = NexusPVTMethods()
         self._separator: NexusSeparatorMethods = NexusSeparatorMethods()
@@ -114,8 +117,6 @@ class NexusSimulator(Simulator):
         self.logging: Logging = Logging(self)
         self.__lazy_loading: bool = lazy_loading
 
-        # Network file attributes
-        self.network = NexusNetwork(model=self)
 
         if destination is not None and destination != '':
             self.set_output_path(path=destination.strip())
@@ -502,8 +503,8 @@ class NexusSimulator(Simulator):
             self._sim_controls.load_run_control_file()
 
         if self.model_files.structured_grid_file is not None:
-            self.__structured_grid = StructuredGridFile.load_structured_grid_file(self.model_files.structured_grid_file,
-                                                                                  lazy_loading=self.__lazy_loading)
+            self._structured_grid = StructuredGrid.load_structured_grid_file(self.model_files.structured_grid_file,
+                                                                             lazy_loading=self.__lazy_loading)
 
         # Load in wellspec files
         if self.model_files.well_files is not None and \
@@ -657,19 +658,19 @@ class NexusSimulator(Simulator):
         self.__force_output = force_output
 
     @property
-    def StructuredGrid(self) -> Optional[StructuredGridFile]:
+    def StructuredGrid(self) -> Optional[StructuredGrid]:
         """Pass the structured grid information to the front end."""
-        return self.__structured_grid
+        return self._structured_grid
 
     def get_structured_grid_dict(self) -> dict[str, Any]:
         """Convert the structured grid info to a dictionary and pass it to the front end."""
-        if self.__structured_grid is None:
+        if self._structured_grid is None:
             return {}
-        return self.__structured_grid.to_dict()
+        return self._structured_grid.to_dict()
 
-    def set_structured_grid(self, structured_grid: StructuredGridFile):
+    def set_structured_grid(self, structured_grid: StructuredGrid):
         """Setter method for the structured grid file for use with modifying functions."""
-        self.__structured_grid = structured_grid
+        self._structured_grid = structured_grid
 
     def get_abs_structured_grid_path(self, filename: str):
         """Returns the absolute path to the Structured Grid file."""
@@ -690,4 +691,4 @@ class NexusSimulator(Simulator):
 
     def load_network(self):
         """Populates nodes and connections from a surface file."""
-        self.network.load()
+        self._network.load()
