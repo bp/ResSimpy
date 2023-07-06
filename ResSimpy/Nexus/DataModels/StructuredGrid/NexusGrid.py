@@ -210,7 +210,7 @@ class NexusGrid(Grid):
             ValueError: If no structured grid file is in the instance of the Simulator class
         """
         # Convert the dictionary back to a class, and update the properties on our class
-        structured_grid = model.StructuredGrid
+        structured_grid = model.grid
         if structured_grid is None or model.model_files.structured_grid_file is None:
             raise ValueError("Model does not contain a structured grid")
         original_structured_grid_file = copy.deepcopy(structured_grid)

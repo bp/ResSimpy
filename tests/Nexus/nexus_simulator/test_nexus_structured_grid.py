@@ -45,7 +45,7 @@ def test_load_structured_grid_file_basic_properties(mocker, structured_grid_file
 
     # Act
     simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
-    result = simulation.StructuredGrid
+    result = simulation.grid
 
     # Assert
     assert result.netgrs.value == expected_net_to_gross
@@ -231,7 +231,7 @@ def test_load_structured_grid_file_k_values(mocker, structured_grid_file_content
 
     # Act
     simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', )
-    result = simulation.StructuredGrid
+    result = simulation.grid
 
     # Assert
     assert result.kx.modifier == expected_kx_modifier
@@ -313,7 +313,7 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
 
     # Act
     NexusGrid.update_structured_grid_file(new_structured_grid_dictionary, simulation)
-    result = simulation.StructuredGrid
+    result = simulation.grid
 
     # Assert
 
@@ -521,7 +521,7 @@ def test_load_faults(mocker, structured_grid_file_contents, expected_results):
 
     # Act
     simulation = NexusSimulator(origin=fcs_path)
-    faults_df = simulation.StructuredGrid.get_faults_df()
+    faults_df = simulation.grid.get_faults_df()
 
     if faults_df is not None:
         faults_df = faults_df.astype({'I1': 'int32', 'I2': 'int32', 'J1': 'int32', 'J2': 'int32',

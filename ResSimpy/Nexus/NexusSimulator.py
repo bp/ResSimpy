@@ -33,14 +33,13 @@ from ResSimpy.Simulator import Simulator
 
 class NexusSimulator(Simulator):
 
-    def __init__(self, origin: Optional[str] = None, destination: Optional[str] = None, force_output: bool = False,
+    def __init__(self, origin: Optional[str] = None, destination: Optional[str] = None,
                  root_name: Optional[str] = None, nexus_data_name: str = "data", write_times: bool = False,
                  manual_fcs_tidy_call: bool = False, lazy_loading: bool = True) -> None:
         """Nexus simulator class. Inherits from the Simulator super class.
 
         Args:
             origin (Optional[str], optional): file path to the fcs file. Defaults to None.
-            force_output (bool, optional): sets force_output parameter - unused. Defaults to False.
             root_name (Optional[str], optional): Root file name of the fcs. Defaults to None.
             nexus_data_name (str, optional): Folder name for the nexus data files to be stored in. Defaults to "data".
             write_times (bool, optional): Sets whether the runcontrol file will expand the include files with time \
@@ -83,9 +82,8 @@ class NexusSimulator(Simulator):
         self.run_control_file_path: Optional[str] = ''
         self.__destination: Optional[str] = None
         self.date_format: DateFormat = DateFormat.MM_DD_YYYY  # Nexus default
-        self.__original_fcs_file_path: str = origin.strip()
-        self.__new_fcs_file_path: str = origin.strip()
-        self.__force_output: bool = force_output
+        self.__original_fcs_file_path: str = self.origin
+        self.__new_fcs_file_path: str = self.origin
         self.__nexus_data_name: str = nexus_data_name
         self.__run_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
         self.root_name: str = root_name
@@ -184,8 +182,6 @@ class NexusSimulator(Simulator):
     @property
     def original_fcs_file_path(self):
         return self.__original_fcs_file_path
-
-
 
     @property
     def root_name(self):
@@ -641,28 +637,11 @@ class NexusSimulator(Simulator):
         else:
             raise NotImplementedError(section, "not yet implemented")
 
-    def change_force_output(self, force_output: bool = True) -> None:
-        """Sets the force output parameter to the supplied value.
-
-        Args:
-            force_output (bool, optional): sets the force_output parameter in the class instance. Defaults to True.
-        """
-        self.__force_output = force_output
-
-    @property
-    def StructuredGrid(self) -> Optional[NexusGrid]:
-        """Pass the structured grid information to the front end."""
-        return self._grid
-
     def get_structured_grid_dict(self) -> dict[str, Any]:
         """Convert the structured grid info to a dictionary and pass it to the front end."""
         if self._grid is None:
             return {}
         return self._grid.to_dict()
-
-    def set_structured_grid(self, structured_grid: NexusGrid):
-        """Setter method for the structured grid file for use with modifying functions."""
-        self._grid = structured_grid
 
     def get_abs_structured_grid_path(self, filename: str):
         """Returns the absolute path to the Structured Grid file."""
