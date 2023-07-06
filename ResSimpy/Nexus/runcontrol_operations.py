@@ -219,7 +219,7 @@ class SimControls:
         file_content = self.__model.model_files.runcontrol_file.get_flat_list_str_file
         filename = self.__model.model_files.runcontrol_file.location
 
-        new_file_content = self.__model.sim_controls.delete_times(file_content)
+        new_file_content = self.__model._sim_controls.delete_times(file_content)
 
         time_list = self.times
         stop_string = 'STOP\n'

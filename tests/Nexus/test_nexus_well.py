@@ -720,7 +720,7 @@ def test_add_completion_write(mocker, file_as_list, add_perf_date, preserve_prev
     # add the required attributes to the model class
     fake_nexus_sim.model_files.well_files = {1: file}
     fake_nexus_sim.date_format = DateFormat.DD_MM_YYYY
-    fake_nexus_sim.sim_controls.date_format_string = "%d/%m/%Y"
+    fake_nexus_sim._sim_controls.date_format_string = "%d/%m/%Y"
     fake_nexus_sim.start_date = start_date
     # mock out open
     wells_obj = NexusWells(fake_nexus_sim)
@@ -762,7 +762,7 @@ def test_add_completion_correct_wellspec(mocker):
     # add the required attributes to the model class
     mock_nexus_sim.model_files.well_files = {1: file_1, 2: file_2, 3: file_target}
     mock_nexus_sim.date_format = DateFormat.DD_MM_YYYY
-    mock_nexus_sim.sim_controls.date_format_string = "%d/%m/%Y"
+    mock_nexus_sim._sim_controls.date_format_string = "%d/%m/%Y"
     mock_nexus_sim.start_date = start_date
     # mock out open
     wells_obj = NexusWells(mock_nexus_sim)
@@ -872,21 +872,21 @@ def test_add_completion_include_files(mocker, fcs_file_contents, wells_file, inc
     # Act
     # test adding a load of completions sequentially
     mock_nexus_sim._wells.add_completion(well_name='well1', completion_properties=add_perf_dict,
-                                        preserve_previous_completions=True)
+                                         preserve_previous_completions=True)
     mock_nexus_sim._wells.add_completion(well_name='well1', completion_properties=add_perf_dict_2,
-                                        preserve_previous_completions=True)
+                                         preserve_previous_completions=True)
+    mock_nexus_sim._wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
+                                         preserve_previous_completions=True)
+    mock_nexus_sim._wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
+                                         preserve_previous_completions=True)
+    mock_nexus_sim._wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
+                                         preserve_previous_completions=True)
+    mock_nexus_sim._wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
+                                         preserve_previous_completions=True)
     mock_nexus_sim._wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
                                         preserve_previous_completions=True)
     mock_nexus_sim._wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
-                                        preserve_previous_completions=True)
-    mock_nexus_sim._wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
-                                        preserve_previous_completions=True)
-    mock_nexus_sim._wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
-                                        preserve_previous_completions=True)
-    mock_nexus_sim._wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
-                                        preserve_previous_completions=True)
-    mock_nexus_sim._wells.add_completion(well_name='well1', completion_properties=add_perf_dict_3,
-                                        preserve_previous_completions=True)
+                                         preserve_previous_completions=True)
 
     result = mock_nexus_sim.model_files.well_files[1].include_objects[0]
 

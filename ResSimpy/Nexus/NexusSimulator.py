@@ -108,9 +108,9 @@ class NexusSimulator(Simulator):
         self._hydraulics: NexusHydraulicsMethods = NexusHydraulicsMethods()
         self._gaslift: NexusGasliftMethods = NexusGasliftMethods()
         # Nexus operations modules
-        self.sim_controls: SimControls = SimControls(self)
+        self._sim_controls: SimControls = SimControls(self)
         self.reporting: Reporting = Reporting(self)
-        self.structured_grid_operations: StructuredGridOperations = StructuredGridOperations(self)
+        self._structured_grid_operations: StructuredGridOperations = StructuredGridOperations(self)
         self.logging: Logging = Logging(self)
         self.__lazy_loading: bool = lazy_loading
 
@@ -430,7 +430,7 @@ class NexusSimulator(Simulator):
                 if value is not None:
                     self.date_format = DateFormat.DD_MM_YYYY if value == 'DD/MM/YYYY' else DateFormat.MM_DD_YYYY
 
-                self.sim_controls.date_format_string = "%m/%d/%Y" if self.date_format is DateFormat.MM_DD_YYYY \
+                self._sim_controls.date_format_string = "%m/%d/%Y" if self.date_format is DateFormat.MM_DD_YYYY \
                     else "%d/%m/%Y"
             elif nfo.check_token('RUN_UNITS', line):
                 value = nfo.get_token_value('RUN_UNITS', line, fcs_content_with_includes)
@@ -499,7 +499,7 @@ class NexusSimulator(Simulator):
         # Load in Runcontrol
         if self.model_files.runcontrol_file is not None:
             self.run_control_file_path = self.model_files.runcontrol_file.location
-            self.sim_controls.load_run_control_file()
+            self._sim_controls.load_run_control_file()
 
         if self.model_files.structured_grid_file is not None:
             self.__structured_grid = StructuredGridFile.load_structured_grid_file(self.model_files.structured_grid_file,
@@ -597,7 +597,7 @@ class NexusSimulator(Simulator):
         """Returns the date format being used by the model
         formats used: ('MM/DD/YYYY', 'DD/MM/YYYY').
         """
-        return self.sim_controls.get_date_format(self.date_format)
+        return self._sim_controls.get_date_format(self.date_format)
 
     def modify(self, operation: str, section: str, keyword: str, content: list[str]):
         """Generic modify method to modify part of the input deck. \
@@ -619,7 +619,7 @@ class NexusSimulator(Simulator):
 
         if section == "RUNCONTROL":
             if keyword == "TIME":
-                self.sim_controls.modify_times(content=content, operation=operation)
+                self._sim_controls.modify_times(content=content, operation=operation)
             else:
                 raise NotImplementedError(keyword, "not yet implemented")
         else:
@@ -642,7 +642,7 @@ class NexusSimulator(Simulator):
         keyword = keyword.upper()
         if section == "RUNCONTROL":
             if keyword == "TIME":
-                return self.sim_controls.times
+                return self._sim_controls.times
             else:
                 raise NotImplementedError(keyword, "not yet implemented")
         else:
