@@ -6,6 +6,7 @@ from typing import Optional
 
 from ResSimpy.Aquifer import Aquifer
 from ResSimpy.Equilibration import Equilibration
+from ResSimpy.File import File
 from ResSimpy.Gaslift import Gaslift
 from ResSimpy.Grid import Grid
 from ResSimpy.Hydraulics import Hydraulics
@@ -36,6 +37,7 @@ class Simulator(ABC):
     _gaslift: Gaslift
     _network: Network
     _grid: Optional[Grid]
+    _model_files: File
 
     """Class Properties"""
 
@@ -111,9 +113,13 @@ class Simulator(ABC):
         self._origin: str = value.strip()
 
     @property
-    def model_location(self):
+    def model_location(self) -> str:
         """Returns the location of the model."""
         return os.path.dirname(self._origin)
+
+    @property
+    def model_files(self) -> File:
+        return self._model_files
 
     """ Class Methods """
 
@@ -128,6 +134,5 @@ class Simulator(ABC):
 
     @abstractmethod
     def get_date_format(self) -> str:
-        """Returns date format as a string"""
+        """Returns date format as a string."""
         raise NotImplementedError("Implement this method on the derived class")
-

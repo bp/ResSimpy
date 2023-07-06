@@ -121,7 +121,7 @@ class NexusSimulator(Simulator):
         # Check the status of any existing or completed runs related to this model
         self.get_simulation_status(from_startup=True)
 
-        self.model_files: FcsNexusFile
+        self._model_files: FcsNexusFile
         # Load in the model
         self.__load_fcs_file()
 
