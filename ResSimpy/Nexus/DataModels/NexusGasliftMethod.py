@@ -45,7 +45,7 @@ class NexusGasliftMethod(DynamicProperty):
             if isinstance(value, pd.DataFrame):
                 printable_str += value.to_string(na_rep='', index=False) + '\n'
             elif isinstance(value, Enum):
-                if isinstance(value, UnitSystem) or isinstance(value, TemperatureUnits):
+                if isinstance(value, UnitSystem | TemperatureUnits):
                     printable_str += f'{value.value}\n'
                 elif isinstance(value, SUnits):
                     printable_str += f'SUNITS {value.value}\n'
