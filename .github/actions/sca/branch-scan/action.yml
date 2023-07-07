@@ -18,7 +18,7 @@ inputs:
     required: true
     default: 'replace'
   app_or_microservice_name:
-    description: 'Provide the microservie or monolithic app name which will be scanned by this workflow '
+    description: 'Provide the microservice or monolithic app name which will be scanned by this workflow '
     required: true
     default: 'replace'
   it_service_number:
@@ -110,8 +110,6 @@ runs:
         echo "The client-id =${{inputs.client-id}}"
         echo "The client_secret =${{inputs.client_secret}}"
         echo "The oidc_scope =${{inputs.oidc_scope}}"
-        echo "The sca_username =${{inputs.sca_username}}"
-        echo "The sca_password =${{inputs.sca_password}}"
       shell: bash
     - name: Checkout the source code to scan using checkmarx
       uses: actions/checkout@v3

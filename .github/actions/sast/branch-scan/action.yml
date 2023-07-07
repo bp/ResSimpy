@@ -112,8 +112,6 @@ runs:
         echo "The client-id =${{inputs.client-id}}"
         echo "The client_secret =${{inputs.client_secret}}"
         echo "The oidc_scope =${{inputs.oidc_scope}}"
-        echo "The sast_username =${{inputs.sast_username}}"
-        echo "The sast_password =${{inputs.sast_password}}"
         echo "The vulnerability_threshhold_high =${{inputs.vulnerability_threshhold_high}}"
         echo "The vulnerability_threshhold_medium =${{inputs.vulnerability_threshhold_medium}}"
         echo "The vulnerability_threshhold_low =${{inputs.vulnerability_threshhold_low}}"
