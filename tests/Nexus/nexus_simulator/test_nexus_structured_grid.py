@@ -83,7 +83,7 @@ INCLUDE includes/Another_structured_grid_01.inc"""
 
     # Act
     simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
-    result = simulation.structuredGrid
+    result = simulation.grid
 
     # Assert
     assert result.netgrs.value == "/path_to_netgrs_file/include_net_to_gross_2.inc"
