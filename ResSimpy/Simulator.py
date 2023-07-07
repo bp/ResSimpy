@@ -2,6 +2,7 @@
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import Optional
 
 from ResSimpy.Aquifer import Aquifer
 from ResSimpy.Equilibration import Equilibration
@@ -130,6 +131,7 @@ class Simulator(ABC):
     @abstractmethod
     def set_output_path(self, path: str) -> None:
         raise NotImplementedError("Implement this method on the derived class")
+
     @abstractmethod
     def get_date_format(self) -> str:
         """Returns date format as a string."""
