@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Optional, Any
+from typing import TYPE_CHECKING, Optional, Any, Literal
 
 from ResSimpy.Network import Network
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
@@ -132,3 +132,47 @@ class NexusNetwork(Network):
         constraint_names_to_add = list(set(constraint_names_to_add))
 
         return constraint_names_to_add
+
+    def find_node_with_dict(self, name: str, search_dict: dict[str, None | float | str | int],
+                            network_element_type: Literal['nodes', 'connections', 'well_connections', 'wellheads',
+                                                          'wellbores', 'constraints']) -> Any:
+        """Finds a uniquely matching constraint from a given set of properties in a dictionary of attributes.
+
+        Args:
+            name (str): name of the node/connection to find
+            search_dict (dict[str, float | str | int]): dictionary of attributes to match on. \
+            Allows for partial matches if it finds a unique object.
+            network_element_type (Literal[str]): one of nodes, connections, well_connections, wellheads, wellbores,
+                constraints
+
+        Returns:
+            NexusConstraint of an existing constraint in the model that uniquely matches the provided \
+            constraint_dict constraint
+        """
+        network_element_to_search: Any
+        self.get_load_status()
+        if network_element_type == 'constraints':
+            network_element_to_search = self.constraints.get_constraints().get(name, None)
+        else:
+            network_element_to_search = getattr(self, network_element_type, None)
+            if network_element_to_search is not None:
+                network_element_to_search = [x for x in network_element_to_search if x.name == name]
+
+        if network_element_to_search is None or len(network_element_to_search) == 0:
+            raise ValueError(f'No {network_element_type} found with {name=}')
+
+        matching_elements = []
+        for elements in network_element_to_search:
+            for prop, value in search_dict.items():
+                if getattr(elements, prop) == value:
+                    continue
+                else:
+                    break
+            else:
+                matching_elements.append(elements)
+
+        if len(matching_elements) == 1:
+            return matching_elements[0]
+        else:
+            raise ValueError(f'No unique matching {network_element_type} with the properties provided.'
+                             f'Instead found: {len(matching_elements)} matching {network_element_type}.')

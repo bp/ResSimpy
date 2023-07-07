@@ -1,5 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
+from uuid import UUID
 
 import numpy as np
 import pandas as pd
@@ -95,6 +96,23 @@ class NexusNodes(Nodes):
             return
         self.__nodes.extend(additional_list)
 
-    def remove_node(self, node_to_remove: Node | dict[str, None | str | float | int]):
+    def remove_node(self, node_to_remove: dict[str, None | str | float | int] | UUID):
+        """Remove a node from the network based on the properties matching a dictionary or id.
 
-        pass
+        Args:
+            node_to_remove (Node | dict[str, None | str | float | int]):
+
+        Returns:
+
+        """
+        if isinstance(node_to_remove, dict):
+            name = node_to_remove.get('name', None)
+            if name is None:
+                raise ValueError(f'Require node name to remove the node instead got {name=}')
+            name = str(name)
+            node = self.__parent_network.find_node_with_dict(name, node_to_remove, 'nodes')
+        else:
+            node_id = node_to_remove
+        node_id = node.id
+
+        # remove from memory

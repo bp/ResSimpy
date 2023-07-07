@@ -57,6 +57,7 @@ def test_remove_node(mocker, file_contents, expected_file_contents, node_to_remo
     # Act
     nexus_sim.network.nodes.remove_node(node_to_remove)
     result_nodes = nexus_sim.network.nodes.get_nodes()
+
     # Assert
     assert result_nodes == expected_nodes
     check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
