@@ -6,7 +6,7 @@ from tests.utility_for_tests import get_fake_nexus_simulator, check_file_read_wr
 
 @pytest.mark.parametrize('file_contents, expected_file_contents, node_to_remove, expected_nodes, expected_number_writes',
 [# basic_test
-('''TIME 01/01/2020
+('''TIME 01/01/2023
 NODES
   NAME                           TYPE       DEPTH   TEMP
  ! comment
@@ -14,7 +14,7 @@ NODES
   node_2        WELLHEAD     1167.3 # 
   ENDNODES
 ''',
-'''TIME 01/01/2020
+'''TIME 01/01/2023
 NODES
   NAME                           TYPE       DEPTH   TEMP
  ! comment

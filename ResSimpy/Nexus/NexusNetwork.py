@@ -49,6 +49,10 @@ class NexusNetwork(Network):
             self.load()
         return self.__has_been_loaded
 
+    @property
+    def model(self) -> NexusSimulator:
+        return self.__model
+
     def get_surface_file(self, method_number: Optional[int] = None) -> Optional[dict[int, NexusFile] | NexusFile]:
         """Gets a specific surface file object or a dictionary of surface files keyed by method number.
 
@@ -149,14 +153,18 @@ class NexusNetwork(Network):
             NexusConstraint of an existing constraint in the model that uniquely matches the provided \
             constraint_dict constraint
         """
-        network_element_to_search: Any
+        network_element_to_search: Any = None
         self.get_load_status()
         if network_element_type == 'constraints':
             network_element_to_search = self.constraints.get_constraints().get(name, None)
         else:
-            network_element_to_search = getattr(self, network_element_type, None)
-            if network_element_to_search is not None:
-                network_element_to_search = [x for x in network_element_to_search if x.name == name]
+            # retrieve the getter method on the network attribute
+            network_element = getattr(self, f'{network_element_type}', None)
+            if network_element is None:
+                raise ValueError(f'Network has no elements associated with the {network_element_type=} requested')
+            network_element_getter = getattr(network_element, f'get_{network_element_type}', None)
+            if network_element_getter is not None:
+                network_element_to_search = [x for x in network_element_getter() if x.name == name]
 
         if network_element_to_search is None or len(network_element_to_search) == 0:
             raise ValueError(f'No {network_element_type} found with {name=}')

@@ -8,7 +8,6 @@ from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.Node import Node
 from ResSimpy.Nodes import Nodes
 from typing import Sequence, Optional, TYPE_CHECKING
 
@@ -96,23 +95,38 @@ class NexusNodes(Nodes):
             return
         self.__nodes.extend(additional_list)
 
-    def remove_node(self, node_to_remove: dict[str, None | str | float | int] | UUID):
+    def remove_node(self, node_to_remove: dict[str, None | str | float | int] | UUID) -> None:
         """Remove a node from the network based on the properties matching a dictionary or id.
 
         Args:
-            node_to_remove (Node | dict[str, None | str | float | int]):
-
-        Returns:
+            node_to_remove (UUID | dict[str, None | str | float | int]): UUID of the node to remove or a dictionary \
+            with sufficient matching parameters to uniquely identify a node
 
         """
+        # TODO make this method generic!
+        network_file = self.__parent_network.model.model_files.surface_files[1]
+        if network_file is None:
+            raise ValueError(f'No file found for {network_file=}')
+
         if isinstance(node_to_remove, dict):
             name = node_to_remove.get('name', None)
             if name is None:
                 raise ValueError(f'Require node name to remove the node instead got {name=}')
             name = str(name)
             node = self.__parent_network.find_node_with_dict(name, node_to_remove, 'nodes')
+            node_id = node.id
         else:
             node_id = node_to_remove
-        node_id = node.id
 
         # remove from memory
+        index_to_remove = [x.id for x in self.__nodes].index(node_id)
+        self.__nodes.pop(index_to_remove)
+
+        # remove from file
+        if network_file.object_locations is None:
+            raise ValueError(f'No object locations specified, cannot find node id: {node_id}')
+        line_numbers_in_file = network_file.object_locations[node_id]
+        if len(line_numbers_in_file) > 0:
+            for index in line_numbers_in_file:
+                network_file.remove_from_file_as_list(index, [node_id])
+        # check there are any nodes left in the specified table

@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
+from uuid import UUID
+
 import pandas as pd
 from ResSimpy.Node import Node
 from typing import Sequence, Optional
@@ -24,5 +26,5 @@ class Nodes(ABC):
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
-    def remove_node(self, node_to_remove: Node | dict[str, None | str | float | int]):
+    def remove_node(self, node_to_remove: UUID | dict[str, None | str | float | int]):
         raise NotImplementedError("Implement this in the derived class")
