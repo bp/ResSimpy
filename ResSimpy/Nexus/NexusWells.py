@@ -194,7 +194,7 @@ class NexusWells(Wells):
         for index, line in enumerate(file_content):
             if header_index == -1 and nfo.check_token('TIME', line):
                 wellspec_date = nfo.get_expected_token_value('TIME', line, [line])
-                date_comp = self.__model.sim_controls.compare_dates(wellspec_date, completion_date)
+                date_comp = self.__model._sim_controls.compare_dates(wellspec_date, completion_date)
                 if date_comp == 0:
                     # if we've found the date we're looking for start looking for a wellspec and name card
                     new_completion_time_index = index
@@ -341,7 +341,7 @@ class NexusWells(Wells):
             # get all the dates for that well
             date_list = well.dates_of_completions
             previous_dates = [x for x in date_list if
-                              self.__model.sim_controls.compare_dates(x, completion_date) < 0]
+                              self.__model._sim_controls.compare_dates(x, completion_date) < 0]
             if len(previous_dates) == 0:
                 # if no dates that are smaller than the completion date then only add the perforation
                 # at the current index with a new wellspec card.
@@ -352,7 +352,7 @@ class NexusWells(Wells):
                 return headers, new_completion_index, completion_table_as_list, False
 
             # get the most recent date that is earlier than the new completion date
-            previous_dates = sorted(previous_dates, key=cmp_to_key(self.__model.sim_controls.compare_dates))
+            previous_dates = sorted(previous_dates, key=cmp_to_key(self.__model._sim_controls.compare_dates))
             last_date = str(previous_dates[-1])
             completion_to_find: NexusCompletion.InputDictionary = {'date': last_date}
             # find all completions at this date

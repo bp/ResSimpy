@@ -4,8 +4,8 @@ import os
 import pandas as pd
 import pytest
 from ResSimpy.Grid import VariableEntry
-from ResSimpy.Nexus.DataModels.StructuredGrid import StructuredGridFile
-from ResSimpy.Nexus.DataModels.StructuredGrid.StructuredGridFile import StructuredGridFile
+from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
 from tests.multifile_mocker import mock_multiple_files
@@ -45,7 +45,7 @@ def test_load_structured_grid_file_basic_properties(mocker, structured_grid_file
 
     # Act
     simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
-    result = simulation.StructuredGrid
+    result = simulation.grid
 
     # Assert
     assert result.netgrs.value == expected_net_to_gross
@@ -231,7 +231,7 @@ def test_load_structured_grid_file_k_values(mocker, structured_grid_file_content
 
     # Act
     simulation = NexusSimulator(origin='testpath1/nexus_run.fcs' )
-    result = simulation.StructuredGrid
+    result = simulation.grid
 
     # Assert
     assert result.kx.modifier == expected_kx_modifier
@@ -312,8 +312,8 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
     mocker.patch("builtins.open", structured_grid_mock)
 
     # Act
-    StructuredGridFile.update_structured_grid_file(new_structured_grid_dictionary, simulation)
-    result = simulation.StructuredGrid
+    NexusGrid.update_structured_grid_file(new_structured_grid_dictionary, simulation)
+    result = simulation.grid
 
     # Assert
 
@@ -372,7 +372,7 @@ def test_view_command(mocker, structured_grid_file_contents, expected_text):
     result = NexusSimulator(origin='testpath1/nexus_run.fcs' )
 
     # Assert
-    value = result.structured_grid_operations.view_command(field='netgrs')
+    value = result._structured_grid_operations.view_command(field='netgrs')
     assert value == expected_text
 
 
@@ -521,7 +521,7 @@ def test_load_faults(mocker, structured_grid_file_contents, expected_results):
 
     # Act
     simulation = NexusSimulator(origin=fcs_path)
-    faults_df = simulation.StructuredGrid.get_faults_df()
+    faults_df = simulation.grid.get_faults_df()
 
     if faults_df is not None:
         faults_df = faults_df.astype({'I1': 'int32', 'I2': 'int32', 'J1': 'int32', 'J2': 'int32',
@@ -603,7 +603,7 @@ def test_included_fault_tables(mocker):
     expected_df = expected_df.astype(comparison_types)
     # Act
     simulation = NexusSimulator(origin=fcs_path)
-    faults_df = simulation.StructuredGrid.get_faults_df()
+    faults_df = simulation.grid.get_faults_df()
     faults_df = faults_df.astype(comparison_types)
     # Assert
     pd.testing.assert_frame_equal(expected_df, faults_df)

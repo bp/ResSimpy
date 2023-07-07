@@ -1,7 +1,7 @@
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.Nexus.DataModels.StructuredGrid import StructuredGridFile
-from ResSimpy.Nexus.DataModels.StructuredGrid.StructuredGridFile import StructuredGridFile
+from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from tests.multifile_mocker import mock_multiple_files
 from pandas.testing import assert_frame_equal
 
@@ -154,7 +154,7 @@ some line
 
     # Act
     test_input_grid_file_object: NexusFile = NexusFile.generate_file_include_structure('mock/str_grid/path.inc')
-    new_sim_grid = StructuredGridFile.load_structured_grid_file(test_input_grid_file_object)
+    new_sim_grid = NexusGrid.load_structured_grid_file(test_input_grid_file_object)
     func_list = new_sim_grid.get_array_functions_list()
     func_summary_df = new_sim_grid.get_array_functions_df()
 

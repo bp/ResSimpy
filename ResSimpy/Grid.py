@@ -92,3 +92,7 @@ class Grid(ABC):
     @abstractmethod
     def to_dict(self) -> dict[str, Optional[int] | VariableEntry]:
         raise NotImplementedError("Implement this in the derived class")
+
+    @abstractmethod
+    def update_properties_from_dict(self, data: dict[str, int | VariableEntry]) -> None:
+        raise NotImplementedError("Implement this in the derived class")

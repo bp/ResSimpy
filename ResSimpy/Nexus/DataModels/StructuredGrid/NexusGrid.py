@@ -25,7 +25,7 @@ class PropertyToLoad:
 
 
 @dataclass(kw_only=True)
-class StructuredGridFile(Grid):
+class NexusGrid(Grid):
     __array_functions_list: Optional[list[list[str]]] = None
     __array_functions_df: Optional[pd.DataFrame] = None
     __array_functions_loaded: bool = False
@@ -167,8 +167,8 @@ class StructuredGridFile(Grid):
         self.__grid_properties_loaded = True
 
     @classmethod
-    def load_structured_grid_file(cls: type[StructuredGridFile], structured_grid_file: NexusFile,
-                                  lazy_loading: bool = True) -> StructuredGridFile:
+    def load_structured_grid_file(cls: type[NexusGrid], structured_grid_file: NexusFile,
+                                  lazy_loading: bool = True) -> NexusGrid:
         """Loads in a structured grid file with all grid properties, and the array functions defined with 'FUNCTION'.
         Other grid modifiers are currently not supported.
 
@@ -210,7 +210,7 @@ class StructuredGridFile(Grid):
             ValueError: If no structured grid file is in the instance of the Simulator class
         """
         # Convert the dictionary back to a class, and update the properties on our class
-        structured_grid = model.StructuredGrid
+        structured_grid = model.grid
         if structured_grid is None or model.model_files.structured_grid_file is None:
             raise ValueError("Model does not contain a structured grid")
         original_structured_grid_file = copy.deepcopy(structured_grid)
