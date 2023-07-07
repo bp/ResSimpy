@@ -115,7 +115,7 @@ class NexusNodes(Nodes):
             if name is None:
                 raise ValueError(f'Require node name to remove the node instead got {name=}')
             name = str(name)
-            node = self.__parent_network.find_node_with_dict(name, node_to_remove, 'nodes')
+            node = self.__parent_network.find_network_element_with_dict(name, node_to_remove, 'nodes')
             node_id = node.id
         else:
             node_id = node_to_remove

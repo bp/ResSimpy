@@ -114,26 +114,13 @@ class NexusConstraints(Constraints):
             constraint_dict constraint
         """
         self.__parent_network.get_load_status()
-
-        constraints = self.__constraints.get(object_name, None)
-        if constraints is None or len(constraints) == 0:
-            raise ValueError(f'No constraints found with {object_name=}')
-
-        matching_constraints = []
-        for constraint in constraints:
-            for prop, value in constraint_dict.items():
-                if getattr(constraint, prop) == value:
-                    continue
-                else:
-                    break
-            else:
-                matching_constraints.append(constraint)
-
-        if len(matching_constraints) == 1:
-            return matching_constraints[0]
+        found_object_from_network = self.__parent_network.find_network_element_with_dict(object_name, constraint_dict,
+                                                                                          'constraints')
+        if isinstance(found_object_from_network, NexusConstraint):
+            return found_object_from_network
         else:
-            raise ValueError(f'No unique matching constraints with the properties provided.'
-                             f'Instead found: {len(matching_constraints)} matching constraints.')
+            raise TypeError(f'Wrong object type returned expected NexusConstraint, '
+                            f'instead returned {type(found_object_from_network)}')
 
     def remove_constraint(self, constraint_dict: Optional[dict[str, float | str | int]] = None,
                           constraint_id: Optional[UUID] = None) -> None:
