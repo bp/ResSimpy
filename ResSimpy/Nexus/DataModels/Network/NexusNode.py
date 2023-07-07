@@ -56,5 +56,5 @@ class NexusNode(Node):
 
     @property
     def id(self) -> uuid.UUID:
-        """Unique identifier for each Node object"""
+        """Unique identifier for each Node object."""
         return self.__id
