@@ -467,5 +467,5 @@ class NexusWells(Wells):
         update_completion_properties.update(properties_to_modify)
 
         self.remove_completion(well_name, completion_id=completion_id)
-        self.add_completion(well_name, update_completion_properties, preserve_previous_completions=True, 
+        self.add_completion(well_name, update_completion_properties, preserve_previous_completions=True,
                             comments=comments)
