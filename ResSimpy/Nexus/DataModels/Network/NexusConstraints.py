@@ -101,7 +101,8 @@ class NexusConstraints(Constraints):
             return
         self.__constraints.update(additional_constraints)
 
-    def find_constraint(self, object_name: str, constraint_dict: dict[str, float | str | int]) -> NexusConstraint:
+    def find_constraint(self, object_name: str, constraint_dict: dict[str, None | float | str | int]) -> \
+            NexusConstraint:
         """Finds a uniquely matching constraint from a given set of properties in a dictionary of attributes.
 
         Args:
@@ -122,7 +123,7 @@ class NexusConstraints(Constraints):
             raise TypeError(f'Wrong object type returned expected NexusConstraint, '
                             f'instead returned {type(found_object_from_network)}')
 
-    def remove_constraint(self, constraint_dict: Optional[dict[str, float | str | int]] = None,
+    def remove_constraint(self, constraint_dict: Optional[dict[str, None | float | str | int]] = None,
                           constraint_id: Optional[UUID] = None) -> None:
         """Remove a constraint based on closest matching constraint, requires node name and date.\
         Needs one of at least constraint dict or constraint id.
@@ -305,13 +306,13 @@ class NexusConstraints(Constraints):
             update the constraint with.
         """
 
-        def clean_constraint_inputs(constraint: dict[str, None | float | int | str | UnitSystem] | NexusConstraint) -> \
-                dict[str, float | int | str | UnitSystem]:
-            """Cleans up an input removing Nones and ensures consistent type is returned."""
+        def clean_constraint_inputs(constraint: dict[str, None | float | int | str] | NexusConstraint) -> \
+                dict[str, None | float | int | str]:
+            """Cleans up an input ensuring consistent type is returned."""
             if isinstance(constraint, NexusConstraint):
-                cleaned_dict = {k: v for k, v in constraint.to_dict().items() if v is not None}
+                cleaned_dict = constraint.to_dict()
             else:
-                cleaned_dict = {k: v for k, v in constraint.items() if v is not None}
+                cleaned_dict = constraint
             return cleaned_dict
 
         cleaned_current_constraint = clean_constraint_inputs(current_constraint)
