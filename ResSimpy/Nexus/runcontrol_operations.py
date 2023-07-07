@@ -219,7 +219,7 @@ class SimControls:
         file_content = self.__model.model_files.runcontrol_file.get_flat_list_str_file
         filename = self.__model.model_files.runcontrol_file.location
 
-        new_file_content = self.__model.sim_controls.delete_times(file_content)
+        new_file_content = self.__model._sim_controls.delete_times(file_content)
 
         time_list = self.times
         stop_string = 'STOP\n'
@@ -261,19 +261,19 @@ class SimControls:
             if nfo.check_token('START', line):
                 value = nfo.get_expected_token_value('START', line, run_control_file_content)
                 if value is not None:
-                    self.__model.start_date_set(value)
+                    self.__model.start_date = value
 
         times = []
         run_control_times = self.get_times(run_control_file_content)
         times.extend(run_control_times)
         if self.__model.start_date is None or self.__model.start_date == '':
             try:
-                self.__model.start_date_set(times[0])
+                self.__model.start_date = times[0]
             except IndexError:
                 for line in run_control_file_content:
                     if nfo.check_token('TIME', line):
                         value = nfo.get_expected_token_value('TIME', line, run_control_file_content)
-                        self.__model.start_date_set(value)
+                        self.__model.start_date = value
                         warnings.warn(f'Setting start date to first time card found in the runcontrol file as: {value}')
                         break
                 warnings.warn('No value found for start date explicitly with START or TIME card')

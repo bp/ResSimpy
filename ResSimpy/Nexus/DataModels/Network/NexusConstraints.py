@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Mapping, Sequence, cast
 from uuid import UUID
 
 import pandas as pd
 
+from ResSimpy.Constraint import Constraint
+from ResSimpy.Constraints import Constraints
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -19,7 +21,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class NexusConstraints:
+class NexusConstraints(Constraints):
     __constraints: dict[str, list[NexusConstraint]] = field(default_factory=lambda: {})
 
     def __init__(self, parent_network: NexusNetwork, model: NexusSimulator) -> None:
@@ -28,7 +30,7 @@ class NexusConstraints:
         self.__model: NexusSimulator = model
 
     def get_constraints(self, object_name: Optional[str] = None, date: Optional[str] = None) -> \
-            dict[str, list[NexusConstraint]]:
+            Mapping[str, Sequence[NexusConstraint]]:
         """Get the constraints of the existing model with optional parameters to filter for name and date
         Args:
             object_name (Optional[str]): name of the connection, node or wellname to return. Defaults to None.
@@ -187,7 +189,7 @@ class NexusConstraints:
 
     def add_constraint(self,
                        name: str,
-                       constraint_to_add: dict[str, None | float | int | str | UnitSystem] | NexusConstraint,
+                       constraint_to_add: dict[str, None | float | int | str | UnitSystem] | Constraint,
                        ) -> None:
         """Adds a constraint to the network and corresponding surface file.
 
@@ -205,7 +207,7 @@ class NexusConstraints:
         if isinstance(constraint_to_add, dict):
             new_constraint = NexusConstraint(constraint_to_add)
         else:
-            new_constraint = constraint_to_add
+            new_constraint = cast(NexusConstraint, constraint_to_add)
 
         self.add_constraints_to_memory({name: [new_constraint]})
 
@@ -238,7 +240,7 @@ class NexusConstraints:
         for index, line in enumerate(file_as_list):
             if nfo.check_token('TIME', line):
                 constraint_date_from_file = nfo.get_expected_token_value('TIME', line, [line])
-                date_comparison = self.__model.sim_controls.compare_dates(constraint_date_from_file, constraint_date)
+                date_comparison = self.__model._sim_controls.compare_dates(constraint_date_from_file, constraint_date)
                 if date_comparison == 0:
                     date_index = index
                     continue
