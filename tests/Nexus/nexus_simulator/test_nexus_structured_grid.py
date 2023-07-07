@@ -603,7 +603,7 @@ def test_included_fault_tables(mocker):
     expected_df = expected_df.astype(comparison_types)
     # Act
     simulation = NexusSimulator(origin=fcs_path)
-    faults_df = simulation.StructuredGrid.get_faults_df()
+    faults_df = simulation.grid.get_faults_df()
     faults_df = faults_df.astype(comparison_types)
     # Assert
     pd.testing.assert_frame_equal(expected_df, faults_df)
