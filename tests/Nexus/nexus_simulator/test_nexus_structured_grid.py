@@ -1,15 +1,11 @@
-
-
 import os
 import pandas as pd
 import pytest
 from ResSimpy.Grid import VariableEntry
 from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
-from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
 from tests.multifile_mocker import mock_multiple_files
-from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 
 
 @pytest.mark.parametrize("structured_grid_file_contents, expected_net_to_gross, expected_porosity, expected_range_x,"
