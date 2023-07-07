@@ -201,7 +201,8 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
 
 
     ], ids=['basic_test', 'over multiple lines', 'multiple_dates', 'constraint_table','qmult_table'])
-def test_remove_constraint(mocker, file_contents, expected_result_file, constraint_to_remove, expected_constraints, expected_number_writes):
+def test_remove_constraint(mocker, file_contents, expected_result_file, constraint_to_remove, expected_constraints,
+                           expected_number_writes):
     # Arrange
 
 

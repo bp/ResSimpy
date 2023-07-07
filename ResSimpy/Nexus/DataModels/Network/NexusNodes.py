@@ -7,6 +7,7 @@ from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Node import Node
 from ResSimpy.Nodes import Nodes
 from typing import Sequence, Optional, TYPE_CHECKING
 
@@ -77,9 +78,9 @@ class NexusNodes(Nodes):
         cons_list = new_nodes.get('NODES')
         if isinstance(cons_list, dict):
             raise ValueError('Incompatible data format for additional wells. Expected type "list" instead got "dict"')
-        self.add_nodes(cons_list)
+        self._add_nodes_to_memory(cons_list)
 
-    def add_nodes(self, additional_list: Optional[list[NexusNode]]) -> None:
+    def _add_nodes_to_memory(self, additional_list: Optional[list[NexusNode]]) -> None:
         """Extends the nodes object by a list of nodes provided to it.
 
         Args:
@@ -93,3 +94,7 @@ class NexusNodes(Nodes):
         if additional_list is None:
             return
         self.__nodes.extend(additional_list)
+
+    def remove_node(self, node_to_remove: Node | dict[str, None | str | float | int]):
+
+        pass
