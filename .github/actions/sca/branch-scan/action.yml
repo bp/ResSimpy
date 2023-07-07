@@ -1,0 +1,291 @@
+name: DSES SCA scan on branches
+description: 'GitHub action to perform SCA scan on branches and temporarily for PRs'
+inputs:
+  release_branches:
+    description: 'The branches from which releases are made, the vulnerabilities reported from to ENODE,SecOps etc. '
+    required: true
+    default: 'None'
+  snow_pkg_number:
+    description: 'Service Now application package number '
+    required: true
+    default: 'replace'
+  snow_pkg_name:
+    description: 'Service Now application package name '
+    required: true
+    default: 'replace'
+  project_informal_name:
+    description: 'Name of the project used in day to day conversation e.g. adminui'
+    required: true
+    default: 'replace'
+  app_or_microservice_name:
+    description: 'Provide the microservice or monolithic app name which will be scanned by this workflow '
+    required: true
+    default: 'replace'
+  it_service_number:
+    description: 'Service NOW ITservice number '
+    required: true
+    default: 'replace'
+  it_service_name:
+    description: 'Service NOW ITservice name '
+    required: true
+    default: 'replace'
+  is_a_microservice:
+    description: 'Is this a microservice?'
+    required: true
+    default: 'true'
+  sca_app_url:
+    description: 'Handled internally,so no worries'
+    required: false
+    default: https://eu.sca.checkmarx.net
+  sca_api_url:
+    description: 'Handled internally,so no worries'
+    required: false
+    default: https://eu.api-sca.checkmarx.net
+  sca_access_control_url:
+    description: 'Handled internally,so no worries'
+    required: false
+    default: https://eu.platform.checkmarx.net
+  sca_tenant:
+    description: 'Handled internally,so no worries '
+    required: false
+    default: BP
+  client-id:
+    description: 'Handled internally,so no worries '
+    required: false
+    default: resource_owner_client
+  client_secret:
+    description: 'Handled internally,so no worries '
+    required: false
+    default: 014DF517-39D1-4453-B7B3-9930C563627C
+  oidc_scope:
+    description: 'Handled internally,so no worries '
+    required: false
+    default: "access_control_api sast_rest_api"
+  sca_username:
+    description: 'Provide the service username. provided by DSES team '
+    required: true
+  sca_password:
+    description: 'Provide the service password. provided by DSES team'
+    required: true
+  
+runs:
+  using: 'composite'
+  steps:
+    - name: Populate internal variables
+      shell: bash
+      run: |
+        echo release_branch="false" >> $GITHUB_ENV
+        echo repo_name=${{toJSON(github.repository)}} | sed 's/\//-/' >> $GITHUB_ENV
+        echo sca_team_path=/CxServer/${{inputs.snow_pkg_number}}/${{inputs.snow_pkg_name}}/${{inputs.project_informal_name}}/${{inputs.app_or_microservice_name}} >> $GITHUB_ENV
+        echo business_application_name=${{inputs.snow_pkg_number}}-${{inputs.snow_pkg_name}}-${{inputs.project_informal_name}} >> $GITHUB_ENV
+        echo it_service=${{inputs.it_service_number}}-${{inputs.it_service_name}} >> $GITHUB_ENV
+    - name: Publish project name for push
+      if: github.event_name == 'push'
+      run: echo project_name_push=${{inputs.snow_pkg_number}}-${{inputs.project_informal_name}}-R${{env.repo_name}}-B${{toJSON(github.ref_name)}} >> $GITHUB_ENV
+      shell: bash
+    - name: Publish project name for Pull request
+      if: github.event_name == 'pull_request'
+      run: echo project_name_push=PR${{toJSON(github.event.number)}}-${{inputs.snow_pkg_number}}--T${{toJSON(github.base_ref)}}-S${{toJSON(github.head_ref)}} >> $GITHUB_ENV
+      shell: bash
+    - name: Publish project name for manual trigger
+      if: github.event_name == 'workflow_dispatch'
+      run: echo project_name_push=manual-trigger-${{inputs.snow_pkg_number}}-${{inputs.project_informal_name}}-R${{env.repo_name}}-B${{toJSON(github.ref_name)}} >> $GITHUB_ENV
+      shell: bash
+    - name: check for release branch
+      if: contains(inputs.release_branches,github.ref_name)
+      run: echo release_branch="true" >> $GITHUB_ENV
+      shell: bash
+    - name: print outputs
+      run: |
+        echo "The status of releasebranch = ${{env.release_branch}}"
+        echo "The modified repo name =${{env.repo_name}}"
+        echo "The teampath =${{env.sca_team_path}}"
+        echo "The Project name =${{env.project_name_push}}"
+        echo "The business application name =${{env.business_application_name}}"
+        echo "The It service =${{env.it_service}}"
+        echo "The is_a_microservice =${{inputs.is_a_microservice}}"
+        echo "The sca app url =${{inputs.sca_app_url}}"
+        echo "The sca api url =${{inputs.sca_api_url}}"
+        echo "The sca_access_control_url =${{inputs.sca_access_control_url}}"
+        echo "The client-id =${{inputs.client-id}}"
+        echo "The client_secret =${{inputs.client_secret}}"
+        echo "The oidc_scope =${{inputs.oidc_scope}}"
+      shell: bash
+    - name: Checkout the source code to scan using checkmarx
+      uses: actions/checkout@v3
+      with:
+        path: src_branch
+    - name: Install dependencies
+      uses: ./.github/actions/prepare-poetry
+      with:
+        python-version: "3.11"
+    - name: Publish scanlocation
+      shell: bash
+      run: echo scanLocation=${{github.workspace}}/src_branch >> $GITHUB_ENV
+    - name: Download SCA Resolver
+      shell: bash
+      run: |
+        curl -L https://sca-downloads.s3.amazonaws.com/cli/1.14.2/ScaResolver-linux64.tar.gz -o ScaResolver-linux64.tar.gz
+        tar -xvf ScaResolver-linux64.tar.gz
+        rm ScaResolver-linux64.tar.gz
+        chmod +x ScaResolver
+    - name: Download CxFlow
+      shell: bash
+      run: |
+        wget -O cxflow.jar https://github.com/checkmarx-ltd/cx-flow/releases/download/1.6.38/cx-flow-1.6.38-java11.jar
+    - name: create spring_config.yml
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const content = `server:
+            port: 8982
+          logging:
+            file:
+              name: flow2.log
+            level:
+              com:
+                checkmarx: DEBUG
+          
+          cxflow:
+            bug-tracker: WAIT
+            bug-tracker-impl:
+            branches:
+              - main
+              - branch1
+            filter-severity:
+            filter-category:
+            filter-cwe:
+            filter-status:
+            codebash-url: https://checkmarx-demo.codebashing.com/courses/
+            enabled-vulnerability-scanners:
+              - sca
+              - sast
+            zip-exclude: /app/src/\.git/.*, .*\.git/.*, \.git/.*, .*\.png, .*\.zip , ScaResolver, .*\.jar
+          
+          checkmarx:
+            version: 9.0
+            username: ----
+            password: ----
+            client-id: resource_owner_client
+            client-secret: ----
+            scope: access_control_api sast_rest_api
+            base-url: https://sast.bpglobal.com
+            team: /CxServer
+            url: \${checkmarx.base-url}/cxrestapi
+            multi-tenant: false
+            preserve-xml: true
+            #WSDL Config
+            portal-url: \${checkmarx.base-url}/cxwebinterface/Portal/CxWebService.asmx
+            sdk-url: \${checkmarx.base-url}/cxwebinterface/SDK/CxSDKWebService.asmx
+            portal-wsdl: \${checkmarx.base-url}/Portal/CxWebService.asmx?wsdl
+            sdk-wsdl: \${checkmarx.base-url}/SDK/CxSDKWebService.asmx?wsdl
+          
+          sca:
+            appUrl: https://eu.sca.checkmarx.net
+            apiUrl: https://eu.api-sca.checkmarx.net
+            accessControlUrl: https://eu.platform.checkmarx.net
+          
+          github:
+            webhook-token: ----
+            token: ----
+            url: https://github.com
+            api-url: https://api.github.com/repos/
+            false-positive-label: false-positive
+            block-merge: true
+            error-merge: true
+          
+          azure:
+            webhook-token: xxxx
+            token: ----
+            url: https://dev.azure.com
+            issue-type: issue
+            closed-status: Done
+            open-status: To Do
+            api-version: 5.0
+            false-positive-label: false-positive
+          
+          cx-xml:
+            file-name-format: "[NAMESPACE]-[REPO]-[BRANCH]-[TIME].xml"
+            data-folder: "/var/lib/jenkins/workspace/CxIntegrations/LGV_XML"
+          
+          jira:
+            url: ----
+            username: ----
+            token: ----
+            project: CXSAS
+            issue-type: Bug
+            label-prefix: CX
+            priorities:
+              High: Highest
+              Medium: Medium
+              Low: Low
+              Informational: Lowest
+            open-transition: LGV_Reopen
+            close-transition: LGV_Close
+            open-status:
+              - To Do
+              - In Progress
+            closed-status:
+              - Done
+            fields:
+              - type: result
+                name: cwe
+                jira-field-name: CWEs
+                jira-field-type: label
+              - type: result
+                name: category
+                jira-field-name: MyCategory
+                jira-field-type: label
+              - type: result
+                name: similarity-id
+                jira-field-name: MySimId
+                jira-field-type: label
+              - type: static
+                name: not needed1
+                jira-field-name: MyStaticField
+                jira-field-type: text
+                jira-default-value: Hola
+              - type: sca-results
+                name: violates-policy
+                jira-field-name: My Violates Policy
+                jira-field-type: single-select
+              - type: sca-results
+                name: package-name
+                jira-field-name: My Package Name
+                jira-field-type: label
+          
+          servicenow:
+            apiUrl: https://xxxx.service-now.com/api/now/table
+            username: xxxx
+            password: xxxx
+          `;
+          fs.writeFileSync('spring_config.yml', content);
+    - name: Run SCA scan
+      shell: bash
+      run: |
+        java -jar cxflow.jar \
+                --spring.config.location="spring_config.yml"  \
+                  --scan \
+                  --f="${{env.scanLocation}}" \
+                  --cx-project="${{env.project_name_push}}" \
+                  --exclude-files="*.jar" \
+                  --namespace="${{github.repository_owner}}" \
+                  --repo-name="${{github.repositoryUrl}}" \
+                  --merge-id="${{github.event.number}}" \
+                  --branch="${{github.ref_name}}" \
+                  --cxflow.enabled-vulnerability-scanners="sca" \
+                  --app="${{inputs.app_or_microservice_name}}" \
+                  --sca.appUrl="${{inputs.sca_app_url}}" \
+                  --sca.apiUrl="${{inputs.sca_api_url}}" \
+                  --sca.accessControlUrl="${{inputs.sca_access_control_url}}" \
+                  --sca.tenant="${{inputs.sca_tenant}}" \
+                  --sca.username="${{inputs.sca_username}}" \
+                  --sca.password="${{inputs.sca_password}}" \
+                  --sca.team="${{env.sca_team_path}}" \
+                  --sca.include-sources=false \
+                  --sca.exclude-files="/app/src/\.git/.*, .*\.git/.*, \.git/.*, .*\.png, ScaResolver, ImageResolverCli, Configuration.ini, Configuration.yml, cxflow.jar, .*\.jar, .*\.env*, src/Assets/images/.*" \
+                  --sca.enable-sca-resolver=true \
+                  --sca.sca-resolver-add-parameters="--log-level Debug --scan-tags foo:bar --project-tags foo1:bar1 --bypass-exitcode" \
+                  --sca.path-to-sca-resolver="${{github.workspace}}" 
+                  
