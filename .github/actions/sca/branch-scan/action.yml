@@ -1,5 +1,5 @@
 name: DSES SCA scan on branches
-description: 'GitHub action to perform SCA scan on branches and temporarily fpr PRs'
+description: 'GitHub action to perform SCA scan on branches and temporarily for PRs'
 inputs:
   release_branches:
     description: 'The branches from which releases are made, the vulnerabilities reported from to ENODE,SecOps etc. '
@@ -34,31 +34,31 @@ inputs:
     required: true
     default: 'true'
   sca_app_url:
-    description: 'Handleled internally,so no worries'
+    description: 'Handled internally,so no worries'
     required: false
     default: https://eu.sca.checkmarx.net
   sca_api_url:
-    description: 'Handleled internally,so no worries'
+    description: 'Handled internally,so no worries'
     required: false
     default: https://eu.api-sca.checkmarx.net
   sca_access_control_url:
-    description: 'Handleled internally,so no worries'
+    description: 'Handled internally,so no worries'
     required: false
     default: https://eu.platform.checkmarx.net
   sca_tenant:
-    description: 'Handleled internally,so no worries '
+    description: 'Handled internally,so no worries '
     required: false
     default: BP
   client-id:
-    description: 'Handleled internally,so no worries '
+    description: 'Handled internally,so no worries '
     required: false
     default: resource_owner_client
   client_secret:
-    description: 'Handleled internally,so no worries '
+    description: 'Handled internally,so no worries '
     required: false
     default: 014DF517-39D1-4453-B7B3-9930C563627C
   oidc_scope:
-    description: 'Handleled internally,so no worries '
+    description: 'Handled internally,so no worries '
     required: false
     default: "access_control_api sast_rest_api"
   sca_username:
@@ -71,7 +71,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Populate internal vairables
+    - name: Populate internal variables
       shell: bash
       run: |
         echo release_branch="false" >> $GITHUB_ENV
@@ -87,7 +87,7 @@ runs:
       if: github.event_name == 'pull_request'
       run: echo project_name_push=PR${{toJSON(github.event.number)}}-${{inputs.snow_pkg_number}}--T${{toJSON(github.base_ref)}}-S${{toJSON(github.head_ref)}} >> $GITHUB_ENV
       shell: bash
-    - name: Publish prwoject name for manual trigger
+    - name: Publish project name for manual trigger
       if: github.event_name == 'workflow_dispatch'
       run: echo project_name_push=manual-trigger-${{inputs.snow_pkg_number}}-${{inputs.project_informal_name}}-R${{env.repo_name}}-B${{toJSON(github.ref_name)}} >> $GITHUB_ENV
       shell: bash
@@ -115,6 +115,10 @@ runs:
       uses: actions/checkout@v3
       with:
         path: src_branch
+    - name: Install dependencies
+      uses: ./.github/actions/prepare-poetry
+      with:
+        python-version: "3.11"
     - name: Publish scanlocation
       shell: bash
       run: echo scanLocation=${{github.workspace}}/src_branch >> $GITHUB_ENV

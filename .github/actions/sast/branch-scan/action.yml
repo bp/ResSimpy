@@ -1,5 +1,5 @@
 name: DSES SAST scan on branches
-description: 'GitHub action to perform SAST scan on branches and temporarily fpr PRs'
+description: 'GitHub action to perform SAST scan on branches and temporarily for PRs'
 inputs:
   release_branches:
     description: 'The branches from which releases are made, the vulnerabilities reported from to ENODE,SecOps etc. '
@@ -34,19 +34,19 @@ inputs:
     required: true
     default: 'true'
   sast_url:
-    description: 'Handleled internally,so no worries '
+    description: 'Handled internally,so no worries '
     required: false
     default: https://sast.bpglobal.com
   client-id:
-    description: 'Handleled internally,so no worries '
+    description: 'Handled internally,so no worries '
     required: false
     default: resource_owner_client
   client_secret:
-    description: 'Handleled internally,so no worries'
+    description: 'Handled internally,so no worries'
     required: false
     default: 014DF517-39D1-4453-B7B3-9930C563627C
   oidc_scope:
-    description: 'Handleled internally,so no worries'
+    description: 'Handled internally,so no worries'
     required: false
     default: "access_control_api sast_rest_api"
   sast_username:
@@ -59,15 +59,15 @@ inputs:
     description: 'Checkmarx preset (scanning rules) to perform the current scan'
     required: true
   vulnerability_threshhold_high:
-    description: 'Handleled internally,so no worries - adjust is according to the projects risk appetite'
+    description: 'Handled internally,so no worries - adjust is according to the projects risk appetite'
     required: false
     default: '100000'
   vulnerability_threshhold_medium:
-    description: 'Handleled internally,so no worries - adjust is according to the projects risk appetite'
+    description: 'Handled internally,so no worries - adjust is according to the projects risk appetite'
     required: false
     default: '100000'
   vulnerability_threshhold_low:
-    description: 'Handleled internally,so no worries - adjust is according to the projects risk appetite '
+    description: 'Handled internally,so no worries - adjust is according to the projects risk appetite '
     required: false
     default: '100000'
 
