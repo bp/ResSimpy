@@ -53,7 +53,150 @@ NODES
     'unit_system': UnitSystem.ENGLISH}],
 1  # no. writes
 ),
-], ids=['basic_test', 'by ID'])
+
+# more tables and timestamps
+('''TIME 01/01/2022
+NODES
+  NAME        TYPE       DEPTH   TEMP
+  node1       NA            NA      #  !comment
+  node_2      WELLHEAD     1167.3 #  ! comment
+  ENDNODES
+  
+  TIME 01/01/2023
+NODES
+  NAME        TYPE       DEPTH   TEMP
+  node1       WELLBORE   1202      110
+  node_2      WELLHEAD     1167.3 #  ! comment
+  ENDNODES
+  TIME 01/01/2024
+NODES
+  NAME        TYPE       DEPTH   TEMP
+  node1       WELLBORE   1202      110
+  node11     WELLBORE   1202      110
+  ENDNODES
+''',
+
+'''TIME 01/01/2022
+NODES
+  NAME        TYPE       DEPTH   TEMP
+  node1       NA            NA      #  !comment
+  node_2      WELLHEAD     1167.3 #  ! comment
+  ENDNODES
+  
+  TIME 01/01/2023
+NODES
+  NAME        TYPE       DEPTH   TEMP
+  node_2      WELLHEAD     1167.3 #  ! comment
+  ENDNODES
+  TIME 01/01/2024
+NODES
+  NAME        TYPE       DEPTH   TEMP
+  node1       WELLBORE   1202      110
+  node11     WELLBORE   1202      110
+  ENDNODES
+''',
+{'name': 'node1', 'type': 'WELLBORE', 'depth': 1202,  'temp': 110, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+
+[{'name': 'node1', 'type': None, 'depth': None,  'temp': None, 'date': '01/01/2022', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/01/2022', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'node1', 'type': 'WELLBORE', 'depth': 1202, 'temp': 110, 'date': '01/01/2024', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'node11', 'type': 'WELLBORE', 'depth': 1202, 'temp': 110, 'date': '01/01/2024', 'unit_system': UnitSystem.ENGLISH},],
+1  # no. writes
+),
+
+# empty table
+('''TIME 01/01/2023
+NODES
+  NAME                           TYPE       DEPTH   TEMP
+ ! comment
+  node_2        WELLHEAD     1167.3 # 
+  ENDNODES
+something after the table
+''',
+'''TIME 01/01/2023
+something after the table
+''',
+{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3,  'temp': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+[],
+5  # no. writes
+),
+
+# empty table and table in the same date
+('''TIME 01/01/2023
+NODES
+  NAME                           TYPE       DEPTH   TEMP
+ ! comment
+  node_2        WELLHEAD     1167.3 # 
+  ENDNODES
+
+NODES
+  NAME                           TYPE       DEPTH   TEMP
+  node3        WELL     1167.3  60 
+  ENDNODES  
+
+something after the table
+''',
+'''TIME 01/01/2023
+
+NODES
+  NAME                           TYPE       DEPTH   TEMP
+  node3        WELL     1167.3  60 
+  ENDNODES  
+
+something after the table
+''',
+{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3,  'temp': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+[{'name': 'node3', 'type': 'WELL', 'depth': 1167.3,  'temp': 60, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+],
+5  # no. writes
+),
+
+('''TIME 01/01/2022
+NODES
+  NAME  TYPE       DEPTH   TEMP
+node3        WELL     1167.3  60
+ENDNODES
+
+TIME 01/01/2023
+NODES
+  NAME                           TYPE       DEPTH   TEMP
+ ! comment
+  node_2        WELLHEAD     1167.3 # 
+  ENDNODES
+
+TIME 01/01/2024
+NODES
+  NAME                           TYPE       DEPTH   TEMP
+  node3        WELL     1167.3  60 
+  ENDNODES  
+
+something after the table
+''',
+'''TIME 01/01/2022
+NODES
+  NAME  TYPE       DEPTH   TEMP
+node3        WELL     1167.3  60
+ENDNODES
+
+TIME 01/01/2023
+
+TIME 01/01/2024
+NODES
+  NAME                           TYPE       DEPTH   TEMP
+  node3        WELL     1167.3  60 
+  ENDNODES  
+
+something after the table
+''',
+{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3,  'temp': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+[{'name': 'node3', 'type': 'WELL', 'depth': 1167.3,  'temp': 60, 'date': '01/01/2022', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'node3', 'type': 'WELL', 'depth': 1167.3,  'temp': 60, 'date': '01/01/2024', 'unit_system': UnitSystem.ENGLISH},
+],
+5  # no. writes
+),
+], ids=['basic_test', 'by ID', 'more tables and timestamps','empty table', 'empty table and table in the same date',
+'empty table and different date'])
 def test_remove_node(mocker, file_contents, expected_file_contents, node_to_remove, expected_nodes,
                      expected_number_writes):
     # Arrange
@@ -88,6 +231,7 @@ def test_remove_node(mocker, file_contents, expected_file_contents, node_to_remo
 
     # Assert
     assert result_nodes == expected_nodes
+    assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
     check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
                                      modifying_mock_open=writing_mock_open,
                                      mocker_fixture=mocker, write_file_name='/surface_file_01.dat',

@@ -123,13 +123,44 @@ class NexusNodes(Nodes):
 
         # remove from memory
         index_to_remove = [x.id for x in self.__nodes].index(node_id)
+        date = self.__nodes[index_to_remove].date
         self.__nodes.pop(index_to_remove)
-
+        remaining_nodes_for_date = [x for x in self.__nodes if x.date == date]
         # remove from file
         if network_file.object_locations is None:
             raise ValueError(f'No object locations specified, cannot find node id: {node_id}')
-        line_numbers_in_file = network_file.object_locations[node_id]
-        if len(line_numbers_in_file) > 0:
-            for index in line_numbers_in_file:
-                network_file.remove_from_file_as_list(index, [node_id])
+        line_numbers_in_file_to_remove = network_file.object_locations[node_id]
+
         # check there are any nodes left in the specified table
+        if len(line_numbers_in_file_to_remove) == 0:
+            raise ValueError('error msg')
+        # remove the table if there aren't any more remaining
+        file_content = network_file.get_flat_list_str_file
+        start_node_table_indices = [i for i, x in enumerate(file_content) if "NODES" in x and
+                                    i < line_numbers_in_file_to_remove[0]]
+        end_node_table_indices = [i for i, x in enumerate(file_content) if "ENDNODES" in x and
+                                  i > line_numbers_in_file_to_remove[-1]]
+        start_node_keyword_index_to_remove = start_node_table_indices[-1]
+        end_node_keyword_index_to_remove = end_node_table_indices[0]
+
+        remove_table = True
+
+        for obj_uuid, line_locations_list in network_file.object_locations.items():
+            if obj_uuid == node_id:
+                # ignore the uuid's for the node that we want to remove
+                continue
+            for value in line_locations_list:
+                if start_node_keyword_index_to_remove <= value <= end_node_keyword_index_to_remove:
+                    remove_table = False
+
+        if remove_table:
+            line_numbers_in_file_to_remove.extend(list(
+                range(start_node_keyword_index_to_remove, end_node_keyword_index_to_remove+1)))
+
+        line_numbers_in_file_to_remove = list(set(line_numbers_in_file_to_remove))
+        line_numbers_in_file_to_remove.sort(reverse=True)
+        for index, line_in_file in enumerate(line_numbers_in_file_to_remove):
+            if index == 0:
+                network_file.remove_from_file_as_list(line_in_file, [node_id])
+            else:
+                network_file.remove_from_file_as_list(line_in_file)
