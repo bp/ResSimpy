@@ -123,7 +123,6 @@ class NexusNodes(Nodes):
 
         # remove from memory
         index_to_remove = [x.id for x in self.__nodes].index(node_id)
-        date = self.__nodes[index_to_remove].date
         self.__nodes.pop(index_to_remove)
         # remove from file
         if network_file.object_locations is None:
