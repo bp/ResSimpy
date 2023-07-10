@@ -125,7 +125,6 @@ class NexusNodes(Nodes):
         index_to_remove = [x.id for x in self.__nodes].index(node_id)
         date = self.__nodes[index_to_remove].date
         self.__nodes.pop(index_to_remove)
-        remaining_nodes_for_date = [x for x in self.__nodes if x.date == date]
         # remove from file
         if network_file.object_locations is None:
             raise ValueError(f'No object locations specified, cannot find node id: {node_id}')
