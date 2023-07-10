@@ -116,7 +116,8 @@ class NexusConstraints(Constraints):
         """
         self.__parent_network.get_load_status()
         found_object_from_network = self.__parent_network.find_network_element_with_dict(object_name, constraint_dict,
-                                                                                          'constraints')
+                                                                                         'constraints')
+        # ensure typing is consistent
         if isinstance(found_object_from_network, NexusConstraint):
             return found_object_from_network
         else:
