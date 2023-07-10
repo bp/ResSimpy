@@ -104,6 +104,7 @@ class NexusNodes(Nodes):
 
         """
         # TODO make this method generic!
+        self.__parent_network.get_load_status()
         if self.__parent_network.model.model_files.surface_files is None:
             raise ValueError('No files found for the surface network')
         network_file = self.__parent_network.model.model_files.surface_files[1]

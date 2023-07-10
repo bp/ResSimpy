@@ -1,3 +1,4 @@
+import uuid
 import pytest
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
@@ -26,7 +27,33 @@ NODES
     'unit_system': UnitSystem.ENGLISH}],
 1  # no. writes
 ),
-], ids=['basic_test'])
+
+# by ID
+('''TIME 01/01/2023
+NODES
+  NAME                           TYPE       DEPTH   TEMP
+ ! comment
+ ! another comment
+  node1                         NA            NA      #  !comment
+  ! comment 3
+  node_2        WELLHEAD     1167.3 #  ! comment
+  ENDNODES
+''',
+'''TIME 01/01/2023
+NODES
+  NAME                           TYPE       DEPTH   TEMP
+ ! comment
+ ! another comment
+  ! comment 3
+  node_2        WELLHEAD     1167.3 #  ! comment
+  ENDNODES
+''',
+'uuid1',
+[{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/01/2023',
+    'unit_system': UnitSystem.ENGLISH}],
+1  # no. writes
+),
+], ids=['basic_test', 'by ID'])
 def test_remove_node(mocker, file_contents, expected_file_contents, node_to_remove, expected_nodes,
                      expected_number_writes):
     # Arrange
@@ -54,6 +81,7 @@ def test_remove_node(mocker, file_contents, expected_file_contents, node_to_remo
 
     expected_nodes = [NexusNode(node) for node in expected_nodes]
 
+    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
     # Act
     nexus_sim.network.nodes.remove_node(node_to_remove)
     result_nodes = nexus_sim.network.nodes.get_nodes()
