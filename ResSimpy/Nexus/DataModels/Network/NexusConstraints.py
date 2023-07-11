@@ -206,7 +206,7 @@ class NexusConstraints(Constraints):
 
         file_to_add_to = self.__model.model_files.surface_files[1]
 
-        file_as_list = file_to_add_to.file_content_as_list
+        file_as_list = file_to_add_to.get_flat_list_str_file
         if file_as_list is None:
             raise ValueError(f'No file content found in the surface file specified at {file_to_add_to.location}')
 
