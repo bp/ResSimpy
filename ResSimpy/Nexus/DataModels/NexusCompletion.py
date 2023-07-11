@@ -360,7 +360,7 @@ class NexusCompletion(Completion):
             elif hasattr(super(), '_Completion__' + k):
                 setattr(self, '_Completion__' + k, v)
 
-    def completion_to_wellspec_row(self, headers: list[str]):
+    def completion_to_wellspec_row(self, headers: list[str]) -> list[str]:
         """Takes a completion object and returns the attribute values as a string in the order of headers provided.
 
         Args:
