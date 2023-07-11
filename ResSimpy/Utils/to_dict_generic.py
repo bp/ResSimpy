@@ -3,8 +3,8 @@ from typing import Any
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 
 
-def to_dict(nexus_object: Any, keys_in_nexus_style: bool = False, add_date: bool = True, add_units: bool = True) -> \
-        dict[str, None | str | int | float]:
+def to_dict(nexus_object: Any, keys_in_nexus_style: bool = False, add_date: bool = True, add_units: bool = True,
+            include_nones: bool = True) -> dict[str, None | str | int | float]:
     """Returns a dictionary of the attributes of a Nexus object. Requires a nexus mapping dictionary.
         Useful for creating dataframes of objects.
 
@@ -15,6 +15,7 @@ def to_dict(nexus_object: Any, keys_in_nexus_style: bool = False, add_date: bool
             attribute name as stored by ressimpy
         add_date (bool): adds a date attribute if it exists
         add_units (bool): adds a units attribute if it exists.
+        include_nones (bool): If False filters the nones out of the dictionary. Defaults to True
 
     Returns:
     -------
@@ -42,4 +43,7 @@ def to_dict(nexus_object: Any, keys_in_nexus_style: bool = False, add_date: bool
                 f'Try setting add_units to False. Full contents of the object: {nexus_object}')
         if isinstance(unit_sys, UnitSystem):
             result_dict['unit_system'] = unit_sys.value
+
+    if not include_nones:
+        result_dict = {k: v for k, v in result_dict.items() if v is not None}
     return result_dict
