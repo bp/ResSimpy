@@ -12,14 +12,14 @@ NODES
   NAME                           TYPE       DEPTH   TEMP
  ! comment
   node1                         NA            NA      #
-  node_2        WELLHEAD     1167.3 # 
+  node_2        WELLHEAD     1167.3 #
   ENDNODES
 ''',
 '''TIME 01/01/2023
 NODES
   NAME                           TYPE       DEPTH   TEMP
  ! comment
-  node_2        WELLHEAD     1167.3 # 
+  node_2        WELLHEAD     1167.3 #
   ENDNODES
 ''',
 {'name': 'node1', 'type': None, 'depth': None,  'temp': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
@@ -61,7 +61,7 @@ NODES
   node1       NA            NA      #  !comment
   node_2      WELLHEAD     1167.3 #  ! comment
   ENDNODES
-  
+
   TIME 01/01/2023
 NODES
   NAME        TYPE       DEPTH   TEMP
@@ -82,7 +82,7 @@ NODES
   node1       NA            NA      #  !comment
   node_2      WELLHEAD     1167.3 #  ! comment
   ENDNODES
-  
+
   TIME 01/01/2023
 NODES
   NAME        TYPE       DEPTH   TEMP
@@ -101,7 +101,7 @@ NODES
 {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/01/2022', 'unit_system': UnitSystem.ENGLISH},
 {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
 {'name': 'node1', 'type': 'WELLBORE', 'depth': 1202, 'temp': 110, 'date': '01/01/2024', 'unit_system': UnitSystem.ENGLISH},
-{'name': 'node11', 'type': 'WELLBORE', 'depth': 1202, 'temp': 110, 'date': '01/01/2024', 'unit_system': UnitSystem.ENGLISH},],
+{'name': 'node11', 'type': 'WELLBORE', 'depth': 1202, 'temp': 110, 'date': '01/01/2024', 'unit_system': UnitSystem.ENGLISH}],
 1  # no. writes
 ),
 
@@ -110,7 +110,7 @@ NODES
 NODES
   NAME                           TYPE       DEPTH   TEMP
  ! comment
-  node_2        WELLHEAD     1167.3 # 
+  node_2        WELLHEAD     1167.3 #
   ENDNODES
 something after the table
 ''',
@@ -127,13 +127,13 @@ something after the table
 NODES
   NAME                           TYPE       DEPTH   TEMP
  ! comment
-  node_2        WELLHEAD     1167.3 # 
+  node_2        WELLHEAD     1167.3 #
   ENDNODES
 
 NODES
   NAME                           TYPE       DEPTH   TEMP
-  node3        WELL     1167.3  60 
-  ENDNODES  
+  node3        WELL     1167.3  60
+  ENDNODES
 
 something after the table
 ''',
@@ -141,8 +141,8 @@ something after the table
 
 NODES
   NAME                           TYPE       DEPTH   TEMP
-  node3        WELL     1167.3  60 
-  ENDNODES  
+  node3        WELL     1167.3  60
+  ENDNODES
 
 something after the table
 ''',
@@ -162,14 +162,14 @@ TIME 01/01/2023
 NODES
   NAME                           TYPE       DEPTH   TEMP
  ! comment
-  node_2        WELLHEAD     1167.3 # 
+  node_2        WELLHEAD     1167.3 #
   ENDNODES
 
 TIME 01/01/2024
 NODES
   NAME                           TYPE       DEPTH   TEMP
-  node3        WELL     1167.3  60 
-  ENDNODES  
+  node3        WELL     1167.3  60
+  ENDNODES
 
 something after the table
 ''',
@@ -184,8 +184,8 @@ TIME 01/01/2023
 TIME 01/01/2024
 NODES
   NAME                           TYPE       DEPTH   TEMP
-  node3        WELL     1167.3  60 
-  ENDNODES  
+  node3        WELL     1167.3  60
+  ENDNODES
 
 something after the table
 ''',
