@@ -10,6 +10,8 @@ from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nodes import Nodes
 from typing import Sequence, Optional, TYPE_CHECKING
+import ResSimpy.Nexus.nexus_file_operations as nfo
+from ResSimpy.Utils import to_dict_generic
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
@@ -164,4 +166,66 @@ class NexusNodes(Nodes):
                 network_file.remove_from_file_as_list(line_in_file)
 
     def add_node(self, node_to_add: dict[str, None | str | float | int]) -> None:
-        pass
+        """Adds a node to a network, taking a dictionary with properties for the new node.
+
+        Args:
+            node_to_add (dict[str, None | str | float | int]): dictionary taking all the properties for the new node.
+            Requires date and a node name.
+        """
+        name = node_to_add.get('name', None)
+        if name is None:
+            raise AttributeError(
+                'Adding a node requires a name, please provide a "name" entry in the input dictionary.')
+        date = node_to_add.get('date', None)
+        if date is None:
+            raise AttributeError(
+                'Adding a node requires a date, please provide a "date" entry in the input dictionary.')
+
+        new_object = NexusNode(node_to_add)
+
+        self._add_nodes_to_memory([new_object])
+
+        # add to the file
+        if self.__parent_network.model.model_files.surface_files is None:
+            raise FileNotFoundError('No well file found, cannot modify a deck with an empty surface file.')
+        file_to_add_to = self.__parent_network.model.model_files.surface_files[1]
+
+        file_as_list = file_to_add_to.get_flat_list_str_file
+        if file_as_list is None:
+            raise ValueError(f'No file content found in the surface file specified at {file_to_add_to.location}')
+
+        # get the start and end table names
+        table_start_token = 'NODES'
+        table_ending_token = 'END' + table_start_token
+
+        additional_content: list[str] = []
+        date_comparison: int = -1
+        date_index: int = -1
+        insert_line_index: int = -1
+        id_line_locs: list[int] = []
+        headers: list[str] = []
+        #for now just get the headers from non None attributes from the object
+        # TODO make this account for new headers
+        required_headers = list(to_dict_generic.to_dict(new_object, keys_in_nexus_style=True, add_date=False,
+                                                        add_units=False, include_nones=False).keys())
+
+        for index, line in enumerate(file_as_list):
+            if nfo.check_token('TIME', line):
+                date_found_in_file = nfo.get_expected_token_value('TIME', line, [line])
+                date_comparison = self.__parent_network.model._sim_controls.compare_dates(
+                    date_found_in_file, date)
+                if date_comparison == 0:
+                    date_index = index
+                    continue
+            if nfo.check_token(table_ending_token, line) and date_comparison == 0:
+                insert_line_index = index
+                additional_content.append(new_object.to_string(headers=headers))
+                id_line_locs = [insert_line_index]
+            if insert_line_index >= 0:
+                break
+        # write out to the file_content_as_list
+        new_object_ids = {
+            new_object.id: id_line_locs
+            }
+        file_to_add_to.add_to_file_as_list(additional_content=additional_content, index=insert_line_index,
+                                           additional_objects=new_object_ids)
