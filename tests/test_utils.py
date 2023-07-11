@@ -19,9 +19,9 @@ class GenericTest:
     attr_1: str
     attr_2: int
     attr_3: float
-    attr_4: Optional[str]
     unit_system: UnitSystem
     date: str
+    attr_4: Optional[str] = None
 
     @staticmethod
     def get_nexus_mapping() -> dict[str, tuple[str, type]]:
@@ -40,11 +40,11 @@ def test_to_dict():
     # Arrange
     class_inst = GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=UnitSystem.METRIC,
                              date='01/01/2030')
-    expected = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'unit_system': 'METRIC', 'date': '01/01/2030'}
-    expected_no_date_no_units = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2 }
+    expected = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'attr_4': None, 'unit_system': 'METRIC', 'date': '01/01/2030'}
+    expected_no_date_no_units = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'attr_4': None, }
     expected_nexus_style = {
         'ATTR_1': 'hello', 'ATTR_2': 10, 'ATTR_3': 43020.2, 'unit_system': 'METRIC',
-        'date': '01/01/2030'
+        'date': '01/01/2030', 'ATTR_4': None
     }
     # Act
     result = to_dict(class_inst )
