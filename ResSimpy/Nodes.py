@@ -26,5 +26,8 @@ class Nodes(ABC):
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
-    def remove_node(self, node_to_remove: UUID | dict[str, None | str | float | int]):
+    def remove_node(self, node_to_remove: UUID | dict[str, None | str | float | int]) -> None:
+        raise NotImplementedError("Implement this in the derived class")
+
+    def add_node(self, node_to_add: dict[str, None | str | float | int]) -> None:
         raise NotImplementedError("Implement this in the derived class")

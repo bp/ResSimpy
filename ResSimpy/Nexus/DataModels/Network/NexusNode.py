@@ -58,3 +58,6 @@ class NexusNode(Node):
     def id(self) -> uuid.UUID:
         """Unique identifier for each Node object."""
         return self.__id
+
+    def to_string(self) -> str:
+        return ''

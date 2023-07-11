@@ -14,5 +14,8 @@ class Node(ABC):
     date: Optional[str] = None
     unit_system: Optional[UnitSystem] = None
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        raise NotImplementedError("Implement this in the derived class")
+
+    def to_string(self) -> str:
         raise NotImplementedError("Implement this in the derived class")

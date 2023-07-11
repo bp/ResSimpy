@@ -162,3 +162,6 @@ class NexusNodes(Nodes):
                 network_file.remove_from_file_as_list(line_in_file, [node_id])
             else:
                 network_file.remove_from_file_as_list(line_in_file)
+
+    def add_node(self, node_to_add: dict[str, None | str | float | int]) -> None:
+        pass
