@@ -1,5 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
+from uuid import UUID
 
 import numpy as np
 import pandas as pd
@@ -77,9 +78,9 @@ class NexusNodes(Nodes):
         cons_list = new_nodes.get('NODES')
         if isinstance(cons_list, dict):
             raise ValueError('Incompatible data format for additional wells. Expected type "list" instead got "dict"')
-        self.add_nodes(cons_list)
+        self._add_nodes_to_memory(cons_list)
 
-    def add_nodes(self, additional_list: Optional[list[NexusNode]]) -> None:
+    def _add_nodes_to_memory(self, additional_list: Optional[list[NexusNode]]) -> None:
         """Extends the nodes object by a list of nodes provided to it.
 
         Args:
@@ -93,3 +94,71 @@ class NexusNodes(Nodes):
         if additional_list is None:
             return
         self.__nodes.extend(additional_list)
+
+    def remove_node(self, node_to_remove: dict[str, None | str | float | int] | UUID) -> None:
+        """Remove a node from the network based on the properties matching a dictionary or id.
+
+        Args:
+            node_to_remove (UUID | dict[str, None | str | float | int]): UUID of the node to remove or a dictionary \
+            with sufficient matching parameters to uniquely identify a node
+
+        """
+        # TODO make this method generic!
+        self.__parent_network.get_load_status()
+        if self.__parent_network.model.model_files.surface_files is None:
+            raise ValueError('No files found for the surface network')
+        network_file = self.__parent_network.model.model_files.surface_files[1]
+        if network_file is None:
+            raise ValueError(f'No file found for {network_file=}')
+
+        if isinstance(node_to_remove, dict):
+            name = node_to_remove.get('name', None)
+            if name is None:
+                raise ValueError(f'Require node name to remove the node instead got {name=}')
+            name = str(name)
+            node = self.__parent_network.find_network_element_with_dict(name, node_to_remove, 'nodes')
+            node_id = node.id
+        else:
+            node_id = node_to_remove
+
+        # remove from memory
+        index_to_remove = [x.id for x in self.__nodes].index(node_id)
+        self.__nodes.pop(index_to_remove)
+        # remove from file
+        if network_file.object_locations is None:
+            raise ValueError(f'No object locations specified, cannot find node id: {node_id}')
+        line_numbers_in_file_to_remove = network_file.object_locations[node_id]
+
+        # check there are any nodes left in the specified table
+        if len(line_numbers_in_file_to_remove) == 0:
+            raise ValueError('error msg')
+        # remove the table if there aren't any more remaining
+        file_content = network_file.get_flat_list_str_file
+        start_node_table_indices = [i for i, x in enumerate(file_content) if "NODES" in x and
+                                    i < line_numbers_in_file_to_remove[0]]
+        end_node_table_indices = [i for i, x in enumerate(file_content) if "ENDNODES" in x and
+                                  i > line_numbers_in_file_to_remove[-1]]
+        start_node_keyword_index_to_remove = start_node_table_indices[-1]
+        end_node_keyword_index_to_remove = end_node_table_indices[0]
+
+        remove_table = True
+
+        for obj_uuid, line_locations_list in network_file.object_locations.items():
+            if obj_uuid == node_id:
+                # ignore the uuid's for the node that we want to remove
+                continue
+            for value in line_locations_list:
+                if start_node_keyword_index_to_remove <= value <= end_node_keyword_index_to_remove:
+                    remove_table = False
+
+        if remove_table:
+            line_numbers_in_file_to_remove.extend(list(
+                range(start_node_keyword_index_to_remove, end_node_keyword_index_to_remove+1)))
+
+        line_numbers_in_file_to_remove = list(set(line_numbers_in_file_to_remove))
+        line_numbers_in_file_to_remove.sort(reverse=True)
+        for index, line_in_file in enumerate(line_numbers_in_file_to_remove):
+            if index == 0:
+                network_file.remove_from_file_as_list(line_in_file, [node_id])
+            else:
+                network_file.remove_from_file_as_list(line_in_file)

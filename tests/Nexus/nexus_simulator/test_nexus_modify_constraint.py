@@ -3,15 +3,16 @@ import pytest
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import check_file_read_write_is_correct, get_fake_nexus_simulator
 
 
 def test_find_constraint(mocker):
     # Arrange
-    mock_nexus_network = mocker.MagicMock()
-    mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
     mock_nexus_sim = get_fake_nexus_simulator(mocker)
+    mock_nexus_network = NexusNetwork(mock_nexus_sim)
+    mock_nexus_network.__setattr__('_NexusNetwork__has_been_loaded', True)
 
     constraints = NexusConstraints(mock_nexus_network, mock_nexus_sim)
     well1_constraint_props = ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000.0,
@@ -29,6 +30,7 @@ def test_find_constraint(mocker):
                             'well2': [NexusConstraint(x) for x in well2_constraint_props]}
 
     constraints.__setattr__('_NexusConstraints__constraints', existing_constraints)
+    mock_nexus_network.constraints = constraints
     expected_constraint = NexusConstraint(well1_constraint_props[2])
     find_constraint_dict = {'date': '01/01/2024', 'name': 'well1', 'max_wor': 95.0}
     # Act
@@ -40,9 +42,9 @@ def test_find_constraint(mocker):
 
 def test_find_constraint_too_many_too_few_constraints_found(mocker):
     # Arrange
-    mock_nexus_network = mocker.MagicMock()
-    mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
     mock_nexus_sim = get_fake_nexus_simulator(mocker)
+    mock_nexus_network = NexusNetwork(mock_nexus_sim)
+    mock_nexus_network.__setattr__('_NexusNetwork__has_been_loaded', True)
 
     constraints = NexusConstraints(mock_nexus_network, mock_nexus_sim)
     well1_constraint_props = ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000.0,
@@ -60,6 +62,8 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
                             'well2': [NexusConstraint(x) for x in well2_constraint_props]}
 
     constraints.__setattr__('_NexusConstraints__constraints', existing_constraints)
+    mock_nexus_network.constraints = constraints
+
     find_constraint_dict = {'name': 'well1', 'max_wor': 95.0}
     no_matching_constraints_dict = {'name': 'well1', 'max_wor': 100000}
     too_many_constraints = {'name': 'well1', 'max_wor': 95.0, 'max_surface_liquid_rate': 1000, 'date': '01/01/2019',
@@ -201,7 +205,8 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
 
 
     ], ids=['basic_test', 'over multiple lines', 'multiple_dates', 'constraint_table','qmult_table'])
-def test_remove_constraint(mocker, file_contents, expected_result_file, constraint_to_remove, expected_constraints, expected_number_writes):
+def test_remove_constraint(mocker, file_contents, expected_result_file, constraint_to_remove, expected_constraints,
+                           expected_number_writes):
     # Arrange
 
 

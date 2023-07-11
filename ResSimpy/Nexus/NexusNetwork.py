@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Optional, Any
+from typing import TYPE_CHECKING, Optional, Any, Literal
 
 from ResSimpy.Network import Network
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
@@ -48,6 +48,10 @@ class NexusNetwork(Network):
         if not self.__has_been_loaded:
             self.load()
         return self.__has_been_loaded
+
+    @property
+    def model(self) -> NexusSimulator:
+        return self.__model
 
     def get_surface_file(self, method_number: Optional[int] = None) -> Optional[dict[int, NexusFile] | NexusFile]:
         """Gets a specific surface file object or a dictionary of surface files keyed by method number.
@@ -106,7 +110,7 @@ class NexusNetwork(Network):
                 start_date=self.__model.start_date,
                 default_units=self.__model.default_units,
                 )
-            self.nodes.add_nodes(type_check_lists(nexus_obj_dict.get('NODES')))
+            self.nodes._add_nodes_to_memory(type_check_lists(nexus_obj_dict.get('NODES')))
             self.connections.add_connections(type_check_lists(nexus_obj_dict.get('NODECON')))
             self.well_connections.add_connections(type_check_lists(nexus_obj_dict.get('WELLS')))
             self.wellheads.add_wellheads(type_check_lists(nexus_obj_dict.get('WELLHEAD')))
@@ -132,3 +136,51 @@ class NexusNetwork(Network):
         constraint_names_to_add = list(set(constraint_names_to_add))
 
         return constraint_names_to_add
+
+    def find_network_element_with_dict(self, name: str, search_dict: dict[str, None | float | str | int],
+                                       network_element_type: Literal['nodes', 'connections', 'well_connections',
+                                                                     'wellheads', 'wellbores', 'constraints']) -> Any:
+        """Finds a uniquely matching constraint from a given set of properties in a dictionary of attributes.
+
+        Args:
+            name (str): name of the node/connection to find
+            search_dict (dict[str, float | str | int]): dictionary of attributes to match on. \
+            Allows for partial matches if it finds a unique object.
+            network_element_type (Literal[str]): one of nodes, connections, well_connections, wellheads, wellbores,
+                constraints
+
+        Returns:
+            NexusConstraint of an existing constraint in the model that uniquely matches the provided \
+            constraint_dict constraint
+        """
+        network_element_to_search: Any = None
+        self.get_load_status()
+        if network_element_type == 'constraints':
+            network_element_to_search = self.constraints.get_constraints().get(name, None)
+        else:
+            # retrieve the getter method on the network attribute
+            network_element = getattr(self, f'{network_element_type}', None)
+            if network_element is None:
+                raise ValueError(f'Network has no elements associated with the {network_element_type=} requested')
+            network_element_getter = getattr(network_element, f'get_{network_element_type}', None)
+            if network_element_getter is not None:
+                network_element_to_search = [x for x in network_element_getter() if x.name == name]
+
+        if network_element_to_search is None or len(network_element_to_search) == 0:
+            raise ValueError(f'No {network_element_type} found with {name=}')
+
+        matching_elements = []
+        for elements in network_element_to_search:
+            for prop, value in search_dict.items():
+                if getattr(elements, prop) == value:
+                    continue
+                else:
+                    break
+            else:
+                matching_elements.append(elements)
+
+        if len(matching_elements) == 1:
+            return matching_elements[0]
+        else:
+            raise ValueError(f'No unique matching {network_element_type} with the properties provided.'
+                             f'Instead found: {len(matching_elements)} matching {network_element_type}.')
