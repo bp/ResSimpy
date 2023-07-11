@@ -8,6 +8,7 @@ from typing import Optional, Union, TypedDict
 import sys
 
 from ResSimpy.Nexus.NexusEnums import DateFormatEnum
+from ResSimpy.Utils.obj_to_table_string import to_string
 
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -370,15 +371,5 @@ class NexusCompletion(Completion):
             string of the values in the order of the headers provided.
 
         """
-        nexus_mapping = NexusCompletion.get_nexus_mapping()
-        completion_properties = self.to_dict()
-
-        completion_values = []
-        for header in headers:
-            attribute_name = nexus_mapping[header][0]
-            attribute_value = completion_properties[attribute_name]
-            if attribute_value is None:
-                attribute_value = 'NA'
-            completion_values.append(attribute_value)
-        completion_string = [' '.join([str(x) for x in completion_values]) + '\n']
-        return completion_string
+        completion_list_string = [to_string(self, headers)]
+        return completion_list_string
