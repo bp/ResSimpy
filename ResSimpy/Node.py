@@ -17,5 +17,5 @@ class Node(ABC):
     def to_dict(self) -> dict:
         raise NotImplementedError("Implement this in the derived class")
 
-    def to_string(self) -> str:
+    def to_string(self, headers: list[str]) -> str:
         raise NotImplementedError("Implement this in the derived class")
