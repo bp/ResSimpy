@@ -66,7 +66,7 @@ class NexusFile(File):
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True,
-                                        skip_arrays: bool = True, top_level_file: bool = False) -> Self:
+                                        skip_arrays: bool = True, top_level_file: bool = True) -> Self:
         """Generates a nexus file instance for a provided text file with information storing the included files.
 
         Args:
@@ -146,7 +146,7 @@ class NexusFile(File):
                         include_locations=inc_file_list,
                         origin=origin,
                         include_objects=includes_objects,
-                        file_content_as_list=modified_file_as_list,
+                        file_content_as_list=modified_file_as_list
                     )
 
                     return nexus_file_class
@@ -174,7 +174,7 @@ class NexusFile(File):
                 skip_next_include = False
             else:
                 inc_file = cls.generate_file_include_structure(inc_file_path, origin=full_file_path, recursive=True,
-                                                               skip_arrays=skip_arrays)
+                                                               skip_arrays=skip_arrays, top_level_file=False)
                 if includes_objects is None:
                     raise ValueError('include_objects is None - recursion failure.')
 
