@@ -57,6 +57,7 @@ class AddObjectOperations:
                                  nexus_mapping: dict[str, tuple[str, type]], file: NexusFile) -> \
             tuple[int, list[str], list[str]]:
         """Gets the header and works out if any additional headers should be added."""
+        # TODO move out the additional headers mutability to a separate method that explicitly sets it
         keyword_map = {x: y[0] for x, y in nexus_mapping.items()}
         inverted_nexus_map = invert_nexus_map(nexus_mapping)
         table = file_content[index::]
@@ -83,8 +84,8 @@ class AddObjectOperations:
             file_to_write_to.file_content_as_list[index_in_file] = new_header_line
         return header_index, headers, headers_original
 
-    def __fill_in_nas(self, additional_headers: list[str], headers_original: list[str], index: int, line: str,
-                      wellspec_file: NexusFile, file_content: list[str]) -> int:
+    def fill_in_nas(self, additional_headers: list[str], headers_original: list[str], index: int, line: str,
+                    file: NexusFile, file_content: list[str]) -> int:
         """Check the validity of the line, if its valid add as many NA's as required for the new columns."""
         valid_line, _ = nfo.table_line_reader(keyword_store={}, headers=headers_original, line=line)
         if valid_line and len(additional_headers) > 0:
@@ -96,7 +97,7 @@ class AddObjectOperations:
             else:
                 new_completion_line = split_comments[0] + additional_column_string + ' !' + split_comments[1]
 
-            nexusfile_to_write_to, index_in_file = wellspec_file.find_which_include_file(index)
+            nexusfile_to_write_to, index_in_file = file.find_which_include_file(index)
             if nexusfile_to_write_to.file_content_as_list is None:
                 raise ValueError(f'No file content to write to in file: {nexusfile_to_write_to}')
             nexusfile_to_write_to.file_content_as_list[index_in_file] = new_completion_line

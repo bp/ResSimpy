@@ -19,7 +19,7 @@ from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Wells import Wells
 from ResSimpy.Nexus.load_wells import load_wells
 import ResSimpy.Nexus.nexus_file_operations as nfo
-from ResSimpy.Utils.invert_nexus_map import invert_nexus_map, attribute_name_to_nexus_keyword
+from ResSimpy.Utils.invert_nexus_map import attribute_name_to_nexus_keyword
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
@@ -176,7 +176,6 @@ class NexusWells(Wells):
 
         # initialise some storage variables
         nexus_mapping = NexusCompletion.get_nexus_mapping()
-        inverted_nexus_map = invert_nexus_map(nexus_mapping)
         new_completion_time_index = -1
         header_index = -1
         headers: list[str] = []
@@ -233,10 +232,10 @@ class NexusWells(Wells):
 
             elif header_index != -1 and index > header_index:
                 # check for valid rows + fill extra columns with NA
-                self.__fill_in_nas(additional_headers, headers_original, index, line,
+                self.__add_object_operations.fill_in_nas(additional_headers, headers_original, index, line,
                                    wellspec_file, file_content)
-                line_valid_index = self.__fill_in_nas(additional_headers, headers_original, index, line,
-                                                      wellspec_file, file_content)
+                line_valid_index = self.__add_object_operations.fill_in_nas(additional_headers, headers_original, index,
+                                                                            line, wellspec_file, file_content)
                 # set the line to insert the new completion at to be the one after the last valid line
                 last_valid_line_index = line_valid_index if line_valid_index > 0 else last_valid_line_index
         # If we haven't found a TIME card after the for loop then we haven't got a valid date so add it at the end

@@ -4,6 +4,8 @@ from uuid import UUID
 
 import numpy as np
 import pandas as pd
+
+from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
@@ -24,6 +26,7 @@ class NexusNodes(Nodes):
     def __init__(self, parent_network: NexusNetwork) -> None:
         self.__parent_network: NexusNetwork = parent_network
         self.__nodes: list[NexusNode] = []
+        self.__add_object_operations = AddObjectOperations(self.__parent_network.model)
 
     def get_nodes(self) -> Sequence[NexusNode]:
         """Returns a list of nodes loaded from the simulator."""
@@ -204,12 +207,14 @@ class NexusNodes(Nodes):
         insert_line_index: int = -1
         id_line_locs: list[int] = []
         headers: list[str] = []
-        #for now just get the headers from non None attributes from the object
+        additional_headers: list[str] = []
         # TODO make this account for new headers
-        required_headers = list(to_dict_generic.to_dict(new_object, keys_in_nexus_style=True, add_date=False,
-                                                        add_units=False, include_nones=False).keys())
+        # required_headers = list(to_dict_generic.to_dict(new_object, keys_in_nexus_style=True, add_date=False,
+        #                                                 add_units=False, include_nones=False).keys())
+        nexus_mapping = new_object.get_nexus_mapping()
 
         for index, line in enumerate(file_as_list):
+            # check for the dates
             if nfo.check_token('TIME', line):
                 date_found_in_file = nfo.get_expected_token_value('TIME', line, [line])
                 date_comparison = self.__parent_network.model._sim_controls.compare_dates(
@@ -217,6 +222,15 @@ class NexusNodes(Nodes):
                 if date_comparison == 0:
                     date_index = index
                     continue
+
+            # find a table that exists in that date
+            if nfo.check_token(table_start_token, line) and date_index != -1:
+                # get the header of the table
+                header_index, headers, headers_original = self.__add_object_operations.get_and_write_new_header(
+                    additional_headers, node_to_add, file_as_list, index, nexus_mapping, file_to_add_to
+                    )
+                continue
+
             if nfo.check_token(table_ending_token, line) and date_comparison == 0:
                 insert_line_index = index
                 additional_content.append(new_object.to_string(headers=headers))
