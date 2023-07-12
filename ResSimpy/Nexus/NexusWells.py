@@ -15,6 +15,7 @@ from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
+from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Wells import Wells
 from ResSimpy.Nexus.load_wells import load_wells
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -33,6 +34,7 @@ class NexusWells(Wells):
     def __init__(self, model: NexusSimulator) -> None:
         self.__model = model
         self.__wells = []
+        self.__add_object_operations = AddObjectOperations(model)
         super().__init__()
 
     def get_wells(self) -> Sequence[NexusWell]:
@@ -280,17 +282,8 @@ class NexusWells(Wells):
             return -1
 
     def __find_which_wellspec_file_from_completion_id(self, completion_id: UUID) -> NexusFile:
-        # find the correct wellspec file in the model by looking at the ids
-        if self.__model.model_files.well_files is None:
-            raise ValueError(f'No wells file found in fcs file at: {self.__model.model_files.location}')
-        wellspec_files = [x for x in self.__model.model_files.well_files.values() if x.object_locations is not None and
-                          completion_id in x.object_locations]
-        if len(wellspec_files) == 0:
-            raise FileNotFoundError(f'No well file found with an existing well that has completion id: {completion_id}')
-        wellspec_file = wellspec_files[0]
-        if wellspec_file.file_content_as_list is None:
-            raise FileNotFoundError(
-                f'No well file content found for specified wellfile at location: {wellspec_file.location}')
+        wellspec_file = self.__add_object_operations.find_which_file_from_id(id=completion_id,
+                                                                             file_type_to_search='well_files')
         return wellspec_file
 
     def __get_wellspec_header(self, additional_headers: list[str],
