@@ -8,6 +8,7 @@ def to_string(obj: Any, headers: list[str]) -> str:
     Requires an implemented to_dict method and get_nexus_mapping() method.
 
     Args:
+        obj (Any): a NexusObject with a to_dict and get_nexus_mapping method.
         headers (list[str]): list of header values in Nexus keyword format
 
     Returns:
@@ -24,5 +25,4 @@ def to_string(obj: Any, headers: list[str]) -> str:
         if attribute_value is None:
             attribute_value = 'NA'
         constructed_values.append(attribute_value)
-    completion_string = ' '.join([str(x) for x in constructed_values]) + '\n'
-    return completion_string
+    return ' '.join([str(x) for x in constructed_values]) + '\n'
