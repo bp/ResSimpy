@@ -10,35 +10,41 @@ from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.Utils.invert_nexus_map import invert_nexus_map, attribute_name_to_nexus_keyword, \
     nexus_keyword_to_attribute_name
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
+from ResSimpy.Utils.obj_to_table_string import to_string
 from ResSimpy.Utils.to_dict_generic import to_dict
 
 
+@dataclass
+class GenericTest:
+    attr_1: str
+    attr_2: int
+    attr_3: float
+    unit_system: UnitSystem
+    date: str
+    attr_4: Optional[str] = None
+
+    @staticmethod
+    def get_nexus_mapping() -> dict[str, tuple[str, type]]:
+        mapping_dict = {
+            'ATTR_1': ('attr_1', str),
+            'ATTR_2': ('attr_2', int),
+            'ATTR_3': ('attr_3', float),
+            'ATTR_4': ('attr_4', str),
+            }
+        return mapping_dict
+
+    def to_dict(self):
+        return to_dict_generic.to_dict(self, add_date=True, add_units=True)
+
 def test_to_dict():
     # Arrange
-    @dataclass
-    class GenericTest:
-        attr_1: str
-        attr_2: int
-        attr_3: float
-        unit_system: UnitSystem
-        date: str
-
-        @staticmethod
-        def get_nexus_mapping():
-            mapping_dict = {
-                'ATTR_1': ('attr_1', str),
-                'ATTR_2': ('attr_2', int),
-                'ATTR_3': ('attr_3', float),
-            }
-            return mapping_dict
-
     class_inst = GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=UnitSystem.METRIC,
                              date='01/01/2030')
-    expected = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'unit_system': 'METRIC', 'date': '01/01/2030'}
-    expected_no_date_no_units = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2 }
+    expected = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'attr_4': None, 'unit_system': 'METRIC', 'date': '01/01/2030'}
+    expected_no_date_no_units = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'attr_4': None, }
     expected_nexus_style = {
         'ATTR_1': 'hello', 'ATTR_2': 10, 'ATTR_3': 43020.2, 'unit_system': 'METRIC',
-        'date': '01/01/2030'
+        'date': '01/01/2030', 'ATTR_4': None
     }
     # Act
     result = to_dict(class_inst )
@@ -53,26 +59,6 @@ def test_to_dict():
 
 def test_obj_to_dataframe():
     # Arrange
-    @dataclass
-    class GenericTest:
-        attr_1: str
-        attr_2: int
-        attr_3: float
-        unit_system: UnitSystem
-        date: str
-
-        @staticmethod
-        def get_nexus_mapping():
-            mapping_dict = {
-                'ATTR_1': ('attr_1', str),
-                'ATTR_2': ('attr_2', int),
-                'ATTR_3': ('attr_3', float),
-            }
-            return mapping_dict
-
-        def to_dict(self):
-            return to_dict_generic.to_dict(self, add_date=True, add_units=True)
-
     class_inst_1 = GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=UnitSystem.METRIC,
                                date='01/01/2030')
     class_inst_2 = GenericTest(attr_1='world', attr_2=2, attr_3=2.2, unit_system=UnitSystem.ENGLISH,
@@ -178,3 +164,30 @@ def test_nexus_keyword_to_attribute_name():
         nexus_keyword_to_attribute_name(nexus_map, 'Failure')
         attribute_name_to_nexus_keyword(nexus_map, 'also fails')
 
+
+@pytest.mark.parametrize('headers, expected_result', [
+    # basic
+    (['ATTR_1', 'ATTR_2', 'ATTR_3'],
+     'name 10 3.14\n'),
+    # repeated + No value to NA
+    (['ATTR_1', 'ATTR_1', 'ATTR_1', 'ATTR_4'],
+     'name name name NA\n'),
+    # not in attributes
+    (['ATTR_1', 'ATTR_NOT_VALID', 'ATTR_1', 'ATTR_4'],
+     None),
+    ], ids=['basic', 'repeated + No value to NA', 'not in attributes'])
+def test_to_string_generic(mocker, headers, expected_result):
+    # Arrange
+    test_object = GenericTest(attr_1='name', attr_2=10, attr_3=3.14, attr_4=None, date='01/01/2020', unit_system=UnitSystem.ENGLISH)
+
+    # Act
+    if expected_result is None:
+        # for the failure case
+        with pytest.raises(AttributeError) as ae:
+            result_string = to_string(test_object, headers)
+            assert 'No attribute found with name "ATTR_NOT_VALID"' in ae
+        return
+    result_string = to_string(test_object, headers)
+
+    # Assert
+    assert result_string == expected_result
