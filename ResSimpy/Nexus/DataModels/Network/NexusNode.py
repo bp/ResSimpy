@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import uuid
 from dataclasses import dataclass
 from typing import Optional
 
@@ -19,6 +21,7 @@ class NexusNode(Node):
         super().__init__()
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)
+        self.__id = uuid.uuid4()
 
     def __repr__(self) -> str:
         return generic_repr(self)
@@ -50,3 +53,8 @@ class NexusNode(Node):
         """
         result_dict = to_dict_generic.to_dict(self, keys_in_nexus_style, add_date=True, add_units=True)
         return result_dict
+
+    @property
+    def id(self) -> uuid.UUID:
+        """Unique identifier for each Node object."""
+        return self.__id

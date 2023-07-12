@@ -39,8 +39,8 @@ class NexusFile(File):
     include_locations: Optional[list[str]] = field(default=None)
     origin: Optional[str] = None
     include_objects: Optional[list[NexusFile]] = field(default=None, repr=False)
-    object_locations: Optional[dict[UUID, list[int]]] = None
-    line_locations: Optional[list[tuple[int, UUID]]] = None
+    object_locations: Optional[dict[UUID, list[int]]] = field(default=None, repr=False)
+    line_locations: Optional[list[tuple[int, UUID]]] = field(default=None, repr=False)
 
     def __init__(self, location: Optional[str] = None,
                  include_locations: Optional[list[str]] = None,
