@@ -98,7 +98,7 @@ class NexusFile(File):
             warnings.warn(UserWarning(f'No file found for: {file_path} while loading {origin}'))
             return nexus_file_class
 
-        # prevent python from mutating the lists that its iterating over
+        # prevent python from mutating the lists that it's iterating over
         modified_file_as_list: list[str] = []
         # search for the INCLUDE keyword and append to a list:
         inc_file_list: list[str] = []
@@ -108,9 +108,9 @@ class NexusFile(File):
 
         for i, line in enumerate(file_as_list):
             if len(modified_file_as_list) >= 1:
-                previous_line = modified_file_as_list[len(modified_file_as_list)-1].rstrip('\n')
+                previous_line = modified_file_as_list[len(modified_file_as_list) - 1].rstrip('\n')
                 if previous_line.endswith('>'):
-                    modified_file_as_list[len(modified_file_as_list)-1] = previous_line[:-1] + line
+                    modified_file_as_list[len(modified_file_as_list) - 1] = previous_line[:-1] + line
                 else:
                     modified_file_as_list.append(line)
             else:
@@ -219,7 +219,8 @@ class NexusFile(File):
         index: int
 
     def iterate_line(self, file_index: Optional[FileIndex] = None, max_depth: Optional[int] = None,
-                     parent: Optional[NexusFile] = None, prefix_line: Optional[str] = None) -> \
+                     parent: Optional[NexusFile] = None, prefix_line: Optional[str] = None,
+                     keep_include_references=False) -> \
             Generator[str, None, None]:
         """Generator object for iterating over a list of strings with nested NexusFile objects in them.
 
@@ -282,6 +283,9 @@ class NexusFile(File):
                 if (max_depth is None or depth > 0) and include_file is not None:
                     level_down_max_depth = None if max_depth is None else depth - 1
 
+                    if keep_include_references:
+                        yield row
+
                     yield from include_file.iterate_line(file_index=file_index, max_depth=level_down_max_depth,
                                                          parent=parent, prefix_line=prefix_line)
 
@@ -303,7 +307,14 @@ class NexusFile(File):
     def get_flat_list_str_file(self) -> list[str]:
         if self.file_content_as_list is None:
             raise ValueError(f'No file content found for {self.location}')
-        flat_list = list(self.iterate_line(file_index=None))
+        flat_list = list(self.iterate_line(file_index=None, keep_include_references=False))
+        return flat_list
+
+    @property
+    def get_flat_list_str_file_including_includes(self) -> list[str]:
+        if self.file_content_as_list is None:
+            raise ValueError(f'No file content found for {self.location}')
+        flat_list = list(self.iterate_line(file_index=None, keep_include_references=True))
         return flat_list
 
     # TODO write an output function using the iterate_line method

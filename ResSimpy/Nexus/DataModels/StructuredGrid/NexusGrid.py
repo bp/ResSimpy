@@ -42,7 +42,7 @@ class NexusGrid(Grid):
         self.__array_functions_df: Optional[pd.DataFrame] = None
         self.__array_functions_loaded: bool = False
         self.__grid_file_contents: Optional[list[str]] = None if grid_nexus_file is None else \
-            grid_nexus_file.get_flat_list_str_file
+            grid_nexus_file.get_flat_list_str_file_including_includes
         self.__grid_file_nested: Optional[list[str]] = None if grid_nexus_file is None else \
             grid_nexus_file.file_content_as_list
         self.__faults_df: Optional[pd.DataFrame] = None
@@ -118,6 +118,7 @@ class NexusGrid(Grid):
 
         file_as_list = self.__grid_file_contents
         for line in file_as_list:
+
             # Load in the basic properties
             properties_to_load = [
                 PropertyToLoad('NETGRS', ['VALUE', 'CON'], self._netgrs),
@@ -135,7 +136,7 @@ class NexusGrid(Grid):
                 PropertyToLoad('PERMZ', ['VALUE', 'MULT', 'CON'], self._kz),
                 PropertyToLoad('PERMK', ['VALUE', 'MULT', 'CON'], self._kz),
                 PropertyToLoad('KK', ['VALUE', 'MULT', 'CON'], self._kz),
-                ]
+            ]
 
             for token_property in properties_to_load:
                 for modifier in token_property.modifiers:

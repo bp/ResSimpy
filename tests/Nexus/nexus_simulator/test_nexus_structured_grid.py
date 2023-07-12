@@ -59,9 +59,10 @@ def test_load_structured_grid_file_basic_properties_nested_includes(mocker):
     structured_grid_file_contents = """ARRAYS ROOT
 ! grid
 INCLUDE includes/Another_structured_grid_01.inc"""
-    included_file_contents = """! Grid dimensions\nNX NY NZ\n3  4 5\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
-                              "\nother text\n\nNETGRS VALUE\n INCLUDE /path_to_netgrs_file/include_net_to_gross_2.inc\n POROSITY "
-                              "VALUE\n!ANOTHER COMMENT \npath/to/porosity_2.inc"""
+    included_file_contents = """POROSITY CON 0.3\n ! Grid dimensions\nNX NY NZ\n3  4 5\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
+                              "\nother text\n\nNETGRS VALUE\n 14 616 8371 81367136  \n 
+                              !Should have stopped reading by this point \n POROSITY "
+                              "CON 0.5\n"""
     included_file_location = os.path.join('testpath1', r'includes/Another_structured_grid_01.inc')
 
     def mock_open_wrapper(filename, mode):
@@ -82,8 +83,7 @@ INCLUDE includes/Another_structured_grid_01.inc"""
     result = simulation.grid
 
     # Assert
-    assert result.netgrs.value == "/path_to_netgrs_file/include_net_to_gross_2.inc"
-    assert result.porosity.value == "/path/to/porosity_2.inc"
+    assert result.porosity.value == '0.3'
     assert result.range_x == 3
     assert result.range_y == 4
     assert result.range_z == 5
