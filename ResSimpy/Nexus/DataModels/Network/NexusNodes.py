@@ -13,7 +13,6 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nodes import Nodes
 from typing import Sequence, Optional, TYPE_CHECKING
 import ResSimpy.Nexus.nexus_file_operations as nfo
-from ResSimpy.Utils import to_dict_generic
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
@@ -158,7 +157,7 @@ class NexusNodes(Nodes):
 
         if remove_table:
             line_numbers_in_file_to_remove.extend(list(
-                range(start_node_keyword_index_to_remove, end_node_keyword_index_to_remove+1)))
+                range(start_node_keyword_index_to_remove, end_node_keyword_index_to_remove + 1)))
 
         line_numbers_in_file_to_remove = list(set(line_numbers_in_file_to_remove))
         line_numbers_in_file_to_remove.sort(reverse=True)
@@ -175,6 +174,8 @@ class NexusNodes(Nodes):
             node_to_add (dict[str, None | str | float | int]): dictionary taking all the properties for the new node.
             Requires date and a node name.
         """
+        self.__parent_network.get_load_status()
+
         name = node_to_add.get('name', None)
         if name is None:
             raise AttributeError(
@@ -208,6 +209,10 @@ class NexusNodes(Nodes):
         id_line_locs: list[int] = []
         headers: list[str] = []
         additional_headers: list[str] = []
+        header_index: int = -1
+        last_valid_line_index: int = -1
+        headers_original: list[str] = []
+
         # TODO make this account for new headers
         # required_headers = list(to_dict_generic.to_dict(new_object, keys_in_nexus_style=True, add_date=False,
         #                                                 add_units=False, include_nones=False).keys())
@@ -230,6 +235,13 @@ class NexusNodes(Nodes):
                     additional_headers, node_to_add, file_as_list, index, nexus_mapping, file_to_add_to
                     )
                 continue
+
+            if header_index != -1 and index > header_index:
+                # check for valid rows + fill extra columns with NA
+                line_valid_index = self.__add_object_operations.fill_in_nas(additional_headers, headers_original, index,
+                                                                            line, file_to_add_to, file_as_list)
+                # set the line to insert the new completion at to be the one after the last valid line
+                last_valid_line_index = line_valid_index if line_valid_index > 0 else last_valid_line_index
 
             if nfo.check_token(table_ending_token, line) and date_comparison == 0:
                 insert_line_index = index

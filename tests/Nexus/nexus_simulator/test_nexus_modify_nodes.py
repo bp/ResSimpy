@@ -260,10 +260,31 @@ node_2 WELLHEAD 1167.3 NA
 1  # no. writes
 ),
 
+# additional headers
+('''TIME 01/01/2023
+NODES
+  NAME TYPE DEPTH TEMP
+  node1 WELLHEAD 100 100
+  ENDNODES
+''',
+'''TIME 01/01/2023
+NODES
+  NAME TYPE DEPTH TEMP STATION
+  node1 WELLHEAD 100 100 NA
+node_2 WELLHEAD 1167.3 NA station_1
+  ENDNODES
+''',
+{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'station': 'station_1',
+'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+[{'name': 'node1', 'type': 'WELLHEAD', 'depth': 100,  'temp': 100, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/01/2023', 'station': 'station_1',
+    'unit_system': UnitSystem.ENGLISH}],
+1  # no. writes
+),
 
-], ids=['basic_test', ])
+], ids=['basic_test', 'additional headers'])
 def test_add_node(mocker, file_contents, expected_file_contents, node_to_add, expected_nodes,
-                     expected_number_writes):
+                  expected_number_writes):
     # Arrange
     fcs_file_contents = '''
         RUN_UNITS ENGLISH
