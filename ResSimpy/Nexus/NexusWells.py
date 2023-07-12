@@ -62,7 +62,7 @@ class NexusWells(Wells):
                 completion_props: dict[str, None | float | int | str] = {
                     'well_name': well.well_name,
                     'units': well.units.name,
-                }
+                    }
                 completion_props.update(completion.to_dict())
                 store_dictionaries.append(completion_props)
         df_store = pd.DataFrame(store_dictionaries)
@@ -220,10 +220,9 @@ class NexusWells(Wells):
             if nfo.check_token('WELLSPEC', line) and nfo.get_token_value('WELLSPEC', line, [line]) == well_name \
                     and new_completion_time_index != -1:
                 # get the header of the wellspec table
-                header_index, headers, headers_original = self.__get_wellspec_header(
-                    additional_headers, completion_properties, file_content, index,
-                    inverted_nexus_map, nexus_mapping, wellspec_file
-                )
+                header_index, headers, headers_original = self.__add_object_operations.get_and_write_new_header(
+                    additional_headers, completion_properties, file_content, index, nexus_mapping, wellspec_file
+                    )
                 continue
 
             if header_index != -1 and nfo.nexus_token_found(line, WELLS_KEYWORDS) and index > header_index:

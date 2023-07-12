@@ -5,6 +5,8 @@ from uuid import UUID
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 import ResSimpy.Nexus.nexus_file_operations as nfo
+from ResSimpy.Utils.invert_nexus_map import invert_nexus_map
+
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
@@ -48,19 +50,20 @@ class AddObjectOperations:
                 f'No well file content found for specified wellfile at location: {file_found.location}')
         return file_found
 
-    def __get_wellspec_header(self, additional_headers: list[str],
-                              completion_properties: dict,
-                              file_content: list[str], index: int, inverted_nexus_map: dict[str, str],
-                              nexus_mapping: dict[str, tuple[str, type]], wellspec_file: NexusFile) -> \
+    @staticmethod
+    def get_and_write_new_header(additional_headers: list[str],
+                                 object_properties: dict[str, None | str | float | int],
+                                 file_content: list[str], index: int,
+                                 nexus_mapping: dict[str, tuple[str, type]], file: NexusFile) -> \
             tuple[int, list[str], list[str]]:
-        """Gets the wellspec header and works out if any additional headers should be added."""
+        """Gets the header and works out if any additional headers should be added."""
         keyword_map = {x: y[0] for x, y in nexus_mapping.items()}
-        wellspec_table = file_content[index::]
-        header_index, headers = nfo.get_table_header(file_as_list=wellspec_table, header_values=keyword_map)
+        inverted_nexus_map = invert_nexus_map(nexus_mapping)
+        table = file_content[index::]
+        header_index, headers = nfo.get_table_header(file_as_list=table, header_values=keyword_map)
         header_index += index
         headers_original = copy.copy(headers)
-        # work out if there are any headers that are not in the new completion
-        for key in completion_properties:
+        for key in object_properties:
             if key == 'date':
                 continue
             if inverted_nexus_map[key] not in headers:
@@ -73,7 +76,7 @@ class AddObjectOperations:
         else:
             new_header_line = split_comments[0] + additional_column_string + ' !' + split_comments[1]
         if len(additional_headers) > 0:
-            file_to_write_to, index_in_file = wellspec_file.find_which_include_file(header_index)
+            file_to_write_to, index_in_file = file.find_which_include_file(header_index)
             if file_to_write_to.file_content_as_list is None:
                 raise ValueError(
                     f'No file content found in {file_to_write_to.location}. Cannot write to index {index_in_file}')
@@ -103,7 +106,7 @@ class AddObjectOperations:
             return -1
     #
     # def __write_out_existing_wellspec(self, completion_date: str,
-    #                                   completion_properties: dict,
+    #                                   object_properties: dict[str, None | str | float | int],
     #                                   date_found: bool, index: int, new_completion_index: int,
     #                                   preserve_previous_completions: bool, well: NexusWell, well_name: str) -> \
     #         tuple[list[str], int, list[str], bool]:
