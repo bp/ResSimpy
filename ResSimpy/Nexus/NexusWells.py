@@ -172,7 +172,8 @@ class NexusWells(Wells):
         if self.__model.model_files.well_files is None:
             raise FileNotFoundError('No well file found, cannot modify ')
 
-        wellspec_file = self.__find_which_wellspec_file_from_completion_id(well_id)
+        wellspec_file = self.__add_object_operations.find_which_file_from_id(id=well_id,
+                                                                             file_type_to_search='well_files')
 
         # initialise some storage variables
         nexus_mapping = NexusCompletion.get_nexus_mapping()
@@ -257,65 +258,6 @@ class NexusWells(Wells):
         wellspec_file.add_to_file_as_list(additional_content=new_completion_string, index=new_completion_index,
                                           additional_objects=new_completion_object_ids)
 
-    def __fill_in_nas(self, additional_headers: list[str], headers_original: list[str], index: int, line: str,
-                      wellspec_file: NexusFile, file_content: list[str]) -> int:
-        """Check the validity of the line, if its valid add as many NA's as required for the new columns."""
-        valid_line, _ = nfo.table_line_reader(keyword_store={}, headers=headers_original, line=line)
-        if valid_line and len(additional_headers) > 0:
-            additional_na_values = ['NA'] * len(additional_headers)
-            additional_column_string = ' '.join(additional_na_values)
-            split_comments = file_content[index].split('!', 1)
-            if len(split_comments) == 1:
-                new_completion_line = split_comments[0].replace('\n', '', 1) + ' ' + additional_column_string + '\n'
-            else:
-                new_completion_line = split_comments[0] + additional_column_string + ' !' + split_comments[1]
-
-            nexusfile_to_write_to, index_in_file = wellspec_file.find_which_include_file(index)
-            if nexusfile_to_write_to.file_content_as_list is None:
-                raise ValueError(f'No file content to write to in file: {nexusfile_to_write_to}')
-            nexusfile_to_write_to.file_content_as_list[index_in_file] = new_completion_line
-        if valid_line:
-            return index
-        else:
-            return -1
-
-    def __find_which_wellspec_file_from_completion_id(self, completion_id: UUID) -> NexusFile:
-        wellspec_file = self.__add_object_operations.find_which_file_from_id(id=completion_id,
-                                                                             file_type_to_search='well_files')
-        return wellspec_file
-
-    def __get_wellspec_header(self, additional_headers: list[str],
-                              completion_properties: NexusCompletion.InputDictionary,
-                              file_content: list[str], index: int, inverted_nexus_map: dict[str, str],
-                              nexus_mapping: dict[str, tuple[str, type]], wellspec_file: NexusFile) -> \
-            tuple[int, list[str], list[str]]:
-        """Gets the wellspec header and works out if any additional headers should be added."""
-        keyword_map = {x: y[0] for x, y in nexus_mapping.items()}
-        wellspec_table = file_content[index::]
-        header_index, headers = nfo.get_table_header(file_as_list=wellspec_table, header_values=keyword_map)
-        header_index += index
-        headers_original = copy.copy(headers)
-        # work out if there are any headers that are not in the new completion
-        for key in completion_properties:
-            if key == 'date':
-                continue
-            if inverted_nexus_map[key] not in headers:
-                headers.append(inverted_nexus_map[key])
-                additional_headers.append(inverted_nexus_map[key])
-        additional_column_string = ' '.join(additional_headers)
-        split_comments = str(file_content[header_index]).split('!', 1)
-        if len(split_comments) == 1:
-            new_header_line = split_comments[0].replace('\n', '', 1) + ' ' + additional_column_string + '\n'
-        else:
-            new_header_line = split_comments[0] + additional_column_string + ' !' + split_comments[1]
-        if len(additional_headers) > 0:
-            file_to_write_to, index_in_file = wellspec_file.find_which_include_file(header_index)
-            if file_to_write_to.file_content_as_list is None:
-                raise ValueError(
-                    f'No file content found in {file_to_write_to.location}. Cannot write to index {index_in_file}')
-            file_to_write_to.file_content_as_list[index_in_file] = new_header_line
-        return header_index, headers, headers_original
-
     def __write_out_existing_wellspec(self, completion_date: str,
                                       completion_properties: NexusCompletion.InputDictionary,
                                       date_found: bool, index: int, new_completion_index: int,
@@ -389,7 +331,8 @@ class NexusWells(Wells):
         if completion_id is None:
             raise ValueError('No completion found for completion_properties')
         # find which wellspec file we should edit
-        wellspec_file = self.__find_which_wellspec_file_from_completion_id(completion_id)
+        wellspec_file = self.__add_object_operations.find_which_file_from_id(id=completion_id,
+                                                                             file_type_to_search='well_files')
 
         # remove from the well object/wells class
         completion_date = well.get_completion_by_id(completion_id).date
