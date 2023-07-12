@@ -162,7 +162,7 @@ TIME 01/01/2023
 NODES
   NAME                           TYPE       DEPTH   TEMP
  ! comment
-  node_2        WELLHEAD     1167.3 #
+  node_2        WELLHEAD     1167.3 # 
   ENDNODES
 
 TIME 01/01/2024
