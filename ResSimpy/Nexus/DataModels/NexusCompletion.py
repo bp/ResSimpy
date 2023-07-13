@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 
-from typing import Optional, Union, TypedDict
+from typing import Optional, Union
 
 
 # Use correct Self type depending upon Python version
