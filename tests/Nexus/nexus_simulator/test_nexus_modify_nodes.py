@@ -422,8 +422,25 @@ ENDNODES
 1
 ),
 # reaching end of file
+('''TIME 01/01/2023
+''',
+'''TIME 01/01/2023
 
-], ids=['basic_test', 'additional headers', 'more time cards', 'no existing time card', 'existing date card but no table'])
+TIME 01/01/2024
+NODES
+NAME TYPE DEPTH STATION
+new_node WELLHEAD 1167.3 station_1
+ENDNODES
+
+''',
+{'name': 'new_node', 'type': 'WELLHEAD', 'depth': 1167.3, 'station': 'station_1',
+'date': '01/01/2024', 'unit_system': UnitSystem.ENGLISH},
+[{'name': 'new_node', 'type': 'WELLHEAD', 'depth': 1167.3, 'station': 'station_1',
+'date': '01/01/2024', 'unit_system': UnitSystem.ENGLISH},],
+1  # no. writes
+),
+], ids=['basic_test', 'additional headers', 'more time cards', 'no existing time card', 'existing date card but no table',
+'hitting end of file'])
 def test_add_node(mocker, file_contents, expected_file_contents, node_to_add, expected_nodes,
                   expected_number_writes):
     # Arrange

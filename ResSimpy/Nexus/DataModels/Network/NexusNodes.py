@@ -191,8 +191,8 @@ class NexusNodes(Nodes):
             raise ValueError(f'No file content found in the surface file specified at {file_to_add_to.location}')
 
         # get the start and end table names
-        table_start_token = 'NODES'
-        table_ending_token = 'END' + table_start_token
+        table_start_token = new_object.table_header
+        table_ending_token = new_object.table_footer
 
         additional_content: list[str] = []
         date_comparison: int = -1
@@ -205,10 +205,6 @@ class NexusNodes(Nodes):
         last_valid_line_index: int = -1
         headers_original: list[str] = []
         date_found = False
-
-        # TODO make this account for new headers
-        # required_headers = list(to_dict_generic.to_dict(new_object, keys_in_nexus_style=True, add_date=False,
-        #                                                 add_units=False, include_nones=False).keys())
         nexus_mapping = new_object.get_nexus_mapping()
 
         for index, line in enumerate(file_as_list):
@@ -237,11 +233,13 @@ class NexusNodes(Nodes):
                 # set the line to insert the new completion at to be the one after the last valid line
                 last_valid_line_index = line_valid_index if line_valid_index > 0 else last_valid_line_index
 
+            # if we've found an existing table then just insert the new object
             if nfo.check_token(table_ending_token, line) and date_comparison == 0:
                 insert_line_index = index
                 additional_content.append(new_object.to_string(headers=headers))
                 id_line_locs = [insert_line_index]
 
+            # if we have passed the date or if we're at the end of the file write out the table
             if date_comparison > 0:
                 new_table, obj_in_table_index = self.__add_object_operations.write_out_new_table_containing_object(
                     obj_date=date, object_properties=node_to_add, date_found=date_found, new_obj=new_object)
@@ -251,6 +249,14 @@ class NexusNodes(Nodes):
 
             if insert_line_index >= 0:
                 break
+        else:
+            # if we've finished the loop normally that means we haven't added any additional objects or lines
+            # This means we have to add the date and a new table to the end of the file.
+            new_table, obj_in_table_index = self.__add_object_operations.write_out_new_table_containing_object(
+                obj_date=date, object_properties=node_to_add, date_found=date_found, new_obj=new_object)
+            additional_content.extend(new_table)
+            insert_line_index = len(file_as_list)
+            id_line_locs = [obj_in_table_index + insert_line_index - 1]
         # write out to the file_content_as_list
         new_object_ids = {
             new_object.id: id_line_locs
