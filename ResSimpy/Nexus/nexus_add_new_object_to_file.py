@@ -196,7 +196,7 @@ class AddObjectOperations:
             if header_index != -1 and index > header_index:
                 # check for valid rows + fill extra columns with NA
                 line_valid_index = self.fill_in_nas(additional_headers, headers_original, index,
-                                                                            line, file_to_add_to, file_as_list)
+                                                    line, file_to_add_to, file_as_list)
                 # set the line to insert the new completion at to be the one after the last valid line
                 last_valid_line_index = line_valid_index if line_valid_index > 0 else last_valid_line_index
 

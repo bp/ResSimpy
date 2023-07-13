@@ -12,7 +12,6 @@ from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nodes import Nodes
 from typing import Sequence, Optional, TYPE_CHECKING
-import ResSimpy.Nexus.nexus_file_operations as nfo
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
