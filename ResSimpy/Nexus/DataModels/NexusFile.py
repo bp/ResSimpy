@@ -531,5 +531,5 @@ class NexusFile(File):
                 additional_content[index] = modified_text
                 return additional_content
 
-        additional_content[-1] += ' ! ' + comments
+        additional_content[-1] += ' ! ' + comments + '\n'
         return additional_content
