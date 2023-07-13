@@ -84,7 +84,8 @@ class AddObjectOperations:
             file_to_write_to.file_content_as_list[index_in_file] = new_header_line
         return header_index, headers, headers_original
 
-    def fill_in_nas(self, additional_headers: list[str], headers_original: list[str], index: int, line: str,
+    @staticmethod
+    def fill_in_nas(additional_headers: list[str], headers_original: list[str], index: int, line: str,
                     file: NexusFile, file_content: list[str]) -> int:
         """Check the validity of the line, if its valid add as many NA's as required for the new columns."""
         valid_line, _ = nfo.table_line_reader(keyword_store={}, headers=headers_original, line=line)
@@ -142,3 +143,91 @@ class AddObjectOperations:
         date = str(date)
 
         return name, date
+
+    def add_object_to_file(self, date: str, file_as_list: list[str], file_to_add_to: NexusFile, new_object: Any,
+                           object_properties: dict[str, None | str | float | int]) -> None:
+        """Finds where the object should be added based on the date and existing tables.
+
+        Args:
+            date (str): date to add the node at
+            file_as_list (list[str]): flattened file as a list of strings
+            file_to_add_to (NexusFile): file to add the new text to
+            new_object (Any): an object with a to_dict, table_header, table_footer, get_nexus_mapping and to_string
+            methods
+            object_properties (dict[str, None | str | float | int]): attributes of the new object
+
+        """
+        # get the start and end table names
+        table_start_token = new_object.table_header
+        table_ending_token = new_object.table_footer
+
+        # initialise some useful variables
+        additional_content: list[str] = []
+        date_comparison: int = -1
+        date_index: int = -1
+        insert_line_index: int = -1
+        id_line_locs: list[int] = []
+        headers: list[str] = []
+        additional_headers: list[str] = []
+        header_index: int = -1
+        last_valid_line_index: int = -1
+        headers_original: list[str] = []
+        date_found = False
+        nexus_mapping = new_object.get_nexus_mapping()
+        for index, line in enumerate(file_as_list):
+            # check for the dates
+            if nfo.check_token('TIME', line):
+                date_found_in_file = nfo.get_expected_token_value('TIME', line, [line])
+                date_comparison = self.__model._sim_controls.compare_dates(
+                    date_found_in_file, date)
+                if date_comparison == 0:
+                    date_index = index
+                    date_found = True
+                    continue
+
+            # find a table that exists in that date
+            if nfo.check_token(table_start_token, line) and date_index != -1:
+                # get the header of the table
+                header_index, headers, headers_original = self.get_and_write_new_header(
+                    additional_headers, object_properties, file_as_list, index, nexus_mapping, file_to_add_to
+                    )
+                continue
+
+            if header_index != -1 and index > header_index:
+                # check for valid rows + fill extra columns with NA
+                line_valid_index = self.fill_in_nas(additional_headers, headers_original, index,
+                                                                            line, file_to_add_to, file_as_list)
+                # set the line to insert the new completion at to be the one after the last valid line
+                last_valid_line_index = line_valid_index if line_valid_index > 0 else last_valid_line_index
+
+            # if we've found an existing table then just insert the new object
+            if nfo.check_token(table_ending_token, line) and date_comparison == 0:
+                insert_line_index = index
+                additional_content.append(new_object.to_string(headers=headers))
+                id_line_locs = [insert_line_index]
+
+            # if we have passed the date or if we're at the end of the file write out the table
+            if date_comparison > 0:
+                new_table, obj_in_table_index = self.write_out_new_table_containing_object(
+                    obj_date=date, object_properties=object_properties, date_found=date_found, new_obj=new_object)
+                additional_content.extend(new_table)
+                insert_line_index = index
+                id_line_locs = [obj_in_table_index + index - 1]
+
+            if insert_line_index >= 0:
+                break
+        else:
+            # if we've finished the loop normally that means we haven't added any additional objects or lines
+            # This means we have to add the date and a new table to the end of the file.
+            new_table, obj_in_table_index = self.write_out_new_table_containing_object(
+                obj_date=date, object_properties=object_properties, date_found=date_found, new_obj=new_object)
+            additional_content.extend(new_table)
+            insert_line_index = len(file_as_list)
+            id_line_locs = [obj_in_table_index + insert_line_index - 1]
+
+        # write out to the file_content_as_list
+        new_object_ids = {
+            new_object.id: id_line_locs
+            }
+        file_to_add_to.add_to_file_as_list(additional_content=additional_content, index=insert_line_index,
+                                           additional_objects=new_object_ids)
