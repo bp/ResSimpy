@@ -282,7 +282,60 @@ node_2 WELLHEAD 1167.3 NA station_1
 1  # no. writes
 ),
 
-], ids=['basic_test', 'additional headers'])
+# more time cards
+('''TIME 01/01/2023
+NODES
+  NAME TYPE DEPTH TEMP 
+  test_node1 WELLHEAD 100 100 
+ENDNODES
+  
+  TIME 01/01/2024
+NODES
+  NAME          TEMP    TYPE
+  test_node2    100     WELL
+ENDNODES
+  
+  TIME 01/01/2025
+NODES
+  NAME TYPE DEPTH  X Y  ! comment to test for keyword in comment
+  test_node3 WELLHEAD 100 100 ! NODES
+ENDNODES
+''',
+'''TIME 01/01/2023
+NODES
+  NAME TYPE DEPTH TEMP 
+  test_node1 WELLHEAD 100 100 
+ENDNODES
+  
+  TIME 01/01/2024
+NODES
+  NAME          TEMP    TYPE DEPTH STATION
+  test_node2    100     WELL NA NA
+new_node NA WELLHEAD 1167.3 station_1
+ENDNODES
+  
+  TIME 01/01/2025
+NODES
+  NAME TYPE DEPTH  X Y  ! comment to test for keyword in comment
+  test_node3 WELLHEAD 100 100 ! NODES
+ENDNODES
+''',
+{'name': 'new_node', 'type': 'WELLHEAD', 'depth': 1167.3, 'station': 'station_1',
+'date': '01/01/2024', 'unit_system': UnitSystem.ENGLISH},
+[{'name': 'test_node1', 'type': 'WELLHEAD', 'depth': 100,  'temp': 100, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'test_node2', 'type': 'WELL', 'temp': 100, 'date': '01/01/2024', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'test_node3', 'type': 'WELLHEAD', 'x_pos': 100, 'y_pos': 100, 'date': '01/01/2025', 'unit_system': UnitSystem.ENGLISH},
+],
+1  # no. writes
+),
+
+# no existing time card for specified date (write out full nodes table)
+
+# more complex
+
+# reaching end of file
+
+], ids=['basic_test', 'additional headers', 'more time cards'])
 def test_add_node(mocker, file_contents, expected_file_contents, node_to_add, expected_nodes,
                   expected_number_writes):
     # Arrange
