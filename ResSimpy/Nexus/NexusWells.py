@@ -1,7 +1,6 @@
 from __future__ import annotations
 import warnings
 from dataclasses import dataclass, field
-from typing import cast
 from functools import cmp_to_key
 from typing import Sequence, Optional, TYPE_CHECKING
 from uuid import UUID
@@ -100,7 +99,7 @@ class NexusWells(Wells):
 
         return set_dates
 
-    def modify_well(self, well_name: str, completion_properties_list: list[NexusCompletion.InputDictionary],
+    def modify_well(self, well_name: str, completion_properties_list: list[dict[str, None | float | int | str]],
                     how: OperationEnum = OperationEnum.ADD) -> None:
         """Modify the existing wells in memory using a dictionary of properties.
 
@@ -139,7 +138,7 @@ class NexusWells(Wells):
             else:
                 raise ValueError('Please select one of the valid OperationEnum values: e.g. OperationEnum.ADD')
 
-    def add_completion(self, well_name: str, completion_properties: NexusCompletion.InputDictionary,
+    def add_completion(self, well_name: str, completion_properties: dict[str, None | float | int | str],
                        preserve_previous_completions: bool = True) -> None:
         """Adds a completion to an existing wellspec file.
 
@@ -152,11 +151,7 @@ class NexusWells(Wells):
             wellspec card for that well will preserve the previous completions from the closest TIME card in addition \
             to the new completion
         """
-        completion_date = completion_properties.get('date', None)
-        if completion_date is None:
-            raise AttributeError('Completion requires a date. '
-                                 'Please provide a date in the completion_properties_list dictionary.')
-
+        _, completion_date = self.__add_object_operations.check_name_date({'name': well_name} | completion_properties)
         well = self.get_well(well_name)
         if well is None:
             # TODO could make this not raise an error and instead initialize a NexusWell and add it to NexusWells
@@ -255,7 +250,7 @@ class NexusWells(Wells):
                                           additional_objects=new_completion_object_ids)
 
     def __write_out_existing_wellspec(self, completion_date: str,
-                                      completion_properties: NexusCompletion.InputDictionary,
+                                      completion_properties: dict[str, None | float | int | str],
                                       date_found: bool, index: int, new_completion_index: int,
                                       preserve_previous_completions: bool, well: NexusWell, well_name: str) -> \
             tuple[list[str], int, list[str], bool]:
@@ -283,7 +278,7 @@ class NexusWells(Wells):
             # get the most recent date that is earlier than the new completion date
             previous_dates = sorted(previous_dates, key=cmp_to_key(self.__model._sim_controls.compare_dates))
             last_date = str(previous_dates[-1])
-            completion_to_find: NexusCompletion.InputDictionary = {'date': last_date}
+            completion_to_find: dict[str, None | float | int | str] = {'date': last_date}
             # find all completions at this date
             previous_completion_list = well.find_completions(completion_to_find)
             if len(previous_completion_list) > 0:
@@ -306,7 +301,8 @@ class NexusWells(Wells):
             completion_table_as_list += write_out_headers
         return headers, new_completion_index, completion_table_as_list, True
 
-    def remove_completion(self, well_name: str, completion_properties: Optional[NexusCompletion.InputDictionary] = None,
+    def remove_completion(self, well_name: str,
+                          completion_properties: Optional[dict[str, None | float | int | str]] = None,
                           completion_id: Optional[UUID] = None) -> None:
 
         well = self.get_well(well_name)
@@ -343,11 +339,11 @@ class NexusWells(Wells):
                 wellspec_file.remove_from_file_as_list(comp_index, [completion_id])
 
         # check that we have completions left:
-        find_completions_dict: NexusCompletion.InputDictionary = {'date': completion_date}
+        find_completions_dict: dict[str, None | float | int | str] = {'date': completion_date}
         remaining_completions = well.find_completions(find_completions_dict)
         if len(remaining_completions) == 0:
             # if there are no more completions remaining for that time stamp then remove the wellspec header!
-            self.__remove_wellspec_header(completion_date, well_name, wellspec_file)
+            self.__remove_wellspec_header(str(completion_date), well_name, wellspec_file)
 
     def __remove_wellspec_header(self, completion_date: str, well_name: str, wellspec_file: NexusFile) -> None:
         """Removes the wellspec and header if the wellspec table is empty\
@@ -374,9 +370,19 @@ class NexusWells(Wells):
         wellspec_file.remove_from_file_as_list(header_index)
         wellspec_file.remove_from_file_as_list(wellspec_index)
 
-    def modify_completion(self, well_name: str, properties_to_modify: NexusCompletion.InputDictionary,
-                          completion_to_change: Optional[NexusCompletion.InputDictionary] = None,
+    def modify_completion(self, well_name: str, properties_to_modify: dict[str, None | float | int | str],
+                          completion_to_change: Optional[dict[str, None | float | int | str]] = None,
                           completion_id: Optional[UUID] = None) -> None:
+        """Modify an existing matching completion, preserves attributes and modifies only additional properties
+        found within the provided properties to modify dictionary.
+
+        Args:
+            well_name (str): Name of the well with the completion to be modified.
+            properties_to_modify (dict[str, None | float | int | str]): attributes to change to.
+            completion_to_change (Optional[dict[str, None | float | int | str]]): properties of the existing completion.
+            User must provide enough to uniquely identify the completion.
+            completion_id (Optional[UUID]): If provided will match against a known UUID for the completion.
+        """
         well = self.get_well(well_name)
         if well is None:
             raise ValueError(f'No well found with name: {well_name}')
@@ -390,10 +396,10 @@ class NexusWells(Wells):
             raise ValueError('Must provide one of completion_to_change dictionary or completion_id')
 
         # start with the existing properties
-        update_completion_properties: NexusCompletion.InputDictionary = cast(
-            NexusCompletion.InputDictionary, {k: v for k, v in completion.to_dict().items() if v is not None})
+        update_completion_properties: dict[str, None | float | int | str] = \
+            {k: v for k, v in completion.to_dict().items() if v is not None}
 
         update_completion_properties.update(properties_to_modify)
 
         self.remove_completion(well_name, completion_id=completion_id)
-        self.add_completion(well_name, update_completion_properties, preserve_previous_completions=True)
+        self.add_completion(well_name, update_completion_properties)
