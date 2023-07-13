@@ -1,6 +1,6 @@
 from __future__ import annotations
 import copy
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -105,55 +105,40 @@ class AddObjectOperations:
             return index
         else:
             return -1
-    #
-    # def __write_out_existing_wellspec(self, completion_date: str,
-    #                                   object_properties: dict[str, None | str | float | int],
-    #                                   date_found: bool, index: int, new_completion_index: int,
-    #                                   preserve_previous_completions: bool, well: NexusWell, well_name: str) -> \
-    #         tuple[list[str], int, list[str], bool]:
-    #     """Writes out the existing wellspec for a well at a new time stamp."""
-    #     nexus_mapping = NexusCompletion.get_nexus_mapping()
-    #     completion_table_as_list = ['\n']
-    #     if not date_found:
-    #         completion_table_as_list += ['TIME ' + completion_date + '\n']
-    #     completion_table_as_list += ['WELLSPEC ' + well_name + '\n']
-    #     headers = [k for k, v in nexus_mapping.items() if v[0] in completion_properties]
-    #     if preserve_previous_completions:
-    #         # get all the dates for that well
-    #         date_list = well.dates_of_completions
-    #         previous_dates = [x for x in date_list if
-    #                           self.__model._sim_controls.compare_dates(x, completion_date) < 0]
-    #         if len(previous_dates) == 0:
-    #             # if no dates that are smaller than the completion date then only add the perforation
-    #             # at the current index with a new wellspec card.
-    #             warnings.warn(f'No previous completions found for {well_name} at date: {completion_date}')
-    #             new_completion_index = index
-    #             write_out_headers = [' '.join(headers) + '\n']
-    #             completion_table_as_list += write_out_headers
-    #             return headers, new_completion_index, completion_table_as_list, False
-    #
-    #         # get the most recent date that is earlier than the new completion date
-    #         previous_dates = sorted(previous_dates, key=cmp_to_key(self.__model._sim_controls.compare_dates))
-    #         last_date = str(previous_dates[-1])
-    #         completion_to_find: NexusCompletion.InputDictionary = {'date': last_date}
-    #         # find all completions at this date
-    #         previous_completion_list = well.find_completions(completion_to_find)
-    #         if len(previous_completion_list) > 0:
-    #             prev_completion_properties = {k: v for k, v in previous_completion_list[0].to_dict().items() if
-    #                                           v is not None}
-    #             for key in prev_completion_properties:
-    #                 if key == 'date':
-    #                     continue
-    #                 header_key = attribute_name_to_nexus_keyword(nexus_mapping, key)
-    #                 if header_key not in headers:
-    #                     headers.append(header_key)
-    #
-    #         write_out_headers = [' '.join(headers) + '\n']
-    #         completion_table_as_list += write_out_headers
-    #         # run through the existing completions to duplicate the completion at the new time
-    #         for completion in previous_completion_list:
-    #             completion_table_as_list += completion.completion_to_wellspec_row(headers)
-    #     else:
-    #         write_out_headers = [' '.join(headers) + '\n']
-    #         completion_table_as_list += write_out_headers
-    #     return headers, new_completion_index, completion_table_as_list, True
+
+    @staticmethod
+    def write_out_new_table_containing_object(obj_date: str,
+                                              object_properties: dict[str, None | str | float | int],
+                                              date_found: bool, new_obj: Any) -> tuple[list[str], int]:
+        """Writes out the existing wellspec for a well at a new time stamp."""
+        nexus_mapping = new_obj.get_nexus_mapping()
+
+        new_table_as_list = ['']
+        if not date_found:
+            new_table_as_list.append('TIME ' + obj_date)
+        new_table_as_list += [new_obj.table_header]
+        headers = [k for k, v in nexus_mapping.items() if v[0] in object_properties]
+        write_out_headers = ' '.join(headers)
+        new_table_as_list.append(write_out_headers)
+        new_table_as_list.append(new_obj.to_string(headers))
+        new_table_as_list.append(new_obj.table_footer)
+        new_table_as_list = [x + '\n' if not x.endswith('\n') else x for x in new_table_as_list]
+        new_table_as_list.append('\n')
+        new_obj_index = len(new_table_as_list) - 1
+        return new_table_as_list, new_obj_index
+
+    @staticmethod
+    def check_name_date(object_properties: dict[str, None | str | float | int]) -> tuple[str, str]:
+        """Checks for the presence of a name and a date in the additional object properties provided."""
+        name = object_properties.get('name', None)
+        if name is None:
+            raise AttributeError(
+                'Adding an object requires a name, please provide a "name" entry in the input dictionary.')
+        date = object_properties.get('date', None)
+        if date is None:
+            raise AttributeError(
+                'Adding an object requires a date, please provide a "date" entry in the input dictionary.')
+        name = str(name)
+        date = str(date)
+
+        return name, date

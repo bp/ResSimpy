@@ -297,8 +297,8 @@ ENDNODES
   
   TIME 01/01/2025
 NODES
-  NAME TYPE DEPTH  X Y  ! comment to test for keyword in comment
-  test_node3 WELLHEAD 100 100 ! NODES
+  NAME TYPE DEPTH  X Y  ! comment to test for keyword in comment ENDNODES
+  test_node3 WELLHEAD 1167.3 100 100 ! NODES
 ENDNODES
 ''',
 '''TIME 01/01/2023
@@ -316,26 +316,114 @@ ENDNODES
   
   TIME 01/01/2025
 NODES
-  NAME TYPE DEPTH  X Y  ! comment to test for keyword in comment
-  test_node3 WELLHEAD 100 100 ! NODES
+  NAME TYPE DEPTH  X Y  ! comment to test for keyword in comment ENDNODES
+  test_node3 WELLHEAD 1167.3 100 100 ! NODES
 ENDNODES
 ''',
 {'name': 'new_node', 'type': 'WELLHEAD', 'depth': 1167.3, 'station': 'station_1',
 'date': '01/01/2024', 'unit_system': UnitSystem.ENGLISH},
 [{'name': 'test_node1', 'type': 'WELLHEAD', 'depth': 100,  'temp': 100, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
 {'name': 'test_node2', 'type': 'WELL', 'temp': 100, 'date': '01/01/2024', 'unit_system': UnitSystem.ENGLISH},
-{'name': 'test_node3', 'type': 'WELLHEAD', 'x_pos': 100, 'y_pos': 100, 'date': '01/01/2025', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'test_node3', 'type': 'WELLHEAD', 'x_pos': 100, 'y_pos': 100, 'depth': 1167.3, 'date': '01/01/2025', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'new_node', 'type': 'WELLHEAD', 'depth': 1167.3, 'station': 'station_1',
+'date': '01/01/2024', 'unit_system': UnitSystem.ENGLISH},
 ],
 1  # no. writes
 ),
 
 # no existing time card for specified date (write out full nodes table)
+('''TIME 01/01/2023
+NODES
+  NAME TYPE DEPTH TEMP 
+  test_node1 WELLHEAD 100 100 
+ENDNODES
 
-# more complex
+  TIME 01/01/2025
+NODES
+  NAME TYPE DEPTH  X Y
+  test_node3 WELLHEAD 1167.3 100 100 ! NODES
+ENDNODES
+''',
+'''TIME 01/01/2023
+NODES
+  NAME TYPE DEPTH TEMP 
+  test_node1 WELLHEAD 100 100 
+ENDNODES
 
+
+TIME 01/01/2024
+NODES
+NAME TYPE DEPTH STATION
+new_node WELLHEAD 1167.3 station_1
+ENDNODES
+
+  TIME 01/01/2025
+NODES
+  NAME TYPE DEPTH  X Y
+  test_node3 WELLHEAD 1167.3 100 100 ! NODES
+ENDNODES
+''',
+{'name': 'new_node', 'type': 'WELLHEAD', 'depth': 1167.3, 'station': 'station_1',
+'date': '01/01/2024', 'unit_system': UnitSystem.ENGLISH},
+[{'name': 'test_node1', 'type': 'WELLHEAD', 'depth': 100,  'temp': 100, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'test_node3', 'type': 'WELLHEAD', 'x_pos': 100, 'y_pos': 100, 'depth': 1167.3, 'date': '01/01/2025', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'new_node', 'type': 'WELLHEAD', 'depth': 1167.3, 'station': 'station_1',
+'date': '01/01/2024', 'unit_system': UnitSystem.ENGLISH},
+],
+1
+),
+
+# existing date card but no table
+('''TIME 01/01/2023
+NODES
+  NAME TYPE DEPTH TEMP 
+  test_node1 WELLHEAD 100 100 
+ENDNODES
+TIME 01/01/2024
+NODECONS
+NAME X Y LENGTH
+test_con 1.254 12.0 10.2
+ENDNODECONS
+  TIME 01/01/2025
+NODES
+  NAME TYPE DEPTH  X Y
+  test_node3 WELLHEAD 1167.3 100 100 ! NODES
+ENDNODES
+''',
+'''TIME 01/01/2023
+NODES
+  NAME TYPE DEPTH TEMP 
+  test_node1 WELLHEAD 100 100 
+ENDNODES
+TIME 01/01/2024
+NODECONS
+NAME X Y LENGTH
+test_con 1.254 12.0 10.2
+ENDNODECONS
+
+NODES
+NAME TYPE DEPTH STATION
+new_node WELLHEAD 1167.3 station_1
+ENDNODES
+
+  TIME 01/01/2025
+NODES
+  NAME TYPE DEPTH  X Y
+  test_node3 WELLHEAD 1167.3 100 100 ! NODES
+ENDNODES
+''',
+{'name': 'new_node', 'type': 'WELLHEAD', 'depth': 1167.3, 'station': 'station_1',
+'date': '01/01/2024', 'unit_system': UnitSystem.ENGLISH},
+[{'name': 'test_node1', 'type': 'WELLHEAD', 'depth': 100,  'temp': 100, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'test_node3', 'type': 'WELLHEAD', 'x_pos': 100, 'y_pos': 100, 'depth': 1167.3, 'date': '01/01/2025', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'new_node', 'type': 'WELLHEAD', 'depth': 1167.3, 'station': 'station_1',
+'date': '01/01/2024', 'unit_system': UnitSystem.ENGLISH},
+],
+1
+),
 # reaching end of file
 
-], ids=['basic_test', 'additional headers', 'more time cards'])
+], ids=['basic_test', 'additional headers', 'more time cards', 'no existing time card', 'existing date card but no table'])
 def test_add_node(mocker, file_contents, expected_file_contents, node_to_add, expected_nodes,
                   expected_number_writes):
     # Arrange

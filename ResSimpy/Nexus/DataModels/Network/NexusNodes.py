@@ -175,15 +175,7 @@ class NexusNodes(Nodes):
             Requires date and a node name.
         """
         self.__parent_network.get_load_status()
-
-        name = node_to_add.get('name', None)
-        if name is None:
-            raise AttributeError(
-                'Adding a node requires a name, please provide a "name" entry in the input dictionary.')
-        date = node_to_add.get('date', None)
-        if date is None:
-            raise AttributeError(
-                'Adding a node requires a date, please provide a "date" entry in the input dictionary.')
+        name, date = self.__add_object_operations.check_name_date(node_to_add)
 
         new_object = NexusNode(node_to_add)
 
@@ -212,6 +204,7 @@ class NexusNodes(Nodes):
         header_index: int = -1
         last_valid_line_index: int = -1
         headers_original: list[str] = []
+        date_found = False
 
         # TODO make this account for new headers
         # required_headers = list(to_dict_generic.to_dict(new_object, keys_in_nexus_style=True, add_date=False,
@@ -226,6 +219,7 @@ class NexusNodes(Nodes):
                     date_found_in_file, date)
                 if date_comparison == 0:
                     date_index = index
+                    date_found = True
                     continue
 
             # find a table that exists in that date
@@ -247,6 +241,14 @@ class NexusNodes(Nodes):
                 insert_line_index = index
                 additional_content.append(new_object.to_string(headers=headers))
                 id_line_locs = [insert_line_index]
+
+            if date_comparison > 0:
+                new_table, obj_in_table_index = self.__add_object_operations.write_out_new_table_containing_object(
+                    obj_date=date, object_properties=node_to_add, date_found=date_found, new_obj=new_object)
+                additional_content.extend(new_table)
+                insert_line_index = index
+                id_line_locs = [obj_in_table_index + index-1]
+
             if insert_line_index >= 0:
                 break
         # write out to the file_content_as_list

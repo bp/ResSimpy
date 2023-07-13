@@ -58,3 +58,13 @@ class NexusNode(Node):
     def to_string(self, headers: list[str]) -> str:
         """Returns the string representation of a row in a table for a given set of headers."""
         return to_string(self, headers)
+
+    @property
+    def table_header(self) -> str:
+        """Start of the Node definition table."""
+        return 'NODES'
+
+    @property
+    def table_footer(self) -> str:
+        """End of the Node definition table."""
+        return 'ENDNODES'
