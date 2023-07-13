@@ -105,9 +105,9 @@ class NexusFile(File):
 
         for i, line in enumerate(file_as_list):
             if len(modified_file_as_list) >= 1:
-                previous_line = modified_file_as_list[len(modified_file_as_list)-1].rstrip('\n')
+                previous_line = modified_file_as_list[len(modified_file_as_list) - 1].rstrip('\n')
                 if previous_line.endswith('>'):
-                    modified_file_as_list[len(modified_file_as_list)-1] = previous_line[:-1] + line
+                    modified_file_as_list[len(modified_file_as_list) - 1] = previous_line[:-1] + line
                 else:
                     modified_file_as_list.append(line)
             else:
@@ -432,7 +432,8 @@ class NexusFile(File):
         return nexus_file, index_in_included_file
 
     def add_to_file_as_list(self, additional_content: list[str], index: int,
-                            additional_objects: Optional[dict[UUID, list[int]]] = None) -> None:
+                            additional_objects: Optional[dict[UUID, list[int]]] = None,
+                            comments: Optional[str] = None) -> None:
         """To add content to the file as list, also updates object numbers and optionally allows user \
         to add several additional new objects.
 
@@ -443,6 +444,9 @@ class NexusFile(File):
             UUID of the new objects to add as well as the corresponding index of the object in the original \
             calling NexusFile
         """
+        if comments is not None:
+            additional_content = NexusFile.insert_comments(additional_content, comments)
+
         nexusfile_to_write_to, relative_index = self.find_which_include_file(index)
         if nexusfile_to_write_to.file_content_as_list is None:
             raise ValueError(f'No file content to write to in file: {nexusfile_to_write_to}')
@@ -517,3 +521,15 @@ class NexusFile(File):
                 self.__remove_object_locations(object_id)
 
         nexusfile_to_write_to.write_to_file()
+
+    @staticmethod
+    def insert_comments(additional_content: list[str], comments) -> list[str]:
+        for index, element in enumerate(additional_content):
+            newline_index = element.find('\n')
+            if newline_index != -1:
+                modified_text = element[:newline_index] + ' ! ' + comments + element[newline_index:]
+                additional_content[index] = modified_text
+                return additional_content
+
+        additional_content[-1] += ' ! ' + comments + '\n'
+        return additional_content

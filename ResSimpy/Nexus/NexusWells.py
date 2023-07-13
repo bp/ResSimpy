@@ -139,7 +139,7 @@ class NexusWells(Wells):
                 raise ValueError('Please select one of the valid OperationEnum values: e.g. OperationEnum.ADD')
 
     def add_completion(self, well_name: str, completion_properties: dict[str, None | float | int | str],
-                       preserve_previous_completions: bool = True) -> None:
+                       preserve_previous_completions: bool = True, comments: Optional[str] = None) -> None:
         """Adds a completion to an existing wellspec file.
 
         Args:
@@ -247,7 +247,7 @@ class NexusWells(Wells):
         # write out to the file_content_as_list
         new_completion_object_ids = {new_completion.id: [new_completion_index + new_completion_additional_lines - 1]}
         wellspec_file.add_to_file_as_list(additional_content=new_completion_string, index=new_completion_index,
-                                          additional_objects=new_completion_object_ids)
+                                          additional_objects=new_completion_object_ids, comments=comments)
 
     def __write_out_existing_wellspec(self, completion_date: str,
                                       completion_properties: dict[str, None | float | int | str],
@@ -372,7 +372,8 @@ class NexusWells(Wells):
 
     def modify_completion(self, well_name: str, properties_to_modify: dict[str, None | float | int | str],
                           completion_to_change: Optional[dict[str, None | float | int | str]] = None,
-                          completion_id: Optional[UUID] = None) -> None:
+                          completion_id: Optional[UUID] = None,
+                          comments: Optional[str] = None) -> None:
         """Modify an existing matching completion, preserves attributes and modifies only additional properties
         found within the provided properties to modify dictionary.
 
@@ -402,4 +403,5 @@ class NexusWells(Wells):
         update_completion_properties.update(properties_to_modify)
 
         self.remove_completion(well_name, completion_id=completion_id)
-        self.add_completion(well_name, update_completion_properties)
+        self.add_completion(well_name, update_completion_properties, preserve_previous_completions=True,
+                            comments=comments)

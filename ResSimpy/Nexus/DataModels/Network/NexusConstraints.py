@@ -80,7 +80,7 @@ class NexusConstraints(Constraints):
                                                             'CONSTRAINTS': NexusConstraint,
                                                             'CONSTRAINT': NexusConstraint,
                                                             'QMULT': NexusConstraint
-                                                            },
+                                                        },
                                                         start_date=start_date,
                                                         default_units=default_units)
         cons_list = new_constraints.get('CONSTRAINTS')
@@ -179,7 +179,7 @@ class NexusConstraints(Constraints):
     def add_constraint(self,
                        name: str,
                        constraint_to_add: dict[str, None | float | int | str | UnitSystem] | Constraint,
-                       ) -> None:
+                       comments: Optional[str] = None) -> None:
         """Adds a constraint to the network and corresponding surface file.
 
         Args:
@@ -287,14 +287,15 @@ class NexusConstraints(Constraints):
                 # once we have found where to add constraint then add the constraint to file and update file ids
                 new_constraint_object_ids = {
                     new_constraint.id: id_line_locs
-                    }
+                }
                 file_to_add_to.add_to_file_as_list(additional_content=new_constraint_text, index=new_constraint_index,
-                                                   additional_objects=new_constraint_object_ids)
+                                                   additional_objects=new_constraint_object_ids, comments=comments)
                 break
 
     def modify_constraint(self, name: str,
                           current_constraint: dict[str, None | float | int | str] | NexusConstraint,
-                          new_constraint_props: dict[str, None | float | int | str | UnitSystem] | NexusConstraint) \
+                          new_constraint_props: dict[str, None | float | int | str | UnitSystem] | NexusConstraint,
+                          comments: Optional[str] = None) \
             -> None:
         """Modify an existing constraint. Retains existing constraint values that are not overridden by the new \
         constraint properties.
@@ -324,4 +325,4 @@ class NexusConstraints(Constraints):
         combination_of_constraints = existing_constraint_obj.to_dict()
         combination_of_constraints.update(cleaned_new_constraint)
 
-        self.add_constraint(name, combination_of_constraints)
+        self.add_constraint(name, combination_of_constraints, comments)

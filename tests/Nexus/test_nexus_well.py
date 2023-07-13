@@ -608,14 +608,14 @@ def test_wells_modify(mocker):
 
 @pytest.mark.parametrize('file_as_list, add_perf_date, preserve_previous_completions, expected_result',[
 (['WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5'], '01/01/2020', False,
-['WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', '4 5 6 7.5\n']),
+['WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', '4 5 6 7.5 ! test user comments\n']),
 
 (['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
 '13  12   11   3.14', 'TIME 01/02/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
   '01/02/2020', True,
 ['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
-'13  12   11   3.14', 'TIME 01/02/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', '4 5 6 7.5\n', 'WELLSPEC well2',
+'13  12   11   3.14', 'TIME 01/02/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', '4 5 6 7.5 ! test user comments\n', 'WELLSPEC well2',
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
   ),
 
@@ -624,7 +624,7 @@ def test_wells_modify(mocker):
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
   '01/02/2020', False,
 ['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
-'13  12   11   3.14', '\n', 'TIME 01/02/2020\n', 'WELLSPEC well1\n', 'IW JW L RADB\n', '4 5 6 7.5\n', '\n',
+'13  12   11   3.14', ' ! test user comments\n', 'TIME 01/02/2020\n', 'WELLSPEC well1\n', 'IW JW L RADB\n', '4 5 6 7.5\n', '\n',
 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
   ),
@@ -634,7 +634,7 @@ def test_wells_modify(mocker):
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
   '01/02/2020', True,
 ['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', 'WELLSPEC well2', 'iw  jw   l    RADB',
-'13  12   11   3.14', '\n', 'TIME 01/02/2020\n', 'WELLSPEC well1\n', 'IW JW L RADB\n', '1 2 3 1.5\n', '4 5 6 7.5\n', '\n',
+'13  12   11   3.14', ' ! test user comments\n', 'TIME 01/02/2020\n', 'WELLSPEC well1\n', 'IW JW L RADB\n', '1 2 3 1.5\n', '4 5 6 7.5\n', '\n',
 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
   ),
@@ -643,7 +643,7 @@ def test_wells_modify(mocker):
 '1  2   5   2.5', 'WELLSPEC well2', 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020',
 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
   '01/02/2020', True,
-['WELLSPEC well2', 'iw  jw   l    RADB', '13  12   11   3.14', '\n',
+['WELLSPEC well2', 'iw  jw   l    RADB', '13  12   11   3.14', ' ! test user comments\n',
 'TIME 01/02/2020\n', 'WELLSPEC well1\n', 'IW JW L RADB\n', '4 5 6 7.5\n', '\n',
 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
@@ -654,7 +654,7 @@ def test_wells_modify(mocker):
 'iw  jw   l    RADB\n', '12  11   10   3.14\n', 'TIME 01/03/2020\n', 'WELLSPEC well1\n', 'iw  jw   l    RADB\n', '2 3   4   555.2\n'],
   '01/02/2020', True,
 ['TIME 01/01/2020\n', 'WELLSPEC well1\n', 'iw  jw   l    KH\n', '1  2   3   1.5\n', 'WELLSPEC well2\n', 'iw  jw   l    RADB\n',
-'13  12   11   3.14\n', 'TIME 01/02/2020\n', 'WELLSPEC well1\n', 'iw  jw   l    KH RADB\n', '1  2   5   2.5 NA\n', '4 5 6 NA 7.5\n', 'WELLSPEC well2\n',
+'13  12   11   3.14\n', 'TIME 01/02/2020\n', 'WELLSPEC well1\n', 'iw  jw   l    KH RADB\n', '1  2   5   2.5 NA\n', '4 5 6 NA 7.5 ! test user comments\n', 'WELLSPEC well2\n',
 'iw  jw   l    RADB\n', '12  11   10   3.14\n', 'TIME 01/03/2020\n', 'WELLSPEC well1\n', 'iw  jw   l    RADB\n', '2 3   4   555.2\n']
   ),
 
@@ -664,7 +664,7 @@ def test_wells_modify(mocker):
   '01/02/2020', True,
 ['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well1',
 'iw  jw    KH  PPERF  SKIN  STAT L RADB\n', '!Some comment line', '1  2   2.5   2   3.5  ON NA NA\n', '', '9  8   6.5   40   32.5  OFF NA NA\n',
-'11  12   4.5   43   394.5  OFF NA NA\n', '4 5 NA NA NA NA 6 7.5\n', '', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
+'11  12   4.5   43   394.5  OFF NA NA\n', '4 5 NA NA NA NA 6 7.5 ! test user comments\n', '', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
   ),
 
 (['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB KH', '1  2   3   1.5 5.5', 'TIME 01/02/2020', 'WELLSPEC well2', 'iw  jw   l    RADB KH',
@@ -672,7 +672,7 @@ def test_wells_modify(mocker):
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2'],
   '01/02/2020', True,
 ['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    RADB KH', '1  2   3   1.5 5.5',  'TIME 01/02/2020', 'WELLSPEC well2', 'iw  jw   l    RADB KH',
-'13  12   11   3.14 5.2', '\n', 'WELLSPEC well1\n', 'IW JW L RADB KH\n', '1 2 3 1.5 5.5\n', '4 5 6 7.5 NA\n', '\n',
+'13  12   11   3.14 5.2', ' ! test user comments\n', 'WELLSPEC well1\n', 'IW JW L RADB KH\n', '1 2 3 1.5 5.5\n', '4 5 6 7.5 NA\n', '\n',
 'TIME 01/04/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   5   2.5', 'WELLSPEC well2',
 'iw  jw   l    RADB', '12  11   10   3.14', 'TIME 01/05/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2']
   ),
@@ -683,7 +683,7 @@ def test_wells_modify(mocker):
   '01/02/2020', True,
 ['TIME 01/01/2020\n', 'WELLSPEC well1\n', 'iw  jw   l    KH\n', '1  2   3   1.5\n', 'TIME 01/02/2020\n', 'WELLSPEC well1\n',
 'iw  jw    KH  PPERF  SKIN  STAT L RADB\n', '!Some comment line\n', '1  2   2.5   2   3.5  ON NA NA !COMMMENT\n', '', '9  8   6.5   40   32.5  OFF NA NA\n',
-'11  12   4.5   43   394.5  OFF NA NA\n', '4 5 NA NA NA NA 6 7.5\n', '', 'TIME 01/03/2020\n', 'WELLSPEC well1\n', 'iw  jw   l    RADB\n', '2 3   4   555.2\n'],
+'11  12   4.5   43   394.5  OFF NA NA\n', '4 5 NA NA NA NA 6 7.5 ! test user comments\n', '', 'TIME 01/03/2020\n', 'WELLSPEC well1\n', 'iw  jw   l    RADB\n', '2 3   4   555.2\n'],
   ),
 
 (['TIME 01/01/2020\n', 'WELLSPEC well1\n', 'iw  jw   l    KH\n', '1  2   3   1.5\n', 'TIME 01/02/2020\n', 'WELLSPEC well1\n',
@@ -692,7 +692,7 @@ def test_wells_modify(mocker):
   '01/02/2020', True,
 ['TIME 01/01/2020\n', 'WELLSPEC well1\n', 'iw  jw   l    KH\n', '1  2   3   1.5\n', 'TIME 01/02/2020\n', 'WELLSPEC well1\n',
 'iw  jw    KH  PPERF  SKIN  STAT L RADB !COmment!\n', '!Some comment line\n', '1  2   2.5   2   3.5  ON NA NA !COMMMENT\n', '', '9  8   6.5   40   32.5  OFF NA NA\n',
-'11  12   4.5   43   394.5  OFF NA NA\n', '4 5 NA NA NA NA 6 7.5\n', '', 'TIME 01/03/2020\n', 'WELLSPEC well1\n', 'iw  jw   l    RADB\n', '2 3   4   555.2\n'],
+'11  12   4.5   43   394.5  OFF NA NA\n', '4 5 NA NA NA NA 6 7.5 ! test user comments\n', '', 'TIME 01/03/2020\n', 'WELLSPEC well1\n', 'iw  jw   l    RADB\n', '2 3   4   555.2\n'],
   ),
 
 (['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well1',
@@ -702,7 +702,7 @@ def test_wells_modify(mocker):
 ['TIME 01/01/2020', 'WELLSPEC well1', 'iw  jw   l    KH', '1  2   3   1.5', 'TIME 01/02/2020', 'WELLSPEC well1',
 'iw  jw    KH  PPERF  SKIN  STAT !COmment!', '!Some comment line', '1  2   2.5   2   3.5  ON !COMMMENT', '', '9  8   6.5   40   32.5  OFF',
 '11  12   4.5   43   394.5  OFF', '', 'TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '2 3   4   555.2',
-'\n', 'TIME 01/06/2020\n', 'WELLSPEC well1\n', 'IW JW L RADB\n', '2 3 4 555.2\n', '4 5 6 7.5\n', '\n' ],
+' ! test user comments\n', 'TIME 01/06/2020\n', 'WELLSPEC well1\n', 'IW JW L RADB\n', '2 3 4 555.2\n', '4 5 6 7.5\n', '\n' ],
   ),
 ], ids=['basic_test', 'insert in middle of file','No time card for new comp', 'preserve previous completions', 'No previous well',
 'Not overlapping columns', 'no overlap and multiple rows', 'Time card no comp', 'comment with not overlapping columns',
@@ -732,7 +732,7 @@ def test_add_completion_write(mocker, file_as_list, add_perf_date, preserve_prev
 
     # Act
     wells_obj.add_completion(well_name='well1', completion_properties=add_perf_dict,
-                             preserve_previous_completions=preserve_previous_completions)
+                             preserve_previous_completions=preserve_previous_completions, comments='test user comments')
     result = file.file_content_as_list
 
     # Assert
