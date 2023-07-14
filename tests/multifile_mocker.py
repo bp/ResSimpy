@@ -25,6 +25,6 @@ def mock_multiple_files(mocker: MockerFixture, passed_filename: str, potential_f
         file_contents = potential_file_dict[passed_filename]
     except KeyError:
         raise FileNotFoundError(f'{passed_filename=} did not match any of the provided files within \
-                                {potential_file_dict=}')
+                                {str(potential_file_dict)}')
     open_mock = mocker.mock_open(read_data=file_contents)
     return open_mock

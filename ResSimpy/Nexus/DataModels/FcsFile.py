@@ -206,7 +206,7 @@ class FcsNexusFile(NexusFile):
                     )
                 full_file_path = nfo.get_full_file_path(value, origin_path)
                 nexus_file = NexusFile.generate_file_include_structure(
-                    value, origin=fcs_file_path, recursive=recursive)
+                    value, origin=fcs_file_path, recursive=recursive, top_level_file=True)
                 fcs_property = getattr(fcs_file, fcs_keyword_map_multi[key])
                 # manually initialise if the property is still a None after class instantiation
                 if fcs_property is None:
@@ -222,7 +222,7 @@ class FcsNexusFile(NexusFile):
             elif key in fcs_keyword_map_single:
                 full_file_path = nfo.get_full_file_path(value, origin_path)
                 nexus_file = NexusFile.generate_file_include_structure(
-                    value, origin=fcs_file_path, recursive=recursive)
+                    value, origin=fcs_file_path, recursive=recursive, top_level_file=True)
                 setattr(fcs_file, fcs_keyword_map_single[key], nexus_file)
                 fcs_file.include_objects.append(nexus_file)
                 fcs_file.include_locations.append(full_file_path)

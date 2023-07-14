@@ -17,7 +17,8 @@ from uuid import UUID
 import re
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import warnings
-from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_OPERATION_KEYWORDS, GRID_ARRAY_FORMAT_KEYWORDS
+from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_OPERATION_KEYWORDS, GRID_ARRAY_FORMAT_KEYWORDS, \
+    GRID_ARRAY_KEYWORDS
 from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_nexus_file, \
     get_empty_dict_uuid_list_int
 from ResSimpy.File import File
@@ -65,7 +66,7 @@ class NexusFile(File):
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True,
-                                        skip_arrays: bool = True) -> Self:
+                                        skip_arrays: bool = True, top_level_file: bool = True) -> Self:
         """Generates a nexus file instance for a provided text file with information storing the included files.
 
         Args:
@@ -73,6 +74,8 @@ class NexusFile(File):
             origin (Optional[str], optional): Where the file was opened from. Defaults to None.
             recursive (bool): Whether the method should recursively drill down multiple layers of include_locations.
             skip_arrays (bool): If set True skips the INCLUDE arrays that come after property array and VALUE
+            top_level_file (bool): If set to True, the code assumes this is a 'top level' file rather than an included
+            one.
 
         Returns:
             NexusFile: a class instance for NexusFile with knowledge of include files
@@ -95,7 +98,7 @@ class NexusFile(File):
             warnings.warn(UserWarning(f'No file found for: {file_path} while loading {origin}'))
             return nexus_file_class
 
-        # prevent python from mutating the lists that its iterating over
+        # prevent python from mutating the lists that it's iterating over
         modified_file_as_list: list[str] = []
         # search for the INCLUDE keyword and append to a list:
         inc_file_list: list[str] = []
@@ -127,6 +130,29 @@ class NexusFile(File):
                 elif previous_value.upper() in keywords_to_skip_include:
                     skip_next_include = True
 
+            elif nfo.check_token("VALUE", line) and not top_level_file:
+                # Check if this is an 'embedded' grid array file. If it is, return this file with only the content up
+                # to this point to help with performance when analysing the files.
+                previous_value = nfo.get_previous_value(file_as_list=file_as_list[0: i + 1], search_before='VALUE')
+                next_value = nfo.get_next_value(start_line_index=0, file_as_list=file_as_list[i:],
+                                                search_string=line.upper().split('VALUE')[1])
+
+                if previous_value is None or next_value is None:
+                    continue
+
+                if next_value.upper() != 'INCLUDE' and previous_value.upper() in GRID_ARRAY_KEYWORDS:
+                    nexus_file_class = cls(
+                        location=file_path,
+                        include_locations=inc_file_list,
+                        origin=origin,
+                        include_objects=includes_objects,
+                        file_content_as_list=modified_file_as_list
+                    )
+
+                    return nexus_file_class
+                else:
+                    continue
+
             else:
                 continue
             inc_file_path = nfo.get_token_value('INCLUDE', line, file_as_list)
@@ -145,14 +171,14 @@ class NexusFile(File):
                                file_content_as_list=None)
                 if includes_objects is None:
                     raise ValueError('include_objects is None - recursion failure.')
-                includes_objects.append(inc_file)
                 skip_next_include = False
             else:
                 inc_file = cls.generate_file_include_structure(inc_file_path, origin=full_file_path, recursive=True,
-                                                               skip_arrays=skip_arrays)
+                                                               skip_arrays=skip_arrays, top_level_file=False)
                 if includes_objects is None:
                     raise ValueError('include_objects is None - recursion failure.')
-                includes_objects.append(inc_file)
+
+            includes_objects.append(inc_file)
 
         includes_objects = None if not includes_objects else includes_objects
 
@@ -193,7 +219,8 @@ class NexusFile(File):
         index: int
 
     def iterate_line(self, file_index: Optional[FileIndex] = None, max_depth: Optional[int] = None,
-                     parent: Optional[NexusFile] = None, prefix_line: Optional[str] = None) -> \
+                     parent: Optional[NexusFile] = None, prefix_line: Optional[str] = None,
+                     keep_include_references=False) -> \
             Generator[str, None, None]:
         """Generator object for iterating over a list of strings with nested NexusFile objects in them.
 
@@ -256,6 +283,9 @@ class NexusFile(File):
                 if (max_depth is None or depth > 0) and include_file is not None:
                     level_down_max_depth = None if max_depth is None else depth - 1
 
+                    if keep_include_references:
+                        yield row
+
                     yield from include_file.iterate_line(file_index=file_index, max_depth=level_down_max_depth,
                                                          parent=parent, prefix_line=prefix_line)
 
@@ -277,7 +307,14 @@ class NexusFile(File):
     def get_flat_list_str_file(self) -> list[str]:
         if self.file_content_as_list is None:
             raise ValueError(f'No file content found for {self.location}')
-        flat_list = list(self.iterate_line(file_index=None))
+        flat_list = list(self.iterate_line(file_index=None, keep_include_references=False))
+        return flat_list
+
+    @property
+    def get_flat_list_str_file_including_includes(self) -> list[str]:
+        if self.file_content_as_list is None:
+            raise ValueError(f'No file content found for {self.location}')
+        flat_list = list(self.iterate_line(file_index=None, keep_include_references=True))
         return flat_list
 
     # TODO write an output function using the iterate_line method
