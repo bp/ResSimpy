@@ -13,6 +13,7 @@ from ResSimpy.Nexus.load_wells import load_wells
     WELLSPEC WELL1
     IW JW L RADW
     1  2  3  4.5
+C    2  2  2  2 (commented line using 'C')
     6 7 8   9.11
     """, "WELL1"),
                           ("""

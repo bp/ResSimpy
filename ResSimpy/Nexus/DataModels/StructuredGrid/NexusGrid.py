@@ -30,6 +30,7 @@ class NexusGrid(Grid):
     __array_functions_df: Optional[pd.DataFrame] = None
     __array_functions_loaded: bool = False
     __grid_file_contents: Optional[list[str]] = None
+    __grid_file_nested: Optional[list[str]] = None
     __faults_df: Optional[pd.DataFrame] = None
     __grid_faults_loaded: bool = False
     __grid_properties_loaded: bool = False
@@ -41,7 +42,7 @@ class NexusGrid(Grid):
         self.__array_functions_df: Optional[pd.DataFrame] = None
         self.__array_functions_loaded: bool = False
         self.__grid_file_contents: Optional[list[str]] = None if grid_nexus_file is None else \
-            grid_nexus_file.get_flat_list_str_file
+            grid_nexus_file.get_flat_list_str_file_including_includes
         self.__grid_file_nested: Optional[list[str]] = None if grid_nexus_file is None else \
             grid_nexus_file.file_content_as_list
         self.__faults_df: Optional[pd.DataFrame] = None
@@ -115,8 +116,9 @@ class NexusGrid(Grid):
         if self.__grid_nexus_file is None or self.__grid_file_contents is None or self.__grid_file_nested is None:
             raise ValueError("Grid file not found, cannot load grid properties")
 
-        file_as_list = self.__grid_file_nested
+        file_as_list = self.__grid_file_contents
         for line in file_as_list:
+
             # Load in the basic properties
             properties_to_load = [
                 PropertyToLoad('NETGRS', ['VALUE', 'CON'], self._netgrs),
@@ -134,7 +136,7 @@ class NexusGrid(Grid):
                 PropertyToLoad('PERMZ', ['VALUE', 'MULT', 'CON'], self._kz),
                 PropertyToLoad('PERMK', ['VALUE', 'MULT', 'CON'], self._kz),
                 PropertyToLoad('KK', ['VALUE', 'MULT', 'CON'], self._kz),
-                ]
+            ]
 
             for token_property in properties_to_load:
                 for modifier in token_property.modifiers:
@@ -183,11 +185,6 @@ class NexusGrid(Grid):
         if structured_grid_file.location is None:
             raise ValueError(f"No file path given or found for structured grid file path. \
                 Instead got {structured_grid_file.location}")
-        file_as_list = structured_grid_file.get_flat_list_str_file
-
-        if file_as_list is None:
-            raise ValueError("No file path given or found for structured grid file path. \
-                Please update structured grid file path")
 
         loaded_structured_grid_file = cls(grid_nexus_file=structured_grid_file)
 
@@ -276,7 +273,7 @@ class NexusGrid(Grid):
             # Ensure resulting dataframe has uppercase column names
             df.columns = [col.upper() for col in df.columns]
 
-            # Check if any multfl's have been used in grid file and update fault trans multipliers accordingly
+            # Check if any multfls have been used in grid file and update fault trans multipliers accordingly
             f_names = df['NAME'].unique()
             f_mults = [1.] * len(f_names)
             mult_dict = dict(zip(f_names, f_mults))
