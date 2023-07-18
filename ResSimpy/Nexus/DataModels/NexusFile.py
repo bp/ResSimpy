@@ -573,6 +573,6 @@ class NexusFile(File):
 
     def get_object_locations_for_id(self, id: UUID) -> list[int]:
         """Gets the number of object locations for a specified id."""
-        if self.object_locations is None:
+        if self.object_locations is None or len(self.object_locations[id]) == 0:
             raise ValueError(f'No object locations specified, cannot find id: {id} in {self.object_locations}')
         return self.object_locations[id]

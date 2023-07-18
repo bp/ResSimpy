@@ -26,8 +26,19 @@ class NexusNodes(Nodes):
     def __init__(self, parent_network: NexusNetwork) -> None:
         self.__parent_network: NexusNetwork = parent_network
         self.__nodes: list[NexusNode] = []
-        self.__add_object_operations = AddObjectOperations(self.__parent_network.model)
-        self.__remove_object_operations = RemoveObjectOperations()
+        self.__add_object_operations = AddObjectOperations(self.__parent_network.model, self.table_header,
+                                                           self.table_footer)
+        self.__remove_object_operations = RemoveObjectOperations(self.table_header, self.table_footer)
+
+    @property
+    def table_header(self) -> str:
+        """Start of the Node definition table."""
+        return 'NODES'
+
+    @property
+    def table_footer(self) -> str:
+        """End of the Node definition table."""
+        return 'ENDNODES'
 
     def get_nodes(self) -> Sequence[NexusNode]:
         """Returns a list of nodes loaded from the simulator."""
@@ -123,32 +134,14 @@ class NexusNodes(Nodes):
 
         # remove from file
         line_numbers_in_file_to_remove = network_file.get_object_locations_for_id(node_id)
+        first_obj_index = line_numbers_in_file_to_remove[0]
+        last_object_index = line_numbers_in_file_to_remove[-1]
+        # get table_header and footers
 
-        # check there are any nodes left in the specified table
-        if len(line_numbers_in_file_to_remove) == 0:
-            raise ValueError('error msg')
+        remove_empty_table_indices = self.__remove_object_operations.check_for_empty_table(
+            network_file, first_obj_index, last_object_index, node_id)
         # remove the table if there aren't any more remaining
-        file_content = network_file.get_flat_list_str_file
-        start_node_table_indices = [i for i, x in enumerate(file_content) if "NODES" in x and
-                                    i < line_numbers_in_file_to_remove[0]]
-        end_node_table_indices = [i for i, x in enumerate(file_content) if "ENDNODES" in x and
-                                  i > line_numbers_in_file_to_remove[-1]]
-        start_node_keyword_index_to_remove = start_node_table_indices[-1]
-        end_node_keyword_index_to_remove = end_node_table_indices[0]
-
-        remove_table = True
-
-        for obj_uuid, line_locations_list in network_file.object_locations.items():
-            if obj_uuid == node_id:
-                # ignore the uuid's for the node that we want to remove
-                continue
-            for value in line_locations_list:
-                if start_node_keyword_index_to_remove <= value <= end_node_keyword_index_to_remove:
-                    remove_table = False
-
-        if remove_table:
-            line_numbers_in_file_to_remove.extend(list(
-                range(start_node_keyword_index_to_remove, end_node_keyword_index_to_remove + 1)))
+        line_numbers_in_file_to_remove.extend(remove_empty_table_indices)
 
         line_numbers_in_file_to_remove = list(set(line_numbers_in_file_to_remove))
         line_numbers_in_file_to_remove.sort(reverse=True)
