@@ -13,6 +13,8 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nodes import Nodes
 from typing import Sequence, Optional, TYPE_CHECKING
 
+from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
+
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 
@@ -52,12 +54,7 @@ class NexusNodes(Nodes):
         Returns:
             DataFrame: of the properties of the nodes through time with each row representing a node.
         """
-        df_store = pd.DataFrame()
-        for node in self.__nodes:
-            df_row = pd.DataFrame(node.to_dict(), index=[0])
-            df_store = pd.concat([df_store, df_row], axis=0, ignore_index=True)
-        df_store = df_store.fillna(value=np.nan)
-        df_store = df_store.dropna(axis=1, how='all')
+        df_store = obj_to_dataframe(self.__nodes)
         return df_store
 
     def get_nodes_overview(self) -> str:
