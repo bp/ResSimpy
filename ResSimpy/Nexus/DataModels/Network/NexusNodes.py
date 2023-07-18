@@ -2,7 +2,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from uuid import UUID
 
-import numpy as np
 import pandas as pd
 
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
@@ -10,6 +9,7 @@ from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.nexus_remove_object_from_file import RemoveObjectOperations
 from ResSimpy.Nodes import Nodes
 from typing import Sequence, Optional, TYPE_CHECKING
 
@@ -27,6 +27,7 @@ class NexusNodes(Nodes):
         self.__parent_network: NexusNetwork = parent_network
         self.__nodes: list[NexusNode] = []
         self.__add_object_operations = AddObjectOperations(self.__parent_network.model)
+        self.__remove_object_operations = RemoveObjectOperations()
 
     def get_nodes(self) -> Sequence[NexusNode]:
         """Returns a list of nodes loaded from the simulator."""
@@ -103,7 +104,6 @@ class NexusNodes(Nodes):
             with sufficient matching parameters to uniquely identify a node
 
         """
-        # TODO make this method generic!
         self.__parent_network.get_load_status()
 
         network_file = self.__parent_network.get_network_file()
@@ -119,12 +119,10 @@ class NexusNodes(Nodes):
             node_id = node_to_remove
 
         # remove from memory
-        index_to_remove = [x.id for x in self.__nodes].index(node_id)
-        self.__nodes.pop(index_to_remove)
+        self.__remove_object_operations.remove_object_from_memory_by_id(self.__nodes, id_to_remove=node_id)
+
         # remove from file
-        if network_file.object_locations is None:
-            raise ValueError(f'No object locations specified, cannot find node id: {node_id}')
-        line_numbers_in_file_to_remove = network_file.object_locations[node_id]
+        line_numbers_in_file_to_remove = network_file.get_object_locations_for_id(node_id)
 
         # check there are any nodes left in the specified table
         if len(line_numbers_in_file_to_remove) == 0:
