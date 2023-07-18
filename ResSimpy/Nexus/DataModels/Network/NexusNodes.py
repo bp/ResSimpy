@@ -105,11 +105,8 @@ class NexusNodes(Nodes):
         """
         # TODO make this method generic!
         self.__parent_network.get_load_status()
-        if self.__parent_network.model.model_files.surface_files is None:
-            raise ValueError('No files found for the surface network')
-        network_file = self.__parent_network.model.model_files.surface_files[1]
-        if network_file is None:
-            raise ValueError(f'No file found for {network_file=}')
+
+        network_file = self.__parent_network.get_network_file()
 
         if isinstance(node_to_remove, dict):
             name = node_to_remove.get('name', None)
@@ -177,10 +174,7 @@ class NexusNodes(Nodes):
 
         self._add_nodes_to_memory([new_object])
 
-        # add to the file
-        if self.__parent_network.model.model_files.surface_files is None:
-            raise FileNotFoundError('No well file found, cannot modify a deck with an empty surface file.')
-        file_to_add_to = self.__parent_network.model.model_files.surface_files[1]
+        file_to_add_to = self.__parent_network.get_network_file()
 
         file_as_list = file_to_add_to.get_flat_list_str_file
         if file_as_list is None:
