@@ -190,3 +190,27 @@ class NexusNodes(Nodes):
             raise ValueError(f'No file content found in the surface file specified at {file_to_add_to.location}')
 
         self.__add_object_operations.add_object_to_file(date, file_as_list, file_to_add_to, new_object, node_to_add)
+
+    def modify_node(self, node_to_modify: dict[str, None | str | float | int],
+                    new_properties: dict[str, None | str | float | int]) -> None:
+        """Modifies an existing node based on a matching dictionary of properties (partial matches allowed if precisely
+         1 matching node is found). Updates the properties with properties in the new_properties dictionary.
+
+        Args:
+            node_to_modify (dict[str, None | str | float | int]): dictionary containing attributes to match in the
+            existing node set.
+            new_properties (dict[str, None | str | float | int]): properties to switch to in the new node
+        """
+        self.__parent_network.get_load_status()
+
+        name = node_to_modify.get('name', None)
+        if name is None:
+            raise ValueError(f'Name is required for modifying nodes, instead got {name}')
+        name = str(name)
+        node = self.__parent_network.find_network_element_with_dict(name, node_to_modify, 'nodes')
+        existing_properties = node.to_dict(include_nones=False)
+        # do the union of the two dicts
+        existing_properties.update(new_properties)
+
+        self.remove_node(node_to_modify)
+        self.add_node(existing_properties)

@@ -224,7 +224,8 @@ class AddObjectOperations:
             additional_content.extend(new_table)
             insert_line_index = len(file_as_list)
             id_line_locs = [obj_in_table_index + insert_line_index - 1]
-
+        if len(additional_content) == 0:
+            raise ValueError('Could not find place to add the additional table lines.')
         # write out to the file_content_as_list
         new_object_ids = {
             new_object.id: id_line_locs

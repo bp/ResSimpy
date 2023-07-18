@@ -68,3 +68,13 @@ class NexusNode(Node):
     def table_footer(self) -> str:
         """End of the Node definition table."""
         return 'ENDNODES'
+
+    def update(self, input_dictionary:  dict[str, None | float | int | str]) -> None:
+        """Updates a node based on a dictionary of attributes."""
+        for k, v in input_dictionary.items():
+            if v is None:
+                continue
+            if hasattr(self, '_NexusNode__' + k):
+                setattr(self, '_NexusNode__' + k, v)
+            elif hasattr(super(), '_Node__' + k):
+                setattr(self, '_Node__' + k, v)
