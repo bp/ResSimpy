@@ -33,8 +33,8 @@ class GenericTest:
             }
         return mapping_dict
 
-    def to_dict(self):
-        return to_dict_generic.to_dict(self, add_date=True, add_units=True)
+    def to_dict(self, include_nones=True):
+        return to_dict_generic.to_dict(self, add_date=True, add_units=True, include_nones=include_nones)
 
 def test_to_dict():
     # Arrange
@@ -46,15 +46,21 @@ def test_to_dict():
         'ATTR_1': 'hello', 'ATTR_2': 10, 'ATTR_3': 43020.2, 'unit_system': 'METRIC',
         'date': '01/01/2030', 'ATTR_4': None
     }
+    expected_without_nones = {
+        'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'unit_system': 'METRIC',
+        'date': '01/01/2030'
+    }
     # Act
-    result = to_dict(class_inst )
+    result = to_dict(class_inst)
     result_no_date_no_units = to_dict(class_inst, add_units=False, add_date=False)
     result_nexus_style = to_dict(class_inst, keys_in_nexus_style=True)
+    result_no_nuns_none = class_inst.to_dict(include_nones=False)
 
     # Assert
     assert result == expected
     assert result_no_date_no_units == expected_no_date_no_units
     assert result_nexus_style == expected_nexus_style
+    assert result_no_nuns_none == expected_without_nones
 
 
 def test_obj_to_dataframe():
