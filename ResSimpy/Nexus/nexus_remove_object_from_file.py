@@ -23,14 +23,14 @@ class RemoveObjectOperations:
         return object_removed, list_obj
 
     def check_for_empty_table(self, file: NexusFile, first_obj_index: int,
-                              last_object_index: int, id: UUID) -> list[int]:
+                              last_obj_index: int, id: UUID) -> list[int]:
         """Identifies the lines needed to be removed if the table is empty.
 
         Args:
-            file ():
-            first_obj_index ():
-            last_object_index ():
-            id ():
+            file (NexusFile): file to check
+            first_obj_index (int): first line index of the object being removed
+            last_obj_index (int): last line index of the object being removed
+            id (UUID): id of the object being removed
 
         Returns:
             A list of integers with the lines to remove from the file if the resulting table is empty after the lines\
@@ -43,7 +43,7 @@ class RemoveObjectOperations:
         start_node_keyword_index_to_remove = max([i for i, x in enumerate(file_content) if self.table_header in x and
                                                   i < first_obj_index])
         end_node_keyword_index_to_remove = min([i for i, x in enumerate(file_content) if self.table_footer in x and
-                                                i > last_object_index])
+                                                i > last_obj_index])
         # check there are any nodes left in the specified table
         if file.object_locations is None:
             raise ValueError(f'No object locations specified, cannot find id: {id} in {file.object_locations}')
@@ -61,3 +61,4 @@ class RemoveObjectOperations:
             additional_indices_to_remove = list(range(start_node_keyword_index_to_remove,
                                                       end_node_keyword_index_to_remove + 1))
         return additional_indices_to_remove
+

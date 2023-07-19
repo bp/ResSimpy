@@ -137,14 +137,15 @@ class NexusNodes(Nodes):
         first_obj_index = line_numbers_in_file_to_remove[0]
         last_object_index = line_numbers_in_file_to_remove[-1]
         # get table_header and footers
-
         remove_empty_table_indices = self.__remove_object_operations.check_for_empty_table(
             network_file, first_obj_index, last_object_index, node_id)
         # remove the table if there aren't any more remaining
         line_numbers_in_file_to_remove.extend(remove_empty_table_indices)
 
+        # get unique line numbers + sort them in descending order
         line_numbers_in_file_to_remove = list(set(line_numbers_in_file_to_remove))
         line_numbers_in_file_to_remove.sort(reverse=True)
+        # remove the lines
         for index, line_in_file in enumerate(line_numbers_in_file_to_remove):
             if index == 0:
                 network_file.remove_from_file_as_list(line_in_file, [node_id])
