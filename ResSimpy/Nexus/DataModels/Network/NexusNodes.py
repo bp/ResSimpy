@@ -129,27 +129,8 @@ class NexusNodes(Nodes):
         else:
             node_id = node_to_remove
 
-        # remove from memory
-        self.__remove_object_operations.remove_object_from_memory_by_id(self.__nodes, id_to_remove=node_id)
+        self.__remove_object_operations.remove_object_by_id(network_file, node_id, self.__nodes)
 
-        # remove from file
-        line_numbers_in_file_to_remove = network_file.get_object_locations_for_id(node_id)
-
-        # get table_header and footers
-        remove_empty_table_indices = self.__remove_object_operations.check_for_empty_table(
-            network_file, line_numbers_in_file_to_remove, node_id)
-        # remove the table if there aren't any more remaining
-        line_numbers_in_file_to_remove.extend(remove_empty_table_indices)
-
-        # get unique line numbers + sort them in descending order
-        line_numbers_in_file_to_remove = list(set(line_numbers_in_file_to_remove))
-        line_numbers_in_file_to_remove.sort(reverse=True)
-        # remove the lines
-        for index, line_in_file in enumerate(line_numbers_in_file_to_remove):
-            if index == 0:
-                network_file.remove_from_file_as_list(line_in_file, [node_id])
-            else:
-                network_file.remove_from_file_as_list(line_in_file)
 
     def add_node(self, node_to_add: dict[str, None | str | float | int]) -> None:
         """Adds a node to a network, taking a dictionary with properties for the new node.
