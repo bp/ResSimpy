@@ -22,20 +22,20 @@ class RemoveObjectOperations:
         object_removed = list_obj.pop(index_to_remove)
         return object_removed, list_obj
 
-    def check_for_empty_table(self, file: NexusFile, first_obj_index: int,
-                              last_obj_index: int, id: UUID) -> list[int]:
+    def check_for_empty_table(self, file: NexusFile, line_numbers_in_file_to_remove: list[int], id: UUID) -> list[int]:
         """Identifies the lines needed to be removed if the table is empty.
 
         Args:
             file (NexusFile): file to check
-            first_obj_index (int): first line index of the object being removed
-            last_obj_index (int): last line index of the object being removed
+            line_numbers_in_file_to_remove list[int]: list of line indices for the object being removed
             id (UUID): id of the object being removed
 
         Returns:
             A list of integers with the lines to remove from the file if the resulting table is empty after the lines\
              associated with the removed object is removed
         """
+        first_obj_index = line_numbers_in_file_to_remove[0]
+        last_obj_index = line_numbers_in_file_to_remove[-1]
         additional_indices_to_remove = []
         remove_table = True
         # get all the indices for the tables:

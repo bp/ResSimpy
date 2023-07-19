@@ -134,11 +134,10 @@ class NexusNodes(Nodes):
 
         # remove from file
         line_numbers_in_file_to_remove = network_file.get_object_locations_for_id(node_id)
-        first_obj_index = line_numbers_in_file_to_remove[0]
-        last_object_index = line_numbers_in_file_to_remove[-1]
+
         # get table_header and footers
         remove_empty_table_indices = self.__remove_object_operations.check_for_empty_table(
-            network_file, first_obj_index, last_object_index, node_id)
+            network_file, line_numbers_in_file_to_remove, node_id)
         # remove the table if there aren't any more remaining
         line_numbers_in_file_to_remove.extend(remove_empty_table_indices)
 
