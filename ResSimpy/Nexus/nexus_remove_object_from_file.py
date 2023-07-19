@@ -61,4 +61,3 @@ class RemoveObjectOperations:
             additional_indices_to_remove = list(range(start_node_keyword_index_to_remove,
                                                       end_node_keyword_index_to_remove + 1))
         return additional_indices_to_remove
-

@@ -59,7 +59,6 @@ class NexusNode(Node):
         """Returns the string representation of a row in a table for a given set of headers."""
         return to_string(self, headers)
 
-
     def update(self, input_dictionary:  dict[str, None | float | int | str]) -> None:
         """Updates a node based on a dictionary of attributes."""
         for k, v in input_dictionary.items():
