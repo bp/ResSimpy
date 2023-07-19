@@ -33,9 +33,11 @@ class AddObjectOperations:
         if files_to_search is None:
             raise FileNotFoundError(f'No files of type {files_to_search} found in model.')
         elif isinstance(files_to_search, NexusFile):
+            # handling only 1 file returned of the file_type_to_search
             all_files = [files_to_search] if files_to_search.object_locations is not None and \
                                              id in files_to_search.object_locations else []
         else:
+            # handle case of multiple files of the same type.
             all_files = [x for x in files_to_search.values() if x.object_locations is not None and
                          id in x.object_locations]
         if len(all_files) == 0:
@@ -56,7 +58,21 @@ class AddObjectOperations:
                                  file_content: list[str], index: int,
                                  nexus_mapping: dict[str, tuple[str, type]], file: NexusFile) -> \
             tuple[int, list[str], list[str]]:
-        """Gets the header and works out if any additional headers should be added."""
+        """Gets the header and works out if any additional headers should be added based on the new obj attributes\
+        being added.
+
+        Args:
+            additional_headers (list[str]): New headers required for the objects new columns.
+            object_properties (dict[str, None | str | float | int]): dictionary containing new attributes of the object.
+            file_content (list[str]): flattened file content as a list of strings.
+            index (int): index to start reading the new headers from.
+            nexus_mapping (dict[str, tuple[str, type]]): dictionary controlling the mapping from keyword to attribute.
+            file (NexusFile): file to write the new header to.
+
+        Returns:
+            tuple[int, list[str], list[str]]: index of the new headers, a list of the headers,
+            the original set of headers.
+        """
         # TODO move out the additional headers mutability to a separate method that explicitly sets it
         keyword_map = {x: y[0] for x, y in nexus_mapping.items()}
         inverted_nexus_map = invert_nexus_map(nexus_mapping)
@@ -87,7 +103,19 @@ class AddObjectOperations:
     @staticmethod
     def fill_in_nas(additional_headers: list[str], headers_original: list[str], index: int, line: str,
                     file: NexusFile, file_content: list[str]) -> int:
-        """Check the validity of the line, if its valid add as many NA's as required for the new columns."""
+        """Check the validity of the line, if its valid add as many NAs as required for the new columns.
+
+        Args:
+            additional_headers (list[str]): New headers added to the table.
+            headers_original (list[str]): headers from the original table in the file.
+            index (int): index of the line to start filling NAs from.
+            line (str): line to add additional NAs to.
+            file (NexusFile): file to add NAs to
+            file_content (list[str]): flattened content of the file being read
+
+        Returns:
+            int: index of the line if a valid line has been found otherwise returns -1.
+        """
         valid_line, _ = nfo.table_line_reader(keyword_store={}, headers=headers_original, line=line)
         if valid_line and len(additional_headers) > 0:
             additional_na_values = ['NA'] * len(additional_headers)
@@ -111,7 +139,18 @@ class AddObjectOperations:
     def write_out_new_table_containing_object(obj_date: str,
                                               object_properties: dict[str, None | str | float | int],
                                               date_found: bool, new_obj: Any) -> tuple[list[str], int]:
-        """Writes out the existing table for an object being added at a new time stamp."""
+        """Writes out the existing table for an object being added at a new time stamp.
+
+        Args:
+            obj_date (str): date for the object to be added at.
+            object_properties (dict[str, None | str | float | int]): dictionary containing new attributes of the object.
+            date_found (bool): Whether a new TIME card is required or not.
+            new_obj (Any): The object getting added that requires the new table to represent it.
+
+        Returns:
+            list[str], int: first return arg is a new table containing the requested object and \
+            the second representing the line location of the new object within the table.
+        """
         nexus_mapping = new_obj.get_nexus_mapping()
 
         new_table_as_list = ['']
@@ -149,12 +188,12 @@ class AddObjectOperations:
         """Finds where the object should be added based on the date and existing tables.
 
         Args:
-            date (str): date to add the node at
-            file_as_list (list[str]): flattened file as a list of strings
-            file_to_add_to (NexusFile): file to add the new text to
+            date (str): date to add the node at.
+            file_as_list (list[str]): flattened file as a list of strings.
+            file_to_add_to (NexusFile): file to add the new text to.
             new_object (Any): an object with a to_dict, table_header, table_footer, get_nexus_mapping and to_string
-            methods
-            object_properties (dict[str, None | str | float | int]): attributes of the new object
+            methods.
+            object_properties (dict[str, None | str | float | int]): dictionary containing new attributes of the object.
 
         """
         # get the start and end table names
