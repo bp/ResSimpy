@@ -111,7 +111,7 @@ class AddObjectOperations:
     def write_out_new_table_containing_object(obj_date: str,
                                               object_properties: dict[str, None | str | float | int],
                                               date_found: bool, new_obj: Any) -> tuple[list[str], int]:
-        """Writes out the existing wellspec for a well at a new time stamp."""
+        """Writes out the existing table for an object being added at a new time stamp."""
         nexus_mapping = new_obj.get_nexus_mapping()
 
         new_table_as_list = ['']
