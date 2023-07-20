@@ -5,6 +5,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.NodeConnection import NodeConnection
 from ResSimpy.Utils import to_dict_generic
 from ResSimpy.Utils.generic_repr import generic_repr
+from ResSimpy.Utils.obj_to_table_string import to_table_line
 
 
 @dataclass
@@ -90,7 +91,7 @@ class NexusNodeConnection(NodeConnection):
             'POLYMER': ('polymer', str),
             'DPADD': ('dp_add', float),
             'DTADD': ('dt_add', float),
-        }
+            }
         return nexus_mapping
 
     def to_dict(self, keys_in_nexus_style: bool = False) -> dict[str, None | str | int | float]:
@@ -105,3 +106,7 @@ class NexusNodeConnection(NodeConnection):
         """
         result_dict = to_dict_generic.to_dict(self, keys_in_nexus_style, add_date=True, add_units=True)
         return result_dict
+
+    def to_table_line(self, headers: list[str]) -> str:
+        """Returns the string representation of a row in a table for a given set of headers."""
+        return to_table_line(self, headers)

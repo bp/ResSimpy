@@ -1,5 +1,7 @@
 from dataclasses import dataclass
-from abc import ABC
+from abc import ABC, abstractmethod
+from uuid import UUID
+
 import pandas as pd
 from typing import Sequence, Optional
 
@@ -18,4 +20,19 @@ class NodeConnections(ABC):
         raise NotImplementedError("Implement this in the derived class")
 
     def get_connections_overview(self) -> str:
+        raise NotImplementedError("Implement this in the derived class")
+
+    @abstractmethod
+    def remove_connection(self, node_to_remove: UUID | dict[str, None | str | float | int]) -> None:
+        raise NotImplementedError("Implement this in the derived class")
+
+    def add_connection(self, node_to_add: dict[str, None | str | float | int]) -> None:
+        raise NotImplementedError("Implement this in the derived class")
+
+    @property
+    def table_header(self) -> str:
+        raise NotImplementedError("Implement this in the derived class")
+
+    @property
+    def table_footer(self) -> str:
         raise NotImplementedError("Implement this in the derived class")
