@@ -131,7 +131,6 @@ class NexusNodes(Nodes):
 
         self.__remove_object_operations.remove_object_by_id(network_file, node_id, self.__nodes)
 
-
     def add_node(self, node_to_add: dict[str, None | str | float | int]) -> None:
         """Adds a node to a network, taking a dictionary with properties for the new node.
 
