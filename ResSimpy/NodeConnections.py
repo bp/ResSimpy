@@ -26,7 +26,13 @@ class NodeConnections(ABC):
     def remove_connection(self, connection_to_remove: UUID | dict[str, None | str | float | int]) -> None:
         raise NotImplementedError("Implement this in the derived class")
 
+    @abstractmethod
     def add_connection(self, connection_to_add: dict[str, None | str | float | int]) -> None:
+        raise NotImplementedError("Implement this in the derived class")
+
+    @abstractmethod
+    def modify_connection(self, connection_to_modify: dict[str, None | str | float | int],
+                    new_properties: dict[str, None | str | float | int]) -> None:
         raise NotImplementedError("Implement this in the derived class")
 
     @property

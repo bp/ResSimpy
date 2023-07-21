@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from uuid import UUID
 
 import pandas as pd
-from typing import Sequence, Optional, TYPE_CHECKING
+from typing import Sequence, Optional, TYPE_CHECKING, Literal
 
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
@@ -40,6 +40,10 @@ class NexusNodeConnections(NodeConnections):
     def table_footer(self) -> str:
         """End of the Node definition table."""
         return 'END' + self.table_header
+
+    @property
+    def __network_element_name(self) -> Literal['connections']:
+        return 'connections'
 
     def get_connections(self) -> Sequence[NexusNodeConnection]:
         self.__parent_network.get_load_status()
@@ -129,9 +133,35 @@ class NexusNodeConnections(NodeConnections):
                 raise ValueError(f'Require connection name to remove the connection instead got {name=}')
             name = str(name)
             network_element = self.__parent_network.find_network_element_with_dict(name, connection_to_remove,
-                                                                                   'connections')
+                                                                                   self.__network_element_name)
             network_element_id = network_element.id
         else:
             network_element_id = connection_to_remove
 
         self.__remove_object_operations.remove_object_by_id(network_file, network_element_id, self.__connections)
+
+    def modify_connection(self, connection_to_modify: dict[str, None | str | float | int],
+                          new_properties: dict[str, None | str | float | int]) -> None:
+        """Modifies an existing connection based on a matching dictionary of properties (partial matches allowed if
+        precisely 1 matching connection is found).
+        Updates the properties with properties in the new_properties dictionary.
+
+        Args:
+            connection_to_modify (dict[str, None | str | float | int]): dictionary containing attributes to match in the
+            existing connection set.
+            new_properties (dict[str, None | str | float | int]): properties to switch to in the new connection
+        """
+        self.__parent_network.get_load_status()
+
+        name = connection_to_modify.get('name', None)
+        if name is None:
+            raise ValueError(f'Name is required for modifying nodes, instead got {name}')
+        name = str(name)
+        network_element = self.__parent_network.find_network_element_with_dict(name, connection_to_modify,
+                                                                               self.__network_element_name)
+        existing_properties = network_element.to_dict(include_nones=False)
+        # do the union of the two dicts
+        existing_properties.update(new_properties)
+
+        self.remove_connection(connection_to_modify)
+        self.add_connection(existing_properties)

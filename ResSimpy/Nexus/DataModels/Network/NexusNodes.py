@@ -11,7 +11,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.nexus_remove_object_from_file import RemoveObjectOperations
 from ResSimpy.Nodes import Nodes
-from typing import Sequence, Optional, TYPE_CHECKING
+from typing import Sequence, Optional, TYPE_CHECKING, Literal
 
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 
@@ -39,6 +39,10 @@ class NexusNodes(Nodes):
     def table_footer(self) -> str:
         """End of the Node definition table."""
         return 'ENDNODES'
+
+    @property
+    def __network_element_name(self) -> Literal['nodes']:
+        return 'nodes'
 
     def get_nodes(self) -> Sequence[NexusNode]:
         """Returns a list of nodes loaded from the simulator."""
@@ -124,7 +128,8 @@ class NexusNodes(Nodes):
             if name is None:
                 raise ValueError(f'Require node name to remove the node instead got {name=}')
             name = str(name)
-            node = self.__parent_network.find_network_element_with_dict(name, node_to_remove, 'nodes')
+            node = self.__parent_network.find_network_element_with_dict(name, node_to_remove,
+                                                                        self.__network_element_name)
             node_id = node.id
         else:
             node_id = node_to_remove
@@ -169,7 +174,7 @@ class NexusNodes(Nodes):
         if name is None:
             raise ValueError(f'Name is required for modifying nodes, instead got {name}')
         name = str(name)
-        node = self.__parent_network.find_network_element_with_dict(name, node_to_modify, 'nodes')
+        node = self.__parent_network.find_network_element_with_dict(name, node_to_modify, self.__network_element_name)
         existing_properties = node.to_dict(include_nones=False)
         # do the union of the two dicts
         existing_properties.update(new_properties)
