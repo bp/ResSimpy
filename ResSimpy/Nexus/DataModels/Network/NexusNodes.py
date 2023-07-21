@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from uuid import UUID
+from typing import Sequence, Optional, TYPE_CHECKING
 
 import pandas as pd
 
@@ -11,7 +12,6 @@ from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.nexus_remove_object_from_file import RemoveObjectOperations
 from ResSimpy.Nodes import Nodes
-from typing import Sequence, Optional, TYPE_CHECKING, Literal
 
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 
@@ -39,10 +39,6 @@ class NexusNodes(Nodes):
     def table_footer(self) -> str:
         """End of the Node definition table."""
         return 'ENDNODES'
-
-    @property
-    def __network_element_name(self) -> Literal['nodes']:
-        return 'nodes'
 
     def get_nodes(self) -> Sequence[NexusNode]:
         """Returns a list of nodes loaded from the simulator."""

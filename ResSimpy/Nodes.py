@@ -4,7 +4,7 @@ from uuid import UUID
 
 import pandas as pd
 from ResSimpy.Node import Node
-from typing import Sequence, Optional
+from typing import Sequence, Optional, Literal
 
 
 @dataclass(kw_only=True)
@@ -39,3 +39,7 @@ class Nodes(ABC):
     @property
     def table_footer(self) -> str:
         raise NotImplementedError("Implement this in the derived class")
+
+    @property
+    def __network_element_name(self) -> Literal['nodes']:
+        return 'nodes'

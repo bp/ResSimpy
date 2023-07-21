@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from uuid import UUID
 
 import pandas as pd
-from typing import Sequence, Optional
+from typing import Sequence, Optional, Literal
 
 from ResSimpy.NodeConnection import NodeConnection
 
@@ -32,7 +32,7 @@ class NodeConnections(ABC):
 
     @abstractmethod
     def modify_connection(self, connection_to_modify: dict[str, None | str | float | int],
-                    new_properties: dict[str, None | str | float | int]) -> None:
+                          new_properties: dict[str, None | str | float | int]) -> None:
         raise NotImplementedError("Implement this in the derived class")
 
     @property
@@ -42,3 +42,7 @@ class NodeConnections(ABC):
     @property
     def table_footer(self) -> str:
         raise NotImplementedError("Implement this in the derived class")
+
+    @property
+    def __network_element_name(self) -> Literal['connections']:
+        return 'connections'

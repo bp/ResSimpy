@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from uuid import UUID
 
 import pandas as pd
-from typing import Sequence, Optional, TYPE_CHECKING, Literal
+from typing import Sequence, Optional, TYPE_CHECKING
 
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
@@ -40,10 +40,6 @@ class NexusNodeConnections(NodeConnections):
     def table_footer(self) -> str:
         """End of the Node definition table."""
         return 'END' + self.table_header
-
-    @property
-    def __network_element_name(self) -> Literal['connections']:
-        return 'connections'
 
     def get_connections(self) -> Sequence[NexusNodeConnection]:
         self.__parent_network.get_load_status()
