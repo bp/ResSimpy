@@ -112,5 +112,26 @@ class NexusNodeConnections(NodeConnections):
         self.__add_object_operations.add_object_to_file(date, file_as_list, file_to_add_to, new_object,
                                                         connection_to_add)
 
-    def remove_connection(self, node_to_remove: UUID | dict[str, None | str | float | int]) -> None:
-        pass
+    def remove_connection(self, connection_to_remove: UUID | dict[str, None | str | float | int]) -> None:
+        """Remove a connection from the network based on the properties matching a dictionary or id.
+
+        Args:
+            connection_to_remove (UUID | dict[str, None | str | float | int]): UUID of the connection to remove
+            or a dictionary with sufficient matching parameters to uniquely identify a node.
+        """
+        self.__parent_network.get_load_status()
+
+        network_file = self.__parent_network.get_network_file()
+
+        if isinstance(connection_to_remove, dict):
+            name = connection_to_remove.get('name', None)
+            if name is None:
+                raise ValueError(f'Require connection name to remove the connection instead got {name=}')
+            name = str(name)
+            network_element = self.__parent_network.find_network_element_with_dict(name, connection_to_remove,
+                                                                                   'connections')
+            network_element_id = network_element.id
+        else:
+            network_element_id = connection_to_remove
+
+        self.__remove_object_operations.remove_object_by_id(network_file, network_element_id, self.__connections)

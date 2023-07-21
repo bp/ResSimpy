@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 import uuid
 
+
 @dataclass
 class NodeConnection(ABC):
     name: Optional[str] = None
