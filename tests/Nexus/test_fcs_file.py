@@ -39,8 +39,7 @@ GRID_FILES
                                          'GRID_FILES\n', '	 STRUCTURED_GRID nexus_data/mp2020_structured_grid_1_reg_update.dat\n',
                                          '	 OPTIONS nexus_data/nexus_data/mp2020_ref_options_reg_update.dat', ],
                                      structured_grid_file=expected_structured_grid_file,
-                                     options_file=expected_options_file, include_locations=expected_includes,
-                                     )
+                                     options_file=expected_options_file, include_locations=expected_includes)
 
     # Act
     fcs_file = FcsNexusFile.generate_fcs_structure(fcs_path)

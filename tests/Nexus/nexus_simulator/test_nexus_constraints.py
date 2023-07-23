@@ -325,6 +325,7 @@ def test_constraint_ids(mocker, file_contents, object_locations):
     mocker.patch('os.listdir', ls_dir)
     fcs_file_exists = Mock(side_effect=lambda x: True)
     mocker.patch('os.path.isfile', fcs_file_exists)
+
     model = NexusSimulator('fcs_file.dat')
 
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',

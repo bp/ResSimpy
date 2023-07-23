@@ -21,7 +21,7 @@ from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_OPERATION
 from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_nexus_file, \
     get_empty_dict_uuid_list_int
 from ResSimpy.File import File
-from pathlib import Path
+import pathlib
 import os
 import datetime
 
@@ -51,7 +51,9 @@ class NexusFile(File):
                  include_locations: Optional[list[str]] = None,
                  origin: Optional[str] = None,
                  include_objects: Optional[list[NexusFile]] = None,
-                 file_content_as_list: Optional[list[str]] = None) -> None:
+                 file_content_as_list: Optional[list[str]] = None,
+                 linked_user: Optional[str] = None,
+                 last_modified: Optional[str] = None) -> None:
         super().__init__(location=location, file_content_as_list=file_content_as_list)
         if origin is not None and location is not None:
             self.location = nfo.get_full_file_path(location, origin)
@@ -69,6 +71,8 @@ class NexusFile(File):
         if self.line_locations is None:
             self.line_locations = []
         self.file_id = uuid.uuid4()
+        self.linked_user = linked_user
+        self.last_modified = last_modified
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True,
@@ -84,14 +88,36 @@ class NexusFile(File):
         Returns:
             NexusFile: a class instance for NexusFile with knowledge of include files
         """
+          
+    
+        def __get_pathlib_path_details(full_file_path: str) -> str:
+            if full_file_path == "" or full_file_path is None:
+                return None
+            pathlib_path= pathlib.Path(full_file_path)
+            #user = f"{pathlib_path.owner()}:{pathlib_path.group()}"
+            owner = pathlib_path.owner()
+            group = pathlib_path.group()
+            if owner is not None and group is not None:
+                return  f"{owner}:{group}"
+            elif owner is not None:
+                return owner
+            return None
 
+        def __get_datetime_from_os_stat(full_file_path: str) -> str:
+            if full_file_path == "" or full_file_path is None:
+                return None
+            stat_obj = os.stat(full_file_path)
+            return datetime.datetime.fromtimestamp(stat_obj.st_mtime)
+
+        user: str = None
+        last_changed: str = None
         full_file_path = file_path
         if origin is not None:
             full_file_path = nfo.get_full_file_path(file_path, origin)
-            file_path = Path(full_file_path)
-            user=f"{file_path.path.owner()}:{file_path.group()}"
-            os_stat = os.stat(full_file_path)
-            last_changed = datetime.datetime.fromtimestamp(os_stat)
+            user = __get_pathlib_path_details(full_file_path)
+            last_changed = __get_datetime_from_os_stat(full_file_path)
+            #user = None
+            #last_changed = None
         try:
             file_as_list = nfo.load_file_as_list(full_file_path)
         except FileNotFoundError:
@@ -346,6 +372,7 @@ class NexusFile(File):
             existing_line_locations.sort()
         else:
             self.object_locations[obj_uuid] = line_indices
+
 
     def __update_object_locations(self, line_number: int, number_additional_lines: int) -> None:
         """Updates the object locations in a nexusfile by the additional lines. Used when files have been modified and

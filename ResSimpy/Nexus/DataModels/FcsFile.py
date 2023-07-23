@@ -50,6 +50,8 @@ class FcsNexusFile(NexusFile):
     polymer_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
     adsorption_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
     flux_in_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
+    linked_user = Optional[str]
+    last_modified = Optional[str]
 
     def __init__(
             self, location: Optional[str] = None,
@@ -85,6 +87,8 @@ class FcsNexusFile(NexusFile):
             polymer_files: Optional[dict[int, NexusFile]] = None,
             adsorption_files: Optional[dict[int, NexusFile]] = None,
             flux_in_files: Optional[dict[int, NexusFile]] = None,
+            linked_user: Optional[str] = None,
+            last_modified: Optional[str]=None
             ) -> None:
         self.restart_file = restart_file
         self.structured_grid_file = structured_grid_file
@@ -114,8 +118,10 @@ class FcsNexusFile(NexusFile):
         self.polymer_files = polymer_files if polymer_files is not None else get_empty_dict_int_nexus_file()
         self.adsorption_files = adsorption_files if adsorption_files is not None else get_empty_dict_int_nexus_file()
         self.flux_in_files = flux_in_files if flux_in_files is not None else get_empty_dict_int_nexus_file()
+        self.linked_user = linked_user
+        self.last_modified = last_modified
         super().__init__(location=location, include_locations=include_locations, origin=origin,
-                         include_objects=include_objects, file_content_as_list=file_content_as_list)
+                         include_objects=include_objects, file_content_as_list=file_content_as_list,linked_user=linked_user, last_modified=last_modified)
 
     def __repr__(self) -> str:
         return generic_repr(self)
