@@ -77,7 +77,7 @@ def test_load_run_control_file_times_in_include_file(mocker, date_format, expect
          ""),
     ])
 def test_load_run_control_invalid_times(mocker, date_format, run_control_contents, include_file_contents):
-    """Included files contain dates in invalid format, raise error when attempting to re-write them"""
+    """Included files contain dates in invalid format, raise error when attempting to re-write them."""
     # Arrange
     fcs_file_name = 'testpath1/test.fcs'
     fcs_file = f"RUNCONTROL /path/run_control\nDATEFORMAT {date_format}\n"

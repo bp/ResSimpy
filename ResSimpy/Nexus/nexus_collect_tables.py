@@ -129,6 +129,14 @@ def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[
                 list_of_token_obj.extend([x[0] for x in list_objects])
                 # add the names from the nodes into the network names for wildcards
                 network_names.extend([x.name for x in list_of_token_obj])
+                for new_object, id_index in list_objects:
+                    correct_line_index = id_index + table_start
+                    # temporary try statement until all objects have an id property
+                    try:
+                        obj_id = new_object.id
+                        nexus_file.add_object_locations(obj_id, [correct_line_index])
+                    except AttributeError:
+                        pass
             else:
                 list_of_token_obj = nexus_constraints
             # reset indices for further tables

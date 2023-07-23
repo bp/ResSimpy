@@ -92,8 +92,26 @@ ENDNODES
 {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': None, 'y_pos': None, 'number': 2,
     'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH}
   ),
+
+
+('''TIME 01/01/2023
+  TIME 01/01/2024
+NODES
+  NAME          TEMP    TYPE
+  test_node2    100     WELL
+ENDNODES
+
+  TIME 01/01/2025
+NODES
+  NAME TYPE DEPTH  X Y  ! comment to test for keyword in comment ENDNODES
+  test_node3 WELLHEAD 1167.3 100 100 ! NODES
+ENDNODES
+''',
+{'name': 'test_node2', 'type': 'WELL', 'temp': 100, 'date': '01/01/2024', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'test_node3', 'type': 'WELLHEAD', 'depth': 1167.3, 'x_pos': 100, 'y_pos': 100, 'date': '01/01/2025', 'unit_system': UnitSystem.ENGLISH},
+)
 ],
-ids=['basic', 'all columns', 'times', 'units', 'two tables']
+ids=['basic', 'all columns', 'times', 'units', 'two tables', 'keyword in column']
 )
 def test_load_nexus_nodes(mocker, file_contents, node1_props, node2_props):
     # Arrange

@@ -80,7 +80,7 @@ class NexusConstraints(Constraints):
                                                             'CONSTRAINTS': NexusConstraint,
                                                             'CONSTRAINT': NexusConstraint,
                                                             'QMULT': NexusConstraint
-                                                            },
+                                                        },
                                                         start_date=start_date,
                                                         default_units=default_units)
         cons_list = new_constraints.get('CONSTRAINTS')
@@ -101,7 +101,8 @@ class NexusConstraints(Constraints):
             return
         self.__constraints.update(additional_constraints)
 
-    def find_constraint(self, object_name: str, constraint_dict: dict[str, float | str | int]) -> NexusConstraint:
+    def find_constraint(self, object_name: str, constraint_dict: dict[str, None | float | str | int]) -> \
+            NexusConstraint:
         """Finds a uniquely matching constraint from a given set of properties in a dictionary of attributes.
 
         Args:
@@ -114,28 +115,16 @@ class NexusConstraints(Constraints):
             constraint_dict constraint
         """
         self.__parent_network.get_load_status()
-
-        constraints = self.__constraints.get(object_name, None)
-        if constraints is None or len(constraints) == 0:
-            raise ValueError(f'No constraints found with {object_name=}')
-
-        matching_constraints = []
-        for constraint in constraints:
-            for prop, value in constraint_dict.items():
-                if getattr(constraint, prop) == value:
-                    continue
-                else:
-                    break
-            else:
-                matching_constraints.append(constraint)
-
-        if len(matching_constraints) == 1:
-            return matching_constraints[0]
+        found_object_from_network = self.__parent_network.find_network_element_with_dict(object_name, constraint_dict,
+                                                                                         'constraints')
+        # ensure typing is consistent
+        if isinstance(found_object_from_network, NexusConstraint):
+            return found_object_from_network
         else:
-            raise ValueError(f'No unique matching constraints with the properties provided.'
-                             f'Instead found: {len(matching_constraints)} matching constraints.')
+            raise TypeError(f'Wrong object type returned expected NexusConstraint, '
+                            f'instead returned {type(found_object_from_network)}')
 
-    def remove_constraint(self, constraint_dict: Optional[dict[str, float | str | int]] = None,
+    def remove_constraint(self, constraint_dict: Optional[dict[str, None | float | str | int]] = None,
                           constraint_id: Optional[UUID] = None) -> None:
         """Remove a constraint based on closest matching constraint, requires node name and date.\
         Needs one of at least constraint dict or constraint id.
@@ -190,7 +179,7 @@ class NexusConstraints(Constraints):
     def add_constraint(self,
                        name: str,
                        constraint_to_add: dict[str, None | float | int | str | UnitSystem] | Constraint,
-                       ) -> None:
+                       comments: Optional[str] = None) -> None:
         """Adds a constraint to the network and corresponding surface file.
 
         Args:
@@ -217,7 +206,7 @@ class NexusConstraints(Constraints):
 
         file_to_add_to = self.__model.model_files.surface_files[1]
 
-        file_as_list = file_to_add_to.file_content_as_list
+        file_as_list = file_to_add_to.get_flat_list_str_file
         if file_as_list is None:
             raise ValueError(f'No file content found in the surface file specified at {file_to_add_to.location}')
 
@@ -298,14 +287,15 @@ class NexusConstraints(Constraints):
                 # once we have found where to add constraint then add the constraint to file and update file ids
                 new_constraint_object_ids = {
                     new_constraint.id: id_line_locs
-                    }
+                }
                 file_to_add_to.add_to_file_as_list(additional_content=new_constraint_text, index=new_constraint_index,
-                                                   additional_objects=new_constraint_object_ids)
+                                                   additional_objects=new_constraint_object_ids, comments=comments)
                 break
 
     def modify_constraint(self, name: str,
                           current_constraint: dict[str, None | float | int | str] | NexusConstraint,
-                          new_constraint_props: dict[str, None | float | int | str | UnitSystem] | NexusConstraint) \
+                          new_constraint_props: dict[str, None | float | int | str | UnitSystem] | NexusConstraint,
+                          comments: Optional[str] = None) \
             -> None:
         """Modify an existing constraint. Retains existing constraint values that are not overridden by the new \
         constraint properties.
@@ -318,13 +308,13 @@ class NexusConstraints(Constraints):
             update the constraint with.
         """
 
-        def clean_constraint_inputs(constraint: dict[str, None | float | int | str | UnitSystem] | NexusConstraint) -> \
-                dict[str, float | int | str | UnitSystem]:
-            """Cleans up an input removing Nones and ensures consistent type is returned."""
+        def clean_constraint_inputs(constraint: dict[str, None | float | int | str] | NexusConstraint) -> \
+                dict[str, None | float | int | str]:
+            """Cleans up an input ensuring consistent type is returned."""
             if isinstance(constraint, NexusConstraint):
-                cleaned_dict = {k: v for k, v in constraint.to_dict().items() if v is not None}
+                cleaned_dict = constraint.to_dict()
             else:
-                cleaned_dict = {k: v for k, v in constraint.items() if v is not None}
+                cleaned_dict = constraint
             return cleaned_dict
 
         cleaned_current_constraint = clean_constraint_inputs(current_constraint)
@@ -335,4 +325,4 @@ class NexusConstraints(Constraints):
         combination_of_constraints = existing_constraint_obj.to_dict()
         combination_of_constraints.update(cleaned_new_constraint)
 
-        self.add_constraint(name, combination_of_constraints)
+        self.add_constraint(name, combination_of_constraints, comments)

@@ -109,7 +109,7 @@ def get_previous_value(file_as_list: list[str], search_before: Optional[str] = N
 
     # If we are searching before a specific token, remove that and the rest of the line.
     if search_before is not None:
-        search_before_location = file_as_list[0].rfind(search_before)
+        search_before_location = file_as_list[0].upper().rfind(search_before)
         file_as_list[0] = file_as_list[0][0: search_before_location]
 
     previous_value: str = ''

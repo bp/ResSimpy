@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Optional, Sequence, Union, cast
+from typing import Optional, Sequence, Union
 from uuid import UUID
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
@@ -96,7 +96,7 @@ class NexusWell(Well):
 
         return events
 
-    def find_completions(self, completion_properties: NexusCompletion.InputDictionary | NexusCompletion) -> \
+    def find_completions(self, completion_properties:  dict[str, None | float | int | str] | NexusCompletion) -> \
             list[NexusCompletion]:
         """Returns a list of all completions that match the completion properties provided.
 
@@ -111,12 +111,12 @@ class NexusWell(Well):
         """
         matching_completions = []
         if isinstance(completion_properties, NexusCompletion):
-            temp_perf_dict = {k: v for k, v in completion_properties.to_dict().items() if v is not None}
-            perf_props: NexusCompletion.InputDictionary = cast(NexusCompletion.InputDictionary, temp_perf_dict)
+            perf_props = completion_properties.to_dict()
         else:
             perf_props = completion_properties
+        perf_props_without_nones = {k: v for k, v in perf_props.items() if v is not None}
         for i, perf in enumerate(self.__completions):
-            for prop, value in perf_props.items():
+            for prop, value in perf_props_without_nones.items():
                 if getattr(perf, prop) == value:
                     # go to the next perf if a value from the dictionary doesn't match
                     continue
@@ -128,7 +128,8 @@ class NexusWell(Well):
         return matching_completions
 
     def find_completion(self,
-                        completion_properties: NexusCompletion.InputDictionary | NexusCompletion) -> NexusCompletion:
+                        completion_properties: dict[str, None | float | int | str] | NexusCompletion) \
+            -> NexusCompletion:
         """Returns precisely one completion which matches all the properties provided.
             If several completions match it raise a ValueError.
 
@@ -153,7 +154,7 @@ class NexusWell(Well):
                 return completion
         raise ValueError('No completion found for id: {id}')
 
-    def _add_completion_to_memory(self, date: str, completion_properties: NexusCompletion.InputDictionary,
+    def _add_completion_to_memory(self, date: str, completion_properties: dict[str, None | float | int | str],
                                   completion_index: Optional[int] = None) -> NexusCompletion:
         """Adds a perforation with the properties specified in completion_properties_list,
             if index is none then adds it to the end of the perforation list.
@@ -178,7 +179,7 @@ class NexusWell(Well):
         completion_index_to_remove = [x.id for x in self.__completions].index(completion_to_remove)
         self.__completions.pop(completion_index_to_remove)
 
-    def _modify_completion_in_memory(self, new_completion_properties: NexusCompletion.InputDictionary,
+    def _modify_completion_in_memory(self, new_completion_properties: dict[str, Union[None, float, int, str]],
                                      completion_to_modify: NexusCompletion | UUID,
                                      ) -> None:
         if isinstance(completion_to_modify, NexusCompletion):
@@ -187,7 +188,7 @@ class NexusWell(Well):
             completion = self.get_completion_by_id(completion_to_modify)
         completion.update(new_completion_properties)
 
-    def _modify_completions_in_memory(self, new_completion_properties: NexusCompletion.InputDictionary,
+    def _modify_completions_in_memory(self, new_completion_properties: dict[str, Union[None, float, int, str]],
                                       completions_to_modify: list[NexusCompletion | UUID]) -> None:
         for completion in completions_to_modify:
             if isinstance(completion, UUID):

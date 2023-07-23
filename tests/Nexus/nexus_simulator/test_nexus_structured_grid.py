@@ -1,15 +1,11 @@
-
-
 import os
 import pandas as pd
 import pytest
 from ResSimpy.Grid import VariableEntry
 from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
-from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
 from tests.multifile_mocker import mock_multiple_files
-from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 
 
 @pytest.mark.parametrize("structured_grid_file_contents, expected_net_to_gross, expected_porosity, expected_range_x,"
@@ -54,6 +50,43 @@ def test_load_structured_grid_file_basic_properties(mocker, structured_grid_file
     assert result.range_y == expected_range_y
     assert result.range_z == expected_range_z
 
+
+def test_load_structured_grid_file_basic_properties_nested_includes(mocker):
+    """Read in Structured Grid File where properties are in a nested include file"""
+    # Arrange
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents = """ARRAYS ROOT
+! grid
+INCLUDE includes/Another_structured_grid_01.inc"""
+    included_file_contents = """POROSITY CON 0.3\n ! Grid dimensions\nNX NY NZ\n3  4 5\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
+                              "\nother text\n\nNETGRS VALUE\n 14 616 8371 81367136  \n 
+                              !Should have stopped reading by this point \n POROSITY "
+                              "CON 0.5\n"""
+    included_file_location = os.path.join('testpath1', r'includes/Another_structured_grid_01.inc')
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'testpath1/nexus_run.fcs': fcs_file_contents,
+                                         '/run_control/path': '',
+                                         structured_grid_name: structured_grid_file_contents,
+                                         '/path_to_netgrs_file/include_net_to_gross.inc': '',
+                                         'path/to/porosity.inc': '',
+                                         included_file_location: included_file_contents
+                                         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
+    result = simulation.grid
+
+    # Assert
+    assert result.porosity.value == '0.3'
+    assert result.range_x == 3
+    assert result.range_y == 4
+    assert result.range_z == 5
 
 @pytest.mark.parametrize("structured_grid_file_contents, expected_net_to_gross, expected_porosity,  "
                          "expected_ntg_modifier, expected_porosity_modifier, expected_range_x, expected_range_y, "
@@ -312,7 +345,7 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
     mocker.patch("builtins.open", structured_grid_mock)
 
     # Act
-    NexusGrid.update_structured_grid_file(new_structured_grid_dictionary, simulation)
+    NexusGrid.NexusGrid.update_structured_grid_file(new_structured_grid_dictionary, simulation)
     result = simulation.grid
 
     # Assert
