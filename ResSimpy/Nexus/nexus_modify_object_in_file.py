@@ -21,14 +21,15 @@ class ModifyObjectOperations:
             existing object set. Requires an implemented add, remove
             new_properties (dict[str, None | str | float | int]): properties to switch to in the new object
         """
-
+        # TODO apply this to more of the network attributes through the Base Class
+        network_attribute_name = self.object_to_modify._network_element_name
         name = object_to_modify.get('name', None)
         if name is None:
-            raise ValueError(f'Name is required for modifying {self.object_to_modify._network_element_name}, '
+            raise ValueError(f'Name is required for modifying {network_attribute_name}, '
                              f'instead got {name}')
         name = str(name)
         network_element = network.find_network_element_with_dict(name, object_to_modify,
-                                                                 self.object_to_modify._network_element_name)
+                                                                 network_attribute_name)
         existing_properties = network_element.to_dict(include_nones=False)
         # do the union of the two dicts
         existing_properties.update(new_properties)
