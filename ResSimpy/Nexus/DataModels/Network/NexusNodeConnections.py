@@ -11,6 +11,7 @@ from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.nexus_modify_object_in_file import ModifyObjectOperations
 from ResSimpy.Nexus.nexus_remove_object_from_file import RemoveObjectOperations
 from ResSimpy.NodeConnection import NodeConnection
 from ResSimpy.NodeConnections import NodeConnections
@@ -30,6 +31,7 @@ class NexusNodeConnections(NodeConnections):
         self.__add_object_operations = AddObjectOperations(self.__parent_network.model, self.table_header,
                                                            self.table_footer)
         self.__remove_object_operations = RemoveObjectOperations(self.table_header, self.table_footer)
+        self.__modify_object_operations = ModifyObjectOperations(self)
 
     @property
     def table_header(self) -> str:
@@ -149,15 +151,5 @@ class NexusNodeConnections(NodeConnections):
         """
         self.__parent_network.get_load_status()
 
-        name = connection_to_modify.get('name', None)
-        if name is None:
-            raise ValueError(f'Name is required for modifying nodes, instead got {name}')
-        name = str(name)
-        network_element = self.__parent_network.find_network_element_with_dict(name, connection_to_modify,
-                                                                               self._network_element_name)
-        existing_properties = network_element.to_dict(include_nones=False)
-        # do the union of the two dicts
-        existing_properties.update(new_properties)
-
-        self.remove_connection(connection_to_modify)
-        self.add_connection(existing_properties)
+        self.__modify_object_operations.modify_network_object(connection_to_modify, new_properties,
+                                                              self.__parent_network)
