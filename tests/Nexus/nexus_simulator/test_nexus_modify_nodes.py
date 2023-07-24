@@ -3,7 +3,7 @@ import pytest
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from tests.multifile_mocker import mock_multiple_files
-from tests.utility_for_tests import get_fake_nexus_simulator, check_file_read_write_is_correct
+from ResSimpy.Utils.Test_Utils.utility_for_tests import get_fake_nexus_simulator, check_file_read_write_is_correct
 
 @pytest.mark.parametrize('file_contents, expected_file_contents, node_to_remove, expected_nodes, expected_number_writes',
 [# basic_test

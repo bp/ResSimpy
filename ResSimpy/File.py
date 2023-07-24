@@ -24,12 +24,13 @@ class File(ABC):
         else:
             self.file_content_as_list = file_content_as_list
 
-    def write_to_file(self) -> None:
+    def write_to_file(self, overwrite: bool = False) -> None:
         """Writes to file specified in self.location the strings contained in the list self.file_content_as_list."""
         if self.location is None:
             raise ValueError(f'No file path to write to, instead found {self.location}')
         if self.file_content_as_list is None:
             raise ValueError(f'No file data to write out, instead found {self.file_content_as_list}')
         file_str = ''.join(self.file_content_as_list)
-        with open(self.location, 'w') as fi:
+        write_operation = 'w' if overwrite else 'x'
+        with open(self.location, write_operation) as fi:
             fi.write(file_str)

@@ -35,7 +35,7 @@ class Completion(ABC):
         dfactor (Optional[float]): non-darcy factor to use for rate dependent skin calculations. 'D' in Nexus
         rel_perm_method (Optional[int]): rel perm method to use for the completion. 'IRELPM' in Nexus
         status (Optional[str]): the status of the layer, can be 'ON' or 'OFF'
-
+        peaceman_well_block_radius (Optional[float]): The pressure equivalent radius of the grid block
 
     """
 
@@ -57,6 +57,7 @@ class Completion(ABC):
     __dfactor: Optional[float] = None
     __rel_perm_method: Optional[int] = None
     __status: Optional[str] = None
+    __peaceman_well_block_radius: Optional[float] = None
 
     def __init__(self, date: str, i: Optional[int] = None, j: Optional[int] = None, k: Optional[int] = None,
                  skin: Optional[float] = None, depth: Optional[float] = None, well_radius: Optional[float] = None,
@@ -64,7 +65,7 @@ class Completion(ABC):
                  angle_v: Optional[float] = None, grid: Optional[str] = None, depth_to_top: Optional[float] = None,
                  depth_to_bottom: Optional[float] = None, perm_thickness_ovr: Optional[float] = None,
                  dfactor: Optional[float] = None, rel_perm_method: Optional[int] = None,
-                 status: Optional[str] = None) -> None:
+                 status: Optional[str] = None, peaceman_well_block_radius: Optional[float] = None) -> None:
         self.__well_radius = well_radius
         self.__date = date
         self.__i = i
@@ -84,6 +85,7 @@ class Completion(ABC):
         self.__rel_perm_method = rel_perm_method
         self.__status = status
         self.__id: uuid.UUID = uuid.uuid4()
+        self.__peaceman_well_block_radius = peaceman_well_block_radius
 
     @property
     def well_radius(self):
@@ -160,6 +162,10 @@ class Completion(ABC):
     @property
     def status(self):
         return self.__status
+
+    @property
+    def peaceman_well_block_radius(self):
+        return self.__peaceman_well_block_radius
 
     @property
     def id(self):

@@ -12,7 +12,7 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusWells import NexusWells
 from tests.multifile_mocker import mock_multiple_files
-from tests.utility_for_tests import get_fake_nexus_simulator
+from ResSimpy.Utils.Test_Utils.utility_for_tests import get_fake_nexus_simulator
 
 
 def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock_open: Mock,

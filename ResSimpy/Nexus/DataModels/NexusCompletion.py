@@ -30,7 +30,7 @@ class NexusCompletion(Completion):
         well_indices (Optional[float]): Well index used to calculate performance of the completion. 'WI' in Nexus
         partial_perf (Optional[float]): Partial penetration factor. 'PPERF' in Nexus
         cell_number (Optional[int]): cell number for the completion in unstructured grids. 'CELL' in Nexus
-        bore_radius (Optional[float]): Well bore radius. 'RADB' in Nexus
+        bore_radius (Optional[float]): Effective block radius. 'RADB' in Nexus
         portype (Optional[str]): indicates the pore type for the completion FRACTURE OR MATRIX. 'PORTYPE' in Nexus
         sector (None | str | int): the section of the wellbore to which this completion flows. 'SECT' in Nexus
         khmult (Optional[float]): the multiplier that is applied to the permeability-thickness. 'KHMULT' in Nexus.
@@ -84,11 +84,12 @@ class NexusCompletion(Completion):
                  no_of_days: Optional[str] = None
                  ) -> None:
         self.__measured_depth = measured_depth
-        self.__well_indices = well_indices
+
+        self.__well_indices = well_indices # TODO: rename this to singular
         self.__partial_perf = partial_perf
 
         self.__cell_number = cell_number
-        self.__bore_radius = bore_radius
+        self.__bore_radius = bore_radius # TODO: remove this from here as now in the Completion class
         self.__fracture_mult = fracture_mult
         self.__sector = sector
         self.__well_group = well_group

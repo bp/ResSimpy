@@ -136,3 +136,7 @@ class Simulator(ABC):
     def get_date_format(self) -> str:
         """Returns date format as a string."""
         raise NotImplementedError("Implement this method on the derived class")
+
+    def write_model(self, create_new_files: bool = True) -> None:
+        """Writes out the model, either creating new versions of the changed files, or overwriting the existing ones."""
+        pass

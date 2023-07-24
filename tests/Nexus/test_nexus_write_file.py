@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 import pytest
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
-from tests.utility_for_tests import check_file_read_write_is_correct
+from ResSimpy.Utils.Test_Utils.utility_for_tests import check_file_read_write_is_correct
 from tests.multifile_mocker import mock_multiple_files
 
 

@@ -5,7 +5,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from tests.multifile_mocker import mock_multiple_files
-from tests.utility_for_tests import check_file_read_write_is_correct, get_fake_nexus_simulator
+from ResSimpy.Utils.Test_Utils.utility_for_tests import check_file_read_write_is_correct, get_fake_nexus_simulator
 
 
 def test_find_constraint(mocker):
