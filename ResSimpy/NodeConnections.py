@@ -44,5 +44,5 @@ class NodeConnections(ABC):
         raise NotImplementedError("Implement this in the derived class")
 
     @property
-    def __network_element_name(self) -> Literal['connections']:
+    def _network_element_name(self) -> Literal['connections']:
         return 'connections'

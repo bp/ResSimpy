@@ -129,7 +129,7 @@ class NexusNodeConnections(NodeConnections):
                 raise ValueError(f'Require connection name to remove the connection instead got {name=}')
             name = str(name)
             network_element = self.__parent_network.find_network_element_with_dict(name, connection_to_remove,
-                                                                                   self.__network_element_name)
+                                                                                   self._network_element_name)
             network_element_id = network_element.id
         else:
             network_element_id = connection_to_remove
@@ -154,7 +154,7 @@ class NexusNodeConnections(NodeConnections):
             raise ValueError(f'Name is required for modifying nodes, instead got {name}')
         name = str(name)
         network_element = self.__parent_network.find_network_element_with_dict(name, connection_to_modify,
-                                                                               self.__network_element_name)
+                                                                               self._network_element_name)
         existing_properties = network_element.to_dict(include_nones=False)
         # do the union of the two dicts
         existing_properties.update(new_properties)

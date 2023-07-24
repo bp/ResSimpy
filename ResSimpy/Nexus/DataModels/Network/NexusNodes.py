@@ -125,7 +125,7 @@ class NexusNodes(Nodes):
                 raise ValueError(f'Require node name to remove the node instead got {name=}')
             name = str(name)
             node = self.__parent_network.find_network_element_with_dict(name, node_to_remove,
-                                                                        self.__network_element_name)
+                                                                        self._network_element_name)
             node_id = node.id
         else:
             node_id = node_to_remove
@@ -170,7 +170,7 @@ class NexusNodes(Nodes):
         if name is None:
             raise ValueError(f'Name is required for modifying nodes, instead got {name}')
         name = str(name)
-        node = self.__parent_network.find_network_element_with_dict(name, node_to_modify, self.__network_element_name)
+        node = self.__parent_network.find_network_element_with_dict(name, node_to_modify, self._network_element_name)
         existing_properties = node.to_dict(include_nones=False)
         # do the union of the two dicts
         existing_properties.update(new_properties)
