@@ -18,7 +18,6 @@ from ResSimpy.Utils.factory_methods import get_empty_dict_int_nexus_file, get_em
 from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Utils.generic_repr import generic_repr
-from datetime import datetime
 
 
 @dataclass(kw_only=True)
@@ -51,8 +50,6 @@ class FcsNexusFile(NexusFile):
     polymer_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
     adsorption_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
     flux_in_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
-    linked_user = Optional[str]
-    last_modified = Optional[datetime]
 
     def __init__(
             self, location: Optional[str] = None,
