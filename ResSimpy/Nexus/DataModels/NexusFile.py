@@ -26,6 +26,7 @@ import pathlib
 import os
 from datetime import datetime
 
+
 @dataclass(kw_only=True, repr=True)
 class NexusFile(File):
     """Class to deal with origin and structure of Nexus files and preserve origin of include files.
@@ -60,7 +61,6 @@ class NexusFile(File):
             self.location = nfo.get_full_file_path(location, origin)
         else:
             self.location = location
-        
         self.input_file_location: Optional[str] = location
         self.include_locations: Optional[list[str]] = get_empty_list_str() if include_locations is None else \
             include_locations
@@ -91,17 +91,14 @@ class NexusFile(File):
         Returns:
             NexusFile: a class instance for NexusFile with knowledge of include files
         """
-          
-    
         def __get_pathlib_path_details(full_file_path: str) -> str:
             if full_file_path == "" or full_file_path is None:
                 return None
-            pathlib_path= pathlib.Path(full_file_path)
-            #user = f"{pathlib_path.owner()}:{pathlib_path.group()}"
+            pathlib_path = pathlib.Path(full_file_path)
             owner = pathlib_path.owner()
             group = pathlib_path.group()
             if owner is not None and group is not None:
-                return  f"{owner}:{group}"
+                return f"{owner}:{group}"
             elif owner is not None:
                 return owner
             return None
@@ -123,8 +120,6 @@ class NexusFile(File):
 
         user = __get_pathlib_path_details(full_file_path)
         last_changed = __get_datetime_from_os_stat(full_file_path)
-        #user = None
-        #last_changed = None     
         try:
             file_as_list = nfo.load_file_as_list(full_file_path)
         except FileNotFoundError:
@@ -413,7 +408,6 @@ class NexusFile(File):
             existing_line_locations.sort()
         else:
             self.object_locations[obj_uuid] = line_indices
-
 
     def __update_object_locations(self, line_number: int, number_additional_lines: int) -> None:
         """Updates the object locations in a nexusfile by the additional lines. Used when files have been modified and
