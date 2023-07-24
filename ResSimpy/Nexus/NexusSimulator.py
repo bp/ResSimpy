@@ -157,7 +157,10 @@ class NexusSimulator(Simulator):
 
     def get_users_linked_with_files(self)->Optional[list[tuple[str,str,str]]]:
         files_info: list[tuple[str,str,str]]
-        files_info = [(self.model_files.restart_file.location,self.model_files.restart_file.linked_user,self.model_files.restart_file.last_modified)]
+        files_info = []
+        if self.model_files.restart_file is not None:
+            files_info.append((self.model_files.restart_file.location,self.model_files.restart_file.linked_user,self.model_files.restart_file.last_modified))
+        
         if self.model_files.structured_grid_file is not None:
             files_info.append((self.model_files.structured_grid_file.location,self.model_files.structured_grid_file.linked_user,self.model_files.structured_grid_file.last_modified))
         

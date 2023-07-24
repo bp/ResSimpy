@@ -24,7 +24,7 @@ from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_ne
 from ResSimpy.File import File
 import pathlib
 import os
-import datetime
+from datetime import datetime
 
 @dataclass(kw_only=True, repr=True)
 class NexusFile(File):
@@ -46,7 +46,7 @@ class NexusFile(File):
     object_locations: Optional[dict[UUID, list[int]]] = field(default=None, repr=False)
     line_locations: Optional[list[tuple[int, UUID]]] = field(default=None, repr=False)
     linked_user: Optional[str] = field(default=None)
-    last_modified: Optional[str] = field(default=None)
+    last_modified: Optional[datetime] = field(default=None)
 
     def __init__(self, location: Optional[str] = None,
                  include_locations: Optional[list[str]] = None,
@@ -54,7 +54,7 @@ class NexusFile(File):
                  include_objects: Optional[list[NexusFile]] = None,
                  file_content_as_list: Optional[list[str]] = None,
                  linked_user: Optional[str] = None,
-                 last_modified: Optional[str] = None) -> None:
+                 last_modified: Optional[datetime] = None) -> None:
         super().__init__(location=location, file_content_as_list=file_content_as_list)
         if origin is not None and location is not None:
             self.location = nfo.get_full_file_path(location, origin)
@@ -106,21 +106,25 @@ class NexusFile(File):
                 return owner
             return None
 
-        def __get_datetime_from_os_stat(full_file_path: str) -> str:
+        def __get_datetime_from_os_stat(full_file_path: str) -> datetime:
             if full_file_path == "" or full_file_path is None:
                 return None
             stat_obj = os.stat(full_file_path)
-            return datetime.datetime.fromtimestamp(stat_obj.st_mtime)
+            timestamp = stat_obj.st_mtime
+            if timestamp is None:
+                return None
+            return datetime.fromtimestamp(timestamp)
 
         user: str = None
-        last_changed: str = None
+        last_changed: datetime = None
         full_file_path = file_path
         if origin is not None:
             full_file_path = nfo.get_full_file_path(file_path, origin)
-            user = __get_pathlib_path_details(full_file_path)
-            last_changed = __get_datetime_from_os_stat(full_file_path)
-            #user = None
-            #last_changed = None
+
+        user = __get_pathlib_path_details(full_file_path)
+        last_changed = __get_datetime_from_os_stat(full_file_path)
+        #user = None
+        #last_changed = None     
         try:
             file_as_list = nfo.load_file_as_list(full_file_path)
         except FileNotFoundError:

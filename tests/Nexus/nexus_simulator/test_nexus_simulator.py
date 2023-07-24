@@ -2,6 +2,7 @@ import os
 import uuid
 import pytest
 import pandas as pd
+import datetime
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
@@ -165,6 +166,22 @@ def test_load_fcs_date_format(mocker, fcs_file_contents, expected_date_format):
     # Assert
     assert simulation.date_format is expected_date_format
 
+@pytest.mark.disable_autouse
+def test_get_users_linked_with_files(mocker):
+    # Arrange 
+    fcs_file = "RUNCONTROL path/to/run/control\nDATEFORMAT DD/MM/YYYYY"
+    open_mock = mocker.mock_open(read_data=fcs_file)
+    mocker.patch("builtins.open", open_mock)
+
+    expected_result = [("testpath1\\path/to/run/control","Mock-Owner:Mock-Group",datetime.datetime(2018, 6, 30, 13, 48, 10))]   
+    simulator = NexusSimulator(
+        origin='testpath1/Path.fcs', destination="test_new_destination")
+
+    # Act
+    result = simulator.get_users_linked_with_files()
+
+    # Assert
+    assert result == expected_result
 
 def test_load_fcs_file_comment_after_declaration(mocker):
     """Check that the code ignores lines with comments that contain tokens"""
@@ -1255,6 +1272,8 @@ def test_get_water(mocker: MockerFixture, fcs_file_contents: str):
     assert result == loaded_wat
 
 
+
+
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
        EQUIL method 1 my/equil/file1.dat
@@ -1511,7 +1530,6 @@ def test_get_hydraulics(mocker: MockerFixture, fcs_file_contents: str):
 
     # Assert
     assert result == loaded_hyds
-
 
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
