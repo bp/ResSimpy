@@ -36,7 +36,7 @@ class NexusSimulator(Simulator):
     def __init__(self, origin: Optional[str] = None, destination: Optional[str] = None,
                  root_name: Optional[str] = None, nexus_data_name: str = "data", write_times: bool = False,
                  manual_fcs_tidy_call: bool = False, lazy_loading: bool = True) -> None:
-        """Nexus simulator class. Inherits from the Simulator super class.
+        """Nexus simulator class. Inherits from the Simulator super class. 
 
         Args:
             origin (Optional[str], optional): file path to the fcs file. Defaults to None.
