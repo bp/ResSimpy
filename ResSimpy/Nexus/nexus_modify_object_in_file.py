@@ -5,6 +5,7 @@ from typing import Any, TYPE_CHECKING
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 
+
 class ModifyObjectOperations:
     def __init__(self, object_to_modify: Any) -> None:
         self.object_to_modify = object_to_modify
