@@ -156,7 +156,7 @@ def test_load_nexus_nodes(mocker, file_contents, node1_props, node2_props):
 {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': 10.21085, 'y_pos': 3524.23, 'number': 2,
     'station': 'station2', 'date': '01/01/2023', 'unit_system': 'ENGLISH'}
   )],)
-def test_get_node_df(mocker, file_contents, node1_props, node2_props):
+def test_get_node_df(mocker, globalFixture, file_contents, node1_props, node2_props):
     # Arrange
     start_date = '01/01/2023'
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())

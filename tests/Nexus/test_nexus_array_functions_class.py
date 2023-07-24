@@ -6,7 +6,7 @@ from tests.multifile_mocker import mock_multiple_files
 from pandas.testing import assert_frame_equal
 
 
-def test_structured_grid_file_loads_array_functions(mocker):
+def test_structured_grid_file_loads_array_functions(mocker, globalFixture):
     # Arrange
     structured_grid_file_contents = """
 

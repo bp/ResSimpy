@@ -175,7 +175,7 @@ from tests.utility_for_tests import get_fake_nexus_simulator
         )),
     ], ids=['basic_test', 'Change in Time', 'more Keywords', 'constraint table', 'multiple constraints on same well',
     'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword', 'GORLIM_drawdowncards'])
-def test_load_constraints(mocker, file_contents, expected_content):
+def test_load_constraints(mocker, globalFixture, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
@@ -301,7 +301,7 @@ def test_load_constraints(mocker, file_contents, expected_content):
      'uuid2': [3, 8]}
     ),
         ], ids=['basic_test', 'two tables', 'several constraints for one well', 'constraint_table', 'qmults'])
-def test_constraint_ids(mocker, file_contents, object_locations):
+def test_constraint_ids(mocker, globalFixture, file_contents, object_locations):
     # Arrange
     fcs_file_data = '''RUN_UNITS ENGLISH
 
@@ -312,7 +312,7 @@ def test_constraint_ids(mocker, file_contents, object_locations):
     SURFACE Network 1 surface.dat'''
     runcontrol_data = 'START 01/01/2020'
 
-    def mock_open_wrapper(filename, mode):
+    def mock_open_wrapper(filename,  mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             'fcs_file.dat': fcs_file_data,
             'surface.dat': file_contents,

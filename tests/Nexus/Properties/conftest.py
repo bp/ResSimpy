@@ -1,7 +1,7 @@
 
 import pytest
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture
 def globalFixture(mocker,request):
 
     if 'disable_autouse' in request.keywords:

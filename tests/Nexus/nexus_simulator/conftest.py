@@ -10,7 +10,7 @@ def simulation(mocker):
     # Create an override for isfile checks
     mocker.patch("os.path.isfile", lambda x: True)
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture
 def globalFixture(mocker,request):
 
     if 'disable_autouse' in request.keywords:

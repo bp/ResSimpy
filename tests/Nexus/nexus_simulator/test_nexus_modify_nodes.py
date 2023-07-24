@@ -197,7 +197,7 @@ something after the table
 ),
 ], ids=['basic_test', 'by ID', 'more tables and timestamps','empty table', 'empty table and table in the same date',
 'empty table and different date'])
-def test_remove_node(mocker, file_contents, expected_file_contents, node_to_remove, expected_nodes,
+def test_remove_node(mocker, globalFixture, file_contents, expected_file_contents, node_to_remove, expected_nodes,
                      expected_number_writes):
     # Arrange
     fcs_file_contents = '''
@@ -441,7 +441,7 @@ ENDNODES
 ),
 ], ids=['basic_test', 'additional headers', 'more time cards', 'no existing time card', 'existing date card but no table',
 'hitting end of file'])
-def test_add_node(mocker, file_contents, expected_file_contents, node_to_add, expected_nodes,
+def test_add_node(mocker, globalFixture, file_contents, expected_file_contents, node_to_add, expected_nodes,
                   expected_number_writes):
     # Arrange
     fcs_file_contents = '''
