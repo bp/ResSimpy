@@ -4,6 +4,8 @@ from uuid import UUID
 
 import numpy as np
 import pandas as pd
+
+from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
@@ -22,6 +24,7 @@ class NexusNodes(Nodes):
     def __init__(self, parent_network: NexusNetwork) -> None:
         self.__parent_network: NexusNetwork = parent_network
         self.__nodes: list[NexusNode] = []
+        self.__add_object_operations = AddObjectOperations(self.__parent_network.model)
 
     def get_nodes(self) -> Sequence[NexusNode]:
         """Returns a list of nodes loaded from the simulator."""
@@ -153,7 +156,7 @@ class NexusNodes(Nodes):
 
         if remove_table:
             line_numbers_in_file_to_remove.extend(list(
-                range(start_node_keyword_index_to_remove, end_node_keyword_index_to_remove+1)))
+                range(start_node_keyword_index_to_remove, end_node_keyword_index_to_remove + 1)))
 
         line_numbers_in_file_to_remove = list(set(line_numbers_in_file_to_remove))
         line_numbers_in_file_to_remove.sort(reverse=True)
@@ -164,4 +167,26 @@ class NexusNodes(Nodes):
                 network_file.remove_from_file_as_list(line_in_file)
 
     def add_node(self, node_to_add: dict[str, None | str | float | int]) -> None:
-        pass
+        """Adds a node to a network, taking a dictionary with properties for the new node.
+
+        Args:
+            node_to_add (dict[str, None | str | float | int]): dictionary taking all the properties for the new node.
+            Requires date and a node name.
+        """
+        self.__parent_network.get_load_status()
+        name, date = self.__add_object_operations.check_name_date(node_to_add)
+
+        new_object = NexusNode(node_to_add)
+
+        self._add_nodes_to_memory([new_object])
+
+        # add to the file
+        if self.__parent_network.model.model_files.surface_files is None:
+            raise FileNotFoundError('No well file found, cannot modify a deck with an empty surface file.')
+        file_to_add_to = self.__parent_network.model.model_files.surface_files[1]
+
+        file_as_list = file_to_add_to.get_flat_list_str_file
+        if file_as_list is None:
+            raise ValueError(f'No file content found in the surface file specified at {file_to_add_to.location}')
+
+        self.__add_object_operations.add_object_to_file(date, file_as_list, file_to_add_to, new_object, node_to_add)

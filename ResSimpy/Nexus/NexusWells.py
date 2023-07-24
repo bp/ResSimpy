@@ -1,9 +1,6 @@
 from __future__ import annotations
-
-import copy
 import warnings
 from dataclasses import dataclass, field
-from typing import cast
 from functools import cmp_to_key
 from typing import Sequence, Optional, TYPE_CHECKING
 from uuid import UUID
@@ -15,10 +12,11 @@ from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
+from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Wells import Wells
 from ResSimpy.Nexus.load_wells import load_wells
 import ResSimpy.Nexus.nexus_file_operations as nfo
-from ResSimpy.Utils.invert_nexus_map import invert_nexus_map, attribute_name_to_nexus_keyword
+from ResSimpy.Utils.invert_nexus_map import attribute_name_to_nexus_keyword
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
@@ -33,6 +31,7 @@ class NexusWells(Wells):
     def __init__(self, model: NexusSimulator) -> None:
         self.__model = model
         self.__wells = []
+        self.__add_object_operations = AddObjectOperations(model)
         super().__init__()
 
     def get_wells(self) -> Sequence[NexusWell]:
@@ -60,7 +59,7 @@ class NexusWells(Wells):
                 completion_props: dict[str, None | float | int | str] = {
                     'well_name': well.well_name,
                     'units': well.units.name,
-                }
+                    }
                 completion_props.update(completion.to_dict())
                 store_dictionaries.append(completion_props)
         df_store = pd.DataFrame(store_dictionaries)
@@ -100,7 +99,7 @@ class NexusWells(Wells):
 
         return set_dates
 
-    def modify_well(self, well_name: str, completion_properties_list: list[NexusCompletion.InputDictionary],
+    def modify_well(self, well_name: str, completion_properties_list: list[dict[str, None | float | int | str]],
                     how: OperationEnum = OperationEnum.ADD) -> None:
         """Modify the existing wells in memory using a dictionary of properties.
 
@@ -139,7 +138,7 @@ class NexusWells(Wells):
             else:
                 raise ValueError('Please select one of the valid OperationEnum values: e.g. OperationEnum.ADD')
 
-    def add_completion(self, well_name: str, completion_properties: NexusCompletion.InputDictionary,
+    def add_completion(self, well_name: str, completion_properties: dict[str, None | float | int | str],
                        preserve_previous_completions: bool = True, comments: Optional[str] = None) -> None:
         """Adds a completion to an existing wellspec file.
 
@@ -152,11 +151,7 @@ class NexusWells(Wells):
             wellspec card for that well will preserve the previous completions from the closest TIME card in addition \
             to the new completion
         """
-        completion_date = completion_properties.get('date', None)
-        if completion_date is None:
-            raise AttributeError('Completion requires a date. '
-                                 'Please provide a date in the completion_properties_list dictionary.')
-
+        _, completion_date = self.__add_object_operations.check_name_date({'name': well_name} | completion_properties)
         well = self.get_well(well_name)
         if well is None:
             # TODO could make this not raise an error and instead initialize a NexusWell and add it to NexusWells
@@ -170,11 +165,11 @@ class NexusWells(Wells):
         if self.__model.model_files.well_files is None:
             raise FileNotFoundError('No well file found, cannot modify ')
 
-        wellspec_file = self.__find_which_wellspec_file_from_completion_id(well_id)
+        wellspec_file = self.__add_object_operations.find_which_file_from_id(id=well_id,
+                                                                             file_type_to_search='well_files')
 
         # initialise some storage variables
         nexus_mapping = NexusCompletion.get_nexus_mapping()
-        inverted_nexus_map = invert_nexus_map(nexus_mapping)
         new_completion_time_index = -1
         header_index = -1
         headers: list[str] = []
@@ -184,7 +179,7 @@ class NexusWells(Wells):
         date_found = False
         new_completion_index = len(file_content)
         new_completion_string: list[str] = []
-        last_valid_line_index = -1
+        last_valid_line_index: int = -1
         writing_new_wellspec_table = False
         date_comp = 0
         # if no time cards present in the file just find the name of the well instead
@@ -218,10 +213,9 @@ class NexusWells(Wells):
             if nfo.check_token('WELLSPEC', line) and nfo.get_token_value('WELLSPEC', line, [line]) == well_name \
                     and new_completion_time_index != -1:
                 # get the header of the wellspec table
-                header_index, headers, headers_original = self.__get_wellspec_header(
-                    additional_headers, completion_properties, file_content, index,
-                    inverted_nexus_map, nexus_mapping, wellspec_file
-                )
+                header_index, headers, headers_original = self.__add_object_operations.get_and_write_new_header(
+                    additional_headers, completion_properties, file_content, index, nexus_mapping, wellspec_file
+                    )
                 continue
 
             if header_index != -1 and nfo.nexus_token_found(line, WELLS_KEYWORDS) and index > header_index:
@@ -232,10 +226,8 @@ class NexusWells(Wells):
 
             elif header_index != -1 and index > header_index:
                 # check for valid rows + fill extra columns with NA
-                self.__fill_in_nas(additional_headers, headers_original, index, line,
-                                   wellspec_file, file_content)
-                line_valid_index = self.__fill_in_nas(additional_headers, headers_original, index, line,
-                                                      wellspec_file, file_content)
+                line_valid_index = self.__add_object_operations.fill_in_nas(additional_headers, headers_original, index,
+                                                                            line, wellspec_file, file_content)
                 # set the line to insert the new completion at to be the one after the last valid line
                 last_valid_line_index = line_valid_index if line_valid_index > 0 else last_valid_line_index
         # If we haven't found a TIME card after the for loop then we haven't got a valid date so add it at the end
@@ -257,76 +249,8 @@ class NexusWells(Wells):
         wellspec_file.add_to_file_as_list(additional_content=new_completion_string, index=new_completion_index,
                                           additional_objects=new_completion_object_ids, comments=comments)
 
-    def __fill_in_nas(self, additional_headers: list[str], headers_original: list[str], index: int, line: str,
-                      wellspec_file: NexusFile, file_content: list[str]) -> int:
-        """Check the validity of the line, if its valid add as many NA's as required for the new columns."""
-        valid_line, _ = nfo.table_line_reader(keyword_store={}, headers=headers_original, line=line)
-        if valid_line and len(additional_headers) > 0:
-            additional_na_values = ['NA'] * len(additional_headers)
-            additional_column_string = ' '.join(additional_na_values)
-            split_comments = file_content[index].split('!', 1)
-            if len(split_comments) == 1:
-                new_completion_line = split_comments[0].replace('\n', '', 1) + ' ' + additional_column_string + '\n'
-            else:
-                new_completion_line = split_comments[0] + additional_column_string + ' !' + split_comments[1]
-
-            nexusfile_to_write_to, index_in_file = wellspec_file.find_which_include_file(index)
-            if nexusfile_to_write_to.file_content_as_list is None:
-                raise ValueError(f'No file content to write to in file: {nexusfile_to_write_to}')
-            nexusfile_to_write_to.file_content_as_list[index_in_file] = new_completion_line
-        if valid_line:
-            return index
-        else:
-            return -1
-
-    def __find_which_wellspec_file_from_completion_id(self, completion_id: UUID) -> NexusFile:
-        # find the correct wellspec file in the model by looking at the ids
-        if self.__model.model_files.well_files is None:
-            raise ValueError(f'No wells file found in fcs file at: {self.__model.model_files.location}')
-        wellspec_files = [x for x in self.__model.model_files.well_files.values() if x.object_locations is not None and
-                          completion_id in x.object_locations]
-        if len(wellspec_files) == 0:
-            raise FileNotFoundError(f'No well file found with an existing well that has completion id: {completion_id}')
-        wellspec_file = wellspec_files[0]
-        if wellspec_file.file_content_as_list is None:
-            raise FileNotFoundError(
-                f'No well file content found for specified wellfile at location: {wellspec_file.location}')
-        return wellspec_file
-
-    def __get_wellspec_header(self, additional_headers: list[str],
-                              completion_properties: NexusCompletion.InputDictionary,
-                              file_content: list[str], index: int, inverted_nexus_map: dict[str, str],
-                              nexus_mapping: dict[str, tuple[str, type]], wellspec_file: NexusFile) -> \
-            tuple[int, list[str], list[str]]:
-        """Gets the wellspec header and works out if any additional headers should be added."""
-        keyword_map = {x: y[0] for x, y in nexus_mapping.items()}
-        wellspec_table = file_content[index::]
-        header_index, headers = nfo.get_table_header(file_as_list=wellspec_table, header_values=keyword_map)
-        header_index += index
-        headers_original = copy.copy(headers)
-        # work out if there are any headers that are not in the new completion
-        for key in completion_properties:
-            if key == 'date':
-                continue
-            if inverted_nexus_map[key] not in headers:
-                headers.append(inverted_nexus_map[key])
-                additional_headers.append(inverted_nexus_map[key])
-        additional_column_string = ' '.join(additional_headers)
-        split_comments = str(file_content[header_index]).split('!', 1)
-        if len(split_comments) == 1:
-            new_header_line = split_comments[0].replace('\n', '', 1) + ' ' + additional_column_string + '\n'
-        else:
-            new_header_line = split_comments[0] + additional_column_string + ' !' + split_comments[1]
-        if len(additional_headers) > 0:
-            file_to_write_to, index_in_file = wellspec_file.find_which_include_file(header_index)
-            if file_to_write_to.file_content_as_list is None:
-                raise ValueError(
-                    f'No file content found in {file_to_write_to.location}. Cannot write to index {index_in_file}')
-            file_to_write_to.file_content_as_list[index_in_file] = new_header_line
-        return header_index, headers, headers_original
-
     def __write_out_existing_wellspec(self, completion_date: str,
-                                      completion_properties: NexusCompletion.InputDictionary,
+                                      completion_properties: dict[str, None | float | int | str],
                                       date_found: bool, index: int, new_completion_index: int,
                                       preserve_previous_completions: bool, well: NexusWell, well_name: str) -> \
             tuple[list[str], int, list[str], bool]:
@@ -354,7 +278,7 @@ class NexusWells(Wells):
             # get the most recent date that is earlier than the new completion date
             previous_dates = sorted(previous_dates, key=cmp_to_key(self.__model._sim_controls.compare_dates))
             last_date = str(previous_dates[-1])
-            completion_to_find: NexusCompletion.InputDictionary = {'date': last_date}
+            completion_to_find: dict[str, None | float | int | str] = {'date': last_date}
             # find all completions at this date
             previous_completion_list = well.find_completions(completion_to_find)
             if len(previous_completion_list) > 0:
@@ -377,7 +301,8 @@ class NexusWells(Wells):
             completion_table_as_list += write_out_headers
         return headers, new_completion_index, completion_table_as_list, True
 
-    def remove_completion(self, well_name: str, completion_properties: Optional[NexusCompletion.InputDictionary] = None,
+    def remove_completion(self, well_name: str,
+                          completion_properties: Optional[dict[str, None | float | int | str]] = None,
                           completion_id: Optional[UUID] = None) -> None:
 
         well = self.get_well(well_name)
@@ -398,7 +323,8 @@ class NexusWells(Wells):
         if completion_id is None:
             raise ValueError('No completion found for completion_properties')
         # find which wellspec file we should edit
-        wellspec_file = self.__find_which_wellspec_file_from_completion_id(completion_id)
+        wellspec_file = self.__add_object_operations.find_which_file_from_id(id=completion_id,
+                                                                             file_type_to_search='well_files')
 
         # remove from the well object/wells class
         completion_date = well.get_completion_by_id(completion_id).date
@@ -413,11 +339,11 @@ class NexusWells(Wells):
                 wellspec_file.remove_from_file_as_list(comp_index, [completion_id])
 
         # check that we have completions left:
-        find_completions_dict: NexusCompletion.InputDictionary = {'date': completion_date}
+        find_completions_dict: dict[str, None | float | int | str] = {'date': completion_date}
         remaining_completions = well.find_completions(find_completions_dict)
         if len(remaining_completions) == 0:
             # if there are no more completions remaining for that time stamp then remove the wellspec header!
-            self.__remove_wellspec_header(completion_date, well_name, wellspec_file)
+            self.__remove_wellspec_header(str(completion_date), well_name, wellspec_file)
 
     def __remove_wellspec_header(self, completion_date: str, well_name: str, wellspec_file: NexusFile) -> None:
         """Removes the wellspec and header if the wellspec table is empty\
@@ -444,10 +370,20 @@ class NexusWells(Wells):
         wellspec_file.remove_from_file_as_list(header_index)
         wellspec_file.remove_from_file_as_list(wellspec_index)
 
-    def modify_completion(self, well_name: str, properties_to_modify: NexusCompletion.InputDictionary,
-                          completion_to_change: Optional[NexusCompletion.InputDictionary] = None,
+    def modify_completion(self, well_name: str, properties_to_modify: dict[str, None | float | int | str],
+                          completion_to_change: Optional[dict[str, None | float | int | str]] = None,
                           completion_id: Optional[UUID] = None,
                           comments: Optional[str] = None) -> None:
+        """Modify an existing matching completion, preserves attributes and modifies only additional properties
+        found within the provided properties to modify dictionary.
+
+        Args:
+            well_name (str): Name of the well with the completion to be modified.
+            properties_to_modify (dict[str, None | float | int | str]): attributes to change to.
+            completion_to_change (Optional[dict[str, None | float | int | str]]): properties of the existing completion.
+            User must provide enough to uniquely identify the completion.
+            completion_id (Optional[UUID]): If provided will match against a known UUID for the completion.
+        """
         well = self.get_well(well_name)
         if well is None:
             raise ValueError(f'No well found with name: {well_name}')
@@ -461,8 +397,8 @@ class NexusWells(Wells):
             raise ValueError('Must provide one of completion_to_change dictionary or completion_id')
 
         # start with the existing properties
-        update_completion_properties: NexusCompletion.InputDictionary = cast(
-            NexusCompletion.InputDictionary, {k: v for k, v in completion.to_dict().items() if v is not None})
+        update_completion_properties: dict[str, None | float | int | str] = \
+            {k: v for k, v in completion.to_dict().items() if v is not None}
 
         update_completion_properties.update(properties_to_modify)
 
