@@ -166,16 +166,21 @@ def test_load_fcs_date_format(mocker, globalFixture, fcs_file_contents, expected
     # Assert
     assert simulation.date_format is expected_date_format
 
-@pytest.mark.disable_autouse
-def test_get_users_linked_with_files(mocker, globalFixture):
+def test_get_users_linked_with_files(mocker):
     # Arrange 
     fcs_file = "RUNCONTROL path\\to\\run\\control\nDATEFORMAT DD/MM/YYYYY"
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
-
-    expected_result = [("testpath1\\path\\to\\run\\control","Mock-Owner:Mock-Group",datetime.datetime(2018, 6, 30, 13, 48, 10))]   
+    path_mock = mocker.MagicMock()
+    mocker.patch('pathlib.Path', path_mock)
+    path_mock.return_value.owner.return_value = "Mock-Owner"
+    path_mock.return_value.group.return_value = "Mock-Group"
+    os_mock = mocker.MagicMock()
+    mocker.patch('os.stat',os_mock)
+    os_mock.return_value.st_mtime = 1530346690 
+    expected_result = [("path\\to\\run\\control","Mock-Owner:Mock-Group",datetime.datetime(2018, 6, 30, 13, 48, 10))]   
     simulator = NexusSimulator(
-        origin='testpath1/Path.fcs', destination="test_new_destination")
+        origin='Path.fcs')
 
     # Act
     result = simulator.get_users_linked_with_files()
