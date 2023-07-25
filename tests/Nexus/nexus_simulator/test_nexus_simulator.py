@@ -173,12 +173,12 @@ def test_get_users_linked_with_files(mocker):
     mocker.patch("builtins.open", open_mock)
     path_mock = mocker.MagicMock()
     mocker.patch('pathlib.Path', path_mock)
-    path_mock.return_value.owner.return_value = "Mock-Owner"
-    path_mock.return_value.group.return_value = "Mock-Group"
+    path_mock.return_value.owner.return_value = None
+    path_mock.return_value.group.return_value = None
     os_mock = mocker.MagicMock()
     mocker.patch('os.stat',os_mock)
     os_mock.return_value.st_mtime = 1530346690 
-    expected_result = [("/run/control/path","Mock-Owner:Mock-Group",datetime.datetime(2018, 6, 30, 13, 48, 10))]
+    expected_result = [("/run/control/path",None,datetime.datetime(2018, 6, 30, 13, 48, 10))]
 
     simulation = NexusSimulator(origin="Path.fcs")
 
