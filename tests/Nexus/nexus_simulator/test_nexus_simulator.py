@@ -178,10 +178,11 @@ def test_get_users_linked_with_files(mocker, globalFixture):
     # os_mock = mocker.MagicMock()
     # mocker.patch('os.stat',os_mock)
     # os_mock.return_value.st_mtime.return_value = 1530346690 
-    expected_result = [("test1\\run_control.inc",None,None)]
+    
 
     simulation = NexusSimulator(origin="test1/Path.fcs")
 
+    expected_result = [("test1\\run_control.inc",None,None)]
     # Act
     
     result = simulation.get_users_linked_with_files()
