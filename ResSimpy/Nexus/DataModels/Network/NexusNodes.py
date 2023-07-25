@@ -2,7 +2,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from uuid import UUID
 
-import numpy as np
 import pandas as pd
 
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
@@ -10,8 +9,11 @@ from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.nexus_remove_object_from_file import RemoveObjectOperations
 from ResSimpy.Nodes import Nodes
 from typing import Sequence, Optional, TYPE_CHECKING
+
+from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
@@ -24,7 +26,19 @@ class NexusNodes(Nodes):
     def __init__(self, parent_network: NexusNetwork) -> None:
         self.__parent_network: NexusNetwork = parent_network
         self.__nodes: list[NexusNode] = []
-        self.__add_object_operations = AddObjectOperations(self.__parent_network.model)
+        self.__add_object_operations = AddObjectOperations(self.__parent_network.model, self.table_header,
+                                                           self.table_footer)
+        self.__remove_object_operations = RemoveObjectOperations(self.table_header, self.table_footer)
+
+    @property
+    def table_header(self) -> str:
+        """Start of the Node definition table."""
+        return 'NODES'
+
+    @property
+    def table_footer(self) -> str:
+        """End of the Node definition table."""
+        return 'ENDNODES'
 
     def get_nodes(self) -> Sequence[NexusNode]:
         """Returns a list of nodes loaded from the simulator."""
@@ -52,12 +66,7 @@ class NexusNodes(Nodes):
         Returns:
             DataFrame: of the properties of the nodes through time with each row representing a node.
         """
-        df_store = pd.DataFrame()
-        for node in self.__nodes:
-            df_row = pd.DataFrame(node.to_dict(), index=[0])
-            df_store = pd.concat([df_store, df_row], axis=0, ignore_index=True)
-        df_store = df_store.fillna(value=np.nan)
-        df_store = df_store.dropna(axis=1, how='all')
+        df_store = obj_to_dataframe(self.__nodes)
         return df_store
 
     def get_nodes_overview(self) -> str:
@@ -106,13 +115,9 @@ class NexusNodes(Nodes):
             with sufficient matching parameters to uniquely identify a node
 
         """
-        # TODO make this method generic!
         self.__parent_network.get_load_status()
-        if self.__parent_network.model.model_files.surface_files is None:
-            raise ValueError('No files found for the surface network')
-        network_file = self.__parent_network.model.model_files.surface_files[1]
-        if network_file is None:
-            raise ValueError(f'No file found for {network_file=}')
+
+        network_file = self.__parent_network.get_network_file()
 
         if isinstance(node_to_remove, dict):
             name = node_to_remove.get('name', None)
@@ -124,47 +129,7 @@ class NexusNodes(Nodes):
         else:
             node_id = node_to_remove
 
-        # remove from memory
-        index_to_remove = [x.id for x in self.__nodes].index(node_id)
-        self.__nodes.pop(index_to_remove)
-        # remove from file
-        if network_file.object_locations is None:
-            raise ValueError(f'No object locations specified, cannot find node id: {node_id}')
-        line_numbers_in_file_to_remove = network_file.object_locations[node_id]
-
-        # check there are any nodes left in the specified table
-        if len(line_numbers_in_file_to_remove) == 0:
-            raise ValueError('error msg')
-        # remove the table if there aren't any more remaining
-        file_content = network_file.get_flat_list_str_file
-        start_node_table_indices = [i for i, x in enumerate(file_content) if "NODES" in x and
-                                    i < line_numbers_in_file_to_remove[0]]
-        end_node_table_indices = [i for i, x in enumerate(file_content) if "ENDNODES" in x and
-                                  i > line_numbers_in_file_to_remove[-1]]
-        start_node_keyword_index_to_remove = start_node_table_indices[-1]
-        end_node_keyword_index_to_remove = end_node_table_indices[0]
-
-        remove_table = True
-
-        for obj_uuid, line_locations_list in network_file.object_locations.items():
-            if obj_uuid == node_id:
-                # ignore the uuid's for the node that we want to remove
-                continue
-            for value in line_locations_list:
-                if start_node_keyword_index_to_remove <= value <= end_node_keyword_index_to_remove:
-                    remove_table = False
-
-        if remove_table:
-            line_numbers_in_file_to_remove.extend(list(
-                range(start_node_keyword_index_to_remove, end_node_keyword_index_to_remove + 1)))
-
-        line_numbers_in_file_to_remove = list(set(line_numbers_in_file_to_remove))
-        line_numbers_in_file_to_remove.sort(reverse=True)
-        for index, line_in_file in enumerate(line_numbers_in_file_to_remove):
-            if index == 0:
-                network_file.remove_from_file_as_list(line_in_file, [node_id])
-            else:
-                network_file.remove_from_file_as_list(line_in_file)
+        self.__remove_object_operations.remove_object_by_id(network_file, node_id, self.__nodes)
 
     def add_node(self, node_to_add: dict[str, None | str | float | int]) -> None:
         """Adds a node to a network, taking a dictionary with properties for the new node.
@@ -180,13 +145,34 @@ class NexusNodes(Nodes):
 
         self._add_nodes_to_memory([new_object])
 
-        # add to the file
-        if self.__parent_network.model.model_files.surface_files is None:
-            raise FileNotFoundError('No well file found, cannot modify a deck with an empty surface file.')
-        file_to_add_to = self.__parent_network.model.model_files.surface_files[1]
+        file_to_add_to = self.__parent_network.get_network_file()
 
         file_as_list = file_to_add_to.get_flat_list_str_file
         if file_as_list is None:
             raise ValueError(f'No file content found in the surface file specified at {file_to_add_to.location}')
 
         self.__add_object_operations.add_object_to_file(date, file_as_list, file_to_add_to, new_object, node_to_add)
+
+    def modify_node(self, node_to_modify: dict[str, None | str | float | int],
+                    new_properties: dict[str, None | str | float | int]) -> None:
+        """Modifies an existing node based on a matching dictionary of properties (partial matches allowed if precisely
+         1 matching node is found). Updates the properties with properties in the new_properties dictionary.
+
+        Args:
+            node_to_modify (dict[str, None | str | float | int]): dictionary containing attributes to match in the
+            existing node set.
+            new_properties (dict[str, None | str | float | int]): properties to switch to in the new node
+        """
+        self.__parent_network.get_load_status()
+
+        name = node_to_modify.get('name', None)
+        if name is None:
+            raise ValueError(f'Name is required for modifying nodes, instead got {name}')
+        name = str(name)
+        node = self.__parent_network.find_network_element_with_dict(name, node_to_modify, 'nodes')
+        existing_properties = node.to_dict(include_nones=False)
+        # do the union of the two dicts
+        existing_properties.update(new_properties)
+
+        self.remove_node(node_to_modify)
+        self.add_node(existing_properties)

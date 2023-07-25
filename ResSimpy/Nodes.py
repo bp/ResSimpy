@@ -31,3 +31,11 @@ class Nodes(ABC):
 
     def add_node(self, node_to_add: dict[str, None | str | float | int]) -> None:
         raise NotImplementedError("Implement this in the derived class")
+
+    @property
+    def table_header(self) -> str:
+        raise NotImplementedError("Implement this in the derived class")
+
+    @property
+    def table_footer(self) -> str:
+        raise NotImplementedError("Implement this in the derived class")

@@ -484,3 +484,135 @@ def test_add_node(mocker, file_contents, expected_file_contents, node_to_add, ex
                                      number_of_writes=expected_number_writes)
 
     # TODO check line locations too
+
+
+@pytest.mark.parametrize('file_contents, expected_file_contents, node_to_modify, modified_properties, expected_nodes,'
+                         'expected_number_writes', [
+# basic_test
+('''TIME 01/01/2023
+NODES
+NAME TYPE DEPTH STATION
+new_node WELLHEAD 1167.3 station_1
+keep_node WELL 1020 staTION2
+ENDNODES
+TIME 01/01/2024
+''',
+'''TIME 01/01/2023
+NODES
+NAME TYPE DEPTH STATION
+keep_node WELL 1020 staTION2
+new_node WELLHEAD 10 station_2
+ENDNODES
+TIME 01/01/2024
+''',
+{'name': 'new_node', 'type': 'WELLHEAD', 'depth': 1167.3, 'station': 'station_1',
+'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+{'depth': 10, 'station': 'station_2'},
+[{'name': 'new_node', 'type': 'WELLHEAD', 'depth': 10, 'station': 'station_2',
+'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'keep_node', 'type': 'WELL', 'depth': 1020, 'station': 'staTION2',
+'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+],
+2  # no. writes
+),
+
+# replace nones
+('''TIME 01/01/2023
+NODES
+NAME TYPE DEPTH STATION
+new_node WELLHEAD 1167.3 station_1
+keep_node WELL 1020 staTION2
+ENDNODES
+TIME 01/01/2024
+''',
+'''TIME 01/01/2023
+NODES
+NAME TYPE DEPTH STATION
+keep_node WELL 1020 staTION2
+new_node WELLHEAD NA station_2
+ENDNODES
+TIME 01/01/2024
+''',
+{'name': 'new_node', 'type': 'WELLHEAD', 'depth': 1167.3, 'station': 'station_1',
+'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+{'depth': None, 'station': 'station_2'},
+[{'name': 'new_node', 'type': 'WELLHEAD', 'depth': None, 'station': 'station_2',
+'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'keep_node', 'type': 'WELL', 'depth': 1020, 'station': 'staTION2',
+'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+],
+2  # no. writes
+),
+
+
+# changes to non-pre-existing columns
+('''TIME 01/01/2023
+NODES
+NAME TYPE DEPTH STATION
+new_node WELLHEAD 1167.3 station_1
+keep_node WELL 1020 staTION2
+ENDNODES
+TIME 01/01/2024
+''',
+'''TIME 01/01/2023
+NODES
+NAME TYPE DEPTH STATION TEMP
+keep_node WELL 1020 staTION2 NA
+new_node WELLHEAD 1167.3 station_2 100
+ENDNODES
+TIME 01/01/2024
+''',
+{'name': 'new_node', 'type': 'WELLHEAD', 'depth': 1167.3, 'station': 'station_1',
+'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+{'temp': 100, 'station': 'station_2'},
+[{'name': 'new_node', 'type': 'WELLHEAD', 'temp': 100, 'depth': 1167.3, 'station': 'station_2',
+'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+{'name': 'keep_node', 'type': 'WELL', 'depth': 1020, 'station': 'staTION2',
+'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+],
+2  # no. writes
+),
+
+
+], ids=['basic_test', 'replace nones', 'changes to non-pre-existing columns'])
+def test_modify_node(mocker, file_contents, expected_file_contents, node_to_modify, modified_properties, expected_nodes,
+                     expected_number_writes):
+    # Arrange
+    fcs_file_contents = '''
+        RUN_UNITS ENGLISH
+        DATEFORMAT DD/MM/YYYY
+        RECURRENT_FILES
+        RUNCONTROL /nexus_data/runcontrol.dat
+        SURFACE Network 1  /surface_file_01.dat
+        '''
+    runcontrol_contents = '''START 01/01/2019'''
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            '/path/fcs_file.fcs': fcs_file_contents,
+            '/surface_file_01.dat': file_contents,
+            '/nexus_data/runcontrol.dat': runcontrol_contents}
+            ).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+    nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
+    # make a mock for the write operation
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+
+    expected_nodes = [NexusNode(node) for node in expected_nodes]
+    expected_nodes.sort(key=lambda x: x.name)
+
+    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
+    # Act
+    nexus_sim.network.nodes.modify_node(node_to_modify, modified_properties)
+    # compare sets as order doesn't matter
+    result_nodes = nexus_sim.network.nodes.get_nodes()
+    result_nodes.sort(key=lambda x: x.name)
+    # Assert
+    assert result_nodes == expected_nodes
+    assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
+    check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
+                                     modifying_mock_open=writing_mock_open,
+                                     mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
+                                     number_of_writes=expected_number_writes)

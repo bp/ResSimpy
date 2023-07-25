@@ -30,3 +30,11 @@ class Wells(ABC):
 
     def get_wells_overview(self) -> str:
         raise NotImplementedError("Implement this in the derived class")
+
+    @property
+    def table_header(self) -> str:
+        raise NotImplementedError("Implement this in the derived class")
+
+    @property
+    def table_footer(self) -> str:
+        raise NotImplementedError("Implement this in the derived class")
