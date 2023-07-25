@@ -180,7 +180,7 @@ def test_get_users_linked_with_files(mocker):
     os_mock.return_value.st_mtime = 1530346690 
     expected_result = [("/run/control/path","Mock-Owner:Mock-Group",datetime.datetime(2018, 6, 30, 13, 48, 10))]
     exists_mock = mocker.Mock(return_value=True)
-    mocker.patch("os.path.exists", exists_mock)
+    mocker.patch("os.makedirs", exists_mock)
     print("creating Nexus Simulator instance...")
     simulation = NexusSimulator(origin='Path.fcs')
 
