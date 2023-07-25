@@ -43,17 +43,17 @@ class NexusNodeConnections(NodeConnections):
         """End of the Node definition table."""
         return 'END' + self.table_header
 
-    def get_connections(self) -> Sequence[NexusNodeConnection]:
+    def get_all(self) -> Sequence[NexusNodeConnection]:
         self.__parent_network.get_load_status()
         return self.__connections
 
-    def get_connection(self, connection_name: str) -> Optional[NodeConnection]:
+    def get_by_name(self, connection_name: str) -> Optional[NodeConnection]:
         self.__parent_network.get_load_status()
         connections_to_return = filter(lambda x: False if x.name is None else x.name.upper() == connection_name.upper(),
                                        self.__connections)
         return next(connections_to_return, None)
 
-    def get_connection_df(self) -> pd.DataFrame:
+    def get_df(self) -> pd.DataFrame:
         """Creates a dataframe representing all processed node connection data in a surface file
         Returns:
             DataFrame: of the properties of the connections through time with each row representing a node.
@@ -61,10 +61,10 @@ class NexusNodeConnections(NodeConnections):
         self.__parent_network.get_load_status()
         return obj_to_dataframe(self.__connections)
 
-    def get_connections_overview(self) -> str:
+    def get_overview(self) -> str:
         raise NotImplementedError('To be implemented')
 
-    def load_connections(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
+    def load(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
         """Calls load connections and appends the list of discovered NodeConnections into the NexusNodeConnection \
             object.
         """
@@ -74,9 +74,9 @@ class NexusNodeConnections(NodeConnections):
         if isinstance(cons_list, dict):
             raise ValueError(
                 'Incompatible data format for additional nodecons. Expected type "list" instead got "dict"')
-        self._add_connections_to_memory(cons_list)
+        self._add_to_memory(cons_list)
 
-    def _add_connections_to_memory(self, additional_list: Optional[list[NexusNodeConnection]]):
+    def _add_to_memory(self, additional_list: Optional[list[NexusNodeConnection]]):
         """Extends the nodes object by a list of nodes provided to it.
 
         Args:
@@ -91,7 +91,7 @@ class NexusNodeConnections(NodeConnections):
             return
         self.__connections.extend(additional_list)
 
-    def add_connection(self, connection_to_add: dict[str, None | str | float | int]) -> None:
+    def add(self, connection_to_add: dict[str, None | str | float | int]) -> None:
         """Adds a nodeconnection to a network, taking a dictionary with properties for the new node.
 
         Args:
@@ -103,7 +103,7 @@ class NexusNodeConnections(NodeConnections):
 
         new_object = NexusNodeConnection(connection_to_add)
 
-        self._add_connections_to_memory([new_object])
+        self._add_to_memory([new_object])
 
         file_to_add_to = self.__parent_network.get_network_file()
 
@@ -114,7 +114,7 @@ class NexusNodeConnections(NodeConnections):
         self.__add_object_operations.add_object_to_file(date, file_as_list, file_to_add_to, new_object,
                                                         connection_to_add)
 
-    def remove_connection(self, connection_to_remove: UUID | dict[str, None | str | float | int]) -> None:
+    def remove(self, connection_to_remove: UUID | dict[str, None | str | float | int]) -> None:
         """Remove a connection from the network based on the properties matching a dictionary or id.
 
         Args:
@@ -138,8 +138,8 @@ class NexusNodeConnections(NodeConnections):
 
         self.__remove_object_operations.remove_object_by_id(network_file, network_element_id, self.__connections)
 
-    def modify_connection(self, connection_to_modify: dict[str, None | str | float | int],
-                          new_properties: dict[str, None | str | float | int]) -> None:
+    def modify(self, connection_to_modify: dict[str, None | str | float | int],
+               new_properties: dict[str, None | str | float | int]) -> None:
         """Modifies an existing connection based on a matching dictionary of properties (partial matches allowed if
         precisely 1 matching connection is found).
         Updates the properties with properties in the new_properties dictionary.

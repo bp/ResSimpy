@@ -111,7 +111,7 @@ class NexusNetwork(Network):
                 default_units=self.__model.default_units,
                 )
             self.nodes._add_nodes_to_memory(type_check_lists(nexus_obj_dict.get('NODES')))
-            self.connections._add_connections_to_memory(type_check_lists(nexus_obj_dict.get('NODECON')))
+            self.connections._add_to_memory(type_check_lists(nexus_obj_dict.get('NODECON')))
             self.well_connections.add_connections(type_check_lists(nexus_obj_dict.get('WELLS')))
             self.wellheads.add_wellheads(type_check_lists(nexus_obj_dict.get('WELLHEAD')))
             self.wellbores.add_wellbores(type_check_lists(nexus_obj_dict.get('WELLBORE')))
@@ -127,10 +127,10 @@ class NexusNetwork(Network):
 
         """
         constraint_names_to_add = []
-        constraint_names_to_add.extend([x.name for x in self.nodes.get_nodes() if x.name is not None])
+        constraint_names_to_add.extend([x.name for x in self.nodes.get_all() if x.name is not None])
         constraint_names_to_add.extend([x.name for x in self.well_connections.get_well_connections()
                                         if x.name is not None])
-        constraint_names_to_add.extend([x.name for x in self.connections.get_connections() if x.name is not None])
+        constraint_names_to_add.extend([x.name for x in self.connections.get_all() if x.name is not None])
         constraint_names_to_add.extend([x.name for x in self.wellbores.get_wellbores() if x.name is not None])
         constraint_names_to_add.extend([x.name for x in self.wellheads.get_wellheads() if x.name is not None])
         constraint_names_to_add = list(set(constraint_names_to_add))
@@ -162,9 +162,8 @@ class NexusNetwork(Network):
             network_element = getattr(self, f'{network_element_type}', None)
             if network_element is None:
                 raise ValueError(f'Network has no elements associated with the {network_element_type=} requested')
-            network_element_getter = getattr(network_element, f'get_{network_element_type}', None)
-            if network_element_getter is not None:
-                network_element_to_search = [x for x in network_element_getter() if x.name == name]
+
+            network_element_to_search = [x for x in network_element.get_all() if x.name == name]
 
         if network_element_to_search is None or len(network_element_to_search) == 0:
             raise ValueError(f'No {network_element_type} found with {name=}')
