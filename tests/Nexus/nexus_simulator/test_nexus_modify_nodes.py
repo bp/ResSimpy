@@ -575,7 +575,7 @@ TIME 01/01/2024
 
 
 ], ids=['basic_test', 'replace nones', 'changes to non-pre-existing columns'])
-def test_modify_node(mocker, file_contents, expected_file_contents, node_to_modify, modified_properties, expected_nodes,
+def test_modify_node(mocker, globalFixture, file_contents, expected_file_contents, node_to_modify, modified_properties, expected_nodes,
                      expected_number_writes):
     # Arrange
     fcs_file_contents = '''
