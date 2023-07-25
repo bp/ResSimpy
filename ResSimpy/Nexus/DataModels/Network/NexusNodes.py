@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from uuid import UUID
+from typing import Sequence, Optional, TYPE_CHECKING
 
 import pandas as pd
 
@@ -11,8 +12,6 @@ from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.nexus_remove_object_from_file import RemoveObjectOperations
 from ResSimpy.Nodes import Nodes
-from typing import Sequence, Optional, TYPE_CHECKING
-
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 
 if TYPE_CHECKING:
@@ -124,7 +123,8 @@ class NexusNodes(Nodes):
             if name is None:
                 raise ValueError(f'Require node name to remove the node instead got {name=}')
             name = str(name)
-            node = self.__parent_network.find_network_element_with_dict(name, node_to_remove, 'nodes')
+            node = self.__parent_network.find_network_element_with_dict(name, node_to_remove,
+                                                                        self._network_element_name)
             node_id = node.id
         else:
             node_id = node_to_remove
@@ -169,7 +169,7 @@ class NexusNodes(Nodes):
         if name is None:
             raise ValueError(f'Name is required for modifying nodes, instead got {name}')
         name = str(name)
-        node = self.__parent_network.find_network_element_with_dict(name, node_to_modify, 'nodes')
+        node = self.__parent_network.find_network_element_with_dict(name, node_to_modify, self._network_element_name)
         existing_properties = node.to_dict(include_nones=False)
         # do the union of the two dicts
         existing_properties.update(new_properties)

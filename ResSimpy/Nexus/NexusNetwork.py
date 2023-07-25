@@ -111,7 +111,7 @@ class NexusNetwork(Network):
                 default_units=self.__model.default_units,
                 )
             self.nodes._add_nodes_to_memory(type_check_lists(nexus_obj_dict.get('NODES')))
-            self.connections.add_connections(type_check_lists(nexus_obj_dict.get('NODECON')))
+            self.connections._add_connections_to_memory(type_check_lists(nexus_obj_dict.get('NODECON')))
             self.well_connections.add_connections(type_check_lists(nexus_obj_dict.get('WELLS')))
             self.wellheads.add_wellheads(type_check_lists(nexus_obj_dict.get('WELLHEAD')))
             self.wellbores.add_wellbores(type_check_lists(nexus_obj_dict.get('WELLBORE')))
