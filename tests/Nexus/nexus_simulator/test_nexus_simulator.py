@@ -168,7 +168,7 @@ def test_load_fcs_date_format(mocker, globalFixture, fcs_file_contents, expected
 
 def test_get_users_linked_with_files(mocker):
     # Arrange 
-    fcs_file = "RUNCONTROL /path/to/run/control\nDATEFORMAT DD/MM/YYYYY"
+    fcs_file = "RUNCONTROL /run/control/path\nDATEFORMAT MM/DD/YYYY"
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
     path_mock = mocker.MagicMock()
@@ -178,14 +178,14 @@ def test_get_users_linked_with_files(mocker):
     os_mock = mocker.MagicMock()
     mocker.patch('os.stat',os_mock)
     os_mock.return_value.st_mtime = 1530346690 
-    expected_result = [("/path/to/run/control","Mock-Owner:Mock-Group",datetime.datetime(2018, 6, 30, 13, 48, 10))]
+    expected_result = [("/run/control/path","Mock-Owner:Mock-Group",datetime.datetime(2018, 6, 30, 13, 48, 10))]
     exists_mock = mocker.Mock(return_value=True)
     mocker.patch("os.path.exists", exists_mock)
-    with pytest.raises(FileExistsError):
-        simulator = NexusSimulator(origin='Path.fcs', destination='original_output_path')
+    simulation = NexusSimulator(
+        origin='test/Path.fcs', destination='original_output_path')
 
     # Act
-    result = simulator.get_users_linked_with_files()
+    result = simulation.get_users_linked_with_files()
 
     # Assert
     assert result == expected_result
