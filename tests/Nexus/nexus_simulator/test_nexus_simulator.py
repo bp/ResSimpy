@@ -178,9 +178,11 @@ def test_get_users_linked_with_files(mocker):
     os_mock = mocker.MagicMock()
     mocker.patch('os.stat',os_mock)
     os_mock.return_value.st_mtime = 1530346690 
-    expected_result = [("/path/to/run/control","Mock-Owner:Mock-Group",datetime.datetime(2018, 6, 30, 13, 48, 10))]   
-    simulator = NexusSimulator(
-        origin='Path.fcs')
+    expected_result = [("/path/to/run/control","Mock-Owner:Mock-Group",datetime.datetime(2018, 6, 30, 13, 48, 10))]
+    exists_mock = mocker.Mock(return_value=True)
+    mocker.patch("os.path.exists", exists_mock)
+    with pytest.raises(FileExistsError):
+        simulator = NexusSimulator(origin='Path.fcs', destination='original_output_path')
 
     # Act
     result = simulator.get_users_linked_with_files()
