@@ -15,6 +15,8 @@ from ResSimpy.Nodes import Nodes
 
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 
+from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
+
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 
