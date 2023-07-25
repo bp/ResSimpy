@@ -168,7 +168,7 @@ def test_load_fcs_date_format(mocker, globalFixture, fcs_file_contents, expected
 
 def test_get_users_linked_with_files(mocker):
     # Arrange 
-    fcs_file = "RUNCONTROL /run/control/path\nDATEFORMAT MM/DD/YYYY"
+    fcs_file = "RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\n"
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
     path_mock = mocker.MagicMock()
@@ -178,7 +178,7 @@ def test_get_users_linked_with_files(mocker):
     os_mock = mocker.MagicMock()
     mocker.patch('os.stat',os_mock)
     os_mock.return_value.st_mtime = 1530346690 
-    expected_result = [("/run/control/path",None,datetime.datetime(2018, 6, 30, 13, 48, 10))]
+    expected_result = [("run_control.inc",None,datetime.datetime(2018, 6, 30, 13, 48, 10))]
 
     simulation = NexusSimulator(origin="Path.fcs")
 
