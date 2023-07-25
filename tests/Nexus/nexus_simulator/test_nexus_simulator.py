@@ -166,7 +166,7 @@ def test_load_fcs_date_format(mocker, globalFixture, fcs_file_contents, expected
     # Assert
     assert simulation.date_format is expected_date_format
 
-def test_get_users_linked_with_files(mocker, globalFixture):
+def test_get_users_linked_with_files(mocker):
     # Arrange 
     fcs_file = "RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\n"
     open_mock = mocker.mock_open(read_data=fcs_file)
