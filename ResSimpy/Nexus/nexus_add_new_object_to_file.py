@@ -12,8 +12,10 @@ if TYPE_CHECKING:
 
 
 class AddObjectOperations:
-    def __init__(self, model: NexusSimulator) -> None:
+    def __init__(self, model: NexusSimulator, table_header: str, table_footer: str) -> None:
         self.__model = model
+        self.table_header = table_header
+        self.table_footer = table_footer
 
     def find_which_file_from_id(self, id: UUID, file_type_to_search: str) -> NexusFile:
         """Finds a file based on the presence of an object in the file.
@@ -135,8 +137,7 @@ class AddObjectOperations:
         else:
             return -1
 
-    @staticmethod
-    def write_out_new_table_containing_object(obj_date: str,
+    def write_out_new_table_containing_object(self, obj_date: str,
                                               object_properties: dict[str, None | str | float | int],
                                               date_found: bool, new_obj: Any) -> tuple[list[str], int]:
         """Writes out the existing table for an object being added at a new time stamp.
@@ -156,12 +157,12 @@ class AddObjectOperations:
         new_table_as_list = ['']
         if not date_found:
             new_table_as_list.append('TIME ' + obj_date)
-        new_table_as_list += [new_obj.table_header]
+        new_table_as_list += [self.table_header]
         headers = [k for k, v in nexus_mapping.items() if v[0] in object_properties]
         write_out_headers = ' '.join(headers)
         new_table_as_list.append(write_out_headers)
-        new_table_as_list.append(new_obj.to_string(headers))
-        new_table_as_list.append(new_obj.table_footer)
+        new_table_as_list.append(new_obj.to_table_line(headers))
+        new_table_as_list.append(self.table_footer)
         new_table_as_list = [x + '\n' if not x.endswith('\n') else x for x in new_table_as_list]
         new_table_as_list.append('\n')
         new_obj_index = len(new_table_as_list) - 1
@@ -196,10 +197,6 @@ class AddObjectOperations:
             object_properties (dict[str, None | str | float | int]): dictionary containing new attributes of the object.
 
         """
-        # get the start and end table names
-        table_start_token = new_object.table_header
-        table_ending_token = new_object.table_footer
-
         # initialise some useful variables
         additional_content: list[str] = []
         date_comparison: int = -1
@@ -225,7 +222,7 @@ class AddObjectOperations:
                     continue
 
             # find a table that exists in that date
-            if nfo.check_token(table_start_token, line) and date_index != -1:
+            if nfo.check_token(self.table_header, line) and date_index != -1:
                 # get the header of the table
                 header_index, headers, headers_original = self.get_and_write_new_header(
                     additional_headers, object_properties, file_as_list, index, nexus_mapping, file_to_add_to
@@ -240,9 +237,9 @@ class AddObjectOperations:
                 last_valid_line_index = line_valid_index if line_valid_index > 0 else last_valid_line_index
 
             # if we've found an existing table then just insert the new object
-            if nfo.check_token(table_ending_token, line) and date_comparison == 0:
+            if nfo.check_token(self.table_footer, line) and date_comparison == 0:
                 insert_line_index = index
-                additional_content.append(new_object.to_string(headers=headers))
+                additional_content.append(new_object.to_table_line(headers=headers))
                 id_line_locs = [insert_line_index]
 
             # if we have passed the date or if we're at the end of the file write out the table
@@ -263,7 +260,8 @@ class AddObjectOperations:
             additional_content.extend(new_table)
             insert_line_index = len(file_as_list)
             id_line_locs = [obj_in_table_index + insert_line_index - 1]
-
+        if len(additional_content) == 0:
+            raise ValueError('Could not find place to add the additional table lines.')
         # write out to the file_content_as_list
         new_object_ids = {
             new_object.id: id_line_locs
