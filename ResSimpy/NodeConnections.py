@@ -36,10 +36,12 @@ class NodeConnections(ABC):
         raise NotImplementedError("Implement this in the derived class")
 
     @property
+    @abstractmethod
     def table_header(self) -> str:
         raise NotImplementedError("Implement this in the derived class")
 
     @property
+    @abstractmethod
     def table_footer(self) -> str:
         raise NotImplementedError("Implement this in the derived class")
 
