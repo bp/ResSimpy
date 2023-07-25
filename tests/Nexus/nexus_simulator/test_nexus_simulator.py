@@ -181,10 +181,11 @@ def test_get_users_linked_with_files(mocker):
     expected_result = [("/run/control/path","Mock-Owner:Mock-Group",datetime.datetime(2018, 6, 30, 13, 48, 10))]
     exists_mock = mocker.Mock(return_value=True)
     mocker.patch("os.path.exists", exists_mock)
-    simulation = NexusSimulator(
-        origin='test/Path.fcs', destination='original_output_path')
+    print("creating Nexus Simulator instance...")
+    simulation = NexusSimulator(origin='Path.fcs')
 
     # Act
+    print("Checking get_users_linked_with_files")
     result = simulation.get_users_linked_with_files()
 
     # Assert
