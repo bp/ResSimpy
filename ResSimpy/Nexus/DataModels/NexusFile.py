@@ -22,8 +22,8 @@ from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_OPERATION
 from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_nexus_file, \
     get_empty_dict_uuid_list_int
 from ResSimpy.File import File
-from pathlib import Path
-from os import stat
+import pathlib
+import os
 from datetime import datetime
 
 
@@ -94,7 +94,7 @@ class NexusFile(File):
         def __get_pathlib_path_details(full_file_path: str):
             if full_file_path == "" or full_file_path is None:
                 return None
-            pathlib_path = Path(full_file_path)
+            pathlib_path = pathlib.Path(full_file_path)
             owner = pathlib_path.owner()
             group = pathlib_path.group()
             if owner is not None and group is not None:
@@ -106,7 +106,7 @@ class NexusFile(File):
         def __get_datetime_from_os_stat(full_file_path: str):
             if full_file_path == "" or full_file_path is None:
                 return None
-            stat_obj = stat(full_file_path)
+            stat_obj = os.stat(full_file_path)
             timestamp = stat_obj.st_mtime
             if timestamp is None:
                 return None
