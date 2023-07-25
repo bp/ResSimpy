@@ -178,7 +178,7 @@ def test_get_users_linked_with_files(mocker):
     
     os_mock = mocker.MagicMock()
     mocker.patch('os.stat',os_mock)
-    os_mock.return_value.st_mtime = None
+    os_mock.return_value.st_mtime = 1530346690
     # os_mock = mocker.MagicMock()
     # mocker.patch('os.stat',os_mock)
     # os_mock.return_value.st_mtime.return_value = 1530346690 
