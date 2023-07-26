@@ -110,7 +110,7 @@ class NexusFile(File):
             timestamp = stat_obj.st_mtime
             if timestamp is None:
                 return None
-            return datetime.fromtimestamp(timestamp,tz=timezone.utc)
+            return datetime.fromtimestamp(timestamp, tz=timezone.utc)
 
         user = None
         last_changed = None
