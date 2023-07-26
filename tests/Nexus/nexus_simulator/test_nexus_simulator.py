@@ -171,10 +171,10 @@ def test_get_users_linked_with_files(mocker):
     # Arrange 
     fcs_file = "RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\n"
     open_mock = mocker.mock_open(read_data=fcs_file)
-    
+    modified_time=datetime(2018, 6, 30, 13, 48, 10)
     dt_mock = mocker.MagicMock()
     mocker.patch('datetime.datetime',dt_mock)
-    dt_mock.fromtimestamp.return_value = datetime(2018, 6, 30, 13, 48, 10)
+    dt_mock.fromtimestamp.return_value = modified_time
     
     mocker.patch("builtins.open", open_mock)
     path_mock = mocker.MagicMock()
@@ -193,8 +193,8 @@ def test_get_users_linked_with_files(mocker):
     
 
     simulation = NexusSimulator(origin="Path.fcs")
-    expected_result:list[tuple[Optional[str], Optional[str], Optional[datetime]]]
-    expected_result = [("run_control.inc","Mock-User:Mock-Group",datetime(2018, 6, 30, 13, 48, 10))]
+    # expected_result:list[tuple[Optional[str], Optional[str], Optional[datetime]]]
+    # expected_result = [("run_control.inc","Mock-User:Mock-Group",modified_time)]
     # Act
     
     result = simulation.get_users_linked_with_files()
@@ -203,10 +203,10 @@ def test_get_users_linked_with_files(mocker):
     # os_mock.reset_mock()
     # path_mock.reset_mock()
     # Assert
-    
+    mocker.stopall()
     assert str(result[0][0]) == "run_control.inc"
     assert str(result[0][1]) == "Mock-User:Mock-Group"
-    assert result[0][2].strftime("%m/%d/%Y, %H:%M:%S") == datetime(2018, 6, 30, 13, 48, 10).strftime("%m/%d/%Y, %H:%M:%S")
+    assert result[0][2] == modified_time
     # assert result == expected_result
 
 def test_load_fcs_file_comment_after_declaration(mocker, globalFixture):
