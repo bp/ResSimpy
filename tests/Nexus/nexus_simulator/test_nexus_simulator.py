@@ -171,6 +171,11 @@ def test_get_users_linked_with_files(mocker):
     # Arrange 
     fcs_file = "RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\n"
     open_mock = mocker.mock_open(read_data=fcs_file)
+    
+    dt_mock = mocker.MagicMock()
+    mocker.patch('datetime.datetime',dt_mock)
+    dt_mock.fromtimestamp.return_value = datetime(2018, 6, 30, 13, 48, 10)
+    
     mocker.patch("builtins.open", open_mock)
     path_mock = mocker.MagicMock()
     mocker.patch('pathlib.Path', path_mock)
@@ -180,6 +185,8 @@ def test_get_users_linked_with_files(mocker):
     os_mock = mocker.MagicMock()
     mocker.patch('os.stat',os_mock)
     os_mock.return_value.st_mtime = 1530346690
+    
+    
     # os_mock = mocker.MagicMock()
     # mocker.patch('os.stat',os_mock)
     # os_mock.return_value.st_mtime.return_value = 1530346690 
@@ -192,13 +199,14 @@ def test_get_users_linked_with_files(mocker):
     
     result = simulation.get_users_linked_with_files()
 
+    dt_mock.reset_mock()
+    os_mock.reset_mock()
+    path_mock.reset_mock()
     # Assert
-    print(str(result[0][0]))
-    print(str(result[0][1]))
-    print(result[0][2])
+    
     assert str(result[0][0]) == "run_control.inc"
     assert str(result[0][1]) == "Mock-User:Mock-Group"
-    # assert result[0][2].strftime("%m/%d/%Y, %H:%M:%S") == datetime(2018, 6, 30, 13, 48, 10).strftime("%m/%d/%Y, %H:%M:%S")
+    assert result[0][2].strftime("%m/%d/%Y, %H:%M:%S") == datetime(2018, 6, 30, 13, 48, 10).strftime("%m/%d/%Y, %H:%M:%S")
     # assert result == expected_result
 
 def test_load_fcs_file_comment_after_declaration(mocker, globalFixture):
