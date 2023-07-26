@@ -45,6 +45,7 @@ class NexusWellConnections(WellConnections):
         Returns:
             NexusWellConnection: which has the same name as requested
         """
+        self.__parent_network.get_load_status()
         to_return = filter(lambda x: False if x.name is None else x.name.upper() == name.upper(),
                            self.__well_connections)
         return next(to_return, None)
@@ -55,6 +56,7 @@ class NexusWellConnections(WellConnections):
             DataFrame: of the properties of the well connections through time with each row representing a single well \
             connection.
         """
+        self.__parent_network.get_load_status()
         return obj_to_dataframe(self.__well_connections)
 
     def get_overview(self) -> str:

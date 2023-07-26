@@ -110,12 +110,12 @@ class NexusNetwork(Network):
                 start_date=self.__model.start_date,
                 default_units=self.__model.default_units,
                 )
-            self.nodes._add_nodes_to_memory(type_check_lists(nexus_obj_dict.get('NODES')))
+            self.nodes._add_to_memory(type_check_lists(nexus_obj_dict.get('NODES')))
             self.connections._add_to_memory(type_check_lists(nexus_obj_dict.get('NODECON')))
             self.well_connections._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLS')))
             self.wellheads._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLHEAD')))
             self.wellbores._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLBORE')))
-            self.constraints.add_constraints_to_memory(type_check_dicts(nexus_obj_dict.get('CONSTRAINTS')))
+            self.constraints._add_to_memory(type_check_dicts(nexus_obj_dict.get('CONSTRAINTS')))
 
         self.__has_been_loaded = True
 
@@ -156,7 +156,7 @@ class NexusNetwork(Network):
         network_element_to_search: Any = None
         self.get_load_status()
         if network_element_type == 'constraints':
-            network_element_to_search = self.constraints.get_constraints().get(name, None)
+            network_element_to_search = self.constraints.get_all().get(name, None)
         else:
             # retrieve the getter method on the network attribute
             network_element = getattr(self, f'{network_element_type}', None)

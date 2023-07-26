@@ -203,11 +203,11 @@ def test_load_constraints(mocker, file_contents, expected_content):
 
     # Act
     constraints = NexusConstraints(mock_nexus_network, mock_nexus_sim)
-    constraints.load_constraints(surface_file, start_date, UnitSystem.ENGLISH)
-    result = constraints.get_constraints()
-    result_single = constraints.get_constraints(object_name='well1')
-    result_df = constraints.get_constraint_df()
-    result_date_filtered = constraints.get_constraints(date='01/01/2019')
+    constraints.load(surface_file, start_date, UnitSystem.ENGLISH)
+    result = constraints.get_all()
+    result_single = constraints.get_all(object_name='well1')
+    result_df = constraints.get_df()
+    result_date_filtered = constraints.get_all(date='01/01/2019')
     # sort the dates for comparing dataframes (order normally wouldn't matter)
     result_df['date'] = pd.to_datetime(result_df['date'])
     result_df = result_df.sort_values('date').reset_index(drop=True)
@@ -330,7 +330,7 @@ def test_constraint_ids(mocker, file_contents, object_locations):
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
                                                     'uuid4', 'uuid5', 'uuid6', 'uuid7'])
     # Act
-    model.network.constraints.get_constraints()
+    model.network.constraints.get_all()
 
     result = model.model_files.surface_files[1].object_locations
     # Assert

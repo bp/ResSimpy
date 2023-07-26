@@ -1673,7 +1673,7 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
     result_wellcons = nexus_sim.network.well_connections.get_all()
     result_wellheads = nexus_sim.network.wellheads.get_all()
     result_wellbores = nexus_sim.network.wellbores.get_all()
-    result_constraints = nexus_sim.network.constraints.get_constraints()
+    result_constraints = nexus_sim.network.constraints.get_all()
     # Assert
     assert result_nodes == expected_nodes
     assert result_cons == expected_cons

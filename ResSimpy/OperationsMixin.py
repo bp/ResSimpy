@@ -31,6 +31,10 @@ class NetworkOperationsMixIn(ABC):
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
+    def _add_to_memory(self, additional_objs: Optional[list[Any]]):
+        raise NotImplementedError("Implement this in the derived class")
+
+    @abstractmethod
     def remove(self, obj_to_remove: UUID | dict[str, None | str | float | int]) -> None:
         raise NotImplementedError("Implement this in the derived class")
 

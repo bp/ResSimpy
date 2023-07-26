@@ -91,9 +91,9 @@ class NexusNodes(Nodes):
         cons_list = new_nodes.get('NODES')
         if isinstance(cons_list, dict):
             raise ValueError('Incompatible data format for additional wells. Expected type "list" instead got "dict"')
-        self._add_nodes_to_memory(cons_list)
+        self._add_to_memory(cons_list)
 
-    def _add_nodes_to_memory(self, additional_list: Optional[list[NexusNode]]) -> None:
+    def _add_to_memory(self, additional_list: Optional[list[NexusNode]]) -> None:
         """Extends the nodes object by a list of nodes provided to it.
 
         Args:
@@ -145,7 +145,7 @@ class NexusNodes(Nodes):
 
         new_object = NexusNode(node_to_add)
 
-        self._add_nodes_to_memory([new_object])
+        self._add_to_memory([new_object])
 
         file_to_add_to = self.__parent_network.get_network_file()
 
