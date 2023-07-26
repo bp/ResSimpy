@@ -5,7 +5,7 @@ from uuid import UUID
 
 import pandas as pd
 
-from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.File import File
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Nexus.nexus_modify_object_in_file import ModifyObjectOperations
 from ResSimpy.Nexus.nexus_remove_object_from_file import RemoveObjectOperations
@@ -72,7 +72,7 @@ class NexusWellConnections(WellConnections):
             return
         self.__well_connections.extend(additional_list)
 
-    def load(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
+    def load(self, surface_file: File, start_date: str, default_units: UnitSystem) -> None:
         new_well_connections = collect_all_tables_to_objects(surface_file, {'WELLS': NexusWellConnection},
                                                              start_date=start_date,
                                                              default_units=default_units)

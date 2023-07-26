@@ -6,9 +6,9 @@ from uuid import UUID
 
 import pandas as pd
 
+from ResSimpy.File import File
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
-from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 from ResSimpy.Wellbores import Wellbores
@@ -49,7 +49,7 @@ class NexusWellbores(Wellbores):
     def get_overview(self) -> str:
         raise NotImplementedError('To be implemented')
 
-    def load(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
+    def load(self, surface_file: File, start_date: str, default_units: UnitSystem) -> None:
         new_wellbores = collect_all_tables_to_objects(surface_file, {'WELLBORE': NexusWellbore},
                                                       start_date=start_date,
                                                       default_units=default_units)

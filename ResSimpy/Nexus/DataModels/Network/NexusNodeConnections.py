@@ -5,10 +5,10 @@ from uuid import UUID
 import pandas as pd
 from typing import Sequence, Optional, TYPE_CHECKING
 
+from ResSimpy.File import File
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 
-from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.nexus_modify_object_in_file import ModifyObjectOperations
@@ -64,7 +64,7 @@ class NexusNodeConnections(NodeConnections):
     def get_overview(self) -> str:
         raise NotImplementedError('To be implemented')
 
-    def load(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
+    def load(self, surface_file: File, start_date: str, default_units: UnitSystem) -> None:
         """Calls load connections and appends the list of discovered NodeConnections into the NexusNodeConnection \
             object.
         """
@@ -76,11 +76,11 @@ class NexusNodeConnections(NodeConnections):
                 'Incompatible data format for additional nodecons. Expected type "list" instead got "dict"')
         self._add_to_memory(cons_list)
 
-    def _add_to_memory(self, additional_list: Optional[list[NodeConnection]]):
+    def _add_to_memory(self, additional_list: Optional[Sequence[NexusNodeConnection]]):
         """Extends the nodes object by a list of nodes provided to it.
 
         Args:
-            additional_list (list[NodeConnection]): list of connections to add to the connection list.
+            additional_list (Sequence[NexusNodeConnection]): list of connections to add to the connection list.
         """
         if additional_list is None:
             return

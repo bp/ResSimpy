@@ -1,5 +1,5 @@
 import uuid
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -22,6 +22,7 @@ class Constraint(ABC):
     max_reservoir_liquid_rate: Optional[float] = None
     __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False)
 
+    @abstractmethod
     def to_dict(self):
         raise NotImplementedError("Implement this in the derived class")
 

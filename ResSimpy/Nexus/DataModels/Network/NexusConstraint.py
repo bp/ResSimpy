@@ -1,11 +1,9 @@
-import uuid
 from dataclasses import dataclass
 from typing import Optional
 
 from ResSimpy.Constraint import Constraint
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Utils import to_dict_generic
-from ResSimpy.Utils.generic_repr import generic_repr
 
 
 @dataclass

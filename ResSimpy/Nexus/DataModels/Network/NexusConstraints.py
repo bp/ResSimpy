@@ -293,8 +293,8 @@ class NexusConstraints(Constraints):
                 break
 
     def modify(self, name: str,
-               current_constraint: dict[str, None | float | int | str] | NexusConstraint,
-               new_constraint_props: dict[str, None | float | int | str | UnitSystem] | NexusConstraint,
+               current_constraint: dict[str, None | float | int | str] | Constraint,
+               new_constraint_props: dict[str, None | float | int | str | UnitSystem] | Constraint,
                comments: Optional[str] = None) \
             -> None:
         """Modify an existing constraint. Retains existing constraint values that are not overridden by the new \
@@ -302,16 +302,16 @@ class NexusConstraints(Constraints):
 
         Args:
             name (str):
-            current_constraint (dict[str, None | float | int | str] | NexusConstraint): dictionary or constraint object\
+            current_constraint (dict[str, None | float | int | str] | Constraint): dictionary or constraint object\
                 with enough attributes to identify a unique existing constraint in the model.
-            new_constraint_props (dict[str, None | float | int | str] | NexusConstraint): dictionary or constraint to \
+            new_constraint_props (dict[str, None | float | int | str] | Constraint): dictionary or constraint to \
             update the constraint with.
         """
 
-        def clean_constraint_inputs(constraint: dict[str, None | float | int | str] | NexusConstraint) -> \
+        def clean_constraint_inputs(constraint: dict[str, None | float | int | str] | Constraint) -> \
                 dict[str, None | float | int | str]:
             """Cleans up an input ensuring consistent type is returned."""
-            if isinstance(constraint, NexusConstraint):
+            if isinstance(constraint, Constraint):
                 cleaned_dict = constraint.to_dict()
             else:
                 cleaned_dict = constraint
