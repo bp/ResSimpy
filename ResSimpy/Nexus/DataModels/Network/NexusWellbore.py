@@ -2,12 +2,12 @@ from dataclasses import dataclass
 from typing import Optional
 
 import ResSimpy.Utils.to_dict_generic as to_dict_generic
-from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Utils.generic_repr import generic_repr
+from ResSimpy.Wellbore import Wellbore
 
 
 @dataclass(kw_only=True)
-class NexusWellbore:
+class NexusWellbore(Wellbore):
     """Attributes
     date (str): string representation of the last defined date
     unit_system (UnitSystem): unit system enum
@@ -26,13 +26,7 @@ class NexusWellbore:
     water_method (int): Method number used for water. (IWAT).
     """
 
-    date: Optional[str] = None
-    unit_system: Optional[UnitSystem] = None
-    name: Optional[str] = None
     flowsect: Optional[int] = None
-    diameter: Optional[float] = None
-    inner_diameter: Optional[float] = None
-    roughness: Optional[float] = None
     bore_type: Optional[str] = None
     hyd_method: Optional[str] = None
     temperature: Optional[float] = None

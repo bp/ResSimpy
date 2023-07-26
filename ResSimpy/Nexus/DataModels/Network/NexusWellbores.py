@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import field, dataclass
 from typing import Optional, TYPE_CHECKING
+from uuid import UUID
 
 import pandas as pd
 
@@ -10,13 +11,14 @@ from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
+from ResSimpy.Wellbores import Wellbores
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 
 
 @dataclass
-class NexusWellbores:
+class NexusWellbores(Wellbores):
     __wellbores: list[NexusWellbore] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork) -> None:
@@ -66,3 +68,21 @@ class NexusWellbores:
         if additional_list is None:
             return
         self.__wellbores.extend(additional_list)
+
+    def add(self, obj_to_add: dict[str, None | str | float | int]) -> None:
+        raise NotImplementedError
+
+    def remove(self, obj_to_remove: UUID | dict[str, None | str | float | int]) -> None:
+        raise NotImplementedError
+
+    def modify(self, obj_to_modify: dict[str, None | str | float | int],
+               new_properties: dict[str, None | str | float | int]) -> None:
+        raise NotImplementedError
+
+    @property
+    def table_header(self) -> str:
+        return 'WELLBORE'
+
+    @property
+    def table_footer(self) -> str:
+        return 'END' + self.table_header

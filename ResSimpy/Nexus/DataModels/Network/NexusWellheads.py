@@ -10,13 +10,14 @@ from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
+from ResSimpy.Wellheads import Wellheads
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 
 
 @dataclass
-class NexusWellheads:
+class NexusWellheads(Wellheads):
     __wellheads: list[NexusWellhead] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork) -> None:
@@ -74,7 +75,6 @@ class NexusWellheads:
     def modify(self, obj_to_modify: dict[str, None | str | float | int],
                new_properties: dict[str, None | str | float | int]) -> None:
         raise NotImplementedError
-
 
     @property
     def table_header(self) -> str:
