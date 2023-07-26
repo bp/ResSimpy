@@ -185,17 +185,20 @@ def test_get_users_linked_with_files(mocker):
     # os_mock.return_value.st_mtime.return_value = 1530346690 
     
 
-    simulation = NexusSimulator(origin="test1/Path.fcs")
+    simulation = NexusSimulator(origin="Path.fcs")
     expected_result:list[tuple[Optional[str], Optional[str], Optional[datetime]]]
-    expected_result = [("test1\\run_control.inc","Mock-User:Mock-Group",datetime(2018, 6, 30, 13, 48, 10))]
+    expected_result = [("run_control.inc","Mock-User:Mock-Group",datetime(2018, 6, 30, 13, 48, 10))]
     # Act
     
     result = simulation.get_users_linked_with_files()
 
     # Assert
-    # assert str(result[0][0]) == "test1\\run_control.inc"
+    print(str(result[0][0]))
+    print(str(result[0][1]))
+    print(result[0][2])
+    assert str(result[0][0]) == "run_control.inc"
     assert str(result[0][1]) == "Mock-User:Mock-Group"
-    # assert result[0][2].strftime("%m/%d/%Y, %H:%M:%S") == datetime(2018, 6, 30, 13, 48, 10).strftime("%m/%d/%Y, %H:%M:%S")
+    assert result[0][2].strftime("%m/%d/%Y, %H:%M:%S") == datetime(2018, 6, 30, 13, 48, 10).strftime("%m/%d/%Y, %H:%M:%S")
     # assert result == expected_result
 
 def test_load_fcs_file_comment_after_declaration(mocker, globalFixture):
