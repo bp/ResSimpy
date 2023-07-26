@@ -191,7 +191,6 @@ def test_get_users_linked_with_files(mocker):
     # Act
     
     result = simulation.get_users_linked_with_files()
-
     mocker.stopall()
     assert str(result[0][0]) == "run_control.inc"
     assert str(result[0][1]) == "Mock-User:Mock-Group"
