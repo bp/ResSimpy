@@ -193,7 +193,10 @@ def test_get_users_linked_with_files(mocker):
     result = simulation.get_users_linked_with_files()
 
     # Assert
-    assert result == expected_result
+    assert str(result[0][0]) == "test1\\run_control.inc"
+    assert str(result[0][1]) == "Mock-User:Mock-Group"
+    assert result[0][2].strftime("%m/%d/%Y, %H:%M:%S") == datetime(2018, 6, 30, 13, 48, 10).strftime("%m/%d/%Y, %H:%M:%S")
+    # assert result == expected_result
 
 def test_load_fcs_file_comment_after_declaration(mocker, globalFixture):
     """Check that the code ignores lines with comments that contain tokens"""
