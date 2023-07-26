@@ -186,13 +186,13 @@ def test_get_users_linked_with_files(mocker):
 
     simulation = NexusSimulator(origin="test1/Path.fcs")
 
-    expected_result = [("test1\\run_control.inc","Mock-User:Mock-Group",None)]
+    expected_result = [("test1\\run_control.inc","Mock-User:Mock-Group",datetime.datetime(2018, 6, 30, 13, 48, 10))]
     # Act
     
     result = simulation.get_users_linked_with_files()
 
     # Assert
-    # assert result == expected_result
+    assert result == expected_result
 
 def test_load_fcs_file_comment_after_declaration(mocker, globalFixture):
     """Check that the code ignores lines with comments that contain tokens"""
