@@ -199,9 +199,9 @@ def test_get_users_linked_with_files(mocker):
     
     result = simulation.get_users_linked_with_files()
 
-    dt_mock.reset_mock()
-    os_mock.reset_mock()
-    path_mock.reset_mock()
+    # dt_mock.reset_mock()
+    # os_mock.reset_mock()
+    # path_mock.reset_mock()
     # Assert
     
     assert str(result[0][0]) == "run_control.inc"
