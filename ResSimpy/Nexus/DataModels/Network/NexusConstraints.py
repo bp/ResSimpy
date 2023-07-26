@@ -249,7 +249,7 @@ class NexusConstraints(Constraints):
             if nfo.check_token('ENDCONSTRAINTS', line) and date_comparison == 0:
                 # find the end of a constraint table and add the new constraint
                 new_constraint_index = index
-                constraint_string = new_constraint.to_string()
+                constraint_string = new_constraint.to_table_line()
                 new_constraint_text.append(constraint_string)
                 id_line_locs = [new_constraint_index]
             elif index == len(file_as_list) - 1 and date_index >= 0 and not nfo.check_token('ENDQMULT', line):
@@ -265,7 +265,7 @@ class NexusConstraints(Constraints):
 
             if new_table_needed:
                 new_constraint_text.append('CONSTRAINTS\n')
-                new_constraint_text.append(new_constraint.to_string())
+                new_constraint_text.append(new_constraint.to_table_line())
                 new_constraint_text.append('ENDCONSTRAINTS\n')
                 id_line_locs = [new_constraint_index + len(new_constraint_text) - 2]
 

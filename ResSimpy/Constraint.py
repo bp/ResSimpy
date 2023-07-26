@@ -1,8 +1,10 @@
+import uuid
 from abc import ABC
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Utils.generic_repr import generic_repr
 
 
 @dataclass
@@ -18,6 +20,19 @@ class Constraint(ABC):
     max_reservoir_gas_rate: Optional[float] = None
     max_reservoir_water_rate: Optional[float] = None
     max_reservoir_liquid_rate: Optional[float] = None
+    __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False)
 
     def to_dict(self):
         raise NotImplementedError("Implement this in the derived class")
+
+    @property
+    def id(self) -> uuid.UUID:
+        """Unique identifier for each Node object."""
+        return self.__id
+
+    def new_id(self):
+        """Refreshes the id on the object."""
+        self.__id = uuid.uuid4()
+
+    def __repr__(self) -> str:
+        return generic_repr(self)

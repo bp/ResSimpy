@@ -483,7 +483,7 @@ def test_constraint_to_string(constraint, expected_string):
     # Arrange
     new_constraint = NexusConstraint(constraint)
     # Act
-    constraint_string = new_constraint.to_string()
+    constraint_string = new_constraint.to_table_line()
     # Assert
     assert constraint_string == expected_string
 

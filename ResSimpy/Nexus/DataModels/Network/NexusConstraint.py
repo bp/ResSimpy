@@ -205,7 +205,6 @@ class NexusConstraint(Constraint):
         super().__init__()
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)
-        self.__id: uuid.UUID = uuid.uuid4()
 
     @staticmethod
     def get_nexus_mapping() -> dict[str, tuple[str, type]]:
@@ -367,18 +366,7 @@ class NexusConstraint(Constraint):
             if v is not None or nones_overwrite:
                 setattr(self, k, v)
 
-    def __repr__(self) -> str:
-        return generic_repr(self)
-
-    @property
-    def id(self) -> uuid.UUID:
-        return self.__id
-
-    def new_id(self):
-        """Refreshes the id on the object."""
-        self.__id = uuid.uuid4()
-
-    def to_string(self) -> str:
+    def to_table_line(self) -> str:
         """String representation of the constraint for entry to an inline constraint table."""
         qmult_control_key_words = ['QALLRMAX_MULT', 'QOSMAX_MULT', 'QWSMAX_MULT', 'QGSMAX_MULT', 'QLIQSMAX_MULT']
         skip_attributes = ['date', 'unit_system', 'NAME', 'ACTIVATE', 'QOIL', 'QWATER', 'QGAS', 'WELL']
