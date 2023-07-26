@@ -24,7 +24,7 @@ from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_ne
 from ResSimpy.File import File
 import pathlib
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 @dataclass(kw_only=True, repr=True)
@@ -110,7 +110,7 @@ class NexusFile(File):
             timestamp = stat_obj.st_mtime
             if timestamp is None:
                 return None
-            return datetime.fromtimestamp(timestamp)
+            return datetime.fromtimestamp(timestamp,tz=timezone.utc)
 
         user = None
         last_changed = None
