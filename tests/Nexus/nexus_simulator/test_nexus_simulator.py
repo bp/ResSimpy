@@ -1,8 +1,9 @@
 import os
+from typing import Optional
 import uuid
 import pytest
 import pandas as pd
-import datetime
+from datetime import datetime
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
@@ -185,8 +186,8 @@ def test_get_users_linked_with_files(mocker):
     
 
     simulation = NexusSimulator(origin="test1/Path.fcs")
-
-    expected_result = [("test1\\run_control.inc","Mock-User:Mock-Group",datetime.datetime(2018, 6, 30, 13, 48, 10))]
+    expected_result:list[tuple[Optional[str], Optional[str], Optional[datetime]]]
+    expected_result = [("test1\\run_control.inc","Mock-User:Mock-Group",datetime(2018, 6, 30, 13, 48, 10))]
     # Act
     
     result = simulation.get_users_linked_with_files()
