@@ -324,10 +324,10 @@ def test_load_wellhead(mocker, file_contents, wellhead_props_1, wellhead_props_2
     expected_df = expected_df.fillna(value=np.nan).dropna(axis=1, how='all')
 
     # Act
-    nexus_wellheads.load_wellheads(surface_file, start_date, default_units=UnitSystem.ENGLISH)
-    result = nexus_wellheads.get_wellheads()
-    single_wellhead = nexus_wellheads.get_wellhead('tubing')
-    result_df = nexus_wellheads.get_wellheads_df()
+    nexus_wellheads.load(surface_file, start_date, default_units=UnitSystem.ENGLISH)
+    result = nexus_wellheads.get_all()
+    single_wellhead = nexus_wellheads.get_by_name('tubing')
+    result_df = nexus_wellheads.get_df()
 
     # Assert
     assert result == expected_result
@@ -365,10 +365,10 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
     expected_df = expected_df.fillna(value=np.nan).dropna(axis=1, how='all')
 
     # Act
-    nexuswellbore.load_wellbores(surface_file, start_date, default_units=UnitSystem.ENGLISH)
-    result = nexuswellbore.get_wellbores()
-    single_wellbore = nexuswellbore.get_wellbore('well1')
-    result_df = nexuswellbore.get_wellbores_df()
+    nexuswellbore.load(surface_file, start_date, default_units=UnitSystem.ENGLISH)
+    result = nexuswellbore.get_all()
+    single_wellbore = nexuswellbore.get_by_name('well1')
+    result_df = nexuswellbore.get_df()
 
     # Assert
     assert result == expected_result

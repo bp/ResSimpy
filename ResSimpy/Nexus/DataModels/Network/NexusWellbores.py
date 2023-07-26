@@ -23,42 +23,40 @@ class NexusWellbores:
         self.__parent_network: NexusNetwork = parent_network
         self.__wellbores: list[NexusWellbore] = []
 
-    def get_wellbores(self) -> list[NexusWellbore]:
+    def get_all(self) -> list[NexusWellbore]:
         """Returns a list of wellbores loaded from the simulator."""
         self.__parent_network.get_load_status()
         return self.__wellbores
 
-    def get_wellbore(self, name: str) -> Optional[NexusWellbore]:
+    def get_by_name(self, name: str) -> Optional[NexusWellbore]:
         """Returns a single well connection with the provided name loaded from the simulator.
 
         Args:
-        ----
             name (str): name of the requested well connection
 
         Returns:
-        -------
             NexusWellbore: which has the same name as requested
         """
         to_return = filter(lambda x: False if x.name is None else x.name.upper() == name.upper(),
                            self.__wellbores)
         return next(to_return, None)
 
-    def get_wellbores_df(self) -> pd.DataFrame:
+    def get_df(self) -> pd.DataFrame:
         return obj_to_dataframe(self.__wellbores)
 
-    def get_wellbores_overview(self) -> str:
+    def get_overview(self) -> str:
         raise NotImplementedError('To be implemented')
 
-    def load_wellbores(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
+    def load(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
         new_wellbores = collect_all_tables_to_objects(surface_file, {'WELLBORE': NexusWellbore},
                                                       start_date=start_date,
                                                       default_units=default_units)
         cons_list = new_wellbores.get('WELLBORE')
         if isinstance(cons_list, dict):
             raise ValueError('Incompatible data format for additional wells. Expected type "list" instead got "dict"')
-        self.add_wellbores(cons_list)
+        self._add_to_memory(cons_list)
 
-    def add_wellbores(self, additional_list: Optional[list[NexusWellbore]]) -> None:
+    def _add_to_memory(self, additional_list: Optional[list[NexusWellbore]]) -> None:
         """Extends the nodes object by a list of wellbores provided to it.
 
         Args:
