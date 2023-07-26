@@ -63,8 +63,6 @@ class NexusWellConnection(WellConnection):
     gradient_calc: Optional[str] = None
     bottomhole_measured_depth: Optional[float] = None
     add_tubing: Optional[int] = None
-    inner_diameter: Optional[float] = None
-    roughness: Optional[float] = None
     tracer: Optional[str] = None
     con_type: Optional[str] = None
     hyd_method: Optional[str] = None
@@ -79,7 +77,6 @@ class NexusWellConnection(WellConnection):
     on_time: Optional[float] = None
     heat_transfer_coeff: Optional[float] = None
     water_inj_mult: Optional[float] = None
-    productivity_index: Optional[float] = None
     vip_productivity_index: Optional[float] = None
     productivity_index_phase: Optional[float] = None
     d_factor: Optional[float] = None

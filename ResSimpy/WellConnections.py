@@ -1,6 +1,6 @@
 from abc import ABC
 from dataclasses import field
-from typing import Optional, Literal
+from typing import Literal
 
 from ResSimpy.OperationsMixin import NetworkOperationsMixIn
 from ResSimpy.WellConnection import WellConnection

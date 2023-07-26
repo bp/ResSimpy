@@ -16,3 +16,6 @@ class WellConnection(ABC):
     length: Optional[float] = None
     temperature: Optional[float] = None
     diameter: Optional[float] = None
+    roughness: Optional[float] = None
+    inner_diameter: Optional[float] = None
+    productivity_index: Optional[float] = None
