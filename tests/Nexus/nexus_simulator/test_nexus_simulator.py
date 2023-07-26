@@ -189,7 +189,7 @@ def test_get_users_linked_with_files(mocker):
     expected_result = [("test1\\run_control.inc","Mock-User:Mock-Group",None)]
     # Act
     
-    # result = simulation.get_users_linked_with_files()
+    result = simulation.get_users_linked_with_files()
 
     # Assert
     # assert result == expected_result
