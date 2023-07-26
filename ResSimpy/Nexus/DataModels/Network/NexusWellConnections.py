@@ -5,12 +5,14 @@ from uuid import UUID
 
 import pandas as pd
 
-from ResSimpy.File import File
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
+from ResSimpy.Nexus.nexus_modify_object_in_file import ModifyObjectOperations
+from ResSimpy.Nexus.nexus_remove_object_from_file import RemoveObjectOperations
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
-from ResSimpy.WellConnection import WellConnection
 from ResSimpy.WellConnections import WellConnections
 
 if TYPE_CHECKING:
@@ -24,6 +26,10 @@ class NexusWellConnections(WellConnections):
     def __init__(self, parent_network: NexusNetwork) -> None:
         self.__parent_network: NexusNetwork = parent_network
         self.__well_connections: list[NexusWellConnection] = []
+        self.__add_object_operations = AddObjectOperations(self.__parent_network.model, self.table_header,
+                                                           self.table_footer)
+        self.__remove_object_operations = RemoveObjectOperations(self.table_header, self.table_footer)
+        self.__modify_object_operations = ModifyObjectOperations(self)
 
     def get_all(self) -> list[NexusWellConnection]:
         """Returns a list of well connections loaded from the simulator."""
@@ -34,11 +40,9 @@ class NexusWellConnections(WellConnections):
         """Returns a single well connection with the provided name loaded from the simulator.
 
         Args:
-        ----
             name (str): name of the requested well connection
 
         Returns:
-        -------
             NexusWellConnection: which has the same name as requested
         """
         to_return = filter(lambda x: False if x.name is None else x.name.upper() == name.upper(),
@@ -56,7 +60,7 @@ class NexusWellConnections(WellConnections):
     def get_overview(self) -> str:
         raise NotImplementedError('To be implemented')
 
-    def _add_to_memory(self, additional_list: Optional[list[WellConnection]]) -> None:
+    def _add_to_memory(self, additional_list: Optional[list[NexusWellConnection]]) -> None:
         """Extends the nodes object by a list of connections provided to it.
 
         Args:
@@ -66,7 +70,7 @@ class NexusWellConnections(WellConnections):
             return
         self.__well_connections.extend(additional_list)
 
-    def load(self, surface_file: File, start_date: str, default_units: UnitSystem) -> None:
+    def load(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
         new_well_connections = collect_all_tables_to_objects(surface_file, {'WELLS': NexusWellConnection},
                                                              start_date=start_date,
                                                              default_units=default_units)
@@ -75,15 +79,15 @@ class NexusWellConnections(WellConnections):
             raise ValueError('Incompatible data format for additional wells. Expected type "list" instead got "dict"')
         self._add_to_memory(cons_list)
 
-    def add(self, obj_to_add: dict[str, None | str | float | int]):
-        pass
+    def add(self, obj_to_add: dict[str, None | str | float | int]) -> None:
+        raise NotImplementedError
 
-    def remove(self, obj_to_remove: UUID | dict[str, None | str | float | int]):
-        pass
+    def remove(self, obj_to_remove: UUID | dict[str, None | str | float | int]) -> None:
+        raise NotImplementedError
 
     def modify(self, obj_to_modify: dict[str, None | str | float | int],
                new_properties: dict[str, None | str | float | int]) -> None:
-        pass
+        raise NotImplementedError
 
     @property
     def table_header(self) -> str:
