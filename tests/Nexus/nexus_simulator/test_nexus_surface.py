@@ -286,10 +286,10 @@ def test_load_well_connections(mocker, file_contents, well_connection_props1, we
 
 
     # Act
-    nexus_well_cons.load_well_connections(surface_file, start_date, default_units=UnitSystem.ENGLISH)
-    result = nexus_well_cons.get_well_connections()
-    single_connection_result = nexus_well_cons.get_well_connection('prod')
-    result_df = nexus_well_cons.get_well_connections_df()
+    nexus_well_cons.load(surface_file, start_date, default_units=UnitSystem.ENGLISH)
+    result = nexus_well_cons.get_all()
+    single_connection_result = nexus_well_cons.get_by_name('prod')
+    result_df = nexus_well_cons.get_df()
 
     # Assert
     assert result == expected_result

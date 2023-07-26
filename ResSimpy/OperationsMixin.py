@@ -31,11 +31,11 @@ class NetworkOperationsMixIn(ABC):
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
-    def remove(self, obj_to_remove: UUID | dict[str, None | str | float | int]):
+    def remove(self, obj_to_remove: UUID | dict[str, None | str | float | int]) -> None:
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
-    def add(self, obj_to_add: dict[str, None | str | float | int]):
+    def add(self, obj_to_add: dict[str, None | str | float | int]) -> None:
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod

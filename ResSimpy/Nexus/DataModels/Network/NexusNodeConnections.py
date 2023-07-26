@@ -76,16 +76,11 @@ class NexusNodeConnections(NodeConnections):
                 'Incompatible data format for additional nodecons. Expected type "list" instead got "dict"')
         self._add_to_memory(cons_list)
 
-    def _add_to_memory(self, additional_list: Optional[list[NexusNodeConnection]]):
+    def _add_to_memory(self, additional_list: Optional[list[NodeConnection]]):
         """Extends the nodes object by a list of nodes provided to it.
 
         Args:
-        ----
-            additional_list (Sequence[NexusNodeConnection]): list of nexus connections to add to the connection list.
-
-        Returns:
-        -------
-            None
+            additional_list (list[NodeConnection]): list of connections to add to the connection list.
         """
         if additional_list is None:
             return
