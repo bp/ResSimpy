@@ -304,7 +304,7 @@ class NexusCompletion(Completion):
         return [v[0] for v in NexusCompletion.get_nexus_mapping().values()]
 
     @classmethod
-    def from_dict(cls, input_dictionary: dict[str, None | float | int | str]) -> Self:
+    def from_dict(cls, input_dictionary: dict[str, None | float | int | str | DateFormatEnum.DateFormat]) -> Self:
         """Generates a NexusCompletion from a dictionary."""
         for input_attr in input_dictionary:
             if input_attr == 'date' or input_attr == 'unit_system' or input_attr == 'date_format':
@@ -312,11 +312,12 @@ class NexusCompletion(Completion):
             elif input_attr not in cls.valid_attributes():
                 raise AttributeError(f'Unexpected keyword "{input_attr}" found within {input_dictionary}')
         date = input_dictionary.get('date', None)
-        date_format: DateFormatEnum.DateFormat = input_dictionary.get('date_format')
+        date_format = input_dictionary.get('date_format')
+        if not isinstance(date_format, DateFormatEnum.DateFormat):
+            raise AttributeError(f'No date_format provided for the completion, instead got {date_format=}')
         if date is None:
             raise AttributeError(f'No date provided for the completion, instead got {date=}')
-        if date_format is None:
-            raise AttributeError(f'No date_format provided for the completion, instead got {date_format=}')
+
         date = str(date)
         constructed_class = cls(date=date, date_format=date_format)
         constructed_class.update(input_dictionary)
