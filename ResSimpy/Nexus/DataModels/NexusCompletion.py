@@ -304,7 +304,7 @@ class NexusCompletion(Completion):
         return [v[0] for v in NexusCompletion.get_nexus_mapping().values()]
 
     @classmethod
-    def from_dict(cls, input_dictionary: dict[str, None | float | int | str | DateFormatEnum.DateFormat]) -> Self:
+    def from_dict(cls, input_dictionary: dict[str, None | float | int | str]) -> Self:
         """Generates a NexusCompletion from a dictionary."""
         for input_attr in input_dictionary:
             if input_attr == 'date' or input_attr == 'unit_system' or input_attr == 'date_format':
