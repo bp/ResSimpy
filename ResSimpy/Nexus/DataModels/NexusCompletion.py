@@ -304,7 +304,7 @@ class NexusCompletion(Completion):
         return [v[0] for v in NexusCompletion.get_nexus_mapping().values()]
 
     @classmethod
-    def from_dict(cls, input_dictionary:  dict[str, None | float | int | str]) -> Self:
+    def from_dict(cls, input_dictionary: dict[str, None | float | int | str]) -> Self:
         """Generates a NexusCompletion from a dictionary."""
         for input_attr in input_dictionary:
             if input_attr == 'date' or input_attr == 'unit_system' or input_attr == 'date_format':
@@ -312,7 +312,7 @@ class NexusCompletion(Completion):
             elif input_attr not in cls.valid_attributes():
                 raise AttributeError(f'Unexpected keyword "{input_attr}" found within {input_dictionary}')
         date = input_dictionary.get('date', None)
-        date_format = input_dictionary.get('date_format', None)
+        date_format = input_dictionary.get('date_format', Optional[DateFormatEnum.DateFormat])
         if date is None:
             raise AttributeError(f'No date provided for the completion, instead got {date=}')
         if date_format is None:
@@ -322,7 +322,7 @@ class NexusCompletion(Completion):
         constructed_class.update(input_dictionary)
         return constructed_class
 
-    def update(self, input_dictionary:  dict[str, None | float | int | str]) -> None:
+    def update(self, input_dictionary: dict[str, None | float | int | str]) -> None:
         """Updates a completion based on a dictionary of attributes."""
         for k, v in input_dictionary.items():
             if v is None:

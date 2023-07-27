@@ -5,6 +5,7 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.load_wells import load_wells
 
 
@@ -55,7 +56,7 @@ C    2  2  2  2 (commented line using 'C')
 def test_load_basic_wellspec(mocker, file_contents, expected_name):
     # Arrange
     start_date = '01/01/2023'
-    date_format = 'DD/MM/YYYY'
+    date_format = DateFormat.DD_MM_YYYY
 
     expected_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date=start_date, grid=None, skin=None,
                                             angle_v=None, date_format=date_format)
@@ -84,7 +85,7 @@ def test_load_wells_multiple_wells(mocker):
     # Arrange
     start_date = '01/01/2023'
 
-    date_format = 'DD/MM/YYYY'
+    date_format = DateFormat.DD_MM_YYYY
 
     file_contents = """
     WELLSPEC DEV1
@@ -159,7 +160,7 @@ WELLMOD	RU001	DKH	CON	0
 def test_load_wells_multiple_wells_multiple_dates(mocker):
     # Arrange
     start_date = '01/01/2023'
-    date_format = 'DD/MM/YYYY'
+    date_format = DateFormat.DD_MM_YYYY
 
     file_contents = """
     
@@ -231,7 +232,7 @@ def test_load_wells_multiple_wells_multiple_dates(mocker):
 def test_load_wells_all_columns_present_structured_grid(mocker):
     # Arrange
     start_date = '01/01/2023'
-    date_format = 'DD/MM/YYYY'
+    date_format = DateFormat.DD_MM_YYYY
 
     file_contents = """
     TIME 01/03/2023 !658 days
@@ -301,7 +302,7 @@ def test_load_wells_all_columns_present_structured_grid(mocker):
 def test_load_wells_all_columns_unstructured_grid(mocker):
     # Arrange
     start_date = '01/01/2023'
-    date_format = 'DD/MM/YYYY'
+    date_format = DateFormat.DD_MM_YYYY
 
     # FM and PORTYPE can't appear in the same file in Nexus but we don't care, just store either
     file_contents = """
@@ -338,7 +339,7 @@ def test_load_wells_all_columns_unstructured_grid(mocker):
 def test_load_wells_rel_perm_tables(mocker):
     # Arrange
     start_date = '01/01/2023'
-    date_format = 'DD/MM/YYYY'
+    date_format = DateFormat.DD_MM_YYYY
 
     file_contents = """WELLSPEC WELL_3
 
@@ -381,7 +382,7 @@ def test_load_wells_rel_perm_tables(mocker):
 def test_load_wells_na_values_converted_to_none(mocker):
     # Arrange
     start_date = '01/01/2023'
-    date_format = 'DD/MM/YYYY'
+    date_format = DateFormat.DD_MM_YYYY
 
     file_contents = """
     TIME 01/03/2023 !658 days
@@ -474,7 +475,7 @@ TIME 01/08/2023 !232 days
 def test_correct_units_loaded(mocker, file_contents, expected_units):
     # Arrange
     start_date = '01/08/2023'
-    date_format = 'DD/MM/YYYY'
+    date_format = DateFormat.DD_MM_YYYY
 
     expected_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date=start_date, grid=None, skin=None,
                                             angle_v=None, date_format=date_format)
