@@ -81,7 +81,7 @@ class AddObjectOperations:
         header_index += index
         headers_original = copy.copy(headers)
         for key in object_properties:
-            if key == 'date' or key == 'unit_system':
+            if key == 'date' or key == 'unit_system' or key == 'date_format':
                 continue
             if inverted_nexus_map[key] not in headers:
                 headers.append(inverted_nexus_map[key])

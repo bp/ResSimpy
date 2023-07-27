@@ -1,3 +1,4 @@
+from typing import Optional
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from datetime import datetime, timedelta
 
@@ -28,22 +29,25 @@ class ISODateTime(datetime):
         else:
             return False
 
-    def convert_to_iso(self):
+    @classmethod
+    def convert_to_iso(cls, date: str, date_format: str, start_date: Optional[str] = None) -> 'ISODateTime':
+        converted_date = None
 
-        date_format = self.date_format
-        start_date = self.date
-        no_of_days = self.no_of_days
+        if date_format is None:
+            raise ValueError('Please provide date format')
 
-        if ISODateTime.isfloat(no_of_days):
+        if ISODateTime.isfloat(date) and start_date is None:
+            raise ValueError('Please provide start date when date is numeric')
+        elif ISODateTime.isfloat(date) and start_date is not None:
             if date_format == DateFormat.DD_MM_YYYY:
-                converted_date = ISODateTime.strptime(start_date, '%d/%m/%Y') + timedelta(days=float(no_of_days))
+                converted_date = ISODateTime.strptime(start_date, '%d/%m/%Y') + timedelta(days=float(date))
             elif date_format == DateFormat.MM_DD_YYYY:
-                converted_date = ISODateTime.strptime(start_date, '%m/%d/%Y') + timedelta(days=float(no_of_days))
+                converted_date = ISODateTime.strptime(start_date, '%m/%d/%Y') + timedelta(days=float(date))
 
         elif date_format == DateFormat.DD_MM_YYYY:
-            converted_date = ISODateTime.strptime(start_date, '%d/%m/%Y')
+            converted_date = ISODateTime.strptime(date, '%d/%m/%Y')
 
         elif date_format == DateFormat.MM_DD_YYYY:
-            converted_date = ISODateTime.strptime(start_date, '%m/%d/%Y')
+            converted_date = ISODateTime.strptime(date, '%m/%d/%Y')
 
         return converted_date
