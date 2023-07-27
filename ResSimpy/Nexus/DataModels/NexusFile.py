@@ -37,8 +37,8 @@ class NexusFile(File):
         origin (Optional[str]): Where the file was opened from. Defaults to None.
         include_objects (Optional[list[NexusFile]]): The include files but generated as a NexusFile instance. \
             Defaults to None.
-        linked_user: user or owner of the file. Defaults to None
-        last_modified: last modified date of the file
+        linked_user (Optional[str]): user or owner of the file. Defaults to None
+        last_modified (Optional[datetime]): last modified date of the file
     """
 
     include_locations: Optional[list[str]] = field(default=None)
