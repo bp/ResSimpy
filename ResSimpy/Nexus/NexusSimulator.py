@@ -154,102 +154,10 @@ class NexusSimulator(Simulator):
 
     def get_simulation_progress(self) -> float:
         return self.logging.get_simulation_progress()
-
+    
     def get_users_linked_with_files(self) -> Optional[list[tuple[Optional[str], Optional[str], Optional[datetime]]]]:
-        files_info: list[tuple[Optional[str], Optional[str], Optional[datetime]]]
-        files_info = []
-        if self.model_files.restart_file is not None:
-            files_info.append((self.model_files.restart_file.location,
-                               self.model_files.restart_file.linked_user,
-                               self.model_files.restart_file.last_modified))
-        if self.model_files.structured_grid_file is not None:
-            files_info.append((self.model_files.structured_grid_file.location,
-                               self.model_files.structured_grid_file.linked_user,
-                               self.model_files.structured_grid_file.last_modified))
-        if self.model_files.options_file is not None:
-            files_info.append((self.model_files.options_file.location,
-                               self.model_files.options_file.linked_user,
-                               self.model_files.options_file.last_modified))
-        if self.model_files.runcontrol_file is not None:
-            files_info.append((self.model_files.runcontrol_file.location,
-                               self.model_files.runcontrol_file.linked_user,
-                               self.model_files.runcontrol_file.last_modified))
-        if self.model_files.override_file is not None:
-            files_info.append((self.model_files.override_file.location,
-                               self.model_files.override_file.linked_user,
-                               self.model_files.override_file.last_modified))
-        if self.model_files.eos_default_file is not None:
-            files_info.append((self.model_files.eos_default_file.location,
-                               self.model_files.eos_default_file.linked_user,
-                               self.model_files.eos_default_file.last_modified))
-        if self.model_files.surface_files is not None:
-            for key, file in self.model_files.surface_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        if self.model_files.well_files is not None:
-            for key, file in self.model_files.well_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        if self.model_files.equil_files is not None:
-            for key, file in self.model_files.equil_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        if self.model_files.water_files is not None:
-            for key, file in self.model_files.water_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        if self.model_files.pvt_files is not None:
-            for key, file in self.model_files.pvt_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        if self.model_files.relperm_files is not None:
-            for key, file in self.model_files.relperm_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        if self.model_files.rock_files is not None:
-            for key, file in self.model_files.rock_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        if self.model_files.separator_files is not None:
-            for key, file in self.model_files.separator_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        if self.model_files.valve_files is not None:
-            for key, file in self.model_files.valve_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        if self.model_files.hyd_files is not None:
-            for key, file in self.model_files.hyd_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        if self.model_files.aquifer_files is not None:
-            for key, file in self.model_files.aquifer_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        if self.model_files.tracer_init_files is not None:
-            for key, file in self.model_files.tracer_init_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        if self.model_files.esp_files is not None:
-            for key, file in self.model_files.esp_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        if self.model_files.icd_files is not None:
-            for key, file in self.model_files.icd_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        if self.model_files.choke_files is not None:
-            for key, file in self.model_files.choke_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        if self.model_files.compressor_files is not None:
-            for key, file in self.model_files.compressor_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        if self.model_files.pump_files is not None:
-            for key, file in self.model_files.pump_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        if self.model_files.gas_lift_files is not None:
-            for key, file in self.model_files.gas_lift_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        if self.model_files.ipr_files is not None:
-            for key, file in self.model_files.ipr_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        if self.model_files.polymer_files is not None:
-            for key, file in self.model_files.polymer_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        if self.model_files.adsorption_files is not None:
-            for key, file in self.model_files.adsorption_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        if self.model_files.flux_in_files is not None:
-            for key, file in self.model_files.flux_in_files.items():
-                files_info.append((file.location, file.linked_user, file.last_modified))
-        return files_info
-
+        return self.model_files.files_info
+    
     @property
     def model_files(self) -> FcsNexusFile:
         return self._model_files

@@ -192,9 +192,12 @@ def test_get_users_linked_with_files(mocker):
     
     result = simulation.get_users_linked_with_files()
     mocker.stopall()
-    assert str(result[0][0]) == "run_control.inc"
+    assert str(result[0][0]) == "Path.fcs"
     assert str(result[0][1]) == "Mock-User:Mock-Group"
-    assert result[0][2] == modified_time
+    assert result[1][2] == modified_time
+    assert str(result[1][0]) == "run_control.inc"
+    assert str(result[1][1]) == "Mock-User:Mock-Group"
+    assert result[1][2] == modified_time
 
 
 def test_load_fcs_file_comment_after_declaration(mocker, globalFixture):
