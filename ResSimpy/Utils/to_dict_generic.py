@@ -21,7 +21,7 @@ def to_dict(nexus_object: Any, keys_in_nexus_style: bool = False, add_date: bool
     -------
         a dictionary keyed by attributes and values as the value of the attribute
     """
-    mapping_dict = nexus_object.get_nexus_mapping()
+    mapping_dict = nexus_object.get_keyword_mapping()
     if keys_in_nexus_style:
         result_dict = {x: nexus_object.__getattribute__(y[0]) for x, y in mapping_dict.items()}
 

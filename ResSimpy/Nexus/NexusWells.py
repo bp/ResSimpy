@@ -31,7 +31,7 @@ class NexusWells(Wells):
     def __init__(self, model: NexusSimulator) -> None:
         self.__model = model
         self.__wells = []
-        self.__add_object_operations = AddObjectOperations(model, self.table_header, self.table_footer)
+        self.__add_object_operations = AddObjectOperations(model, self.table_header, self.table_footer, NexusCompletion)
         super().__init__()
 
     @property
@@ -177,7 +177,7 @@ class NexusWells(Wells):
                                                                              file_type_to_search='well_files')
 
         # initialise some storage variables
-        nexus_mapping = NexusCompletion.get_nexus_mapping()
+        nexus_mapping = NexusCompletion.get_keyword_mapping()
         new_completion_time_index = -1
         header_index = -1
         headers: list[str] = []
@@ -248,7 +248,7 @@ class NexusWells(Wells):
             writing_new_wellspec_table = True
 
         # construct the new completion and ensure the order of the values is in the same order as the headers
-        new_completion_string += new_completion.completion_to_wellspec_row(headers)
+        new_completion_string += new_completion.to_table_line(headers)
         new_completion_additional_lines = len(new_completion_string)
         if writing_new_wellspec_table:
             new_completion_string += ['\n']
@@ -263,7 +263,7 @@ class NexusWells(Wells):
                                       preserve_previous_completions: bool, well: NexusWell, well_name: str) -> \
             tuple[list[str], int, list[str], bool]:
         """Writes out the existing wellspec for a well at a new time stamp."""
-        nexus_mapping = NexusCompletion.get_nexus_mapping()
+        nexus_mapping = NexusCompletion.get_keyword_mapping()
         completion_table_as_list = ['\n']
         if not date_found:
             completion_table_as_list += ['TIME ' + completion_date + '\n']
@@ -303,7 +303,7 @@ class NexusWells(Wells):
             completion_table_as_list += write_out_headers
             # run through the existing completions to duplicate the completion at the new time
             for completion in previous_completion_list:
-                completion_table_as_list += completion.completion_to_wellspec_row(headers)
+                completion_table_as_list += completion.to_table_line(headers)
         else:
             write_out_headers = [' '.join(headers) + '\n']
             completion_table_as_list += write_out_headers
@@ -357,7 +357,7 @@ class NexusWells(Wells):
         """Removes the wellspec and header if the wellspec table is empty\
         must first check for whether the well has any remaining completions in the wellspec table.
         """
-        nexus_mapping = NexusCompletion.get_nexus_mapping()
+        nexus_mapping = NexusCompletion.get_keyword_mapping()
         completion_date_found = False
         file_content = wellspec_file.get_flat_list_str_file
         wellspec_index = -1

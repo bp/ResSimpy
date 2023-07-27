@@ -251,7 +251,7 @@ class NexusCompletion(Completion):
         return not NexusCompletion.completion_is_perforation(completion)
 
     @staticmethod
-    def get_nexus_mapping() -> dict[str, tuple[str, type]]:
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
         """Returns a dictionary of mapping from nexus keyword to attribute name."""
 
         nexus_mapping: dict[str, tuple[str, type]] = {
@@ -303,7 +303,7 @@ class NexusCompletion(Completion):
     @staticmethod
     def valid_attributes() -> list[str]:
         """Lists all possible attributes for the object that relate to a Nexus keyword."""
-        return [v[0] for v in NexusCompletion.get_nexus_mapping().values()]
+        return [v[0] for v in NexusCompletion.get_keyword_mapping().values()]
 
     @classmethod
     def from_dict(cls, input_dictionary:  dict[str, None | float | int | str]) -> Self:
@@ -331,7 +331,7 @@ class NexusCompletion(Completion):
             elif hasattr(super(), '_Completion__' + k):
                 setattr(self, '_Completion__' + k, v)
 
-    def completion_to_wellspec_row(self, headers: list[str]) -> list[str]:
+    def to_table_line(self, headers: list[str]) -> list[str]:
         """Takes a completion object and returns the attribute values as a string in the order of headers provided.
 
         Args:

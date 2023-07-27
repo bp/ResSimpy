@@ -62,7 +62,7 @@ class NexusWellhead(Wellhead):
             self.__setattr__(key, prop)
 
     @staticmethod
-    def get_nexus_mapping() -> dict[str, tuple[str, type]]:
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
         """Gets the mapping of nexus keywords to attribute definitions."""
         nexus_mapping = {
             'WELL': ('well', str),

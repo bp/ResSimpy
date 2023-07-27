@@ -4,11 +4,12 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
 
+from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.ISODateTime import ISODateTime
 
 
 @dataclass(kw_only=True)
-class Completion(ABC):
+class Completion(DataObjectMixin, ABC):
     """A class representing well completions.
 
     IMPORTANT: if modifying this class, make sure to update the relevant tests in test_load_wells, as well as updating

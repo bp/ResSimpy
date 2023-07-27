@@ -24,7 +24,7 @@ class GenericTest:
     attr_4: Optional[str] = None
 
     @staticmethod
-    def get_nexus_mapping() -> dict[str, tuple[str, type]]:
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
         mapping_dict = {
             'ATTR_1': ('attr_1', str),
             'ATTR_2': ('attr_2', int),

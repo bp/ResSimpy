@@ -103,7 +103,7 @@ class NexusWellConnection(WellConnection):
         return generic_repr(self)
 
     @staticmethod
-    def get_nexus_mapping() -> dict[str, tuple[str, type]]:
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
         """Gets the mapping of nexus keywords to attribute definitions."""
         nexus_mapping = {
             'NAME': ('name', str),
@@ -153,16 +153,3 @@ class NexusWellConnection(WellConnection):
             'BENEFIT': ('drill_order_benefit', float),
             }
         return nexus_mapping
-
-    def to_dict(self, keys_in_nexus_style: bool = False) -> dict[str, None | str | int | float]:
-        """Returns a dictionary of the attributes of the well connection.
-
-        Args:
-            keys_in_nexus_style (bool): if True returns the key values in Nexus keywords, otherwise returns the \
-                attribute name as stored by ressimpy.
-
-        Returns:
-            a dictionary keyed by attributes and values as the value of the attribute
-        """
-        result_dict = to_dict_generic.to_dict(self, keys_in_nexus_style, add_date=True, add_units=True)
-        return result_dict

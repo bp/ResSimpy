@@ -27,7 +27,7 @@ class NexusNodes(Nodes):
         self.__parent_network: NexusNetwork = parent_network
         self.__nodes: list[NexusNode] = []
         self.__add_object_operations = AddObjectOperations(self.__parent_network.model, self.table_header,
-                                                           self.table_footer)
+                                                           self.table_footer, NexusNode)
         self.__remove_object_operations = RemoveObjectOperations(self.table_header, self.table_footer)
         self.__modify_object_operations = ModifyObjectOperations(self)
 
@@ -141,19 +141,9 @@ class NexusNodes(Nodes):
             Requires date and a node name.
         """
         self.__parent_network.get_load_status()
-        name, date = self.__add_object_operations.check_name_date(node_to_add)
-
-        new_object = NexusNode(node_to_add)
-
-        self._add_to_memory([new_object])
-
         file_to_add_to = self.__parent_network.get_network_file()
-
-        file_as_list = file_to_add_to.get_flat_list_str_file
-        if file_as_list is None:
-            raise ValueError(f'No file content found in the surface file specified at {file_to_add_to.location}')
-
-        self.__add_object_operations.add_object_to_file(date, file_as_list, file_to_add_to, new_object, node_to_add)
+        new_object = self.__add_object_operations.add_network_obj(node_to_add, file_to_add_to, NexusNode)
+        self._add_to_memory([new_object])
 
     def modify(self, node_to_modify: dict[str, None | str | float | int],
                new_properties: dict[str, None | str | float | int]) -> None:
