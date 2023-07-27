@@ -154,10 +154,10 @@ class NexusSimulator(Simulator):
 
     def get_simulation_progress(self) -> float:
         return self.logging.get_simulation_progress()
-    
+
     def get_users_linked_with_files(self) -> Optional[list[tuple[Optional[str], Optional[str], Optional[datetime]]]]:
         return self.model_files.files_info
-    
+
     @property
     def model_files(self) -> FcsNexusFile:
         return self._model_files

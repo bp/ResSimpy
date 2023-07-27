@@ -18,7 +18,7 @@ from ResSimpy.Utils.factory_methods import get_empty_dict_int_nexus_file, get_em
 from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Utils.generic_repr import generic_repr
-from datetime import datetime, timezone
+from datetime import datetime
 
 
 @dataclass(kw_only=True)
@@ -52,7 +52,7 @@ class FcsNexusFile(NexusFile):
     adsorption_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
     flux_in_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
     files_info: list[tuple[Optional[str], Optional[str], Optional[datetime]]]
-    
+
     def __init__(
             self, location: Optional[str] = None,
             include_locations: Optional[list[str]] = None,
@@ -185,9 +185,8 @@ class FcsNexusFile(NexusFile):
         origin_path = fcs_file_path
         fcs_nexus_file = NexusFile.generate_file_include_structure(
             fcs_file_path, origin=None)
-        fcs_file.files_info.append((fcs_nexus_file.location,
-                               fcs_nexus_file.linked_user,
-                               fcs_nexus_file.last_modified))
+        fcs_file.files_info.append((fcs_nexus_file.location, fcs_nexus_file.linked_user,
+                                   fcs_nexus_file.last_modified))
         flat_fcs_file_content = fcs_nexus_file.get_flat_list_str_file
         if flat_fcs_file_content is None or fcs_file.file_content_as_list is None:
             raise ValueError(f'FCS file not found, no content for {fcs_file_path=}')
@@ -226,9 +225,8 @@ class FcsNexusFile(NexusFile):
                 setattr(fcs_file, fcs_keyword_map_multi[key], fcs_property_list)
                 fcs_file.include_objects.append(nexus_file)
                 fcs_file.include_locations.append(full_file_path)
-                fcs_file.files_info.append((nexus_file.location,
-                               nexus_file.linked_user,
-                               nexus_file.last_modified))
+                fcs_file.files_info.append((nexus_file.location, nexus_file.linked_user,
+                                           nexus_file.last_modified))
             elif key in fcs_keyword_map_single:
                 full_file_path = nfo.get_full_file_path(value, origin_path)
                 nexus_file = NexusFile.generate_file_include_structure(
@@ -236,9 +234,8 @@ class FcsNexusFile(NexusFile):
                 setattr(fcs_file, fcs_keyword_map_single[key], nexus_file)
                 fcs_file.include_objects.append(nexus_file)
                 fcs_file.include_locations.append(full_file_path)
-                fcs_file.files_info.append((nexus_file.location,
-                               nexus_file.linked_user,
-                               nexus_file.last_modified))
+                fcs_file.files_info.append((nexus_file.location, nexus_file.linked_user,
+                                           nexus_file.last_modified))
             else:
                 continue
         return fcs_file
