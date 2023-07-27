@@ -312,7 +312,7 @@ class NexusCompletion(Completion):
             elif input_attr not in cls.valid_attributes():
                 raise AttributeError(f'Unexpected keyword "{input_attr}" found within {input_dictionary}')
         date = input_dictionary.get('date', None)
-        date_format = input_dictionary.get('date_format')
+        date_format: DateFormatEnum.DateFormat = input_dictionary.get('date_format')
         if date is None:
             raise AttributeError(f'No date provided for the completion, instead got {date=}')
         if date_format is None:
