@@ -130,9 +130,9 @@ def test_load_nexus_nodes(mocker, file_contents, node1_props, node2_props):
     # Act
 
     nexus_nodes = NexusNodes(mock_nexus_network)
-    nexus_nodes.load_nodes(surface_file, start_date, default_units=UnitSystem.ENGLISH)
-    result = nexus_nodes.get_nodes()
-    single_node_result = nexus_nodes.get_node(second_node_name)
+    nexus_nodes.load(surface_file, start_date, default_units=UnitSystem.ENGLISH)
+    result = nexus_nodes.get_all()
+    single_node_result = nexus_nodes.get_by_name(second_node_name)
 
     # Assert
     assert result == expected_result
@@ -163,12 +163,12 @@ def test_get_node_df(mocker, file_contents, node1_props, node2_props):
     mock_nexus_network = mocker.MagicMock()
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
     nexus_nodes = NexusNodes(mock_nexus_network)
-    nexus_nodes.load_nodes(surface_file, start_date, default_units=UnitSystem.ENGLISH)
+    nexus_nodes.load(surface_file, start_date, default_units=UnitSystem.ENGLISH)
 
     expected_df = pd.DataFrame([node1_props, node2_props])
     expected_df = expected_df.fillna(value=np.nan).dropna(axis=1, how='all')
     # Act
-    result = nexus_nodes.get_node_df()
+    result = nexus_nodes.get_df()
 
     # Assert
     pd.testing.assert_frame_equal(result, expected_df,)
@@ -242,10 +242,10 @@ def test_load_connections(mocker, file_contents, connection1_props, connection2_
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
     nexus_cons = NexusNodeConnections(mock_nexus_network)
     # Act
-    nexus_cons.load_connections(surface_file, start_date, default_units=UnitSystem.ENGLISH)
-    result = nexus_cons.get_connections()
-    single_connection_result = nexus_cons.get_connection('CP01')
-    result_df = nexus_cons.get_connection_df()
+    nexus_cons.load(surface_file, start_date, default_units=UnitSystem.ENGLISH)
+    result = nexus_cons.get_all()
+    single_connection_result = nexus_cons.get_by_name('CP01')
+    result_df = nexus_cons.get_df()
     # Assert
     assert result == expected_result
     assert single_connection_result == con1
@@ -286,10 +286,10 @@ def test_load_well_connections(mocker, file_contents, well_connection_props1, we
 
 
     # Act
-    nexus_well_cons.load_well_connections(surface_file, start_date, default_units=UnitSystem.ENGLISH)
-    result = nexus_well_cons.get_well_connections()
-    single_connection_result = nexus_well_cons.get_well_connection('prod')
-    result_df = nexus_well_cons.get_well_connections_df()
+    nexus_well_cons.load(surface_file, start_date, default_units=UnitSystem.ENGLISH)
+    result = nexus_well_cons.get_all()
+    single_connection_result = nexus_well_cons.get_by_name('prod')
+    result_df = nexus_well_cons.get_df()
 
     # Assert
     assert result == expected_result
@@ -324,10 +324,10 @@ def test_load_wellhead(mocker, file_contents, wellhead_props_1, wellhead_props_2
     expected_df = expected_df.fillna(value=np.nan).dropna(axis=1, how='all')
 
     # Act
-    nexus_wellheads.load_wellheads(surface_file, start_date, default_units=UnitSystem.ENGLISH)
-    result = nexus_wellheads.get_wellheads()
-    single_wellhead = nexus_wellheads.get_wellhead('tubing')
-    result_df = nexus_wellheads.get_wellheads_df()
+    nexus_wellheads.load(surface_file, start_date, default_units=UnitSystem.ENGLISH)
+    result = nexus_wellheads.get_all()
+    single_wellhead = nexus_wellheads.get_by_name('tubing')
+    result_df = nexus_wellheads.get_df()
 
     # Assert
     assert result == expected_result
@@ -365,10 +365,10 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
     expected_df = expected_df.fillna(value=np.nan).dropna(axis=1, how='all')
 
     # Act
-    nexuswellbore.load_wellbores(surface_file, start_date, default_units=UnitSystem.ENGLISH)
-    result = nexuswellbore.get_wellbores()
-    single_wellbore = nexuswellbore.get_wellbore('well1')
-    result_df = nexuswellbore.get_wellbores_df()
+    nexuswellbore.load(surface_file, start_date, default_units=UnitSystem.ENGLISH)
+    result = nexuswellbore.get_all()
+    single_wellbore = nexuswellbore.get_by_name('well1')
+    result_df = nexuswellbore.get_df()
 
     # Assert
     assert result == expected_result

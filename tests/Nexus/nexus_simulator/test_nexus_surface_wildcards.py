@@ -138,7 +138,7 @@ def test_read_wildcard(mocker, file_contents, expected_constraints):
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
 
     # Act
-    result = nexus_sim.network.constraints.get_constraints()
+    result = nexus_sim.network.constraints.get_all()
     # Assert
     assert result == expected_result
 
@@ -151,10 +151,10 @@ def test_add_remove_wildcard_well(mocker):
     constraint_props = {'name': 'P*', 'date': '01/01/2020', 'max_surface_oil_rate': 100.2}
     # Act Assert
     with pytest.raises(NotImplementedError) as error_msg:
-        constraints.add_constraint(name='P*', constraint_to_add=constraint_props)
+        constraints.add(name='P*', constraint_to_add=constraint_props)
         assert 'unsupported' in error_msg
 
     with pytest.raises(NotImplementedError) as error_msg:
-        constraints.remove_constraint(constraint_dict=constraint_props)
+        constraints.remove(constraint_dict=constraint_props)
         assert 'unsupported' in error_msg
 

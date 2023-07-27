@@ -5,11 +5,12 @@ from typing import Sequence, Optional, TYPE_CHECKING
 
 import pandas as pd
 
+from ResSimpy.File import File
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
-from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.nexus_modify_object_in_file import ModifyObjectOperations
 from ResSimpy.Nexus.nexus_remove_object_from_file import RemoveObjectOperations
 from ResSimpy.Nodes import Nodes
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
@@ -28,6 +29,7 @@ class NexusNodes(Nodes):
         self.__add_object_operations = AddObjectOperations(self.__parent_network.model, self.table_header,
                                                            self.table_footer)
         self.__remove_object_operations = RemoveObjectOperations(self.table_header, self.table_footer)
+        self.__modify_object_operations = ModifyObjectOperations(self)
 
     @property
     def table_header(self) -> str:
@@ -39,12 +41,12 @@ class NexusNodes(Nodes):
         """End of the Node definition table."""
         return 'ENDNODES'
 
-    def get_nodes(self) -> Sequence[NexusNode]:
+    def get_all(self) -> Sequence[NexusNode]:
         """Returns a list of nodes loaded from the simulator."""
         self.__parent_network.get_load_status()
         return self.__nodes
 
-    def get_node(self, node_name: str) -> Optional[NexusNode]:
+    def get_by_name(self, node_name: str) -> Optional[NexusNode]:
         """Returns a single node with the provided name loaded from the simulator.
 
         Args:
@@ -60,7 +62,7 @@ class NexusNodes(Nodes):
                                  self.__nodes)
         return next(nodes_to_return, None)
 
-    def get_node_df(self) -> pd.DataFrame:
+    def get_df(self) -> pd.DataFrame:
         """Creates a dataframe representing all processed node data in a surface file
         Returns:
             DataFrame: of the properties of the nodes through time with each row representing a node.
@@ -68,14 +70,14 @@ class NexusNodes(Nodes):
         df_store = obj_to_dataframe(self.__nodes)
         return df_store
 
-    def get_nodes_overview(self) -> str:
+    def get_overview(self) -> str:
         raise NotImplementedError('To be implemented')
 
-    def load_nodes(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
+    def load(self, surface_file: File, start_date: str, default_units: UnitSystem) -> None:
         """Calls load nodes and appends the list of discovered nodes into the NexusNodes object.
 
         Args:
-            surface_file (NexusFile): NexusFile representation of the surface file.
+            surface_file (File): NexusFile representation of the surface file.
             start_date (str): Starting date of the run
             default_units (UnitSystem): Units used in case not specified by surface file.
 
@@ -89,9 +91,9 @@ class NexusNodes(Nodes):
         cons_list = new_nodes.get('NODES')
         if isinstance(cons_list, dict):
             raise ValueError('Incompatible data format for additional wells. Expected type "list" instead got "dict"')
-        self._add_nodes_to_memory(cons_list)
+        self._add_to_memory(cons_list)
 
-    def _add_nodes_to_memory(self, additional_list: Optional[list[NexusNode]]) -> None:
+    def _add_to_memory(self, additional_list: Optional[list[NexusNode]]) -> None:
         """Extends the nodes object by a list of nodes provided to it.
 
         Args:
@@ -106,7 +108,7 @@ class NexusNodes(Nodes):
             return
         self.__nodes.extend(additional_list)
 
-    def remove_node(self, node_to_remove: dict[str, None | str | float | int] | UUID) -> None:
+    def remove(self, node_to_remove: dict[str, None | str | float | int] | UUID) -> None:
         """Remove a node from the network based on the properties matching a dictionary or id.
 
         Args:
@@ -131,7 +133,7 @@ class NexusNodes(Nodes):
 
         self.__remove_object_operations.remove_object_by_id(network_file, node_id, self.__nodes)
 
-    def add_node(self, node_to_add: dict[str, None | str | float | int]) -> None:
+    def add(self, node_to_add: dict[str, None | str | float | int]) -> None:
         """Adds a node to a network, taking a dictionary with properties for the new node.
 
         Args:
@@ -143,7 +145,7 @@ class NexusNodes(Nodes):
 
         new_object = NexusNode(node_to_add)
 
-        self._add_nodes_to_memory([new_object])
+        self._add_to_memory([new_object])
 
         file_to_add_to = self.__parent_network.get_network_file()
 
@@ -153,8 +155,8 @@ class NexusNodes(Nodes):
 
         self.__add_object_operations.add_object_to_file(date, file_as_list, file_to_add_to, new_object, node_to_add)
 
-    def modify_node(self, node_to_modify: dict[str, None | str | float | int],
-                    new_properties: dict[str, None | str | float | int]) -> None:
+    def modify(self, node_to_modify: dict[str, None | str | float | int],
+               new_properties: dict[str, None | str | float | int]) -> None:
         """Modifies an existing node based on a matching dictionary of properties (partial matches allowed if precisely
          1 matching node is found). Updates the properties with properties in the new_properties dictionary.
 
@@ -165,14 +167,5 @@ class NexusNodes(Nodes):
         """
         self.__parent_network.get_load_status()
 
-        name = node_to_modify.get('name', None)
-        if name is None:
-            raise ValueError(f'Name is required for modifying nodes, instead got {name}')
-        name = str(name)
-        node = self.__parent_network.find_network_element_with_dict(name, node_to_modify, self._network_element_name)
-        existing_properties = node.to_dict(include_nones=False)
-        # do the union of the two dicts
-        existing_properties.update(new_properties)
-
-        self.remove_node(node_to_modify)
-        self.add_node(existing_properties)
+        self.__modify_object_operations.modify_network_object(node_to_modify, new_properties,
+                                                              self.__parent_network)

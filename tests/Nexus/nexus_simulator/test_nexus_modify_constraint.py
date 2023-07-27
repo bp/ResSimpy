@@ -34,7 +34,7 @@ def test_find_constraint(mocker):
     expected_constraint = NexusConstraint(well1_constraint_props[2])
     find_constraint_dict = {'date': '01/01/2024', 'name': 'well1', 'max_wor': 95.0}
     # Act
-    result = constraints.find_constraint('well1', find_constraint_dict)
+    result = constraints.find_by_properties('well1', find_constraint_dict)
 
     # Assert
     assert result == expected_constraint
@@ -71,15 +71,15 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
 
     # Act
     with pytest.raises(ValueError) as ve:
-        constraints.find_constraint('well1', find_constraint_dict)
+        constraints.find_by_properties('well1', find_constraint_dict)
         assert "Instead found: 3 matching constraints" in str(ve.value)
 
     with pytest.raises(ValueError) as ve:
-        constraints.find_constraint('well1', no_matching_constraints_dict)
+        constraints.find_by_properties('well1', no_matching_constraints_dict)
         assert "Instead found: 0 matching constraints" in str(ve.value)
 
     with pytest.raises(ValueError) as ve:
-        constraints.find_constraint('well1', too_many_constraints)
+        constraints.find_by_properties('well1', too_many_constraints)
         assert "Instead found: 0 matching constraints" in str(ve.value)
 
 
@@ -238,9 +238,9 @@ def test_remove_constraint(mocker, file_contents, expected_result_file, constrai
             expected_constraint_dict[node_name].append(NexusConstraint(constraint_dict))
 
     # Act
-    nexus_sim.network.constraints.get_constraints()
-    nexus_sim.network.constraints.remove_constraint(constraint_to_remove)
-    result = nexus_sim.network.constraints.get_constraints()
+    nexus_sim.network.constraints.get_all()
+    nexus_sim.network.constraints.remove(constraint_to_remove)
+    result = nexus_sim.network.constraints.get_all()
 
     # Assert
     assert result == expected_constraint_dict
@@ -439,7 +439,7 @@ def test_add_constraint(mocker, file_contents, expected_file_contents, new_const
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
                                                     'uuid4', 'uuid5', 'uuid6'])
     # Act
-    nexus_sim.network.constraints.add_constraint('well3', new_constraint, 'test user comments')
+    nexus_sim.network.constraints.add('well3', new_constraint, 'test user comments')
     # Assert
     assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
     check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
@@ -483,7 +483,7 @@ def test_constraint_to_string(constraint, expected_string):
     # Arrange
     new_constraint = NexusConstraint(constraint)
     # Act
-    constraint_string = new_constraint.to_string()
+    constraint_string = new_constraint.to_table_line()
     # Assert
     assert constraint_string == expected_string
 
@@ -574,7 +574,7 @@ def test_modify_constraints(mocker, file_contents, expected_file_contents, curre
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
                                                     'uuid4', 'uuid5', 'uuid6', 'uuid7'])
     # Act
-    nexus_sim.network.constraints.modify_constraint('well1', current_constraint, new_constraint)
+    nexus_sim.network.constraints.modify('well1', current_constraint, new_constraint)
     # Assert
     assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
     check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
@@ -627,4 +627,4 @@ def test_modify_constraint_no_constraint_found(mocker, current_constraint, new_c
                                                     'uuid4', 'uuid5', 'uuid6', 'uuid7'])
     # Act
     with pytest.raises(ValueError) as ve:
-        nexus_sim.network.constraints.modify_constraint('well1', current_constraint, new_constraint)
+        nexus_sim.network.constraints.modify('well1', current_constraint, new_constraint)

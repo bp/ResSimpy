@@ -35,5 +35,5 @@ class ModifyObjectOperations:
         # do the union of the two dicts
         existing_properties.update(new_properties)
 
-        self.object_to_modify.remove_connection(object_to_modify)
-        self.object_to_modify.add_connection(existing_properties)
+        self.object_to_modify.remove(object_to_modify)
+        self.object_to_modify.add(existing_properties)
