@@ -1,7 +1,5 @@
 from dataclasses import dataclass
 from typing import Optional
-import ResSimpy.Utils.to_dict_generic as to_dict_generic
-from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.WellConnection import WellConnection
 
 
@@ -98,9 +96,6 @@ class NexusWellConnection(WellConnection):
         if self.name is not None:
             self.bh_node_name = self.name + '%bh'
             self.wh_node_name = self.name + '%wh'
-
-    def __repr__(self) -> str:
-        return generic_repr(self)
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:

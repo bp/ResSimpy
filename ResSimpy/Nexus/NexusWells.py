@@ -248,7 +248,7 @@ class NexusWells(Wells):
             writing_new_wellspec_table = True
 
         # construct the new completion and ensure the order of the values is in the same order as the headers
-        new_completion_string += new_completion.to_table_line(headers)
+        new_completion_string += [new_completion.to_table_line(headers)]
         new_completion_additional_lines = len(new_completion_string)
         if writing_new_wellspec_table:
             new_completion_string += ['\n']
@@ -303,7 +303,7 @@ class NexusWells(Wells):
             completion_table_as_list += write_out_headers
             # run through the existing completions to duplicate the completion at the new time
             for completion in previous_completion_list:
-                completion_table_as_list += completion.to_table_line(headers)
+                completion_table_as_list += [completion.to_table_line(headers)]
         else:
             write_out_headers = [' '.join(headers) + '\n']
             completion_table_as_list += write_out_headers

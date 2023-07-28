@@ -66,6 +66,7 @@ class Completion(DataObjectMixin, ABC):
                  depth_to_bottom: Optional[float] = None, perm_thickness_ovr: Optional[float] = None,
                  dfactor: Optional[float] = None, rel_perm_method: Optional[int] = None,
                  status: Optional[str] = None) -> None:
+        super().__init__()
         self.__well_radius = well_radius
         self.__date = date
         self.__i = i
@@ -84,7 +85,6 @@ class Completion(DataObjectMixin, ABC):
         self.__dfactor = dfactor
         self.__rel_perm_method = rel_perm_method
         self.__status = status
-        self.__id: uuid.UUID = uuid.uuid4()
 
     @property
     def well_radius(self):
@@ -161,30 +161,3 @@ class Completion(DataObjectMixin, ABC):
     @property
     def status(self):
         return self.__status
-
-    @property
-    def id(self):
-        return self.__id
-
-    def to_dict(self) -> dict[str, None | float | int | str]:
-        attribute_dict = {
-            'well_radius': self.__well_radius,
-            'date': self.__date,
-            'i': self.__i,
-            'j': self.__j,
-            'k': self.__k,
-            'skin': self.__skin,
-            'depth': self.__depth,
-            'x': self.__x,
-            'y': self.__y,
-            'angle_a': self.__angle_a,
-            'angle_v': self.__angle_v,
-            'grid': self.__grid,
-            'depth_to_top': self.__depth_to_top,
-            'depth_to_bottom': self.__depth_to_bottom,
-            'perm_thickness_ovr': self.__perm_thickness_ovr,
-            'dfactor': self.__dfactor,
-            'rel_perm_method': self.__rel_perm_method,
-            'status': self.__status,
-        }
-        return attribute_dict

@@ -396,7 +396,7 @@ class NexusFile(File):
             raise ValueError(f'No object with {obj_uuid=} found within the object locations')
         self.object_locations.pop(obj_uuid, None)
 
-    def find_which_include_file(self, flattened_index: int) -> tuple[NexusFile, int]:
+    def find_which_include_file(self, flattened_index: int) -> tuple[File, int]:
         """Given a line index that relates to a position within the flattened file_as_list from the method
         get_flat_file_as_list.
 
@@ -404,7 +404,7 @@ class NexusFile(File):
             flattened_index (int): index in the flattened file as list structure
 
         Returns:
-            tuple[NexusFile, int] where the first element is the file that the relevant line is in and the second
+            tuple[File, int] where the first element is the file that the relevant line is in and the second
             element is the relative index in that file.
         """
         if self.line_locations is None:

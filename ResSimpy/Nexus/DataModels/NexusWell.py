@@ -111,7 +111,7 @@ class NexusWell(Well):
         """
         matching_completions = []
         if isinstance(completion_properties, NexusCompletion):
-            perf_props = completion_properties.to_dict()
+            perf_props = completion_properties.to_dict(add_units=False)
         else:
             perf_props = completion_properties
         perf_props_without_nones = {k: v for k, v in perf_props.items() if v is not None}

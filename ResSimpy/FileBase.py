@@ -1,8 +1,8 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Optional
 from uuid import UUID
-
 
 @dataclass
 class FileBase(ABC):

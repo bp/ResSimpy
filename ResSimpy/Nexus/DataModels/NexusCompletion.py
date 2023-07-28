@@ -220,10 +220,13 @@ class NexusCompletion(Completion):
     def kh_mult(self):
         return self.__kh_mult
 
-    def to_dict(self) -> dict[str, None | float | int | str]:
-        attribute_dict: dict[str, None | float | int | str] = to_dict(self, add_units=False)
+    def to_dict(self, keys_in_keyword_style: bool = False, add_date=True, add_units=True, include_nones=True) -> \
+            dict[str, None | str | int | float]:
 
-        attribute_dict.update(super().to_dict())
+        # overwrite add_units to be False for completions as they currently do not contain units.
+        attribute_dict = to_dict(self, keys_in_keyword_style, add_date, add_units=False, include_nones=include_nones)
+
+        attribute_dict.update(super().to_dict(add_units=False))
         if self.rel_perm_end_point is not None:
             attribute_dict.update(self.rel_perm_end_point.to_dict())
         return attribute_dict
@@ -330,16 +333,3 @@ class NexusCompletion(Completion):
                 setattr(self, '_NexusCompletion__' + k, v)
             elif hasattr(super(), '_Completion__' + k):
                 setattr(self, '_Completion__' + k, v)
-
-    def to_table_line(self, headers: list[str]) -> list[str]:
-        """Takes a completion object and returns the attribute values as a string in the order of headers provided.
-
-        Args:
-            headers (list[str]): list of header values in Nexus keyword format
-
-        Returns:
-            string of the values in the order of the headers provided.
-
-        """
-        completion_list_string = [to_table_line(self, headers)]
-        return completion_list_string

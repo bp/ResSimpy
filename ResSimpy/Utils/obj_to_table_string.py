@@ -1,9 +1,18 @@
-from typing import Any
+from abc import abstractmethod
 
 from ResSimpy.Utils.invert_nexus_map import nexus_keyword_to_attribute_name
+from typing import Protocol
 
+class SupportsKeywordMapping(Protocol):
+    @staticmethod
+    @abstractmethod
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
+        pass
+    @abstractmethod
+    def to_dict(self) -> dict[str, None | str | int | float]:
+        pass
 
-def to_table_line(obj: Any, headers: list[str]) -> str:
+def to_table_line(obj: SupportsKeywordMapping, headers: list[str]) -> str:
     """Takes a generic Nexus object and returns the attribute values as a string in the order of headers provided.
     Requires an implemented to_dict method and get_keyword_mapping() method.
 
