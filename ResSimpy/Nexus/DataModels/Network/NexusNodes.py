@@ -26,8 +26,8 @@ class NexusNodes(Nodes):
     def __init__(self, parent_network: NexusNetwork) -> None:
         self.__parent_network: NexusNetwork = parent_network
         self.__nodes: list[NexusNode] = []
-        self.__add_object_operations = AddObjectOperations(self.__parent_network, self.table_header,
-                                                           self.table_footer, NexusNode)
+        self.__add_object_operations = AddObjectOperations(NexusNode, self.table_header, self.table_footer,
+                                                           self.__parent_network.model)
         self.__remove_object_operations = RemoveObjectOperations(self.__parent_network, self.table_header,
                                                                  self.table_footer)
         self.__modify_object_operations = ModifyObjectOperations(self)
@@ -128,7 +128,7 @@ class NexusNodes(Nodes):
             node_to_add (dict[str, None | str | float | int]): dictionary taking all the properties for the new node.
             Requires date and a node name.
         """
-        new_object = self.__add_object_operations.add_network_obj(node_to_add, NexusNode)
+        new_object = self.__add_object_operations.add_network_obj(node_to_add, NexusNode, self.__parent_network)
         self._add_to_memory([new_object])
 
     def modify(self, node_to_modify: dict[str, None | str | float | int],

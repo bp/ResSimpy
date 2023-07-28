@@ -26,8 +26,8 @@ class NexusWellConnections(WellConnections):
     def __init__(self, parent_network: NexusNetwork) -> None:
         self.__parent_network: NexusNetwork = parent_network
         self.__well_connections: list[NexusWellConnection] = []
-        self.__add_object_operations = AddObjectOperations(self.__parent_network, self.table_header,
-                                                           self.table_footer, NexusWellConnection)
+        self.__add_object_operations = AddObjectOperations(NexusWellConnection, self.table_header, self.table_footer,
+                                                           self.__parent_network.model)
         self.__remove_object_operations = RemoveObjectOperations(self.__parent_network, self.table_header,
                                                                  self.table_footer)
         self.__modify_object_operations = ModifyObjectOperations(self)
@@ -82,15 +82,43 @@ class NexusWellConnections(WellConnections):
             raise ValueError('Incompatible data format for additional wells. Expected type "list" instead got "dict"')
         self._add_to_memory(cons_list)
 
-    def add(self, obj_to_add: dict[str, None | str | float | int]) -> None:
-        raise NotImplementedError
+    def remove(self, obj_to_remove: dict[str, None | str | float | int] | UUID) -> None:
+        """Remove a wellbore from the network based on the properties matching a dictionary or id.
 
-    def remove(self, obj_to_remove: UUID | dict[str, None | str | float | int]) -> None:
-        raise NotImplementedError
+        Args:
+            obj_to_remove (UUID | dict[str, None | str | float | int]): UUID of the wellbore to remove or a dictionary \
+            with sufficient matching parameters to uniquely identify a wellbore
+
+        """
+        self.__remove_object_operations.remove_object_from_network_main(
+            obj_to_remove, self._network_element_name, self.__well_connections)
+
+    def add(self, obj_to_remove: dict[str, None | str | float | int]) -> None:
+        """Adds a well connection to a network, taking a dictionary with properties for the new well connection.
+
+        Args:
+            obj_to_remove (dict[str, None | str | float | int]): dictionary taking all the properties for the new
+            well connection.
+            Requires date and a name.
+        """
+        new_object = self.__add_object_operations.add_network_obj(obj_to_remove, NexusWellConnection,
+                                                                  self.__parent_network)
+        self._add_to_memory([new_object])
 
     def modify(self, obj_to_modify: dict[str, None | str | float | int],
                new_properties: dict[str, None | str | float | int]) -> None:
-        raise NotImplementedError
+        """Modifies an existing well connection based on a matching dictionary of properties.
+        (partial matches allowed if precisely 1 matching node is found).
+        Updates the properties with properties in the new_properties dictionary.
+
+        Args:
+            obj_to_modify (dict[str, None | str | float | int]): dictionary containing attributes to match in the
+            existing well connections.
+            new_properties (dict[str, None | str | float | int]): properties to switch to in the new well connection
+        """
+        self.__parent_network.get_load_status()
+        self.__modify_object_operations.modify_network_object(obj_to_modify, new_properties,
+                                                              self.__parent_network)
 
     @property
     def table_header(self) -> str:

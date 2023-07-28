@@ -31,7 +31,7 @@ class NexusWells(Wells):
     def __init__(self, model: NexusSimulator) -> None:
         self.__model = model
         self.__wells = []
-        self.__add_object_operations = AddObjectOperations(model, self.table_header, self.table_footer, NexusCompletion)
+        self.__add_object_operations = AddObjectOperations(NexusCompletion, self.table_header, self.table_footer, model)
         super().__init__()
 
     @property
@@ -173,7 +173,7 @@ class NexusWells(Wells):
         if self.__model.model_files.well_files is None:
             raise FileNotFoundError('No well file found, cannot modify ')
 
-        wellspec_file = self.__add_object_operations.find_which_file_from_id(id=well_id,
+        wellspec_file = self.__add_object_operations.find_which_file_from_id(obj_id=well_id,
                                                                              file_type_to_search='well_files')
 
         # initialise some storage variables
@@ -331,7 +331,7 @@ class NexusWells(Wells):
         if completion_id is None:
             raise ValueError('No completion found for completion_properties')
         # find which wellspec file we should edit
-        wellspec_file = self.__add_object_operations.find_which_file_from_id(id=completion_id,
+        wellspec_file = self.__add_object_operations.find_which_file_from_id(obj_id=completion_id,
                                                                              file_type_to_search='well_files')
 
         # remove from the well object/wells class

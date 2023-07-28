@@ -10,24 +10,24 @@ from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Utils.invert_nexus_map import invert_nexus_map
 
 if TYPE_CHECKING:
+    from ResSimpy.Nexus.NexusSimulator import NexusSimulator
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 
 T = TypeVar('T', bound=DataObjectMixin)
 
 class AddObjectOperations:
-    def __init__(self, parent_network: NexusNetwork, table_header: str, table_footer: str,
-                 obj_type: Optional[type[T]]) -> None:
-        self.__network = parent_network
-        self.__model = parent_network.model
+    def __init__(self, obj_type: Optional[type[T]], table_header: str, table_footer: str,
+                 model: NexusSimulator) -> None:
+        self.__model = model
         self.table_header = table_header
         self.table_footer = table_footer
         self.obj_type = obj_type
 
-    def find_which_file_from_id(self, id: UUID, file_type_to_search: str) -> NexusFile:
+    def find_which_file_from_id(self, obj_id: UUID, file_type_to_search: str) -> NexusFile:
         """Finds a file based on the presence of an object in the file.
 
         Args:
-            id (UUID): object id to match on
+            obj_id (UUID): object id to match on
             file_type_to_search (str): file type from within the fcsfile. e.g. 'well_files'
 
         Returns:
@@ -43,13 +43,13 @@ class AddObjectOperations:
         elif isinstance(files_to_search, NexusFile):
             # handling only 1 file returned of the file_type_to_search
             all_files = [files_to_search] if files_to_search.object_locations is not None and \
-                                             id in files_to_search.object_locations else []
+                                             obj_id in files_to_search.object_locations else []
         else:
             # handle case of multiple files of the same type.
             all_files = [x for x in files_to_search.values() if x.object_locations is not None and
-                         id in x.object_locations]
+                         obj_id in x.object_locations]
         if len(all_files) == 0:
-            raise FileNotFoundError(f'No {file_type_to_search} found with and object with id: {id}')
+            raise FileNotFoundError(f'No {file_type_to_search} found with and object with id: {obj_id}')
         elif len(all_files) > 1:
             raise ValueError(f'Too many files found containing that object id.'
                              f'Check if there are conflicts in where the objects are being stored.'
@@ -275,9 +275,10 @@ class AddObjectOperations:
         file_to_add_to.add_to_file_as_list(additional_content=additional_content, index=insert_line_index,
                                            additional_objects=new_object_ids)
 
-    def add_network_obj(self, node_to_add: dict[str, None | str | float | int], obj_type: type[T]) -> T:
-        self.__network.get_load_status()
-        file_to_add_to = self.__network.get_network_file()
+    def add_network_obj(self, node_to_add: dict[str, None | str | float | int], obj_type: type[T],
+                        network: NexusNetwork) -> T:
+        network.get_load_status()
+        file_to_add_to = network.get_network_file()
         if self.obj_type is not None:
             obj_type = self.obj_type
         name, date = self.check_name_date(node_to_add)

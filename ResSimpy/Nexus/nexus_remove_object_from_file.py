@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, TYPE_CHECKING, Literal, TypeVar
+from typing import Any, TYPE_CHECKING, Literal, TypeVar, Optional
 from uuid import UUID
 
 from ResSimpy.DataObjectMixin import DataObjectMixin
@@ -10,13 +10,13 @@ if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 
 class RemoveObjectOperations:
-    def __init__(self, network: NexusNetwork, table_header: str, table_footer: str) -> None:
+    def __init__(self, network: Optional[NexusNetwork], table_header: str, table_footer: str) -> None:
         self.table_header = table_header
         self.table_footer = table_footer
         self.__network = network
 
     @staticmethod
-    def remove_object_from_memory_by_id(list_obj: list[Any], id_to_remove: UUID) -> tuple[Any, list[Any]]:
+    def remove_object_from_memory_by_id(list_obj: list[T], id_to_remove: UUID) -> tuple[Any, list[Any]]:
         """Directly removes an object from a list of objects based on the id attribute of that object."""
         if len(list_obj) == 0:
             raise ValueError('Tried to remove object from empty list. Cannot remove object.')
@@ -88,7 +88,7 @@ class RemoveObjectOperations:
             else:
                 file.remove_from_file_as_list(line_in_file)
 
-    def remove_object_by_id(self, file: NexusFile, obj_id: UUID, obj_list: list[Any]) -> None:
+    def remove_object_by_id(self, file: NexusFile, obj_id: UUID, obj_list: list[T]) -> None:
         """Remove an object from a file and from the list of stored objects.
 
         Args:
@@ -121,6 +121,9 @@ class RemoveObjectOperations:
             'constraints'. Identifies the attribute name of the element inside the network
             existing_objects (list[T]): list of all existing network objects for the network element. e.g. self.__nodes
         """
+        if self.__network is None:
+            raise ValueError('No network provided for removing objects from.'
+                             'Cannot remove an object from something that does not exist')
         self.__network.get_load_status()
         network_file = self.__network.get_network_file()
         if isinstance(obj_to_remove, dict):
