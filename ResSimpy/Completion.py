@@ -1,5 +1,4 @@
 """The base class for all Well Completions."""
-import uuid
 from abc import ABC
 from dataclasses import dataclass
 from typing import Optional

@@ -8,7 +8,6 @@ from typing import Optional, Union
 import sys
 
 from ResSimpy.Nexus.NexusEnums import DateFormatEnum
-from ResSimpy.Utils.obj_to_table_string import to_table_line
 
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -220,11 +219,12 @@ class NexusCompletion(Completion):
     def kh_mult(self):
         return self.__kh_mult
 
-    def to_dict(self, keys_in_keyword_style: bool = False, add_date=True, add_units=True, include_nones=True) -> \
+    def to_dict(self, keys_in_keyword_style: bool = False, add_date=True, add_units=False, include_nones=True) -> \
             dict[str, None | str | int | float]:
 
         # overwrite add_units to be False for completions as they currently do not contain units.
-        attribute_dict = to_dict(self, keys_in_keyword_style, add_date, add_units=False, include_nones=include_nones)
+        attribute_dict = to_dict(self, keys_in_keyword_style, add_date, add_units=add_units,
+                                 include_nones=include_nones)
 
         attribute_dict.update(super().to_dict(add_units=False))
         if self.rel_perm_end_point is not None:
