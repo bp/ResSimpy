@@ -11,6 +11,11 @@ from ResSimpy.Utils.obj_to_table_string import to_table_line
 class DataObjectMixin(ABC):
     __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False)
 
+    def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
+        self.__id = uuid.uuid4()
+        for key, prop in properties_dict.items():
+            self.__setattr__(key, prop)
+
     def to_dict(self, keys_in_keyword_style: bool = False, add_date: bool = True, add_units: bool = True,
                 include_nones: bool = True) -> dict[str, None | str | int | float]:
         """Returns a dictionary of the attributes of the object.

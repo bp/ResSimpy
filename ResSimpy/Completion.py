@@ -66,7 +66,7 @@ class Completion(DataObjectMixin, ABC):
                  depth_to_bottom: Optional[float] = None, perm_thickness_ovr: Optional[float] = None,
                  dfactor: Optional[float] = None, rel_perm_method: Optional[int] = None,
                  status: Optional[str] = None) -> None:
-        super().__init__()
+        super().__init__({})
         self.__well_radius = well_radius
         self.__date = date
         self.__i = i
