@@ -10,14 +10,15 @@ from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Utils.invert_nexus_map import invert_nexus_map
 
 if TYPE_CHECKING:
-    from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+    from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 
 T = TypeVar('T', bound=DataObjectMixin)
 
 class AddObjectOperations:
-    def __init__(self, model: NexusSimulator, table_header: str, table_footer: str,
+    def __init__(self, parent_network: NexusNetwork, table_header: str, table_footer: str,
                  obj_type: Optional[type[T]]) -> None:
-        self.__model = model
+        self.__network = parent_network
+        self.__model = parent_network.model
         self.table_header = table_header
         self.table_footer = table_footer
         self.obj_type = obj_type
@@ -274,8 +275,9 @@ class AddObjectOperations:
         file_to_add_to.add_to_file_as_list(additional_content=additional_content, index=insert_line_index,
                                            additional_objects=new_object_ids)
 
-    def add_network_obj(self, node_to_add: dict[str, None | str | float | int], file_to_add_to: File,
-                        obj_type: type[T]) -> T:
+    def add_network_obj(self, node_to_add: dict[str, None | str | float | int], obj_type: type[T]) -> T:
+        self.__network.get_load_status()
+        file_to_add_to = self.__network.get_network_file()
         if self.obj_type is not None:
             obj_type = self.obj_type
         name, date = self.check_name_date(node_to_add)

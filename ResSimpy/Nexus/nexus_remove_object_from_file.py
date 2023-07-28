@@ -1,13 +1,19 @@
-from typing import Any
+from __future__ import annotations
+from typing import Any, TYPE_CHECKING, Literal, TypeVar
 from uuid import UUID
 
+from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+T = TypeVar('T', bound=DataObjectMixin)
 
+if TYPE_CHECKING:
+    from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 
 class RemoveObjectOperations:
-    def __init__(self, table_header: str, table_footer: str) -> None:
+    def __init__(self, network: NexusNetwork, table_header: str, table_footer: str) -> None:
         self.table_header = table_header
         self.table_footer = table_footer
+        self.__network = network
 
     @staticmethod
     def remove_object_from_memory_by_id(list_obj: list[Any], id_to_remove: UUID) -> tuple[Any, list[Any]]:
@@ -100,3 +106,31 @@ class RemoveObjectOperations:
         # remove the table if there aren't any more remaining
         line_numbers_in_file_to_remove.extend(remove_empty_table_indices)
         self.remove_lines_from_file(line_numbers_in_file_to_remove, file, obj_id)
+
+    def remove_object_from_network_main(self, obj_to_remove: dict[str, None | str | float | int] | UUID,
+                                        network_element_name: Literal['nodes', 'connections', 'well_connections',
+                                                                     'wellheads', 'wellbores', 'constraints'],
+                                        existing_objects: list[T]) -> None:
+        """Removes object from file and from the list of objects based on matching a set of attributes provided in a
+        dictionary or a unique id.
+
+        Args:
+            obj_to_remove (dict[str, None | str | float | int] | UUID): dictionary of properties for identifying which
+            object to remove. Can also take an object id.
+            network_element_name (str): One of: 'nodes', 'connections', 'well_connections', 'wellheads', 'wellbores',
+            'constraints'. Identifies the attribute name of the element inside the network
+            existing_objects (list[T]): list of all existing network objects for the network element. e.g. self.__nodes
+        """
+        self.__network.get_load_status()
+        network_file = self.__network.get_network_file()
+        if isinstance(obj_to_remove, dict):
+            name = obj_to_remove.get('name', None)
+            if name is None:
+                raise ValueError(f'Require node name to remove the node instead got {name=}')
+            name = str(name)
+            obj_in_network = self.__network.find_network_element_with_dict(name, obj_to_remove,
+                                                                           network_element_name)
+            obj_id = obj_in_network.id
+        else:
+            obj_id = obj_to_remove
+        self.remove_object_by_id(network_file, obj_id, existing_objects)

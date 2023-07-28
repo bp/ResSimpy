@@ -26,9 +26,10 @@ class NexusNodes(Nodes):
     def __init__(self, parent_network: NexusNetwork) -> None:
         self.__parent_network: NexusNetwork = parent_network
         self.__nodes: list[NexusNode] = []
-        self.__add_object_operations = AddObjectOperations(self.__parent_network.model, self.table_header,
+        self.__add_object_operations = AddObjectOperations(self.__parent_network, self.table_header,
                                                            self.table_footer, NexusNode)
-        self.__remove_object_operations = RemoveObjectOperations(self.table_header, self.table_footer)
+        self.__remove_object_operations = RemoveObjectOperations(self.__parent_network, self.table_header,
+                                                                 self.table_footer)
         self.__modify_object_operations = ModifyObjectOperations(self)
 
     @property
@@ -116,22 +117,9 @@ class NexusNodes(Nodes):
             with sufficient matching parameters to uniquely identify a node
 
         """
-        self.__parent_network.get_load_status()
+        self.__remove_object_operations.remove_object_from_network_main(
+            node_to_remove, self._network_element_name, self.__nodes)
 
-        network_file = self.__parent_network.get_network_file()
-
-        if isinstance(node_to_remove, dict):
-            name = node_to_remove.get('name', None)
-            if name is None:
-                raise ValueError(f'Require node name to remove the node instead got {name=}')
-            name = str(name)
-            node = self.__parent_network.find_network_element_with_dict(name, node_to_remove,
-                                                                        self._network_element_name)
-            node_id = node.id
-        else:
-            node_id = node_to_remove
-
-        self.__remove_object_operations.remove_object_by_id(network_file, node_id, self.__nodes)
 
     def add(self, node_to_add: dict[str, None | str | float | int]) -> None:
         """Adds a node to a network, taking a dictionary with properties for the new node.
@@ -140,9 +128,7 @@ class NexusNodes(Nodes):
             node_to_add (dict[str, None | str | float | int]): dictionary taking all the properties for the new node.
             Requires date and a node name.
         """
-        self.__parent_network.get_load_status()
-        file_to_add_to = self.__parent_network.get_network_file()
-        new_object = self.__add_object_operations.add_network_obj(node_to_add, file_to_add_to, NexusNode)
+        new_object = self.__add_object_operations.add_network_obj(node_to_add, NexusNode)
         self._add_to_memory([new_object])
 
     def modify(self, node_to_modify: dict[str, None | str | float | int],

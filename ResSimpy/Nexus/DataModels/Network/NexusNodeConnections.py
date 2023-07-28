@@ -30,7 +30,8 @@ class NexusNodeConnections(NodeConnections):
         self.__connections: list[NexusNodeConnection] = []
         self.__add_object_operations = AddObjectOperations(self.__parent_network.model, self.table_header,
                                                            self.table_footer, NexusNodeConnection)
-        self.__remove_object_operations = RemoveObjectOperations(self.table_header, self.table_footer)
+        self.__remove_object_operations = RemoveObjectOperations(self.__parent_network, self.table_header,
+                                                                 self.table_footer)
         self.__modify_object_operations = ModifyObjectOperations(self)
 
     @property
