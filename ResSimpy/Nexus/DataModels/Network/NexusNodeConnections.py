@@ -106,7 +106,8 @@ class NexusNodeConnections(NodeConnections):
             connection.
             Requires date and a name.
         """
-        new_object = self.__add_object_operations.add_network_obj(obj_to_remove, NexusNodeConnection, self.__parent_network)
+        new_object = self.__add_object_operations.add_network_obj(obj_to_remove, NexusNodeConnection,
+                                                                  self.__parent_network)
         self._add_to_memory([new_object])
 
     def modify(self, obj_to_modify: dict[str, None | str | float | int],
