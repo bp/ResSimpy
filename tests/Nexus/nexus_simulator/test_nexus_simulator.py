@@ -188,16 +188,13 @@ def test_get_users_linked_with_files(mocker):
   
     simulation = NexusSimulator(origin="Path.fcs")
     
+    expected_result = [("Path.fcs","Mock-User:Mock-Group",modified_time),("run_control.inc","Mock-User:Mock-Group",modified_time)]
     # Act
     
     result = simulation.get_users_linked_with_files()
     mocker.stopall()
-    assert str(result[0][0]) == "Path.fcs"
-    assert str(result[0][1]) == "Mock-User:Mock-Group"
-    assert result[1][2] == modified_time
-    assert str(result[1][0]) == "run_control.inc"
-    assert str(result[1][1]) == "Mock-User:Mock-Group"
-    assert result[1][2] == modified_time
+
+    assert result == expected_result
 
 
 def test_load_fcs_file_comment_after_declaration(mocker, globalFixture):
