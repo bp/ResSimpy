@@ -226,8 +226,8 @@ def test_remove_node(mocker, fixture_for_osstat_pathlib, file_contents, expected
 
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
     # Act
-    nexus_sim.network.nodes.remove_node(node_to_remove)
-    result_nodes = nexus_sim.network.nodes.get_nodes()
+    nexus_sim.network.nodes.remove(node_to_remove)
+    result_nodes = nexus_sim.network.nodes.get_all()
 
     # Assert
     assert result_nodes == expected_nodes
@@ -471,9 +471,9 @@ def test_add_node(mocker, fixture_for_osstat_pathlib, file_contents, expected_fi
 
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
     # Act
-    nexus_sim.network.nodes.add_node(node_to_add)
+    nexus_sim.network.nodes.add(node_to_add)
     # compare sets as order doesn't matter
-    result_nodes = nexus_sim.network.nodes.get_nodes()
+    result_nodes = nexus_sim.network.nodes.get_all()
     result_nodes.sort(key=lambda x: x.name)
     # Assert
     assert result_nodes == expected_nodes
@@ -605,9 +605,9 @@ def test_modify_node(mocker, fixture_for_osstat_pathlib, file_contents, expected
 
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
     # Act
-    nexus_sim.network.nodes.modify_node(node_to_modify, modified_properties)
+    nexus_sim.network.nodes.modify(node_to_modify, modified_properties)
     # compare sets as order doesn't matter
-    result_nodes = nexus_sim.network.nodes.get_nodes()
+    result_nodes = nexus_sim.network.nodes.get_all()
     result_nodes.sort(key=lambda x: x.name)
     # Assert
     assert result_nodes == expected_nodes

@@ -61,9 +61,9 @@ def test_add_connection(mocker, fixture_for_osstat_pathlib, file_contents, expec
 
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
     # Act
-    nexus_sim.network.connections.add_connection(connection_to_add)
+    nexus_sim.network.connections.add(connection_to_add)
     # compare sets as order doesn't matter
-    result_connections = nexus_sim.network.connections.get_connections()
+    result_connections = nexus_sim.network.connections.get_all()
     result_connections.sort(key=lambda x: x.name)
     # Assert
     assert result_connections == expected_cons
@@ -125,8 +125,8 @@ def test_remove_connection(mocker, fixture_for_osstat_pathlib, file_contents, ex
 
         mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
         # Act
-        nexus_sim.network.connections.remove_connection(connection_to_remove)
-        result_nodes = nexus_sim.network.connections.get_connections()
+        nexus_sim.network.connections.remove(connection_to_remove)
+        result_nodes = nexus_sim.network.connections.get_all()
 
         # Assert
         assert result_nodes == expected_connection
@@ -198,9 +198,9 @@ def test_modify_connections(mocker, fixture_for_osstat_pathlib, file_contents, e
 
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
     # Act
-    nexus_sim.network.connections.modify_connection(obj_to_modify, modified_properties)
+    nexus_sim.network.connections.modify(obj_to_modify, modified_properties)
     # compare sets as order doesn't matter
-    result_nodes = nexus_sim.network.connections.get_connections()
+    result_nodes = nexus_sim.network.connections.get_all()
     result_nodes.sort(key=lambda x: x.name)
     # Assert
     assert result_nodes == expected_objs

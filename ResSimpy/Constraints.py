@@ -13,23 +13,31 @@ class Constraints(ABC):
     __constraints: dict[str, list[Constraint]] = field(default_factory=lambda: {})
 
     @abstractmethod
-    def get_constraints(self, object_name: Optional[str] = None, date: Optional[str] = None) \
+    def get_all(self, object_name: Optional[str] = None, date: Optional[str] = None) \
             -> Mapping[str, Sequence[Constraint]]:
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
-    def get_constraint_df(self) -> pd.DataFrame:
+    def get_df(self) -> pd.DataFrame:
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
-    def get_constraint_overview(self) -> str:
+    def get_overview(self) -> str:
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
-    def remove_constraint(self) -> None:
+    def remove(self) -> None:
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
-    def add_constraint(self, name: str,
-                       constraint_to_add: dict[str, None | float | int | str | UnitSystem] | Constraint) -> None:
+    def add(self, name: str,
+            constraint_to_add: dict[str, None | float | int | str | UnitSystem] | Constraint) -> None:
+        raise NotImplementedError("Implement this in the derived class")
+
+    @abstractmethod
+    def modify(self, name: str,
+               current_constraint: dict[str, None | float | int | str] | Constraint,
+               new_constraint_props: dict[str, None | float | int | str | UnitSystem] | Constraint,
+               comments: Optional[str] = None) \
+            -> None:
         raise NotImplementedError("Implement this in the derived class")

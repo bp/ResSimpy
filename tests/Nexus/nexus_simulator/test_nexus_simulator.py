@@ -1730,12 +1730,12 @@ def test_load_surface_file(mocker, fixture_for_osstat_pathlib, fcs_file_contents
     spy = mocker.spy(nexus_sim._network, 'load')
 
     # Act
-    result_nodes = nexus_sim.network.nodes.get_nodes()
-    result_cons = nexus_sim.network.connections.get_connections()
-    result_wellcons = nexus_sim.network.well_connections.get_well_connections()
-    result_wellheads = nexus_sim.network.wellheads.get_wellheads()
-    result_wellbores = nexus_sim.network.wellbores.get_wellbores()
-    result_constraints = nexus_sim.network.constraints.get_constraints()
+    result_nodes = nexus_sim.network.nodes.get_all()
+    result_cons = nexus_sim.network.connections.get_all()
+    result_wellcons = nexus_sim.network.well_connections.get_all()
+    result_wellheads = nexus_sim.network.wellheads.get_all()
+    result_wellbores = nexus_sim.network.wellbores.get_all()
+    result_constraints = nexus_sim.network.constraints.get_all()
     # Assert
     assert result_nodes == expected_nodes
     assert result_cons == expected_cons

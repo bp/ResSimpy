@@ -8,12 +8,12 @@ from ResSimpy.Nexus.nexus_file_operations import get_next_value, correct_datatyp
 from ResSimpy.Utils.invert_nexus_map import nexus_keyword_to_attribute_name
 import fnmatch
 if TYPE_CHECKING:
-    from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+    from ResSimpy.File import File
 
 
 def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConstraint], current_date: Optional[str],
                             unit_system: UnitSystem, property_map: dict[str, tuple[str, type]],
-                            existing_constraints: dict[str, list[NexusConstraint]], nexus_file: NexusFile,
+                            existing_constraints: dict[str, list[NexusConstraint]], nexus_file: File,
                             start_line_index: int, network_names: Optional[list[str]] = None) -> None:
     """Loads table of constraints with the wellname/node first and the constraints following inline
         uses previous set of constraints as still applied to the well.
