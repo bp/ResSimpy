@@ -1,21 +1,15 @@
-from dataclasses import dataclass
 from abc import ABC
-import pandas as pd
-from typing import Sequence, Optional
+from dataclasses import dataclass, field
+from typing import Literal
 
 from ResSimpy.NodeConnection import NodeConnection
+from ResSimpy.OperationsMixin import NetworkOperationsMixIn
 
 
 @dataclass(kw_only=True)
-class NodeConnections(ABC):
-    def get_connections(self) -> Sequence[NodeConnection]:
-        raise NotImplementedError("Implement this in the derived class")
+class NodeConnections(NetworkOperationsMixIn, ABC):
+    __connections: list[NodeConnection] = field(default_factory=list)
 
-    def get_connection(self, node_name: str) -> Optional[NodeConnection]:
-        raise NotImplementedError("Implement this in the derived class")
-
-    def get_connection_df(self) -> pd.DataFrame:
-        raise NotImplementedError("Implement this in the derived class")
-
-    def get_connections_overview(self) -> str:
-        raise NotImplementedError("Implement this in the derived class")
+    @property
+    def _network_element_name(self) -> Literal['connections']:
+        return 'connections'

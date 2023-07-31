@@ -1,7 +1,9 @@
 import os
+from typing import Optional
 import uuid
 import pytest
 import pandas as pd
+from datetime import datetime, timezone
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
@@ -108,7 +110,7 @@ def check_file_read_write_is_correct_for_windows(expected_file_contents: str, mo
         # Providing a relative path to the fcs file + Non-USA date format
         ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
     ])
-def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expected_root, expected_run_control_path,
+def test_load_fcs_file_no_output_no_include_file(mocker, fixture_for_osstat_pathlib, run_control_path, expected_root, expected_run_control_path,
                                                  date_format, expected_date_format):
     # Arrange
     fcs_file = f"RUNCONTROL {run_control_path}\nDATEFORMAT {date_format}\n"
@@ -130,7 +132,7 @@ def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expec
         # Providing a relative path to the fcs file + Non-USA date format
         ("run/control/path", "testpath1", "run/control/path", "DD/MM/YYYY", DateFormat.DD_MM_YYYY)
     ])
-def test_load_fcs_space_in_filename(mocker, run_control_path, expected_root, expected_run_control_path,
+def test_load_fcs_space_in_filename(mocker, fixture_for_osstat_pathlib, run_control_path, expected_root, expected_run_control_path,
                                     date_format, expected_date_format):
     # Arrange
     fcs_file = f"RUNCONTROL {run_control_path}\nDATEFORMAT {date_format}\n"
@@ -154,7 +156,7 @@ def test_load_fcs_space_in_filename(mocker, run_control_path, expected_root, exp
         ("RUNCONTROL c:\path\to\run\control\n  DATE_FORMAT DD/MM/YYYY", DateFormat.DD_MM_YYYY),
         ("RUNCONTROL c:\path\to\run\control\n", DateFormat.MM_DD_YYYY),
     ], ids=['US date format', 'non-us date format', 'default (us format)', 'Win US Date Format', 'Win non-us date format', 'Win default (us format)', ])
-def test_load_fcs_date_format(mocker, fcs_file_contents, expected_date_format):
+def test_load_fcs_date_format(mocker, fixture_for_osstat_pathlib, fcs_file_contents, expected_date_format):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file_contents)
     mocker.patch("builtins.open", open_mock)
@@ -165,8 +167,67 @@ def test_load_fcs_date_format(mocker, fcs_file_contents, expected_date_format):
     # Assert
     assert simulation.date_format is expected_date_format
 
+def test_get_users_linked_with_files(mocker):
+    # Arrange 
+    fcs_file = "RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\n"
+    open_mock = mocker.mock_open(read_data=fcs_file)
+    modified_time=datetime(2018, 6, 30, 8, 18, 10,tzinfo=timezone.utc)
+    dt_mock = mocker.MagicMock()
+    mocker.patch('datetime.datetime',dt_mock)
+    dt_mock.fromtimestamp.return_value = modified_time
+    
+    mocker.patch("builtins.open", open_mock)
+    path_mock = mocker.MagicMock()
+    mocker.patch('pathlib.Path', path_mock)
+    path_mock.return_value.owner.return_value = "Mock-User"
+    path_mock.return_value.group.return_value = "Mock-Group"
+    
+    os_mock = mocker.MagicMock()
+    mocker.patch('os.stat',os_mock)
+    os_mock.return_value.st_mtime = 1530346690
+  
+    simulation = NexusSimulator(origin="Path.fcs")
+    
+    expected_result = [("Path.fcs","Mock-User:Mock-Group",modified_time),("run_control.inc","Mock-User:Mock-Group",modified_time)]
+    # Act
+    
+    result = simulation.get_users_linked_with_files()
+    mocker.stopall()
+    assert result == expected_result
+    
+def test_get_users_with_files_for_multiple_files(mocker):
+    
+    fcs_file = 'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'     
+     
+     
+    open_mock = mocker.mock_open(read_data=fcs_file)
+    modified_time=datetime(2018, 6, 30, 8, 18, 10,tzinfo=timezone.utc)
+    dt_mock = mocker.MagicMock()
+    mocker.patch('datetime.datetime',dt_mock)
+    dt_mock.fromtimestamp.return_value = modified_time
+    
+    mocker.patch("builtins.open", open_mock)
+    path_mock = mocker.MagicMock()
+    mocker.patch('pathlib.Path', path_mock)
+    path_mock.return_value.owner.return_value = "Mock-User"
+    path_mock.return_value.group.return_value = "Mock-Group"
+    
+    os_mock = mocker.MagicMock()
+    mocker.patch('os.stat',os_mock)
+    os_mock.return_value.st_mtime = 1530346690
+  
+    simulation = NexusSimulator(origin="Path.fcs")
+    
+    expected_result = [("Path.fcs","Mock-User:Mock-Group",modified_time),
+                       ("Includes/grid_data/main_grid.dat","Mock-User:Mock-Group",modified_time)]
+    # Act
+    
+    result = simulation.get_users_linked_with_files()
+    mocker.stopall()
+    assert result == expected_result
 
-def test_load_fcs_file_comment_after_declaration(mocker):
+
+def test_load_fcs_file_comment_after_declaration(mocker, fixture_for_osstat_pathlib):
     """Check that the code ignores lines with comments that contain tokens"""
     # Arrange
     fcs_file = "!RUNCONTROL run_control_1\n RUNCONTROL run_control_2.inc\nDATEFORMAT DD/MM/YYYY\n!DATEFORMAT MM/DD/YYYY"
@@ -289,7 +350,7 @@ def test_output_to_existing_directory(mocker):
                                      'DESC Test model\n\nRUN_UNITS ENGLISH\n\ndefault_Units Metbar\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
                                      UnitSystem.METBAR),
                          ])
-def test_load_fcs_file_populates_default_units(mocker, fcs_file, expected_default_unit_value):
+def test_load_fcs_file_populates_default_units(mocker, fixture_for_osstat_pathlib, fcs_file, expected_default_unit_value):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
@@ -307,7 +368,7 @@ def test_load_fcs_file_populates_default_units(mocker, fcs_file, expected_defaul
                              'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS NOTVALID\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
                              'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS \nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
                          ])
-def test_load_fcs_file_raises_error_for_undefined_default_units(mocker, fcs_file):
+def test_load_fcs_file_raises_error_for_undefined_default_units(mocker, fixture_for_osstat_pathlib, fcs_file):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
@@ -334,7 +395,7 @@ def test_load_fcs_file_raises_error_for_undefined_default_units(mocker, fcs_file
                                      'DESC Test model\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat',
                                      UnitSystem.ENGLISH)
                          ])
-def test_load_fcs_file_populates_run_units(mocker, fcs_file, expected_run_unit_value):
+def test_load_fcs_file_populates_run_units(mocker, fixture_for_osstat_pathlib, fcs_file, expected_run_unit_value):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
@@ -353,7 +414,7 @@ def test_load_fcs_file_populates_run_units(mocker, fcs_file, expected_run_unit_v
                              'DESC Test model\n\nRUN_UNITs \nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
                              'DESC Test model\n\nRUN_UNITs 1\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
                          ])
-def test_load_fcs_file_raises_error_for_undefined_run_units(mocker, fcs_file):
+def test_load_fcs_file_raises_error_for_undefined_run_units(mocker, fixture_for_osstat_pathlib, fcs_file):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
@@ -377,7 +438,7 @@ def test_load_fcs_file_raises_error_for_undefined_run_units(mocker, fcs_file):
                                  'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data\\Includes\\nexus_data\\surface_simplified_06082018.inc',
                                  'testpath1', 'nexus_data\\Includes\\nexus_data\\surface_simplified_06082018.inc')
                          ])
-def test_get_abs_surface_file_path(mocker, fcs_file, expected_root, expected_extracted_path):
+def test_get_abs_surface_file_path(mocker, fixture_for_osstat_pathlib, fcs_file, expected_root, expected_extracted_path):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
@@ -454,7 +515,7 @@ def test_get_check_oil_gas_types_for_models_different_types(mocker):
                               "GASWATER"
                               )
                          ])
-def test_get_check_oil_gas_types_for_models_same_types(mocker, fcs_file_contents_1, fcs_file_contents_2,
+def test_get_check_oil_gas_types_for_models_same_types(mocker, fixture_for_osstat_pathlib, fcs_file_contents_1, fcs_file_contents_2,
                                                        surface_file_contents_1, surface_file_contents_2, expected_type):
     # Checks that the correct oil / gas type is returned.
     # Arrange
@@ -496,7 +557,7 @@ def test_get_check_oil_gas_types_for_models_same_types(mocker, fcs_file_contents
                               ""
                               )
                          ])
-def test_get_check_oil_gas_types_for_models_no_type_found(mocker, fcs_file_contents_1, fcs_file_contents_2,
+def test_get_check_oil_gas_types_for_models_no_type_found(mocker, fixture_for_osstat_pathlib, fcs_file_contents_1, fcs_file_contents_2,
                                                           surface_file_contents_1, surface_file_contents_2,
                                                           expected_type):
     # Checks that the correct oil / gas type is returned.
@@ -514,7 +575,7 @@ def test_get_check_oil_gas_types_for_models_no_type_found(mocker, fcs_file_conte
     with pytest.raises(ValueError):
         NexusSimulator.get_check_oil_gas_types_for_models(models)
 
-def test_get_check_oil_gas_types_for_models_different_types(mocker):
+def test_get_check_oil_gas_types_for_models_different_types(mocker, fixture_for_osstat_pathlib):
     # Checks that a Value error is raised if the surface files contain different oil / gas types
     # Arrange
     models = ['path/to/model1.fcs', 'path/to/another/model2.fcs']
@@ -612,7 +673,7 @@ TOKENNOVALUE """,
                          ids=["basic case", "standard value change", "token not present (add to start)",
                               "token not present (add to end)",
                               "token not present and has no value"])
-def test_update_token_file_value(mocker, original_file_contents, expected_file_contents, token, new_value,
+def test_update_token_file_value(mocker, fixture_for_osstat_pathlib, original_file_contents, expected_file_contents, token, new_value,
                                  add_to_start):
     """Test the update token value functionality"""
     # Arrange
@@ -712,7 +773,7 @@ TOKENNOVALUE """,
                          ids=["basic case", "standard value change", "token not present (add to start)",
                               "token not present (add to end)",
                               "token not present and has no value"])
-def test_update_token_file_value(mocker, original_file_contents, expected_file_contents, token, new_value,
+def test_update_token_file_value(mocker, fixture_for_osstat_pathlib, original_file_contents, expected_file_contents, token, new_value,
                                  add_to_start):
     """Test the update token value functionality"""
     # Arrange
@@ -761,7 +822,7 @@ GRIDSOLVER IMPLICIT_COUPLING NONE
 VIPUNITS""",
                               "METHOD")
                          ], ids=["standard comment out", "Larger file"])
-def test_comment_out_file_value(mocker, original_file_contents, expected_file_contents, token):
+def test_comment_out_file_value(mocker, fixture_for_osstat_pathlib, original_file_contents, expected_file_contents, token):
     """Testing the functionality to comment out a line containing a specific token"""
     # Arrange
     mock_original_opens = mocker.mock_open()
@@ -808,7 +869,7 @@ GRIDSOLVER IMPLICIT_COUPLING NONE
 VIPUNITS""",
                               "METHOD")
                          ], ids=["standard comment out", "Larger file"])
-def test_comment_out_file_value(mocker, original_file_contents, expected_file_contents, token):
+def test_comment_out_file_value(mocker, fixture_for_osstat_pathlib, original_file_contents, expected_file_contents, token):
     """Testing the functionality to comment out a line containing a specific token"""
     # Arrange
     mock_original_opens = mocker.mock_open()
@@ -828,7 +889,7 @@ def test_comment_out_file_value(mocker, original_file_contents, expected_file_co
                                      modifying_mock_open=modifying_mock_open,
                                      mocker_fixture=mocker)
 
-def test_add_map_statements(mocker):
+def test_add_map_statements(mocker, fixture_for_osstat_pathlib):
     """Testing the functionality to comment out a line containing a specific token"""
     # Arrange
 
@@ -881,7 +942,7 @@ PLOTBINARY
                                      modifying_mock_open=modifying_mock_open,
                                      mocker_fixture=mocker)
 
-def test_add_map_statements_windows(mocker):
+def test_add_map_statements_windows(mocker, fixture_for_osstat_pathlib):
     """Testing the functionality to comment out a line containing a specific token"""
     # Arrange
 
@@ -940,7 +1001,7 @@ PLOTBINARY
        WelLS sEt 1 my/wellspec/file.dat
     """)
 ], ids=['path_after_set'])
-def test_get_wells(mocker: MockerFixture, fcs_file_contents: str):
+def test_get_wells(mocker: MockerFixture, fixture_for_osstat_pathlib, fcs_file_contents: str):
     """Testing the functionality to load in and retrieve a set of wells"""
     # Arrange
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
@@ -978,7 +1039,7 @@ def test_get_wells(mocker: MockerFixture, fcs_file_contents: str):
        WelLS sEt 1 my\wellspec\file.dat
     """)
 ], ids=['path_after_set'])
-def test_get_wells_windows(mocker: MockerFixture, fcs_file_contents: str):
+def test_get_wells_windows(mocker: MockerFixture, fixture_for_osstat_pathlib, fcs_file_contents: str):
     """Testing the functionality to load in and retrieve a set of wells"""
     # Arrange
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
@@ -1012,7 +1073,7 @@ def test_get_wells_windows(mocker: MockerFixture, fcs_file_contents: str):
                                             start_date='', date_format = DateFormat.MM_DD_YYYY)
 
 
-def test_get_wells_df(mocker: MockerFixture):
+def test_get_wells_df(mocker: MockerFixture, fixture_for_osstat_pathlib):
     # Arrange
     fcs_file_contents = """
        WelLS sEt 1 my/wellspec/file.dat
@@ -1050,7 +1111,7 @@ def test_get_wells_df(mocker: MockerFixture):
        WelLS set 1 my/wellspec/file.dat
     """)
 ], ids=['basic case'])
-def test_get_well(mocker: MockerFixture, fcs_file_contents: str):
+def test_get_well(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_pathlib):
     """Testing the functionality to load in and retrieve a single wells."""
     # Arrange
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
@@ -1090,7 +1151,7 @@ def test_get_well(mocker: MockerFixture, fcs_file_contents: str):
        WelLS set 1 my\\wellspec\\file.dat
     """)
 ], ids=['basic case'])
-def test_get_well_windows(mocker: MockerFixture, fcs_file_contents: str):
+def test_get_well_windows(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_pathlib):
     """Testing the functionality to load in and retrieve a single wells."""
     # Arrange
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
@@ -1135,7 +1196,7 @@ def test_get_well_windows(mocker: MockerFixture, fcs_file_contents: str):
        Pvt METHOD 3 my/pvt/file3.dat
     """)
 ], ids=['basic case'])
-def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
+def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_pathlib):
     """Testing the functionality to retrieve pvt methods from Nexus fcs file."""
     # Arrange
     mocker.patch.object(uuid, 'uuid4', return_value='uuid')
@@ -1177,7 +1238,7 @@ def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
        Separator METHOD 3 my/separator/file3.dat
     """)
 ], ids=['basic case'])
-def test_get_separator(mocker: MockerFixture, fcs_file_contents: str):
+def test_get_separator(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_pathlib):
     """Testing the functionality to retrieve separator methods from Nexus fcs file."""
     # Arrange
     mocker.patch.object(uuid, 'uuid4', return_value='uuid')
@@ -1220,7 +1281,7 @@ def test_get_separator(mocker: MockerFixture, fcs_file_contents: str):
        Water METHOD 3 my/water/file3.dat
     """)
 ], ids=['basic case'])
-def test_get_water(mocker: MockerFixture, fcs_file_contents: str):
+def test_get_water(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_pathlib):
     """Testing the functionality to retrieve water methods from Nexus fcs file."""
     # Arrange
     mocker.patch.object(uuid, 'uuid4', return_value='uuid')
@@ -1255,6 +1316,8 @@ def test_get_water(mocker: MockerFixture, fcs_file_contents: str):
     assert result == loaded_wat
 
 
+
+
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
        EQUIL method 1 my/equil/file1.dat
@@ -1263,7 +1326,7 @@ def test_get_water(mocker: MockerFixture, fcs_file_contents: str):
        Equil METHOD 3 my/equil/file3.dat
     """)
 ], ids=['basic case'])
-def test_get_equil(mocker: MockerFixture, fcs_file_contents: str):
+def test_get_equil(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_pathlib):
     """Testing the functionality to retrieve equilibration methods from Nexus fcs file."""
     # Arrange
     mocker.patch.object(uuid, 'uuid4', return_value='uuid')
@@ -1306,7 +1369,7 @@ def test_get_equil(mocker: MockerFixture, fcs_file_contents: str):
        Rock METHOD 3 my/rock/file3.dat
     """)
 ], ids=['basic case'])
-def test_get_rock(mocker: MockerFixture, fcs_file_contents: str):
+def test_get_rock(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_pathlib):
     """Testing the functionality to retrieve rock properties methods from Nexus fcs file."""
     # Arrange
     mocker.patch.object(uuid, 'uuid4', return_value='uuid')
@@ -1349,7 +1412,7 @@ def test_get_rock(mocker: MockerFixture, fcs_file_contents: str):
        RelPm METHOD 3 my/relpm/file3.dat
     """)
 ], ids=['basic case'])
-def test_get_relperm(mocker: MockerFixture, fcs_file_contents: str):
+def test_get_relperm(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_pathlib):
     """Testing the functionality to retrieve relative permeability and
     capillary pressure methods from Nexus fcs file.
     """
@@ -1394,7 +1457,7 @@ def test_get_relperm(mocker: MockerFixture, fcs_file_contents: str):
        Valve METHOD 3 my/valve/file3.dat
     """)
 ], ids=['basic case'])
-def test_get_valve(mocker: MockerFixture, fcs_file_contents: str):
+def test_get_valve(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_pathlib):
     """Testing the functionality to retrieve valve methods from Nexus fcs file."""
     # Arrange
     mocker.patch.object(uuid, 'uuid4', return_value='uuid')
@@ -1436,7 +1499,7 @@ def test_get_valve(mocker: MockerFixture, fcs_file_contents: str):
        Aquifer METHOD 3 my/aquifer/file3.dat
     """)
 ], ids=['basic case'])
-def test_get_aquifer(mocker: MockerFixture, fcs_file_contents: str):
+def test_get_aquifer(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_pathlib):
     """Testing the functionality to retrieve aquifer methods from Nexus fcs file."""
     # Arrange
     mocker.patch.object(uuid, 'uuid4', return_value='uuid')
@@ -1478,7 +1541,7 @@ def test_get_aquifer(mocker: MockerFixture, fcs_file_contents: str):
        Hyd METHOD 3 my/hyd/file3.dat
     """)
 ], ids=['basic case'])
-def test_get_hydraulics(mocker: MockerFixture, fcs_file_contents: str):
+def test_get_hydraulics(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_pathlib):
     """Testing the functionality to retrieve hydraulics methods from Nexus fcs file."""
     # Arrange
     mocker.patch.object(uuid, 'uuid4', return_value='uuid')
@@ -1512,7 +1575,6 @@ def test_get_hydraulics(mocker: MockerFixture, fcs_file_contents: str):
     # Assert
     assert result == loaded_hyds
 
-
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
        GASLIFT method 1 my/gaslift/file1.dat
@@ -1520,7 +1582,7 @@ def test_get_hydraulics(mocker: MockerFixture, fcs_file_contents: str):
        Gaslift METHOD 3 my/gaslift/file3.dat
     """)
 ], ids=['basic case'])
-def test_get_gaslift(mocker: MockerFixture, fcs_file_contents: str):
+def test_get_gaslift(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_pathlib):
     """Testing the functionality to retrieve gaslift methods from Nexus fcs file."""
     # Arrange
     mocker.patch.object(uuid, 'uuid4', return_value='uuid')
@@ -1639,7 +1701,7 @@ C          node1         NA        NA    80    100.5 200.8   1     station      
 'well_name':'GUN_P'},
          ),
      ])
-def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node1_props, node2_props,
+def test_load_surface_file(mocker, fixture_for_osstat_pathlib, fcs_file_contents, surface_file_content, node1_props, node2_props,
     connection1_props, connection2_props, wellconprops1, wellconprops2, wellheadprops1, wellheadprops2,
     wellboreprops1, wellboreprops2, constraint_props1, constraint_props2):
     # Arrange
@@ -1668,12 +1730,12 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
     spy = mocker.spy(nexus_sim._network, 'load')
 
     # Act
-    result_nodes = nexus_sim.network.nodes.get_nodes()
-    result_cons = nexus_sim.network.connections.get_connections()
-    result_wellcons = nexus_sim.network.well_connections.get_well_connections()
-    result_wellheads = nexus_sim.network.wellheads.get_wellheads()
-    result_wellbores = nexus_sim.network.wellbores.get_wellbores()
-    result_constraints = nexus_sim.network.constraints.get_constraints()
+    result_nodes = nexus_sim.network.nodes.get_all()
+    result_cons = nexus_sim.network.connections.get_all()
+    result_wellcons = nexus_sim.network.well_connections.get_all()
+    result_wellheads = nexus_sim.network.wellheads.get_all()
+    result_wellbores = nexus_sim.network.wellbores.get_all()
+    result_constraints = nexus_sim.network.constraints.get_all()
     # Assert
     assert result_nodes == expected_nodes
     assert result_cons == expected_cons

@@ -175,7 +175,7 @@ from tests.utility_for_tests import get_fake_nexus_simulator
         )),
     ], ids=['basic_test', 'Change in Time', 'more Keywords', 'constraint table', 'multiple constraints on same well',
     'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword', 'GORLIM_drawdowncards'])
-def test_load_constraints(mocker, file_contents, expected_content):
+def test_load_constraints(mocker, fixture_for_osstat_pathlib, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
@@ -203,11 +203,11 @@ def test_load_constraints(mocker, file_contents, expected_content):
 
     # Act
     constraints = NexusConstraints(mock_nexus_network, mock_nexus_sim)
-    constraints.load_constraints(surface_file, start_date, UnitSystem.ENGLISH)
-    result = constraints.get_constraints()
-    result_single = constraints.get_constraints(object_name='well1')
-    result_df = constraints.get_constraint_df()
-    result_date_filtered = constraints.get_constraints(date='01/01/2019')
+    constraints.load(surface_file, start_date, UnitSystem.ENGLISH)
+    result = constraints.get_all()
+    result_single = constraints.get_all(object_name='well1')
+    result_df = constraints.get_df()
+    result_date_filtered = constraints.get_all(date='01/01/2019')
     # sort the dates for comparing dataframes (order normally wouldn't matter)
     result_df['date'] = pd.to_datetime(result_df['date'])
     result_df = result_df.sort_values('date').reset_index(drop=True)
@@ -301,7 +301,7 @@ def test_load_constraints(mocker, file_contents, expected_content):
      'uuid2': [3, 8]}
     ),
         ], ids=['basic_test', 'two tables', 'several constraints for one well', 'constraint_table', 'qmults'])
-def test_constraint_ids(mocker, file_contents, object_locations):
+def test_constraint_ids(mocker, fixture_for_osstat_pathlib, file_contents, object_locations):
     # Arrange
     fcs_file_data = '''RUN_UNITS ENGLISH
 
@@ -312,7 +312,7 @@ def test_constraint_ids(mocker, file_contents, object_locations):
     SURFACE Network 1 surface.dat'''
     runcontrol_data = 'START 01/01/2020'
 
-    def mock_open_wrapper(filename, mode):
+    def mock_open_wrapper(filename,  mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             'fcs_file.dat': fcs_file_data,
             'surface.dat': file_contents,
@@ -325,12 +325,13 @@ def test_constraint_ids(mocker, file_contents, object_locations):
     mocker.patch('os.listdir', ls_dir)
     fcs_file_exists = Mock(side_effect=lambda x: True)
     mocker.patch('os.path.isfile', fcs_file_exists)
+
     model = NexusSimulator('fcs_file.dat')
 
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
                                                     'uuid4', 'uuid5', 'uuid6', 'uuid7'])
     # Act
-    model.network.constraints.get_constraints()
+    model.network.constraints.get_all()
 
     result = model.model_files.surface_files[1].object_locations
     # Assert

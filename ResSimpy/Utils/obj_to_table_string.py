@@ -3,7 +3,7 @@ from typing import Any
 from ResSimpy.Utils.invert_nexus_map import nexus_keyword_to_attribute_name
 
 
-def to_string(obj: Any, headers: list[str]) -> str:
+def to_table_line(obj: Any, headers: list[str]) -> str:
     """Takes a generic Nexus object and returns the attribute values as a string in the order of headers provided.
     Requires an implemented to_dict method and get_nexus_mapping() method.
 

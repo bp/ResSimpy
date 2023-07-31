@@ -10,7 +10,7 @@ from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.Utils.invert_nexus_map import invert_nexus_map, attribute_name_to_nexus_keyword, \
     nexus_keyword_to_attribute_name
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
-from ResSimpy.Utils.obj_to_table_string import to_string
+from ResSimpy.Utils.obj_to_table_string import to_table_line
 from ResSimpy.Utils.to_dict_generic import to_dict
 
 
@@ -190,10 +190,10 @@ def test_to_string_generic(mocker, headers, expected_result):
     if expected_result is None:
         # for the failure case
         with pytest.raises(AttributeError) as ae:
-            result_string = to_string(test_object, headers)
+            result_string = to_table_line(test_object, headers)
             assert 'No attribute found with name "ATTR_NOT_VALID"' in ae
         return
-    result_string = to_string(test_object, headers)
+    result_string = to_table_line(test_object, headers)
 
     # Assert
     assert result_string == expected_result

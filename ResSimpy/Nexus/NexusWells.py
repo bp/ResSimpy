@@ -31,8 +31,16 @@ class NexusWells(Wells):
     def __init__(self, model: NexusSimulator) -> None:
         self.__model = model
         self.__wells = []
-        self.__add_object_operations = AddObjectOperations(model)
+        self.__add_object_operations = AddObjectOperations(model, self.table_header, self.table_footer)
         super().__init__()
+
+    @property
+    def table_header(self) -> str:
+        return 'WELLSPEC'
+
+    @property
+    def table_footer(self) -> str:
+        return ''
 
     def get_wells(self) -> Sequence[NexusWell]:
         if not self.__wells_loaded:

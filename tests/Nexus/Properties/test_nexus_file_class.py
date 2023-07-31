@@ -28,7 +28,7 @@ def mock_different_includes(mocker, filename, test_file_contents, inc_file_conte
     return open_mock
 
 
-def test_generate_file_include_structure_basic(mocker):
+def test_generate_file_include_structure_basic(mocker, fixture_for_osstat_pathlib):
     # Arrange
     file_path = 'test_file_path.dat'
     test_file_contents = 'basic_file INCLUDE inc_file1.inc'
@@ -64,7 +64,7 @@ def test_generate_file_include_structure_basic(mocker):
     assert nexus_file == expected_nexus_file
 
 
-def test_generate_file_include_structure_multiple_includes(mocker):
+def test_generate_file_include_structure_multiple_includes(mocker, fixture_for_osstat_pathlib):
     # Arrange
     file_path = 'test_file_path.dat'
     test_file_contents = (
@@ -104,7 +104,7 @@ second_file INCLUDE inc_file2.inc''')
     assert nexus_file == expected_nexus_file
 
 
-def test_generate_file_include_structure_nested_includes(mocker):
+def test_generate_file_include_structure_nested_includes(mocker, fixture_for_osstat_pathlib):
     # Arrange
     file_path = 'test_file_path.dat'
     test_file_contents = 'basic_file INCLUDE inc_file1.inc something after'
@@ -145,7 +145,7 @@ def test_generate_file_include_structure_nested_includes(mocker):
     assert nexus_file == expected_nexus_file
 
 
-def test_generate_file_include_structure_origin_path(mocker):
+def test_generate_file_include_structure_origin_path(mocker, fixture_for_osstat_pathlib):
     # Arrange
     file_path = '/origin/path/test_file_path.dat'
     test_file_contents = 'basic_file INCLUDE nexus_data/inc_file1.inc'
@@ -253,7 +253,7 @@ def test_iterate_line_nested(max_depth, expected_results):
 ], ids=['basic_test', 'newline',
         'comment',
         'another_token', 'second_token'])
-def test_generate_file_include_structure_skip_array(mocker, test_file_contents):
+def test_generate_file_include_structure_skip_array(mocker, fixture_for_osstat_pathlib, test_file_contents):
     # Arrange
     file_path = '/origin/path/test_file_path.dat'
     include_file_contents = 'inc file contents'
@@ -330,7 +330,7 @@ KX ZVAR
 ], ids=['basic case', 'exclude from start of file'])
 def test_generate_file_include_structure_skip_file_with_nested_array(mocker: MockerFixture,
                                                                      file_with_nested_grid_array_contents: str,
-                                                                     expected_file_contents: str):
+                                                                     expected_file_contents: str, fixture_for_osstat_pathlib):
     # Arrange
     file_path = '/origin/path/test_file_path.dat'
     parent_file_contents = 'INCLUDE nexus_data/inc_file1.inc'
@@ -358,7 +358,7 @@ def test_generate_file_include_structure_skip_file_with_nested_array(mocker: Moc
     assert nexus_file.include_objects[0].file_content_as_list == expected_included_file.file_content_as_list
     assert nexus_file.include_objects[0] == expected_included_file
 
-def test_generate_file_include_structure_not_skipping_file(mocker: MockerFixture):
+def test_generate_file_include_structure_not_skipping_file(mocker: MockerFixture, fixture_for_osstat_pathlib):
     # Arrange
     file_contents = """POROSITY CON 0.31012
 CORP VALUE INCLUDE nested/include/file/path.dat
@@ -416,7 +416,7 @@ KZ CON 1
                           ],
                          ids=['basic_test']
                          )
-def test_file_object_locations(mocker, test_file_contents, expected_results):
+def test_file_object_locations(mocker, fixture_for_osstat_pathlib, test_file_contents, expected_results):
     # Arrange
     mocker.patch.object(uuid, 'uuid4', side_effect=['file_uuid', 'uuid1', 'uuid2'])
 
@@ -438,7 +438,7 @@ def test_file_object_locations(mocker, test_file_contents, expected_results):
     assert result == expected_results
 
 
-def test_line_locations_complex(mocker):
+def test_line_locations_complex(mocker, fixture_for_osstat_pathlib):
     # Arrange
     # We need 2 lots of the mocked out uuid one for init of the expected files and one set for the try statement
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid_inc1', 'uuid_inc2', 'parent_file',
@@ -500,7 +500,7 @@ second_file INCLUDE inc_file2.inc continuation''')
     assert nexus_file.line_locations == expected_nexus_file.line_locations
 
 
-def test_line_locations_nested(mocker):
+def test_line_locations_nested(mocker, fixture_for_osstat_pathlib):
     # Arrange
     # We need 2 lots of the mocked out uuid one for init of the expected files and one set for the try statement
 
@@ -562,7 +562,7 @@ continuation''')
     assert nexus_file.line_locations == expected_nexus_file.line_locations
 
 
-def test_line_locations_with_additional_lines(mocker):
+def test_line_locations_with_additional_lines(mocker, fixture_for_osstat_pathlib):
     # Arrange
     # We need 2 lots of the mocked out uuid one for init of the expected files and one set for the try statement
 
@@ -641,7 +641,7 @@ continuation''')
     (5, 1, 2),
     (2, 1, 1),
 ])
-def test_find_which_include_file(mocker, index, expected_file_number, expected_index_in_file):
+def test_find_which_include_file(mocker, fixture_for_osstat_pathlib, index, expected_file_number, expected_index_in_file):
     # Arrange
     # We need 2 lots of the mocked out uuid one for init of the expected files and one set for the try statement
 
@@ -733,7 +733,7 @@ continuation''')
                           ],
                          ids=['basic_test']
                          )
-def test_update_object_locations(mocker, test_file_contents, expected_results):
+def test_update_object_locations(mocker, fixture_for_osstat_pathlib, test_file_contents, expected_results):
     # Arrange
     mocker.patch.object(uuid, 'uuid4', side_effect=['file_uuid', 'uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5'])
 
