@@ -29,3 +29,19 @@ def get_fake_nexus_simulator(mocker: MockerFixture, fcs_file_path: str = '/path/
     fake_nexus_sim = NexusSimulator(fcs_file_path)
 
     return fake_nexus_sim
+
+def get_fake_stat_pathlib_time(mocker):
+    """ mocks pathlibpath, os.stat and datetime"""
+    
+    dt_mock = mocker.MagicMock()
+    mocker.patch('datetime.datetime',dt_mock)
+    dt_mock.fromtimestamp.return_value = None
+    path_mock = mocker.MagicMock()
+    mocker.patch('pathlib.Path', path_mock)
+    path_mock.return_value.owner.return_value = None
+    path_mock.return_value.group.return_value = None
+
+    os_mock = mocker.MagicMock()
+    mocker.patch('os.stat',os_mock)
+    os_mock.return_value.st_mtime = None
+

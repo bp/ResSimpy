@@ -5,7 +5,7 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from tests.multifile_mocker import mock_multiple_files
 
 
-def test_fcs_file(mocker):
+def test_fcs_file(mocker, fixture_for_osstat_pathlib):
     # Arrange
     fcs_content = '''DESC reservoir1
 RUN_UNITS ENGLISH
@@ -39,9 +39,10 @@ GRID_FILES
                                          'GRID_FILES\n', '	 STRUCTURED_GRID nexus_data/mp2020_structured_grid_1_reg_update.dat\n',
                                          '	 OPTIONS nexus_data/nexus_data/mp2020_ref_options_reg_update.dat', ],
                                      structured_grid_file=expected_structured_grid_file,
-                                     options_file=expected_options_file, include_locations=expected_includes,
-                                     )
-
+                                     options_file=expected_options_file, include_locations=expected_includes)
+    expected_fcs_file.files_info =[(fcs_path, None, None),
+                                   (structured_grid_path, None, None),
+                                   (options_file_path, None, None)]
     # Act
     fcs_file = FcsNexusFile.generate_fcs_structure(fcs_path)
     # Assert
@@ -50,7 +51,7 @@ GRID_FILES
     assert fcs_file.structured_grid_file == expected_fcs_file.structured_grid_file
 
 
-def test_fcs_file_multiple_methods(mocker):
+def test_fcs_file_multiple_methods(mocker, fixture_for_osstat_pathlib):
     # Arrange
     fcs_content = '''DESC reservoir1
     RUN_UNITS ENGLISH
@@ -92,13 +93,18 @@ def test_fcs_file_multiple_methods(mocker):
         equil_files={1: expected_equil_1, 2: expected_equil_2, 3: expected_equil_3},
         include_locations=expected_includes,
     )
+    
+    expected_fcs_file.files_info=[(fcs_path,None,None),
+                                  ('nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',None,None),
+                                  ('nexus_data/nexus_data/mp2017hm_ref_equil_02.dat',None,None),
+                                  ('nexus_data/nexus_data/mp2017hm_ref_equil_03.dat',None,None)]
     # Act
     result = FcsNexusFile.generate_fcs_structure(fcs_path)
     # Assert
     assert result == expected_fcs_file
     
     
-def test_fcs_file_all_methods(mocker):
+def test_fcs_file_all_methods(mocker, fixture_for_osstat_pathlib):
     # Currently this test doesn't cover ensuring that the include file object gets into the fcs file.
     # Arrange
     fcs_content = '''DESC reservoir1
@@ -164,6 +170,14 @@ def test_fcs_file_all_methods(mocker):
                                      options_file=expected_options_file, well_files={1: expected_wells_file},
                                      hyd_files={3: expected_hyd_method_file},
                                      file_content_as_list=expected_fcs_contents_as_list, include_locations=expected_includes)
+    expected_fcs_file.files_info = [(fcs_path,None,None),
+                                    ('nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',None,None),
+                                    ('nexus_data/nexus_data/mp2017hm_ref_equil_02.dat',None,None),
+                                    ('nexus_data/mp2020_structured_grid_1_reg_update.dat',None,None),
+                                    ('nexus_data/nexus_data/mp2020_ref_options_reg_update.dat',None,None),
+                                    ('wells.dat',None,None),
+                                    ('hyd.dat',None,None)]
+    
     # Act
     result = FcsNexusFile.generate_fcs_structure(fcs_file_path=fcs_path)
     
