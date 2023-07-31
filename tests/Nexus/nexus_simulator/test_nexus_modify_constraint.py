@@ -8,7 +8,7 @@ from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import check_file_read_write_is_correct, get_fake_nexus_simulator
 
 
-def test_find_constraint(mocker, globalFixture):
+def test_find_constraint(mocker, fixture_for_osstat_pathlib):
     # Arrange
     mock_nexus_sim = get_fake_nexus_simulator(mocker)
     mock_nexus_network = NexusNetwork(mock_nexus_sim)
@@ -40,7 +40,7 @@ def test_find_constraint(mocker, globalFixture):
     assert result == expected_constraint
 
 
-def test_find_constraint_too_many_too_few_constraints_found(mocker, globalFixture):
+def test_find_constraint_too_many_too_few_constraints_found(mocker, fixture_for_osstat_pathlib):
     # Arrange
     mock_nexus_sim = get_fake_nexus_simulator(mocker)
     mock_nexus_network = NexusNetwork(mock_nexus_sim)
@@ -204,7 +204,7 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker, globalFixtur
 
 
     ], ids=['basic_test', 'over multiple lines', 'multiple_dates', 'constraint_table','qmult_table'])
-def test_remove_constraint(mocker, globalFixture, file_contents, expected_result_file, constraint_to_remove, expected_constraints,
+def test_remove_constraint(mocker, fixture_for_osstat_pathlib, file_contents, expected_result_file, constraint_to_remove, expected_constraints,
                            expected_number_writes):
     # Arrange
 
@@ -410,7 +410,7 @@ TIME 01/03/2020
 
 ], ids=['basic_test', 'add new table', 'add to new date', 'add QMULT table', 'add QMULT table to existing QMULT',
         'more time cards with qmult'])
-def test_add_constraint(mocker, globalFixture, file_contents, expected_file_contents, new_constraint, expected_number_writes,
+def test_add_constraint(mocker, fixture_for_osstat_pathlib, file_contents, expected_file_contents, new_constraint, expected_number_writes,
                         expected_uuid):
     # Arrange
     fcs_file_contents = '''
@@ -545,7 +545,7 @@ ENDQMULT
     {'uuid2': [2,6]}
     )
     ],ids=['basic_test', 'qmult_test'])
-def test_modify_constraints(mocker, globalFixture, file_contents, expected_file_contents, current_constraint, new_constraint,
+def test_modify_constraints(mocker, fixture_for_osstat_pathlib, file_contents, expected_file_contents, current_constraint, new_constraint,
                             expected_number_writes, expected_uuid):
     # Arrange
     fcs_file_contents = '''
@@ -594,7 +594,7 @@ def test_modify_constraints(mocker, globalFixture, file_contents, expected_file_
 
 ], ids=['well name not', 'constraint not matching']
 )
-def test_modify_constraint_no_constraint_found(mocker, globalFixture, current_constraint, new_constraint):
+def test_modify_constraint_no_constraint_found(mocker, fixture_for_osstat_pathlib, current_constraint, new_constraint):
     # Arrange
     fcs_file_contents = '''
         RUN_UNITS ENGLISH

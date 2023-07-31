@@ -5,7 +5,7 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from tests.multifile_mocker import mock_multiple_files
 
 
-def test_fcs_file(mocker, globalFixture):
+def test_fcs_file(mocker, fixture_for_osstat_pathlib):
     # Arrange
     fcs_content = '''DESC reservoir1
 RUN_UNITS ENGLISH
@@ -51,7 +51,7 @@ GRID_FILES
     assert fcs_file.structured_grid_file == expected_fcs_file.structured_grid_file
 
 
-def test_fcs_file_multiple_methods(mocker, globalFixture):
+def test_fcs_file_multiple_methods(mocker, fixture_for_osstat_pathlib):
     # Arrange
     fcs_content = '''DESC reservoir1
     RUN_UNITS ENGLISH
@@ -104,7 +104,7 @@ def test_fcs_file_multiple_methods(mocker, globalFixture):
     assert result == expected_fcs_file
     
     
-def test_fcs_file_all_methods(mocker, globalFixture):
+def test_fcs_file_all_methods(mocker, fixture_for_osstat_pathlib):
     # Currently this test doesn't cover ensuring that the include file object gets into the fcs file.
     # Arrange
     fcs_content = '''DESC reservoir1

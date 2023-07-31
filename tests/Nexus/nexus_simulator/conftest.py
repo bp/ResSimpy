@@ -12,7 +12,7 @@ def simulation(mocker):
     mocker.patch("os.path.isfile", lambda x: True)
 
 @pytest.fixture
-def globalFixture(mocker):
+def fixture_for_osstat_pathlib(mocker):
     get_fake_stat_pathlib_time(mocker)
 
 
