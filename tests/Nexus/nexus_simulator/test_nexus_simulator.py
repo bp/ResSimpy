@@ -193,7 +193,37 @@ def test_get_users_linked_with_files(mocker):
     
     result = simulation.get_users_linked_with_files()
     mocker.stopall()
-
+    assert result == expected_result
+    
+def test_get_users_with_files_for_multiple_files(mocker):
+    
+    fcs_file = 'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'     
+     
+     
+    open_mock = mocker.mock_open(read_data=fcs_file)
+    modified_time=datetime(2018, 6, 30, 8, 18, 10,tzinfo=timezone.utc)
+    dt_mock = mocker.MagicMock()
+    mocker.patch('datetime.datetime',dt_mock)
+    dt_mock.fromtimestamp.return_value = modified_time
+    
+    mocker.patch("builtins.open", open_mock)
+    path_mock = mocker.MagicMock()
+    mocker.patch('pathlib.Path', path_mock)
+    path_mock.return_value.owner.return_value = "Mock-User"
+    path_mock.return_value.group.return_value = "Mock-Group"
+    
+    os_mock = mocker.MagicMock()
+    mocker.patch('os.stat',os_mock)
+    os_mock.return_value.st_mtime = 1530346690
+  
+    simulation = NexusSimulator(origin="Path.fcs")
+    
+    expected_result = [("Path.fcs","Mock-User:Mock-Group",modified_time),
+                       ("Includes/grid_data/main_grid.dat","Mock-User:Mock-Group",modified_time)]
+    # Act
+    
+    result = simulation.get_users_linked_with_files()
+    mocker.stopall()
     assert result == expected_result
 
 
