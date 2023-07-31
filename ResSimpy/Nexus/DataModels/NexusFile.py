@@ -22,6 +22,9 @@ from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_OPERATION
 from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_nexus_file, \
     get_empty_dict_uuid_list_int
 from ResSimpy.File import File
+import pathlib
+import os
+from datetime import datetime, timezone
 
 
 @dataclass(kw_only=True, repr=True)
@@ -34,6 +37,8 @@ class NexusFile(File):
         origin (Optional[str]): Where the file was opened from. Defaults to None.
         include_objects (Optional[list[NexusFile]]): The include files but generated as a NexusFile instance. \
             Defaults to None.
+        linked_user (Optional[str]): user or owner of the file. Defaults to None
+        last_modified (Optional[datetime]): last modified date of the file
     """
 
     include_locations: Optional[list[str]] = field(default=None)
@@ -41,12 +46,16 @@ class NexusFile(File):
     include_objects: Optional[list[NexusFile]] = field(default=None, repr=False)
     object_locations: Optional[dict[UUID, list[int]]] = field(default=None, repr=False)
     line_locations: Optional[list[tuple[int, UUID]]] = field(default=None, repr=False)
+    linked_user: Optional[str] = field(default=None)
+    last_modified: Optional[datetime] = field(default=None)
 
     def __init__(self, location: Optional[str] = None,
                  include_locations: Optional[list[str]] = None,
                  origin: Optional[str] = None,
                  include_objects: Optional[list[NexusFile]] = None,
-                 file_content_as_list: Optional[list[str]] = None) -> None:
+                 file_content_as_list: Optional[list[str]] = None,
+                 linked_user: Optional[str] = None,
+                 last_modified: Optional[datetime] = None) -> None:
         super().__init__(location=location, file_content_as_list=file_content_as_list)
         if origin is not None and location is not None:
             self.location = nfo.get_full_file_path(location, origin)
@@ -63,6 +72,8 @@ class NexusFile(File):
         if self.line_locations is None:
             self.line_locations = []
         self.file_id = uuid.uuid4()
+        self.linked_user = linked_user
+        self.last_modified = last_modified
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True,
@@ -80,10 +91,35 @@ class NexusFile(File):
         Returns:
             NexusFile: a class instance for NexusFile with knowledge of include files
         """
+        def __get_pathlib_path_details(full_file_path: str):
+            if full_file_path == "" or full_file_path is None:
+                return None
+            pathlib_path = pathlib.Path(full_file_path)
+            owner = pathlib_path.owner()
+            group = pathlib_path.group()
+            if owner is not None and group is not None:
+                return f"{owner}:{group}"
+            elif owner is not None:
+                return owner
+            return None
 
+        def __get_datetime_from_os_stat(full_file_path: str):
+            if full_file_path == "" or full_file_path is None:
+                return None
+            stat_obj = os.stat(full_file_path)
+            timestamp = stat_obj.st_mtime
+            if timestamp is None:
+                return None
+            return datetime.fromtimestamp(timestamp, tz=timezone.utc)
+
+        user = None
+        last_changed = None
         full_file_path = file_path
         if origin is not None:
             full_file_path = nfo.get_full_file_path(file_path, origin)
+
+        user = __get_pathlib_path_details(full_file_path)
+        last_changed = __get_datetime_from_os_stat(full_file_path)
         try:
             file_as_list = nfo.load_file_as_list(full_file_path)
         except FileNotFoundError:
@@ -94,7 +130,9 @@ class NexusFile(File):
                                    include_locations=None,
                                    origin=origin,
                                    include_objects=None,
-                                   file_content_as_list=None)
+                                   file_content_as_list=None,
+                                   linked_user=user,
+                                   last_modified=last_changed)
             warnings.warn(UserWarning(f'No file found for: {file_path} while loading {origin}'))
             return nexus_file_class
 
@@ -168,7 +206,9 @@ class NexusFile(File):
                                include_locations=None,
                                origin=full_file_path,
                                include_objects=None,
-                               file_content_as_list=None)
+                               file_content_as_list=None,
+                               linked_user=user,
+                               last_modified=last_changed)
                 if includes_objects is None:
                     raise ValueError('include_objects is None - recursion failure.')
                 skip_next_include = False
@@ -188,6 +228,8 @@ class NexusFile(File):
             origin=origin,
             include_objects=includes_objects,
             file_content_as_list=modified_file_as_list,
+            linked_user=user,
+            last_modified=last_changed
         )
 
         return nexus_file_class
