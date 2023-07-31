@@ -2,22 +2,22 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
+from ResSimpy.File import File
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
-from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.nexus_constraint_operations import load_inline_constraints
 from ResSimpy.Nexus.nexus_file_operations import check_property_in_line, check_token, get_expected_token_value, \
     check_list_tokens, load_table_to_objects
 
 
-def collect_all_tables_to_objects(nexus_file: NexusFile, table_object_map: dict[str, Any], start_date: Optional[str],
+def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, Any], start_date: Optional[str],
                                   default_units: Optional[UnitSystem]) -> \
         dict[str, list[Any] | dict[str, list[NexusConstraint]]]:
     """Loads all tables from a given file.
 
     Args:
     ----
-    nexus_file (NexusFile): NexusFile representation of the file.
+    nexus_file (File): NexusFile representation of the file.
     table_object_map (dict[str, Storage_Object]): dictionary containing the name of the table as keys and \
                 the object type to store the data from each row into. Require objects to have a get_nexus_mapping \
                 function

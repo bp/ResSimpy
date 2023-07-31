@@ -53,8 +53,8 @@ class NexusNetwork(Network):
     def model(self) -> NexusSimulator:
         return self.__model
 
-    def get_surface_file(self, method_number: Optional[int] = None) -> Optional[dict[int, NexusFile] | NexusFile]:
-        """Gets a specific surface file object or a dictionary of surface files keyed by method number.
+    def get_network_file(self, method_number: int = 1) -> NexusFile:
+        """Gets a specific network file object from the method number.
 
         Args:
         ----
@@ -63,14 +63,14 @@ class NexusNetwork(Network):
 
         Returns:
         -------
-            Optional[dict[int, NexusFile] | NexusFile]: returns a specific surface file object or a dictionary of \
-                surface files keyed by method number
+            NexusFile: returns a specific surface file object of surface files keyed by method number
         """
-        if method_number is None:
-            return self.__model.model_files.surface_files
         if self.__model.model_files.surface_files is None:
-            return None
-        return self.__model.model_files.surface_files.get(method_number)
+            raise ValueError('No files found for the surface network')
+        network_file = self.__model.model_files.surface_files.get(method_number, None)
+        if network_file is None:
+            raise ValueError(f'No file found for {method_number=}, instead found {network_file=}')
+        return network_file
 
     def load(self) -> None:
         """Loads all the objects from the surface files in the Simulator class.
@@ -110,12 +110,12 @@ class NexusNetwork(Network):
                 start_date=self.__model.start_date,
                 default_units=self.__model.default_units,
                 )
-            self.nodes._add_nodes_to_memory(type_check_lists(nexus_obj_dict.get('NODES')))
-            self.connections.add_connections(type_check_lists(nexus_obj_dict.get('NODECON')))
-            self.well_connections.add_connections(type_check_lists(nexus_obj_dict.get('WELLS')))
-            self.wellheads.add_wellheads(type_check_lists(nexus_obj_dict.get('WELLHEAD')))
-            self.wellbores.add_wellbores(type_check_lists(nexus_obj_dict.get('WELLBORE')))
-            self.constraints.add_constraints_to_memory(type_check_dicts(nexus_obj_dict.get('CONSTRAINTS')))
+            self.nodes._add_to_memory(type_check_lists(nexus_obj_dict.get('NODES')))
+            self.connections._add_to_memory(type_check_lists(nexus_obj_dict.get('NODECON')))
+            self.well_connections._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLS')))
+            self.wellheads._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLHEAD')))
+            self.wellbores._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLBORE')))
+            self.constraints._add_to_memory(type_check_dicts(nexus_obj_dict.get('CONSTRAINTS')))
 
         self.__has_been_loaded = True
 
@@ -127,12 +127,12 @@ class NexusNetwork(Network):
 
         """
         constraint_names_to_add = []
-        constraint_names_to_add.extend([x.name for x in self.nodes.get_nodes() if x.name is not None])
-        constraint_names_to_add.extend([x.name for x in self.well_connections.get_well_connections()
+        constraint_names_to_add.extend([x.name for x in self.nodes.get_all() if x.name is not None])
+        constraint_names_to_add.extend([x.name for x in self.well_connections.get_all()
                                         if x.name is not None])
-        constraint_names_to_add.extend([x.name for x in self.connections.get_connections() if x.name is not None])
-        constraint_names_to_add.extend([x.name for x in self.wellbores.get_wellbores() if x.name is not None])
-        constraint_names_to_add.extend([x.name for x in self.wellheads.get_wellheads() if x.name is not None])
+        constraint_names_to_add.extend([x.name for x in self.connections.get_all() if x.name is not None])
+        constraint_names_to_add.extend([x.name for x in self.wellbores.get_all() if x.name is not None])
+        constraint_names_to_add.extend([x.name for x in self.wellheads.get_all() if x.name is not None])
         constraint_names_to_add = list(set(constraint_names_to_add))
 
         return constraint_names_to_add
@@ -156,15 +156,14 @@ class NexusNetwork(Network):
         network_element_to_search: Any = None
         self.get_load_status()
         if network_element_type == 'constraints':
-            network_element_to_search = self.constraints.get_constraints().get(name, None)
+            network_element_to_search = self.constraints.get_all().get(name, None)
         else:
             # retrieve the getter method on the network attribute
             network_element = getattr(self, f'{network_element_type}', None)
             if network_element is None:
                 raise ValueError(f'Network has no elements associated with the {network_element_type=} requested')
-            network_element_getter = getattr(network_element, f'get_{network_element_type}', None)
-            if network_element_getter is not None:
-                network_element_to_search = [x for x in network_element_getter() if x.name == name]
+
+            network_element_to_search = [x for x in network_element.get_all() if x.name == name]
 
         if network_element_to_search is None or len(network_element_to_search) == 0:
             raise ValueError(f'No {network_element_type} found with {name=}')

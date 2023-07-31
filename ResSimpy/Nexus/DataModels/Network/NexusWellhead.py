@@ -2,12 +2,12 @@ from dataclasses import dataclass
 from typing import Optional
 
 import ResSimpy.Utils.to_dict_generic as to_dict_generic
-from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Utils.generic_repr import generic_repr
+from ResSimpy.Wellhead import Wellhead
 
 
 @dataclass(kw_only=True)
-class NexusWellhead:
+class NexusWellhead(Wellhead):
     """Attributes
     well (str):  Associates the wellhead to the well. (WELL)
     name (str):  The name of the wellhead. (NAME)
@@ -37,14 +37,6 @@ class NexusWellhead:
 
     """
 
-    well: Optional[str] = None
-    name: Optional[str] = None
-    date: Optional[str] = None
-    unit_system: Optional[UnitSystem] = None
-    wellhead_type: Optional[str] = None
-    depth: Optional[float] = None
-    x_pos: Optional[float] = None
-    y_pos: Optional[float] = None
     pvt_method: Optional[int] = None
     water_method: Optional[int] = None
     bat_method: Optional[int] = None

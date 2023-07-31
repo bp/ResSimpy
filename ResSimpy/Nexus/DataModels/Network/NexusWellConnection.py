@@ -1,13 +1,12 @@
 from dataclasses import dataclass
 from typing import Optional
-
-from ResSimpy.Enums.UnitsEnum import UnitSystem
 import ResSimpy.Utils.to_dict_generic as to_dict_generic
 from ResSimpy.Utils.generic_repr import generic_repr
+from ResSimpy.WellConnection import WellConnection
 
 
 @dataclass(kw_only=True)
-class NexusWellConnection:
+class NexusWellConnection(WellConnection):
     """Attributes
     stream (str): COMMENT (STREAM)
     number (int): COMMENT (NUMBER)
@@ -55,33 +54,21 @@ class NexusWellConnection:
     drill_order_benefit (float): COMMENT (BENEFIT).
     """
 
-    name: Optional[str] = None
-    date: Optional[str] = None
-    unit_system: Optional[UnitSystem] = None
     bh_node_name: Optional[str] = None
     wh_node_name: Optional[str] = None
 
     stream: Optional[str] = None
     number: Optional[int] = None
     scale: Optional[float] = None
-    bhdepth: Optional[float] = None
-    datum_depth: Optional[float] = None
-    x_pos: Optional[float] = None
-    y_pos: Optional[float] = None
     gradient_calc: Optional[str] = None
-    length: Optional[float] = None
     bottomhole_measured_depth: Optional[float] = None
     add_tubing: Optional[int] = None
-    diameter: Optional[float] = None
-    inner_diameter: Optional[float] = None
-    roughness: Optional[float] = None
     tracer: Optional[str] = None
     con_type: Optional[str] = None
     hyd_method: Optional[str] = None
     pvt_method: Optional[int] = None
     water_method: Optional[int] = None
     bat_method: Optional[int] = None
-    temperature: Optional[float] = None
     elevation_profile: Optional[str] = None
     temperature_profile: Optional[str] = None
     inj_mobility: Optional[str] = None
@@ -90,7 +77,6 @@ class NexusWellConnection:
     on_time: Optional[float] = None
     heat_transfer_coeff: Optional[float] = None
     water_inj_mult: Optional[float] = None
-    productivity_index: Optional[float] = None
     vip_productivity_index: Optional[float] = None
     productivity_index_phase: Optional[float] = None
     d_factor: Optional[float] = None

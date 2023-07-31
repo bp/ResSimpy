@@ -8,7 +8,7 @@ from typing import Optional, Union
 import sys
 
 from ResSimpy.Nexus.NexusEnums import DateFormatEnum
-from ResSimpy.Utils.obj_to_table_string import to_string
+from ResSimpy.Utils.obj_to_table_string import to_table_line
 
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -342,5 +342,5 @@ class NexusCompletion(Completion):
             string of the values in the order of the headers provided.
 
         """
-        completion_list_string = [to_string(self, headers)]
+        completion_list_string = [to_table_line(self, headers)]
         return completion_list_string
