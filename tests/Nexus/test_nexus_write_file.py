@@ -1,5 +1,6 @@
 from unittest.mock import Mock
 import pytest
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.utility_for_tests import check_file_read_write_is_correct
 from tests.multifile_mocker import mock_multiple_files
@@ -67,7 +68,7 @@ def test_write_to_file(mocker, fixture_for_osstat_pathlib, fcs_file_contents, we
 
     mock_nexus_sim = NexusSimulator('fcs_file.fcs')
     mock_nexus_sim.start_date = start_date
-    add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 7.5}
+    add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 7.5, 'date_format': DateFormat.DD_MM_YYYY}
 
     # make a mock for the write operation
     writing_mock_open = mocker.mock_open()
@@ -263,8 +264,8 @@ def test_modify_completion_write_to_file(mocker, fixture_for_osstat_pathlib, fcs
 
     mock_nexus_sim = NexusSimulator('fcs_file.fcs')
     mock_nexus_sim.start_date = start_date
-    modify_perf_target = {'date': modify_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 4.2}
-    modify_perf_new_properties = {'date': modify_perf_date, 'j': 8, 'well_radius': 10.2}
+    modify_perf_target = {'date': modify_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 4.2, 'date_format': DateFormat.DD_MM_YYYY}
+    modify_perf_new_properties = {'date': modify_perf_date, 'j': 8, 'well_radius': 10.2, 'date_format': DateFormat.DD_MM_YYYY}
 
     mock_nexus_sim.model_files.well_files[1]
     # make a mock for the write operation
