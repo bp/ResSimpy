@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ResSimpy"
-version = "1.0.0"
+version = "1.0.1"
 description = "A Python library for working with Reservoir Simulator Models."
 authors = ["BP"]
 readme = "README.md"
@@ -23,7 +23,7 @@ python = ">=3.10, <3.12"
 resqpy = "^4.9"
 numpy = "^1.24"
 pandas = "^1.5"
-typing_extensions = "^4.7"
+typing-extensions = "^4.7"
 
 [tool.poetry.group.dev.dependencies]
 pytest-mock = "^3.9"
