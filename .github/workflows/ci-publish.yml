@@ -68,7 +68,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pytest-mock
-          pip install ressimpy --pre --target=dist --find-links=dist/
+          pip install ResSimpy --pre --target=dist --find-links=dist/
 
       - name: Copy tests and example data to dist folder for testing against artifacts
         run: |
