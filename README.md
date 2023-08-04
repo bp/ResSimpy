@@ -1,6 +1,6 @@
 # ResSimpy: Python API for working with Reservoir Simulator models
 
-[![License](https://img.shields.io/pypi/l/resqpy)](https://github.com/bp/ResSimpy/blob/master/LICENSE.MD)
+[![License](https://img.shields.io/pypi/l/ressimpy)](https://github.com/bp/ResSimpy/blob/master/LICENSE.MD)
 [![Documentation Status](https://readthedocs.org/projects/ResSimpy/badge/?version=latest)](https://ResSimpy.readthedocs.io/en/latest/?badge=latest)
 [![Python CI](https://github.com/bp/ResSimpy/actions/workflows/ci-tests.yml/badge.svg)](https://github.com/bp/ResSimpy/actions/workflows/ci-tests.yml)
 ![Python version](https://img.shields.io/pypi/pyversions/ResSimpy)
