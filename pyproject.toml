@@ -20,9 +20,10 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.10, <3.12"
-resqpy = "^4.7"
-numpy = "^1.23"
+resqpy = "^4.9"
+numpy = "^1.24"
 pandas = "^1.5"
+typing-extensions = "^4.7"
 
 [tool.poetry.group.dev.dependencies]
 pytest-mock = "^3.9"
