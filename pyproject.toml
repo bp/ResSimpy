@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "ressimpy"
+name = "ResSimpy"
 version = "1.0.0"
 description = "A Python library for working with Reservoir Simulator Models."
 authors = ["BP"]
@@ -13,6 +13,9 @@ classifiers = [
     "Topic :: Scientific/Engineering",
     "Topic :: System :: Filesystems",
     "Topic :: Scientific/Engineering :: Information Analysis"
+]
+packages = [
+    { include = "ResSimpy" }
 ]
 
 [tool.poetry.dependencies]
