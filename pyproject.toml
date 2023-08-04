@@ -1,9 +1,9 @@
 [tool.poetry]
 name = "ResSimpy"
-version = "0.1.0"
-description = ""
+version = "1.0.0"
+description = "A Python library for working with Reservoir Simulator Models."
 authors = ["BP"]
-readme = "README.rst"
+readme = "README.md"
 keywords = ["ResSimpy", "Reservoir Engineering"]
 classifiers = [
     "Operating System :: OS Independent",
