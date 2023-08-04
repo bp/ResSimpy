@@ -75,7 +75,7 @@ jobs:
           cp -R tests dist/
 
       - name: Run tests
-        run: pytest dist/tests --buildtest
+        run: pytest dist/tests
 
   publish:
     name: Publish to PyPI
