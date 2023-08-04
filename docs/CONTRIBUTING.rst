@@ -39,6 +39,7 @@ Development environment setup
    **Note: due to a requirement of one of the dependencies, you will need to use a 64-bit installation of Python when working with ResSimpy.**
    The RESQPY project uses `Poetry <https://python-poetry.org/>`_ for dependency management and environment setup. Please `install Poetry <https://python-poetry.org/docs/master/#installing-with-pip>`_ first if you have not already done so.
    With Poetry installed, please then install the `Poetry Dynamic Versioning Plugin <https://github.com/mtkennerly/poetry-dynamic-versioning>`_.
+   **Note: some Windows PCs run into issues related to the default Maximum path limit. If you receive errors when creating a Poetry virtual environment, please try `enabling long paths <https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=registry>`_.
 
    Once both those packages are installed, the environment can then be setup automatically with all dependencies installed using the following command in the base directory (the directory with the pyproject.toml file):
 
@@ -144,6 +145,23 @@ There are several command line options that can be appended, for example:
 
     pytest -k foobar  # selects just tests with "foobar" in the name
     pytest -rA        # prints summary of all executed tests at end
+
+Running Other Checks on your local machine.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+We also run various type checkers, linters and static analysis to ensure high code quality. You can run these checks
+yourself on your local machine using the following commands in the poetry shell:
+
+.. code:: bash
+
+    flake8 ResSimpy --append-config ./.config/flake8
+    mypy ResSimpy --config-file ./.config/mypy
+    ruff check ResSimpy
+
+Other Considerations
+^^^^^^^^^^^^^^^^^^^^
+Please be aware that all keywords / trademarks used on this project need the full legal approval of the trademark holder.
+If we receive a PR that contains a keyword or trademark that does not have such an approval we will not be able to accept
+it without an advanced approval to use that word.
 
 Get in touch
 ------------
