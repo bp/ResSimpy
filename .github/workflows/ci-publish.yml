@@ -1,0 +1,96 @@
+---
+
+name: Publish release
+
+on:
+  push:
+    tags:
+      # Run when a tag is pushed with a valid semantic version number
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  build:
+    name: Build distribution
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          pip install poetry-dynamic-versioning
+
+      - name: Build
+        run: |
+          poetry build
+
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist-artifact
+          path: dist/
+
+  test:
+    name: Test
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist-artifact
+          path: dist/
+
+      - name: Install from build
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest-mock
+          pip install ResSimpy --pre --target=dist --find-links=dist/
+
+      - name: Copy tests for testing against artifacts
+        run: |
+          cp -R tests dist/
+
+      - name: Run tests
+        run: pytest dist/tests
+
+  publish:
+    name: Publish to PyPI
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/ResSimpy
+    permissions:
+      id-token: write
+    steps:
+
+      - name: Get build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist-artifact
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
