@@ -9,8 +9,7 @@ def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock
                                      mocker_fixture: MockerFixture, write_file_name: str, number_of_writes=1,
                                      expected_write_method='w'):
     assert len(modifying_mock_open.call_args_list) == number_of_writes
-    assert modifying_mock_open.call_args_list[0] == mocker_fixture.call(write_file_name, 'w')
-        write_file_name, expected_write_method)
+    assert modifying_mock_open.call_args_list[0] == mocker_fixture.call(write_file_name, expected_write_method)
     # Get all the calls to write() and check that the contents are what we expect
     list_of_writes = [call for call in modifying_mock_open.mock_calls if 'call().write' in str(call)]
     assert len(list_of_writes) == number_of_writes

@@ -68,8 +68,8 @@ class Completion(ABC):
                  angle_v: Optional[float] = None, grid: Optional[str] = None, depth_to_top: Optional[float] = None,
                  depth_to_bottom: Optional[float] = None, perm_thickness_ovr: Optional[float] = None,
                  dfactor: Optional[float] = None, rel_perm_method: Optional[int] = None,
-                 status: Optional[str] = None, peaceman_well_block_radius: Optional[float] = None) -> None:
-                 start_date: Optional[str] = None) -> None:
+                 status: Optional[str] = None, date_format: Optional[DateFormatEnum.DateFormat] = None,
+                 peaceman_well_block_radius: Optional[float] = None, start_date: Optional[str] = None) -> None:
         self.__well_radius = well_radius
         self.__date = date
         self.__i = i
@@ -90,6 +90,8 @@ class Completion(ABC):
         self.__status = status
         self.__id: uuid.UUID = uuid.uuid4()
         self.__date_format = date_format
+        self.__start_date = start_date
+        self.__iso_date = self.set_iso_date()
         self.__peaceman_well_block_radius = peaceman_well_block_radius
 
     @property
