@@ -85,11 +85,11 @@ class NexusCompletion(Completion):
                  ) -> None:
         self.__measured_depth = measured_depth
 
-        self.__well_indices = well_indices # TODO: rename this to singular
+        self.__well_indices = well_indices  # TODO: rename this to singular
         self.__partial_perf = partial_perf
 
         self.__cell_number = cell_number
-        self.__bore_radius = bore_radius # TODO: remove this from here as now in the Completion class
+        self.__bore_radius = bore_radius  # TODO: remove this from here as now in the Completion class
         self.__fracture_mult = fracture_mult
         self.__sector = sector
         self.__well_group = well_group

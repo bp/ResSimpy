@@ -139,4 +139,4 @@ class Simulator(ABC):
 
     def write_model(self, create_new_files: bool = True) -> None:
         """Writes out the model, either creating new versions of the changed files, or overwriting the existing ones."""
-        pass
+        raise NotImplementedError("Not Implemented Yet")

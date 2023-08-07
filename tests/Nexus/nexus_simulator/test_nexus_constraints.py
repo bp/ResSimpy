@@ -8,7 +8,7 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.multifile_mocker import mock_multiple_files
-from ResSimpy.Utils.Test_Utils.utility_for_tests import get_fake_nexus_simulator
+from tests.utility_for_tests import get_fake_nexus_simulator
 
 @pytest.mark.parametrize("file_contents, expected_content",[
     #'basic_test'
