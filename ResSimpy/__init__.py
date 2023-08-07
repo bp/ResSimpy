@@ -10,3 +10,5 @@
     Utils
     Enums
 """
+
+__version__ = "0.0.0"  # Set at build time

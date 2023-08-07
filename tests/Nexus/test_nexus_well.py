@@ -29,57 +29,57 @@ def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock
 
 
 @pytest.mark.parametrize('completions, expected_perforations', [
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       partial_perf=0.1),
-      NexusCompletion(i=1, j=2, k=3, well_radius=9.11, date='01/02/2023', partial_perf=0.5)],
+      NexusCompletion(i=1, j=2, k=3, well_radius=9.11, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5)],
      # Expected:
-     [NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+     [NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       partial_perf=0.1),
-      NexusCompletion(i=1, j=2, k=3, well_radius=9.11, date='01/02/2023', partial_perf=0.5)]),
+      NexusCompletion(i=1, j=2, k=3, well_radius=9.11, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5)]),
 
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       partial_perf=0.1),
-      NexusCompletion(i=1, j=2, k=4, well_radius=9.11, date='01/02/2024', partial_perf=0),
-      NexusCompletion(i=1, j=2, k=5, well_radius=9.11, date='01/02/2024', status='ON'),
-      NexusCompletion(i=1, j=2, k=6, well_radius=9.11, date='01/02/2024', status='ON', well_indices=0),
-      NexusCompletion(i=1, j=2, k=7, well_radius=9.11, date='01/02/2024', status='ON', partial_perf=0.000),
-      NexusCompletion(i=1, j=2, k=8, well_radius=9.11, date='01/02/2024', status='OFF', partial_perf=1),
-      NexusCompletion(i=1, j=2, k=9, well_radius=9.11, date='01/02/2024', status='ON', partial_perf=1, well_indices=0),
-      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2025', status='ON', partial_perf=1, well_indices=1),
-      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2028', well_indices=3),
-      NexusCompletion(i=1, j=2, k=11, well_radius=9.11, date='01/02/2028', perm_thickness_ovr=1),
-      NexusCompletion(i=1, j=2, k=11, well_radius=9.11, date='01/05/2028', perm_thickness_ovr=1, partial_perf=1,
+      NexusCompletion(i=1, j=2, k=4, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, partial_perf=0),
+      NexusCompletion(i=1, j=2, k=5, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON'),
+      NexusCompletion(i=1, j=2, k=6, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON', well_indices=0),
+      NexusCompletion(i=1, j=2, k=7, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=0.000),
+      NexusCompletion(i=1, j=2, k=8, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='OFF', partial_perf=1),
+      NexusCompletion(i=1, j=2, k=9, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0),
+      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2025', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=1),
+      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2028', date_format=DateFormat.DD_MM_YYYY, well_indices=3),
+      NexusCompletion(i=1, j=2, k=11, well_radius=9.11, date='01/02/2028', date_format=DateFormat.DD_MM_YYYY, perm_thickness_ovr=1),
+      NexusCompletion(i=1, j=2, k=11, well_radius=9.11, date='01/05/2028', date_format=DateFormat.DD_MM_YYYY, perm_thickness_ovr=1, partial_perf=1,
                       kh_mult=1),
-      NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/02/2034', partial_perf=0.5),
-      NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/03/2034', partial_perf=0.5, length=100),
-      NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/05/2034', partial_perf=0.5, length=0)],
+      NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/02/2034', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5),
+      NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/03/2034', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5, length=100),
+      NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/05/2034', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5, length=0)],
      # Expected:
-     [NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+     [NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       partial_perf=0.1),
-      NexusCompletion(i=1, j=2, k=5, well_radius=9.11, date='01/02/2024', status='ON'),
-      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2025', status='ON', partial_perf=1, well_indices=1),
-      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2028', well_indices=3),
-      NexusCompletion(i=1, j=2, k=11, well_radius=9.11, date='01/02/2028', perm_thickness_ovr=1),
-      NexusCompletion(i=1, j=2, k=11, well_radius=9.11, date='01/05/2028', perm_thickness_ovr=1, partial_perf=1,
+      NexusCompletion(i=1, j=2, k=5, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON'),
+      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2025', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=1),
+      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2028', date_format=DateFormat.DD_MM_YYYY, well_indices=3),
+      NexusCompletion(i=1, j=2, k=11, well_radius=9.11, date='01/02/2028', date_format=DateFormat.DD_MM_YYYY, perm_thickness_ovr=1),
+      NexusCompletion(i=1, j=2, k=11, well_radius=9.11, date='01/05/2028', date_format=DateFormat.DD_MM_YYYY, perm_thickness_ovr=1, partial_perf=1,
                       kh_mult=1),
-      NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/02/2034', partial_perf=0.5),
-      NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/03/2034', partial_perf=0.5, length=100)]),
+      NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/02/2034', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5),
+      NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/03/2034', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5, length=100)]),
 
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       partial_perf=0.1, status='ON', well_indices=0),
-      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', partial_perf=0.5, well_indices=5, status='OFF'),
-      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', partial_perf=0.5, well_indices=5, perm_thickness_ovr=0),
-      NexusCompletion(i=1, j=2, k=4, date='01/02/2023', partial_perf=0.5, well_indices=5, perm_thickness_ovr=5,
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5, well_indices=5, status='OFF'),
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5, well_indices=5, perm_thickness_ovr=0),
+      NexusCompletion(i=1, j=2, k=4, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5, well_indices=5, perm_thickness_ovr=5,
                       length=0),
-      NexusCompletion(i=1, j=2, k=5, date='01/02/2023', partial_perf=0.5, well_indices=5, kh_mult=0)],
+      NexusCompletion(i=1, j=2, k=5, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5, well_indices=5, kh_mult=0)],
      # Expected:
      []),
 
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None),
-      NexusCompletion(i=1, j=2, k=3, date='01/02/2023')],
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None),
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY)],
      # Expected:
-     [NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1',  skin=None, angle_v=None),
-      NexusCompletion(i=1, j=2, k=3, date='01/02/2023')]),
+     [NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1',  skin=None, angle_v=None),
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY)]),
 
     ([], [])
 
@@ -97,31 +97,31 @@ def test_get_perforations(completions, expected_perforations):
 
 
 @pytest.mark.parametrize('completions, expected_perforation', [
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       partial_perf=0.1),
-      NexusCompletion(i=1, j=2, k=3, well_radius=9.11, date='01/02/2023', partial_perf=0.5)],
+      NexusCompletion(i=1, j=2, k=3, well_radius=9.11, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5)],
      # Expected:
-     NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+     NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                      partial_perf=0.1)),
 
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       partial_perf=0.1),
-      NexusCompletion(i=1, j=2, k=4, well_radius=9.11, date='01/02/2024', partial_perf=0),
-      NexusCompletion(i=1, j=2, k=5, well_radius=9.11, date='01/02/2024', status='ON'),
-      NexusCompletion(i=1, j=2, k=6, well_radius=9.11, date='01/02/2024', status='ON', well_indices=0),
-      NexusCompletion(i=1, j=2, k=7, well_radius=9.11, date='01/02/2024', status='ON', partial_perf=0.000),
-      NexusCompletion(i=1, j=2, k=8, well_radius=9.11, date='01/02/2024', status='OFF', partial_perf=1),
-      NexusCompletion(i=1, j=2, k=9, well_radius=9.11, date='01/02/2024', status='ON', partial_perf=1, well_indices=0),
-      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2025', status='ON', partial_perf=1, well_indices=1),
-      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2028', well_indices=3),
-      NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/02/2034', partial_perf=0.5)],
+      NexusCompletion(i=1, j=2, k=4, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, partial_perf=0),
+      NexusCompletion(i=1, j=2, k=5, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON'),
+      NexusCompletion(i=1, j=2, k=6, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON', well_indices=0),
+      NexusCompletion(i=1, j=2, k=7, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=0.000),
+      NexusCompletion(i=1, j=2, k=8, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='OFF', partial_perf=1),
+      NexusCompletion(i=1, j=2, k=9, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0),
+      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2025', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=1),
+      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2028', date_format=DateFormat.DD_MM_YYYY, well_indices=3),
+      NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/02/2034', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5)],
      # Expected:
-     NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+     NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                      partial_perf=0.1)),
 
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       partial_perf=0.1, status='ON', well_indices=0),
-      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', partial_perf=0.5, well_indices=5, status='OFF')],
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5, well_indices=5, status='OFF')],
      # Expected:
      None),
 
@@ -141,43 +141,43 @@ def test_get_first_perforation(completions, expected_perforation):
 
 
 @pytest.mark.parametrize('completions, expected_shutins', [
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       partial_perf=0),
-      NexusCompletion(i=1, j=2, k=3, well_radius=9.11, date='01/02/2023', partial_perf=0.5, status='OFF')],
+      NexusCompletion(i=1, j=2, k=3, well_radius=9.11, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5, status='OFF')],
      # Expected:
-     [NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+     [NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       partial_perf=0),
-      NexusCompletion(i=1, j=2, k=3, well_radius=9.11, date='01/02/2023', partial_perf=0.5, status='OFF')]),
+      NexusCompletion(i=1, j=2, k=3, well_radius=9.11, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5, status='OFF')]),
 
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       partial_perf=0.1),
-      NexusCompletion(i=1, j=2, k=4, well_radius=9.11, date='01/02/2024', partial_perf=0),
-      NexusCompletion(i=1, j=2, k=5, well_radius=9.11, date='01/02/2024', status='ON'),
-      NexusCompletion(i=1, j=2, k=6, well_radius=9.11, date='01/02/2024', status='ON', well_indices=0),
-      NexusCompletion(i=1, j=2, k=7, well_radius=9.11, date='01/02/2024', status='ON', partial_perf=0.000),
-      NexusCompletion(i=1, j=2, k=8, well_radius=9.11, date='01/02/2024', status='OFF', partial_perf=1),
-      NexusCompletion(i=1, j=2, k=9, well_radius=9.11, date='01/02/2024', status='ON', partial_perf=1, well_indices=0),
-      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2025', status='ON', partial_perf=1, well_indices=1),
-      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2028', well_indices=3),
-      NexusCompletion(i=1, j=2, k=11, well_radius=9.11, date='01/02/2028', well_indices=3, partial_perf=1, length=0),
-      NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/02/2034', partial_perf=0.5)],
+      NexusCompletion(i=1, j=2, k=4, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, partial_perf=0),
+      NexusCompletion(i=1, j=2, k=5, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON'),
+      NexusCompletion(i=1, j=2, k=6, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON', well_indices=0),
+      NexusCompletion(i=1, j=2, k=7, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=0.000),
+      NexusCompletion(i=1, j=2, k=8, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='OFF', partial_perf=1),
+      NexusCompletion(i=1, j=2, k=9, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0),
+      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2025', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=1),
+      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2028', date_format=DateFormat.DD_MM_YYYY, well_indices=3),
+      NexusCompletion(i=1, j=2, k=11, well_radius=9.11, date='01/02/2028', date_format=DateFormat.DD_MM_YYYY, well_indices=3, partial_perf=1, length=0),
+      NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/02/2034', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5)],
      # Expected:
-     [NexusCompletion(i=1, j=2, k=4, well_radius=9.11, date='01/02/2024', partial_perf=0),
-      NexusCompletion(i=1, j=2, k=6, well_radius=9.11, date='01/02/2024', status='ON', well_indices=0),
-      NexusCompletion(i=1, j=2, k=7, well_radius=9.11, date='01/02/2024', status='ON', partial_perf=0.000),
-      NexusCompletion(i=1, j=2, k=8, well_radius=9.11, date='01/02/2024', status='OFF', partial_perf=1),
-      NexusCompletion(i=1, j=2, k=9, well_radius=9.11, date='01/02/2024', status='ON', partial_perf=1, well_indices=0),
-      NexusCompletion(i=1, j=2, k=11, well_radius=9.11, date='01/02/2028', well_indices=3, partial_perf=1, length=0)
+     [NexusCompletion(i=1, j=2, k=4, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, partial_perf=0),
+      NexusCompletion(i=1, j=2, k=6, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON', well_indices=0),
+      NexusCompletion(i=1, j=2, k=7, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=0.000),
+      NexusCompletion(i=1, j=2, k=8, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='OFF', partial_perf=1),
+      NexusCompletion(i=1, j=2, k=9, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0),
+      NexusCompletion(i=1, j=2, k=11, well_radius=9.11, date='01/02/2028', date_format=DateFormat.DD_MM_YYYY, well_indices=3, partial_perf=1, length=0)
       ]),
 
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       partial_perf=0.1, status='ON'),
-      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', partial_perf=0.5, well_indices=5)],
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5, well_indices=5)],
      # Expected:
      []),
 
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None),
-      NexusCompletion(i=1, j=2, k=3, date='01/02/2023')],
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None),
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY)],
      # Expected:
      []),
 
@@ -197,40 +197,40 @@ def test_get_shutins(completions, expected_shutins):
 
 
 @pytest.mark.parametrize('completions, expected_shutin', [
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       partial_perf=0),
-      NexusCompletion(i=1, j=2, k=3, well_radius=9.11, date='01/02/2023', partial_perf=0.5, status='OFF')],
+      NexusCompletion(i=1, j=2, k=3, well_radius=9.11, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5, status='OFF')],
      # Expected:
-     NexusCompletion(i=1, j=2, k=3, well_radius=9.11, date='01/02/2023', partial_perf=0.5, status='OFF')),
+     NexusCompletion(i=1, j=2, k=3, well_radius=9.11, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5, status='OFF')),
 
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       partial_perf=0.1),
-      NexusCompletion(i=1, j=2, k=4, well_radius=9.11, date='01/02/2024', partial_perf=0),
-      NexusCompletion(i=1, j=2, k=5, well_radius=9.11, date='01/02/2024', status='ON'),
-      NexusCompletion(i=1, j=2, k=6, well_radius=9.11, date='01/02/2024', status='ON', well_indices=0),
-      NexusCompletion(i=1, j=2, k=7, well_radius=9.11, date='01/02/2024', status='ON', partial_perf=0.000),
-      NexusCompletion(i=1, j=2, k=8, well_radius=9.11, date='01/02/2024', status='OFF', partial_perf=1),
-      NexusCompletion(i=1, j=2, k=9, well_radius=9.11, date='01/02/2024', status='ON', partial_perf=1, well_indices=0),
-      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2025', status='ON', partial_perf=1, well_indices=1),
-      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2028', well_indices=3),
-      NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/02/2034', partial_perf=0.5)],
+      NexusCompletion(i=1, j=2, k=4, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, partial_perf=0),
+      NexusCompletion(i=1, j=2, k=5, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON'),
+      NexusCompletion(i=1, j=2, k=6, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON', well_indices=0),
+      NexusCompletion(i=1, j=2, k=7, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=0.000),
+      NexusCompletion(i=1, j=2, k=8, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='OFF', partial_perf=1),
+      NexusCompletion(i=1, j=2, k=9, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0),
+      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2025', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=1),
+      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2028', date_format=DateFormat.DD_MM_YYYY, well_indices=3),
+      NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/02/2034', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5)],
      # Expected:
-     NexusCompletion(i=1, j=2, k=9, well_radius=9.11, date='01/02/2024', status='ON', partial_perf=1, well_indices=0)),
+     NexusCompletion(i=1, j=2, k=9, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0)),
 
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       partial_perf=0.1, status='ON', well_indices=0),
-      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', partial_perf=0.5, well_indices=5, status='OFF')],
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5, well_indices=5, status='OFF')],
      # Expected:
-     NexusCompletion(i=1, j=2, k=3, date='01/02/2023', partial_perf=0.5, well_indices=5, status='OFF')),
+     NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5, well_indices=5, status='OFF')),
 
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       partial_perf=0.1),
-      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', partial_perf=0.5, well_indices=5)],
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5, well_indices=5)],
      # Expected:
      None),
 
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None),
-      NexusCompletion(i=1, j=2, k=3, date='01/02/2023')],
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None),
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY)],
      # Expected:
      None),
 
@@ -251,11 +251,11 @@ def test_get_last_shutin(completions, expected_shutin):
 
 def test_printable_well_info():
     # Arrange
-    completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None,
+    completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None,
                                    angle_v=None, status='ON')
-    completion_2 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2024', grid='GRID1', skin=None,
+    completion_2 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2024', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None,
                                    angle_v=None, status='ON', partial_perf=1)
-    completion_3 = NexusCompletion(i=1, j=2, k=3, date='01/02/2025', partial_perf=0)
+    completion_3 = NexusCompletion(i=1, j=2, k=3, date='01/02/2025', date_format=DateFormat.DD_MM_YYYY, partial_perf=0)
     completions = [completion_1, completion_2, completion_3]
 
     well = NexusWell(well_name='test well', completions=completions, units=UnitSystem.LAB)
@@ -297,49 +297,49 @@ def test_printable_well_info_missing_info():
 
 
 @pytest.mark.parametrize('completions, expected_shutin', [
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       well_indices=3),
-      NexusCompletion(i=1, j=2, k=3, well_radius=9.11, date='01/02/2024', partial_perf=0.5)],
+      NexusCompletion(i=1, j=2, k=3, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5)],
      # Expected:
      [('01/01/2023', 3), ('01/02/2024', 3)]),
 
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       partial_perf=0.1),
-      NexusCompletion(i=1, j=2, k=4, well_radius=9.11, date='01/02/2024', partial_perf=0),
-      NexusCompletion(i=1, j=2, k=5, well_radius=9.11, date='01/02/2024', status='ON'),
-      NexusCompletion(i=1, j=2, k=6, well_radius=9.11, date='01/02/2024', status='ON', well_indices=0),
-      NexusCompletion(i=1, j=2, k=7, well_radius=9.11, date='01/02/2024', status='ON', partial_perf=0.000),
-      NexusCompletion(i=1, j=2, k=8, well_radius=9.11, date='01/02/2024', status='OFF', partial_perf=1),
-      NexusCompletion(i=1, j=2, k=9, well_radius=9.11, date='01/02/2024', status='ON', partial_perf=1, well_indices=0),
-      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2025', status='ON', partial_perf=1, well_indices=1),
-      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2028', well_indices=3),
-      NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/02/2034', partial_perf=0.5)],
+      NexusCompletion(i=1, j=2, k=4, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, partial_perf=0),
+      NexusCompletion(i=1, j=2, k=5, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON'),
+      NexusCompletion(i=1, j=2, k=6, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON', well_indices=0),
+      NexusCompletion(i=1, j=2, k=7, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=0.000),
+      NexusCompletion(i=1, j=2, k=8, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='OFF', partial_perf=1),
+      NexusCompletion(i=1, j=2, k=9, well_radius=9.11, date='01/02/2024', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0),
+      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2025', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=1),
+      NexusCompletion(i=1, j=2, k=10, well_radius=9.11, date='01/02/2028', date_format=DateFormat.DD_MM_YYYY, well_indices=3),
+      NexusCompletion(i=1, j=2, k=38, well_radius=9.11, date='01/02/2034', date_format=DateFormat.DD_MM_YYYY, partial_perf=0.5)],
      # Expected:
      [('01/01/2023', 3), ('01/02/2024', 5), ('01/02/2025', 10), ('01/02/2028', 10), ('01/02/2034', 38)]),
 
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None, partial_perf=0),
-      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1, well_indices=0)],
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None, partial_perf=0),
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0)],
      # Expected:
      []),
 
     ([], []),
 
-    ([NexusCompletion(i=1, j=2, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+    ([NexusCompletion(i=1, j=2, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       depth_to_top=1000, depth_to_bottom=1300, well_indices=1),
-      NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=1, depth_to_top=1156,
+      NexusCompletion(i=1, j=2, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=1, depth_to_top=1156,
                       depth_to_bottom=1234),
-      NexusCompletion(i=1, j=2, date='01/02/2023', status='OFF', partial_perf=1, depth_to_top=1156,
+      NexusCompletion(i=1, j=2, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='OFF', partial_perf=1, depth_to_top=1156,
                       depth_to_bottom=1234)],
      # Expected:
      [('01/01/2023', (1000, 1300)), ('01/02/2023', (1156, 1234))]),
 
-    ([NexusCompletion(i=1, j=2, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+    ([NexusCompletion(i=1, j=2, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       depth_to_top=1000, depth_to_bottom=1300, well_indices=1),
-      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1),
-      NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=2, depth_to_top=1156,
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1),
+      NexusCompletion(i=1, j=2, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=2, depth_to_top=1156,
                       depth_to_bottom=1234),
-      NexusCompletion(i=1, j=2,k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=3),
-      NexusCompletion(i=1, j=2, date='01/03/2025', status='ON', partial_perf=1, well_indices=3, depth_to_top=1156,
+      NexusCompletion(i=1, j=2,k=5, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=3),
+      NexusCompletion(i=1, j=2, date='01/03/2025', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=3, depth_to_top=1156,
                       depth_to_bottom=1234),
       ],
      # Expected:
@@ -347,13 +347,13 @@ def test_printable_well_info_missing_info():
       ('01/02/2023', (1156, 1234)),
       ('01/03/2025', (1156, 1234)),]),
 
-    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+    ([NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       well_indices=1),
-      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1),
-      NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+      NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1),
+      NexusCompletion(i=1, j=2, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY,status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
                       depth_to_bottom=1234),
-      NexusCompletion(i=1, j=2, k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=3),
-      NexusCompletion(i=1, j=2, date='01/03/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+      NexusCompletion(i=1, j=2, k=5, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=3),
+      NexusCompletion(i=1, j=2, date='01/03/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
                       depth_to_bottom=1234),
       ],
      # Expected:
@@ -375,13 +375,13 @@ def test_get_completion_events(completions, expected_shutin):
     assert result == expected_shutin
 @pytest.mark.parametrize('existing_completions',[
 ([
-        NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+        NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       well_indices=1),
-        NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1),
-        NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+        NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1),
+        NexusCompletion(i=1, j=2, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
                       depth_to_bottom=1234),
-        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=3),
-        NexusCompletion(i=1, j=2, date='01/03/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=3),
+        NexusCompletion(i=1, j=2, date='01/03/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
                       depth_to_bottom=1234),
         ]),]
 )
@@ -390,14 +390,14 @@ def test_find_completion(mocker, existing_completions):
     completion_to_find = {'date': '01/02/2023', 'i': 1, 'j': 2, 'k': 3,}
     completion_to_fail = {'date': '01/02/2023'}
     expected_completions = [
-        NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1),
-        NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+        NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1),
+        NexusCompletion(i=1, j=2, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
                       depth_to_bottom=1234),
-        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=3),
+        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=3),
         ]
-    completion_to_find_as_completion = NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON',)
+    completion_to_find_as_completion = NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON',)
     well = NexusWell(well_name='test well', completions=existing_completions, units=UnitSystem.METKGCM2)
-    expected_result = NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1)
+    expected_result = NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1)
 
     # Act
     result = well.find_completion(completion_to_find)
@@ -415,18 +415,18 @@ def test_add_completion():
     # Arrange
     new_date = '01/04/2023'
     existing_completions = [
-        NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+        NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                       well_indices=1),
-        NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1),
-        NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+        NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1),
+        NexusCompletion(i=1, j=2, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
                       depth_to_bottom=1234),
-        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=3),
-        NexusCompletion(i=1, j=2, date='01/03/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=3),
+        NexusCompletion(i=1, j=2, date='01/03/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
                       depth_to_bottom=1234),
         ]
-    new_completion_props = {'i': 3, 'j': 3, 'k': 5, 'well_radius': 1005.2}
+    new_completion_props = {'i': 3, 'j': 3, 'k': 5, 'well_radius': 1005.2, 'date_format': DateFormat.DD_MM_YYYY}
 
-    new_nexus_completion = NexusCompletion(date=new_date, i=3, j=3, k=5, well_radius=1005.2)
+    new_nexus_completion = NexusCompletion(date=new_date, i=3, j=3, k=5, well_radius=1005.2, date_format=DateFormat.DD_MM_YYYY)
 
     expected_completions = [x for x in existing_completions]
     expected_completions.append(new_nexus_completion)
@@ -443,19 +443,19 @@ def test_add_completion():
 def test_remove_completion_from_memory():
     # Arrange
     existing_completions = [
-        NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+        NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                        well_indices=1),
-        NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1),
-        NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+        NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1),
+        NexusCompletion(i=1, j=2, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
                        depth_to_bottom=1234),
-        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=3),
-        NexusCompletion(i=1, j=2, date='01/03/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=3),
+        NexusCompletion(i=1, j=2, date='01/03/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
                        depth_to_bottom=1234),
         ]
     expected_completions_after_removal = [
-    NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+    NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                     well_indices=1),
-    NexusCompletion(i=1, j=2, date='01/03/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+    NexusCompletion(i=1, j=2, date='01/03/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
                                         depth_to_bottom=1234),
     ]
     expected_result = NexusWell(well_name='test well', completions=expected_completions_after_removal,
@@ -474,17 +474,17 @@ def test_remove_completion_from_memory():
 def test_modify_completion():
     # Arrange
     existing_completions = [
-        NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+        NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                        well_indices=1),
-        NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1),
-        NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+        NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1),
+        NexusCompletion(i=1, j=2, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
                        depth_to_bottom=1234),
-        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=3),
-        NexusCompletion(i=1, j=2, date='01/03/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=3),
+        NexusCompletion(i=1, j=2, date='01/03/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
                        depth_to_bottom=1234),
         ]
 
-    changed_completion = NexusCompletion(i=1, j=5, k=6, date='01/03/2023', status='ON', partial_perf=0.5, well_indices=0,
+    changed_completion = NexusCompletion(i=1, j=5, k=6, date='01/03/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=0.5, well_indices=0,
                                          depth_to_top=1156, depth_to_bottom=1234, perm_thickness_ovr=10000.4)
     expected_completions = existing_completions[:-1] + [changed_completion]
     completion_id = existing_completions[-1].id
@@ -499,21 +499,21 @@ def test_modify_completion():
     # Assert
     assert well.completions[-1] == changed_completion
     # check the id is still the same:
-    assert well.find_completion(NexusCompletion(i=1, j=5, k=6, date='01/03/2023', status='ON', partial_perf=0.5, well_indices=0,
+    assert well.find_completion(NexusCompletion(i=1, j=5, k=6, date='01/03/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=0.5, well_indices=0,
                                          depth_to_top=1156, depth_to_bottom=1234, perm_thickness_ovr=10000.4)).id == completion_id
 
 def test_well_dates(mocker):
     # Arrange
     well_1_completions = [
-        NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+        NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                         well_indices=1),
-        NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1),
-        NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+        NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1),
+        NexusCompletion(i=1, j=2, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
                         depth_to_bottom=1234),]
 
     well_2_completions = [
-        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=3),
-        NexusCompletion(i=1, j=2, date='01/03/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=3),
+        NexusCompletion(i=1, j=2, date='01/03/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
                         depth_to_bottom=1234),
                         ]
     mock_sim = mocker.MagicMock()
@@ -571,29 +571,27 @@ def test_wells_modify(mocker, fixture_for_osstat_pathlib):
     nexus_sim = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='fcs_file.fcs', mock_open=False)
 
     well_1_completions = [
-        NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid='GRID1', skin=None, angle_v=None,
+        NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid='GRID1', skin=None, angle_v=None,
                         well_indices=1),
-        NexusCompletion(i=1, j=2, k=3, date='01/02/2023', status='ON', partial_perf=1),
-        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
-                        depth_to_bottom=1234),
-                        ]
+        NexusCompletion(i=1, j=2, k=3, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1),
+        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+                        depth_to_bottom=1234)]
 
     well_2_completions = [
-        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', status='ON', partial_perf=1, well_indices=3),
-        NexusCompletion(i=1, j=2, date='01/02/2023', status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
-                        depth_to_bottom=1234),
-                        ]
+        NexusCompletion(i=1, j=2, k=5, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=3),
+        NexusCompletion(i=1, j=2, date='01/02/2023', date_format=DateFormat.DD_MM_YYYY, status='ON', partial_perf=1, well_indices=0, depth_to_top=1156,
+                        depth_to_bottom=1234)]
 
     wells = nexus_sim.wells
 
     date = '01/02/2023'
-    perf_1_to_add = {'date': date, 'i': 3, 'j': 3, 'k': 5, 'well_radius': 1005.2}
-    perf_2_to_add = {'date': date, 'i': 1, 'j': 2, 'k': 6, 'permeability': 1005.2}
+    perf_1_to_add = {'date': date, 'i': 3, 'j': 3, 'k': 5, 'well_radius': 1005.2, 'date_format': DateFormat.DD_MM_YYYY}
+    perf_2_to_add = {'date': date, 'i': 1, 'j': 2, 'k': 6, 'permeability': 1005.2, 'date_format': DateFormat.DD_MM_YYYY}
     perf_to_remove = {'date': date, 'i':1, 'j':2, 'status':'ON', 'partial_perf':1, 'well_indices':0, 'depth_to_top':1156,
                       'depth_to_bottom':1234}
 
-    new_nexus_completion_1 = NexusCompletion(date=date, i=3, j=3, k=5, well_radius=1005.2)
-    new_nexus_completion_2 = NexusCompletion(date=date, i=1, j=2, k=6, permeability=1005.2)
+    new_nexus_completion_1 = NexusCompletion(date=date, i=3, j=3, k=5, well_radius=1005.2, date_format=DateFormat.DD_MM_YYYY)
+    new_nexus_completion_2 = NexusCompletion(date=date, i=1, j=2, k=6, permeability=1005.2, date_format=DateFormat.DD_MM_YYYY)
     expected_completions = well_1_completions[0:2] + [new_nexus_completion_1, new_nexus_completion_2]
 
     expected_result = [NexusWell(well_name='well1', completions=expected_completions, units=UnitSystem.METRIC),
@@ -726,7 +724,7 @@ def test_add_completion_write(mocker, fixture_for_osstat_pathlib, file_as_list, 
     wells_obj = NexusWells(fake_nexus_sim)
     wells_obj.load_wells()
 
-    add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'bore_radius': 7.5}
+    add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'bore_radius': 7.5, 'date_format': fake_nexus_sim.date_format}
 
     add_perf_dict_without_date = {'i': 4, 'j': 5, 'k': 6, 'bore_radius': 7.5}
 
@@ -768,7 +766,7 @@ def test_add_completion_correct_wellspec(mocker, fixture_for_osstat_pathlib):
     wells_obj = NexusWells(mock_nexus_sim)
     wells_obj.load_wells()
 
-    add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'bore_radius': 7.5}
+    add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'bore_radius': 7.5, 'date_format': DateFormat.DD_MM_YYYY}
 
     expected_result = ['TIME 01/03/2020', 'WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5', '4 5 6 7.5\n']
     expected_result_file_1 = ['TIME 01/02/2020', 'WELLSPEC well2', 'iw  jw   l    RADB', '3  5  41   0.3']
@@ -859,9 +857,9 @@ def test_add_completion_include_files(mocker, fixture_for_osstat_pathlib, fcs_fi
 
     mock_nexus_sim.start_date = start_date
     # mock out open
-    add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 7.5}
-    add_perf_dict_2 = {'date': add_perf_date, 'i': 7, 'j': 8, 'k': 9, 'well_radius': 10.5}
-    add_perf_dict_3 = {'date': add_perf_date, 'i': 20, 'j': 20, 'k': 20, 'well_radius': 5.5}
+    add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 7.5, 'date_format': DateFormat.DD_MM_YYYY}
+    add_perf_dict_2 = {'date': add_perf_date, 'i': 7, 'j': 8, 'k': 9, 'well_radius': 10.5, 'date_format': DateFormat.DD_MM_YYYY}
+    add_perf_dict_3 = {'date': add_perf_date, 'i': 20, 'j': 20, 'k': 20, 'well_radius': 5.5, 'date_format': DateFormat.DD_MM_YYYY}
 
     expected_include_file = NexusFile(location=include_file_path, include_locations=[],
         origin='/my/wellspec/file.dat', include_objects=None, file_content_as_list=expected_result)
@@ -993,7 +991,7 @@ IW JW L RADW SKIN PPERF
 
     add_perf_date = '01/02/2020'
 
-    add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 7.5}
+    add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 7.5, 'date_format': DateFormat.DD_MM_YYYY}
 
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
@@ -1078,8 +1076,8 @@ def test_object_locations_updating(mocker, fixture_for_osstat_pathlib, well_file
 
     add_perf_date = '01/01/2020'
 
-    add_perf_dict_1 = {'date': add_perf_date, 'i': 11, 'j': 22, 'k': 33, 'well_radius': 44.5}
-    add_perf_dict_2 = {'date': add_perf_date, 'i': 44, 'j': 55, 'k': 66, 'well_radius': 77.5}
+    add_perf_dict_1 = {'date': add_perf_date, 'i': 11, 'j': 22, 'k': 33, 'well_radius': 44.5, 'date_format': DateFormat.DD_MM_YYYY}
+    add_perf_dict_2 = {'date': add_perf_date, 'i': 44, 'j': 55, 'k': 66, 'well_radius': 77.5, 'date_format': DateFormat.DD_MM_YYYY}
 
     # Act
     model.wells.add_completion(well_name='DEV1', completion_properties=add_perf_dict_1)
