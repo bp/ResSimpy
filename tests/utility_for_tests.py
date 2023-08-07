@@ -1,3 +1,5 @@
+import pathlib
+from pathlib import Path
 from unittest.mock import Mock
 
 from pytest_mock import MockerFixture
@@ -36,10 +38,11 @@ def get_fake_stat_pathlib_time(mocker):
     dt_mock = mocker.MagicMock()
     mocker.patch('datetime.datetime',dt_mock)
     dt_mock.fromtimestamp.return_value = None
-    path_mock = mocker.MagicMock()
-    mocker.patch('pathlib.Path', path_mock)
-    path_mock.return_value.owner.return_value = None
-    path_mock.return_value.group.return_value = None
+
+    owner_mock = mocker.MagicMock(return_value=None)
+    group_mock = mocker.MagicMock(return_value=None)
+    mocker.patch.object(pathlib.Path, 'owner', owner_mock)
+    mocker.patch.object(pathlib.Path, 'group', group_mock)
 
     os_mock = mocker.MagicMock()
     mocker.patch('os.stat',os_mock)
