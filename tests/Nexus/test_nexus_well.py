@@ -1086,6 +1086,3 @@ def test_object_locations_updating(mocker, fixture_for_osstat_pathlib, well_file
     # Assert
 
     assert model.model_files.well_files[1].object_locations == expected_uuid
-
-def test_tests(mocker, fixture_for_osstat_pathlib):
-    assert 1==0
