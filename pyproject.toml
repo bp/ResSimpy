@@ -1,25 +1,30 @@
 [tool.poetry]
 name = "ResSimpy"
-version = "0.1.0"
-description = ""
+version = "0.0.0" # Set at build time
+description = "A Python library for working with Reservoir Simulator Models."
 authors = ["BP"]
-readme = "README.rst"
+readme = "README.md"
+license = "Apache-2.0"
 keywords = ["ResSimpy", "Reservoir Engineering"]
 classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Topic :: Scientific/Engineering",
     "Topic :: System :: Filesystems",
     "Topic :: Scientific/Engineering :: Information Analysis"
 ]
+packages = [
+    { include = "ResSimpy" } # Needed because the default build command ignores capital letters
+]
 
 [tool.poetry.dependencies]
 python = ">=3.10, <3.12"
-resqpy = "^4.7"
-numpy = "^1.23"
+resqpy = "^4.9"
+numpy = "^1.24"
 pandas = "^1.5"
+typing-extensions = "^4.7"
 
 [tool.poetry.group.dev.dependencies]
 pytest-mock = "^3.9"
@@ -31,9 +36,26 @@ pycodestyle = "^2.9.1"
 pytest-cov = "^4.0.0"
 ruff = "^0.0.270"
 
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+style = "pep440"
+format-jinja = """
+    {%- if distance == 0 -%}
+        {{ serialize_pep440(base, stage, revision) }}
+    {%- elif revision is not none -%}
+        {{ serialize_pep440(base, stage, revision + 1, dev=distance) }}
+    {%- else -%}
+        {{ serialize_pep440(bump_version(base), stage, revision, dev=distance) }}
+    {%- endif -%}
+"""
+
+[tool.poetry-dynamic-versioning.substitution]
+files = ["resqpy/__init__.py"]
+
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.ruff]
 line-length = 120

@@ -5,6 +5,7 @@ from typing import Optional
 
 from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.ISODateTime import ISODateTime
+from ResSimpy.Nexus.NexusEnums import DateFormatEnum
 
 
 @dataclass(kw_only=True)
@@ -57,6 +58,9 @@ class Completion(DataObjectMixin, ABC):
     __dfactor: Optional[float] = None
     __rel_perm_method: Optional[int] = None
     __status: Optional[str] = None
+    __iso_date: Optional[ISODateTime] = None
+    __date_format: Optional[DateFormatEnum.DateFormat] = None
+    __start_date: Optional[str] = None
 
     def __init__(self, date: str, i: Optional[int] = None, j: Optional[int] = None, k: Optional[int] = None,
                  skin: Optional[float] = None, depth: Optional[float] = None, well_radius: Optional[float] = None,
@@ -64,7 +68,8 @@ class Completion(DataObjectMixin, ABC):
                  angle_v: Optional[float] = None, grid: Optional[str] = None, depth_to_top: Optional[float] = None,
                  depth_to_bottom: Optional[float] = None, perm_thickness_ovr: Optional[float] = None,
                  dfactor: Optional[float] = None, rel_perm_method: Optional[int] = None,
-                 status: Optional[str] = None) -> None:
+                 status: Optional[str] = None, date_format: Optional[DateFormatEnum.DateFormat] = None,
+                 start_date: Optional[str] = None) -> None:
         super().__init__({})
         self.__well_radius = well_radius
         self.__date = date
@@ -84,6 +89,9 @@ class Completion(DataObjectMixin, ABC):
         self.__dfactor = dfactor
         self.__rel_perm_method = rel_perm_method
         self.__status = status
+        self.__date_format = date_format
+        self.__start_date = start_date
+        self.__iso_date = self.set_iso_date()
 
     @property
     def well_radius(self):
@@ -94,8 +102,8 @@ class Completion(DataObjectMixin, ABC):
         return self.__date
 
     @property
-    def date_ISO(self):
-        return ISODateTime.convert_to_iso(self)
+    def iso_date(self):
+        return self.__iso_date
 
     @property
     def i(self):
@@ -160,3 +168,15 @@ class Completion(DataObjectMixin, ABC):
     @property
     def status(self):
         return self.__status
+
+    @property
+    def date_format(self):
+        return self.__date_format
+
+    @property
+    def start_date(self):
+        return self.__start_date
+
+
+    def set_iso_date(self) -> ISODateTime:
+        return ISODateTime.convert_to_iso(self.date, self.date_format, self.start_date)

@@ -17,3 +17,16 @@ tests/scratch_test.py
 
 # kdiff files
 *.orig
+
+# Built Documentation
+docs/_build
+docs/_autosummary
+docs/html
+
+# Build artifacts
+build
+dist
+*.egg-info
+
+# Dynamically-generated version
+resqpy/version.py
