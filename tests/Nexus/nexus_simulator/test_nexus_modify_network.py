@@ -151,8 +151,8 @@ ENDNODECON
 WELLS
   NAME    STREAM   NUMBER   DATUM   CROSSFLOW   CROSS_SHUT
   inj   WATER      95     2020     OFF        CALC
-testwell PRODUCER 94 2020 OFF CELLGRAD
   bad_data
+testwell PRODUCER 94 2020.0 OFF CELLGRAD
     ENDWELLS
 
 WELLHEAD
@@ -170,7 +170,7 @@ TIME 01/01/2024
     {'name':'testwell', 'date': '01/01/2023'},
         {'name': 'testwell', 'crossflow': 'OFF'},
         [
-            {'name': 'testwell', 'stream': 'PRODUCER', 'number': 94, 'datum_depth': 2020, 'crossflow': 'ON', 'crossshut_method': 'CELLGRAD',
+            {'name': 'testwell', 'stream': 'PRODUCER', 'number': 94, 'datum_depth': 2020, 'crossflow': 'OFF', 'crossshut_method': 'CELLGRAD',
             'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
             {'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 2020, 'crossflow': 'OFF', 'crossshut_method': 'CALC',
             'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
@@ -195,7 +195,8 @@ TIME 01/01/2024
 
         # Assert
         assert result_nodes == expected_objs
-        assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
+        assert nexus_sim.model_files.surface_files[1].file_content_as_list == \
+            expected_file_contents.splitlines(keepends=True)
         check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
                                          modifying_mock_open=writing_mock_open,
                                          mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
