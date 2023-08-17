@@ -91,7 +91,8 @@ class NexusWellConnection(WellConnection):
     drill_order_benefit: Optional[float] = None
 
     def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
-        super().__init__()
+        # call the init of the DataObjectMixin
+        super(WellConnection, self).__init__({})
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)
         if self.name is not None:

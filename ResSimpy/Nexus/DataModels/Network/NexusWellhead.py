@@ -56,7 +56,7 @@ class NexusWellhead(Wellhead):
     dt_add: Optional[float] = None
 
     def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
-        super().__init__()
+        super(Wellhead, self).__init__({})
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)
 
