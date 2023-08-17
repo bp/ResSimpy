@@ -9,6 +9,7 @@ T = TypeVar('T', bound=DataObjectMixin)
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 
+
 class RemoveObjectOperations:
     def __init__(self, network: Optional[NexusNetwork], table_header: str, table_footer: str) -> None:
         self.table_header = table_header
@@ -109,7 +110,7 @@ class RemoveObjectOperations:
 
     def remove_object_from_network_main(self, obj_to_remove: dict[str, None | str | float | int] | UUID,
                                         network_element_name: Literal['nodes', 'connections', 'well_connections',
-                                                                     'wellheads', 'wellbores', 'constraints'],
+                                                                      'wellheads', 'wellbores', 'constraints'],
                                         existing_objects: list[T]) -> None:
         """Removes object from file and from the list of objects based on matching a set of attributes provided in a
         dictionary or a unique id.

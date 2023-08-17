@@ -177,6 +177,5 @@ class Completion(DataObjectMixin, ABC):
     def start_date(self):
         return self.__start_date
 
-
     def set_iso_date(self) -> ISODateTime:
         return ISODateTime.convert_to_iso(self.date, self.date_format, self.start_date)

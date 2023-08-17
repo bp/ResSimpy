@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
 T = TypeVar('T', bound=DataObjectMixin)
 
+
 class AddObjectOperations:
     def __init__(self, obj_type: Optional[type[T]], table_header: str, table_footer: str,
                  model: NexusSimulator) -> None:

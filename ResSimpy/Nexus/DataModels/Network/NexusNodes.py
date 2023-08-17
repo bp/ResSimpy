@@ -120,7 +120,6 @@ class NexusNodes(Nodes):
         self.__remove_object_operations.remove_object_from_network_main(
             node_to_remove, self._network_element_name, self.__nodes)
 
-
     def add(self, node_to_add: dict[str, None | str | float | int]) -> None:
         """Adds a node to a network, taking a dictionary with properties for the new node.
 

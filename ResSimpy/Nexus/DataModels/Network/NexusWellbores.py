@@ -113,6 +113,7 @@ class NexusWellbores(Wellbores):
         self.__parent_network.get_load_status()
         self.__modify_object_operations.modify_network_object(obj_to_modify, new_properties,
                                                               self.__parent_network)
+
     @property
     def table_header(self) -> str:
         return 'WELLBORE'

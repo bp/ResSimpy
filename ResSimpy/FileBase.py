@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 from uuid import UUID
 
+
 @dataclass
 class FileBase(ABC):
     """The abstract base class for simulator files.
