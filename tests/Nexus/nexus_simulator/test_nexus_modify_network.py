@@ -4,8 +4,9 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
+from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from tests.multifile_mocker import mock_multiple_files
-from tests.utility_for_tests import get_fake_nexus_simulator, check_file_read_write_is_correct
+from tests.utility_for_tests import get_fake_nexus_simulator, check_file_read_write_is_correct, uuid_side_effect
 
 
 class TestNetworkModify:
@@ -38,11 +39,13 @@ WELLS
 WELLHEAD
 WELL NAME DEPTH X Y\t IPVT\t IWAT
 testwell testwell_wellhead 1000 102 302 2 3
+testwell2 testwell_wellhead2 1000 102 302 2 3
 ENDWELLHEAD
 
 WELLBORE
 WELL TEMPPR DIAM
 testwell textdata 10.2
+testwell2 temppr NA
 ENDWELLBORE
 
 TIME 01/01/2024
@@ -92,11 +95,13 @@ WELLS
 WELLHEAD
 WELL NAME DEPTH X Y\t IPVT\t IWAT
 testwell testwell_wellhead 1000 102 302 2 3
+testwell2 testwell_wellhead2 1000 102 302 2 3
 ENDWELLHEAD
 
 WELLBORE
 WELL TEMPPR DIAM
 testwell textdata 10.2
+testwell2 temppr NA
 ENDWELLBORE
 
 TIME 01/01/2024
@@ -119,7 +124,7 @@ TIME 01/01/2024
         expected_objs = [NexusNodeConnection(node) for node in expected_objs]
         expected_objs.sort(key=lambda x: x.name)
 
-        mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
+        mocker.patch.object(uuid, 'uuid4', side_effect=uuid_side_effect)
         # Act
         nexus_sim.network.connections.modify(obj_to_modify, modified_properties)
         # compare sets as order doesn't matter
@@ -158,11 +163,13 @@ testwell PRODUCER 94 2020.0 OFF CELLGRAD
 WELLHEAD
 WELL NAME DEPTH X Y\t IPVT\t IWAT
 testwell testwell_wellhead 1000 102 302 2 3
+testwell2 testwell_wellhead2 1000 102 302 2 3
 ENDWELLHEAD
 
 WELLBORE
 WELL TEMPPR DIAM
 testwell textdata 10.2
+testwell2 temppr NA
 ENDWELLBORE
 
 TIME 01/01/2024
@@ -186,7 +193,7 @@ TIME 01/01/2024
         expected_objs = [NexusWellConnection(obj) for obj in expected_objs]
         expected_objs.sort(key=lambda x: x.name)
 
-        mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
+        mocker.patch.object(uuid, 'uuid4', side_effect=uuid_side_effect)
         # Act
         nexus_sim.network.well_connections.modify(obj_to_modify, modified_properties)
         # compare sets as order doesn't matter
@@ -226,20 +233,24 @@ WELLS
 WELLHEAD
 WELL NAME DEPTH X Y\t IPVT\t IWAT
 testwell testwell_wellhead 1000 102 302 2 3
+testwell2 testwell_wellhead2 1000 102 302 2 3
 ENDWELLHEAD
 
 WELLBORE
 WELL TEMPPR DIAM METHOD
+testwell2 temppr NA NA
 testwell textdata 10.2 NEW_METHOD
 ENDWELLBORE
 
 TIME 01/01/2024
 ''',
     {'name': 'testwell', 'date': '01/01/2023'},
-        {'name': 'testwell', 'METHOD': 'NEW_METHOD'},
+        {'name': 'testwell', 'hyd_method': 'NEW_METHOD'},
         [
             {'name': 'testwell', 'temperature_profile': 'textdata', 'diameter': 10.2, 'hyd_method': 'NEW_METHOD',
             'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+            {'name': 'testwell2', 'temperature_profile': 'temppr',
+                'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
             ],
         2  # no. writes
         ),
@@ -251,7 +262,7 @@ TIME 01/01/2024
         expected_objs = [NexusWellbore(obj) for obj in expected_objs]
         expected_objs.sort(key=lambda x: x.name)
 
-        mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
+        mocker.patch.object(uuid, 'uuid4', side_effect=uuid_side_effect)
         # Act
         nexus_sim.network.wellbores.modify(obj_to_modify, modified_properties)
         # compare sets as order doesn't matter
@@ -266,5 +277,72 @@ TIME 01/01/2024
                                          mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
                                          number_of_writes=expected_number_writes)
 
-    def test_modify_wellhead(self):
-        pass
+
+    @pytest.mark.parametrize('expected_file_contents, obj_to_modify, modified_properties, expected_objs,'
+                             'expected_number_writes', [
+            # basic_test
+        ('''TIME 01/01/2019
+    ! comment
+    TIME 01/01/2020
+    Something here!
+    TIME 01/01/2023
+NODECON
+NAME        NODEIN     NODEOUT      TYPE ROUGHNESS  TEMPPR
+test_name_1 test_node test_node_out PIPE 3.2        tempprof
+test_name_2 test_node test_node_out PIPE 100  NA
+ENDNODECON
+
+WELLS
+  NAME    STREAM   NUMBER   DATUM   CROSSFLOW   CROSS_SHUT
+  testwell   PRODUCER   94     2020     ON        CELLGRAD
+  inj   WATER      95     2020     OFF        CALC
+  bad_data
+    ENDWELLS
+
+WELLHEAD
+WELL NAME DEPTH X Y\t IPVT\t IWAT
+testwell2 testwell_wellhead2 1000 102 302 2 3
+testwell testwell_wellhead 1000.0 1 302.0 2 3
+ENDWELLHEAD
+
+WELLBORE
+WELL TEMPPR DIAM
+testwell textdata 10.2
+testwell2 temppr NA
+ENDWELLBORE
+
+TIME 01/01/2024
+''',
+    {'well': 'testwell', 'name': 'testwell_wellhead', 'date': '01/01/2023', 'depth': 1000},
+    {'name': 'testwell_wellhead', 'x_pos': 1},
+        [
+            {'well': 'testwell', 'name': 'testwell_wellhead', 'date': '01/01/2023', 'depth': 1000, 'x_pos': 1,
+            'y_pos': 302, 'pvt_method': 2, 'water_method': 3, 'unit_system': UnitSystem.ENGLISH},
+            {'well': 'testwell2', 'name': 'testwell_wellhead2', 'date': '01/01/2023', 'depth': 1000, 'x_pos': 102,
+                'y_pos': 302, 'pvt_method': 2, 'water_method': 3, 'unit_system': UnitSystem.ENGLISH},
+            ],
+        2  # no. writes
+        ),
+        ], ids=['basic_test'])
+    def test_modify_wellhead(self, mocker, fixture_for_osstat_pathlib, expected_file_contents, obj_to_modify,
+                          modified_properties, expected_objs, expected_number_writes):
+        # Arrange
+        nexus_sim, writing_mock_open = self.patch_simulator(mocker)
+        expected_objs = [NexusWellhead(obj) for obj in expected_objs]
+        expected_objs.sort(key=lambda x: x.name)
+
+        mocker.patch.object(uuid, 'uuid4', side_effect=uuid_side_effect)
+        # Act
+        nexus_sim.network.wellheads.modify(obj_to_modify, modified_properties)
+        # compare sets as order doesn't matter
+        result_nodes = nexus_sim.network.wellheads.get_all()
+        result_nodes.sort(key=lambda x: x.name)
+
+        # Assert
+        assert result_nodes == expected_objs
+        assert nexus_sim.model_files.surface_files[1].file_content_as_list == \
+            expected_file_contents.splitlines(keepends=True)
+        check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
+                                         modifying_mock_open=writing_mock_open,
+                                         mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
+                                         number_of_writes=expected_number_writes)

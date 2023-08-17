@@ -70,7 +70,7 @@ class Completion(DataObjectMixin, ABC):
                  dfactor: Optional[float] = None, rel_perm_method: Optional[int] = None,
                  status: Optional[str] = None, date_format: Optional[DateFormatEnum.DateFormat] = None,
                  start_date: Optional[str] = None) -> None:
-        super().__init__({})
+        super().__init__()
         self.__well_radius = well_radius
         self.__date = date
         self.__i = i

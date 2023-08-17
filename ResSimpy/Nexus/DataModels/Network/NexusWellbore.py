@@ -35,6 +35,7 @@ class NexusWellbore(Wellbore):
     water_method: Optional[int] = None
 
     def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
+        super().__init__()
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)
 
@@ -58,3 +59,6 @@ class NexusWellbore(Wellbore):
         }
 
         return nexus_mapping
+
+    def __repr__(self) -> str:
+        return super().__repr__()
