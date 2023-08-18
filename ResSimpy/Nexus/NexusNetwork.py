@@ -153,7 +153,6 @@ class NexusNetwork(Network):
             NexusConstraint of an existing constraint in the model that uniquely matches the provided \
             constraint_dict constraint
         """
-        network_element_to_search: Any = None
         self.get_load_status()
         if network_element_type == 'constraints':
             network_element_to_search = self.constraints.get_all().get(name, None)
