@@ -89,7 +89,7 @@ class SimControls:
         with open(output_file_path, "w") as text_file:
             text_file.write(new_file_str)
 
-    def convert_date_to_number(self, date: str | float]) -> float:
+    def convert_date_to_number(self, date: str | float) -> float:
         """Converts a date to a number designating number of days from the start date.
 
         Args:
