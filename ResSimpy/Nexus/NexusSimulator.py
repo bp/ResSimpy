@@ -94,9 +94,9 @@ class NexusSimulator(Simulator):
 
         self.__default_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
         #
+        self._network: NexusNetwork = NexusNetwork(model=self)
         self._wells: NexusWells = NexusWells(self)
         self._grid: Optional[NexusGrid] = None
-        self._network: NexusNetwork = NexusNetwork(model=self)
         # Model dynamic properties
         self._pvt: NexusPVTMethods = NexusPVTMethods()
         self._separator: NexusSeparatorMethods = NexusSeparatorMethods()
@@ -161,6 +161,10 @@ class NexusSimulator(Simulator):
     @property
     def model_files(self) -> FcsNexusFile:
         return self._model_files
+
+    @property
+    def network(self) -> NexusNetwork:
+        return self._network
 
     @property
     def structured_grid_path(self):

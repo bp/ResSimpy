@@ -61,7 +61,7 @@ build-backend = "poetry_dynamic_versioning.backend"
 line-length = 120
 # Rule codes for ruff can be found at: https://beta.ruff.rs/docs/rules/
 select = ["E", "F", "W", "C90", "N",  "UP", "YTT", "ANN", "S", "BLE", "D", "PLE", "PLW", "RUF", "BLE", "ARG", "I",
-    "COM", "C4", "FA100", "PIE", "T20", "PYI", "TID", "INT", "ERA", "PD", "FLY", "NPY"] # To add later: PL, PLR
+    "COM", "C4", "PIE", "T20", "PYI", "TID", "INT", "ERA", "PD", "FLY", "NPY"] # To add later: PL, PLR
 ignore = ["UP007",  "ANN101", "N999", "UP035", "S105", "N802", "S106", "S107", "UP015", "ANN401", "ANN102", "D202",
     "D105", "D203", "D213", "RUF010", "I001", "B028", "COM812", "PD901",
     # To fix later:
@@ -69,7 +69,9 @@ ignore = ["UP007",  "ANN101", "N999", "UP035", "S105", "N802", "S106", "S107", "
    "ANN201", # Types
    "ANN202", # Types
     "C901", # Complexity
-    "D102", "D100", "D103", "D107", "D101", "D205", "D401", "D417", "D104", "D106" # Docstrings
+    "D102", "D100", "D103", "D107", "D101", "D205", "D401", "D417", "D104", "D106", # Docstrings
+    "FA100", # TODO need to remove references to Union, Optional, capital lettered typing (e.g. List)
+             # from typings module.
     ]
 
 [tool.ruff.pydocstyle]

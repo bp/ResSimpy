@@ -8,7 +8,6 @@ from typing import Optional, Union
 import sys
 
 from ResSimpy.Nexus.NexusEnums import DateFormatEnum
-from ResSimpy.Utils.obj_to_table_string import to_table_line
 
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -218,10 +217,14 @@ class NexusCompletion(Completion):
     def kh_mult(self):
         return self.__kh_mult
 
-    def to_dict(self) -> dict[str, None | float | int | str]:
-        attribute_dict: dict[str, None | float | int | str] = to_dict(self, add_units=False)
+    def to_dict(self, keys_in_keyword_style: bool = False, add_date=True, add_units=False, include_nones=True) -> \
+            dict[str, None | str | int | float]:
 
-        attribute_dict.update(super().to_dict())
+        # overwrite add_units to be False for completions as they currently do not contain units.
+        attribute_dict = to_dict(self, keys_in_keyword_style, add_date, add_units=add_units,
+                                 include_nones=include_nones)
+
+        attribute_dict.update(super().to_dict(add_units=False))
         if self.rel_perm_end_point is not None:
             attribute_dict.update(self.rel_perm_end_point.to_dict())
         return attribute_dict
@@ -249,7 +252,7 @@ class NexusCompletion(Completion):
         return not NexusCompletion.completion_is_perforation(completion)
 
     @staticmethod
-    def get_nexus_mapping() -> dict[str, tuple[str, type]]:
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
         """Returns a dictionary of mapping from nexus keyword to attribute name."""
 
         nexus_mapping: dict[str, tuple[str, type]] = {
@@ -301,7 +304,7 @@ class NexusCompletion(Completion):
     @staticmethod
     def valid_attributes() -> list[str]:
         """Lists all possible attributes for the object that relate to a Nexus keyword."""
-        return [v[0] for v in NexusCompletion.get_nexus_mapping().values()]
+        return [v[0] for v in NexusCompletion.get_keyword_mapping().values()]
 
     @classmethod
     def from_dict(cls, input_dictionary: dict[str, None | float | int | str]) -> Self:
@@ -332,16 +335,3 @@ class NexusCompletion(Completion):
                 setattr(self, '_NexusCompletion__' + k, v)
             elif hasattr(super(), '_Completion__' + k):
                 setattr(self, '_Completion__' + k, v)
-
-    def completion_to_wellspec_row(self, headers: list[str]) -> list[str]:
-        """Takes a completion object and returns the attribute values as a string in the order of headers provided.
-
-        Args:
-            headers (list[str]): list of header values in Nexus keyword format
-
-        Returns:
-            string of the values in the order of the headers provided.
-
-        """
-        completion_list_string = [to_table_line(self, headers)]
-        return completion_list_string

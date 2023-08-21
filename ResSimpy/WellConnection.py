@@ -2,9 +2,10 @@ from abc import ABC
 from typing import Optional
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.DataObjectMixin import DataObjectMixin
 
 
-class WellConnection(ABC):
+class WellConnection(DataObjectMixin, ABC):
     name: Optional[str] = None
     date: Optional[str] = None
     unit_system: Optional[UnitSystem] = None

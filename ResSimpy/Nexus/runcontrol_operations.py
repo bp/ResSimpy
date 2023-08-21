@@ -3,7 +3,6 @@ from __future__ import annotations
 import warnings
 from datetime import datetime, timedelta
 from functools import cmp_to_key
-from typing import Union, Optional
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.constants import DATE_WITH_TIME_LENGTH
@@ -14,12 +13,12 @@ class SimControls:
         """Class for controlling all runcontrol and time related functionality
         Args:
             model: NexusSimulator instance
-            __times (Optional[list[str]]): list of times to be included in the runcontrol file
+            __times (None | list[str]): list of times to be included in the runcontrol file
             __date_format_string (str): How the dates should formatted based on date_format.
 
         """
         self.__model = model
-        self.__times: Optional[list[str]] = None
+        self.__times: None | list[str] = None
         self.__date_format_string: str = ''
 
     @property
@@ -90,12 +89,12 @@ class SimControls:
         with open(output_file_path, "w") as text_file:
             text_file.write(new_file_str)
 
-    def convert_date_to_number(self, date: Union[str, int, float]) -> float:
+    def convert_date_to_number(self, date: str | float) -> float:
         """Converts a date to a number designating number of days from the start date.
 
         Args:
         ----
-            date (Union[str, int, float]): a date or time stamp from a Nexus simulation
+            date (str | float): a date or time stamp from a Nexus simulation
         Raises:
             ValueError: if supplied incorrect type for 'date' parameter
 
@@ -105,7 +104,7 @@ class SimControls:
         """
         # If we can retrieve a number of days from date, use that, otherwise convert the string date to a number of days
         try:
-            converted_date: Union[str, float] = float(date)
+            converted_date: str | float = float(date)
         except ValueError:
             if not isinstance(date, str):
                 raise ValueError("convert_date_to_number: Incorrect type for 'date' parameter")
@@ -130,13 +129,13 @@ class SimControls:
         difference = date_as_datetime - start_date_as_datetime
         return difference.total_seconds() / timedelta(days=1).total_seconds()
 
-    def compare_dates(self, x: Union[str, float], y: Union[str, float]) -> int:
+    def compare_dates(self, x: str | float, y: str | float) -> int:
         """Comparator for two supplied dates or numbers.
 
         Args:
         ----
-            x (Union[str, float]): first date to compare
-            y (Union[str, float]): second date to compare
+            x (str | float): first date to compare
+            y (str | float): second date to compare
 
         Returns:
         -------
@@ -172,12 +171,12 @@ class SimControls:
         new_times = sorted(new_times, key=cmp_to_key(self.compare_dates))
         return new_times
 
-    def check_date_format(self, date: Union[str, float]) -> None:
+    def check_date_format(self, date: str | float) -> None:
         """Checks that a supplied date is in the correct format.
 
         Args:
         ----
-            date (Union[str, float]): date to check the format of
+            date (str | float): date to check the format of
         Raises:
             ValueError: If a date provided isn't in a date format that the model expects
         """
@@ -292,7 +291,7 @@ class SimControls:
 
         self.modify_times(content=times, operation='replace')
 
-    def modify_times(self, content: Optional[list[str]] = None, operation: str = 'merge'):
+    def modify_times(self, content: None | list[str] = None, operation: str = 'merge'):
         """Modifies the output times in the simulation.
 
         Args:

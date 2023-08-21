@@ -19,7 +19,7 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
     ----
     nexus_file (File): NexusFile representation of the file.
     table_object_map (dict[str, Storage_Object]): dictionary containing the name of the table as keys and \
-                the object type to store the data from each row into. Require objects to have a get_nexus_mapping \
+                the object type to store the data from each row into. Require objects to have a get_keyword_mapping \
                 function
     model: (NexusSimulator): main simulator object
 
@@ -76,7 +76,7 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                 token_found = None
                 continue
             list_objects = None
-            property_map = table_object_map[token_found].get_nexus_mapping()
+            property_map = table_object_map[token_found].get_keyword_mapping()
             if token_found == 'CONSTRAINTS':
                 load_inline_constraints(file_as_list=file_as_list[table_start:table_end],
                                         constraint=table_object_map[token_found],

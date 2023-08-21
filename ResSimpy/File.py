@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from uuid import uuid4, UUID
 from dataclasses import dataclass, field
 from typing import Optional
@@ -64,4 +66,7 @@ class File(FileBase):
 
     def remove_from_file_as_list(self, index: int, objects_to_remove: Optional[list[UUID]] = None,
                                  string_to_remove: Optional[str] = None) -> None:
+        raise NotImplementedError("Implement this in the derived class")
+
+    def find_which_include_file(self, flattened_index: int) -> tuple[File, int]:
         raise NotImplementedError("Implement this in the derived class")
