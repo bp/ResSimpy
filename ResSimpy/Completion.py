@@ -1,12 +1,11 @@
 """The base class for all Well Completions."""
+from __future__ import annotations
 import uuid
 from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
-
 from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.NexusEnums import DateFormatEnum
-
 
 @dataclass(kw_only=True)
 class Completion(ABC):

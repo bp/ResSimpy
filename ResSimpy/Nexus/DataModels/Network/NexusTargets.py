@@ -137,7 +137,8 @@ class NexusTargets(Targets):
         """Adds a target to a network, taking a dictionary with properties for the new node.
 
         Args:
-            target_to_add (dict[str, None | str | float | int]): dictionary taking all the properties for the new target.
+            target_to_add (dict[str, None | str | float | int]): 
+            dictionary taking all the properties for the new target.
             Requires date and a target name.
         """
         self.__parent_network.get_load_status()

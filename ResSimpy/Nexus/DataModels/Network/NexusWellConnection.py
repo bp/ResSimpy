@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 import ResSimpy.Utils.to_dict_generic as to_dict_generic

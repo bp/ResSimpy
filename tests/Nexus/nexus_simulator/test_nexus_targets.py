@@ -42,13 +42,17 @@ def test_read_target(mocker, fixture_for_osstat_pathlib, file_contents):
 
     # Act
     nexus_sim.network.load()
-    result= nexus_sim.network.targets.get_df()
-    # target1_props=({'name': 'target1', 'control_quantity': 'control1', 'control_conditions': 'ctrlcnd1', 'control_connections': 'ctrlcons1',
-    #   'control_method': 'ctrlmthd1', 'calculation_method': 'calcmthd1', 'calculation_conditions': 'calccond1', 'calculation_connections': 'calccons1',
-    #   'value': 1.0, 'add_value': 11.0, 'region': 'region1', 'priority': 1,
-    #   'minimum_rate': 1.5, 'minimum_rate_no_shut': 1.8, 'guide_rate': 1.9, 'max_change_pressure': 1.6,
-    #   'rank_dt': 0.9, 'control_type': 'type1', 'calculation_type': 'ctype1','unit_system': UnitSystem.ENGLISH})
+    record_count= nexus_sim.network.targets.get_df()
+    target_record=nexus_sim.network.targets.get_by_name('target1')
+    target_dict=target_record.to_dict()
+    target1_props={'name': 'target1', 'control_quantity': 'control1', 'control_conditions': 'ctrlcnd1', 'control_connections': 'ctrlcons1',
+      'control_method': 'ctrlmthd1', 'calculation_method': 'calcmthd1', 'calculation_conditions': 'calccond1', 'calculation_connections': 'calccons1',
+      'value': 1.0, 'add_value': 11.0, 'region': 'region1', 'priority': 1,
+      'minimum_rate': 1.5, 'minimum_rate_no_shut': 1.8, 'guide_rate': 1.9, 'max_change_pressure': 1.6,
+      'rank_dt': 0.9, 'control_type': 'type1', 'calculation_type': 'ctype1','unit_system': UnitSystem.ENGLISH}
     
+    for k in target1_props:
+        assert target1_props[k] == target_dict[k]    
     # target2_props=({'name': 'target2', 'control_quantity': 'control2', 'control_conditions': 'ctrlcnd2', 'control_connections': 'ctrlcons2',
     #   'control_method': 'ctrlmthd2', 'calculation_method': 'calcmthd2', 'calculation_conditions': 'calccond2', 'calculation_connections': 'calccons2',
     #   'value': 2.0, 'add_value': 21.0, 'region': 'region2', 'priority': 2,
@@ -56,4 +60,7 @@ def test_read_target(mocker, fixture_for_osstat_pathlib, file_contents):
     #   'rank_dt': 1.9, 'control_type': 'type2', 'calculation_type': 'ctype2','unit_system': UnitSystem.ENGLISH})
     # expected_result=[(NexusTarget(x) for x in target1_props),(NexusTarget(x) for x in target2_props)]
     # Assert
-    assert result.shape[0] == 2
+    assert record_count.shape[0] == 2
+    
+    
+

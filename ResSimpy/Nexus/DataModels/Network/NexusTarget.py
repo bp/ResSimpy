@@ -1,7 +1,5 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Optional
-
 from ResSimpy.Target import Target
 from ResSimpy.Utils import to_dict_generic
 from ResSimpy.Utils.generic_repr import generic_repr
