@@ -9,6 +9,7 @@ from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
 
+
 def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem,
                date_format: DateFormat) -> list[NexusWell]:
     """Loads a list of Nexus Well instances and populates it with the wells completions over time from a wells file.

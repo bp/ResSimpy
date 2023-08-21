@@ -59,7 +59,7 @@ class NexusTargets(Targets):
 
         """
         targets_to_return = filter(lambda x: False if x.name is None else x.name.upper() == target_name.upper(),
-                                 self.__targets)
+                                   self.__targets)
         return next(targets_to_return, None)
 
     def get_df(self) -> pd.DataFrame:
@@ -86,8 +86,8 @@ class NexusTargets(Targets):
 
         """
         new_targets = collect_all_tables_to_objects(surface_file, {'TARGET': NexusTarget},
-                                                   start_date=start_date,
-                                                   default_units=default_units)
+                                                    start_date=start_date,
+                                                    default_units=default_units)
         cons_list = new_targets.get('TARGET')
         if isinstance(cons_list, dict):
             raise ValueError('Incompatible data format for additional wells. Expected type "list" instead got "dict"')
@@ -126,7 +126,7 @@ class NexusTargets(Targets):
                 raise ValueError(f'Require target name to remove the target instead got {name=}')
             name = str(name)
             target = self.__parent_network.find_network_element_with_dict(name, target_to_remove,
-                                                                         self._network_element_name)
+                                                                          self._network_element_name)
             target_id = target.id
         else:
             target_id = target_to_remove
