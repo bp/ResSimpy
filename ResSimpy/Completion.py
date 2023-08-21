@@ -7,6 +7,7 @@ from typing import Optional
 from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.NexusEnums import DateFormatEnum
 
+
 @dataclass(kw_only=True)
 class Completion(ABC):
     """A class representing well completions.

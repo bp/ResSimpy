@@ -838,7 +838,7 @@ def check_list_tokens(list_tokens: list[str], line: str) -> Optional[str]:
     return None
 
 
-def correct_datatypes(value: None | int | float | str, dtype: type,
+def correct_datatypes(value: None | float | str, dtype: type,
                       na_to_none: bool = True) -> None | int | str | float:
     """Takes a value and returns the value but converted to specified type. if na_to_none True then will
         reduce a lot of values to none.

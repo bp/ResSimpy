@@ -5,6 +5,7 @@ from ResSimpy.Utils import to_dict_generic
 from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.Utils.obj_to_table_string import to_table_line
 
+
 @dataclass(kw_only=True)
 class NexusTarget(Target):
 

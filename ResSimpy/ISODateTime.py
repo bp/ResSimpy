@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Optional
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from datetime import datetime, timedelta
