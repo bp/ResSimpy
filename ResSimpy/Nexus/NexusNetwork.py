@@ -144,7 +144,8 @@ class NexusNetwork(Network):
 
     def find_network_element_with_dict(self, name: str, search_dict: dict[str, None | float | str | int],
                                        network_element_type: Literal['nodes', 'connections', 'well_connections',
-                                                                     'wellheads', 'wellbores', 'constraints', 'targets']) -> Any:
+                                                                     'wellheads', 'wellbores', 'constraints',
+                                                                     'targets']) -> Any:
         """Finds a uniquely matching constraint from a given set of properties in a dictionary of attributes.
 
         Args:
