@@ -28,5 +28,3 @@ class Target(ABC):
     control_type: Optional[str] = None
     calculation_type: Optional[str] = None
     __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False)
-     
-    

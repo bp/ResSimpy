@@ -7,28 +7,8 @@ from ResSimpy.Utils import to_dict_generic
 from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.Utils.obj_to_table_string import to_table_line
 
-
 @dataclass(kw_only=True)
 class NexusTarget(Target):
-    # name: Optional[str] = None
-    # control_quantity: Optional[str] = None
-    # control_conditions: Optional[str] = None
-    # control_connections: Optional[str] = None
-    # control_method: Optional[str] = None
-    # calculation_method: Optional[str] = None
-    # calculation_conditions: Optional[str] = None
-    # calculation_connections: Optional[str] = None
-    # value: Optional[float] = None
-    # add_value: Optional[float] = None
-    # -region: Optional[str] = None
-    # priority: Optional[int] = None
-    # minimum_rate: Optional[str] = None
-    # minimum_rate_no_shut: Optional[float] = None
-    # guide_rate: Optional[float] = None
-    # max_change_pressure: Optional[float] = None
-    # rank_dt: Optional[float] = None
-    # control_type: Optional[str] = None
-    # calculation_type: Optional[str] = None
 
     def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
         super().__init__()
@@ -62,7 +42,6 @@ class NexusTarget(Target):
             'CTRLTYPE': ('control_type', str),
             'CALCTYPE': ('calculation_type', str)
             }
-        
         return keywords
 
     def to_dict(self, keys_in_nexus_style: bool = False, include_nones: bool = True) -> \
