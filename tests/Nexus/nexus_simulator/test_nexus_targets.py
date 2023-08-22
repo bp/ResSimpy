@@ -41,26 +41,32 @@ def test_read_target(mocker, fixture_for_osstat_pathlib, file_contents):
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
 
     # Act
+    
     nexus_sim.network.load()
-    record_count= nexus_sim.network.targets.get_df()
-    target_record=nexus_sim.network.targets.get_by_name('target1')
-    target_dict=target_record.to_dict()
+    
     target1_props={'name': 'target1', 'control_quantity': 'control1', 'control_conditions': 'ctrlcnd1', 'control_connections': 'ctrlcons1',
       'control_method': 'ctrlmthd1', 'calculation_method': 'calcmthd1', 'calculation_conditions': 'calccond1', 'calculation_connections': 'calccons1',
       'value': 1.0, 'add_value': 11.0, 'region': 'region1', 'priority': 1,
       'minimum_rate': 1.5, 'minimum_rate_no_shut': 1.8, 'guide_rate': 1.9, 'max_change_pressure': 1.6,
-      'rank_dt': 0.9, 'control_type': 'type1', 'calculation_type': 'ctype1','unit_system': UnitSystem.ENGLISH}
+      'rank_dt': 0.9, 'control_type': 'type1', 'calculation_type': 'ctype1','unit_system': UnitSystem.ENGLISH, 'type_of_record':'testing'}
     
-    for k in target1_props:
-        assert target1_props[k] == target_dict[k]    
-    # target2_props=({'name': 'target2', 'control_quantity': 'control2', 'control_conditions': 'ctrlcnd2', 'control_connections': 'ctrlcons2',
-    #   'control_method': 'ctrlmthd2', 'calculation_method': 'calcmthd2', 'calculation_conditions': 'calccond2', 'calculation_connections': 'calccons2',
-    #   'value': 2.0, 'add_value': 21.0, 'region': 'region2', 'priority': 2,
-    #   'minimum_rate': 2.5, 'minimum_rate_no_shut': 2.8, 'guide_rate': 2.9, 'max_change_pressure': 2.6,
-    #   'rank_dt': 1.9, 'control_type': 'type2', 'calculation_type': 'ctype2','unit_system': UnitSystem.ENGLISH})
-    # expected_result=[(NexusTarget(x) for x in target1_props),(NexusTarget(x) for x in target2_props)]
+      
+    target3_props={'date':'01/01/2019','name': 'target3', 'control_quantity': 'control3', 'control_conditions': 'ctrlcnd3', 'control_connections': 'ctrlcons3',
+      'control_method': 'ctrlmthd3', 'calculation_method': 'calcmthd3', 'calculation_conditions': 'calccond3', 'calculation_connections': 'calccons3',
+      'value': 3.0, 'add_value': 31.0, 'region': 'region3', 'priority': 3,
+      'minimum_rate': 3.5, 'minimum_rate_no_shut': 3.8, 'guide_rate': 3.9, 'max_change_pressure': 3.6,
+      'rank_dt': 4.9, 'control_type': 'type3', 'calculation_type': 'ctype3','unit_system': UnitSystem.ENGLISH}
+    
+    nexus_sim.network.targets.add(target3_props)
+    record_count= nexus_sim.network.targets.get_df()
+    target_record=nexus_sim.network.targets.get_by_name('target1')
+    target_record.update({'type_of_record':'testing'})
+    target_dict=target_record.to_dict()
+    
     # Assert
-    assert record_count.shape[0] == 2
+    for k in target1_props:
+        assert target1_props[k] == target_dict[k]  
+    assert record_count.shape[0] == 3
     
     
 
