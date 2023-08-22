@@ -17,6 +17,17 @@ def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock
     assert len(list_of_writes) == number_of_writes
     assert list_of_writes[-1].args[0] == expected_file_contents
 
+
+def check_sequential_write_is_correct(expected_file_contents: list[str], modifying_mock_open: Mock,
+                                     mocker_fixture: MockerFixture, write_file_name: str, number_of_writes=1):
+    assert len(modifying_mock_open.call_args_list) == number_of_writes
+    assert modifying_mock_open.call_args_list[0] == mocker_fixture.call(write_file_name, 'w')
+    # Get all the calls to write() and check that the contents are what we expect
+    list_of_writes = [call for call in modifying_mock_open.mock_calls if 'call().write' in str(call)]
+    assert len(list_of_writes) == number_of_writes
+    assert list_of_writes[-1].args[0] == expected_file_contents
+
+
 def get_fake_nexus_simulator(mocker: MockerFixture, fcs_file_path: str = '/path/fcs_file.fcs',
                              mock_open: bool = True) -> NexusSimulator:
     """Returns a set up NexusSimulator object that can then be used for testing. Note that if mock_open is set to True,
@@ -65,10 +76,10 @@ def generic_fcs(mocker):
         RUN_UNITS ENGLISH
         DATEFORMAT DD/MM/YYYY
         INITIALIZATION_FILES
-    	 EQUIL Method 1 nexus_data/nexus_data/mp2017hm_ref_equil_01.dat
-    	 EQUIL Method 2 nexus_data/nexus_data/mp2017hm_ref_equil_02.dat
-        STRUCTURED_GRID nexus_data/mp2020_structured_grid_1_reg_update.dat
-    	 OPTIONS nexus_data/nexus_data/mp2020_ref_options_reg_update.dat
+    	 EQUIL Method 1 nexus_data/nexus_data/equil_01.dat
+    	 EQUIL Method 2 nexus_data/nexus_data/equil_02.dat
+        STRUCTURED_GRID nexus_data/structured_grid_1_reg_update.dat
+    	 OPTIONS nexus_data/nexus_data/ref_options_reg_update.dat
     	 
     	ROCK_FILES
 	        ROCK Method 1 nexus_data/nexus_data/rock.dat
@@ -88,7 +99,8 @@ def generic_fcs(mocker):
         }).return_value
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
-
+    fcs_file_exists = Mock(side_effect=lambda x: True)
+    mocker.patch('os.path.isfile', fcs_file_exists)
     fcs = FcsNexusFile.generate_fcs_structure(fcs_path)
 
     return fcs

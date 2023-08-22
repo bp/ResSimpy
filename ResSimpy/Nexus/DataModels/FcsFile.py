@@ -255,11 +255,44 @@ class FcsNexusFile(NexusFile):
         return_dict = dict(single_keywords, **multi_keywords)
         return return_dict
 
-    def update_fcs_file(self, fcs_file_name: None | str = None, **kwargs):
+    def update_fcs_file(self, new_file_path: None | str = None):
         # Take the original file, find which files have changed and write out those locations?
-        for attr_name in self.fcs_keyword_map_single().values():
-            file = getattr(self, attr_name, None)
+
+        if new_file_path is not None:
+            file_location = new_file_path
+            new_fcs_name = os.path.basename(new_file_path).replace('.fcs', '')
+        else:
+            new_fcs_name = os.path.basename(self.location).replace('.fcs', '')
+            file_location = self.location if self.location is not None else 'new_fcs.fcs'
+
+        file_directory = os.path.dirname(file_location)
+
+        for keyword, attr_name in self.fcs_keyword_map_single().items():
+            file: None | NexusFile = getattr(self, attr_name, None)
             if file is None:
                 # skip if there is no file
                 continue
+            if file.file_modified:
+                # write the modified files out
+                file_path_to_write_to = os.path.join(file_directory, f"{new_fcs_name}_{attr_name}_.dat")
+                file.write_to_file(file_path_to_write_to)
+                # update them in the fcs file_as_list
+                self.change_file_path(file_path_to_write_to, keyword)
 
+        self.write_to_file(file_location)
+
+    def change_file_path(self, new_file_path: str, token: str):
+        if self.file_content_as_list is None:
+            raise ValueError('No file content to change file path on.')
+        for index, line in enumerate(self.get_flat_list_str_file):
+            if not nfo.check_token(token, line):
+                continue
+            path_to_replace = nfo.get_expected_token_value(token, line, self.get_flat_list_str_file)
+            # edit the file as list
+            file_to_edit, index_to_mod = self.find_which_include_file(flattened_index=index)
+            file_to_edit.file_content_as_list[index_to_mod] = line.replace(path_to_replace, new_file_path)
+
+
+    def change_file_path_with_method(self, new_file_path: str, token: str, method_num: int):
+        if self.file_content_as_list is None:
+            raise ValueError('No file content to change file path on.')

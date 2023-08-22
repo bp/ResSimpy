@@ -306,16 +306,27 @@ def test_update_fcs_file(mocker, fixture_for_osstat_pathlib):
     # flag one of the files as modified.
     fcs_file_class.equil_files[1].file_modified = True
     fcs_file_class.equil_files[1].file_content_as_list = ['some', 'new', 'data']
+    fcs_file_class.structured_grid_file.file_modified = True
+    fcs_file_class.structured_grid_file.file_content_as_list = ['structured grid new data']
+    new_file_name = 'test_new_file.fcs'
     expected_file_contents ='''some
 new
 data'''
+    new_equil_file_name = 'nexus_data/nexus_data/test_new_file_equil_1.dat'
+    new_grid_file_name = 'nexus_data / test_new_file_structured_grid.dat'
+    fcs_content = fcs_file_class.file_content_as_list
+    fcs_content[4] = f'    	 EQUIL Method 1 {new_equil_file_name}\n'
+    fcs_content[6] = f'        STRUCTURED_GRID {new_grid_file_name}\n'
+
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
+    expected_list_of_writes = ['debugging']
+
     # Act
     fcs_file_class.update_fcs_file()
 
     # Assert
-    check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
-                                     number_of_writes=2)
+    # need to update this to check multiple files writes
+    # Get all the calls to write() and check that the contents are what we expect
+    list_of_writes = [call for call in writing_mock_open.mock_calls if 'call().write' in str(call)]
+    assert list_of_writes == expected_list_of_writes
