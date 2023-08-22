@@ -1,27 +1,34 @@
 from __future__ import annotations
 import copy
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypeVar, Optional
 from uuid import UUID
 
+from ResSimpy.File import File
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 import ResSimpy.Nexus.nexus_file_operations as nfo
+from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Utils.invert_nexus_map import invert_nexus_map
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+    from ResSimpy.Nexus.NexusNetwork import NexusNetwork
+
+T = TypeVar('T', bound=DataObjectMixin)
 
 
 class AddObjectOperations:
-    def __init__(self, model: NexusSimulator, table_header: str, table_footer: str) -> None:
+    def __init__(self, obj_type: Optional[type[T]], table_header: str, table_footer: str,
+                 model: NexusSimulator) -> None:
         self.__model = model
         self.table_header = table_header
         self.table_footer = table_footer
+        self.obj_type = obj_type
 
-    def find_which_file_from_id(self, id: UUID, file_type_to_search: str) -> NexusFile:
+    def find_which_file_from_id(self, obj_id: UUID, file_type_to_search: str) -> NexusFile:
         """Finds a file based on the presence of an object in the file.
 
         Args:
-            id (UUID): object id to match on
+            obj_id (UUID): object id to match on
             file_type_to_search (str): file type from within the fcsfile. e.g. 'well_files'
 
         Returns:
@@ -37,13 +44,13 @@ class AddObjectOperations:
         elif isinstance(files_to_search, NexusFile):
             # handling only 1 file returned of the file_type_to_search
             all_files = [files_to_search] if files_to_search.object_locations is not None and \
-                                             id in files_to_search.object_locations else []
+                                             obj_id in files_to_search.object_locations else []
         else:
             # handle case of multiple files of the same type.
             all_files = [x for x in files_to_search.values() if x.object_locations is not None and
-                         id in x.object_locations]
+                         obj_id in x.object_locations]
         if len(all_files) == 0:
-            raise FileNotFoundError(f'No {file_type_to_search} found with and object with id: {id}')
+            raise FileNotFoundError(f'No {file_type_to_search} found with and object with id: {obj_id}')
         elif len(all_files) > 1:
             raise ValueError(f'Too many files found containing that object id.'
                              f'Check if there are conflicts in where the objects are being stored.'
@@ -58,7 +65,7 @@ class AddObjectOperations:
     def get_and_write_new_header(additional_headers: list[str],
                                  object_properties: dict[str, None | str | float | int],
                                  file_content: list[str], index: int,
-                                 nexus_mapping: dict[str, tuple[str, type]], file: NexusFile) -> \
+                                 nexus_mapping: dict[str, tuple[str, type]], file: File) -> \
             tuple[int, list[str], list[str]]:
         """Gets the header and works out if any additional headers should be added based on the new obj attributes\
         being added.
@@ -104,7 +111,7 @@ class AddObjectOperations:
 
     @staticmethod
     def fill_in_nas(additional_headers: list[str], headers_original: list[str], index: int, line: str,
-                    file: NexusFile, file_content: list[str]) -> int:
+                    file: File, file_content: list[str]) -> int:
         """Check the validity of the line, if its valid add as many NAs as required for the new columns.
 
         Args:
@@ -152,7 +159,7 @@ class AddObjectOperations:
             list[str], int: first return arg is a new table containing the requested object and \
             the second representing the line location of the new object within the table.
         """
-        nexus_mapping = new_obj.get_nexus_mapping()
+        nexus_mapping = new_obj.get_keyword_mapping()
 
         new_table_as_list = ['']
         if not date_found:
@@ -184,7 +191,7 @@ class AddObjectOperations:
 
         return name, date
 
-    def add_object_to_file(self, date: str, file_as_list: list[str], file_to_add_to: NexusFile, new_object: Any,
+    def add_object_to_file(self, date: str, file_as_list: list[str], file_to_add_to: File, new_object: T,
                            object_properties: dict[str, None | str | float | int]) -> None:
         """Finds where the object should be added based on the date and existing tables.
 
@@ -192,7 +199,7 @@ class AddObjectOperations:
             date (str): date to add the node at.
             file_as_list (list[str]): flattened file as a list of strings.
             file_to_add_to (NexusFile): file to add the new text to.
-            new_object (Any): an object with a to_dict, table_header, table_footer, get_nexus_mapping and to_string
+            new_object (Any): an object with a to_dict, table_header, table_footer, get_keyword_mapping and to_string
             methods.
             object_properties (dict[str, None | str | float | int]): dictionary containing new attributes of the object.
 
@@ -209,7 +216,7 @@ class AddObjectOperations:
         last_valid_line_index: int = -1
         headers_original: list[str] = []
         date_found = False
-        nexus_mapping = new_object.get_nexus_mapping()
+        nexus_mapping = new_object.get_keyword_mapping()
         for index, line in enumerate(file_as_list):
             # check for the dates
             if nfo.check_token('TIME', line):
@@ -268,3 +275,17 @@ class AddObjectOperations:
             }
         file_to_add_to.add_to_file_as_list(additional_content=additional_content, index=insert_line_index,
                                            additional_objects=new_object_ids)
+
+    def add_network_obj(self, node_to_add: dict[str, None | str | float | int], obj_type: type[T],
+                        network: NexusNetwork) -> T:
+        network.get_load_status()
+        file_to_add_to = network.get_network_file()
+        if self.obj_type is not None:
+            obj_type = self.obj_type
+        name, date = self.check_name_date(node_to_add)
+        new_object = obj_type(node_to_add)
+        file_as_list = file_to_add_to.get_flat_list_str_file
+        if file_as_list is None:
+            raise ValueError(f'No file content found in the surface file specified at {file_to_add_to.location}')
+        self.add_object_to_file(date, file_as_list, file_to_add_to, new_object, node_to_add)
+        return new_object

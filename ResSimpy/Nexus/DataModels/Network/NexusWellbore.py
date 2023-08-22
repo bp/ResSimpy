@@ -2,8 +2,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-import ResSimpy.Utils.to_dict_generic as to_dict_generic
-from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.Wellbore import Wellbore
 
 
@@ -38,11 +36,13 @@ class NexusWellbore(Wellbore):
     water_method: Optional[int] = None
 
     def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
+        # call the init of the DataObjectMixin
+        super(Wellbore, self).__init__({})
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)
 
     @staticmethod
-    def get_nexus_mapping() -> dict[str, tuple[str, type]]:
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
         """Gets the mapping of nexus keywords to attribute definitions."""
         nexus_mapping = {
             'WELL': ('name', str),
@@ -62,18 +62,5 @@ class NexusWellbore(Wellbore):
 
         return nexus_mapping
 
-    def to_dict(self, keys_in_nexus_style: bool = False) -> dict[str, None | str | int | float]:
-        """Returns a dictionary of the attributes of the wellbore.
-
-        Args:
-            keys_in_nexus_style (bool): if True returns the key values in Nexus keywords, otherwise returns the \
-                attribute name as stored by ressimpy.
-
-        Returns:
-            a dictionary keyed by attributes and values as the value of the attribute
-        """
-        result_dict = to_dict_generic.to_dict(self, keys_in_nexus_style, add_date=True, add_units=True)
-        return result_dict
-
     def __repr__(self) -> str:
-        return generic_repr(self)
+        return super().__repr__()

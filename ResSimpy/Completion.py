@@ -1,15 +1,16 @@
 """The base class for all Well Completions."""
 from __future__ import annotations
-import uuid
 from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
+
+from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.NexusEnums import DateFormatEnum
 
 
 @dataclass(kw_only=True)
-class Completion(ABC):
+class Completion(DataObjectMixin, ABC):
     """A class representing well completions.
 
     IMPORTANT: if modifying this class, make sure to update the relevant tests in test_load_wells, as well as updating
@@ -70,6 +71,7 @@ class Completion(ABC):
                  dfactor: Optional[float] = None, rel_perm_method: Optional[int] = None,
                  status: Optional[str] = None, date_format: Optional[DateFormatEnum.DateFormat] = None,
                  start_date: Optional[str] = None) -> None:
+        super().__init__({})
         self.__well_radius = well_radius
         self.__date = date
         self.__i = i
@@ -88,7 +90,6 @@ class Completion(ABC):
         self.__dfactor = dfactor
         self.__rel_perm_method = rel_perm_method
         self.__status = status
-        self.__id: uuid.UUID = uuid.uuid4()
         self.__date_format = date_format
         self.__start_date = start_date
         self.__iso_date = self.set_iso_date()
@@ -170,39 +171,12 @@ class Completion(ABC):
         return self.__status
 
     @property
-    def id(self):
-        return self.__id
-
-    @property
     def date_format(self):
         return self.__date_format
 
     @property
     def start_date(self):
         return self.__start_date
-
-    def to_dict(self) -> dict[str, None | float | int | str]:
-        attribute_dict = {
-            'well_radius': self.__well_radius,
-            'date': self.__date,
-            'i': self.__i,
-            'j': self.__j,
-            'k': self.__k,
-            'skin': self.__skin,
-            'depth': self.__depth,
-            'x': self.__x,
-            'y': self.__y,
-            'angle_a': self.__angle_a,
-            'angle_v': self.__angle_v,
-            'grid': self.__grid,
-            'depth_to_top': self.__depth_to_top,
-            'depth_to_bottom': self.__depth_to_bottom,
-            'perm_thickness_ovr': self.__perm_thickness_ovr,
-            'dfactor': self.__dfactor,
-            'rel_perm_method': self.__rel_perm_method,
-            'status': self.__status,
-        }
-        return attribute_dict
 
     def set_iso_date(self) -> ISODateTime:
         return ISODateTime.convert_to_iso(self.date, self.date_format, self.start_date)

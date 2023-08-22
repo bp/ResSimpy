@@ -47,3 +47,8 @@ def get_fake_stat_pathlib_time(mocker):
     mocker.patch('os.stat',os_mock)
     os_mock.return_value.st_mtime = None
 
+def uuid_side_effect():
+    num = 0
+    while True:
+        yield 'uuid' + str(num)
+        num += 1
