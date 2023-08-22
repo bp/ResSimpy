@@ -48,7 +48,7 @@ def test_read_target(mocker, fixture_for_osstat_pathlib, file_contents):
       'control_method': 'ctrlmthd1', 'calculation_method': 'calcmthd1', 'calculation_conditions': 'calccond1', 'calculation_connections': 'calccons1',
       'value': 1.0, 'add_value': 11.0, 'region': 'region1', 'priority': 1,
       'minimum_rate': 1.5, 'minimum_rate_no_shut': 1.8, 'guide_rate': 1.9, 'max_change_pressure': 1.6,
-      'rank_dt': 0.9, 'control_type': 'type1', 'calculation_type': 'ctype1','unit_system': UnitSystem.ENGLISH, 'type_of_record':'testing'}
+      'rank_dt': 0.9, 'control_type': 'type1', 'calculation_type': 'ctype1','unit_system': UnitSystem.ENGLISH}
     
       
     target3_props={'date':'01/01/2019','name': 'target3', 'control_quantity': 'control3', 'control_conditions': 'ctrlcnd3', 'control_connections': 'ctrlcons3',
@@ -60,13 +60,14 @@ def test_read_target(mocker, fixture_for_osstat_pathlib, file_contents):
     # nexus_sim.network.targets.add(target3_props)
     record_count= nexus_sim.network.targets.get_df()
     target_record=nexus_sim.network.targets.get_by_name('target1')
-    target_record.update({'type_of_record':'testing'})
+    
     target_dict=target_record.to_dict()
     
     # Assert
     for k in target1_props:
         assert target1_props[k] == target_dict[k]  
     assert record_count.shape[0] == 2
+    
     
     
 

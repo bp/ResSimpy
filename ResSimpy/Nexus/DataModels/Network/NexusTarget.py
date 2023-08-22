@@ -1,5 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Target import Target
 from ResSimpy.Utils import to_dict_generic
 from ResSimpy.Utils.generic_repr import generic_repr
@@ -18,7 +19,7 @@ class NexusTarget(Target):
         return generic_repr(self)
 
     @staticmethod
-    def get_nexus_mapping() -> dict[str, tuple[str, type]]:
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
         """Gets the mapping of nexus keywords to attribute definitions."""
         keywords = {
             'NAME': ('name', str),
@@ -63,12 +64,8 @@ class NexusTarget(Target):
         """Returns the string representation of a row in a table for a given set of headers."""
         return to_table_line(self, headers)
 
-    def update(self, input_dictionary:  dict[str, None | float | int | str]) -> None:
-        """Updates a target based on a dictionary of attributes."""
-        for k, v in input_dictionary.items():
-            if v is None:
-                continue
-            if hasattr(self, '_NexusTarget__' + k):
-                setattr(self, '_NexusTarget__' + k, v)
-            elif hasattr(super(), '_Target__' + k):
-                setattr(self, '_Target__' + k, v)
+    def update(self, new_data: dict[str, None | int | str | float | UnitSystem], nones_overwrite: bool = False):
+        """Updates attributes in the object based on the dictionary provided."""
+        for k, v in new_data.items():
+            if v is not None or nones_overwrite:
+                setattr(self, k, v)
