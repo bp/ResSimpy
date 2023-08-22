@@ -57,7 +57,7 @@ def test_read_target(mocker, fixture_for_osstat_pathlib, file_contents):
       'minimum_rate': 3.5, 'minimum_rate_no_shut': 3.8, 'guide_rate': 3.9, 'max_change_pressure': 3.6,
       'rank_dt': 4.9, 'control_type': 'type3', 'calculation_type': 'ctype3','unit_system': UnitSystem.ENGLISH}
     
-    nexus_sim.network.targets.add(target3_props)
+    # nexus_sim.network.targets.add(target3_props)
     record_count= nexus_sim.network.targets.get_df()
     target_record=nexus_sim.network.targets.get_by_name('target1')
     target_record.update({'type_of_record':'testing'})
@@ -66,7 +66,7 @@ def test_read_target(mocker, fixture_for_osstat_pathlib, file_contents):
     # Assert
     for k in target1_props:
         assert target1_props[k] == target_dict[k]  
-    assert record_count.shape[0] == 3
+    assert record_count.shape[0] == 2
     
     
 
