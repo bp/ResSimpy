@@ -3,6 +3,7 @@ import pytest
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from tests.multifile_mocker import mock_multiple_files
+from tests.utility_for_tests import generic_fcs, check_file_read_write_is_correct
 
 
 def test_fcs_file(mocker, fixture_for_osstat_pathlib):
@@ -298,3 +299,23 @@ def test_get_full_network(mocker):
     # Assert
     assert to_list == expected_to_list
     assert from_list == expected_from_list
+
+def test_update_fcs_file(mocker, fixture_for_osstat_pathlib):
+    # Arrange
+    fcs_file_class = generic_fcs(mocker)
+    # flag one of the files as modified.
+    fcs_file_class.equil_files[1].file_modified = True
+    fcs_file_class.equil_files[1].file_content_as_list = ['some', 'new', 'data']
+    expected_file_contents ='''some
+new
+data'''
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+    # Act
+    fcs_file_class.update_fcs_file()
+
+    # Assert
+    check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
+                                     modifying_mock_open=writing_mock_open,
+                                     mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
+                                     number_of_writes=2)

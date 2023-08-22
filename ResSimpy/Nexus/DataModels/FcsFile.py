@@ -255,5 +255,11 @@ class FcsNexusFile(NexusFile):
         return_dict = dict(single_keywords, **multi_keywords)
         return return_dict
 
-    # def write_fcs_file(self):
-    #     # Take the original file, find which files have changed and write out those locations?
+    def update_fcs_file(self, fcs_file_name: None | str = None, **kwargs):
+        # Take the original file, find which files have changed and write out those locations?
+        for attr_name in self.fcs_keyword_map_single().values():
+            file = getattr(self, attr_name, None)
+            if file is None:
+                # skip if there is no file
+                continue
+

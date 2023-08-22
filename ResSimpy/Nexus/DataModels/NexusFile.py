@@ -74,6 +74,7 @@ class NexusFile(File):
         self.file_id = uuid.uuid4()
         self.linked_user = linked_user
         self.last_modified = last_modified
+        self.file_changed: bool = False
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True,
@@ -564,6 +565,7 @@ class NexusFile(File):
                 else:
                     # the remaining iterations remove just the lines
                     self.remove_from_file_as_list(index)
+        self.file_modified = True
 
     def remove_from_file_as_list(self, index: int, objects_to_remove: Optional[list[UUID]] = None,
                                  string_to_remove: Optional[str] = None) -> None:

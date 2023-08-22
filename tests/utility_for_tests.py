@@ -2,7 +2,9 @@ import pathlib
 from unittest.mock import Mock
 
 from pytest_mock import MockerFixture
+from tests.multifile_mocker import mock_multiple_files
 
+from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
 
@@ -35,7 +37,7 @@ def get_fake_stat_pathlib_time(mocker):
     """ mocks pathlibpath, os.stat and datetime"""
     
     dt_mock = mocker.MagicMock()
-    mocker.patch('datetime.datetime',dt_mock)
+    mocker.patch('datetime.datetime', dt_mock)
     dt_mock.fromtimestamp.return_value = None
 
     owner_mock = mocker.MagicMock(return_value=None)
@@ -47,8 +49,46 @@ def get_fake_stat_pathlib_time(mocker):
     mocker.patch('os.stat',os_mock)
     os_mock.return_value.st_mtime = None
 
+
 def uuid_side_effect():
     num = 0
     while True:
         yield 'uuid' + str(num)
         num += 1
+
+
+def generic_fcs(mocker):
+
+    fcs_path = 'test_fcs.fcs'
+
+    fcs_content = '''DESC reservoir1
+        RUN_UNITS ENGLISH
+        DATEFORMAT DD/MM/YYYY
+        INITIALIZATION_FILES
+    	 EQUIL Method 1 nexus_data/nexus_data/mp2017hm_ref_equil_01.dat
+    	 EQUIL Method 2 nexus_data/nexus_data/mp2017hm_ref_equil_02.dat
+        STRUCTURED_GRID nexus_data/mp2020_structured_grid_1_reg_update.dat
+    	 OPTIONS nexus_data/nexus_data/mp2020_ref_options_reg_update.dat
+    	 
+    	ROCK_FILES
+	        ROCK Method 1 nexus_data/nexus_data/rock.dat
+	        RELPM Method 1 nexus_data/relpm.dat
+    	 NET_METHOD_FILES
+         HYD METHOd 3 hyd.dat
+        
+        RECURRENT_FILES
+            RUNCONTROL nexus_data/nexus_data/runcontrol.dat
+            WELLS Set 1 nexus_data/nexus_data/wells.dat
+            SURFACE Network 1 nexus_data/nexus_data/surface.dat
+         '''
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'test_fcs.fcs': fcs_content,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    fcs = FcsNexusFile.generate_fcs_structure(fcs_path)
+
+    return fcs
