@@ -16,6 +16,7 @@ class FileBase(ABC):
 
     location: Optional[str] = None
     file_content_as_list: Optional[list[str]] = field(default=None, repr=False)
+    file_modified: bool = False
 
     @abstractmethod
     def write_to_file(self) -> None:
@@ -30,8 +31,9 @@ class FileBase(ABC):
     def add_object_locations(self, obj_uuid: UUID, line_indices: list[int]) -> None:
         raise NotImplementedError("Implement this in the derived class")
 
+    @staticmethod
     @abstractmethod
-    def insert_comments(self, additional_content: list[str], comments) -> list[str]:
+    def insert_comments(additional_content: list[str], comments) -> list[str]:
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod

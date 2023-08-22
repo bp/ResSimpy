@@ -18,6 +18,7 @@ class File(FileBase):
     location: Optional[str] = None
     file_content_as_list: Optional[list[str]] = field(default=None, repr=False)
     __id: UUID = field(default_factory=lambda: uuid4(), compare=False)
+    file_modified: bool = False
 
     def __init__(self, location: Optional[str] = None,
                  file_content_as_list: Optional[list[str]] = None) -> None:
@@ -27,6 +28,7 @@ class File(FileBase):
             self.file_content_as_list = []
         else:
             self.file_content_as_list = file_content_as_list
+        self.file_modified = False
 
     def write_to_file(self) -> None:
         """Writes to file specified in self.location the strings contained in the list self.file_content_as_list."""
@@ -37,6 +39,9 @@ class File(FileBase):
         file_str = ''.join(self.file_content_as_list)
         with open(self.location, 'w') as fi:
             fi.write(file_str)
+
+        # reset the modified file state
+        self.file_modified = False
 
     @property
     def id(self) -> UUID:
@@ -50,7 +55,8 @@ class File(FileBase):
     def add_object_locations(self, obj_uuid: UUID, line_indices: list[int]) -> None:
         raise NotImplementedError("Implement this in the derived class")
 
-    def insert_comments(self, additional_content: list[str], comments) -> list[str]:
+    @staticmethod
+    def insert_comments(additional_content: list[str], comments) -> list[str]:
         raise NotImplementedError("Implement this in the derived class")
 
     def get_object_locations_for_id(self, obj_id: UUID) -> list[int]:

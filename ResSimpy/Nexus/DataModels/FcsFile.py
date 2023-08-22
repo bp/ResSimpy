@@ -8,6 +8,7 @@ from typing import Optional
 
 # Use correct Self type depending upon Python version
 import sys
+
 if sys.version_info >= (3, 11):
     from typing import Self
 else:
@@ -87,7 +88,7 @@ class FcsNexusFile(NexusFile):
             polymer_files: Optional[dict[int, NexusFile]] = None,
             adsorption_files: Optional[dict[int, NexusFile]] = None,
             flux_in_files: Optional[dict[int, NexusFile]] = None
-            ) -> None:
+    ) -> None:
         self.restart_file = restart_file
         self.structured_grid_file = structured_grid_file
         self.options_file = options_file
@@ -147,14 +148,81 @@ class FcsNexusFile(NexusFile):
         fcs_file.file_content_as_list = get_empty_list_str()
         fcs_file.include_locations = get_empty_list_str()
 
-        fcs_keyword_map_single = {
+        # guard against bad links/empty files:
+        if not os.path.isfile(fcs_file_path):
+            raise FileNotFoundError(f'fcs file not found for path {fcs_file_path}')
+        origin_path = fcs_file_path
+        fcs_nexus_file = NexusFile.generate_file_include_structure(
+            fcs_file_path, origin=None)
+        fcs_file.files_info.append((fcs_nexus_file.location, fcs_nexus_file.linked_user,
+                                    fcs_nexus_file.last_modified))
+        flat_fcs_file_content = fcs_nexus_file.get_flat_list_str_file
+        if flat_fcs_file_content is None or fcs_file.file_content_as_list is None:
+            raise ValueError(f'FCS file not found, no content for {fcs_file_path=}')
+        fcs_file.file_content_as_list = flat_fcs_file_content
+        for i, line in enumerate(flat_fcs_file_content):
+            if not nfo.nexus_token_found(line, valid_list=FCS_KEYWORDS):
+                continue
+            key = nfo.get_next_value(start_line_index=i, file_as_list=flat_fcs_file_content, search_string=line)
+            if key is None:
+                warnings.warn(f'get next value failed to find a suitable token in {line}')
+                continue
+            key = key.upper()
+            value = nfo.get_token_value(key, line, flat_fcs_file_content[i::])
+            if value is None:
+                warnings.warn(f'No value found for {key}, skipping file')
+                continue
+            # TODO handle methods / sets instead of getting full file path
+            if key in cls.fcs_keyword_map_multi():
+                # for keywords that have multiple methods we store the value in a dictionary
+                # with the method number and the NexusFile object
+                _, method_string, method_number, value = (
+                    nfo.get_multiple_sequential_values(flat_fcs_file_content[i::], 4)
+                )
+                full_file_path = nfo.get_full_file_path(value, origin_path)
+                nexus_file = NexusFile.generate_file_include_structure(
+                    value, origin=fcs_file_path, recursive=recursive, top_level_file=True)
+                fcs_property = getattr(fcs_file, cls.fcs_keyword_map_multi()[key])
+                # manually initialise if the property is still a None after class instantiation
+                if fcs_property is None:
+                    fcs_property = get_empty_dict_int_nexus_file()
+                # shallow copy to maintain list elements pointing to nexus_file that are
+                # stored in the file_content_as_list
+                fcs_property_list = fcs_property.copy()
+                fcs_property_list.update({int(method_number): nexus_file})
+                # set the attribute in the FcsNexusFile instance
+                setattr(fcs_file, cls.fcs_keyword_map_multi()[key], fcs_property_list)
+                fcs_file.include_objects.append(nexus_file)
+                fcs_file.include_locations.append(full_file_path)
+                fcs_file.files_info.append((nexus_file.location, nexus_file.linked_user,
+                                            nexus_file.last_modified))
+            elif key in cls.fcs_keyword_map_single():
+                full_file_path = nfo.get_full_file_path(value, origin_path)
+                nexus_file = NexusFile.generate_file_include_structure(
+                    value, origin=fcs_file_path, recursive=recursive, top_level_file=True)
+                setattr(fcs_file, cls.fcs_keyword_map_single()[key], nexus_file)
+                fcs_file.include_objects.append(nexus_file)
+                fcs_file.include_locations.append(full_file_path)
+                fcs_file.files_info.append((nexus_file.location, nexus_file.linked_user,
+                                            nexus_file.last_modified))
+            else:
+                continue
+        return fcs_file
+
+    @staticmethod
+    def fcs_keyword_map_single() -> dict[str, str]:
+        keyword_map = {
             'STRUCTURED_GRID': 'structured_grid_file',
             'OPTIONS': 'options_file',
             'RUNCONTROL': 'runcontrol_file',
             'OVERRIDE': 'override_file',
             'EOS_DEFAULTS': 'eos_default_file',
-            }
-        fcs_keyword_map_multi = {
+        }
+        return keyword_map
+
+    @staticmethod
+    def fcs_keyword_map_multi() -> dict[str, str]:
+        keyword_map = {
             'EQUIL': 'equil_files',
             'ROCK': 'rock_files',
             'RELPM': 'relperm_files',
@@ -177,65 +245,14 @@ class FcsNexusFile(NexusFile):
             'ADSORPTION': 'adsorption_files',
             'FLUXIN': 'flux_in_files',
             'TRACER_INIT': 'tracer_init_files',
-            }
+        }
+        return keyword_map
 
-        # guard against bad links/empty files:
-        if not os.path.isfile(fcs_file_path):
-            raise FileNotFoundError(f'fcs file not found for path {fcs_file_path}')
-        origin_path = fcs_file_path
-        fcs_nexus_file = NexusFile.generate_file_include_structure(
-            fcs_file_path, origin=None)
-        fcs_file.files_info.append((fcs_nexus_file.location, fcs_nexus_file.linked_user,
-                                   fcs_nexus_file.last_modified))
-        flat_fcs_file_content = fcs_nexus_file.get_flat_list_str_file
-        if flat_fcs_file_content is None or fcs_file.file_content_as_list is None:
-            raise ValueError(f'FCS file not found, no content for {fcs_file_path=}')
-        fcs_file.file_content_as_list = flat_fcs_file_content
-        for i, line in enumerate(flat_fcs_file_content):
-            if not nfo.nexus_token_found(line, valid_list=FCS_KEYWORDS):
-                continue
-            key = nfo.get_next_value(start_line_index=i, file_as_list=flat_fcs_file_content, search_string=line)
-            if key is None:
-                warnings.warn(f'get next value failed to find a suitable token in {line}')
-                continue
-            key = key.upper()
-            value = nfo.get_token_value(key, line, flat_fcs_file_content[i::])
-            if value is None:
-                warnings.warn(f'No value found for {key}, skipping file')
-                continue
-            # TODO handle methods / sets instead of getting full file path
-            if key in fcs_keyword_map_multi:
-                # for keywords that have multiple methods we store the value in a dictionary
-                # with the method number and the NexusFile object
-                _, method_string, method_number, value = (
-                    nfo.get_multiple_sequential_values(flat_fcs_file_content[i::], 4)
-                    )
-                full_file_path = nfo.get_full_file_path(value, origin_path)
-                nexus_file = NexusFile.generate_file_include_structure(
-                    value, origin=fcs_file_path, recursive=recursive, top_level_file=True)
-                fcs_property = getattr(fcs_file, fcs_keyword_map_multi[key])
-                # manually initialise if the property is still a None after class instantiation
-                if fcs_property is None:
-                    fcs_property = get_empty_dict_int_nexus_file()
-                # shallow copy to maintain list elements pointing to nexus_file that are
-                # stored in the file_content_as_list
-                fcs_property_list = fcs_property.copy()
-                fcs_property_list.update({int(method_number): nexus_file})
-                # set the attribute in the FcsNexusFile instance
-                setattr(fcs_file, fcs_keyword_map_multi[key], fcs_property_list)
-                fcs_file.include_objects.append(nexus_file)
-                fcs_file.include_locations.append(full_file_path)
-                fcs_file.files_info.append((nexus_file.location, nexus_file.linked_user,
-                                           nexus_file.last_modified))
-            elif key in fcs_keyword_map_single:
-                full_file_path = nfo.get_full_file_path(value, origin_path)
-                nexus_file = NexusFile.generate_file_include_structure(
-                    value, origin=fcs_file_path, recursive=recursive, top_level_file=True)
-                setattr(fcs_file, fcs_keyword_map_single[key], nexus_file)
-                fcs_file.include_objects.append(nexus_file)
-                fcs_file.include_locations.append(full_file_path)
-                fcs_file.files_info.append((nexus_file.location, nexus_file.linked_user,
-                                           nexus_file.last_modified))
-            else:
-                continue
-        return fcs_file
+    @staticmethod
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
+        single_keywords = {k: (v, type(NexusFile)) for k,v in FcsNexusFile.fcs_keyword_map_single().items()}
+        multi_keywords = {k: (v, dict[int, type(NexusFile)]) for k,v in FcsNexusFile.fcs_keyword_map_multi().items()}
+        return single_keywords.update(multi_keywords)
+
+    # def write_fcs_file(self):
+    #     # Take the original file, find which files have changed and write out those locations?

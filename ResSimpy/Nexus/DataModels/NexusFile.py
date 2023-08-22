@@ -522,6 +522,7 @@ class NexusFile(File):
             additional_objects (Optional[dict[UUID, int]]): defaults to None. Otherwise, a dictionary keyed with the \
             UUID of the new objects to add as well as the corresponding index of the object in the original \
             calling NexusFile
+            comments (str | None): defaults to None. Comments to add in-line to the file.
         """
         if comments is not None:
             additional_content = NexusFile.insert_comments(additional_content, comments)
@@ -532,6 +533,8 @@ class NexusFile(File):
         nexusfile_to_write_to.file_content_as_list = \
             nexusfile_to_write_to.file_content_as_list[:relative_index] + \
             additional_content + nexusfile_to_write_to.file_content_as_list[relative_index:]
+
+        self.file_modified = True
         # write straight to file
         nexusfile_to_write_to.write_to_file()
         # update object locations
@@ -598,6 +601,7 @@ class NexusFile(File):
         if objects_to_remove is not None:
             for object_id in objects_to_remove:
                 self.__remove_object_locations(object_id)
+        self.file_modified = True
 
         nexusfile_to_write_to.write_to_file()
 
