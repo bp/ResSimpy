@@ -250,9 +250,10 @@ class FcsNexusFile(NexusFile):
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
-        single_keywords = {k: (v, type(NexusFile)) for k,v in FcsNexusFile.fcs_keyword_map_single().items()}
-        multi_keywords = {k: (v, dict[int, type(NexusFile)]) for k,v in FcsNexusFile.fcs_keyword_map_multi().items()}
-        return single_keywords.update(multi_keywords)
+        single_keywords = {k: (v, type(NexusFile)) for k, v in FcsNexusFile.fcs_keyword_map_single().items()}
+        multi_keywords = {k: (v, type(dict)) for k, v in FcsNexusFile.fcs_keyword_map_multi().items()}
+        return_dict = dict(single_keywords, **multi_keywords)
+        return return_dict
 
     # def write_fcs_file(self):
     #     # Take the original file, find which files have changed and write out those locations?
