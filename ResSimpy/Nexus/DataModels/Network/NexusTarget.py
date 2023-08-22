@@ -56,7 +56,8 @@ class NexusTarget(Target):
         Returns:
             a dictionary keyed by attributes and values as the value of the attribute
         """
-        result_dict = to_dict_generic.to_dict(self, keys_in_keyword_style, add_date=True, add_units=True,
+        result_dict = to_dict_generic.to_dict(self, keys_in_keyword_style, add_date=add_date,
+                                              add_units=add_units,
                                               include_nones=include_nones)
         return result_dict
 
