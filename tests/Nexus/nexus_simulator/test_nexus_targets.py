@@ -62,11 +62,20 @@ def test_read_target(mocker, fixture_for_osstat_pathlib, file_contents):
     target_record=nexus_sim.network.targets.get_by_name('target1')
     
     target_dict=target_record.to_dict()
+    rec_to_remove=nexus_sim.network.targets.get_by_name('target2').to_dict()
+    nexus_sim.network.targets.remove({'name':rec_to_remove['name']})
+    
+    targets_list=nexus_sim.network.targets.get_all()
+    
+    nexus_sim.network.targets.add(target3_props)
+    targets_list_after_add=nexus_sim.network.targets.get_all()
     
     # Assert
     for k in target1_props:
         assert target1_props[k] == target_dict[k]  
     assert record_count.shape[0] == 2
+    assert nexus_sim.network.targets.get_by_name('target2') == None
+    assert len(targets_list_after_add) == 2
     
     
     
