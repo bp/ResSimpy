@@ -1,13 +1,13 @@
 from __future__ import annotations
-
 import uuid
 from abc import ABC
 from dataclasses import dataclass, field
 from typing import Optional
+from ResSimpy.DataObjectMixin import DataObjectMixin
 
 
 @dataclass
-class Target(ABC):
+class Target(DataObjectMixin, ABC):
     name: Optional[str] = None
     control_quantity: Optional[str] = None
     control_conditions: Optional[str] = None
@@ -27,4 +27,4 @@ class Target(ABC):
     rank_dt: Optional[float] = None
     control_type: Optional[str] = None
     calculation_type: Optional[str] = None
-    id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False)
+    __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False)

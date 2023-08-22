@@ -26,7 +26,7 @@ class NexusTargets(Targets):
     def __init__(self, parent_network: NexusNetwork) -> None:
         self.__parent_network: NexusNetwork = parent_network
         self.__targets: list[NexusTarget] = []
-        self.__add_object_operations = AddObjectOperations(self.__parent_network.model, self.table_header,
+        self.__add_object_operations = AddObjectOperations(None, self.table_header,
                                                            self.table_footer, self.__parent_network.model)
         self.__remove_object_operations = RemoveObjectOperations(self.__parent_network, self.table_header,
                                                                  self.table_footer)
