@@ -356,3 +356,31 @@ def test_update_fcs_file(mocker, fixture_for_osstat_pathlib, new_file_name, subf
     assert list_of_write_names[1].args[0] == new_equil_file_name
     assert list_of_write_names[2].args[0] == new_file_name
     assert len(list_of_writes) == 3
+
+@pytest.mark.parametrize('token, method_number, edited_line, new_line_content',
+                         [
+                             ( # basic test
+                                 'ROCK', 1, 10,
+                                 '	        ROCK Method 1 new_file.dat\n'
+                             ),
+
+                             ( # different methods
+                                     'HYD', 3, 13,
+                                     '         HYD METHOd 3 new_file.dat\n'
+                             ),
+                             ( # no method number
+                                     'RUNCONTROL', None, 16,
+                                     '            RUNCONTROL new_file.dat\n'
+                             ),
+                         ],
+                         ids = ['basic', 'different methods', 'no method_number',])
+def test_update_file_path(mocker, fixture_for_osstat_pathlib, token, method_number, edited_line, new_line_content):
+    # Arrange
+    fcs_file_class = generic_fcs(mocker)
+    expected_fcs_content = fcs_file_class.file_content_as_list.copy()
+    expected_fcs_content[edited_line] = new_line_content
+    # Act
+    fcs_file_class.change_file_path('new_file.dat', token, method_number)
+
+    # Assert
+    assert fcs_file_class.file_content_as_list == expected_fcs_content
