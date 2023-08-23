@@ -255,7 +255,8 @@ class FcsNexusFile(NexusFile):
         return_dict = dict(single_keywords, **multi_keywords)
         return return_dict
 
-    def update_fcs_file(self, new_file_path: None | str = None, new_include_file_location: None | str = None):
+    def update_fcs_file(self, new_file_path: None | str = None, new_include_file_location: None | str = None,
+                        write_out_all_files: bool = False):
         # Take the original file, find which files have changed and write out those locations?
 
         if new_file_path is not None:
@@ -276,20 +277,23 @@ class FcsNexusFile(NexusFile):
             if file is None:
                 # skip if there is no file
                 continue
-            self.write_out_included_file(file, attr_name, file_directory, keyword, new_fcs_name)
+            self.write_out_included_file(file, attr_name, file_directory, keyword, new_fcs_name,
+                                         method_number=None, write_out_all_files=write_out_all_files)
 
         for keyword, attr_name in self.fcs_keyword_map_multi().items():
             file_dict: None | dict[int, NexusFile] = getattr(self, attr_name, None)
             if file_dict is None or len(file_dict) == 0:
                 continue
             for method_number, file in file_dict.items():
-                self.write_out_included_file(file, attr_name, file_directory, keyword, new_fcs_name, method_number)
+                self.write_out_included_file(file, attr_name, file_directory, keyword, new_fcs_name, method_number,
+                                             write_out_all_files)
 
         # write out the final fcs file
         self.write_to_file(file_location)
 
     def write_out_included_file(self, file: NexusFile, attr_name: str, file_directory: str, keyword: str,
-                                new_fcs_name: str, method_number: None | int = None) -> None:
+                                new_fcs_name: str, method_number: None | int = None, write_out_all_files: bool = False
+                                ) -> None:
         """Writes out the included file and prepares to switch out the path in the fcs file.
 
         Args:
@@ -300,15 +304,16 @@ class FcsNexusFile(NexusFile):
             new_fcs_name (str): new file name for the fcs
             method_number (None | int): method number to include in the file name (defaults to None)
         """
-        if file.file_modified:
+        if not file.file_modified and not write_out_all_files:
+            return
             # write the modified files out
-            if method_number is not None:
-                attr_name += f'_{str(method_number)}'
-                attr_name = attr_name.replace('files', 'method')
-            file_path_to_write_to = os.path.join(file_directory, f"{new_fcs_name}_{attr_name}.dat")
-            file.write_to_file(file_path_to_write_to)
-            # update them in the fcs file_as_list
-            self.change_file_path(file_path_to_write_to, keyword, method_number)
+        if method_number is not None:
+            attr_name += f'_{str(method_number)}'
+            attr_name = attr_name.replace('files', 'method')
+        file_path_to_write_to = os.path.join(file_directory, f"{new_fcs_name}_{attr_name}.dat")
+        file.write_to_file(file_path_to_write_to)
+        # update them in the fcs file_as_list
+        self.change_file_path(file_path_to_write_to, keyword, method_number)
 
     def change_file_path(self, new_file_path: str, token: str, method_number: int | None = None) -> bool:
         """Switch the file path for a new file_path based on the value of the associated keyword in the fcs.
