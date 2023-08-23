@@ -373,7 +373,7 @@ def test_update_fcs_file(mocker, fixture_for_osstat_pathlib, new_file_name, subf
                                      '            RUNCONTROL new_file.dat\n'
                              ),
                          ],
-                         ids = ['basic', 'different methods', 'no method_number',])
+                         ids = ['basic', 'different methods', 'no method_number'])
 def test_update_file_path(mocker, fixture_for_osstat_pathlib, token, method_number, edited_line, new_line_content):
     # Arrange
     fcs_file_class = generic_fcs(mocker)

@@ -262,8 +262,8 @@ class FcsNexusFile(NexusFile):
             file_location = new_file_path
             new_fcs_name = os.path.basename(new_file_path).replace('.fcs', '')
         else:
-            new_fcs_name = os.path.basename(self.location).replace('.fcs', '')
             file_location = self.location if self.location is not None else 'new_fcs.fcs'
+            new_fcs_name = os.path.basename(file_location).replace('.fcs', '')
 
         # figure out where to store the include files:
         # by default store it in the same directory as the new fcs file.
@@ -337,6 +337,8 @@ class FcsNexusFile(NexusFile):
                 path_to_replace = nfo.get_expected_token_value(token, line, self.get_flat_list_str_file)
             # edit the file as list
             file_to_edit, index_to_mod = self.find_which_include_file(flattened_index=index)
+            if file_to_edit.file_content_as_list is None:
+                raise ValueError(f'No content found within {file_to_edit.location}')
             file_to_edit.file_content_as_list[index_to_mod] = line.replace(path_to_replace, new_file_path)
             file_changed = True
         return file_changed
