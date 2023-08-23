@@ -13,11 +13,6 @@
 write reservoir simulation input decks. Whilst it was created by staff at BP, we welcome contributions from anybody 
 interested, whether it is by raising pull requests, or simply suggesting features / raising bugs in the GitHub issues.
 
-### Documentation
-
-See the complete package documentation on
-[readthedocs](https://ResSimpy.readthedocs.io/).
-
 ## Installation
 
 ResSimpy can be installed with pip:
