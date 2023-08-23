@@ -300,28 +300,46 @@ def test_get_full_network(mocker):
     assert to_list == expected_to_list
     assert from_list == expected_from_list
 
-def test_update_fcs_file(mocker, fixture_for_osstat_pathlib):
+
+@pytest.mark.parametrize('new_file_name, subfolder',
+                         [(
+                             'test_new_file.fcs',
+                             'nexus_data'
+                         ),
+                         (
+                             '/basefolder/test_new_file.fcs',
+                             None,
+                         ),
+                         (
+                                 '/basefolder/test_new_file.fcs',
+                                 '/absolutepath/',
+                         ),
+                         ], ids = ['basic_test', 'no subfolder', 'absolute paths'])
+def test_update_fcs_file(mocker, fixture_for_osstat_pathlib, new_file_name, subfolder):
     # Arrange
     fcs_file_class = generic_fcs(mocker)
-    # flag one of the files as modified.
-    fcs_file_class.equil_files[1].file_modified = True
-    fcs_file_class.equil_files[1].file_content_as_list = ['some\n', 'new\n', 'data\n']
+    # flag one of the files as modified and give them some content
+    fcs_file_class.equil_files[2].file_modified = True
+    fcs_file_class.equil_files[2].file_content_as_list = ['some\n', 'new\n', 'data\n']
     fcs_file_class.structured_grid_file.file_modified = True
     fcs_file_class.structured_grid_file.file_content_as_list = ['structured grid new data']
-    new_file_name = 'test_new_file.fcs'
     expected_equil_contents ='some\nnew\ndata\n'
     expected_grid_contents = 'structured grid new data'
-    new_equil_file_name = os.path.join('nexus_data', 'test_new_file_equil_method_1.dat')
-    new_grid_file_name = os.path.join('nexus_data', 'test_new_file_structured_grid_file.dat')
+    if subfolder is None:
+        subfolder = ''
+    new_equil_file_name = os.path.join(subfolder, 'test_new_file_equil_method_2.dat')
+    new_grid_file_name = os.path.join(subfolder, 'test_new_file_structured_grid_file.dat')
+
     expected_fcs_content = fcs_file_class.file_content_as_list.copy()
-    expected_fcs_content[4] = f'    	 EQUIL Method 1 {new_equil_file_name}\n'
+    expected_fcs_content[5] = f'    	 EQUIL Method 2 {new_equil_file_name}\n'
     expected_fcs_content[6] = f'        STRUCTURED_GRID {new_grid_file_name}\n'
     expected_fcs_content = ''.join(expected_fcs_content)
+
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    fcs_file_class.update_fcs_file(new_file_name, 'nexus_data')
+    fcs_file_class.update_fcs_file(new_file_name, subfolder)
 
     # Assert
     # need to update this to check multiple files writes
