@@ -305,13 +305,12 @@ def test_update_fcs_file(mocker, fixture_for_osstat_pathlib):
     fcs_file_class = generic_fcs(mocker)
     # flag one of the files as modified.
     fcs_file_class.equil_files[1].file_modified = True
-    fcs_file_class.equil_files[1].file_content_as_list = ['some', 'new', 'data']
+    fcs_file_class.equil_files[1].file_content_as_list = ['some\n', 'new\n', 'data\n']
     fcs_file_class.structured_grid_file.file_modified = True
     fcs_file_class.structured_grid_file.file_content_as_list = ['structured grid new data']
     new_file_name = 'test_new_file.fcs'
-    expected_file_contents ='''some
-new
-data'''
+    expected_equil_contents ='some\nnew\ndata\n'
+    expected_grid_contents = 'structured grid new data'
     new_equil_file_name = os.path.join('nexus_data', 'test_new_file_equil_method_1.dat')
     new_grid_file_name = os.path.join('nexus_data', 'test_new_file_structured_grid_file.dat')
     expected_fcs_content = fcs_file_class.file_content_as_list.copy()
@@ -328,4 +327,14 @@ data'''
     # need to update this to check multiple files writes
     # Get all the calls to write() and check that the contents are what we expect
     list_of_writes = [call for call in writing_mock_open.mock_calls if 'call().write' in str(call)]
-    assert list_of_writes[-1].args[0] == expected_fcs_content
+    assert list_of_writes[0].args[0] == expected_grid_contents
+    assert list_of_writes[1].args[0] == expected_equil_contents
+    assert list_of_writes[2].args[0] == expected_fcs_content
+    assert len(list_of_writes) == 3
+
+    # Get all the calls to write() with a write 'w' as the last arg and check that the file name writes are correct
+    list_of_write_names = [call for call in writing_mock_open.mock_calls if "'w')" in str(call)]
+    assert list_of_write_names[0].args[0] == new_grid_file_name
+    assert list_of_write_names[1].args[0] == new_equil_file_name
+    assert list_of_write_names[2].args[0] == new_file_name
+    assert len(list_of_writes) == 3
