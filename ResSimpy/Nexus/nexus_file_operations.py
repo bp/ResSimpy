@@ -729,12 +729,12 @@ def table_line_reader(keyword_store: dict[str, None | int | float | str], header
     corresponding dictionary.
 
     Args:
-        keyword_store (dict[str, None | int | float | str]):
-        headers (list[str]):
-        line (str):
+        keyword_store (dict[str, None | int | float | str]): place to store the value from the given column
+        headers (list[str]): list of headers to read values into
+        line (str): line to read the data from.
 
     Returns:
-        tuple[bool, dict[str, None | int | float | str]]: a dictionary with the found set of
+        tuple[bool, dict[str, None | int | float | str]]: a dictionary with the found set of objects and lines
     """
     trimmed_line = line
     valid_line = True
