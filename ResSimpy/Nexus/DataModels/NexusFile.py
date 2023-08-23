@@ -608,7 +608,16 @@ class NexusFile(File):
         nexusfile_to_write_to.write_to_file()
 
     @staticmethod
-    def insert_comments(additional_content: list[str], comments) -> list[str]:
+    def insert_comments(additional_content: list[str], comments: str) -> list[str]:
+        """Adds comments alongside additional content.
+
+        Args:
+            additional_content (list[str]): additional lines of the file to be added with a new entry per line.
+            comments (str): comments to be added to all lines
+
+        Returns:
+            list of strings within the content.
+        """
         for index, element in enumerate(additional_content):
             newline_index = element.find('\n')
             if newline_index != -1:
