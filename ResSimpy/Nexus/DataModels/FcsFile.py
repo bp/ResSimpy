@@ -255,7 +255,7 @@ class FcsNexusFile(NexusFile):
         return_dict = dict(single_keywords, **multi_keywords)
         return return_dict
 
-    def update_fcs_file(self, new_file_path: None | str = None):
+    def update_fcs_file(self, new_file_path: None | str = None, new_include_file_location: None | str = None):
         # Take the original file, find which files have changed and write out those locations?
 
         if new_file_path is not None:
@@ -265,34 +265,78 @@ class FcsNexusFile(NexusFile):
             new_fcs_name = os.path.basename(self.location).replace('.fcs', '')
             file_location = self.location if self.location is not None else 'new_fcs.fcs'
 
+        # figure out where to store the include files:
+        # by default store it in the same directory as the new fcs file.
         file_directory = os.path.dirname(file_location)
+        if new_include_file_location is not None:
+            file_directory = new_include_file_location
 
         for keyword, attr_name in self.fcs_keyword_map_single().items():
             file: None | NexusFile = getattr(self, attr_name, None)
             if file is None:
                 # skip if there is no file
                 continue
-            if file.file_modified:
-                # write the modified files out
-                file_path_to_write_to = os.path.join(file_directory, f"{new_fcs_name}_{attr_name}_.dat")
-                file.write_to_file(file_path_to_write_to)
-                # update them in the fcs file_as_list
-                self.change_file_path(file_path_to_write_to, keyword)
+            self.write_out_included_file(file, attr_name, file_directory, keyword, new_fcs_name)
 
+        for keyword, attr_name in self.fcs_keyword_map_multi().items():
+            file_dict: None | dict[int, NexusFile] = getattr(self, attr_name, None)
+            if file_dict is None or len(file_dict) == 0:
+                continue
+            for method_number, file in file_dict.items():
+                self.write_out_included_file(file, attr_name, file_directory, keyword, new_fcs_name, method_number)
+
+        # write out the final fcs file
         self.write_to_file(file_location)
 
-    def change_file_path(self, new_file_path: str, token: str):
+    def write_out_included_file(self, file: NexusFile, attr_name: str, file_directory: str, keyword: str,
+                                new_fcs_name: str, method_number: None | int = None) -> None:
+        """Writes out the included file and prepares to switch out the path in the fcs file.
+
+        Args:
+            file (NexusFile): file to write out
+            attr_name (str): attribute name of the method to be replaced
+            file_directory (str): path to directory the file should be stored in
+            keyword (str): Nexus keyword for the type of method.
+            new_fcs_name (str): new file name for the fcs
+            method_number (None | int): method number to include in the file name (defaults to None)
+        """
+        if file.file_modified:
+            # write the modified files out
+            if method_number is not None:
+                attr_name += f'_{str(method_number)}'
+                attr_name = attr_name.replace('files', 'method')
+            file_path_to_write_to = os.path.join(file_directory, f"{new_fcs_name}_{attr_name}.dat")
+            file.write_to_file(file_path_to_write_to)
+            # update them in the fcs file_as_list
+            self.change_file_path(file_path_to_write_to, keyword, method_number)
+
+    def change_file_path(self, new_file_path: str, token: str, method_number: int | None = None) -> bool:
+        """Switch the file path for a new file_path based on the value of the associated keyword in the fcs.
+
+        Args:
+            new_file_path (str): file path to replace the existing file path with.
+            token (str): token indicating the
+            method_number (int | None): method number for the file to replace.
+            If None then will only look for keywords that follow directly after a token
+        Returns:
+            (bool): representing whether the file was successfully changed
+        """
+        file_changed = False
         if self.file_content_as_list is None:
             raise ValueError('No file content to change file path on.')
         for index, line in enumerate(self.get_flat_list_str_file):
             if not nfo.check_token(token, line):
                 continue
-            path_to_replace = nfo.get_expected_token_value(token, line, self.get_flat_list_str_file)
+
+            if method_number is not None:
+                token_from_file, intermediate_word, method_num_in_file, path_to_replace\
+                    = nfo.get_multiple_sequential_values([line], 4)
+                if int(method_num_in_file) != method_number:
+                    continue
+            else:
+                path_to_replace = nfo.get_expected_token_value(token, line, self.get_flat_list_str_file)
             # edit the file as list
             file_to_edit, index_to_mod = self.find_which_include_file(flattened_index=index)
             file_to_edit.file_content_as_list[index_to_mod] = line.replace(path_to_replace, new_file_path)
-
-
-    def change_file_path_with_method(self, new_file_path: str, token: str, method_num: int):
-        if self.file_content_as_list is None:
-            raise ValueError('No file content to change file path on.')
+            file_changed = True
+        return file_changed
