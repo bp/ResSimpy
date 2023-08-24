@@ -256,7 +256,7 @@ class FcsNexusFile(NexusFile):
         return return_dict
 
     def update_fcs_file(self, new_file_path: None | str = None, new_include_file_location: None | str = None,
-                        write_out_all_files: bool = False) -> None:
+                        write_out_all_files: bool = False, preserve_file_names: bool = False) -> None:
         """Updates or creates a new fcs_file with all the updated include files.
 
         Args:
@@ -265,7 +265,9 @@ class FcsNexusFile(NexusFile):
             new_include_file_location (None | str): Defaults to None. If None saves in the same directory as the fcs \
             file. Otherwise saves it to a path either absolute or relative to the file path provided.
             write_out_all_files (bool): Defaults to False. If False writes out only changed files.
-            Otherwise writes out all files.
+            If False writes out all files.
+            preserve_file_names (bool): Defaults to False. If True will derive names from the existing fcs_file.
+            If False will derive new names from the new fcs file name and the property it represents in Nexus.
         """
         # Take the original file, find which files have changed and write out those locations?
 
@@ -288,7 +290,8 @@ class FcsNexusFile(NexusFile):
                 # skip if there is no file
                 continue
             self.write_out_included_file(file, attr_name, file_directory, keyword, new_fcs_name,
-                                         method_number=None, write_out_all_files=write_out_all_files)
+                                         method_number=None, write_out_all_files=write_out_all_files,
+                                         preserve_file_names=preserve_file_names)
 
         for keyword, attr_name in self.fcs_keyword_map_multi().items():
             file_dict: None | dict[int, NexusFile] = getattr(self, attr_name, None)
@@ -296,14 +299,14 @@ class FcsNexusFile(NexusFile):
                 continue
             for method_number, file in file_dict.items():
                 self.write_out_included_file(file, attr_name, file_directory, keyword, new_fcs_name, method_number,
-                                             write_out_all_files)
+                                             write_out_all_files, preserve_file_names)
 
         # write out the final fcs file
         self.write_to_file(file_location)
 
     def write_out_included_file(self, file: NexusFile, attr_name: str, file_directory: str, keyword: str,
-                                new_fcs_name: str, method_number: None | int = None, write_out_all_files: bool = False
-                                ) -> None:
+                                new_fcs_name: str, method_number: None | int = None, write_out_all_files: bool = False,
+                                preserve_file_names: bool = False) -> None:
         """Writes out the included file and prepares to switch out the path in the fcs file.
 
         Args:
@@ -313,6 +316,8 @@ class FcsNexusFile(NexusFile):
             keyword (str): Nexus keyword for the type of method.
             new_fcs_name (str): new file name for the fcs
             method_number (None | int): method number to include in the file name (defaults to None)
+            preserve_file_names (bool): Defaults to False. If True will derive names from the existing fcs_file.
+            If False will derive new names from the new fcs file name and the property it represents in Nexus.
         """
         if not file.file_modified and not write_out_all_files:
             return
@@ -320,7 +325,11 @@ class FcsNexusFile(NexusFile):
         if method_number is not None:
             attr_name += f'_{str(method_number)}'
             attr_name = attr_name.replace('files', 'method')
-        file_path_to_write_to = os.path.join(file_directory, f"{new_fcs_name}_{attr_name}.dat")
+        if preserve_file_names and file.location is not None:
+            new_file_name = os.path.basename(file.location)
+        else:
+            new_file_name = f"{new_fcs_name}_{attr_name}.dat"
+        file_path_to_write_to = os.path.join(file_directory, new_file_name)
         file.write_to_file(file_path_to_write_to)
         # update them in the fcs file_as_list
         self.change_file_path(file_path_to_write_to, keyword, method_number)
