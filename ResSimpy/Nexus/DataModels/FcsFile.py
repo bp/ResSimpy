@@ -256,7 +256,17 @@ class FcsNexusFile(NexusFile):
         return return_dict
 
     def update_fcs_file(self, new_file_path: None | str = None, new_include_file_location: None | str = None,
-                        write_out_all_files: bool = False):
+                        write_out_all_files: bool = False) -> None:
+        """Updates or creates a new fcs_file with all the updated include files.
+
+        Args:
+            new_file_path (None | str): Defaults to None. If None overwrites the original file.
+            If string it will save the file in the path provided.
+            new_include_file_location (None | str): Defaults to None. If None saves in the same directory as the fcs \
+            file. Otherwise saves it to a path either absolute or relative to the file path provided.
+            write_out_all_files (bool): Defaults to False. If False writes out only changed files.
+            Otherwise writes out all files.
+        """
         # Take the original file, find which files have changed and write out those locations?
 
         if new_file_path is not None:
