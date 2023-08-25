@@ -1,4 +1,5 @@
 """The base class for all Well Completions."""
+from __future__ import annotations
 from abc import ABC
 from dataclasses import dataclass
 from typing import Optional

@@ -17,6 +17,8 @@ from ResSimpy.Nexus.DataModels.Network.NexusWellbores import NexusWellbores
 from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.Network.NexusWellheads import NexusWellheads
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.DataModels.Network.NexusTarget import NexusTarget
+from ResSimpy.Nexus.DataModels.Network.NexusTargets import NexusTargets
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
@@ -32,6 +34,7 @@ class NexusNetwork(Network):
     wellbores: NexusWellbores
     constraints: NexusConstraints
     __has_been_loaded: bool = False
+    targets: NexusTargets
 
     def __init__(self, model: NexusSimulator) -> None:
         self.__has_been_loaded: bool = False
@@ -42,6 +45,7 @@ class NexusNetwork(Network):
         self.wellheads: NexusWellheads = NexusWellheads(self)
         self.wellbores: NexusWellbores = NexusWellbores(self)
         self.constraints: NexusConstraints = NexusConstraints(self, model)
+        self.targets: NexusTargets = NexusTargets(self)
 
     def get_load_status(self) -> bool:
         """Checks load status and loads the network if it hasn't already been loaded."""
@@ -105,7 +109,7 @@ class NexusNetwork(Network):
                           'CONSTRAINT': NexusConstraint,
                           'QMULT': NexusConstraint,
                           'CONDEFAULTS': None,
-                          'TARGET': None,
+                          'TARGET': NexusTarget,
                           },
                 start_date=self.__model.start_date,
                 default_units=self.__model.default_units,
@@ -116,6 +120,7 @@ class NexusNetwork(Network):
             self.wellheads._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLHEAD')))
             self.wellbores._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLBORE')))
             self.constraints._add_to_memory(type_check_dicts(nexus_obj_dict.get('CONSTRAINTS')))
+            self.targets._add_to_memory(type_check_lists(nexus_obj_dict.get('TARGET')))
 
         self.__has_been_loaded = True
 
@@ -139,7 +144,8 @@ class NexusNetwork(Network):
 
     def find_network_element_with_dict(self, name: str, search_dict: dict[str, None | float | str | int],
                                        network_element_type: Literal['nodes', 'connections', 'well_connections',
-                                                                     'wellheads', 'wellbores', 'constraints']) -> Any:
+                                                                     'wellheads', 'wellbores', 'constraints',
+                                                                     'targets']) -> Any:
         """Finds a uniquely matching constraint from a given set of properties in a dictionary of attributes.
 
         Args:
