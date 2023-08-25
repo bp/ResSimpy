@@ -40,9 +40,9 @@ def test_read_target(mocker, fixture_for_osstat_pathlib, file_contents):
     mocker.patch("builtins.open", mock_open_wrapper)
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
 
-    # Act
-    
+    # Act    
     nexus_sim.network.load()
+    # Arrange
     
     target1_props={'name': 'target1', 'control_quantity': 'control1', 'control_conditions': 'ctrlcnd1', 'control_connections': 'ctrlcons1',
       'control_method': 'ctrlmthd1', 'calculation_method': 'calcmthd1', 'calculation_conditions': 'calccond1', 'calculation_connections': 'calccons1',
@@ -57,16 +57,14 @@ def test_read_target(mocker, fixture_for_osstat_pathlib, file_contents):
       'minimum_rate': 3.5, 'minimum_rate_no_shut': 3.8, 'guide_rate': 3.9, 'max_change_pressure': 3.6,
       'rank_dt': 4.9, 'control_type': 'type3', 'calculation_type': 'ctype3','unit_system': UnitSystem.ENGLISH}
     
-    # nexus_sim.network.targets.add(target3_props)
+    
     record_count= nexus_sim.network.targets.get_df()
     target_record=nexus_sim.network.targets.get_by_name('target1')
     
     target_dict=target_record.to_dict()
     rec_to_remove=nexus_sim.network.targets.get_by_name('target2').to_dict()
     nexus_sim.network.targets.remove({'name':rec_to_remove['name']})
-    
-    targets_list=nexus_sim.network.targets.get_all()
-    
+       
     nexus_sim.network.targets.add(target3_props)
     targets_list_after_add=nexus_sim.network.targets.get_all()
     

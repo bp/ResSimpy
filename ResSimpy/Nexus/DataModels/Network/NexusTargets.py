@@ -117,23 +117,9 @@ class NexusTargets(Targets):
             with sufficient matching parameters to uniquely identify a node
 
         """
-        self.__parent_network.get_load_status()
-
-        network_file = self.__parent_network.get_network_file()
-
-        if isinstance(target_to_remove, dict):
-            name = target_to_remove.get('name', None)
-            if name is None:
-                raise ValueError(f'Require target name to remove the target instead got {name=}')
-            name = str(name)
-            target = self.__parent_network.find_network_element_with_dict(name, target_to_remove,
-                                                                          self._network_element_name)
-            target_id = target.id
-        else:
-            target_id = target_to_remove
-
-        self.__remove_object_operations.remove_object_by_id(network_file, target_id, self.__targets)
-
+        self.__remove_object_operations.remove_object_from_network_main(
+            target_to_remove, self._network_element_name, self.__targets)
+        
     def add(self, target_to_add: dict[str, None | str | float | int]) -> None:
         """Adds a target to a network, taking a dictionary with properties for the new node.
 
@@ -142,20 +128,8 @@ class NexusTargets(Targets):
             dictionary taking all the properties for the new target.
             Requires date and a target name.
         """
-        self.__parent_network.get_load_status()
-        name, date = self.__add_object_operations.check_name_date(target_to_add)
-
-        new_object = NexusTarget(target_to_add)
-
+        new_object = self.__add_object_operations.add_network_obj(target_to_add, NexusTarget,  self.__parent_network)
         self._add_to_memory([new_object])
-
-        file_to_add_to = self.__parent_network.get_network_file()
-
-        file_as_list = file_to_add_to.get_flat_list_str_file
-        if file_as_list is None:
-            raise ValueError(f'No file content found in the surface file specified at {file_to_add_to.location}')
-
-        self.__add_object_operations.add_object_to_file(date, file_as_list, file_to_add_to, new_object, target_to_add)
 
     def modify(self, target_to_modify: dict[str, None | str | float | int],
                new_properties: dict[str, None | str | float | int]) -> None:
