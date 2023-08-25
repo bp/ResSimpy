@@ -30,13 +30,18 @@ class File(FileBase):
         self.file_modified = False
 
     def write_to_file(self, new_file_name: None | str = None) -> None:
-        """Writes to file specified in self.location the strings contained in the list self.file_content_as_list."""
+        """Writes to file specified in self.location the strings contained in the list self.file_content_as_list.
+
+        Args:
+            new_file_name (None | str): writes to self.location if left as None. Otherwise writes to new_file_name.
+        """
         if new_file_name is not None:
             self.location = new_file_name
         if self.location is None:
             raise ValueError(f'No file path to write to, instead found {self.location}')
         if self.file_content_as_list is None:
             raise ValueError(f'No file data to write out, instead found {self.file_content_as_list}')
+
         file_str = ''.join(self.file_content_as_list)
 
         with open(self.location, 'w') as fi:

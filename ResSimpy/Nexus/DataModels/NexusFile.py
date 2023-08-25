@@ -633,3 +633,47 @@ class NexusFile(File):
         if self.object_locations is None or len(self.object_locations[id]) == 0:
             raise ValueError(f'No object locations specified, cannot find id: {id} in {self.object_locations}')
         return self.object_locations[id]
+
+    def write_to_file(self, new_file_name: None | str = None, write_includes: bool = False) -> None:
+        """Writes to file specified in self.location the strings contained in the list self.file_content_as_list.
+
+        Args:
+            new_file_name (None | str): writes to self.location if left as None. Otherwise writes to new_file_name.
+            write_includes (bool): If True will write out all include files within the file. Defaults to False.
+        """
+        # overwrite File base class method to allow for write_includes
+        if new_file_name is not None:
+            self.location = new_file_name
+        if self.location is None:
+            raise ValueError(f'No file path to write to, instead found {self.location}')
+        if self.file_content_as_list is None:
+            raise ValueError(f'No file data to write out, instead found {self.file_content_as_list}')
+        if write_includes and self.include_objects is not None:
+            for file in self.include_objects:
+                if new_file_name is None:
+                    # if the base file has no new name then just overwrite the include file
+                    include_file_name = None
+                else:
+                    new_root_name = f'{os.path.basename(new_file_name).split(".")[0]}_{os.path.basename(file.location)}'
+                    # write the include file to the same directory.
+                    include_file_name = os.path.join(os.path.dirname(self.location), new_root_name)
+                    self.update_include_location_in_file_as_list(include_file_name)
+                file.write_to_file(include_file_name, write_includes=True)
+
+        file_str = ''.join(self.file_content_as_list)
+
+        with open(self.location, 'w') as fi:
+            fi.write(file_str)
+
+        # reset the modified file state
+        self.file_modified = False
+
+    def update_include_location_in_file_as_list(self, path_to_update: str, original_include_path_in_file: str) -> None:
+        """Updates the path of an include file within a file as list.
+
+        Args:
+            path_to_update (str): Updates the path in the file as list to point towards the new include location.
+            original_include_path_in_file (str): string representation of the include file in the original file as list
+        """
+        # TODO write this test
+        pass

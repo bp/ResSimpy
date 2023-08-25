@@ -302,7 +302,7 @@ class FcsNexusFile(NexusFile):
                                              write_out_all_files, preserve_file_names)
 
         # write out the final fcs file
-        self.write_to_file(file_location)
+        self.write_to_file(file_location, write_includes=False)
 
     def write_out_included_file(self, file: NexusFile, attr_name: str, file_directory: str, keyword: str,
                                 new_fcs_name: str, method_number: None | int = None, write_out_all_files: bool = False,
