@@ -39,11 +39,8 @@ def test_read_target(mocker, fixture_for_osstat_pathlib, file_contents):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
-
-    # Act    
-    nexus_sim.network.load()
-    # Arrange
     
+     
     target1_props={'name': 'target1', 'control_quantity': 'control1', 'control_conditions': 'ctrlcnd1', 'control_connections': 'ctrlcons1',
       'control_method': 'ctrlmthd1', 'calculation_method': 'calcmthd1', 'calculation_conditions': 'calccond1', 'calculation_connections': 'calccons1',
       'value': 1.0, 'add_value': 11.0, 'region': 'region1', 'priority': 1,
@@ -56,6 +53,11 @@ def test_read_target(mocker, fixture_for_osstat_pathlib, file_contents):
       'value': 3.0, 'add_value': 31.0, 'region': 'region3', 'priority': 3,
       'minimum_rate': 3.5, 'minimum_rate_no_shut': 3.8, 'guide_rate': 3.9, 'max_change_pressure': 3.6,
       'rank_dt': 4.9, 'control_type': 'type3', 'calculation_type': 'ctype3','unit_system': UnitSystem.ENGLISH}
+
+    # Act    
+    nexus_sim.network.load()
+    
+   
     
     
     record_count= nexus_sim.network.targets.get_df()
