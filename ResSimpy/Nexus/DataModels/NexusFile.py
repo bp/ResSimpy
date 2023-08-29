@@ -666,12 +666,24 @@ class NexusFile(File):
         # reset the modified file state
         self.file_modified = False
 
-    def update_include_location_in_file_as_list(self, new_path: str, file_id: UUID) -> None:
-        """Updates the path of an include file within a file as list.
+    def update_include_location_in_file_as_list(self, new_path: str, file: NexusFile) -> None:
+        """Updates the path of an include file within this file's file_as_list.
 
         Args:
             new_path (str): Updates the path in the file as list to point towards the new include location.
-            file_id (UUID): id of the include file to modify
+            file (NexusFile): include object whose path is being modified
         """
-        # TODO write this test
-        pass
+        file_path_to_replace = file.input_file_location
+        if file_path_to_replace is None:
+            file_path_to_replace = file.location
+        if file_path_to_replace is None:
+            raise ValueError('No location found to try and replace in this file.')
+        file_content = self.file_content_as_list
+        if file_content is None:
+            raise ValueError(f'No file content found within file {self.location}')
+
+        for line in file_content:
+            if not nfo.check_token('INCLUDE', line):
+                continue
+            if nfo.get_expected_token_value('INCLUDE', line, file_content) == file_path_to_replace:
+                nfo.get_expected_token_value('INCLUDE', line, file_content, replace_with=new_path)

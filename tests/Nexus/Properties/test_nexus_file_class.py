@@ -839,7 +839,7 @@ def test_update_include_location_in_file_as_list(mocker, fixture_for_osstat_path
 
     new_file_path = 'new_file_path.inc'
     # Act
-    nexus_file.update_include_location_in_file_as_list(new_file_path, nexus_file.include_objects[0].id)
+    nexus_file.update_include_location_in_file_as_list(new_file_path, nexus_file.include_objects[0])
     # Assert
+    assert nexus_file.file_content_as_list == expected_file_content.splitlines()
     assert nexus_file.location == new_file_path
-    assert nexus_file.file_content_as_list == expected_file_content
