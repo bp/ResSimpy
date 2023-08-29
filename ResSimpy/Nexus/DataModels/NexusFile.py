@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os.path
-import uuid
 from dataclasses import dataclass, field
 from typing import Optional, Generator
 
@@ -71,7 +70,6 @@ class NexusFile(File):
             self.object_locations: dict[UUID, list[int]] = get_empty_dict_uuid_list_int()
         if self.line_locations is None:
             self.line_locations = []
-        self.file_id = uuid.uuid4()
         self.linked_user = linked_user
         self.last_modified = last_modified
         self.file_changed: bool = False
@@ -282,7 +280,7 @@ class NexusFile(File):
             file_index.index += 1
             yield prefix_line
 
-        new_entry = (file_index.index, self.file_id)
+        new_entry = (file_index.index, self.id)
         if new_entry not in parent.line_locations:
             parent.line_locations.append(new_entry)
         depth: int = 0
@@ -332,7 +330,7 @@ class NexusFile(File):
                     yield from include_file.iterate_line(file_index=file_index, max_depth=level_down_max_depth,
                                                          parent=parent, prefix_line=prefix_line)
 
-                    new_entry = (file_index.index, self.file_id)
+                    new_entry = (file_index.index, self.id)
                     if new_entry not in parent.line_locations:
                         parent.line_locations.append(new_entry)
                     if suffix_line:
@@ -494,17 +492,17 @@ class NexusFile(File):
 
         index_in_included_file += lines_already_included
 
-        if uuid_index == self.file_id or self.include_objects is None:
+        if uuid_index == self.id or self.include_objects is None:
             return self, index_in_included_file
 
         nexus_file = None
         for file in self.include_objects:
-            if file.file_id == uuid_index:
+            if file.id == uuid_index:
                 nexus_file = file
             elif file.include_objects is not None:
                 # CURRENTLY THIS ONLY SUPPORTS 2 LEVELS OF INCLUDES
                 for lvl_2_include in file.include_objects:
-                    if lvl_2_include.file_id == uuid_index:
+                    if lvl_2_include.id == uuid_index:
                         nexus_file = lvl_2_include
         if nexus_file is None:
             raise ValueError(f'No file with {uuid_index=} found within include objects')
