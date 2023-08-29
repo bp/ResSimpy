@@ -685,5 +685,14 @@ class NexusFile(File):
         for line in file_content:
             if not nfo.check_token('INCLUDE', line):
                 continue
+            # if the right path to replace is found then replace it
             if nfo.get_expected_token_value('INCLUDE', line, file_content) == file_path_to_replace:
                 nfo.get_expected_token_value('INCLUDE', line, file_content, replace_with=new_path)
+
+        # replace the location in the include locations list using the original path
+        index_of_path_to_replace = self.include_locations.index(file.location)
+        # get the full path and update it in the include file object
+        file.location = nfo.get_full_file_path(new_path, self.location)
+        self.include_locations[index_of_path_to_replace] = file.location
+        # update the new path
+        file.input_file_location = new_path

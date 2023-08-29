@@ -838,8 +838,12 @@ def test_update_include_location_in_file_as_list(mocker, fixture_for_osstat_path
     nexus_file = NexusFile.generate_file_include_structure(file_path)
 
     new_file_path = 'new_file_path.inc'
+    include_file = nexus_file.include_objects[0]
+    expected_path = os.path.join('/root', 'new_file_path.inc')
     # Act
-    nexus_file.update_include_location_in_file_as_list(new_file_path, nexus_file.include_objects[0])
+    nexus_file.update_include_location_in_file_as_list(new_file_path, include_file)
     # Assert
-    assert nexus_file.file_content_as_list == expected_file_content.splitlines()
-    assert nexus_file.location == new_file_path
+    assert nexus_file.file_content_as_list == expected_file_content.splitlines(keepends=True)
+    assert nexus_file.include_locations == [expected_path]
+    assert include_file.location == expected_path
+    assert include_file.input_file_location == 'new_file_path.inc'
