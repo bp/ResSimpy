@@ -818,3 +818,28 @@ def test_remove_from_file_as_list(mocker):
     # Assert
     assert nexus_file.file_content_as_list == expected_result.file_content_as_list
     assert nexus_file == expected_result
+
+@pytest.mark.parametrize('file_content, expected_file_content', [
+    (
+        'test_file_content\nInCluDE original_include.inc\nend of the file\n',
+        'test_file_content\nInCluDE new_file_path.inc\nend of the file\n',
+    )
+])
+def test_update_include_location_in_file_as_list(mocker, fixture_for_osstat_pathlib, file_content, expected_file_content):
+    # Arrange
+    file_path = '/root/file.dat'
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            file_path: file_content,
+            '/root/original_include.inc': 'inc file contents',
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+    nexus_file = NexusFile.generate_file_include_structure(file_path)
+
+    new_file_path = 'new_file_path.inc'
+    # Act
+    nexus_file.update_include_location_in_file_as_list(new_file_path, nexus_file.include_objects[0].id)
+    # Assert
+    assert nexus_file.location == new_file_path
+    assert nexus_file.file_content_as_list == expected_file_content

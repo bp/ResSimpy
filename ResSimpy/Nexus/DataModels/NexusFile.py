@@ -657,7 +657,7 @@ class NexusFile(File):
                     new_root_name = f'{os.path.basename(new_file_name).split(".")[0]}_{os.path.basename(file.location)}'
                     # write the include file to the same directory.
                     include_file_name = os.path.join(os.path.dirname(self.location), new_root_name)
-                    self.update_include_location_in_file_as_list(include_file_name)
+                    self.update_include_location_in_file_as_list(include_file_name, )
                 file.write_to_file(include_file_name, write_includes=True)
 
         file_str = ''.join(self.file_content_as_list)
@@ -668,12 +668,12 @@ class NexusFile(File):
         # reset the modified file state
         self.file_modified = False
 
-    def update_include_location_in_file_as_list(self, path_to_update: str, original_include_path_in_file: str) -> None:
+    def update_include_location_in_file_as_list(self, new_path: str, file_id: UUID) -> None:
         """Updates the path of an include file within a file as list.
 
         Args:
-            path_to_update (str): Updates the path in the file as list to point towards the new include location.
-            original_include_path_in_file (str): string representation of the include file in the original file as list
+            new_path (str): Updates the path in the file as list to point towards the new include location.
+            file_id (UUID): id of the include file to modify
         """
         # TODO write this test
         pass
