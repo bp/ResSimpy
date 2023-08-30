@@ -293,7 +293,7 @@ class Logging:
                 if next_value is not None and next_value.replace('.', '', 1).isdigit():
                     if time_heading_location == 0 and (last_time is None or float(next_value) > float(last_time)):
                         last_time = next_value
-                    for x in range(0, time_heading_location):
+                    for x in range(time_heading_location):
                         line_string = line_string.replace(next_value, '', 1)
                         next_value = nfo.get_next_value(0, [line_string], line_string)
                         if next_value is None:
