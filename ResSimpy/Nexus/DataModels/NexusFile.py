@@ -522,6 +522,7 @@ class NexusFile(File):
             additional_objects (Optional[dict[UUID, int]]): defaults to None. Otherwise, a dictionary keyed with the \
             UUID of the new objects to add as well as the corresponding index of the object in the original \
             calling NexusFile
+            comments (str | None): defaults to None. Comments to add in-line to the file.
         """
         if comments is not None:
             additional_content = NexusFile.insert_comments(additional_content, comments)
@@ -532,6 +533,8 @@ class NexusFile(File):
         nexusfile_to_write_to.file_content_as_list = \
             nexusfile_to_write_to.file_content_as_list[:relative_index] + \
             additional_content + nexusfile_to_write_to.file_content_as_list[relative_index:]
+
+        self._file_modified_set(True)
         # write straight to file
         nexusfile_to_write_to.write_to_file()
         # update object locations
@@ -561,6 +564,7 @@ class NexusFile(File):
                 else:
                     # the remaining iterations remove just the lines
                     self.remove_from_file_as_list(index)
+        self._file_modified_set(True)
 
     def remove_from_file_as_list(self, index: int, objects_to_remove: Optional[list[UUID]] = None,
                                  string_to_remove: Optional[str] = None) -> None:
@@ -598,11 +602,21 @@ class NexusFile(File):
         if objects_to_remove is not None:
             for object_id in objects_to_remove:
                 self.__remove_object_locations(object_id)
+        self._file_modified_set(True)
 
         nexusfile_to_write_to.write_to_file()
 
     @staticmethod
-    def insert_comments(additional_content: list[str], comments) -> list[str]:
+    def insert_comments(additional_content: list[str], comments: str) -> list[str]:
+        """Adds comments alongside additional content.
+
+        Args:
+            additional_content (list[str]): additional lines of the file to be added with a new entry per line.
+            comments (str): comments to be added to all lines
+
+        Returns:
+            list of strings within the content.
+        """
         for index, element in enumerate(additional_content):
             newline_index = element.find('\n')
             if newline_index != -1:

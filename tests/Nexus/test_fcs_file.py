@@ -1,8 +1,11 @@
 import os
+from unittest.mock import Mock
+
 import pytest
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from tests.multifile_mocker import mock_multiple_files
+from tests.utility_for_tests import generic_fcs, check_file_read_write_is_correct
 
 
 def test_fcs_file(mocker, fixture_for_osstat_pathlib):
@@ -16,33 +19,37 @@ GRID_FILES
 
     fcs_path = '/root_folder/test_fcs.fcs'
     root_folder = '/root_folder'
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             '/root_folder/test_fcs.fcs': fcs_content,
-            }).return_value
+        }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
     mocker.patch("os.path.isfile", lambda x: True)
     structured_grid_path = os.path.join(root_folder, 'nexus_data/mp2020_structured_grid_1_reg_update.dat')
     options_file_path = os.path.join(root_folder, 'nexus_data/nexus_data/mp2020_ref_options_reg_update.dat')
-    expected_includes = [ structured_grid_path, options_file_path]
+    expected_includes = [structured_grid_path, options_file_path]
     expected_structured_grid_file = NexusFile(location=structured_grid_path,
                                               origin=fcs_path, include_locations=None,
                                               include_objects=None, file_content_as_list=None)
-    
+
     expected_options_file = NexusFile(location=options_file_path,
-                                      include_locations=None, origin=fcs_path, include_objects=None, file_content_as_list=None)
+                                      include_locations=None, origin=fcs_path, include_objects=None,
+                                      file_content_as_list=None)
     expected_fcs_file = FcsNexusFile(location=fcs_path, origin=None,
                                      include_objects=[expected_structured_grid_file, expected_options_file],
                                      file_content_as_list=[
                                          'DESC reservoir1\n', 'RUN_UNITS ENGLISH\n', 'DATEFORMAT DD/MM/YYYY\n',
-                                         'GRID_FILES\n', '	 STRUCTURED_GRID nexus_data/mp2020_structured_grid_1_reg_update.dat\n',
+                                         'GRID_FILES\n',
+                                         '	 STRUCTURED_GRID nexus_data/mp2020_structured_grid_1_reg_update.dat\n',
                                          '	 OPTIONS nexus_data/nexus_data/mp2020_ref_options_reg_update.dat', ],
                                      structured_grid_file=expected_structured_grid_file,
                                      options_file=expected_options_file, include_locations=expected_includes)
-    expected_fcs_file.files_info =[(fcs_path, None, None),
-                                   (structured_grid_path, None, None),
-                                   (options_file_path, None, None)]
+    expected_fcs_file.files_info = [(fcs_path, None, None),
+                                    (structured_grid_path, None, None),
+                                    (options_file_path, None, None)]
     # Act
     fcs_file = FcsNexusFile.generate_fcs_structure(fcs_path)
     # Assert
@@ -60,18 +67,20 @@ def test_fcs_file_multiple_methods(mocker, fixture_for_osstat_pathlib):
 	 EQUIL Method 1 nexus_data/nexus_data/mp2017hm_ref_equil_01.dat
 	 EQUIL Method 2 nexus_data/nexus_data/mp2017hm_ref_equil_02.dat
 	 EQUIL Method 3 nexus_data/nexus_data/mp2017hm_ref_equil_03.dat'''
-  
+
     fcs_path = 'test_fcs.fcs'
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             'test_fcs.fcs': fcs_content,
-            }).return_value
+        }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
     mocker.patch("os.path.isfile", lambda x: True)
     expected_includes = ['nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',
                          'nexus_data/nexus_data/mp2017hm_ref_equil_02.dat',
-	                     'nexus_data/nexus_data/mp2017hm_ref_equil_03.dat', ]
+                         'nexus_data/nexus_data/mp2017hm_ref_equil_03.dat', ]
     expected_equil_1 = NexusFile(location='nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',
                                  origin=fcs_path, include_locations=None,
                                  include_objects=None, file_content_as_list=None)
@@ -93,17 +102,17 @@ def test_fcs_file_multiple_methods(mocker, fixture_for_osstat_pathlib):
         equil_files={1: expected_equil_1, 2: expected_equil_2, 3: expected_equil_3},
         include_locations=expected_includes,
     )
-    
-    expected_fcs_file.files_info=[(fcs_path,None,None),
-                                  ('nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',None,None),
-                                  ('nexus_data/nexus_data/mp2017hm_ref_equil_02.dat',None,None),
-                                  ('nexus_data/nexus_data/mp2017hm_ref_equil_03.dat',None,None)]
+
+    expected_fcs_file.files_info = [(fcs_path, None, None),
+                                    ('nexus_data/nexus_data/mp2017hm_ref_equil_01.dat', None, None),
+                                    ('nexus_data/nexus_data/mp2017hm_ref_equil_02.dat', None, None),
+                                    ('nexus_data/nexus_data/mp2017hm_ref_equil_03.dat', None, None)]
     # Act
     result = FcsNexusFile.generate_fcs_structure(fcs_path)
     # Assert
     assert result == expected_fcs_file
-    
-    
+
+
 def test_fcs_file_all_methods(mocker, fixture_for_osstat_pathlib):
     # Currently this test doesn't cover ensuring that the include file object gets into the fcs file.
     # Arrange
@@ -118,13 +127,14 @@ def test_fcs_file_all_methods(mocker, fixture_for_osstat_pathlib):
      INCLUDE wells.inc
      HYD METHOd 3 hyd.dat'''
     include_contents = 'WELLS SET 1 wells.dat'
-    
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             'test_fcs.fcs': fcs_content,
             'wells.inc': include_contents,
-            }).return_value
+        }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
     mocker.patch("os.path.isfile", lambda x: True)
     fcs_path = 'test_fcs.fcs'
@@ -132,7 +142,7 @@ def test_fcs_file_all_methods(mocker, fixture_for_osstat_pathlib):
                          'nexus_data/nexus_data/mp2017hm_ref_equil_02.dat',
                          'nexus_data/mp2020_structured_grid_1_reg_update.dat',
                          'nexus_data/nexus_data/mp2020_ref_options_reg_update.dat',
-                         #'wells.inc',  # TODO fix this test to ensure the include files get included here 
+                         # 'wells.inc',  # TODO fix this test to ensure the include files get included here
                          'wells.dat',
                          'hyd.dat']
     expected_equil_1 = NexusFile(location='nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',
@@ -144,7 +154,8 @@ def test_fcs_file_all_methods(mocker, fixture_for_osstat_pathlib):
     expected_structured_grid_file = NexusFile(location='nexus_data/mp2020_structured_grid_1_reg_update.dat',
                                               origin=fcs_path, include_locations=None,
                                               include_objects=None, file_content_as_list=None)
-    expected_options_file = NexusFile(location='nexus_data/nexus_data/mp2020_ref_options_reg_update.dat', include_locations=None,
+    expected_options_file = NexusFile(location='nexus_data/nexus_data/mp2020_ref_options_reg_update.dat',
+                                      include_locations=None,
                                       origin=fcs_path, include_objects=None, file_content_as_list=None)
     expected_wells_file = NexusFile(location='wells.dat', origin=fcs_path, include_locations=None, include_objects=None,
                                     file_content_as_list=None)
@@ -166,21 +177,22 @@ def test_fcs_file_all_methods(mocker, fixture_for_osstat_pathlib):
                                      '     HYD METHOd 3 hyd.dat',
                                      ]
     expected_fcs_file = FcsNexusFile(location=fcs_path, origin=None, include_objects=include_objects,
-                                     equil_files=equil_files, structured_grid_file=expected_structured_grid_file, 
+                                     equil_files=equil_files, structured_grid_file=expected_structured_grid_file,
                                      options_file=expected_options_file, well_files={1: expected_wells_file},
                                      hyd_files={3: expected_hyd_method_file},
-                                     file_content_as_list=expected_fcs_contents_as_list, include_locations=expected_includes)
-    expected_fcs_file.files_info = [(fcs_path,None,None),
-                                    ('nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',None,None),
-                                    ('nexus_data/nexus_data/mp2017hm_ref_equil_02.dat',None,None),
-                                    ('nexus_data/mp2020_structured_grid_1_reg_update.dat',None,None),
-                                    ('nexus_data/nexus_data/mp2020_ref_options_reg_update.dat',None,None),
-                                    ('wells.dat',None,None),
-                                    ('hyd.dat',None,None)]
-    
+                                     file_content_as_list=expected_fcs_contents_as_list,
+                                     include_locations=expected_includes)
+    expected_fcs_file.files_info = [(fcs_path, None, None),
+                                    ('nexus_data/nexus_data/mp2017hm_ref_equil_01.dat', None, None),
+                                    ('nexus_data/nexus_data/mp2017hm_ref_equil_02.dat', None, None),
+                                    ('nexus_data/mp2020_structured_grid_1_reg_update.dat', None, None),
+                                    ('nexus_data/nexus_data/mp2020_ref_options_reg_update.dat', None, None),
+                                    ('wells.dat', None, None),
+                                    ('hyd.dat', None, None)]
+
     # Act
     result = FcsNexusFile.generate_fcs_structure(fcs_file_path=fcs_path)
-    
+
     # Assert
     assert result.file_content_as_list == expected_fcs_file.file_content_as_list
     assert result == expected_fcs_file
@@ -204,8 +216,9 @@ def test_get_full_network(mocker):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             'test_fcs.fcs': fcs_content,
             'wells.inc': include_contents,
-            }).return_value
+        }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
     mocker.patch("os.path.isfile", lambda x: True)
     fcs_path = 'test_fcs.fcs'
@@ -224,7 +237,7 @@ def test_get_full_network(mocker):
         'wells.dat',
         'hyd.dat',
         'hyd.dat',
-        ]
+    ]
 
     expected_from_list = [
         None,
@@ -287,7 +300,7 @@ def test_get_full_network(mocker):
                             '',
                             ]
     compiled_fcs_file = FcsNexusFile(location=fcs_path, origin=None, include_objects=include_objects,
-                                     equil_files=equil_files, structured_grid_file=structured_grid_file, 
+                                     equil_files=equil_files, structured_grid_file=structured_grid_file,
                                      options_file=options_file, well_files={1: wells_file},
                                      hyd_files={3: hyd_method_file},
                                      file_content_as_list=fcs_contents_as_list, include_locations=[])
@@ -298,3 +311,139 @@ def test_get_full_network(mocker):
     # Assert
     assert to_list == expected_to_list
     assert from_list == expected_from_list
+
+
+@pytest.mark.parametrize('new_file_name, subfolder',
+                         [(
+                                 'test_new_file.fcs',
+                                 'nexus_data'
+                         ),
+                             (
+                                     '/basefolder/test_new_file.fcs',
+                                     None,
+                             ),
+                             (
+                                     '/basefolder/test_new_file.fcs',
+                                     '/absolutepath/',
+                             ),
+                         ], ids=['basic_test', 'no subfolder', 'absolute paths'])
+def test_update_fcs_file(mocker, fixture_for_osstat_pathlib, new_file_name, subfolder):
+    # Arrange
+    fcs_file_class = generic_fcs(mocker)
+    # flag one of the files as modified and give them some content
+    setattr(fcs_file_class.equil_files[2], '_File__file_modified', True)
+    fcs_file_class.equil_files[2].file_content_as_list = ['some\n', 'new\n', 'data\n']
+    setattr(fcs_file_class.structured_grid_file, '_File__file_modified', True)
+    fcs_file_class.structured_grid_file.file_content_as_list = ['structured grid new data']
+    expected_equil_contents = 'some\nnew\ndata\n'
+    expected_grid_contents = 'structured grid new data'
+    if subfolder is None:
+        subfolder = ''
+    new_equil_file_name = os.path.join(subfolder, 'test_new_file_equil_method_2.dat')
+    new_grid_file_name = os.path.join(subfolder, 'test_new_file_structured_grid_file.dat')
+
+    expected_fcs_content = fcs_file_class.file_content_as_list.copy()
+    expected_fcs_content[5] = f'    	 EQUIL Method 2 {new_equil_file_name}\n'
+    expected_fcs_content[6] = f'        STRUCTURED_GRID {new_grid_file_name}\n'
+    expected_fcs_content = ''.join(expected_fcs_content)
+
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+
+    # Act
+    fcs_file_class.update_fcs_file(new_file_name, subfolder)
+
+    # Assert
+    # need to update this to check multiple files writes
+    # Get all the calls to write() and check that the contents are what we expect
+    list_of_writes = [call for call in writing_mock_open.mock_calls if 'call().write' in str(call)]
+    assert list_of_writes[0].args[0] == expected_grid_contents
+    assert list_of_writes[1].args[0] == expected_equil_contents
+    assert list_of_writes[2].args[0] == expected_fcs_content
+    assert len(list_of_writes) == 3
+
+    # Get all the calls to write() with a write 'w' as the last arg and check that the file name writes are correct
+    list_of_write_names = [call for call in writing_mock_open.mock_calls if "'w')" in str(call)]
+    assert list_of_write_names[0].args[0] == new_grid_file_name
+    assert list_of_write_names[1].args[0] == new_equil_file_name
+    assert list_of_write_names[2].args[0] == new_file_name
+    assert len(list_of_writes) == 3
+
+
+@pytest.mark.parametrize('token, method_number, edited_line, new_line_content',
+                         [
+                             (  # basic test
+                                     'ROCK', 1, 10,
+                                     '	        ROCK Method 1 new_file.dat\n'
+                             ),
+
+                             (  # different methods
+                                     'HYD', 3, 13,
+                                     '         HYD METHOd 3 new_file.dat\n'
+                             ),
+                             (  # no method number
+                                     'RUNCONTROL', None, 16,
+                                     '            RUNCONTROL new_file.dat\n'
+                             ),
+                         ],
+                         ids=['basic', 'different methods', 'no method_number'])
+def test_update_file_path(mocker, fixture_for_osstat_pathlib, token, method_number, edited_line, new_line_content):
+    # Arrange
+    fcs_file_class = generic_fcs(mocker)
+    expected_fcs_content = fcs_file_class.file_content_as_list.copy()
+    expected_fcs_content[edited_line] = new_line_content
+    # Act
+    fcs_file_class.change_file_path('new_file.dat', token, method_number)
+
+    # Assert
+    assert fcs_file_class.file_content_as_list == expected_fcs_content
+
+
+@pytest.mark.parametrize('expected_files, preserve_file_names', [
+    (['new_fcs_runcontrol_file.dat', 'new_fcs_equil_method_1.dat', 'new_fcs_equil_method_2.dat',
+      'new_fcs_surface_method_1.dat', 'new_fcs_well_method_1.dat'],
+     False
+     ),
+    (['runcontrol.dat', 'equil_01.dat', 'equil_02.dat', 'surface.dat', 'wells.dat'],
+     True
+     )])
+def test_update_fcs_file_write_all_files(mocker, fixture_for_osstat_pathlib, expected_files, preserve_file_names):
+    # Arrange
+    fcs_path = 'test_fcs.fcs'
+
+    fcs_content = '''DESC reservoir1
+            RUN_UNITS ENGLISH
+            DATEFORMAT DD/MM/YYYY
+            INITIALIZATION_FILES
+        	 EQUIL Method 1 nexus_data/nexus_data/equil_01.dat
+        	 EQUIL Method 2 nexus_data/nexus_data/equil_02.dat
+        	  RECURRENT_FILES
+            RUNCONTROL nexus_data/nexus_data/runcontrol.dat
+            WELLS Set 1 nexus_data/nexus_data/wells.dat
+            SURFACE Network 1 nexus_data/nexus_data/surface.dat
+        	 '''
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'test_fcs.fcs': fcs_content,
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+    fcs_file_exists = Mock(side_effect=lambda x: True)
+    mocker.patch('os.path.isfile', fcs_file_exists)
+
+    fcs = FcsNexusFile.generate_fcs_structure(fcs_path)
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+    expected_files = [os.path.join('nexus_data', x) for x in expected_files]
+    expected_files.append('/data/new_fcs.fcs')
+    # Act
+    fcs.update_fcs_file(new_file_path='/data/new_fcs.fcs', new_include_file_location='nexus_data',
+                        write_out_all_files=True, preserve_file_names=preserve_file_names)
+
+    # Assert
+    list_of_write_names = [call.args[0] for call in writing_mock_open.mock_calls if "'w')" in str(call)]
+    # one write call per file
+    assert len(list_of_write_names) == 6
+    assert list_of_write_names == expected_files
