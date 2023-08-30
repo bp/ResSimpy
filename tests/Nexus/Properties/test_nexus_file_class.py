@@ -8,7 +8,6 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.load_wells import load_wells
-import ResSimpy.Nexus.nexus_file_operations as nfo
 
 from tests.multifile_mocker import mock_multiple_files
 
