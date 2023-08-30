@@ -356,18 +356,13 @@ def test_update_fcs_file(mocker, fixture_for_osstat_pathlib, new_file_name, subf
     # Assert
     # need to update this to check multiple files writes
     # Get all the calls to write() and check that the contents are what we expect
-    list_of_writes = [call for call in writing_mock_open.mock_calls if 'call().write' in str(call)]
-    assert list_of_writes[0].args[0] == expected_grid_contents
-    assert list_of_writes[1].args[0] == expected_equil_contents
-    assert list_of_writes[2].args[0] == expected_fcs_content
-    assert len(list_of_writes) == 3
+    list_of_writes = [call.args[0] for call in writing_mock_open.mock_calls if 'call().write' in str(call)]
+
+    assert list_of_writes == [expected_grid_contents, expected_equil_contents, expected_fcs_content]
 
     # Get all the calls to write() with a write 'w' as the last arg and check that the file name writes are correct
-    list_of_write_names = [call for call in writing_mock_open.mock_calls if "'w')" in str(call)]
-    assert list_of_write_names[0].args[0] == new_grid_file_name
-    assert list_of_write_names[1].args[0] == new_equil_file_name
-    assert list_of_write_names[2].args[0] == new_file_name
-    assert len(list_of_writes) == 3
+    list_of_write_names = [call.args[0] for call in writing_mock_open.mock_calls if "'w')" in str(call)]
+    assert list_of_write_names == [new_grid_file_name, new_equil_file_name, new_file_name]
 
 
 @pytest.mark.parametrize('token, method_number, edited_line, new_line_content',
