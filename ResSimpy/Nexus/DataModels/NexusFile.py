@@ -631,29 +631,32 @@ class NexusFile(File):
             raise ValueError(f'No object locations specified, cannot find id: {id} in {self.object_locations}')
         return self.object_locations[id]
 
-    def write_to_file(self, new_file_name: None | str = None, write_includes: bool = False) -> None:
+    def write_to_file(self, new_file_path: None | str = None, write_includes: bool = False) -> None:
         """Writes to file specified in self.location the strings contained in the list self.file_content_as_list.
 
         Args:
-            new_file_name (None | str): writes to self.location if left as None. Otherwise writes to new_file_name.
+            new_file_path (None | str): writes to self.location if left as None. Otherwise writes to new_file_name.
             write_includes (bool): If True will write out all include files within the file. Defaults to False.
         """
         # overwrite File base class method to allow for write_includes
-        if new_file_name is not None:
-            self.location = new_file_name
-        if self.location is None:
+        if new_file_path is None and self.location is not None:
+            new_file_path = self.location
+        elif self.location is None:
             raise ValueError(f'No file path to write to, instead found {self.location}')
         if self.file_content_as_list is None:
             raise ValueError(f'No file data to write out, instead found {self.file_content_as_list}')
         if write_includes and self.include_objects is not None:
             for file in self.include_objects:
-                if new_file_name is None:
+                if new_file_path is None:
                     # if the base file has no new name then just overwrite the include file
                     include_file_name = None
                 else:
-                    new_root_name = f'{os.path.basename(new_file_name).split(".")[0]}_{os.path.basename(file.location)}'
+                    if file.location is None:
+                        warnings.warn(f'No location found for file: {file}')
+                        continue
+                    new_root_name = f'{os.path.basename(new_file_path).split(".")[0]}_{os.path.basename(file.location)}'
                     # write the include file to the same directory.
-                    include_file_name = os.path.join(os.path.dirname(self.location), new_root_name)
+                    include_file_name = os.path.join(os.path.dirname(new_file_path), new_root_name)
                     self.update_include_location_in_file_as_list(include_file_name, file)
                 file.write_to_file(include_file_name, write_includes=True)
 
@@ -663,18 +666,20 @@ class NexusFile(File):
             fi.write(file_str)
 
         # reset the modified file state
-        self.file_modified = False
+        self._file_modified_set(False)
 
-    def update_include_location_in_file_as_list(self, new_path: str, file: NexusFile) -> None:
+    def update_include_location_in_file_as_list(self, new_path: str, include_file: NexusFile) -> None:
         """Updates the path of an include file within this file's file_as_list.
 
         Args:
             new_path (str): Updates the path in the file as list to point towards the new include location.
-            file (NexusFile): include object whose path is being modified
+            include_file (NexusFile): include object whose path is being modified
         """
-        file_path_to_replace = file.input_file_location
+        if self.include_locations is None or include_file.location is None:
+            raise ValueError('No include locations found and therefore cannot be accessed')
+        file_path_to_replace = include_file.input_file_location
         if file_path_to_replace is None:
-            file_path_to_replace = file.location
+            file_path_to_replace = include_file.location
         if file_path_to_replace is None:
             raise ValueError('No location found to try and replace in this file.')
         file_content = self.file_content_as_list
@@ -689,9 +694,16 @@ class NexusFile(File):
                 nfo.get_expected_token_value('INCLUDE', line, file_content, replace_with=new_path)
 
         # replace the location in the include locations list using the original path
-        index_of_path_to_replace = self.include_locations.index(file.location)
+
+        index_of_path_to_replace = self.include_locations.index(include_file.location)
         # get the full path and update it in the include file object
-        file.location = nfo.get_full_file_path(new_path, self.location)
-        self.include_locations[index_of_path_to_replace] = file.location
+        # TODO maybe include this in a setter attr for the location.
+        if self.location is None:
+            include_file.location = new_path
+        else:
+            include_file.location = nfo.get_full_file_path(new_path, self.location)
+        if include_file.location is None:
+            raise ValueError('Include file location cannot be None.')
+        self.include_locations[index_of_path_to_replace] = include_file.location
         # update the new path
-        file.input_file_location = new_path
+        include_file.input_file_location = new_path
