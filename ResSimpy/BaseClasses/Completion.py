@@ -17,7 +17,6 @@ class Completion(DataObjectMixin, ABC):
     the constructor calls in the derived classes.
 
     Args:
-    ----
         date (str): The starting date of the completion. Applies until changed.
         i (Optional[int]): The structured grid cell location in the x direction. 'IW' in Nexus
         j (Optional[int]): The structured grid cell location in the y direction. 'JW' in Nexus

@@ -26,8 +26,7 @@ class PropertyToLoad:
 
 @dataclass(kw_only=True)
 class NexusGrid(Grid):
-    """Nexus implementation of the Grid class.
-    """
+    """Nexus implementation of the Grid class."""
     __array_functions_list: Optional[list[list[str]]] = None
     __array_functions_df: Optional[pd.DataFrame] = None
     __array_functions_loaded: bool = False
