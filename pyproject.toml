@@ -73,6 +73,7 @@ ignore = ["UP007",  "ANN101", "N999", "UP035", "S105", "N802", "S106", "S107", "
     "FA100", # TODO need to remove references to Union, Optional, capital lettered typing (e.g. List)
              # from typings module.
     ]
+exclude = ["./tests"]
 
 [tool.ruff.pydocstyle]
 # Use Google-style docstrings.

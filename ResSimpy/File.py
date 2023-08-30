@@ -17,44 +17,50 @@ class File(FileBase):
     location: Optional[str] = None
     file_content_as_list: Optional[list[str]] = field(default=None, repr=False)
     __id: UUID = field(default_factory=lambda: uuid4(), compare=False)
-    file_modified: bool = False
+    __file_modified: bool = False
 
     def __init__(self, location: Optional[str] = None,
                  file_content_as_list: Optional[list[str]] = None) -> None:
+
         self.location = location
         if file_content_as_list is None:
             self.file_content_as_list = []
         else:
             self.file_content_as_list = file_content_as_list
-        self.file_modified = False
-
         self.__id = uuid.uuid4()
+        self.__file_modified = False
 
-    def write_to_file(self, new_file_name: None | str = None) -> None:
+    def write_to_file(self, new_file_path: None | str = None) -> None:
         """Writes to file specified in self.location the strings contained in the list self.file_content_as_list.
 
         Args:
             new_file_name (None | str): writes to self.location if left as None. Otherwise writes to new_file_name.
         """
-        if new_file_name is not None:
-            self.location = new_file_name
+        if new_file_path is not None:
+            self.location = new_file_path
         if self.location is None:
             raise ValueError(f'No file path to write to, instead found {self.location}')
         if self.file_content_as_list is None:
             raise ValueError(f'No file data to write out, instead found {self.file_content_as_list}')
-
         file_str = ''.join(self.file_content_as_list)
 
         with open(self.location, 'w') as fi:
             fi.write(file_str)
 
         # reset the modified file state
-        self.file_modified = False
+        self.__file_modified = False
 
     @property
     def id(self) -> UUID:
         """Unique identifier for each Node object."""
         return self.__id
+
+    @property
+    def file_modified(self) -> bool:
+        return self.__file_modified
+
+    def _file_modified_set(self, value: bool) -> None:
+        self.__file_modified = value
 
     @property
     def get_flat_list_str_file(self) -> list[str]:
