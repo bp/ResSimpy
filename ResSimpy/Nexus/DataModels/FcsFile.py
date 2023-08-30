@@ -330,9 +330,10 @@ class FcsNexusFile(NexusFile):
         else:
             new_file_name = f"{new_fcs_name}_{attr_name}.dat"
         file_path_to_write_to = os.path.join(file_directory, new_file_name)
-        file.write_to_file(file_path_to_write_to)
+        file.write_to_file(file_path_to_write_to, write_includes=True, write_out_all_files=write_out_all_files)
         # update them in the fcs file_as_list
-        self.change_file_path(file_path_to_write_to, keyword, method_number)
+        fcs_changed = self.change_file_path(file_path_to_write_to, keyword, method_number)
+        self._file_modified_set(fcs_changed)
 
     def change_file_path(self, new_file_path: str, token: str, method_number: int | None = None) -> bool:
         """Switch the file path for a new file_path based on the value of the associated keyword in the fcs.

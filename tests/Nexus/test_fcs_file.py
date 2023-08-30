@@ -401,7 +401,7 @@ def test_update_file_path(mocker, fixture_for_osstat_pathlib, token, method_numb
      ),
     (['runcontrol.dat', 'equil_01.dat', 'equil_02.dat', 'surface.dat', 'wells.dat'],
      True
-     )])
+     )], ids=['new_names', 'preserve names'])
 def test_update_fcs_file_write_all_files(mocker, fixture_for_osstat_pathlib, expected_files, preserve_file_names):
     # Arrange
     fcs_path = 'test_fcs.fcs'

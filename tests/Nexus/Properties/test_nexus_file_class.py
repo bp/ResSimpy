@@ -822,8 +822,16 @@ def test_remove_from_file_as_list(mocker):
     (
         'test_file_content\nInCluDE original_include.inc\nend of the file\n',
         'test_file_content\nInCluDE new_file_path.inc\nend of the file\n',
+    ),
+    (
+        'test_file_content\nInCluDE\noriginal_include.inc\nend of the file\n',
+        'test_file_content\nInCluDE\nnew_file_path.inc\nend of the file\n',
+    ),
+    (
+        'test_file_content\nInCluDE /abs_path/original_include.inc\nend of the file\n',
+        'test_file_content\nInCluDE new_file_path.inc\nend of the file\n',
     )
-])
+], ids=['basic', 'on another line', 'next line'])
 def test_update_include_location_in_file_as_list(mocker, fixture_for_osstat_pathlib, file_content, expected_file_content):
     # Arrange
     file_path = '/root/file.dat'
@@ -831,6 +839,7 @@ def test_update_include_location_in_file_as_list(mocker, fixture_for_osstat_path
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             file_path: file_content,
             '/root/original_include.inc': 'inc file contents',
+            '/abs_path/original_include.inc': 'inc file contents',
         }).return_value
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
@@ -846,3 +855,65 @@ def test_update_include_location_in_file_as_list(mocker, fixture_for_osstat_path
     assert nexus_file.include_locations == [expected_path]
     assert include_file.location == expected_path
     assert include_file.input_file_location == 'new_file_path.inc'
+
+
+def test_write_to_file(mocker, fixture_for_osstat_pathlib):
+    # Arrange
+    file_content = '''test_file_content\nInCluDE original_include.inc\nINCLUDE
+                    /abs_path/another_file.inc\nend of the file\n'''
+    file_path = '/root/file.dat'
+    new_file_path = os.path.join('\\new_location', 'new_file_path.dat')
+    expected_include_path_1 = os.path.join('\\new_location', 'new_file_path_original_include.inc')
+    expected_include_path_2 = os.path.join('\\new_location', 'new_file_path_another_file.inc')
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            file_path: file_content,
+            '/root/original_include.inc': 'inc file contents',
+            '/abs_path/another_file.inc': 'inc file contents',
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+    nexus_file = NexusFile.generate_file_include_structure(file_path)
+
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+    # Act
+    nexus_file.write_to_file(new_file_path, write_includes=True, write_out_all_files=True)
+    # Assert
+    list_of_write_names = [call.args[0] for call in writing_mock_open.mock_calls if "'w')" in str(call)]
+    assert list_of_write_names == [expected_include_path_1, expected_include_path_2, new_file_path]
+
+
+def test_write_to_file_only_modified(mocker, fixture_for_osstat_pathlib):
+    # Arrange
+    file_content = '''test_file_content\nInCluDE original_include.inc\nINCLUDE
+                    /abs_path/another_file.inc\nend of the file\n'''
+
+    file_path = '/root/file.dat'
+    new_file_path = os.path.join('\\new_location', 'new_file_path.dat')
+    expected_include_path_1 = os.path.join('\\new_location', 'new_file_path_original_include.inc')
+
+    expected_file_content = f'''test_file_content\nInCluDE {expected_include_path_1}\nINCLUDE
+                    /abs_path/another_file.inc\nend of the file\n'''
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            file_path: file_content,
+            '/root/original_include.inc': 'inc file contents',
+            '/abs_path/another_file.inc': 'inc file contents',
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+    nexus_file = NexusFile.generate_file_include_structure(file_path)
+    nexus_file._file_modified_set(True)
+    nexus_file.include_objects[0]._file_modified_set(True)
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+    # Act
+    nexus_file.write_to_file(new_file_path, write_includes=True, write_out_all_files=False)
+    # Assert
+    list_of_write_names = [call.args[0] for call in writing_mock_open.mock_calls if "'w')" in str(call)]
+    assert list_of_write_names == [expected_include_path_1, new_file_path]
+
+    list_of_writes = [call for call in writing_mock_open.mock_calls if 'call().write' in str(call)]
+    assert list_of_writes[-1].args[0] == expected_file_content
