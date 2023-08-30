@@ -21,7 +21,6 @@ class File(FileBase):
 
     def __init__(self, location: Optional[str] = None,
                  file_content_as_list: Optional[list[str]] = None) -> None:
-
         self.location = location
         if file_content_as_list is None:
             self.file_content_as_list = []
