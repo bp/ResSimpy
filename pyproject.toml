@@ -84,3 +84,4 @@ optional = true
 
 [tool.poetry.group.docs.dependencies]
 autoclasstoc = "*"
+sphinx_rtd_theme = "*"
