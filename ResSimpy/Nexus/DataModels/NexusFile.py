@@ -74,7 +74,6 @@ class NexusFile(File):
         self.file_id = uuid.uuid4()
         self.linked_user = linked_user
         self.last_modified = last_modified
-        self.file_changed: bool = False
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True,
@@ -535,7 +534,7 @@ class NexusFile(File):
             nexusfile_to_write_to.file_content_as_list[:relative_index] + \
             additional_content + nexusfile_to_write_to.file_content_as_list[relative_index:]
 
-        self.file_modified = True
+        self._file_modified_set(True)
         # write straight to file
         nexusfile_to_write_to.write_to_file()
         # update object locations
@@ -565,7 +564,7 @@ class NexusFile(File):
                 else:
                     # the remaining iterations remove just the lines
                     self.remove_from_file_as_list(index)
-        self.file_modified = True
+        self._file_modified_set(True)
 
     def remove_from_file_as_list(self, index: int, objects_to_remove: Optional[list[UUID]] = None,
                                  string_to_remove: Optional[str] = None) -> None:
@@ -603,7 +602,7 @@ class NexusFile(File):
         if objects_to_remove is not None:
             for object_id in objects_to_remove:
                 self.__remove_object_locations(object_id)
-        self.file_modified = True
+        self._file_modified_set(True)
 
         nexusfile_to_write_to.write_to_file()
 

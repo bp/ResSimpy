@@ -331,9 +331,9 @@ def test_update_fcs_file(mocker, fixture_for_osstat_pathlib, new_file_name, subf
     # Arrange
     fcs_file_class = generic_fcs(mocker)
     # flag one of the files as modified and give them some content
-    fcs_file_class.equil_files[2].file_modified = True
+    setattr(fcs_file_class.equil_files[2], '_File__file_modified', True)
     fcs_file_class.equil_files[2].file_content_as_list = ['some\n', 'new\n', 'data\n']
-    fcs_file_class.structured_grid_file.file_modified = True
+    setattr(fcs_file_class.structured_grid_file, '_File__file_modified', True)
     fcs_file_class.structured_grid_file.file_content_as_list = ['structured grid new data']
     expected_equil_contents = 'some\nnew\ndata\n'
     expected_grid_contents = 'structured grid new data'

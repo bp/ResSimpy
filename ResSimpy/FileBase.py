@@ -16,7 +16,7 @@ class FileBase(ABC):
 
     location: Optional[str] = None
     file_content_as_list: Optional[list[str]] = field(default=None, repr=False)
-    file_modified: bool = False
+    __file_modified: bool = False
 
     @abstractmethod
     def write_to_file(self) -> None:
