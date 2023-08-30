@@ -6,7 +6,7 @@ from uuid import UUID
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Utils.generic_repr import generic_repr
-from ResSimpy.Well import Well
+from ResSimpy.BaseClasses.Well import Well
 
 
 @dataclass

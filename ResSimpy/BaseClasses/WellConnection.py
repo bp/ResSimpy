@@ -3,7 +3,7 @@ from abc import ABC
 from typing import Optional
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.DataObjectMixin import DataObjectMixin
+from ResSimpy.BaseClasses.DataObjectMixin import DataObjectMixin
 
 
 class WellConnection(DataObjectMixin, ABC):

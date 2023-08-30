@@ -4,8 +4,8 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
 
-from ResSimpy.DataObjectMixin import DataObjectMixin
-from ResSimpy.ISODateTime import ISODateTime
+from ResSimpy.BaseClasses.DataObjectMixin import DataObjectMixin
+from ResSimpy.BaseClasses.ISODateTime import ISODateTime
 from ResSimpy.Nexus.NexusEnums import DateFormatEnum
 
 

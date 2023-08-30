@@ -6,7 +6,7 @@ from io import StringIO
 from typing import Optional, Union, Any
 
 import pandas as pd
-from ResSimpy.Grid import VariableEntry
+from ResSimpy.BaseClasses.Grid import VariableEntry
 from string import Template
 import re
 import os

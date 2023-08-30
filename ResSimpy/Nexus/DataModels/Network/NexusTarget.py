@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.Target import Target
+from ResSimpy.BaseClasses.Target import Target
 from ResSimpy.Utils.generic_repr import generic_repr
 
 

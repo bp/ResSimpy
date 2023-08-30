@@ -4,7 +4,7 @@ import os
 from typing import Optional, MutableMapping
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusSeparatorMethod import NexusSeparatorMethod
-from ResSimpy.Separator import Separator
+from ResSimpy.BaseClasses.Separator import Separator
 
 
 @dataclass(kw_only=True)

@@ -4,7 +4,7 @@ import os
 from typing import Optional, MutableMapping
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusValveMethod import NexusValveMethod
-from ResSimpy.Valve import Valve
+from ResSimpy.BaseClasses.Valve import Valve
 
 
 @dataclass(kw_only=True)

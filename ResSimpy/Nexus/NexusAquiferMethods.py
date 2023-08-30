@@ -4,7 +4,7 @@ import os
 from typing import Optional, MutableMapping
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusAquiferMethod import NexusAquiferMethod
-from ResSimpy.Aquifer import Aquifer
+from ResSimpy.BaseClasses.Aquifer import Aquifer
 
 
 @dataclass(kw_only=True)

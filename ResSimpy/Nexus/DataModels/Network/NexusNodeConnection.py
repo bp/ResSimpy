@@ -2,7 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.NodeConnection import NodeConnection
+from ResSimpy.BaseClasses.NodeConnection import NodeConnection
 
 
 @dataclass

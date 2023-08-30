@@ -5,14 +5,14 @@ from typing import Sequence, Optional, TYPE_CHECKING
 
 import pandas as pd
 
-from ResSimpy.File import File
+from ResSimpy.BaseClasses.File import File
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusTarget import NexusTarget
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.nexus_modify_object_in_file import ModifyObjectOperations
 from ResSimpy.Nexus.nexus_remove_object_from_file import RemoveObjectOperations
-from ResSimpy.Targets import Targets
+from ResSimpy.BaseClasses.Targets import Targets
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 
 if TYPE_CHECKING:

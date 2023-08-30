@@ -1,8 +1,8 @@
 from abc import ABC
 from dataclasses import dataclass, field
 from typing import Literal
-from ResSimpy.OperationsMixin import NetworkOperationsMixIn
-from ResSimpy.Wellbore import Wellbore
+from ResSimpy.BaseClasses.OperationsMixin import NetworkOperationsMixIn
+from ResSimpy.BaseClasses.Wellbore import Wellbore
 
 
 @dataclass(kw_only=True)

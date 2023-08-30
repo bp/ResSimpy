@@ -6,7 +6,7 @@ import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Enums.UnitsEnum import SUnits, TemperatureUnits, UnitSystem
 from ResSimpy.Nexus.NexusKeywords.gaslift_keywords import GL_ARRAY_KEYWORDS, GASLIFT_KEYWORDS, GL_TABLE_HEADER_COLS
-from ResSimpy.DynamicProperty import DynamicProperty
+from ResSimpy.BaseClasses.DynamicProperty import DynamicProperty
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo

@@ -3,7 +3,7 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
 
-from ResSimpy.DataObjectMixin import DataObjectMixin
+from ResSimpy.BaseClasses.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 
 

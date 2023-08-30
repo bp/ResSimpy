@@ -4,7 +4,7 @@ import os
 from typing import Optional, MutableMapping
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusRockMethod import NexusRockMethod
-from ResSimpy.Rock import Rock
+from ResSimpy.BaseClasses.Rock import Rock
 
 
 @dataclass(kw_only=True)

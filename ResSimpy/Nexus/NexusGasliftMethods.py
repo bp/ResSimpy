@@ -4,7 +4,7 @@ import os
 from typing import Optional, MutableMapping
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusGasliftMethod import NexusGasliftMethod
-from ResSimpy.Gaslift import Gaslift
+from ResSimpy.BaseClasses.Gaslift import Gaslift
 
 
 @dataclass(kw_only=True)

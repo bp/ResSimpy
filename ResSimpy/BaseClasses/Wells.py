@@ -4,7 +4,7 @@ from abc import ABC
 
 import pandas as pd
 
-from ResSimpy.Well import Well
+from ResSimpy.BaseClasses.Well import Well
 from typing import Sequence, Optional
 
 

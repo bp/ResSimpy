@@ -21,7 +21,7 @@ from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_OPERATION
     GRID_ARRAY_KEYWORDS
 from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_list_nexus_file, \
     get_empty_dict_uuid_list_int
-from ResSimpy.File import File
+from ResSimpy.BaseClasses.File import File
 import pathlib
 import os
 from datetime import datetime, timezone

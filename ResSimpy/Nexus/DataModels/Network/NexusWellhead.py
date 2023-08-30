@@ -2,7 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from ResSimpy.Wellhead import Wellhead
+from ResSimpy.BaseClasses.Wellhead import Wellhead
 
 
 @dataclass(kw_only=True)

@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Optional, Union
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.DynamicProperty import DynamicProperty
+from ResSimpy.BaseClasses.DynamicProperty import DynamicProperty
 from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_list_nexus_water_params
 import ResSimpy.Nexus.nexus_file_operations as nfo

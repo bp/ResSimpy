@@ -4,7 +4,7 @@ import os
 from typing import Optional, MutableMapping
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusRelPermMethod import NexusRelPermMethod
-from ResSimpy.RelPerm import RelPerm
+from ResSimpy.BaseClasses.RelPerm import RelPerm
 
 
 @dataclass(kw_only=True)

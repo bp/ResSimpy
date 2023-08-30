@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
-from ResSimpy.Grid import VariableEntry
+from ResSimpy.BaseClasses.Grid import VariableEntry
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 if TYPE_CHECKING:

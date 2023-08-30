@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
-from ResSimpy.RelPermEndPoint import RelPermEndPoint
+from ResSimpy.BaseClasses.RelPermEndPoint import RelPermEndPoint
 
 
 @dataclass

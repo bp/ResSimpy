@@ -8,7 +8,7 @@ from ResSimpy.Nexus.NexusKeywords.aquifer_keywords import AQUIFER_SINGLE_KEYWORD
 from ResSimpy.Nexus.NexusKeywords.aquifer_keywords import AQUIFER_KEYWORDS_VALUE_FLOAT, AQUIFER_KEYWORDS_VALUE_INT
 from ResSimpy.Nexus.NexusKeywords.aquifer_keywords import AQUIFER_KEYWORDS, AQUIFER_TYPE_KEYWORDS
 from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
-from ResSimpy.DynamicProperty import DynamicProperty
+from ResSimpy.BaseClasses.DynamicProperty import DynamicProperty
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo

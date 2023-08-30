@@ -8,7 +8,7 @@ from ResSimpy.Nexus.nexus_file_operations import get_next_value, correct_datatyp
 from ResSimpy.Utils.invert_nexus_map import nexus_keyword_to_attribute_name
 import fnmatch
 if TYPE_CHECKING:
-    from ResSimpy.File import File
+    from ResSimpy.BaseClasses.File import File
 
 
 def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConstraint], current_date: Optional[str],

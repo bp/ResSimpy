@@ -4,7 +4,7 @@ import os
 from typing import Optional, MutableMapping
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterMethod
-from ResSimpy.Water import Water
+from ResSimpy.BaseClasses.Water import Water
 
 
 @dataclass(kw_only=True)

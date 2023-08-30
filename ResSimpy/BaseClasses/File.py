@@ -2,7 +2,7 @@ from __future__ import annotations
 from uuid import uuid4, UUID
 from dataclasses import dataclass, field
 from typing import Optional
-from ResSimpy.FileBase import FileBase
+from ResSimpy.BaseClasses.FileBase import FileBase
 
 
 @dataclass

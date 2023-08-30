@@ -4,7 +4,7 @@ import os
 from typing import Optional, MutableMapping
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusPVTMethod import NexusPVTMethod
-from ResSimpy.PVT import PVT
+from ResSimpy.BaseClasses.PVT import PVT
 
 
 @dataclass(kw_only=True)

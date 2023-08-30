@@ -2,8 +2,8 @@ from dataclasses import dataclass, field
 from abc import ABC
 from typing import Literal
 
-from ResSimpy.Target import Target
-from ResSimpy.OperationsMixin import NetworkOperationsMixIn
+from ResSimpy.BaseClasses.Target import Target
+from ResSimpy.BaseClasses.OperationsMixin import NetworkOperationsMixIn
 
 
 @dataclass(kw_only=True)

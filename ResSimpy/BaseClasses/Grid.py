@@ -12,6 +12,15 @@ class VariableEntry:
 
 @dataclass(kw_only=True)
 class Grid(ABC):
+    """Nexus implementation of the Grid class.
+
+       Attributes:
+           stream (str): COMMENT (STREAM)
+           number (int): COMMENT (NUMBER)
+           scale (float): COMMENT (SCALE)
+           bhdepth (float): COMMENT (BHDEPTH)
+           datum_depth (float): COMMENT (DATUM)
+    """
     # Grid dimensions
     _range_x: Optional[int]
     _range_y: Optional[int]

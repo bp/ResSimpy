@@ -2,7 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from ResSimpy.Node import Node
+from ResSimpy.BaseClasses.Node import Node
 
 
 @dataclass(kw_only=True)

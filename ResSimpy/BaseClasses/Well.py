@@ -4,7 +4,7 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Optional, Sequence, Union
 
-from ResSimpy.Completion import Completion
+from ResSimpy.BaseClasses.Completion import Completion
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 
 

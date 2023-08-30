@@ -10,7 +10,7 @@ from ResSimpy.Nexus.NexusKeywords.hyd_keywords import HYD_PRESSURE_KEYWORDS, HYD
 from ResSimpy.Nexus.NexusKeywords.hyd_keywords import HYD_KEYWORDS_VALUE_FLOAT, HYD_WATINJ_KEYWORDS_VALUE_FLOAT
 from ResSimpy.Nexus.NexusKeywords.hyd_keywords import HYD_ALQ_KEYWORD, HYD_ALQ_OPTIONS
 from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
-from ResSimpy.DynamicProperty import DynamicProperty
+from ResSimpy.BaseClasses.DynamicProperty import DynamicProperty
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo

@@ -2,8 +2,8 @@ from abc import ABC
 from dataclasses import field
 from typing import Literal
 
-from ResSimpy.OperationsMixin import NetworkOperationsMixIn
-from ResSimpy.WellConnection import WellConnection
+from ResSimpy.BaseClasses.OperationsMixin import NetworkOperationsMixIn
+from ResSimpy.BaseClasses.WellConnection import WellConnection
 
 
 class WellConnections(NetworkOperationsMixIn, ABC):

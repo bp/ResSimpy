@@ -4,7 +4,7 @@ import os
 from typing import Optional, MutableMapping
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusEquilMethod import NexusEquilMethod
-from ResSimpy.Equilibration import Equilibration
+from ResSimpy.BaseClasses.Equilibration import Equilibration
 
 
 @dataclass(kw_only=True)

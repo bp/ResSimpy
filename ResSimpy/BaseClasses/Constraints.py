@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 import pandas as pd
 
-from ResSimpy.Constraint import Constraint
+from ResSimpy.BaseClasses.Constraint import Constraint
 from typing import Optional, Mapping, Sequence
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem

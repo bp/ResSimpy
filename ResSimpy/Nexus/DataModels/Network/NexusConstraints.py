@@ -6,8 +6,8 @@ from uuid import UUID
 
 import pandas as pd
 
-from ResSimpy.Constraint import Constraint
-from ResSimpy.Constraints import Constraints
+from ResSimpy.BaseClasses.Constraint import Constraint
+from ResSimpy.BaseClasses.Constraints import Constraints
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile

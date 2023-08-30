@@ -5,20 +5,20 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional
 
-from ResSimpy.Aquifer import Aquifer
-from ResSimpy.Equilibration import Equilibration
-from ResSimpy.File import File
-from ResSimpy.Gaslift import Gaslift
-from ResSimpy.Grid import Grid
-from ResSimpy.Hydraulics import Hydraulics
-from ResSimpy.Network import Network
-from ResSimpy.PVT import PVT
-from ResSimpy.RelPerm import RelPerm
-from ResSimpy.Rock import Rock
-from ResSimpy.Separator import Separator
-from ResSimpy.Valve import Valve
-from ResSimpy.Water import Water
-from ResSimpy.Wells import Wells
+from ResSimpy.BaseClasses.Aquifer import Aquifer
+from ResSimpy.BaseClasses.Equilibration import Equilibration
+from ResSimpy.BaseClasses.File import File
+from ResSimpy.BaseClasses.Gaslift import Gaslift
+from ResSimpy.BaseClasses.Grid import Grid
+from ResSimpy.BaseClasses.Hydraulics import Hydraulics
+from ResSimpy.BaseClasses.Network import Network
+from ResSimpy.BaseClasses.PVT import PVT
+from ResSimpy.BaseClasses.RelPerm import RelPerm
+from ResSimpy.BaseClasses.Rock import Rock
+from ResSimpy.BaseClasses.Separator import Separator
+from ResSimpy.BaseClasses.Valve import Valve
+from ResSimpy.BaseClasses.Water import Water
+from ResSimpy.BaseClasses.Wells import Wells
 
 
 @dataclass(kw_only=True, init=False)

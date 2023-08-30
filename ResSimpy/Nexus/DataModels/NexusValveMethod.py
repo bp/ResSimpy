@@ -5,7 +5,7 @@ from typing import Optional, Union
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusKeywords.valve_keywords import VALVE_TABLE_KEYWORDS, VALVE_RATE_KEYWORDS
-from ResSimpy.DynamicProperty import DynamicProperty
+from ResSimpy.BaseClasses.DynamicProperty import DynamicProperty
 from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo

@@ -5,7 +5,7 @@ import pandas as pd
 from dataclasses import dataclass
 from typing import Optional, TYPE_CHECKING
 
-from ResSimpy.Grid import Grid, VariableEntry
+from ResSimpy.BaseClasses.Grid import Grid, VariableEntry
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -26,6 +26,8 @@ class PropertyToLoad:
 
 @dataclass(kw_only=True)
 class NexusGrid(Grid):
+    """Nexus implementation of the Grid class.
+    """
     __array_functions_list: Optional[list[list[str]]] = None
     __array_functions_df: Optional[pd.DataFrame] = None
     __array_functions_loaded: bool = False

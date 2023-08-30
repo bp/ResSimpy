@@ -14,7 +14,7 @@ if sys.version_info >= (3, 11):
 else:
     from typing_extensions import Self
 
-from ResSimpy.Completion import Completion
+from ResSimpy.BaseClasses.Completion import Completion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
 from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.Utils.to_dict_generic import to_dict

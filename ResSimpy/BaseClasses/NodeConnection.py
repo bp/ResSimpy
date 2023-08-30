@@ -2,7 +2,7 @@ from __future__ import annotations
 from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
-from ResSimpy.DataObjectMixin import DataObjectMixin
+from ResSimpy.BaseClasses.DataObjectMixin import DataObjectMixin
 
 
 @dataclass

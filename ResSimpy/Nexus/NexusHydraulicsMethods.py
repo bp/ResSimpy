@@ -4,7 +4,7 @@ import os
 from typing import Optional, MutableMapping
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusHydraulicsMethod import NexusHydraulicsMethod
-from ResSimpy.Hydraulics import Hydraulics
+from ResSimpy.BaseClasses.Hydraulics import Hydraulics
 
 
 @dataclass(kw_only=True)
