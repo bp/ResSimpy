@@ -5,6 +5,7 @@ from typing import Optional
 from ResSimpy.FileBase import FileBase
 import uuid
 
+
 @dataclass
 class File(FileBase):
     """The abstract base class for simulator files.
@@ -34,7 +35,7 @@ class File(FileBase):
         """Writes to file specified in self.location the strings contained in the list self.file_content_as_list.
 
         Args:
-            new_file_name (None | str): writes to self.location if left as None. Otherwise writes to new_file_name.
+            new_file_path (None | str): writes to self.location if left as None. Otherwise writes to new_file_name.
         """
         if new_file_path is not None:
             self.location = new_file_path

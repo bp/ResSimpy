@@ -640,8 +640,9 @@ class NexusFile(File):
         """
         # overwrite File base class method to allow for write_includes
         if new_file_path is None and self.location is not None:
+            # In this case just overwrite the file with the existing path:
             new_file_path = self.location
-        elif self.location is None:
+        elif new_file_path is None:
             raise ValueError(f'No file path to write to, instead found {self.location}')
         if self.file_content_as_list is None:
             raise ValueError(f'No file data to write out, instead found {self.file_content_as_list}')
@@ -662,7 +663,9 @@ class NexusFile(File):
 
         file_str = ''.join(self.file_content_as_list)
 
-        with open(self.location, 'w') as fi:
+        # update the location:
+        self.location = new_file_path
+        with open(new_file_path, 'w') as fi:
             fi.write(file_str)
 
         # reset the modified file state
