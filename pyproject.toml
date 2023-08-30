@@ -78,3 +78,9 @@ exclude = ["./tests"]
 [tool.ruff.pydocstyle]
 # Use Google-style docstrings.
 convention = "google"
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+autoclasstoc = "*"
