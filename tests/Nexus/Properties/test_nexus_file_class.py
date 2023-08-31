@@ -869,7 +869,7 @@ def test_write_to_file(mocker, fixture_for_osstat_pathlib):
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             file_path: file_content,
-            '/root/original_include.inc': 'inc file contents',
+            os.path.join('/root','original_include.inc'): 'inc file contents',
             '/abs_path/another_file.inc': 'inc file contents',
         }).return_value
         return mock_open
@@ -917,3 +917,32 @@ def test_write_to_file_only_modified(mocker, fixture_for_osstat_pathlib):
 
     list_of_writes = [call for call in writing_mock_open.mock_calls if 'call().write' in str(call)]
     assert list_of_writes[-1].args[0] == expected_file_content
+
+
+@pytest.mark.parametrize('location, file_as_list, error', [
+    (None, None, 'No file path to write to'),
+    ('path/file.dat', None, 'No file data to write out'),
+], ids=['nothing', 'no file as list',])
+def test_write_to_file_exit_points(mocker, fixture_for_osstat_pathlib, location, file_as_list, error):
+    # Arrange
+    empty_file = NexusFile(location=location, file_content_as_list=file_as_list)
+    # Act Assert
+    with pytest.raises(ValueError) as ve:
+        empty_file.write_to_file()
+    assert error in str(ve)
+
+
+@pytest.mark.parametrize('location, file_as_list, include_locations, error', [
+    ('location.dat', ['file_content'], None, 'No include locations found'),
+    (None, None, ['include_loc.dat'], 'No location found to'),
+    ('location.dat', None, ['include_loc.dat'], 'No file content found within file'),
+], ids=['No includes locs', 'No location', 'No file content'])
+def test_update_include_location_in_file_as_list_exit_points(mocker, fixture_for_osstat_pathlib,
+                                                             location, file_as_list, include_locations, error):
+    # Arrange
+    empty_file = NexusFile(location=location, file_content_as_list=file_as_list, include_locations=include_locations)
+    include_file = NexusFile()
+    # Act Assert
+    with pytest.raises(ValueError) as ve:
+        empty_file.update_include_location_in_file_as_list(new_path='New_path.dat', include_file=include_file)
+        assert error in ve

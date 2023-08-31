@@ -646,7 +646,7 @@ class NexusFile(File):
             new_file_path = self.location
         elif new_file_path is None:
             raise ValueError(f'No file path to write to, instead found {self.location}')
-        if self.file_content_as_list is None:
+        if self.file_content_as_list is None or len(self.file_content_as_list) == 0:
             raise ValueError(f'No file data to write out, instead found {self.file_content_as_list}')
         if write_includes and self.include_objects is not None:
             for file in self.include_objects:
@@ -684,8 +684,9 @@ class NexusFile(File):
             new_path (str): Updates the path in the file as list to point towards the new include location.
             include_file (NexusFile): include object whose path is being modified
         """
+        # try and find the path of the file that should be replaced (i.e. how it is currently written in the file)
         if self.include_locations is None or include_file.location is None:
-            raise ValueError('No include locations found and therefore cannot be accessed')
+            raise ValueError('No include locations found and therefore cannot update include path')
         file_path_to_replace = include_file.input_file_location
         if file_path_to_replace is None:
             file_path_to_replace = include_file.location
