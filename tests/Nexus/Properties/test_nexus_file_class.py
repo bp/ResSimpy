@@ -926,6 +926,8 @@ def test_write_to_file_only_modified(mocker, fixture_for_osstat_pathlib):
 def test_write_to_file_exit_points(mocker, fixture_for_osstat_pathlib, location, file_as_list, error):
     # Arrange
     empty_file = NexusFile(location=location, file_content_as_list=file_as_list)
+    if file_as_list is None:
+        empty_file.file_content_as_list = None
     # Act Assert
     with pytest.raises(ValueError) as ve:
         empty_file.write_to_file()

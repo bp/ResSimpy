@@ -646,7 +646,7 @@ class NexusFile(File):
             new_file_path = self.location
         elif new_file_path is None:
             raise ValueError(f'No file path to write to, instead found {self.location}')
-        if self.file_content_as_list is None or len(self.file_content_as_list) == 0:
+        if self.file_content_as_list is None:
             raise ValueError(f'No file data to write out, instead found {self.file_content_as_list}')
         if write_includes and self.include_objects is not None:
             for file in self.include_objects:
