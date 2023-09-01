@@ -5,7 +5,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from tests.multifile_mocker import mock_multiple_files
-from tests.utility_for_tests import check_file_read_write_is_correct, get_fake_nexus_simulator
+from tests.utility_for_tests import check_file_read_write_is_correct, get_fake_nexus_simulator, uuid_side_effect
 
 
 def test_find_constraint(mocker, fixture_for_osstat_pathlib):
@@ -571,8 +571,7 @@ def test_modify_constraints(mocker, fixture_for_osstat_pathlib, file_contents, e
     mocker.patch("builtins.open", writing_mock_open)
 
     # patch in uuids for the constraints
-    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
-                                                    'uuid4', 'uuid5', 'uuid6', 'uuid7'])
+    mocker.patch.object(uuid, 'uuid4', side_effect=uuid_side_effect())
     # Act
     nexus_sim.network.constraints.modify('well1', current_constraint, new_constraint)
     # Assert
