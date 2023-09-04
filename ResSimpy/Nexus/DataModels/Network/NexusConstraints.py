@@ -177,13 +177,13 @@ class NexusConstraints(Constraints):
         return surface_file
 
     def add(self,
-            name: str,
             constraint_to_add: dict[str, None | float | int | str | UnitSystem] | Constraint,
+            name: str | None = None,
             comments: Optional[str] = None) -> None:
         """Adds a constraint to the network and corresponding surface file.
 
         Args:
-            name (str): name of the node to apply constraints to
+            name (str | None): name of the node to apply constraints to
             constraint_to_add (dict[str, float | int | str | UnitSystem] | NexusConstraint): properties of \
             the constraints or a constraint object
         """
@@ -194,6 +194,10 @@ class NexusConstraints(Constraints):
             raise NotImplementedError('Adding constraints with wildcards is currently unsupported')
         # add to memory
         if isinstance(constraint_to_add, dict):
+            if constraint_to_add.get('name', None) is None and name is None:
+                raise ValueError('Input arguments or constraint_to_add dictionary must contain a name for the node.')
+            elif name is not None:
+                constraint_to_add['name'] = name
             new_constraint = NexusConstraint(constraint_to_add)
         else:
             new_constraint = cast(NexusConstraint, constraint_to_add)
