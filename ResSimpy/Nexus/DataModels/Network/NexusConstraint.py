@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import warnings
 from dataclasses import dataclass
 from typing import Optional
 
@@ -351,11 +353,18 @@ class NexusConstraint(Constraint):
             if v is not None or nones_overwrite:
                 setattr(self, k, v)
 
-    def to_table_line(self) -> str:
-        """String representation of the constraint for entry to an inline constraint table."""
+    def to_table_line(self, headers: list[str]) -> str:
+        """String representation of the constraint for entry to an inline constraint table.
+
+        Args:
+            headers (list[str]): Unused for nexusconstraint, provide an empty list
+        """
         qmult_control_key_words = ['QALLRMAX_MULT', 'QOSMAX_MULT', 'QWSMAX_MULT', 'QGSMAX_MULT', 'QLIQSMAX_MULT']
         skip_attributes = ['date', 'unit_system', 'NAME', 'ACTIVATE', 'QOIL', 'QWATER', 'QGAS', 'WELL']
         clear_attributes = ['CLEAR', 'CLEARQ', 'CLEARP', 'CLEARLIMIT', 'CLEARALQ']
+
+        if headers:
+            warnings.warn('Headers is currently not used in the constraint to line call')
 
         if self.name is not None:
             constraint_string = self.name
