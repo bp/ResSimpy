@@ -288,7 +288,7 @@ def test_load_wells_all_columns_present_structured_grid(mocker, fixture_for_osst
     assert result_wells[0].completions[0].non_darcy_model == expected_wells[0].completions[0].non_darcy_model
     assert result_wells[0].completions[0].comp_dz == expected_wells[0].completions[0].comp_dz
     assert result_wells[0].completions[0].layer_assignment == expected_wells[0].completions[0].layer_assignment
-    assert result_wells[0].completions[0].polymer_bore_radius == expected_wells[0].completions[0].polymer_bore_radius
+    assert result_wells[0].completions[0].polymer_block_radius == expected_wells[0].completions[0].polymer_block_radius
     assert result_wells[0].completions[0].polymer_well_radius == expected_wells[0].completions[0].polymer_well_radius
     assert result_wells[0].completions[0].rel_perm_end_point == expected_wells[0].completions[0].rel_perm_end_point
     assert result_wells[0].completions[0].kh_mult == expected_wells[0].completions[0].kh_mult

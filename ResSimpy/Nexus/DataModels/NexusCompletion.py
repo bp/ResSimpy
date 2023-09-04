@@ -56,7 +56,7 @@ class NexusCompletion(Completion):
     __non_darcy_model: Optional[str] = None
     __comp_dz: Optional[float] = None
     __layer_assignment: Optional[int] = None
-    __polymer_bore_radius: Optional[float] = None
+    __polymer_block_radius: Optional[float] = None
     __polymer_well_radius: Optional[float] = None
     __rel_perm_end_point: Optional[NexusRelPermEndPoint] = None
     __kh_mult: Optional[float] = None
@@ -103,7 +103,7 @@ class NexusCompletion(Completion):
         self.__non_darcy_model = non_darcy_model
         self.__comp_dz = comp_dz
         self.__layer_assignment = layer_assignment
-        self.__polymer_bore_radius = polymer_bore_radius
+        self.__polymer_block_radius = polymer_bore_radius
         self.__polymer_well_radius = polymer_well_radius
         self.__portype = portype
         self.__rel_perm_end_point = rel_perm_end_point
@@ -202,8 +202,8 @@ class NexusCompletion(Completion):
         return self.__layer_assignment
 
     @property
-    def polymer_bore_radius(self):
-        return self.__polymer_bore_radius
+    def polymer_block_radius(self):
+        return self.__polymer_block_radius
 
     @property
     def polymer_well_radius(self):
@@ -294,7 +294,7 @@ class NexusCompletion(Completion):
             'ND': ('non_darcy_model', str),
             'DZ': ('comp_dz', float),
             'LAYER': ('layer_assignment', int),
-            'RADBP': ('polymer_bore_radius', float),
+            'RADBP': ('polymer_block_radius', float),
             'RADWP': ('polymer_well_radius', float),
             'KHMULT': ('kh_mult', float),
         }

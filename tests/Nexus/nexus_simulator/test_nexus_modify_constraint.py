@@ -439,7 +439,7 @@ def test_add_constraint(mocker, fixture_for_osstat_pathlib, file_contents, expec
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
                                                     'uuid4', 'uuid5', 'uuid6'])
     # Act
-    nexus_sim.network.constraints.add('well3', new_constraint, 'test user comments')
+    nexus_sim.network.constraints.add(new_constraint, comments='test user comments')
     # Assert
     assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
     check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
