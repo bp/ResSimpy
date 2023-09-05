@@ -641,5 +641,7 @@ def test_add_constraint_no_name_given(mocker, fixture_for_osstat_pathlib):
     # Act and Assert
     with pytest.raises(ValueError) as ve:
         constraints.add(constraint_to_add={'max_surface_oil_rate': 10}, name=None)
+        assert str(ve) == 'Input arguments or constraint_to_add dictionary must contain a name for the node.'
     with pytest.raises(ValueError) as ve:
         constraints.add(constraint_to_add=empty_constraint, name=None)
+        assert str(ve) == 'No name found in the provided constraint object.'
