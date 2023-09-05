@@ -710,6 +710,12 @@ continuation''')
     assert nexus_file_result == expected_return_file
     assert index_in_file == expected_index_in_file
 
+    # raises
+    nexus_file.include_objects.pop(0)
+    with pytest.raises(ValueError) as ve:
+        nexus_file.find_which_include_file(flattened_index=1)
+    assert str(ve.value) == "No file with uuid_index='uuid_inc1' found within include objects"
+
 
 @pytest.mark.parametrize("test_file_contents, expected_results",
                          [('''       WELLSPEC DEV1
