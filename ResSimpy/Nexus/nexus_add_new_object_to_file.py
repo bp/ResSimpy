@@ -168,7 +168,7 @@ class AddObjectOperations:
         headers = [k for k, v in nexus_mapping.items() if v[0] in object_properties]
         write_out_headers = ' '.join(headers)
         new_table_as_list.append(write_out_headers)
-        new_table_as_list.append(new_obj.to_table_line([]))
+        new_table_as_list.append(new_obj.to_table_line(headers))
         new_table_as_list.append(self.table_footer)
         new_table_as_list = [x + '\n' if not x.endswith('\n') else x for x in new_table_as_list]
         new_table_as_list.append('\n')
