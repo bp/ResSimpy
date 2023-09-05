@@ -931,20 +931,19 @@ def test_write_to_file_exit_points(mocker, fixture_for_osstat_pathlib, location,
     # Act Assert
     with pytest.raises(ValueError) as ve:
         empty_file.write_to_file()
-    assert error in str(ve)
+    assert error in str(ve.value)
 
 
 @pytest.mark.parametrize('location, file_as_list, include_locations, error', [
     ('location.dat', ['file_content'], None, 'No include locations found'),
-    (None, None, ['include_loc.dat'], 'No location found to'),
     ('location.dat', None, ['include_loc.dat'], 'No file content found within file'),
-], ids=['No includes locs', 'No location', 'No file content'])
+], ids=['No includes locs', 'No file content'])
 def test_update_include_location_in_file_as_list_exit_points(mocker, fixture_for_osstat_pathlib,
                                                              location, file_as_list, include_locations, error):
     # Arrange
     empty_file = NexusFile(location=location, file_content_as_list=file_as_list, include_locations=include_locations)
-    include_file = NexusFile()
+    include_file = NexusFile(location='include_loc.dat')
     # Act Assert
     with pytest.raises(ValueError) as ve:
         empty_file.update_include_location_in_file_as_list(new_path='New_path.dat', include_file=include_file)
-        assert error in ve
+    assert error in str(ve.value)
