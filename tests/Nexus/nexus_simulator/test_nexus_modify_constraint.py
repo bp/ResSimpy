@@ -627,3 +627,15 @@ def test_modify_constraint_no_constraint_found(mocker, fixture_for_osstat_pathli
     # Act
     with pytest.raises(ValueError) as ve:
         nexus_sim.network.constraints.modify('well1', current_constraint, new_constraint)
+
+
+def test_add_constraint_no_name_given(mocker, fixture_for_osstat_pathlib):
+    # Arrange
+    model = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
+    mock_nexus_network = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
+    constraints = NexusConstraints(mock_nexus_network, model)
+
+    # Act and Assert
+    with pytest.raises(ValueError) as ve:
+        constraints.add(constraint_to_add={'max_surface_oil_rate': 10}, name=None)
