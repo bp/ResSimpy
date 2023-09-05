@@ -636,6 +636,10 @@ def test_add_constraint_no_name_given(mocker, fixture_for_osstat_pathlib):
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
     constraints = NexusConstraints(mock_nexus_network, model)
 
+    empty_constraint = NexusConstraint({})
+
     # Act and Assert
     with pytest.raises(ValueError) as ve:
         constraints.add(constraint_to_add={'max_surface_oil_rate': 10}, name=None)
+    with pytest.raises(ValueError) as ve:
+        constraints.add(constraint_to_add=empty_constraint, name=None)
