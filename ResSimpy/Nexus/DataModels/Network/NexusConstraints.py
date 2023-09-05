@@ -197,13 +197,13 @@ class NexusConstraints(Constraints):
             elif name is not None:
                 constraint_to_add['name'] = name
             elif name is None:
-                name = constraint_to_add['name']
+                name = str(constraint_to_add['name'])
             new_constraint = NexusConstraint(constraint_to_add)
         else:
             new_constraint = cast(NexusConstraint, constraint_to_add)
             name = new_constraint.name
-            if name is None:
-                raise ValueError('No name found in the provided constraint object.')
+        if name is None:
+            raise ValueError('No name found in the provided constraint object.')
         # check for wildcards
         if '*' in name:
             raise NotImplementedError('Adding constraints with wildcards is currently unsupported')
