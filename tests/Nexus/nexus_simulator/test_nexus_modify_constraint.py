@@ -244,10 +244,7 @@ def test_remove_constraint(mocker, fixture_for_osstat_pathlib, file_contents, ex
     assert result == expected_constraint_dict
     assert result['well1'] == expected_constraint_dict['well1']
     assert result['well2'] == expected_constraint_dict['well2']
-    check_file_read_write_is_correct(expected_file_contents=expected_result_file,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
-                                     number_of_writes=expected_number_writes)
+    assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_result_file.splitlines(keepends=True)
 
 @pytest.mark.parametrize("file_contents, expected_file_contents, new_constraint, expected_number_writes, expected_uuid", [
     # basic_test
