@@ -533,8 +533,7 @@ class NexusFile(File):
             additional_content + nexusfile_to_write_to.file_content_as_list[relative_index:]
 
         self._file_modified_set(True)
-        # write straight to file
-        nexusfile_to_write_to.write_to_file()
+
         # update object locations
         self.__update_object_locations(line_number=index, number_additional_lines=len(additional_content))
 
@@ -601,8 +600,6 @@ class NexusFile(File):
             for object_id in objects_to_remove:
                 self.__remove_object_locations(object_id)
         self._file_modified_set(True)
-
-        nexusfile_to_write_to.write_to_file()
 
     @staticmethod
     def insert_comments(additional_content: list[str], comments: str) -> list[str]:

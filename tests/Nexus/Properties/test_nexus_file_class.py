@@ -404,7 +404,6 @@ KZ CON 1
     assert nexus_file.include_objects[0] == expected_included_file
 
 
-
 @pytest.mark.parametrize("test_file_contents, expected_results",
                          [('''       WELLSPEC DEV1
        IW JW L RADW
@@ -783,6 +782,7 @@ def test_add_to_file_as_list(mocker):
 
     expected_result.line_locations = expected_line_locations
     expected_result.object_locations = expected_object_locations
+    expected_result._file_modified_set(True)
 
     # mock out the write method to ensure it isn't making new files.
     writing_mock_open = mocker.mock_open()
@@ -793,6 +793,7 @@ def test_add_to_file_as_list(mocker):
 
     # Assert
     assert result == expected_result
+    assert result.file_modified
 
 
 def test_remove_from_file_as_list(mocker):
@@ -812,6 +813,7 @@ def test_remove_from_file_as_list(mocker):
 
     expected_result.line_locations = [(0, 'file_uuid')]
     expected_result.object_locations = expected_object_locations
+    expected_result._file_modified_set(True)
 
     # mock out the write method to ensure it isn't making new files.
     writing_mock_open = mocker.mock_open()
@@ -823,6 +825,7 @@ def test_remove_from_file_as_list(mocker):
     # Assert
     assert nexus_file.file_content_as_list == expected_result.file_content_as_list
     assert nexus_file == expected_result
+    assert nexus_file.file_modified
 
 @pytest.mark.parametrize('file_content, expected_file_content', [
     (
@@ -861,6 +864,7 @@ def test_update_include_location_in_file_as_list(mocker, fixture_for_osstat_path
     assert nexus_file.include_locations == [expected_path]
     assert include_file.location == expected_path
     assert include_file.input_file_location == 'New_FiLe_Path.inc'
+    assert nexus_file.file_modified
 
 
 def test_write_to_file(mocker, fixture_for_osstat_pathlib):
@@ -889,6 +893,8 @@ def test_write_to_file(mocker, fixture_for_osstat_pathlib):
     # Assert
     list_of_write_names = [call.args[0] for call in writing_mock_open.mock_calls if "'w')" in str(call)]
     assert list_of_write_names == [expected_include_path_1, expected_include_path_2, new_file_path]
+    # assert the file_modified has been removed
+    assert not nexus_file.file_modified
 
 
 def test_write_to_file_only_modified(mocker, fixture_for_osstat_pathlib):
