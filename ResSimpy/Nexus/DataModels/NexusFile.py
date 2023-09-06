@@ -685,15 +685,12 @@ class NexusFile(File):
             include_file (NexusFile): include object whose path is being modified
         """
         # try and find the path of the file that should be replaced (i.e. how it is currently written in the file)
-        if self.include_locations is None or include_file.location is None:
+        if self.include_locations is None or not self.include_locations or include_file.location is None\
+                or include_file.input_file_location is None:
             raise ValueError('No include locations found and therefore cannot update include path')
         file_path_to_replace = include_file.input_file_location
-        if file_path_to_replace is None:
-            file_path_to_replace = include_file.location
-        if file_path_to_replace is None:
-            raise ValueError('No location found to try and replace in this file.')
         file_content = self.file_content_as_list
-        if file_content is None:
+        if file_content is None or not file_content:
             raise ValueError(f'No file content found within file {self.location}')
 
         for line in file_content:

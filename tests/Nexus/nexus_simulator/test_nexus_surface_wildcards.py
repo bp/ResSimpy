@@ -152,9 +152,9 @@ def test_add_remove_wildcard_well(mocker, fixture_for_osstat_pathlib):
     # Act Assert
     with pytest.raises(NotImplementedError) as error_msg:
         constraints.add(name='P*', constraint_to_add=constraint_props)
-        assert 'unsupported' in error_msg
+    assert 'unsupported' in str(error_msg.value)
 
     with pytest.raises(NotImplementedError) as error_msg:
         constraints.remove(constraint_dict=constraint_props)
-        assert 'unsupported' in error_msg
+    assert 'unsupported' in str(error_msg.value)
 
