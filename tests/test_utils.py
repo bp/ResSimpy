@@ -168,6 +168,7 @@ def test_nexus_keyword_to_attribute_name():
 
     with pytest.raises(AttributeError):
         nexus_keyword_to_attribute_name(nexus_map, 'Failure')
+    with pytest.raises(AttributeError):
         attribute_name_to_nexus_keyword(nexus_map, 'also fails')
 
 
