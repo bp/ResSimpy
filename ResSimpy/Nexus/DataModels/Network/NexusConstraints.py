@@ -177,27 +177,36 @@ class NexusConstraints(Constraints):
         return surface_file
 
     def add(self,
-            name: str,
             constraint_to_add: dict[str, None | float | int | str | UnitSystem] | Constraint,
-            comments: Optional[str] = None) -> None:
+            name: str | None = None,
+            comments: str | None = None) -> None:
         """Adds a constraint to the network and corresponding surface file.
 
         Args:
-            name (str): name of the node to apply constraints to
+            name (str | None): name of the node to apply constraints to
             constraint_to_add (dict[str, float | int | str | UnitSystem] | NexusConstraint): properties of \
             the constraints or a constraint object
+            comments (str | None): add optional post line comments
         """
         self.__parent_network.get_load_status()
 
-        # check for wildcards
-        if '*' in name:
-            raise NotImplementedError('Adding constraints with wildcards is currently unsupported')
         # add to memory
         if isinstance(constraint_to_add, dict):
+            if constraint_to_add.get('name', None) is None and name is None:
+                raise ValueError('Input arguments or constraint_to_add dictionary must contain a name for the node.')
+            elif name is not None:
+                constraint_to_add['name'] = name
+            elif name is None:
+                name = str(constraint_to_add['name'])
             new_constraint = NexusConstraint(constraint_to_add)
         else:
             new_constraint = cast(NexusConstraint, constraint_to_add)
-
+            name = new_constraint.name
+        if name is None:
+            raise ValueError('No name found in the provided constraint object.')
+        # check for wildcards
+        if '*' in name:
+            raise NotImplementedError('Adding constraints with wildcards is currently unsupported')
         self._add_to_memory({name: [new_constraint]})
 
         # add to the file
@@ -249,7 +258,7 @@ class NexusConstraints(Constraints):
             if nfo.check_token('ENDCONSTRAINTS', line) and date_comparison == 0:
                 # find the end of a constraint table and add the new constraint
                 new_constraint_index = index
-                constraint_string = new_constraint.to_table_line()
+                constraint_string = new_constraint.to_table_line([])
                 new_constraint_text.append(constraint_string)
                 id_line_locs = [new_constraint_index]
             elif index == len(file_as_list) - 1 and date_index >= 0 and not nfo.check_token('ENDQMULT', line):
@@ -265,7 +274,7 @@ class NexusConstraints(Constraints):
 
             if new_table_needed:
                 new_constraint_text.append('CONSTRAINTS\n')
-                new_constraint_text.append(new_constraint.to_table_line())
+                new_constraint_text.append(new_constraint.to_table_line([]))
                 new_constraint_text.append('ENDCONSTRAINTS\n')
                 id_line_locs = [new_constraint_index + len(new_constraint_text) - 2]
 
@@ -325,4 +334,4 @@ class NexusConstraints(Constraints):
         combination_of_constraints = existing_constraint_obj.to_dict()
         combination_of_constraints.update(cleaned_new_constraint)
 
-        self.add(name, combination_of_constraints, comments)
+        self.add(combination_of_constraints, name, comments)

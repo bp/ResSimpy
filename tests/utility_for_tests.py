@@ -62,6 +62,7 @@ def get_fake_stat_pathlib_time(mocker):
 
 
 def uuid_side_effect():
+    """Generates an infinite sequence of overwrites for uuid calls."""
     num = 0
     while True:
         yield 'uuid' + str(num)

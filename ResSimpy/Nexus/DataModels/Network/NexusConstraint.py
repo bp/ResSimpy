@@ -1,10 +1,11 @@
 from __future__ import annotations
+
+import warnings
 from dataclasses import dataclass
 from typing import Optional
 
 from ResSimpy.Constraint import Constraint
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.Utils import to_dict_generic
 
 
 @dataclass
@@ -201,7 +202,7 @@ class NexusConstraint(Constraint):
     clear_p: Optional[bool] = None
 
     def __init__(self, properties_dict: dict[str, None | int | str | float | UnitSystem]) -> None:
-        super().__init__()
+        super(Constraint, self).__init__({})
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)
 
@@ -346,30 +347,24 @@ class NexusConstraint(Constraint):
             }
         return nexus_mapping
 
-    def to_dict(self, keys_in_nexus_style: bool = False) -> dict[str, None | str | int | float]:
-        """Returns a dictionary of the attributes of the Constraint.
-
-        Args:
-            keys_in_nexus_style (bool): if True returns the key values in Nexus keywords, otherwise returns the \
-                attribute name as stored by ressimpy.
-
-        Returns:
-            a dictionary keyed by attributes and values as the value of the attribute
-        """
-        result_dict = to_dict_generic.to_dict(self, keys_in_nexus_style, add_date=True, add_units=True)
-        return result_dict
-
     def update(self, new_data: dict[str, None | int | str | float | UnitSystem], nones_overwrite: bool = False):
         """Updates attributes in the object based on the dictionary provided."""
         for k, v in new_data.items():
             if v is not None or nones_overwrite:
                 setattr(self, k, v)
 
-    def to_table_line(self) -> str:
-        """String representation of the constraint for entry to an inline constraint table."""
+    def to_table_line(self, headers: list[str]) -> str:
+        """String representation of the constraint for entry to an inline constraint table.
+
+        Args:
+            headers (list[str]): Unused for nexusconstraint, provide an empty list
+        """
         qmult_control_key_words = ['QALLRMAX_MULT', 'QOSMAX_MULT', 'QWSMAX_MULT', 'QGSMAX_MULT', 'QLIQSMAX_MULT']
         skip_attributes = ['date', 'unit_system', 'NAME', 'ACTIVATE', 'QOIL', 'QWATER', 'QGAS', 'WELL']
         clear_attributes = ['CLEAR', 'CLEARQ', 'CLEARP', 'CLEARLIMIT', 'CLEARALQ']
+
+        if headers:
+            warnings.warn('Headers is currently not used in the constraint to line call')
 
         if self.name is not None:
             constraint_string = self.name
@@ -378,7 +373,7 @@ class NexusConstraint(Constraint):
         else:
             raise ValueError('Must have a well or node name for returning a constraint to a string')
 
-        for attribute, value in self.to_dict(keys_in_nexus_style=True).items():
+        for attribute, value in self.to_dict(keys_in_keyword_style=True).items():
             if value and attribute in qmult_control_key_words:
                 constraint_string += (' ' + attribute.replace('_MULT', '') + ' MULT')
             elif value is None or attribute in skip_attributes:
