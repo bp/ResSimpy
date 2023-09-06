@@ -691,7 +691,7 @@ class NexusSimulator(Simulator):
         self.model_files.update_fcs_file(new_file_path, new_include_file_location,
                                          write_out_all_files, preserve_file_names)
 
-    def update_simulator_to_file(self) -> None:
+    def update_simulator_files(self) -> None:
         """Updates the simulator with any changes to the included files. Overwrites existing files."""
         self.model_files.update_fcs_file(new_file_path=None, new_include_file_location=None,
                                          write_out_all_files=False, preserve_file_names=False)
