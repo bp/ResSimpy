@@ -72,15 +72,15 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker, fixture_for_
     # Act
     with pytest.raises(ValueError) as ve:
         constraints.find_by_properties('well1', find_constraint_dict)
-        assert "Instead found: 3 matching constraints" in str(ve.value)
+    assert "Instead found: 3 matching constraints" in str(ve.value)
 
     with pytest.raises(ValueError) as ve:
         constraints.find_by_properties('well1', no_matching_constraints_dict)
-        assert "Instead found: 0 matching constraints" in str(ve.value)
+    assert "Instead found: 0 matching constraints" in str(ve.value)
 
     with pytest.raises(ValueError) as ve:
         constraints.find_by_properties('well1', too_many_constraints)
-        assert "Instead found: 0 matching constraints" in str(ve.value)
+    assert "Instead found: 0 matching constraints" in str(ve.value)
 
 
 @pytest.mark.parametrize("file_contents, expected_result_file, constraint_to_remove, expected_constraints, expected_number_writes", [
@@ -244,8 +244,10 @@ def test_remove_constraint(mocker, fixture_for_osstat_pathlib, file_contents, ex
     assert result == expected_constraint_dict
     assert result['well1'] == expected_constraint_dict['well1']
     assert result['well2'] == expected_constraint_dict['well2']
-    assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_result_file.splitlines(keepends=True)
-
+    check_file_read_write_is_correct(expected_file_contents=expected_result_file,
+                                     modifying_mock_open=writing_mock_open,
+                                     mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
+                                     number_of_writes=expected_number_writes)
 
 @pytest.mark.parametrize("file_contents, expected_file_contents, new_constraint, expected_number_writes, expected_uuid", [
     # basic_test
@@ -570,18 +572,22 @@ def test_modify_constraints(mocker, fixture_for_osstat_pathlib, file_contents, e
     assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
     assert nexus_sim.model_files.surface_files[1].object_locations == expected_uuid
 
-@pytest.mark.parametrize('current_constraint, new_constraint',[
+@pytest.mark.parametrize('current_constraint, new_constraint, error_msg',[
 # well name not found
 ({'name': 'well1', 'date': '01/01/2019', 'max_surface_oil_rate': 10},
-{'name': 'well1', 'date': '01/01/2019', 'max_surface_oil_rate': 1000.0}),
+{'name': 'well1', 'date': '01/01/2019', 'max_surface_oil_rate': 1000.0},
+ "No constraints found with name='well1'"),
 
 # constraint not matching
 ({'name': 'well_not_found', 'date': '01/01/2019', 'max_surface_oil_rate': 10},
-{'name': 'well_not_found', 'date': '01/01/2019', 'max_surface_oil_rate': 1000.0}),
+{'name': 'well_not_found', 'date': '01/01/2019', 'max_surface_oil_rate': 1000.0},
+ 'No unique matching constraints with the properties provided.Instead found: 0 matching constraints.'
+ ),
 
 ], ids=['well name not', 'constraint not matching']
 )
-def test_modify_constraint_no_constraint_found(mocker, fixture_for_osstat_pathlib, current_constraint, new_constraint):
+def test_modify_constraint_no_constraint_found(mocker, fixture_for_osstat_pathlib, current_constraint, new_constraint,
+                                               error_msg):
     # Arrange
     fcs_file_contents = '''
         RUN_UNITS ENGLISH
@@ -614,8 +620,8 @@ def test_modify_constraint_no_constraint_found(mocker, fixture_for_osstat_pathli
                                                     'uuid4', 'uuid5', 'uuid6', 'uuid7'])
     # Act
     with pytest.raises(ValueError) as ve:
-        nexus_sim.network.constraints.modify('well1', current_constraint, new_constraint)
-
+        nexus_sim.network.constraints.modify(current_constraint['name'], current_constraint, new_constraint)
+    assert str(ve.value) == error_msg
 
 def test_add_constraint_no_name_given(mocker, fixture_for_osstat_pathlib):
     # Arrange
@@ -629,7 +635,7 @@ def test_add_constraint_no_name_given(mocker, fixture_for_osstat_pathlib):
     # Act and Assert
     with pytest.raises(ValueError) as ve:
         constraints.add(constraint_to_add={'max_surface_oil_rate': 10}, name=None)
-        assert str(ve) == 'Input arguments or constraint_to_add dictionary must contain a name for the node.'
+    assert str(ve.value) == 'Input arguments or constraint_to_add dictionary must contain a name for the node.'
     with pytest.raises(ValueError) as ve:
         constraints.add(constraint_to_add=empty_constraint, name=None)
-        assert str(ve) == 'No name found in the provided constraint object.'
+    assert str(ve.value) == 'No name found in the provided constraint object.'
