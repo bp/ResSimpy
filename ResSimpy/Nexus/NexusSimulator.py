@@ -674,3 +674,24 @@ class NexusSimulator(Simulator):
     def load_network(self):
         """Populates nodes and connections from a surface file."""
         self._network.load()
+
+    def write_out_new_simulator(self, new_file_path: str, new_include_file_location: str,
+                                write_out_all_files: bool = True, preserve_file_names: bool = True) -> None:
+        """Creates a set of simulator files.
+
+        Args:
+            new_file_path (str): Path to save the new simulator to.
+            new_include_file_location (str): Saves included files to a path either absolute or relative to the
+            file path provided.
+            write_out_all_files (bool): Defaults to False. If False writes out only changed files.
+            preserve_file_names (bool): Defaults to False. If True will derive names from the existing fcs_file.
+            If False will derive new names from the new fcs file name and the property it represents in Nexus.
+        """
+
+        self.model_files.update_fcs_file(new_file_path, new_include_file_location,
+                                         write_out_all_files, preserve_file_names)
+
+    def update_simulator_to_file(self) -> None:
+        """Updates the simulator with any changes to the included files. Overwrites existing files."""
+        self.model_files.update_fcs_file(new_file_path=None, new_include_file_location=None,
+                                         write_out_all_files=False, preserve_file_names=False)
