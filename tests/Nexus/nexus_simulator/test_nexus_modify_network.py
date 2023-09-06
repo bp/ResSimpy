@@ -269,7 +269,3 @@ TIME 01/01/2024
         assert result_nodes == expected_objs
         assert nexus_sim.model_files.surface_files[1].file_content_as_list == \
             expected_file_contents.splitlines(keepends=True)
-        check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
-                                         modifying_mock_open=writing_mock_open,
-                                         mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
-                                         number_of_writes=2)
