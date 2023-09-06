@@ -3,6 +3,7 @@ from uuid import uuid4, UUID
 from dataclasses import dataclass, field
 from typing import Optional
 from ResSimpy.FileBase import FileBase
+import uuid
 
 
 @dataclass
@@ -27,10 +28,15 @@ class File(FileBase):
             self.file_content_as_list = []
         else:
             self.file_content_as_list = file_content_as_list
+        self.__id = uuid.uuid4()
         self.__file_modified = False
 
     def write_to_file(self, new_file_path: None | str = None) -> None:
-        """Writes to file specified in self.location the strings contained in the list self.file_content_as_list."""
+        """Writes to file specified in self.location the strings contained in the list self.file_content_as_list.
+
+        Args:
+            new_file_path (None | str): writes to self.location if left as None. Otherwise writes to new_file_name.
+        """
         if new_file_path is not None:
             self.location = new_file_path
         if self.location is None:

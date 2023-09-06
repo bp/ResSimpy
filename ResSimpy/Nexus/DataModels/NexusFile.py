@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os.path
-import uuid
 from dataclasses import dataclass, field
 from typing import Optional, Generator
 
@@ -71,7 +70,6 @@ class NexusFile(File):
             self.object_locations: dict[UUID, list[int]] = get_empty_dict_uuid_list_int()
         if self.line_locations is None:
             self.line_locations = []
-        self.file_id = uuid.uuid4()
         self.linked_user = linked_user
         self.last_modified = last_modified
 
@@ -281,7 +279,7 @@ class NexusFile(File):
             file_index.index += 1
             yield prefix_line
 
-        new_entry = (file_index.index, self.file_id)
+        new_entry = (file_index.index, self.id)
         if new_entry not in parent.line_locations:
             parent.line_locations.append(new_entry)
         depth: int = 0
@@ -331,7 +329,7 @@ class NexusFile(File):
                     yield from include_file.iterate_line(file_index=file_index, max_depth=level_down_max_depth,
                                                          parent=parent, prefix_line=prefix_line)
 
-                    new_entry = (file_index.index, self.file_id)
+                    new_entry = (file_index.index, self.id)
                     if new_entry not in parent.line_locations:
                         parent.line_locations.append(new_entry)
                     if suffix_line:
@@ -493,17 +491,17 @@ class NexusFile(File):
 
         index_in_included_file += lines_already_included
 
-        if uuid_index == self.file_id or self.include_objects is None:
+        if uuid_index == self.id or self.include_objects is None:
             return self, index_in_included_file
 
         nexus_file = None
         for file in self.include_objects:
-            if file.file_id == uuid_index:
+            if file.id == uuid_index:
                 nexus_file = file
             elif file.include_objects is not None:
                 # CURRENTLY THIS ONLY SUPPORTS 2 LEVELS OF INCLUDES
                 for lvl_2_include in file.include_objects:
-                    if lvl_2_include.file_id == uuid_index:
+                    if lvl_2_include.id == uuid_index:
                         nexus_file = lvl_2_include
         if nexus_file is None:
             raise ValueError(f'No file with {uuid_index=} found within include objects')
@@ -632,3 +630,87 @@ class NexusFile(File):
         if self.object_locations is None or len(self.object_locations[id]) == 0:
             raise ValueError(f'No object locations specified, cannot find id: {id} in {self.object_locations}')
         return self.object_locations[id]
+
+    def write_to_file(self, new_file_path: None | str = None, write_includes: bool = False,
+                      write_out_all_files: bool = False) -> None:
+        """Writes to file specified in self.location the strings contained in the list self.file_content_as_list.
+
+        Args:
+            new_file_path (None | str): writes to self.location if left as None. Otherwise writes to new_file_name.
+            write_includes (bool): If True will write out all include files within the file. Defaults to False.
+            write_out_all_files (bool): If False will write only modified files. Otherwise will write all files.
+        """
+        # overwrite File base class method to allow for write_includes
+        if new_file_path is None and self.location is not None:
+            # In this case just overwrite the file with the existing path:
+            new_file_path = self.location
+        elif new_file_path is None:
+            raise ValueError(f'No file path to write to, instead found {self.location}')
+        if self.file_content_as_list is None:
+            raise ValueError(f'No file data to write out, instead found {self.file_content_as_list}')
+        if write_includes and self.include_objects is not None:
+            for file in self.include_objects:
+                write_file: bool = file.file_modified or write_out_all_files
+                if new_file_path is None:
+                    # if the base file has no new name then just overwrite the include file
+                    include_file_name = None
+                else:
+                    if file.location is None or file.file_content_as_list is None:
+                        warnings.warn(f'No location found for file: {file}. Not writing file.')
+                        continue
+                    new_root_name = f'{os.path.basename(new_file_path).split(".")[0]}_{os.path.basename(file.location)}'
+                    # write the include file to the same directory.
+                    include_file_name = os.path.join(os.path.dirname(new_file_path), new_root_name)
+                    if write_file:
+                        self.update_include_location_in_file_as_list(include_file_name, file)
+                if write_file:
+                    file.write_to_file(include_file_name, write_includes=True, write_out_all_files=write_out_all_files)
+
+        file_str = ''.join(self.file_content_as_list)
+
+        # update the location:
+        if self.file_modified or write_out_all_files:
+            self.location = new_file_path
+            with open(new_file_path, 'w') as fi:
+                fi.write(file_str)
+
+            # reset the modified file state
+            self._file_modified_set(False)
+
+    def update_include_location_in_file_as_list(self, new_path: str, include_file: NexusFile) -> None:
+        """Updates the path of an include file within this file's file_as_list.
+
+        Args:
+            new_path (str): Updates the path in the file as list to point towards the new include location.
+            include_file (NexusFile): include object whose path is being modified
+        """
+        # try and find the path of the file that should be replaced (i.e. how it is currently written in the file)
+        if self.include_locations is None or not self.include_locations or include_file.location is None\
+                or include_file.input_file_location is None:
+            raise ValueError('No include locations found and therefore cannot update include path')
+        file_path_to_replace = include_file.input_file_location
+        file_content = self.file_content_as_list
+        if file_content is None or not file_content:
+            raise ValueError(f'No file content found within file {self.location}')
+
+        for line in file_content:
+            if not nfo.check_token('INCLUDE', line):
+                continue
+            # if the right path to replace is found then replace it
+            if nfo.get_expected_token_value('INCLUDE', line, file_content) == file_path_to_replace:
+                nfo.get_expected_token_value('INCLUDE', line, file_content, replace_with=new_path)
+                self._file_modified_set(True)
+        # replace the location in the include locations list using the original path
+
+        index_of_path_to_replace = self.include_locations.index(include_file.location)
+        # get the full path and update it in the include file object
+        # TODO maybe include this in a setter attr for the location.
+        if self.location is None:
+            include_file.location = new_path
+        else:
+            include_file.location = nfo.get_full_file_path(new_path, self.location)
+        if include_file.location is None:
+            raise ValueError('Include file location cannot be None.')
+        self.include_locations[index_of_path_to_replace] = include_file.location
+        # update the new path
+        include_file.input_file_location = new_path
