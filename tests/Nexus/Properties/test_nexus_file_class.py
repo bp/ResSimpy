@@ -826,16 +826,16 @@ def test_remove_from_file_as_list(mocker):
 
 @pytest.mark.parametrize('file_content, expected_file_content', [
     (
-        'test_file_content\nInCluDE original_include.inc\nend of the file\n',
-        'test_file_content\nInCluDE new_file_path.inc\nend of the file\n',
+        'test_file_content\nInCluDE oRigINAl_Include.inc\nend of the file\n',
+        'test_file_content\nInCluDE New_FiLe_Path.inc\nend of the file\n',
     ),
     (
-        'test_file_content\nInCluDE\noriginal_include.inc\nend of the file\n',
-        'test_file_content\nInCluDE\nnew_file_path.inc\nend of the file\n',
+        'test_file_content\nInCluDE\noRigINAl_Include.inc\nend of the file\n',
+        'test_file_content\nInCluDE\nNew_FiLe_Path.inc\nend of the file\n',
     ),
     (
-        'test_file_content\nInCluDE /abs_path/original_include.inc\nend of the file\n',
-        'test_file_content\nInCluDE new_file_path.inc\nend of the file\n',
+        'test_file_content\nInCluDE /abs_path/oRigINAl_Include.inc\nend of the file\n',
+        'test_file_content\nInCluDE New_FiLe_Path.inc\nend of the file\n',
     )
 ], ids=['basic', 'on another line', 'next line'])
 def test_update_include_location_in_file_as_list(mocker, fixture_for_osstat_pathlib, file_content, expected_file_content):
@@ -844,23 +844,23 @@ def test_update_include_location_in_file_as_list(mocker, fixture_for_osstat_path
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             file_path: file_content,
-            '/root/original_include.inc': 'inc file contents',
-            '/abs_path/original_include.inc': 'inc file contents',
+            '/root/oRigINAl_Include.inc': 'inc file contents',
+            '/abs_path/oRigINAl_Include.inc': 'inc file contents',
         }).return_value
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
     nexus_file = NexusFile.generate_file_include_structure(file_path)
 
-    new_file_path = 'new_file_path.inc'
+    new_file_path = 'New_FiLe_Path.inc'
     include_file = nexus_file.include_objects[0]
-    expected_path = os.path.join('/root', 'new_file_path.inc')
+    expected_path = os.path.join('/root', 'New_FiLe_Path.inc')
     # Act
     nexus_file.update_include_location_in_file_as_list(new_file_path, include_file)
     # Assert
     assert nexus_file.file_content_as_list == expected_file_content.splitlines(keepends=True)
     assert nexus_file.include_locations == [expected_path]
     assert include_file.location == expected_path
-    assert include_file.input_file_location == 'new_file_path.inc'
+    assert include_file.input_file_location == 'New_FiLe_Path.inc'
 
 
 def test_write_to_file(mocker, fixture_for_osstat_pathlib):
