@@ -49,3 +49,8 @@ def test_write_out_new_simulator(mocker, fixture_for_osstat_pathlib):
     assert list_of_writes[-1].args[0] == expected_fcs_file_contents
     assert list_of_writes[0].args[0] == runcontrol_contents
     assert list_of_writes[1].args[0] == ''
+
+    # assert we are writing to the correct file
+    assert writing_mock_open.call_args_list[-1][0][0] == '/new_path/new_fcs_file.fcs'
+    assert writing_mock_open.call_args_list[0][0][0] == expected_runcontrol_path
+    assert writing_mock_open.call_args_list[1][0][0] == expected_surface_path
