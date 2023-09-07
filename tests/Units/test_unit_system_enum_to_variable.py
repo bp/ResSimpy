@@ -1,6 +1,7 @@
 import pytest
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.Units.Units import Area, AttributeUnitDimension
+from ResSimpy.Units.Units import Area
+from ResSimpy.Units.AttributeMapping import ConstraintUnits
 
 
 @pytest.mark.parametrize('unit_system, expected_result', [
@@ -37,7 +38,7 @@ def test_unit_system_enum_to_variable(unit_system, expected_result):
 def test_get_unit(attribute, unit_system, expected_result):
     """Tests the get_unit method."""
     # Arrange
-    unit_dimension = AttributeUnitDimension()
+    unit_dimension = ConstraintUnits()
 
     # Act
     result = unit_dimension.get_unit_from_attribute(unit_system=unit_system, attribute_name=attribute)
@@ -47,9 +48,8 @@ def test_get_unit(attribute, unit_system, expected_result):
 def test_get_unit_error():
     """Tests the get_unit method."""
     # Arrange
-    unit_dimension = AttributeUnitDimension()
+    unit_dimension = ConstraintUnits()
 
     # Act
     with pytest.raises(ValueError):
         unit_dimension.get_unit_from_attribute(unit_system=UnitSystem.ENGLISH, attribute_name='not_an_attribute')
-
