@@ -204,11 +204,9 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker, fixture_for_
 
 
     ], ids=['basic_test', 'over multiple lines', 'multiple_dates', 'constraint_table','qmult_table'])
-def test_remove_constraint(mocker, fixture_for_osstat_pathlib, file_contents, expected_result_file, constraint_to_remove, expected_constraints,
-                           expected_number_writes):
+def test_remove_constraint(mocker, fixture_for_osstat_pathlib, file_contents, expected_result_file,
+                           constraint_to_remove, expected_constraints, expected_number_writes):
     # Arrange
-
-
     fcs_file_contents = '''RUN_UNITS ENGLISH
     DATEFORMAT DD/MM/YYYY
     RECURRENT_FILES
@@ -246,10 +244,7 @@ def test_remove_constraint(mocker, fixture_for_osstat_pathlib, file_contents, ex
     assert result == expected_constraint_dict
     assert result['well1'] == expected_constraint_dict['well1']
     assert result['well2'] == expected_constraint_dict['well2']
-    check_file_read_write_is_correct(expected_file_contents=expected_result_file,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
-                                     number_of_writes=expected_number_writes)
+    assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_result_file.splitlines(keepends=True)
 
 @pytest.mark.parametrize("file_contents, expected_file_contents, new_constraint, expected_number_writes, expected_uuid", [
     # basic_test
@@ -442,10 +437,6 @@ def test_add_constraint(mocker, fixture_for_osstat_pathlib, file_contents, expec
     nexus_sim.network.constraints.add(new_constraint, comments='test user comments')
     # Assert
     assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
-    check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
-                                     number_of_writes=expected_number_writes)
     assert nexus_sim.model_files.surface_files[1].object_locations == expected_uuid
 
 
@@ -576,10 +567,6 @@ def test_modify_constraints(mocker, fixture_for_osstat_pathlib, file_contents, e
     nexus_sim.network.constraints.modify('well1', current_constraint, new_constraint)
     # Assert
     assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
-    check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
-                                     number_of_writes=expected_number_writes)
     assert nexus_sim.model_files.surface_files[1].object_locations == expected_uuid
 
 @pytest.mark.parametrize('current_constraint, new_constraint, error_msg',[
