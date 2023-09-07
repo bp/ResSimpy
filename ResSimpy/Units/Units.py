@@ -45,12 +45,12 @@ Volume	ft3	m3	m3  m3	cc
 @dataclass
 class UnitDimension(ABC):
     """Class for handling the mapping between unit systems and the units used for that unit system."""
-    english = None
-    metric = None
-    lab = None
-    metkgcm2 = None
-    metbar = None
-    metric_atm = None
+    english: str = ''
+    metric: str = ''
+    lab: str = ''
+    metkgcm2: str = ''
+    metbar: str = ''
+    metric_atm: str = ''
 
     def unit_system_enum_to_variable(self, unit_system: UnitSystem) -> str:
         """Returns the unit variable for the given unit system."""

@@ -2,8 +2,9 @@ from abc import ABC
 from typing import Mapping
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.Units.Units import SurfaceRatesLiquid, SurfaceRatesGas, ReservoirRates, MolarRates, Pressure, Temperature, \
-    SaturationFraction, GasLiquidRatio, LiquidGasRatio, SurfaceVolumesGas, SurfaceVolumesLiquid, UnitDimension
+from ResSimpy.Units.Units import (SurfaceRatesLiquid, SurfaceRatesGas, ReservoirRates, MolarRates, Pressure,
+                                  Temperature, SaturationFraction, GasLiquidRatio, LiquidGasRatio, SurfaceVolumesGas,
+                                  SurfaceVolumesLiquid, UnitDimension)
 
 
 class AttributeMapBase(ABC):
@@ -100,4 +101,3 @@ class ConstraintUnits(AttributeMapBase):
         'qmult_water_rate': SurfaceRatesLiquid(),
         'qmult_gas_rate': SurfaceRatesGas(),
     }
-
