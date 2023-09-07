@@ -5,6 +5,7 @@ from typing import Optional
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.DataObjectMixin import DataObjectMixin
+from ResSimpy.Units.AttributeMapping import NodeUnits, AttributeMapBase
 
 
 @dataclass
@@ -14,3 +15,8 @@ class Node(DataObjectMixin, ABC):
     depth: Optional[float] = None
     date: Optional[str] = None
     unit_system: Optional[UnitSystem] = None
+
+    @property
+    def attribute_to_unit_map(self) -> AttributeMapBase:
+        """Returns the attribute to unit map for the constraint."""
+        return NodeUnits()

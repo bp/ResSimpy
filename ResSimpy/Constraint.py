@@ -7,10 +7,12 @@ from typing import Optional
 
 from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Units.AttributeMapping import ConstraintUnits, AttributeMapBase
 
 
 @dataclass
 class Constraint(DataObjectMixin, ABC):
+    """Base class object for storing data related to well and node constraints."""
     name: Optional[str] = None
     date: Optional[str] = None
     unit_system: Optional[UnitSystem] = None
@@ -22,3 +24,8 @@ class Constraint(DataObjectMixin, ABC):
     max_reservoir_gas_rate: Optional[float] = None
     max_reservoir_water_rate: Optional[float] = None
     max_reservoir_liquid_rate: Optional[float] = None
+
+    @property
+    def attribute_to_unit_map(self) -> AttributeMapBase:
+        """Returns the attribute to unit map for the constraint."""
+        return ConstraintUnits()

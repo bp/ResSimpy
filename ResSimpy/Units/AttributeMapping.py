@@ -1,13 +1,16 @@
+"""Handling the mapping between ResSimpy attributes and the unit type of the attribute."""
 from abc import ABC
 from typing import Mapping
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Units.Units import (SurfaceRatesLiquid, SurfaceRatesGas, ReservoirRates, MolarRates, Pressure,
                                   Temperature, SaturationFraction, GasLiquidRatio, LiquidGasRatio, SurfaceVolumesGas,
-                                  SurfaceVolumesLiquid, UnitDimension)
+                                  SurfaceVolumesLiquid, UnitDimension, Length, Roughness, Diameter, HeatTransfer,
+                                  Dimensionless)
 
 
 class AttributeMapBase(ABC):
+    """Base class for handling the mapping between ResSimpy attributes and the unit type of the attribute."""
     attribute_map: Mapping[str, UnitDimension]
 
     def get_unit_from_attribute(self, attribute_name: str, unit_system: UnitSystem, uppercase: bool = False) -> str:
@@ -101,3 +104,32 @@ class ConstraintUnits(AttributeMapBase):
         'qmult_water_rate': SurfaceRatesLiquid(),
         'qmult_gas_rate': SurfaceRatesGas(),
     }
+
+
+class NodeUnits(AttributeMapBase):
+    """Unit types for the attributes of a node."""
+    attribute_map: Mapping[str, UnitDimension] = {
+        'depth': Length(),
+        'x_pos': Length(),
+        'y_pos': Length(),
+        'temp': Temperature(),
+    }
+
+
+class ConnectionUnits(AttributeMapBase):
+    """Unit types for the attributes of a connection."""
+    attribute_map: Mapping[str, UnitDimension] = {
+        'length': Length(),
+        'depth': Length(),
+        'measured_depth_in': Length(),
+        'measured_depth_out': Length(),
+        'diameter': Diameter(),
+        'inner_diameter': Diameter(),
+        'roughness': Roughness(),
+        'heat_transfer_coeff': HeatTransfer(),
+        'delta_depth': Length(),
+        'rate_mult': Dimensionless(),
+        'dp_add': Pressure(),
+        'dt_add': Temperature(),
+    }
+

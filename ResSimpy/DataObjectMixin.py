@@ -1,7 +1,10 @@
+"""Base class representing a data object in ResSimpy."""
 import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
+from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Units.AttributeMapping import AttributeMapBase
 from ResSimpy.Utils import to_dict_generic
 from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.Utils.obj_to_table_string import to_table_line
@@ -59,3 +62,23 @@ class DataObjectMixin(ABC):
 
     def __repr__(self) -> str:
         return generic_repr(self)
+
+    @property
+    def attribute_to_unit_map(self) -> AttributeMapBase:
+        raise NotImplementedError("Implement this in the derived class")
+
+    def get_unit_for_attribute(self, attribute_name: str, unit_system: UnitSystem, uppercase: bool = False) -> str:
+        """Returns the unit variable for the given unit system.
+
+        Args:
+            attribute_name (str): name of the attribute to get the unit for
+            unit_system (UnitSystem): unit system to get the unit for
+            uppercase (bool): if True returns the unit in uppercase
+        """
+        unit_dimension = self.attribute_to_unit_map.attribute_map.get(attribute_name, None)
+        if unit_dimension is None:
+            raise AttributeError(f'Attribute {attribute_name} not recognised and does not have a unit definition')
+        unit = unit_dimension.unit_system_enum_to_variable(unit_system=unit_system)
+        if uppercase:
+            unit = unit.upper()
+        return unit

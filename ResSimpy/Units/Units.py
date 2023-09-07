@@ -42,7 +42,6 @@ Volume	ft3	m3	m3  m3	cc
 """
 
 
-@dataclass
 class UnitDimension(ABC):
     """Class for handling the mapping between unit systems and the units used for that unit system."""
     english: str = ''
@@ -85,9 +84,9 @@ class AcousticImpedance(UnitDimension):
     """Units for acoustic impedance."""
     english = 'ft/sec·(g/cm3)'
     metric = 'm/sec·(kg/m3)'
-    lab = 'cm/sec·(g/cm3)'
     metkgcm2 = 'm/sec·(kg/m3)'
     metbar = 'm/sec·(kg/m3)'
+    lab = 'cm/sec·(g/cm3)'
     metric_atm = 'm/sec·(kg/m3)'
 
 
@@ -407,3 +406,41 @@ class LiquidGasRatio(UnitDimension):
     metbar = 'STM3/SM3'
     lab = 'stcc/stcc'
     metric_atm = 'STM3/SM3'
+
+
+class Roughness(UnitDimension):
+    """Roughness units."""
+    english = 'in'
+    metric = 'mm'
+    metkgcm2 = 'mm'
+    metbar = 'mm'
+    lab = 'mm'
+    metric_atm = 'mm'
+
+
+class Diameter(UnitDimension):
+    """Diameter units."""
+    english = 'in'
+    metric = 'cm'
+    metkgcm2 = 'cm'
+    metbar = 'cm'
+    lab = 'cm'
+    metric_atm = 'cm'
+
+
+class HeatTransfer(UnitDimension):
+    """Heat transfer units."""
+    english = 'BTU/(hr*ft²*F)'
+    metric = 'W/(m2*K)'
+    metkgcm2 = 'W/(m2*K)'
+    metbar = 'W/(m2*K)'
+    lab = 'W/(cm2*K)'
+    metric_atm = 'W/(m2*K)'
+
+class Dimensionless(UnitDimension):
+    english = ''
+    metric = ''
+    metkgcm2 = ''
+    metbar = ''
+    lab = ''
+    metric_atm = ''
