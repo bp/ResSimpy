@@ -688,8 +688,10 @@ class NexusSimulator(Simulator):
             If False will derive new names from the new fcs file name and the property it represents in Nexus.
         """
 
-        self.model_files.update_fcs_file(new_file_path, new_include_file_location,
-                                         write_out_all_files, preserve_file_names)
+        self.model_files.update_fcs_file(new_file_path=new_file_path,
+                                         new_include_file_location=new_include_file_location,
+                                         write_out_all_files=write_out_all_files,
+                                         preserve_file_names=preserve_file_names)
 
     def update_simulator_files(self) -> None:
         """Updates the simulator with any changes to the included files. Overwrites existing files."""
