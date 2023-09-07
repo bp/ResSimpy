@@ -4,6 +4,7 @@ from typing import Optional
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.DataObjectMixin import DataObjectMixin
+from ResSimpy.Units.AttributeMapping import WellConnectionUnits, AttributeMapBase
 
 
 class WellConnection(DataObjectMixin, ABC):
@@ -21,3 +22,8 @@ class WellConnection(DataObjectMixin, ABC):
     roughness: Optional[float] = None
     inner_diameter: Optional[float] = None
     productivity_index: Optional[float] = None
+
+    @property
+    def attribute_to_unit_map(self) -> AttributeMapBase:
+        """Returns the attribute to unit map for the WellConnection."""
+        return WellConnectionUnits()

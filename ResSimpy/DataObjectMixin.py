@@ -65,6 +65,7 @@ class DataObjectMixin(ABC):
 
     @property
     def attribute_to_unit_map(self) -> AttributeMapBase:
+        """Returns the attribute to unit map for the data object."""
         raise NotImplementedError("Implement this in the derived class")
 
     def get_unit_for_attribute(self, attribute_name: str, unit_system: UnitSystem, uppercase: bool = False) -> str:

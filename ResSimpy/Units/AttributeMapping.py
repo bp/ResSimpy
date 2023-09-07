@@ -133,3 +133,36 @@ class ConnectionUnits(AttributeMapBase):
         'dt_add': Temperature(),
     }
 
+
+class WellConnectionUnits(AttributeMapBase):
+    """Unit types for the attributes of a well connection."""
+    attribute_map: Mapping[str, UnitDimension] = {
+        'bhdepth': Length(),
+        'datum_depth': Length(),
+        'x_pos': Length(),
+        'y_pos': Length(),
+        'length': Length(),
+        'temperature': Temperature(),
+        'diameter': Diameter(),
+        'roughness': Roughness(),
+        'inner_diameter': Diameter(),
+        'productivity_index': ReservoirRates(),
+        'rate_mult': Dimensionless(),
+        'dp_add': Pressure(),
+        'dt_add': Temperature(),
+        'water_inj_mult': Dimensionless(),
+        'vip_productivity_index': ReservoirRates(),
+        'd_factor': Dimensionless(),
+        'gas_mobility': Dimensionless(),
+        'drill_order_benefit': Dimensionless(),
+        'heat_transfer_coeff': HeatTransfer(),
+        'non_darcy_flow_model': Dimensionless(),
+        'non_darcy_flow_method': Dimensionless(),
+        'capillary_number_model': Dimensionless(),
+        'on_time': Dimensionless(),
+        'crossflow': Dimensionless(),
+        'crossshut_method': Dimensionless(),
+        'inj_mobility': Dimensionless(),
+        'temperature_profile': Dimensionless(),
+        'elevation_profile': Dimensionless(),
+    }

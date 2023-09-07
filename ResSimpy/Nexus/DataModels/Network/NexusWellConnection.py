@@ -39,8 +39,8 @@ class NexusWellConnection(WellConnection):
         heat_transfer_coeff (float): COMMENT (HTC)
         water_inj_mult (float): COMMENT (WIMULT)
         productivity_index (float): COMMENT (PI)
-        vip_productivity_index (float): COMMENT (VIPPI)
-        productivity_index_phase (float): COMMENT (PIPHASE)
+        vip_productivity_index (str): COMMENT (VIPPI)
+        productivity_index_phase (str): COMMENT (PIPHASE)
         d_factor (float): COMMENT (D)
         non_darcy_flow_model (str): COMMENT (ND)
         non_darcy_flow_method (str): COMMENT (DPERF)
@@ -79,7 +79,7 @@ class NexusWellConnection(WellConnection):
     heat_transfer_coeff: Optional[float] = None
     water_inj_mult: Optional[float] = None
     vip_productivity_index: Optional[float] = None
-    productivity_index_phase: Optional[float] = None
+    productivity_index_phase: Optional[str] = None
     d_factor: Optional[float] = None
     non_darcy_flow_model: Optional[str] = None
     non_darcy_flow_method: Optional[str] = None
