@@ -12,8 +12,8 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     ('''TIME 01/01/2019
     TARGET
     NAME    CTRL   CTRLCOND   CTRLCONS   CTRLMETHOD   CALCMETHOD   CALCCOND   CALCCONS   VALUE   ADDVALUE   REGION   PRIORITY   QMIN   QMIN_NOSHUT   QGUIDE   MAXDPDT   RANKDT   CTRLTYPE   CALCTYPE
-    target1   control1   ctrlcnd1   ctrlcons1   ctrlmthd1   calcmthd1   calccond1   calccons1   1.0   11.0   region1   1   1.5   1.8   1.9   1.6   0.9   type1   ctype1
-    target2   control2   ctrlcnd2   ctrlcons2   ctrlmthd2   calcmthd2   calccond2   calccons2   2.0   21.0   region2   2   2.5   2.8   2.9   2.6   1.9   type2   ctype2
+    target1   control1   ctrlcnd1   ctrlcons1   ctrlmthd1   calcmthd1   calccond1   calccons1   1.0   11.0   region1   1   1.5   1.8   Formula  1.6   0.9   type1   ctype1
+    target2   control2   ctrlcnd2   ctrlcons2   ctrlmthd2   calcmthd2   calccond2   calccons2   2.0   21.0   region2   2   2.5   2.8   NA   2.6   1.9   type2   ctype2
     ENDTARGET'''
     )
     ],ids=['basic_test'])
