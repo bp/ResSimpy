@@ -22,7 +22,7 @@ class Target(DataObjectMixin, ABC):
     priority: Optional[int] = None
     minimum_rate: Optional[str] = None
     minimum_rate_no_shut: Optional[float] = None
-    guide_rate: Optional[float] = None
+    guide_rate: Optional[str] = None
     max_change_pressure: Optional[float] = None
     rank_dt: Optional[float] = None
     control_type: Optional[str] = None
