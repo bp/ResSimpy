@@ -1,6 +1,5 @@
 """Class for handling the mapping between unit systems and the units used for that unit system."""
 from abc import ABC
-from dataclasses import dataclass
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 
@@ -436,6 +435,7 @@ class HeatTransfer(UnitDimension):
     metbar = 'W/(m2*K)'
     lab = 'W/(cm2*K)'
     metric_atm = 'W/(m2*K)'
+
 
 class Dimensionless(UnitDimension):
     english = ''

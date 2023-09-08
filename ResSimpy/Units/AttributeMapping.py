@@ -6,7 +6,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Units.Units import (SurfaceRatesLiquid, SurfaceRatesGas, ReservoirRates, MolarRates, Pressure,
                                   Temperature, SaturationFraction, GasLiquidRatio, LiquidGasRatio, SurfaceVolumesGas,
                                   SurfaceVolumesLiquid, UnitDimension, Length, Roughness, Diameter, HeatTransfer,
-                                  Dimensionless)
+                                  Dimensionless, Time)
 
 
 class AttributeMapBase(ABC):
@@ -142,5 +142,34 @@ class NetworkNodesConnections(AttributeMapBase):
         'measured_depth_out': Length(),
         'delta_depth': Length(),
         'temp': Temperature(),
+        'hyd_method': Dimensionless(),
+        'pvt_method': Dimensionless(),
+        'water_method': Dimensionless(),
+        'bat_method': Dimensionless(),
+        'number': Dimensionless(),
+        'gradient_calc': Dimensionless(),
+        'add_tubing': Dimensionless(),
+        'tracer': Dimensionless(),
+        'con_type': Dimensionless(),
+        'bore_type': Dimensionless(),
 
+        # Units from Target class
+        'control_quantity': Dimensionless(),
+        'control_type': Dimensionless(),
+        'control_condition': Dimensionless(),
+        'control_method': Dimensionless(),
+        'control_connections': Dimensionless(),
+        'calculation_method': Dimensionless(),
+        'calculation_conditions': Dimensionless(),
+        'calculation_connections': Dimensionless(),
+        'value': Dimensionless(),
+        'add_value': Dimensionless(),
+        'region': Dimensionless(),
+        'priority': Dimensionless(),
+        'minimum_rate': Dimensionless(),
+        'minimum_rate_no_shut': Dimensionless(),
+        'guide_rate': Dimensionless(),
+        'max_change_pressure': Pressure(),
+        'rank_dt': Time(),
+        'calculation_type': Dimensionless(),
     }

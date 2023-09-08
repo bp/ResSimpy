@@ -28,6 +28,8 @@ class DataObjectMixin(ABC):
             include_nones (bool):
             keys_in_keyword_style (bool): if True returns the key values as simulator keywords, otherwise returns the \
                 attribute name as stored by ressimpy.
+            add_date (bool): if True adds the date to the dictionary
+            add_units (bool): if True adds the units to the dictionary
 
         Returns:
             a dictionary keyed by attributes and values as the value of the attribute
