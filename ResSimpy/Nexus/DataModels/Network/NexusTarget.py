@@ -34,7 +34,7 @@ class NexusTarget(Target):
             'PRIORITY': ('priority', int),
             'QMIN': ('minimum_rate', float),
             'QMIN_NOSHUT': ('minimum_rate_no_shut', float),
-            'QGUIDE': ('guide_rate', float),
+            'QGUIDE': ('guide_rate', str),
             'MAXDPDT': ('max_change_pressure', float),
             'RANKDT': ('rank_dt', float),
             'CTRLTYPE': ('control_type', str),
