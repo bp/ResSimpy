@@ -44,14 +44,14 @@ def test_read_target(mocker, fixture_for_osstat_pathlib, file_contents):
     target1_props={'name': 'target1', 'control_quantity': 'control1', 'control_conditions': 'ctrlcnd1', 'control_connections': 'ctrlcons1',
       'control_method': 'ctrlmthd1', 'calculation_method': 'calcmthd1', 'calculation_conditions': 'calccond1', 'calculation_connections': 'calccons1',
       'value': 1.0, 'add_value': 11.0, 'region': 'region1', 'priority': 1,
-      'minimum_rate': 1.5, 'minimum_rate_no_shut': 1.8, 'guide_rate': 1.9, 'max_change_pressure': 1.6,
+      'minimum_rate': 1.5, 'minimum_rate_no_shut': 1.8, 'guide_rate': 'Formula', 'max_change_pressure': 1.6,
       'rank_dt': 0.9, 'control_type': 'type1', 'calculation_type': 'ctype1','unit_system': UnitSystem.ENGLISH}
     
       
     target3_props={'date':'01/01/2019','name': 'target3', 'control_quantity': 'control3', 'control_conditions': 'ctrlcnd3', 'control_connections': 'ctrlcons3',
       'control_method': 'ctrlmthd3', 'calculation_method': 'calcmthd3', 'calculation_conditions': 'calccond3', 'calculation_connections': 'calccons3',
       'value': 3.0, 'add_value': 31.0, 'region': 'region3', 'priority': 3,
-      'minimum_rate': 3.5, 'minimum_rate_no_shut': 3.8, 'guide_rate': 3.9, 'max_change_pressure': 3.6,
+      'minimum_rate': 3.5, 'minimum_rate_no_shut': 3.8, 'guide_rate': 'Formula', 'max_change_pressure': 3.6,
       'rank_dt': 4.9, 'control_type': 'type3', 'calculation_type': 'ctype3','unit_system': UnitSystem.ENGLISH}
 
     # Act    
@@ -65,7 +65,7 @@ def test_read_target(mocker, fixture_for_osstat_pathlib, file_contents):
     
     target_dict=target_record.to_dict()
     rec_to_remove=nexus_sim.network.targets.get_by_name('target2').to_dict()
-    nexus_sim.network.targets.remove({'name':rec_to_remove['name']})
+    nexus_sim.network.targets.remove({'name': rec_to_remove['name']})
        
     nexus_sim.network.targets.add(target3_props)
     targets_list_after_add=nexus_sim.network.targets.get_all()
