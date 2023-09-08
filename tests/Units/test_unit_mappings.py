@@ -4,8 +4,9 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
+from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
 from ResSimpy.Units.Units import Area
-from ResSimpy.Units.AttributeMapping import ConstraintUnits
+from ResSimpy.Units.AttributeMappings.ConstraintUnitAttributeMapping import ConstraintUnits
 
 
 @pytest.mark.parametrize('unit_system, expected_result', [
@@ -65,6 +66,7 @@ def test_get_unit_error():
     (NexusConstraint, 'max_surface_water_rate', 'STB/day'),
     (NexusNode, 'depth', 'ft'),
     (NexusNodeConnection, 'diameter', 'in'),
+    (NexusWellbore, 'measured_depth_in', 'ft'),
 ])
 def test_get_unit_for_attribute(data_object, attribute, expected_result):
     """Write a test to check that the DataObjectMixin.get_unit_for_attribute method works as expected."""

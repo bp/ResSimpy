@@ -6,7 +6,8 @@ from typing import Optional
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.DataObjectMixin import DataObjectMixin
-from ResSimpy.Units.AttributeMapping import AttributeMapBase, NetworkNodesConnections
+from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBase
+from ResSimpy.Units.AttributeMappings.NetworkUnitAttributeMapping import NetworkNodesConnections
 
 
 @dataclass
