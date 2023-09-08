@@ -3,7 +3,7 @@ from abc import ABC
 from typing import Mapping
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.Units.Units import (UnitDimension)
+from ResSimpy.Units.Units import UnitDimension
 
 
 class AttributeMapBase(ABC):

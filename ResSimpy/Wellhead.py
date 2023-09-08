@@ -6,7 +6,7 @@ from typing import Optional
 from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBase
-from ResSimpy.Units.AttributeMappings.NetworkUnitAttributeMapping import NetworkNodesConnections
+from ResSimpy.Units.AttributeMappings.NetworkUnitAttributeMapping import NetworkUnits
 
 
 @dataclass
@@ -23,4 +23,4 @@ class Wellhead(DataObjectMixin, ABC):
     @property
     def attribute_to_unit_map(self) -> AttributeMapBase:
         """Returns the attribute to unit map for the WellConnection."""
-        return NetworkNodesConnections()
+        return NetworkUnits()

@@ -438,9 +438,29 @@ class HeatTransfer(UnitDimension):
 
 
 class Dimensionless(UnitDimension):
+    """For attributes which do not have a dimension."""
     english = ''
     metric = ''
     metkgcm2 = ''
     metbar = ''
     lab = ''
     metric_atm = ''
+
+
+class PermeabilityThickness(UnitDimension):
+    """Permeability thickness units."""
+    english = 'md*ft'
+    metric = 'md*m'
+    metkgcm2 = 'md*m'
+    metbar = 'md*m'
+    lab = 'md*m'
+    metric_atm = 'md*m'
+
+class NonDarcySkin(UnitDimension):
+    """Non darcy skin units."""
+    english = 'day/MSCF'
+    metric = 'day/SM3'
+    metkgcm2 = 'day/SM3'
+    metbar = 'day/SM3'
+    lab = 'hour/stcc'
+    metric_atm = 'day/SM3'

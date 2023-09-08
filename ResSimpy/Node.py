@@ -6,7 +6,7 @@ from typing import Optional
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBase
-from ResSimpy.Units.AttributeMappings.NetworkUnitAttributeMapping import NetworkNodesConnections
+from ResSimpy.Units.AttributeMappings.NetworkUnitAttributeMapping import NetworkUnits
 
 
 @dataclass
@@ -20,4 +20,4 @@ class Node(DataObjectMixin, ABC):
     @property
     def attribute_to_unit_map(self) -> AttributeMapBase:
         """Returns the attribute to unit map for the constraint."""
-        return NetworkNodesConnections()
+        return NetworkUnits()

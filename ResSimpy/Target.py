@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBase
-from ResSimpy.Units.AttributeMappings.NetworkUnitAttributeMapping import NetworkNodesConnections
+from ResSimpy.Units.AttributeMappings.NetworkUnitAttributeMapping import NetworkUnits
 
 
 @dataclass
@@ -34,4 +34,4 @@ class Target(DataObjectMixin, ABC):
     @property
     def attribute_to_unit_map(self) -> AttributeMapBase:
         """Returns the attribute to unit map for the WellConnection."""
-        return NetworkNodesConnections()
+        return NetworkUnits()

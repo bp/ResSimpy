@@ -5,7 +5,7 @@ from ResSimpy.Units.Units import UnitDimension, Length, Temperature, Diameter, R
     Pressure, HeatTransfer, Time
 
 
-class NetworkNodesConnections(AttributeMapBase):
+class NetworkUnits(AttributeMapBase):
     """Unit types for the attributes of a well connection, wellhead, wellbore, ."""
     attribute_map: Mapping[str, UnitDimension] = {
         'bhdepth': Length(),
