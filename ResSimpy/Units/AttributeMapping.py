@@ -106,38 +106,11 @@ class ConstraintUnits(AttributeMapBase):
     }
 
 
-class NodeUnits(AttributeMapBase):
-    """Unit types for the attributes of a node."""
-    attribute_map: Mapping[str, UnitDimension] = {
-        'depth': Length(),
-        'x_pos': Length(),
-        'y_pos': Length(),
-        'temp': Temperature(),
-    }
-
-
-class ConnectionUnits(AttributeMapBase):
-    """Unit types for the attributes of a connection."""
-    attribute_map: Mapping[str, UnitDimension] = {
-        'length': Length(),
-        'depth': Length(),
-        'measured_depth_in': Length(),
-        'measured_depth_out': Length(),
-        'diameter': Diameter(),
-        'inner_diameter': Diameter(),
-        'roughness': Roughness(),
-        'heat_transfer_coeff': HeatTransfer(),
-        'delta_depth': Length(),
-        'rate_mult': Dimensionless(),
-        'dp_add': Pressure(),
-        'dt_add': Temperature(),
-    }
-
-
-class WellConnectionUnits(AttributeMapBase):
-    """Unit types for the attributes of a well connection."""
+class NetworkNodesConnections(AttributeMapBase):
+    """Unit types for the attributes of a well connection, wellhead, wellbore, ."""
     attribute_map: Mapping[str, UnitDimension] = {
         'bhdepth': Length(),
+        'depth': Length(),
         'datum_depth': Length(),
         'x_pos': Length(),
         'y_pos': Length(),
@@ -165,4 +138,9 @@ class WellConnectionUnits(AttributeMapBase):
         'inj_mobility': Dimensionless(),
         'temperature_profile': Dimensionless(),
         'elevation_profile': Dimensionless(),
+        'measured_depth_in': Length(),
+        'measured_depth_out': Length(),
+        'delta_depth': Length(),
+        'temp': Temperature(),
+
     }

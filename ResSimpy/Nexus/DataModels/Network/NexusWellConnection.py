@@ -1,3 +1,5 @@
+"""Nexus implementation of the Well Connection class."""
+
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
