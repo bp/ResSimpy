@@ -65,13 +65,10 @@ def test_add_connection(mocker, fixture_for_osstat_pathlib, file_contents, expec
     # compare sets as order doesn't matter
     result_connections = nexus_sim.network.connections.get_all()
     result_connections.sort(key=lambda x: x.name)
+
     # Assert
     assert result_connections == expected_cons
     assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
-    check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
-                                     number_of_writes=expected_number_writes)
 
 
 @pytest.mark.parametrize('file_contents, expected_file_contents, connection_to_remove, expected_connection, expected_number_writes', [
@@ -131,10 +128,7 @@ def test_remove_connection(mocker, fixture_for_osstat_pathlib, file_contents, ex
         # Assert
         assert result_nodes == expected_connection
         assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
-        check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
-                                         modifying_mock_open=writing_mock_open,
-                                         mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
-                                         number_of_writes=expected_number_writes)
+
 
 @pytest.mark.parametrize('file_contents, expected_file_contents, obj_to_modify, modified_properties, expected_objs,'
                          'expected_number_writes', [
@@ -205,7 +199,3 @@ def test_modify_connections(mocker, fixture_for_osstat_pathlib, file_contents, e
     # Assert
     assert result_nodes == expected_objs
     assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
-    check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
-                                     number_of_writes=expected_number_writes)

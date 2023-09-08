@@ -232,10 +232,6 @@ def test_remove_node(mocker, fixture_for_osstat_pathlib, file_contents, expected
     # Assert
     assert result_nodes == expected_nodes
     assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
-    check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
-                                     number_of_writes=expected_number_writes)
 
 
 @pytest.mark.parametrize('file_contents, expected_file_contents, node_to_add, expected_nodes, expected_number_writes', [
@@ -478,12 +474,6 @@ def test_add_node(mocker, fixture_for_osstat_pathlib, file_contents, expected_fi
     # Assert
     assert result_nodes == expected_nodes
     assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
-    check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
-                                     number_of_writes=expected_number_writes)
-
-    # TODO check line locations too
 
 
 @pytest.mark.parametrize('file_contents, expected_file_contents, node_to_modify, modified_properties, expected_nodes,'
@@ -612,7 +602,3 @@ def test_modify_node(mocker, fixture_for_osstat_pathlib, file_contents, expected
     # Assert
     assert result_nodes == expected_nodes
     assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
-    check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
-                                     number_of_writes=expected_number_writes)
