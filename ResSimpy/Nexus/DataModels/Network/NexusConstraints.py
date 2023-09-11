@@ -199,6 +199,7 @@ class NexusConstraints(Constraints):
         if name is None:
             raise ValueError('No name found in the provided constraint object.')
         # check for wildcards
+        name = str(name)
         if '*' in name:
             raise NotImplementedError('Adding constraints with wildcards is currently unsupported')
         self._add_to_memory({name: [new_constraint]})
