@@ -66,6 +66,7 @@ class DataObjectMixin(ABC):
         return generic_repr(self)
 
     @property
+    @abstractmethod
     def attribute_to_unit_map(self) -> AttributeMapBase:
         """Returns the attribute to unit map for the data object."""
         raise NotImplementedError("Implement this in the derived class")
