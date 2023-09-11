@@ -74,7 +74,7 @@ def test_get_unit_error():
     # Act
     with pytest.raises(AttributeError) as ae:
         unit_dimension.get_unit_from_attribute(unit_system=UnitSystem.ENGLISH, attribute_name='not_an_attribute')
-    assert ae == 'Attribute not_an_attribute not recognised and does not have a unit definition'
+    assert str(ae.value) == 'Attribute not_an_attribute not recognised and does not have a unit definition'
 
 
 @pytest.mark.parametrize('data_object, attribute, expected_result, upper', [
