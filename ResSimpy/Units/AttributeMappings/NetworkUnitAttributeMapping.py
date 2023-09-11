@@ -1,8 +1,8 @@
 from typing import Mapping
 
 from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBase
-from ResSimpy.Units.Units import UnitDimension, Length, Temperature, Diameter, Roughness, ReservoirRates, Dimensionless, \
-    Pressure, HeatTransfer, Time
+from ResSimpy.Units.Units import (UnitDimension, Length, Temperature, Diameter, Roughness, ReservoirRates,
+                                  Dimensionless, Pressure, HeatTransfer, Time)
 
 
 class NetworkUnits(AttributeMapBase):
