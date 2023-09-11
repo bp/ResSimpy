@@ -33,7 +33,6 @@ class Constraints(ABC):
     @abstractmethod
     def add(self,
             constraint_to_add: dict[str, None | float | int | str | UnitSystem] | Constraint,
-            name: str | None,
             comments: str | None,
             ) -> None:
         raise NotImplementedError("Implement this in the derived class")
