@@ -255,9 +255,9 @@ class FcsNexusFile(NexusFile):
         return_dict = dict(single_keywords, **multi_keywords)
         return return_dict
 
-    def update_fcs_file(self, new_file_path: None | str = None, new_include_file_location: None | str = None,
+    def update_model_files(self, new_file_path: None | str = None, new_include_file_location: None | str = None,
                         write_out_all_files: bool = False, preserve_file_names: bool = False) -> None:
-        """Updates or creates a new fcs_file with all the updated include files.
+        """ Updates all the fcs files as well as the modified files.
 
         Args:
             new_file_path (None | str): Defaults to None. If None overwrites the original file.
@@ -266,7 +266,7 @@ class FcsNexusFile(NexusFile):
             file. Otherwise saves it to a path either absolute or relative to the file path provided.
             write_out_all_files (bool): Defaults to False. If False writes out only changed files.
             If False writes out all files.
-            preserve_file_names (bool): Defaults to False. If True will derive names from the existing fcs_file.
+            preserve_file_names (bool): Defaults to False. If True will derive names from the existing model_file.
             If False will derive new names from the new fcs file name and the property it represents in Nexus.
         """
         # Take the original file, find which files have changed and write out those locations?
@@ -283,7 +283,8 @@ class FcsNexusFile(NexusFile):
         file_directory = os.path.dirname(file_location)
         if new_include_file_location is not None:
             file_directory = new_include_file_location
-
+            
+        # We are Creating a loop is going to fetch the Content/Data from each and every file.
         for keyword, attr_name in self.fcs_keyword_map_single().items():
             file: None | NexusFile = getattr(self, attr_name, None)
             if file is None:
