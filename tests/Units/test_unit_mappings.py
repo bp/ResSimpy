@@ -4,7 +4,10 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
+from ResSimpy.Nexus.DataModels.Network.NexusTarget import NexusTarget
+from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
+from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Units.Units import Area
 from ResSimpy.Units.AttributeMappings.ConstraintUnitAttributeMapping import ConstraintUnits
@@ -84,6 +87,9 @@ def test_get_unit_error():
     (NexusWellbore, 'measured_depth_in', 'ft', False),
     (NexusCompletion, 'angle_a', 'degrees', False),
     (NexusCompletion, 'angle_a', 'DEGREES', True),
+    (NexusTarget, 'calculation_method', '', True),
+    (NexusWellhead, 'dp_add', 'psi', False),
+    (NexusWellConnection, 'dt_add', 'DEGREES F', True),
 ])
 def test_get_unit_for_attribute(mocker, data_object, attribute, expected_result, upper):
     """Write a test to check that the DataObjectMixin.get_unit_for_attribute method works as expected."""

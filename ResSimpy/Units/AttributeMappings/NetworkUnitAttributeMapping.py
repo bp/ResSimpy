@@ -2,7 +2,7 @@ from typing import Mapping
 
 from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBase
 from ResSimpy.Units.Units import (UnitDimension, Length, Temperature, Diameter, Roughness, ReservoirRates,
-                                  Dimensionless, Pressure, HeatTransfer, Time)
+                                  Dimensionless, Pressure, HeatTransfer, Time, DeltaPressure)
 
 
 class NetworkUnits(AttributeMapBase):
@@ -20,7 +20,7 @@ class NetworkUnits(AttributeMapBase):
         'inner_diameter': Diameter(),
         'productivity_index': ReservoirRates(),
         'rate_mult': Dimensionless(),
-        'dp_add': Pressure(),
+        'dp_add': DeltaPressure(),
         'dt_add': Temperature(),
         'water_inj_mult': Dimensionless(),
         'vip_productivity_index': ReservoirRates(),

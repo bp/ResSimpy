@@ -257,6 +257,16 @@ class Pressure(UnitDimension):
     metric_atm = 'atm'
 
 
+class DeltaPressure(UnitDimension):
+    """Units for pressure."""
+    english = 'psi'
+    metric = 'kPa'
+    metkgcm2 = 'kg/cm2'
+    metbar = 'bars'
+    lab = 'psi'
+    metric_atm = 'atm'
+
+
 class ReservoirRates(UnitDimension):
     """Units for reservoir rates."""
     english = 'RB/day'
