@@ -644,7 +644,7 @@ class NexusFile(File):
         return self.object_locations[id]
 
     def write_to_file(self, new_file_path: None | str = None, write_includes: bool = False,
-                      write_out_all_files: bool = False) -> None:
+                      write_out_all_files: bool = False, overwrite_file: bool = False) -> None:
         """Writes to file specified in self.location the strings contained in the list self.file_content_as_list.
 
         Args:
@@ -666,6 +666,9 @@ class NexusFile(File):
                 if new_file_path is None:
                     # if the base file has no new name then just overwrite the include file
                     include_file_name = None
+                elif new_file_path and overwrite_file:
+                    # if the base file has a new name and overwrite_file is True then overwrite the include file
+                    raise ValueError(f'Cannot overwrite file with a new file path provided at {new_file_path}')
                 else:
                     if file.location is None or file.file_content_as_list is None:
                         warnings.warn(f'No location found for file: {file}. Not writing file.')
@@ -676,7 +679,8 @@ class NexusFile(File):
                     if write_file:
                         self.update_include_location_in_file_as_list(include_file_name, file)
                 if write_file:
-                    file.write_to_file(include_file_name, write_includes=True, write_out_all_files=write_out_all_files)
+                    file.write_to_file(include_file_name, write_includes=True, write_out_all_files=write_out_all_files,
+                                       overwrite_file=overwrite_file)
 
         file_str = ''.join(self.file_content_as_list)
 
