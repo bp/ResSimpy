@@ -7,7 +7,8 @@ from typing import Optional
 
 from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.Units.AttributeMapping import ConstraintUnits, AttributeMapBase
+from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBase
+from ResSimpy.Units.AttributeMappings.ConstraintUnitAttributeMapping import ConstraintUnits
 
 
 @dataclass

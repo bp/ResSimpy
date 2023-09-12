@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.Units.AttributeMapping import AttributeMapBase
+from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBase
 from ResSimpy.Utils import to_dict_generic
 from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.Utils.obj_to_table_string import to_table_line
@@ -66,6 +66,7 @@ class DataObjectMixin(ABC):
         return generic_repr(self)
 
     @property
+    @abstractmethod
     def attribute_to_unit_map(self) -> AttributeMapBase:
         """Returns the attribute to unit map for the data object."""
         raise NotImplementedError("Implement this in the derived class")
