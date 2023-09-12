@@ -129,8 +129,6 @@ class NexusFile(File):
         if origin is not None:
             full_file_path = nfo.get_full_file_path(file_path, origin)
 
-        user = __get_pathlib_path_details(full_file_path)
-        last_changed = __get_datetime_from_os_stat(full_file_path)
         try:
             file_as_list = nfo.load_file_as_list(full_file_path)
         except FileNotFoundError:
@@ -142,10 +140,14 @@ class NexusFile(File):
                                    origin=origin,
                                    include_objects=None,
                                    file_content_as_list=None,
-                                   linked_user=user,
-                                   last_modified=last_changed)
+                                   linked_user=None,
+                                   last_modified=None)
             warnings.warn(UserWarning(f'No file found for: {file_path} while loading {origin}'))
             return nexus_file_class
+
+        # check last modified and user for the file
+        user = __get_pathlib_path_details(full_file_path)
+        last_changed = __get_datetime_from_os_stat(full_file_path)
 
         # prevent python from mutating the lists that it's iterating over
         modified_file_as_list: list[str] = []
