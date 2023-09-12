@@ -176,14 +176,11 @@ class NexusConstraints(Constraints):
                                     f'with an existing constraint that has: {constraint_id=}')
         return surface_file
 
-    def add(self,
-            constraint_to_add: dict[str, None | float | int | str | UnitSystem] | Constraint,
-            name: str | None = None,
+    def add(self, constraint_to_add: dict[str, None | float | int | str | UnitSystem] | Constraint,
             comments: str | None = None) -> None:
         """Adds a constraint to the network and corresponding surface file.
 
         Args:
-            name (str | None): name of the node to apply constraints to
             constraint_to_add (dict[str, float | int | str | UnitSystem] | NexusConstraint): properties of \
             the constraints or a constraint object
             comments (str | None): add optional post line comments
@@ -192,12 +189,9 @@ class NexusConstraints(Constraints):
 
         # add to memory
         if isinstance(constraint_to_add, dict):
-            if constraint_to_add.get('name', None) is None and name is None:
+            name = constraint_to_add.get('name', None)
+            if name is None:
                 raise ValueError('Input arguments or constraint_to_add dictionary must contain a name for the node.')
-            elif name is not None:
-                constraint_to_add['name'] = name
-            elif name is None:
-                name = str(constraint_to_add['name'])
             new_constraint = NexusConstraint(constraint_to_add)
         else:
             new_constraint = cast(NexusConstraint, constraint_to_add)
@@ -205,6 +199,7 @@ class NexusConstraints(Constraints):
         if name is None:
             raise ValueError('No name found in the provided constraint object.')
         # check for wildcards
+        name = str(name)
         if '*' in name:
             raise NotImplementedError('Adding constraints with wildcards is currently unsupported')
         self._add_to_memory({name: [new_constraint]})
@@ -334,4 +329,4 @@ class NexusConstraints(Constraints):
         combination_of_constraints = existing_constraint_obj.to_dict()
         combination_of_constraints.update(cleaned_new_constraint)
 
-        self.add(combination_of_constraints, name, comments)
+        self.add(combination_of_constraints, comments)

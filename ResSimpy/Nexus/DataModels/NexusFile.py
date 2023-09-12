@@ -93,8 +93,23 @@ class NexusFile(File):
             if full_file_path == "" or full_file_path is None:
                 return None
             pathlib_path = pathlib.Path(full_file_path)
-            owner = pathlib_path.owner()
-            group = pathlib_path.group()
+            owner: str = ''
+            group: str = ''
+            try:
+                owner = pathlib_path.owner()
+                group = pathlib_path.group()
+            except NotImplementedError:
+                # owner or group not supported on this system, continue without filling out that information
+                pass
+            except PermissionError:
+                # user doesn't have permission to access the file, continue without filling out that information
+                warnings.warn(f'PermissionError when trying to access file at {full_file_path}')
+                pass
+            except FileNotFoundError:
+                # file not found, continue without filling out that information
+                warnings.warn(f'FileNotFoundError when trying to access file at {full_file_path}')
+                pass
+
             if owner is not None and group is not None:
                 return f"{owner}:{group}"
             elif owner is not None:
@@ -110,8 +125,6 @@ class NexusFile(File):
                 return None
             return datetime.fromtimestamp(timestamp, tz=timezone.utc)
 
-        user = None
-        last_changed = None
         full_file_path = file_path
         if origin is not None:
             full_file_path = nfo.get_full_file_path(file_path, origin)
