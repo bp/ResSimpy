@@ -6,6 +6,7 @@ from typing import Optional
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.DataObjectMixin import DataObjectMixin
+from ResSimpy.Units.AttributeMapping import AttributeMapBase, NetworkNodesConnections
 
 
 @dataclass
@@ -16,3 +17,8 @@ class Wellbore(DataObjectMixin, ABC):
     diameter: Optional[float] = None
     inner_diameter: Optional[float] = None
     roughness: Optional[float] = None
+
+    @property
+    def attribute_to_unit_map(self) -> AttributeMapBase:
+        """Returns the attribute to unit map for the WellConnection."""
+        return NetworkNodesConnections()
