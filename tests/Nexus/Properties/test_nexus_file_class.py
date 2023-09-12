@@ -962,6 +962,19 @@ def test_update_include_location_in_file_as_list_exit_points(mocker, fixture_for
     assert error in str(ve.value)
 
 
+def test_write_to_file_failure(mocker, fixture_for_osstat_pathlib):
+    # Arrange
+    file_content = '''test_file_content'''
+    file = NexusFile(location='somefile.dat', origin=None, file_content_as_list=[file_content])
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+    # Act
+    with pytest.raises(ValueError) as ve:
+        file.write_to_file(new_file_path='new_somefile.dat', write_includes=True, write_out_all_files=True,
+                           overwrite_file=True)
+    assert str(ve.value) == f'Cannot overwrite file with a new file path provided at new_somefile.dat'
+
+
 def test_missing_file(mocker, fixture_for_osstat_pathlib):
     # Arrange
     file_content = '''test_file_content\nInCluDE original_include.inc\nINCLUDE'''
