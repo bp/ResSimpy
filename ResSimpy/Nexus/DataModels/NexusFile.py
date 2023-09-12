@@ -653,7 +653,7 @@ class NexusFile(File):
             write_out_all_files (bool): If False will write only modified files. Otherwise will write all files.
         """
         # overwrite File base class method to allow for write_includes
-        if new_file_path is None and self.location is not None:
+        if new_file_path is None and self.location is not None and overwrite_file:
             # In this case just overwrite the file with the existing path:
             new_file_path = self.location
         elif new_file_path is None:
