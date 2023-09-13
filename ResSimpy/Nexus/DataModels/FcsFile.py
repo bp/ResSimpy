@@ -2,6 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 import os
 import warnings
+from pathlib import Path
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from typing import Optional
@@ -281,6 +282,7 @@ class FcsNexusFile(NexusFile):
         # figure out where to store the include files:
         # by default store it in the same directory as the new fcs file.
         file_directory = os.path.dirname(file_location)
+        Path(new_include_file_location).mkdir(parents=True, exist_ok=True)
         if new_include_file_location is not None:
             file_directory = new_include_file_location
 
