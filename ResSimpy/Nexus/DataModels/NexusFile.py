@@ -129,8 +129,6 @@ class NexusFile(File):
         if origin is not None:
             full_file_path = nfo.get_full_file_path(file_path, origin)
 
-        user = __get_pathlib_path_details(full_file_path)
-        last_changed = __get_datetime_from_os_stat(full_file_path)
         try:
             file_as_list = nfo.load_file_as_list(full_file_path)
         except FileNotFoundError:
@@ -142,10 +140,14 @@ class NexusFile(File):
                                    origin=origin,
                                    include_objects=None,
                                    file_content_as_list=None,
-                                   linked_user=user,
-                                   last_modified=last_changed)
+                                   linked_user=None,
+                                   last_modified=None)
             warnings.warn(UserWarning(f'No file found for: {file_path} while loading {origin}'))
             return nexus_file_class
+
+        # check last modified and user for the file
+        user = __get_pathlib_path_details(full_file_path)
+        last_changed = __get_datetime_from_os_stat(full_file_path)
 
         # prevent python from mutating the lists that it's iterating over
         modified_file_as_list: list[str] = []
@@ -642,7 +644,7 @@ class NexusFile(File):
         return self.object_locations[id]
 
     def write_to_file(self, new_file_path: None | str = None, write_includes: bool = False,
-                      write_out_all_files: bool = False) -> None:
+                      write_out_all_files: bool = False, overwrite_file: bool = False) -> None:
         """Writes to file specified in self.location the strings contained in the list self.file_content_as_list.
 
         Args:
@@ -656,6 +658,8 @@ class NexusFile(File):
             new_file_path = self.location
         elif new_file_path is None:
             raise ValueError(f'No file path to write to, instead found {self.location}')
+        elif new_file_path and overwrite_file:
+            raise ValueError(f'Cannot overwrite file with a new file path provided at {new_file_path}')
         if self.file_content_as_list is None:
             raise ValueError(f'No file data to write out, instead found {self.file_content_as_list}')
         if write_includes and self.include_objects is not None:
@@ -674,7 +678,8 @@ class NexusFile(File):
                     if write_file:
                         self.update_include_location_in_file_as_list(include_file_name, file)
                 if write_file:
-                    file.write_to_file(include_file_name, write_includes=True, write_out_all_files=write_out_all_files)
+                    file.write_to_file(include_file_name, write_includes=True, write_out_all_files=write_out_all_files,
+                                       overwrite_file=overwrite_file)
 
         file_str = ''.join(self.file_content_as_list)
 

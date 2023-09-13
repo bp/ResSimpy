@@ -962,6 +962,19 @@ def test_update_include_location_in_file_as_list_exit_points(mocker, fixture_for
     assert error in str(ve.value)
 
 
+def test_write_to_file_failure(mocker, fixture_for_osstat_pathlib):
+    # Arrange
+    file_content = '''test_file_content'''
+    file = NexusFile(location='somefile.dat', origin=None, file_content_as_list=[file_content])
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+    # Act
+    with pytest.raises(ValueError) as ve:
+        file.write_to_file(new_file_path='new_somefile.dat', write_includes=True, write_out_all_files=True,
+                           overwrite_file=True)
+    assert str(ve.value) == f'Cannot overwrite file with a new file path provided at new_somefile.dat'
+
+
 def test_missing_file(mocker, fixture_for_osstat_pathlib):
     # Arrange
     file_content = '''test_file_content\nInCluDE original_include.inc\nINCLUDE'''
@@ -981,29 +994,13 @@ def test_missing_file(mocker, fixture_for_osstat_pathlib):
     with pytest.warns(UserWarning, match=r'No file found for:') as warn_msg:
         nexus_file = NexusFile.generate_file_include_structure(file_path)
     mocker.stopall()
-
-    assert warn_msg[1].message.args[0] == f'FileNotFoundError when trying to access file at {expected_missing_file}'
-    assert warn_msg[2].message.args[0] == 'No file found for: original_include.inc while loading /root/file.dat'
-
-
-def test_permission_error_file(mocker, fixture_for_osstat_pathlib):
-    # Arrange
-    file_content = '''test_file_content\nInCluDE original_include.inc\nINCLUDE'''
-    file_path = '/root/file.dat'
-    expected_missing_file = os.path.join('/root', 'original_include.inc')
-    def mock_open_wrapper(filename, mode):
-        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
-            file_path: file_content,
-        }).return_value
-        return mock_open
-    mocker.patch("builtins.open", mock_open_wrapper)
-    path_mock = mocker.MagicMock()
-    mocker.patch('pathlib.Path', path_mock)
-    path_mock.return_value.owner.return_value = "mock_User"
-    path_mock.return_value.group.side_effect = PermissionError("Permission Error")
-    # Act Assert
-    with pytest.warns(UserWarning, match=r'No file found for:') as warn_msg:
-        nexus_file = NexusFile.generate_file_include_structure(file_path)
-    mocker.stopall()
-
-    assert warn_msg[1].message.args[0] == f'PermissionError when trying to access file at {expected_missing_file}'
+    result_include_file = nexus_file.include_objects[0]
+    assert result_include_file.file_content_as_list == []
+    assert result_include_file.location == expected_missing_file
+    assert result_include_file.origin == file_path
+    assert result_include_file.include_objects == []
+    assert result_include_file.include_locations == []
+    assert result_include_file.linked_user is None
+    assert result_include_file.last_modified is None
+    assert warn_msg[0].message.args[0] == 'FileNotFoundError when trying to access file at /root/file.dat'
+    assert warn_msg[1].message.args[0] == 'No file found for: original_include.inc while loading /root/file.dat'
