@@ -94,7 +94,7 @@ def test_get_unit_error():
 def test_get_unit_for_attribute(mocker, data_object, attribute, expected_result, upper):
     """Write a test to check that the DataObjectMixin.get_unit_for_attribute method works as expected."""
     # Arrange
-    'patch out convert_to_iso from the ISODateTime module as it is not needed for this test'
+    #patch out convert_to_iso from the ISODateTime module as it is not needed for this test
     mocker.patch.object(ISODateTime, 'convert_to_iso', return_value=ISODateTime(2021, 1, 1))
     dataobj = data_object({})
     # Act
