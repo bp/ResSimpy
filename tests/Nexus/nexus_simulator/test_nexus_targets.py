@@ -57,9 +57,6 @@ def test_read_target(mocker, fixture_for_osstat_pathlib, file_contents):
     # Act    
     nexus_sim.network.load()
     
-   
-    
-    
     record_count= nexus_sim.network.targets.get_df()
     target_record=nexus_sim.network.targets.get_by_name('target1')
     
@@ -76,7 +73,3 @@ def test_read_target(mocker, fixture_for_osstat_pathlib, file_contents):
     assert record_count.shape[0] == 2
     assert nexus_sim.network.targets.get_by_name('target2') == None
     assert len(targets_list_after_add) == 2
-    
-    
-    
-

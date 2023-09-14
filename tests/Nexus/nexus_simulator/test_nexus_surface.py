@@ -374,5 +374,3 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
     assert result == expected_result
     assert single_wellbore == wellbore1
     pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
-
-
