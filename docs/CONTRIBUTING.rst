@@ -57,7 +57,7 @@ Development environment setup
 
    .. code-block:: bash
 
-      pytest
+      pytest tests
 
    If at a later date you wish to ensure that the dependencies in your dev environment are up to date with the latest supported versions, you can again run `poetry install` and your libraries will automatically be updated.
     
