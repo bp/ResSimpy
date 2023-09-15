@@ -285,7 +285,6 @@ class FcsNexusFile(NexusFile):
         file_directory = os.path.dirname(file_location)
         if new_include_file_location is not None:
             file_directory = new_include_file_location
-        
         # Loop through all files in the model, writing out the contents if they have been modified.
         for keyword, attr_name in self.fcs_keyword_map_single().items():
             file: None | NexusFile = getattr(self, attr_name, None)
