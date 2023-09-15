@@ -256,8 +256,8 @@ class FcsNexusFile(NexusFile):
         return return_dict
 
     def update_model_files(self, new_file_path: None | str = None, new_include_file_location: None | str = None,
-                        write_out_all_files: bool = False, preserve_file_names: bool = False,
-                        overwrite_include_files: bool = False) -> None:
+                           write_out_all_files: bool = False, preserve_file_names: bool = False,
+                           overwrite_include_files: bool = False) -> None:
         """Updates all the modified files as well as the fcs file if a new file has been created.
 
         Args:
@@ -363,7 +363,7 @@ class FcsNexusFile(NexusFile):
                 continue
 
             if method_number is not None:
-                token_from_file, intermediate_word, method_num_in_file, path_to_replace\
+                token_from_file, intermediate_word, method_num_in_file, path_to_replace \
                     = nfo.get_multiple_sequential_values([line], 4)
                 if int(method_num_in_file) != method_number:
                     continue
