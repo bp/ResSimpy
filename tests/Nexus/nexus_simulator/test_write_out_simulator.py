@@ -112,7 +112,7 @@ class TestWriteOutSimulator:
         # pretend a file has been modified
         nexus_sim.model_files.surface_files[1]._file_modified_set(True)
         # Act
-        nexus_sim.model_files.update_fcs_file(new_file_path='new_file_name.fcs', new_include_file_location=None,
+        nexus_sim.model_files.update_model_files(new_file_path='new_file_name.fcs', new_include_file_location=None,
                                               write_out_all_files=False, preserve_file_names=False,
                                               overwrite_include_files=True)
         # assert
