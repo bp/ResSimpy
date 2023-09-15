@@ -255,10 +255,10 @@ class FcsNexusFile(NexusFile):
         return_dict = dict(single_keywords, **multi_keywords)
         return return_dict
 
-    def update_fcs_file(self, new_file_path: None | str = None, new_include_file_location: None | str = None,
+    def update_model_files(self, new_file_path: None | str = None, new_include_file_location: None | str = None,
                         write_out_all_files: bool = False, preserve_file_names: bool = False,
                         overwrite_include_files: bool = False) -> None:
-        """Updates or creates a new fcs_file with all the updated include files.
+        """Updates all the modified files as well as the fcs file if a new file has been created.
 
         Args:
             new_file_path (None | str): Defaults to None. If None overwrites the original file.
@@ -285,7 +285,8 @@ class FcsNexusFile(NexusFile):
         file_directory = os.path.dirname(file_location)
         if new_include_file_location is not None:
             file_directory = new_include_file_location
-
+        
+        # Loop through all files in the model, writing out the contents if they have been modified.
         for keyword, attr_name in self.fcs_keyword_map_single().items():
             file: None | NexusFile = getattr(self, attr_name, None)
             if file is None:
