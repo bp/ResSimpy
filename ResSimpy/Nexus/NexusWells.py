@@ -42,24 +42,24 @@ class NexusWells(Wells):
     def table_footer(self) -> str:
         return ''
 
-    def get_wells(self) -> Sequence[NexusWell]:
+    def get_all(self) -> Sequence[NexusWell]:
         if not self.__wells_loaded:
-            self.load_wells()
+            self.load()
         return self.__wells
 
-    def get_well(self, well_name: str) -> Optional[NexusWell]:
+    def get(self, well_name: str) -> Optional[NexusWell]:
         """Returns a specific well requested, or None if that well cannot be found."""
         if not self.__wells_loaded:
-            self.load_wells()
+            self.load()
 
         wells_to_return = filter(lambda x: x.well_name.upper() == well_name.upper(), self.__wells)
 
         return next(wells_to_return, None)
 
-    def get_wells_df(self) -> pd.DataFrame:
+    def get_df(self) -> pd.DataFrame:
         # loop through wells and completions to output a table
         if not self.__wells_loaded:
-            self.load_wells()
+            self.load()
 
         store_dictionaries = []
         for well in self.__wells:
@@ -74,7 +74,7 @@ class NexusWells(Wells):
         df_store = df_store.dropna(axis=1, how='all')
         return df_store
 
-    def load_wells(self) -> None:
+    def load(self) -> None:
         if self.__model.model_files.well_files is None:
             raise FileNotFoundError('No wells files found for current model.')
         for method_number, well_file in self.__model.model_files.well_files.items():
@@ -88,7 +88,7 @@ class NexusWells(Wells):
 
     def get_wells_overview(self) -> str:
         if not self.__wells_loaded:
-            self.load_wells()
+            self.load()
 
         overview: str = ''
         for well in self.__wells:
@@ -99,7 +99,7 @@ class NexusWells(Wells):
     def get_wells_dates(self) -> set[str]:
         """Returns a set of the unique dates in the wellspec file over all wells."""
         if not self.__wells_loaded:
-            self.load_wells()
+            self.load()
 
         set_dates: set[str] = set()
         for well in self.__wells:
@@ -107,7 +107,7 @@ class NexusWells(Wells):
 
         return set_dates
 
-    def modify_well(self, well_name: str, completion_properties_list: list[dict[str, None | float | int | str]],
+    def modify(self, well_name: str, completion_properties_list: list[dict[str, None | float | int | str]],
                     how: OperationEnum = OperationEnum.ADD) -> None:
         """Modify the existing wells in memory using a dictionary of properties.
 
@@ -124,7 +124,7 @@ class NexusWells(Wells):
                 does not remove them.
             write_to_file (bool): If True writes directly to file. (Currently not in use)
         """
-        well = self.get_well(well_name)
+        well = self.get(well_name)
         if well is None:
             raise ValueError(f'No well named {well_name} found in simulator')
         for perf in completion_properties_list:
@@ -160,7 +160,7 @@ class NexusWells(Wells):
             to the new completion
         """
         _, completion_date = self.__add_object_operations.check_name_date({'name': well_name} | completion_properties)
-        well = self.get_well(well_name)
+        well = self.get(well_name)
         if well is None:
             # TODO could make this not raise an error and instead initialize a NexusWell and add it to NexusWells
             raise ValueError(
@@ -313,7 +313,7 @@ class NexusWells(Wells):
                           completion_properties: Optional[dict[str, None | float | int | str]] = None,
                           completion_id: Optional[UUID] = None) -> None:
 
-        well = self.get_well(well_name)
+        well = self.get(well_name)
         if well is None:
             raise ValueError(f'No well found with name: {well_name}')
 
@@ -392,7 +392,7 @@ class NexusWells(Wells):
             User must provide enough to uniquely identify the completion.
             completion_id (Optional[UUID]): If provided will match against a known UUID for the completion.
         """
-        well = self.get_well(well_name)
+        well = self.get(well_name)
         if well is None:
             raise ValueError(f'No well found with name: {well_name}')
 

@@ -20,16 +20,28 @@ class Wells(ABC):
     def wells(self, value):
         self.__wells = value
 
-    def get_wells(self) -> Sequence[Well]:
+    def get_all(self) -> Sequence[Well]:
         raise NotImplementedError("Implement this in the derived class")
 
-    def get_well(self, well_name: str) -> Optional[Well]:
+    def get(self, well_name: str) -> Optional[Well]:
         raise NotImplementedError("Implement this in the derived class")
 
-    def get_wells_df(self) -> pd.DataFrame:
+    def get_df(self) -> pd.DataFrame:
         raise NotImplementedError("Implement this in the derived class")
 
     def get_wells_overview(self) -> str:
+        raise NotImplementedError("Implement this in the derived class")
+    
+    def modify(self) -> str:
+        raise NotImplementedError("Implement this in the derived class")
+    
+    def add_completion(self) -> str:
+        raise NotImplementedError("Implement this in the derived class")
+
+    def remove_completion(self) -> str:
+        raise NotImplementedError("Implement this in the derived class")
+    
+    def modify_completion(self) -> str:
         raise NotImplementedError("Implement this in the derived class")
 
     @property
