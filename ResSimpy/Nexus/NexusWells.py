@@ -108,7 +108,7 @@ class NexusWells(Wells):
         return set_dates
 
     def modify(self, well_name: str, completion_properties_list: list[dict[str, None | float | int | str]],
-                    how: OperationEnum = OperationEnum.ADD) -> None:
+               how: OperationEnum = OperationEnum.ADD) -> None:
         """Modify the existing wells in memory using a dictionary of properties.
 
         Args:

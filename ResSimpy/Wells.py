@@ -31,16 +31,16 @@ class Wells(ABC):
 
     def get_wells_overview(self) -> str:
         raise NotImplementedError("Implement this in the derived class")
-    
+
     def modify(self) -> str:
         raise NotImplementedError("Implement this in the derived class")
-    
+
     def add_completion(self) -> str:
         raise NotImplementedError("Implement this in the derived class")
 
     def remove_completion(self) -> str:
         raise NotImplementedError("Implement this in the derived class")
-    
+
     def modify_completion(self) -> str:
         raise NotImplementedError("Implement this in the derived class")
 
