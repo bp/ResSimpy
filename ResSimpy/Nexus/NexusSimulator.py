@@ -698,8 +698,8 @@ class NexusSimulator(Simulator):
         """Updates the simulator with any changes to the included files. Overwrites existing files.
         IMPORTANT: No changes to the model will be saved until this method is called!
         """
-        
+
         self.model_files.update_model_files(new_file_path=None, new_include_file_location=None,
-        
+
                                             write_out_all_files=False, preserve_file_names=True,
                                             overwrite_include_files=True)
