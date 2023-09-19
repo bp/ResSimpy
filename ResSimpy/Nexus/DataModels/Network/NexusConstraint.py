@@ -8,7 +8,7 @@ from ResSimpy.Constraint import Constraint
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 
 
-@dataclass
+@dataclass(repr=False)
 class NexusConstraint(Constraint):
     """Attributes:
     name (str): name of the well (NAME)

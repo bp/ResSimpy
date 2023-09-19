@@ -351,7 +351,7 @@ def test_update_fcs_file(mocker, fixture_for_osstat_pathlib, new_file_name, subf
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    fcs_file_class.update_fcs_file(new_file_name, subfolder)
+    fcs_file_class.update_model_files(new_file_name, subfolder)
 
     # Assert
     # need to update this to check multiple files writes
@@ -434,7 +434,7 @@ def test_update_fcs_file_write_all_files(mocker, fixture_for_osstat_pathlib, exp
     expected_files = [os.path.join('nexus_data', x) for x in expected_files]
     expected_files.append('/data/new_fcs.fcs')
     # Act
-    fcs.update_fcs_file(new_file_path='/data/new_fcs.fcs', new_include_file_location='nexus_data',
+    fcs.update_model_files(new_file_path='/data/new_fcs.fcs', new_include_file_location='nexus_data',
                         write_out_all_files=True, preserve_file_names=preserve_file_names)
 
     # Assert
