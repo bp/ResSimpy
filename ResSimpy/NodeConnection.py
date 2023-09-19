@@ -8,7 +8,7 @@ from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBa
 from ResSimpy.Units.AttributeMappings.NetworkUnitAttributeMapping import NetworkUnits
 
 
-@dataclass
+@dataclass(repr=False)
 class NodeConnection(DataObjectMixin, ABC):
     """Base class object for storing data related to nodeconnections."""
     name: Optional[str] = None
