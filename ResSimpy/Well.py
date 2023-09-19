@@ -1,4 +1,5 @@
 """The abstract base class for all wells."""
+from __future__ import annotations
 from abc import ABC
 from dataclasses import dataclass
 from typing import Optional, Sequence, Union

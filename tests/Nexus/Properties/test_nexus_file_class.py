@@ -1,5 +1,6 @@
 import os
 import uuid
+import warnings
 
 import pytest
 from pytest_mock import MockerFixture
@@ -8,7 +9,6 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.load_wells import load_wells
-import ResSimpy.Nexus.nexus_file_operations as nfo
 
 from tests.multifile_mocker import mock_multiple_files
 
@@ -405,7 +405,6 @@ KZ CON 1
     assert nexus_file.include_objects[0] == expected_included_file
 
 
-
 @pytest.mark.parametrize("test_file_contents, expected_results",
                          [('''       WELLSPEC DEV1
        IW JW L RADW
@@ -711,6 +710,12 @@ continuation''')
     assert nexus_file_result == expected_return_file
     assert index_in_file == expected_index_in_file
 
+    # raises
+    nexus_file.include_objects.pop(0)
+    with pytest.raises(ValueError) as ve:
+        nexus_file.find_which_include_file(flattened_index=1)
+    assert str(ve.value) == "No file with uuid_index='uuid_inc1' found within include objects"
+
 
 @pytest.mark.parametrize("test_file_contents, expected_results",
                          [('''       WELLSPEC DEV1
@@ -778,6 +783,7 @@ def test_add_to_file_as_list(mocker):
 
     expected_result.line_locations = expected_line_locations
     expected_result.object_locations = expected_object_locations
+    expected_result._file_modified_set(True)
 
     # mock out the write method to ensure it isn't making new files.
     writing_mock_open = mocker.mock_open()
@@ -788,6 +794,7 @@ def test_add_to_file_as_list(mocker):
 
     # Assert
     assert result == expected_result
+    assert result.file_modified
 
 
 def test_remove_from_file_as_list(mocker):
@@ -807,6 +814,7 @@ def test_remove_from_file_as_list(mocker):
 
     expected_result.line_locations = [(0, 'file_uuid')]
     expected_result.object_locations = expected_object_locations
+    expected_result._file_modified_set(True)
 
     # mock out the write method to ensure it isn't making new files.
     writing_mock_open = mocker.mock_open()
@@ -818,3 +826,181 @@ def test_remove_from_file_as_list(mocker):
     # Assert
     assert nexus_file.file_content_as_list == expected_result.file_content_as_list
     assert nexus_file == expected_result
+    assert nexus_file.file_modified
+
+@pytest.mark.parametrize('file_content, expected_file_content', [
+    (
+        'test_file_content\nInCluDE oRigINAl_Include.inc\nend of the file\n',
+        'test_file_content\nInCluDE New_FiLe_Path.inc\nend of the file\n',
+    ),
+    (
+        'test_file_content\nInCluDE\noRigINAl_Include.inc\nend of the file\n',
+        'test_file_content\nInCluDE\nNew_FiLe_Path.inc\nend of the file\n',
+    ),
+    (
+        'test_file_content\nInCluDE /abs_path/oRigINAl_Include.inc\nend of the file\n',
+        'test_file_content\nInCluDE New_FiLe_Path.inc\nend of the file\n',
+    )
+], ids=['basic', 'on another line', 'next line'])
+def test_update_include_location_in_file_as_list(mocker, fixture_for_osstat_pathlib, file_content, expected_file_content):
+    # Arrange
+    file_path = '/root/file.dat'
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            file_path: file_content,
+            '/root/oRigINAl_Include.inc': 'inc file contents',
+            '/abs_path/oRigINAl_Include.inc': 'inc file contents',
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+    nexus_file = NexusFile.generate_file_include_structure(file_path)
+
+    new_file_path = 'New_FiLe_Path.inc'
+    include_file = nexus_file.include_objects[0]
+    expected_path = os.path.join('/root', 'New_FiLe_Path.inc')
+    # Act
+    nexus_file.update_include_location_in_file_as_list(new_file_path, include_file)
+    # Assert
+    assert nexus_file.file_content_as_list == expected_file_content.splitlines(keepends=True)
+    assert nexus_file.include_locations == [expected_path]
+    assert include_file.location == expected_path
+    assert include_file.input_file_location == 'New_FiLe_Path.inc'
+    assert nexus_file.file_modified
+
+
+def test_write_to_file(mocker, fixture_for_osstat_pathlib):
+    # Arrange
+    file_content = '''test_file_content\nInCluDE original_include.inc\nINCLUDE
+                    /abs_path/another_file.inc\nend of the file\n'''
+    file_path = '/root/file.dat'
+    new_file_path = os.path.join('\\new_location', 'new_file_path.dat')
+    expected_include_path_1 = os.path.join('\\new_location', 'new_file_path_original_include.inc')
+    expected_include_path_2 = os.path.join('\\new_location', 'new_file_path_another_file.inc')
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            file_path: file_content,
+            os.path.join('/root','original_include.inc'): 'inc file contents',
+            '/abs_path/another_file.inc': 'inc file contents',
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+    nexus_file = NexusFile.generate_file_include_structure(file_path)
+
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+    # Act
+    nexus_file.write_to_file(new_file_path, write_includes=True, write_out_all_files=True)
+    # Assert
+    list_of_write_names = [call.args[0] for call in writing_mock_open.mock_calls if "'w')" in str(call)]
+    assert list_of_write_names == [expected_include_path_1, expected_include_path_2, new_file_path]
+    # assert the file_modified has been removed
+    assert not nexus_file.file_modified
+
+
+def test_write_to_file_only_modified(mocker, fixture_for_osstat_pathlib):
+    # Arrange
+    file_content = '''test_file_content\nInCluDE original_include.inc\nINCLUDE
+                    /abs_path/another_file.inc\nend of the file\n'''
+
+    file_path = '/root/file.dat'
+    new_file_path = os.path.join('\\new_location', 'new_file_path.dat')
+    expected_include_path_1 = os.path.join('\\new_location', 'new_file_path_original_include.inc')
+
+    expected_file_content = f'''test_file_content\nInCluDE {expected_include_path_1}\nINCLUDE
+                    /abs_path/another_file.inc\nend of the file\n'''
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            file_path: file_content,
+            '/root/original_include.inc': 'inc file contents',
+            '/abs_path/another_file.inc': 'inc file contents',
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+    nexus_file = NexusFile.generate_file_include_structure(file_path)
+    nexus_file._file_modified_set(True)
+    nexus_file.include_objects[0]._file_modified_set(True)
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+    # Act
+    nexus_file.write_to_file(new_file_path, write_includes=True, write_out_all_files=False)
+    # Assert
+    list_of_write_names = [call.args[0] for call in writing_mock_open.mock_calls if "'w')" in str(call)]
+    assert list_of_write_names == [expected_include_path_1, new_file_path]
+
+    list_of_writes = [call for call in writing_mock_open.mock_calls if 'call().write' in str(call)]
+    assert list_of_writes[-1].args[0] == expected_file_content
+
+
+@pytest.mark.parametrize('location, file_as_list, error', [
+    (None, None, 'No file path to write to'),
+    ('path/file.dat', None, 'No file data to write out'),
+], ids=['nothing', 'no file as list',])
+def test_write_to_file_exit_points(mocker, fixture_for_osstat_pathlib, location, file_as_list, error):
+    # Arrange
+    empty_file = NexusFile(location=location, file_content_as_list=file_as_list)
+    if file_as_list is None:
+        empty_file.file_content_as_list = None
+    # Act Assert
+    with pytest.raises(ValueError) as ve:
+        empty_file.write_to_file()
+    assert error in str(ve.value)
+
+
+@pytest.mark.parametrize('location, file_as_list, include_locations, error', [
+    ('location.dat', ['file_content'], None, 'No include locations found'),
+    ('location.dat', None, ['include_loc.dat'], 'No file content found within file'),
+], ids=['No includes locs', 'No file content'])
+def test_update_include_location_in_file_as_list_exit_points(mocker, fixture_for_osstat_pathlib,
+                                                             location, file_as_list, include_locations, error):
+    # Arrange
+    empty_file = NexusFile(location=location, file_content_as_list=file_as_list, include_locations=include_locations)
+    include_file = NexusFile(location='include_loc.dat')
+    # Act Assert
+    with pytest.raises(ValueError) as ve:
+        empty_file.update_include_location_in_file_as_list(new_path='New_path.dat', include_file=include_file)
+    assert error in str(ve.value)
+
+
+def test_write_to_file_failure(mocker, fixture_for_osstat_pathlib):
+    # Arrange
+    file_content = '''test_file_content'''
+    file = NexusFile(location='somefile.dat', origin=None, file_content_as_list=[file_content])
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+    # Act
+    with pytest.raises(ValueError) as ve:
+        file.write_to_file(new_file_path='new_somefile.dat', write_includes=True, write_out_all_files=True,
+                           overwrite_file=True)
+    assert str(ve.value) == f'Cannot overwrite file with a new file path provided at new_somefile.dat'
+
+
+def test_missing_file(mocker, fixture_for_osstat_pathlib):
+    # Arrange
+    file_content = '''test_file_content\nInCluDE original_include.inc\nINCLUDE'''
+    file_path = '/root/file.dat'
+    expected_missing_file = os.path.join('/root', 'original_include.inc')
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            file_path: file_content,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+    path_mock = mocker.MagicMock()
+    mocker.patch('pathlib.Path', path_mock)
+    path_mock.return_value.owner.return_value = "mock_User"
+    path_mock.return_value.group.side_effect = FileNotFoundError("File not found")
+    # Act Assert
+    with pytest.warns(UserWarning, match=r'No file found for:') as warn_msg:
+        nexus_file = NexusFile.generate_file_include_structure(file_path)
+    mocker.stopall()
+    result_include_file = nexus_file.include_objects[0]
+    assert result_include_file.file_content_as_list == []
+    assert result_include_file.location == expected_missing_file
+    assert result_include_file.origin == file_path
+    assert result_include_file.include_objects == []
+    assert result_include_file.include_locations == []
+    assert result_include_file.linked_user is None
+    assert result_include_file.last_modified is None
+    assert warn_msg[0].message.args[0] == 'FileNotFoundError when trying to access file at /root/file.dat'
+    assert warn_msg[1].message.args[0] == 'No file found for: original_include.inc while loading /root/file.dat'

@@ -1,14 +1,19 @@
-import uuid
-from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+"""Base class object for storing data related to well and node constraints."""
+
+from __future__ import annotations
+from abc import ABC
+from dataclasses import dataclass
 from typing import Optional
 
+from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.Utils.generic_repr import generic_repr
+from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBase
+from ResSimpy.Units.AttributeMappings.ConstraintUnitAttributeMapping import ConstraintUnits
 
 
-@dataclass
-class Constraint(ABC):
+@dataclass(repr=False)
+class Constraint(DataObjectMixin, ABC):
+    """Base class object for storing data related to well and node constraints."""
     name: Optional[str] = None
     date: Optional[str] = None
     unit_system: Optional[UnitSystem] = None
@@ -20,20 +25,8 @@ class Constraint(ABC):
     max_reservoir_gas_rate: Optional[float] = None
     max_reservoir_water_rate: Optional[float] = None
     max_reservoir_liquid_rate: Optional[float] = None
-    __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False)
-
-    @abstractmethod
-    def to_dict(self):
-        raise NotImplementedError("Implement this in the derived class")
 
     @property
-    def id(self) -> uuid.UUID:
-        """Unique identifier for each Node object."""
-        return self.__id
-
-    def new_id(self):
-        """Refreshes the id on the object."""
-        self.__id = uuid.uuid4()
-
-    def __repr__(self) -> str:
-        return generic_repr(self)
+    def attribute_to_unit_map(self) -> AttributeMapBase:
+        """Returns the attribute to unit map for the constraint."""
+        return ConstraintUnits()

@@ -1,15 +1,20 @@
-
+from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Any, Sequence, Optional
+from typing import Any, Sequence, Optional, TYPE_CHECKING
 from uuid import UUID
 
 import pandas as pd
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.File import File
+if TYPE_CHECKING:
+    from ResSimpy.Nexus.NexusNetwork import Network
 
 
 class NetworkOperationsMixIn(ABC):
+    def __init__(self, parent_network: Network) -> None:
+        self.__parent_network = parent_network
+
     @abstractmethod
     def get_all(self) -> Sequence[Any]:
         raise NotImplementedError("Implement this in the derived class")

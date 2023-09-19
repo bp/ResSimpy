@@ -559,7 +559,7 @@ def get_multiple_sequential_values(list_of_strings: list[str], number_tokens: in
     """
     store_values = []
     filter_list = list_of_strings.copy()
-    for i in range(0, number_tokens):
+    for i in range(number_tokens):
         value = get_expected_next_value(0, filter_list, filter_list[0], replace_with='')
         while value is None:
             # if no valid value found in the first line, remove it and try it again
@@ -674,7 +674,7 @@ def looks_like_grid_array(file_path: str, lines2check: int = 10) -> bool:
     """
     with open(file_path, 'r') as f:
 
-        for i in range(0, lines2check):
+        for i in range(lines2check):
             line = f.readline()
             line_elems = line.split()
             found_keywords = [word for word in line_elems if (word in GRID_ARRAY_KEYWORDS) and
@@ -729,12 +729,12 @@ def table_line_reader(keyword_store: dict[str, None | int | float | str], header
     corresponding dictionary.
 
     Args:
-        keyword_store (dict[str, None | int | float | str]):
-        headers (list[str]):
-        line (str):
+        keyword_store (dict[str, None | int | float | str]): place to store the value from the given column
+        headers (list[str]): list of headers to read values into
+        line (str): line to read the data from.
 
     Returns:
-        tuple[bool, dict[str, None | int | float | str]]: a dictionary with the found set of
+        tuple[bool, dict[str, None | int | float | str]]: a dictionary with the found set of objects and lines
     """
     trimmed_line = line
     valid_line = True
@@ -838,8 +838,8 @@ def check_list_tokens(list_tokens: list[str], line: str) -> Optional[str]:
     return None
 
 
-def correct_datatypes(value: None | int | float | str, dtype: type,
-                      na_to_none: bool = True) -> None | int | str | float:
+def correct_datatypes(value: None | float | str, dtype: type,
+                      na_to_none: bool = True) -> None | str | float:
     """Takes a value and returns the value but converted to specified type. if na_to_none True then will
         reduce a lot of values to none.
 

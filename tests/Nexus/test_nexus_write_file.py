@@ -77,7 +77,7 @@ def test_write_to_file(mocker, fixture_for_osstat_pathlib, fcs_file_contents, we
     # Act
     mock_nexus_sim._wells.add_completion(well_name='well1', completion_properties=add_perf_dict,
                                         preserve_previous_completions=True)
-
+    mock_nexus_sim.model_files.well_files[1].write_to_file()
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
                                      modifying_mock_open=writing_mock_open,
@@ -85,7 +85,7 @@ def test_write_to_file(mocker, fixture_for_osstat_pathlib, fcs_file_contents, we
 
 
 @pytest.mark.parametrize('fcs_file_contents, wells_file, expected_result, expected_removed_completion_line, '
-'expected_obj_locations, number_of_writes', [
+'expected_obj_locations', [
 ('''DATEFORMAT DD/MM/YYYY
 WelLS sEt 1 /my/wellspec/file.dat''',
 
@@ -122,7 +122,7 @@ WELLSPEC well1
 iw jw l radw
 1  2  3 4.5
 ''',
-10, [[4], [9], [14]], 1),
+10, [[4], [9], [14]]),
 
 
 ('''DATEFORMAT DD/MM/YYYY
@@ -155,10 +155,10 @@ WELLSPEC well2
 iw jw l radw
 5 6 4 3.2
 ''',
-9, [[4], [10]], 3),
+9, [[4], [10]]),
 ], ids=['basic_test', 'only 1 completion to remove'] )
 def test_remove_completion_write_to_file(mocker, fixture_for_osstat_pathlib, fcs_file_contents, wells_file, expected_result,
-        expected_removed_completion_line, expected_obj_locations, number_of_writes):
+        expected_removed_completion_line, expected_obj_locations, ):
     # Arrange
     start_date = '01/01/2020'
     remove_perf_date = '01/03/2020'
@@ -193,11 +193,12 @@ def test_remove_completion_write_to_file(mocker, fixture_for_osstat_pathlib, fcs
     # Act
     mock_nexus_sim._wells.remove_completion(well_name='well1', completion_properties=remove_perf_dict)
     result_object_ids = mock_nexus_sim.model_files.well_files[1].object_locations
+    mock_nexus_sim.model_files.well_files[1].write_to_file()
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
                                      modifying_mock_open=writing_mock_open,
                                      mocker_fixture=mocker, write_file_name='/my/wellspec/file.dat',
-                                     number_of_writes=number_of_writes)
+                                     number_of_writes=1)
 
     assert result_object_ids == object_locations_minus_completion
 
@@ -267,7 +268,6 @@ def test_modify_completion_write_to_file(mocker, fixture_for_osstat_pathlib, fcs
     modify_perf_target = {'date': modify_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 4.2, 'date_format': DateFormat.DD_MM_YYYY}
     modify_perf_new_properties = {'date': modify_perf_date, 'j': 8, 'well_radius': 10.2, 'date_format': DateFormat.DD_MM_YYYY}
 
-    mock_nexus_sim.model_files.well_files[1]
     # make a mock for the write operation
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
@@ -275,9 +275,10 @@ def test_modify_completion_write_to_file(mocker, fixture_for_osstat_pathlib, fcs
     # Act
     mock_nexus_sim._wells.modify_completion(well_name='well1Dev', properties_to_modify=modify_perf_new_properties,
                                            completion_to_change=modify_perf_target )
+    mock_nexus_sim.model_files.well_files[1].write_to_file()
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
                                      modifying_mock_open=writing_mock_open,
                                      mocker_fixture=mocker, write_file_name='/my/wellspec/file.dat',
-                                     number_of_writes=2,
+                                     number_of_writes=1,
                                      )

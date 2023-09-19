@@ -59,7 +59,7 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
         while next_value is not None:
             token_value = next_value.upper()
             if token_value in ['CLEAR', 'CLEARP', 'CLEARQ', 'CLEARLIMIT', 'CLEARALQ']:
-                properties_dict[nexus_keyword_to_attribute_name(constraint.get_nexus_mapping(), token_value)] = True
+                properties_dict[nexus_keyword_to_attribute_name(constraint.get_keyword_mapping(), token_value)] = True
                 nones_overwrite = True
                 # break out of the while loop as the next value will not be there
                 break

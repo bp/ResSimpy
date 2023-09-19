@@ -1,12 +1,11 @@
+from __future__ import annotations
 from typing import Optional
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
-
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
 

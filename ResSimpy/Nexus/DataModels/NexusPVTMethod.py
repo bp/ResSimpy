@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional, Union
@@ -180,7 +181,8 @@ class NexusPVTMethod(DynamicProperty):
                                 self.eos_options[primary_key] = (secondary_key, {})
 
                             secondary_eos_option = self.eos_options[primary_key]
-                            if type(secondary_eos_option) is not tuple or type(secondary_eos_option[1]) is not dict:
+                            if not isinstance(secondary_eos_option, tuple) or \
+                                    not isinstance(secondary_eos_option[1], dict):
                                 raise ValueError(f"EOS secondary key invalid: {secondary_key}")
                             secondary_eos_option[1][tertiary_key] = float(
                                 nfo.get_expected_token_value(tertiary_key, single_line, line_list))
@@ -189,7 +191,7 @@ class NexusPVTMethod(DynamicProperty):
                                         table_indices: dict[str, list[int]],
                                         table_indices_dict: dict[str, dict[str, list[int]]],
                                         table_flag: dict[str, bool], l_index: int,
-                                        unsat_obj: dict[str, list[str]] = {}) -> Optional[int]:
+                                        unsat_obj: dict[str, list[str]] | None = None) -> Optional[int]:
         """Utility function to find the starting line index of a specified PVT table.
 
         Args:
@@ -210,6 +212,8 @@ class NexusPVTMethod(DynamicProperty):
         Returns:
             int: Updated line index
         """
+        if unsat_obj is None:
+            unsat_obj = {}
         if table_key not in PVT_UNSAT_TABLE_INDICES:  # All tables except undersaturated tables
             if nfo.check_token(table_key, single_line):
                 table_indices[table_key] = [l_index + 1, len(line_list)]

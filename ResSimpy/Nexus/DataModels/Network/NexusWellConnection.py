@@ -1,57 +1,60 @@
+"""Nexus implementation of the Well Connection class."""
+
+from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
-import ResSimpy.Utils.to_dict_generic as to_dict_generic
-from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.WellConnection import WellConnection
 
 
 @dataclass(kw_only=True)
 class NexusWellConnection(WellConnection):
-    """Attributes
-    stream (str): COMMENT (STREAM)
-    number (int): COMMENT (NUMBER)
-    scale (float): COMMENT (SCALE)
-    bhdepth (float): COMMENT (BHDEPTH)
-    datum_depth (float): COMMENT (DATUM)
-    x_pos (float): COMMENT (X)
-    y_pos (float): COMMENT (Y)
-    gradient_calc (str): COMMENT (DATGRAD)
-    length (float): COMMENT (LENGTH)
-    bottomhole_measured_depth (float): COMMENT (BHMD)
-    add_tubing (int): COMMENT (ADDTUBING)
-    diameter (float): COMMENT (DIAM)
-    inner_diameter (float): COMMENT (INNERDIAM)
-    roughness (float): COMMENT (ROUGHNESS)
-    tracer (str): COMMENT (TRACERS)
-    con_type (str): COMMENT (TYPE)
-    hyd_method (str): COMMENT (METHOD)
-    pvt_method (int): COMMENT (IPVT)
-    water_method (int): COMMENT (IWAT)
-    bat_method (int): COMMENT (IBAT)
-    temperature (float): COMMENT (TEMP)
-    elevation_profile (str): COMMENT (ELEVPR)
-    temperature_profile (str): COMMENT (TEMPPR)
-    inj_mobility (str): COMMENT (INJMOB)
-    crossshut_method (str): COMMENT (CROSS_SHUT)
-    crossflow (str): COMMENT (CROSSFLOW)
-    on_time (float): COMMENT (ONTIME)
-    heat_transfer_coeff (float): COMMENT (HTC)
-    water_inj_mult (float): COMMENT (WIMULT)
-    productivity_index (float): COMMENT (PI)
-    vip_productivity_index (float): COMMENT (VIPPI)
-    productivity_index_phase (float): COMMENT (PIPHASE)
-    d_factor (float): COMMENT (D)
-    non_darcy_flow_model (str): COMMENT (ND)
-    non_darcy_flow_method (str): COMMENT (DPERF)
-    gas_mobility (float): COMMENT (GASMOB)
-    capillary_number_model (str): COMMENT (CN)
-    dp_add (float): COMMENT (DPADD)
-    dt_add (float): COMMENT (DTADD)
-    rate_mult (float): COMMENT (RATEMULT)
-    polymer (str): COMMENT (POLYMER)
-    station (str): COMMENT (STATION)
-    drill_queue (str): COMMENT (ASSCDR)
-    drill_order_benefit (float): COMMENT (BENEFIT).
+    """Nexus implementation of the Well Connection class.
+
+    Attributes:
+        stream (str): COMMENT (STREAM)
+        number (int): COMMENT (NUMBER)
+        scale (float): COMMENT (SCALE)
+        bhdepth (float): COMMENT (BHDEPTH)
+        datum_depth (float): COMMENT (DATUM)
+        x_pos (float): COMMENT (X)
+        y_pos (float): COMMENT (Y)
+        gradient_calc (str): COMMENT (DATGRAD)
+        length (float): COMMENT (LENGTH)
+        bottomhole_measured_depth (float): COMMENT (BHMD)
+        add_tubing (int): COMMENT (ADDTUBING)
+        diameter (float): COMMENT (DIAM)
+        inner_diameter (float): COMMENT (INNERDIAM)
+        roughness (float): COMMENT (ROUGHNESS)
+        tracer (str): COMMENT (TRACERS)
+        con_type (str): COMMENT (TYPE)
+        hyd_method (str): COMMENT (METHOD)
+        pvt_method (int): COMMENT (IPVT)
+        water_method (int): COMMENT (IWAT)
+        bat_method (int): COMMENT (IBAT)
+        temperature (float): COMMENT (TEMP)
+        elevation_profile (str): COMMENT (ELEVPR)
+        temperature_profile (str): COMMENT (TEMPPR)
+        inj_mobility (str): COMMENT (INJMOB)
+        crossshut_method (str): COMMENT (CROSS_SHUT)
+        crossflow (str): COMMENT (CROSSFLOW)
+        on_time (float): COMMENT (ONTIME)
+        heat_transfer_coeff (float): COMMENT (HTC)
+        water_inj_mult (float): COMMENT (WIMULT)
+        productivity_index (float): COMMENT (PI)
+        vip_productivity_index (str): COMMENT (VIPPI)
+        productivity_index_phase (str): COMMENT (PIPHASE)
+        d_factor (float): COMMENT (D)
+        non_darcy_flow_model (str): COMMENT (ND)
+        non_darcy_flow_method (str): COMMENT (DPERF)
+        gas_mobility (float): COMMENT (GASMOB)
+        capillary_number_model (str): COMMENT (CN)
+        dp_add (float): COMMENT (DPADD)
+        dt_add (float): COMMENT (DTADD)
+        rate_mult (float): COMMENT (RATEMULT)
+        polymer (str): COMMENT (POLYMER)
+        station (str): COMMENT (STATION)
+        drill_queue (str): COMMENT (ASSCDR)
+        drill_order_benefit (float): COMMENT (BENEFIT).
     """
 
     bh_node_name: Optional[str] = None
@@ -78,7 +81,7 @@ class NexusWellConnection(WellConnection):
     heat_transfer_coeff: Optional[float] = None
     water_inj_mult: Optional[float] = None
     vip_productivity_index: Optional[float] = None
-    productivity_index_phase: Optional[float] = None
+    productivity_index_phase: Optional[str] = None
     d_factor: Optional[float] = None
     non_darcy_flow_model: Optional[str] = None
     non_darcy_flow_method: Optional[str] = None
@@ -93,17 +96,16 @@ class NexusWellConnection(WellConnection):
     drill_order_benefit: Optional[float] = None
 
     def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
+        # call the init of the DataObjectMixin
+        super(WellConnection, self).__init__({})
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)
         if self.name is not None:
             self.bh_node_name = self.name + '%bh'
             self.wh_node_name = self.name + '%wh'
 
-    def __repr__(self) -> str:
-        return generic_repr(self)
-
     @staticmethod
-    def get_nexus_mapping() -> dict[str, tuple[str, type]]:
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
         """Gets the mapping of nexus keywords to attribute definitions."""
         nexus_mapping = {
             'NAME': ('name', str),
@@ -154,15 +156,5 @@ class NexusWellConnection(WellConnection):
             }
         return nexus_mapping
 
-    def to_dict(self, keys_in_nexus_style: bool = False) -> dict[str, None | str | int | float]:
-        """Returns a dictionary of the attributes of the well connection.
-
-        Args:
-            keys_in_nexus_style (bool): if True returns the key values in Nexus keywords, otherwise returns the \
-                attribute name as stored by ressimpy.
-
-        Returns:
-            a dictionary keyed by attributes and values as the value of the attribute
-        """
-        result_dict = to_dict_generic.to_dict(self, keys_in_nexus_style, add_date=True, add_units=True)
-        return result_dict
+    def __repr__(self) -> str:
+        return super().__repr__()

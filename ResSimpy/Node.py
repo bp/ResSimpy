@@ -1,29 +1,23 @@
 from __future__ import annotations
-
-import uuid
 from abc import ABC
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.DataObjectMixin import DataObjectMixin
+from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBase
+from ResSimpy.Units.AttributeMappings.NetworkUnitAttributeMapping import NetworkUnits
 
 
-@dataclass
-class Node(ABC):
+@dataclass(repr=False)
+class Node(DataObjectMixin, ABC):
     name: Optional[str] = None
     type: Optional[str] = None
     depth: Optional[float] = None
     date: Optional[str] = None
     unit_system: Optional[UnitSystem] = None
-    __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False)
-
-    def to_dict(self) -> dict:
-        raise NotImplementedError("Implement this in the derived class")
-
-    def to_table_line(self, headers: list[str]) -> str:
-        raise NotImplementedError("Implement this in the derived class")
 
     @property
-    def id(self) -> uuid.UUID:
-        """Unique identifier for each Node object."""
-        return self.__id
+    def attribute_to_unit_map(self) -> AttributeMapBase:
+        """Returns the attribute to unit map for the constraint."""
+        return NetworkUnits()

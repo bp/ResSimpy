@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Optional
 import ResSimpy.Nexus.nexus_file_operations as nfo
 

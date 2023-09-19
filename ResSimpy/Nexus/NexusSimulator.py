@@ -94,9 +94,9 @@ class NexusSimulator(Simulator):
 
         self.__default_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
         #
+        self._network: NexusNetwork = NexusNetwork(model=self)
         self._wells: NexusWells = NexusWells(self)
         self._grid: Optional[NexusGrid] = None
-        self._network: NexusNetwork = NexusNetwork(model=self)
         # Model dynamic properties
         self._pvt: NexusPVTMethods = NexusPVTMethods()
         self._separator: NexusSeparatorMethods = NexusSeparatorMethods()
@@ -161,6 +161,10 @@ class NexusSimulator(Simulator):
     @property
     def model_files(self) -> FcsNexusFile:
         return self._model_files
+
+    @property
+    def network(self) -> NexusNetwork:
+        return self._network
 
     @property
     def structured_grid_path(self):
@@ -670,3 +674,28 @@ class NexusSimulator(Simulator):
     def load_network(self):
         """Populates nodes and connections from a surface file."""
         self._network.load()
+
+    def write_out_new_simulator(self, new_file_path: str, new_include_file_location: str,
+                                write_out_all_files: bool = True, preserve_file_names: bool = True) -> None:
+        """Creates a set of simulator files.
+
+        Args:
+            new_file_path (str): Path to save the new simulator to.
+            new_include_file_location (str): Saves included files to a path either absolute or relative to the
+            file path provided.
+            write_out_all_files (bool): Defaults to False. If False writes out only changed files.
+            preserve_file_names (bool): Defaults to False. If True will derive names from the existing fcs_file.
+            If False will derive new names from the new fcs file name and the property it represents in Nexus.
+        """
+
+        self.model_files.update_model_files(new_file_path=new_file_path,
+                                            new_include_file_location=new_include_file_location,
+                                            write_out_all_files=write_out_all_files,
+                                            preserve_file_names=preserve_file_names,
+                                            overwrite_include_files=False)
+
+    def update_simulator_files(self) -> None:
+        """Updates the simulator with any changes to the included files. Overwrites existing files."""
+        self.model_files.update_model_files(new_file_path=None, new_include_file_location=None,
+                                            write_out_all_files=False, preserve_file_names=True,
+                                            overwrite_include_files=True)

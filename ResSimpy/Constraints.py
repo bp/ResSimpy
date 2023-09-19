@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 import pandas as pd
@@ -30,8 +31,10 @@ class Constraints(ABC):
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
-    def add(self, name: str,
-            constraint_to_add: dict[str, None | float | int | str | UnitSystem] | Constraint) -> None:
+    def add(self,
+            constraint_to_add: dict[str, None | float | int | str | UnitSystem] | Constraint,
+            comments: str | None,
+            ) -> None:
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod

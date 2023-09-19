@@ -1,14 +1,16 @@
 from __future__ import annotations
 from abc import ABC
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
-import uuid
 
+from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBase
+from ResSimpy.Units.AttributeMappings.NetworkUnitAttributeMapping import NetworkUnits
 
 
-@dataclass
-class Wellhead(ABC):
+@dataclass(repr=False)
+class Wellhead(DataObjectMixin, ABC):
     well: Optional[str] = None
     name: Optional[str] = None
     date: Optional[str] = None
@@ -17,12 +19,8 @@ class Wellhead(ABC):
     depth: Optional[float] = None
     x_pos: Optional[float] = None
     y_pos: Optional[float] = None
-    __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False)
 
     @property
-    def id(self) -> uuid.UUID:
-        """Unique identifier for each Node object."""
-        return self.__id
-
-    def to_dict(self):
-        raise NotImplementedError("Implement this in the derived class")
+    def attribute_to_unit_map(self) -> AttributeMapBase:
+        """Returns the attribute to unit map for the WellConnection."""
+        return NetworkUnits()

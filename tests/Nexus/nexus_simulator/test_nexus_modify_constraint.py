@@ -5,7 +5,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from tests.multifile_mocker import mock_multiple_files
-from tests.utility_for_tests import check_file_read_write_is_correct, get_fake_nexus_simulator
+from tests.utility_for_tests import check_file_read_write_is_correct, get_fake_nexus_simulator, uuid_side_effect
 
 
 def test_find_constraint(mocker, fixture_for_osstat_pathlib):
@@ -72,15 +72,15 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker, fixture_for_
     # Act
     with pytest.raises(ValueError) as ve:
         constraints.find_by_properties('well1', find_constraint_dict)
-        assert "Instead found: 3 matching constraints" in str(ve.value)
+    assert "Instead found: 3 matching constraints" in str(ve.value)
 
     with pytest.raises(ValueError) as ve:
         constraints.find_by_properties('well1', no_matching_constraints_dict)
-        assert "Instead found: 0 matching constraints" in str(ve.value)
+    assert "Instead found: 0 matching constraints" in str(ve.value)
 
     with pytest.raises(ValueError) as ve:
         constraints.find_by_properties('well1', too_many_constraints)
-        assert "Instead found: 0 matching constraints" in str(ve.value)
+    assert "Instead found: 0 matching constraints" in str(ve.value)
 
 
 @pytest.mark.parametrize("file_contents, expected_result_file, constraint_to_remove, expected_constraints, expected_number_writes", [
@@ -204,11 +204,9 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker, fixture_for_
 
 
     ], ids=['basic_test', 'over multiple lines', 'multiple_dates', 'constraint_table','qmult_table'])
-def test_remove_constraint(mocker, fixture_for_osstat_pathlib, file_contents, expected_result_file, constraint_to_remove, expected_constraints,
-                           expected_number_writes):
+def test_remove_constraint(mocker, fixture_for_osstat_pathlib, file_contents, expected_result_file,
+                           constraint_to_remove, expected_constraints, expected_number_writes):
     # Arrange
-
-
     fcs_file_contents = '''RUN_UNITS ENGLISH
     DATEFORMAT DD/MM/YYYY
     RECURRENT_FILES
@@ -246,10 +244,7 @@ def test_remove_constraint(mocker, fixture_for_osstat_pathlib, file_contents, ex
     assert result == expected_constraint_dict
     assert result['well1'] == expected_constraint_dict['well1']
     assert result['well2'] == expected_constraint_dict['well2']
-    check_file_read_write_is_correct(expected_file_contents=expected_result_file,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
-                                     number_of_writes=expected_number_writes)
+    assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_result_file.splitlines(keepends=True)
 
 @pytest.mark.parametrize("file_contents, expected_file_contents, new_constraint, expected_number_writes, expected_uuid", [
     # basic_test
@@ -439,13 +434,9 @@ def test_add_constraint(mocker, fixture_for_osstat_pathlib, file_contents, expec
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
                                                     'uuid4', 'uuid5', 'uuid6'])
     # Act
-    nexus_sim.network.constraints.add('well3', new_constraint, 'test user comments')
+    nexus_sim.network.constraints.add(new_constraint, comments='test user comments')
     # Assert
     assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
-    check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
-                                     number_of_writes=expected_number_writes)
     assert nexus_sim.model_files.surface_files[1].object_locations == expected_uuid
 
 
@@ -483,7 +474,7 @@ def test_constraint_to_string(constraint, expected_string):
     # Arrange
     new_constraint = NexusConstraint(constraint)
     # Act
-    constraint_string = new_constraint.to_table_line()
+    constraint_string = new_constraint.to_table_line([])
     # Assert
     assert constraint_string == expected_string
 
@@ -518,7 +509,7 @@ well1 QWSMAX 1000.0 QLIQSMAX 3884.0
     {'name': 'well1', 'date': '01/01/2019', 'max_surface_water_rate': 0},
     {'name': 'well1', 'date': '01/01/2019', 'max_surface_water_rate': 1000.0},
     2,
-    {'uuid1': [2], 'uuid3': [3]}
+    {'uuid0': [2], 'uuid2': [3]}
     ),
    # qmult_test
     ('''TIME 01/01/2019
@@ -542,7 +533,7 @@ ENDQMULT
     {'name': 'well1', 'date': '01/01/2019'},
     {'name': 'well1', 'date': '01/01/2019', 'qmult_oil_rate': 1000.0, 'qmult_water_rate': 1.31, 'qmult_gas_rate': 10},
     4,
-    {'uuid2': [2,6]}
+    {'uuid1': [2, 6]}
     )
     ],ids=['basic_test', 'qmult_test'])
 def test_modify_constraints(mocker, fixture_for_osstat_pathlib, file_contents, expected_file_contents, current_constraint, new_constraint,
@@ -571,30 +562,29 @@ def test_modify_constraints(mocker, fixture_for_osstat_pathlib, file_contents, e
     mocker.patch("builtins.open", writing_mock_open)
 
     # patch in uuids for the constraints
-    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
-                                                    'uuid4', 'uuid5', 'uuid6', 'uuid7'])
+    mocker.patch.object(uuid, 'uuid4', side_effect=uuid_side_effect())
     # Act
     nexus_sim.network.constraints.modify('well1', current_constraint, new_constraint)
     # Assert
     assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
-    check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/surface_file_01.dat',
-                                     number_of_writes=expected_number_writes)
     assert nexus_sim.model_files.surface_files[1].object_locations == expected_uuid
 
-@pytest.mark.parametrize('current_constraint, new_constraint',[
+@pytest.mark.parametrize('current_constraint, new_constraint, error_msg',[
 # well name not found
 ({'name': 'well1', 'date': '01/01/2019', 'max_surface_oil_rate': 10},
-{'name': 'well1', 'date': '01/01/2019', 'max_surface_oil_rate': 1000.0}),
+{'name': 'well1', 'date': '01/01/2019', 'max_surface_oil_rate': 1000.0},
+ "No constraints found with name='well1'"),
 
 # constraint not matching
 ({'name': 'well_not_found', 'date': '01/01/2019', 'max_surface_oil_rate': 10},
-{'name': 'well_not_found', 'date': '01/01/2019', 'max_surface_oil_rate': 1000.0}),
+{'name': 'well_not_found', 'date': '01/01/2019', 'max_surface_oil_rate': 1000.0},
+ 'No unique matching constraints with the properties provided.Instead found: 0 matching constraints.'
+ ),
 
 ], ids=['well name not', 'constraint not matching']
 )
-def test_modify_constraint_no_constraint_found(mocker, fixture_for_osstat_pathlib, current_constraint, new_constraint):
+def test_modify_constraint_no_constraint_found(mocker, fixture_for_osstat_pathlib, current_constraint, new_constraint,
+                                               error_msg):
     # Arrange
     fcs_file_contents = '''
         RUN_UNITS ENGLISH
@@ -627,4 +617,22 @@ def test_modify_constraint_no_constraint_found(mocker, fixture_for_osstat_pathli
                                                     'uuid4', 'uuid5', 'uuid6', 'uuid7'])
     # Act
     with pytest.raises(ValueError) as ve:
-        nexus_sim.network.constraints.modify('well1', current_constraint, new_constraint)
+        nexus_sim.network.constraints.modify(current_constraint['name'], current_constraint, new_constraint)
+    assert str(ve.value) == error_msg
+
+def test_add_constraint_no_name_given(mocker, fixture_for_osstat_pathlib):
+    # Arrange
+    model = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
+    mock_nexus_network = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
+    constraints = NexusConstraints(mock_nexus_network, model)
+
+    empty_constraint = NexusConstraint({})
+
+    # Act and Assert
+    with pytest.raises(ValueError) as ve:
+        constraints.add(constraint_to_add={'max_surface_oil_rate': 10},)
+    assert str(ve.value) == 'Input arguments or constraint_to_add dictionary must contain a name for the node.'
+    with pytest.raises(ValueError) as ve:
+        constraints.add(constraint_to_add=empty_constraint)
+    assert str(ve.value) == 'No name found in the provided constraint object.'
