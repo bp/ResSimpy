@@ -5,7 +5,7 @@ from typing import Optional
 from ResSimpy.Node import Node
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, repr=False)
 class NexusNode(Node):
     x_pos: Optional[float] = None
     y_pos: Optional[float] = None

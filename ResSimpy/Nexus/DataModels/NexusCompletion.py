@@ -20,7 +20,7 @@ from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.Utils.to_dict_generic import to_dict
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, repr=False)
 class NexusCompletion(Completion):
     """A class representing a completion specific to a Nexus Model. Inherits from Completion.
 
