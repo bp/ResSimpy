@@ -6,9 +6,10 @@ from typing import Optional
 
 from ResSimpy.Constraint import Constraint
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Utils.generic_repr import generic_repr
 
 
-@dataclass
+@dataclass(repr=False)
 class NexusConstraint(Constraint):
     """Attributes:
     name (str): name of the well (NAME)
@@ -426,3 +427,6 @@ class NexusConstraint(Constraint):
                 string_to_return += f' {str(value)}'
         string_to_return += '\n'
         return string_to_return
+
+    def __repr__(self) -> str:
+        return generic_repr(self)
