@@ -1033,7 +1033,7 @@ PLOTBINARY
        WelLS sEt 1 my/wellspec/file.dat
     """)
 ], ids=['path_after_set'])
-def test_get_wells(mocker: MockerFixture, fixture_for_osstat_pathlib, fcs_file_contents: str):
+def test_get_all(mocker: MockerFixture, fixture_for_osstat_pathlib, fcs_file_contents: str):
     """Testing the functionality to load in and retrieve a set of wells"""
     # Arrange
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
@@ -1058,7 +1058,7 @@ def test_get_wells(mocker: MockerFixture, fixture_for_osstat_pathlib, fcs_file_c
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.wells.get_wells()
+    result = simulation.wells.get_all()
 
     # Assert
     assert result == loaded_wells
@@ -1096,7 +1096,7 @@ def test_get_wells_windows(mocker: MockerFixture, fixture_for_osstat_pathlib, fc
     simulation = NexusSimulator(origin='path\nexus_run.fcs')
 
     # Act
-    result = simulation.wells.get_wells()
+    result = simulation.wells.get_all()
 
     # Assert
     assert result == loaded_wells
@@ -1105,7 +1105,7 @@ def test_get_wells_windows(mocker: MockerFixture, fixture_for_osstat_pathlib, fc
                                             start_date='', date_format = DateFormat.MM_DD_YYYY)
 
 
-def test_get_wells_df(mocker: MockerFixture, fixture_for_osstat_pathlib):
+def test_get_df(mocker: MockerFixture, fixture_for_osstat_pathlib):
     # Arrange
     fcs_file_contents = """
        WelLS sEt 1 my/wellspec/file.dat
@@ -1132,7 +1132,7 @@ def test_get_wells_df(mocker: MockerFixture, fixture_for_osstat_pathlib):
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
     simulation = NexusSimulator(origin='nexus_run.fcs')
     # Act
-    result = simulation.wells.get_wells_df()
+    result = simulation.wells.get_df()
     # Assert
 
     pd.testing.assert_frame_equal(result, loaded_wells_df, check_like=True)
@@ -1143,7 +1143,7 @@ def test_get_wells_df(mocker: MockerFixture, fixture_for_osstat_pathlib):
        WelLS set 1 my/wellspec/file.dat
     """)
 ], ids=['basic case'])
-def test_get_well(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_pathlib):
+def test_get(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_pathlib):
     """Testing the functionality to load in and retrieve a single wells."""
     # Arrange
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
@@ -1171,7 +1171,7 @@ def test_get_well(mocker: MockerFixture, fcs_file_contents: str, fixture_for_oss
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.wells.get_well(well_name='WELL2')
+    result = simulation.wells.get(well_name='WELL2')
 
     # Assert
     assert result == loaded_wells[1]
@@ -1211,7 +1211,7 @@ def test_get_well_windows(mocker: MockerFixture, fcs_file_contents: str, fixture
     simulation = NexusSimulator(origin='path\\nexus_run.fcs')
 
     # Act
-    result = simulation.wells.get_well(well_name='WELL2')
+    result = simulation.wells.get(well_name='WELL2')
 
     # Assert
     assert result == loaded_wells[1]
