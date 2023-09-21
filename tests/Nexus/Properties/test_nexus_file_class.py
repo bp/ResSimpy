@@ -1004,3 +1004,32 @@ def test_missing_file(mocker, fixture_for_osstat_pathlib):
     assert result_include_file.last_modified is None
     assert warn_msg[0].message.args[0] == 'FileNotFoundError when trying to access file at /root/file.dat'
     assert warn_msg[1].message.args[0] == 'No file found for: original_include.inc while loading /root/file.dat'
+
+def test_group_not_found(mocker, fixture_for_osstat_pathlib):
+    # Arrange
+    file_content = '''test_file_content\nInCluDE original_include.inc\nINCLUDE'''
+    file_path = '/root/file.dat'
+    expected_missing_file = os.path.join('/root', 'original_include.inc')
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            file_path: file_content,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+    path_mock = mocker.MagicMock()
+    mocker.patch('pathlib.Path', path_mock)
+    path_mock.return_value.owner.return_value = "mock_User"
+    path_mock.return_value.group.side_effect = KeyError(f"Unable to find the group for the file at {file_path}")
+    # Act Assert
+    with pytest.warns(UserWarning, match=r'Unable to find the group for the file at') as warn_msg:
+        nexus_file = NexusFile.generate_file_include_structure(file_path)
+    mocker.stopall()
+    result_include_file = nexus_file.include_objects[0]
+    assert result_include_file.file_content_as_list == []
+    assert result_include_file.location == expected_missing_file
+    assert result_include_file.origin == file_path
+    assert result_include_file.include_objects == []
+    assert result_include_file.include_locations == []
+    assert result_include_file.linked_user is None
+    assert result_include_file.last_modified is None
+    assert warn_msg[0].message.args[0] == 'Unable to find the group for the file at /root/file.dat'

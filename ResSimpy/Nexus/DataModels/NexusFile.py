@@ -109,6 +109,10 @@ class NexusFile(File):
                 # file not found, continue without filling out that information
                 warnings.warn(f'FileNotFoundError when trying to access file at {full_file_path}')
                 pass
+            except KeyError:
+                # Group or owner doesn't exist on this system, continue without filling out that information
+                warnings.warn(f'Unable to find the group for the file at {full_file_path}')
+                pass
 
             if owner is not None and group is not None:
                 return f"{owner}:{group}"
