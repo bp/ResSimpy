@@ -10,7 +10,7 @@ from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBa
 from ResSimpy.Units.AttributeMappings.NetworkUnitAttributeMapping import NetworkUnits
 
 
-@dataclass
+@dataclass(repr=False)
 class Wellbore(DataObjectMixin, ABC):
     date: Optional[str] = None
     unit_system: Optional[UnitSystem] = None

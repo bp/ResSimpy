@@ -255,9 +255,10 @@ class FcsNexusFile(NexusFile):
         return_dict = dict(single_keywords, **multi_keywords)
         return return_dict
 
-    def update_fcs_file(self, new_file_path: None | str = None, new_include_file_location: None | str = None,
-                        write_out_all_files: bool = False, preserve_file_names: bool = False) -> None:
-        """Updates or creates a new fcs_file with all the updated include files.
+    def update_model_files(self, new_file_path: None | str = None, new_include_file_location: None | str = None,
+                           write_out_all_files: bool = False, preserve_file_names: bool = False,
+                           overwrite_include_files: bool = False) -> None:
+        """Updates all the modified files as well as the fcs file if a new file has been created.
 
         Args:
             new_file_path (None | str): Defaults to None. If None overwrites the original file.
@@ -268,8 +269,9 @@ class FcsNexusFile(NexusFile):
             If False writes out all files.
             preserve_file_names (bool): Defaults to False. If True will derive names from the existing fcs_file.
             If False will derive new names from the new fcs file name and the property it represents in Nexus.
+            overwrite_include_files (bool): Defaults to False. If True will overwrite the included files.
         """
-        # Take the original file, find which files have changed and write out those locations?
+        # Take the original file, find which files have changed and write out those locations
 
         if new_file_path is not None:
             file_location = new_file_path
@@ -283,7 +285,7 @@ class FcsNexusFile(NexusFile):
         file_directory = os.path.dirname(file_location)
         if new_include_file_location is not None:
             file_directory = new_include_file_location
-
+        # Loop through all files in the model, writing out the contents if they have been modified.
         for keyword, attr_name in self.fcs_keyword_map_single().items():
             file: None | NexusFile = getattr(self, attr_name, None)
             if file is None:
@@ -291,7 +293,8 @@ class FcsNexusFile(NexusFile):
                 continue
             self.write_out_included_file(file, attr_name, file_directory, keyword, new_fcs_name,
                                          method_number=None, write_out_all_files=write_out_all_files,
-                                         preserve_file_names=preserve_file_names)
+                                         preserve_file_names=preserve_file_names,
+                                         overwrite_file=overwrite_include_files)
 
         for keyword, attr_name in self.fcs_keyword_map_multi().items():
             file_dict: None | dict[int, NexusFile] = getattr(self, attr_name, None)
@@ -299,14 +302,15 @@ class FcsNexusFile(NexusFile):
                 continue
             for method_number, file in file_dict.items():
                 self.write_out_included_file(file, attr_name, file_directory, keyword, new_fcs_name, method_number,
-                                             write_out_all_files, preserve_file_names)
+                                             write_out_all_files, preserve_file_names,
+                                             overwrite_file=overwrite_include_files)
 
         # write out the final fcs file
         self.write_to_file(file_location, write_includes=False)
 
     def write_out_included_file(self, file: NexusFile, attr_name: str, file_directory: str, keyword: str,
                                 new_fcs_name: str, method_number: None | int = None, write_out_all_files: bool = False,
-                                preserve_file_names: bool = False) -> None:
+                                preserve_file_names: bool = False, overwrite_file: bool = False) -> None:
         """Writes out the included file and prepares to switch out the path in the fcs file.
 
         Args:
@@ -318,6 +322,7 @@ class FcsNexusFile(NexusFile):
             method_number (None | int): method number to include in the file name (defaults to None)
             preserve_file_names (bool): Defaults to False. If True will derive names from the existing fcs_file.
             If False will derive new names from the new fcs file name and the property it represents in Nexus.
+            overwrite_file (bool): Defaults to False. If True will overwrite the file.
         """
         if not file.file_modified and not write_out_all_files:
             return
@@ -325,11 +330,15 @@ class FcsNexusFile(NexusFile):
         if method_number is not None:
             attr_name += f'_{str(method_number)}'
             attr_name = attr_name.replace('files', 'method')
-        if preserve_file_names and file.location is not None:
+        if overwrite_file and file.location is not None:
+            file_path_to_write_to = file.location
+        elif preserve_file_names and file.location is not None:
             new_file_name = os.path.basename(file.location)
+            file_path_to_write_to = os.path.join(file_directory, new_file_name)
         else:
             new_file_name = f"{new_fcs_name}_{attr_name}.dat"
-        file_path_to_write_to = os.path.join(file_directory, new_file_name)
+            file_path_to_write_to = os.path.join(file_directory, new_file_name)
+
         file.write_to_file(file_path_to_write_to, write_includes=True, write_out_all_files=write_out_all_files)
         # update them in the fcs file_as_list
         fcs_changed = self.change_file_path(file_path_to_write_to, keyword, method_number)
@@ -354,7 +363,7 @@ class FcsNexusFile(NexusFile):
                 continue
 
             if method_number is not None:
-                token_from_file, intermediate_word, method_num_in_file, path_to_replace\
+                token_from_file, intermediate_word, method_num_in_file, path_to_replace \
                     = nfo.get_multiple_sequential_values([line], 4)
                 if int(method_num_in_file) != method_number:
                     continue

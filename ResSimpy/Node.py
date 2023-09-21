@@ -9,7 +9,7 @@ from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBa
 from ResSimpy.Units.AttributeMappings.NetworkUnitAttributeMapping import NetworkUnits
 
 
-@dataclass
+@dataclass(repr=False)
 class Node(DataObjectMixin, ABC):
     name: Optional[str] = None
     type: Optional[str] = None

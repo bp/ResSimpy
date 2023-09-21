@@ -11,7 +11,7 @@ from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBa
 from ResSimpy.Units.AttributeMappings.ConstraintUnitAttributeMapping import ConstraintUnits
 
 
-@dataclass
+@dataclass(repr=False)
 class Constraint(DataObjectMixin, ABC):
     """Base class object for storing data related to well and node constraints."""
     name: Optional[str] = None

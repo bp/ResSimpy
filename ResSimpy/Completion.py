@@ -11,7 +11,7 @@ from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBa
 from ResSimpy.Units.AttributeMappings.WellUnitAttributeMapping import CompletionUnits
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, repr=False)
 class Completion(DataObjectMixin, ABC):
     """A class representing well completions.
 
