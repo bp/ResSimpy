@@ -14,6 +14,8 @@ from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_EOSOPTIONS_TERTIARY_KE
 from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_UNSAT_TABLE_INDICES
 from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 from ResSimpy.DynamicProperty import DynamicProperty
+from ResSimpy.Units.AttributeMapping import AttributeMapBase
+from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitAttributeMapping import PVTUnits
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_list_str, get_empty_eosopt_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -78,6 +80,28 @@ class NexusPVTMethod(DynamicProperty):
         else:
             self.properties = {}
         super().__init__(input_number=input_number, file=file)
+
+    @staticmethod
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """Gets the mapping of nexus keywords to attribute definitions."""
+        keywords = {
+            'DENOIL': ('oil_density', float),
+            'DENGAS': ('gas_density', float),
+            'API': ('oil_api_gravity', float),
+            'SPECG': ('gas_specific_gravity', float),
+            'MWOR': ('molecular_weight_of_residual_oil', float),
+            'PSAT': ('saturation_pressure', float),
+            'PRES': ('pressure', float),
+            'VO': ('oil_viscosity', float),
+            'VG': ('gas_viscosity', float),
+            'RS': ('solution_gas_oil_ratio', float),
+        }
+        return keywords
+
+    @property
+    def attribute_to_unit_map(self) -> AttributeMapBase:
+        """Returns the attribute to unit map for the constraint."""
+        return PVTUnits()
 
     def to_string(self) -> str:
         """Create string with PVT data in Nexus file format."""

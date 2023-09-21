@@ -2,7 +2,10 @@ from __future__ import annotations
 from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.File import File
+from ResSimpy.Units.AttributeMapping import AttributeMapBase
+from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitAttributeMapping import PVTUnits
 
 
 @dataclass
@@ -19,6 +22,12 @@ class DynamicProperty(ABC):
     def __init__(self, input_number: int, file: File) -> None:
         self.input_number: int = input_number
         self.file: File = file
+        # self.attribute_map: AttributeMapBase
+
+    @property
+    def attribute_to_unit_map(self) -> AttributeMapBase:
+        """Returns the attribute to unit map for the constraint."""
+        raise NotImplementedError('Implement in the derived class.')
 
     def __repr__(self) -> str:
         """Pretty printing dynamic property data."""
@@ -29,6 +38,22 @@ class DynamicProperty(ABC):
     def to_string(self) -> str:
         """Write dynamic property data to string."""
         raise NotImplementedError('Implement in the derived class.')
+
+    def get_unit_for_attribute(self, attribute_name: str, unit_system: UnitSystem, uppercase: bool = False) -> str:
+        """Returns the unit variable for the given unit system.
+
+        Args:
+            attribute_name (str): name of the attribute to get the unit for
+            unit_system (UnitSystem): unit system to get the unit for
+            uppercase (bool): if True returns the unit in uppercase
+        """
+        unit_dimension = self.attribute_to_unit_map.attribute_map.get(attribute_name, None)
+        if unit_dimension is None:
+            raise AttributeError(f'Attribute {attribute_name} not recognised and does not have a unit definition')
+        unit = unit_dimension.unit_system_enum_to_variable(unit_system=unit_system)
+        if uppercase:
+            unit = unit.upper()
+        return unit
 
     def write_to_file(self, overwrite_existing: bool = False, new_file_location: Optional[str] = None) -> None:
         """Write dynamic property data to file."""

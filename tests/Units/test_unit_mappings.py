@@ -9,6 +9,8 @@ from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConne
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
 from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.DataModels.NexusPVTMethod import NexusPVTMethod
 from ResSimpy.Units.Units import Area
 from ResSimpy.Units.AttributeMappings.ConstraintUnitAttributeMapping import ConstraintUnits
 from ResSimpy.ISODateTime import ISODateTime
@@ -97,6 +99,20 @@ def test_get_unit_for_attribute(mocker, data_object, attribute, expected_result,
     'patch out convert_to_iso from the ISODateTime module as it is not needed for this test'
     mocker.patch.object(ISODateTime, 'convert_to_iso', return_value=ISODateTime(2021, 1, 1))
     dataobj = data_object({})
+    # Act
+    result = dataobj.get_unit_for_attribute(attribute_name=attribute, unit_system=UnitSystem.ENGLISH, uppercase=upper)
+    # Assert
+    assert result == expected_result
+
+
+@pytest.mark.parametrize('data_object, attribute, expected_result, upper', [
+    (NexusPVTMethod, 'pressure', 'PSIA', True),
+])
+def test_get_unit_for_dynamic_property_attribute(data_object, attribute, expected_result, upper):
+    """A test to check if DynamicProperty.get_unit_for_attribute method works as expected."""
+    # Arrange
+    prop_file = NexusFile(location='test/file/prop.dat')
+    dataobj = data_object(file=prop_file, input_number=1)
     # Act
     result = dataobj.get_unit_for_attribute(attribute_name=attribute, unit_system=UnitSystem.ENGLISH, uppercase=upper)
     # Assert
