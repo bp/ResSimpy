@@ -10,7 +10,7 @@ from ResSimpy.Grid import VariableEntry
 from string import Template
 import re
 import os
-
+import warnings
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Enums.UnitsEnum import UnitSystem, TemperatureUnits, SUnits
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEYWORDS
@@ -623,10 +623,14 @@ def check_property_in_line(
     # Check for dateformat
     if check_token('DATEFORMAT', line):
         date_format_value = get_expected_token_value('DATEFORMAT', line, file_as_list)
-        if date_format_value == 'MM/DD/YYYY':
-            property_dict['DATEFORMAT'] = DateFormat.MM_DD_YYYY
+        if date_format_value != 'MM/DD/YYYY' and date_format_value == 'DD_MM_YYYY':
+            warnings.warn('New Date Format detected')
         else:
-            property_dict['DATEFORMAT'] = DateFormat.DD_MM_YYYY
+            if date_format_value == 'MM/DD/YYYY':
+                property_dict['DATEFORMAT'] = DateFormat.MM_DD_YYYY
+            else:
+                property_dict['DATEFORMAT'] = DateFormat.DD_MM_YYYY
+        
     # Check unit system specification
     if check_token('ENGLISH', line):
         property_dict['UNIT_SYSTEM'] = UnitSystem.ENGLISH
