@@ -7,9 +7,11 @@ from typing import Optional
 from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.NexusEnums import DateFormatEnum
+from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBase
+from ResSimpy.Units.AttributeMappings.WellUnitAttributeMapping import CompletionUnits
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, repr=False)
 class Completion(DataObjectMixin, ABC):
     """A class representing well completions.
 
@@ -180,3 +182,7 @@ class Completion(DataObjectMixin, ABC):
 
     def set_iso_date(self) -> ISODateTime:
         return ISODateTime.convert_to_iso(self.date, self.date_format, self.start_date)
+
+    @property
+    def attribute_to_unit_map(self) -> AttributeMapBase:
+        return CompletionUnits()

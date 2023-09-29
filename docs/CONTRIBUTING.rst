@@ -57,7 +57,7 @@ Development environment setup
 
    .. code-block:: bash
 
-      pytest
+      pytest tests
 
    If at a later date you wish to ensure that the dependencies in your dev environment are up to date with the latest supported versions, you can again run `poetry install` and your libraries will automatically be updated.
     
@@ -105,9 +105,9 @@ Writing tests
 pytest is a framework for running automated tests in Python. It is a high-level
 framework, so very little code is required to write a test.
 
-Tests are written in the form of functions with the prefix `test_`. Look in the
+Tests are written in the form of functions with the prefix ``test_``. Look in the
 tests directory for examples of existing tests. A typical pattern is
-“Arrange-Act-Assert”:
+``Arrange-Act-Assert``:
 
 .. code:: python
 
@@ -124,20 +124,17 @@ tests directory for examples of existing tests. A typical pattern is
         expected = [1,2,3]
         assert result == expected
 
-Running tests
+Running tests and other checks
 ^^^^^^^^^^^^^
 
-The easiest way to run the tests is simply to open a Pull Request on GitHub.
-This automatically triggers the unit tests, run in several different Python
-environments. Note that if your PR references an outside fork of the repo, then
-a maintainer may need to manually approve the CI suite to run.
+You should run all the unit tests and checks on your local machine before submitting a pull request.
 
-Alternatively, you can run the tests against your local clone of the code base
+You can run the tests against your local clone of the codebase
 from the command line when running inside the Poetry shell:
 
 .. code:: bash
 
-    pytest
+    pytest tests
 
 There are several command line options that can be appended, for example:
 
@@ -156,6 +153,9 @@ yourself on your local machine using the following commands in the poetry shell:
     flake8 ResSimpy --append-config ./.config/flake8
     mypy ResSimpy --config-file ./.config/mypy
     ruff check ResSimpy
+
+A shell script ``run_all_checks.sh`` has been provided for your convenience to allow you to run all the checks at the same
+time inside the poetry shell if you wish to.
 
 Other Considerations
 ^^^^^^^^^^^^^^^^^^^^

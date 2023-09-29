@@ -93,8 +93,27 @@ class NexusFile(File):
             if full_file_path == "" or full_file_path is None:
                 return None
             pathlib_path = pathlib.Path(full_file_path)
-            owner = pathlib_path.owner()
-            group = pathlib_path.group()
+            owner: str = ''
+            group: str = ''
+            try:
+                owner = pathlib_path.owner()
+                group = pathlib_path.group()
+            except NotImplementedError:
+                # owner or group not supported on this system, continue without filling out that information
+                pass
+            except PermissionError:
+                # user doesn't have permission to access the file, continue without filling out that information
+                warnings.warn(f'PermissionError when trying to access file at {full_file_path}')
+                pass
+            except FileNotFoundError:
+                # file not found, continue without filling out that information
+                warnings.warn(f'FileNotFoundError when trying to access file at {full_file_path}')
+                pass
+            except KeyError:
+                # Group or owner doesn't exist on this system, continue without filling out that information
+                warnings.warn(f'Unable to find the group for the file at {full_file_path}')
+                pass
+
             if owner is not None and group is not None:
                 return f"{owner}:{group}"
             elif owner is not None:
@@ -110,14 +129,10 @@ class NexusFile(File):
                 return None
             return datetime.fromtimestamp(timestamp, tz=timezone.utc)
 
-        user = None
-        last_changed = None
         full_file_path = file_path
         if origin is not None:
             full_file_path = nfo.get_full_file_path(file_path, origin)
 
-        user = __get_pathlib_path_details(full_file_path)
-        last_changed = __get_datetime_from_os_stat(full_file_path)
         try:
             file_as_list = nfo.load_file_as_list(full_file_path)
         except FileNotFoundError:
@@ -129,10 +144,14 @@ class NexusFile(File):
                                    origin=origin,
                                    include_objects=None,
                                    file_content_as_list=None,
-                                   linked_user=user,
-                                   last_modified=last_changed)
+                                   linked_user=None,
+                                   last_modified=None)
             warnings.warn(UserWarning(f'No file found for: {file_path} while loading {origin}'))
             return nexus_file_class
+
+        # check last modified and user for the file
+        user = __get_pathlib_path_details(full_file_path)
+        last_changed = __get_datetime_from_os_stat(full_file_path)
 
         # prevent python from mutating the lists that it's iterating over
         modified_file_as_list: list[str] = []
@@ -629,7 +648,7 @@ class NexusFile(File):
         return self.object_locations[id]
 
     def write_to_file(self, new_file_path: None | str = None, write_includes: bool = False,
-                      write_out_all_files: bool = False) -> None:
+                      write_out_all_files: bool = False, overwrite_file: bool = False) -> None:
         """Writes to file specified in self.location the strings contained in the list self.file_content_as_list.
 
         Args:
@@ -643,6 +662,8 @@ class NexusFile(File):
             new_file_path = self.location
         elif new_file_path is None:
             raise ValueError(f'No file path to write to, instead found {self.location}')
+        elif new_file_path and overwrite_file:
+            raise ValueError(f'Cannot overwrite file with a new file path provided at {new_file_path}')
         if self.file_content_as_list is None:
             raise ValueError(f'No file data to write out, instead found {self.file_content_as_list}')
         if write_includes and self.include_objects is not None:
@@ -661,7 +682,8 @@ class NexusFile(File):
                     if write_file:
                         self.update_include_location_in_file_as_list(include_file_name, file)
                 if write_file:
-                    file.write_to_file(include_file_name, write_includes=True, write_out_all_files=write_out_all_files)
+                    file.write_to_file(include_file_name, write_includes=True, write_out_all_files=write_out_all_files,
+                                       overwrite_file=overwrite_file)
 
         file_str = ''.join(self.file_content_as_list)
 

@@ -5,7 +5,7 @@ from ResSimpy.OperationsMixin import NetworkOperationsMixIn
 from ResSimpy.Wellbore import Wellbore
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, repr=False)
 class Wellbores(NetworkOperationsMixIn, ABC):
     __connections: list[Wellbore] = field(default_factory=list)
 

@@ -194,7 +194,39 @@ def test_get_users_linked_with_files(mocker):
     result = simulation.get_users_linked_with_files()
     mocker.stopall()
     assert result == expected_result
-    
+
+
+def test_get_users_linked_with_files_error_raised(mocker):
+    # Arrange
+    fcs_file = "RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\n"
+    open_mock = mocker.mock_open(read_data=fcs_file)
+    modified_time = datetime(2018, 6, 30, 8, 18, 10, tzinfo=timezone.utc)
+    dt_mock = mocker.MagicMock()
+    mocker.patch('datetime.datetime', dt_mock)
+    dt_mock.fromtimestamp.return_value = modified_time
+
+    mocker.patch("builtins.open", open_mock)
+    path_mock = mocker.MagicMock()
+    mocker.patch('pathlib.Path', path_mock)
+    path_mock.return_value.owner.return_value = "mock_User"
+    path_mock.return_value.group.side_effect = NotImplementedError("Not implemented on this system")
+
+    os_mock = mocker.MagicMock()
+    mocker.patch('os.stat', os_mock)
+    os_mock.return_value.st_mtime = 1530346690
+
+    simulation = NexusSimulator(origin="Path.fcs")
+
+    expected_result = [("Path.fcs", "mock_User:", modified_time),
+                       ("run_control.inc", "mock_User:", modified_time)]
+    # Act
+
+    result = simulation.get_users_linked_with_files()
+    mocker.stopall()
+
+    # Assert
+    assert result == expected_result
+
 def test_get_users_with_files_for_multiple_files(mocker):
     
     fcs_file = 'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'     
@@ -1001,7 +1033,7 @@ PLOTBINARY
        WelLS sEt 1 my/wellspec/file.dat
     """)
 ], ids=['path_after_set'])
-def test_get_wells(mocker: MockerFixture, fixture_for_osstat_pathlib, fcs_file_contents: str):
+def test_get_all(mocker: MockerFixture, fixture_for_osstat_pathlib, fcs_file_contents: str):
     """Testing the functionality to load in and retrieve a set of wells"""
     # Arrange
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
@@ -1026,7 +1058,7 @@ def test_get_wells(mocker: MockerFixture, fixture_for_osstat_pathlib, fcs_file_c
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.wells.get_wells()
+    result = simulation.wells.get_all()
 
     # Assert
     assert result == loaded_wells
@@ -1064,7 +1096,7 @@ def test_get_wells_windows(mocker: MockerFixture, fixture_for_osstat_pathlib, fc
     simulation = NexusSimulator(origin='path\nexus_run.fcs')
 
     # Act
-    result = simulation.wells.get_wells()
+    result = simulation.wells.get_all()
 
     # Assert
     assert result == loaded_wells
@@ -1073,7 +1105,7 @@ def test_get_wells_windows(mocker: MockerFixture, fixture_for_osstat_pathlib, fc
                                             start_date='', date_format = DateFormat.MM_DD_YYYY)
 
 
-def test_get_wells_df(mocker: MockerFixture, fixture_for_osstat_pathlib):
+def test_get_df(mocker: MockerFixture, fixture_for_osstat_pathlib):
     # Arrange
     fcs_file_contents = """
        WelLS sEt 1 my/wellspec/file.dat
@@ -1100,7 +1132,7 @@ def test_get_wells_df(mocker: MockerFixture, fixture_for_osstat_pathlib):
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
     simulation = NexusSimulator(origin='nexus_run.fcs')
     # Act
-    result = simulation.wells.get_wells_df()
+    result = simulation.wells.get_df()
     # Assert
 
     pd.testing.assert_frame_equal(result, loaded_wells_df, check_like=True)
@@ -1111,7 +1143,7 @@ def test_get_wells_df(mocker: MockerFixture, fixture_for_osstat_pathlib):
        WelLS set 1 my/wellspec/file.dat
     """)
 ], ids=['basic case'])
-def test_get_well(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_pathlib):
+def test_get(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_pathlib):
     """Testing the functionality to load in and retrieve a single wells."""
     # Arrange
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
@@ -1139,7 +1171,7 @@ def test_get_well(mocker: MockerFixture, fcs_file_contents: str, fixture_for_oss
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
     # Act
-    result = simulation.wells.get_well(well_name='WELL2')
+    result = simulation.wells.get(well_name='WELL2')
 
     # Assert
     assert result == loaded_wells[1]
@@ -1179,7 +1211,7 @@ def test_get_well_windows(mocker: MockerFixture, fcs_file_contents: str, fixture
     simulation = NexusSimulator(origin='path\\nexus_run.fcs')
 
     # Act
-    result = simulation.wells.get_well(well_name='WELL2')
+    result = simulation.wells.get(well_name='WELL2')
 
     # Assert
     assert result == loaded_wells[1]

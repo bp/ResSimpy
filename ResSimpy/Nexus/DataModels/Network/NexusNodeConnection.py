@@ -5,7 +5,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.NodeConnection import NodeConnection
 
 
-@dataclass
+@dataclass(repr=False)
 class NexusNodeConnection(NodeConnection):
     """Attributes
     hyd_method: hydraulic lift correlation method used (METHOD)

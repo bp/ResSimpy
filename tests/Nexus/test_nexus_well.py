@@ -598,11 +598,11 @@ def test_wells_modify(mocker, fixture_for_osstat_pathlib):
                        NexusWell(well_name='well2', completions=well_2_completions, units=UnitSystem.METRIC)]
 
     # Act
-    wells.modify_well(well_name='well1', completion_properties_list=[perf_1_to_add, perf_2_to_add],
+    wells.modify(well_name='well1', completion_properties_list=[perf_1_to_add, perf_2_to_add],
                       how=OperationEnum.ADD)
-    wells.modify_well(well_name='well1', completion_properties_list=[perf_to_remove], how=OperationEnum.REMOVE)
+    wells.modify(well_name='well1', completion_properties_list=[perf_to_remove], how=OperationEnum.REMOVE)
     # Assert
-    assert wells.get_wells()[0].completions == expected_result[0].completions
+    assert wells.get_all()[0].completions == expected_result[0].completions
 
 @pytest.mark.parametrize('file_as_list, add_perf_date, preserve_previous_completions, expected_result',[
 (['WELLSPEC well1', 'iw  jw   l    RADB', '1  2   3   1.5'], '01/01/2020', False,
@@ -729,7 +729,7 @@ def test_add_completion_write(mocker, fixture_for_osstat_pathlib, file_as_list, 
     fake_nexus_sim.start_date = start_date
     # mock out open
     wells_obj = NexusWells(fake_nexus_sim)
-    wells_obj.load_wells()
+    wells_obj.load()
 
     add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'bore_radius': 7.5, 'date_format': fake_nexus_sim.date_format}
 
@@ -771,7 +771,7 @@ def test_add_completion_correct_wellspec(mocker, fixture_for_osstat_pathlib):
     mock_nexus_sim.start_date = start_date
     # mock out open
     wells_obj = NexusWells(mock_nexus_sim)
-    wells_obj.load_wells()
+    wells_obj.load()
 
     add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'bore_radius': 7.5, 'date_format': DateFormat.DD_MM_YYYY}
 
