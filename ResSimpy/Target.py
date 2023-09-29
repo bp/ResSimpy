@@ -31,6 +31,8 @@ class Target(DataObjectMixin, ABC):
     calculation_type: Optional[str] = None
     __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False)
 
+
+
     @property
     def attribute_to_unit_map(self) -> AttributeMapBase:
         """Returns the attribute to unit map for the WellConnection."""
