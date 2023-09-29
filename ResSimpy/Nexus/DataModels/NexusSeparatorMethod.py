@@ -1,3 +1,4 @@
+"""Class to hold data input for a Nexus Separator method."""
 from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum

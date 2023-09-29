@@ -1,3 +1,5 @@
+"""Class for collection of Nexus PVT property methods."""
+
 from __future__ import annotations
 from dataclasses import dataclass
 import os

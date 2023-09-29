@@ -1,4 +1,4 @@
-"""Abstract class for constraints."""
+"""Abstract base class for constraints."""
 from __future__ import annotations
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
@@ -12,6 +12,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 
 @dataclass(kw_only=True)
 class Constraints(ABC):
+    """Abstract base class for constraints."""
     __constraints: dict[str, list[Constraint]] = field(default_factory=lambda: {})
 
     @abstractmethod

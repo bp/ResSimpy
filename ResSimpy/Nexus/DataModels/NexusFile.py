@@ -1,3 +1,4 @@
+"""Handle Nexus files and preserve origin of include files."""
 from __future__ import annotations
 
 import os.path
