@@ -1,3 +1,4 @@
+"""Class that represents a single nexus target in the NexusSimulator."""
 from __future__ import annotations
 from dataclasses import dataclass
 from ResSimpy.Enums.UnitsEnum import UnitSystem

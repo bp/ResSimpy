@@ -1,3 +1,4 @@
+"""The Nexus Simulator class is the main class for interacting with Nexus models."""
 from __future__ import annotations
 
 import os
@@ -7,6 +8,7 @@ from typing import Any, Union, Optional
 import resqpy.model as rq
 from datetime import datetime
 import ResSimpy.Nexus.nexus_file_operations as nfo
+from ResSimpy.File import File
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusPVTMethods import NexusPVTMethods
@@ -159,7 +161,7 @@ class NexusSimulator(Simulator):
         return self.model_files.files_info
 
     @property
-    def model_files(self) -> FcsNexusFile:
+    def model_files(self) -> File:
         return self._model_files
 
     @property

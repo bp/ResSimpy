@@ -1,3 +1,4 @@
+"""Abstract class for constraints."""
 from __future__ import annotations
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod

@@ -1,3 +1,6 @@
+"""Class for handling targets in the Nexus Network. This class is used to store and manipulate the targets in a
+NexusNetwork. It is stored as an instance in the NexusNetwork class as "targets".
+"""
 from __future__ import annotations
 from dataclasses import dataclass, field
 from uuid import UUID

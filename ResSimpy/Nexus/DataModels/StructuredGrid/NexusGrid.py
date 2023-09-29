@@ -1,3 +1,4 @@
+"""Nexus grid file class for loading in a structured grid file and extracting the grid properties."""
 from __future__ import annotations
 
 import copy

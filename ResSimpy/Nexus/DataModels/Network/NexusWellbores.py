@@ -1,3 +1,6 @@
+"""Class for handling wellbores in the Nexus Network. This class is used to store and manipulate the wellbores in a
+NexusNetwork. It is stored as an instance in the NexusNetwork class as "wellbores".
+"""
 from __future__ import annotations
 
 from dataclasses import field, dataclass

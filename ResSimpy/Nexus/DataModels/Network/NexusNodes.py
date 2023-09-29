@@ -1,3 +1,7 @@
+"""Holds the NexusNodes class which is used to store and manipulate the nodes in a NexusNetwork.
+It is stored as an instance in the NexusNetwork class as "nodes".
+"""
+
 from __future__ import annotations
 from dataclasses import dataclass, field
 from uuid import UUID
@@ -21,6 +25,9 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class NexusNodes(Nodes):
+    """Holds the NexusNodes class which is used to store and manipulate the nodes in a NexusNetwork.
+    It is stored as an instance in the NexusNetwork class as "nodes".
+    """
     __nodes: list[NexusNode] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork) -> None:
