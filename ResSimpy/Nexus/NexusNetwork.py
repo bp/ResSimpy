@@ -30,9 +30,9 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class NexusNetwork(Network):
-    """Represents the Nexus implementation of a network. Holds all the network objects and loads them from the simulator.
-    The currently supported elements are nodes, connections, well connections, wellheads, wellbores, constraints and
-    targets.
+    """Represents the Nexus implementation of a network. Holds all the network objects and loads them from the
+    simulator. The currently supported elements are nodes, connections, well connections, wellheads, wellbores,
+    constraints and targets.
     """
     __model: NexusSimulator
     nodes: NexusNodes

@@ -1,6 +1,6 @@
 """Class that holds all the constraints for a NexusNetwork object. This class is responsible for loading,
-    modifying and removing constraints from the NexusNetwork object. This class is also responsible for
-    writing the constraints to the Nexus deck. An instance of this is held within the Network class as "constraints".
+modifying and removing constraints from the NexusNetwork object. This class is also responsible for
+writing the constraints to the Nexus deck. An instance of this is held within the Network class as "constraints".
 """
 from __future__ import annotations
 
