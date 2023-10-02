@@ -1,4 +1,4 @@
-"""class for collection of Nexus water property methods."""
+"""Class for collection of Nexus water property methods."""
 from __future__ import annotations
 from dataclasses import dataclass
 import os

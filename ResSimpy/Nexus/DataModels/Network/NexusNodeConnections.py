@@ -1,5 +1,5 @@
-"""Holds all the node connections in a network. This class is responsible for loading, modifying and removing \
-    connections from a network. It also holds the list of connections in memory. \
+"""Holds all the node connections in a network. This class is responsible for loading, modifying and removing
+    connections from a network. It also holds the list of connections in memory.
     An instance is held within the NexusNetwork class as "connections".
 """
 from __future__ import annotations
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class NexusNodeConnections(NodeConnections):
-    """Holds all the node connections in a network. This class is responsible for loading, modifying and removing \
+    """Holds all the node connections in a network. This class is responsible for loading, modifying and removing
         connections from a network. It also holds the list of connections in memory.
     """
     __connections: list[NexusNodeConnection] = field(default_factory=list)

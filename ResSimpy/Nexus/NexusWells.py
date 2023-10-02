@@ -1,4 +1,4 @@
-"""A class for collecting all NexusWell objects in a NexusSimulator. Handles adding and removing completions \
+"""A class for collecting all NexusWell objects in a NexusSimulator. Handles adding and removing completions
 as well as rescheduling wells.
 """
 from __future__ import annotations
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class NexusWells(Wells):
-    """A class for collecting all NexusWell objects in a NexusSimulator. Handles adding and removing completions \
+    """A class for collecting all NexusWell objects in a NexusSimulator. Handles adding and removing completions
     as well as rescheduling wells. This is usually accessed through the model.wells property.
 
     Arguments:

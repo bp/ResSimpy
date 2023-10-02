@@ -8,33 +8,34 @@ from ResSimpy.Wellhead import Wellhead
 
 @dataclass(kw_only=True)
 class NexusWellhead(Wellhead):
-    """Attributes
-    well (str):  Associates the wellhead to the well. (WELL)
-    name (str):  The name of the wellhead. (NAME)
-    type (str):  The type of well. (TYPE)
-    depth (float):  The depth of the wellhead  (DEPTH)
-    x_pos (float):  The x-coordinate location of the wellhead  (X)
-    y_pos (float):  The y-coordinate location of the wellhead  (Y)
-    pvt_method (int):  The PVT table numbers to be used for the well and wellhead connections. (IPVT)
-    water_method (int):  The Water PVT table numbers to be used for the well and wellhead connections. (IWAT)
-    bat_method (int):  The separator battery numbers associated with the well and wellhead connections. (IBAT)
-    measured_depth_in (float):  The measured depth at the start of the well interval  (MDIN)
-    measured_depth_out (float):  The measured depth at the end of the well interval  (MDOUT)
-    hyd_method (int):  The hydraulic method used. (METHOD)
-    number (int):  The well number. (NUMBER)
-    diameter (float):  The wellbore diameter  (DIAM)
-    inner_diameter (float):  The well inner diameter  (INNERDIAM)
-    roughness (float):  The well roughness. (ROUGHNESS)
-    length (float):  The length of the well  (LENGTH)
-    temperature (float):  The temperature of the fluid in the well  (TEMP)
-    elevation_profile (str):  The well elevation profile. (ELEVPR)
-    temperature_profile (str):  The well temperature profile. (TEMPPR)
-    dp_add (float):  The additional pressure drop across the well  (DPADD)
-    rate_mult (float):  The rate multiplier for the well. (RATEMULT)
-    delta_depth (float):  The depth difference between the two points in the connection  (DDEPTH)
-    heat_transfer_coeff (float):  The heat transfer coefficient for the well  (HTC)
-    dt_add (float):  The additional temperature difference across the well  (DTADD).
+    """Class representing a single Wellhead in a Nexus Network.
 
+    Attributes:
+        well (str):  Associates the wellhead to the well. (WELL)
+        name (str):  The name of the wellhead. (NAME)
+        type (str):  The type of well. (TYPE)
+        depth (float):  The depth of the wellhead  (DEPTH)
+        x_pos (float):  The x-coordinate location of the wellhead  (X)
+        y_pos (float):  The y-coordinate location of the wellhead  (Y)
+        pvt_method (int):  The PVT table numbers to be used for the well and wellhead connections. (IPVT)
+        water_method (int):  The Water PVT table numbers to be used for the well and wellhead connections. (IWAT)
+        bat_method (int):  The separator battery numbers associated with the well and wellhead connections. (IBAT)
+        measured_depth_in (float):  The measured depth at the start of the well interval  (MDIN)
+        measured_depth_out (float):  The measured depth at the end of the well interval  (MDOUT)
+        hyd_method (int):  The hydraulic method used. (METHOD)
+        number (int):  The well number. (NUMBER)
+        diameter (float):  The wellbore diameter  (DIAM)
+        inner_diameter (float):  The well inner diameter  (INNERDIAM)
+        roughness (float):  The well roughness. (ROUGHNESS)
+        length (float):  The length of the well  (LENGTH)
+        temperature (float):  The temperature of the fluid in the well  (TEMP)
+        elevation_profile (str):  The well elevation profile. (ELEVPR)
+        temperature_profile (str):  The well temperature profile. (TEMPPR)
+        dp_add (float):  The additional pressure drop across the well  (DPADD)
+        rate_mult (float):  The rate multiplier for the well. (RATEMULT)
+        delta_depth (float):  The depth difference between the two points in the connection  (DDEPTH)
+        heat_transfer_coeff (float):  The heat transfer coefficient for the well  (HTC)
+        dt_add (float):  The additional temperature difference across the well  (DTADD).
     """
 
     pvt_method: Optional[int] = None

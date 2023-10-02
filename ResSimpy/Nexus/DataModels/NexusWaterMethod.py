@@ -1,4 +1,4 @@
-"""class to hold Nexus Water properties."""
+"""Class to hold Nexus Water properties."""
 from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
@@ -14,7 +14,7 @@ from ResSimpy.Utils.invert_nexus_map import invert_nexus_map
 
 @dataclass  # Doesn't need to write an _init_, _eq_ methods, etc.
 class NexusWaterParams:
-    """Class to hold a single set of water property parameters, i.e., density, compressibility, etc.
+    """Class to represent a single set of water property parameters, i.e., density, compressibility, etc.
 
     Attributes:
         temperature (Optional[float]): Temperature at which the rest of the water property parameters apply
