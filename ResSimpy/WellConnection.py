@@ -27,4 +27,4 @@ class WellConnection(DataObjectMixin, ABC):
     @property
     def attribute_to_unit_map(self) -> AttributeMapBase:
         """Returns the attribute to unit map for the WellConnection."""
-        return NetworkUnits()
+        return NetworkUnits(self.unit_system)

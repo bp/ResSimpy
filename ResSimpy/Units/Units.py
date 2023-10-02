@@ -475,3 +475,13 @@ class NonDarcySkin(UnitDimension):
     metbar = 'day/SM3'
     lab = 'hour/stcc'
     metric_atm = 'day/SM3'
+
+
+class ProductivityIndex(UnitDimension):
+    """Productivity index units."""
+    english = 'STB/day/psi'
+    metric = 'STM3/day/kPa'
+    metkgcm2 = 'STM3/day/kg/cm2'
+    metbar = 'STM3/day/bars'
+    lab = 'stcc/hour/psi'
+    metric_atm = 'STM3/day/atm'

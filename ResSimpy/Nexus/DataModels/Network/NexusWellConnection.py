@@ -3,6 +3,9 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
+
+from ResSimpy.Units.AttributeMapping import AttributeMapBase
+from ResSimpy.Units.AttributeMappings.NetworkUnitAttributeMapping import NetworkUnits
 from ResSimpy.WellConnection import WellConnection
 
 
@@ -103,6 +106,7 @@ class NexusWellConnection(WellConnection):
         if self.name is not None:
             self.bh_node_name = self.name + '%bh'
             self.wh_node_name = self.name + '%wh'
+        self.units: AttributeMapBase = NetworkUnits(self.unit_system)
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
@@ -133,11 +137,11 @@ class NexusWellConnection(WellConnection):
             'ELEVPR': ('elevation_profile', str),
             'TEMPPR': ('temperature_profile', str),
             'INJMOB': ('inj_mobility', str),
-            'CROSS_SHUT': ('crossshut_method', str),
+            'CROSS_SHUT': ('crossshut', str),
             'CROSSFLOW': ('crossflow', str),
             'ONTIME': ('on_time', float),
             'HTC': ('heat_transfer_coeff', float),
-            'WIMULT': ('water_inj_mult', float),
+            'WIMULT': ('well_index_mult', float),
             'PI': ('productivity_index', float),
             'VIPPI': ('vip_productivity_index', float),
             'PIPHASE': ('productivity_index_phase', str),

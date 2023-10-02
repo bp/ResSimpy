@@ -1,12 +1,13 @@
 from typing import Mapping
 
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBase
-from ResSimpy.Units.Units import (UnitDimension, Length, Temperature, Diameter, Roughness, ReservoirRates,
-                                  Dimensionless, Pressure, HeatTransfer, Time, DeltaPressure)
+from ResSimpy.Units.Units import (UnitDimension, Length, Temperature, Diameter, Roughness,
+                                  Dimensionless, Pressure, HeatTransfer, Time, DeltaPressure, ProductivityIndex)
 
 
 class NetworkUnits(AttributeMapBase):
-    """Unit types for the attributes of a well connection, wellhead, wellbore, ."""
+    """Unit types for the attributes of a well connection, wellhead, wellbore, etc."""
     attribute_map: Mapping[str, UnitDimension] = {
         'bhdepth': Length(),
         'depth': Length(),
@@ -18,12 +19,12 @@ class NetworkUnits(AttributeMapBase):
         'diameter': Diameter(),
         'roughness': Roughness(),
         'inner_diameter': Diameter(),
-        'productivity_index': ReservoirRates(),
+        'productivity_index': ProductivityIndex(),
         'rate_mult': Dimensionless(),
         'dp_add': DeltaPressure(),
         'dt_add': Temperature(),
         'water_inj_mult': Dimensionless(),
-        'vip_productivity_index': ReservoirRates(),
+        'vip_productivity_index': ProductivityIndex(),
         'd_factor': Dimensionless(),
         'gas_mobility': Dimensionless(),
         'drill_order_benefit': Dimensionless(),
@@ -72,3 +73,71 @@ class NetworkUnits(AttributeMapBase):
         'rank_dt': Time(),
         'calculation_type': Dimensionless(),
     }
+
+    def __init__(self, unit_system: UnitSystem) -> None:
+        super().__init__(unit_system=unit_system)
+
+    @property
+    def bhdepth(self) -> str:
+        """Returns the unit variable for the given unit system."""
+        return Length().unit_system_enum_to_variable(self.unit_system)
+
+    @property
+    def depth(self) -> str:
+        """Returns the unit variable for the given unit system."""
+        return Length().unit_system_enum_to_variable(self.unit_system)
+
+    @property
+    def datum_depth(self) -> str:
+        """Returns the unit variable for the given unit system."""
+        return Length().unit_system_enum_to_variable(self.unit_system)
+
+    @property
+    def x_pos(self) -> str:
+        """Returns the unit variable for the given unit system."""
+        return Length().unit_system_enum_to_variable(self.unit_system)
+
+    @property
+    def y_pos(self) -> str:
+        """Returns the unit variable for the given unit system."""
+        return Length().unit_system_enum_to_variable(self.unit_system)
+
+    @property
+    def length(self) -> str:
+        """Returns the unit variable for the given unit system."""
+        return Length().unit_system_enum_to_variable(self.unit_system)
+
+    @property
+    def temperature(self) -> str:
+        """Returns the unit variable for the given unit system."""
+        return Temperature().unit_system_enum_to_variable(self.unit_system)
+
+    @property
+    def diameter(self) -> str:
+        """Returns the unit variable for the given unit system."""
+        return Diameter().unit_system_enum_to_variable(self.unit_system)
+
+    @property
+    def roughness(self) -> str:
+        """Returns the unit variable for the given unit system."""
+        return Roughness().unit_system_enum_to_variable(self.unit_system)
+
+    @property
+    def inner_diameter(self) -> str:
+        """Returns the unit variable for the given unit system."""
+        return Diameter().unit_system_enum_to_variable(self.unit_system)
+
+    @property
+    def productivity_index(self) -> str:
+        """Returns the unit variable for the given unit system."""
+        return ProductivityIndex().unit_system_enum_to_variable(self.unit_system)
+
+    @property
+    def rate_mult(self) -> str:
+        """Returns the unit variable for the given unit system."""
+        return Dimensionless().unit_system_enum_to_variable(self.unit_system)
+
+    @property
+    def dp_add(self) -> str:
+        """Returns the unit variable for the given unit system."""
+        return DeltaPressure().unit_system_enum_to_variable(self.unit_system)
