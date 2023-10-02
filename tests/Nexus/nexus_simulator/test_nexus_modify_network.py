@@ -198,10 +198,10 @@ TIME 01/01/2024
     {'name':'testwell', 'date': '01/01/2023'},
         {'name': 'testwell', 'crossflow': 'OFF'},
         [
-            {'name': 'testwell', 'stream': 'PRODUCER', 'number': 94, 'datum_depth': 2020, 'crossflow': 'OFF', 'crossshut_method': 'CELLGRAD',
-            'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-            {'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 2020, 'crossflow': 'OFF', 'crossshut_method': 'CALC',
-            'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+            {'name': 'testwell', 'stream': 'PRODUCER', 'number': 94, 'datum_depth': 2020, 'crossflow': 'OFF',
+             'crossshut': 'CELLGRAD', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+            {'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 2020, 'crossflow': 'OFF',
+             'crossshut': 'CALC', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
             ],
     ),
 
@@ -253,11 +253,12 @@ TIME 01/01/2024
                                       expected_file_contents, obj_to_modify,
                                       modified_properties, expected_objs):
         # Arrange
+        mocker.patch.object(uuid, 'uuid4', side_effect=uuid_side_effect)
+
         nexus_sim, writing_mock_open = self.patch_simulator(mocker)
         expected_objs = [object_type(obj) for obj in expected_objs]
         expected_objs.sort(key=lambda x: x.name)
 
-        mocker.patch.object(uuid, 'uuid4', side_effect=uuid_side_effect)
         # Act
         network_objects = getattr(nexus_sim.network, network_component)
         network_objects.modify(obj_to_modify, modified_properties)

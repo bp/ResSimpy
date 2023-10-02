@@ -1,3 +1,4 @@
+from ResSimpy.Units.AttributeMappings.NetworkUnitMapping import NetworkUnits
 import pytest
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
@@ -10,7 +11,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
 from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Units.Units import Area
-from ResSimpy.Units.AttributeMappings.ConstraintUnitAttributeMapping import ConstraintUnits
+from ResSimpy.Units.AttributeMappings.ConstraintUnitMapping import ConstraintUnits
 from ResSimpy.ISODateTime import ISODateTime
 
 @pytest.mark.parametrize('unit_system, expected_result', [
@@ -49,10 +50,10 @@ def test_unit_system_enum_to_variable(unit_system, expected_result):
 def test_get_unit(attribute, unit_system, expected_result):
     """Tests the get_unit method."""
     # Arrange
-    unit_dimension = ConstraintUnits()
+    unit_dimension = ConstraintUnits(unit_system=unit_system)
 
     # Act
-    result = unit_dimension.get_unit_from_attribute(unit_system=unit_system, attribute_name=attribute)
+    result = unit_dimension.get_unit_from_attribute(attribute_name=attribute)
     # Assert
     assert result == expected_result
 
@@ -60,11 +61,10 @@ def test_get_unit(attribute, unit_system, expected_result):
 def test_get_unit_upper():
     """Tests the get_unit method."""
     # Arrange
-    unit_dimension = ConstraintUnits()
+    unit_dimension = ConstraintUnits(unit_system=UnitSystem.ENGLISH)
 
     # Act
-    result = unit_dimension.get_unit_from_attribute(unit_system=UnitSystem.ENGLISH,
-                                                    attribute_name='max_surface_water_rate', uppercase=True)
+    result = unit_dimension.get_unit_from_attribute(attribute_name='max_surface_water_rate', uppercase=True)
     # Assert
     assert result == 'STB/DAY'
 
@@ -72,11 +72,11 @@ def test_get_unit_upper():
 def test_get_unit_error():
     """Tests the get_unit method."""
     # Arrange
-    unit_dimension = ConstraintUnits()
+    unit_dimension = ConstraintUnits(unit_system=UnitSystem.ENGLISH)
 
     # Act
     with pytest.raises(AttributeError) as ae:
-        unit_dimension.get_unit_from_attribute(unit_system=UnitSystem.ENGLISH, attribute_name='not_an_attribute')
+        unit_dimension.get_unit_from_attribute( attribute_name='not_an_attribute')
     assert str(ae.value) == 'Attribute not_an_attribute not recognised and does not have a unit definition'
 
 
@@ -101,3 +101,21 @@ def test_get_unit_for_attribute(mocker, data_object, attribute, expected_result,
     result = dataobj.get_unit_for_attribute(attribute_name=attribute, unit_system=UnitSystem.ENGLISH, uppercase=upper)
     # Assert
     assert result == expected_result
+
+
+def test_network_unit_properties():
+    # Arrange
+    expected_units = {
+        'bhdepth': 'm',
+        'temp': 'degrees C',
+        'rank_dt': 'days',
+        'well_index_mult': '',
+        'productivity_index': 'STM3/day/kPa',
+    }
+    mapping = NetworkUnits(unit_system=UnitSystem.METRIC)
+
+    # Act
+    for attribute, expected_unit in expected_units.items():
+        unit = getattr(mapping, attribute)
+        # Assert
+        assert unit == expected_unit

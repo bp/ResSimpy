@@ -1,7 +1,7 @@
 from typing import Mapping
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.Units.AttributeMappings.AttributeMappingBase import BaseUnitMapping
+from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Units.Units import UnitDimension, SurfaceRatesLiquid, SurfaceRatesGas, ReservoirRates, MolarRates, \
     Pressure, Temperature, SaturationFraction, GasLiquidRatio, LiquidGasRatio, SurfaceVolumesGas, SurfaceVolumesLiquid
 

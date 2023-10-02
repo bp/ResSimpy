@@ -1,7 +1,7 @@
 from typing import Mapping
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.Units.AttributeMappings.AttributeMappingBase import BaseUnitMapping
+from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Units.Units import UnitDimension, Length, Temperature, Dimensionless, \
     Angle, PermeabilityThickness, Permeability
 
