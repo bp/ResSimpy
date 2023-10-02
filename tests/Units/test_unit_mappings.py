@@ -1,3 +1,4 @@
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Units.AttributeMappings.NetworkUnitMapping import NetworkUnits
 import pytest
 
@@ -119,3 +120,23 @@ def test_network_unit_properties():
         unit = getattr(mapping, attribute)
         # Assert
         assert unit == expected_unit
+
+def test_object_attribute_property_completion():
+    # Arrange
+    test_object = NexusCompletion(date='01/01/2001', unit_system=UnitSystem.ENGLISH, date_format=DateFormat.DD_MM_YYYY)
+    expected_unit = ['ft', 'degrees', '']
+    # Act
+    result = [test_object.units.depth, test_object.units.angle_a, test_object.units.skin]
+
+    # Assert
+    assert result == expected_unit
+
+def test_object_attribute_property_constraint():
+    # Arrange
+    test_object = NexusConstraint(dict(date='01/01/2001', unit_system=UnitSystem.METRIC))
+    expected_unit = ['STM3/day', 'kPa', 'fraction']
+    # Act
+    result = [test_object.units.max_surface_oil_rate, test_object.units.max_pressure, test_object.units.max_watercut_perf]
+
+    # Assert
+    assert result == expected_unit

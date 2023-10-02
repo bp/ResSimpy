@@ -9,7 +9,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.NexusEnums import DateFormatEnum
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
-from ResSimpy.Units.AttributeMappings.WellUnitMapping import CompletionUnits
+from ResSimpy.Units.AttributeMappings.CompletionUnitMapping import CompletionUnits
 
 
 @dataclass(kw_only=True, repr=False)
