@@ -74,7 +74,7 @@ class NetworkUnits(AttributeMapBase):
         'calculation_type': Dimensionless(),
     }
 
-    def __init__(self, unit_system: UnitSystem) -> None:
+    def __init__(self, unit_system: None | UnitSystem) -> None:
         super().__init__(unit_system=unit_system)
 
     @property

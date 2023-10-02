@@ -1,5 +1,6 @@
 from __future__ import annotations
 from abc import ABC
+from dataclasses import dataclass
 from typing import Optional
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
@@ -7,7 +8,7 @@ from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBase
 from ResSimpy.Units.AttributeMappings.NetworkUnitAttributeMapping import NetworkUnits
 
-
+@dataclass
 class WellConnection(DataObjectMixin, ABC):
     name: Optional[str] = None
     date: Optional[str] = None
