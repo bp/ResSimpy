@@ -6,7 +6,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Units.Units import UnitDimension
 
 
-class AttributeMapBase(ABC):
+class BaseUnitMapping(ABC):
     """Base class for handling the mapping between ResSimpy attributes and the unit type of the attribute."""
     attribute_map: Mapping[str, UnitDimension]
 

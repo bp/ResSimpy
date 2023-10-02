@@ -1,11 +1,12 @@
 from typing import Mapping
 
-from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBase
+from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Units.AttributeMappings.AttributeMappingBase import BaseUnitMapping
 from ResSimpy.Units.Units import UnitDimension, Length, Temperature, Dimensionless, \
     Angle, PermeabilityThickness, Permeability
 
 
-class CompletionUnits(AttributeMapBase):
+class CompletionUnits(BaseUnitMapping):
     """Unit types for the attributes of a well completion."""
     attribute_map: Mapping[str, UnitDimension] = {
         'i': Dimensionless(),
@@ -51,3 +52,6 @@ class CompletionUnits(AttributeMapBase):
         'rel_perm_end_point': Dimensionless(),
         'kh_mult': Dimensionless(),
     }
+
+    def __init__(self, unit_system: None | UnitSystem) -> None:
+        super().__init__(unit_system=unit_system)

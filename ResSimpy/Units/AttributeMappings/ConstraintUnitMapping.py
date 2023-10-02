@@ -1,11 +1,12 @@
 from typing import Mapping
 
-from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBase
+from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Units.AttributeMappings.AttributeMappingBase import BaseUnitMapping
 from ResSimpy.Units.Units import UnitDimension, SurfaceRatesLiquid, SurfaceRatesGas, ReservoirRates, MolarRates, \
     Pressure, Temperature, SaturationFraction, GasLiquidRatio, LiquidGasRatio, SurfaceVolumesGas, SurfaceVolumesLiquid
 
 
-class ConstraintUnits(AttributeMapBase):
+class ConstraintUnits(BaseUnitMapping):
     """Class for handling the mapping between unit systems and the units used for that unit system."""
     attribute_map: Mapping[str, UnitDimension] = {
         'max_surface_oil_rate': SurfaceRatesLiquid(),
@@ -79,3 +80,7 @@ class ConstraintUnits(AttributeMapBase):
         'qmult_water_rate': SurfaceRatesLiquid(),
         'qmult_gas_rate': SurfaceRatesGas(),
     }
+
+    def __init__(self, unit_system: None | UnitSystem) -> None:
+        super().__init__(unit_system=unit_system)
+
