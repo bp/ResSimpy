@@ -4,8 +4,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from ResSimpy.Units.AttributeMapping import AttributeMapBase
-from ResSimpy.Units.AttributeMappings.NetworkUnitMapping import NetworkUnits
 from ResSimpy.WellConnection import WellConnection
 
 

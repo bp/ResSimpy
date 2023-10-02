@@ -4,6 +4,7 @@ from abc import ABC
 from dataclasses import dataclass, field
 from typing import Optional
 from ResSimpy.DataObjectMixin import DataObjectMixin
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Units.AttributeMappings.NetworkUnitMapping import NetworkUnits
 
@@ -12,7 +13,7 @@ from ResSimpy.Units.AttributeMappings.NetworkUnitMapping import NetworkUnits
 class Target(DataObjectMixin, ABC):
     name: Optional[str] = None
     date: Optional[str] = None
-    unit_system: Optional[str] = None
+    unit_system: Optional[UnitSystem] = None
 
     control_quantity: Optional[str] = None
     control_conditions: Optional[str] = None
