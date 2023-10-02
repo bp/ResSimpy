@@ -1044,7 +1044,7 @@ def test_get_all(mocker: MockerFixture, fixture_for_osstat_pathlib, fcs_file_con
     loaded_completion_2 = NexusCompletion(date='01/01/2023', i=6, j=7, k=8, well_radius=9.11,
                                           date_format=DateFormat.DD_MM_YYYY)
     loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
-                              units=UnitSystem.ENGLISH)]
+                              unit_system=UnitSystem.ENGLISH)]
 
     # mock out the load_wells function as that is tested elsewhere
     mock_load_wells = mocker.Mock(return_value=loaded_wells)
@@ -1082,7 +1082,7 @@ def test_get_wells_windows(mocker: MockerFixture, fixture_for_osstat_pathlib, fc
     loaded_completion_2 = NexusCompletion(date='01/01/2023', i=6, j=7, k=8, well_radius=9.11,
                                           date_format=DateFormat.DD_MM_YYYY)
     loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
-                              units=UnitSystem.ENGLISH)]
+                              unit_system=UnitSystem.ENGLISH)]
 
     # mock out the load_wells function as that is tested elsewhere
     mock_load_wells = mocker.Mock(return_value=loaded_wells)
@@ -1118,7 +1118,7 @@ def test_get_df(mocker: MockerFixture, fixture_for_osstat_pathlib):
     loaded_completion_2 = NexusCompletion(date='01/01/2023', i=6, j=7, k=8, well_radius=9.11,
                                           date_format=DateFormat.DD_MM_YYYY)
     loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
-                              units=UnitSystem.ENGLISH)]
+                              unit_system=UnitSystem.ENGLISH)]
     # create the expected dataframe
     loaded_wells_txt = ['WELL1, ENGLISH, 4.5, 01/01/2023, 1, 2, 3',
                         'WELL1, ENGLISH, 9.11, 01/01/2023, 6, 7, 8', ]
@@ -1154,9 +1154,9 @@ def test_get(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_p
     loaded_completion_2 = NexusCompletion(date='01/01/2023', i=6, j=7, k=8, well_radius=9.11,
                                           date_format=DateFormat.DD_MM_YYYY)
     loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
-                              units=UnitSystem.ENGLISH),
+                              unit_system=UnitSystem.ENGLISH),
                     NexusWell(well_name='WELL2', completions=[loaded_completion_1, loaded_completion_2],
-                              units=UnitSystem.ENGLISH)
+                              unit_system=UnitSystem.ENGLISH)
                     ]
 
     # mock out the load_wells function as that is tested elsewhere
@@ -1194,9 +1194,9 @@ def test_get_well_windows(mocker: MockerFixture, fcs_file_contents: str, fixture
     loaded_completion_2 = NexusCompletion(date='01/01/2023', i=6, j=7, k=8, well_radius=9.11,
                                           date_format=DateFormat.DD_MM_YYYY)
     loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
-                              units=UnitSystem.ENGLISH),
+                              unit_system=UnitSystem.ENGLISH),
                     NexusWell(well_name='WELL2', completions=[loaded_completion_1, loaded_completion_2],
-                              units=UnitSystem.ENGLISH)
+                              unit_system=UnitSystem.ENGLISH)
                     ]
 
     # mock out the load_wells function as that is tested elsewhere

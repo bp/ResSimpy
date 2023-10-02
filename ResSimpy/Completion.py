@@ -65,6 +65,7 @@ class Completion(DataObjectMixin, ABC):
     __iso_date: Optional[ISODateTime] = None
     __date_format: Optional[DateFormatEnum.DateFormat] = None
     __start_date: Optional[str] = None
+    __unit_system: Optional[UnitSystem] = None
 
     def __init__(self, date: str, i: Optional[int] = None, j: Optional[int] = None, k: Optional[int] = None,
                  skin: Optional[float] = None, depth: Optional[float] = None, well_radius: Optional[float] = None,
@@ -96,7 +97,7 @@ class Completion(DataObjectMixin, ABC):
         self.__date_format = date_format
         self.__start_date = start_date
         self.__iso_date = self.set_iso_date()
-        self.unit_system = unit_system
+        self.__unit_system = unit_system
 
     @property
     def well_radius(self):
@@ -184,6 +185,10 @@ class Completion(DataObjectMixin, ABC):
 
     def set_iso_date(self) -> ISODateTime:
         return ISODateTime.convert_to_iso(self.date, self.date_format, self.start_date)
+
+    @property
+    def unit_system(self):
+        return self.__unit_system
 
     @property
     def units(self) -> BaseUnitMapping:

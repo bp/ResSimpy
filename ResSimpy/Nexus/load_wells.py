@@ -173,7 +173,7 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
             if well_name in well_name_list:
                 wells[well_name_list.index(well_name)].completions.extend(completions)
             else:
-                new_well = NexusWell(completions=completions, well_name=well_name, units=wellspec_file_units)
+                new_well = NexusWell(completions=completions, well_name=well_name, unit_system=wellspec_file_units)
                 well_name_list.append(well_name)
                 wells.append(new_well)
             wellspec_found = False

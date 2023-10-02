@@ -13,11 +13,11 @@ from ResSimpy.Well import Well
 class NexusWell(Well):
     __completions: list[NexusCompletion]
 
-    def __init__(self, well_name: str, completions: Sequence[NexusCompletion], units: UnitSystem) -> None:
+    def __init__(self, well_name: str, completions: Sequence[NexusCompletion], unit_system: UnitSystem) -> None:
         if not isinstance(completions, list):
             completions = list(completions)
         self.__completions: list[NexusCompletion] = completions
-        super().__init__(well_name=well_name, completions=completions, units=units)
+        super().__init__(well_name=well_name, completions=completions, unit_system=unit_system)
 
     def __repr__(self) -> str:
         return generic_repr(self)
@@ -166,6 +166,7 @@ class NexusWell(Well):
             completion_index (Optional[int]):
         """
         completion_properties['date'] = date
+        completion_properties['unit_system'] = self.unit_system
         new_completion = NexusCompletion.from_dict(completion_properties)
         if completion_index is None:
             completion_index = len(self.__completions)

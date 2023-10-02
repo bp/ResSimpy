@@ -12,7 +12,7 @@ from ResSimpy.Utils.obj_to_table_string import to_table_line
 
 @dataclass(repr=False)
 class DataObjectMixin(ABC):
-    __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False)
+    __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False, repr=False)
 
     def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
         # properties dict is a parameter to make the call signature equivalent to subclasses.

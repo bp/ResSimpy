@@ -12,12 +12,12 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 class Well(ABC):
     __completions: list[Completion]
     __well_name: str
-    __units: UnitSystem
+    __unit_system: UnitSystem
 
-    def __init__(self, well_name: str, completions: list[Completion], units: UnitSystem) -> None:
+    def __init__(self, well_name: str, completions: list[Completion], unit_system: UnitSystem) -> None:
         self.__well_name = well_name
         self.__completions = completions
-        self.__units = units
+        self.__unit_system = unit_system
 
     @property
     def completions(self) -> list[Completion]:
@@ -28,8 +28,8 @@ class Well(ABC):
         return self.__well_name
 
     @property
-    def units(self) -> UnitSystem:
-        return self.__units
+    def unit_system(self) -> UnitSystem:
+        return self.__unit_system
 
     @property
     def perforations(self) -> Sequence[Completion]:
