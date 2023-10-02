@@ -55,6 +55,7 @@ class CompletionUnits(BaseUnitMapping):
 
     def __init__(self, unit_system: None | UnitSystem) -> None:
         super().__init__(unit_system=unit_system)
+
     @property
     def i(self) -> str:
         """Returns the unit for i."""
