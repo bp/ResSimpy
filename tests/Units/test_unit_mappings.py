@@ -142,8 +142,8 @@ def test_object_attribute_property_completion():
                        ]
 
     # Assert
-
-    assert result == expected_unit
+    for result, expected in result_expected:
+        assert result == expected
 
 
 def test_object_attribute_property_constraint():
