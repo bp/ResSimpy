@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Describe the bug**
-A clear and concise description of what the bug is.
+A clear and concise description of what the bug is. Please remember that this form is public, so do not include any confidential information or data.
 
 **To Reproduce**
 Steps to reproduce the behavior:
