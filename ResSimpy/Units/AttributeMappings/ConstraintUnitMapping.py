@@ -1,3 +1,5 @@
+"""Class for handling the mapping between unit systems and the units used for that unit system."""
+
 from typing import Mapping
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem

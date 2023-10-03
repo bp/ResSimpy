@@ -1,3 +1,4 @@
+"""Unit types for the attributes of a well connection, wellhead, wellbore, etc."""
 from typing import Mapping
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem

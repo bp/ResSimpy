@@ -1,5 +1,4 @@
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from ResSimpy.Units.AttributeMappings.NetworkUnitMapping import NetworkUnits
 import pytest
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
