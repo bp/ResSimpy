@@ -140,13 +140,37 @@ def test_object_attribute_property_completion():
                        (units.skin, ''),
                        (units.angle_a, 'degrees'),
                        (units.angle_v, 'degrees'),
-                          (units.perm_thickness_ovr, 'mD-ft'),
-                            (units.dfactor, ''),
-                            (units.rel_perm_method, ''),
-                       (units.)
-
+                       (units.perm_thickness_ovr, 'md*ft'),
+                       (units.dfactor, 'day/MSCF'),
+                       (units.rel_perm_method, ''),
+                       (units.status, ''),
+                       (units.grid, ''),
+                       (units.measured_depth, 'ft'),
+                       (units.well_indices, ''),
+                       (units.partial_perf, ''),
+                       (units.cell_number, ''),
+                       (units.bore_radius, 'ft'),
+                       (units.portype, ''),
+                       (units.facture_mult, ''),
+                       (units.sector, ''),
+                       (units.well_group, ''),
+                       (units.zone, ''),
+                       (units.angle_open_flow, 'degrees'),
+                       (units.temperature, 'degrees F'),
+                       (units.flowsector, ''),
+                       (units.parent_node, ''),
+                       (units.mdcon, ''),
+                       (units.pressure_avg_pattern, ''),
+                       (units.length, 'ft'),
+                       (units.permeability, 'md'),
+                       (units.non_darcy_model, ''),
+                       (units.comp_dz, 'ft'),
+                       (units.layer_assignment, ''),
+                       (units.polymer_block_radius, 'ft'),
+                       (units.polymer_well_radius, 'ft'),
+                       (units.rel_perm_end_point, ''),
+                       (units.kh_mult, ''),
                        ]
-
     # Assert
     for result, expected in result_expected:
         assert result == expected
