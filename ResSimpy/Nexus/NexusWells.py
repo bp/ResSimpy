@@ -75,7 +75,7 @@ class NexusWells(Wells):
             for completion in well.completions:
                 completion_props: dict[str, None | float | int | str] = {
                     'well_name': well.well_name,
-                    'units': well.units.name,
+                    'units': well.unit_system.name,
                     }
                 completion_props.update(completion.to_dict())
                 store_dictionaries.append(completion_props)
