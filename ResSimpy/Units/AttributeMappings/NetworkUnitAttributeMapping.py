@@ -1,3 +1,4 @@
+"""Network unit mappings for ResSimpy."""
 from typing import Mapping
 
 from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBase

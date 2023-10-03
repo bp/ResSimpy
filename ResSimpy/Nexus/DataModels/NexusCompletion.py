@@ -1,3 +1,4 @@
+"""A class representing a single completion from a Nexus wells file."""
 from __future__ import annotations
 from dataclasses import dataclass
 

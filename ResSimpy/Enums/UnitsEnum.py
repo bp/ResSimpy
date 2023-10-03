@@ -1,3 +1,4 @@
+"""Collection of Enumerations for Units used in ResSimpy."""
 from enum import Enum
 
 
