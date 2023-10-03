@@ -15,6 +15,7 @@ from ResSimpy.Units.Units import Area
 from ResSimpy.Units.AttributeMappings.ConstraintUnitMapping import ConstraintUnits
 from ResSimpy.ISODateTime import ISODateTime
 
+
 @pytest.mark.parametrize('unit_system, expected_result', [
     (UnitSystem.ENGLISH, 'ft2'),
     (UnitSystem.LAB, 'cm2'),
@@ -22,8 +23,8 @@ from ResSimpy.ISODateTime import ISODateTime
     (UnitSystem.METKGCM2, 'm2'),
     (UnitSystem.METBAR, 'm2'),
     (UnitSystem.METRIC_ATM, 'm2'),
-    ]
-                         , ids=['ENGLISH', 'LAB', 'METRIC', 'METKGCM2', 'METBAR', 'METRIC_ATM'])
+]
+    , ids=['ENGLISH', 'LAB', 'METRIC', 'METKGCM2', 'METBAR', 'METRIC_ATM'])
 def test_unit_system_enum_to_variable(unit_system, expected_result):
     """Tests the unit_system_enum_to_variable method."""
     # Arrange
@@ -77,7 +78,7 @@ def test_get_unit_error():
 
     # Act
     with pytest.raises(AttributeError) as ae:
-        unit_dimension.get_unit_from_attribute( attribute_name='not_an_attribute')
+        unit_dimension.get_unit_from_attribute(attribute_name='not_an_attribute')
     assert str(ae.value) == 'Attribute not_an_attribute not recognised and does not have a unit definition'
 
 
@@ -95,7 +96,7 @@ def test_get_unit_error():
 def test_get_unit_for_attribute(mocker, data_object, attribute, expected_result, upper):
     """Write a test to check that the DataObjectMixin.get_unit_for_attribute method works as expected."""
     # Arrange
-    #patch out convert_to_iso from the ISODateTime module as it is not needed for this test
+    # patch out convert_to_iso from the ISODateTime module as it is not needed for this test
     mocker.patch.object(ISODateTime, 'convert_to_iso', return_value=ISODateTime(2021, 1, 1))
     dataobj = data_object({})
     # Act
@@ -121,26 +122,43 @@ def test_network_unit_properties():
         # Assert
         assert unit == expected_unit
 
+
 def test_object_attribute_property_completion():
     # Arrange
     test_object = NexusCompletion(date='01/01/2001', unit_system=UnitSystem.ENGLISH, date_format=DateFormat.DD_MM_YYYY)
-    expected_unit = ['ft', 'degrees', '']
     # Act
-    result = [test_object.units.depth, test_object.units.angle_a, test_object.units.skin]
+    result_expected = [(test_object.units.depth, 'ft'),
+                       (test_object.units.j, ''),
+                       (test_object.units.k, ''),
+                       (test_object.units.x, 'ft'),
+                       (test_object.units.i, ''),
+                       (test_object.units.y, 'ft'),
+                       (test_object.units.depth_to_top, 'ft'),
+                       (test_object.units.depth_to_bottom, 'ft'),
+                       (test_object.units.well_radius, 'ft'),
+                       (test_object.units.skin, ''),
+                       (test_object.units.angle_a, 'degrees'),
+                       (test_object.units.angle_v, 'degrees'),
+                       ]
 
     # Assert
+
     assert result == expected_unit
+
 
 def test_object_attribute_property_constraint():
     # Arrange
     test_object = NexusConstraint(dict(date='01/01/2001', unit_system=UnitSystem.METRIC))
     expected_unit = ['STM3/day', 'kPa', 'fraction']
     # Act
-    result = [test_object.units.max_surface_oil_rate, test_object.units.max_pressure,
-              test_object.units.max_watercut_perf]
+    result = [test_object.units.max_surface_oil_rate,
+              test_object.units.max_pressure,
+              test_object.units.max_watercut_perf,
 
+              ]
     # Assert
     assert result == expected_unit
+
 
 def test_object_no_unit_system():
     # Arrange

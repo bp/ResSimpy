@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from typing import Optional
 from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Units.AttributeMappings.NetworkUnitMapping import NetworkUnits
 
 
@@ -22,6 +21,6 @@ class NodeConnection(DataObjectMixin, ABC):
     depth: Optional[float] = None
 
     @property
-    def units(self) -> BaseUnitMapping:
+    def units(self) -> NetworkUnits:
         """Returns the attribute to unit map for the constraint."""
         return NetworkUnits(self.unit_system)

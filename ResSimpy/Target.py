@@ -5,7 +5,6 @@ from dataclasses import dataclass, field
 from typing import Optional
 from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Units.AttributeMappings.NetworkUnitMapping import NetworkUnits
 
 
@@ -36,6 +35,6 @@ class Target(DataObjectMixin, ABC):
     __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False)
 
     @property
-    def units(self) -> BaseUnitMapping:
+    def units(self) -> NetworkUnits:
         """Returns the attribute to unit map for the WellConnection."""
         return NetworkUnits(self.unit_system)

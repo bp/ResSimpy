@@ -8,7 +8,6 @@ from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.NexusEnums import DateFormatEnum
-from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Units.AttributeMappings.CompletionUnitMapping import CompletionUnits
 
 
@@ -191,5 +190,5 @@ class Completion(DataObjectMixin, ABC):
         return self.__unit_system
 
     @property
-    def units(self) -> BaseUnitMapping:
+    def units(self) -> CompletionUnits:
         return CompletionUnits(self.unit_system)
