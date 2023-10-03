@@ -264,9 +264,9 @@ WELLS
   bad_data
     ENDWELLS
 ''',
-{'name': 'prod', 'stream': 'PRODUCER', 'number': 94, 'datum_depth': 4039.3, 'crossflow': 'ON', 'crossshut_method': 'CELLGRAD',
+{'name': 'prod', 'stream': 'PRODUCER', 'number': 94, 'datum_depth': 4039.3, 'crossflow': 'ON', 'crossshut': 'CELLGRAD',
 'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
-{'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 4039.3, 'crossflow': 'OFF', 'crossshut_method': 'CALC',
+{'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 4039.3, 'crossflow': 'OFF', 'crossshut': 'CALC',
 'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
 )
 ])

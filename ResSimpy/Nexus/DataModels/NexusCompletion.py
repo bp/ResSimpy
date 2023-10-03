@@ -8,6 +8,7 @@ from typing import Optional, Union
 # Use correct Self type depending upon Python version
 import sys
 
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums import DateFormatEnum
 
 if sys.version_info >= (3, 11):
@@ -81,7 +82,8 @@ class NexusCompletion(Completion):
                  portype: Optional[str] = None, rel_perm_end_point: Optional[NexusRelPermEndPoint] = None,
                  kh_mult: Optional[float] = None,
                  date_format: Optional[DateFormatEnum.DateFormat] = None,
-                 start_date: Optional[str] = None
+                 start_date: Optional[str] = None,
+                 unit_system: Optional[UnitSystem] = None,
                  ) -> None:
         self.__measured_depth = measured_depth
         self.__well_indices = well_indices
@@ -113,7 +115,8 @@ class NexusCompletion(Completion):
         super().__init__(date=date, i=i, j=j, k=k, skin=skin, depth=depth, well_radius=well_radius, x=x, y=y,
                          angle_a=angle_a, angle_v=angle_v, grid=grid, depth_to_top=depth_to_top,
                          depth_to_bottom=depth_to_bottom, perm_thickness_ovr=perm_thickness_ovr, dfactor=dfactor,
-                         rel_perm_method=rel_perm_method, status=status, date_format=date_format, start_date=start_date)
+                         rel_perm_method=rel_perm_method, status=status, date_format=date_format, start_date=start_date,
+                         unit_system=unit_system)
 
     def __repr__(self) -> str:
         return generic_repr(self)
