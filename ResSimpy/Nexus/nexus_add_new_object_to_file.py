@@ -1,3 +1,4 @@
+"""Class for handling adding objects to a nexus file and memory."""
 from __future__ import annotations
 import copy
 from typing import TYPE_CHECKING, Any, TypeVar, Optional
@@ -17,6 +18,8 @@ T = TypeVar('T', bound=DataObjectMixin)
 
 
 class AddObjectOperations:
+    """Class for handling adding objects to a nexus file and memory."""
+
     def __init__(self, obj_type: Optional[type[T]], table_header: str, table_footer: str,
                  model: NexusSimulator) -> None:
         self.__model = model

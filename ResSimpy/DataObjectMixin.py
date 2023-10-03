@@ -12,6 +12,7 @@ from ResSimpy.Utils.obj_to_table_string import to_table_line
 
 @dataclass(repr=False)
 class DataObjectMixin(ABC):
+    """Base class representing a data object in ResSimpy."""
     __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False, repr=False)
 
     def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:

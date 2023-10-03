@@ -1,3 +1,4 @@
+"""Class to hold Nexus relative permeability and capillary pressure properties."""
 from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum

@@ -1,3 +1,6 @@
+"""Class for handling wellbores in the Nexus Network. This class is used to store and manipulate the wellbores in a
+NexusNetwork. It is stored as an instance in the NexusNetwork class as "wellbores".
+"""
 from __future__ import annotations
 
 from dataclasses import field, dataclass
@@ -22,6 +25,9 @@ if TYPE_CHECKING:
 
 @dataclass
 class NexusWellbores(Wellbores):
+    """Class for handling wellbores in the Nexus Network. This class is used to store and manipulate the wellbores in a
+    NexusNetwork. It is stored as an instance in the NexusNetwork class as "wellbores".
+    """
     __wellbores: list[NexusWellbore] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork) -> None:

@@ -1,3 +1,4 @@
+"""Class for handling all Reporting and runcontrol related tasks."""
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 

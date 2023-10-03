@@ -1,3 +1,4 @@
+"""The Nexus Simulator class is the main class for interacting with Nexus models."""
 from __future__ import annotations
 
 import os

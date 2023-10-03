@@ -1,3 +1,4 @@
+"""This module contains the abstract base class for file manipulations for simulator files."""
 from __future__ import annotations
 from uuid import uuid4, UUID
 from dataclasses import dataclass, field

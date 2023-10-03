@@ -1,3 +1,4 @@
+"""Used to represent a connection between two nodes in a Nexus network."""
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
@@ -7,7 +8,9 @@ from ResSimpy.NodeConnection import NodeConnection
 
 @dataclass(repr=False)
 class NexusNodeConnection(NodeConnection):
-    """Attributes
+    """Used to represent a connection between two nodes in a Nexus network.
+
+    Attributes:
     hyd_method: hydraulic lift correlation method used (METHOD)
     pvt_method: pvt method number (IPVT)
     water_method: water method number (IWAT)

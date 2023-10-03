@@ -1,3 +1,4 @@
+"""Class for representing a well in Nexus. Consists of a list of completions and a well name."""
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional, Sequence, Union

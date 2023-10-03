@@ -1,3 +1,4 @@
+"""A class built for removing an object from a file and from the list of objects."""
 from __future__ import annotations
 from typing import Any, TYPE_CHECKING, Literal, TypeVar, Optional
 from uuid import UUID
