@@ -53,7 +53,7 @@ class ConstraintUnits(BaseUnitMapping):
         'min_reverse_reservoir_liquid_rate': ReservoirRates(),
         'min_reverse_hc_moles_rate': MolarRates(),
         'max_watercut': SaturationFraction(),
-        'max_watercut_plug:': SaturationFraction(),
+        'max_watercut_plug': SaturationFraction(),
         'max_watercut_plugplus': SaturationFraction(),
         'max_watercut_perf': SaturationFraction(),
         'max_watercut_perfplus': SaturationFraction(),
@@ -306,8 +306,8 @@ class ConstraintUnits(BaseUnitMapping):
 
     @property
     def max_watercut_plug(self) -> str:
-        """Returns the unit for max_watercut_plug:."""
-        return self.get_unit_from_attribute('max_watercut_plug:')
+        """Returns the unit for max_watercut_plug."""
+        return self.get_unit_from_attribute('max_watercut_plug')
 
     @property
     def max_watercut_plugplus(self) -> str:

@@ -176,16 +176,83 @@ def test_object_attribute_property_completion():
         assert result == expected
 
 
-def test_object_attribute_property_constraint():
+@pytest.mark.parametrize('attribute, expected_unit', [
+    ('max_gor', 'SM3/STM3'),
+    ('max_gor_plug', 'SM3/STM3'),
+    ('max_gor_plugplus', 'SM3/STM3'),
+    ('max_gor_perf', 'SM3/STM3'),
+    ('max_gor_perfplus', 'SM3/STM3'),
+    ('max_lgr', 'STM3/SM3'),
+    ('max_lgr_plug', 'STM3/SM3'),
+    ('max_lgr_plugplus', 'STM3/SM3'),
+    ('max_lgr_perf', 'STM3/SM3'),
+    ('max_lgr_perfplus', 'STM3/SM3'),
+    ('max_hc_moles_rate', 'kg-moles/day'),
+    ('max_reverse_hc_moles_rate', 'kg-moles/day'),
+    ('min_hc_moles_rate', 'kg-moles/day'),
+    ('min_reverse_hc_moles_rate', 'kg-moles/day'),
+    ('min_pressure', 'kPa'),
+    ('max_pressure', 'kPa'),
+    ('max_wag_water_pressure', 'kPa'),
+    ('max_wag_gas_pressure', 'kPa'),
+    ('bottom_hole_pressure', 'kPa'),
+    ('tube_head_pressure', 'kPa'),
+    ('max_reservoir_oil_rate', 'm3/day'),
+    ('max_reservoir_water_rate', 'm3/day'),
+    ('max_reservoir_gas_rate', 'm3/day'),
+    ('max_reservoir_liquid_rate', 'm3/day'),
+    ('max_reverse_reservoir_oil_rate', 'm3/day'),
+    ('max_reverse_reservoir_water_rate', 'm3/day'),
+    ('max_reverse_reservoir_gas_rate', 'm3/day'),
+    ('max_reverse_reservoir_liquid_rate', 'm3/day'),
+    ('min_reservoir_oil_rate', 'm3/day'),
+    ('min_reservoir_water_rate', 'm3/day'),
+    ('min_reservoir_gas_rate', 'm3/day'),
+    ('min_reservoir_liquid_rate', 'm3/day'),
+    ('min_reverse_reservoir_oil_rate', 'm3/day'),
+    ('min_reverse_reservoir_water_rate', 'm3/day'),
+    ('min_reverse_reservoir_gas_rate', 'm3/day'),
+    ('min_reverse_reservoir_liquid_rate', 'm3/day'),
+    ('max_watercut', 'fraction'),
+    ('max_watercut_plugplus', 'fraction'),
+    ('max_watercut_perf', 'fraction'),
+    ('max_watercut_perfplus', 'fraction'),
+    ('max_wor', 'fraction'),
+    ('max_wor_plug', 'fraction'),
+    ('max_wor_plugplus', 'fraction'),
+    ('max_watercut_plug', 'fraction'),
+    ('max_wor_perf', 'fraction'),
+    ('max_wor_perfplus', 'fraction'),
+    ('max_surface_gas_rate', 'SM3/day'),
+    ('max_reverse_surface_gas_rate', 'SM3/day'),
+    ('min_surface_gas_rate', 'SM3/day'),
+    ('min_reverse_surface_gas_rate', 'SM3/day'),
+    ('qmult_gas_rate', 'SM3/day'),
+    ('max_surface_oil_rate', 'STM3/day'),
+    ('max_surface_water_rate', 'STM3/day'),
+    ('max_surface_liquid_rate', 'STM3/day'),
+    ('max_reverse_surface_oil_rate', 'STM3/day'),
+    ('max_reverse_surface_water_rate', 'STM3/day'),
+    ('max_reverse_surface_liquid_rate', 'STM3/day'),
+    ('min_surface_oil_rate', 'STM3/day'),
+    ('min_surface_water_rate', 'STM3/day'),
+    ('min_surface_liquid_rate', 'STM3/day'),
+    ('min_reverse_surface_oil_rate', 'STM3/day'),
+    ('min_reverse_surface_water_rate', 'STM3/day'),
+    ('min_reverse_surface_liquid_rate', 'STM3/day'),
+    ('qmult_oil_rate', 'STM3/day'),
+    ('qmult_water_rate', 'STM3/day'),
+    ('max_cum_gas_prod', 'k STM3'),
+    ('max_cum_oil_prod', 'k STM3'),
+    ('max_cum_water_prod', 'k STM3'),
+    ('max_cum_liquid_prod', 'k STM3'),
+    ('min_temperature', 'degrees C'),
+])
+def test_object_attribute_property_constraint(attribute, expected_unit):
     # Arrange
     test_object = NexusConstraint(dict(date='01/01/2001', unit_system=UnitSystem.METRIC))
-    expected_unit = ['STM3/day', 'kPa', 'fraction']
     # Act
-    result = [test_object.units.max_surface_oil_rate,
-              test_object.units.max_pressure,
-              test_object.units.max_watercut_perf,
-
-              ]
+    result = getattr(test_object.units, attribute)
     # Assert
     assert result == expected_unit
 
