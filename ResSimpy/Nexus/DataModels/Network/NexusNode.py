@@ -1,3 +1,4 @@
+"""Class that is used to represent a nexus node in the network."""
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
@@ -7,6 +8,7 @@ from ResSimpy.Node import Node
 
 @dataclass(kw_only=True, repr=False)
 class NexusNode(Node):
+    """Class that is used to represent a nexus node in the network."""
     x_pos: Optional[float] = None
     y_pos: Optional[float] = None
     number: Optional[int] = None

@@ -1,3 +1,4 @@
+"""File object for handling FCS top level files for Nexus."""
 from __future__ import annotations
 from dataclasses import dataclass, field
 import os

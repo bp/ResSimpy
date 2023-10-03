@@ -1,3 +1,4 @@
+"""Constants for the Nexus module."""
 from typing import Final
 
 # Constants

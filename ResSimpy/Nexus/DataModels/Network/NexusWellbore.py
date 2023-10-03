@@ -1,3 +1,4 @@
+"""Class representing a single Wellbore in a Nexus Network."""
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
@@ -7,22 +8,24 @@ from ResSimpy.Wellbore import Wellbore
 
 @dataclass(kw_only=True)
 class NexusWellbore(Wellbore):
-    """Attributes
-    date (str): string representation of the last defined date
-    unit_system (UnitSystem): unit system enum
-    name (str): Name of the well. (WELL)
-    flowsect (int): Number of the flow section. (FLOWSECT)
-    diameter (float): Diameter of the well. (DIAM)
-    inner_diameter (float): Inner diameter of the well. (INNERDIAM)
-    roughness (float): Roughness of the well. (ROUGHNESS)
-    bore_type (str): Type of well. (TYPE)
-    hyd_method (str): hydraulic method. (METHOD)
-    temperature (float): Temperature of the well. (TEMP)
-    elevation_profile (str): Elevation profile of the well. (ELEVPR)
-    temperature_profile (str): Temperature profile of the well. (TEMPPR)
-    heat_transfer_coeff (float): Heat transfer coefficient of the well. (HTC)
-    pvt_method (int): Method number used for PVT. (IPVT)
-    water_method (int): Method number used for water. (IWAT).
+    """Class representing a single Wellbore in a Nexus Network.
+
+    Attributes:
+        date (str): string representation of the last defined date
+        unit_system (UnitSystem): unit system enum
+        name (str): Name of the well. (WELL)
+        flowsect (int): Number of the flow section. (FLOWSECT)
+        diameter (float): Diameter of the well. (DIAM)
+        inner_diameter (float): Inner diameter of the well. (INNERDIAM)
+        roughness (float): Roughness of the well. (ROUGHNESS)
+        bore_type (str): Type of well. (TYPE)
+        hyd_method (str): hydraulic method. (METHOD)
+        temperature (float): Temperature of the well. (TEMP)
+        elevation_profile (str): Elevation profile of the well. (ELEVPR)
+        temperature_profile (str): Temperature profile of the well. (TEMPPR)
+        heat_transfer_coeff (float): Heat transfer coefficient of the well. (HTC)
+        pvt_method (int): Method number used for PVT. (IPVT)
+        water_method (int): Method number used for water. (IWAT).
     """
 
     flowsect: Optional[int] = None

@@ -1,3 +1,4 @@
+"""A collection of Utility functions for handling parsing Nexus files."""
 from __future__ import annotations
 
 from enum import Enum

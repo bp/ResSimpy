@@ -1,3 +1,4 @@
+"""Base class for handling any dynamic property simulator inputs, for use in inputs such as PVT, relperm, etc."""
 from __future__ import annotations
 from abc import ABC
 from dataclasses import dataclass

@@ -1,3 +1,4 @@
+"""Class for dealing with logfiles produced from the nexus simulation engine."""
 from __future__ import annotations
 
 import os
