@@ -167,6 +167,7 @@ def test_get_unit_for_attribute(mocker, data_object, attribute, expected_result,
     ('max_change_pressure', 'psi'),
     ('rank_dt', 'days'),
     ('calculation_type', ''),
+    ('temperature', 'degrees F'),
 ])
 def test_network_unit_properties(attribute, expected_unit):
     # Arrange
