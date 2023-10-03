@@ -1,3 +1,6 @@
+"""A class for collecting all NexusWell objects in a NexusSimulator. Handles adding and removing completions
+as well as rescheduling wells.
+"""
 from __future__ import annotations
 import warnings
 from dataclasses import dataclass, field
@@ -24,6 +27,12 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class NexusWells(Wells):
+    """A class for collecting all NexusWell objects in a NexusSimulator. Handles adding and removing completions
+    as well as rescheduling wells. This is usually accessed through the model.wells property.
+
+    Arguments:
+        model (Simulator): NexusSimulator object that has the instance of wells on.
+    """
     __model: NexusSimulator
     __wells: list[NexusWell] = field(default_factory=list)
     __wells_loaded: bool = False
@@ -66,7 +75,7 @@ class NexusWells(Wells):
             for completion in well.completions:
                 completion_props: dict[str, None | float | int | str] = {
                     'well_name': well.well_name,
-                    'units': well.units.name,
+                    'units': well.unit_system.name,
                     }
                 completion_props.update(completion.to_dict())
                 store_dictionaries.append(completion_props)

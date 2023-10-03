@@ -1,3 +1,4 @@
+"""Key functions for reading in nexus constraints and populating objects with the data."""
 from __future__ import annotations
 
 from typing import Optional, TYPE_CHECKING
