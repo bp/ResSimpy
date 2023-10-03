@@ -109,13 +109,13 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
         'PARENT': parent_node, 'MDCON': mdcon, 'IPTN': pressure_avg_pattern, 'LENGTH': length, 'K': permeability,
         'ND': non_darcy_model, 'DZ': comp_dz, 'LAYER': layer_assignment, 'RADBP': polymer_bore_radius,
         'RADWP': polymer_well_radius, 'KHMULT': kh_mult
-        }
+    }
     end_point_scaling_header_values: dict[str, None | int | float | str] = {
         'SWL': swl, 'SWR': swr, 'SWU': swu, 'SGL': sgl, 'SGR': sgr, 'SGU': sgu,
         'SWRO': swro, 'SGRO': sgro, 'SGRW': sgrw, 'KRW_SWRO': krw_swro, 'KRW_SWU': krw_swu, 'KRG_SGRO': krg_sgro,
         'KRG_SGU': krg_sgu, 'KRO_SWL': kro_swl, 'KRO_SWR': kro_swr, 'KRO_SGL': kro_sgl, 'KRO_SGR': kro_sgr,
         'KRW_SGL': krw_sgl, 'KRW_SGR': krw_sgr, 'KRG_SGRW': krg_sgrw, 'SGTR': sgtr, 'SOTR': sotr,
-        }
+    }
     # add end point scaling header to the header values we search for:
     header_values.update(end_point_scaling_header_values)
 
@@ -235,47 +235,53 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
         else:
             new_rel_perm_end_point = None
 
-        new_completion = NexusCompletion(date=start_date, i=convert_header_value_int('IW'),
-                                         j=convert_header_value_int('JW'), k=convert_header_value_int('L'),
-                                         skin=convert_header_value_float('SKIN'),
-                                         depth=convert_header_value_float('DEPTH'),
-                                         well_radius=convert_header_value_float('RADW'),
-                                         x=convert_header_value_float('X'), y=convert_header_value_float('Y'),
-                                         angle_a=convert_header_value_float('ANGLA'),
-                                         angle_v=convert_header_value_float('ANGLV'),
-                                         grid=(None if header_values['GRID'] is None else str(header_values['GRID'])),
-                                         measured_depth=convert_header_value_float('MD'),
-                                         well_indices=convert_header_value_float('WI'),
-                                         depth_to_top=convert_header_value_float('DTOP'),
-                                         depth_to_bottom=convert_header_value_float('DBOT'),
-                                         rel_perm_method=convert_header_value_int('IRELPM'),
-                                         dfactor=convert_header_value_float('D'),
-                                         status=(None if header_values['STAT'] is None else str(header_values['STAT'])),
-                                         partial_perf=convert_header_value_float('PPERF'),
-                                         cell_number=convert_header_value_int('CELL'),
-                                         perm_thickness_ovr=convert_header_value_float('KH'),
-                                         bore_radius=convert_header_value_float('RADB'),
-                                         fracture_mult=convert_header_value_float('FM'),
-                                         sector=convert_header_value_int('SECT'), well_group=(
-                None if header_values['GROUP'] is None else str(header_values['GROUP'])),
-                                         zone=convert_header_value_int('ZONE'),
-                                         angle_open_flow=convert_header_value_float('ANGLE'),
-                                         temperature=convert_header_value_float('TEMP'),
-                                         flowsector=convert_header_value_int('FLOWSECT'), parent_node=(
-                None if header_values['PARENT'] is None else str(header_values['PARENT'])),
-                                         mdcon=convert_header_value_float('MDCON'),
-                                         pressure_avg_pattern=convert_header_value_int('IPTN'),
-                                         length=convert_header_value_float('LENGTH'),
-                                         permeability=convert_header_value_float('K'), non_darcy_model=(
-                None if header_values['ND'] is None else str(header_values['ND'])),
-                                         comp_dz=convert_header_value_float('DZ'),
-                                         layer_assignment=convert_header_value_int('LAYER'),
-                                         polymer_bore_radius=convert_header_value_float('RADBP'),
-                                         polymer_well_radius=convert_header_value_float('RADWP'), portype=(
-                None if header_values['PORTYPE'] is None else str(header_values['PORTYPE'])),
-                                         rel_perm_end_point=new_rel_perm_end_point,
-                                         kh_mult=convert_header_value_float('KHMULT'), date_format=date_format,
-                                         unit_system=unit_system)
+        new_completion = NexusCompletion(
+            date=start_date,
+            i=convert_header_value_int('IW'),
+            j=convert_header_value_int('JW'),
+            k=convert_header_value_int('L'),
+            skin=convert_header_value_float('SKIN'),
+            depth=convert_header_value_float('DEPTH'),
+            well_radius=convert_header_value_float('RADW'),
+            x=convert_header_value_float('X'),
+            y=convert_header_value_float('Y'),
+            angle_a=convert_header_value_float('ANGLA'),
+            angle_v=convert_header_value_float('ANGLV'),
+            grid=(None if header_values['GRID'] is None else str(header_values['GRID'])),
+            measured_depth=convert_header_value_float('MD'),
+            well_indices=convert_header_value_float('WI'),
+            depth_to_top=convert_header_value_float('DTOP'),
+            depth_to_bottom=convert_header_value_float('DBOT'),
+            rel_perm_method=convert_header_value_int('IRELPM'),
+            dfactor=convert_header_value_float('D'),
+            status=(None if header_values['STAT'] is None else str(header_values['STAT'])),
+            partial_perf=convert_header_value_float('PPERF'),
+            cell_number=convert_header_value_int('CELL'),
+            perm_thickness_ovr=convert_header_value_float('KH'),
+            bore_radius=convert_header_value_float('RADB'),
+            fracture_mult=convert_header_value_float('FM'),
+            sector=convert_header_value_int('SECT'),
+            well_group=(None if header_values['GROUP'] is None else str(header_values['GROUP'])),
+            zone=convert_header_value_int('ZONE'),
+            angle_open_flow=convert_header_value_float('ANGLE'),
+            temperature=convert_header_value_float('TEMP'),
+            flowsector=convert_header_value_int('FLOWSECT'),
+            parent_node=(None if header_values['PARENT'] is None else str(header_values['PARENT'])),
+            mdcon=convert_header_value_float('MDCON'),
+            pressure_avg_pattern=convert_header_value_int('IPTN'),
+            length=convert_header_value_float('LENGTH'),
+            permeability=convert_header_value_float('K'),
+            non_darcy_model=(None if header_values['ND'] is None else str(header_values['ND'])),
+            comp_dz=convert_header_value_float('DZ'),
+            layer_assignment=convert_header_value_int('LAYER'),
+            polymer_bore_radius=convert_header_value_float('RADBP'),
+            polymer_well_radius=convert_header_value_float('RADWP'),
+            portype=(None if header_values['PORTYPE'] is None else str(header_values['PORTYPE'])),
+            rel_perm_end_point=new_rel_perm_end_point,
+            kh_mult=convert_header_value_float('KHMULT'),
+            date_format=date_format,
+            unit_system=unit_system,
+        )
 
         nexus_file.add_object_locations(new_completion.id, [index + header_index + 1])
 
