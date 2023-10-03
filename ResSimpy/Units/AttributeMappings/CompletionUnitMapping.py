@@ -3,7 +3,7 @@ from typing import Mapping
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Units.Units import UnitDimension, Length, Temperature, Dimensionless, \
-    Angle, PermeabilityThickness, Permeability
+    Angle, PermeabilityThickness, Permeability, NonDarcySkin
 
 
 class CompletionUnits(BaseUnitMapping):
@@ -23,7 +23,7 @@ class CompletionUnits(BaseUnitMapping):
         'angle_v': Angle(),
         'grid': Dimensionless(),
         'perm_thickness_ovr': PermeabilityThickness(),
-        'dfactor': Dimensionless(),
+        'dfactor': NonDarcySkin(),
         'rel_perm_method': Dimensionless(),
         'status': Dimensionless(),
         'measured_depth': Length(),

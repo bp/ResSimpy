@@ -126,19 +126,25 @@ def test_network_unit_properties():
 def test_object_attribute_property_completion():
     # Arrange
     test_object = NexusCompletion(date='01/01/2001', unit_system=UnitSystem.ENGLISH, date_format=DateFormat.DD_MM_YYYY)
+    units = test_object.units
     # Act
-    result_expected = [(test_object.units.depth, 'ft'),
-                       (test_object.units.j, ''),
-                       (test_object.units.k, ''),
-                       (test_object.units.x, 'ft'),
-                       (test_object.units.i, ''),
-                       (test_object.units.y, 'ft'),
-                       (test_object.units.depth_to_top, 'ft'),
-                       (test_object.units.depth_to_bottom, 'ft'),
-                       (test_object.units.well_radius, 'ft'),
-                       (test_object.units.skin, ''),
-                       (test_object.units.angle_a, 'degrees'),
-                       (test_object.units.angle_v, 'degrees'),
+    result_expected = [(units.depth, 'ft'),
+                       (units.j, ''),
+                       (units.k, ''),
+                       (units.x, 'ft'),
+                       (units.i, ''),
+                       (units.y, 'ft'),
+                       (units.depth_to_top, 'ft'),
+                       (units.depth_to_bottom, 'ft'),
+                       (units.well_radius, 'ft'),
+                       (units.skin, ''),
+                       (units.angle_a, 'degrees'),
+                       (units.angle_v, 'degrees'),
+                          (units.perm_thickness_ovr, 'mD-ft'),
+                            (units.dfactor, ''),
+                            (units.rel_perm_method, ''),
+                       (units.)
+
                        ]
 
     # Assert
