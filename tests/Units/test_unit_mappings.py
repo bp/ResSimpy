@@ -136,7 +136,17 @@ def test_object_attribute_property_constraint():
     test_object = NexusConstraint(dict(date='01/01/2001', unit_system=UnitSystem.METRIC))
     expected_unit = ['STM3/day', 'kPa', 'fraction']
     # Act
-    result = [test_object.units.max_surface_oil_rate, test_object.units.max_pressure, test_object.units.max_watercut_perf]
+    result = [test_object.units.max_surface_oil_rate, test_object.units.max_pressure,
+              test_object.units.max_watercut_perf]
 
     # Assert
     assert result == expected_unit
+
+def test_object_no_unit_system():
+    # Arrange
+    test_object = NexusConstraint(dict(date='01/01/2001'))
+    expected_unit = ['STB/day', 'psi', 'fraction']
+    # Act and Assert
+    with pytest.raises(AttributeError) as ae:
+        unit = test_object.units.max_surface_oil_rate
+    assert str(ae.value) == 'Unit system not defined'
