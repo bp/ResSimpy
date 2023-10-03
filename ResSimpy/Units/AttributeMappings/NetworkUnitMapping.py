@@ -3,7 +3,7 @@ from typing import Mapping
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Units.Units import (UnitDimension, Length, Temperature, Diameter, Roughness,
-                                  Dimensionless, Pressure, HeatTransfer, Time, DeltaPressure, ProductivityIndex,
+                                  Dimensionless, HeatTransfer, Time, DeltaPressure, ProductivityIndex,
                                   NonDarcySkin)
 
 
