@@ -3,7 +3,8 @@ from typing import Mapping
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Units.Units import (UnitDimension, Length, Temperature, Diameter, Roughness,
-                                  Dimensionless, Pressure, HeatTransfer, Time, DeltaPressure, ProductivityIndex)
+                                  Dimensionless, Pressure, HeatTransfer, Time, DeltaPressure, ProductivityIndex,
+                                  NonDarcySkin)
 
 
 class NetworkUnits(BaseUnitMapping):
@@ -28,7 +29,7 @@ class NetworkUnits(BaseUnitMapping):
             'dt_add': Temperature(),
             'well_index_mult': Dimensionless(),
             'vip_productivity_index': ProductivityIndex(),
-            'd_factor': Dimensionless(),
+            'd_factor': NonDarcySkin(),
             'gas_mobility': Dimensionless(),
             'drill_order_benefit': Dimensionless(),
             'heat_transfer_coeff': HeatTransfer(),
@@ -37,7 +38,7 @@ class NetworkUnits(BaseUnitMapping):
             'capillary_number_model': Dimensionless(),
             'on_time': Dimensionless(),
             'crossflow': Dimensionless(),
-            'crossshut_method': Dimensionless(),
+            'crossshut': Dimensionless(),
             'inj_mobility': Dimensionless(),
             'temperature_profile': Dimensionless(),
             'elevation_profile': Dimensionless(),
@@ -203,9 +204,9 @@ class NetworkUnits(BaseUnitMapping):
         return self.get_unit_from_attribute('crossflow')
 
     @property
-    def crossshut_method(self) -> str:
-        """Returns the unit for crossshut_method."""
-        return self.get_unit_from_attribute('crossshut_method')
+    def crossshut(self) -> str:
+        """Returns the unit for crossshut."""
+        return self.get_unit_from_attribute('crossshut')
 
     @property
     def inj_mobility(self) -> str:

@@ -439,7 +439,7 @@ class Diameter(UnitDimension):
 
 class HeatTransfer(UnitDimension):
     """Heat transfer units."""
-    english = 'BTU/(hr*ft²*F)'
+    english = 'BTU/(hr*ft2*F)'
     metric = 'W/(m2*K)'
     metkgcm2 = 'W/(m2*K)'
     metbar = 'W/(m2*K)'

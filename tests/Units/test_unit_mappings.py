@@ -105,22 +105,76 @@ def test_get_unit_for_attribute(mocker, data_object, attribute, expected_result,
     assert result == expected_result
 
 
-def test_network_unit_properties():
+@pytest.mark.parametrize('attribute, expected_unit', [
+    ('depth', 'ft'),
+    ('bhdepth', 'ft'),
+    ('diameter', 'in'),
+    ('datum_depth', 'ft'),
+    ('x_pos', 'ft'),
+    ('y_pos', 'ft'),
+    ('length', 'ft'),
+    ('temp', 'degrees F'),
+    ('roughness', 'in'),
+    ('inner_diameter', 'in'),
+    ('productivity_index', 'STB/day/psi'),
+    ('rate_mult', ''),
+    ('dp_add', 'psi'),
+    ('dt_add', 'degrees F'),
+    ('well_index_mult', ''),
+    ('vip_productivity_index', 'STB/day/psi'),
+    ('d_factor', 'day/MSCF'),
+    ('gas_mobility', ''),
+    ('drill_order_benefit', ''),
+    ('heat_transfer_coeff', 'BTU/(hr*ft2*F)'),
+    ('non_darcy_flow_model', ''),
+    ('non_darcy_flow_method', ''),
+    ('capillary_number_model', ''),
+    ('on_time', ''),
+    ('crossflow', ''),
+    ('crossshut', ''),
+    ('inj_mobility', ''),
+    ('temperature_profile', ''),
+    ('elevation_profile', ''),
+    ('measured_depth_in', 'ft'),
+    ('measured_depth_out', 'ft'),
+    ('delta_depth', 'ft'),
+    ('temp', 'degrees F'),
+    ('hyd_method', ''),
+    ('pvt_method', ''),
+    ('water_method', ''),
+    ('bat_method', ''),
+    ('number', ''),
+    ('gradient_calc', ''),
+    ('add_tubing', ''),
+    ('tracer', ''),
+    ('con_type', ''),
+    ('bore_type', ''),
+    ('control_quantity', ''),
+    ('control_type', ''),
+    ('control_condition', ''),
+    ('control_method', ''),
+    ('control_connections', ''),
+    ('calculation_method', ''),
+    ('calculation_conditions', ''),
+    ('calculation_connections', ''),
+    ('value', ''),
+    ('add_value', ''),
+    ('region', ''),
+    ('priority', ''),
+    ('minimum_rate', ''),
+    ('minimum_rate_no_shut', ''),
+    ('guide_rate', ''),
+    ('max_change_pressure', 'psi'),
+    ('rank_dt', 'days'),
+    ('calculation_type', ''),
+])
+def test_network_unit_properties(attribute, expected_unit):
     # Arrange
-    expected_units = {
-        'bhdepth': 'm',
-        'temp': 'degrees C',
-        'rank_dt': 'days',
-        'well_index_mult': '',
-        'productivity_index': 'STM3/day/kPa',
-    }
-    mapping = NetworkUnits(unit_system=UnitSystem.METRIC)
-
+    test_object = NexusNode(dict(date='01/01/2001', unit_system=UnitSystem.ENGLISH))
     # Act
-    for attribute, expected_unit in expected_units.items():
-        unit = getattr(mapping, attribute)
-        # Assert
-        assert unit == expected_unit
+    result = getattr(test_object.units, attribute)
+    # Assert
+    assert result == expected_unit
 
 
 def test_object_attribute_property_completion():
