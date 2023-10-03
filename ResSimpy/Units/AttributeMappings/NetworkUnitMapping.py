@@ -73,7 +73,7 @@ class NetworkUnits(BaseUnitMapping):
             'minimum_rate': Dimensionless(),
             'minimum_rate_no_shut': Dimensionless(),
             'guide_rate': Dimensionless(),
-            'max_change_pressure': Pressure(),
+            'max_change_pressure': DeltaPressure(),
             'rank_dt': Time(),
             'calculation_type': Dimensionless(),
         }
