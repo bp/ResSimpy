@@ -1039,12 +1039,12 @@ def test_get_all(mocker: MockerFixture, fixture_for_osstat_pathlib, fcs_file_con
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
     mocker.patch("builtins.open", fcs_file_open)
 
-    loaded_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid=None, skin=None,
-                                          angle_v=None)
-    loaded_completion_2 = NexusCompletion(
-        i=6, j=7, k=8, well_radius=9.11, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY)
+    loaded_completion_1 = NexusCompletion(date='01/01/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None,
+                                          grid=None, date_format=DateFormat.DD_MM_YYYY)
+    loaded_completion_2 = NexusCompletion(date='01/01/2023', i=6, j=7, k=8, well_radius=9.11,
+                                          date_format=DateFormat.DD_MM_YYYY)
     loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
-                              units=UnitSystem.ENGLISH)]
+                              unit_system=UnitSystem.ENGLISH)]
 
     # mock out the load_wells function as that is tested elsewhere
     mock_load_wells = mocker.Mock(return_value=loaded_wells)
@@ -1077,12 +1077,12 @@ def test_get_wells_windows(mocker: MockerFixture, fixture_for_osstat_pathlib, fc
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
     mocker.patch("builtins.open", fcs_file_open)
 
-    loaded_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid=None, skin=None,
-                                          angle_v=None)
-    loaded_completion_2 = NexusCompletion(
-        i=6, j=7, k=8, well_radius=9.11, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY)
+    loaded_completion_1 = NexusCompletion(date='01/01/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None,
+                                          grid=None, date_format=DateFormat.DD_MM_YYYY)
+    loaded_completion_2 = NexusCompletion(date='01/01/2023', i=6, j=7, k=8, well_radius=9.11,
+                                          date_format=DateFormat.DD_MM_YYYY)
     loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
-                              units=UnitSystem.ENGLISH)]
+                              unit_system=UnitSystem.ENGLISH)]
 
     # mock out the load_wells function as that is tested elsewhere
     mock_load_wells = mocker.Mock(return_value=loaded_wells)
@@ -1113,12 +1113,12 @@ def test_get_df(mocker: MockerFixture, fixture_for_osstat_pathlib):
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
     mocker.patch("builtins.open", fcs_file_open)
 
-    loaded_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid=None, skin=None,
-                                          angle_v=None)
-    loaded_completion_2 = NexusCompletion(
-        i=6, j=7, k=8, well_radius=9.11, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY)
+    loaded_completion_1 = NexusCompletion(date='01/01/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None,
+                                          grid=None, date_format=DateFormat.DD_MM_YYYY)
+    loaded_completion_2 = NexusCompletion(date='01/01/2023', i=6, j=7, k=8, well_radius=9.11,
+                                          date_format=DateFormat.DD_MM_YYYY)
     loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
-                              units=UnitSystem.ENGLISH)]
+                              unit_system=UnitSystem.ENGLISH)]
     # create the expected dataframe
     loaded_wells_txt = ['WELL1, ENGLISH, 4.5, 01/01/2023, 1, 2, 3',
                         'WELL1, ENGLISH, 9.11, 01/01/2023, 6, 7, 8', ]
@@ -1149,14 +1149,14 @@ def test_get(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_p
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
     mocker.patch("builtins.open", fcs_file_open)
 
-    loaded_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid=None, skin=None,
-                                          angle_v=None)
-    loaded_completion_2 = NexusCompletion(
-        i=6, j=7, k=8, well_radius=9.11, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY)
+    loaded_completion_1 = NexusCompletion(date='01/01/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None,
+                                          grid=None, date_format=DateFormat.DD_MM_YYYY)
+    loaded_completion_2 = NexusCompletion(date='01/01/2023', i=6, j=7, k=8, well_radius=9.11,
+                                          date_format=DateFormat.DD_MM_YYYY)
     loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
-                              units=UnitSystem.ENGLISH),
+                              unit_system=UnitSystem.ENGLISH),
                     NexusWell(well_name='WELL2', completions=[loaded_completion_1, loaded_completion_2],
-                              units=UnitSystem.ENGLISH)
+                              unit_system=UnitSystem.ENGLISH)
                     ]
 
     # mock out the load_wells function as that is tested elsewhere
@@ -1189,14 +1189,14 @@ def test_get_well_windows(mocker: MockerFixture, fcs_file_contents: str, fixture
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
     mocker.patch("builtins.open", fcs_file_open)
 
-    loaded_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid=None, skin=None,
-                                          angle_v=None, date_format=DateFormat.DD_MM_YYYY)
-    loaded_completion_2 = NexusCompletion(
-        i=6, j=7, k=8, well_radius=9.11, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY)
+    loaded_completion_1 = NexusCompletion(date='01/01/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None,
+                                          grid=None, date_format=DateFormat.DD_MM_YYYY)
+    loaded_completion_2 = NexusCompletion(date='01/01/2023', i=6, j=7, k=8, well_radius=9.11,
+                                          date_format=DateFormat.DD_MM_YYYY)
     loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
-                              units=UnitSystem.ENGLISH),
+                              unit_system=UnitSystem.ENGLISH),
                     NexusWell(well_name='WELL2', completions=[loaded_completion_1, loaded_completion_2],
-                              units=UnitSystem.ENGLISH)
+                              unit_system=UnitSystem.ENGLISH)
                     ]
 
     # mock out the load_wells function as that is tested elsewhere
@@ -1715,9 +1715,9 @@ C          node1         NA        NA    80    100.5 200.8   1     station      
             'delta_depth': 7002.67, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
             {'name': 'cp01_gaslift', 'node_in': 'GAS', 'node_out': 'CP01', 'con_type': 'GASLIFT', 'hyd_method': None,
             'delta_depth': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-            {'name': 'R001', 'stream': 'PRODUCER', 'datum_depth': 10350.0, 'crossflow': 'OFF', 'crossshut_method': 'OFF',
+            {'name': 'R001', 'stream': 'PRODUCER', 'datum_depth': 10350.0, 'crossflow': 'OFF', 'crossshut': 'OFF',
             'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH},
-            {'name': 'R002', 'stream': 'PRODUCER', 'datum_depth': 10350.0, 'crossflow': 'ON', 'crossshut_method': 'OFF',
+            {'name': 'R002', 'stream': 'PRODUCER', 'datum_depth': 10350.0, 'crossflow': 'ON', 'crossshut': 'OFF',
              'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH},
 {'well': 'R001', 'name': 'tubing', 'depth': 50.2, 'wellhead_type': 'PIPE', 'hyd_method': 2, 'date': '01/03/2025', 'unit_system': UnitSystem.ENGLISH},
 {'well': 'R-0_02', 'name': 'TH-03', 'depth': 0, 'wellhead_type': 'PIPE', 'hyd_method': 1, 'date': '01/03/2025', 'unit_system': UnitSystem.ENGLISH},
