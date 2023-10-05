@@ -186,7 +186,7 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
                     value_string = search_string[character_location: len(search_string)]
                     for value_character in value_string:
                         # If we've formed a string we're supposed to ignore, ignore it and get the next value
-                        if ignore_values is not None and value in ignore_values:
+                        if ignore_values is not None and (value in ignore_values or value.upper() in ignore_values):
                             search_string = search_string[character_location: len(search_string)]
                             new_search_string = True
                             value = ""
