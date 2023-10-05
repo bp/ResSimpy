@@ -560,7 +560,7 @@ def get_multiple_sequential_values(list_of_strings: list[str], number_tokens: in
     Returns:
         list[str]: list of strings comprised of the token values in order.
     """
-    store_values = []
+    store_values: list[str] = []
     filter_list = list_of_strings.copy()
     for i in range(number_tokens):
         value = get_next_value(0, filter_list, filter_list[0], replace_with='',
