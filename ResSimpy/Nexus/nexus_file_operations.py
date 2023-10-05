@@ -563,13 +563,14 @@ def get_multiple_sequential_values(list_of_strings: list[str], number_tokens: in
     store_values = []
     filter_list = list_of_strings.copy()
     for i in range(number_tokens):
-        value = get_expected_next_value(0, filter_list, filter_list[0], replace_with='',
-                                        ignore_values=ignore_values)
+        value = get_next_value(0, filter_list, filter_list[0], replace_with='',
+                               ignore_values=ignore_values)
         while value is None:
             # if no valid value found in the first line, remove it and try it again
             filter_list.pop(0)
             if len(filter_list) == 0:
-                raise ValueError('Too many values requested from the list of strings passed')
+                raise ValueError('Too many values requested from the list of strings passed,'
+                                 f' instead found: {len(store_values)} values, out of the requested {number_tokens}')
             value = get_next_value(0, filter_list, filter_list[0], replace_with='',
                                    ignore_values=ignore_values)
         store_values.append(value)

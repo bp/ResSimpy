@@ -414,10 +414,13 @@ def test_get_multiple_sequential_values_fail_case():
     # Arrange
     line = 'EQUIL METHOD'
     number_tokens = 3
+    expected_error_str = ('Too many values requested from the list of strings passed, instead found: 2 values, '
+                          'out of the requested 3')
     # Act + Assert
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as ve:
         value = nfo.get_multiple_sequential_values([line], number_tokens, [])
-
+    result_error_msg = str(ve.value)
+    assert result_error_msg == expected_error_str
 
 @pytest.mark.parametrize("line, expected_result", [
     ('\t 1', '1'),
