@@ -401,7 +401,7 @@ def test_get_expected_token_value_value_present():
     ('EQUIL METHOD !comment\n \t 1 ', 3, ['EQUIL', 'METHOD', '1']),
     ('EQUIL\n METHOD\n1\n/path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat'])
 ], ids=["basic", "more tokens", "get more tokens", "new line", "newline comment", "lots of newlines"])
-def test_get_multiple_sequential_tokens(line, number_tokens, expected_result):
+def test_get_multiple_sequential_values(line, number_tokens, expected_result):
     # Arrange
     list_of_strings = line.splitlines()
     # Act
@@ -410,7 +410,7 @@ def test_get_multiple_sequential_tokens(line, number_tokens, expected_result):
     assert result == expected_result
 
 
-def test_get_multiple_sequential_tokens_fail_case():
+def test_get_multiple_sequential_values_fail_case():
     # Arrange
     line = 'EQUIL METHOD'
     number_tokens = 3
