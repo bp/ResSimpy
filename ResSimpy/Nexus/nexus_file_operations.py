@@ -545,7 +545,8 @@ def clean_up_string(value: str) -> str:
     return value
 
 
-def get_multiple_sequential_values(list_of_strings: list[str], number_tokens: int, ignore_values: list[str]) -> list[str]:
+def get_multiple_sequential_values(list_of_strings: list[str], number_tokens: int,
+                                   ignore_values: list[str]) -> list[str]:
     """Returns a sequential list of values as long as the number of tokens requested.
 
     Args:
