@@ -255,14 +255,15 @@ def test_load_wells_all_columns_present_structured_grid(mocker, fixture_for_osst
     TIME 01/03/2023 !658 days
     WELLSPEC WELL_3
     IW JW L RADW    MD      SKIN    DEPTH   X               Y   ANGLA  ANGLV  GRID       WI    DTOP    DBOT  KH  KHMULT
-    1  2  3  4.5    1.38974  8.9    7.56    89787.5478      1.24    0.98    3   GRID_A  2.84    8.95   7.1564 1.23  0.363
+    1  2  3  4.5    1.38974  8.9    7.56    89787.5478      1.24    0.98    3   GRID_A  2.84   TOP   BOT  1.23  0.363
     6 7 8   9.11    1.568   4.52    8.955   9000.48974      2   1   5.68    GRID_B  0.2874   0.2132  5.45454 4.56      1.567
        """
 
     expected_well_completion_1 = NexusCompletion(date='01/03/2023', i=1, j=2, k=3, skin=8.9, depth=7.56,
                                                  well_radius=4.5, x=89787.5478, y=1.24, angle_a=0.98, angle_v=3,
                                                  grid='GRID_A', measured_depth=1.38974, well_indices=2.84,
-                                                 depth_to_top=8.95, depth_to_bottom=7.1564, perm_thickness_ovr=1.23,
+                                                 depth_to_top=None, depth_to_top_str='TOP', depth_to_bottom_str='BOT',
+                                                 depth_to_bottom=None, perm_thickness_ovr=1.23,
                                                  kh_mult=0.363, date_format=date_format, unit_system=UnitSystem.ENGLISH)
     expected_well_completion_2 = NexusCompletion(date='01/03/2023', i=6, j=7, k=8, skin=4.52, depth=8.955,
                                                  well_radius=9.11, x=9000.48974, y=2, angle_a=1, angle_v=5.68,
