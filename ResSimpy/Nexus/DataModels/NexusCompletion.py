@@ -4,7 +4,6 @@ from dataclasses import dataclass
 
 from typing import Optional, Union
 
-
 # Use correct Self type depending upon Python version
 import sys
 
@@ -68,7 +67,8 @@ class NexusCompletion(Completion):
                  x: Optional[float] = None, y: Optional[float] = None, angle_a: Optional[float] = None,
                  angle_v: Optional[float] = None, grid: Optional[str] = None, measured_depth: Optional[float] = None,
                  well_indices: Optional[float] = None, depth_to_top: Optional[float] = None,
-                 depth_to_bottom: Optional[float] = None, rel_perm_method: Optional[int] = None,
+                 depth_to_bottom: Optional[float] = None, depth_to_top_str: Optional[str] = None,
+                 depth_to_bottom_str: Optional[str] = None, rel_perm_method: Optional[int] = None,
                  dfactor: Optional[float] = None, status: Optional[str] = None, partial_perf: Optional[float] = None,
                  cell_number: Optional[int] = None, perm_thickness_ovr: Optional[float] = None,
                  bore_radius: Optional[float] = None, fracture_mult: Optional[float] = None,
@@ -85,10 +85,12 @@ class NexusCompletion(Completion):
                  start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None,
                  ) -> None:
+
         self.__measured_depth = measured_depth
         self.__well_indices = well_indices
         self.__partial_perf = partial_perf
-
+        self.__depth_to_top_str = depth_to_top_str
+        self.__depth_to_bottom_str = depth_to_bottom_str
         self.__cell_number = cell_number
         self.__bore_radius = bore_radius
         self.__fracture_mult = fracture_mult
@@ -220,6 +222,14 @@ class NexusCompletion(Completion):
     @property
     def kh_mult(self):
         return self.__kh_mult
+
+    @property
+    def depth_to_top_str(self):
+        return self.__depth_to_top_str
+
+    @property
+    def depth_to_bottom_str(self):
+        return self.__depth_to_bottom_str
 
     def to_dict(self, keys_in_keyword_style: bool = False, add_date=True, add_units=False, include_nones=True) -> \
             dict[str, None | str | int | float]:
