@@ -568,7 +568,7 @@ def get_multiple_sequential_values(list_of_strings: list[str], number_tokens: in
         if value is None:
             # if no valid value found, raise an error
             raise ValueError('Too many values requested from the list of strings passed,'
-                                 f' instead found: {len(store_values)} values, out of the requested {number_tokens}')
+                             f' instead found: {len(store_values)} values, out of the requested {number_tokens}')
         store_values.append(value)
 
     return store_values
