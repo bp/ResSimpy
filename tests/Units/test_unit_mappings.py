@@ -167,6 +167,12 @@ def test_get_unit_for_attribute(mocker, data_object, attribute, expected_result,
     ('rank_dt', 'days'),
     ('calculation_type', ''),
     ('temperature', 'degrees F'),
+    ('heat_conductivity', 'BTU/(hr*ft*F)'),
+    ('insulation_thickness', 'in'),
+    ('insulation_conductivity', 'BTU/(hr*ft*F)'),
+    ('gravity_pressure_gradient_mult', ''),
+    ('friction_pressure_gradient_mult', ''),
+    ('acceleration_pressure_gradient_mult', ''),
 ])
 def test_network_unit_properties(attribute, expected_unit):
     # Arrange
