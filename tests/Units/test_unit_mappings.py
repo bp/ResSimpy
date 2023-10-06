@@ -173,6 +173,8 @@ def test_get_unit_for_attribute(mocker, data_object, attribute, expected_result,
     ('gravity_pressure_gradient_mult', ''),
     ('friction_pressure_gradient_mult', ''),
     ('acceleration_pressure_gradient_mult', ''),
+    ('temperature_in', 'degrees F'),
+    ('temperature_out', 'degrees F'),
 ])
 def test_network_unit_properties(attribute, expected_unit):
     # Arrange
