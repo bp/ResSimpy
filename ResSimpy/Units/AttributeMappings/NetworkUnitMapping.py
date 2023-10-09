@@ -5,7 +5,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Units.Units import (UnitDimension, Length, Temperature, Diameter, Roughness,
                                   Dimensionless, HeatTransfer, Time, DeltaPressure, ProductivityIndex,
-                                  NonDarcySkin)
+                                  NonDarcySkin, Conductivity)
 
 
 class NetworkUnits(BaseUnitMapping):
@@ -77,6 +77,14 @@ class NetworkUnits(BaseUnitMapping):
             'max_change_pressure': DeltaPressure(),
             'rank_dt': Time(),
             'calculation_type': Dimensionless(),
+            'temperature_in': Temperature(),
+            'temperature_out': Temperature(),
+            'heat_conductivity': Conductivity(),
+            'insulation_thickness': Diameter(),  # Same units as diameter but is annular
+            'insulation_conductivity': Conductivity(),
+            'gravity_pressure_gradient_mult': Dimensionless(),
+            'friction_pressure_gradient_mult': Dimensionless(),
+            'acceleration_pressure_gradient_mult': Dimensionless(),
         }
 
     @property
@@ -383,3 +391,43 @@ class NetworkUnits(BaseUnitMapping):
     def calculation_type(self) -> str:
         """Returns the unit for calculation_type."""
         return self.get_unit_from_attribute('calculation_type')
+
+    @property
+    def temperature_in(self) -> str:
+        """Returns the unit for temperature_in."""
+        return self.get_unit_from_attribute('temperature_in')
+
+    @property
+    def temperature_out(self) -> str:
+        """Returns the unit for temperature_out."""
+        return self.get_unit_from_attribute('temperature_out')
+
+    @property
+    def heat_conductivity(self) -> str:
+        """Returns the unit for heat_conductivity."""
+        return self.get_unit_from_attribute('heat_conductivity')
+
+    @property
+    def insulation_thickness(self) -> str:
+        """Returns the unit for insulation_thickness."""
+        return self.get_unit_from_attribute('insulation_thickness')
+
+    @property
+    def insulation_conductivity(self) -> str:
+        """Returns the unit for insulation_conductivity."""
+        return self.get_unit_from_attribute('insulation_conductivity')
+
+    @property
+    def gravity_pressure_gradient_mult(self) -> str:
+        """Returns the unit for gravity_pressure_gradient_mult."""
+        return self.get_unit_from_attribute('gravity_pressure_gradient_mult')
+
+    @property
+    def friction_pressure_gradient_mult(self) -> str:
+        """Returns the unit for friction_pressure_gradient_mult."""
+        return self.get_unit_from_attribute('friction_pressure_gradient_mult')
+
+    @property
+    def acceleration_pressure_gradient_mult(self) -> str:
+        """Returns the unit for acceleration_pressure_gradient_mult."""
+        return self.get_unit_from_attribute('acceleration_pressure_gradient_mult')
