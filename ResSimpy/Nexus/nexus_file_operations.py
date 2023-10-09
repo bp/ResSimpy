@@ -186,7 +186,7 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
                     value_string = search_string[character_location: len(search_string)]
                     for value_character in value_string:
                         # If we've formed a string we're supposed to ignore, ignore it and get the next value
-                        if ignore_values is not None and value in ignore_values:
+                        if ignore_values is not None and (value in ignore_values or value.upper() in ignore_values):
                             search_string = search_string[character_location: len(search_string)]
                             new_search_string = True
                             value = ""
@@ -545,12 +545,14 @@ def clean_up_string(value: str) -> str:
     return value
 
 
-def get_multiple_sequential_values(list_of_strings: list[str], number_tokens: int) -> list[str]:
+def get_multiple_sequential_values(list_of_strings: list[str], number_tokens: int,
+                                   ignore_values: list[str]) -> list[str]:
     """Returns a sequential list of values as long as the number of tokens requested.
 
     Args:
         list_of_strings (list[str]): list of strings to represent the file with a new entry per line in the file.
         number_tokens (int): number of tokens to return values of
+        ignore_values (list[str]): list of values to ignore if found
 
     Raises:
         ValueError: if too many tokens are requested compared to the file provided
@@ -558,16 +560,15 @@ def get_multiple_sequential_values(list_of_strings: list[str], number_tokens: in
     Returns:
         list[str]: list of strings comprised of the token values in order.
     """
-    store_values = []
+    store_values: list[str] = []
     filter_list = list_of_strings.copy()
     for i in range(number_tokens):
-        value = get_expected_next_value(0, filter_list, filter_list[0], replace_with='')
-        while value is None:
-            # if no valid value found in the first line, remove it and try it again
-            filter_list.pop(0)
-            if len(filter_list) == 0:
-                raise ValueError('Too many values requested from the list of strings passed')
-            value = get_next_value(0, filter_list, filter_list[0], replace_with='')
+        value = get_next_value(0, filter_list, filter_list[0], replace_with='',
+                               ignore_values=ignore_values)
+        if value is None:
+            # if no valid value found, raise an error
+            raise ValueError('Too many values requested from the list of strings passed,'
+                             f' instead found: {len(store_values)} values, out of the requested {number_tokens}')
         store_values.append(value)
 
     return store_values

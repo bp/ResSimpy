@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import warnings
 from typing import Optional
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -205,7 +207,14 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
         value = header_values[key]
         if value == 'NA':
             value = None
-        return None if value is None else float(value)
+        if value is None:
+            return None
+        try:
+            value = float(value)
+        except ValueError:
+            warnings.warn(f"Cannot convert {value=} to float")
+            value = None
+        return value
 
     def convert_header_value_int(key: str) -> Optional[int]:
         value = header_values[key]
@@ -252,6 +261,8 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
             well_indices=convert_header_value_float('WI'),
             depth_to_top=convert_header_value_float('DTOP'),
             depth_to_bottom=convert_header_value_float('DBOT'),
+            depth_to_top_str=(None if header_values['DTOP'] is None else str(header_values['DTOP'])),
+            depth_to_bottom_str=(None if header_values['DBOT'] is None else str(header_values['DBOT'])),
             rel_perm_method=convert_header_value_int('IRELPM'),
             dfactor=convert_header_value_float('D'),
             status=(None if header_values['STAT'] is None else str(header_values['STAT'])),
