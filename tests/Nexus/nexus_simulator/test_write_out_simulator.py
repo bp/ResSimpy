@@ -67,8 +67,6 @@ class TestWriteOutSimulator:
 
     def test_update_simulator_files(self, mocker, fixture_for_osstat_pathlib):
         # Arrange
-        expected_surface_path = os.path.join('/path', 'fcs_file_surface_method_1.dat')
-
         def mock_open_wrapper(filename, mode):
             mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
                 '/path/fcs_file.fcs': self.fcs_file_contents,
@@ -84,6 +82,8 @@ class TestWriteOutSimulator:
         writing_mock_open = mocker.mock_open()
         mocker.patch("builtins.open", writing_mock_open)
         nexus_sim.model_files.surface_files[1]._file_modified_set(True)
+        expected_fcs_file_contents = self.fcs_file_contents.replace('hyd_method.dat',
+                                                                    os.path.join('/path', 'hyd_method.dat'))
         # Act
         nexus_sim.update_simulator_files()
 
@@ -91,15 +91,19 @@ class TestWriteOutSimulator:
         # Get all the calls to write() and check that the contents are what we expect
         list_of_writes = [call for call in writing_mock_open.mock_calls if 'call().write' in str(call)]
         assert len(list_of_writes) == 2
-        assert list_of_writes[1].args[0] == self.fcs_file_contents
+        assert list_of_writes[1].args[0] == expected_fcs_file_contents
         assert list_of_writes[0].args[0] == 'surface_file_content'
 
         # assert we are writing to the correct file
         assert writing_mock_open.call_args_list[-1][0][0] == '/path/fcs_file.fcs'
         assert writing_mock_open.call_args_list[0][0][0] == '/surface_file_01.dat'
 
-
-    def test_write_out_new_simulator_new_location(self, mocker, fixture_for_osstat_pathlib):
+    @pytest.mark.parametrize("overwrite_include_files, expected_surface_path", [
+        (True, '/surface_file_01.dat'),
+        (False, os.path.join('/new_location', 'new_file_name_surface_method_1.dat'))],
+                             ids=['overwrite', 'dont_overwrite'])
+    def test_write_out_new_simulator_new_location(self, mocker, fixture_for_osstat_pathlib, overwrite_include_files,
+                                                  expected_surface_path):
         # test the case where we have both a new file location and overwrite file and overwrite file and
         # preserve_file_names false
         # Arrange
@@ -121,7 +125,6 @@ class TestWriteOutSimulator:
         nexus_sim.model_files.surface_files[1]._file_modified_set(True)
 
         expected_runcontrol_path = '/nexus_data/runcontrol.dat'
-        expected_surface_path = os.path.join('/new_location', 'surface_file_01.dat')
         expected_hyd_path = os.path.join('/path', 'hyd_method.dat')
         expected_fcs_content = (
             '\n'
@@ -136,7 +139,7 @@ class TestWriteOutSimulator:
         nexus_sim.model_files.update_model_files(new_file_path='/new_location/new_file_name.fcs',
                                                  new_include_file_location=None,
                                                  write_out_all_files=False, preserve_file_names=False,
-                                                 overwrite_include_files=True)
+                                                 overwrite_include_files=overwrite_include_files)
         # assert
         assert writing_mock_open.call_args_list[0][0][0] == expected_surface_path
         assert writing_mock_open.call_args_list[1][0][0] == '/new_location/new_file_name.fcs'
