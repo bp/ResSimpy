@@ -312,22 +312,7 @@ def test_get_full_network(mocker):
     assert to_list == expected_to_list
     assert from_list == expected_from_list
 
-
-@pytest.mark.parametrize('new_file_name, subfolder',
-                         [(
-                                 'test_new_file.fcs',
-                                 'nexus_data'
-                         ),
-                             (
-                                     '/basefolder/test_new_file.fcs',
-                                     None,
-                             ),
-                             (
-                                     '/basefolder/test_new_file.fcs',
-                                     '/absolutepath/',
-                             ),
-                         ], ids=['basic_test', 'no subfolder', 'absolute paths'])
-def test_update_fcs_file(mocker, fixture_for_osstat_pathlib, new_file_name, subfolder):
+def test_update_fcs_file(mocker, fixture_for_osstat_pathlib):
     # Arrange
     fcs_file_class = generic_fcs(mocker)
     # flag one of the files as modified and give them some content
@@ -337,32 +322,23 @@ def test_update_fcs_file(mocker, fixture_for_osstat_pathlib, new_file_name, subf
     fcs_file_class.structured_grid_file.file_content_as_list = ['structured grid new data']
     expected_equil_contents = 'some\nnew\ndata\n'
     expected_grid_contents = 'structured grid new data'
-    if subfolder is None:
-        subfolder = ''
-    new_equil_file_name = os.path.join(subfolder, 'test_new_file_equil_method_2.dat')
-    new_grid_file_name = os.path.join(subfolder, 'test_new_file_structured_grid_file.dat')
-
-    expected_fcs_content = fcs_file_class.file_content_as_list.copy()
-    expected_fcs_content[5] = f'    	 EQUIL Method 2 {new_equil_file_name}\n'
-    expected_fcs_content[6] = f'        STRUCTURED_GRID {new_grid_file_name}\n'
-    expected_fcs_content = ''.join(expected_fcs_content)
 
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    fcs_file_class.update_model_files(new_file_name, subfolder)
+    fcs_file_class.update_model_files()
 
     # Assert
     # need to update this to check multiple files writes
     # Get all the calls to write() and check that the contents are what we expect
     list_of_writes = [call.args[0] for call in writing_mock_open.mock_calls if 'call().write' in str(call)]
 
-    assert list_of_writes == [expected_grid_contents, expected_equil_contents, expected_fcs_content]
+    assert list_of_writes == [expected_grid_contents, expected_equil_contents]
 
     # Get all the calls to write() with a write 'w' as the last arg and check that the file name writes are correct
     list_of_write_names = [call.args[0] for call in writing_mock_open.mock_calls if "'w')" in str(call)]
-    assert list_of_write_names == [new_grid_file_name, new_equil_file_name, new_file_name]
+    assert list_of_write_names == [fcs_file_class.structured_grid_file.location, fcs_file_class.equil_files[2].location]
 
 
 @pytest.mark.parametrize('token, method_number, edited_line, new_line_content',
@@ -394,15 +370,7 @@ def test_update_file_path(mocker, fixture_for_osstat_pathlib, token, method_numb
     assert fcs_file_class.file_content_as_list == expected_fcs_content
 
 
-@pytest.mark.parametrize('expected_files, preserve_file_names', [
-    (['new_fcs_runcontrol_file.dat', 'new_fcs_equil_method_1.dat', 'new_fcs_equil_method_2.dat',
-      'new_fcs_surface_method_1.dat', 'new_fcs_well_method_1.dat'],
-     False
-     ),
-    (['runcontrol.dat', 'equil_01.dat', 'equil_02.dat', 'surface.dat', 'wells.dat'],
-     True
-     )], ids=['new_names', 'preserve names'])
-def test_update_fcs_file_write_all_files(mocker, fixture_for_osstat_pathlib, expected_files, preserve_file_names):
+def test_move_model_files(mocker, fixture_for_osstat_pathlib):
     # Arrange
     fcs_path = 'test_fcs.fcs'
 
@@ -431,14 +399,16 @@ def test_update_fcs_file_write_all_files(mocker, fixture_for_osstat_pathlib, exp
     fcs = FcsNexusFile.generate_fcs_structure(fcs_path)
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
-    expected_files = [os.path.join('nexus_data', x) for x in expected_files]
+
+    new_include_loc = 'nexus_data'
+    expected_files = ['runcontrol.dat', 'equil_01.dat', 'equil_02.dat', 'surface.dat', 'wells.dat']
+    expected_files = [os.path.join('/data', new_include_loc, x) for x in expected_files]
     expected_files.append('/data/new_fcs.fcs')
     # Act
-    fcs.update_model_files(new_file_path='/data/new_fcs.fcs', new_include_file_location='nexus_data',
-                        write_out_all_files=True, preserve_file_names=preserve_file_names)
+    fcs.move_model_files(new_file_path='/data/new_fcs.fcs', new_include_file_location=new_include_loc)
 
     # Assert
     list_of_write_names = [call.args[0] for call in writing_mock_open.mock_calls if "'w')" in str(call)]
     # one write call per file
-    assert len(list_of_write_names) == 6
     assert list_of_write_names == expected_files
+    assert len(list_of_write_names) == 6

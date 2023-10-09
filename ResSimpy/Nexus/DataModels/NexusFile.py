@@ -667,6 +667,7 @@ class NexusFile(File):
         if write_includes and self.include_objects is not None:
             for file in self.include_objects:
                 write_file: bool = file.file_modified or write_out_all_files
+                write_file = write_file or (new_file_path != self.location and not os.path.isabs(file.location))
                 if new_file_path is None:
                     # if the base file has no new name then just overwrite the include file
                     include_file_name = None
@@ -690,7 +691,6 @@ class NexusFile(File):
             self.location = new_file_path
             with open(new_file_path, 'w') as fi:
                 fi.write(file_str)
-
             # reset the modified file state
             self._file_modified_set(False)
 
