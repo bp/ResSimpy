@@ -14,7 +14,7 @@ class FileBase(ABC):
         file_content_as_list (list[str]): List of lines in the file
     """
 
-    location: Optional[str] = None
+    location: str
     file_content_as_list: Optional[list[str]] = field(default=None, repr=False)
     __file_modified: bool = False
 

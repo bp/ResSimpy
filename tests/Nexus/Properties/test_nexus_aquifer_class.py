@@ -113,7 +113,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits
 )
 def test_read_aquifer_properties_from_file(mocker, file_contents, expected_aquifer_properties):
     # Arrange
-    aq_file = NexusFile(file_content_as_list=file_contents.splitlines())
+    aq_file = NexusFile(location='', file_content_as_list=file_contents.splitlines())
     aquifer_obj = NexusAquiferMethod(file=aq_file, input_number=1)
 
     # mock out open to return our test file contents

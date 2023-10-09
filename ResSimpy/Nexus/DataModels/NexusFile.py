@@ -49,7 +49,7 @@ class NexusFile(File):
     linked_user: Optional[str] = field(default=None)
     last_modified: Optional[datetime] = field(default=None)
 
-    def __init__(self, location: Optional[str] = None,
+    def __init__(self, location: str,
                  include_locations: Optional[list[str]] = None,
                  origin: Optional[str] = None,
                  include_objects: Optional[list[NexusFile]] = None,
@@ -375,7 +375,7 @@ class NexusFile(File):
         return flat_list
 
     # TODO write an output function using the iterate_line method
-    def get_full_network(self, max_depth: Optional[int] = None) -> tuple[list[str | None], list[str | None]]:
+    def get_full_network(self, max_depth: Optional[int] = None) -> tuple[list[str | None], list[str]]:
         """Recursively constructs two lists of from and to nodes representing the connections between files.
 
         Args:
@@ -667,6 +667,9 @@ class NexusFile(File):
         if write_includes and self.include_objects is not None:
             for file in self.include_objects:
                 write_file: bool = file.file_modified or write_out_all_files
+                if file.location is None:
+                    warnings.warn(f'No location found for file: {file}. Not writing file.')
+                    continue
                 write_file = write_file or (new_file_path != self.location and not os.path.isabs(file.location))
                 if new_file_path is None:
                     # if the base file has no new name then just overwrite the include file

@@ -56,7 +56,7 @@ class FcsNexusFile(NexusFile):
     files_info: list[tuple[Optional[str], Optional[str], Optional[datetime]]]
 
     def __init__(
-            self, location: Optional[str] = None,
+            self, location: str,
             include_locations: Optional[list[str]] = None,
             origin: Optional[str] = None,
             include_objects: Optional[list[NexusFile]] = None,
