@@ -121,11 +121,11 @@ def test_fcs_file_all_methods(mocker, fixture_for_osstat_pathlib):
     DATEFORMAT DD/MM/YYYY
     INITIALIZATION_FILES
 	 EQUIL Method 1 nexus_data/nexus_data/mp2017hm_ref_equil_01.dat
-	 EQUIL Method 2 nexus_data/nexus_data/mp2017hm_ref_equil_02.dat
+	 EQUIL NORPT Method 2 nexus_data/nexus_data/mp2017hm_ref_equil_02.dat
     STRUCTURED_GRID nexus_data/mp2020_structured_grid_1_reg_update.dat
 	 OPTIONS nexus_data/nexus_data/mp2020_ref_options_reg_update.dat
      INCLUDE wells.inc
-     HYD METHOd 3 hyd.dat'''
+     HYD NORPT METHOd 3 hyd.dat'''
     include_contents = 'WELLS SET 1 wells.dat'
 
     def mock_open_wrapper(filename, mode):
@@ -170,11 +170,11 @@ def test_fcs_file_all_methods(mocker, fixture_for_osstat_pathlib):
                                      '    DATEFORMAT DD/MM/YYYY\n',
                                      '    INITIALIZATION_FILES\n',
                                      '	 EQUIL Method 1 nexus_data/nexus_data/mp2017hm_ref_equil_01.dat\n',
-                                     '	 EQUIL Method 2 nexus_data/nexus_data/mp2017hm_ref_equil_02.dat\n',
+                                     '	 EQUIL NORPT Method 2 nexus_data/nexus_data/mp2017hm_ref_equil_02.dat\n',
                                      '    STRUCTURED_GRID nexus_data/mp2020_structured_grid_1_reg_update.dat\n',
                                      '	 OPTIONS nexus_data/nexus_data/mp2020_ref_options_reg_update.dat\n',
                                      'WELLS SET 1 wells.dat',
-                                     '     HYD METHOd 3 hyd.dat',
+                                     '     HYD NORPT METHOd 3 hyd.dat',
                                      ]
     expected_fcs_file = FcsNexusFile(location=fcs_path, origin=None, include_objects=include_objects,
                                      equil_files=equil_files, structured_grid_file=expected_structured_grid_file,
