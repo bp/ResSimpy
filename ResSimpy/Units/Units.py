@@ -447,6 +447,16 @@ class HeatTransfer(UnitDimension):
     metric_atm = 'W/(m2*K)'
 
 
+class Conductivity(UnitDimension):
+    """Conductivity units."""
+    english = 'BTU/(hr*ft*F)'
+    metric = 'W/(m*K)'
+    metkgcm2 = 'W/(m*K)'
+    metbar = 'W/(m*K)'
+    lab = 'W/(cm*K)'
+    metric_atm = 'W/(m*K)'
+
+
 class Dimensionless(UnitDimension):
     """For attributes which do not have a dimension."""
     english = ''
