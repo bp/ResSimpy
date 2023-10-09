@@ -326,6 +326,8 @@ class FcsNexusFile(NexusFile):
             overwrite_file (bool): Defaults to False. If True will overwrite the file.
         """
         if not file.file_modified and not write_out_all_files:
+            if file.location is None or file.origin is None:
+                return
             abs_path = nfo.get_full_file_path(file.location, file.origin)
             if abs_path != file.input_file_location:
                 self.change_file_path(file.location, keyword, method_number)
