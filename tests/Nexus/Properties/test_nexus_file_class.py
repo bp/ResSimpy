@@ -1,6 +1,6 @@
 import os
 import uuid
-import warnings
+from unittest.mock import MagicMock
 
 import pytest
 from pytest_mock import MockerFixture
@@ -889,6 +889,14 @@ def test_write_to_file(mocker, fixture_for_osstat_pathlib):
 
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
+
+    # Mock out the file exists
+    file_exists_mock = MagicMock(side_effect=lambda x: False)
+    mocker.patch('os.path.exists', file_exists_mock)
+
+    # mock out makedirs
+    makedirs_mock = MagicMock()
+    mocker.patch('os.makedirs', makedirs_mock)
     # Act
     nexus_file.write_to_file(new_file_path, write_includes=True, write_out_all_files=True)
     # Assert
@@ -922,6 +930,17 @@ def test_write_to_file_only_modified(mocker, fixture_for_osstat_pathlib):
     nexus_file.include_objects[0]._file_modified_set(True)
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
+    # mock out makedirs
+    makedirs_mock = MagicMock()
+    mocker.patch('os.makedirs', makedirs_mock)
+    # Mock out the file exists
+    file_exists_mock = MagicMock(side_effect=lambda x: False)
+    mocker.patch('os.path.exists', file_exists_mock)
+
+    # mock out makedirs
+    makedirs_mock = MagicMock()
+    mocker.patch('os.makedirs', makedirs_mock)
+
     # Act
     nexus_file.write_to_file(new_file_path, write_includes=True, write_out_all_files=False)
     # Assert

@@ -1,5 +1,5 @@
 import os
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock
 
 import pytest
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
@@ -404,6 +404,15 @@ def test_move_model_files(mocker, fixture_for_osstat_pathlib):
     expected_files = ['runcontrol.dat', 'equil_01.dat', 'equil_02.dat', 'surface.dat', 'wells.dat']
     expected_files = [os.path.join('/data', new_include_loc, x) for x in expected_files]
     expected_files.append('/data/new_fcs.fcs')
+
+    # Mock out the file exists
+    file_exists_mock = MagicMock(side_effect=lambda x: False)
+    mocker.patch('os.path.exists', file_exists_mock)
+
+    # mock out makedirs
+    makedirs_mock = MagicMock()
+    mocker.patch('os.makedirs', makedirs_mock)
+
     # Act
     fcs.move_model_files(new_file_path='/data/new_fcs.fcs', new_include_file_location=new_include_loc)
 

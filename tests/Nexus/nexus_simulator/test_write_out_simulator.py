@@ -1,4 +1,5 @@
 import os
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -50,6 +51,14 @@ class TestWriteOutSimulator:
         # change all but the hydraulics file
         nexus_sim.model_files.surface_files[1]._file_modified_set(True)
         nexus_sim.model_files.runcontrol_file._file_modified_set(True)
+
+        # Mock out the file exists
+        file_exists_mock = MagicMock(side_effect=lambda x: False)
+        mocker.patch('os.path.exists', file_exists_mock)
+
+        # mock out makedirs
+        makedirs_mock = MagicMock()
+        mocker.patch('os.makedirs', makedirs_mock)
 
         # Act
         nexus_sim.write_out_case(new_file_path='/new_path/new_fcs_file.fcs', case_suffix='case_1')

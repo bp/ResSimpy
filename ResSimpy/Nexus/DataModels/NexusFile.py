@@ -653,6 +653,8 @@ class NexusFile(File):
             new_file_path (None | str): writes to self.location if left as None. Otherwise writes to new_file_name.
             write_includes (bool): If True will write out all include files within the file. Defaults to False.
             write_out_all_files (bool): If False will write only modified files. Otherwise will write all files.
+            overwrite_file (bool): If True will overwrite the file at the location specified by new_file_path. \
+            Otherwise will raise an error if the file already exists.
         """
         # overwrite File base class method to allow for write_includes
         if new_file_path is None and overwrite_file:
@@ -664,6 +666,12 @@ class NexusFile(File):
             raise ValueError(f'Cannot overwrite file with a new file path provided at {new_file_path}')
         if self.file_content_as_list is None:
             raise ValueError(f'No file data to write out, instead found {self.file_content_as_list}')
+
+        if new_file_path is None:
+            raise ValueError('No file path to write to.')
+        if os.path.exists(new_file_path) and not overwrite_file:
+            raise ValueError(f'File already exists at {new_file_path} and overwrite_file set to False')
+
         if write_includes and self.include_objects is not None:
             for file in self.include_objects:
                 write_file: bool = file.file_modified or write_out_all_files
