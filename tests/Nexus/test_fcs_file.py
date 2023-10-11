@@ -370,6 +370,16 @@ def test_update_file_path(mocker, fixture_for_osstat_pathlib, token, method_numb
     assert fcs_file_class.file_content_as_list == expected_fcs_content
 
 
+def test_update_file_path_no_content(mocker, fixture_for_osstat_pathlib):
+    # Arrange
+    fcs_file_class = generic_fcs(mocker)
+    fcs_file_class.file_content_as_list = None
+    # Act
+    with pytest.raises(ValueError) as ve:
+        fcs_file_class.change_file_path('new_file.dat', 'ROCK', 1)
+    assert str(ve.value) == 'No file content to change file path on.'
+
+
 def test_move_model_files(mocker, fixture_for_osstat_pathlib):
     # Arrange
     fcs_path = 'test_fcs.fcs'

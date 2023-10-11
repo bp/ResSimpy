@@ -347,7 +347,9 @@ class FcsNexusFile(NexusFile):
         self.write_to_file(new_file_path, write_includes=False)
 
     def update_model_files(self) -> None:
-        """Updates all the modified files and the fcs in the model. Keeps file names and paths the same."""
+        """Updates all the modified files and the fcs in the model. Keeps file names and paths the same.
+        Warning: this method overwrites the existing files!
+        """
         # Loop through all files in the model, writing out the contents if they have been modified.
         for keyword, attr_name in self.fcs_keyword_map_single().items():
             file: None | NexusFile = getattr(self, attr_name, None)
