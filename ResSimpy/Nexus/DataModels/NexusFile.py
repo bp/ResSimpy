@@ -662,8 +662,6 @@ class NexusFile(File):
             new_file_path = self.location
         elif new_file_path is None and not overwrite_file:
             raise ValueError('No file path to write to, and overwrite_file set to False')
-        elif new_file_path != self.location and overwrite_file:
-            raise ValueError(f'Cannot overwrite file with a new file path provided at {new_file_path}')
         if self.file_content_as_list is None:
             raise ValueError(f'No file data to write out, instead found {self.file_content_as_list}')
 
@@ -671,6 +669,10 @@ class NexusFile(File):
             raise ValueError('No file path to write to.')
         if os.path.exists(new_file_path) and not overwrite_file:
             raise ValueError(f'File already exists at {new_file_path} and overwrite_file set to False')
+
+        # create directories that do not exist
+        if not os.path.exists(os.path.dirname(new_file_path)):
+            os.makedirs(os.path.dirname(new_file_path))
 
         if write_includes and self.include_objects is not None:
             for file in self.include_objects:

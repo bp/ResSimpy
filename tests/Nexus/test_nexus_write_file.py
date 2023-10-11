@@ -1,5 +1,7 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock
 import pytest
+
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.utility_for_tests import check_file_read_write_is_correct
@@ -283,3 +285,45 @@ def test_modify_completion_write_to_file(mocker, fixture_for_osstat_pathlib, fcs
                                      mocker_fixture=mocker, write_file_name='/my/wellspec/file.dat',
                                      number_of_writes=1,
                                      )
+
+@pytest.mark.parametrize('folder_exists, expected_number_calls', [
+    (True, 0),
+    (False, 1)], ids=['folder_exists', 'folder_does_not_exist'])
+def test_write_file_makedirs(mocker, fixture_for_osstat_pathlib, folder_exists, expected_number_calls, ):
+    # Arrange
+    file_contents = 'Contents of the file to write'
+    file_location = '/path/to/file.dat'
+    new_file_location = '/new/path/to/file.dat'
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            file_location: file_contents,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    file = NexusFile(file_location, file_content_as_list=[file_contents])
+    file._file_modified_set(True)
+    # mock out the write operation
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+
+    # mock out folder exists
+    folder_exists_mock = MagicMock(side_effect=lambda x: folder_exists)
+    mocker.patch('os.path.exists', folder_exists_mock)
+
+    # mock out the makedirs
+    makedirs_mock = MagicMock()
+    mocker.patch('os.makedirs', makedirs_mock)
+
+    # Act
+    file.write_to_file(new_file_location, overwrite_file=True)
+
+    # Assert
+    # check we are writing to the correct file
+    # check we are creating the correct folder
+    assert len(makedirs_mock.call_args_list) == expected_number_calls
+    if expected_number_calls == 1:
+        assert makedirs_mock.call_args_list[0][0][0] == '/new/path/to'
+    assert writing_mock_open.call_args_list[0][0][0] == new_file_location
+

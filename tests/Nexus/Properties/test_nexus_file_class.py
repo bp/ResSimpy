@@ -988,11 +988,12 @@ def test_write_to_file_failure(mocker, fixture_for_osstat_pathlib):
     file = NexusFile(location='somefile.dat', origin=None, file_content_as_list=[file_content])
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
+    mocker.patch('os.path.exists', MagicMock(return_value=True))
     # Act
     with pytest.raises(ValueError) as ve:
         file.write_to_file(new_file_path='new_somefile.dat', write_includes=True, write_out_all_files=True,
-                           overwrite_file=True)
-    assert str(ve.value) == f'Cannot overwrite file with a new file path provided at new_somefile.dat'
+                           overwrite_file=False)
+    assert str(ve.value) == 'File already exists at new_somefile.dat and overwrite_file set to False'
 
 
 def test_missing_file(mocker, fixture_for_osstat_pathlib):
