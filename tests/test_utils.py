@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+import uuid
+from dataclasses import dataclass, field
 from typing import Optional
 
 import pandas as pd
@@ -22,6 +23,7 @@ class GenericTest:
     unit_system: UnitSystem
     date: str
     attr_4: Optional[str] = None
+    __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False, repr=False)
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
@@ -35,6 +37,9 @@ class GenericTest:
 
     def to_dict(self, include_nones=True):
         return to_dict_generic.to_dict(self, add_date=True, add_units=True, include_nones=include_nones)
+
+    def __repr__(self):
+        return generic_repr(self)
 
 def test_to_dict():
     # Arrange
@@ -84,27 +89,17 @@ def test_obj_to_dataframe():
     pd.testing.assert_frame_equal(result, expected_df, check_like=True)
 
 
-def test_generic_repr():
-    @dataclass
-    class MyClass:
-        well: str
-        depth: float
-        x_pos: Optional[float]
-        y_pos: Optional[float]
-        temp: Optional[float]
+def test_generic_repr(mocker):
+    # Arrange
+    mocker.patch('uuid.uuid4', return_value='uuid1')
+    class_inst = GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=UnitSystem.METRIC, date='01/01/2030',
+                             attr_4='world')
+    # mock out id
 
-        def __repr__(self) -> str:
-            return generic_repr(self)
-
-    obj = MyClass(
-        well="my_well",
-        depth=100,
-        x_pos=50.0,
-        y_pos=75.0,
-        temp=None
-    )
-    expected = "MyClass(well='my_well', depth=100, x_pos=50.0, y_pos=75.0)"
-    assert repr(obj) == expected
+    expected = ("GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=<UnitSystem.METRIC: 'METRIC'>, "
+                "date='01/01/2030', attr_4='world')")
+    # Act Assert
+    assert repr(class_inst) == expected
 
 
 def test_invert_nexus_map():

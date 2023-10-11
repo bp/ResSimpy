@@ -10,7 +10,7 @@ from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.Utils.obj_to_table_string import to_table_line
 
 
-@dataclass(repr=False)
+@dataclass()
 class DataObjectMixin(ABC):
     """Base class representing a data object in ResSimpy."""
     __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False, repr=False)
@@ -87,3 +87,4 @@ class DataObjectMixin(ABC):
         if uppercase:
             unit = unit.upper()
         return unit
+
