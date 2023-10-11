@@ -260,8 +260,9 @@ class FcsNexusFile(NexusFile):
         """Moves all the model files to a new location.
 
         Args:
-            new_file_path (str): new file path for the fcs file
-            new_include_file_location (str): new location for the included files
+            new_file_path (str): new file path for the fcs file e.g. /new_path/new_fcs_file.fcs
+            new_include_file_location (str): new location for the included files either absolute or relative
+            to the new fcs file path
         """
         # Take the original file, find which files have changed and write out those locations
         # figure out where to store the include files:
