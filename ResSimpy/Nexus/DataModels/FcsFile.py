@@ -298,7 +298,14 @@ class FcsNexusFile(NexusFile):
         self.write_to_file(new_file_path, write_includes=False)
 
     def write_out_case(self, new_file_path: str, new_include_file_location: str, case_suffix: str) -> None:
-        """Writes out a new simulator with only modified files."""
+        """Writes out a new simulator with only modified files. For use with creating multiple cases from a base case.
+
+        Args:
+            new_file_path (str): new file path for the fcs file e.g. /new_path/new_fcs_file.fcs
+            new_include_file_location (str): new location for the included files either absolute or relative
+            to the new fcs file path
+            case_suffix (str): suffix to append to the end of the file name e.g. case_1
+        """
         def new_include_file_name(file_name: str) -> str:
             """Returns the new include file name based on the original file name plus the suffix provided."""
             file_name = os.path.basename(file_name)
