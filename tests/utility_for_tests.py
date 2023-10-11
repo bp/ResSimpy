@@ -1,5 +1,5 @@
 import pathlib
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 from pytest_mock import MockerFixture
 from tests.multifile_mocker import mock_multiple_files
