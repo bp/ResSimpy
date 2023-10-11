@@ -87,4 +87,3 @@ class DataObjectMixin(ABC):
         if uppercase:
             unit = unit.upper()
         return unit
-
