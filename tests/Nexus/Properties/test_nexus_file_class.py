@@ -932,17 +932,19 @@ def test_write_to_file_only_modified(mocker, fixture_for_osstat_pathlib):
     assert list_of_writes[-1].args[0] == expected_file_content
 
 
-@pytest.mark.parametrize('location, file_as_list, expected_error', [
-    ('path/file.dat', None, 'No file data to write out, instead found None'),
-], ids=['no file as list',])
-def test_write_to_file_exit_points(mocker, fixture_for_osstat_pathlib, location, file_as_list, expected_error):
+@pytest.mark.parametrize('location, file_as_list, overwrite_file, expected_error', [
+    ('path/file.dat', None, True, 'No file data to write out, instead found None'),
+    (None, ['file_content'], False, 'No file path to write to, and overwrite_file set to False'),
+], ids=['no file as list', 'no overwrite'])
+def test_write_to_file_exit_points(mocker, fixture_for_osstat_pathlib, location, file_as_list, overwrite_file,
+                                   expected_error):
     # Arrange
     empty_file = NexusFile(location=location, file_content_as_list=file_as_list)
     if file_as_list is None:
         empty_file.file_content_as_list = None
     # Act Assert
     with pytest.raises(ValueError) as ve:
-        empty_file.write_to_file(overwrite_file=True)
+        empty_file.write_to_file(overwrite_file=overwrite_file)
     assert str(ve.value) == expected_error
 
 
