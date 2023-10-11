@@ -74,6 +74,13 @@ class NexusSimulator(Simulator):
 
         Raises:
             ValueError: If the FCS file path is not given
+
+        Examples:
+            Example of calling a NexusSimulator with a file path to an fcs file:
+
+            >>> from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+            >>> model = NexusSimulator(origin="/path/to/fcs_file.fcs")
+
         """
         if origin is None:
             raise ValueError(f'Origin path to model fcs file is required. Instead got {origin}.')
