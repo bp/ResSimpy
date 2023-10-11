@@ -317,7 +317,7 @@ class FcsNexusFile(NexusFile):
         # Loop through all files in the model, writing out the contents
         for keyword, attr_name in self.fcs_keyword_map_single().items():
             file: None | NexusFile = getattr(self, attr_name, None)
-            if file is None or file.location is None:
+            if file is None:
                 # skip if there is no file
                 continue
             include_write_name = file.location
@@ -347,7 +347,7 @@ class FcsNexusFile(NexusFile):
                 # skip if there is no file
                 continue
             if file.file_modified:
-                file.write_to_file(write_includes=True, write_out_all_files=False)
+                file.write_to_file(write_includes=True, write_out_all_files=False, overwrite_file=True)
 
         for keyword, attr_name in self.fcs_keyword_map_multi().items():
             file_dict: None | dict[int, NexusFile] = getattr(self, attr_name, None)
@@ -355,10 +355,10 @@ class FcsNexusFile(NexusFile):
                 continue
             for method_number, file in file_dict.items():
                 if file.file_modified:
-                    file.write_to_file(write_includes=True, write_out_all_files=False)
+                    file.write_to_file(write_includes=True, write_out_all_files=False, overwrite_file=True)
 
         # write out the final fcs file
-        self.write_to_file(self.location, write_includes=False)
+        self.write_to_file(self.location, write_includes=False, overwrite_file=True)
 
     def change_file_path(self, new_file_path: str, token: str, method_number: int | None = None) -> bool:
         """Switch the file path for a new file_path based on the value of the associated keyword in the fcs.

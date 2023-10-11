@@ -77,7 +77,7 @@ def test_write_to_file(mocker, fixture_for_osstat_pathlib, fcs_file_contents, we
     # Act
     mock_nexus_sim._wells.add_completion(well_name='well1', completion_properties=add_perf_dict,
                                         preserve_previous_completions=True)
-    mock_nexus_sim.model_files.well_files[1].write_to_file()
+    mock_nexus_sim.model_files.well_files[1].write_to_file(overwrite_file=True)
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
                                      modifying_mock_open=writing_mock_open,
@@ -183,7 +183,8 @@ def test_remove_completion_write_to_file(mocker, fixture_for_osstat_pathlib, fcs
     remove_perf_dict = {'date': remove_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 4.2}
     well_files = mock_nexus_sim.model_files.well_files[1]
     object_locations = well_files.object_locations
-    object_locations_minus_completion = {k: v for k, v in object_locations.items() if v != [expected_removed_completion_line]}
+    object_locations_minus_completion = {k: v for k, v in object_locations.items() if v !=
+                                         [expected_removed_completion_line]}
     object_locations_minus_completion = dict(zip(object_locations_minus_completion, expected_obj_locations))
 
     # make a mock for the write operation
@@ -193,7 +194,7 @@ def test_remove_completion_write_to_file(mocker, fixture_for_osstat_pathlib, fcs
     # Act
     mock_nexus_sim._wells.remove_completion(well_name='well1', completion_properties=remove_perf_dict)
     result_object_ids = mock_nexus_sim.model_files.well_files[1].object_locations
-    mock_nexus_sim.model_files.well_files[1].write_to_file()
+    mock_nexus_sim.model_files.well_files[1].write_to_file(overwrite_file=True)
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
                                      modifying_mock_open=writing_mock_open,
@@ -275,7 +276,7 @@ def test_modify_completion_write_to_file(mocker, fixture_for_osstat_pathlib, fcs
     # Act
     mock_nexus_sim._wells.modify_completion(well_name='well1Dev', properties_to_modify=modify_perf_new_properties,
                                            completion_to_change=modify_perf_target )
-    mock_nexus_sim.model_files.well_files[1].write_to_file()
+    mock_nexus_sim.model_files.well_files[1].write_to_file(overwrite_file=True)
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
                                      modifying_mock_open=writing_mock_open,
