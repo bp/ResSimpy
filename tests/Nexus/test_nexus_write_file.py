@@ -178,7 +178,7 @@ def test_remove_completion_write_to_file(mocker, fixture_for_osstat_pathlib, fcs
     mocker.patch('os.path.isfile', fcs_file_exists)
 
     mock_nexus_sim = NexusSimulator('fcs_file.fcs')
-    mock_nexus_sim._wells.load() # Manually call load_wells to simulate loading in wells before we change the open mock.
+    mock_nexus_sim._wells._load() # Manually call load_wells to simulate loading in wells before we change the open mock.
     mock_nexus_sim.start_date = start_date
     remove_perf_dict = {'date': remove_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 4.2}
     well_files = mock_nexus_sim.model_files.well_files[1]

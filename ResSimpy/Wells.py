@@ -12,15 +12,21 @@ from typing import Sequence, Optional
 
 @dataclass(kw_only=True)
 class Wells(ABC):
-    __wells: list[Well] = field(default_factory=list)
+    _wells: list[Well] = field(default_factory=list)
+    _wells_loaded: bool = False
 
     @property
     def wells(self):
-        return self.__wells
+        if not self._wells_loaded:
+            self._load()
+        return self._wells
 
     @wells.setter
     def wells(self, value):
-        self.__wells = value
+        self._wells = value
+
+    def _load(self) -> None:
+        raise NotImplementedError("Implement this in the derived class")
 
     def get_all(self) -> Sequence[Well]:
         raise NotImplementedError("Implement this in the derived class")

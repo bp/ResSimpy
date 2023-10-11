@@ -33,7 +33,7 @@ from tests.multifile_mocker import mock_multiple_files
 
 def mock_multiple_opens(mocker, filename, fcs_file_contents, run_control_contents, include_contents,
                         run_control_mock=None, include_file_mock=None, log_file_mock=None, structured_grid_mock=None,
-                        surface_1_mock=None, surface_2_mock=None):
+                        surface_1_mock=None, surface_2_mock=None, wellspec_mock=None):
     """Mock method that returns different test file contents depending upon the file name"""
     if "fcs" in filename:
         file_contents = fcs_file_contents
@@ -51,6 +51,8 @@ def mock_multiple_opens(mocker, filename, fcs_file_contents, run_control_content
         return log_file_mock
     elif "structured_grid" in filename:
         return structured_grid_mock
+    elif "wellspec" in filename:
+        return wellspec_mock
     else:
         raise FileNotFoundError(filename)
     open_mock = mocker.mock_open(read_data=file_contents)
