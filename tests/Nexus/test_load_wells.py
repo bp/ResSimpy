@@ -76,7 +76,7 @@ def test_load_basic_wellspec(mocker, fixture_for_osstat_pathlib, file_contents, 
     wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
     # Act
     result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH,
-                              model_date_format=date_format)
+                              model_date_format=date_format)[0]
 
     # Assert
     # Deep compare expected and received wells
@@ -168,7 +168,7 @@ WELLMOD	RU001	DKH	CON	0
 
     # Act
     result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH,
-                              model_date_format=date_format)
+                              model_date_format=date_format)[0]
 
     # Assert
     assert result_wells == expected_wells
@@ -251,7 +251,7 @@ def test_load_wells_multiple_wells_multiple_dates(mocker, fixture_for_osstat_pat
 
     # Act
     result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH,
-                              model_date_format=date_format)
+                              model_date_format=date_format)[0]
 
     # Assert
     assert result_wells == expected_wells
@@ -292,7 +292,7 @@ def test_load_wells_all_columns_present_structured_grid(mocker, fixture_for_osst
 
     # Act
     result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH,
-                              model_date_format=date_format)
+                              model_date_format=date_format)[0]
 
     # Assert
     assert result_wells == expected_wells
@@ -361,7 +361,7 @@ def test_load_wells_all_columns_unstructured_grid(mocker, fixture_for_osstat_pat
 
     # Act
     result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH,
-                              model_date_format=date_format)
+                              model_date_format=date_format)[0]
 
     # Assert
     assert result_wells == expected_wells
@@ -413,7 +413,7 @@ def test_load_wells_rel_perm_tables(mocker, fixture_for_osstat_pathlib):
 
     # Act
     result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH,
-                              model_date_format=date_format)
+                              model_date_format=date_format)[0]
 
     # Assert
     assert result_wells == expected_wells
@@ -457,7 +457,7 @@ def test_load_wells_na_values_converted_to_none(mocker, fixture_for_osstat_pathl
 
     # Act
     result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH,
-                              model_date_format=date_format)
+                              model_date_format=date_format)[0]
 
     # Assert
     assert result_wells == expected_wells
@@ -536,7 +536,7 @@ def test_correct_units_loaded(mocker, fixture_for_osstat_pathlib, file_contents,
 
     # Act
     result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH,
-                              model_date_format=date_format)
+                              model_date_format=date_format)[0]
 
     # Assert
     assert result_wells == expected_wells

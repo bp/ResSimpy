@@ -530,7 +530,8 @@ def test_add_completion():
     well = NexusWell(well_name='test well', completions=existing_completions,
                      unit_system=UnitSystem.METKGCM2)
     # Act
-    well._add_completion_to_memory(date=new_date, completion_properties=new_completion_props)
+    well._add_completion_to_memory(date=new_date, completion_properties=new_completion_props,
+                                   date_format=DateFormat.DD_MM_YYYY)
     # Assert
     assert well == expected_well
 
@@ -623,7 +624,7 @@ def test_well_dates(mocker):
     mocker.patch('ResSimpy.Nexus.NexusSimulator.NexusSimulator', mock_sim)
     well = NexusWells(mock_sim)
 
-    well.__setattr__('_NexusWells__wells', [NexusWell(well_name='well1', completions=well_1_completions, unit_system=UnitSystem.METRIC),
+    well.__setattr__('_wells', [NexusWell(well_name='well1', completions=well_1_completions, unit_system=UnitSystem.METRIC),
                                             NexusWell(well_name='well2', completions=well_2_completions, unit_system=UnitSystem.METRIC)])
 
     expected_result = {'01/01/2023', '01/02/2023', '01/03/2023'}
@@ -829,7 +830,7 @@ def test_add_completion_write(mocker, fixture_for_osstat_pathlib, file_as_list, 
     fake_nexus_sim.start_date = start_date
     # mock out open
     wells_obj = NexusWells(fake_nexus_sim)
-    wells_obj.__load()
+    wells_obj._load()
 
     add_perf_dict = {'date': add_perf_date, 'i': 4, 'j': 5, 'k': 6, 'bore_radius': 7.5, 'date_format': fake_nexus_sim.date_format}
 

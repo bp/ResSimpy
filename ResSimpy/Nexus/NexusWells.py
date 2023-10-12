@@ -101,10 +101,10 @@ class NexusWells(Wells):
                                                 default_units=self.__model.default_units, model_date_format=self.__model.date_format)
             self._wells += new_wells
             self.__date_format = date_format
-        self.__wells_loaded = True
+        self._wells_loaded = True
 
     def get_wells_overview(self) -> str:
-        if not self.__wells_loaded:
+        if not self._wells_loaded:
             self._load()
 
         overview: str = ''
@@ -115,7 +115,7 @@ class NexusWells(Wells):
 
     def get_wells_dates(self) -> set[str]:
         """Returns a set of the unique dates in the wellspec file over all wells."""
-        if not self.__wells_loaded:
+        if not self._wells_loaded:
             self._load()
 
         set_dates: set[str] = set()
