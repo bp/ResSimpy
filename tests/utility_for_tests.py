@@ -103,5 +103,4 @@ def generic_fcs(mocker):
     fcs_file_exists = Mock(side_effect=lambda x: True)
     mocker.patch('os.path.isfile', fcs_file_exists)
     fcs = FcsNexusFile.generate_fcs_structure(fcs_path)
-
     return fcs

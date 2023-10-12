@@ -167,7 +167,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 )
 def test_read_rock_properties_from_file(mocker, file_contents, expected_rock_properties):
     # Arrange
-    rock_file = NexusFile(file_content_as_list=file_contents.splitlines())
+    rock_file = NexusFile(location='', file_content_as_list=file_contents.splitlines())
     rock_obj = NexusRockMethod(file=rock_file, input_number=1)
 
     # mock out open to return our test file contents

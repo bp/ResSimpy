@@ -214,7 +214,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 )
 def test_read_hydraulics_properties_from_file(mocker, file_contents, expected_hydraulics_properties):
     # Arrange
-    hyd_file = NexusFile(file_content_as_list=file_contents.splitlines())
+    hyd_file = NexusFile(location='', file_content_as_list=file_contents.splitlines())
     hydraulics_obj = NexusHydraulicsMethod(file=hyd_file, input_number=1)
 
     # mock out open to return our test file contents
