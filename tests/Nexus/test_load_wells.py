@@ -1,3 +1,5 @@
+import warnings
+
 import pytest
 from pytest_mock import MockerFixture
 
@@ -541,15 +543,14 @@ def test_correct_units_loaded(mocker, fixture_for_osstat_pathlib, file_contents,
     # Assert
     assert result_wells == expected_wells
 
+
 @pytest.mark.parametrize("first_line_wellspec, first_line_fcs_file, expected_format",
-
-[("DATEFORMAT DD/MM/YYYY", "DATEFORMAT MM/DD/YYYY", DateFormat.DD_MM_YYYY),
-("DATEFORMAT MM/DD/YYYY", "DATEFORMAT DD/MM/YYYY", DateFormat.MM_DD_YYYY),
-("", "DATEFORMAT DD/MM/YYYY", DateFormat.DD_MM_YYYY),
-("", "", DateFormat.MM_DD_YYYY)],
-
-ids=['Date format in wellspec file', 'American Date format in wellspec file',
-  'Date format in FCS file only', 'No date format specified'])
+                         [("DATEFORMAT DD/MM/YYYY", "DATEFORMAT MM/DD/YYYY", DateFormat.DD_MM_YYYY),
+                          ("DATEFORMAT MM/DD/YYYY", "DATEFORMAT DD/MM/YYYY", DateFormat.MM_DD_YYYY),
+                          ("", "DATEFORMAT DD/MM/YYYY", DateFormat.DD_MM_YYYY),
+                          ("", "", DateFormat.MM_DD_YYYY)],
+                         ids=['Date format in wellspec file', 'American Date format in wellspec file',
+                              'Date format in FCS file only', 'No date format specified'])
 def test_load_full_model_with_wells(mocker: MockerFixture, fixture_for_osstat_pathlib, first_line_wellspec,
                                     first_line_fcs_file, expected_format):
     # Arrange
@@ -577,3 +578,121 @@ def test_load_full_model_with_wells(mocker: MockerFixture, fixture_for_osstat_pa
     # Assert
     assert model.wells.date_format == expected_format
     assert model.wells.wells[0].completions[0].date_format == expected_format
+
+
+def test_load_full_model_with_wells_no_date_format(mocker: MockerFixture, fixture_for_osstat_pathlib):
+    # Arrange
+    wellspec_contents = f"""    
+    TIME 01/08/2023 !232 days
+    WELLSPEC WELL1
+    IW JW L RADW
+    1  2  3  4.5
+DATEFORMAT 
+"""
+
+    fcs_file_contents = f" WELLS Set 1 data/wells.dat\n"
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'model.fcs': fcs_file_contents,
+            'data/wells.dat': wellspec_contents
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    expected_error_str = "Cannot find the date format associated with the DATEFORMAT card in line='DATEFORMAT \\n' " \
+                         "at line number 5"
+
+    model = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='model.fcs', mock_open=False)
+
+    # Act
+    with pytest.raises(ValueError) as ve:
+        _ = model.wells.date_format
+
+    # Assert
+    result_error_msg = str(ve.value)
+    assert result_error_msg == expected_error_str
+
+
+def test_load_full_model_with_wells_invalid_date_format(mocker: MockerFixture, fixture_for_osstat_pathlib):
+    # Arrange
+    wellspec_contents = f"""
+    DATEFORMAT DD.MM.YYYY    
+    TIME 01/08/2023 !232 days
+    WELLSPEC WELL1
+    IW JW L RADW
+    1  2  3  4.5
+"""
+
+    fcs_file_contents = f" WELLS Set 1 data/wells.dat\n"
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'model.fcs': fcs_file_contents,
+            'data/wells.dat': wellspec_contents
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    expected_error_str = "Invalid Date Format found: 'DD.MM.YYYY' at line 1"
+
+    model = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='model.fcs', mock_open=False)
+
+    # Act
+    with pytest.raises(ValueError) as ve:
+        _ = model.wells.date_format
+
+    # Assert
+    result_error_msg = str(ve.value)
+    assert result_error_msg == expected_error_str
+
+
+def test_load_full_model_with_wells_multiple_wellspecs(mocker: MockerFixture, fixture_for_osstat_pathlib):
+    # Arrange
+    wellspec_1_contents = f"""
+DATEFORMAT     DD/MM/YYYY
+    TIME 01/08/2023 !232 days
+    WELLSPEC WELL1
+    IW JW L RADW
+    1  2  3  4.5
+"""
+
+    wellspec_2_contents = f"""    
+    DATEFORMAT     MM/DD/YYYY
+        TIME 01/08/2023 !232 days
+        WELLSPEC WELL2
+        IW JW L RADW
+        1  2  3  4.5
+    """
+
+    fcs_file_contents = """
+    DATEFORMAT DD/MM/YYYY 
+    WELLS Set 1 data/wells1.dat
+     WELLS Set 2 data/wells2.dat"""
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'model.fcs': fcs_file_contents,
+            'data/wells1.dat': wellspec_1_contents,
+            'data/wells2.dat': wellspec_2_contents
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+    expected_well_1_format = DateFormat.DD_MM_YYYY
+    expected_well_2_format = DateFormat.MM_DD_YYYY
+
+    warnings_mock = mocker.Mock()
+    mocker.patch("warnings.warn", warnings_mock)
+
+    # Act
+    model = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='model.fcs', mock_open=False)
+    _ = model.wells.wells[0] # Used to stimulate loading as we are lazy loading this part
+
+    # Assert
+    warnings_mock.assert_called_once_with('Wells date format of MM/DD/YYYY inconsistent with base model format of DD/MM/YYYY')
+    assert model.wells.wells[0].completions[0].date_format == expected_well_1_format
+    assert model.wells.date_format == expected_well_2_format
+    assert model.wells.wells[1].completions[0].date_format == expected_well_2_format

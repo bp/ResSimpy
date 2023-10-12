@@ -12,7 +12,7 @@ from typing import Sequence, Optional
 
 @dataclass(kw_only=True)
 class Wells(ABC):
-    _wells: list[Well] = field(default_factory=list)
+    _wells: Sequence[Well] = field(default_factory=list)
     _wells_loaded: bool = False
 
     @property

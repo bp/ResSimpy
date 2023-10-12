@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Optional, Tuple
+from typing import Optional, Sequence
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -13,7 +13,7 @@ from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
 
 
 def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem,
-               model_date_format: DateFormat) -> Tuple[list[NexusWell], DateFormat]:
+               model_date_format: DateFormat) -> tuple[Sequence[NexusWell], DateFormat]:
     """Loads a list of Nexus Well instances and populates it with the wells completions over time from a wells file.
 
     Args:
@@ -28,7 +28,9 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
         ValueError: If no valid wells are found in the wellspec file.
 
     Returns:
-        list[NexusWell]: list of Nexus well classes contained within a wellspec file.
+        A tuple containing:
+        Sequence[NexusWell]: list of Nexus well classes contained within a wellspec file.
+        DateFormat: The date format found in the wellspec file if present, otherwise just the model date format.
     """
     date_format = model_date_format
     file_as_list = nexus_file.get_flat_list_str_file
@@ -143,11 +145,16 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
                 raise ValueError(f"Cannot find the date format associated with the DATEFORMAT card in {line=} at line"
                                  f" number {index}")
 
-            if new_date_format_str != date_format.value:
-                warnings.warn(f"Date format of {new_date_format_str} inconsistent with base model format of "
-                              f"{date_format.value}")
+            model_date_format_str = model_date_format.name.replace('_', '/')
+            if new_date_format_str != model_date_format_str:
+                warnings.warn(f"Wells date format of {new_date_format_str} inconsistent with base model format of "
+                              f"{model_date_format_str}")
 
             converted_format_str = new_date_format_str.replace('/', '_')
+
+            if not hasattr(DateFormat, converted_format_str):
+                raise ValueError(f"Invalid Date Format found: '{new_date_format_str}' at line {index}")
+
             date_format = DateFormat[converted_format_str]
 
         if nfo.check_token('TIME', line):

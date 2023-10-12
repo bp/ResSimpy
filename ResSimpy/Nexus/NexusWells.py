@@ -40,7 +40,6 @@ class NexusWells(Wells):
 
     def __init__(self, model: NexusSimulator) -> None:
         self.__model = model
-        # self.__wells = []
         self.__add_object_operations = AddObjectOperations(NexusCompletion, self.table_header, self.table_footer, model)
         super().__init__()
 
@@ -98,7 +97,9 @@ class NexusWells(Wells):
                 warnings.warn(f'Well file location has not been found for {well_file}')
                 continue
             new_wells, date_format = load_wells(nexus_file=well_file, start_date=self.__model.start_date,
-                                                default_units=self.__model.default_units, model_date_format=self.__model.date_format)
+                                                default_units=self.__model.default_units,
+                                                model_date_format=self.__model.date_format)
+
             self._wells += new_wells
             self.__date_format = date_format
         self._wells_loaded = True
