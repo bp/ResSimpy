@@ -228,7 +228,7 @@ def test_read_equil_properties_from_file(mocker, file_contents, expected_equil_p
         file_contents_as_list[1] = file_contents_as_list[1].split('>')[0] + file_contents_as_list[2]
         del file_contents_as_list[2]
 
-    eq_file = NexusFile(file_content_as_list=file_contents_as_list)
+    eq_file = NexusFile(location='', file_content_as_list=file_contents_as_list)
     equil_obj = NexusEquilMethod(file=eq_file, input_number=1)
 
     # mock out open to return our test file contents

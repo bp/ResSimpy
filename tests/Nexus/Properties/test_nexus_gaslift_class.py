@@ -48,7 +48,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 )
 def test_read_gaslift_properties_from_file(mocker, file_contents, expected_gaslift_properties):
     # Arrange
-    gl_file = NexusFile(file_content_as_list=file_contents.splitlines())
+    gl_file = NexusFile(location='', file_content_as_list=file_contents.splitlines())
     gaslift_obj = NexusGasliftMethod(file=gl_file, input_number=1)
 
     # mock out open to return our test file contents
