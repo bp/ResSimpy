@@ -332,7 +332,8 @@ class NexusCompletion(Completion):
         date = input_dictionary.get('date', None)
         date_format_str = input_dictionary.get('date_format')
         if date_format_str is not None and isinstance(date_format_str, str):
-            completion_date_format = DateFormat[date_format_str]
+            converted_date_format_str = date_format_str.replace('/', '_')
+            completion_date_format = DateFormat[converted_date_format_str]
         else:
             completion_date_format = date_format
         if date is None:
