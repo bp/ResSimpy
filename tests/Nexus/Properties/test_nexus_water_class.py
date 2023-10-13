@@ -131,7 +131,7 @@ from ResSimpy.Enums.UnitsEnum import SUnits, UnitSystem, TemperatureUnits
 )
 def test_read_water_properties_from_file(mocker, file_contents, expected_water_properties):
     # Arrange
-    wat_file = NexusFile(file_content_as_list=file_contents.splitlines())
+    wat_file = NexusFile(location='', file_content_as_list=file_contents.splitlines())
     wat_obj = NexusWaterMethod(file=wat_file, input_number=1)
 
     # mock out open to return our test file contents

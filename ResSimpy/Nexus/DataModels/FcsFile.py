@@ -56,7 +56,7 @@ class FcsNexusFile(NexusFile):
     files_info: list[tuple[Optional[str], Optional[str], Optional[datetime]]]
 
     def __init__(
-            self, location: Optional[str] = None,
+            self, location: str,
             include_locations: Optional[list[str]] = None,
             origin: Optional[str] = None,
             include_objects: Optional[list[NexusFile]] = None,
@@ -259,94 +259,119 @@ class FcsNexusFile(NexusFile):
         return_dict = dict(single_keywords, **multi_keywords)
         return return_dict
 
-    def update_model_files(self, new_file_path: None | str = None, new_include_file_location: None | str = None,
-                           write_out_all_files: bool = False, preserve_file_names: bool = False,
-                           overwrite_include_files: bool = False) -> None:
-        """Updates all the modified files as well as the fcs file if a new file has been created.
+    def move_model_files(self, new_file_path: str, new_include_file_location: str) -> None:
+        """Moves all the model files to a new location.
 
         Args:
-            new_file_path (None | str): Defaults to None. If None overwrites the original file.
-            If string it will save the file in the path provided.
-            new_include_file_location (None | str): Defaults to None. If None saves in the same directory as the fcs \
-            file. Otherwise saves it to a path either absolute or relative to the file path provided.
-            write_out_all_files (bool): Defaults to False. If False writes out only changed files.
-            If False writes out all files.
-            preserve_file_names (bool): Defaults to False. If True will derive names from the existing fcs_file.
-            If False will derive new names from the new fcs file name and the property it represents in Nexus.
-            overwrite_include_files (bool): Defaults to False. If True will overwrite the included files.
+            new_file_path (str): new file path for the fcs file e.g. /new_path/new_fcs_file.fcs
+            new_include_file_location (str): new location for the included files either absolute or relative
+            to the new fcs file path
         """
         # Take the original file, find which files have changed and write out those locations
-
-        if new_file_path is not None:
-            file_location = new_file_path
-            new_fcs_name = os.path.basename(new_file_path).replace('.fcs', '')
-        else:
-            file_location = self.location if self.location is not None else 'new_fcs.fcs'
-            new_fcs_name = os.path.basename(file_location).replace('.fcs', '')
-
         # figure out where to store the include files:
-        # by default store it in the same directory as the new fcs file.
-        file_directory = os.path.dirname(file_location)
-        if new_include_file_location is not None:
-            file_directory = new_include_file_location
-        # Loop through all files in the model, writing out the contents if they have been modified.
+        file_directory = os.path.dirname(new_file_path)
+        include_dir = new_include_file_location
+        if not os.path.isabs(new_include_file_location):
+            include_dir = os.path.join(file_directory, new_include_file_location)
+
+        if not os.path.exists(include_dir):
+            # make the folders if they don't already exist
+            os.makedirs(include_dir)
+
+        # Loop through all files in the model, writing out the contents
         for keyword, attr_name in self.fcs_keyword_map_single().items():
             file: None | NexusFile = getattr(self, attr_name, None)
             if file is None:
                 # skip if there is no file
                 continue
-            self.write_out_included_file(file, attr_name, file_directory, keyword, new_fcs_name,
-                                         method_number=None, write_out_all_files=write_out_all_files,
-                                         preserve_file_names=preserve_file_names,
-                                         overwrite_file=overwrite_include_files)
+            include_name = os.path.join(include_dir, os.path.basename(file.location))
+            file.write_to_file(include_name, write_includes=True, write_out_all_files=True)
+            self.change_file_path(include_name, keyword)
 
         for keyword, attr_name in self.fcs_keyword_map_multi().items():
             file_dict: None | dict[int, NexusFile] = getattr(self, attr_name, None)
             if file_dict is None or len(file_dict) == 0:
                 continue
             for method_number, file in file_dict.items():
-                self.write_out_included_file(file, attr_name, file_directory, keyword, new_fcs_name, method_number,
-                                             write_out_all_files, preserve_file_names,
-                                             overwrite_file=overwrite_include_files)
+                include_name = os.path.join(include_dir, os.path.basename(file.location))
+                file.write_to_file(include_name, write_includes=True, write_out_all_files=True)
+                self.change_file_path(include_name, keyword, method_number)
 
         # write out the final fcs file
-        self.write_to_file(file_location, write_includes=False)
+        self.write_to_file(new_file_path, write_includes=False)
 
-    def write_out_included_file(self, file: NexusFile, attr_name: str, file_directory: str, keyword: str,
-                                new_fcs_name: str, method_number: None | int = None, write_out_all_files: bool = False,
-                                preserve_file_names: bool = False, overwrite_file: bool = False) -> None:
-        """Writes out the included file and prepares to switch out the path in the fcs file.
+    def write_out_case(self, new_file_path: str, new_include_file_location: str, case_suffix: str) -> None:
+        """Writes out a new simulator with only modified files. For use with creating multiple cases from a base case.
 
         Args:
-            file (NexusFile): file to write out
-            attr_name (str): attribute name of the method to be replaced
-            file_directory (str): path to directory the file should be stored in
-            keyword (str): Nexus keyword for the type of method.
-            new_fcs_name (str): new file name for the fcs
-            method_number (None | int): method number to include in the file name (defaults to None)
-            preserve_file_names (bool): Defaults to False. If True will derive names from the existing fcs_file.
-            If False will derive new names from the new fcs file name and the property it represents in Nexus.
-            overwrite_file (bool): Defaults to False. If True will overwrite the file.
+            new_file_path (str): new file path for the fcs file e.g. /new_path/new_fcs_file.fcs
+            new_include_file_location (str): new location for the included files either absolute or relative
+            to the new fcs file path
+            case_suffix (str): suffix to append to the end of the file name e.g. case_1
         """
-        if not file.file_modified and not write_out_all_files:
-            return
-            # write the modified files out
-        if method_number is not None:
-            attr_name += f'_{str(method_number)}'
-            attr_name = attr_name.replace('files', 'method')
-        if overwrite_file and file.location is not None:
-            file_path_to_write_to = file.location
-        elif preserve_file_names and file.location is not None:
-            new_file_name = os.path.basename(file.location)
-            file_path_to_write_to = os.path.join(file_directory, new_file_name)
-        else:
-            new_file_name = f"{new_fcs_name}_{attr_name}.dat"
-            file_path_to_write_to = os.path.join(file_directory, new_file_name)
+        def new_include_file_name(file_name: str) -> str:
+            """Returns the new include file name based on the original file name plus the suffix provided."""
+            file_name = os.path.basename(file_name)
+            file_name, file_extension = os.path.splitext(file_name)
+            file_name = f'{file_name}_{case_suffix}{file_extension}'
+            return os.path.join(new_include_file_location, file_name)
 
-        file.write_to_file(file_path_to_write_to, write_includes=True, write_out_all_files=write_out_all_files)
-        # update them in the fcs file_as_list
-        fcs_changed = self.change_file_path(file_path_to_write_to, keyword, method_number)
-        self._file_modified_set(fcs_changed)
+        file_directory = os.path.dirname(new_file_path)
+        include_dir = new_include_file_location
+        if not os.path.isabs(new_include_file_location):
+            include_dir = os.path.join(file_directory, new_include_file_location)
+
+        if not os.path.exists(include_dir):
+            # make the folders if they don't already exist
+            os.makedirs(include_dir)
+
+        # Loop through all files in the model, writing out the contents
+        for keyword, attr_name in self.fcs_keyword_map_single().items():
+            file: None | NexusFile = getattr(self, attr_name, None)
+            if file is None:
+                # skip if there is no file
+                continue
+            include_write_name = file.location
+            if file.file_modified:
+                include_write_name = new_include_file_name(file.location)
+                file.write_to_file(include_write_name, write_includes=True, write_out_all_files=False)
+            self.change_file_path(include_write_name, keyword)
+
+        for keyword, attr_name in self.fcs_keyword_map_multi().items():
+            file_dict: None | dict[int, NexusFile] = getattr(self, attr_name, None)
+            if file_dict is None or len(file_dict) == 0:
+                continue
+            for method_number, file in file_dict.items():
+                include_write_name = file.location
+                if file.file_modified:
+                    include_write_name = new_include_file_name(file.location)
+                    file.write_to_file(include_write_name, write_includes=True, write_out_all_files=False)
+                self.change_file_path(include_write_name, keyword, method_number)
+        self.write_to_file(new_file_path, write_includes=False)
+
+    def update_model_files(self) -> None:
+        """Updates all the modified files and the fcs in the model. Keeps file names and paths the same.
+        Warning: this method overwrites the existing files!
+        """
+        # Loop through all files in the model, writing out the contents if they have been modified.
+        for keyword, attr_name in self.fcs_keyword_map_single().items():
+            file: None | NexusFile = getattr(self, attr_name, None)
+            if file is None:
+                # skip if there is no file
+                continue
+            if file.file_modified:
+                file.write_to_file(write_includes=True, write_out_all_files=False, overwrite_file=True)
+
+        for keyword, attr_name in self.fcs_keyword_map_multi().items():
+            file_dict: None | dict[int, NexusFile] = getattr(self, attr_name, None)
+            if file_dict is None or len(file_dict) == 0:
+                continue
+            for method_number, file in file_dict.items():
+                if file.file_modified:
+                    file.write_to_file(write_includes=True, write_out_all_files=False, overwrite_file=True)
+
+        # write out the final fcs file
+        self.write_to_file(self.location, write_includes=False, overwrite_file=True)
 
     def change_file_path(self, new_file_path: str, token: str, method_number: int | None = None) -> bool:
         """Switch the file path for a new file_path based on the value of the associated keyword in the fcs.
@@ -379,4 +404,5 @@ class FcsNexusFile(NexusFile):
                 raise ValueError(f'No content found within {file_to_edit.location}')
             file_to_edit.file_content_as_list[index_to_mod] = line.replace(path_to_replace, new_file_path)
             file_changed = True
+            self._file_modified_set(file_changed)
         return file_changed

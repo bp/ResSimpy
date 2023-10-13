@@ -16,13 +16,12 @@ class File(FileBase):
         file_content_as_list (list[str]): List of lines in the file
     """
 
-    location: Optional[str] = None
+    location: str
     file_content_as_list: Optional[list[str]] = field(default=None, repr=False)
     __id: UUID = field(default_factory=lambda: uuid4(), compare=False)
     __file_modified: bool = False
 
-    def __init__(self, location: Optional[str] = None,
-                 file_content_as_list: Optional[list[str]] = None) -> None:
+    def __init__(self, location: str, file_content_as_list: Optional[list[str]] = None) -> None:
 
         self.location = location
         if file_content_as_list is None:
