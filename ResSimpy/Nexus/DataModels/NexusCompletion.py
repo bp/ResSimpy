@@ -17,7 +17,7 @@ else:
 
 from ResSimpy.Completion import Completion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
-from ResSimpy.Utils.generic_repr import generic_repr
+from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Utils.to_dict_generic import to_dict
 
 
@@ -122,6 +122,9 @@ class NexusCompletion(Completion):
 
     def __repr__(self) -> str:
         return generic_repr(self)
+
+    def __str__(self) -> str:
+        return generic_str(self)
 
     @property
     def measured_depth(self):

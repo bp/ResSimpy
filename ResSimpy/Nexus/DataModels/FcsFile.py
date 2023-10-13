@@ -19,7 +19,7 @@ from ResSimpy.Utils.factory_methods import get_empty_dict_int_nexus_file, get_em
     get_empty_list_nexus_file
 from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
 import ResSimpy.Nexus.nexus_file_operations as nfo
-from ResSimpy.Utils.generic_repr import generic_repr
+from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from datetime import datetime
 
 
@@ -124,6 +124,9 @@ class FcsNexusFile(NexusFile):
 
     def __repr__(self) -> str:
         return generic_repr(self)
+
+    def __str__(self) -> str:
+        return generic_str(self)
 
     @classmethod
     def generate_fcs_structure(cls, fcs_file_path: str, recursive: bool = True) -> Self:

@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Target import Target
-from ResSimpy.Utils.generic_repr import generic_repr
+from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 
 
 @dataclass(kw_only=True)
@@ -17,6 +17,9 @@ class NexusTarget(Target):
 
     def __repr__(self) -> str:
         return generic_repr(self)
+
+    def __str__(self) -> str:
+        return generic_str(self)
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
