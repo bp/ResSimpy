@@ -17,7 +17,6 @@ else:
 
 from ResSimpy.Completion import Completion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
-from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Utils.to_dict_generic import to_dict
 
 
@@ -119,12 +118,6 @@ class NexusCompletion(Completion):
                          depth_to_bottom=depth_to_bottom, perm_thickness_ovr=perm_thickness_ovr, dfactor=dfactor,
                          rel_perm_method=rel_perm_method, status=status, date_format=date_format, start_date=start_date,
                          unit_system=unit_system)
-
-    def __repr__(self) -> str:
-        return generic_repr(self)
-
-    def __str__(self) -> str:
-        return generic_str(self)
 
     @property
     def measured_depth(self):
