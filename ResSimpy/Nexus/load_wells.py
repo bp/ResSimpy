@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Optional
+from typing import Optional, Sequence
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -13,14 +13,14 @@ from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
 
 
 def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem,
-               date_format: DateFormat) -> list[NexusWell]:
+               model_date_format: DateFormat) -> tuple[Sequence[NexusWell], DateFormat]:
     """Loads a list of Nexus Well instances and populates it with the wells completions over time from a wells file.
 
     Args:
         nexus_file (NexusFile): NexusFile containing the wellspec files.
         start_date (str): starting date of the wellspec file as a string.
         default_units (UnitSystem): default units to use if no units are found.
-        date_format (DateFormat): Date format specified in the FCS file.
+        model_date_format (DateFormat): Date format specified in the FCS file.
 
     Raises:
         ValueError: If no value is found after a TIME card.
@@ -28,9 +28,11 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
         ValueError: If no valid wells are found in the wellspec file.
 
     Returns:
-        list[NexusWell]: list of Nexus well classes contained within a wellspec file.
+        A tuple containing:
+        Sequence[NexusWell]: list of Nexus well classes contained within a wellspec file.
+        DateFormat: The date format found in the wellspec file if present, otherwise just the model date format.
     """
-
+    date_format = model_date_format
     file_as_list = nexus_file.get_flat_list_str_file
     well_name: Optional[str] = None
     wellspec_file_units: Optional[UnitSystem] = None
@@ -136,6 +138,25 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
                 if unit.value in uppercase_line and (line.find('!') > line.find(unit.value) or line.find('!') == -1):
                     wellspec_file_units = unit
 
+        if nfo.check_token('DATEFORMAT', line):
+            new_date_format_str = nfo.get_token_value(token='DATEFORMAT', token_line=line, file_list=file_as_list)
+
+            if new_date_format_str is None:
+                raise ValueError(f"Cannot find the date format associated with the DATEFORMAT card in {line=} at line"
+                                 f" number {index}")
+
+            model_date_format_str = model_date_format.name.replace('_', '/')
+            if new_date_format_str != model_date_format_str:
+                warnings.warn(f"Wells date format of {new_date_format_str} inconsistent with base model format of "
+                              f"{model_date_format_str}")
+
+            converted_format_str = new_date_format_str.replace('/', '_')
+
+            if not hasattr(DateFormat, converted_format_str):
+                raise ValueError(f"Invalid Date Format found: '{new_date_format_str}' at line {index}")
+
+            date_format = DateFormat[converted_format_str]
+
         if nfo.check_token('TIME', line):
             current_date = nfo.get_token_value(token='TIME', token_line=line, file_list=file_as_list)
             if current_date is None:
@@ -179,7 +200,7 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
                 well_name_list.append(well_name)
                 wells.append(new_well)
             wellspec_found = False
-    return wells
+    return wells, date_format
 
 
 def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,

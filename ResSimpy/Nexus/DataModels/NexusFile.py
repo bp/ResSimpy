@@ -97,8 +97,8 @@ class NexusFile(File):
             owner: str = ''
             group: str = ''
             try:
-                owner = pathlib_path.owner()
-                group = pathlib_path.group()
+                owner = pathlib_path.owner()  # type: ignore
+                group = pathlib_path.group()  # type: ignore
             except NotImplementedError:
                 # owner or group not supported on this system, continue without filling out that information
                 pass
