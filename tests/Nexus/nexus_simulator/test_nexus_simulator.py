@@ -33,7 +33,7 @@ from tests.multifile_mocker import mock_multiple_files
 
 def mock_multiple_opens(mocker, filename, fcs_file_contents, run_control_contents, include_contents,
                         run_control_mock=None, include_file_mock=None, log_file_mock=None, structured_grid_mock=None,
-                        surface_1_mock=None, surface_2_mock=None):
+                        surface_1_mock=None, surface_2_mock=None, wellspec_mock=None):
     """Mock method that returns different test file contents depending upon the file name"""
     if "fcs" in filename:
         file_contents = fcs_file_contents
@@ -51,6 +51,8 @@ def mock_multiple_opens(mocker, filename, fcs_file_contents, run_control_content
         return log_file_mock
     elif "structured_grid" in filename:
         return structured_grid_mock
+    elif "wellspec" in filename:
+        return wellspec_mock
     else:
         raise FileNotFoundError(filename)
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -1047,7 +1049,7 @@ def test_get_all(mocker: MockerFixture, fixture_for_osstat_pathlib, fcs_file_con
                               unit_system=UnitSystem.ENGLISH)]
 
     # mock out the load_wells function as that is tested elsewhere
-    mock_load_wells = mocker.Mock(return_value=loaded_wells)
+    mock_load_wells = mocker.Mock(return_value=(loaded_wells, ''))
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
 
     # NB file_content_as_list needs to be set as below due to the mocker open re-reading fcs contents
@@ -1064,7 +1066,7 @@ def test_get_all(mocker: MockerFixture, fixture_for_osstat_pathlib, fcs_file_con
     assert result == loaded_wells
     mock_load_wells.assert_called_once_with(nexus_file=expected_well_file,
                                             default_units=UnitSystem.ENGLISH,
-                                            start_date='', date_format=DateFormat.MM_DD_YYYY)
+                                            start_date='', model_date_format=DateFormat.MM_DD_YYYY)
 
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
@@ -1085,7 +1087,7 @@ def test_get_wells_windows(mocker: MockerFixture, fixture_for_osstat_pathlib, fc
                               unit_system=UnitSystem.ENGLISH)]
 
     # mock out the load_wells function as that is tested elsewhere
-    mock_load_wells = mocker.Mock(return_value=loaded_wells)
+    mock_load_wells = mocker.Mock(return_value=(loaded_wells, ''))
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
 
     # NB file_content_as_list needs to be set as below due to the mocker open re-reading fcs contents
@@ -1102,7 +1104,7 @@ def test_get_wells_windows(mocker: MockerFixture, fixture_for_osstat_pathlib, fc
     assert result == loaded_wells
     mock_load_wells.assert_called_once_with(nexus_file=expected_well_file,
                                             default_units=UnitSystem.ENGLISH,
-                                            start_date='', date_format = DateFormat.MM_DD_YYYY)
+                                            start_date='', model_date_format = DateFormat.MM_DD_YYYY)
 
 
 def test_get_df(mocker: MockerFixture, fixture_for_osstat_pathlib):
@@ -1128,7 +1130,7 @@ def test_get_df(mocker: MockerFixture, fixture_for_osstat_pathlib):
     loaded_wells_df = loaded_wells_df.astype(
         {'well_radius': 'float64', 'i': 'int64', 'j': 'int64', 'k': 'int64'})
 
-    mock_load_wells = mocker.Mock(return_value=loaded_wells)
+    mock_load_wells = mocker.Mock(return_value=(loaded_wells, ''))
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
     simulation = NexusSimulator(origin='nexus_run.fcs')
     # Act
@@ -1160,7 +1162,7 @@ def test_get(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_p
                     ]
 
     # mock out the load_wells function as that is tested elsewhere
-    mock_load_wells = mocker.Mock(return_value=loaded_wells)
+    mock_load_wells = mocker.Mock(return_value=(loaded_wells, ''))
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
 
     # NB file_content_as_list needs to be set as below due to the mocker open re-reading fcs contents
@@ -1177,7 +1179,7 @@ def test_get(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_p
     assert result == loaded_wells[1]
     mock_load_wells.assert_called_once_with(nexus_file=expected_well_file,
                                             default_units=UnitSystem.ENGLISH,
-                                            start_date='', date_format = DateFormat.MM_DD_YYYY)
+                                            start_date='', model_date_format = DateFormat.MM_DD_YYYY)
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
        WelLS set 1 my\\wellspec\\file.dat
@@ -1200,7 +1202,7 @@ def test_get_well_windows(mocker: MockerFixture, fcs_file_contents: str, fixture
                     ]
 
     # mock out the load_wells function as that is tested elsewhere
-    mock_load_wells = mocker.Mock(return_value=loaded_wells)
+    mock_load_wells = mocker.Mock(return_value=(loaded_wells, ''))
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
 
     # NB file_content_as_list needs to be set as below due to the mocker open re-reading fcs contents
@@ -1217,7 +1219,7 @@ def test_get_well_windows(mocker: MockerFixture, fcs_file_contents: str, fixture
     assert result == loaded_wells[1]
     mock_load_wells.assert_called_once_with(nexus_file=expected_well_file,
                                             default_units=UnitSystem.ENGLISH,
-                                            start_date='', date_format = DateFormat.MM_DD_YYYY)
+                                            start_date='', model_date_format = DateFormat.MM_DD_YYYY)
 
 
 @pytest.mark.parametrize("fcs_file_contents", [

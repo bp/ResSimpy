@@ -7,6 +7,7 @@ from uuid import UUID
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Well import Well
 
 
@@ -159,7 +160,7 @@ class NexusWell(Well):
         raise ValueError('No completion found for id: {id}')
 
     def _add_completion_to_memory(self, date: str, completion_properties: dict[str, None | float | int | str],
-                                  completion_index: Optional[int] = None) -> NexusCompletion:
+                                  date_format: DateFormat, completion_index: Optional[int] = None) -> NexusCompletion:
         """Adds a perforation with the properties specified in completion_properties_list,
             if index is none then adds it to the end of the perforation list.
 
@@ -171,7 +172,7 @@ class NexusWell(Well):
         """
         completion_properties['date'] = date
         completion_properties['unit_system'] = self.unit_system
-        new_completion = NexusCompletion.from_dict(completion_properties)
+        new_completion = NexusCompletion.from_dict(completion_properties, date_format)
         if completion_index is None:
             completion_index = len(self.__completions)
         self.__completions.insert(completion_index, new_completion)
