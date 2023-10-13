@@ -109,8 +109,6 @@ def test_generic_repr_str(mocker):
     assert str(class_inst) == expected_str
 
 
-
-
 def test_invert_nexus_map():
     # Arrange
     @dataclass

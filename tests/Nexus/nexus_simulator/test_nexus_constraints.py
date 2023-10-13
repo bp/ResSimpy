@@ -339,13 +339,18 @@ def test_constraint_ids(mocker, fixture_for_osstat_pathlib, file_contents, objec
 
 def test_nexus_constraint_repr(mocker):
     # Arrange
-    constraint = NexusConstraint({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0})
-    # patch the uuid to make the test deterministic
-    expected_repr = ("NexusConstraint(date='01/01/2019', name='well1', max_surface_liquid_rate=3884.0, max_surface_water_rate=0)")
+    # patch the uuid
+    mocker.patch('uuid.uuid4', return_value='uuid1')
+    constraint = NexusConstraint({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0,
+                                  'max_surface_water_rate': 0})
+    expected_repr = ("NexusConstraint(_DataObjectMixin__id='uuid1', date='01/01/2019', name='well1', max_surface_liquid_rate=3884.0, "
+                     "max_surface_water_rate=0)")
+    expected_str = ("NexusConstraint(date='01/01/2019', name='well1', max_surface_liquid_rate=3884.0, "
+                     "max_surface_water_rate=0)")
     # Act
     repr_result = constraint.__repr__()
     str_result = constraint.__str__()
 
     # Assert
     assert repr_result == expected_repr
-    assert str_result == expected_repr
+    assert str_result == expected_str
