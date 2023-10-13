@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Utils import to_dict_generic
-from ResSimpy.Utils.generic_repr import generic_repr
+from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Utils.obj_to_table_string import to_table_line
 
 
@@ -65,6 +65,9 @@ class DataObjectMixin(ABC):
 
     def __repr__(self) -> str:
         return generic_repr(self)
+
+    def __str__(self) -> str:
+        return generic_str(self)
 
     @property
     @abstractmethod

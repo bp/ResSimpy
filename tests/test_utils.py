@@ -7,7 +7,7 @@ import pytest
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Utils import to_dict_generic
-from ResSimpy.Utils.generic_repr import generic_repr
+from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Utils.invert_nexus_map import invert_nexus_map, attribute_name_to_nexus_keyword, \
     nexus_keyword_to_attribute_name
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
@@ -41,11 +41,15 @@ class GenericTest:
     def __repr__(self):
         return generic_repr(self)
 
+    def __str__(self):
+        return generic_str(self)
+
 def test_to_dict():
     # Arrange
     class_inst = GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=UnitSystem.METRIC,
                              date='01/01/2030')
-    expected = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'attr_4': None, 'unit_system': 'METRIC', 'date': '01/01/2030'}
+    expected = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'attr_4': None, 'unit_system': 'METRIC',
+                'date': '01/01/2030'}
     expected_no_date_no_units = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'attr_4': None, }
     expected_nexus_style = {
         'ATTR_1': 'hello', 'ATTR_2': 10, 'ATTR_3': 43020.2, 'unit_system': 'METRIC',
@@ -89,17 +93,22 @@ def test_obj_to_dataframe():
     pd.testing.assert_frame_equal(result, expected_df, check_like=True)
 
 
-def test_generic_repr(mocker):
+def test_generic_repr_str(mocker):
     # Arrange
     mocker.patch('uuid.uuid4', return_value='uuid1')
     class_inst = GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=UnitSystem.METRIC, date='01/01/2030',
                              attr_4='world')
     # mock out id
 
-    expected = ("GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=<UnitSystem.METRIC: 'METRIC'>, "
-                "date='01/01/2030', attr_4='world')")
+    expected_repr = ("GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=<UnitSystem.METRIC: 'METRIC'>, "
+                     "date='01/01/2030', attr_4='world', _GenericTest__id='uuid1')")
+    expected_str = ("GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=<UnitSystem.METRIC: 'METRIC'>, "
+                     "date='01/01/2030', attr_4='world')")
     # Act Assert
-    assert repr(class_inst) == expected
+    assert repr(class_inst) == expected_repr
+    assert str(class_inst) == expected_str
+
+
 
 
 def test_invert_nexus_map():
