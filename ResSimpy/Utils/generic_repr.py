@@ -20,7 +20,7 @@ def generic_repr(input_class: Any) -> str:
 
 
 def generic_str(input_class: Any) -> str:
-    """Creates a string representation of the object while removing None and id's from the string.
+    """Creates a string representation of the object while removing None and ids from the string.
 
     Args:
         input_class (Any): a class with attributes to summarise
