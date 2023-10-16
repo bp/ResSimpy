@@ -1,3 +1,4 @@
+"""This module contains the abstract base class for a collection of equilibration inputs."""
 from dataclasses import dataclass
 from abc import ABC
 

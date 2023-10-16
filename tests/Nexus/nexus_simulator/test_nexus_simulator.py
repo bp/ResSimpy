@@ -33,7 +33,7 @@ from tests.multifile_mocker import mock_multiple_files
 
 def mock_multiple_opens(mocker, filename, fcs_file_contents, run_control_contents, include_contents,
                         run_control_mock=None, include_file_mock=None, log_file_mock=None, structured_grid_mock=None,
-                        surface_1_mock=None, surface_2_mock=None):
+                        surface_1_mock=None, surface_2_mock=None, wellspec_mock=None):
     """Mock method that returns different test file contents depending upon the file name"""
     if "fcs" in filename:
         file_contents = fcs_file_contents
@@ -51,6 +51,8 @@ def mock_multiple_opens(mocker, filename, fcs_file_contents, run_control_content
         return log_file_mock
     elif "structured_grid" in filename:
         return structured_grid_mock
+    elif "wellspec" in filename:
+        return wellspec_mock
     else:
         raise FileNotFoundError(filename)
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -1039,15 +1041,15 @@ def test_get_all(mocker: MockerFixture, fixture_for_osstat_pathlib, fcs_file_con
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
     mocker.patch("builtins.open", fcs_file_open)
 
-    loaded_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid=None, skin=None,
-                                          angle_v=None)
-    loaded_completion_2 = NexusCompletion(
-        i=6, j=7, k=8, well_radius=9.11, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY)
+    loaded_completion_1 = NexusCompletion(date='01/01/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None,
+                                          grid=None, date_format=DateFormat.DD_MM_YYYY)
+    loaded_completion_2 = NexusCompletion(date='01/01/2023', i=6, j=7, k=8, well_radius=9.11,
+                                          date_format=DateFormat.DD_MM_YYYY)
     loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
-                              units=UnitSystem.ENGLISH)]
+                              unit_system=UnitSystem.ENGLISH)]
 
     # mock out the load_wells function as that is tested elsewhere
-    mock_load_wells = mocker.Mock(return_value=loaded_wells)
+    mock_load_wells = mocker.Mock(return_value=(loaded_wells, ''))
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
 
     # NB file_content_as_list needs to be set as below due to the mocker open re-reading fcs contents
@@ -1064,7 +1066,7 @@ def test_get_all(mocker: MockerFixture, fixture_for_osstat_pathlib, fcs_file_con
     assert result == loaded_wells
     mock_load_wells.assert_called_once_with(nexus_file=expected_well_file,
                                             default_units=UnitSystem.ENGLISH,
-                                            start_date='', date_format=DateFormat.MM_DD_YYYY)
+                                            start_date='', model_date_format=DateFormat.MM_DD_YYYY)
 
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
@@ -1077,15 +1079,15 @@ def test_get_wells_windows(mocker: MockerFixture, fixture_for_osstat_pathlib, fc
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
     mocker.patch("builtins.open", fcs_file_open)
 
-    loaded_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid=None, skin=None,
-                                          angle_v=None)
-    loaded_completion_2 = NexusCompletion(
-        i=6, j=7, k=8, well_radius=9.11, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY)
+    loaded_completion_1 = NexusCompletion(date='01/01/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None,
+                                          grid=None, date_format=DateFormat.DD_MM_YYYY)
+    loaded_completion_2 = NexusCompletion(date='01/01/2023', i=6, j=7, k=8, well_radius=9.11,
+                                          date_format=DateFormat.DD_MM_YYYY)
     loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
-                              units=UnitSystem.ENGLISH)]
+                              unit_system=UnitSystem.ENGLISH)]
 
     # mock out the load_wells function as that is tested elsewhere
-    mock_load_wells = mocker.Mock(return_value=loaded_wells)
+    mock_load_wells = mocker.Mock(return_value=(loaded_wells, ''))
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
 
     # NB file_content_as_list needs to be set as below due to the mocker open re-reading fcs contents
@@ -1102,7 +1104,7 @@ def test_get_wells_windows(mocker: MockerFixture, fixture_for_osstat_pathlib, fc
     assert result == loaded_wells
     mock_load_wells.assert_called_once_with(nexus_file=expected_well_file,
                                             default_units=UnitSystem.ENGLISH,
-                                            start_date='', date_format = DateFormat.MM_DD_YYYY)
+                                            start_date='', model_date_format = DateFormat.MM_DD_YYYY)
 
 
 def test_get_df(mocker: MockerFixture, fixture_for_osstat_pathlib):
@@ -1113,12 +1115,12 @@ def test_get_df(mocker: MockerFixture, fixture_for_osstat_pathlib):
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
     mocker.patch("builtins.open", fcs_file_open)
 
-    loaded_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid=None, skin=None,
-                                          angle_v=None)
-    loaded_completion_2 = NexusCompletion(
-        i=6, j=7, k=8, well_radius=9.11, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY)
+    loaded_completion_1 = NexusCompletion(date='01/01/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None,
+                                          grid=None, date_format=DateFormat.DD_MM_YYYY)
+    loaded_completion_2 = NexusCompletion(date='01/01/2023', i=6, j=7, k=8, well_radius=9.11,
+                                          date_format=DateFormat.DD_MM_YYYY)
     loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
-                              units=UnitSystem.ENGLISH)]
+                              unit_system=UnitSystem.ENGLISH)]
     # create the expected dataframe
     loaded_wells_txt = ['WELL1, ENGLISH, 4.5, 01/01/2023, 1, 2, 3',
                         'WELL1, ENGLISH, 9.11, 01/01/2023, 6, 7, 8', ]
@@ -1128,7 +1130,7 @@ def test_get_df(mocker: MockerFixture, fixture_for_osstat_pathlib):
     loaded_wells_df = loaded_wells_df.astype(
         {'well_radius': 'float64', 'i': 'int64', 'j': 'int64', 'k': 'int64'})
 
-    mock_load_wells = mocker.Mock(return_value=loaded_wells)
+    mock_load_wells = mocker.Mock(return_value=(loaded_wells, ''))
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
     simulation = NexusSimulator(origin='nexus_run.fcs')
     # Act
@@ -1149,18 +1151,18 @@ def test_get(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_p
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
     mocker.patch("builtins.open", fcs_file_open)
 
-    loaded_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY, grid=None, skin=None,
-                                          angle_v=None)
-    loaded_completion_2 = NexusCompletion(
-        i=6, j=7, k=8, well_radius=9.11, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY)
+    loaded_completion_1 = NexusCompletion(date='01/01/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None,
+                                          grid=None, date_format=DateFormat.DD_MM_YYYY)
+    loaded_completion_2 = NexusCompletion(date='01/01/2023', i=6, j=7, k=8, well_radius=9.11,
+                                          date_format=DateFormat.DD_MM_YYYY)
     loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
-                              units=UnitSystem.ENGLISH),
+                              unit_system=UnitSystem.ENGLISH),
                     NexusWell(well_name='WELL2', completions=[loaded_completion_1, loaded_completion_2],
-                              units=UnitSystem.ENGLISH)
+                              unit_system=UnitSystem.ENGLISH)
                     ]
 
     # mock out the load_wells function as that is tested elsewhere
-    mock_load_wells = mocker.Mock(return_value=loaded_wells)
+    mock_load_wells = mocker.Mock(return_value=(loaded_wells, ''))
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
 
     # NB file_content_as_list needs to be set as below due to the mocker open re-reading fcs contents
@@ -1177,7 +1179,7 @@ def test_get(mocker: MockerFixture, fcs_file_contents: str, fixture_for_osstat_p
     assert result == loaded_wells[1]
     mock_load_wells.assert_called_once_with(nexus_file=expected_well_file,
                                             default_units=UnitSystem.ENGLISH,
-                                            start_date='', date_format = DateFormat.MM_DD_YYYY)
+                                            start_date='', model_date_format = DateFormat.MM_DD_YYYY)
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
        WelLS set 1 my\\wellspec\\file.dat
@@ -1189,18 +1191,18 @@ def test_get_well_windows(mocker: MockerFixture, fcs_file_contents: str, fixture
     fcs_file_open = mocker.mock_open(read_data=fcs_file_contents)
     mocker.patch("builtins.open", fcs_file_open)
 
-    loaded_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2023', grid=None, skin=None,
-                                          angle_v=None, date_format=DateFormat.DD_MM_YYYY)
-    loaded_completion_2 = NexusCompletion(
-        i=6, j=7, k=8, well_radius=9.11, date='01/01/2023', date_format=DateFormat.DD_MM_YYYY)
+    loaded_completion_1 = NexusCompletion(date='01/01/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None,
+                                          grid=None, date_format=DateFormat.DD_MM_YYYY)
+    loaded_completion_2 = NexusCompletion(date='01/01/2023', i=6, j=7, k=8, well_radius=9.11,
+                                          date_format=DateFormat.DD_MM_YYYY)
     loaded_wells = [NexusWell(well_name='WELL1', completions=[loaded_completion_1, loaded_completion_2],
-                              units=UnitSystem.ENGLISH),
+                              unit_system=UnitSystem.ENGLISH),
                     NexusWell(well_name='WELL2', completions=[loaded_completion_1, loaded_completion_2],
-                              units=UnitSystem.ENGLISH)
+                              unit_system=UnitSystem.ENGLISH)
                     ]
 
     # mock out the load_wells function as that is tested elsewhere
-    mock_load_wells = mocker.Mock(return_value=loaded_wells)
+    mock_load_wells = mocker.Mock(return_value=(loaded_wells, ''))
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
 
     # NB file_content_as_list needs to be set as below due to the mocker open re-reading fcs contents
@@ -1217,7 +1219,7 @@ def test_get_well_windows(mocker: MockerFixture, fcs_file_contents: str, fixture
     assert result == loaded_wells[1]
     mock_load_wells.assert_called_once_with(nexus_file=expected_well_file,
                                             default_units=UnitSystem.ENGLISH,
-                                            start_date='', date_format = DateFormat.MM_DD_YYYY)
+                                            start_date='', model_date_format = DateFormat.MM_DD_YYYY)
 
 
 @pytest.mark.parametrize("fcs_file_contents", [
@@ -1715,9 +1717,9 @@ C          node1         NA        NA    80    100.5 200.8   1     station      
             'delta_depth': 7002.67, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
             {'name': 'cp01_gaslift', 'node_in': 'GAS', 'node_out': 'CP01', 'con_type': 'GASLIFT', 'hyd_method': None,
             'delta_depth': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-            {'name': 'R001', 'stream': 'PRODUCER', 'datum_depth': 10350.0, 'crossflow': 'OFF', 'crossshut_method': 'OFF',
+            {'name': 'R001', 'stream': 'PRODUCER', 'datum_depth': 10350.0, 'crossflow': 'OFF', 'crossshut': 'OFF',
             'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH},
-            {'name': 'R002', 'stream': 'PRODUCER', 'datum_depth': 10350.0, 'crossflow': 'ON', 'crossshut_method': 'OFF',
+            {'name': 'R002', 'stream': 'PRODUCER', 'datum_depth': 10350.0, 'crossflow': 'ON', 'crossshut': 'OFF',
              'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH},
 {'well': 'R001', 'name': 'tubing', 'depth': 50.2, 'wellhead_type': 'PIPE', 'hyd_method': 2, 'date': '01/03/2025', 'unit_system': UnitSystem.ENGLISH},
 {'well': 'R-0_02', 'name': 'TH-03', 'depth': 0, 'wellhead_type': 'PIPE', 'hyd_method': 1, 'date': '01/03/2025', 'unit_system': UnitSystem.ENGLISH},

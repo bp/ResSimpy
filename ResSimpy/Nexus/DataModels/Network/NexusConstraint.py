@@ -1,3 +1,4 @@
+"""This module contains the NexusConstraint class, which is used to represent a constraint in the Nexus model."""
 from __future__ import annotations
 
 import warnings

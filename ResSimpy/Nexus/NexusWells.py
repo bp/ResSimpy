@@ -1,3 +1,6 @@
+"""A class for collecting all NexusWell objects in a NexusSimulator. Handles adding and removing completions
+as well as rescheduling wells.
+"""
 from __future__ import annotations
 import warnings
 from dataclasses import dataclass, field
@@ -11,6 +14,7 @@ from ResSimpy.Enums.HowEnum import OperationEnum
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Wells import Wells
@@ -24,15 +28,26 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class NexusWells(Wells):
+    """A class for collecting all NexusWell objects in a NexusSimulator. Handles adding and removing completions
+    as well as rescheduling wells. This is usually accessed through the model.wells property.
+
+    Arguments:
+        model (Simulator): NexusSimulator object that has the instance of wells on.
+    """
     __model: NexusSimulator
-    __wells: list[NexusWell] = field(default_factory=list)
-    __wells_loaded: bool = False
+    _wells: list[NexusWell] = field(default_factory=list)
+    __date_format: DateFormat
 
     def __init__(self, model: NexusSimulator) -> None:
         self.__model = model
-        self.__wells = []
         self.__add_object_operations = AddObjectOperations(NexusCompletion, self.table_header, self.table_footer, model)
         super().__init__()
+
+    @property
+    def date_format(self) -> DateFormat:
+        if not self._wells_loaded:
+            self._load()
+        return self.__date_format
 
     @property
     def table_header(self) -> str:
@@ -43,30 +58,30 @@ class NexusWells(Wells):
         return ''
 
     def get_all(self) -> Sequence[NexusWell]:
-        if not self.__wells_loaded:
-            self.load()
-        return self.__wells
+        if not self._wells_loaded:
+            self._load()
+        return self._wells
 
     def get(self, well_name: str) -> Optional[NexusWell]:
         """Returns a specific well requested, or None if that well cannot be found."""
-        if not self.__wells_loaded:
-            self.load()
+        if not self._wells_loaded:
+            self._load()
 
-        wells_to_return = filter(lambda x: x.well_name.upper() == well_name.upper(), self.__wells)
+        wells_to_return = filter(lambda x: x.well_name.upper() == well_name.upper(), self._wells)
 
         return next(wells_to_return, None)
 
     def get_df(self) -> pd.DataFrame:
         # loop through wells and completions to output a table
-        if not self.__wells_loaded:
-            self.load()
+        if not self._wells_loaded:
+            self._load()
 
         store_dictionaries = []
-        for well in self.__wells:
+        for well in self._wells:
             for completion in well.completions:
                 completion_props: dict[str, None | float | int | str] = {
                     'well_name': well.well_name,
-                    'units': well.units.name,
+                    'units': well.unit_system.name,
                     }
                 completion_props.update(completion.to_dict())
                 store_dictionaries.append(completion_props)
@@ -74,35 +89,38 @@ class NexusWells(Wells):
         df_store = df_store.dropna(axis=1, how='all')
         return df_store
 
-    def load(self) -> None:
+    def _load(self) -> None:
         if self.__model.model_files.well_files is None:
             raise FileNotFoundError('No wells files found for current model.')
         for method_number, well_file in self.__model.model_files.well_files.items():
             if well_file.location is None:
                 warnings.warn(f'Well file location has not been found for {well_file}')
                 continue
-            new_wells = load_wells(nexus_file=well_file, start_date=self.__model.start_date,
-                                   default_units=self.__model.default_units, date_format=self.__model.date_format)
-            self.__wells += new_wells
-        self.__wells_loaded = True
+            new_wells, date_format = load_wells(nexus_file=well_file, start_date=self.__model.start_date,
+                                                default_units=self.__model.default_units,
+                                                model_date_format=self.__model.date_format)
+
+            self._wells += new_wells
+            self.__date_format = date_format
+        self._wells_loaded = True
 
     def get_wells_overview(self) -> str:
-        if not self.__wells_loaded:
-            self.load()
+        if not self._wells_loaded:
+            self._load()
 
         overview: str = ''
-        for well in self.__wells:
+        for well in self._wells:
             overview += well.printable_well_info
 
         return overview
 
     def get_wells_dates(self) -> set[str]:
         """Returns a set of the unique dates in the wellspec file over all wells."""
-        if not self.__wells_loaded:
-            self.load()
+        if not self._wells_loaded:
+            self._load()
 
         set_dates: set[str] = set()
-        for well in self.__wells:
+        for well in self._wells:
             set_dates.update(set(well.dates_of_completions))
 
         return set_dates
@@ -168,7 +186,9 @@ class NexusWells(Wells):
         well_id = well.completions[0].id
 
         # add completion in memory
-        new_completion = well._add_completion_to_memory(completion_date, completion_properties)
+        new_completion = well._add_completion_to_memory(date=completion_date,
+                                                        completion_properties=completion_properties,
+                                                        date_format=self.date_format)
 
         if self.__model.model_files.well_files is None:
             raise FileNotFoundError('No well file found, cannot modify ')

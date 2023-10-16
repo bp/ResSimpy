@@ -4,13 +4,16 @@ from abc import ABC
 from dataclasses import dataclass, field
 from typing import Optional
 from ResSimpy.DataObjectMixin import DataObjectMixin
-from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBase
-from ResSimpy.Units.AttributeMappings.NetworkUnitAttributeMapping import NetworkUnits
+from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Units.AttributeMappings.NetworkUnitMapping import NetworkUnits
 
 
-@dataclass
+@dataclass(repr=False)
 class Target(DataObjectMixin, ABC):
     name: Optional[str] = None
+    date: Optional[str] = None
+    unit_system: Optional[UnitSystem] = None
+
     control_quantity: Optional[str] = None
     control_conditions: Optional[str] = None
     control_connections: Optional[str] = None
@@ -32,6 +35,6 @@ class Target(DataObjectMixin, ABC):
     __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False)
 
     @property
-    def attribute_to_unit_map(self) -> AttributeMapBase:
+    def units(self) -> NetworkUnits:
         """Returns the attribute to unit map for the WellConnection."""
-        return NetworkUnits()
+        return NetworkUnits(self.unit_system)

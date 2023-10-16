@@ -1,6 +1,6 @@
 import os
 import uuid
-import warnings
+from unittest.mock import MagicMock
 
 import pytest
 from pytest_mock import MockerFixture
@@ -430,7 +430,7 @@ def test_file_object_locations(mocker, fixture_for_osstat_pathlib, test_file_con
     wells_file = NexusFile.generate_file_include_structure(file_path='wells.dat', skip_arrays=True, )
 
     # Act
-    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH, date_format=DateFormat.DD_MM_YYYY)
+    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH, model_date_format=DateFormat.DD_MM_YYYY)
     result = wells_file.object_locations
 
     # Assert
@@ -752,7 +752,7 @@ def test_update_object_locations(mocker, fixture_for_osstat_pathlib, test_file_c
 
     wells_file = NexusFile.generate_file_include_structure(file_path='wells.dat', skip_arrays=True, )
     # load the uuids
-    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH, date_format=DateFormat.DD_MM_YYYY)
+    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH, model_date_format=DateFormat.DD_MM_YYYY)
 
     # Act
     # effectively add 2 lines at location 5
@@ -889,6 +889,14 @@ def test_write_to_file(mocker, fixture_for_osstat_pathlib):
 
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
+
+    # Mock out the file exists
+    file_exists_mock = MagicMock(side_effect=lambda x: False)
+    mocker.patch('os.path.exists', file_exists_mock)
+
+    # mock out makedirs
+    makedirs_mock = MagicMock()
+    mocker.patch('os.makedirs', makedirs_mock)
     # Act
     nexus_file.write_to_file(new_file_path, write_includes=True, write_out_all_files=True)
     # Assert
@@ -922,6 +930,17 @@ def test_write_to_file_only_modified(mocker, fixture_for_osstat_pathlib):
     nexus_file.include_objects[0]._file_modified_set(True)
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
+    # mock out makedirs
+    makedirs_mock = MagicMock()
+    mocker.patch('os.makedirs', makedirs_mock)
+    # Mock out the file exists
+    file_exists_mock = MagicMock(side_effect=lambda x: False)
+    mocker.patch('os.path.exists', file_exists_mock)
+
+    # mock out makedirs
+    makedirs_mock = MagicMock()
+    mocker.patch('os.makedirs', makedirs_mock)
+
     # Act
     nexus_file.write_to_file(new_file_path, write_includes=True, write_out_all_files=False)
     # Assert
@@ -932,19 +951,20 @@ def test_write_to_file_only_modified(mocker, fixture_for_osstat_pathlib):
     assert list_of_writes[-1].args[0] == expected_file_content
 
 
-@pytest.mark.parametrize('location, file_as_list, error', [
-    (None, None, 'No file path to write to'),
-    ('path/file.dat', None, 'No file data to write out'),
-], ids=['nothing', 'no file as list',])
-def test_write_to_file_exit_points(mocker, fixture_for_osstat_pathlib, location, file_as_list, error):
+@pytest.mark.parametrize('location, file_as_list, overwrite_file, expected_error', [
+    ('path/file.dat', None, True, 'No file data to write out, instead found None'),
+    (None, ['file_content'], False, 'No file path to write to, and overwrite_file set to False'),
+], ids=['no file as list', 'no overwrite'])
+def test_write_to_file_exit_points(mocker, fixture_for_osstat_pathlib, location, file_as_list, overwrite_file,
+                                   expected_error):
     # Arrange
     empty_file = NexusFile(location=location, file_content_as_list=file_as_list)
     if file_as_list is None:
         empty_file.file_content_as_list = None
     # Act Assert
     with pytest.raises(ValueError) as ve:
-        empty_file.write_to_file()
-    assert error in str(ve.value)
+        empty_file.write_to_file(overwrite_file=overwrite_file)
+    assert str(ve.value) == expected_error
 
 
 @pytest.mark.parametrize('location, file_as_list, include_locations, error', [
@@ -968,11 +988,12 @@ def test_write_to_file_failure(mocker, fixture_for_osstat_pathlib):
     file = NexusFile(location='somefile.dat', origin=None, file_content_as_list=[file_content])
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
+    mocker.patch('os.path.exists', MagicMock(return_value=True))
     # Act
     with pytest.raises(ValueError) as ve:
         file.write_to_file(new_file_path='new_somefile.dat', write_includes=True, write_out_all_files=True,
-                           overwrite_file=True)
-    assert str(ve.value) == f'Cannot overwrite file with a new file path provided at new_somefile.dat'
+                           overwrite_file=False)
+    assert str(ve.value) == 'File already exists at new_somefile.dat and overwrite_file set to False'
 
 
 def test_missing_file(mocker, fixture_for_osstat_pathlib):

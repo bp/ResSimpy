@@ -1,3 +1,4 @@
+"""The Nexus Simulator class is the main class for interacting with Nexus models."""
 from __future__ import annotations
 
 import os
@@ -73,6 +74,13 @@ class NexusSimulator(Simulator):
 
         Raises:
             ValueError: If the FCS file path is not given
+
+        Examples:
+            Example of calling a NexusSimulator with a file path to an fcs file:
+
+            >>> from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+            >>> model = NexusSimulator(origin="/path/to/fcs_file.fcs")
+
         """
         if origin is None:
             raise ValueError(f'Origin path to model fcs file is required. Instead got {origin}.')
@@ -675,31 +683,35 @@ class NexusSimulator(Simulator):
         """Populates nodes and connections from a surface file."""
         self._network.load()
 
-    def write_out_new_simulator(self, new_file_path: str, new_include_file_location: str,
-                                write_out_all_files: bool = True, preserve_file_names: bool = True) -> None:
-        """Creates a set of simulator files.
+    def write_out_case(self, new_file_path: str, new_include_file_location: str = 'include_files',
+                       case_suffix: str = '') -> None:
+        """Creates a new case of a simulator run by writing out the modified include files to a new file.
 
         Args:
             new_file_path (str): Path to save the new simulator to.
             new_include_file_location (str): Saves included files to a path either absolute or relative to the
             file path provided.
-            write_out_all_files (bool): Defaults to False. If False writes out only changed files.
-            preserve_file_names (bool): Defaults to False. If True will derive names from the existing fcs_file.
-            If False will derive new names from the new fcs file name and the property it represents in Nexus.
+            case_suffix (str): Suffix to append to the case name. Defaults to ''.
         """
 
-        self.model_files.update_model_files(new_file_path=new_file_path,
-                                            new_include_file_location=new_include_file_location,
-                                            write_out_all_files=write_out_all_files,
-                                            preserve_file_names=preserve_file_names,
-                                            overwrite_include_files=False)
+        self.model_files.write_out_case(new_file_path=new_file_path,
+                                        new_include_file_location=new_include_file_location,
+                                        case_suffix=case_suffix)
 
     def update_simulator_files(self) -> None:
         """Updates the simulator with any changes to the included files. Overwrites existing files.
         IMPORTANT: No changes to the model will be saved until this method is called!
         """
 
-        self.model_files.update_model_files(new_file_path=None, new_include_file_location=None,
+        self.model_files.update_model_files()
 
-                                            write_out_all_files=False, preserve_file_names=True,
-                                            overwrite_include_files=True)
+    def move_simulator_files(self, new_file_path: str, new_include_file_location: str) -> None:
+        """Creates a set of simulator files.
+
+        Args:
+            new_file_path (str): Path to save the new simulator to.
+            new_include_file_location (str): Saves included files to a path either absolute or relative to the
+            file path provided.
+        """
+
+        self.model_files.move_model_files(new_file_path, new_include_file_location)

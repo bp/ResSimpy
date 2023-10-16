@@ -439,12 +439,22 @@ class Diameter(UnitDimension):
 
 class HeatTransfer(UnitDimension):
     """Heat transfer units."""
-    english = 'BTU/(hr*ft²*F)'
+    english = 'BTU/(hr*ft2*F)'
     metric = 'W/(m2*K)'
     metkgcm2 = 'W/(m2*K)'
     metbar = 'W/(m2*K)'
     lab = 'W/(cm2*K)'
     metric_atm = 'W/(m2*K)'
+
+
+class Conductivity(UnitDimension):
+    """Conductivity units."""
+    english = 'BTU/(hr*ft*F)'
+    metric = 'W/(m*K)'
+    metkgcm2 = 'W/(m*K)'
+    metbar = 'W/(m*K)'
+    lab = 'W/(cm*K)'
+    metric_atm = 'W/(m*K)'
 
 
 class Dimensionless(UnitDimension):
@@ -475,3 +485,13 @@ class NonDarcySkin(UnitDimension):
     metbar = 'day/SM3'
     lab = 'hour/stcc'
     metric_atm = 'day/SM3'
+
+
+class ProductivityIndex(UnitDimension):
+    """Productivity index units."""
+    english = 'STB/day/psi'
+    metric = 'STM3/day/kPa'
+    metkgcm2 = 'STM3/day/kg/cm2'
+    metbar = 'STM3/day/bars'
+    lab = 'stcc/hour/psi'
+    metric_atm = 'STM3/day/atm'

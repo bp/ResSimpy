@@ -214,17 +214,17 @@ def test_get_node_df(mocker, fixture_for_osstat_pathlib, file_contents, node1_pr
     {'name': 'cp01_gaslift', 'node_in': 'GAS', 'node_out': 'CP01', 'con_type': 'GASLIFT', 'hyd_method': None,
     'delta_depth': None, 'date': '01/03/2023', 'unit_system': UnitSystem.ENGLISH},),
 ('''NODECON
-  NAME    NODEIN        NODEOUT       TYPE      METHOD    IPVT  ELEVPR   MDIN     MDOUT DIAM  ROUGHNESS    HTC  TEMPPR
-  CP01   dccfr1        pseudo_prd_1  PIPE      HAG_BEG     NA  R0302E04 NA        NA   9.500    0.0476  8.000  prtempr
-  prd_2   pseudo_prd_1  pseudo_prd_2  PIPE      HAG_BEG     NA  R0308E03 NA        NA   9.130    0.0018  8.000  prtempr
-!prd_3   prd_3         prd_3         PIPE      HAG_BEG     NA  R0308E03 NA        NA   9.130    0.0018  8.000  prtempr
+  NAME    NODEIN        NODEOUT       TYPE      METHOD    IPVT  ELEVPR   MDIN     MDOUT DIAM  ROUGHNESS    HTC  TEMPPR    TEMPIN  TEMPOUT
+  CP01   dccfr1        pseudo_prd_1  PIPE      HAG_BEG     NA  R0302E04 NA        NA   9.500    0.0476  8.000  prtempr    100.3     300
+  prd_2   pseudo_prd_1  pseudo_prd_2  PIPE      HAG_BEG     NA  R0308E03 NA        NA   9.130    0.0018  8.000  prtempr   100     10.3
+!prd_3   prd_3         prd_3         PIPE      HAG_BEG     NA  R0308E03 NA        NA   9.130    0.0018  8.000  prtempr    200     NA
   ENDNODECON''',
     {'name': 'CP01', 'node_in': 'dccfr1', 'node_out': 'pseudo_prd_1', 'con_type': 'PIPE', 'hyd_method': 'HAG_BEG',
     'elevation_profile': 'R0302E04','diameter': 9.500, 'roughness':0.0476, 'heat_transfer_coeff': 8.000,
-    'temperature_profile': 'prtempr', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+    'temperature_profile': 'prtempr', 'temperature_in': 100.3, 'temperature_out': 300, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
     {'name': 'prd_2', 'node_in': 'pseudo_prd_1', 'node_out': 'pseudo_prd_2', 'con_type': 'PIPE', 'hyd_method': 'HAG_BEG',
     'elevation_profile': 'R0308E03', 'diameter': 9.130, 'roughness':0.0018, 'heat_transfer_coeff':8.000,
-    'temperature_profile': 'prtempr', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},),
+    'temperature_profile': 'prtempr', 'temperature_in': 100, 'temperature_out': 10.3, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},),
 
 	], ids=['basic', 'other_tables', 'time changes two tables', 'More Columns'])
 def test_load_connections(mocker, file_contents, connection1_props, connection2_props):
@@ -264,9 +264,9 @@ WELLS
   bad_data
     ENDWELLS
 ''',
-{'name': 'prod', 'stream': 'PRODUCER', 'number': 94, 'datum_depth': 4039.3, 'crossflow': 'ON', 'crossshut_method': 'CELLGRAD',
+{'name': 'prod', 'stream': 'PRODUCER', 'number': 94, 'datum_depth': 4039.3, 'crossflow': 'ON', 'crossshut': 'CELLGRAD',
 'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
-{'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 4039.3, 'crossflow': 'OFF', 'crossshut_method': 'CALC',
+{'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 4039.3, 'crossflow': 'OFF', 'crossshut': 'CALC',
 'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
 )
 ])

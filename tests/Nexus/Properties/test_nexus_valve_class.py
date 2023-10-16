@@ -68,7 +68,7 @@ from ResSimpy.Nexus.DataModels.NexusValveMethod import NexusValveMethod
 )
 def test_read_valve_properties_from_file(mocker, file_contents, expected_valve_properties):
     # Arrange
-    valve_file = NexusFile(file_content_as_list=file_contents.splitlines())
+    valve_file = NexusFile(location='', file_content_as_list=file_contents.splitlines())
     valve_obj = NexusValveMethod(file=valve_file, input_number=1)
 
     # mock out open to return our test file contents

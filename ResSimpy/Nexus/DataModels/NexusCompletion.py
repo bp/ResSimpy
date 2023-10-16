@@ -1,13 +1,15 @@
+"""A class representing a single completion from a Nexus wells file."""
 from __future__ import annotations
 from dataclasses import dataclass
 
 from typing import Optional, Union
 
-
 # Use correct Self type depending upon Python version
 import sys
 
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums import DateFormatEnum
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -16,7 +18,6 @@ else:
 
 from ResSimpy.Completion import Completion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
-from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.Utils.to_dict_generic import to_dict
 
 
@@ -66,7 +67,8 @@ class NexusCompletion(Completion):
                  x: Optional[float] = None, y: Optional[float] = None, angle_a: Optional[float] = None,
                  angle_v: Optional[float] = None, grid: Optional[str] = None, measured_depth: Optional[float] = None,
                  well_indices: Optional[float] = None, depth_to_top: Optional[float] = None,
-                 depth_to_bottom: Optional[float] = None, rel_perm_method: Optional[int] = None,
+                 depth_to_bottom: Optional[float] = None, depth_to_top_str: Optional[str] = None,
+                 depth_to_bottom_str: Optional[str] = None, rel_perm_method: Optional[int] = None,
                  dfactor: Optional[float] = None, status: Optional[str] = None, partial_perf: Optional[float] = None,
                  cell_number: Optional[int] = None, perm_thickness_ovr: Optional[float] = None,
                  bore_radius: Optional[float] = None, fracture_mult: Optional[float] = None,
@@ -80,12 +82,15 @@ class NexusCompletion(Completion):
                  portype: Optional[str] = None, rel_perm_end_point: Optional[NexusRelPermEndPoint] = None,
                  kh_mult: Optional[float] = None,
                  date_format: Optional[DateFormatEnum.DateFormat] = None,
-                 start_date: Optional[str] = None
+                 start_date: Optional[str] = None,
+                 unit_system: Optional[UnitSystem] = None,
                  ) -> None:
+
         self.__measured_depth = measured_depth
         self.__well_indices = well_indices
         self.__partial_perf = partial_perf
-
+        self.__depth_to_top_str = depth_to_top_str
+        self.__depth_to_bottom_str = depth_to_bottom_str
         self.__cell_number = cell_number
         self.__bore_radius = bore_radius
         self.__fracture_mult = fracture_mult
@@ -112,10 +117,8 @@ class NexusCompletion(Completion):
         super().__init__(date=date, i=i, j=j, k=k, skin=skin, depth=depth, well_radius=well_radius, x=x, y=y,
                          angle_a=angle_a, angle_v=angle_v, grid=grid, depth_to_top=depth_to_top,
                          depth_to_bottom=depth_to_bottom, perm_thickness_ovr=perm_thickness_ovr, dfactor=dfactor,
-                         rel_perm_method=rel_perm_method, status=status, date_format=date_format, start_date=start_date)
-
-    def __repr__(self) -> str:
-        return generic_repr(self)
+                         rel_perm_method=rel_perm_method, status=status, date_format=date_format, start_date=start_date,
+                         unit_system=unit_system)
 
     @property
     def measured_depth(self):
@@ -217,6 +220,14 @@ class NexusCompletion(Completion):
     def kh_mult(self):
         return self.__kh_mult
 
+    @property
+    def depth_to_top_str(self):
+        return self.__depth_to_top_str
+
+    @property
+    def depth_to_bottom_str(self):
+        return self.__depth_to_bottom_str
+
     def to_dict(self, keys_in_keyword_style: bool = False, add_date=True, add_units=False, include_nones=True) -> \
             dict[str, None | str | int | float]:
 
@@ -307,7 +318,7 @@ class NexusCompletion(Completion):
         return [v[0] for v in NexusCompletion.get_keyword_mapping().values()]
 
     @classmethod
-    def from_dict(cls, input_dictionary: dict[str, None | float | int | str]) -> Self:
+    def from_dict(cls, input_dictionary: dict[str, None | float | int | str], date_format: DateFormat) -> Self:
         """Generates a NexusCompletion from a dictionary."""
         for input_attr in input_dictionary:
             if input_attr == 'date' or input_attr == 'unit_system' or input_attr == 'date_format':
@@ -315,14 +326,17 @@ class NexusCompletion(Completion):
             elif input_attr not in cls.valid_attributes():
                 raise AttributeError(f'Unexpected keyword "{input_attr}" found within {input_dictionary}')
         date = input_dictionary.get('date', None)
-        date_format = input_dictionary.get('date_format')
-        if not isinstance(date_format, DateFormatEnum.DateFormat):
-            raise AttributeError(f'No date_format provided for the completion, instead got {date_format=}')
+        date_format_str = input_dictionary.get('date_format')
+        if date_format_str is not None and isinstance(date_format_str, str):
+            converted_date_format_str = date_format_str.replace('/', '_')
+            completion_date_format = DateFormat[converted_date_format_str]
+        else:
+            completion_date_format = date_format
         if date is None:
             raise AttributeError(f'No date provided for the completion, instead got {date=}')
 
         date = str(date)
-        constructed_class = cls(date=date, date_format=date_format)
+        constructed_class = cls(date=date, date_format=completion_date_format)
         constructed_class.update(input_dictionary)
         return constructed_class
 
