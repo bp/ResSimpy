@@ -6,8 +6,8 @@ from uuid import UUID
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from ResSimpy.Utils.generic_repr import generic_repr
 from ResSimpy.Well import Well
 
 
@@ -23,6 +23,9 @@ class NexusWell(Well):
 
     def __repr__(self) -> str:
         return generic_repr(self)
+
+    def __str__(self) -> str:
+        return generic_str(self)
 
     @property
     def perforations(self) -> Sequence[NexusCompletion]:

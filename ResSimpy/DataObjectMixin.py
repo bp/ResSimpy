@@ -6,11 +6,11 @@ from dataclasses import dataclass, field
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Utils import to_dict_generic
-from ResSimpy.Utils.generic_repr import generic_repr
+from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Utils.obj_to_table_string import to_table_line
 
 
-@dataclass(repr=False)
+@dataclass()
 class DataObjectMixin(ABC):
     """Base class representing a data object in ResSimpy."""
     __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False, repr=False)
@@ -20,6 +20,12 @@ class DataObjectMixin(ABC):
         self.__id = uuid.uuid4()
         if properties_dict:
             raise ValueError('No properties should be passed to the DataObjectMixin')
+
+    def __repr__(self) -> str:
+        return generic_repr(self)
+
+    def __str__(self) -> str:
+        return generic_str(self)
 
     def to_dict(self, keys_in_keyword_style: bool = False, add_date: bool = True, add_units: bool = True,
                 include_nones: bool = True) -> dict[str, None | str | int | float]:
@@ -62,9 +68,6 @@ class DataObjectMixin(ABC):
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
         """Gets the mapping of keywords to attribute definitions."""
         raise NotImplementedError("Implement this in the derived class")
-
-    def __repr__(self) -> str:
-        return generic_repr(self)
 
     @property
     @abstractmethod

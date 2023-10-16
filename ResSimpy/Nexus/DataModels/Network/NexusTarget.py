@@ -3,10 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Target import Target
-from ResSimpy.Utils.generic_repr import generic_repr
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, repr=False)
 class NexusTarget(Target):
     """Class that represents a single nexus target in the NexusSimulator."""
     def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
@@ -14,9 +13,6 @@ class NexusTarget(Target):
         super(Target, self).__init__({})
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)
-
-    def __repr__(self) -> str:
-        return generic_repr(self)
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:

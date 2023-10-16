@@ -8,7 +8,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Units.AttributeMappings.NetworkUnitMapping import NetworkUnits
 
 
-@dataclass
+@dataclass(repr=False)
 class Target(DataObjectMixin, ABC):
     name: Optional[str] = None
     date: Optional[str] = None

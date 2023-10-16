@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+import uuid
+from dataclasses import dataclass, field
 from typing import Optional
 
 import pandas as pd
@@ -6,7 +7,7 @@ import pytest
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Utils import to_dict_generic
-from ResSimpy.Utils.generic_repr import generic_repr
+from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Utils.invert_nexus_map import invert_nexus_map, attribute_name_to_nexus_keyword, \
     nexus_keyword_to_attribute_name
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
@@ -22,6 +23,7 @@ class GenericTest:
     unit_system: UnitSystem
     date: str
     attr_4: Optional[str] = None
+    __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False, repr=False)
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
@@ -36,11 +38,18 @@ class GenericTest:
     def to_dict(self, include_nones=True):
         return to_dict_generic.to_dict(self, add_date=True, add_units=True, include_nones=include_nones)
 
+    def __repr__(self):
+        return generic_repr(self)
+
+    def __str__(self):
+        return generic_str(self)
+
 def test_to_dict():
     # Arrange
     class_inst = GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=UnitSystem.METRIC,
                              date='01/01/2030')
-    expected = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'attr_4': None, 'unit_system': 'METRIC', 'date': '01/01/2030'}
+    expected = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'attr_4': None, 'unit_system': 'METRIC',
+                'date': '01/01/2030'}
     expected_no_date_no_units = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'attr_4': None, }
     expected_nexus_style = {
         'ATTR_1': 'hello', 'ATTR_2': 10, 'ATTR_3': 43020.2, 'unit_system': 'METRIC',
@@ -84,27 +93,20 @@ def test_obj_to_dataframe():
     pd.testing.assert_frame_equal(result, expected_df, check_like=True)
 
 
-def test_generic_repr():
-    @dataclass
-    class MyClass:
-        well: str
-        depth: float
-        x_pos: Optional[float]
-        y_pos: Optional[float]
-        temp: Optional[float]
+def test_generic_repr_str(mocker):
+    # Arrange
+    mocker.patch('uuid.uuid4', return_value='uuid1')
+    class_inst = GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=UnitSystem.METRIC, date='01/01/2030',
+                             attr_4='world')
+    # mock out id
 
-        def __repr__(self) -> str:
-            return generic_repr(self)
-
-    obj = MyClass(
-        well="my_well",
-        depth=100,
-        x_pos=50.0,
-        y_pos=75.0,
-        temp=None
-    )
-    expected = "MyClass(well='my_well', depth=100, x_pos=50.0, y_pos=75.0)"
-    assert repr(obj) == expected
+    expected_repr = ("GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=<UnitSystem.METRIC: 'METRIC'>, "
+                     "date='01/01/2030', attr_4='world', _GenericTest__id='uuid1')")
+    expected_str = ("GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=<UnitSystem.METRIC: 'METRIC'>, "
+                     "date='01/01/2030', attr_4='world')")
+    # Act Assert
+    assert repr(class_inst) == expected_repr
+    assert str(class_inst) == expected_str
 
 
 def test_invert_nexus_map():
