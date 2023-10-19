@@ -83,7 +83,7 @@ defines conventions such as variable naming and capitalisation. A consistent
 style makes it much easier for other developers to read and understand your
 code.
 
-See `Static analysis`_ for how to check your code for conformance to PEP8 style.
+See :ref:`Running Other Checks on your local machine` for how to check your code for conformance to PEP8 style.
 
 Tests
 -----
@@ -110,7 +110,7 @@ tests directory for examples of existing tests. A typical pattern is
 ``Arrange-Act-Assert``:
 
 .. code:: python
-
+TODO:Replace this with a better example! Perhaps one showing how to create a dummy simulator object?
     def test_a_thing():
         """ Test to check that MyClass behaves as expected """
 
