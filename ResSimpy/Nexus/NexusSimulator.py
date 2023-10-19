@@ -106,7 +106,7 @@ class NexusSimulator(Simulator):
         self._wells: NexusWells = NexusWells(self)
         self._grid: Optional[NexusGrid] = None
         # Model dynamic properties
-        self._pvt: NexusPVTMethods = NexusPVTMethods()
+        self._pvt: NexusPVTMethods = NexusPVTMethods(model_unit_system=UnitSystem.ENGLISH)
         self._separator: NexusSeparatorMethods = NexusSeparatorMethods()
         self._water: NexusWaterMethods = NexusWaterMethods()
         self._equil: NexusEquilMethods = NexusEquilMethods()
