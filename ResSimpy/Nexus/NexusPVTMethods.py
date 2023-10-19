@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import os
 from typing import Optional, MutableMapping
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusPVTMethod import NexusPVTMethod
 from ResSimpy.PVT import PVT
@@ -21,8 +22,9 @@ class NexusPVTMethods(PVT):
     __inputs: MutableMapping[int, NexusPVTMethod]
     __files: dict[int, NexusFile]
     __properties_loaded: bool = False  # Used in lazy loading
+    __model_unit_system: UnitSystem
 
-    def __init__(self, inputs: Optional[MutableMapping[int, NexusPVTMethod]] = None,
+    def __init__(self, model_unit_system: UnitSystem, inputs: Optional[MutableMapping[int, NexusPVTMethod]] = None,
                  files: Optional[dict[int, NexusFile]] = None) -> None:
         if inputs:
             self.__inputs = inputs
@@ -32,6 +34,7 @@ class NexusPVTMethods(PVT):
             self.__files = files
         else:
             self.__files = {}
+        self.__model_unit_system = model_unit_system
         super().__init__()
 
     def __repr__(self) -> str:
@@ -67,6 +70,7 @@ class NexusPVTMethods(PVT):
                     raise ValueError(f'Unable to find pvt file: {pvt_file}')
                 if os.path.isfile(pvt_file.location):
                     # Create NexusPVTMethod object
-                    self.__inputs[table_num] = NexusPVTMethod(file=pvt_file, input_number=table_num)
+                    self.__inputs[table_num] = NexusPVTMethod(file=pvt_file, input_number=table_num,
+                                                              model_unit_system=self.__model_unit_system)
                     self.__inputs[table_num].read_properties()  # Populate object with pvt properties in file
         self.__properties_loaded = True

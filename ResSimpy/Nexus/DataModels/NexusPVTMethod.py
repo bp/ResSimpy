@@ -16,7 +16,7 @@ from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_UNSAT_TABLE_INDICES
 from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 from ResSimpy.DynamicProperty import DynamicProperty
 from ResSimpy.Units.AttributeMapping import AttributeMapBase
-from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitAttributeMapping import PVTUnits
+from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import PVTUnits
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_list_str, get_empty_eosopt_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -54,8 +54,10 @@ class NexusPVTMethod(DynamicProperty):
     properties: dict[str, Union[str, int, float, Enum, list[str],
                                 pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
+    unit_system: UnitSystem
 
-    def __init__(self, file: NexusFile, input_number: int, pvt_type: Optional[str] = None,
+    def __init__(self, file: NexusFile, input_number: int, model_unit_system: UnitSystem,
+                 pvt_type: Optional[str] = None,
                  eos_nhc: Optional[int] = None, eos_temp: Optional[float] = None,
                  eos_components: Optional[list[str]] = None,
                  eos_options: Optional[dict[str, Union[str, int, float, pd.DataFrame, list[str], dict[str, float],
@@ -80,6 +82,7 @@ class NexusPVTMethod(DynamicProperty):
             self.properties = properties
         else:
             self.properties = {}
+        self.unit_system = model_unit_system
         super().__init__(input_number=input_number, file=file)
 
     @staticmethod
@@ -100,9 +103,9 @@ class NexusPVTMethod(DynamicProperty):
         return keywords
 
     @property
-    def attribute_to_unit_map(self) -> AttributeMapBase:
-        """Returns the attribute to unit map for the constraint."""
-        return PVTUnits()
+    def attribute_to_unit_map(self) -> PVTUnits:
+        """Returns the attribute to unit map for the PVT method."""
+        return PVTUnits(unit_system=self.unit_system)
 
     def to_string(self) -> str:
         """Create string with PVT data in Nexus file format."""
@@ -321,6 +324,9 @@ class NexusPVTMethod(DynamicProperty):
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
+
+        if 'UNIT_SYSTEM' in self.properties and isinstance(self.properties['UNIT_SYSTEM'], UnitSystem):
+            self.unit_system = self.properties['UNIT_SYSTEM']
 
         # Initialize flags and containers used to record properties as we iterate through pvt file contents
         # Dictionary to record start and ending indices for tables

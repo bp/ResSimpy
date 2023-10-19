@@ -331,14 +331,14 @@ def test_object_no_unit_system():
     assert str(ae.value) == 'Unit system not defined'
 
 
-@pytest.mark.parametrize('data_object, attribute, expected_result, upper', [
-    (NexusPVTMethod, 'pressure', 'PSIA', True),
+@pytest.mark.parametrize('data_object, attribute, expected_result, upper, unitsystem', [
+    (NexusPVTMethod, 'pressure', 'PSIA', True, UnitSystem.ENGLISH),
 ])
-def test_get_unit_for_dynamic_property_attribute(data_object, attribute, expected_result, upper):
+def test_get_unit_for_dynamic_property_attribute(data_object, attribute, expected_result, upper, unitsystem):
     """A test to check if DynamicProperty.get_unit_for_attribute method works as expected."""
     # Arrange
     prop_file = NexusFile(location='test/file/prop.dat')
-    dataobj = data_object(file=prop_file, input_number=1)
+    dataobj = data_object(file=prop_file, input_number=1, model_unit_system=unitsystem)
     # Act
     result = dataobj.get_unit_for_attribute(attribute_name=attribute, unit_system=UnitSystem.ENGLISH, uppercase=upper)
     # Assert

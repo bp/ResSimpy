@@ -6,7 +6,7 @@ from typing import Optional
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.File import File
 from ResSimpy.Units.AttributeMapping import AttributeMapBase
-from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitAttributeMapping import PVTUnits
+# from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import PVTUnits
 
 
 @dataclass
