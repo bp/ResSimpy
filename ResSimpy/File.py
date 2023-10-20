@@ -45,7 +45,7 @@ class File(FileBase):
             raise ValueError(f'No file data to write out, instead found {self.file_content_as_list}')
         file_str = ''.join(self.file_content_as_list)
 
-        with open(self.location, write_operation) as fi:
+        with open(self.location, 'w') as fi:
             fi.write(file_str)
 
         # reset the modified file state
