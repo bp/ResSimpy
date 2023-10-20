@@ -110,19 +110,27 @@ tests directory for examples of existing tests. A typical pattern is
 ``Arrange-Act-Assert``:
 
 .. code:: python
-TODO:Replace this with a better example! Perhaps one showing how to create a dummy simulator object?
-    def test_a_thing():
-        """ Test to check that MyClass behaves as expected """
 
+    def test_get_first_perforation(completions, expected_perforation):
+        """Test to check that the first_perforation property returns the correct completion"""
         # Arrange
-        my_obj = resqml.MyClass()
+        completion_1 = NexusCompletion(date='01/02/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None, grid='GRID1',
+                      partial_perf=0.1, date_format=DateFormat.DD_MM_YYYY),
+        completion_2 = NexusCompletion(date='01/01/2023', i=1, j=2, k=3, well_radius=9.11, partial_perf=0.5,
+                      date_format=DateFormat.DD_MM_YYYY)
+
+        completions = [completion_1, completion_2]
+
+        well = NexusWell(well_name='test well', completions=completions,
+                         unit_system=UnitSystem.ENGLISH)
+
+        expected_perforation = completion2
 
         # Act
-        result = my_obj.do_calculation()
+        result = well.first_perforation
 
         # Assert
-        expected = [1,2,3]
-        assert result == expected
+        assert result == expected_perforation
 
 Running tests and other checks
 ^^^^^^^^^^^^^
