@@ -5,10 +5,10 @@ from dataclasses import dataclass
 from typing import Optional
 
 from ResSimpy.DataObjectMixin import DataObjectMixin
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.NexusEnums import DateFormatEnum
-from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBase
-from ResSimpy.Units.AttributeMappings.WellUnitAttributeMapping import CompletionUnits
+from ResSimpy.Units.AttributeMappings.CompletionUnitMapping import CompletionUnits
 
 
 @dataclass(kw_only=True, repr=False)
@@ -64,6 +64,7 @@ class Completion(DataObjectMixin, ABC):
     __iso_date: Optional[ISODateTime] = None
     __date_format: Optional[DateFormatEnum.DateFormat] = None
     __start_date: Optional[str] = None
+    __unit_system: Optional[UnitSystem] = None
 
     def __init__(self, date: str, i: Optional[int] = None, j: Optional[int] = None, k: Optional[int] = None,
                  skin: Optional[float] = None, depth: Optional[float] = None, well_radius: Optional[float] = None,
@@ -72,7 +73,7 @@ class Completion(DataObjectMixin, ABC):
                  depth_to_bottom: Optional[float] = None, perm_thickness_ovr: Optional[float] = None,
                  dfactor: Optional[float] = None, rel_perm_method: Optional[int] = None,
                  status: Optional[str] = None, date_format: Optional[DateFormatEnum.DateFormat] = None,
-                 peaceman_well_block_radius: Optional[float] = None, start_date: Optional[str] = None) -> None:
+                 peaceman_well_block_radius: Optional[float] = None, start_date: Optional[str] = None, unit_system: Optional[UnitSystem] = None) -> None:
         super().__init__({})
         self.__well_radius = well_radius
         self.__date = date
@@ -95,6 +96,7 @@ class Completion(DataObjectMixin, ABC):
         self.__date_format = date_format
         self.__start_date = start_date
         self.__iso_date = self.set_iso_date()
+        self.__unit_system = unit_system
         self.__peaceman_well_block_radius = peaceman_well_block_radius
 
     @property
@@ -189,5 +191,9 @@ class Completion(DataObjectMixin, ABC):
         return ISODateTime.convert_to_iso(self.date, self.date_format, self.start_date)
 
     @property
-    def attribute_to_unit_map(self) -> AttributeMapBase:
-        return CompletionUnits()
+    def unit_system(self):
+        return self.__unit_system
+
+    @property
+    def units(self) -> CompletionUnits:
+        return CompletionUnits(self.unit_system)

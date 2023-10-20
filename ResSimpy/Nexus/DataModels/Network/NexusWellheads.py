@@ -1,3 +1,7 @@
+"""Class for handling wellheads in the Nexus Network. This class is used to store and manipulate the wellheads in \
+a NexusNetwork. It is stored as an instance in the NexusNetwork class as "wellheads".
+In Nexus this is the WELLHEAD table.
+"""
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional, TYPE_CHECKING

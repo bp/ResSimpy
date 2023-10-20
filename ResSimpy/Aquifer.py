@@ -1,3 +1,4 @@
+"""Abstract base class for aquifer inputs."""
 from dataclasses import dataclass
 from abc import ABC
 

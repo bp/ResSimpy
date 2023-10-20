@@ -1,3 +1,4 @@
+"""A class to modify an existing object in a file with a new set of properties."""
 from __future__ import annotations
 
 from typing import Any, TYPE_CHECKING

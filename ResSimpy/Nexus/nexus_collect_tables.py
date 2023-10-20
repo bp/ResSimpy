@@ -1,3 +1,4 @@
+"""Functions for collecting tables from a Nexus file to populate Nexus objects."""
 from __future__ import annotations
 
 from typing import Any, Optional

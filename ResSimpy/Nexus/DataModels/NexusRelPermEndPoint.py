@@ -1,3 +1,4 @@
+"""Class for Nexus relative permeability endpoints data storage."""
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
@@ -6,6 +7,7 @@ from ResSimpy.RelPermEndPoint import RelPermEndPoint
 
 @dataclass
 class NexusRelPermEndPoint(RelPermEndPoint):
+    """Class for Nexus relative permeability endpoints data storage."""
     def __init__(self, swl: Optional[float] = None, swr: Optional[float] = None, swu: Optional[float] = None,
                  sgl: Optional[float] = None, sgr: Optional[float] = None, sgu: Optional[float] = None,
                  swro: Optional[float] = None, sgro: Optional[float] = None, sgrw: Optional[float] = None,

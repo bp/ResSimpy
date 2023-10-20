@@ -3,6 +3,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
+
 from ResSimpy.WellConnection import WellConnection
 
 
@@ -35,11 +36,11 @@ class NexusWellConnection(WellConnection):
         elevation_profile (str): COMMENT (ELEVPR)
         temperature_profile (str): COMMENT (TEMPPR)
         inj_mobility (str): COMMENT (INJMOB)
-        crossshut_method (str): COMMENT (CROSS_SHUT)
+        crossshut (str): COMMENT (CROSS_SHUT)
         crossflow (str): COMMENT (CROSSFLOW)
         on_time (float): COMMENT (ONTIME)
         heat_transfer_coeff (float): COMMENT (HTC)
-        water_inj_mult (float): COMMENT (WIMULT)
+        well_index_mult (float): COMMENT (WIMULT)
         productivity_index (float): COMMENT (PI)
         vip_productivity_index (str): COMMENT (VIPPI)
         productivity_index_phase (str): COMMENT (PIPHASE)
@@ -75,11 +76,11 @@ class NexusWellConnection(WellConnection):
     elevation_profile: Optional[str] = None
     temperature_profile: Optional[str] = None
     inj_mobility: Optional[str] = None
-    crossshut_method: Optional[str] = None
+    crossshut: Optional[str] = None
     crossflow: Optional[str] = None
     on_time: Optional[float] = None
     heat_transfer_coeff: Optional[float] = None
-    water_inj_mult: Optional[float] = None
+    well_index_mult: Optional[float] = None
     vip_productivity_index: Optional[float] = None
     productivity_index_phase: Optional[str] = None
     d_factor: Optional[float] = None
@@ -133,11 +134,11 @@ class NexusWellConnection(WellConnection):
             'ELEVPR': ('elevation_profile', str),
             'TEMPPR': ('temperature_profile', str),
             'INJMOB': ('inj_mobility', str),
-            'CROSS_SHUT': ('crossshut_method', str),
+            'CROSS_SHUT': ('crossshut', str),
             'CROSSFLOW': ('crossflow', str),
             'ONTIME': ('on_time', float),
             'HTC': ('heat_transfer_coeff', float),
-            'WIMULT': ('water_inj_mult', float),
+            'WIMULT': ('well_index_mult', float),
             'PI': ('productivity_index', float),
             'VIPPI': ('vip_productivity_index', float),
             'PIPHASE': ('productivity_index_phase', str),

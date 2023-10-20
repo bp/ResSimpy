@@ -1,3 +1,4 @@
+"""Handle Nexus files and preserve origin of include files."""
 from __future__ import annotations
 
 import os.path
@@ -48,7 +49,7 @@ class NexusFile(File):
     linked_user: Optional[str] = field(default=None)
     last_modified: Optional[datetime] = field(default=None)
 
-    def __init__(self, location: Optional[str] = None,
+    def __init__(self, location: str,
                  include_locations: Optional[list[str]] = None,
                  origin: Optional[str] = None,
                  include_objects: Optional[list[NexusFile]] = None,
@@ -96,19 +97,20 @@ class NexusFile(File):
             owner: str = ''
             group: str = ''
             try:
-                owner = pathlib_path.owner()
-                group = pathlib_path.group()
+                owner = pathlib_path.owner()  # type: ignore
+                group = pathlib_path.group()  # type: ignore
             except NotImplementedError:
                 # owner or group not supported on this system, continue without filling out that information
                 pass
             except PermissionError:
                 # user doesn't have permission to access the file, continue without filling out that information
                 warnings.warn(f'PermissionError when trying to access file at {full_file_path}')
-                pass
             except FileNotFoundError:
                 # file not found, continue without filling out that information
                 warnings.warn(f'FileNotFoundError when trying to access file at {full_file_path}')
-                pass
+            except KeyError:
+                # Group or owner doesn't exist on this system, continue without filling out that information
+                warnings.warn(f'Unable to find the group for the file at {full_file_path}')
 
             if owner is not None and group is not None:
                 return f"{owner}:{group}"
@@ -373,7 +375,7 @@ class NexusFile(File):
         return flat_list
 
     # TODO write an output function using the iterate_line method
-    def get_full_network(self, max_depth: Optional[int] = None) -> tuple[list[str | None], list[str | None]]:
+    def get_full_network(self, max_depth: Optional[int] = None) -> tuple[list[str | None], list[str]]:
         """Recursively constructs two lists of from and to nodes representing the connections between files.
 
         Args:
@@ -651,32 +653,39 @@ class NexusFile(File):
             new_file_path (None | str): writes to self.location if left as None. Otherwise writes to new_file_name.
             write_includes (bool): If True will write out all include files within the file. Defaults to False.
             write_out_all_files (bool): If False will write only modified files. Otherwise will write all files.
+            overwrite_file (bool): If True will overwrite the file at the location specified by new_file_path. \
+            Otherwise will raise an error if the file already exists.
         """
         # overwrite File base class method to allow for write_includes
-        if new_file_path is None and self.location is not None:
+        if new_file_path is None and overwrite_file:
             # In this case just overwrite the file with the existing path:
             new_file_path = self.location
-        elif new_file_path is None:
-            raise ValueError(f'No file path to write to, instead found {self.location}')
-        elif new_file_path and overwrite_file:
-            raise ValueError(f'Cannot overwrite file with a new file path provided at {new_file_path}')
+        elif new_file_path is None and not overwrite_file:
+            raise ValueError('No file path to write to, and overwrite_file set to False')
         if self.file_content_as_list is None:
             raise ValueError(f'No file data to write out, instead found {self.file_content_as_list}')
+
+        if new_file_path is None:
+            raise ValueError('No file path to write to.')
+        if os.path.exists(new_file_path) and not overwrite_file:
+            raise ValueError(f'File already exists at {new_file_path} and overwrite_file set to False')
+
+        # create directories that do not exist
+        if not os.path.exists(os.path.dirname(new_file_path)):
+            os.makedirs(os.path.dirname(new_file_path))
+
         if write_includes and self.include_objects is not None:
             for file in self.include_objects:
                 write_file: bool = file.file_modified or write_out_all_files
-                if new_file_path is None:
-                    # if the base file has no new name then just overwrite the include file
-                    include_file_name = None
-                else:
-                    if file.location is None or file.file_content_as_list is None:
-                        warnings.warn(f'No location found for file: {file}. Not writing file.')
-                        continue
-                    new_root_name = f'{os.path.basename(new_file_path).split(".")[0]}_{os.path.basename(file.location)}'
-                    # write the include file to the same directory.
-                    include_file_name = os.path.join(os.path.dirname(new_file_path), new_root_name)
-                    if write_file:
-                        self.update_include_location_in_file_as_list(include_file_name, file)
+                write_file = write_file or (new_file_path != self.location and not os.path.isabs(file.location))
+                if file.file_content_as_list is None:
+                    warnings.warn(f'No content found for file: {file}. Not writing file.')
+                    continue
+                new_root_name = f'{os.path.basename(new_file_path).split(".")[0]}_{os.path.basename(file.location)}'
+                # write the include file to the same directory.
+                include_file_name = os.path.join(os.path.dirname(new_file_path), new_root_name)
+                if write_file:
+                    self.update_include_location_in_file_as_list(include_file_name, file)
                 if write_file:
                     file.write_to_file(include_file_name, write_includes=True, write_out_all_files=write_out_all_files,
                                        overwrite_file=overwrite_file)
@@ -688,7 +697,6 @@ class NexusFile(File):
             self.location = new_file_path
             with open(new_file_path, 'w') as fi:
                 fi.write(file_str)
-
             # reset the modified file state
             self._file_modified_set(False)
 
@@ -700,8 +708,7 @@ class NexusFile(File):
             include_file (NexusFile): include object whose path is being modified
         """
         # try and find the path of the file that should be replaced (i.e. how it is currently written in the file)
-        if self.include_locations is None or not self.include_locations or include_file.location is None\
-                or include_file.input_file_location is None:
+        if self.include_locations is None or not self.include_locations or include_file.input_file_location is None:
             raise ValueError('No include locations found and therefore cannot update include path')
         file_path_to_replace = include_file.input_file_location
         file_content = self.file_content_as_list
@@ -720,12 +727,8 @@ class NexusFile(File):
         index_of_path_to_replace = self.include_locations.index(include_file.location)
         # get the full path and update it in the include file object
         # TODO maybe include this in a setter attr for the location.
-        if self.location is None:
-            include_file.location = new_path
-        else:
-            include_file.location = nfo.get_full_file_path(new_path, self.location)
-        if include_file.location is None:
-            raise ValueError('Include file location cannot be None.')
+        include_file.location = nfo.get_full_file_path(new_path, self.location)
+
         self.include_locations[index_of_path_to_replace] = include_file.location
         # update the new path
         include_file.input_file_location = new_path

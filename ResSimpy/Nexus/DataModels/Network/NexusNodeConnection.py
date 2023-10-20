@@ -1,3 +1,4 @@
+"""Used to represent a connection between two nodes in a Nexus network."""
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
@@ -7,7 +8,9 @@ from ResSimpy.NodeConnection import NodeConnection
 
 @dataclass(repr=False)
 class NexusNodeConnection(NodeConnection):
-    """Attributes
+    """Used to represent a connection between two nodes in a Nexus network.
+
+    Attributes:
     hyd_method: hydraulic lift correlation method used (METHOD)
     pvt_method: pvt method number (IPVT)
     water_method: water method number (IWAT)
@@ -50,6 +53,15 @@ class NexusNodeConnection(NodeConnection):
     unit_system: Optional[UnitSystem] = None
     dp_add: Optional[float] = None
     dt_add: Optional[float] = None
+    temperature_in: Optional[float] = None
+    temperature_out: Optional[float] = None
+    tracer: Optional[str] = None
+    heat_conductivity: Optional[float] = None
+    insulation_thickness: Optional[float] = None
+    insulation_conductivity: Optional[float] = None
+    gravity_pressure_gradient_mult: Optional[float] = None
+    friction_pressure_gradient_mult: Optional[float] = None
+    acceleration_pressure_gradient_mult: Optional[float] = None
 
     def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
         # call the init of the DataObjectMixin
@@ -85,5 +97,14 @@ class NexusNodeConnection(NodeConnection):
             'POLYMER': ('polymer', str),
             'DPADD': ('dp_add', float),
             'DTADD': ('dt_add', float),
-            }
+            'TEMPIN': ('temperature_in', float),
+            'TEMPOUT': ('temperature_out', float),
+            'TRACERS': ('tracer', str),
+            'HCOND': ('heat_conductivity', float),
+            'INSTHN': ('insulation_thickness', float),
+            'INSK': ('insulation_conductivity', float),
+            'GRPGCR': ('gravity_pressure_gradient_mult', float),
+            'FRPGCR': ('friction_pressure_gradient_mult', float),
+            'ACPGCR': ('acceleration_pressure_gradient_mult', float),
+        }
         return nexus_mapping

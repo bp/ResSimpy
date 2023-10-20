@@ -307,7 +307,7 @@ from ResSimpy.Nexus.DataModels.NexusRelPermMethod import NexusRelPermMethod
 )
 def test_read_relpm_properties_from_file(mocker, file_contents, expected_relpm_properties):
     # Arrange
-    rp_file = NexusFile(file_content_as_list=file_contents.splitlines())
+    rp_file = NexusFile(location='', file_content_as_list=file_contents.splitlines())
     relpm_obj = NexusRelPermMethod(file=rp_file, input_number=1)
 
     # mock out open to return our test file contents

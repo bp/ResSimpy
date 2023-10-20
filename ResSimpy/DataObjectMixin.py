@@ -4,21 +4,28 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.Units.AttributeMappings.AttributeMappingBase import AttributeMapBase
+from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Utils import to_dict_generic
-from ResSimpy.Utils.generic_repr import generic_repr
+from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Utils.obj_to_table_string import to_table_line
 
 
-@dataclass(repr=False)
+@dataclass()
 class DataObjectMixin(ABC):
-    __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False)
+    """Base class representing a data object in ResSimpy."""
+    __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False, repr=False)
 
     def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
         # properties dict is a parameter to make the call signature equivalent to subclasses.
         self.__id = uuid.uuid4()
         if properties_dict:
             raise ValueError('No properties should be passed to the DataObjectMixin')
+
+    def __repr__(self) -> str:
+        return generic_repr(self)
+
+    def __str__(self) -> str:
+        return generic_str(self)
 
     def to_dict(self, keys_in_keyword_style: bool = False, add_date: bool = True, add_units: bool = True,
                 include_nones: bool = True) -> dict[str, None | str | int | float]:
@@ -62,12 +69,9 @@ class DataObjectMixin(ABC):
         """Gets the mapping of keywords to attribute definitions."""
         raise NotImplementedError("Implement this in the derived class")
 
-    def __repr__(self) -> str:
-        return generic_repr(self)
-
     @property
     @abstractmethod
-    def attribute_to_unit_map(self) -> AttributeMapBase:
+    def units(self) -> BaseUnitMapping:
         """Returns the attribute to unit map for the data object."""
         raise NotImplementedError("Implement this in the derived class")
 
@@ -79,7 +83,7 @@ class DataObjectMixin(ABC):
             unit_system (UnitSystem): unit system to get the unit for
             uppercase (bool): if True returns the unit in uppercase
         """
-        unit_dimension = self.attribute_to_unit_map.attribute_map.get(attribute_name, None)
+        unit_dimension = self.units.attribute_map.get(attribute_name, None)
         if unit_dimension is None:
             raise AttributeError(f'Attribute {attribute_name} not recognised and does not have a unit definition')
         unit = unit_dimension.unit_system_enum_to_variable(unit_system=unit_system)

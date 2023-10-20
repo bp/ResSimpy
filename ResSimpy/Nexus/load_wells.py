@@ -1,5 +1,7 @@
 from __future__ import annotations
-from typing import Optional
+
+import warnings
+from typing import Optional, Sequence
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -11,14 +13,14 @@ from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
 
 
 def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem,
-               date_format: DateFormat) -> list[NexusWell]:
+               model_date_format: DateFormat) -> tuple[Sequence[NexusWell], DateFormat]:
     """Loads a list of Nexus Well instances and populates it with the wells completions over time from a wells file.
 
     Args:
         nexus_file (NexusFile): NexusFile containing the wellspec files.
         start_date (str): starting date of the wellspec file as a string.
         default_units (UnitSystem): default units to use if no units are found.
-        date_format (DateFormat): Date format specified in the FCS file.
+        model_date_format (DateFormat): Date format specified in the FCS file.
 
     Raises:
         ValueError: If no value is found after a TIME card.
@@ -26,9 +28,11 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
         ValueError: If no valid wells are found in the wellspec file.
 
     Returns:
-        list[NexusWell]: list of Nexus well classes contained within a wellspec file.
+        A tuple containing:
+        Sequence[NexusWell]: list of Nexus well classes contained within a wellspec file.
+        DateFormat: The date format found in the wellspec file if present, otherwise just the model date format.
     """
-
+    date_format = model_date_format
     file_as_list = nexus_file.get_flat_list_str_file
     well_name: Optional[str] = None
     wellspec_file_units: Optional[UnitSystem] = None
@@ -109,13 +113,13 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
         'PARENT': parent_node, 'MDCON': mdcon, 'IPTN': pressure_avg_pattern, 'LENGTH': length, 'K': permeability,
         'ND': non_darcy_model, 'DZ': comp_dz, 'LAYER': layer_assignment, 'RADBP': polymer_bore_radius,
         'RADWP': polymer_well_radius, 'KHMULT': kh_mult
-        }
+    }
     end_point_scaling_header_values: dict[str, None | int | float | str] = {
         'SWL': swl, 'SWR': swr, 'SWU': swu, 'SGL': sgl, 'SGR': sgr, 'SGU': sgu,
         'SWRO': swro, 'SGRO': sgro, 'SGRW': sgrw, 'KRW_SWRO': krw_swro, 'KRW_SWU': krw_swu, 'KRG_SGRO': krg_sgro,
         'KRG_SGU': krg_sgu, 'KRO_SWL': kro_swl, 'KRO_SWR': kro_swr, 'KRO_SGL': kro_sgl, 'KRO_SGR': kro_sgr,
         'KRW_SGL': krw_sgl, 'KRW_SGR': krw_sgr, 'KRG_SGRW': krg_sgrw, 'SGTR': sgtr, 'SOTR': sotr,
-        }
+    }
     # add end point scaling header to the header values we search for:
     header_values.update(end_point_scaling_header_values)
 
@@ -133,6 +137,25 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
             for unit in UnitSystem:
                 if unit.value in uppercase_line and (line.find('!') > line.find(unit.value) or line.find('!') == -1):
                     wellspec_file_units = unit
+
+        if nfo.check_token('DATEFORMAT', line):
+            new_date_format_str = nfo.get_token_value(token='DATEFORMAT', token_line=line, file_list=file_as_list)
+
+            if new_date_format_str is None:
+                raise ValueError(f"Cannot find the date format associated with the DATEFORMAT card in {line=} at line"
+                                 f" number {index}")
+
+            model_date_format_str = model_date_format.name.replace('_', '/')
+            if new_date_format_str != model_date_format_str:
+                warnings.warn(f"Wells date format of {new_date_format_str} inconsistent with base model format of "
+                              f"{model_date_format_str}")
+
+            converted_format_str = new_date_format_str.replace('/', '_')
+
+            if not hasattr(DateFormat, converted_format_str):
+                raise ValueError(f"Invalid Date Format found: '{new_date_format_str}' at line {index}")
+
+            date_format = DateFormat[converted_format_str]
 
         if nfo.check_token('TIME', line):
             current_date = nfo.get_token_value(token='TIME', token_line=line, file_list=file_as_list)
@@ -162,29 +185,30 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
                 current_date = start_date
             # reset the storage dictionary to prevent completion properties being carried forward from earlier timestep
             header_values = {k: None for k in header_values}
+            if wellspec_file_units is None:
+                wellspec_file_units = default_units
+
             # Load in each line of the table
             completions = __load_wellspec_table_completions(
                 nexus_file, header_index, header_values, headers, current_date, end_point_scaling_header_values,
-                date_format)
-
-            if wellspec_file_units is None:
-                wellspec_file_units = default_units
+                date_format, unit_system=wellspec_file_units)
 
             if well_name in well_name_list:
                 wells[well_name_list.index(well_name)].completions.extend(completions)
             else:
-                new_well = NexusWell(completions=completions, well_name=well_name, units=wellspec_file_units)
+                new_well = NexusWell(completions=completions, well_name=well_name, unit_system=wellspec_file_units)
                 well_name_list.append(well_name)
                 wells.append(new_well)
             wellspec_found = False
-    return wells
+    return wells, date_format
 
 
 def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
                                       header_values: dict[str, None | int | float | str],
                                       headers: list[str], start_date: str,
                                       end_point_scaling_header_values: dict[str, None | int | float | str],
-                                      date_format: DateFormat
+                                      date_format: DateFormat,
+                                      unit_system: UnitSystem,
                                       ) -> list[NexusCompletion]:
     """Loads a completion table in for a single WELLSPEC keyword. \
         Loads in the next available completions following a WELLSPEC keyword and a header line.
@@ -204,7 +228,14 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
         value = header_values[key]
         if value == 'NA':
             value = None
-        return None if value is None else float(value)
+        if value is None:
+            return None
+        try:
+            value = float(value)
+        except ValueError:
+            warnings.warn(f"Cannot convert {value=} to float")
+            value = None
+        return value
 
     def convert_header_value_int(key: str) -> Optional[int]:
         value = header_values[key]
@@ -235,30 +266,31 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
             new_rel_perm_end_point = None
 
         new_completion = NexusCompletion(
+            date=start_date,
             i=convert_header_value_int('IW'),
             j=convert_header_value_int('JW'),
             k=convert_header_value_int('L'),
-            # keep grid = 'NA' as 'NA' and not None
-            grid=(None if header_values['GRID'] is None else str(header_values['GRID'])),
-            well_radius=convert_header_value_float('RADW'),
-            measured_depth=convert_header_value_float('MD'),
             skin=convert_header_value_float('SKIN'),
             depth=convert_header_value_float('DEPTH'),
+            well_radius=convert_header_value_float('RADW'),
             x=convert_header_value_float('X'),
             y=convert_header_value_float('Y'),
             angle_a=convert_header_value_float('ANGLA'),
             angle_v=convert_header_value_float('ANGLV'),
+            grid=(None if header_values['GRID'] is None else str(header_values['GRID'])),
+            measured_depth=convert_header_value_float('MD'),
             well_indices=convert_header_value_float('WI'),
             depth_to_top=convert_header_value_float('DTOP'),
             depth_to_bottom=convert_header_value_float('DBOT'),
+            depth_to_top_str=(None if header_values['DTOP'] is None else str(header_values['DTOP'])),
+            depth_to_bottom_str=(None if header_values['DBOT'] is None else str(header_values['DBOT'])),
+            rel_perm_method=convert_header_value_int('IRELPM'),
+            dfactor=convert_header_value_float('D'),
+            status=(None if header_values['STAT'] is None else str(header_values['STAT'])),
             partial_perf=convert_header_value_float('PPERF'),
             cell_number=convert_header_value_int('CELL'),
             perm_thickness_ovr=convert_header_value_float('KH'),
-            dfactor=convert_header_value_float('D'),
-            rel_perm_method=convert_header_value_int('IRELPM'),
-            status=(None if header_values['STAT'] is None else str(header_values['STAT'])),
             bore_radius=convert_header_value_float('RADB'),
-            portype=(None if header_values['PORTYPE'] is None else str(header_values['PORTYPE'])),
             fracture_mult=convert_header_value_float('FM'),
             sector=convert_header_value_int('SECT'),
             well_group=(None if header_values['GROUP'] is None else str(header_values['GROUP'])),
@@ -276,11 +308,12 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
             layer_assignment=convert_header_value_int('LAYER'),
             polymer_bore_radius=convert_header_value_float('RADBP'),
             polymer_well_radius=convert_header_value_float('RADWP'),
+            portype=(None if header_values['PORTYPE'] is None else str(header_values['PORTYPE'])),
             rel_perm_end_point=new_rel_perm_end_point,
-            date=start_date,
             kh_mult=convert_header_value_float('KHMULT'),
-            date_format=date_format
-            )
+            date_format=date_format,
+            unit_system=unit_system,
+        )
 
         nexus_file.add_object_locations(new_completion.id, [index + header_index + 1])
 

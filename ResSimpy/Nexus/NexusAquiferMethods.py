@@ -1,3 +1,4 @@
+"""Class for collecting all the Nexus Aquifer methods."""
 from __future__ import annotations
 from dataclasses import dataclass
 import os
