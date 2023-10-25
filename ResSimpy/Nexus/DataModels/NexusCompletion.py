@@ -30,7 +30,7 @@ class NexusCompletion(Completion):
         well_indices (Optional[float]): Well index used to calculate performance of the completion. 'WI' in Nexus
         partial_perf (Optional[float]): Partial penetration factor. 'PPERF' in Nexus
         cell_number (Optional[int]): cell number for the completion in unstructured grids. 'CELL' in Nexus
-        bore_radius (Optional[float]): Effective block radius. 'RADB' in Nexus
+        peaceman_well_block_radius (Optional[float]): Effective block radius. 'RADB' in Nexus
         portype (Optional[str]): indicates the pore type for the completion FRACTURE OR MATRIX. 'PORTYPE' in Nexus
         sector (None | str | int): the section of the wellbore to which this completion flows. 'SECT' in Nexus
         khmult (Optional[float]): the multiplier that is applied to the permeability-thickness. 'KHMULT' in Nexus.
@@ -71,7 +71,7 @@ class NexusCompletion(Completion):
                  depth_to_bottom_str: Optional[str] = None, rel_perm_method: Optional[int] = None,
                  dfactor: Optional[float] = None, status: Optional[str] = None, partial_perf: Optional[float] = None,
                  cell_number: Optional[int] = None, perm_thickness_ovr: Optional[float] = None,
-                 bore_radius: Optional[float] = None, fracture_mult: Optional[float] = None,
+                 peaceman_well_block_radius: Optional[float] = None, fracture_mult: Optional[float] = None,
                  sector: Union[None, str, int] = None, well_group: Optional[str] = None, zone: Optional[int] = None,
                  angle_open_flow: Optional[float] = None, temperature: Optional[float] = None,
                  flowsector: Optional[int] = None, parent_node: Optional[str] = None, mdcon: Optional[float] = None,
@@ -93,7 +93,6 @@ class NexusCompletion(Completion):
         self.__depth_to_top_str = depth_to_top_str
         self.__depth_to_bottom_str = depth_to_bottom_str
         self.__cell_number = cell_number
-        self.__bore_radius = bore_radius  # TODO: remove this from here as now in the Completion class
         self.__fracture_mult = fracture_mult
         self.__sector = sector
         self.__well_group = well_group
@@ -119,7 +118,7 @@ class NexusCompletion(Completion):
                          angle_a=angle_a, angle_v=angle_v, grid=grid, depth_to_top=depth_to_top,
                          depth_to_bottom=depth_to_bottom, perm_thickness_ovr=perm_thickness_ovr, dfactor=dfactor,
                          rel_perm_method=rel_perm_method, status=status, date_format=date_format, start_date=start_date,
-                         unit_system=unit_system)
+                         unit_system=unit_system, peaceman_well_block_radius=peaceman_well_block_radius)
 
     @property
     def measured_depth(self):
@@ -136,10 +135,6 @@ class NexusCompletion(Completion):
     @property
     def cell_number(self):
         return self.__cell_number
-
-    @property
-    def bore_radius(self):
-        return self.__bore_radius
 
     @property
     def portype(self):
@@ -289,7 +284,7 @@ class NexusCompletion(Completion):
             'D': ('dfactor', float),
             'IRELPM': ('rel_perm_method', int),
             'STAT': ('status', str),
-            'RADB': ('bore_radius', float),
+            'RADB': ('peaceman_well_block_radius', float),
             'PORTYPE': ('portype', str),
             'FM': ('fracture_mult', float),
             'SECT': ('sector', int),
@@ -350,3 +345,5 @@ class NexusCompletion(Completion):
                 setattr(self, '_NexusCompletion__' + k, v)
             elif hasattr(super(), '_Completion__' + k):
                 setattr(self, '_Completion__' + k, v)
+            # elif hasattr(self, '_' + k):
+            #     setattr(self, '_' + k, v)

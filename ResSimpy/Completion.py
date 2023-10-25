@@ -65,6 +65,7 @@ class Completion(DataObjectMixin, ABC):
     __date_format: Optional[DateFormatEnum.DateFormat] = None
     __start_date: Optional[str] = None
     __unit_system: Optional[UnitSystem] = None
+    __peaceman_well_block_radius: Optional[float] = None
 
     def __init__(self, date: str, i: Optional[int] = None, j: Optional[int] = None, k: Optional[int] = None,
                  skin: Optional[float] = None, depth: Optional[float] = None, well_radius: Optional[float] = None,
@@ -177,7 +178,8 @@ class Completion(DataObjectMixin, ABC):
         return self.__status
 
     @property
-    def peaceman_well_block_radius(self):
+    def peaceman_well_block_radius(self) -> Optional[float]:
+        """The Peaceman Well Block Radius for the completion"""
         return self.__peaceman_well_block_radius
 
     @property
