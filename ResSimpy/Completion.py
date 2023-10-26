@@ -179,7 +179,7 @@ class Completion(DataObjectMixin, ABC):
 
     @property
     def peaceman_well_block_radius(self) -> Optional[float]:
-        """The Peaceman Well Block Radius for the completion"""
+        """The Peaceman Well Block Radius for the completion."""
         return self.__peaceman_well_block_radius
 
     @property
