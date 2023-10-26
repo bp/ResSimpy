@@ -141,7 +141,8 @@ class Simulator(ABC):
     @abstractmethod
     def write_out_new_model(self, new_location: str) -> None:
         """Writes out a new version of the model to the location supplied.
-         Args:
-            new_location (str): Path to write the contents of the model to.
+
+        Args:
+        new_location (str): Path to write the contents of the model to.
         """
         raise NotImplementedError("Implement this method on the derived class")

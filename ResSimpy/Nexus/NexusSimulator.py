@@ -717,5 +717,5 @@ class NexusSimulator(Simulator):
         self.model_files.move_model_files(new_file_path, new_include_file_location)
 
     def write_out_new_model(self, new_location: str) -> None:
-        """Not implemented for Nexus yet"""
+        """Not implemented for Nexus yet."""
         raise NotImplementedError("Not Implemented Yet")
