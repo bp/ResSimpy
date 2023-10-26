@@ -301,3 +301,62 @@ class NexusGrid(Grid):
         if not self.__grid_faults_loaded:
             self.load_faults()
         return self.__faults_df
+
+    @staticmethod
+    def swap_ij_grid_functions(file_content_as_list: list[str]) -> list[str]:
+        """Swaps the i range and the j range for polynomial functions in array functions.
+
+        Args:
+            file_content_as_list (list[str]): the file contents as a list of strings
+
+        Returns:
+            list[str]: the file contents as a list of strings with the i and j ranges swapped
+        """
+        lines_to_change = []
+        for index, line in enumerate(file_content_as_list):
+            if not nfo.check_token('BLOCKS', line):
+                continue
+            _, *blocks_values = nfo.get_multiple_sequential_values(
+                file_content_as_list[index::], 9, ignore_values=[])
+            i_1 = blocks_values[0]
+            i_2 = blocks_values[1]
+            j_1 = blocks_values[2]
+            j_2 = blocks_values[3]
+            k_1 = blocks_values[4]
+            k_2 = blocks_values[5]
+
+            new_line = f'    BLOCKS\t{j_1}\t{j_2}\t{i_1}\t{i_2}\t{k_1}\t{k_2}\t\n'
+            lines_to_change.append((index, new_line))
+
+        for index, new_line in lines_to_change:
+            file_content_as_list[index] = new_line
+        return file_content_as_list
+
+    @staticmethod
+    def swap_ij_ftrans(file_content_as_list: list[str], number_tokens=7) -> list[str]:
+        """Swaps the i range and the j range for ftrans."""
+        lines_to_change = []
+        ftrans_token_found = False
+        for index, line in enumerate(file_content_as_list):
+            if nfo.check_token('FTRANS', line):
+                ftrans_token_found = True
+                continue
+            if not ftrans_token_found:
+                continue
+            if nfo.check_token('GRID', line):
+                continue
+            valid_line = True
+            trimmed_line = line
+            for _ in range(number_tokens):
+                value = nfo.get_next_value(0, [trimmed_line], trimmed_line)
+                if value is None:
+                    valid_line = False
+            if not valid_line:
+                continue
+            i_1, i_2, im, j_1, j_2, km, transmult = nfo.get_multiple_sequential_values(
+                [file_content_as_list[index]], number_tokens, ignore_values=[])
+            new_line = f'    {i_2}\t{i_1}\t{im}\t{j_2}\t{j_1}\t{km}\t{transmult}\n'
+            lines_to_change.append((index, new_line))
+        for index, new_line in lines_to_change:
+            file_content_as_list[index] = new_line
+        return file_content_as_list

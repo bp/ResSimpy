@@ -640,3 +640,55 @@ def test_included_fault_tables(mocker, fixture_for_osstat_pathlib):
     faults_df = faults_df.astype(comparison_types)
     # Assert
     pd.testing.assert_frame_equal(expected_df, faults_df)
+
+def test_swap_ij_grid_functions():
+    # Arrange
+    file_contents = """
+    FUNCTION							
+    ANALYT	POLYN	0	1				
+    GRID	LGR_1						
+    BLOCKS	3	3	4	12	1	1	
+    NETGRS	OUTPUT	NETGRS	POROSITY	TMY	TMZ	KY	KX
+    """
+    expected_result = """
+    FUNCTION							
+    ANALYT	POLYN	0	1				
+    GRID	LGR_1						
+    BLOCKS	4	12	3	3	1	1	
+    NETGRS	OUTPUT	NETGRS	POROSITY	TMY	TMZ	KY	KX
+    """
+    file_contents = file_contents.splitlines(keepends=True)
+    # Act
+    result = NexusGrid.NexusGrid.swap_ij_grid_functions(file_contents)
+    result = ''.join(result)
+    # Assert
+    assert result == expected_result
+
+def test_swap_ij_ftrans():
+    file_contents = """
+    FTRANS
+    GRID LGR_2
+       3    6    1    3    6    2    0.5089
+       3    7    1    3    7    2    1.5415
+       3    8    1    3    8    2    1.9016
+       3    9    1    3    9    2    1.5415
+       3   10    1    3   10    2    0.9479
+       3   11    1    3   11    2    0.2046
+    """
+    expected_result = """
+    FTRANS
+    GRID LGR_2
+    6\t3\t1\t6\t3\t2\t0.5089
+    7\t3\t1\t7\t3\t2\t1.5415
+    8\t3\t1\t8\t3\t2\t1.9016
+    9\t3\t1\t9\t3\t2\t1.5415
+    10\t3\t1\t10\t3\t2\t0.9479
+    11\t3\t1\t11\t3\t2\t0.2046
+    """
+    file_contents = file_contents.splitlines(keepends=True)
+
+    # Act
+    result = NexusGrid.NexusGrid.swap_ij_ftrans(file_contents)
+    result = ''.join(result)
+    # Assert
+    assert result == expected_result
