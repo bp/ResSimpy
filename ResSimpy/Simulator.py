@@ -138,6 +138,10 @@ class Simulator(ABC):
         """Returns date format as a string."""
         raise NotImplementedError("Implement this method on the derived class")
 
-    def write_model(self, create_new_files: bool = True) -> None:
-        """Writes out the model, either creating new versions of the changed files, or overwriting the existing ones."""
-        raise NotImplementedError("Not Implemented Yet")
+    @abstractmethod
+    def write_out_new_model(self, new_location: str) -> None:
+        """Writes out a new version of the model to the location supplied.
+         Args:
+            new_location (str): Path to write the contents of the model to.
+        """
+        raise NotImplementedError("Implement this method on the derived class")
