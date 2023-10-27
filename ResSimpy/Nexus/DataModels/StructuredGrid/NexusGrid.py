@@ -333,30 +333,36 @@ class NexusGrid(Grid):
         return file_content_as_list
 
     @staticmethod
-    def swap_ij_ftrans(file_content_as_list: list[str], number_tokens=7) -> list[str]:
+    def swap_ij(file_content_as_list: list[str], number_tokens=7, table_token='FTRANS') -> list[str]:
         """Swaps the i range and the j range for ftrans."""
         lines_to_change = []
         ftrans_token_found = False
         for index, line in enumerate(file_content_as_list):
-            if nfo.check_token('FTRANS', line):
+            if nfo.check_token(table_token, line):
                 ftrans_token_found = True
                 continue
             if not ftrans_token_found:
                 continue
             if nfo.check_token('GRID', line):
                 continue
+            if nfo.nexus_token_found(line):
+                break
             valid_line = True
             trimmed_line = line
             for _ in range(number_tokens):
                 value = nfo.get_next_value(0, [trimmed_line], trimmed_line)
                 if value is None:
                     valid_line = False
+                else:
+                    trimmed_line = trimmed_line.replace(value, "", 1)
+
             if not valid_line:
                 continue
             i_1, i_2, im, j_1, j_2, km, transmult = nfo.get_multiple_sequential_values(
                 [file_content_as_list[index]], number_tokens, ignore_values=[])
             new_line = f'    {i_2}\t{i_1}\t{im}\t{j_2}\t{j_1}\t{km}\t{transmult}\n'
             lines_to_change.append((index, new_line))
+
         for index, new_line in lines_to_change:
             file_content_as_list[index] = new_line
         return file_content_as_list
