@@ -15,7 +15,7 @@ class Wells(ABC):
     _wells: Sequence[Well] = field(default_factory=list)
     _wells_loaded: bool = False
 
-    def __init__(self, assume_loaded: bool = False):
+    def __init__(self, assume_loaded: bool = False) -> None:
         self._wells_loaded = assume_loaded
         self._wells = []
 
