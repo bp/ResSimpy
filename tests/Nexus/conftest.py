@@ -4,7 +4,7 @@ import pathlib
 
 
 @pytest.fixture(scope='function', autouse=True)
-def fixture_for_osstat_pathlib(mocker, request):
+def mock_out_file_datetime_operations(mocker, request):
     """ mocks pathlibpath, os.stat and datetime"""
 
     # Avoid mocking datetime if the test setup relies upon it
