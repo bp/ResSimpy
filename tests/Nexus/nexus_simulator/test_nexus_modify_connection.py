@@ -32,7 +32,7 @@ ENDNODECON
 1  # no. writes
 ),
 ], ids=['basic_test'])
-def test_add_connection(mocker, fixture_for_osstat_pathlib, file_contents, expected_file_contents, connection_to_add, expected_connections, expected_number_writes):
+def test_add_connection(mocker, file_contents, expected_file_contents, connection_to_add, expected_connections, expected_number_writes):
     # Arrange
     fcs_file_contents = '''
         RUN_UNITS ENGLISH
@@ -93,7 +93,7 @@ ENDNODECON
 1  # no. writes
 ),
 ], ids=['basic_test',])
-def test_remove_connection(mocker, fixture_for_osstat_pathlib, file_contents, expected_file_contents, connection_to_remove, expected_connection,
+def test_remove_connection(mocker, file_contents, expected_file_contents, connection_to_remove, expected_connection,
                          expected_number_writes):
         # Arrange
         fcs_file_contents = '''
@@ -162,7 +162,7 @@ TIME 01/01/2024
 
 
 ], ids=['basic_test'])
-def test_modify_connections(mocker, fixture_for_osstat_pathlib, file_contents, expected_file_contents, obj_to_modify, modified_properties, expected_objs,
+def test_modify_connections(mocker, file_contents, expected_file_contents, obj_to_modify, modified_properties, expected_objs,
                      expected_number_writes):
     # Arrange
     fcs_file_contents = '''

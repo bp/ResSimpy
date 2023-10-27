@@ -18,7 +18,7 @@ class TestWriteOutSimulator:
 
     runcontrol_contents = '''START 01/01/2019'''
 
-    def test_write_out_case(self, mocker, fixture_for_osstat_pathlib):
+    def test_write_out_case(self, mocker):
         # Arrange
         expected_runcontrol_path = os.path.join('include_files', 'runcontrol_case_1.dat')
         expected_surface_path = os.path.join('include_files', 'surface_file_01_case_1.dat')
@@ -77,7 +77,7 @@ class TestWriteOutSimulator:
         assert writing_mock_open.call_args_list[1][0][0] == expected_surface_path
 
 
-    def test_update_simulator_files(self, mocker, fixture_for_osstat_pathlib):
+    def test_update_simulator_files(self, mocker):
         # Arrange
         def mock_open_wrapper(filename, mode):
             mock_open = mock_multiple_files(mocker, filename, potential_file_dict={

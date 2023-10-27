@@ -646,7 +646,7 @@ def test_well_dates(mocker):
     assert result == expected_result
 
 
-def test_wells_modify(mocker, fixture_for_osstat_pathlib):
+def test_wells_modify(mocker):
     # Arrange
 
     fcs_file_data = '''RUN_UNITS ENGLISH
@@ -884,7 +884,7 @@ def test_wells_modify(mocker, fixture_for_osstat_pathlib):
         'Not overlapping columns', 'no overlap and multiple rows', 'Time card no comp',
         'comment with not overlapping columns',
         'comment inline with headers', 'date_after_end_of_file'])
-def test_add_completion_write(mocker, fixture_for_osstat_pathlib, file_as_list, add_perf_date,
+def test_add_completion_write(mocker, file_as_list, add_perf_date,
                               preserve_previous_completions, expected_result):
     ''' TODO insert into include files
      TODO write multiple completions in a row
@@ -925,7 +925,7 @@ def test_add_completion_write(mocker, fixture_for_osstat_pathlib, file_as_list, 
 @pytest.mark.parametrize('date_format',
                          ['DD/MM/YYYY',
                           DateFormat.DD_MM_YYYY])
-def test_add_completion_correct_wellspec(mocker, fixture_for_osstat_pathlib, date_format):
+def test_add_completion_correct_wellspec(mocker, date_format):
     start_date = '01/01/2020'
     # Arrange
     add_perf_date = '01/03/2020'
@@ -1018,7 +1018,7 @@ iw jw l radw
      ),
 
 ], ids=['modify well in include_locations file'])
-def test_add_completion_include_files(mocker, fixture_for_osstat_pathlib, fcs_file_contents, wells_file,
+def test_add_completion_include_files(mocker, fcs_file_contents, wells_file,
                                       include_file_contents, add_perf_date, expected_result):
     '''TODO after an include in main file
         TODO inside an include file
@@ -1085,7 +1085,7 @@ def test_add_completion_include_files(mocker, fixture_for_osstat_pathlib, fcs_fi
     assert mock_nexus_sim.model_files.well_files[1].file_content_as_list == expected_wells_file.file_content_as_list
 
 
-def test_add_completion_other(mocker, fixture_for_osstat_pathlib):
+def test_add_completion_other(mocker):
     # Arrange
     fcs_file_data = '''RUN_UNITS ENGLISH
 
@@ -1245,7 +1245,7 @@ TIME 01/02/2020
      ),
 
 ], ids=['basic_test_2_lines', 'multiple_lines_added'])
-def test_object_locations_updating(mocker, fixture_for_osstat_pathlib, well_file_data, expected_uuid):
+def test_object_locations_updating(mocker, well_file_data, expected_uuid):
     # Arrange
     fcs_file_data = '''RUN_UNITS ENGLISH
 

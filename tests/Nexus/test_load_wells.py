@@ -60,7 +60,7 @@ C    2  2  2  2 (commented line using 'C')
     WELLMOD PD---_BB KHMULT CON 0.4""", "well3"),
                           ],
                          ids=["basic case", "swapped columns", "number name", "comments", "different cases", "WELLMOD"])
-def test_load_basic_wellspec(mocker, fixture_for_osstat_pathlib, file_contents, expected_name):
+def test_load_basic_wellspec(mocker, file_contents, expected_name):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.DD_MM_YYYY
@@ -90,7 +90,7 @@ def test_load_basic_wellspec(mocker, fixture_for_osstat_pathlib, file_contents, 
     assert well_to_compare.well_name == expected_name
 
 
-def test_load_wells_multiple_wells(mocker, fixture_for_osstat_pathlib):
+def test_load_wells_multiple_wells(mocker):
     # Arrange
     start_date = '01/01/2023'
 
@@ -176,7 +176,7 @@ WELLMOD	RU001	DKH	CON	0
     assert result_wells == expected_wells
 
 
-def test_load_wells_multiple_wells_multiple_dates(mocker, fixture_for_osstat_pathlib):
+def test_load_wells_multiple_wells_multiple_dates(mocker):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.DD_MM_YYYY
@@ -259,7 +259,7 @@ def test_load_wells_multiple_wells_multiple_dates(mocker, fixture_for_osstat_pat
     assert result_wells == expected_wells
 
 
-def test_load_wells_all_columns_present_structured_grid(mocker, fixture_for_osstat_pathlib):
+def test_load_wells_all_columns_present_structured_grid(mocker):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.DD_MM_YYYY
@@ -329,7 +329,7 @@ def test_load_wells_all_columns_present_structured_grid(mocker, fixture_for_osst
     assert result_wells[0].completions[0].depth_to_bottom_str == expected_wells[0].completions[0].depth_to_bottom_str
 
 
-def test_load_wells_all_columns_unstructured_grid(mocker, fixture_for_osstat_pathlib):
+def test_load_wells_all_columns_unstructured_grid(mocker):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.DD_MM_YYYY
@@ -369,7 +369,7 @@ def test_load_wells_all_columns_unstructured_grid(mocker, fixture_for_osstat_pat
     assert result_wells == expected_wells
 
 
-def test_load_wells_rel_perm_tables(mocker, fixture_for_osstat_pathlib):
+def test_load_wells_rel_perm_tables(mocker):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.DD_MM_YYYY
@@ -421,7 +421,7 @@ def test_load_wells_rel_perm_tables(mocker, fixture_for_osstat_pathlib):
     assert result_wells == expected_wells
 
 
-def test_load_wells_na_values_converted_to_none(mocker, fixture_for_osstat_pathlib):
+def test_load_wells_na_values_converted_to_none(mocker):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.DD_MM_YYYY
@@ -519,7 +519,7 @@ TIME 01/08/2023 !232 days
 
                          ],
                          ids=['None specified', 'Oilfield', 'kpa', 'kgcm2 + comment before', 'metbar', 'lab'])
-def test_correct_units_loaded(mocker, fixture_for_osstat_pathlib, file_contents, expected_units):
+def test_correct_units_loaded(mocker, file_contents, expected_units):
     # Arrange
     start_date = '01/08/2023'
     date_format = DateFormat.DD_MM_YYYY
@@ -551,7 +551,7 @@ def test_correct_units_loaded(mocker, fixture_for_osstat_pathlib, file_contents,
                           ("", "", DateFormat.MM_DD_YYYY)],
                          ids=['Date format in wellspec file', 'American Date format in wellspec file',
                               'Date format in FCS file only', 'No date format specified'])
-def test_load_full_model_with_wells(mocker: MockerFixture, fixture_for_osstat_pathlib, first_line_wellspec,
+def test_load_full_model_with_wells(mocker: MockerFixture, first_line_wellspec,
                                     first_line_fcs_file, expected_format):
     # Arrange
     wellspec_contents = f"""
@@ -580,7 +580,7 @@ def test_load_full_model_with_wells(mocker: MockerFixture, fixture_for_osstat_pa
     assert model.wells.wells[0].completions[0].date_format == expected_format
 
 
-def test_load_full_model_with_wells_no_date_format(mocker: MockerFixture, fixture_for_osstat_pathlib):
+def test_load_full_model_with_wells_no_date_format(mocker: MockerFixture):
     # Arrange
     wellspec_contents = f"""    
     TIME 01/08/2023 !232 days
@@ -615,7 +615,7 @@ DATEFORMAT
     assert result_error_msg == expected_error_str
 
 
-def test_load_full_model_with_wells_invalid_date_format(mocker: MockerFixture, fixture_for_osstat_pathlib):
+def test_load_full_model_with_wells_invalid_date_format(mocker: MockerFixture):
     # Arrange
     wellspec_contents = f"""
     DATEFORMAT DD.MM.YYYY    
@@ -649,7 +649,7 @@ def test_load_full_model_with_wells_invalid_date_format(mocker: MockerFixture, f
     assert result_error_msg == expected_error_str
 
 
-def test_load_full_model_with_wells_multiple_wellspecs(mocker: MockerFixture, fixture_for_osstat_pathlib):
+def test_load_full_model_with_wells_multiple_wellspecs(mocker: MockerFixture):
     # Arrange
     wellspec_1_contents = f"""
 DATEFORMAT     DD/MM/YYYY
