@@ -8,7 +8,7 @@ from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import generic_fcs, check_file_read_write_is_correct
 
 
-def test_fcs_file(mocker, fixture_for_osstat_pathlib):
+def test_fcs_file(mocker):
     # Arrange
     fcs_content = '''DESC reservoir1
 RUN_UNITS ENGLISH
@@ -58,7 +58,7 @@ GRID_FILES
     assert fcs_file.structured_grid_file == expected_fcs_file.structured_grid_file
 
 
-def test_fcs_file_multiple_methods(mocker, fixture_for_osstat_pathlib):
+def test_fcs_file_multiple_methods(mocker):
     # Arrange
     fcs_content = '''DESC reservoir1
     RUN_UNITS ENGLISH
@@ -113,7 +113,7 @@ def test_fcs_file_multiple_methods(mocker, fixture_for_osstat_pathlib):
     assert result == expected_fcs_file
 
 
-def test_fcs_file_all_methods(mocker, fixture_for_osstat_pathlib):
+def test_fcs_file_all_methods(mocker):
     # Currently this test doesn't cover ensuring that the include file object gets into the fcs file.
     # Arrange
     fcs_content = '''DESC reservoir1
@@ -312,7 +312,7 @@ def test_get_full_network(mocker):
     assert to_list == expected_to_list
     assert from_list == expected_from_list
 
-def test_update_fcs_file(mocker, fixture_for_osstat_pathlib):
+def test_update_fcs_file(mocker):
     # Arrange
     fcs_file_class = generic_fcs(mocker)
     # flag one of the files as modified and give them some content
@@ -358,7 +358,7 @@ def test_update_fcs_file(mocker, fixture_for_osstat_pathlib):
                              ),
                          ],
                          ids=['basic', 'different methods', 'no method_number'])
-def test_update_file_path(mocker, fixture_for_osstat_pathlib, token, method_number, edited_line, new_line_content):
+def test_update_file_path(mocker, token, method_number, edited_line, new_line_content):
     # Arrange
     fcs_file_class = generic_fcs(mocker)
     expected_fcs_content = fcs_file_class.file_content_as_list.copy()
@@ -370,7 +370,7 @@ def test_update_file_path(mocker, fixture_for_osstat_pathlib, token, method_numb
     assert fcs_file_class.file_content_as_list == expected_fcs_content
 
 
-def test_update_file_path_no_content(mocker, fixture_for_osstat_pathlib):
+def test_update_file_path_no_content(mocker):
     # Arrange
     fcs_file_class = generic_fcs(mocker)
     fcs_file_class.file_content_as_list = None
@@ -380,7 +380,7 @@ def test_update_file_path_no_content(mocker, fixture_for_osstat_pathlib):
     assert str(ve.value) == 'No file content to change file path on.'
 
 
-def test_move_model_files(mocker, fixture_for_osstat_pathlib):
+def test_move_model_files(mocker):
     # Arrange
     fcs_path = 'test_fcs.fcs'
 

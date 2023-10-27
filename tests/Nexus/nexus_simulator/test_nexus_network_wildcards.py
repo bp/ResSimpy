@@ -107,7 +107,7 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     ),
     ], ids=['basic_test', 'with extra nodes', 'with extra constraints', 'wildcard in the middle + case sensitivity',
             'previous time card'])
-def test_read_wildcard(mocker, fixture_for_osstat_pathlib, file_contents, expected_constraints):
+def test_read_wildcard(mocker, file_contents, expected_constraints):
     # Arrange
     fcs_file_contents = '''
         RUN_UNITS ENGLISH
@@ -142,7 +142,7 @@ def test_read_wildcard(mocker, fixture_for_osstat_pathlib, file_contents, expect
     # Assert
     assert result == expected_result
 
-def test_add_remove_wildcard_well(mocker, fixture_for_osstat_pathlib):
+def test_add_remove_wildcard_well(mocker):
     # Arrange
     model = get_fake_nexus_simulator(mocker)
     parent_network = NexusNetwork(model)

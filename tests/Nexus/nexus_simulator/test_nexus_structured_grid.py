@@ -20,7 +20,7 @@ from tests.multifile_mocker import mock_multiple_files
                               "/path/to/netgrs_file\nother text\n\n",
                               "/path/to/netgrs_file", "porosity_file.inc", 111, 123, 321)
                          ])
-def test_load_structured_grid_file_basic_properties(mocker, fixture_for_osstat_pathlib, structured_grid_file_contents,
+def test_load_structured_grid_file_basic_properties(mocker, structured_grid_file_contents,
                                                     expected_net_to_gross, expected_porosity, expected_range_x,
                                                     expected_range_y, expected_range_z):
     """Read in Structured Grid File"""
@@ -51,7 +51,7 @@ def test_load_structured_grid_file_basic_properties(mocker, fixture_for_osstat_p
     assert result.range_z == expected_range_z
 
 
-def test_load_structured_grid_file_basic_properties_nested_includes(mocker, fixture_for_osstat_pathlib):
+def test_load_structured_grid_file_basic_properties_nested_includes(mocker):
     """Read in Structured Grid File where properties are in a nested include file"""
     # Arrange
     fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
@@ -112,7 +112,7 @@ INCLUDE includes/Another_structured_grid_01.inc"""
                               "\nother text\n\nNETGRS VALUE\n\t ntg_file.dat\n POROSITY CON\n!ANOTHER COMMENT \n3",
                               "ntg_file.dat", "3", "VALUE", "CON", 69, 30, 1),
                          ])
-def test_load_structured_grid_file_dict_basic_properties(mocker, fixture_for_osstat_pathlib, structured_grid_file_contents,
+def test_load_structured_grid_file_dict_basic_properties(mocker, structured_grid_file_contents,
                                                          expected_net_to_gross, expected_porosity,
                                                          expected_ntg_modifier,
                                                          expected_porosity_modifier, expected_range_x, expected_range_y,
@@ -177,7 +177,7 @@ def test_load_structured_grid_file_fails(mocker):
                              ("CON VALUE\nSW VALUE\tSW_FILE.inc",
                               "VALUE", "SW_FILE.inc"),
                          ])
-def test_load_structured_grid_file_sw(mocker, fixture_for_osstat_pathlib, structured_grid_file_contents,
+def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
                                       expected_water_saturation_modifier,
                                       expected_water_saturation_value):
     """Read in Structured Grid File"""
@@ -238,7 +238,7 @@ def test_load_structured_grid_file_sw(mocker, fixture_for_osstat_pathlib, struct
                             ("!KX VALUE\nKX VALUE\n /path/to/kx.inc\nKY MULT\n12 KX\n KZ VALUE\n\n\n kz.inc", "/path/to/kx.inc",
                               "VALUE", "12 KX", "MULT", "kz.inc", "VALUE"),
                          ])
-def test_load_structured_grid_file_k_values(mocker, fixture_for_osstat_pathlib, structured_grid_file_contents, expected_kx_value,
+def test_load_structured_grid_file_k_values(mocker, structured_grid_file_contents, expected_kx_value,
                                             expected_kx_modifier, expected_ky_value, expected_ky_modifier,
                                             expected_kz_value, expected_kz_modifier):
     """Read in Structured Grid File"""
@@ -302,7 +302,7 @@ def test_load_structured_grid_file_k_values(mocker, fixture_for_osstat_pathlib, 
                                   "VALUE", "path/to/kx.inc"),
                               VariableEntry("VALUE", "path/to/ky.inc"), VariableEntry("VALUE", "path/to/KZ.inc")),
                          ])
-def test_save_structured_grid_values(mocker, fixture_for_osstat_pathlib, new_porosity, new_sw, new_netgrs, new_kx, new_ky, new_kz):
+def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, new_kx, new_ky, new_kz):
     """Test saving values passed from the front end to the structured grid file and update the class"""
     # Arrange
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
@@ -381,7 +381,7 @@ def test_save_structured_grid_values(mocker, fixture_for_osstat_pathlib, new_por
                               "!ioeheih\ndummy text\nother text\n\tNETGRS VALUE\n INCLUDE NETGRS_FILE.inc !Inline Comment"
                               "\n !Comment VALUE\n"),
                          ])
-def test_view_command(mocker, fixture_for_osstat_pathlib, structured_grid_file_contents, expected_text):
+def test_view_command(mocker, structured_grid_file_contents, expected_text):
     """Test the View Command functionality"""
     # Arrange
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
@@ -427,7 +427,7 @@ def test_view_command(mocker, fixture_for_osstat_pathlib, structured_grid_file_c
                                  'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nstructured_grid\n path/to/include_locations/grid.dat',
                                  'testpath1', 'path/to/include_locations/grid.dat'),
                          ])
-def test_get_abs_structured_grid_path(mocker, fixture_for_osstat_pathlib, fcs_file, expected_root, expected_extracted_path):
+def test_get_abs_structured_grid_path(mocker, fcs_file, expected_root, expected_extracted_path):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file)
     mocker.patch("builtins.open", open_mock)
@@ -532,7 +532,7 @@ def test_get_abs_structured_grid_path(mocker, fixture_for_osstat_pathlib, fcs_fi
      )
     ], ids=['basic_nomultfl', 'no_faults', 'basic_w_multfl']
                          )
-def test_load_faults(mocker, fixture_for_osstat_pathlib, structured_grid_file_contents, expected_results):
+def test_load_faults(mocker, structured_grid_file_contents, expected_results):
     """Read in Structured Grid File and test extraction of fault information"""
     # Arrange
     fcs_path = 'testpath1/nexus_run.fcs'
@@ -566,7 +566,7 @@ def test_load_faults(mocker, fixture_for_osstat_pathlib, structured_grid_file_co
         pd.testing.assert_frame_equal(expected_results, faults_df)
 
 
-def test_included_fault_tables(mocker, fixture_for_osstat_pathlib):
+def test_included_fault_tables(mocker):
     # Arrange
     fcs_path = 'testpath1/nexus_run.fcs'
     fcs_file = "DESC test fcs file\nDATEFORMAT MM/DD/YYYY\nGRID_FILES\n\tSTRUCTURED_GRID test_structured_grid.dat"

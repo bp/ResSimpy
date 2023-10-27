@@ -49,7 +49,7 @@ iw jw l radw
 ''')
 
 ])
-def test_write_to_file(mocker, fixture_for_osstat_pathlib, fcs_file_contents, wells_file, expected_result):
+def test_write_to_file(mocker, fcs_file_contents, wells_file, expected_result):
     # Arrange
     start_date = '01/01/2020'
     add_perf_date = '01/03/2020'
@@ -159,7 +159,7 @@ iw jw l radw
 ''',
 9, [[4], [10]]),
 ], ids=['basic_test', 'only 1 completion to remove'] )
-def test_remove_completion_write_to_file(mocker, fixture_for_osstat_pathlib, fcs_file_contents, wells_file, expected_result,
+def test_remove_completion_write_to_file(mocker, fcs_file_contents, wells_file, expected_result,
         expected_removed_completion_line, expected_obj_locations, ):
     # Arrange
     start_date = '01/01/2020'
@@ -247,7 +247,7 @@ iw jw l radw
 ''')
 
 ])
-def test_modify_completion_write_to_file(mocker, fixture_for_osstat_pathlib, fcs_file_contents, wells_file, expected_result):
+def test_modify_completion_write_to_file(mocker, fcs_file_contents, wells_file, expected_result):
     # Arrange
     start_date = '01/01/2020'
     modify_perf_date = '01/03/2020'
@@ -289,7 +289,7 @@ def test_modify_completion_write_to_file(mocker, fixture_for_osstat_pathlib, fcs
 @pytest.mark.parametrize('folder_exists, expected_number_calls', [
     (True, 0),
     (False, 1)], ids=['folder_exists', 'folder_does_not_exist'])
-def test_write_file_makedirs(mocker, fixture_for_osstat_pathlib, folder_exists, expected_number_calls, ):
+def test_write_file_makedirs(mocker, folder_exists, expected_number_calls, ):
     # Arrange
     file_contents = 'Contents of the file to write'
     file_location = '/path/to/file.dat'

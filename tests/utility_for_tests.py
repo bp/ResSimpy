@@ -44,23 +44,6 @@ def get_fake_nexus_simulator(mocker: MockerFixture, fcs_file_path: str = '/path/
 
     return fake_nexus_sim
 
-def get_fake_stat_pathlib_time(mocker):
-    """ mocks pathlibpath, os.stat and datetime"""
-    
-    dt_mock = mocker.MagicMock()
-    mocker.patch('datetime.datetime', dt_mock)
-    dt_mock.fromtimestamp.return_value = None
-
-    owner_mock = mocker.MagicMock(return_value=None)
-    group_mock = mocker.MagicMock(return_value=None)
-    mocker.patch.object(pathlib.Path, 'owner', owner_mock)
-    mocker.patch.object(pathlib.Path, 'group', group_mock)
-
-    os_mock = mocker.MagicMock()
-    mocker.patch('os.stat',os_mock)
-    os_mock.return_value.st_mtime = None
-
-
 def uuid_side_effect():
     """Generates an infinite sequence of overwrites for uuid calls."""
     num = 0

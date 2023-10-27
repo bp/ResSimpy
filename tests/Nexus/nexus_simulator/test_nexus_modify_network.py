@@ -249,7 +249,7 @@ TIME 01/01/2024
             ],
         ),
         ], ids=['wellhead', 'wellbore', 'wellconnection', 'nodeconnections'])
-    def test_modify_network_component(self, mocker, fixture_for_osstat_pathlib, object_type, network_component,
+    def test_modify_network_component(self, mocker, object_type, network_component,
                                       expected_file_contents, obj_to_modify,
                                       modified_properties, expected_objs):
         # Arrange
