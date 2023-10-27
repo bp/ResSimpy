@@ -83,7 +83,7 @@ defines conventions such as variable naming and capitalisation. A consistent
 style makes it much easier for other developers to read and understand your
 code.
 
-See `Static analysis`_ for how to check your code for conformance to PEP8 style.
+See :ref:`Running Other Checks on your local machine` for how to check your code for conformance to PEP8 style.
 
 Tests
 -----
@@ -111,18 +111,26 @@ tests directory for examples of existing tests. A typical pattern is
 
 .. code:: python
 
-    def test_a_thing():
-        """ Test to check that MyClass behaves as expected """
-
+    def test_get_first_perforation(completions, expected_perforation):
+        """Test to check that the first_perforation property returns the correct completion"""
         # Arrange
-        my_obj = resqml.MyClass()
+        completion_1 = NexusCompletion(date='01/02/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None, grid='GRID1',
+                      partial_perf=0.1, date_format=DateFormat.DD_MM_YYYY),
+        completion_2 = NexusCompletion(date='01/01/2023', i=1, j=2, k=3, well_radius=9.11, partial_perf=0.5,
+                      date_format=DateFormat.DD_MM_YYYY)
+
+        completions = [completion_1, completion_2]
+
+        well = NexusWell(well_name='test well', completions=completions,
+                         unit_system=UnitSystem.ENGLISH)
+
+        expected_perforation = completion2
 
         # Act
-        result = my_obj.do_calculation()
+        result = well.first_perforation
 
         # Assert
-        expected = [1,2,3]
-        assert result == expected
+        assert result == expected_perforation
 
 Running tests and other checks
 ^^^^^^^^^^^^^
