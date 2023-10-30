@@ -60,7 +60,7 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
     status: Optional[str] = None
 
     cell_number: Optional[str] = None
-    bore_radius: Optional[str] = None
+    peaceman_well_block_radius: Optional[str] = None
     portype: Optional[str] = None
     fracture_mult: Optional[str] = None
     sector: Optional[str] = None
@@ -108,7 +108,7 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
         'IW': iw, 'JW': jw, 'L': kw, 'MD': md, 'SKIN': skin, 'DEPTH': depth, 'X': x_value, 'Y': y_value,
         'ANGLA': angla, 'ANGLV': anglv, 'GRID': grid, 'WI': wi, 'DTOP': dtop, 'DBOT': dbot, 'RADW': well_radius,
         'PPERF': partial_perf, 'CELL': cell_number, 'KH': perm_thickness_ovr, 'D': dfactor, 'IRELPM': rel_perm_method,
-        'STAT': status, 'RADB': bore_radius, 'PORTYPE': portype, 'FM': fracture_mult, 'SECT': sector,
+        'STAT': status, 'RADB': peaceman_well_block_radius, 'PORTYPE': portype, 'FM': fracture_mult, 'SECT': sector,
         'GROUP': well_group, 'ZONE': zone, 'ANGLE': angle_open_flow, 'TEMP': temperature, 'FLOWSECT': flowsector,
         'PARENT': parent_node, 'MDCON': mdcon, 'IPTN': pressure_avg_pattern, 'LENGTH': length, 'K': permeability,
         'ND': non_darcy_model, 'DZ': comp_dz, 'LAYER': layer_assignment, 'RADBP': polymer_bore_radius,
@@ -290,7 +290,7 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
             partial_perf=convert_header_value_float('PPERF'),
             cell_number=convert_header_value_int('CELL'),
             perm_thickness_ovr=convert_header_value_float('KH'),
-            bore_radius=convert_header_value_float('RADB'),
+            peaceman_well_block_radius=convert_header_value_float('RADB'),
             fracture_mult=convert_header_value_float('FM'),
             sector=convert_header_value_int('SECT'),
             well_group=(None if header_values['GROUP'] is None else str(header_values['GROUP'])),
