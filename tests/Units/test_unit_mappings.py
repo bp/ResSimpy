@@ -211,7 +211,7 @@ def test_object_attribute_property_completion():
                        (units.well_indices, ''),
                        (units.partial_perf, ''),
                        (units.cell_number, ''),
-                       (units.bore_radius, 'ft'),
+                       (units.peaceman_well_block_radius, 'ft'),
                        (units.portype, ''),
                        (units.facture_mult, ''),
                        (units.sector, ''),

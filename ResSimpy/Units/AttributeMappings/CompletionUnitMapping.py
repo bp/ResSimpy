@@ -31,7 +31,7 @@ class CompletionUnits(BaseUnitMapping):
         'well_indices': Dimensionless(),
         'partial_perf': Dimensionless(),
         'cell_number': Dimensionless(),
-        'bore_radius': Length(),
+        'peaceman_well_block_radius': Length(),
         'portype': Dimensionless(),
         'facture_mult': Dimensionless(),
         'sector': Dimensionless(),
@@ -163,9 +163,9 @@ class CompletionUnits(BaseUnitMapping):
         return self.get_unit_from_attribute('cell_number')
 
     @property
-    def bore_radius(self) -> str:
-        """Returns the unit for bore_radius."""
-        return self.get_unit_from_attribute('bore_radius')
+    def peaceman_well_block_radius(self) -> str:
+        """Returns the unit for peaceman_well_block_radius."""
+        return self.get_unit_from_attribute('peaceman_well_block_radius')
 
     @property
     def portype(self) -> str:
