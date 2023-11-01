@@ -17,7 +17,7 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     ENDTARGET'''
     )
     ],ids=['basic_test'])
-def test_read_target(mocker, fixture_for_osstat_pathlib, file_contents):
+def test_read_target(mocker, file_contents):
     # Arrange
     fcs_file_contents = '''
         RUN_UNITS ENGLISH

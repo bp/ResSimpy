@@ -40,7 +40,7 @@ from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
           '15/12/2021(00:00:01)']),
     ], ids=['USA date format', 'Non-USA date format', 'times in include', 'times in runcontrol only',
             'times and dates', 'times and dates 2'])
-def test_load_run_control_file_times_in_include_file(mocker, fixture_for_osstat_pathlib, date_format, expected_date_format,
+def test_load_run_control_file_times_in_include_file(mocker, date_format, expected_date_format,
                                                      run_control_contents, include_file_contents, expected_times):
     """Getting times from an external include file"""
     # Arrange
@@ -76,7 +76,7 @@ def test_load_run_control_file_times_in_include_file(mocker, fixture_for_osstat_
         ("DD/MM/YYYY", "START 01/01/1980\nINCLUDE     path/to/include\nTIME 19/08/2025\nTIME 0.1\nTIME 5p0000",
          ""),
     ])
-def test_load_run_control_invalid_times(mocker, fixture_for_osstat_pathlib, date_format, run_control_contents, include_file_contents):
+def test_load_run_control_invalid_times(mocker, date_format, run_control_contents, include_file_contents):
     """Included files contain dates in invalid format, raise error when attempting to re-write them."""
     # Arrange
     fcs_file_name = 'testpath1/test.fcs'
@@ -135,7 +135,7 @@ def test_load_run_control_invalid_times(mocker, fixture_for_osstat_pathlib, date
              '08/07/2025', '01/02/1981'], 'replace',
          ['0.1', '01/02/1981', '08/08/1998', '15/12/2000', '01/01/2001', '08/07/2025']),
     ])
-def test_modify_times(mocker, fixture_for_osstat_pathlib, date_format, expected_date_format,
+def test_modify_times(mocker, date_format, expected_date_format,
                       run_control_contents, include_file_contents, new_times, operation, expected_times):
     """Testing the modify times code. Checks that the code correctly orders times and removes duplicates (checks both
     US and Rest of the world dates) """
@@ -216,7 +216,7 @@ def test_modify_times(mocker, fixture_for_osstat_pathlib, date_format, expected_
          ['0.3', '01/01/1981', '01/01/2000', '08/08/1981'], 'REMOVE',
          ['0.1', '0.3', '01/01/1986', '1503.1', '15/10/1993', '15/12/1996', '01/01/2000']),
     ])
-def test_modify_times_invalid_date(mocker, fixture_for_osstat_pathlib, date_format, expected_date_format,
+def test_modify_times_invalid_date(mocker, date_format, expected_date_format,
                                    run_control_contents, include_file_contents, new_times, operation, expected_times):
     """Checks that the code doesn't allow times to be entered before the start date, and leaves the times array
      unchanged.  Also Checks that the code outputs new times to the run control file correctly, and clears the include
@@ -296,7 +296,7 @@ def test_load_run_control_file_write_times_to_run_control(mocker, fcs_content, r
     assert result_times == expected_times
 
 
-def test_runcontrol_no_start_time(mocker, fixture_for_osstat_pathlib):
+def test_runcontrol_no_start_time(mocker):
     # Arrange
     fcs_data ='''RUN_UNITS     ENGLISH
     DEFAULT_UNITS ENGLISH

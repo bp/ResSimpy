@@ -60,7 +60,7 @@ C    2  2  2  2 (commented line using 'C')
     WELLMOD PD---_BB KHMULT CON 0.4""", "well3"),
                           ],
                          ids=["basic case", "swapped columns", "number name", "comments", "different cases", "WELLMOD"])
-def test_load_basic_wellspec(mocker, fixture_for_osstat_pathlib, file_contents, expected_name):
+def test_load_basic_wellspec(mocker, file_contents, expected_name):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.DD_MM_YYYY
@@ -90,7 +90,7 @@ def test_load_basic_wellspec(mocker, fixture_for_osstat_pathlib, file_contents, 
     assert well_to_compare.well_name == expected_name
 
 
-def test_load_wells_multiple_wells(mocker, fixture_for_osstat_pathlib):
+def test_load_wells_multiple_wells(mocker):
     # Arrange
     start_date = '01/01/2023'
 
@@ -176,7 +176,7 @@ WELLMOD	RU001	DKH	CON	0
     assert result_wells == expected_wells
 
 
-def test_load_wells_multiple_wells_multiple_dates(mocker, fixture_for_osstat_pathlib):
+def test_load_wells_multiple_wells_multiple_dates(mocker):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.DD_MM_YYYY
@@ -221,7 +221,7 @@ def test_load_wells_multiple_wells_multiple_dates(mocker, fixture_for_osstat_pat
     expected_well_1_completion_4 = NexusCompletion(date='15/10/2023', i=5, j=9, k=56, well_radius=37.23,
                                                    date_format=date_format, unit_system=UnitSystem.ENGLISH)
     expected_well_1_completion_5 = NexusCompletion(date='15/12/2023', i=1, j=2, k=4, perm_thickness_ovr=1.423,
-                                                   bore_radius=1.55, date_format=date_format,
+                                                   peaceman_well_block_radius=1.55, date_format=date_format,
                                                    unit_system=UnitSystem.ENGLISH)
 
     expected_well_2_completion_1 = NexusCompletion(date='01/08/2023', i=12, j=12, k=13, well_radius=4.50000000000,
@@ -259,7 +259,7 @@ def test_load_wells_multiple_wells_multiple_dates(mocker, fixture_for_osstat_pat
     assert result_wells == expected_wells
 
 
-def test_load_wells_all_columns_present_structured_grid(mocker, fixture_for_osstat_pathlib):
+def test_load_wells_all_columns_present_structured_grid(mocker):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.DD_MM_YYYY
@@ -267,9 +267,9 @@ def test_load_wells_all_columns_present_structured_grid(mocker, fixture_for_osst
     file_contents = """
     TIME 01/03/2023 !658 days
     WELLSPEC WELL_3
-    IW JW L RADW    MD      SKIN    DEPTH   X               Y   ANGLA  ANGLV  GRID       WI    DTOP    DBOT  KH  KHMULT
-    1  2  3  4.5    1.38974  8.9    7.56    89787.5478      1.24    0.98    3   GRID_A  2.84   TOP   BOT  1.23  0.363
-    6 7 8   9.11    1.568   4.52    8.955   9000.48974      2   1   5.68    GRID_B  0.2874   0.2132  5.45454 4.56      1.567
+    IW JW L RADW    MD      SKIN    DEPTH   X               Y   ANGLA  ANGLV  GRID       WI    DTOP    DBOT  KH  KHMULT RADB
+    1  2  3  4.5    1.38974  8.9    7.56    89787.5478      1.24    0.98    3   GRID_A  2.84   TOP   BOT  1.23  0.363 1234
+    6 7 8   9.11    1.568   4.52    8.955   9000.48974      2   1   5.68    GRID_B  0.2874   0.2132  5.45454 4.56      1.567 1.589
        """
 
     expected_well_completion_1 = NexusCompletion(date='01/03/2023', i=1, j=2, k=3, skin=8.9, depth=7.56,
@@ -277,12 +277,14 @@ def test_load_wells_all_columns_present_structured_grid(mocker, fixture_for_osst
                                                  grid='GRID_A', measured_depth=1.38974, well_indices=2.84,
                                                  depth_to_top=None, depth_to_top_str='TOP', depth_to_bottom_str='BOT',
                                                  depth_to_bottom=None, perm_thickness_ovr=1.23,
-                                                 kh_mult=0.363, date_format=date_format, unit_system=UnitSystem.ENGLISH)
+                                                 kh_mult=0.363, date_format=date_format, unit_system=UnitSystem.ENGLISH,
+                                                 peaceman_well_block_radius=1234)
     expected_well_completion_2 = NexusCompletion(date='01/03/2023', i=6, j=7, k=8, skin=4.52, depth=8.955,
                                                  well_radius=9.11, x=9000.48974, y=2, angle_a=1, angle_v=5.68,
                                                  grid='GRID_B', measured_depth=1.568, well_indices=0.2874,
                                                  depth_to_top=0.2132, depth_to_bottom=5.45454, perm_thickness_ovr=4.56,
-                                                 kh_mult=1.567, date_format=date_format, unit_system=UnitSystem.ENGLISH)
+                                                 kh_mult=1.567, date_format=date_format, unit_system=UnitSystem.ENGLISH,
+                                                 peaceman_well_block_radius=1.589)
 
     expected_well = NexusWell(well_name='WELL_3', completions=[expected_well_completion_1, expected_well_completion_2],
                               unit_system=UnitSystem.ENGLISH)
@@ -304,7 +306,7 @@ def test_load_wells_all_columns_present_structured_grid(mocker, fixture_for_osst
     assert result_wells[0].completions[0].well_indices == expected_wells[0].completions[0].well_indices
     assert result_wells[0].completions[0].partial_perf == expected_wells[0].completions[0].partial_perf
     assert result_wells[0].completions[0].cell_number == expected_wells[0].completions[0].cell_number
-    assert result_wells[0].completions[0].bore_radius == expected_wells[0].completions[0].bore_radius
+    assert result_wells[0].completions[0].peaceman_well_block_radius == expected_wells[0].completions[0].peaceman_well_block_radius
     assert result_wells[0].completions[0].portype == expected_wells[0].completions[0].portype
     assert result_wells[0].completions[0].fracture_mult == expected_wells[0].completions[0].fracture_mult
     assert result_wells[0].completions[0].sector == expected_wells[0].completions[0].sector
@@ -329,7 +331,7 @@ def test_load_wells_all_columns_present_structured_grid(mocker, fixture_for_osst
     assert result_wells[0].completions[0].depth_to_bottom_str == expected_wells[0].completions[0].depth_to_bottom_str
 
 
-def test_load_wells_all_columns_unstructured_grid(mocker, fixture_for_osstat_pathlib):
+def test_load_wells_all_columns_unstructured_grid(mocker):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.DD_MM_YYYY
@@ -344,7 +346,7 @@ def test_load_wells_all_columns_unstructured_grid(mocker, fixture_for_osstat_pat
        """
 
     expected_well_completion_1 = NexusCompletion(date='01/03/2023', rel_perm_method=1, dfactor=0.005, status='OFF',
-                                                 cell_number=1, perm_thickness_ovr=2000.3, bore_radius=2.2,
+                                                 cell_number=1, perm_thickness_ovr=2000.3, peaceman_well_block_radius=2.2,
                                                  fracture_mult=0.5, sector=1, well_group='well_group', zone=1,
                                                  angle_open_flow=10.2, temperature=60.3, flowsector=2,
                                                  parent_node='NODe', mdcon=10.765, pressure_avg_pattern=7,
@@ -369,7 +371,7 @@ def test_load_wells_all_columns_unstructured_grid(mocker, fixture_for_osstat_pat
     assert result_wells == expected_wells
 
 
-def test_load_wells_rel_perm_tables(mocker, fixture_for_osstat_pathlib):
+def test_load_wells_rel_perm_tables(mocker):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.DD_MM_YYYY
@@ -421,7 +423,7 @@ def test_load_wells_rel_perm_tables(mocker, fixture_for_osstat_pathlib):
     assert result_wells == expected_wells
 
 
-def test_load_wells_na_values_converted_to_none(mocker, fixture_for_osstat_pathlib):
+def test_load_wells_na_values_converted_to_none(mocker):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.DD_MM_YYYY
@@ -519,7 +521,7 @@ TIME 01/08/2023 !232 days
 
                          ],
                          ids=['None specified', 'Oilfield', 'kpa', 'kgcm2 + comment before', 'metbar', 'lab'])
-def test_correct_units_loaded(mocker, fixture_for_osstat_pathlib, file_contents, expected_units):
+def test_correct_units_loaded(mocker, file_contents, expected_units):
     # Arrange
     start_date = '01/08/2023'
     date_format = DateFormat.DD_MM_YYYY
@@ -551,7 +553,7 @@ def test_correct_units_loaded(mocker, fixture_for_osstat_pathlib, file_contents,
                           ("", "", DateFormat.MM_DD_YYYY)],
                          ids=['Date format in wellspec file', 'American Date format in wellspec file',
                               'Date format in FCS file only', 'No date format specified'])
-def test_load_full_model_with_wells(mocker: MockerFixture, fixture_for_osstat_pathlib, first_line_wellspec,
+def test_load_full_model_with_wells(mocker: MockerFixture, first_line_wellspec,
                                     first_line_fcs_file, expected_format):
     # Arrange
     wellspec_contents = f"""
@@ -580,7 +582,7 @@ def test_load_full_model_with_wells(mocker: MockerFixture, fixture_for_osstat_pa
     assert model.wells.wells[0].completions[0].date_format == expected_format
 
 
-def test_load_full_model_with_wells_no_date_format(mocker: MockerFixture, fixture_for_osstat_pathlib):
+def test_load_full_model_with_wells_no_date_format(mocker: MockerFixture):
     # Arrange
     wellspec_contents = f"""    
     TIME 01/08/2023 !232 days
@@ -615,7 +617,7 @@ DATEFORMAT
     assert result_error_msg == expected_error_str
 
 
-def test_load_full_model_with_wells_invalid_date_format(mocker: MockerFixture, fixture_for_osstat_pathlib):
+def test_load_full_model_with_wells_invalid_date_format(mocker: MockerFixture):
     # Arrange
     wellspec_contents = f"""
     DATEFORMAT DD.MM.YYYY    
@@ -649,7 +651,7 @@ def test_load_full_model_with_wells_invalid_date_format(mocker: MockerFixture, f
     assert result_error_msg == expected_error_str
 
 
-def test_load_full_model_with_wells_multiple_wellspecs(mocker: MockerFixture, fixture_for_osstat_pathlib):
+def test_load_full_model_with_wells_multiple_wellspecs(mocker: MockerFixture):
     # Arrange
     wellspec_1_contents = f"""
 DATEFORMAT     DD/MM/YYYY

@@ -68,7 +68,7 @@ from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
                               "0",
                               ["2", "4", "10"], 40.0),
                          ])
-def test_get_simulation_progress(mocker, fixture_for_osstat_pathlib, log_file_contents, times, expected_progress):
+def test_get_simulation_progress(mocker, log_file_contents, times, expected_progress):
     """Getting an estimate for how far through the simulation is"""
     # Arrange
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\n"
@@ -101,7 +101,7 @@ def test_get_simulation_progress(mocker, fixture_for_osstat_pathlib, log_file_co
 
 
 @pytest.mark.skip("Re-enable once the run code has been established")
-def test_get_status_running(mocker, fixture_for_osstat_pathlib):
+def test_get_status_running(mocker):
     """Getting a simulation status for a running simulation"""
     # Arrange
     fcs_file = f"RUNCONTROL /run/control/path\nDATEFORMAT DD/MM/YYYY\n"
@@ -127,7 +127,7 @@ def test_get_status_running(mocker, fixture_for_osstat_pathlib):
                               "37856"),
                              ("test\n other status\nNexus\nNexus finished\nerrors 12 warnings 34", "12", "34"),
                          ])
-def test_get_status_finished(mocker, fixture_for_osstat_pathlib, log_file_contents, errors, warnings):
+def test_get_status_finished(mocker, log_file_contents, errors, warnings):
     """Getting a simulation status for a completed simulation - checking the log file"""
     # Arrange
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\n"
@@ -190,7 +190,7 @@ def test_get_status_finished(mocker, fixture_for_osstat_pathlib, log_file_conten
                               f"\ngeneric pdsh   epilog  with cleanup on  hpchw0101 Wed Sep 2 05:13:19 CDT 2020",
                               "-"),
                          ])
-def test_get_base_case_run_time(mocker, fixture_for_osstat_pathlib, log_file_contents, run_time):
+def test_get_base_case_run_time(mocker, log_file_contents, run_time):
     """Test the 'retrieve previous time for run' functionality"""
     # Arrange
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\n"
@@ -238,7 +238,7 @@ def test_get_base_case_run_time(mocker, fixture_for_osstat_pathlib, log_file_con
                               "Wed Sep 2 03:13:19 CDT 2020"),
 
                          ])
-def test_get_simulation_start_time(mocker, fixture_for_osstat_pathlib, log_file_contents, start_time):
+def test_get_simulation_start_time(mocker, log_file_contents, start_time):
     """Test the get start time functionality"""
     # Arrange
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\n"
@@ -275,7 +275,7 @@ def test_get_simulation_start_time(mocker, fixture_for_osstat_pathlib, log_file_
                               f"\nend generic pdsh prolog  with cleanup  Wed Sep 2 03:13:22 CDT 2020",
                               "-"),
                          ])
-def test_get_simulation_end_time(mocker, fixture_for_osstat_pathlib, log_file_contents, end_time):
+def test_get_simulation_end_time(mocker, log_file_contents, end_time):
     """Test the get end time functionality"""
     # Arrange
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\n"
@@ -320,7 +320,7 @@ def test_get_simulation_end_time(mocker, fixture_for_osstat_pathlib, log_file_co
                               f"end generic pdsh   prolog  with cleanup on  hpchw0101 Wed Aug 26 08:15:02 CDT 2020\n\n",
                               "-", "-"),
                          ])
-def test_get_simulation_start_end_time(mocker, fixture_for_osstat_pathlib, log_file_contents, expected_start_time, expected_end_time):
+def test_get_simulation_start_end_time(mocker, log_file_contents, expected_start_time, expected_end_time):
     """Test the get end time functionality"""
     # Arrange
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\n"

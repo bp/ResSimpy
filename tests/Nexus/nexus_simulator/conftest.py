@@ -1,5 +1,4 @@
 import pytest
-from tests.utility_for_tests import get_fake_stat_pathlib_time
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -10,9 +9,5 @@ def simulation(mocker):
     mocker.patch("os.listdir", listdir_mock)
     # Create an override for isfile checks
     mocker.patch("os.path.isfile", lambda x: True)
-
-@pytest.fixture
-def fixture_for_osstat_pathlib(mocker):
-    get_fake_stat_pathlib_time(mocker)
 
 
