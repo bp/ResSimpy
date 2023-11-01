@@ -15,7 +15,6 @@ from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_EOSOPTIONS_TERTIARY_KE
 from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_UNSAT_TABLE_INDICES
 from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 from ResSimpy.DynamicProperty import DynamicProperty
-from ResSimpy.Units.AttributeMapping import AttributeMapBase
 from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import PVTUnits
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_list_str, get_empty_eosopt_dict_union
@@ -88,7 +87,7 @@ class NexusPVTMethod(DynamicProperty):
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
         """Gets the mapping of nexus keywords to attribute definitions."""
-        keywords = {
+        keywords: dict[str, tuple[str, type]] = {
             'DENOIL': ('oil_density', float),
             'DENGAS': ('gas_density', float),
             'API': ('oil_api_gravity', float),
@@ -103,7 +102,7 @@ class NexusPVTMethod(DynamicProperty):
         return keywords
 
     @property
-    def attribute_to_unit_map(self) -> PVTUnits:
+    def units(self) -> PVTUnits:
         """Returns the attribute to unit map for the PVT method."""
         return PVTUnits(unit_system=self.unit_system)
 
