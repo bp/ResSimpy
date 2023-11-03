@@ -13,7 +13,7 @@ class BaseUnitMapping(ABC):
     def __init__(self, unit_system: None | UnitSystem) -> None:
         self.unit_system = unit_system
 
-    def get_unit_from_attribute(self, attribute_name: str, uppercase: bool = False) -> str:
+    def get_unit_for_attribute(self, attribute_name: str, uppercase: bool = False) -> str:
         """Returns the unit variable for the given unit system.
 
         Args:
@@ -29,3 +29,19 @@ class BaseUnitMapping(ABC):
         if uppercase:
             unit = unit.upper()
         return unit
+
+    def get_unit_for_keyword(self, keyword: str,
+                             keyword_mapping: dict[str, tuple[str, type]],
+                             uppercase: bool = False) -> str:
+        """Given a simulator keyword, return the appropriate unit string.
+
+        Args:
+            keyword (str): Simulator keyword
+            keyword_mapping (dict[str, tuple[str, type]]): Mapping of simulator keywords to attribute definitions
+            uppercase (bool): if True returns the unit in uppercase
+
+        Returns:
+            str: unit string
+        """
+        attribute_name = keyword_mapping[keyword][0]  # Extract ResSimpy attribute name from provided keyword mapping
+        return self.get_unit_for_attribute(attribute_name, uppercase)

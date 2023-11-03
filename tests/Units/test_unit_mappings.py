@@ -24,8 +24,7 @@ from ResSimpy.ISODateTime import ISODateTime
     (UnitSystem.METKGCM2, 'm2'),
     (UnitSystem.METBAR, 'm2'),
     (UnitSystem.METRIC_ATM, 'm2'),
-]
-    , ids=['ENGLISH', 'LAB', 'METRIC', 'METKGCM2', 'METBAR', 'METRIC_ATM'])
+], ids=['ENGLISH', 'LAB', 'METRIC', 'METKGCM2', 'METBAR', 'METRIC_ATM'])
 def test_unit_system_enum_to_variable(unit_system, expected_result):
     """Tests the unit_system_enum_to_variable method."""
     # Arrange
@@ -56,7 +55,7 @@ def test_get_unit(attribute, unit_system, expected_result):
     unit_dimension = ConstraintUnits(unit_system=unit_system)
 
     # Act
-    result = unit_dimension.get_unit_from_attribute(attribute_name=attribute)
+    result = unit_dimension.get_unit_for_attribute(attribute_name=attribute)
     # Assert
     assert result == expected_result
 
@@ -67,7 +66,7 @@ def test_get_unit_upper():
     unit_dimension = ConstraintUnits(unit_system=UnitSystem.ENGLISH)
 
     # Act
-    result = unit_dimension.get_unit_from_attribute(attribute_name='max_surface_water_rate', uppercase=True)
+    result = unit_dimension.get_unit_for_attribute(attribute_name='max_surface_water_rate', uppercase=True)
     # Assert
     assert result == 'STB/DAY'
 
@@ -79,7 +78,7 @@ def test_get_unit_error():
 
     # Act
     with pytest.raises(AttributeError) as ae:
-        unit_dimension.get_unit_from_attribute(attribute_name='not_an_attribute')
+        unit_dimension.get_unit_for_attribute(attribute_name='not_an_attribute')
     assert str(ae.value) == 'Attribute not_an_attribute not recognised and does not have a unit definition'
 
 
@@ -332,6 +331,8 @@ def test_object_no_unit_system():
 
 @pytest.mark.parametrize('data_object, attribute, expected_result, upper, unitsystem', [
     (NexusPVTMethod, 'pressure', 'PSIA', True, UnitSystem.ENGLISH),
+    (NexusPVTMethod, 'oil_density', 'kg/m3', False, UnitSystem.METRIC),
+    (NexusPVTMethod, 'gas_heat_capacity_at_constant_volume', 'kJ/(kg*K)', False, UnitSystem.METBAR),
 ])
 def test_get_unit_for_dynamic_property_attribute(data_object, attribute, expected_result, upper, unitsystem):
     """A test to check if DynamicProperty.get_unit_for_attribute method works as expected."""
@@ -339,6 +340,63 @@ def test_get_unit_for_dynamic_property_attribute(data_object, attribute, expecte
     prop_file = NexusFile(location='test/file/prop.dat')
     dataobj = data_object(file=prop_file, input_number=1, model_unit_system=unitsystem)
     # Act
-    result = dataobj.get_unit_for_attribute(attribute_name=attribute, unit_system=UnitSystem.ENGLISH, uppercase=upper)
+    result = dataobj.units.get_unit_for_attribute(attribute_name=attribute, uppercase=upper)
     # Assert
     assert result == expected_result
+
+
+@pytest.mark.parametrize('data_object, keyword, expected_result, upper, unitsystem', [
+    (NexusPVTMethod, 'API', '', True, UnitSystem.ENGLISH),
+    (NexusPVTMethod, 'BO', 'M3/STM3', True, UnitSystem.METBAR),
+    (NexusPVTMethod, 'GOR', 'stcc/stcc', False, UnitSystem.LAB),
+])
+def test_get_unit_for_dynamic_property_keyword(data_object, keyword, expected_result, upper, unitsystem):
+    """A test to check if DynamicProperty.get_unit_for_keyword method works as expected."""
+    # Arrange
+    prop_file = NexusFile(location='test/file/prop.dat')
+    dataobj = data_object(file=prop_file, input_number=1, model_unit_system=unitsystem)
+    # Act
+    result = dataobj.units.get_unit_for_keyword(keyword=keyword, keyword_mapping=dataobj.get_keyword_mapping(),
+                                                uppercase=upper)
+    # Assert
+    assert result == expected_result
+
+
+def test_object_attribute_property_pvt():
+    # Arrange
+    prop_file = NexusFile(location='test/file/prop.dat')
+    test_object = NexusPVTMethod(file=prop_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
+    units = test_object.units
+    # Act
+    result_expected = [(units.pressure, 'psia'),
+                       (units.temperature, 'degrees F'),
+                       (units.delta_pressure, 'psi'),
+                       (units.oil_density, 'lb/ft3'),
+                       (units.gas_density, 'lb/ft3'),
+                       (units.oil_api_gravity, ''),
+                       (units.gas_specific_gravity, ''),
+                       (units.molecular_weight_of_residual_oil, ''),
+                       (units.oil_viscosity, 'cp'),
+                       (units.gas_viscosity, 'cp'),
+                       (units.oil_formation_volume_factor, 'RB/STB'),
+                       (units.gas_formation_volume_factor, 'RB/MSCF'),
+                       (units.solution_gas_oil_ratio, 'MSCF/STB'),
+                       (units.solution_oil_gas_ratio, 'STB/MSCF'),
+                       (units.saturation_pressure, 'psia'),
+                       (units.gas_oil_ratio, 'MSCF/STB'),
+                       (units.oil_gas_ratio, 'STB/MSCF'),
+                       (units.gas_heat_capacity_at_constant_volume, 'BTU/(lb*F)'),
+                       (units.gas_heat_capacity_at_constant_pressure, 'BTU/(lb*F)'),
+                       (units.oil_fvf_over_oil_fvf_at_saturation_pressure, ''),
+                       (units.oil_viscosity_over_oil_viscosity_at_saturation_pressure, ''),
+                       (units.gas_fvf_over_gas_fvf_at_saturation_pressure, ''),
+                       (units.gas_viscosity_over_gas_viscosity_at_saturation_pressure, ''),
+                       (units.gas_heat_capacity_at_constant_volume_over_cv_at_saturation_pressure, ''),
+                       (units.gas_heat_capacity_at_constant_pressure_over_cp_at_saturation_pressure, ''),
+                       (units.critical_pressure, 'psia'),
+                       (units.critical_temperature, 'degrees F'),
+                       (units.critical_volume, 'ft3/lbmole'),
+                       ]
+    # Assert
+    for result, expected in result_expected:
+        assert result == expected

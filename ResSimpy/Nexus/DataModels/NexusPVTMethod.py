@@ -88,16 +88,34 @@ class NexusPVTMethod(DynamicProperty):
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
         """Gets the mapping of nexus keywords to attribute definitions."""
         keywords: dict[str, tuple[str, type]] = {
+            'PRES': ('pressure', float),
+            'TEMP': ('temperature', float),
+            'DP': ('delta_pressure', float),
             'DENOIL': ('oil_density', float),
             'DENGAS': ('gas_density', float),
             'API': ('oil_api_gravity', float),
             'SPECG': ('gas_specific_gravity', float),
             'MWOR': ('molecular_weight_of_residual_oil', float),
-            'PSAT': ('saturation_pressure', float),
-            'PRES': ('pressure', float),
             'VO': ('oil_viscosity', float),
             'VG': ('gas_viscosity', float),
+            'BO': ('oil_formation_volume_factor', float),
+            'BG': ('gas_formation_volume_factor', float),
             'RS': ('solution_gas_oil_ratio', float),
+            'RV': ('solution_oil_gas_ratio', float),
+            'PSAT': ('saturation_pressure', float),
+            'GOR': ('gas_oil_ratio', float),
+            'OGR': ('oil_gas_ratio', float),
+            'CV': ('gas_heat_capacity_at_constant_volume', float),
+            'CP': ('gas_heat_capacity_at_constant_pressure', float),
+            'BOFAC': ('oil_fvf_over_oil_fvf_at_saturation_pressure', float),
+            'VOFAC': ('oil_viscosity_over_oil_viscosity_at_saturation_pressure', float),
+            'BGFAC': ('gas_fvf_over_gas_fvf_at_saturation_pressure', float),
+            'VGFAC': ('gas_viscosity_over_gas_viscosity_at_saturation_pressure', float),
+            'CVFAC': ('gas_heat_capacity_at_constant_volume_over_cv_at_saturation_pressure', float),
+            'CPFAC': ('gas_heat_capacity_at_constant_pressure_over_cp_at_saturation_pressure', float),
+            'PC': ('critical_pressure', float),
+            'TC': ('critical_temperature', float),
+            'VC': ('critical_volume', float),
         }
         return keywords
 
