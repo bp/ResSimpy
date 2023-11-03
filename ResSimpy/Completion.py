@@ -1,6 +1,6 @@
 """The base class for all Well Completions."""
 from __future__ import annotations
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional
 
@@ -40,7 +40,6 @@ class Completion(DataObjectMixin, ABC):
         rel_perm_method (Optional[int]): rel perm method to use for the completion. 'IRELPM' in Nexus
         status (Optional[str]): the status of the layer, can be 'ON' or 'OFF'
         peaceman_well_block_radius (Optional[float]): The pressure equivalent radius of the grid block
-
     """
 
     __date: str
@@ -62,7 +61,7 @@ class Completion(DataObjectMixin, ABC):
     __rel_perm_method: Optional[int] = None
     __status: Optional[str] = None
     __iso_date: Optional[ISODateTime] = None
-    __date_format: Optional[DateFormatEnum.DateFormat] = None
+    _date_format: Optional[DateFormatEnum.DateFormat] = None
     __start_date: Optional[str] = None
     __unit_system: Optional[UnitSystem] = None
     __peaceman_well_block_radius: Optional[float] = None
@@ -77,6 +76,7 @@ class Completion(DataObjectMixin, ABC):
                  peaceman_well_block_radius: Optional[float] = None, start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None) -> None:
         super().__init__({})
+        self._date_format = date_format
         self.__well_radius = well_radius
         self.__date = date
         self.__i = i
@@ -95,11 +95,11 @@ class Completion(DataObjectMixin, ABC):
         self.__dfactor = dfactor
         self.__rel_perm_method = rel_perm_method
         self.__status = status
-        self.__date_format = date_format
         self.__start_date = start_date
         self.__iso_date = self.set_iso_date()
         self.__unit_system = unit_system
         self.__peaceman_well_block_radius = peaceman_well_block_radius
+
 
     @property
     def well_radius(self):
@@ -184,7 +184,7 @@ class Completion(DataObjectMixin, ABC):
 
     @property
     def date_format(self):
-        return self.__date_format
+        return self._date_format
 
     @property
     def start_date(self):

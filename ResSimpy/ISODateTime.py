@@ -51,6 +51,9 @@ class ISODateTime(datetime):
         elif date_format == DateFormat.MM_DD_YYYY:
             converted_date = ISODateTime.strptime(date, '%m/%d/%Y')
 
+        elif date_format == DateFormat.DD_MMM_YYYY:
+            converted_date = ISODateTime.strptime(date, '%d %b %Y')
+
         if converted_date is None:
             raise ValueError('Invalid date format or missing start_date.')
 

@@ -139,7 +139,7 @@ class Simulator(ABC):
         raise NotImplementedError("Implement this method on the derived class")
 
     @abstractmethod
-    def write_out_new_model(self, new_location: str) -> None:
+    def write_out_new_model(self, new_location: str, new_model_name: str) -> None:
         """Writes out a new version of the model to the location supplied.
 
         Args:
