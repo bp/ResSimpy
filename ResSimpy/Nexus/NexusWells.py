@@ -104,27 +104,6 @@ class NexusWells(Wells):
             self.__date_format = date_format
         self._wells_loaded = True
 
-    def get_wells_overview(self) -> str:
-        if not self._wells_loaded:
-            self._load()
-
-        overview: str = ''
-        for well in self._wells:
-            overview += well.printable_well_info
-
-        return overview
-
-    def get_wells_dates(self) -> set[str]:
-        """Returns a set of the unique dates in the wellspec file over all wells."""
-        if not self._wells_loaded:
-            self._load()
-
-        set_dates: set[str] = set()
-        for well in self._wells:
-            set_dates.update(set(well.dates_of_completions))
-
-        return set_dates
-
     def modify(self, well_name: str, completion_properties_list: list[dict[str, None | float | int | str]],
                how: OperationEnum = OperationEnum.ADD) -> None:
         """Modify the existing wells in memory using a dictionary of properties.
