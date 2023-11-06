@@ -1,6 +1,6 @@
 """The base class for all Well Completions."""
 from __future__ import annotations
-from abc import ABC, abstractmethod
+from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
 
@@ -99,7 +99,6 @@ class Completion(DataObjectMixin, ABC):
         self.__iso_date = self.set_iso_date()
         self.__unit_system = unit_system
         self.__peaceman_well_block_radius = peaceman_well_block_radius
-
 
     @property
     def well_radius(self):
