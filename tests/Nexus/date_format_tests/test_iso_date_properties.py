@@ -2,6 +2,7 @@ import datetime
 
 import pytest
 
+from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
@@ -106,3 +107,15 @@ def test_date_decimal_ddmmyyyyFormat():
 
     # Assert
     assert result_date == expected_iso_date
+
+@pytest.mark.maintain_datetime_behaviour
+def test_datetime_to_iso():
+    # Arrange
+    date_to_convert = datetime.datetime(2022, 1, 19)
+    expected_iso_date = ISODateTime(2022, 1, 19)
+
+    #Act
+    result = ISODateTime.datetime_to_iso(date_to_convert, '%Y-%m-%d %H:%M:%S')
+
+    # Assert
+    assert result == expected_iso_date
