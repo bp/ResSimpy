@@ -72,3 +72,8 @@ class ISODateTime(datetime):
             raise ValueError('Invalid date format or missing start_date.')
 
         return converted_date
+
+    @classmethod
+    def datetime_to_iso(cls, date: datetime, datetime_format: str = '%Y-%m-%d') -> ISODateTime:
+        """Converts datetime object to ISODateTime object."""
+        return ISODateTime.strptime(str(date), datetime_format)

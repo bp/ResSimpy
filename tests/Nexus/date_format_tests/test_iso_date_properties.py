@@ -2,6 +2,7 @@ import datetime
 
 import pytest
 
+from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
@@ -113,7 +114,7 @@ def test_dd_MMM_yyyy_date_format():
     # Arrange
     completion = NexusCompletion(date='14 JAN 2022', date_format=DateFormat.DD_MMM_YYYY)
 
-    # expected_iso_date_str = 2022-01-14T00:00:00
+    expected_iso_date_str = '2022-01-14T00:00:00'
     expected_iso_date = datetime.datetime(2022, 1, 14, 0, 0, 0)
 
     # Act
@@ -121,6 +122,7 @@ def test_dd_MMM_yyyy_date_format():
 
     # Assert
     assert result_date == expected_iso_date
+    assert str(completion.iso_date) == expected_iso_date_str
 
 
 @pytest.mark.maintain_datetime_behaviour
@@ -132,4 +134,17 @@ def test_invalid_date_format_raises_error():
         _ = NexusCompletion(date='1234', date_format=DateFormat.DD_MMM_YYYY, start_date='01/01/2023')
 
     # Assert
-    assert str(e.value) ==  'Invalid date format or missing start_date.'
+    assert str(e.value) == 'Invalid date format or missing start_date.'
+
+
+@pytest.mark.maintain_datetime_behaviour
+def test_datetime_to_iso():
+    # Arrange
+    date_to_convert = datetime.datetime(2022, 1, 19)
+    expected_iso_date = ISODateTime(2022, 1, 19)
+
+    # Act
+    result = ISODateTime.datetime_to_iso(date_to_convert, '%Y-%m-%d %H:%M:%S')
+
+    # Assert
+    assert result == expected_iso_date
