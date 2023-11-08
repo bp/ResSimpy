@@ -20,13 +20,13 @@ class Wells(ABC):
         self._wells = []
 
     @property
-    def wells(self):
+    def wells(self) -> Sequence[Well]:
         if not self._wells_loaded:
             self._load()
         return self._wells
 
     @wells.setter
-    def wells(self, value):
+    def wells(self, value) -> None:
         self._wells = value
 
     def _load(self) -> None:

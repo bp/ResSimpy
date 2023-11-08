@@ -106,3 +106,30 @@ def test_date_decimal_ddmmyyyyFormat():
 
     # Assert
     assert result_date == expected_iso_date
+
+
+@pytest.mark.maintain_datetime_behaviour
+def test_dd_MMM_yyyy_date_format():
+    # Arrange
+    completion = NexusCompletion(date='14 JAN 2022', date_format=DateFormat.DD_MMM_YYYY)
+
+    # expected_iso_date_str = 2022-01-14T00:00:00
+    expected_iso_date = datetime.datetime(2022, 1, 14, 0, 0, 0)
+
+    # Act
+    result_date = completion.iso_date
+
+    # Assert
+    assert result_date == expected_iso_date
+
+
+@pytest.mark.maintain_datetime_behaviour
+def test_invalid_date_format_raises_error():
+    # Arrange
+
+    # Act
+    with pytest.raises(ValueError) as e:
+        _ = NexusCompletion(date='1234', date_format=DateFormat.DD_MMM_YYYY, start_date='01/01/2023')
+
+    # Assert
+    assert str(e.value) ==  'Invalid date format or missing start_date.'

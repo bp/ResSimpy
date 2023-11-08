@@ -689,6 +689,18 @@ DATEFORMAT     DD/MM/YYYY
     warnings_mock = mocker.Mock()
     mocker.patch("warnings.warn", warnings_mock)
 
+    expected_wells_overview = """
+    Well Name: WELL1
+    First Perforation: 01/08/2023
+    Last Shut-in: N/A
+    Dates Changed: 01/08/2023
+    
+    Well Name: WELL2
+    First Perforation: 01/08/2023
+    Last Shut-in: N/A
+    Dates Changed: 01/08/2023
+    """
+
     # Act
     model = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='model.fcs', mock_open=False)
     _ = model.wells.wells[0] # Used to stimulate loading as we are lazy loading this part
@@ -698,3 +710,4 @@ DATEFORMAT     DD/MM/YYYY
     assert model.wells.wells[0].completions[0].date_format == expected_well_1_format
     assert model.wells.date_format == expected_well_2_format
     assert model.wells.wells[1].completions[0].date_format == expected_well_2_format
+    assert model.wells.get_wells_overview() == expected_wells_overview
