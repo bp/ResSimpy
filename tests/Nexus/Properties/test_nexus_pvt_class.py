@@ -379,7 +379,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem, TemperatureUnits
 def test_read_pvt_properties_from_file(mocker, file_contents, expected_pvt_properties):
     # Arrange
     pvt_file = NexusFile(location='', file_content_as_list=file_contents.splitlines())
-    pvt_obj = NexusPVTMethod(file=pvt_file, input_number=1)
+    pvt_obj = NexusPVTMethod(file=pvt_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -414,7 +414,7 @@ def test_read_pvt_properties_from_file(mocker, file_contents, expected_pvt_prope
 def test_nexus_blackoil_pvt_repr():
     # Arrange
     pvt_file = NexusFile(location='test/file/pvt.dat')
-    pvt_obj = NexusPVTMethod(file=pvt_file, input_number=1)
+    pvt_obj = NexusPVTMethod(file=pvt_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
     pvt_obj.pvt_type = 'BLACKOIL'
     pvt_obj.properties = {'API': 30.0, 'SPECG': 0.6,
           'UNIT_SYSTEM': UnitSystem.ENGLISH, 'DESC': ['This is first line of description',
@@ -478,7 +478,7 @@ UNSATGAS PRES 3415.0
 def test_nexus_eos_pvt_repr():
     # Arrange
     pvt_file = NexusFile(location='test/file/pvt.dat')
-    pvt_obj = NexusPVTMethod(file=pvt_file, input_number=1)
+    pvt_obj = NexusPVTMethod(file=pvt_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
     pvt_obj.pvt_type = 'EOS'
     pvt_obj.eos_nhc = 6
     pvt_obj.eos_components = ['C1', 'C3', 'C6', 'C10', 'C15', 'C20']

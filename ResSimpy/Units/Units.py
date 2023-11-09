@@ -13,12 +13,15 @@ Bulk Modulus	psia	kPa	kg/cm2	bars	psia
 Compressibility	psi-1	kPa-1	(kg/cm2)-1	(bars)-1	psi-1
 Critical Pressure	psia	kPa	(kg/cm2)	bars	psia
 Critical Temperature	degrees F	degrees C	degrees C	degrees C	degrees C
+Critical Volume ft3/lbmole  m3/kgmole   m3/kgmole   m3/kgmole   cc/gmole
 Density	lb/ft3	kg/m3	kg/m3	kg/m3	gm/cc
 Formation Volume Factor (Oil)	RB/STB	m3/STM3	m3/STM3	m3/STM3	cc/stcc
 Formation Volume Factor (Gas)	RB/MSCF	m3/STM3	m3/STM3	m3/STM3	cc/stcc
 Gas-Liquid Ratio (Gas-Oil Ratio)	MSCF/STB	SM3/STM3	SM3/STM3	SM3/STM3	stcc/stcc
 Gravity Gradient	psi/ft	kPa/m	kg/cm2/m	bars/m	psi/cm
+Heat Capacity   BTU/lb-F    kJ/kg-K kJ/kg-K kJ/kg-K J/g-K
 Length	ft	m	m	m	cm
+Liquid-Gas Ratio (Oil-Gas Ratio)    STB/MSCF    STM3/SM3	STM3/SM3	STM3/SM3	stcc/stcc
 Moles	lb-moles	kg-moles	kg-moles	kg-moles	gmmoles
 Molar Density	lb-moles/ft3	kg-moles/m3	kg-moles/m3	kg-moles/m3	gmmoles/cm3
 Molar Rates	lb-moles/day	kg-moles/day	kg-moles/day	kg-moles/day	gmmoles/hour
@@ -28,6 +31,7 @@ Reservoir Rates	RB/day	m3/day	m3/day	m3/day	cc/hour
 Reservoir Volumes	MRB	k m3	k m3	k m3	k cc
 Saturation Fraction	fraction	fraction	fraction	fraction	fraction
 Solution Gas-Oil Ratio	MSCF/STB	SM3/STM3	SM3/STM3	SM3/STM3	stcc/stcc
+Solution Oil-Gas Ratio	STB/MSCF    STM3/SM3	STM3/SM3	STM3/SM3	stcc/stcc
 Surface Rates (Liquid)	STB/day	STM3/day	STM3/day	STM3/day	stcc/hour
 Surface Rates (Gas)	MSCF/day	SM3/day	SM3/day	SM3/day	stcc/hour
 Surface Volumes (Gas)	MMSCF	k STM3	k STM3	k STM3	k stcc
@@ -145,6 +149,16 @@ class CriticalTemperature(UnitDimension):
     metkgcm2 = 'degrees C'
     metbar = 'degrees C'
     lab = 'degrees C'
+
+
+class CriticalVolume(UnitDimension):
+    """Units for critical volume."""
+    english = 'ft3/lbmole'
+    metric = 'm3/kgmole'
+    metkgcm2 = 'm3/kgmole'
+    metbar = 'm3/kgmole'
+    lab = 'cc/gmole'
+    metric_atm = 'm3/kgmole'
 
 
 class Density(UnitDimension):
@@ -307,6 +321,16 @@ class SolutionGasOilRatio(UnitDimension):
     metric_atm = 'SM3/STM3'
 
 
+class SolutionOilGasRatio(UnitDimension):
+    """Units for solution oil gas ratio."""
+    english = 'STB/MSCF'
+    metric = 'STM3/SM3'
+    metkgcm2 = 'STM3/SM3'
+    metbar = 'STM3/SM3'
+    lab = 'stcc/stcc'
+    metric_atm = 'STM3/SM3'
+
+
 class SurfaceRatesLiquid(UnitDimension):
     """Units for surface rates liquid."""
     english = 'STB/day'
@@ -447,14 +471,34 @@ class HeatTransfer(UnitDimension):
     metric_atm = 'W/(m2*K)'
 
 
-class Conductivity(UnitDimension):
-    """Conductivity units."""
+class ThermalConductivity(UnitDimension):
+    """Thermal conductivity units."""
     english = 'BTU/(hr*ft*F)'
     metric = 'W/(m*K)'
     metkgcm2 = 'W/(m*K)'
     metbar = 'W/(m*K)'
     lab = 'W/(cm*K)'
     metric_atm = 'W/(m*K)'
+
+
+class HeatCapacity(UnitDimension):
+    """Heat capacity units."""
+    english = 'BTU/(lb*F)'
+    metric = 'kJ/(kg*K)'
+    metkgcm2 = 'kJ/(kg*K)'
+    metbar = 'kJ/(kg*K)'
+    lab = 'J/(g*K)'
+    metric_atm = 'kJ/(kg*K)'
+
+
+class DiffusionCoefficient(UnitDimension):
+    """Diffusion coefficient units."""
+    english = 'ft2/day'
+    metric = 'm2/day'
+    metkgcm2 = 'm2/day'
+    metbar = 'm2/day'
+    lab = 'cm2/hr'
+    metric_atm = 'm2/day'
 
 
 class Dimensionless(UnitDimension):

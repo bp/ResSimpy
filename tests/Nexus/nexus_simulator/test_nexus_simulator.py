@@ -1251,9 +1251,9 @@ def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
         pvt_file.line_locations = [(0, uuid.uuid4())]
         pvt_files.append(pvt_file)
 
-    loaded_pvt = {1: NexusPVTMethod(file=pvt_files[0], input_number=1),
-                  2: NexusPVTMethod(file=pvt_files[1], input_number=2),
-                  3: NexusPVTMethod(file=pvt_files[2], input_number=3),
+    loaded_pvt = {1: NexusPVTMethod(file=pvt_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                  2: NexusPVTMethod(file=pvt_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                  3: NexusPVTMethod(file=pvt_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH),
                   }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')

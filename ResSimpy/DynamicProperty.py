@@ -4,6 +4,7 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
 from ResSimpy.File import File
+from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 
 
 @dataclass
@@ -20,6 +21,11 @@ class DynamicProperty(ABC):
     def __init__(self, input_number: int, file: File) -> None:
         self.input_number: int = input_number
         self.file: File = file
+
+    @property
+    def units(self) -> BaseUnitMapping:
+        """Returns the attribute to unit map for the constraint."""
+        raise NotImplementedError('Implement in the derived class.')
 
     def __repr__(self) -> str:
         """Pretty printing dynamic property data."""
