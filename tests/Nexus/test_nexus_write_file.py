@@ -330,7 +330,7 @@ def test_write_file_makedirs(mocker, folder_exists, expected_number_calls, ):
     assert writing_mock_open.call_args_list[0][0][0] == new_file_location
 
 
-def test_nexus_pvt_write_to_file(mocker):
+def test_nexus_pvt_write_to_new_file(mocker):
     # Arrange
     pfile = NexusFile(location='/my/orig_prop/file.dat')
     properties = {'API': 30.0, 'SPECG': 0.6, 'UNIT_SYSTEM': UnitSystem.ENGLISH, 'DESC': ['This is first line of description',
@@ -348,9 +348,60 @@ ENGLISH
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+    dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
                                      modifying_mock_open=writing_mock_open,
                                      mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
+
+
+def test_nexus_pvt_write_to_existing_file(mocker):
+    # Arrange
+    fcs_file_contents = '''PVT Method 1 /my/prop/file.dat
+'''
+    pvt_file_contents = '''DESC This is first line of description
+DESC and this is second line of description
+BLACKOIL API 30.0 SPECG 0.6
+ENGLISH
+'''
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'fcs_file.fcs': fcs_file_contents,
+            '/my/prop/file.dat': pvt_file_contents,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    ls_dir = Mock(side_effect=lambda x: [])
+    mocker.patch('os.listdir', ls_dir)
+    fcs_file_exists = Mock(side_effect=lambda x: True)
+    mocker.patch('os.path.isfile', fcs_file_exists)
+
+    # pfile = NexusFile(location='/my/prop/file.dat')
+    mock_nexus_sim = NexusSimulator('fcs_file.fcs')
+    # properties = {'API': 30.0, 'SPECG': 0.6, 'UNIT_SYSTEM': UnitSystem.ENGLISH, 'DESC': ['This is first line of description',
+    #                                                                                      'and this is second line of description']}
+    # dataobj = NexusPVTMethod(file=pfile, input_number=1, model_unit_system=UnitSystem.ENGLISH, pvt_type='BLACKOIL',
+    #                          properties=properties)
+    mock_nexus_sim.pvt.inputs[1].properties['API'] = 40.0
+    expected_result = '''DESC This is first line of description
+DESC and this is second line of description
+BLACKOIL API 40.0 SPECG 0.6
+ENGLISH
+'''
+
+    # make a mock for the write operation
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+
+    # Act
+    mock_nexus_sim.pvt.inputs[1].write_to_file(overwrite_file=True)
+    # dataobj.write_to_file(overwrite_existing=True)
+
+    # Assert
+    check_file_read_write_is_correct(expected_file_contents=expected_result,
+                                     modifying_mock_open=writing_mock_open,
+                                     mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
+    
