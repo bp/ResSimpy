@@ -58,17 +58,6 @@ class NexusWell(Well):
         return self.shutins[-1]
 
     @property
-    def dates_of_completions(self) -> list[str]:
-        """Returns a list of dates that the well was changed using a completion."""
-
-        dates_changed: list[str] = []
-        for completion in self.__completions:
-            if completion.date not in dates_changed:
-                dates_changed.append(completion.date)
-
-        return dates_changed
-
-    @property
     def printable_well_info(self) -> str:
         """Returns some printable well information in string format."""
         printable_dates_of_completions = ", ".join(self.dates_of_completions)

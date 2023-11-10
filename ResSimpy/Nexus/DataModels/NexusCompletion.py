@@ -30,7 +30,6 @@ class NexusCompletion(Completion):
         well_indices (Optional[float]): Well index used to calculate performance of the completion. 'WI' in Nexus
         partial_perf (Optional[float]): Partial penetration factor. 'PPERF' in Nexus
         cell_number (Optional[int]): cell number for the completion in unstructured grids. 'CELL' in Nexus
-        peaceman_well_block_radius (Optional[float]): Effective block radius. 'RADB' in Nexus
         portype (Optional[str]): indicates the pore type for the completion FRACTURE OR MATRIX. 'PORTYPE' in Nexus
         sector (None | str | int): the section of the wellbore to which this completion flows. 'SECT' in Nexus
         khmult (Optional[float]): the multiplier that is applied to the permeability-thickness. 'KHMULT' in Nexus.

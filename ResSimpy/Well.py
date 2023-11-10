@@ -32,6 +32,17 @@ class Well(ABC):
         return self.__unit_system
 
     @property
+    def dates_of_completions(self) -> list[str]:
+        """Returns a list of dates that the well was changed using a completion."""
+
+        dates_changed: list[str] = []
+        for completion in self.__completions:
+            if completion.date not in dates_changed:
+                dates_changed.append(completion.date)
+
+        return dates_changed
+
+    @property
     def perforations(self) -> Sequence[Completion]:
         """Returns a list of all of the perforations for the well."""
         raise NotImplementedError("This method has not been implemented for this simulator yet")

@@ -32,10 +32,24 @@ class ISODateTime(datetime):
 
     @classmethod
     def convert_to_iso(cls, date: str, date_format: DateFormat, start_date: Optional[str] = None) -> ISODateTime:
+        """Converts an ordinary date to an ISODate format.
+
+        Args:
+            date (str): The date as it is written in the model file.
+            date_format (DateFormat): The date format to use to convert the date.
+            start_date (Optional[str]): The start date of the model (required if the date is a number of days from the
+                start).
+
+        Raises:
+            ValueError: if the provided parameters cannot produce a valid date.
+
+        Returns:
+        ISODateTime: an initialised ISODateTime class instance for the date provided.
+        """
         converted_date = None
 
         if date_format is None:
-            raise ValueError('Please provide date format')
+            raise ValueError('Please provide a date format')
 
         if ISODateTime.isfloat(date) and start_date is None:
             raise ValueError('Please provide start date when date is numeric')
@@ -50,6 +64,9 @@ class ISODateTime(datetime):
 
         elif date_format == DateFormat.MM_DD_YYYY:
             converted_date = ISODateTime.strptime(date, '%m/%d/%Y')
+
+        elif date_format == DateFormat.DD_MMM_YYYY:
+            converted_date = ISODateTime.strptime(date, '%d %b %Y')
 
         if converted_date is None:
             raise ValueError('Invalid date format or missing start_date.')
