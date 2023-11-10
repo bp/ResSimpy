@@ -1,7 +1,9 @@
 from unittest.mock import Mock, MagicMock
 import pytest
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.DataModels.NexusPVTMethod import NexusPVTMethod
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.utility_for_tests import check_file_read_write_is_correct
@@ -327,3 +329,28 @@ def test_write_file_makedirs(mocker, folder_exists, expected_number_calls, ):
         assert makedirs_mock.call_args_list[0][0][0] == '/new/path/to'
     assert writing_mock_open.call_args_list[0][0][0] == new_file_location
 
+
+def test_nexus_pvt_write_to_file(mocker):
+    # Arrange
+    pfile = NexusFile(location='/my/orig_prop/file.dat')
+    properties = {'API': 30.0, 'SPECG': 0.6, 'UNIT_SYSTEM': UnitSystem.ENGLISH, 'DESC': ['This is first line of description',
+                                                                                         'and this is second line of description']}
+    dataobj = NexusPVTMethod(file=pfile, input_number=1, model_unit_system=UnitSystem.ENGLISH, pvt_type='BLACKOIL',
+                             properties=properties)
+    expected_result = '''DESC This is first line of description
+DESC and this is second line of description
+BLACKOIL API 30.0 SPECG 0.6
+ENGLISH
+'''
+
+    # make a mock for the write operation
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+
+    # Act
+    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+
+    # Assert
+    check_file_read_write_is_correct(expected_file_contents=expected_result,
+                                     modifying_mock_open=writing_mock_open,
+                                     mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
