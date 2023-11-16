@@ -28,7 +28,7 @@ class File(FileBase):
 
     def __init__(self, location: str,
                  file_content_as_list: Optional[list[str]] = None,
-                 include_objects: Optional[list[File]] = None) -> None:
+                 include_objects: Optional[list[File]] = None, create_as_modified: bool = False) -> None:
 
         self.location = location
         self.include_objects: Optional[list[File]] = get_empty_list_file() \
@@ -38,7 +38,7 @@ class File(FileBase):
         else:
             self.file_content_as_list = file_content_as_list
         self.__id = uuid.uuid4()
-        self.__file_modified = False
+        self.__file_modified = create_as_modified
 
     # def write_to_file(self, new_file_path: None | str = None) -> None:
     #     """Writes to file specified in self.location the strings contained in the list self.file_content_as_list.
@@ -75,6 +75,9 @@ class File(FileBase):
             Otherwise will raise an error if the file already exists.
         """
         # overwrite File base class method to allow for write_includes
+        if overwrite_file:
+            self._file_modified_set(True)
+
         if new_file_path is None and overwrite_file:
             # In this case just overwrite the file with the existing path:
             new_file_path = self.location
@@ -104,7 +107,6 @@ class File(FileBase):
                 include_file_name = os.path.join(os.path.dirname(new_file_path), new_root_name)
                 if write_file:
                     self.update_include_location_in_file_as_list(include_file_name, file)
-                if write_file:
                     file.write_to_file(include_file_name, write_includes=True, write_out_all_files=write_out_all_files,
                                        overwrite_file=overwrite_file)
 

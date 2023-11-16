@@ -350,7 +350,7 @@ class FcsNexusFile(NexusFile):
         self.write_to_file(new_file_path, write_includes=False)
 
     def update_model_files(self) -> None:
-        """Updates all the modified files and the fcs in the model. Keeps file names and paths the same.
+        """Updates all the modified files in the model. Keeps file names and paths the same.
         Warning: this method overwrites the existing files!
         """
         # Loop through all files in the model, writing out the contents if they have been modified.
@@ -369,9 +369,6 @@ class FcsNexusFile(NexusFile):
             for method_number, file in file_dict.items():
                 if file.file_modified:
                     file.write_to_file(write_includes=True, write_out_all_files=False, overwrite_file=True)
-
-        # write out the final fcs file
-        self.write_to_file(self.location, write_includes=False, overwrite_file=True)
 
     def change_file_path(self, new_file_path: str, token: str, method_number: int | None = None) -> bool:
         """Switch the file path for a new file_path based on the value of the associated keyword in the fcs.

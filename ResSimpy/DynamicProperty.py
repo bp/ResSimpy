@@ -45,7 +45,7 @@ class DynamicProperty(ABC):
             raise ValueError('Please specify only one of either overwrite_existing or new_file_location.')
 
         if new_file_path is not None:
-            new_file = File(file_content_as_list=new_file_contents, location=new_file_path)
+            new_file = File(file_content_as_list=new_file_contents, location=new_file_path, create_as_modified=True)
             new_file.write_to_file(new_file_path=new_file_path, overwrite_file=True)
             return
         elif overwrite_file is False:
