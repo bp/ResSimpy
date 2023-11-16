@@ -40,26 +40,6 @@ class File(FileBase):
         self.__id = uuid.uuid4()
         self.__file_modified = create_as_modified
 
-    # def write_to_file(self, new_file_path: None | str = None) -> None:
-    #     """Writes to file specified in self.location the strings contained in the list self.file_content_as_list.
-
-    #     Args:
-    #         new_file_path (None | str): writes to self.location if left as None. Otherwise writes to new_file_name.
-    #     """
-    #     if new_file_path is not None:
-    #         self.location = new_file_path
-    #     if self.location is None:
-    #         raise ValueError(f'No file path to write to, instead found {self.location}')
-    #     if self.file_content_as_list is None:
-    #         raise ValueError(f'No file data to write out, instead found {self.file_content_as_list}')
-    #     file_str = ''.join(self.file_content_as_list)
-
-    #     with open(self.location, 'w') as fi:
-    #         fi.write(file_str)
-
-    #     # reset the modified file state
-    #     self.__file_modified = False
-
     def update_include_location_in_file_as_list(self, new_path: str, include_file: File) -> None:
         raise NotImplementedError("Implement this in the derived class.")
 

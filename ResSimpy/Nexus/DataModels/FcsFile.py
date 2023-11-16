@@ -16,7 +16,7 @@ else:
     from typing_extensions import Self
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_int_nexus_file, get_empty_list_str, \
-    get_empty_list_nexus_file
+    get_empty_list_nexus_file, get_empty_list_file
 from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
@@ -148,7 +148,7 @@ class FcsNexusFile(NexusFile):
             FcsNexusFile: instance of a FcsNexusFile for a given fcs file path
         """
         fcs_file = cls(location=fcs_file_path)
-        fcs_file.include_objects = get_empty_list_nexus_file()
+        fcs_file.include_objects = get_empty_list_file()
         fcs_file.file_content_as_list = get_empty_list_str()
         fcs_file.include_locations = get_empty_list_str()
 

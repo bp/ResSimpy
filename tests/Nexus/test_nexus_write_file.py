@@ -379,12 +379,7 @@ ENGLISH
     fcs_file_exists = Mock(side_effect=lambda x: True)
     mocker.patch('os.path.isfile', fcs_file_exists)
 
-    # pfile = NexusFile(location='/my/prop/file.dat')
     mock_nexus_sim = NexusSimulator('fcs_file.fcs')
-    # properties = {'API': 30.0, 'SPECG': 0.6, 'UNIT_SYSTEM': UnitSystem.ENGLISH, 'DESC': ['This is first line of description',
-    #                                                                                      'and this is second line of description']}
-    # dataobj = NexusPVTMethod(file=pfile, input_number=1, model_unit_system=UnitSystem.ENGLISH, pvt_type='BLACKOIL',
-    #                          properties=properties)
     mock_nexus_sim.pvt.inputs[1].properties['API'] = 40.0
     expected_result = '''DESC This is first line of description
 DESC and this is second line of description
@@ -398,7 +393,6 @@ ENGLISH
 
     # Act
     mock_nexus_sim.pvt.inputs[1].write_to_file(overwrite_file=True)
-    # dataobj.write_to_file(overwrite_existing=True)
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
