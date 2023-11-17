@@ -4,6 +4,7 @@ import pytest
 from ResSimpy.Nexus.DataModels.NexusAquiferMethod import NexusAquiferMethod
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits
+from ResSimpy.Nexus.NexusAquiferMethods import NexusAquiferMethods
 
 @pytest.mark.parametrize("file_contents, expected_aquifer_properties",
     [("""
@@ -170,6 +171,86 @@ DAQI 9600
 
     # Act
     result = aquifer_obj.__repr__()
+
+    # Assert
+    assert result == expected_output
+
+
+def test_nexus_aquifer_methods_repr():
+    # Arrange
+    aq_file = NexusFile(location='test/file/aquifer.dat')
+    properties = {'DESC': ['This is first line of description', 'and this is second line of description'],
+                              'FETKOVICH': '', 'LABEL': 'FETTY_V',
+                              'UNIT_SYSTEM': UnitSystem.ENGLISH, 'SUNITS': SUnits.PPM, 'IWATER': 2, 'SALINITY': 300000,
+                              'LINFAC': 2.5, 'RADIAL': '', 'VISC': 1.1, 'CT': 1e-6, 'H': 50, 'RO': 5000,
+                              'S': 0.3333, 'RE': 10000, 'NOFLOW': '', 'WAQI': 5e8, 'PAQI': 4800, 'DAQI': 9600
+          }
+    aquifer_obj = NexusAquiferMethod(file=aq_file, input_number=1, model_unit_system=UnitSystem.ENGLISH,
+                                     properties=properties)
+    aquifer_methods_obj = NexusAquiferMethods(model_unit_system=UnitSystem.ENGLISH, inputs={1: aquifer_obj,
+                                                                                            2: aquifer_obj})
+    expected_output = """
+--------------------------------
+AQUIFER method 1
+--------------------------------
+
+FILE_PATH: test/file/aquifer.dat
+
+DESC This is first line of description
+DESC and this is second line of description
+FETKOVICH
+LABEL FETTY_V
+ENGLISH
+SUNITS PPM
+IWATER 2
+SALINITY 300000
+LINFAC 2.5
+RADIAL
+VISC 1.1
+CT 1e-06
+H 50
+RO 5000
+S 0.3333
+RE 10000
+NOFLOW
+WAQI 500000000.0
+PAQI 4800
+DAQI 9600
+
+
+
+--------------------------------
+AQUIFER method 2
+--------------------------------
+
+FILE_PATH: test/file/aquifer.dat
+
+DESC This is first line of description
+DESC and this is second line of description
+FETKOVICH
+LABEL FETTY_V
+ENGLISH
+SUNITS PPM
+IWATER 2
+SALINITY 300000
+LINFAC 2.5
+RADIAL
+VISC 1.1
+CT 1e-06
+H 50
+RO 5000
+S 0.3333
+RE 10000
+NOFLOW
+WAQI 500000000.0
+PAQI 4800
+DAQI 9600
+
+
+"""
+
+    # Act
+    result = aquifer_methods_obj.__repr__()
 
     # Assert
     assert result == expected_output

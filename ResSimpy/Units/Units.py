@@ -291,8 +291,8 @@ class ReservoirRates(UnitDimension):
     metric_atm = 'm3/day'
 
 
-class ReservoirVolumes(UnitDimension):
-    """Units for reservoir volumes."""
+class ReservoirVolumeThousand(UnitDimension):
+    """Units for reservoir volumes, in thousands."""
     english = 'MRB'
     metric = 'k m3'
     metkgcm2 = 'k m3'

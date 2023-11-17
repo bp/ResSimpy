@@ -1,6 +1,7 @@
 from unittest.mock import Mock, MagicMock
 import pytest
-from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Enums.UnitsEnum import SUnits, UnitSystem
+from ResSimpy.Nexus.DataModels.NexusAquiferMethod import NexusAquiferMethod
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusPVTMethod import NexusPVTMethod
@@ -341,6 +342,53 @@ def test_nexus_pvt_write_to_file(mocker):
 DESC and this is second line of description
 BLACKOIL API 30.0 SPECG 0.6
 ENGLISH
+'''
+
+    # make a mock for the write operation
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+
+    # Act
+    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+
+    # Assert
+    check_file_read_write_is_correct(expected_file_contents=expected_result,
+                                     modifying_mock_open=writing_mock_open,
+                                     mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
+
+
+def test_nexus_aquifer_write_to_file(mocker):
+    # Arrange
+    pfile = NexusFile(location='/my/orig_prop/file.dat')
+    properties = {'DESC': ['This is first line of description', 'and this is second line of description'],
+                  'FETKOVICH': '', 'LABEL': 'FETTY_V',
+                  'UNIT_SYSTEM': UnitSystem.ENGLISH, 'SUNITS': SUnits.PPM, 'IWATER': 2, 'SALINITY': 300000,
+                  'LINFAC': 2.5, 'RADIAL': '', 'VISC': 1.1, 'CT': 1e-6, 'H': 50, 'RO': 5000,
+                  'S': 0.3333, 'RE': 10000, 'NOFLOW': '', 'WAQI': 5e8, 'PAQI': 4800, 'DAQI': 9600
+                  }
+    dataobj = NexusAquiferMethod(file=pfile, input_number=1, model_unit_system=UnitSystem.ENGLISH,
+                                 properties=properties)
+    expected_result = '''DESC This is first line of description
+DESC and this is second line of description
+FETKOVICH
+LABEL FETTY_V
+ENGLISH
+SUNITS PPM
+IWATER 2
+SALINITY 300000
+LINFAC 2.5
+RADIAL
+VISC 1.1
+CT 1e-06
+H 50
+RO 5000
+S 0.3333
+RE 10000
+NOFLOW
+WAQI 500000000.0
+PAQI 4800
+DAQI 9600
+
 '''
 
     # make a mock for the write operation
