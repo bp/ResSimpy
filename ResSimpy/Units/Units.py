@@ -391,6 +391,16 @@ class Time(UnitDimension):
     metric_atm = 'days'
 
 
+class InverseTime(UnitDimension):
+    """Units for 1/time."""
+    english = '1/days'
+    metric = '1/days'
+    metkgcm2 = '1/days'
+    metbar = '1/days'
+    lab = '1/hours'
+    metric_atm = '1/days'
+
+
 class TracerConcentrations(UnitDimension):
     """Units for tracer concentrations."""
     english = 'fraction'
@@ -424,6 +434,16 @@ class Viscosity(UnitDimension):
 class Volume(UnitDimension):
     """Units for volume."""
     english = 'ft3'
+    metric = 'm3'
+    metkgcm2 = 'm3'
+    metbar = 'm3'
+    lab = 'cc'
+    metric_atm = 'm3'
+
+
+class ReservoirVolume(UnitDimension):
+    """Units for reservoir volume."""
+    english = 'rb'
     metric = 'm3'
     metkgcm2 = 'm3'
     metbar = 'm3'
@@ -538,4 +558,24 @@ class ProductivityIndex(UnitDimension):
     metkgcm2 = 'STM3/day/kg/cm2'
     metbar = 'STM3/day/bars'
     lab = 'stcc/hour/psi'
+    metric_atm = 'STM3/day/atm'
+
+
+class ReservoirProductivityIndex(UnitDimension):
+    """Productivity index reservoir units."""
+    english = 'RB/day/psi'
+    metric = 'M3/day/kPa'
+    metkgcm2 = 'M3/day/kg/cm2'
+    metbar = 'M3/day/bars'
+    lab = 'cc/hour/psi'
+    metric_atm = 'M3/day/atm'
+
+
+class ReservoirVolumeOverPressure(UnitDimension):
+    """Reservoir volume over pressure, for instance as needed for Carter-Tracy constant."""
+    english = 'rb/psia'
+    metric = 'm3/kPa'
+    metkgcm2 = 'm3/kg/cm2'
+    metbar = 'm3/bars'
+    lab = 'cc/psia'
     metric_atm = 'STM3/day/atm'

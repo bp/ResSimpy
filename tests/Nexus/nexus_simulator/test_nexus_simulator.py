@@ -1554,9 +1554,9 @@ def test_get_aquifer(mocker: MockerFixture, fcs_file_contents: str):
         aq_file.line_locations = [(0, uuid.uuid4())]
         aq_files.append(aq_file)
 
-    loaded_aquifers = {1: NexusAquiferMethod(file=aq_files[0], input_number=1),
-                       2: NexusAquiferMethod(file=aq_files[1], input_number=2),
-                       3: NexusAquiferMethod(file=aq_files[2], input_number=3)
+    loaded_aquifers = {1: NexusAquiferMethod(file=aq_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                       2: NexusAquiferMethod(file=aq_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                       3: NexusAquiferMethod(file=aq_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH)
                        }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')

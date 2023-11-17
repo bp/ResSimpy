@@ -113,7 +113,7 @@ class NexusSimulator(Simulator):
         self._rock: NexusRockMethods = NexusRockMethods()
         self._relperm: NexusRelPermMethods = NexusRelPermMethods()
         self._valve: NexusValveMethods = NexusValveMethods()
-        self._aquifer: NexusAquiferMethods = NexusAquiferMethods()
+        self._aquifer: NexusAquiferMethods = NexusAquiferMethods(model_unit_system=UnitSystem.ENGLISH)
         self._hydraulics: NexusHydraulicsMethods = NexusHydraulicsMethods()
         self._gaslift: NexusGasliftMethods = NexusGasliftMethods()
         # Nexus operations modules
@@ -490,7 +490,8 @@ class NexusSimulator(Simulator):
         # Read in aquifer properties from Nexus aquifer method files
         if self.model_files.aquifer_files is not None and \
                 len(self.model_files.aquifer_files) > 0:
-            self._aquifer = NexusAquiferMethods(files=self.model_files.aquifer_files)
+            self._aquifer = NexusAquiferMethods(files=self.model_files.aquifer_files,
+                                                model_unit_system=self.default_units)
 
         # Read in hydraulics properties from Nexus hyd method files
         if self.model_files.hyd_files is not None and \

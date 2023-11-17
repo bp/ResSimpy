@@ -114,7 +114,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits
 def test_read_aquifer_properties_from_file(mocker, file_contents, expected_aquifer_properties):
     # Arrange
     aq_file = NexusFile(location='', file_content_as_list=file_contents.splitlines())
-    aquifer_obj = NexusAquiferMethod(file=aq_file, input_number=1)
+    aquifer_obj = NexusAquiferMethod(file=aq_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -135,7 +135,7 @@ def test_read_aquifer_properties_from_file(mocker, file_contents, expected_aquif
 def test_nexus_aquifer_repr():
     # Arrange
     aq_file = NexusFile(location='test/file/aquifer.dat')
-    aquifer_obj = NexusAquiferMethod(file=aq_file, input_number=1)
+    aquifer_obj = NexusAquiferMethod(file=aq_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
     aquifer_obj.properties = {'DESC': ['This is first line of description', 'and this is second line of description'],
                               'FETKOVICH': '', 'LABEL': 'FETTY_V',
                               'UNIT_SYSTEM': UnitSystem.ENGLISH, 'SUNITS': SUnits.PPM, 'IWATER': 2, 'SALINITY': 300000,
