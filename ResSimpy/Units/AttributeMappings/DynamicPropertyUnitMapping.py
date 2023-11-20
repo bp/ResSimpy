@@ -11,6 +11,94 @@ from ResSimpy.Units.Units import (HeatCapacity, UnitDimension, Viscosity, Densit
                                   )
 
 
+class EquilUnits(BaseUnitMapping):
+    """Unit types for the attributes of equilibration methods."""
+
+    def __init__(self, unit_system: None | UnitSystem) -> None:
+        super().__init__(unit_system=unit_system)
+
+    attribute_map: Mapping[str, UnitDimension] = {
+        'initial_pressure': Pressure(),
+        'datum_depth': Length(),
+        'depth': Length(),
+        'coordinate': Length(),
+        'temperature': Temperature(),
+        'gas_oil_contact_depth': Length(),
+        'water_oil_contact_depth': Length(),
+        'gas_water_contact_depth': Length(),
+        'gas_oil_capillary_pressure_at_gas_oil_contact': Pressure(),
+        'water_oil_capillary_pressure_at_water_oil_contact': Pressure(),
+        'gas_water_capillary_pressure_at_gas_water_contact': Pressure(),
+        'saturation_pressure': Pressure(),
+        'oil_api_gravity': Dimensionless()
+    }
+
+    @property
+    def initial_pressure(self) -> str:
+        """Returns the unit for initial_pressure."""
+        return self.get_unit_for_attribute('initial_pressure')
+
+    @property
+    def datum_depth(self) -> str:
+        """Returns the unit for datum_depth."""
+        return self.get_unit_for_attribute('datum_depth')
+
+    @property
+    def depth(self) -> str:
+        """Returns the unit for depth."""
+        return self.get_unit_for_attribute('depth')
+
+    @property
+    def coordinate(self) -> str:
+        """Returns the unit for coordinate."""
+        return self.get_unit_for_attribute('coordinate')
+
+    @property
+    def temperature(self) -> str:
+        """Returns the unit for temperature."""
+        return self.get_unit_for_attribute('temperature')
+
+    @property
+    def gas_oil_contact_depth(self) -> str:
+        """Returns the unit for gas_oil_contact_depth."""
+        return self.get_unit_for_attribute('gas_oil_contact_depth')
+
+    @property
+    def water_oil_contact_depth(self) -> str:
+        """Returns the unit for water_oil_contact_depth."""
+        return self.get_unit_for_attribute('water_oil_contact_depth')
+
+    @property
+    def gas_water_contact_depth(self) -> str:
+        """Returns the unit for gas_water_contact_depth."""
+        return self.get_unit_for_attribute('gas_water_contact_depth')
+
+    @property
+    def gas_oil_capillary_pressure_at_gas_oil_contact(self) -> str:
+        """Returns the unit for gas_oil_capillary_pressure_at_gas_oil_contact."""
+        return self.get_unit_for_attribute('gas_oil_capillary_pressure_at_gas_oil_contact')
+
+    @property
+    def water_oil_capillary_pressure_at_water_oil_contact(self) -> str:
+        """Returns the unit for water_oil_capillary_pressure_at_water_oil_contact."""
+        return self.get_unit_for_attribute('water_oil_capillary_pressure_at_water_oil_contact')
+
+    @property
+    def gas_water_capillary_pressure_at_gas_water_contact(self) -> str:
+        """Returns the unit for gas_water_capillary_pressure_at_gas_water_contact."""
+        return self.get_unit_for_attribute('gas_water_capillary_pressure_at_gas_water_contact')
+
+    @property
+    def saturation_pressure(self) -> str:
+        """Returns the unit for saturation_pressure."""
+        return self.get_unit_for_attribute('saturation_pressure')
+
+    @property
+    def oil_api_gravity(self) -> str:
+        """Returns the unit for oil_api_gravity."""
+        return self.get_unit_for_attribute('oil_api_gravity')
+
+
 class AquiferUnits(BaseUnitMapping):
     """Unit types for the attributes of Aquifer methods."""
 

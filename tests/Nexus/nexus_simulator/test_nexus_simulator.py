@@ -1381,9 +1381,9 @@ def test_get_equil(mocker: MockerFixture, fcs_file_contents: str):
         eq_file.line_locations = [(0, uuid.uuid4())]
         eq_files.append(eq_file)
 
-    loaded_equil = {1: NexusEquilMethod(file=eq_files[0], input_number=1),
-                    2: NexusEquilMethod(file=eq_files[1], input_number=2),
-                    3: NexusEquilMethod(file=eq_files[2], input_number=3)
+    loaded_equil = {1: NexusEquilMethod(file=eq_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                    2: NexusEquilMethod(file=eq_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                    3: NexusEquilMethod(file=eq_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH)
                     }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
