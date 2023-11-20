@@ -106,14 +106,14 @@ class NexusSimulator(Simulator):
         self._wells: NexusWells = NexusWells(self)
         self._grid: Optional[NexusGrid] = None
         # Model dynamic properties
-        self._pvt: NexusPVTMethods = NexusPVTMethods(model_unit_system=UnitSystem.ENGLISH)
+        self._pvt: NexusPVTMethods = NexusPVTMethods(model_unit_system=self.default_units)
         self._separator: NexusSeparatorMethods = NexusSeparatorMethods()
         self._water: NexusWaterMethods = NexusWaterMethods()
-        self._equil: NexusEquilMethods = NexusEquilMethods(model_unit_system=UnitSystem.ENGLISH)
+        self._equil: NexusEquilMethods = NexusEquilMethods(model_unit_system=self.default_units)
         self._rock: NexusRockMethods = NexusRockMethods()
         self._relperm: NexusRelPermMethods = NexusRelPermMethods()
         self._valve: NexusValveMethods = NexusValveMethods()
-        self._aquifer: NexusAquiferMethods = NexusAquiferMethods(model_unit_system=UnitSystem.ENGLISH)
+        self._aquifer: NexusAquiferMethods = NexusAquiferMethods(model_unit_system=self.default_units)
         self._hydraulics: NexusHydraulicsMethods = NexusHydraulicsMethods()
         self._gaslift: NexusGasliftMethods = NexusGasliftMethods()
         # Nexus operations modules

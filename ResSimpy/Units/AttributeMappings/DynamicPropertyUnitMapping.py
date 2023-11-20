@@ -21,8 +21,10 @@ class EquilUnits(BaseUnitMapping):
         'initial_pressure': Pressure(),
         'datum_depth': Length(),
         'depth': Length(),
-        'coordinate': Length(),
+        'x': Length(),
+        'y': Length(),
         'temperature': Temperature(),
+        'initial_temperature': Temperature(),
         'gas_oil_contact_depth': Length(),
         'water_oil_contact_depth': Length(),
         'gas_water_contact_depth': Length(),
@@ -49,14 +51,24 @@ class EquilUnits(BaseUnitMapping):
         return self.get_unit_for_attribute('depth')
 
     @property
-    def coordinate(self) -> str:
-        """Returns the unit for coordinate."""
-        return self.get_unit_for_attribute('coordinate')
+    def x(self) -> str:
+        """Returns the unit for x-coordinate."""
+        return self.get_unit_for_attribute('x')
+
+    @property
+    def y(self) -> str:
+        """Returns the unit for y-coordinate."""
+        return self.get_unit_for_attribute('y')
 
     @property
     def temperature(self) -> str:
         """Returns the unit for temperature."""
         return self.get_unit_for_attribute('temperature')
+
+    @property
+    def initial_temperature(self) -> str:
+        """Returns the unit for initial_temperature."""
+        return self.get_unit_for_attribute('initial_temperature')
 
     @property
     def gas_oil_contact_depth(self) -> str:
