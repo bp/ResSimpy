@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import os
 from typing import Optional, MutableMapping
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusAquiferMethod import NexusAquiferMethod
 from ResSimpy.Aquifer import Aquifer
@@ -20,8 +21,9 @@ class NexusAquiferMethods(Aquifer):
     __inputs: MutableMapping[int, NexusAquiferMethod]
     __files: dict[int, NexusFile]
     __properties_loaded: bool = False  # Used in lazy loading
+    __model_unit_system: UnitSystem
 
-    def __init__(self, inputs: Optional[MutableMapping[int, NexusAquiferMethod]] = None,
+    def __init__(self, model_unit_system: UnitSystem, inputs: Optional[MutableMapping[int, NexusAquiferMethod]] = None,
                  files: Optional[dict[int, NexusFile]] = None) -> None:
         if inputs:
             self.__inputs = inputs
@@ -31,6 +33,7 @@ class NexusAquiferMethods(Aquifer):
             self.__files = files
         else:
             self.__files = {}
+        self.__model_unit_system = model_unit_system
         super().__init__()
 
     def __repr__(self) -> str:
@@ -66,6 +69,7 @@ class NexusAquiferMethods(Aquifer):
                     raise ValueError(f'Unable to find aquifer file: {aquifer_file.location}')
                 if os.path.isfile(aquifer_file.location):
                     # Create NexusAquifer object
-                    self.__inputs[table_num] = NexusAquiferMethod(file=aquifer_file, input_number=table_num)
+                    self.__inputs[table_num] = NexusAquiferMethod(file=aquifer_file, input_number=table_num,
+                                                                  model_unit_system=self.__model_unit_system)
                     self.__inputs[table_num].read_properties()  # Populate object with aquifer properties from file
         self.__properties_loaded = True

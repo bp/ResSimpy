@@ -3,9 +3,224 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Units.Units import (HeatCapacity, UnitDimension, Viscosity, Density, GasLiquidRatio, LiquidGasRatio,
-                                  SolutionOilGasRatio, DeltaPressure, Temperature,
+                                  SolutionOilGasRatio, DeltaPressure, Temperature, ReservoirVolumeOverPressure,
                                   FormationVolumeFactorGas, FormationVolumeFactorOil, SolutionGasOilRatio,
-                                  Dimensionless, Pressure, CriticalPressure, CriticalTemperature, CriticalVolume)
+                                  Dimensionless, Pressure, CriticalPressure, CriticalTemperature, CriticalVolume,
+                                  Compressibility, Length, InverseTime, Permeability, ReservoirProductivityIndex,
+                                  ReservoirVolume
+                                  )
+
+
+class EquilUnits(BaseUnitMapping):
+    """Unit types for the attributes of equilibration methods."""
+
+    def __init__(self, unit_system: None | UnitSystem) -> None:
+        super().__init__(unit_system=unit_system)
+
+    attribute_map: Mapping[str, UnitDimension] = {
+        'initial_pressure': Pressure(),
+        'datum_depth': Length(),
+        'depth': Length(),
+        'x': Length(),
+        'y': Length(),
+        'temperature': Temperature(),
+        'initial_temperature': Temperature(),
+        'gas_oil_contact_depth': Length(),
+        'water_oil_contact_depth': Length(),
+        'gas_water_contact_depth': Length(),
+        'gas_oil_capillary_pressure_at_gas_oil_contact': Pressure(),
+        'water_oil_capillary_pressure_at_water_oil_contact': Pressure(),
+        'gas_water_capillary_pressure_at_gas_water_contact': Pressure(),
+        'saturation_pressure': Pressure(),
+        'oil_api_gravity': Dimensionless()
+    }
+
+    @property
+    def initial_pressure(self) -> str:
+        """Returns the unit for initial_pressure."""
+        return self.get_unit_for_attribute('initial_pressure')
+
+    @property
+    def datum_depth(self) -> str:
+        """Returns the unit for datum_depth."""
+        return self.get_unit_for_attribute('datum_depth')
+
+    @property
+    def depth(self) -> str:
+        """Returns the unit for depth."""
+        return self.get_unit_for_attribute('depth')
+
+    @property
+    def x(self) -> str:
+        """Returns the unit for x-coordinate."""
+        return self.get_unit_for_attribute('x')
+
+    @property
+    def y(self) -> str:
+        """Returns the unit for y-coordinate."""
+        return self.get_unit_for_attribute('y')
+
+    @property
+    def temperature(self) -> str:
+        """Returns the unit for temperature."""
+        return self.get_unit_for_attribute('temperature')
+
+    @property
+    def initial_temperature(self) -> str:
+        """Returns the unit for initial_temperature."""
+        return self.get_unit_for_attribute('initial_temperature')
+
+    @property
+    def gas_oil_contact_depth(self) -> str:
+        """Returns the unit for gas_oil_contact_depth."""
+        return self.get_unit_for_attribute('gas_oil_contact_depth')
+
+    @property
+    def water_oil_contact_depth(self) -> str:
+        """Returns the unit for water_oil_contact_depth."""
+        return self.get_unit_for_attribute('water_oil_contact_depth')
+
+    @property
+    def gas_water_contact_depth(self) -> str:
+        """Returns the unit for gas_water_contact_depth."""
+        return self.get_unit_for_attribute('gas_water_contact_depth')
+
+    @property
+    def gas_oil_capillary_pressure_at_gas_oil_contact(self) -> str:
+        """Returns the unit for gas_oil_capillary_pressure_at_gas_oil_contact."""
+        return self.get_unit_for_attribute('gas_oil_capillary_pressure_at_gas_oil_contact')
+
+    @property
+    def water_oil_capillary_pressure_at_water_oil_contact(self) -> str:
+        """Returns the unit for water_oil_capillary_pressure_at_water_oil_contact."""
+        return self.get_unit_for_attribute('water_oil_capillary_pressure_at_water_oil_contact')
+
+    @property
+    def gas_water_capillary_pressure_at_gas_water_contact(self) -> str:
+        """Returns the unit for gas_water_capillary_pressure_at_gas_water_contact."""
+        return self.get_unit_for_attribute('gas_water_capillary_pressure_at_gas_water_contact')
+
+    @property
+    def saturation_pressure(self) -> str:
+        """Returns the unit for saturation_pressure."""
+        return self.get_unit_for_attribute('saturation_pressure')
+
+    @property
+    def oil_api_gravity(self) -> str:
+        """Returns the unit for oil_api_gravity."""
+        return self.get_unit_for_attribute('oil_api_gravity')
+
+
+class AquiferUnits(BaseUnitMapping):
+    """Unit types for the attributes of Aquifer methods."""
+
+    def __init__(self, unit_system: None | UnitSystem) -> None:
+        super().__init__(unit_system=unit_system)
+
+    attribute_map: Mapping[str, UnitDimension] = {
+        'carter_tracy_constant': ReservoirVolumeOverPressure(),
+        'total_compressibility': Compressibility(),
+        'porosity': Dimensionless(),
+        'thickness': Length(),
+        'radius_to_inner_perimeter': Length(),
+        'radius_to_exterior_perimeter': Length(),
+        'fraction_of_circular_boundary': Dimensionless(),
+        'linear_aquifer_width': Length(),
+        'linear_aquifer_length': Length(),
+        'time_conversion_factor': InverseTime(),
+        'viscosity': Viscosity(),
+        'permeability': Permeability(),
+        'initial_aquifer_pressure': Pressure(),
+        'datum_depth': Length(),
+        'productivity_index': ReservoirProductivityIndex(),
+        'initial_encroachable_water_volume': ReservoirVolume(),
+        'initial_aquifer_volume': ReservoirVolume()
+    }
+
+    @property
+    def carter_tracy_constant(self) -> str:
+        """Returns the unit for carter_tracy_constant."""
+        return self.get_unit_for_attribute('carter_tracy_constant')
+
+    @property
+    def total_compressibility(self) -> str:
+        """Returns the unit for total_compressibility."""
+        return self.get_unit_for_attribute('total_compressibility')
+
+    @property
+    def porosity(self) -> str:
+        """Returns the unit for porosity."""
+        return self.get_unit_for_attribute('porosity')
+
+    @property
+    def thickness(self) -> str:
+        """Returns the unit for thickness."""
+        return self.get_unit_for_attribute('thickness')
+
+    @property
+    def radius_to_inner_perimeter(self) -> str:
+        """Returns the unit for radius_to_inner_perimeter."""
+        return self.get_unit_for_attribute('radius_to_inner_perimeter')
+
+    @property
+    def radius_to_exterior_perimeter(self) -> str:
+        """Returns the unit for radius_to_exterior_perimeter."""
+        return self.get_unit_for_attribute('radius_to_exterior_perimeter')
+
+    @property
+    def fraction_of_circular_boundary(self) -> str:
+        """Returns the unit for fraction_of_circular_boundary."""
+        return self.get_unit_for_attribute('fraction_of_circular_boundary')
+
+    @property
+    def linear_aquifer_width(self) -> str:
+        """Returns the unit for linear_aquifer_width."""
+        return self.get_unit_for_attribute('linear_aquifer_width')
+
+    @property
+    def linear_aquifer_length(self) -> str:
+        """Returns the unit for linear_aquifer_length."""
+        return self.get_unit_for_attribute('linear_aquifer_length')
+
+    @property
+    def time_conversion_factor(self) -> str:
+        """Returns the unit for time_conversion_factor."""
+        return self.get_unit_for_attribute('time_conversion_factor')
+
+    @property
+    def viscosity(self) -> str:
+        """Returns the unit for viscosity."""
+        return self.get_unit_for_attribute('viscosity')
+
+    @property
+    def permeability(self) -> str:
+        """Returns the unit for permeability."""
+        return self.get_unit_for_attribute('permeability')
+
+    @property
+    def initial_aquifer_pressure(self) -> str:
+        """Returns the unit for initial_aquifer_pressure."""
+        return self.get_unit_for_attribute('initial_aquifer_pressure')
+
+    @property
+    def datum_depth(self) -> str:
+        """Returns the unit for datum_depth."""
+        return self.get_unit_for_attribute('datum_depth')
+
+    @property
+    def productivity_index(self) -> str:
+        """Returns the unit for productivity_index."""
+        return self.get_unit_for_attribute('productivity_index')
+
+    @property
+    def initial_encroachable_water_volume(self) -> str:
+        """Returns the unit for initial_encroachable_water_volume."""
+        return self.get_unit_for_attribute('initial_encroachable_water_volume')
+
+    @property
+    def initial_aquifer_volume(self) -> str:
+        """Returns the unit for initial_aquifer_volume."""
+        return self.get_unit_for_attribute('initial_aquifer_volume')
 
 
 class PVTUnits(BaseUnitMapping):

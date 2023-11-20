@@ -12,6 +12,8 @@ from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusPVTMethod import NexusPVTMethod
+from ResSimpy.Nexus.DataModels.NexusAquiferMethod import NexusAquiferMethod
+from ResSimpy.Nexus.DataModels.NexusEquilMethod import NexusEquilMethod
 from ResSimpy.Units.Units import Area
 from ResSimpy.Units.AttributeMappings.ConstraintUnitMapping import ConstraintUnits
 from ResSimpy.ISODateTime import ISODateTime
@@ -333,6 +335,12 @@ def test_object_no_unit_system():
     (NexusPVTMethod, 'pressure', 'PSIA', True, UnitSystem.ENGLISH),
     (NexusPVTMethod, 'oil_density', 'kg/m3', False, UnitSystem.METRIC),
     (NexusPVTMethod, 'gas_heat_capacity_at_constant_volume', 'kJ/(kg*K)', False, UnitSystem.METBAR),
+    (NexusAquiferMethod, 'initial_aquifer_pressure', 'PSIA', True, UnitSystem.ENGLISH),
+    (NexusAquiferMethod, 'total_compressibility', 'kPa-1', False, UnitSystem.METRIC),
+    (NexusAquiferMethod, 'time_conversion_factor', '1/days', False, UnitSystem.METBAR),
+    (NexusEquilMethod, 'initial_pressure', 'PSIA', True, UnitSystem.ENGLISH),
+    (NexusEquilMethod, 'datum_depth', 'm', False, UnitSystem.METRIC),
+    (NexusEquilMethod, 'oil_api_gravity', '', False, UnitSystem.METBAR),
 ])
 def test_get_unit_for_dynamic_property_attribute(data_object, attribute, expected_result, upper, unitsystem):
     """A test to check if DynamicProperty.get_unit_for_attribute method works as expected."""
@@ -349,6 +357,12 @@ def test_get_unit_for_dynamic_property_attribute(data_object, attribute, expecte
     (NexusPVTMethod, 'API', '', True, UnitSystem.ENGLISH),
     (NexusPVTMethod, 'BO', 'M3/STM3', True, UnitSystem.METBAR),
     (NexusPVTMethod, 'GOR', 'stcc/stcc', False, UnitSystem.LAB),
+    (NexusAquiferMethod, 'BAQ', 'RB/PSIA', True, UnitSystem.ENGLISH),
+    (NexusAquiferMethod, 'RO', 'M', True, UnitSystem.METBAR),
+    (NexusAquiferMethod, 'VISC', 'cp', False, UnitSystem.LAB),
+    (NexusEquilMethod, 'PINIT', 'PSIA', True, UnitSystem.ENGLISH),
+    (NexusEquilMethod, 'GOC', 'M', True, UnitSystem.METBAR),
+    (NexusEquilMethod, 'TINIT', 'degrees C', False, UnitSystem.LAB),
 ])
 def test_get_unit_for_dynamic_property_keyword(data_object, keyword, expected_result, upper, unitsystem):
     """A test to check if DynamicProperty.get_unit_for_keyword method works as expected."""
@@ -396,6 +410,62 @@ def test_object_attribute_property_pvt():
                        (units.critical_pressure, 'psia'),
                        (units.critical_temperature, 'degrees F'),
                        (units.critical_volume, 'ft3/lbmole'),
+                       ]
+    # Assert
+    for result, expected in result_expected:
+        assert result == expected
+
+
+def test_object_attribute_property_aquifer():
+    # Arrange
+    prop_file = NexusFile(location='test/file/prop.dat')
+    test_object = NexusAquiferMethod(file=prop_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
+    units = test_object.units
+    # Act
+    result_expected = [(units.carter_tracy_constant, 'rb/psia'),
+                       (units.total_compressibility, 'psi-1'),
+                       (units.porosity, ''),
+                       (units.thickness, 'ft'),
+                       (units.radius_to_inner_perimeter, 'ft'),
+                       (units.radius_to_exterior_perimeter, 'ft'),
+                       (units.fraction_of_circular_boundary, ''),
+                       (units.linear_aquifer_width, 'ft'),
+                       (units.linear_aquifer_length, 'ft'),
+                       (units.time_conversion_factor, '1/days'),
+                       (units.viscosity, 'cp'),
+                       (units.permeability, 'md'),
+                       (units.initial_aquifer_pressure, 'psia'),
+                       (units.datum_depth, 'ft'),
+                       (units.productivity_index, 'RB/day/psi'),
+                       (units.initial_encroachable_water_volume, 'rb'),
+                       (units.initial_aquifer_volume, 'rb'),
+                       ]
+    # Assert
+    for result, expected in result_expected:
+        assert result == expected
+
+
+def test_object_attribute_property_equil():
+    # Arrange
+    prop_file = NexusFile(location='test/file/prop.dat')
+    test_object = NexusEquilMethod(file=prop_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
+    units = test_object.units
+    # Act
+    result_expected = [(units.initial_pressure, 'psia'),
+                       (units.datum_depth, 'ft'),
+                       (units.depth, 'ft'),
+                       (units.x, 'ft'),
+                       (units.y, 'ft'),
+                       (units.temperature, 'degrees F'),
+                       (units.initial_temperature, 'degrees F'),
+                       (units.gas_oil_contact_depth, 'ft'),
+                       (units.water_oil_contact_depth, 'ft'),
+                       (units.gas_water_contact_depth, 'ft'),
+                       (units.gas_oil_capillary_pressure_at_gas_oil_contact, 'psia'),
+                       (units.water_oil_capillary_pressure_at_water_oil_contact, 'psia'),
+                       (units.gas_water_capillary_pressure_at_gas_water_contact, 'psia'),
+                       (units.saturation_pressure, 'psia'),
+                       (units.oil_api_gravity, ''),
                        ]
     # Assert
     for result, expected in result_expected:
