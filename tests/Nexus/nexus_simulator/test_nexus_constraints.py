@@ -184,7 +184,7 @@ WELL       QOIL        QGAS        QWATER
 well1      0           0.0         0
 ENDQMULT ''',
          ({'date': '01/01/2019', 'name': 'well1', 'use_qmult_qoil_surface_rate': True,
-    'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 0, 'qmult_gas_rate': 0, 'qmult_water_rate': 0, 'well_name':'well1'},
+    'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 0.0, 'qmult_gas_rate': 0.0, 'qmult_water_rate': 0.0, 'well_name':'well1'},
           )
      ),
     ], ids=['basic_test', 'Change in Time', 'more Keywords', 'constraint table', 'multiple constraints on same well',
