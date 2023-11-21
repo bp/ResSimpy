@@ -547,8 +547,15 @@ def test_get_check_oil_gas_types_for_models_different_types(mocker):
                               "line 1\nline 2\nGASWATER",
                               "line 1\nGASWATER",
                               "GASWATER"
-                              )
-                         ])
+                              ),
+                             ("Line 1\nAnother LIne\nSURFACE Network 1	Includes/nexus_data/surface_1.dat",
+                              "SURFACE Network 1	Includes/nexus_data/surface_2.dat",
+                              "line 1\nAPI",
+                                "line 1\nAPI",
+                                "API"
+                              ),
+
+])
 def test_get_check_oil_gas_types_for_models_same_types(mocker, fcs_file_contents_1, fcs_file_contents_2,
                                                        surface_file_contents_1, surface_file_contents_2, expected_type):
     # Checks that the correct oil / gas type is returned.

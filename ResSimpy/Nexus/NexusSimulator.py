@@ -356,7 +356,7 @@ class NexusSimulator(Simulator):
             ValueError: if no fluid type is found within the provided file path
 
         Returns:
-            str: fluid type as one of [BLACKOIL, WATEROIL, GASWATER,] or the full details from an EOS model
+            str: fluid type as one of [BLACKOIL, WATEROIL, GASWATER, API] or the full details from an EOS model
         """
         surface_file = nfo.load_file_as_list(surface_file_name)
         fluid_type = None
@@ -373,6 +373,8 @@ class NexusSimulator(Simulator):
                 break
             elif nfo.check_token("EOS", line):
                 fluid_type = NexusSimulator.get_eos_details(surface_file)
+            elif nfo.check_token("API", line):
+                fluid_type = "API"
 
         if fluid_type is None:
             raise ValueError("No Oil / Gas type detected")
