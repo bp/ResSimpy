@@ -1519,9 +1519,9 @@ def test_get_valve(mocker: MockerFixture, fcs_file_contents: str):
         valve_file.line_locations = [(0, uuid.uuid4())]
         valve_files.append(valve_file)
 
-    loaded_valves = {1: NexusValveMethod(file=valve_files[0], input_number=1),
-                     2: NexusValveMethod(file=valve_files[1], input_number=2),
-                     3: NexusValveMethod(file=valve_files[2], input_number=3),
+    loaded_valves = {1: NexusValveMethod(file=valve_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                     2: NexusValveMethod(file=valve_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                     3: NexusValveMethod(file=valve_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH),
                      }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1603,9 +1603,9 @@ def test_get_hydraulics(mocker: MockerFixture, fcs_file_contents: str):
         hyd_file.line_locations = [(0, uuid.uuid4())]
         hyd_files.append(hyd_file)
 
-    loaded_hyds = {1: NexusHydraulicsMethod(file=hyd_files[0], input_number=1),
-                   2: NexusHydraulicsMethod(file=hyd_files[1], input_number=2),
-                   3: NexusHydraulicsMethod(file=hyd_files[2], input_number=3)
+    loaded_hyds = {1: NexusHydraulicsMethod(file=hyd_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                   2: NexusHydraulicsMethod(file=hyd_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                   3: NexusHydraulicsMethod(file=hyd_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH)
                    }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1644,9 +1644,9 @@ def test_get_gaslift(mocker: MockerFixture, fcs_file_contents: str):
         gl_file.line_locations = [(0, uuid.uuid4())]
         gl_files.append(gl_file)
 
-    loaded_gaslift = {1: NexusGasliftMethod(file=gl_files[0], input_number=1),
-                      2: NexusGasliftMethod(file=gl_files[1], input_number=2),
-                      3: NexusGasliftMethod(file=gl_files[2], input_number=3)
+    loaded_gaslift = {1: NexusGasliftMethod(file=gl_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                      2: NexusGasliftMethod(file=gl_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                      3: NexusGasliftMethod(file=gl_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH)
                       }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')

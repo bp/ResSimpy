@@ -122,6 +122,9 @@ class NexusPVTMethod(DynamicProperty):
     @property
     def units(self) -> PVTUnits:
         """Returns the attribute to unit map for the PVT method."""
+        # Specify unit system, if provided
+        if 'UNIT_SYSTEM' in self.properties.keys() and isinstance(self.properties['UNIT_SYSTEM'], UnitSystem):
+            self.unit_system = self.properties['UNIT_SYSTEM']
         return PVTUnits(unit_system=self.unit_system)
 
     def to_string(self) -> str:
@@ -342,7 +345,8 @@ class NexusPVTMethod(DynamicProperty):
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
 
-        if 'UNIT_SYSTEM' in self.properties and isinstance(self.properties['UNIT_SYSTEM'], UnitSystem):
+        # Specify unit system, if provided
+        if 'UNIT_SYSTEM' in self.properties.keys() and isinstance(self.properties['UNIT_SYSTEM'], UnitSystem):
             self.unit_system = self.properties['UNIT_SYSTEM']
 
         # Initialize flags and containers used to record properties as we iterate through pvt file contents
