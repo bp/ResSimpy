@@ -92,8 +92,10 @@ def test_read_valve_properties_from_file(mocker, file_contents, expected_valve_p
 def test_nexus_valve_repr():
     # Arrange
     valve_file = NexusFile(location='test/file/valve.dat')
-    valve_obj = NexusValveMethod(file=valve_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
+    valve_obj = NexusValveMethod(file=valve_file, input_number=1, model_unit_system=UnitSystem.METBAR)
     valve_obj.properties = {'DESC': ['This is first line of description', 'and this is second line of description'],
+                            'UNIT_SYSTEM': UnitSystem.ENGLISH,
+                            'LABEL': 'VALVE01',
                             'DP_RATE': 'QALL',
                             'VALVE': pd.DataFrame({'SETTING': [1, 2, 3, 4, 5],
                                                    'VC': ['NOFLOW', '5.4', '0.8', '0.3', '0.01']
@@ -103,6 +105,8 @@ FILE_PATH: test/file/valve.dat
 
 DESC This is first line of description
 DESC and this is second line of description
+ENGLISH
+LABEL VALVE01
 VALVE QALL
 """ + valve_obj.properties['VALVE'].to_string(na_rep='', index=False) + \
 """
