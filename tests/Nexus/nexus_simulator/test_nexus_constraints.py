@@ -173,8 +173,22 @@ from tests.utility_for_tests import get_fake_nexus_simulator
       ''',
       ({'date': '01/01/2019', 'name': 'well1', 'max_avg_comp_dp': 1024.2, 'gor_limit_exponent': 9999.0, 'unit_system': UnitSystem.ENGLISH},
         )),
+    # MULT keyword with a number after it
+    ('''
+CONSTRAINTS
+well1 QOSMAX MULT      9999
+ENDCONSTRAINTS
+
+QMULT
+WELL       QOIL        QGAS        QWATER
+well1      0           0.0         0
+ENDQMULT ''',
+         ({'date': '01/01/2019', 'name': 'well1', 'use_qmult_qoil_surface_rate': True,
+    'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 0.0, 'qmult_gas_rate': 0.0, 'qmult_water_rate': 0.0, 'well_name':'well1'},
+          )
+     ),
     ], ids=['basic_test', 'Change in Time', 'more Keywords', 'constraint table', 'multiple constraints on same well',
-    'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword', 'GORLIM_drawdowncards'])
+    'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword', 'GORLIM_drawdowncards', 'MULT keyword with a number after it'])
 def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'
