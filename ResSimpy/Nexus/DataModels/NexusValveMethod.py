@@ -8,7 +8,7 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusKeywords.valve_keywords import VALVE_TABLE_KEYWORDS, VALVE_RATE_KEYWORDS
 from ResSimpy.DynamicProperty import DynamicProperty
 from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import HydraulicsUnits
-from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
+from ResSimpy.Enums.UnitsEnum import UnitSystem, TemperatureUnits
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
@@ -78,13 +78,8 @@ class NexusValveMethod(DynamicProperty):
             elif isinstance(value, Enum):
                 if isinstance(value, UnitSystem) or isinstance(value, TemperatureUnits):
                     printable_str += f'{value.value}\n'
-                elif isinstance(value, SUnits):
-                    printable_str += f'SUNITS {value.value}\n'
             elif key not in ['DP_RATE']:
-                if value == '':
-                    printable_str += f'{key}\n'
-                else:
-                    printable_str += f'{key} {value}\n'
+                printable_str += f'{key} {value}\n'
         return printable_str
 
     def read_properties(self) -> None:
