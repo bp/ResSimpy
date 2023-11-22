@@ -112,10 +112,10 @@ class NexusSimulator(Simulator):
         self._equil: NexusEquilMethods = NexusEquilMethods(model_unit_system=self.default_units)
         self._rock: NexusRockMethods = NexusRockMethods()
         self._relperm: NexusRelPermMethods = NexusRelPermMethods()
-        self._valve: NexusValveMethods = NexusValveMethods()
+        self._valve: NexusValveMethods = NexusValveMethods(model_unit_system=self.default_units)
         self._aquifer: NexusAquiferMethods = NexusAquiferMethods(model_unit_system=self.default_units)
-        self._hydraulics: NexusHydraulicsMethods = NexusHydraulicsMethods()
-        self._gaslift: NexusGasliftMethods = NexusGasliftMethods()
+        self._hydraulics: NexusHydraulicsMethods = NexusHydraulicsMethods(model_unit_system=self.default_units)
+        self._gaslift: NexusGasliftMethods = NexusGasliftMethods(model_unit_system=self.default_units)
         # Nexus operations modules
         self._sim_controls: SimControls = SimControls(self)
         self.reporting: Reporting = Reporting(self)
@@ -487,7 +487,8 @@ class NexusSimulator(Simulator):
         # Read in valve and choke properties from Nexus valve method files
         if self.model_files.valve_files is not None and \
                 len(self.model_files.valve_files) > 0:
-            self._valve = NexusValveMethods(files=self.model_files.valve_files)
+            self._valve = NexusValveMethods(files=self.model_files.valve_files,
+                                            model_unit_system=self.default_units)
 
         # Read in aquifer properties from Nexus aquifer method files
         if self.model_files.aquifer_files is not None and \
@@ -498,12 +499,14 @@ class NexusSimulator(Simulator):
         # Read in hydraulics properties from Nexus hyd method files
         if self.model_files.hyd_files is not None and \
                 len(self.model_files.hyd_files) > 0:
-            self._hydraulics = NexusHydraulicsMethods(files=self.model_files.hyd_files)
+            self._hydraulics = NexusHydraulicsMethods(files=self.model_files.hyd_files,
+                                                      model_unit_system=self.default_units)
 
         # Read in gaslift properties from Nexus gaslift method files
         if self.model_files.gas_lift_files is not None and \
                 len(self.model_files.gas_lift_files) > 0:
-            self._gaslift = NexusGasliftMethods(files=self.model_files.gas_lift_files)
+            self._gaslift = NexusGasliftMethods(files=self.model_files.gas_lift_files,
+                                                model_unit_system=self.default_units)
 
         # === End of dynamic properties loading ===
 

@@ -579,3 +579,13 @@ class ReservoirVolumeOverPressure(UnitDimension):
     metbar = 'm3/bars'
     lab = 'cc/psia'
     metric_atm = 'STM3/day/atm'
+
+
+class ValveCoefficient(UnitDimension):
+    """Valve coefficient units."""
+    english = 'psi(lb/ft3)/(lb/s)2'
+    metric = 'kPa(kg/m3)/(kg/s)2'
+    metkgcm2 = '(kg/cm2) (kg/m3)/(kg/s)2'
+    metbar = 'bar(kg/m3)/(kg/s)2'
+    lab = 'psi(gm/cc)/(gm/s)2'
+    metric_atm = 'atm(kg/m3)/(kg/s)2'

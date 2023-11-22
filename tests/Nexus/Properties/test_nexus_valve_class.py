@@ -2,8 +2,10 @@ import numpy as np
 import pandas as pd
 import pytest
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusValveMethod import NexusValveMethod
+from ResSimpy.Nexus.NexusValveMethods import NexusValveMethods
+
 
 @pytest.mark.parametrize("file_contents, expected_valve_properties",
     [("""
@@ -69,7 +71,7 @@ from ResSimpy.Nexus.DataModels.NexusValveMethod import NexusValveMethod
 def test_read_valve_properties_from_file(mocker, file_contents, expected_valve_properties):
     # Arrange
     valve_file = NexusFile(location='', file_content_as_list=file_contents.splitlines())
-    valve_obj = NexusValveMethod(file=valve_file, input_number=1)
+    valve_obj = NexusValveMethod(file=valve_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -90,7 +92,7 @@ def test_read_valve_properties_from_file(mocker, file_contents, expected_valve_p
 def test_nexus_valve_repr():
     # Arrange
     valve_file = NexusFile(location='test/file/valve.dat')
-    valve_obj = NexusValveMethod(file=valve_file, input_number=1)
+    valve_obj = NexusValveMethod(file=valve_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
     valve_obj.properties = {'DESC': ['This is first line of description', 'and this is second line of description'],
                             'DP_RATE': 'QALL',
                             'VALVE': pd.DataFrame({'SETTING': [1, 2, 3, 4, 5],
@@ -110,6 +112,56 @@ ENDVALVE
 
     # Act
     result = valve_obj.__repr__()
+
+    # Assert
+    assert result == expected_output
+
+
+def test_nexus_valve_methods_repr():
+    # Arrange
+    valve_file = NexusFile(location='test/file/valve.dat')
+    properties = {'DESC': ['This is first line of description', 'and this is second line of description'],
+                  'DP_RATE': 'QALL',
+                  'VALVE': pd.DataFrame({'SETTING': [1, 2, 3, 4, 5],
+                                         'VC': ['NOFLOW', '5.4', '0.8', '0.3', '0.01']
+                                         })}
+    valve_obj = NexusValveMethod(file=valve_file, input_number=1, model_unit_system=UnitSystem.ENGLISH,
+                                 properties=properties)
+    valve_methods_obj = NexusValveMethods(model_unit_system=UnitSystem.ENGLISH, inputs={1: valve_obj, 2: valve_obj})
+    expected_output = """
+--------------------------------
+VALVE method 1
+--------------------------------
+
+FILE_PATH: test/file/valve.dat
+
+DESC This is first line of description
+DESC and this is second line of description
+VALVE QALL
+""" + valve_obj.properties['VALVE'].to_string(na_rep='', index=False) + \
+"""
+ENDVALVE
+
+
+
+--------------------------------
+VALVE method 2
+--------------------------------
+
+FILE_PATH: test/file/valve.dat
+
+DESC This is first line of description
+DESC and this is second line of description
+VALVE QALL
+""" + valve_obj.properties['VALVE'].to_string(na_rep='', index=False) + \
+"""
+ENDVALVE
+
+
+"""
+
+    # Act
+    result = valve_methods_obj.__repr__()
 
     # Assert
     assert result == expected_output

@@ -7,8 +7,206 @@ from ResSimpy.Units.Units import (HeatCapacity, UnitDimension, Viscosity, Densit
                                   FormationVolumeFactorGas, FormationVolumeFactorOil, SolutionGasOilRatio,
                                   Dimensionless, Pressure, CriticalPressure, CriticalTemperature, CriticalVolume,
                                   Compressibility, Length, InverseTime, Permeability, ReservoirProductivityIndex,
-                                  ReservoirVolume
+                                  ReservoirVolume, SurfaceRatesLiquid, SurfaceRatesGas, GravityGradient,
+                                  ValveCoefficient, Roughness, Diameter
                                   )
+
+
+class HydraulicsUnits(BaseUnitMapping):
+    """Unit types for the attributes of hydraulics, gaslift, valve, etc. methods."""
+
+    def __init__(self, unit_system: None | UnitSystem, ratio_thousands: bool = True) -> None:
+        self.ratio_thousands = ratio_thousands
+        super().__init__(unit_system=unit_system)
+
+    attribute_map: Mapping[str, UnitDimension] = {
+        'surface_oil_rate': SurfaceRatesLiquid(),  # For use in hyd & gaslift methods
+        'surface_liquid_rate': SurfaceRatesLiquid(),
+        'surface_water_rate': SurfaceRatesLiquid(),
+        'surface_gas_rate': SurfaceRatesGas(),
+        'surface_wet_gas_rate': SurfaceRatesGas(),
+        'mean_molecular_weight': Dimensionless(),
+        'watercut': Dimensionless(),
+        'oilcut': Dimensionless(),
+        'pressure': Pressure(),
+        'inlet_pressure': Pressure(),
+        'outlet_pressure': Pressure(),
+        'bottomhole_pressure': Pressure(),
+        'tubinghead_pressure': Pressure(),
+        'gas_liquid_ratio': GasLiquidRatio(),  # Note extra complexity in Nexus for VIP compatibility
+        'gas_oil_ratio': SolutionGasOilRatio(),  # Note extra complexity in Nexus for VIP compatibility
+        'oil_gas_ratio': LiquidGasRatio(),  # Note extra complexity in Nexus for VIP compatibility
+        'water_gas_ratio': LiquidGasRatio(),  # Note extra complexity in Nexus for VIP compatibility
+        'gas_water_ratio': GasLiquidRatio(),  # Note extra complexity in Nexus for VIP compatibility
+        'water_wet_gas_ratio': LiquidGasRatio(),  # Note extra complexity in Nexus for VIP compatibility
+        'length': Length(),
+        'datum_depth': Length(),
+        'depth_change': Length(),
+        'hydraulic_table_vertical_distance': Length(),
+        'injected_fluid_pressure_gradient': GravityGradient(),
+        'viscosity': Viscosity(),
+        'diameter': Diameter(),
+        'roughness': Roughness(),
+        'valve_coefficient': ValveCoefficient()  # For use in Valve method
+    }
+
+    @property
+    def surface_oil_rate(self) -> str:
+        """Returns the unit for surface_oil_rate."""
+        return self.get_unit_for_attribute('surface_oil_rate')
+
+    @property
+    def surface_liquid_rate(self) -> str:
+        """Returns the unit for surface_liquid_rate."""
+        return self.get_unit_for_attribute('surface_liquid_rate')
+
+    @property
+    def surface_water_rate(self) -> str:
+        """Returns the unit for surface_water_rate."""
+        return self.get_unit_for_attribute('surface_water_rate')
+
+    @property
+    def surface_gas_rate(self) -> str:
+        """Returns the unit for surface_gas_rate."""
+        return self.get_unit_for_attribute('surface_gas_rate')
+
+    @property
+    def surface_wet_gas_rate(self) -> str:
+        """Returns the unit for surface_wet_gas_rate."""
+        return self.get_unit_for_attribute('surface_wet_gas_rate')
+
+    @property
+    def mean_molecular_weight(self) -> str:
+        """Returns the unit for mean_molecular_weight."""
+        return self.get_unit_for_attribute('mean_molecular_weight')
+
+    @property
+    def watercut(self) -> str:
+        """Returns the unit for watercut."""
+        return self.get_unit_for_attribute('watercut')
+
+    @property
+    def oilcut(self) -> str:
+        """Returns the unit for oilcut."""
+        return self.get_unit_for_attribute('oilcut')
+
+    @property
+    def pressure(self) -> str:
+        """Returns the unit for pressure."""
+        return self.get_unit_for_attribute('pressure')
+
+    @property
+    def inlet_pressure(self) -> str:
+        """Returns the unit for inlet_pressure."""
+        return self.get_unit_for_attribute('inlet_pressure')
+
+    @property
+    def outlet_pressure(self) -> str:
+        """Returns the unit for outlet_pressure."""
+        return self.get_unit_for_attribute('outlet_pressure')
+
+    @property
+    def bottomhole_pressure(self) -> str:
+        """Returns the unit for bottomhole_pressure."""
+        return self.get_unit_for_attribute('bottomhole_pressure')
+
+    @property
+    def tubinghead_pressure(self) -> str:
+        """Returns the unit for tubinghead_pressure."""
+        return self.get_unit_for_attribute('tubinghead_pressure')
+
+    @property
+    def gas_liquid_ratio(self) -> str:
+        """Returns the unit for gas_liquid_ratio."""
+        unit = self.get_unit_for_attribute('gas_liquid_ratio')
+        if not self.ratio_thousands:
+            unit = unit.replace('MSCF', 'SCF')
+        return unit
+
+    @property
+    def gas_oil_ratio(self) -> str:
+        """Returns the unit for gas_oil_ratio."""
+        unit = self.get_unit_for_attribute('gas_oil_ratio')
+        if not self.ratio_thousands:
+            unit = unit.replace('MSCF', 'SCF')
+        return unit
+
+    @property
+    def oil_gas_ratio(self) -> str:
+        """Returns the unit for oil_gas_ratio."""
+        unit = self.get_unit_for_attribute('oil_gas_ratio')
+        if not self.ratio_thousands:
+            unit = unit.replace('MSCF', 'MMSCF')
+        return unit
+
+    @property
+    def water_gas_ratio(self) -> str:
+        """Returns the unit for water_gas_ratio."""
+        unit = self.get_unit_for_attribute('water_gas_ratio')
+        if not self.ratio_thousands:
+            unit = unit.replace('MSCF', 'MMSCF')
+        return unit
+
+    @property
+    def gas_water_ratio(self) -> str:
+        """Returns the unit for gas_water_ratio."""
+        unit = self.get_unit_for_attribute('gas_water_ratio')
+        if not self.ratio_thousands:
+            unit = unit.replace('MSCF', 'SCF')
+        return unit
+
+    @property
+    def water_wet_gas_ratio(self) -> str:
+        """Returns the unit for water_wet_gas_ratio."""
+        unit = self.get_unit_for_attribute('water_wet_gas_ratio')
+        if not self.ratio_thousands:
+            unit = unit.replace('MSCF', 'MMSCF')
+        return unit
+
+    @property
+    def length(self) -> str:
+        """Returns the unit for length."""
+        return self.get_unit_for_attribute('length')
+
+    @property
+    def datum_depth(self) -> str:
+        """Returns the unit for datum_depth."""
+        return self.get_unit_for_attribute('datum_depth')
+
+    @property
+    def depth_change(self) -> str:
+        """Returns the unit for depth_change."""
+        return self.get_unit_for_attribute('depth_change')
+
+    @property
+    def hydraulic_table_vertical_distance(self) -> str:
+        """Returns the unit for hydraulic_table_vertical_distance."""
+        return self.get_unit_for_attribute('hydraulic_table_vertical_distance')
+
+    @property
+    def injected_fluid_pressure_gradient(self) -> str:
+        """Returns the unit for injected_fluid_pressure_gradient."""
+        return self.get_unit_for_attribute('injected_fluid_pressure_gradient')
+
+    @property
+    def viscosity(self) -> str:
+        """Returns the unit for viscosity."""
+        return self.get_unit_for_attribute('viscosity')
+
+    @property
+    def diameter(self) -> str:
+        """Returns the unit for diameter."""
+        return self.get_unit_for_attribute('diameter')
+
+    @property
+    def roughness(self) -> str:
+        """Returns the unit for roughness."""
+        return self.get_unit_for_attribute('roughness')
+
+    @property
+    def valve_coefficient(self) -> str:
+        """Returns the unit for valve_coefficient."""
+        return self.get_unit_for_attribute('valve_coefficient')
 
 
 class EquilUnits(BaseUnitMapping):
