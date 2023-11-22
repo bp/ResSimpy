@@ -396,7 +396,8 @@ def test_get_unit_for_dynamic_property_keyword(data_object, keyword, expected_re
 def test_object_attribute_property_pvt():
     # Arrange
     prop_file = NexusFile(location='test/file/prop.dat')
-    test_object = NexusPVTMethod(file=prop_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
+    test_object = NexusPVTMethod(file=prop_file, input_number=1, properties={'UNIT_SYSTEM': UnitSystem.ENGLISH},
+                                 model_unit_system=UnitSystem.METRIC)
     units = test_object.units
     # Act
     result_expected = [(units.pressure, 'psia'),
@@ -436,7 +437,8 @@ def test_object_attribute_property_pvt():
 def test_object_attribute_property_aquifer():
     # Arrange
     prop_file = NexusFile(location='test/file/prop.dat')
-    test_object = NexusAquiferMethod(file=prop_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
+    test_object = NexusAquiferMethod(file=prop_file, input_number=1, properties={'UNIT_SYSTEM': UnitSystem.ENGLISH},
+                                     model_unit_system=UnitSystem.METRIC)
     units = test_object.units
     # Act
     result_expected = [(units.carter_tracy_constant, 'rb/psia'),
@@ -465,7 +467,8 @@ def test_object_attribute_property_aquifer():
 def test_object_attribute_property_equil():
     # Arrange
     prop_file = NexusFile(location='test/file/prop.dat')
-    test_object = NexusEquilMethod(file=prop_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
+    test_object = NexusEquilMethod(file=prop_file, input_number=1, properties={'UNIT_SYSTEM': UnitSystem.ENGLISH},
+                                   model_unit_system=UnitSystem.METRIC)
     units = test_object.units
     # Act
     result_expected = [(units.initial_pressure, 'psia'),
@@ -492,7 +495,8 @@ def test_object_attribute_property_equil():
 def test_object_attribute_property_gaslift():
     # Arrange
     prop_file = NexusFile(location='test/file/prop.dat')
-    test_object = NexusGasliftMethod(file=prop_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
+    test_object = NexusGasliftMethod(file=prop_file, input_number=1, properties={'UNIT_SYSTEM': UnitSystem.ENGLISH},
+                                     model_unit_system=UnitSystem.METRIC)
     units = test_object.units
     # Act
     result_expected = [(units.surface_oil_rate, 'STB/day'),
@@ -510,7 +514,8 @@ def test_object_attribute_property_gaslift():
 def test_object_attribute_property_valve():
     # Arrange
     prop_file = NexusFile(location='test/file/prop.dat')
-    test_object = NexusValveMethod(file=prop_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
+    test_object = NexusValveMethod(file=prop_file, input_number=1, properties={'UNIT_SYSTEM': UnitSystem.ENGLISH},
+                                   model_unit_system=UnitSystem.METRIC)
     units = test_object.units
     # Act
     result_expected = [(units.valve_coefficient, 'psi(lb/ft3)/(lb/s)2'),
@@ -523,7 +528,8 @@ def test_object_attribute_property_valve():
 def test_object_attribute_property_hydraulics():
     # Arrange
     prop_file = NexusFile(location='test/file/prop.dat')
-    test_object = NexusHydraulicsMethod(file=prop_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
+    test_object = NexusHydraulicsMethod(file=prop_file, input_number=1, properties={'UNIT_SYSTEM': UnitSystem.ENGLISH},
+                                        model_unit_system=UnitSystem.METRIC)
     units = test_object.units
     # Act
     result_expected = [(units.surface_oil_rate, 'STB/day'),

@@ -73,6 +73,9 @@ class NexusEquilMethod(DynamicProperty):
     @property
     def units(self) -> EquilUnits:
         """Returns the attribute to unit map for the Equil method."""
+        # Specify unit system, if provided
+        if 'UNIT_SYSTEM' in self.properties.keys() and isinstance(self.properties['UNIT_SYSTEM'], UnitSystem):
+            self.unit_system = self.properties['UNIT_SYSTEM']
         return EquilUnits(unit_system=self.unit_system)
 
     def to_string(self) -> str:
@@ -123,6 +126,10 @@ class NexusEquilMethod(DynamicProperty):
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
+
+        # Specify unit system, if provided
+        if 'UNIT_SYSTEM' in self.properties.keys() and isinstance(self.properties['UNIT_SYSTEM'], UnitSystem):
+            self.unit_system = self.properties['UNIT_SYSTEM']
 
         # Initialize properties
         equil_table_indices: dict[str, list[int]] = {}
