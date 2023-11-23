@@ -1300,9 +1300,9 @@ def test_get_separator(mocker: MockerFixture, fcs_file_contents: str):
         sep_file.line_locations = [(0, uuid.uuid4())]
         sep_files.append(sep_file)
 
-    loaded_sep = {1: NexusSeparatorMethod(file=sep_files[0], input_number=1),
-                  2: NexusSeparatorMethod(file=sep_files[1], input_number=2),
-                  3: NexusSeparatorMethod(file=sep_files[2], input_number=3),
+    loaded_sep = {1: NexusSeparatorMethod(file=sep_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                  2: NexusSeparatorMethod(file=sep_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                  3: NexusSeparatorMethod(file=sep_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH),
                   }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1343,9 +1343,9 @@ def test_get_water(mocker: MockerFixture, fcs_file_contents: str):
         wat_file.line_locations = [(0, uuid.uuid4())]
         wat_files.append(wat_file)
 
-    loaded_wat = {1: NexusWaterMethod(file=wat_files[0], input_number=1),
-                  2: NexusWaterMethod(file=wat_files[1], input_number=2),
-                  3: NexusWaterMethod(file=wat_files[2], input_number=3),
+    loaded_wat = {1: NexusWaterMethod(file=wat_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                  2: NexusWaterMethod(file=wat_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                  3: NexusWaterMethod(file=wat_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH),
                   }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1431,9 +1431,9 @@ def test_get_rock(mocker: MockerFixture, fcs_file_contents: str):
         rock_file.line_locations = [(0, uuid.uuid4())]
         rock_files.append(rock_file)
 
-    loaded_rocks = {1: NexusRockMethod(file=rock_files[0], input_number=1),
-                    2: NexusRockMethod(file=rock_files[1], input_number=2),
-                    3: NexusRockMethod(file=rock_files[2], input_number=3),
+    loaded_rocks = {1: NexusRockMethod(file=rock_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                    2: NexusRockMethod(file=rock_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                    3: NexusRockMethod(file=rock_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH),
                     }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1476,9 +1476,9 @@ def test_get_relperm(mocker: MockerFixture, fcs_file_contents: str):
         relpm_file.line_locations = [(0, uuid.uuid4())]
         relpm_files.append(relpm_file)
 
-    loaded_relperms = {1: NexusRelPermMethod(file=relpm_files[0], input_number=1),
-                       2: NexusRelPermMethod(file=relpm_files[1], input_number=2),
-                       3: NexusRelPermMethod(file=relpm_files[2], input_number=3),
+    loaded_relperms = {1: NexusRelPermMethod(file=relpm_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                       2: NexusRelPermMethod(file=relpm_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                       3: NexusRelPermMethod(file=relpm_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH),
                        }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')

@@ -298,7 +298,7 @@ COMPOSITION X 50.0 Y -50.0
     assert result == expected_output
 
 
-def test_nexus_aquifer_methods_repr():
+def test_nexus_equil_methods_repr():
     # Arrange
     eq_file = NexusFile(location='test/file/equil.dat')
     properties = {'UNIT_SYSTEM': UnitSystem.ENGLISH,

@@ -1,7 +1,8 @@
 from unittest.mock import Mock, MagicMock
 import pytest
+import numpy as np
 import pandas as pd
-from ResSimpy.Enums.UnitsEnum import SUnits, UnitSystem
+from ResSimpy.Enums.UnitsEnum import SUnits, TemperatureUnits, UnitSystem
 
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -11,6 +12,10 @@ from ResSimpy.Nexus.DataModels.NexusEquilMethod import NexusEquilMethod
 from ResSimpy.Nexus.DataModels.NexusGasliftMethod import NexusGasliftMethod
 from ResSimpy.Nexus.DataModels.NexusHydraulicsMethod import NexusHydraulicsMethod
 from ResSimpy.Nexus.DataModels.NexusValveMethod import NexusValveMethod
+from ResSimpy.Nexus.DataModels.NexusRelPermMethod import NexusRelPermMethod
+from ResSimpy.Nexus.DataModels.NexusRockMethod import NexusRockMethod
+from ResSimpy.Nexus.DataModels.NexusSeparatorMethod import NexusSeparatorMethod
+from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterMethod, NexusWaterParams
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.utility_for_tests import check_file_read_write_is_correct
@@ -562,6 +567,244 @@ VALVE QALL
 """
 ENDVALVE
 
+"""
+
+    # make a mock for the write operation
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+
+    # Act
+    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+
+    # Assert
+    check_file_read_write_is_correct(expected_file_contents=expected_result,
+                                     modifying_mock_open=writing_mock_open,
+                                     mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
+
+
+def test_nexus_relperm_write_to_file(mocker):
+    # Arrange
+    pfile = NexusFile(location='/my/orig_prop/file.dat')
+    hysteresis_params = {'KRG': {'LINEAR': {'MAXTRAP': 0.2, 'NOMOD': ''}},
+                         'KRW': 'USER',
+                         'KROW': {'KILLOUGH': {'MAXTRAP': 0.2, 'EXP': 1.1}},
+                         'PCWO': {'MAXSW': 0.8, 'ETA': 0.15, 'TRAPSCALE': ''},
+                         'PCGO': {},
+                         'WAG': {'LAND': 1.1, 'NOOILHYS': ''},
+                         'TOLREV': 0.05, 'NOCHK_HYS': ''
+                         }
+    properties = {'DESC': ['This is first line of description', 'and this is second line of description'],
+                  'WOTABLE': pd.DataFrame({'SW': [0.2, 0.25, 0.35, 0.425, 0.5, 0.6, 0.7],
+                                           'KROW': [1.0, 0.729, 0.343, 0.1664, 0.064, 0.008, 0],
+                                           'KRW': [0.0, 0.0005, 0.0135, 0.0456, 0.108, 0.256, 0.50],
+                                           'PCWO': [1., np.nan, np.nan, 0.2, np.nan, np.nan, 0.0]
+                                           }),
+                  'GOTABLE': pd.DataFrame({'SG': [0, 0.05, 0.2, 0.4, 0.55, 0.65, 0.8],
+                                           'KROG': [1, 0.729, 0.216, 0.008, 0, 0, 0],
+                                           'KRG': [0, 0.0039, 0.0625, 0.25, 0.4727, 0.6602, 1],
+                                           'PCGO': [0., np.nan, np.nan, 1., np.nan, np.nan, 5.0]
+                                           }),
+                  'WOTABLE_IMB': pd.DataFrame({'SW': [0.2, 0.25, 0.35, 0.425, 0.5, 0.6, 0.7],
+                                               'KROW': [1.0, 0.729, 0.343, 0.1664, 0.064, 0.008, 0],
+                                               'KRW': [0.0, 0.0005, 0.0135, 0.0456, 0.108, 0.256, 0.50],
+                                               'PCWO': [1., np.nan, np.nan, 0.2, np.nan, np.nan, 0.0]
+                                               }),
+                  'PRSTAB': pd.DataFrame({'SWL': [0.1, 0.15],
+                                          'SWR': [0.2, 0.25],
+                                          'SWRO': [0.6, 0.7],
+                                          'SWU': [1., 0.9],
+                                          'KRO_SWL': [0.55, 0.65]
+                                          }),
+                  'STONE1': '', 'SOMOPT2': 0.05, 'STONE2_WAT': '', 'LOW_SAL': '', 'SCALING': 'TWOPOINT', 'VEGO_PC': '',
+                  'VEWO': '', 'DRELPM': 0.9, 'IFT': '', 'TENTHR': 0.005, 'XEX': 0.3, 'TENI': 0.005,
+                  'FREEZE_PCGO': '', 'FREEZE_PCWO': '', 'DERIVATIVES': 'NUMERICAL',
+                  'NONDARCY_GAS': {},
+                  'NONDARCY_OIL': {'BETA0': 0.001, 'BETA1': -0.5, 'BETA2': -5, 'BETA3': -0.5, 'BETA4': -3, 'BETA5': 4.4},
+                  'RECONSTRUCT': {'NSGDIM': 101, 'NSWDIM': 101}, 'VIP_RELPM': ''
+                  }
+    dataobj = NexusRelPermMethod(file=pfile, input_number=1, model_unit_system=UnitSystem.ENGLISH,
+                                 properties=properties, hysteresis_params=hysteresis_params)
+    expected_result = """DESC This is first line of description
+DESC and this is second line of description
+WOTABLE LOW_SAL
+""" + properties['WOTABLE'].to_string(na_rep='', index=False) + '\n' + \
+"""
+GOTABLE
+""" + properties['GOTABLE'].to_string(na_rep='', index=False) + '\n' + \
+"""
+WOTABLE_IMB
+""" + properties['WOTABLE_IMB'].to_string(na_rep='', index=False) + '\n' + \
+"""
+PRSTAB
+""" + properties['PRSTAB'].to_string(na_rep='', index=False) + '\n' + \
+"""
+STONE1 SOMOPT2 0.05
+STONE2_WAT
+SCALING TWOPOINT
+VEGO_PC
+VEWO
+DRELPM 0.9
+IFT
+TENTHR 0.005
+XEX 0.3
+TENI 0.005
+FREEZE_PCGO
+FREEZE_PCWO
+DERIVATIVES NUMERICAL
+NONDARCY_GAS
+ENDNONDARCY_GAS
+NONDARCY_OIL
+    BETA0 0.001
+    BETA1 -0.5
+    BETA2 -5
+    BETA3 -0.5
+    BETA4 -3
+    BETA5 4.4
+ENDNONDARCY_OIL
+RECONSTRUCT
+    NSGDIM 101
+    NSWDIM 101
+VIP_RELPM
+HYSTERESIS KRG LINEAR MAXTRAP 0.2 NOMOD
+           KRW USER
+           KROW KILLOUGH MAXTRAP 0.2 EXP 1.1
+           PCWO MAXSW 0.8 ETA 0.15 TRAPSCALE
+           PCGO
+           WAG LAND 1.1 NOOILHYS
+           TOLREV 0.05
+           NOCHK_HYS
+"""
+
+    # make a mock for the write operation
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+
+    # Act
+    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+
+    # Assert
+    check_file_read_write_is_correct(expected_file_contents=expected_result,
+                                     modifying_mock_open=writing_mock_open,
+                                     mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
+
+
+def test_nexus_rock_write_to_file(mocker):
+    # Arrange
+    pfile = NexusFile(location='/my/orig_prop/file.dat')
+    properties = {'UNIT_SYSTEM': UnitSystem.ENGLISH, 
+                  'CMT': pd.DataFrame({'P': [1500, 2000, 3500],
+                                       'PVMULT': [0.76, 0.81, 0.85]
+                                       }),
+                  'REVERSIBLE': 'CMTONLY', 'TOLREV_P': 2.5,
+                  'WIRCT': {'0.10': pd.DataFrame({'DSW': [0.0, 0.02, 0.12, 0.22, 0.32, 0.42],
+                                                  'PVMULT': [1., 1., 0.94, 0.88, 0.82, 0.76],
+                                                  'TAMULT': [1., 1., 0.40, 0.25, 0.09, 0.09]
+                                                  }),
+                            '0.50': pd.DataFrame({'DSW': [0.02, 0.12, 0.35],
+                                                  'TAMULT': [1., 0.9, 0.8]
+                                                  })
+                            },
+                  'IRREVERSIBLE': 'WIRCTONLY', 'TOLREV_SW': 0.01
+                  }
+    dataobj = NexusRockMethod(file=pfile, input_number=1, model_unit_system=UnitSystem.ENGLISH,
+                              properties=properties)
+    expected_result = """ENGLISH
+CMT
+""" + properties['CMT'].to_string(na_rep='', index=False) + '\n' + \
+"""
+REVERSIBLE CMTONLY
+TOLREV_P 2.5
+WIRCT
+SWINIT 0.10
+""" + properties['WIRCT']['0.10'].to_string(na_rep='', index=False) + '\n' + \
+"""
+SWINIT 0.50
+""" + properties['WIRCT']['0.50'].to_string(na_rep='', index=False) + '\n' + \
+"""
+IRREVERSIBLE WIRCTONLY
+TOLREV_SW 0.01
+"""
+
+    # make a mock for the write operation
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+
+    # Act
+    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+
+    # Assert
+    check_file_read_write_is_correct(expected_file_contents=expected_result,
+                                     modifying_mock_open=writing_mock_open,
+                                     mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
+
+
+def test_nexus_separator_write_to_file(mocker):
+    # Arrange
+    pfile = NexusFile(location='/my/orig_prop/file.dat')
+    properties = {'DESC': ['This is first line of description',
+                           'and this is second line of description'
+                           ],
+                  'UNIT_SYSTEM': UnitSystem.ENGLISH,
+                  'TEMP_UNIT': TemperatureUnits.FAHR,
+                  'SEPARATOR_TABLE': pd.DataFrame({'STAGE': [1, 2],
+                                                   'METHOD': [1, 2],
+                                                   'PRES': [500.0, 14.7],
+                                                   'TEMP': [150.0, 60.0],
+                                                   'IDL1': ['2', 'OIL'],
+                                                   'IDL2': [np.nan, np.nan],  
+                                                   'IDV1': ['GAS', 'VENT'],
+                                                   'IDV2': [np.nan, np.nan],
+                                                   'FDL1': [1., 1.],
+                                                   'FDV1': [1., 1.]
+                                                   }),
+                  'WATERMETHOD': 1}
+    dataobj = NexusSeparatorMethod(file=pfile, input_number=1, model_unit_system=UnitSystem.ENGLISH,
+                                   properties=properties, separator_type='EOS')
+    expected_result = """DESC This is first line of description
+DESC and this is second line of description
+ENGLISH
+FAHR
+""" + properties['SEPARATOR_TABLE'].to_string(na_rep='', index=False) + '\n' + \
+"""
+WATERMETHOD 1
+"""
+
+    # make a mock for the write operation
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+
+    # Act
+    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+
+    # Assert
+    check_file_read_write_is_correct(expected_file_contents=expected_result,
+                                     modifying_mock_open=writing_mock_open,
+                                     mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
+
+
+def test_nexus_water_write_to_file(mocker):
+    # Arrange
+    pfile = NexusFile(location='/my/orig_prop/file.dat')
+    properties = {'DESC': ['This is first line of description',
+                           'and this is second line of description'],
+                  'UNIT_SYSTEM': UnitSystem.ENGLISH}
+    water_params1 = NexusWaterParams(water_density=62.4, water_compressibility=3.4,
+                                     water_formation_volume_factor=1.04, water_viscosity=0.7,
+                                     water_viscosity_compressibility=1e-3
+                                     )
+    dataobj = NexusWaterMethod(file=pfile, input_number=1, model_unit_system=UnitSystem.ENGLISH,
+                               properties=properties, reference_pressure=3600.0,
+                               parameters=[water_params1]
+                               )
+    expected_result = """DESC This is first line of description
+DESC and this is second line of description
+PREF 3600.0
+ENGLISH
+DENW 62.4
+CW 3.4
+BW 1.04
+VISW 0.7
+CVW 0.001
 """
 
     # make a mock for the write operation

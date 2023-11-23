@@ -6,6 +6,7 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from ResSimpy.Nexus.DataModels.NexusSeparatorMethod import NexusSeparatorMethod
 from ResSimpy.Enums.UnitsEnum import UnitSystem, TemperatureUnits
+from ResSimpy.Nexus.NexusSeparatorMethods import NexusSeparatorMethods
 
 @pytest.mark.parametrize("file_contents, expected_separator_properties",
     [("""
@@ -137,7 +138,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem, TemperatureUnits
 def test_read_separator_properties_from_file(mocker, file_contents, expected_separator_properties):
     # Arrange
     sep_file = NexusFile(location='', file_content_as_list=file_contents.splitlines())
-    sep_obj = NexusSeparatorMethod(file=sep_file, input_number=1)
+    sep_obj = NexusSeparatorMethod(file=sep_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -159,7 +160,7 @@ def test_read_separator_properties_from_file(mocker, file_contents, expected_sep
 def test_nexus_eos_separator_repr():
     # Arrange
     sep_file = NexusFile(location='test/file/separator.dat')
-    sep_obj = NexusSeparatorMethod(file=sep_file, input_number=1)
+    sep_obj = NexusSeparatorMethod(file=sep_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
     sep_obj.separator_type = 'EOS'
     sep_obj.properties = {'DESC': ['This is first line of description',
                                    'and this is second line of description'
@@ -201,7 +202,7 @@ WATERMETHOD 1
 def test_nexus_gas_plant_separator_repr():
     # Arrange
     sep_file = NexusFile(location='test/file/separator.dat')
-    sep_obj = NexusSeparatorMethod(file=sep_file, input_number=1)
+    sep_obj = NexusSeparatorMethod(file=sep_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
     sep_obj.separator_type = 'GASPLANT'
     sep_obj.properties = {'DESC': ['This is first line of description',
                                    'and this is second line of description'],
@@ -247,7 +248,7 @@ ENDRECFAC_TABLE
 def test_nexus_blackoil_separator_repr():
     # Arrange
     sep_file = NexusFile(location='test/file/separator.dat')
-    sep_obj = NexusSeparatorMethod(file=sep_file, input_number=1)
+    sep_obj = NexusSeparatorMethod(file=sep_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
     sep_obj.separator_type = 'BLACKOIL'
     sep_obj.properties = {'DESC': ['This is first line of description',
                                    'and this is second line of description'
@@ -279,6 +280,73 @@ ZOIL 0.009
 
     # Act
     result = sep_obj.__repr__()
+
+    # Assert
+    assert result == expected_output
+
+
+def test_nexus_separator_methods_repr():
+    # Arrange
+    sep_file = NexusFile(location='test/file/separator.dat')
+    properties = {'DESC': ['This is first line of description',
+                           'and this is second line of description'
+                           ],
+                  'UNIT_SYSTEM': UnitSystem.ENGLISH,
+                  'TEMP_UNIT': TemperatureUnits.FAHR,
+                  'SEPARATOR_TABLE': pd.DataFrame({'STAGE': [1, 2],
+                                                   'METHOD': [1, 2],
+                                                   'PRES': [500.0, 14.7],
+                                                   'TEMP': [150.0, 60.0],
+                                                   'IDL1': ['2', 'OIL'],
+                                                   'IDL2': [np.nan, np.nan],  
+                                                   'IDV1': ['GAS', 'VENT'],
+                                                   'IDV2': [np.nan, np.nan],
+                                                   'FDL1': [1., 1.],
+                                                   'FDV1': [1., 1.]
+                                                   }),
+                  'WATERMETHOD': 1}
+    sep_obj = NexusSeparatorMethod(file=sep_file, input_number=1, model_unit_system=UnitSystem.ENGLISH,
+                                   properties=properties, separator_type='EOS')
+    sep_methods_obj = NexusSeparatorMethods(model_unit_system=UnitSystem.ENGLISH, inputs={1: sep_obj,
+                                                                                          2: sep_obj})
+    expected_output = """
+--------------------------------
+SEPARATOR method 1
+--------------------------------
+
+SEPARATOR_TYPE: EOS
+
+FILE_PATH: test/file/separator.dat
+
+DESC This is first line of description
+DESC and this is second line of description
+ENGLISH
+FAHR
+""" + properties['SEPARATOR_TABLE'].to_string(na_rep='', index=False) + '\n' + \
+"""
+WATERMETHOD 1
+
+
+--------------------------------
+SEPARATOR method 2
+--------------------------------
+
+SEPARATOR_TYPE: EOS
+
+FILE_PATH: test/file/separator.dat
+
+DESC This is first line of description
+DESC and this is second line of description
+ENGLISH
+FAHR
+""" + properties['SEPARATOR_TABLE'].to_string(na_rep='', index=False) + '\n' + \
+"""
+WATERMETHOD 1
+
+"""
+
+    # Act
+    result = sep_methods_obj.__repr__()
 
     # Assert
     assert result == expected_output

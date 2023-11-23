@@ -4,6 +4,7 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 from ResSimpy.Nexus.DataModels.NexusRockMethod import NexusRockMethod
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.NexusRockMethods import NexusRockMethods
 
 @pytest.mark.parametrize("file_contents, expected_rock_properties",
     [(
@@ -168,7 +169,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 def test_read_rock_properties_from_file(mocker, file_contents, expected_rock_properties):
     # Arrange
     rock_file = NexusFile(location='', file_content_as_list=file_contents.splitlines())
-    rock_obj = NexusRockMethod(file=rock_file, input_number=1)
+    rock_obj = NexusRockMethod(file=rock_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -192,7 +193,7 @@ def test_read_rock_properties_from_file(mocker, file_contents, expected_rock_pro
 def test_nexus_rock_repr():
     # Arrange
     rock_file = NexusFile(location='test/file/rock.dat')
-    rock_obj = NexusRockMethod(file=rock_file, input_number=1)
+    rock_obj = NexusRockMethod(file=rock_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
     rock_obj.properties = {'UNIT_SYSTEM': UnitSystem.ENGLISH, 
                            'CMT': pd.DataFrame({'P': [1500, 2000, 3500],
                                                 'PVMULT': [0.76, 0.81, 0.85]
@@ -230,6 +231,83 @@ TOLREV_SW 0.01
 
     # Act
     result = rock_obj.__repr__()
+
+    # Assert
+    assert result == expected_output
+
+
+def test_nexus_rock_methods_repr():
+    # Arrange
+    rock_file = NexusFile(location='test/file/rock.dat')
+    properties = {'UNIT_SYSTEM': UnitSystem.ENGLISH, 
+                  'CMT': pd.DataFrame({'P': [1500, 2000, 3500],
+                                       'PVMULT': [0.76, 0.81, 0.85]
+                                       }),
+                  'REVERSIBLE': 'CMTONLY', 'TOLREV_P': 2.5,
+                  'WIRCT': {'0.10': pd.DataFrame({'DSW': [0.0, 0.02, 0.12, 0.22, 0.32, 0.42],
+                                                  'PVMULT': [1., 1., 0.94, 0.88, 0.82, 0.76],
+                                                  'TAMULT': [1., 1., 0.40, 0.25, 0.09, 0.09]
+                                                  }),
+                            '0.50': pd.DataFrame({'DSW': [0.02, 0.12, 0.35],
+                                                  'TAMULT': [1., 0.9, 0.8]
+                                                  })
+                            },
+                  'IRREVERSIBLE': 'WIRCTONLY', 'TOLREV_SW': 0.01
+                  }
+    rock_obj = NexusRockMethod(file=rock_file, input_number=1, model_unit_system=UnitSystem.ENGLISH,
+                               properties=properties)
+    rock_methods_obj = NexusRockMethods(model_unit_system=UnitSystem.ENGLISH, inputs={1: rock_obj,
+                                                                                      2: rock_obj})
+    expected_output = """
+--------------------------------
+ROCK method 1
+--------------------------------
+
+FILE_PATH: test/file/rock.dat
+
+ENGLISH
+CMT
+""" + properties['CMT'].to_string(na_rep='', index=False) + '\n' + \
+"""
+REVERSIBLE CMTONLY
+TOLREV_P 2.5
+WIRCT
+SWINIT 0.10
+""" + properties['WIRCT']['0.10'].to_string(na_rep='', index=False) + '\n' + \
+"""
+SWINIT 0.50
+""" + properties['WIRCT']['0.50'].to_string(na_rep='', index=False) + '\n' + \
+"""
+IRREVERSIBLE WIRCTONLY
+TOLREV_SW 0.01
+
+
+--------------------------------
+ROCK method 2
+--------------------------------
+
+FILE_PATH: test/file/rock.dat
+
+ENGLISH
+CMT
+""" + properties['CMT'].to_string(na_rep='', index=False) + '\n' + \
+"""
+REVERSIBLE CMTONLY
+TOLREV_P 2.5
+WIRCT
+SWINIT 0.10
+""" + properties['WIRCT']['0.10'].to_string(na_rep='', index=False) + '\n' + \
+"""
+SWINIT 0.50
+""" + properties['WIRCT']['0.50'].to_string(na_rep='', index=False) + '\n' + \
+"""
+IRREVERSIBLE WIRCTONLY
+TOLREV_SW 0.01
+
+"""
+
+    # Act
+    result = rock_methods_obj.__repr__()
 
     # Assert
     assert result == expected_output

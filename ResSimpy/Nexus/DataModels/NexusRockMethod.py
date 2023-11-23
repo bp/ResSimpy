@@ -9,6 +9,7 @@ from ResSimpy.Nexus.NexusKeywords.rock_keywords import ROCK_ALL_TABLE_KEYWORDS, 
 from ResSimpy.Nexus.NexusKeywords.rock_keywords import ROCK_SINGLE_KEYWORDS, ROCK_KEYWORDS_VALUE_STR
 from ResSimpy.Nexus.NexusKeywords.rock_keywords import ROCK_KEYWORDS, ROCK_REV_IRREV_OPTIONS
 from ResSimpy.DynamicProperty import DynamicProperty
+from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import RockUnits
 from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -30,15 +31,37 @@ class NexusRockMethod(DynamicProperty):
     file: NexusFile
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                 dict[str, Union[float, pd.DataFrame]]]] = field(default_factory=get_empty_dict_union)
+    unit_system: UnitSystem
 
-    def __init__(self, file: NexusFile, input_number: int,
+    def __init__(self, file: NexusFile, input_number: int, model_unit_system: UnitSystem,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
         if properties is not None:
             self.properties = properties
         else:
             self.properties = {}
+        self.unit_system = model_unit_system
         super().__init__(input_number=input_number, file=file)
+
+    @staticmethod
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """Gets the mapping of nexus keywords to attribute definitions."""
+        keywords: dict[str, tuple[str, type]] = {
+            'CR': ('rock_compressibility', float),
+            'KP': ('rock_permeability_compressibility', float),
+            'PREF': ('reference_pressure', float),
+            'P': ('pressure', float),
+            'DP': ('delta_pressure', float),
+        }
+        return keywords
+
+    @property
+    def units(self) -> RockUnits:
+        """Returns the attribute to unit map for the rock method."""
+        # Specify unit system, if provided
+        if 'UNIT_SYSTEM' in self.properties.keys() and isinstance(self.properties['UNIT_SYSTEM'], UnitSystem):
+            self.unit_system = self.properties['UNIT_SYSTEM']
+        return RockUnits(unit_system=self.unit_system)
 
     def to_string(self) -> str:
         """Create string with rock properties data, in Nexus file format."""
@@ -76,6 +99,10 @@ class NexusRockMethod(DynamicProperty):
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
+
+        # Specify unit system, if provided
+        if 'UNIT_SYSTEM' in self.properties.keys() and isinstance(self.properties['UNIT_SYSTEM'], UnitSystem):
+            self.unit_system = self.properties['UNIT_SYSTEM']
 
         # Initialize properties
         cmt_indices: list[int] = []
