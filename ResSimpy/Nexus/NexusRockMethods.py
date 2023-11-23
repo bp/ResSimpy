@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import os
 from typing import Optional, MutableMapping
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusRockMethod import NexusRockMethod
 from ResSimpy.Rock import Rock
@@ -20,8 +21,10 @@ class NexusRockMethods(Rock):
     __inputs: MutableMapping[int, NexusRockMethod]
     __files: dict[int, NexusFile]
     __properties_loaded: bool = False  # Used in lazy loading
+    __model_unit_system: UnitSystem
 
-    def __init__(self, inputs: Optional[MutableMapping[int, NexusRockMethod]] = None,
+    def __init__(self, model_unit_system: UnitSystem,
+                 inputs: Optional[MutableMapping[int, NexusRockMethod]] = None,
                  files: Optional[dict[int, NexusFile]] = None) -> None:
         if inputs:
             self.__inputs = inputs
@@ -31,6 +34,7 @@ class NexusRockMethods(Rock):
             self.__files = files
         else:
             self.__files = {}
+        self.__model_unit_system = model_unit_system
         super().__init__()
 
     def __repr__(self) -> str:
@@ -66,6 +70,7 @@ class NexusRockMethods(Rock):
                     raise ValueError(f'Unable to find rock file: {rock_file}')
                 if os.path.isfile(rock_file.location):
                     # Create NexusRockMethod object
-                    self.__inputs[table_num] = NexusRockMethod(file=rock_file, input_number=table_num)
+                    self.__inputs[table_num] = NexusRockMethod(file=rock_file, input_number=table_num,
+                                                               model_unit_system=self.__model_unit_system)
                     self.__inputs[table_num].read_properties()  # Populate object with rock properties in file
         self.__properties_loaded = True

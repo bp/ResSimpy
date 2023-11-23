@@ -171,7 +171,7 @@ class Density(UnitDimension):
     metric_atm = 'kg/m3'
 
 
-class FormationVolumeFactorOil(UnitDimension):
+class FormationVolumeFactorLiquid(UnitDimension):
     """Units for formation volume factor oil."""
     english = 'RB/STB'
     metric = 'm3/STM3'
@@ -589,3 +589,13 @@ class ValveCoefficient(UnitDimension):
     metbar = 'bar(kg/m3)/(kg/s)2'
     lab = 'psi(gm/cc)/(gm/s)2'
     metric_atm = 'atm(kg/m3)/(kg/s)2'
+
+
+class InterfacialTension(UnitDimension):
+    """Interfacial tension units."""
+    english = 'dynes/cm'
+    metric = 'dynes/cm'
+    metkgcm2 = 'dynes/cm'
+    metbar = 'dynes/cm'
+    lab = 'dynes/cm'
+    metric_atm = 'dynes/cm'

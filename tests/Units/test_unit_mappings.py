@@ -17,6 +17,10 @@ from ResSimpy.Nexus.DataModels.NexusEquilMethod import NexusEquilMethod
 from ResSimpy.Nexus.DataModels.NexusGasliftMethod import NexusGasliftMethod
 from ResSimpy.Nexus.DataModels.NexusHydraulicsMethod import NexusHydraulicsMethod
 from ResSimpy.Nexus.DataModels.NexusValveMethod import NexusValveMethod
+from ResSimpy.Nexus.DataModels.NexusRelPermMethod import NexusRelPermMethod
+from ResSimpy.Nexus.DataModels.NexusRockMethod import NexusRockMethod
+from ResSimpy.Nexus.DataModels.NexusSeparatorMethod import NexusSeparatorMethod
+from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterMethod
 from ResSimpy.Units.Units import Area
 from ResSimpy.Units.AttributeMappings.ConstraintUnitMapping import ConstraintUnits
 from ResSimpy.ISODateTime import ISODateTime
@@ -351,6 +355,15 @@ def test_object_no_unit_system():
     (NexusHydraulicsMethod, 'oilcut', '', False, UnitSystem.METRIC),
     (NexusHydraulicsMethod, 'roughness', 'mm', False, UnitSystem.METBAR),
     (NexusValveMethod, 'valve_coefficient', 'kPa(kg/m3)/(kg/s)2', False, UnitSystem.METRIC),
+    (NexusRelPermMethod, 'water_oil_capillary_pressure', 'PSIA', True, UnitSystem.ENGLISH),
+    (NexusRelPermMethod, 'interfacial_tension_threshold_for_relperm_adjustment', 'dynes/cm', False, UnitSystem.METRIC),
+    (NexusRockMethod, 'rock_compressibility', 'PSI-1', True, UnitSystem.ENGLISH),
+    (NexusRockMethod, 'reference_pressure', 'bars', False, UnitSystem.METBAR),
+    (NexusSeparatorMethod, 'temperature', 'DEGREES F', True, UnitSystem.ENGLISH),
+    (NexusSeparatorMethod, 'pressure', 'bars', False, UnitSystem.METBAR),
+    (NexusWaterMethod, 'water_compressibility', 'PSI-1', True, UnitSystem.ENGLISH),
+    (NexusWaterMethod, 'reference_pressure', 'kPa', False, UnitSystem.METRIC),
+    (NexusWaterMethod, 'water_density', 'kg/m3', False, UnitSystem.METBAR),
 ])
 def test_get_unit_for_dynamic_property_attribute(data_object, attribute, expected_result, upper, unitsystem):
     """A test to check if DynamicProperty.get_unit_for_attribute method works as expected."""
@@ -380,6 +393,15 @@ def test_get_unit_for_dynamic_property_attribute(data_object, attribute, expecte
     (NexusHydraulicsMethod, 'MMW', '', True, UnitSystem.METBAR),
     (NexusHydraulicsMethod, 'DATUM', 'cm', False, UnitSystem.LAB),
     (NexusValveMethod, 'VC', 'PSI(LB/FT3)/(LB/S)2', True, UnitSystem.ENGLISH),
+    (NexusRelPermMethod, 'PCGO', 'PSIA', True, UnitSystem.ENGLISH),
+    (NexusRelPermMethod, 'TENI', 'DYNES/CM', True, UnitSystem.METBAR),
+    (NexusRockMethod, 'PREF', 'PSIA', True, UnitSystem.ENGLISH),
+    (NexusRockMethod, 'CR', '(BARS)-1', True, UnitSystem.METBAR),
+    (NexusSeparatorMethod, 'TEMP', 'DEGREES F', True, UnitSystem.ENGLISH),
+    (NexusSeparatorMethod, 'PRES', 'BARS', True, UnitSystem.METBAR),
+    (NexusWaterMethod, 'DENW', 'LB/FT3', True, UnitSystem.ENGLISH),
+    (NexusWaterMethod, 'BW', 'M3/STM3', True, UnitSystem.METBAR),
+    (NexusWaterMethod, 'VISW', 'cp', False, UnitSystem.LAB),
 ])
 def test_get_unit_for_dynamic_property_keyword(data_object, keyword, expected_result, upper, unitsystem):
     """A test to check if DynamicProperty.get_unit_for_keyword method works as expected."""
@@ -596,6 +618,79 @@ def test_object_attribute_property_hydraulics():
                        (units.viscosity, 'cp'),
                        (units.diameter, 'in'),
                        (units.roughness, 'in'),
+                       ]
+    # Assert
+    for result, expected in result_expected:
+        assert result == expected
+
+
+def test_object_attribute_property_relperm():
+    # Arrange
+    prop_file = NexusFile(location='test/file/prop.dat')
+    test_object = NexusRelPermMethod(file=prop_file, input_number=1, properties={'UNIT_SYSTEM': UnitSystem.ENGLISH},
+                                     model_unit_system=UnitSystem.METRIC)
+    units = test_object.units
+    # Act
+    result_expected = [(units.water_oil_capillary_pressure, 'psia'),
+                       (units.gas_oil_capillary_pressure, 'psia'),
+                       (units.gas_water_capillary_pressure, 'psia'),
+                       (units.interfacial_tension_threshold_for_relperm_adjustment, 'dynes/cm'),
+                       (units.reference_interfacial_tension_for_capillary_pressure_adjustment, 'dynes/cm'),
+                       ]
+    # Assert
+    for result, expected in result_expected:
+        assert result == expected
+
+
+def test_object_attribute_property_rock():
+    # Arrange
+    prop_file = NexusFile(location='test/file/prop.dat')
+    test_object = NexusRockMethod(file=prop_file, input_number=1, properties={'UNIT_SYSTEM': UnitSystem.ENGLISH},
+                                  model_unit_system=UnitSystem.METRIC)
+    units = test_object.units
+    # Act
+    result_expected = [(units.pressure, 'psia'),
+                       (units.rock_compressibility, 'psi-1'),
+                       (units.delta_pressure, 'psi'),
+                       (units.rock_permeability_compressibility, 'psi-1'),
+                       (units.reference_pressure, 'psia'),
+                       ]
+    # Assert
+    for result, expected in result_expected:
+        assert result == expected
+
+
+def test_object_attribute_property_separator():
+    # Arrange
+    prop_file = NexusFile(location='test/file/prop.dat')
+    test_object = NexusSeparatorMethod(file=prop_file, input_number=1, properties={'UNIT_SYSTEM': UnitSystem.ENGLISH},
+                                       model_unit_system=UnitSystem.METRIC)
+    units = test_object.units
+    # Act
+    result_expected = [(units.pressure, 'psia'),
+                       (units.temperature, 'degrees F'),
+                       (units.standard_temperature, 'degrees F'),
+                       (units.standard_pressure, 'psia'),
+                       ]
+    # Assert
+    for result, expected in result_expected:
+        assert result == expected
+
+
+def test_object_attribute_property_water():
+    # Arrange
+    prop_file = NexusFile(location='test/file/prop.dat')
+    test_object = NexusWaterMethod(file=prop_file, input_number=1, properties={'UNIT_SYSTEM': UnitSystem.ENGLISH},
+                                   model_unit_system=UnitSystem.METRIC)
+    units = test_object.units
+    # Act
+    result_expected = [(units.reference_pressure, 'psia'),
+                       (units.temperature, 'degrees F'),
+                       (units.water_density, 'lb/ft3'),
+                       (units.water_compressibility, 'psi-1'),
+                       (units.water_formation_volume_factor, 'RB/STB'),
+                       (units.water_viscosity, 'cp'),
+                       (units.water_viscosity_compressibility, 'psi-1'),
                        ]
     # Assert
     for result, expected in result_expected:

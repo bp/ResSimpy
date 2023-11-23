@@ -107,11 +107,11 @@ class NexusSimulator(Simulator):
         self._grid: Optional[NexusGrid] = None
         # Model dynamic properties
         self._pvt: NexusPVTMethods = NexusPVTMethods(model_unit_system=self.default_units)
-        self._separator: NexusSeparatorMethods = NexusSeparatorMethods()
-        self._water: NexusWaterMethods = NexusWaterMethods()
+        self._separator: NexusSeparatorMethods = NexusSeparatorMethods(model_unit_system=self.default_units)
+        self._water: NexusWaterMethods = NexusWaterMethods(model_unit_system=self.default_units)
         self._equil: NexusEquilMethods = NexusEquilMethods(model_unit_system=self.default_units)
-        self._rock: NexusRockMethods = NexusRockMethods()
-        self._relperm: NexusRelPermMethods = NexusRelPermMethods()
+        self._rock: NexusRockMethods = NexusRockMethods(model_unit_system=self.default_units)
+        self._relperm: NexusRelPermMethods = NexusRelPermMethods(model_unit_system=self.default_units)
         self._valve: NexusValveMethods = NexusValveMethods(model_unit_system=self.default_units)
         self._aquifer: NexusAquiferMethods = NexusAquiferMethods(model_unit_system=self.default_units)
         self._hydraulics: NexusHydraulicsMethods = NexusHydraulicsMethods(model_unit_system=self.default_units)
@@ -463,12 +463,14 @@ class NexusSimulator(Simulator):
         # Read in separator properties from Nexus separator method files
         if self.model_files.separator_files is not None and \
                 len(self.model_files.separator_files) > 0:
-            self._separator = NexusSeparatorMethods(files=self.model_files.separator_files)
+            self._separator = NexusSeparatorMethods(files=self.model_files.separator_files,
+                                                    model_unit_system=self.default_units)
 
         # Read in water properties from Nexus water method files
         if self.model_files.water_files is not None and \
                 len(self.model_files.water_files) > 0:
-            self._water = NexusWaterMethods(files=self.model_files.water_files)
+            self._water = NexusWaterMethods(files=self.model_files.water_files,
+                                            model_unit_system=self.default_units)
 
         # Read in equilibration properties from Nexus equil method files
         if self.model_files.equil_files is not None and \
@@ -479,12 +481,14 @@ class NexusSimulator(Simulator):
         # Read in rock properties from Nexus rock method files
         if self.model_files.rock_files is not None and \
                 len(self.model_files.rock_files) > 0:
-            self._rock = NexusRockMethods(files=self.model_files.rock_files)
+            self._rock = NexusRockMethods(files=self.model_files.rock_files,
+                                          model_unit_system=self.default_units)
 
         # Read in relative permeability and capillary pressure properties from Nexus relperm method files
         if self.model_files.relperm_files is not None and \
                 len(self.model_files.relperm_files) > 0:
-            self._relperm = NexusRelPermMethods(files=self.model_files.relperm_files)
+            self._relperm = NexusRelPermMethods(files=self.model_files.relperm_files,
+                                                model_unit_system=self.default_units)
 
         # Read in valve and choke properties from Nexus valve method files
         if self.model_files.valve_files is not None and \

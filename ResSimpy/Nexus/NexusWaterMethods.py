@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import os
 from typing import Optional, MutableMapping
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterMethod
 from ResSimpy.Water import Water
@@ -20,8 +21,10 @@ class NexusWaterMethods(Water):
     __inputs: MutableMapping[int, NexusWaterMethod]
     __files: dict[int, NexusFile]
     __properties_loaded: bool = False  # Used in lazy loading
+    __model_unit_system: UnitSystem
 
-    def __init__(self, inputs: Optional[MutableMapping[int, NexusWaterMethod]] = None,
+    def __init__(self, model_unit_system: UnitSystem,
+                 inputs: Optional[MutableMapping[int, NexusWaterMethod]] = None,
                  files: Optional[dict[int, NexusFile]] = None) -> None:
         if inputs:
             self.__inputs = inputs
@@ -31,6 +34,7 @@ class NexusWaterMethods(Water):
             self.__files = files
         else:
             self.__files = {}
+        self.__model_unit_system = model_unit_system
         super().__init__()
 
     def __repr__(self) -> str:
@@ -66,6 +70,7 @@ class NexusWaterMethods(Water):
                     raise ValueError(f'Unable to find water file: {water_file}')
                 if os.path.isfile(water_file.location):
                     # Create NexusWaterMethod object
-                    self.__inputs[table_num] = NexusWaterMethod(file=water_file, input_number=table_num)
+                    self.__inputs[table_num] = NexusWaterMethod(file=water_file, input_number=table_num,
+                                                                model_unit_system=self.__model_unit_system)
                     self.__inputs[table_num].read_properties()  # Populate object with water properties in file
         self.__properties_loaded = True

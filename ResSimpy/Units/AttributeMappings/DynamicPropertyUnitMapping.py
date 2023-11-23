@@ -4,12 +4,178 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Units.Units import (HeatCapacity, UnitDimension, Viscosity, Density, GasLiquidRatio, LiquidGasRatio,
                                   SolutionOilGasRatio, DeltaPressure, Temperature, ReservoirVolumeOverPressure,
-                                  FormationVolumeFactorGas, FormationVolumeFactorOil, SolutionGasOilRatio,
+                                  FormationVolumeFactorGas, FormationVolumeFactorLiquid, SolutionGasOilRatio,
                                   Dimensionless, Pressure, CriticalPressure, CriticalTemperature, CriticalVolume,
                                   Compressibility, Length, InverseTime, Permeability, ReservoirProductivityIndex,
                                   ReservoirVolume, SurfaceRatesLiquid, SurfaceRatesGas, GravityGradient,
-                                  ValveCoefficient, Roughness, Diameter
+                                  ValveCoefficient, Roughness, Diameter, InterfacialTension
                                   )
+
+
+class WaterUnits(BaseUnitMapping):
+    """Unit types for the attributes of water methods."""
+
+    def __init__(self, unit_system: None | UnitSystem) -> None:
+        super().__init__(unit_system=unit_system)
+
+    attribute_map: Mapping[str, UnitDimension] = {
+        'temperature': Temperature(),
+        'reference_pressure': Pressure(),
+        'water_density': Density(),
+        'water_compressibility': Compressibility(),
+        'water_formation_volume_factor': FormationVolumeFactorLiquid(),
+        'water_viscosity': Viscosity(),
+        'water_viscosity_compressibility': Compressibility()
+    }
+
+    @property
+    def temperature(self) -> str:
+        """Returns the unit for temperature."""
+        return self.get_unit_for_attribute('temperature')
+
+    @property
+    def reference_pressure(self) -> str:
+        """Returns the unit for reference_pressure."""
+        return self.get_unit_for_attribute('reference_pressure')
+
+    @property
+    def water_density(self) -> str:
+        """Returns the unit for water_density."""
+        return self.get_unit_for_attribute('water_density')
+
+    @property
+    def water_compressibility(self) -> str:
+        """Returns the unit for water_compressibility."""
+        return self.get_unit_for_attribute('water_compressibility')
+
+    @property
+    def water_formation_volume_factor(self) -> str:
+        """Returns the unit for water_formation_volume_factor."""
+        return self.get_unit_for_attribute('water_formation_volume_factor')
+
+    @property
+    def water_viscosity(self) -> str:
+        """Returns the unit for water_viscosity."""
+        return self.get_unit_for_attribute('water_viscosity')
+
+    @property
+    def water_viscosity_compressibility(self) -> str:
+        """Returns the unit for water_viscosity_compressibility."""
+        return self.get_unit_for_attribute('water_viscosity_compressibility')
+
+
+class SeparatorUnits(BaseUnitMapping):
+    """Unit types for the attributes of separator methods."""
+
+    def __init__(self, unit_system: None | UnitSystem) -> None:
+        super().__init__(unit_system=unit_system)
+
+    attribute_map: Mapping[str, UnitDimension] = {
+        'temperature': Temperature(),
+        'pressure': Pressure(),
+        'standard_temperature': Temperature(),
+        'standard_pressure': Pressure(),
+    }
+
+    @property
+    def temperature(self) -> str:
+        """Returns the unit for temperature."""
+        return self.get_unit_for_attribute('temperature')
+
+    @property
+    def pressure(self) -> str:
+        """Returns the unit for pressure."""
+        return self.get_unit_for_attribute('pressure')
+
+    @property
+    def standard_temperature(self) -> str:
+        """Returns the unit for standard_temperature."""
+        return self.get_unit_for_attribute('standard_temperature')
+
+    @property
+    def standard_pressure(self) -> str:
+        """Returns the unit for standard_pressure."""
+        return self.get_unit_for_attribute('standard_pressure')
+
+
+class RockUnits(BaseUnitMapping):
+    """Unit types for the attributes of rock methods."""
+
+    def __init__(self, unit_system: None | UnitSystem) -> None:
+        super().__init__(unit_system=unit_system)
+
+    attribute_map: Mapping[str, UnitDimension] = {
+        'rock_compressibility': Compressibility(),
+        'rock_permeability_compressibility': Compressibility(),
+        'reference_pressure': Pressure(),
+        'pressure': Pressure(),
+        'delta_pressure': DeltaPressure()
+    }
+
+    @property
+    def rock_compressibility(self) -> str:
+        """Returns the unit for rock_compressibility."""
+        return self.get_unit_for_attribute('rock_compressibility')
+
+    @property
+    def rock_permeability_compressibility(self) -> str:
+        """Returns the unit for rock_permeability_compressibility."""
+        return self.get_unit_for_attribute('rock_permeability_compressibility')
+
+    @property
+    def reference_pressure(self) -> str:
+        """Returns the unit for reference_pressure."""
+        return self.get_unit_for_attribute('reference_pressure')
+
+    @property
+    def pressure(self) -> str:
+        """Returns the unit for pressure."""
+        return self.get_unit_for_attribute('pressure')
+
+    @property
+    def delta_pressure(self) -> str:
+        """Returns the unit for delta_pressure."""
+        return self.get_unit_for_attribute('delta_pressure')
+
+
+class RelPermUnits(BaseUnitMapping):
+    """Unit types for the attributes of relative permeability and capillary pressure methods."""
+
+    def __init__(self, unit_system: None | UnitSystem) -> None:
+        super().__init__(unit_system=unit_system)
+
+    attribute_map: Mapping[str, UnitDimension] = {
+        'water_oil_capillary_pressure': Pressure(),
+        'gas_oil_capillary_pressure': Pressure(),
+        'gas_water_capillary_pressure': Pressure(),
+        'interfacial_tension_threshold_for_relperm_adjustment': InterfacialTension(),
+        'reference_interfacial_tension_for_capillary_pressure_adjustment': InterfacialTension()
+    }
+
+    @property
+    def water_oil_capillary_pressure(self) -> str:
+        """Returns the unit for water_oil_capillary_pressure."""
+        return self.get_unit_for_attribute('water_oil_capillary_pressure')
+
+    @property
+    def gas_oil_capillary_pressure(self) -> str:
+        """Returns the unit for gas_oil_capillary_pressure."""
+        return self.get_unit_for_attribute('gas_oil_capillary_pressure')
+
+    @property
+    def gas_water_capillary_pressure(self) -> str:
+        """Returns the unit for gas_water_capillary_pressure."""
+        return self.get_unit_for_attribute('gas_water_capillary_pressure')
+
+    @property
+    def interfacial_tension_threshold_for_relperm_adjustment(self) -> str:
+        """Returns the unit for interfacial_tension_threshold_for_relperm_adjustment."""
+        return self.get_unit_for_attribute('interfacial_tension_threshold_for_relperm_adjustment')
+
+    @property
+    def reference_interfacial_tension_for_capillary_pressure_adjustment(self) -> str:
+        """Returns the unit for reference_interfacial_tension_for_capillary_pressure_adjustment."""
+        return self.get_unit_for_attribute('reference_interfacial_tension_for_capillary_pressure_adjustment')
 
 
 class HydraulicsUnits(BaseUnitMapping):
@@ -438,7 +604,7 @@ class PVTUnits(BaseUnitMapping):
         'molecular_weight_of_residual_oil': Dimensionless(),
         'oil_viscosity': Viscosity(),
         'gas_viscosity': Viscosity(),
-        'oil_formation_volume_factor': FormationVolumeFactorOil(),
+        'oil_formation_volume_factor': FormationVolumeFactorLiquid(),
         'gas_formation_volume_factor': FormationVolumeFactorGas(),
         'solution_gas_oil_ratio': SolutionGasOilRatio(),
         'solution_oil_gas_ratio': SolutionOilGasRatio(),
