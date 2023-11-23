@@ -262,6 +262,7 @@ def test_generate_file_include_structure_skip_array(mocker, test_file_contents):
     nexus_file_include1 = NexusFile(location=include_full_file_path_1, include_locations=None,
                                     origin=file_path, include_objects=None,
                                     file_content_as_list=None)
+    nexus_file_include1._input_file_location='nexus_data/inc_file1.inc'
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -384,6 +385,7 @@ KZ CON 1
     expected_included_file = NexusFile(location=expected_include_file_path, include_locations=[expected_nested_include_file_path],
                                     origin=file_path, include_objects=[expected_nested_included_file],
                                     file_content_as_list=file_contents.splitlines(keepends=True))
+    expected_included_file._location_in_including_file = 'nexus_data/inc_file1.inc'
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -864,7 +866,7 @@ def test_update_include_location_in_file_as_list(mocker, file_content, expected_
     assert nexus_file.file_content_as_list == expected_file_content.splitlines(keepends=True)
     assert nexus_file.include_locations == [expected_path]
     assert include_file.location == expected_path
-    assert include_file.input_file_location == 'New_FiLe_Path.inc'
+    assert include_file.location_in_including_file == 'New_FiLe_Path.inc'
     assert nexus_file.file_modified
 
 

@@ -50,8 +50,12 @@ GRID_FILES
     expected_fcs_file.files_info = [(fcs_path, None, None),
                                     (structured_grid_path, None, None),
                                     (options_file_path, None, None)]
+
+    expected_fcs_file._location_in_including_file = '/root_folder/test_fcs.fcs'
+
     # Act
     fcs_file = FcsNexusFile.generate_fcs_structure(fcs_path)
+
     # Assert
     assert fcs_file.file_content_as_list == expected_fcs_file.file_content_as_list
     assert fcs_file == expected_fcs_file

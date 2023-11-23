@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from uuid import uuid4, UUID
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, Sequence
 import warnings
 from ResSimpy.FileBase import FileBase
 import uuid
@@ -11,7 +11,7 @@ import uuid
 from ResSimpy.Utils.factory_methods import get_empty_list_file
 
 
-@dataclass
+@dataclass(kw_only=True)
 class File(FileBase):
     """The abstract base class for simulator files.
 
@@ -21,14 +21,15 @@ class File(FileBase):
     """
 
     location: str
+    _location_in_including_file: str
+    include_objects: Optional[Sequence[File]]
     file_content_as_list: Optional[list[str]] = field(default=None, repr=False)
-    include_objects: Optional[list[File]] = field(default=None, repr=False)
     __id: UUID = field(default_factory=lambda: uuid4(), compare=False)
     __file_modified: bool = False
 
     def __init__(self, location: str,
                  file_content_as_list: Optional[list[str]] = None,
-                 include_objects: Optional[list[File]] = None, create_as_modified: bool = False) -> None:
+                 include_objects: Optional[Sequence[File]] = None, create_as_modified: bool = False) -> None:
 
         self.location = location
         self.include_objects: Optional[list[File]] = get_empty_list_file() \
@@ -108,6 +109,11 @@ class File(FileBase):
     @property
     def file_modified(self) -> bool:
         return self.__file_modified
+
+    @property
+    def location_in_including_file(self) -> str:
+        """The location of the file as it is written after the INCLUDE token in the file including it."""
+        return self._location_in_including_file
 
     def _file_modified_set(self, value: bool) -> None:
         self.__file_modified = value
