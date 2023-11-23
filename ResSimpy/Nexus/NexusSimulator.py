@@ -101,7 +101,7 @@ class NexusSimulator(Simulator):
         self.__manual_fcs_tidy_call: bool = manual_fcs_tidy_call
 
         self.__default_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
-        #
+
         self._network: NexusNetwork = NexusNetwork(model=self)
         self._wells: NexusWells = NexusWells(self)
         self._grid: Optional[NexusGrid] = None

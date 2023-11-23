@@ -236,8 +236,11 @@ class NexusCompletion(Completion):
         return attribute_dict
 
     @staticmethod
-    def completion_is_perforation(completion: NexusCompletion) -> bool:
+    def completion_is_perforation(completion: Completion) -> bool:
         """Determines if the supplied completion is a perforation or not."""
+
+        if not isinstance(completion, NexusCompletion):
+            raise ValueError(f"Attempting to compare invalid object: {type(completion)}")
 
         # If we don't have any non-none values for these properties, assume the default values, which mean that the
         # layer is perforated
@@ -253,7 +256,7 @@ class NexusCompletion(Completion):
                 (completion.status != 'OFF'))
 
     @staticmethod
-    def completion_is_shutin(completion: NexusCompletion) -> bool:
+    def completion_is_shutin(completion: Completion) -> bool:
         """Determines if the supplied completion is a shut-in or not."""
         return not NexusCompletion.completion_is_perforation(completion)
 

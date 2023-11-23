@@ -11,14 +11,12 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Well import Well
 
 
-@dataclass
+@dataclass(kw_only=True)
 class NexusWell(Well):
-    __completions: list[NexusCompletion]
 
     def __init__(self, well_name: str, completions: Sequence[NexusCompletion], unit_system: UnitSystem) -> None:
         if not isinstance(completions, list):
             completions = list(completions)
-        self.__completions: list[NexusCompletion] = completions
         super().__init__(well_name=well_name, completions=completions, unit_system=unit_system)
 
     def __repr__(self) -> str:
@@ -31,7 +29,7 @@ class NexusWell(Well):
     def perforations(self) -> Sequence[NexusCompletion]:
         """Returns a list of all of the perforations for the well."""
 
-        activations = filter(NexusCompletion.completion_is_perforation, self.__completions)
+        activations = filter(NexusCompletion.completion_is_perforation, self._completions)
         return list(activations)
 
     @property
@@ -46,7 +44,7 @@ class NexusWell(Well):
     def shutins(self) -> Sequence[NexusCompletion]:
         """Returns a list of all of the shut-ins for the well."""
 
-        shutins = filter(NexusCompletion.completion_is_shutin, self.__completions)
+        shutins = filter(NexusCompletion.completion_is_shutin, self._completions)
         return list(shutins)
 
     @property
@@ -77,7 +75,7 @@ class NexusWell(Well):
         events = []
         using_k_values: Optional[bool] = None
 
-        for completion in self.__completions:
+        for completion in self._completions:
             is_perforation = NexusCompletion.completion_is_perforation(completion)
             if not is_perforation:
                 continue
@@ -109,7 +107,7 @@ class NexusWell(Well):
         else:
             perf_props = completion_properties
         perf_props_without_nones = {k: v for k, v in perf_props.items() if v is not None}
-        for i, perf in enumerate(self.__completions):
+        for i, perf in enumerate(self._completions):
             for prop, value in perf_props_without_nones.items():
                 if getattr(perf, prop) == value:
                     # go to the next perf if a value from the dictionary doesn't match
@@ -143,7 +141,7 @@ class NexusWell(Well):
 
     def get_completion_by_id(self, id: UUID) -> NexusCompletion:
         """Returns the completion that matches the id provided."""
-        for completion in self.__completions:
+        for completion in self._completions:
             if completion.id == id:
                 return completion
         raise ValueError('No completion found for id: {id}')
@@ -163,16 +161,16 @@ class NexusWell(Well):
         completion_properties['unit_system'] = self.unit_system
         new_completion = NexusCompletion.from_dict(completion_properties, date_format)
         if completion_index is None:
-            completion_index = len(self.__completions)
-        self.__completions.insert(completion_index, new_completion)
+            completion_index = len(self._completions)
+        self._completions.insert(completion_index, new_completion)
         return new_completion
 
     def _remove_completion_from_memory(self, completion_to_remove: NexusCompletion | UUID) -> None:
         if isinstance(completion_to_remove, NexusCompletion):
             completion_to_remove = self.find_completion(completion_to_remove)
             completion_to_remove = completion_to_remove.id
-        completion_index_to_remove = [x.id for x in self.__completions].index(completion_to_remove)
-        self.__completions.pop(completion_index_to_remove)
+        completion_index_to_remove = [x.id for x in self._completions].index(completion_to_remove)
+        self._completions.pop(completion_index_to_remove)
 
     def _modify_completion_in_memory(self, new_completion_properties: dict[str, Union[None, float, int, str]],
                                      completion_to_modify: NexusCompletion | UUID,

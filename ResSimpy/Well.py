@@ -10,18 +10,18 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 
 @dataclass
 class Well(ABC):
-    __completions: list[Completion]
+    _completions: list[Completion]
     __well_name: str
     __unit_system: UnitSystem
 
     def __init__(self, well_name: str, completions: list[Completion], unit_system: UnitSystem) -> None:
         self.__well_name = well_name
-        self.__completions = completions
+        self._completions = completions
         self.__unit_system = unit_system
 
     @property
     def completions(self) -> list[Completion]:
-        return self.__completions
+        return self._completions
 
     @property
     def well_name(self) -> str:
@@ -36,7 +36,7 @@ class Well(ABC):
         """Returns a list of dates that the well was changed using a completion."""
 
         dates_changed: list[str] = []
-        for completion in self.__completions:
+        for completion in self._completions:
             if completion.date not in dates_changed:
                 dates_changed.append(completion.date)
 
