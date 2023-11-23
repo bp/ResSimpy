@@ -1,5 +1,6 @@
 """Class for handling all Reporting and runcontrol related tasks."""
 import ResSimpy.Nexus.nexus_file_operations as nfo
+import ResSimpy.FileOperations.file_operations as fo
 
 
 class Reporting:
@@ -19,15 +20,15 @@ class Reporting:
                 Please update structured grid file path")
         file = nfo.load_file_as_list(structured_grid_path)
 
-        if not nfo.value_in_file('MAPBINARY', file):
+        if not fo.value_in_file('MAPBINARY', file):
             new_file = ['MAPBINARY\n']
         else:
             new_file = []
 
-        if not nfo.value_in_file('MAPVDB', file):
+        if not fo.value_in_file('MAPVDB', file):
             new_file.extend(['MAPVDB\n'])
 
-        if not nfo.value_in_file('MAPOUT', file):
+        if not fo.value_in_file('MAPOUT', file):
             new_file.extend(['MAPOUT ALL\n'])
         else:
             line_counter = 0

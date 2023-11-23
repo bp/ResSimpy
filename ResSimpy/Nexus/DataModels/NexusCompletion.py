@@ -235,30 +235,25 @@ class NexusCompletion(Completion):
             attribute_dict.update(self.rel_perm_end_point.to_dict())
         return attribute_dict
 
-    @staticmethod
-    def completion_is_perforation(completion: Completion) -> bool:
+    @property
+    def completion_is_perforation(self) -> bool:
         """Determines if the supplied completion is a perforation or not."""
 
-        if not isinstance(completion, NexusCompletion):
-            raise ValueError(f"Attempting to compare invalid object: {type(completion)}")
+        if not isinstance(self, NexusCompletion):
+            raise ValueError(f"Attempting to compare invalid object: {type(self)}")
 
         # If we don't have any non-none values for these properties, assume the default values, which mean that the
         # layer is perforated
-        if completion.partial_perf is None and completion.well_indices is None and completion.status is None \
-                and completion.kh_mult is None and completion.perm_thickness_ovr is None:
+        if self.partial_perf is None and self.well_indices is None and self.status is None \
+                and self.kh_mult is None and self.perm_thickness_ovr is None:
             return True
 
-        return ((completion.partial_perf is None or completion.partial_perf > 0) and
-                (completion.well_indices is None or completion.well_indices > 0) and
-                (completion.perm_thickness_ovr is None or completion.perm_thickness_ovr > 0) and
-                (completion.kh_mult is None or completion.kh_mult > 0) and
-                (completion.length is None or completion.length > 0) and
-                (completion.status != 'OFF'))
-
-    @staticmethod
-    def completion_is_shutin(completion: Completion) -> bool:
-        """Determines if the supplied completion is a shut-in or not."""
-        return not NexusCompletion.completion_is_perforation(completion)
+        return ((self.partial_perf is None or self.partial_perf > 0) and
+                (self.well_indices is None or self.well_indices > 0) and
+                (self.perm_thickness_ovr is None or self.perm_thickness_ovr > 0) and
+                (self.kh_mult is None or self.kh_mult > 0) and
+                (self.length is None or self.length > 0) and
+                (self.status != 'OFF'))
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:

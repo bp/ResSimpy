@@ -26,36 +26,6 @@ class NexusWell(Well):
         return generic_str(self)
 
     @property
-    def perforations(self) -> Sequence[NexusCompletion]:
-        """Returns a list of all of the perforations for the well."""
-
-        activations = filter(NexusCompletion.completion_is_perforation, self._completions)
-        return list(activations)
-
-    @property
-    def first_perforation(self) -> Optional[NexusCompletion]:
-        """Returns the first perforation for the well."""
-        if len(self.perforations) == 0:
-            return None
-
-        return self.perforations[0]
-
-    @property
-    def shutins(self) -> Sequence[NexusCompletion]:
-        """Returns a list of all of the shut-ins for the well."""
-
-        shutins = filter(NexusCompletion.completion_is_shutin, self._completions)
-        return list(shutins)
-
-    @property
-    def last_shutin(self) -> Optional[NexusCompletion]:
-        """Returns the last shut-in for the well in the Wellspec file."""
-        if len(self.shutins) == 0:
-            return None
-
-        return self.shutins[-1]
-
-    @property
     def printable_well_info(self) -> str:
         """Returns some printable well information in string format."""
         printable_dates_of_completions = ", ".join(self.dates_of_completions)
@@ -76,7 +46,7 @@ class NexusWell(Well):
         using_k_values: Optional[bool] = None
 
         for completion in self._completions:
-            is_perforation = NexusCompletion.completion_is_perforation(completion)
+            is_perforation = completion.completion_is_perforation
             if not is_perforation:
                 continue
             if completion.k is not None and using_k_values is not False:
@@ -101,7 +71,7 @@ class NexusWell(Well):
         -------
             list[NexusCompletion] that match the completion properties provided
         """
-        matching_completions = []
+        matching_completions: list[NexusCompletion] = []
         if isinstance(completion_properties, NexusCompletion):
             perf_props = completion_properties.to_dict(add_units=False)
         else:
@@ -115,8 +85,9 @@ class NexusWell(Well):
                 else:
                     break
             else:
-                # if all the conditions match then append the perf to completions
-                matching_completions.append(perf)
+                if isinstance(perf, NexusCompletion):
+                    # if all the conditions match then append the perf to completions
+                    matching_completions.append(perf)
         return matching_completions
 
     def find_completion(self,
@@ -138,13 +109,6 @@ class NexusWell(Well):
             raise ValueError(f'Could not find single unique completion that matches property provided. Instead found: '
                              f'{len(matching_completions)} completions')
         return matching_completions[0]
-
-    def get_completion_by_id(self, id: UUID) -> NexusCompletion:
-        """Returns the completion that matches the id provided."""
-        for completion in self._completions:
-            if completion.id == id:
-                return completion
-        raise ValueError('No completion found for id: {id}')
 
     def _add_completion_to_memory(self, date: str, completion_properties: dict[str, None | float | int | str],
                                   date_format: DateFormat, completion_index: Optional[int] = None) -> NexusCompletion:
@@ -180,6 +144,13 @@ class NexusWell(Well):
         else:
             completion = self.get_completion_by_id(completion_to_modify)
         completion.update(new_completion_properties)
+
+    def get_completion_by_id(self, id: UUID) -> NexusCompletion:
+        """Returns the completion that matches the id provided."""
+        for completion in self._completions:
+            if completion.id == id and isinstance(completion, NexusCompletion):
+                return completion
+        raise ValueError('No completion found for id: {id}')
 
     def _modify_completions_in_memory(self, new_completion_properties: dict[str, Union[None, float, int, str]],
                                       completions_to_modify: list[NexusCompletion | UUID]) -> None:

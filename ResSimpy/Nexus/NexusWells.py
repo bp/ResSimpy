@@ -19,6 +19,7 @@ from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Wells import Wells
 from ResSimpy.Nexus.load_wells import load_wells
+import ResSimpy.FileOperations.file_operations as fo
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Utils.invert_nexus_map import attribute_name_to_nexus_keyword
 
@@ -190,12 +191,12 @@ class NexusWells(Wells):
         writing_new_wellspec_table = False
         date_comp = 0
         # if no time cards present in the file just find the name of the well instead
-        if not nfo.value_in_file('TIME', file_content):
+        if not fo.value_in_file('TIME', file_content):
             new_completion_time_index = 0
 
         for index, line in enumerate(file_content):
-            if header_index == -1 and nfo.check_token('TIME', line):
-                wellspec_date = nfo.get_expected_token_value('TIME', line, [line])
+            if header_index == -1 and fo.check_token('TIME', line):
+                wellspec_date = fo.get_expected_token_value('TIME', line, [line])
                 date_comp = self.__model._sim_controls.compare_dates(wellspec_date, completion_date)
                 if date_comp == 0:
                     # if we've found the date we're looking for start looking for a wellspec and name card
@@ -217,7 +218,7 @@ class NexusWells(Wells):
                 else:
                     continue
 
-            if nfo.check_token('WELLSPEC', line) and nfo.get_token_value('WELLSPEC', line, [line]) == well_name \
+            if fo.check_token('WELLSPEC', line) and fo.get_token_value('WELLSPEC', line, [line]) == well_name \
                     and new_completion_time_index != -1:
                 # get the header of the wellspec table
                 header_index, headers, headers_original = self.__add_object_operations.get_and_write_new_header(
@@ -362,11 +363,11 @@ class NexusWells(Wells):
         wellspec_index = -1
         header_index = -1
         for index, line in enumerate(file_content):
-            if nfo.check_token('TIME', line) and nfo.get_expected_token_value('TIME', line, [line]) == \
+            if fo.check_token('TIME', line) and fo.get_expected_token_value('TIME', line, [line]) == \
                     completion_date:
                 completion_date_found = True
-            if completion_date_found and nfo.check_token('WELLSPEC', line) and \
-                    nfo.get_token_value('WELLSPEC', line, [line]) == well_name:
+            if completion_date_found and fo.check_token('WELLSPEC', line) and \
+                    fo.get_token_value('WELLSPEC', line, [line]) == well_name:
                 # get the index in the list as string
                 wellspec_index = index
                 keyword_map = {x: y[0] for x, y in nexus_mapping.items()}

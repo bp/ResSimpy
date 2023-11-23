@@ -19,6 +19,7 @@ from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import PVTUnits
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_list_str, get_empty_eosopt_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
+import ResSimpy.FileOperations.file_operations as fo
 
 
 @dataclass(kw_only=True, repr=False)  # Doesn't need to write an _init_, _eq_ methods, etc.
@@ -275,7 +276,7 @@ class NexusPVTMethod(DynamicProperty):
                 table_name = 'UNSATOIL'
                 full_table_name = table_name + '_' + table_key
             if nfo.check_token(table_name, single_line) and nfo.check_token(table_key, single_line):
-                if nfo.get_token_value(table_key, single_line, line_list) is None:
+                if fo.get_token_value(table_key, single_line, line_list) is None:
                     raise ValueError(f'Property {table_key} does not have a numerical value.')
                 unsat_obj[table_key].append(nfo.get_expected_token_value(table_key, single_line, line_list))
                 if full_table_name in table_indices_dict.keys():

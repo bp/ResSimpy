@@ -14,6 +14,7 @@ from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import RelPermU
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_hysteresis_dict
 import ResSimpy.Nexus.nexus_file_operations as nfo
+import ResSimpy.FileOperations.file_operations as fo
 
 
 @dataclass(kw_only=True, repr=False)  # Doesn't need to write an _init_, _eq_ methods, etc.
@@ -175,7 +176,7 @@ class NexusRelPermMethod(DynamicProperty):
             line_list (list[str]): list of strings that comprise input RELPM file
         """
         if nfo.check_token(keyword, single_line):
-            key_val = nfo.get_token_value(keyword, single_line, line_list)
+            key_val = fo.get_token_value(keyword, single_line, line_list)
             if key_val in keyword_value_options:
                 self.properties[keyword] = key_val
             else:
@@ -301,12 +302,12 @@ class NexusRelPermMethod(DynamicProperty):
                     for hyst_keyword in ['NONE', 'NOCHK_HYS']:
                         if nfo.check_token(hyst_keyword, line):
                             self.hysteresis_params[hyst_keyword] = ''
-                if nfo.check_token('KRW', line) and nfo.get_token_value('KRW', line, file_as_list) == 'USER':
+                if nfo.check_token('KRW', line) and fo.get_token_value('KRW', line, file_as_list) == 'USER':
                     self.hysteresis_params['KRW'] = 'USER'
                 if [i for i in line.split() if i in ['KRG', 'KROW']]:
                     for hyst_keyword in ['KRG', 'KROW']:
                         if nfo.check_token(hyst_keyword, line):
-                            hyst_keyword_primary_key = nfo.get_token_value(hyst_keyword, line, file_as_list)
+                            hyst_keyword_primary_key = fo.get_token_value(hyst_keyword, line, file_as_list)
                             if hyst_keyword_primary_key == 'USER':
                                 self.hysteresis_params[hyst_keyword] = 'USER'
                             elif hyst_keyword_primary_key in ['LINEAR', 'SCALED', 'CARLSON', 'KILLOUGH']:

@@ -8,4 +8,3 @@ class OpenGoSimWells(Wells):
     """A class for collecting all OpenGoSimWell objects in an OpenGoSimSimulator. Handles adding and removing
     completions as well as rescheduling wells. This is usually accessed through the model.wells property.
     """
-    pass

@@ -16,6 +16,7 @@ else:
 from uuid import UUID
 import re
 import ResSimpy.Nexus.nexus_file_operations as nfo
+import ResSimpy.FileOperations.file_operations as fo
 import warnings
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_OPERATION_KEYWORDS, GRID_ARRAY_FORMAT_KEYWORDS, \
     GRID_ARRAY_KEYWORDS
@@ -208,7 +209,7 @@ class NexusFile(File):
 
             else:
                 continue
-            inc_file_path = nfo.get_token_value('INCLUDE', line, file_as_list)
+            inc_file_path = fo.get_token_value('INCLUDE', line, file_as_list)
             if inc_file_path is None:
                 continue
             inc_full_path = nfo.get_full_file_path(inc_file_path, origin=full_file_path)
@@ -307,7 +308,7 @@ class NexusFile(File):
             return
         for row in self.file_content_as_list:
             if nfo.check_token('INCLUDE', row):
-                incfile_location = nfo.get_token_value('INCLUDE', row, self.file_content_as_list)
+                incfile_location = fo.get_token_value('INCLUDE', row, self.file_content_as_list)
                 if incfile_location is None:
                     continue
                 split_line = re.split(incfile_location, row, maxsplit=1, flags=re.IGNORECASE)
@@ -396,7 +397,7 @@ class NexusFile(File):
             return from_list, to_list
         for row in self.file_content_as_list:
             if isinstance(row, NexusFile):
-                if (max_depth is None or depth > 0):
+                if max_depth is None or depth > 0:
                     level_down_max_depth = None if max_depth is None else depth - 1
                     temp_from_list, temp_to_list = row.export_network_lists()
                     from_list.extend(temp_from_list)
@@ -466,7 +467,7 @@ class NexusFile(File):
         """
         if self.line_locations is None:
             # call get_flat_list_str_file to ensure line locations are updated
-            self.get_flat_list_str_file
+            _ = self.get_flat_list_str_file
             if self.line_locations is None:
                 raise ValueError("No include line locations found.")
 

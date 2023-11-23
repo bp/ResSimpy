@@ -19,6 +19,7 @@ from ResSimpy.Utils.factory_methods import get_empty_dict_int_nexus_file, get_em
     get_empty_list_nexus_file
 from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
 import ResSimpy.Nexus.nexus_file_operations as nfo
+import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from datetime import datetime
 
@@ -172,7 +173,7 @@ class FcsNexusFile(NexusFile):
                 warnings.warn(f'get next value failed to find a suitable token in {line}')
                 continue
             key = key.upper()
-            value = nfo.get_token_value(key, line, flat_fcs_file_content[i::])
+            value = fo.get_token_value(key, line, flat_fcs_file_content[i::])
             if value is None:
                 warnings.warn(f'No value found for {key}, skipping file')
                 continue

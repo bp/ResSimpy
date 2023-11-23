@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import ResSimpy.Nexus.nexus_collect_tables
 import ResSimpy.Nexus.nexus_file_operations as nfo
+import ResSimpy.FileOperations.file_operations as fo
 import pytest
 import pandas as pd
 import numpy as np
@@ -67,7 +68,7 @@ def test_get_token_value(mocker, line_contents, file_contents, expected_result):
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    result = nfo.get_token_value(token='MYTESTTOKEN', token_line=line_contents,
+    result = fo.get_token_value(token='MYTESTTOKEN', token_line=line_contents,
                                  file_list=dummy_file_as_list)
 
     # Assert

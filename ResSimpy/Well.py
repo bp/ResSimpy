@@ -45,22 +45,32 @@ class Well(ABC):
     @property
     def perforations(self) -> Sequence[Completion]:
         """Returns a list of all of the perforations for the well."""
-        raise NotImplementedError("This method has not been implemented for this simulator yet")
+
+        activations = filter(lambda x: x.completion_is_perforation, self._completions)
+        return list(activations)
 
     @property
     def first_perforation(self) -> Optional[Completion]:
         """Returns the first perforation for the well."""
-        raise NotImplementedError("This method has not been implemented for this simulator yet")
+        if len(self.perforations) == 0:
+            return None
+
+        return self.perforations[0]
 
     @property
     def shutins(self) -> Sequence[Completion]:
-        """Returns a list of all of the perforations for the well."""
-        raise NotImplementedError("This method has not been implemented for this simulator yet")
+        """Returns a list of all of the shut-ins for the well."""
+
+        shutins = filter(lambda x: x.completion_is_shutin, self._completions)
+        return list(shutins)
 
     @property
     def last_shutin(self) -> Optional[Completion]:
-        """Returns the first perforation for the well."""
-        raise NotImplementedError("This method has not been implemented for this simulator yet")
+        """Returns the last shut-in for the well in the Wellspec file."""
+        if len(self.shutins) == 0:
+            return None
+
+        return self.shutins[-1]
 
     @property
     def printable_well_info(self) -> str:

@@ -1,6 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
-
 from ResSimpy.OpenGoSim.Enums.SimulationTypeEnum import SimulationType
 from ResSimpy.OpenGoSim.OpenGoSimWells import OpenGoSimWells
 from ResSimpy.Simulator import Simulator
@@ -10,7 +8,7 @@ from ResSimpy.Simulator import Simulator
 class OpenGoSimSimulator(Simulator):
     __simulation_type: SimulationType
 
-    def __init__(self, origin: str):
+    def __init__(self, origin: str) -> None:
         self._origin = origin
         self._wells: OpenGoSimWells = OpenGoSimWells()
 
@@ -21,8 +19,7 @@ class OpenGoSimSimulator(Simulator):
         return self.__simulation_type
 
     def load_model(self) -> None:
-        """Loads the full OGS model"""
-        pass
+        """Loads the full OGS model."""
 
     @staticmethod
     def get_fluid_type(surface_file_name: str) -> str:

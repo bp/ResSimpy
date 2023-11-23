@@ -4,6 +4,7 @@ import warnings
 from datetime import datetime, timedelta
 from functools import cmp_to_key
 import ResSimpy.Nexus.nexus_file_operations as nfo
+import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.constants import DATE_WITH_TIME_LENGTH
 
@@ -46,8 +47,8 @@ class SimControls:
         """
         times = []
         for line in times_file:
-            if nfo.check_token('TIME', line):
-                value = nfo.get_token_value('TIME', line, times_file)
+            if fo.check_token('TIME', line):
+                value = fo.get_token_value('TIME', line, times_file)
                 if value is not None:
                     times.append(value)
 
