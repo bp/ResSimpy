@@ -306,17 +306,17 @@ def get_expected_token_value(token: str, token_line: str, file_list: list[str],
     return value
 
 def load_in_three_part_date(self, initial_token: str, token_line: str, file_as_list: list[str], start_index:int) -> str:
-    # Get the three parts of the date e.g. 01 JAN 2024
+    # Get the three parts of the date e.g. 1 JAN 2024
     first_date_part = get_expected_token_value(token=initial_token, token_line=token_line,
                                                   file_list=file_as_list)
 
     snipped_string = token_line.replace(initial_token, '')
-    snipped_string = snipped_string.replace(first_date_part, '')
+    snipped_string = snipped_string.replace(first_date_part, '', 1)
 
     second_date_part = get_next_value(start_line_index=start_index, file_as_list=file_as_list,
                                          search_string=snipped_string)
 
-    snipped_string = snipped_string.replace(second_date_part, '')
+    snipped_string = snipped_string.replace(second_date_part, '', 1)
 
     third_date_part = get_next_value(start_line_index=start_index, file_as_list=file_as_list,
                                         search_string=snipped_string)

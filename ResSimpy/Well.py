@@ -75,7 +75,16 @@ class Well(ABC):
     @property
     def printable_well_info(self) -> str:
         """Returns some printable well information in string format."""
-        raise NotImplementedError("This method has not been implemented for this simulator yet")
+        printable_dates_of_completions = ", ".join(self.dates_of_completions)
+        well_info = \
+            f"""
+    Well Name: {self.well_name}
+    First Perforation: {'N/A' if self.first_perforation is None else self.first_perforation.date}
+    Last Shut-in: {'N/A' if self.last_shutin is None else self.last_shutin.date}
+    Dates Changed: {'N/A' if len(self.dates_of_completions) == 0 else printable_dates_of_completions}
+    """
+
+        return well_info
 
     @property
     def completion_events(self) -> list[tuple[str, Union[int, tuple[float, float]]]]:

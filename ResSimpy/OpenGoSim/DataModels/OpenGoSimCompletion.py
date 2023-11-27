@@ -11,11 +11,29 @@ from ResSimpy.Units.AttributeMappings.CompletionUnitMapping import CompletionUni
 class OpenGoSimCompletion(Completion):
 
     __penetration_direction: Optional[PenetrationDirectionEnum]
+    __is_open: bool
 
     def __init__(self, date: str, i: Optional[int] = None, j: Optional[int] = None, k: Optional[int] = None,
-                 penetration_direction: Optional[PenetrationDirectionEnum] = None) -> None:
+                 penetration_direction: Optional[PenetrationDirectionEnum] = None, is_open: Optional[bool] = None) \
+            -> None:
         self.__penetration_direction = penetration_direction
+        self.__is_open = is_open if is_open is not None else True
         super().__init__(i=i, j=j, k=k, date=date, date_format=DateFormat.DD_MMM_YYYY)
+
+    def __repr__(self) -> str:
+        return f"i: {self.i} j: {self.j} k: {self.k}"
+
+    def is_open_set(self, value: bool) -> None:
+        """ Set the open state of a completion. """
+        self.__is_open = value
+
+    @property
+    def penetration_direction(self) -> Optional[PenetrationDirectionEnum]:
+        return self.__penetration_direction
+
+    @property
+    def is_open(self) -> bool:
+        return self.__is_open
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:

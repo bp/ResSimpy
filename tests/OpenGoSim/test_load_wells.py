@@ -61,4 +61,67 @@ END
     assert model == expected_sim_object
 
 
+def test_load_open_and_shut_wells(mocker: MockerFixture):
+    # Arrange
+    in_file_contents = """
+! Initial comment describing the model
+SIMULATION
+    SIMULATION_TYPE SUBSURFACE
+END
+
+TIME
+  START_DATE 1 DEC 2025
+END
+
+#======== Wells =========
+
+WELL_DATA well_1
+   WELL_TYPE GAS_INJECTOR
+ CIJK_D	1 2 3   4 Z
+ SHUT
+ DATE 1 JAN 2026		! Open injector 1 years after simulation starts
+ OPEN
+ DATE 1 JAN 2047		! Shut injector 20 years after start
+ SHUT
+END    
+"""
+
+    open_mock = mocker.mock_open(read_data=in_file_contents)
+    mocker.patch("builtins.open", open_mock)
+    expected_completion_1 = OpenGoSimCompletion(i=1, j=2, k=3, penetration_direction=PenetrationDirectionEnum.Z,
+                                                date='1 DEC 2025', is_open=False)
+    expected_completion_2 = OpenGoSimCompletion(i=1, j=2, k=4, penetration_direction=PenetrationDirectionEnum.Z,
+                                                date='1 DEC 2025', is_open=False)
+    expected_completion_3 = OpenGoSimCompletion(i=1, j=2, k=3, penetration_direction=PenetrationDirectionEnum.Z,
+                                                date='1 JAN 2026', is_open=True)
+    expected_completion_4 = OpenGoSimCompletion(i=1, j=2, k=4, penetration_direction=PenetrationDirectionEnum.Z,
+                                                date='1 JAN 2026', is_open=True)
+    expected_completion_5 = OpenGoSimCompletion(i=1, j=2, k=3, penetration_direction=PenetrationDirectionEnum.Z,
+                                                date='1 JAN 2047', is_open=False)
+    expected_completion_6 = OpenGoSimCompletion(i=1, j=2, k=4, penetration_direction=PenetrationDirectionEnum.Z,
+                                                date='1 JAN 2047', is_open=False)
+    expected_completions = [expected_completion_1, expected_completion_2, expected_completion_3, expected_completion_4,
+                            expected_completion_5, expected_completion_6]
+    expected_well_1 = OpenGoSimWell(well_type=WellType.GAS_INJECTOR, well_name='well_1', completions=expected_completions)
+
+    expected_wells_object = OpenGoSimWells(_wells=[expected_well_1])
+    expected_wells_object._wells_loaded = True
+
+    expected_sim_object = OpenGoSimSimulator(origin='/my/test/path')
+    expected_sim_object.__simulation_type = SimulationType.SUBSURFACE
+    expected_sim_object._wells = expected_wells_object
+    expected_sim_object._start_date = '1 DEC 2025'
+
+    # Act
+    model = OpenGoSimSimulator(origin='/my/test/path')
+
+    # Assert
+    assert model.simulation_type == SimulationType.SUBSURFACE
+    assert model.wells.wells[0].well_name == 'well_1'
+    assert model.wells.wells[0].well_type == WellType.GAS_INJECTOR
+    assert model.wells.wells[0].completions[0] == expected_completion_1
+    assert model.wells.wells[0] == expected_well_1
+    assert model.wells == expected_wells_object
+    assert model == expected_sim_object
+
 # TODO: Add tests that test loading wells via include files etc

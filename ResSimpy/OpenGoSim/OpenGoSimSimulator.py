@@ -64,7 +64,15 @@ class OpenGoSimSimulator(Simulator):
         return self.__final_date
 
     def __repr__(self) -> str:
-        full_string = f"""Simulation Type {self.simulation_type}"""
+        full_string = f"""Simulation Type {self.simulation_type}
+Start Date: {self.start_date}
+End Date: {self.final_date}
+
+Wells:
+{self.wells.get_wells_overview()}
+
+
+"""
         return full_string
 
     def __load_model(self) -> None:
@@ -111,12 +119,14 @@ class OpenGoSimSimulator(Simulator):
 
     def __load_in_well_data_block(self, remaining_text: list[str]):
         # Load in the WELL_DATA block of the model.
-        completions_to_add: list[Completion] = []
+        completions_to_add: list[OpenGoSimCompletion] = []
+        unique_completions: list[OpenGoSimCompletion] = []
         well_name: str = fo.get_expected_token_value(token='WELL_DATA',
                                                      token_line=remaining_text[0],
                                                      file_list=remaining_text)
         well_type: WellType | None = None
         relevant_date = self.start_date
+        open_status = True
         for index, line in enumerate(remaining_text):
             if fo.check_token('END', line):
                 break
@@ -126,6 +136,27 @@ class OpenGoSimSimulator(Simulator):
             if fo.check_token('DATE', line):
                 relevant_date = fo.load_in_three_part_date(self, initial_token='DATE', token_line=line,
                                                            file_as_list=remaining_text, start_index=index)
+
+                new_completions_to_add: list[OpenGoSimCompletion] = []
+
+                # Make a copy of each existing completion for the new date
+                for unique_completion in unique_completions:
+                    new_completion = OpenGoSimCompletion(i=unique_completion.i, j=unique_completion.j,
+                                                         k=unique_completion.k, date=relevant_date,
+                                                         penetration_direction=unique_completion.penetration_direction,
+                                                         is_open=open_status)
+                    new_completions_to_add.append(new_completion)
+                completions_to_add.extend(new_completions_to_add)
+            if fo.check_token('OPEN', line):
+                # Apply 'open' state to all previous completions on this date
+                for completion in completions_to_add:
+                    if completion.date == relevant_date:
+                        completion.is_open_set(True)
+            if fo.check_token('SHUT', line):
+                # Apply 'shut' state to all previous completions on this date
+                for completion in completions_to_add:
+                    if completion.date == relevant_date:
+                        completion.is_open_set(False)
             if fo.check_token('CIJK_D', line) or fo.check_token('CIJKL_D', line):
                 # Load in the completions
                 snipped_string = line.replace('CIJK_D', '')
@@ -158,9 +189,12 @@ class OpenGoSimSimulator(Simulator):
                     else PenetrationDirectionEnum.Z
 
                 for c in range(int(k_bottom_value), int(k_top_value) + 1):
-                    completion_to_add = OpenGoSimCompletion(i=int(i_value), j=int(j_value), k=c, date=relevant_date,
-                                                            penetration_direction=penetration_direction)
-                    completions_to_add.append(completion_to_add)
+                    new_completion_to_add = OpenGoSimCompletion(i=int(i_value), j=int(j_value), k=c, date=relevant_date,
+                                                                penetration_direction=penetration_direction,
+                                                                is_open=open_status)
+                    completions_to_add.append(new_completion_to_add)
+
+                unique_completions = completions_to_add.copy()
 
         if well_type is None:
             raise ValueError(f"Cannot determine well type for well {well_name}")
