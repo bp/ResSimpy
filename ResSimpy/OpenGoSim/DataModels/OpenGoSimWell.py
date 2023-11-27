@@ -43,6 +43,7 @@ Dates well is Changed: {'N/A' if len(self.dates_of_completions) == 0 else printa
             matching_previous_completions = [x for x in previous_completions if x.i == completion.i and
                                              x.j == completion.j and x.k == completion.k]
 
+            # If we have already handled this completion, don't add it again.
             if len(matching_previous_completions) > 0:
                 continue
 
@@ -56,5 +57,6 @@ Dates well is Changed: {'N/A' if len(self.dates_of_completions) == 0 else printa
                 completion_string += f" |{'Opened' if matching_completion.is_open else 'Shut'} on {matching_completion.date}"
 
             completions_string += completion_string + '\n'
+            previous_completions.append(completion)
 
         return completions_string
