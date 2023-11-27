@@ -68,7 +68,8 @@ class OpenGoSimSimulator(Simulator):
 Start Date: {self.start_date}
 End Date: {self.final_date}
 
-Wells:
+WELLS
+-----
 {self.wells.get_wells_overview()}
 
 
