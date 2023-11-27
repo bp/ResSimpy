@@ -1,7 +1,65 @@
 from functools import partial
 from typing import Optional, Union
+import re
 
 from ResSimpy.Grid import VariableEntry
+
+
+def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False) -> list[str]:
+    """Strips all of the inline, single and multi line comments out of a file.
+    Comment characters assumed are: ! and square brackets. Escaped characters are ones wrapped in quotation marks.
+
+    Args:
+        file_as_list (list[str]): a list of strings containing each line of the file as a new entry
+        strip_str (bool, optional): if True strips the lines of whitespace. Defaults to False.
+
+    Returns:
+        list[str]: a list of strings containing each line of the file as a new entry without comments
+    """
+    # TODO: support VIP comment out single C character
+    # remove any empty lines
+    file_as_list = list(filter(None, file_as_list))
+
+    # regex: look back and forward 1 character from an ! and check if its a quotation mark and
+    # exclude it from the match if it is
+    file_without_comments = [re.split(r'(?<!\")!(?!\")', x)[0] for x in file_as_list if x and x[0] != '!']
+
+    flat_file = '\n'.join(file_without_comments)
+
+    # regex: look back and forward 1 character from a square bracket and check if its a quotation mark and
+    # exclude it from the match if it is
+    flatfile_minus_square_brackets = re.sub(r"(?<!\")\[.*?\](?!\")", '', flat_file, flags=re.DOTALL)
+
+    file_without_comments = flatfile_minus_square_brackets.splitlines()
+
+    if strip_str:
+        file_without_comments = [x.strip() for x in file_without_comments]
+    return file_without_comments
+
+
+def load_file_as_list(file_path: str, strip_comments: bool = False, strip_str: bool = False) -> list[str]:
+    """Reads the text file into a variable.
+
+    Args:
+        file_path (str): string containing a path pointing towards a text file
+        strip_comments (bool, optional): If set to True removes all inline/single line comments from \
+            the passed in file. Defaults to False.
+        strip_str (bool, optional): if True strips the lines of whitespace. Defaults to False.
+
+    Returns:
+        list[str]: list of strings with each line from the file a new entry in the list
+    """
+    try:
+        with open(file_path, 'r') as f:
+            file_content = list(f)
+    except UnicodeDecodeError:
+        with open(file_path, 'r', errors='replace') as f:
+            file_content = list(f)
+
+    if strip_comments:
+        file_content = strip_file_of_comments(file_content, strip_str=strip_str)
+
+    return file_content
 
 
 def get_next_value(start_line_index: int, file_as_list: list[str], search_string: Optional[str] = None,
@@ -246,3 +304,22 @@ def get_expected_token_value(token: str, token_line: str, file_list: list[str],
             raise ValueError(f"{custom_message} {token_line}")
 
     return value
+
+def load_in_three_part_date(self, initial_token: str, token_line: str, file_as_list: list[str], start_index:int) -> str:
+    # Get the three parts of the date e.g. 01 JAN 2024
+    first_date_part = get_expected_token_value(token=initial_token, token_line=token_line,
+                                                  file_list=file_as_list)
+
+    snipped_string = token_line.replace(initial_token, '')
+    snipped_string = snipped_string.replace(first_date_part, '')
+
+    second_date_part = get_next_value(start_line_index=start_index, file_as_list=file_as_list,
+                                         search_string=snipped_string)
+
+    snipped_string = snipped_string.replace(second_date_part, '')
+
+    third_date_part = get_next_value(start_line_index=start_index, file_as_list=file_as_list,
+                                        search_string=snipped_string)
+
+    full_date = f"{first_date_part} {second_date_part} {third_date_part}"
+    return full_date

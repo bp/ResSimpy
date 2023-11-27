@@ -11,11 +11,11 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 @dataclass
 class Well(ABC):
     _completions: list[Completion]
-    __well_name: str
+    _well_name: str
     __unit_system: UnitSystem
 
     def __init__(self, well_name: str, completions: list[Completion], unit_system: UnitSystem) -> None:
-        self.__well_name = well_name
+        self._well_name = well_name
         self._completions = completions
         self.__unit_system = unit_system
 
@@ -25,7 +25,7 @@ class Well(ABC):
 
     @property
     def well_name(self) -> str:
-        return self.__well_name
+        return self._well_name
 
     @property
     def unit_system(self) -> UnitSystem:

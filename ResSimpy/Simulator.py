@@ -38,7 +38,7 @@ class Simulator(ABC):
     _gaslift: Gaslift
     _network: Network
     _grid: Optional[Grid]
-    _model_files: File
+    _model_files: File #TODO: check this type is correct
 
     """Class Properties"""
 

@@ -11,7 +11,8 @@ from typing import Optional, Union, Any
 import pandas as pd
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem, TemperatureUnits, SUnits
-from ResSimpy.FileOperations.file_operations import get_next_value, check_token, get_expected_token_value
+from ResSimpy.FileOperations.file_operations import get_next_value, check_token, get_expected_token_value, \
+    strip_file_of_comments, load_file_as_list
 from ResSimpy.Grid import VariableEntry
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusKeywords.nexus_keywords import VALID_NEXUS_KEYWORDS
@@ -111,64 +112,6 @@ def get_expected_next_value(start_line_index: int, file_as_list: list[str], sear
             raise ValueError(f"{custom_message} {file_as_list[start_line_index]}")
 
     return value
-
-
-def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False) -> list[str]:
-    """Strips all of the inline, single and multi line comments out of a file.
-    Comment characters assumed are: ! and square brackets. Escaped characters are ones wrapped in quotation marks.
-
-    Args:
-        file_as_list (list[str]): a list of strings containing each line of the file as a new entry
-        strip_str (bool, optional): if True strips the lines of whitespace. Defaults to False.
-
-    Returns:
-        list[str]: a list of strings containing each line of the file as a new entry without comments
-    """
-    # TODO: support VIP comment out single C character
-    # remove any empty lines
-    file_as_list = list(filter(None, file_as_list))
-
-    # regex: look back and forward 1 character from an ! and check if its a quotation mark and
-    # exclude it from the match if it is
-    file_without_comments = [re.split(r'(?<!\")!(?!\")', x)[0] for x in file_as_list if x and x[0] != '!']
-
-    flat_file = '\n'.join(file_without_comments)
-
-    # regex: look back and forward 1 character from a square bracket and check if its a quotation mark and
-    # exclude it from the match if it is
-    flatfile_minus_square_brackets = re.sub(r"(?<!\")\[.*?\](?!\")", '', flat_file, flags=re.DOTALL)
-
-    file_without_comments = flatfile_minus_square_brackets.splitlines()
-
-    if strip_str:
-        file_without_comments = [x.strip() for x in file_without_comments]
-    return file_without_comments
-
-
-def load_file_as_list(file_path: str, strip_comments: bool = False, strip_str: bool = False) -> list[str]:
-    """Reads the text file into a variable.
-
-    Args:
-        file_path (str): string containing a path pointing towards a text file
-        strip_comments (bool, optional): If set to True removes all inline/single line comments from \
-            the passed in file. Defaults to False.
-        strip_str (bool, optional): if True strips the lines of whitespace. Defaults to False.
-
-    Returns:
-        list[str]: list of strings with each line from the file a new entry in the list
-    """
-    try:
-        with open(file_path, 'r') as f:
-            file_content = list(f)
-    except UnicodeDecodeError:
-        with open(file_path, 'r', errors='replace') as f:
-            file_content = list(f)
-
-    if strip_comments:
-        file_content = strip_file_of_comments(file_content, strip_str=strip_str)
-
-    return file_content
-
 
 def create_templated_file(template_location: str, substitutions: dict, output_file_name: str):
     """Creates a new text file at the requested destination substituting the supplied values.

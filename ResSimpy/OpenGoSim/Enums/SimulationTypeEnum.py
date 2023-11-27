@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class SimulationType(Enum):
+class SimulationType(str, Enum):
     """Enum representing OpenGoSim Simulation Types."""
-    SUBSURFACE = 1
-    GEOMECHANICS_SUBSURFACE = 2
+    SUBSURFACE = 'SUBSURFACE'
+    GEOMECHANICS_SUBSURFACE = 'GEOMECHANICS_SUBSURFACE'
