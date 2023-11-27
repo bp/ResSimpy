@@ -89,4 +89,18 @@ class Well(ABC):
     @property
     def completion_events(self) -> list[tuple[str, Union[int, tuple[float, float]]]]:
         """Returns a list of dates and values representing either the layer, or the depths of each perforation."""
-        raise NotImplementedError("This method has not been implemented for this simulator yet")
+        events = []
+        using_k_values: Optional[bool] = None
+
+        for completion in self._completions:
+            is_perforation = completion.completion_is_perforation
+            if not is_perforation:
+                continue
+            if completion.k is not None and using_k_values is not False:
+                using_k_values = True
+                events.append((completion.date, completion.k))
+            elif completion.depth_to_top is not None and using_k_values is not True:
+                using_k_values = False
+                events.append((completion.date, (completion.depth_to_top, completion.depth_to_bottom)))
+
+        return events

@@ -48,4 +48,4 @@ class OpenGoSimCompletion(Completion):
     @property
     def completion_is_perforation(self) -> bool:
         """Determines if the supplied completion is a perforation or not."""
-        raise NotImplementedError("Not implemented yet.")
+        return self.__is_open
