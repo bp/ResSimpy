@@ -82,6 +82,7 @@ def get_previous_value(file_as_list: list[str], search_before: Optional[str] = N
     # Start of file reached, no values found
     return None
 
+
 def create_templated_file(template_location: str, substitutions: dict, output_file_name: str):
     """Creates a new text file at the requested destination substituting the supplied values.
 
@@ -248,8 +249,7 @@ def check_property_in_line(
         line: str,
         property_dict: dict[str,
                             Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                  dict[str, Union[float, pd.DataFrame]]]],
-        file_as_list: list[str]) -> None:
+                                  dict[str, Union[float, pd.DataFrame]]]], file_as_list: list[str]) -> None:
     """Given a line of Nexus input file content looking for common input data, e.g.,
     units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
     as defined in Nexus manual. If any found, include in provided property_dict and return.

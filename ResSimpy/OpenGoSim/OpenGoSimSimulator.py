@@ -158,14 +158,14 @@ WELLS
 
                 values_in_order = fo.get_multiple_expected_sequential_values(list_of_strings=remaining_text_from_here,
                                                                              number_tokens=4,
-                                                                             ignore_values=['CIJK_D','CIJKL_D'])
+                                                                             ignore_values=['CIJK_D', 'CIJKL_D'])
 
                 i_value = values_in_order[0]
                 j_value = values_in_order[1]
                 k_bottom_value = values_in_order[2]
                 k_top_value = values_in_order[3]
                 pen_value = fo.get_nth_value(list_of_strings=remaining_text_from_here, value_number=5,
-                                             ignore_values=['CIJK_D','CIJKL_D'])
+                                             ignore_values=['CIJK_D', 'CIJKL_D'])
 
                 penetration_direction = PenetrationDirectionEnum[pen_value] if pen_value is not None \
                     else PenetrationDirectionEnum.Z

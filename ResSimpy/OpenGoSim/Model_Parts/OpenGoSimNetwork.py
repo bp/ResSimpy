@@ -15,7 +15,6 @@ class OpenGoSimNetwork(Network):
         self.constraints = None
         self.targets = None
 
-
     def __repr__(self) -> str:
         # TODO: implement this
         return "Not implemented yet"
