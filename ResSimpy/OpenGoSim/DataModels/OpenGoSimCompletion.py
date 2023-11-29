@@ -24,7 +24,7 @@ class OpenGoSimCompletion(Completion):
         return f"i: {self.i} j: {self.j} k: {self.k}"
 
     def is_open_set(self, value: bool) -> None:
-        """ Set the open state of a completion. """
+        """Set the open state of a completion."""
         self.__is_open = value
 
     @property

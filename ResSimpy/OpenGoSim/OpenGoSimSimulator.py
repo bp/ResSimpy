@@ -1,16 +1,14 @@
 from dataclasses import dataclass
-from typing import Sequence, Optional
+from typing import Optional
 
+import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.Aquifer import Aquifer
-from ResSimpy.Completion import Completion
 from ResSimpy.Enums.PenetrationDirectionEnum import PenetrationDirectionEnum
-from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.Equilibration import Equilibration
 from ResSimpy.File import File
 from ResSimpy.Gaslift import Gaslift
 from ResSimpy.Hydraulics import Hydraulics
-from ResSimpy.Network import Network
 from ResSimpy.OpenGoSim.DataModels.OpenGoSimCompletion import OpenGoSimCompletion
 from ResSimpy.OpenGoSim.DataModels.OpenGoSimWell import OpenGoSimWell
 from ResSimpy.OpenGoSim.Enums.SimulationTypeEnum import SimulationType
@@ -21,7 +19,6 @@ from ResSimpy.RelPerm import RelPerm
 from ResSimpy.Rock import Rock
 from ResSimpy.Separator import Separator
 from ResSimpy.Simulator import Simulator
-import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.Valve import Valve
 from ResSimpy.Water import Water
 
@@ -39,19 +36,19 @@ class OpenGoSimSimulator(Simulator):
         self.__final_date = None
 
         # Model parts not implemented yet. Will be replaced by OGS specific classes
-        self._pvt=PVT()
-        self._separator=Separator()
-        self._water=Water()
-        self._equil=Equilibration()
-        self._rock=Rock()
-        self._relperm=RelPerm()
-        self._valve=Valve()
-        self._aquifer=Aquifer()
-        self._hydraulics=Hydraulics()
-        self._gaslift=Gaslift()
-        self._network=OpenGoSimNetwork()
-        self._grid=None
-        self._model_files=File(location=origin)
+        self._pvt = PVT()
+        self._separator = Separator()
+        self._water = Water()
+        self._equil = Equilibration()
+        self._rock = Rock()
+        self._relperm = RelPerm()
+        self._valve = Valve()
+        self._aquifer = Aquifer()
+        self._hydraulics = Hydraulics()
+        self._gaslift = Gaslift()
+        self._network = OpenGoSimNetwork()
+        self._grid = None
+        self._model_files = File(location=origin)
 
         self.__load_model()
 
@@ -71,8 +68,6 @@ End Date: {self.final_date}
 WELLS
 -----
 {self.wells.get_wells_overview()}
-
-
 """
         return full_string
 
@@ -100,12 +95,11 @@ WELLS
             if fo.check_token('END', line):
                 break
             if fo.check_token('START_DATE', line):
-                self._start_date = fo.load_in_three_part_date(self, initial_token='START_DATE', token_line=line,
+                self._start_date = fo.load_in_three_part_date(initial_token='START_DATE', token_line=line,
                                                               file_as_list=remaining_text, start_index=index)
 
             if fo.check_token('FINAL_DATE', line):
-                value = fo.get_expected_token_value(token='FINAL_DATE', token_line=line, file_list=remaining_text)
-                self.__final_date = fo.load_in_three_part_date(self, initial_token='FINAL_DATE', token_line=line,
+                self.__final_date = fo.load_in_three_part_date(initial_token='FINAL_DATE', token_line=line,
                                                                file_as_list=remaining_text, start_index=index)
 
     def __load_in_simulation_block(self, remaining_text: list[str]):
@@ -135,7 +129,7 @@ WELLS
                 value = fo.get_expected_token_value(token='WELL_TYPE', token_line=line, file_list=remaining_text)
                 well_type = WellType[value.upper()]
             if fo.check_token('DATE', line):
-                relevant_date = fo.load_in_three_part_date(self, initial_token='DATE', token_line=line,
+                relevant_date = fo.load_in_three_part_date(initial_token='DATE', token_line=line,
                                                            file_as_list=remaining_text, start_index=index)
 
                 new_completions_to_add: list[OpenGoSimCompletion] = []

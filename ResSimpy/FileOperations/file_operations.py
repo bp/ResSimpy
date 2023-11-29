@@ -305,21 +305,52 @@ def get_expected_token_value(token: str, token_line: str, file_list: list[str],
 
     return value
 
-def load_in_three_part_date(self, initial_token: str, token_line: str, file_as_list: list[str], start_index:int) -> str:
+
+def load_in_three_part_date(initial_token: str, token_line: str, file_as_list: list[str], start_index: int) -> str:
     # Get the three parts of the date e.g. 1 JAN 2024
     first_date_part = get_expected_token_value(token=initial_token, token_line=token_line,
-                                                  file_list=file_as_list)
+                                               file_list=file_as_list)
 
     snipped_string = token_line.replace(initial_token, '')
     snipped_string = snipped_string.replace(first_date_part, '', 1)
 
-    second_date_part = get_next_value(start_line_index=start_index, file_as_list=file_as_list,
-                                         search_string=snipped_string)
+    second_date_part = get_expected_next_value(start_line_index=start_index, file_as_list=file_as_list,
+                                               search_string=snipped_string)
 
     snipped_string = snipped_string.replace(second_date_part, '', 1)
 
     third_date_part = get_next_value(start_line_index=start_index, file_as_list=file_as_list,
-                                        search_string=snipped_string)
+                                     search_string=snipped_string)
 
     full_date = f"{first_date_part} {second_date_part} {third_date_part}"
     return full_date
+
+
+def get_expected_next_value(start_line_index: int, file_as_list: list[str], search_string: Optional[str] = None,
+                            ignore_values: Optional[list[str]] = None,
+                            replace_with: Union[str, VariableEntry, None] = None,
+                            custom_message: Optional[str] = None) -> str:
+    """Gets the next non blank value in a list of lines.
+
+    Args:
+        start_line_index (int): line number to start reading file_as_list from
+        file_as_list (list[str]): a list of strings containing each line of the file as a new entry
+        search_string (str): string to search from within the first indexed line
+        ignore_values (Optional[list[str]], optional): a list of values that should be ignored if found. \
+            Defaults to None.
+        replace_with (Union[str, VariableEntry, None], optional): a value to replace the existing value with. \
+            Defaults to None.
+        custom_message Optional[str]: A custom error message if no value is found
+
+    Returns:
+        str: Next non blank value from the list, if none found raises ValueError
+    """
+    value = get_next_value(start_line_index, file_as_list, search_string, ignore_values, replace_with)
+
+    if value is None:
+        if custom_message is None:
+            raise ValueError(f"No value found in the line, line: {file_as_list[start_line_index]}")
+        else:
+            raise ValueError(f"{custom_message} {file_as_list[start_line_index]}")
+
+    return value

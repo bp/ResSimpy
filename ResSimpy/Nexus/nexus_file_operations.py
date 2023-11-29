@@ -13,7 +13,6 @@ import pandas as pd
 from ResSimpy.Enums.UnitsEnum import UnitSystem, TemperatureUnits, SUnits
 from ResSimpy.FileOperations.file_operations import get_next_value, check_token, get_expected_token_value, \
     strip_file_of_comments, load_file_as_list
-from ResSimpy.Grid import VariableEntry
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusKeywords.nexus_keywords import VALID_NEXUS_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEYWORDS
@@ -82,36 +81,6 @@ def get_previous_value(file_as_list: list[str], search_before: Optional[str] = N
 
     # Start of file reached, no values found
     return None
-
-
-def get_expected_next_value(start_line_index: int, file_as_list: list[str], search_string: Optional[str] = None,
-                            ignore_values: Optional[list[str]] = None,
-                            replace_with: Union[str, VariableEntry, None] = None,
-                            custom_message: Optional[str] = None) -> str:
-    """Gets the next non blank value in a list of lines.
-
-    Args:
-        start_line_index (int): line number to start reading file_as_list from
-        file_as_list (list[str]): a list of strings containing each line of the file as a new entry
-        search_string (str): string to search from within the first indexed line
-        ignore_values (Optional[list[str]], optional): a list of values that should be ignored if found. \
-            Defaults to None.
-        replace_with (Union[str, VariableEntry, None], optional): a value to replace the existing value with. \
-            Defaults to None.
-        custom_message Optional[str]: A custom error message if no value is found
-
-    Returns:
-        str: Next non blank value from the list, if none found raises ValueError
-    """
-    value = get_next_value(start_line_index, file_as_list, search_string, ignore_values, replace_with)
-
-    if value is None:
-        if custom_message is None:
-            raise ValueError(f"No value found in the line, line: {file_as_list[start_line_index]}")
-        else:
-            raise ValueError(f"{custom_message} {file_as_list[start_line_index]}")
-
-    return value
 
 def create_templated_file(template_location: str, substitutions: dict, output_file_name: str):
     """Creates a new text file at the requested destination substituting the supplied values.

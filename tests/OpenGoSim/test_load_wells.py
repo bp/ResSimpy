@@ -40,7 +40,8 @@ END
     expected_completions = [expected_completion_1, expected_completion_2]
     expected_well_1 = OpenGoSimWell(well_type=WellType.GAS_INJECTOR, well_name='well_1', completions=expected_completions)
 
-    expected_wells_object = OpenGoSimWells(_wells=[expected_well_1])
+    expected_wells_object = OpenGoSimWells()
+    expected_wells_object._wells = [expected_well_1]
     expected_wells_object._wells_loaded = True
 
     expected_sim_object = OpenGoSimSimulator(origin='/my/test/path')
@@ -104,7 +105,8 @@ END
                             expected_completion_5, expected_completion_6]
     expected_well_1 = OpenGoSimWell(well_type=WellType.GAS_INJECTOR, well_name='well_1', completions=expected_completions)
 
-    expected_wells_object = OpenGoSimWells(_wells=[expected_well_1])
+    expected_wells_object = OpenGoSimWells()
+    expected_wells_object._wells = [expected_well_1]
     expected_wells_object._wells_loaded = True
 
     expected_sim_object = OpenGoSimSimulator(origin='/my/test/path')
