@@ -222,35 +222,6 @@ def clean_up_string(value: str) -> str:
     return value
 
 
-def get_multiple_sequential_values(list_of_strings: list[str], number_tokens: int,
-                                   ignore_values: list[str]) -> list[str]:
-    """Returns a sequential list of values as long as the number of tokens requested.
-
-    Args:
-        list_of_strings (list[str]): list of strings to represent the file with a new entry per line in the file.
-        number_tokens (int): number of tokens to return values of
-        ignore_values (list[str]): list of values to ignore if found
-
-    Raises:
-        ValueError: if too many tokens are requested compared to the file provided
-
-    Returns:
-        list[str]: list of strings comprised of the token values in order.
-    """
-    store_values: list[str] = []
-    filter_list = list_of_strings.copy()
-    for i in range(number_tokens):
-        value = get_next_value(0, filter_list, filter_list[0], replace_with='',
-                               ignore_values=ignore_values)
-        if value is None:
-            # if no valid value found, raise an error
-            raise ValueError('Too many values requested from the list of strings passed,'
-                             f' instead found: {len(store_values)} values, out of the requested {number_tokens}')
-        store_values.append(value)
-
-    return store_values
-
-
 def check_for_and_populate_common_input_data(
         file_as_list: list[str],
         property_dict: dict[str,

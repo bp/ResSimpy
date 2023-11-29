@@ -178,9 +178,6 @@ def __replace_with_variable_entry(new_line: str, original_line: str, replace_wit
     return new_line, new_value, value
 
 
-# def __replace_multiple_entry():
-
-
 def check_token(token: str, line: str) -> bool:
     """Checks if the text line contains the supplied token and is not commented out
     Args:
@@ -354,3 +351,58 @@ def get_expected_next_value(start_line_index: int, file_as_list: list[str], sear
             raise ValueError(f"{custom_message} {file_as_list[start_line_index]}")
 
     return value
+
+
+def get_multiple_expected_sequential_values(list_of_strings: list[str], number_tokens: int,
+                                            ignore_values: list[str]) -> list[str]:
+    """Returns a sequential list of values as long as the number of tokens requested.
+
+    Args:
+        list_of_strings (list[str]): list of strings to represent the file with a new entry per line in the file.
+        number_tokens (int): number of tokens to return values of
+        ignore_values (list[str]): list of values to ignore if found
+
+    Raises:
+        ValueError: if too many tokens are requested compared to the file provided
+
+    Returns:
+        list[str]: list of strings comprised of the token values in order.
+    """
+    store_values: list[str] = []
+    filter_list = list_of_strings.copy()
+    for i in range(number_tokens):
+        value = get_next_value(0, filter_list, filter_list[0], replace_with='',
+                               ignore_values=ignore_values)
+        if value is None:
+            # if no valid value found, raise an error
+            raise ValueError('Too many values requested from the list of strings passed,'
+                             f' instead found: {len(store_values)} values, out of the requested {number_tokens}')
+        store_values.append(value)
+
+    return store_values
+
+
+def get_nth_value(list_of_strings: list[str], value_number: int, ignore_values: list[str]) -> Optional[str]:
+    """Returns the Nth value from a list of strings.
+
+    Args:
+        list_of_strings (list[str]): list of strings to represent the file with a new entry per line in the file.
+        value_number (int): the index of the value that should be returned.One-based rather than zero-based.
+        ignore_values (list[str]): list of values to ignore if found.
+
+    Returns:
+        Optional[str]: the value found at that location, if one is found
+    """
+    found_value: Optional[str] = None
+    filter_list = list_of_strings.copy()
+
+    if len(filter_list) == 0:
+        return None
+
+    for i in range(value_number):
+        found_value = get_next_value(0, filter_list, filter_list[0], replace_with='',
+                                     ignore_values=ignore_values)
+        if found_value is None:
+            return None
+
+    return found_value

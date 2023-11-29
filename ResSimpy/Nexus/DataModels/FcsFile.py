@@ -182,7 +182,7 @@ class FcsNexusFile(NexusFile):
                 # for keywords that have multiple methods we store the value in a dictionary
                 # with the method number and the NexusFile object
                 _, method_string, method_number, value = (
-                    nfo.get_multiple_sequential_values(flat_fcs_file_content[i::], 4, ['NORPT'])
+                    fo.get_multiple_expected_sequential_values(flat_fcs_file_content[i::], 4, ['NORPT'])
                 )
                 full_file_path = nfo.get_full_file_path(value, origin_path)
                 nexus_file = NexusFile.generate_file_include_structure(
@@ -394,7 +394,7 @@ class FcsNexusFile(NexusFile):
 
             if method_number is not None:
                 token_from_file, intermediate_word, method_num_in_file, path_to_replace \
-                    = nfo.get_multiple_sequential_values([line], 4, ['NORPT'])
+                    = fo.get_multiple_expected_sequential_values([line], 4, ['NORPT'])
                 if int(method_num_in_file) != method_number:
                     continue
             else:

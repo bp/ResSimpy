@@ -154,31 +154,18 @@ WELLS
                         completion.is_open_set(False)
             if fo.check_token('CIJK_D', line) or fo.check_token('CIJKL_D', line):
                 # Load in the completions
-                snipped_string = line.replace('CIJK_D', '')
-                snipped_string = snipped_string.replace('CIJKL_D', '')
+                remaining_text_from_here = remaining_text[index:]
 
-                i_value = fo.get_next_value(start_line_index=index, file_as_list=remaining_text,
-                                            search_string=snipped_string)
+                values_in_order = fo.get_multiple_expected_sequential_values(list_of_strings=remaining_text_from_here,
+                                                                             number_tokens=4,
+                                                                             ignore_values=['CIJK_D','CIJKL_D'])
 
-                snipped_string = snipped_string.replace(i_value, '', 1)
-
-                j_value = fo.get_next_value(start_line_index=index, file_as_list=remaining_text,
-                                            search_string=snipped_string)
-
-                snipped_string = snipped_string.replace(j_value, '', 1)
-
-                k_bottom_value = fo.get_next_value(start_line_index=index, file_as_list=remaining_text,
-                                                   search_string=snipped_string)
-
-                snipped_string = snipped_string.replace(k_bottom_value, '', 1)
-
-                k_top_value = fo.get_next_value(start_line_index=index, file_as_list=remaining_text,
-                                                search_string=snipped_string)
-
-                snipped_string = snipped_string.replace(k_top_value, '', 1)
-
-                pen_value = fo.get_next_value(start_line_index=index, file_as_list=remaining_text,
-                                              search_string=snipped_string)
+                i_value = values_in_order[0]
+                j_value = values_in_order[1]
+                k_bottom_value = values_in_order[2]
+                k_top_value = values_in_order[3]
+                pen_value = fo.get_nth_value(list_of_strings=remaining_text_from_here, value_number=5,
+                                             ignore_values=['CIJK_D','CIJKL_D'])
 
                 penetration_direction = PenetrationDirectionEnum[pen_value] if pen_value is not None \
                     else PenetrationDirectionEnum.Z

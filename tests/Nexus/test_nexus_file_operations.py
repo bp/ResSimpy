@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 import ResSimpy.Nexus.nexus_collect_tables
 import ResSimpy.Nexus.nexus_file_operations as nfo
-import ResSimpy.FileOperations.file_operations as fo
 import pytest
 import pandas as pd
 import numpy as np
@@ -9,70 +8,6 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from unittest.mock import Mock
-
-
-@pytest.mark.parametrize("line_contents, file_contents, expected_result", [
-    ("MYTESTTOKEN 3", "MYTESTTOKEN 3\n ANOTHER_TOKEN 8", '3'),
-    ("MYTESTTOKEN 123",
-     """GOTABLE 
-               SG         KRG        KROG        PCGO
-          0.000000     0.000000     1.000000     0.000000
-          0.085260     0.011210     0.681265     0.000000
-          ! Test comment in the middle of the table          
-          0.100598     0.014109     0.625140     0.000000
-          ANOTHERTOKEN 6
-        MYTESTTOKEN 123
-          TOKENCONTAINING_MYTESTTOKEN 8
-          FINALTOKEN 90
-
-          """,
-     '123'),
-    ("MYTESTTOKEN",
-     """GOTABLE 
-       SG         KRG        KROG        PCGO
-  0.000000     0.000000     1.000000     0.000000
-  0.085260     0.011210     0.681265     0.000000
-  ! Test comment in the middle of the table    
-C Another comment using 'C'        
-  0.100598     0.014109     0.625140     0.000000
-  ANOTHERTOKEN 6
-MYTESTTOKEN 
-7
-  TOKENCONTAINING_MYTESTTOKEN 8
-  FINALTOKEN 90
-
-  """,
-     '7'),
-    ("MYTESTTOKEN",
-     '''MYTESTTOKEN
-     C Comment line
-     token_value''',
-     'token_value'),
-    ("not a comment C MYTESTTOKEN",
-     '''not a comment C MYTESTTOKEN
-     C Comment line
-     C
-     Ctoken_value''',
-     'Ctoken_value'),
-     ("MYTESTTOKEN",
-     '''MYTESTTOKEN
-     C Comment line
-     "token value"''',
-     'token value'),
-     
-], ids=['basic case', 'multiple lines', 'value on next line', 'Comment character C', 'complex C comment','get value in double quotes' ])
-def test_get_token_value(mocker, line_contents, file_contents, expected_result):
-    # Arrange
-    dummy_file_as_list = [y for y in (x.strip() for x in file_contents.splitlines()) if y]
-    open_mock = mocker.mock_open(read_data=file_contents)
-    mocker.patch("builtins.open", open_mock)
-
-    # Act
-    result = fo.get_token_value(token='MYTESTTOKEN', token_line=line_contents,
-                                 file_list=dummy_file_as_list)
-
-    # Assert
-    assert result == expected_result
 
 
 @pytest.mark.parametrize("line_string, token, expected_result",
@@ -394,38 +329,6 @@ def test_get_expected_token_value_value_present():
     assert value == 4.0
 
 
-@pytest.mark.parametrize("line, number_tokens, expected_result", [
-    ('EQUIL METHOD 1 /path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
-    ('EQUIL METHOD 1 /path/equil.dat ! comment', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
-    ('EQUIL NorPT METHOD 1 /path/equil.dat TOKEN TOKEN', 6, ['EQUIL', 'METHOD', '1', '/path/equil.dat', 'TOKEN', 'TOKEN']),
-    ('EQUIL METHOD 1 \n /path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
-    ('EQUIL METHOD !comment\n \t 1 ', 3, ['EQUIL', 'METHOD', '1']),
-    ('EQUIL\n NORPT METHOD\n1\n/path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
-    ('EQUIL METHOD 1 /path/equil.dat', 2, ['EQUIL', 'METHOD']),
-    ('\n \n \n EQUIL METHOD 1 /path/equil.dat', 2, ['EQUIL', 'METHOD']),
-], ids=["basic", "more tokens", "get more tokens", "new line", "newline comment", "lots of newlines",
-        "more text than declared tokens", "starting with new lines"])
-def test_get_multiple_sequential_values(line, number_tokens, expected_result):
-    # Arrange
-    list_of_strings = line.splitlines()
-    # Act
-    result = nfo.get_multiple_sequential_values(list_of_strings, number_tokens, ['NORPT'])
-    # Assert
-    assert result == expected_result
-
-
-def test_get_multiple_sequential_values_fail_case():
-    # Arrange
-    line = 'EQUIL METHOD \n \n \n'
-    number_tokens = 3
-    expected_error_str = ('Too many values requested from the list of strings passed, instead found: 2 values, '
-                          'out of the requested 3')
-    # Act + Assert
-    with pytest.raises(ValueError) as ve:
-        value = nfo.get_multiple_sequential_values(line.splitlines(), number_tokens, [])
-    result_error_msg = str(ve.value)
-    assert result_error_msg == expected_error_str
-
 @pytest.mark.parametrize("line, expected_result", [
     ('\t 1', '1'),
     ('\t 1 ', '1'),
@@ -436,9 +339,9 @@ def test_get_multiple_sequential_values_fail_case():
     ("", None),
     ("\t   a", 'a'),
     ("a", 'a'),
-    ("\"a a\"",'a a'),
-    ("\"ABCD   \"",'ABCD   '),
-    ('"ABCD"',"ABCD")
+    ("\"a a\"", 'a a'),
+    ("\"ABCD   \"", 'ABCD   '),
+    ('"ABCD"', "ABCD")
 ])
 def test_get_next_value_single_line(line, expected_result):
     # Act
@@ -451,7 +354,7 @@ def test_get_next_value_single_line(line, expected_result):
     (['\t ', '1'], '1'),
     (['\t ', '\n', '\n', '\n', '\n', '1'], '1'),
     (['!Comment Line 1', '\n', '\n', '\t', ' !Comment Line 2 ', '\n', ' ABCDEFG '], 'ABCDEFG'),
-    (['!"First Value"','"Second Value"'],'Second Value')
+    (['!"First Value"', '"Second Value"'], 'Second Value')
 ])
 def test_get_next_value_multiple_lines(file, expected_result):
     # Act
@@ -497,8 +400,10 @@ def test_get_previous_value_single_line_specify_search_before(line, search_befor
     (['\t ', '\n', '     \n', '\n', '\n', '1'], '1', None),
     (['\t ', '1\n', '     \n', '\n', '12 \n', '1'], '1', '12'),
     (['\t ', '3\n', '     \n', '\n', '12 1', '1'], '1', '12'),
-    ([' ABCDEFG ', '!Comment Line 1', '\n', '\n', '\t', ' !Comment Line 2 ', '\n' 'START_TEXT'], 'START_TEXT', 'ABCDEFG'),
-    ([' ABCDEFG ', '!Comment Line 1', '\n', '\n', '\t', ' !Comment Line 2 ', '\n', '12_3 START_TEXT'], 'START_TEXT', '12_3'),
+    ([' ABCDEFG ', '!Comment Line 1', '\n', '\n', '\t', ' !Comment Line 2 ', '\n' 'START_TEXT'], 'START_TEXT',
+     'ABCDEFG'),
+    ([' ABCDEFG ', '!Comment Line 1', '\n', '\n', '\t', ' !Comment Line 2 ', '\n', '12_3 START_TEXT'], 'START_TEXT',
+     '12_3'),
     (['1', '2 ', ' 3', '!4', ' START_TEXT 5'], 'START_TEXT', '3'),
     (['1', '2 ', ' 3', '!4', '1 START_TEXT 5'], 'START_TEXT', '1')
 ])
@@ -516,7 +421,7 @@ def test_get_previous_value_multiple_lines_specify_search_before(file, search_be
      0, ['KH', 'NAME', 'COLUMN1', 'COLUMN2', 'COLUMN3']),
     ('! comment first \n KH \t NAME \t COLUMN1 \t   COLUMN2 ! comment \n 10 well1 10 item',
      1, ['KH', 'NAME', 'COLUMN1', 'COLUMN2']),
-     ('well1\n jw  iw   l    RADB \n\n 1  2   3   1.5',
+    ('well1\n jw  iw   l    RADB \n\n 1  2   3   1.5',
      1, ['JW', 'IW', 'L', 'RADB']),
     ('extra values first \n KH \t NAME \t COLUMN1 \t   COLUMN2 ! comment \n 10 well1 10 item',
      1, ['KH', 'NAME', 'COLUMN1', 'COLUMN2']),
@@ -681,7 +586,6 @@ def test_load_table_to_objects_date_units():
       'unit_system': UnitSystem.ENGLISH},
      ),
 
-
     ('''NODES
   NAME       TYPE       DEPTH   TemP    X     Y       NUMBER  StatiON
  ! Riser Nodes
@@ -769,7 +673,9 @@ def test_collect_all_tables_to_objects(mocker, file_contents, node1_props, node2
     # Act
 
     result_dict = ResSimpy.Nexus.nexus_collect_tables.collect_all_tables_to_objects(surface_file,
-        {'NODES': NexusNode, 'WELLS': NexusNode}, start_date, default_units=UnitSystem.ENGLISH)
+                                                                                    {'NODES': NexusNode,
+                                                                                     'WELLS': NexusNode}, start_date,
+                                                                                    default_units=UnitSystem.ENGLISH)
     result = result_dict.get('NODES')
     if result_dict.get('WELLS') is not None:
         result.extend(result_dict.get('WELLS'))
