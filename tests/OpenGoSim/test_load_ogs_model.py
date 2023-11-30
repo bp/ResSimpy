@@ -90,10 +90,6 @@ def test_load_time_information(mocker: MockerFixture):
 TIME
   START_DATE 1 DEC 2023
   FINAL_DATE 1 JAN 2126  ! Test Comment
-  INITIAL_TIMESTEP_SIZE 0.1 d
-  MAXIMUM_TIMESTEP_SIZE 10 d at 0 d
-  MAXIMUM_TIMESTEP_SIZE 50 d at 1 y
-  MAXIMUM_TIMESTEP_SIZE 365 d at 25 y
 END    
     
     """
@@ -108,3 +104,54 @@ END
     assert model.simulation_type == SimulationType.SUBSURFACE
     assert model.start_date == '1 DEC 2023'
     assert model.final_date == '1 JAN 2126'
+
+
+def test_print_simulator_information(mocker: MockerFixture):
+    # Arrange
+    in_file_contents = """
+    ! Initial comment describing the model
+    SIMULATION
+      SIMULATION_TYPE SUBSURFACE           
+    END
+
+TIME
+  START_DATE 1 DEC 2023
+  FINAL_DATE 1 JAN 2126
+END    
+
+WELL_DATA test_well_1
+    WELL_TYPE GAS_INJECTOR
+    CIJK_D	1 2     3 3
+    DATE 1 OCT 2025
+    CIJK_D	8    222     76  76
+END
+
+    """
+
+    open_mock = mocker.mock_open(read_data=in_file_contents)
+    mocker.patch("builtins.open", open_mock)
+
+    expected_model_string = \
+"""Simulation Type SUBSURFACE
+Start Date: 1 DEC 2023
+End Date: 1 JAN 2126
+
+WELLS
+-----
+
+Well Name: test_well_1
+Well Type: GAS_INJECTOR
+Completions:
+i: 1 j: 2 k: 3 | Opened on 1 DEC 2023
+i: 8 j: 222 k: 76 | Opened on 1 OCT 2025
+
+Dates well is Changed: 1 DEC 2023, 1 OCT 2025
+
+"""
+
+    # Act
+    model = OpenGoSimSimulator(origin='/my/test/path')
+    result = model.__repr__()
+
+    # Assert
+    assert result == expected_model_string

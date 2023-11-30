@@ -13,6 +13,7 @@ from ResSimpy.OpenGoSim.DataModels.OpenGoSimCompletion import OpenGoSimCompletio
 from ResSimpy.OpenGoSim.DataModels.OpenGoSimWell import OpenGoSimWell
 from ResSimpy.OpenGoSim.Enums.SimulationTypeEnum import SimulationType
 from ResSimpy.OpenGoSim.Model_Parts.OpenGoSimNetwork import OpenGoSimNetwork
+from ResSimpy.OpenGoSim.OpenGoSimKeywords.OpenGoSimKeywords import OPENGOSIM_KEYWORDS
 from ResSimpy.OpenGoSim.OpenGoSimWells import OpenGoSimWells
 from ResSimpy.PVT import PVT
 from ResSimpy.RelPerm import RelPerm
@@ -61,7 +62,7 @@ class OpenGoSimSimulator(Simulator):
         return self.__final_date
 
     def __repr__(self) -> str:
-        full_string = f"""Simulation Type {self.simulation_type}
+        full_string = f"""Simulation Type {self.simulation_type.value}
 Start Date: {self.start_date}
 End Date: {self.final_date}
 
@@ -164,11 +165,13 @@ WELLS
                 j_value = values_in_order[1]
                 k_bottom_value = values_in_order[2]
                 k_top_value = values_in_order[3]
-                pen_value = fo.get_nth_value(list_of_strings=remaining_text_from_here, value_number=5,
-                                             ignore_values=['CIJK_D', 'CIJKL_D'])
+                next_value = fo.get_nth_value(list_of_strings=remaining_text_from_here, value_number=5,
+                                              ignore_values=['CIJK_D', 'CIJKL_D'])
 
-                penetration_direction = PenetrationDirectionEnum[pen_value] if pen_value is not None \
-                    else PenetrationDirectionEnum.Z
+                if next_value is None or next_value.upper() in OPENGOSIM_KEYWORDS:
+                    penetration_direction = PenetrationDirectionEnum.Z
+                else:
+                    penetration_direction = PenetrationDirectionEnum[next_value]
 
                 for c in range(int(k_bottom_value), int(k_top_value) + 1):
                     new_completion_to_add = OpenGoSimCompletion(i=int(i_value), j=int(j_value), k=c, date=relevant_date,

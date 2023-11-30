@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Sequence
+from typing import Sequence, Optional
 
 from ResSimpy.Completion import Completion
 from ResSimpy.Enums.UnitsEnum import UnitSystem
@@ -50,16 +50,19 @@ Dates well is Changed: {'N/A' if len(self.dates_of_completions) == 0 else printa
             if len(matching_previous_completions) > 0:
                 continue
 
-            completion_string = completion.__repr__()  # + f" {completion.is_open} on {completion.date}"
+            completion_string = completion.__repr__()
 
             # Add the open and shut dates for the completion
             matching_future_completions = [x for x in self.completions if x.i == completion.i and
                                            x.j == completion.j and x.k == completion.k
                                            and isinstance(x, OpenGoSimCompletion)]
 
+            existing_status: Optional[bool] = None
             for matching_completion in matching_future_completions:
-                completion_string += f" |{'Opened' if matching_completion.is_open else 'Shut'} on \
-                {matching_completion.date}"
+                if matching_completion.completion_is_perforation != existing_status:
+                    status_string = 'Opened' if matching_completion.is_open else 'Shut'
+                    completion_string += f" | {status_string} on {matching_completion.date}"
+                    existing_status = matching_completion.completion_is_perforation
 
             completions_string += completion_string + '\n'
             previous_completions.append(completion)
