@@ -83,7 +83,7 @@ class NexusWells(Wells):
                 completion_props: dict[str, None | float | int | str] = {
                     'well_name': well.well_name,
                     'units': well.unit_system.name,
-                    }
+                }
                 completion_props.update(completion.to_dict())
                 store_dictionaries.append(completion_props)
         df_store = pd.DataFrame(store_dictionaries)
@@ -151,13 +151,14 @@ class NexusWells(Wells):
         Args:
         ----
             well_name (str): well name to update
-            completion_properties (dict[str, float | int | str): properties of the completion you want to update.
+            completion_properties (dict[str, float | int | str]: properties of the completion you want to update.
             Must contain date of the completion to be added.
             preserve_previous_completions (bool): if true a new perforation added on a TIME card without a \
             wellspec card for that well will preserve the previous completions from the closest TIME card in addition \
             to the new completion
         """
-        _, completion_date = self.__add_object_operations.check_name_date({'name': well_name} | completion_properties)
+        basic_dict: dict[str, float | int | str | None] = {'name': well_name}
+        _, completion_date = self.__add_object_operations.check_name_date(basic_dict | completion_properties)
         well = self.get(well_name)
         if well is None:
             # TODO could make this not raise an error and instead initialize a NexusWell and add it to NexusWells
@@ -223,7 +224,7 @@ class NexusWells(Wells):
                 # get the header of the wellspec table
                 header_index, headers, headers_original = self.__add_object_operations.get_and_write_new_header(
                     additional_headers, completion_properties, file_content, index, nexus_mapping, wellspec_file
-                    )
+                )
                 continue
 
             if header_index != -1 and nfo.nexus_token_found(line, WELLS_KEYWORDS) and index > header_index:
