@@ -35,6 +35,7 @@ END  !! end simulation block
     # Assert
     assert model.simulation_type == SimulationType.SUBSURFACE
 
+
 @pytest.mark.skip("Not implemented yet")
 def test_load_other_simulation_properties(mocker: MockerFixture):
     # Arrange
@@ -66,6 +67,7 @@ END  !! end simulation block
     # Assert
     assert model.simulation_type == SimulationType.SUBSURFACE
     # assert model.mode ==
+
 
 def test_load_time_information(mocker: MockerFixture):
     # Arrange
@@ -132,7 +134,7 @@ END
     mocker.patch("builtins.open", open_mock)
 
     expected_model_string = \
-"""Simulation Type SUBSURFACE
+        """Simulation Type SUBSURFACE
 Start Date: 1 DEC 2023
 End Date: 1 JAN 2126
 

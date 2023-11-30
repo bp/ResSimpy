@@ -31,7 +31,7 @@ class OpenGoSimWell(Well):
         well_info = \
             f"""
 Well Name: {self.well_name}
-Well Type: {self.well_type}
+Well Type: {self.well_type.value}
 Completions:
 {self.__get_completions_string()}
 Dates well is Changed: {'N/A' if len(self.dates_of_completions) == 0 else printable_dates_of_completions}
