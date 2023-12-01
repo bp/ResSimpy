@@ -683,6 +683,9 @@ class NexusFile(File):
                     continue
                 new_root_name = f'{os.path.basename(new_file_path).split(".")[0]}_{os.path.basename(file.location)}'
                 # write the include file to the same directory.
+
+                #TODO add a fix for the name above and a check for whether the file exists as exactly the same name
+
                 include_file_name = os.path.join(os.path.dirname(new_file_path), new_root_name)
                 if write_file:
                     self.update_include_location_in_file_as_list(include_file_name, file)
