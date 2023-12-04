@@ -467,19 +467,38 @@ def test_move_model_files_duplicate_file(mocker):
     mocker.patch("builtins.open", writing_mock_open)
 
     new_include_loc = 'nexus_data'
-    expected_files = ['grid.dat', 'structured_grid.dat', 'runcontrol.dat', ]
+    expected_files = ['structured_grid_grid.dat', 'structured_grid.dat', 'runcontrol.dat', ]
     expected_files = [os.path.join('/data', new_include_loc, x) for x in expected_files]
     expected_files.append('/data/new_fcs.fcs')
 
     # Mock out the file exists
-    file_exists_mock = MagicMock(side_effect=lambda x: False)
+    # the first time it is called with the structured_grid_grid.dat file it will return false
+    # the second time it will return true
+    # otherwise will return false
+
+    class CallCount:
+        count = 0
+    call_count_obj = CallCount()
+
+    def file_exists_side_effect(file_name, call_count=call_count_obj):
+        if file_name == expected_files[0] and call_count.count == 0:
+            call_count.count += 1
+            return False
+        elif file_name == expected_files[0] and call_count.count == 1:
+            return True
+        else:
+            return False
+
+    file_exists_mock = MagicMock(side_effect=file_exists_side_effect)
     mocker.patch('os.path.exists', file_exists_mock)
 
     # mock out makedirs
     makedirs_mock = MagicMock()
     mocker.patch('os.makedirs', makedirs_mock)
 
+
     # Act
+
     fcs.move_model_files(new_file_path='/data/new_fcs.fcs', new_include_file_location=new_include_loc)
 
     # Assert

@@ -681,15 +681,19 @@ class NexusFile(File):
                 if file.file_content_as_list is None:
                     warnings.warn(f'No content found for file: {file}. Not writing file.')
                     continue
+                # this distinguishes the include file name from other includes in other files.
+                # this could be moved to a folder name instead rather than affecting the include file name?
                 new_root_name = f'{os.path.basename(new_file_path).split(".")[0]}_{os.path.basename(file.location)}'
                 # write the include file to the same directory.
-
-                #TODO add a fix for the name above and a check for whether the file exists as exactly the same name
-
+                # TODO add a fix for the name above and a check for whether the file exists as exactly the same name
                 include_file_name = os.path.join(os.path.dirname(new_file_path), new_root_name)
+                matching_includes = [x for x in self.include_locations if x == include_file_name]
+                if len(matching_includes) >= 1 and os.path.exists(include_file_name):
+                    # if the file is already copied across then move on to the next file
+                    continue
+
                 if write_file:
                     self.update_include_location_in_file_as_list(include_file_name, file)
-                if write_file:
                     file.write_to_file(include_file_name, write_includes=True, write_out_all_files=write_out_all_files,
                                        overwrite_file=overwrite_file)
 
