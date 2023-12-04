@@ -689,6 +689,8 @@ class NexusFile(File):
                 include_file_name = os.path.join(os.path.dirname(new_file_path), new_root_name)
                 if self.include_locations is not None:
                     matching_includes = [x for x in self.include_locations if x == include_file_name]
+                else:
+                    matching_includes = []
                 if len(matching_includes) >= 1 and os.path.exists(include_file_name):
                     # if the file is already copied across then move on to the next file
                     continue
