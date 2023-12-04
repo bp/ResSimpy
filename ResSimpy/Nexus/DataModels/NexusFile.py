@@ -687,8 +687,8 @@ class NexusFile(File):
                 # write the include file to the same directory.
                 # TODO add a fix for the name above and a check for whether the file exists as exactly the same name
                 include_file_name = os.path.join(os.path.dirname(new_file_path), new_root_name)
-                matching_includes = [x for x in self.include_locations if self.include_locations is not None and
-                                     x == include_file_name]
+                if self.include_locations is not None:
+                    matching_includes = [x for x in self.include_locations if x == include_file_name]
                 if len(matching_includes) >= 1 and os.path.exists(include_file_name):
                     # if the file is already copied across then move on to the next file
                     continue
