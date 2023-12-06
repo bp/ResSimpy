@@ -481,10 +481,10 @@ def test_move_model_files_duplicate_file(mocker):
     call_count_obj = CallCount()
 
     def file_exists_side_effect(file_name, call_count=call_count_obj):
-        if file_name == expected_files[0] and call_count.count == 0:
+        if file_name == expected_files[0] and call_count.count < 2:
             call_count.count += 1
             return False
-        elif file_name == expected_files[0] and call_count.count == 1:
+        elif file_name == expected_files[0] and call_count.count >= 2:
             return True
         else:
             return False
@@ -495,7 +495,6 @@ def test_move_model_files_duplicate_file(mocker):
     # mock out makedirs
     makedirs_mock = MagicMock()
     mocker.patch('os.makedirs', makedirs_mock)
-
 
     # Act
 
