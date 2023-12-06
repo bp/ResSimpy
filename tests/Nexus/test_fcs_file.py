@@ -463,8 +463,6 @@ def test_move_model_files_duplicate_file(mocker):
     mocker.patch('os.path.isfile', fcs_file_exists)
 
     fcs = FcsNexusFile.generate_fcs_structure(fcs_path)
-    writing_mock_open = mocker.mock_open()
-    mocker.patch("builtins.open", writing_mock_open)
 
     new_include_loc = 'nexus_data'
     expected_files = ['structured_grid_grid.dat', 'structured_grid.dat', 'runcontrol.dat', ]
@@ -492,12 +490,14 @@ def test_move_model_files_duplicate_file(mocker):
     file_exists_mock = MagicMock(side_effect=file_exists_side_effect)
     mocker.patch('os.path.exists', file_exists_mock)
 
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+
     # mock out makedirs
     makedirs_mock = MagicMock()
     mocker.patch('os.makedirs', makedirs_mock)
 
     # Act
-
     fcs.move_model_files(new_file_path='/data/new_fcs.fcs', new_include_file_location=new_include_loc)
 
     # Assert
