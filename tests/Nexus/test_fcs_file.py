@@ -446,8 +446,11 @@ def test_move_model_files_duplicate_file(mocker):
             RUNCONTROL nexus_data/nexus_data/runcontrol.dat
         	 '''
 
-    structured_grid_content = '''INCLUDE grid.dat
+    structured_grid_content = '''
+    KX VALUE
+    INCLUDE grid.dat
     some other content
+    KY VALUE
     INCLUDE grid.dat'''
 
     def mock_open_wrapper(filename, mode):
@@ -470,19 +473,10 @@ def test_move_model_files_duplicate_file(mocker):
     expected_files.append('/data/new_fcs.fcs')
 
     # Mock out the file exists
-    # the first time it is called with the structured_grid_grid.dat file it will return false
-    # the second time it will return true
-    # otherwise will return false
+    file_calls = []
 
-    class CallCount:
-        count = 0
-    call_count_obj = CallCount()
-
-    def file_exists_side_effect(file_name, call_count=call_count_obj):
-        if file_name == expected_files[0] and call_count.count < 2:
-            call_count.count += 1
-            return False
-        elif file_name == expected_files[0] and call_count.count >= 2:
+    def file_exists_side_effect(file_name):
+        if file_name in file_calls:
             return True
         else:
             return False
@@ -490,7 +484,12 @@ def test_move_model_files_duplicate_file(mocker):
     file_exists_mock = MagicMock(side_effect=file_exists_side_effect)
     mocker.patch('os.path.exists', file_exists_mock)
 
-    writing_mock_open = mocker.mock_open()
+    def append_file_calls_side_effect(file_name, write_mode):
+        if write_mode == 'w':
+            file_calls.append(file_name)
+        return MagicMock()
+
+    writing_mock_open = MagicMock(side_effect=append_file_calls_side_effect)
     mocker.patch("builtins.open", writing_mock_open)
 
     # mock out makedirs
