@@ -1,4 +1,5 @@
 import os
+from io import StringIO
 from unittest.mock import Mock, MagicMock
 
 import pytest
@@ -564,9 +565,11 @@ def test_move_model_files_skipped_array(mocker):
     mocker.patch('os.path.exists', file_exists_mock)
 
     append_writes_files_mocker = mocker.mock_open()
-    def append_file_calls_side_effect(file_name, write_mode):
-        if write_mode == 'w':
+    def append_file_calls_side_effect(file_name, mode):
+        if mode == 'w':
             file_calls.append(file_name)
+        if mode == 'r' and file_name == os.path.join('nexus_data', 'arrays.dat'):
+            return StringIO('array_content')
         return append_writes_files_mocker.return_value
 
     writing_mock_open = MagicMock(side_effect=append_file_calls_side_effect)
