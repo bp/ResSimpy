@@ -58,7 +58,7 @@ class NexusFile(File):
                  last_modified: Optional[datetime] = None,
                  array_skipped: bool = False) -> None:
         super().__init__(location=location, file_content_as_list=file_content_as_list)
-        if origin is not None and location is not None:
+        if origin is not None:
             self.location = nfo.get_full_file_path(location, origin)
         else:
             self.location = location
@@ -469,7 +469,7 @@ class NexusFile(File):
         """
         if self.line_locations is None:
             # call get_flat_list_str_file to ensure line locations are updated
-            self.get_flat_list_str_file
+            _ = self.get_flat_list_str_file
             if self.line_locations is None:
                 raise ValueError("No include line locations found.")
 
@@ -704,15 +704,15 @@ class NexusFile(File):
                     file.write_to_file(include_file_name, write_includes=True, write_out_all_files=write_out_all_files,
                                        overwrite_file=overwrite_file)
 
-        file_str = ''.join(self.file_content_as_list)
-
-        # write the file to the new location
+        # check if the file already exists so we aren't accidentally overwriting it
         if os.path.exists(new_file_path) and not overwrite_file:
             raise ValueError(f'File already exists at {new_file_path} and overwrite_file set to False')
 
+        file_str = ''.join(self.file_content_as_list)
         # update the location:
         if self.file_modified or write_out_all_files:
             self.location = new_file_path
+            # write the file to the new location
             with open(new_file_path, 'w') as fi:
                 fi.write(file_str)
             # reset the modified file state
