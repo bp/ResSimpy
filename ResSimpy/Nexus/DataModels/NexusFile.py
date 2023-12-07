@@ -697,15 +697,15 @@ class NexusFile(File):
                     file.write_to_file(include_file_name, write_includes=True, write_out_all_files=write_out_all_files,
                                        overwrite_file=overwrite_file)
 
-        file_str = ''.join(self.file_content_as_list)
-
-        # write the file to the new location
+        # check if the file already exists so we aren't accidentally overwriting it
         if os.path.exists(new_file_path) and not overwrite_file:
             raise ValueError(f'File already exists at {new_file_path} and overwrite_file set to False')
 
+        file_str = ''.join(self.file_content_as_list)
         # update the location:
         if self.file_modified or write_out_all_files:
             self.location = new_file_path
+            # write the file to the new location
             with open(new_file_path, 'w') as fi:
                 fi.write(file_str)
             # reset the modified file state
