@@ -5,32 +5,39 @@ import re
 from ResSimpy.Grid import VariableEntry
 
 
-def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False) -> list[str]:
+def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,
+                           comment_characters: Optional[list[str]] = None,
+                           square_bracket_comments: bool = False) -> list[str]:
     """Strips all of the inline, single and multi line comments out of a file.
     Comment characters assumed are: ! and square brackets. Escaped characters are ones wrapped in quotation marks.
 
     Args:
+        square_bracket_comments ():
+        comment_characters ():
         file_as_list (list[str]): a list of strings containing each line of the file as a new entry
         strip_str (bool, optional): if True strips the lines of whitespace. Defaults to False.
 
     Returns:
         list[str]: a list of strings containing each line of the file as a new entry without comments
     """
-    # TODO: support VIP comment out single C character
-    # remove any empty lines
+    # TODO: support VIP comment out single C character at the start of a line
+    if comment_characters is None:
+        comment_characters = ['!']
     file_as_list = list(filter(None, file_as_list))
 
-    # regex: look back and forward 1 character from an ! and check if its a quotation mark and
+    # remove any empty lines
+    # regex: look back and forward 1 character from an ! and check if it's a quotation mark and
     # exclude it from the match if it is
     file_without_comments = [re.split(r'(?<!\")!(?!\")', x)[0] for x in file_as_list if x and x[0] != '!']
 
     flat_file = '\n'.join(file_without_comments)
 
-    # regex: look back and forward 1 character from a square bracket and check if its a quotation mark and
-    # exclude it from the match if it is
-    flatfile_minus_square_brackets = re.sub(r"(?<!\")\[.*?\](?!\")", '', flat_file, flags=re.DOTALL)
+    if square_bracket_comments:
+        # regex: look back and forward 1 character from a square bracket and check if it's a quotation mark and
+        # exclude it from the match if it is
+        flatfile_minus_square_brackets = re.sub(r"(?<!\")\[.*?](?!\")", '', flat_file, flags=re.DOTALL)
 
-    file_without_comments = flatfile_minus_square_brackets.splitlines()
+        file_without_comments = flatfile_minus_square_brackets.splitlines()
 
     if strip_str:
         file_without_comments = [x.strip() for x in file_without_comments]
@@ -304,7 +311,19 @@ def get_expected_token_value(token: str, token_line: str, file_list: list[str],
 
 
 def load_in_three_part_date(initial_token: str, token_line: str, file_as_list: list[str], start_index: int) -> str:
-    # Get the three parts of the date e.g. 1 JAN 2024
+    """Function that reads in a three part date separated by spaces e.g. 1 JAN 2024
+
+        Args:
+            initial_token (str): The token that will appear before the start of the date e.g. DATE
+            token_line (str): Line in the file that the token has been found.
+            file_as_list (list[str]): The whole file as a list of strings.
+            start_index (int): The index in file_as_list where the token can be found.
+
+        Returns:
+            str:  The three part date as a string.
+        """
+
+    # Get the three parts of the date
     first_date_part = get_expected_token_value(token=initial_token, token_line=token_line,
                                                file_list=file_as_list)
 

@@ -31,7 +31,7 @@ def nexus_token_found(line_to_check: str, valid_list: list[str] = VALID_NEXUS_KE
     """
     valid_set = set(valid_list)
     uppercase_line = line_to_check.upper()
-    strip_comments = strip_file_of_comments([uppercase_line])
+    strip_comments = strip_file_of_comments([uppercase_line], square_bracket_comments=True)
     if len(strip_comments) == 0:
         return False
     split_line = set(strip_comments[0].split())
@@ -119,7 +119,7 @@ def expand_include(file_as_list: list[str], recursive: bool = True) -> tuple[lis
         list[str]: list of strings containing each line of the file as a new entry but with files following \
             include_locations expanded out
     """
-    no_comment_file = strip_file_of_comments(file_as_list, strip_str=True)
+    no_comment_file = strip_file_of_comments(file_as_list, strip_str=True, square_bracket_comments=True)
 
     # Initialize iterator variables, if no Include is found then return the prvious file
     old_file_contents = no_comment_file.copy()
@@ -185,7 +185,7 @@ def read_table_to_df(file_as_list: list[str], keep_comments: bool = False, nohea
         header = None
     if not keep_comments:
         # Clean of comments
-        cleaned_file_as_list = strip_file_of_comments(file_as_list, strip_str=True)
+        cleaned_file_as_list = strip_file_of_comments(file_as_list, strip_str=True, square_bracket_comments=True)
         # Create dataframe
         df = pd.read_csv(StringIO('\n'.join(cleaned_file_as_list)), sep=r'\s+', header=header)
         if header is not None:

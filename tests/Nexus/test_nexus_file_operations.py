@@ -111,7 +111,7 @@ def test_strip_file_of_comments(file_contents, strip_str, expected_result_conten
     expected_result = expected_result_contents.splitlines()
 
     # Act
-    result = nfo.strip_file_of_comments(dummy_file_as_list, strip_str=strip_str)
+    result = nfo.strip_file_of_comments(dummy_file_as_list, strip_str=strip_str, square_bracket_comments=True)
     # Assert
     assert result == expected_result
 
