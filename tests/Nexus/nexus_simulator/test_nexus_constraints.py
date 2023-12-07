@@ -368,3 +368,40 @@ def test_nexus_constraint_repr(mocker):
     # Assert
     assert repr_result == expected_repr
     assert str_result == expected_str
+
+def test_nexus_constraints_skip_procs(mocker):
+    # Arrange
+    surface_content = '''TIME 04/10/2019
+
+PROCS NAME PROCNAME 
+	IF(TIME > 0.0) THEN
+ DO something
+ENDPROCS
+
+CONSTRAINTS
+   WELL1 QOSMAX 6100.7
+ENDCONSTRAINTS'''
+
+    fcs_file_data = '''RUN_UNITS ENGLISH
+
+    DATEFORMAT DD/MM/YYYY
+
+    RECURRENT_FILES
+    RUNCONTROL ref_runcontrol.dat
+    SURFACE Network 1 surface.dat'''
+    runcontrol_data = 'START 01/01/2020'
+
+    def mock_open_wrapper(filename,  mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'fcs_file.dat': fcs_file_data,
+            'surface.dat': surface_content,
+            'ref_runcontrol.dat': runcontrol_data,
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+    model = NexusSimulator('fcs_file.dat')
+    # Act
+    constraint = model.network.constraints.get_all()['WELL1'][0]
+    # Assert
+    assert constraint.date == '04/10/2019'
