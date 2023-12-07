@@ -282,8 +282,12 @@ def test_modify_completion_write_to_file(mocker, fcs_file_contents, wells_file, 
 
     mock_nexus_sim = NexusSimulator('fcs_file.fcs')
     mock_nexus_sim.start_date = start_date
-    modify_perf_target = {'date': modify_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 4.2, 'date_format': DateFormat.DD_MM_YYYY}
-    modify_perf_new_properties = {'date': modify_perf_date, 'j': 8, 'well_radius': 10.2, 'date_format': DateFormat.DD_MM_YYYY}
+    modify_perf_target = {'date': modify_perf_date, 'i': 4, 'j': 5, 'k': 6,
+                          'well_radius': 4.2,
+                          'date_format': DateFormat.DD_MM_YYYY}
+    modify_perf_new_properties = {'date': modify_perf_date, 'j': 8,
+                                  'well_radius': 10.2,
+                                  'date_format': DateFormat.DD_MM_YYYY}
 
     # make a mock for the write operation
     writing_mock_open = mocker.mock_open()
