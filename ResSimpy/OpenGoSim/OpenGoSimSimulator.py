@@ -24,6 +24,13 @@ from ResSimpy.Valve import Valve
 from ResSimpy.Water import Water
 
 
+def line_contains_block_ending(line: str) -> bool:
+    """Checks if a line contains a block ending or not."""
+    if '/' in line or fo.check_token('END', line):
+        return True
+    return False
+
+
 @dataclass(kw_only=True)
 class OpenGoSimSimulator(Simulator):
     __simulation_type: SimulationType
@@ -93,7 +100,7 @@ WELLS
     def __load_in_time_block(self, remaining_text: list[str]):
         # Load in the TIME block of the model.
         for index, line in enumerate(remaining_text):
-            if fo.check_token('END', line):
+            if line_contains_block_ending(line):
                 break
             if fo.check_token('START_DATE', line):
                 self._start_date = fo.load_in_three_part_date(initial_token='START_DATE', token_line=line,
@@ -106,7 +113,7 @@ WELLS
     def __load_in_simulation_block(self, remaining_text: list[str]):
         # Load in the SIMULATION block of the model.
         for line in remaining_text:
-            if fo.check_token('END', line):
+            if line_contains_block_ending(line):
                 break
             if fo.check_token('SIMULATION_TYPE', line):
                 value = fo.get_expected_token_value(token='SIMULATION_TYPE', token_line=line, file_list=remaining_text)
@@ -123,8 +130,10 @@ WELLS
         well_type: WellType | None = None
         relevant_date = self.start_date
         open_status = True
+        penetration_direction = PenetrationDirectionEnum.Z
+        refinement_name = None
         for index, line in enumerate(remaining_text):
-            if fo.check_token('END', line):
+            if line_contains_block_ending(line):
                 break
             if fo.check_token('WELL_TYPE', line):
                 value = fo.get_expected_token_value(token='WELL_TYPE', token_line=line, file_list=remaining_text)
@@ -140,7 +149,7 @@ WELLS
                     new_completion = OpenGoSimCompletion(i=unique_completion.i, j=unique_completion.j,
                                                          k=unique_completion.k, date=relevant_date,
                                                          penetration_direction=unique_completion.penetration_direction,
-                                                         is_open=open_status)
+                                                         is_open=open_status, refinement_name=refinement_name)
                     new_completions_to_add.append(new_completion)
                 completions_to_add.extend(new_completions_to_add)
             if fo.check_token('OPEN', line):
@@ -163,20 +172,28 @@ WELLS
 
                 i_value = values_in_order[0]
                 j_value = values_in_order[1]
-                k_bottom_value = values_in_order[2]
-                k_top_value = values_in_order[3]
+                k_1 = values_in_order[2]
+                k_2 = values_in_order[3]
+
+                # Get the refinement name and / or penetration direction
                 next_value = fo.get_nth_value(list_of_strings=remaining_text_from_here, value_number=5,
                                               ignore_values=['CIJK_D', 'CIJKL_D'])
 
-                if next_value is None or next_value.upper() in OPENGOSIM_KEYWORDS:
-                    penetration_direction = PenetrationDirectionEnum.Z
-                else:
+                if fo.check_token('CIJKL_D', line):
+                    # Completion is in grid refinement, get the name of that refinement first
+                    refinement_name = next_value
+                    next_value = fo.get_nth_value(list_of_strings=remaining_text_from_here, value_number=6,
+                                                  ignore_values=['CIJKL_D'])
+
+                # The next value, if present, will be the penetration direction.
+                if next_value is not None and next_value.upper() not in OPENGOSIM_KEYWORDS:
                     penetration_direction = PenetrationDirectionEnum[next_value]
 
-                for c in range(int(k_bottom_value), int(k_top_value) + 1):
+                # Create a new completion for every layer found, and add it to the well
+                for c in range(int(k_1), int(k_2) + 1):
                     new_completion_to_add = OpenGoSimCompletion(i=int(i_value), j=int(j_value), k=c, date=relevant_date,
                                                                 penetration_direction=penetration_direction,
-                                                                is_open=open_status)
+                                                                refinement_name=refinement_name, is_open=open_status)
                     completions_to_add.append(new_completion_to_add)
 
                 unique_completions = completions_to_add.copy()

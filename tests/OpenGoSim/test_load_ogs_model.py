@@ -36,6 +36,36 @@ END  !! end simulation block
     assert model.simulation_type == SimulationType.SUBSURFACE
 
 
+def test_load_simulation_type_slash_instead_of_end(mocker: MockerFixture):
+    # Arrange
+    in_file_contents = """
+! Initial comment describing the model
+SIMULATION
+  SIMULATION_TYPE SUBSURFACE
+  PROCESS_MODELS
+    SUBSURFACE_FLOW Flow
+      MODE GAS_WATER
+      OPTIONS
+        ! ISOTHERMAL
+        RESERVOIR_DEFAULTS
+        HYSTERESIS
+        STRAND
+      	LDT
+      /
+    / ! end of subsurface_flow
+  / ! end of process models
+/  !! end simulation block
+"""
+
+    open_mock = mocker.mock_open(read_data=in_file_contents)
+    mocker.patch("builtins.open", open_mock)
+
+    # Act
+    model = OpenGoSimSimulator(origin='/my/test/path')
+
+    # Assert
+    assert model.simulation_type == SimulationType.SUBSURFACE
+
 @pytest.mark.skip("Not implemented yet")
 def test_load_other_simulation_properties(mocker: MockerFixture):
     # Arrange
@@ -107,6 +137,45 @@ END
     assert model.start_date == '1 DEC 2023'
     assert model.final_date == '1 JAN 2126'
 
+
+def test_load_time_information_slash_instead_of_end(mocker: MockerFixture):
+    # Arrange
+    in_file_contents = """
+    ! Initial comment describing the model
+    SIMULATION
+      SIMULATION_TYPE SUBSURFACE
+      PROCESS_MODELS
+        SUBSURFACE_FLOW Flow
+          MODE GAS_WATER
+          OPTIONS
+            ! ISOTHERMAL
+            RESERVOIR_DEFAULTS
+            HYSTERESIS
+            STRAND
+          	LDT
+          /
+        /
+      /
+    /
+
+TIME
+  START_DATE 1 DEC 2023
+  FINAL_DATE 1 JAN 2126  ! Test Comment
+/    
+
+START_DATE 17 MAR 2024
+
+    """
+    open_mock = mocker.mock_open(read_data=in_file_contents)
+    mocker.patch("builtins.open", open_mock)
+
+    # Act
+    model = OpenGoSimSimulator(origin='/my/test/path')
+
+    # Assert
+    assert model.simulation_type == SimulationType.SUBSURFACE
+    assert model.start_date == '1 DEC 2023'
+    assert model.final_date == '1 JAN 2126'
 
 def test_print_simulator_information(mocker: MockerFixture):
     # Arrange
