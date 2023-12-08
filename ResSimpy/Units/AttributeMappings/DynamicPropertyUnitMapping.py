@@ -286,7 +286,7 @@ class HydraulicsUnits(BaseUnitMapping):
         """Returns the unit for gas_liquid_ratio."""
         unit = self.get_unit_for_attribute('gas_liquid_ratio')
         if not self.ratio_thousands:
-            unit = unit.replace('MSCF', 'SCF')
+            unit = unit.replace('mscf', 'scf')
         return unit
 
     @property
@@ -294,7 +294,7 @@ class HydraulicsUnits(BaseUnitMapping):
         """Returns the unit for gas_oil_ratio."""
         unit = self.get_unit_for_attribute('gas_oil_ratio')
         if not self.ratio_thousands:
-            unit = unit.replace('MSCF', 'SCF')
+            unit = unit.replace('mscf', 'scf')
         return unit
 
     @property
@@ -302,7 +302,7 @@ class HydraulicsUnits(BaseUnitMapping):
         """Returns the unit for oil_gas_ratio."""
         unit = self.get_unit_for_attribute('oil_gas_ratio')
         if not self.ratio_thousands:
-            unit = unit.replace('MSCF', 'MMSCF')
+            unit = unit.replace('mscf', 'mmscf')
         return unit
 
     @property
@@ -310,7 +310,7 @@ class HydraulicsUnits(BaseUnitMapping):
         """Returns the unit for water_gas_ratio."""
         unit = self.get_unit_for_attribute('water_gas_ratio')
         if not self.ratio_thousands:
-            unit = unit.replace('MSCF', 'MMSCF')
+            unit = unit.replace('mscf', 'mmscf')
         return unit
 
     @property
@@ -318,7 +318,7 @@ class HydraulicsUnits(BaseUnitMapping):
         """Returns the unit for gas_water_ratio."""
         unit = self.get_unit_for_attribute('gas_water_ratio')
         if not self.ratio_thousands:
-            unit = unit.replace('MSCF', 'SCF')
+            unit = unit.replace('mscf', 'scf')
         return unit
 
     @property
@@ -326,7 +326,7 @@ class HydraulicsUnits(BaseUnitMapping):
         """Returns the unit for water_wet_gas_ratio."""
         unit = self.get_unit_for_attribute('water_wet_gas_ratio')
         if not self.ratio_thousands:
-            unit = unit.replace('MSCF', 'MMSCF')
+            unit = unit.replace('mscf', 'mmscf')
         return unit
 
     @property
