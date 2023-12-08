@@ -1,3 +1,4 @@
+"""Collection of Enumerations for penetration direction used in ResSimpy."""
 from enum import Enum
 
 

@@ -311,17 +311,17 @@ def get_expected_token_value(token: str, token_line: str, file_list: list[str],
 
 
 def load_in_three_part_date(initial_token: str, token_line: str, file_as_list: list[str], start_index: int) -> str:
-    """Function that reads in a three part date separated by spaces e.g. 1 JAN 2024
+    """Function that reads in a three part date separated by spaces e.g. 1 JAN 2024.
 
-        Args:
-            initial_token (str): The token that will appear before the start of the date e.g. DATE
-            token_line (str): Line in the file that the token has been found.
-            file_as_list (list[str]): The whole file as a list of strings.
-            start_index (int): The index in file_as_list where the token can be found.
+    Args:
+    initial_token (str): The token that will appear before the start of the date e.g. DATE
+    token_line (str): Line in the file that the token has been found.
+    file_as_list (list[str]): The whole file as a list of strings.
+    start_index (int): The index in file_as_list where the token can be found.
 
-        Returns:
-            str:  The three part date as a string.
-        """
+    Returns:
+    str:  The three part date as a string.
+    """
 
     # Get the three parts of the date
     first_date_part = get_expected_token_value(token=initial_token, token_line=token_line,
