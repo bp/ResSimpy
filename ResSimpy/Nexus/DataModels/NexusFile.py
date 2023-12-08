@@ -74,7 +74,7 @@ class NexusFile(File):
             self.line_locations = []
         self.linked_user = linked_user
         self.last_modified = last_modified
-        self.array_skipped = array_skipped
+        self.__array_skipped = array_skipped
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True,
@@ -680,7 +680,7 @@ class NexusFile(File):
                 write_file: bool = file.file_modified or write_out_all_files
                 write_file = write_file or (new_file_path != self.location and not os.path.isabs(file.location))
                 # if the array was previously skipped then load the file as list
-                if file.array_skipped:
+                if file.__array_skipped:
                     file.file_content_as_list = nfo.load_file_as_list(file.location)
 
                 if file.file_content_as_list is None:
