@@ -455,7 +455,7 @@ def test_get_completion_events(completions, expected_shutin):
                      unit_system=UnitSystem.METKGCM2)
 
     # Act
-    result = well.completion_events
+    result = well.open_and_shut_events
 
     # Assert
     assert result == expected_shutin
