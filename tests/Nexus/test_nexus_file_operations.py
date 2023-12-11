@@ -105,7 +105,7 @@ value
 ], ids=['basic test', 'several inline/single line comments', 'wrapped in quotations', 'Square bracket',
         'square bracket complicated', 'Square bracket quotation', 'stripstring']
                          )
-def test_strip_file_of_comments(file_contents, strip_str, expected_result_contents):
+def test_strip_file_of_comments(file_contents, expected_result_contents, strip_str):
     # Arrange
     dummy_file_as_list = file_contents.splitlines()
     expected_result = expected_result_contents.splitlines()
@@ -115,6 +115,49 @@ def test_strip_file_of_comments(file_contents, strip_str, expected_result_conten
     # Assert
     assert result == expected_result
 
+
+def test_strip_file_of_comments_other_comment_characters():
+    # Arrange
+    file_contents = '''some string \t# comment
+#entire line commented out
+value 1 '#value 2
+'''
+
+    expected_result_contents = '''some string \t
+value 1 '
+'''
+
+    dummy_file_as_list = file_contents.splitlines()
+    expected_result = expected_result_contents.splitlines()
+
+    # Act
+    result = nfo.strip_file_of_comments(dummy_file_as_list, comment_characters=['#'])
+    # Assert
+    assert result == expected_result
+
+
+def test_strip_file_of_comments_multiple_comment_characters():
+    # Arrange
+    file_contents = '''some string \t# comment
+#entire line commented out
+value 1 '#value 2
+value 3 -- different comment style
+-- both comment # types
+-- Another line missing
+'''
+
+    expected_result_contents = '''some string \t
+value 1 '
+value 3 
+'''
+
+    dummy_file_as_list = file_contents.splitlines()
+    expected_result = expected_result_contents.splitlines()
+
+    # Act
+    result = nfo.strip_file_of_comments(dummy_file_as_list, comment_characters=['--', '#'])
+    # Assert
+    assert result == expected_result
 
 def mock_includes(mocker, filename, include_contents0, include_contents1):
     # yes this should just index a tuple
