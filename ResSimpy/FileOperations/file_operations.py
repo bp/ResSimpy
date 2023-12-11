@@ -12,9 +12,6 @@ def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,
     Comment characters assumed are: ! and square brackets. Escaped characters are ones wrapped in quotation marks.
 
     Args:
-        square_bracket_comments ():
-        comment_characters ():
-        
         square_bracket_comments (bool): whether to also remove text contained in square brackets ([])
         comment_characters (Optional[list[str]]): A list of characters that are considered comments. Defaults to the
                                                   Nexus format (!)
