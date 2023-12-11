@@ -144,11 +144,13 @@ value 1 '#value 2
 value 3 -- different comment style
 -- both comment # types
 -- Another line missing
+! Not a comment for this test.
 '''
 
     expected_result_contents = '''some string \t
 value 1 '
 value 3 
+! Not a comment for this test.
 '''
 
     dummy_file_as_list = file_contents.splitlines()
