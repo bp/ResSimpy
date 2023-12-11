@@ -14,6 +14,10 @@ def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,
     Args:
         square_bracket_comments ():
         comment_characters ():
+        
+        square_bracket_comments (bool): whether to also remove text contained in square brackets ([])
+        comment_characters (Optional[list[str]]): A list of characters that are considered comments. Defaults to the
+                                                  Nexus format (!)
         file_as_list (list[str]): a list of strings containing each line of the file as a new entry
         strip_str (bool, optional): if True strips the lines of whitespace. Defaults to False.
 
@@ -28,14 +32,21 @@ def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,
     # remove any empty lines
     # regex: look back and forward 1 character from an ! and check if it's a quotation mark and
     # exclude it from the match if it is
-    file_without_comments = [re.split(r'(?<!\")!(?!\")', x)[0] for x in file_as_list if x and x[0] != '!']
+    file_without_comments = file_as_list
+
+    for comment_character in comment_characters:
+        file_without_comments = [re.split(fr'(?<!\"){comment_character}(?!\")', x)[0]
+                                 for x in file_without_comments if x and x[0] != comment_character]
 
     flat_file = '\n'.join(file_without_comments)
 
     if square_bracket_comments:
         # regex: look back and forward 1 character from a square bracket and check if it's a quotation mark and
         # exclude it from the match if it is
-        flatfile_minus_square_brackets = re.sub(r"(?<!\")\[.*?](?!\")", '', flat_file, flags=re.DOTALL)
+        flatfile_minus_square_brackets = flat_file
+        for comment_character in comment_characters:
+            flatfile_minus_square_brackets = re.sub(fr"(?<!\")\[.*?](?{comment_character}\")", '',
+                                                    flatfile_minus_square_brackets, flags=re.DOTALL)
 
         file_without_comments = flatfile_minus_square_brackets.splitlines()
 
