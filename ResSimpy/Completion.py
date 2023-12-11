@@ -1,8 +1,8 @@
 """The base class for all Well Completions."""
 from __future__ import annotations
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Sequence
 
 from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
@@ -199,3 +199,34 @@ class Completion(DataObjectMixin, ABC):
     @property
     def units(self) -> CompletionUnits:
         return CompletionUnits(self.unit_system)
+
+    @property
+    def completion_is_shutin(self) -> bool:
+        """Determines if the supplied completion is a shut-in or not."""
+        return not self.completion_is_perforation
+
+    @property
+    def perforations(self) -> Sequence[Completion]:
+        """Returns a list of all of the perforations for the well."""
+        raise NotImplementedError("This method has not been implemented for this simulator yet")
+
+    @property
+    def first_perforation(self) -> Optional[Completion]:
+        """Returns the first perforation for the well."""
+        raise NotImplementedError("This method has not been implemented for this simulator yet")
+
+    @property
+    def shutins(self) -> Sequence[Completion]:
+        """Returns a list of all of the perforations for the well."""
+        raise NotImplementedError("This method has not been implemented for this simulator yet")
+
+    @property
+    def last_shutin(self) -> Optional[Completion]:
+        """Returns the first perforation for the well."""
+        raise NotImplementedError("This method has not been implemented for this simulator yet")
+
+    @property
+    @abstractmethod
+    def completion_is_perforation(self) -> bool:
+        """Determines if the supplied completion is a perforation or not."""
+        raise NotImplementedError("Implement this in the derived class")
