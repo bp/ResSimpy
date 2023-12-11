@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 from ResSimpy.Grid import VariableEntry
 import ResSimpy.Nexus.nexus_file_operations as nfo
+import ResSimpy.FileOperations.file_operations as fo
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
@@ -36,20 +37,20 @@ class StructuredGridOperations:
             ignore_values = []
         token_modifier = f"{token} {modifier}"
 
-        if nfo.check_token(token, line) and nfo.get_token_value(token, line, file_as_list) == modifier:
+        if nfo.check_token(token, line) and fo.get_token_value(token, line, file_as_list) == modifier:
             # If we are loading a multiple, load the two relevant values, otherwise just the next value
             if modifier == 'MULT':
                 numerical_value = nfo.get_expected_token_value(token_modifier, line, file_as_list, ignore_values=None)
                 if numerical_value is None:
                     raise ValueError(
                         f'No numerical value found after {token_modifier} keyword in line: {line}')
-                value_to_multiply = nfo.get_token_value(token_modifier, line, file_as_list,
-                                                        ignore_values=[numerical_value])
+                value_to_multiply = fo.get_token_value(token_modifier, line, file_as_list,
+                                                       ignore_values=[numerical_value])
                 if numerical_value is not None and value_to_multiply is not None:
                     token_property.modifier = 'MULT'
                     token_property.value = f"{numerical_value} {value_to_multiply}"
             else:
-                value = nfo.get_token_value(token_modifier, line, file_as_list, ignore_values=ignore_values)
+                value = fo.get_token_value(token_modifier, line, file_as_list, ignore_values=ignore_values)
                 if value is None:
                     # Could be 'cut short' by us excluding the rest of a file
                     token_property.value = None
@@ -80,11 +81,11 @@ class StructuredGridOperations:
                 # If we are replacing a mult, replace the first value with a blank
                 if old_property.modifier == 'MULT':
                     dummy_value = VariableEntry('MULT', '')
-                    nfo.get_token_value(old_token_modifier, line, file_as_list, ignore_values=ignore_values,
-                                        replace_with=dummy_value)
+                    fo.get_token_value(old_token_modifier, line, file_as_list, ignore_values=ignore_values,
+                                       replace_with=dummy_value)
 
-                nfo.get_token_value(old_token_modifier, line, file_as_list, ignore_values=ignore_values,
-                                    replace_with=new_property)
+                fo.get_token_value(old_token_modifier, line, file_as_list, ignore_values=ignore_values,
+                                   replace_with=new_property)
 
                 new_line = line.replace(old_token_modifier, new_token_modifier, 1)
                 line_index = file_as_list.index(line)

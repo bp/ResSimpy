@@ -15,6 +15,7 @@ from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import EquilUni
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
+import ResSimpy.FileOperations.file_operations as fo
 
 
 @dataclass(kw_only=True, repr=False)  # Doesn't need to write an _init_, _eq_ methods, etc.
@@ -165,7 +166,7 @@ class NexusEquilMethod(DynamicProperty):
             if [i for i in line.split() if i in EQUIL_INTSAT_KEYWORDS]:
                 for key in EQUIL_INTSAT_KEYWORDS:
                     if nfo.check_token(key, line):
-                        if nfo.get_token_value(key, line, file_as_list) == 'MOBILE':
+                        if fo.get_token_value(key, line, file_as_list) == 'MOBILE':
                             self.properties[key] = 'MOBILE'
                         else:
                             self.properties[key] = ''

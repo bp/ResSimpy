@@ -13,6 +13,7 @@ from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import RockUnit
 from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
+import ResSimpy.FileOperations.file_operations as fo
 
 
 @dataclass(kw_only=True, repr=False)  # Doesn't need to write an _init_, _eq_ methods, etc.
@@ -132,7 +133,7 @@ class NexusRockMethod(DynamicProperty):
             if [i for i in line.split() if i in ROCK_KEYWORDS_VALUE_STR]:
                 for key in ROCK_KEYWORDS_VALUE_STR:
                     if nfo.check_token(key, line):
-                        if nfo.get_token_value(key, line, file_as_list) in ROCK_REV_IRREV_OPTIONS:
+                        if fo.get_token_value(key, line, file_as_list) in ROCK_REV_IRREV_OPTIONS:
                             self.properties[key] = nfo.get_expected_token_value(key, line, file_as_list)
                         else:
                             self.properties[key] = ''

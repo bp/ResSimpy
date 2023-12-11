@@ -8,6 +8,7 @@ from typing import Any, Union, Optional
 import resqpy.model as rq
 from datetime import datetime
 import ResSimpy.Nexus.nexus_file_operations as nfo
+import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusPVTMethods import NexusPVTMethods
@@ -101,7 +102,7 @@ class NexusSimulator(Simulator):
         self.__manual_fcs_tidy_call: bool = manual_fcs_tidy_call
 
         self.__default_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
-        #
+
         self._network: NexusNetwork = NexusNetwork(model=self)
         self._wells: NexusWells = NexusWells(self)
         self._grid: Optional[NexusGrid] = None
@@ -436,18 +437,18 @@ class NexusSimulator(Simulator):
         for line in fcs_content_with_includes:
             if nfo.check_token('DATEFORMAT', line) or nfo.check_token('DATE_FORMAT', line):
                 format_token = 'DATEFORMAT' if nfo.check_token('DATEFORMAT', line) else 'DATE_FORMAT'
-                value = nfo.get_token_value(format_token, line, fcs_content_with_includes)
+                value = fo.get_token_value(format_token, line, fcs_content_with_includes)
                 if value is not None:
                     self.date_format = DateFormat.DD_MM_YYYY if value == 'DD/MM/YYYY' else DateFormat.MM_DD_YYYY
 
                 self._sim_controls.date_format_string = "%m/%d/%Y" if self.date_format is DateFormat.MM_DD_YYYY \
                     else "%d/%m/%Y"
             elif nfo.check_token('RUN_UNITS', line):
-                value = nfo.get_token_value('RUN_UNITS', line, fcs_content_with_includes)
+                value = fo.get_token_value('RUN_UNITS', line, fcs_content_with_includes)
                 if value is not None:
                     self.__run_units = UnitSystem(value.upper())
             elif nfo.check_token('DEFAULT_UNITS', line):
-                value = nfo.get_token_value('DEFAULT_UNITS', line, fcs_content_with_includes)
+                value = fo.get_token_value('DEFAULT_UNITS', line, fcs_content_with_includes)
                 if value is not None:
                     self.__default_units = UnitSystem(value.upper())
 
