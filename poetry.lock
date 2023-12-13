@@ -33,13 +33,13 @@ tests = ["coverage[toml]", "lxml", "parametrize_from_file", "pytest", "pytest_tm
 
 [[package]]
 name = "babel"
-version = "2.13.1"
+version = "2.14.0"
 description = "Internationalization utilities"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "Babel-2.13.1-py3-none-any.whl", hash = "sha256:7077a4984b02b6727ac10f1f7294484f737443d7e2e66c5e4380e41a3ae0b4ed"},
-    {file = "Babel-2.13.1.tar.gz", hash = "sha256:33e0952d7dd6374af8dbf6768cc4ddf3ccfefc244f9986d4074704f2fbd18900"},
+    {file = "Babel-2.14.0-py3-none-any.whl", hash = "sha256:efb1a25b7118e67ce3a259bed20545c29cb68be8ad2c784c83689981b7a57287"},
+    {file = "Babel-2.14.0.tar.gz", hash = "sha256:6919867db036398ba21eb5c7a0f6b28ab8cbc3ae7a73a44ebe34ae74a4e7d363"},
 ]
 
 [package.extras]
@@ -961,13 +961,13 @@ use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
 name = "resqpy"
-version = "4.12.1"
+version = "4.12.3"
 description = "Python API for working with RESQML models"
 optional = false
 python-versions = ">=3.8.1,<3.12"
 files = [
-    {file = "resqpy-4.12.1-py3-none-any.whl", hash = "sha256:b76b597e2899971db7016377466a5d5521fdd90aec16456fc4ce473700cec83c"},
-    {file = "resqpy-4.12.1.tar.gz", hash = "sha256:0356f6efe219e986cf05594e3ac2d9bf61c15031530896ce807c8e4ff7b9f38f"},
+    {file = "resqpy-4.12.3-py3-none-any.whl", hash = "sha256:e20454b63e6761636f94dfad705d689f48817aeb6040264174fc9134bdfe8d2f"},
+    {file = "resqpy-4.12.3.tar.gz", hash = "sha256:9d101690898192129f9262ad699eee358d8c0d71eb68dd04540c02ee1d416f0a"},
 ]
 
 [package.dependencies]
@@ -1240,13 +1240,13 @@ files = [
 
 [[package]]
 name = "typing-extensions"
-version = "4.8.0"
+version = "4.9.0"
 description = "Backported and Experimental Type Hints for Python 3.8+"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "typing_extensions-4.8.0-py3-none-any.whl", hash = "sha256:8f92fc8806f9a6b641eaa5318da32b44d401efaac0f6678c9bc448ba3605faa0"},
-    {file = "typing_extensions-4.8.0.tar.gz", hash = "sha256:df8e4339e9cb77357558cbdbceca33c303714cf861d1eef15e1070055ae8b7ef"},
+    {file = "typing_extensions-4.9.0-py3-none-any.whl", hash = "sha256:af72aea155e91adfc61c3ae9e0e342dbc0cba726d6cba4b6c72c1f34e47291cd"},
+    {file = "typing_extensions-4.9.0.tar.gz", hash = "sha256:23478f88c37f27d76ac8aee6c905017a143b0b1b886c3c9f66bc2fd94f9f5783"},
 ]
 
 [[package]]
@@ -1268,4 +1268,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10, <3.12"
-content-hash = "7d4dd72d3adb31439c1cd11b2813b9cade00bc6247079ecf4121dc63253c4eff"
+content-hash = "519595245f1c5d4adfb84282bc0522bccc282e73da001d9f1f65d241d2dd278e"
