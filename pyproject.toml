@@ -10,7 +10,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Topic :: Scientific/Engineering",
     "Topic :: System :: Filesystems",
     "Topic :: Scientific/Engineering :: Information Analysis"
@@ -21,7 +21,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.10, <3.12"
-resqpy = "^4.11"
+resqpy = "^4.12"
 numpy = "^1.25"
 pandas = "^1.5"
 typing-extensions = "^4.8"
