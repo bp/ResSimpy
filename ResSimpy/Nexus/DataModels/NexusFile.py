@@ -56,9 +56,10 @@ class NexusFile(File):
                  include_objects: Optional[list[NexusFile]] = None,
                  file_content_as_list: Optional[list[str]] = None,
                  linked_user: Optional[str] = None,
-                 last_modified: Optional[datetime] = None) -> None:
+                 last_modified: Optional[datetime] = None,
+                 array_skipped: bool = False) -> None:
         super().__init__(location=location, file_content_as_list=file_content_as_list)
-        if origin is not None and location is not None:
+        if origin is not None:
             self.location = nfo.get_full_file_path(location, origin)
         else:
             self.location = location
@@ -74,6 +75,7 @@ class NexusFile(File):
             self.line_locations = []
         self.linked_user = linked_user
         self.last_modified = last_modified
+        self.__array_skipped = array_skipped
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True,
@@ -224,7 +226,8 @@ class NexusFile(File):
                                include_objects=None,
                                file_content_as_list=None,
                                linked_user=user,
-                               last_modified=last_changed)
+                               last_modified=last_changed,
+                               array_skipped=True)
                 if includes_objects is None:
                     raise ValueError('include_objects is None - recursion failure.')
                 skip_next_include = False
@@ -677,6 +680,10 @@ class NexusFile(File):
             for file in self.include_objects:
                 write_file: bool = file.file_modified or write_out_all_files
                 write_file = write_file or (new_file_path != self.location and not os.path.isabs(file.location))
+                # if the array was previously skipped then load the file as list
+                if file.__array_skipped:
+                    file.file_content_as_list = nfo.load_file_as_list(file.location)
+
                 if file.file_content_as_list is None:
                     warnings.warn(f'No content found for file: {file}. Not writing file.')
                     continue

@@ -279,6 +279,8 @@ def test_generate_file_include_structure_skip_array(mocker, test_file_contents):
 
     # Assert
     assert len(nexus_file.include_objects) == 1
+    assert nexus_file.__getattribute__('_NexusFile__array_skipped') is False
+    assert nexus_file.include_objects[0].__getattribute__('_NexusFile__array_skipped') is True
     assert nexus_file.include_objects[0] == expected_result
 
 @pytest.mark.parametrize("file_with_nested_grid_array_contents, expected_file_contents", [
