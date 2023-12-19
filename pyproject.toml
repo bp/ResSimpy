@@ -85,4 +85,4 @@ optional = true
 [tool.poetry.group.docs.dependencies]
 autoclasstoc = "*"
 sphinx_rtd_theme = "*"
-sphinx = "<7.0.0" # Necessary as the theme doesn't currently work with versions 7+
+sphinx = "^7.2"
