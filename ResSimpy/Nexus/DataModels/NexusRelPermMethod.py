@@ -10,9 +10,11 @@ from ResSimpy.Nexus.NexusKeywords.relpm_keywords import RELPM_SINGLE_KEYWORDS, R
 from ResSimpy.Nexus.NexusKeywords.relpm_keywords import RELPM_KEYWORDS, RELPM_NONDARCY_KEYWORDS, RELPM_NONDARCY_PARAMS
 from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 from ResSimpy.DynamicProperty import DynamicProperty
+from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import RelPermUnits
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_hysteresis_dict
 import ResSimpy.Nexus.nexus_file_operations as nfo
+import ResSimpy.FileOperations.file_operations as fo
 
 
 @dataclass(kw_only=True, repr=False)  # Doesn't need to write an _init_, _eq_ methods, etc.
@@ -33,8 +35,9 @@ class NexusRelPermMethod(DynamicProperty):
                      dict[str, Union[float, pd.DataFrame]]]] = field(default_factory=get_empty_dict_union)
     hysteresis_params: dict[str, Union[str, float, dict[str, Union[str, float, dict[str, Union[str, float]]]]]] \
         = field(default_factory=get_empty_hysteresis_dict)
+    unit_system: UnitSystem
 
-    def __init__(self, file: NexusFile, input_number: int,
+    def __init__(self, file: NexusFile, input_number: int, model_unit_system: UnitSystem,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None,
                  hysteresis_params: Optional[dict[str, Union[str, float, dict[str, Union[str, float,
@@ -47,7 +50,28 @@ class NexusRelPermMethod(DynamicProperty):
             self.hysteresis_params = hysteresis_params
         else:
             self.hysteresis_params = {}
+        self.unit_system = model_unit_system
         super().__init__(input_number=input_number, file=file)
+
+    @staticmethod
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """Gets the mapping of nexus keywords to attribute definitions."""
+        keywords: dict[str, tuple[str, type]] = {
+            'PCWO': ('water_oil_capillary_pressure', float),
+            'PCGO': ('gas_oil_capillary_pressure', float),
+            'PCGW': ('gas_water_capillary_pressure', float),
+            'TENTHR': ('interfacial_tension_threshold_for_relperm_adjustment', float),
+            'TENI': ('reference_interfacial_tension_for_capillary_pressure_adjustment', float),
+        }
+        return keywords
+
+    @property
+    def units(self) -> RelPermUnits:
+        """Returns the attribute to unit map for the relperm method."""
+        # Specify unit system, if provided
+        if 'UNIT_SYSTEM' in self.properties.keys() and isinstance(self.properties['UNIT_SYSTEM'], UnitSystem):
+            self.unit_system = self.properties['UNIT_SYSTEM']
+        return RelPermUnits(unit_system=self.unit_system)
 
     def to_string(self) -> str:
         """Create string with relative permeability and capillary pressure data, in Nexus file format."""
@@ -152,7 +176,7 @@ class NexusRelPermMethod(DynamicProperty):
             line_list (list[str]): list of strings that comprise input RELPM file
         """
         if nfo.check_token(keyword, single_line):
-            key_val = nfo.get_token_value(keyword, single_line, line_list)
+            key_val = fo.get_token_value(keyword, single_line, line_list)
             if key_val in keyword_value_options:
                 self.properties[keyword] = key_val
             else:
@@ -164,6 +188,10 @@ class NexusRelPermMethod(DynamicProperty):
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
+
+        # Specify unit system, if provided
+        if 'UNIT_SYSTEM' in self.properties.keys() and isinstance(self.properties['UNIT_SYSTEM'], UnitSystem):
+            self.unit_system = self.properties['UNIT_SYSTEM']
 
         # Initialize flags and containers to use to record properties as we iterate through relperm file contents
         # Dictionary to record start and ending indices for tables
@@ -274,12 +302,12 @@ class NexusRelPermMethod(DynamicProperty):
                     for hyst_keyword in ['NONE', 'NOCHK_HYS']:
                         if nfo.check_token(hyst_keyword, line):
                             self.hysteresis_params[hyst_keyword] = ''
-                if nfo.check_token('KRW', line) and nfo.get_token_value('KRW', line, file_as_list) == 'USER':
+                if nfo.check_token('KRW', line) and fo.get_token_value('KRW', line, file_as_list) == 'USER':
                     self.hysteresis_params['KRW'] = 'USER'
                 if [i for i in line.split() if i in ['KRG', 'KROW']]:
                     for hyst_keyword in ['KRG', 'KROW']:
                         if nfo.check_token(hyst_keyword, line):
-                            hyst_keyword_primary_key = nfo.get_token_value(hyst_keyword, line, file_as_list)
+                            hyst_keyword_primary_key = fo.get_token_value(hyst_keyword, line, file_as_list)
                             if hyst_keyword_primary_key == 'USER':
                                 self.hysteresis_params[hyst_keyword] = 'USER'
                             elif hyst_keyword_primary_key in ['LINEAR', 'SCALED', 'CARLSON', 'KILLOUGH']:

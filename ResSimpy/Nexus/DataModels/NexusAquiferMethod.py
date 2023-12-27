@@ -10,6 +10,7 @@ from ResSimpy.Nexus.NexusKeywords.aquifer_keywords import AQUIFER_KEYWORDS_VALUE
 from ResSimpy.Nexus.NexusKeywords.aquifer_keywords import AQUIFER_KEYWORDS, AQUIFER_TYPE_KEYWORDS
 from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 from ResSimpy.DynamicProperty import DynamicProperty
+from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import AquiferUnits
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -31,15 +32,49 @@ class NexusAquiferMethod(DynamicProperty):
     file: NexusFile
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                 dict[str, Union[float, pd.DataFrame]]]] = field(default_factory=get_empty_dict_union)
+    unit_system: UnitSystem
 
-    def __init__(self, file: NexusFile, input_number: int,
+    def __init__(self, file: NexusFile, input_number: int, model_unit_system: UnitSystem,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
         if properties is not None:
             self.properties = properties
         else:
             self.properties = {}
+        self.unit_system = model_unit_system
         super().__init__(input_number=input_number, file=file)
+
+    @staticmethod
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """Gets the mapping of nexus keywords to attribute definitions."""
+        keywords: dict[str, tuple[str, type]] = {
+            'BAQ': ('carter_tracy_constant', float),
+            'CT': ('total_compressibility', float),
+            'POR': ('porosity', float),
+            'H': ('thickness', float),
+            'RO': ('radius_to_inner_perimeter', float),
+            'RE': ('radius_to_exterior_perimeter', float),
+            'S': ('fraction_of_circular_boundary', float),
+            'W': ('linear_aquifer_width', float),
+            'L': ('linear_aquifer_length', float),
+            'TC': ('time_conversion_factor', float),
+            'VISC': ('viscosity', float),
+            'K': ('permeability', float),
+            'PAQI': ('initial_aquifer_pressure', float),
+            'DAQI': ('datum_depth', float),
+            'PI': ('productivity_index', float),
+            'WEI': ('initial_encroachable_water_volume', float),
+            'WAQI': ('initial_aquifer_volume', float),
+        }
+        return keywords
+
+    @property
+    def units(self) -> AquiferUnits:
+        """Returns the attribute to unit map for the Aquifer method."""
+        # Specify unit system, if provided
+        if 'UNIT_SYSTEM' in self.properties.keys() and isinstance(self.properties['UNIT_SYSTEM'], UnitSystem):
+            self.unit_system = self.properties['UNIT_SYSTEM']
+        return AquiferUnits(unit_system=self.unit_system)
 
     def to_string(self) -> str:
         """Create string with aquifer data in Nexus file format."""
@@ -74,6 +109,10 @@ class NexusAquiferMethod(DynamicProperty):
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
+
+        # Specify unit system, if provided
+        if 'UNIT_SYSTEM' in self.properties.keys() and isinstance(self.properties['UNIT_SYSTEM'], UnitSystem):
+            self.unit_system = self.properties['UNIT_SYSTEM']
 
         # Initialize flags and containers to use to record properties as we iterate through aquifer file contents
         # Dictionary to record start and ending indices for tables

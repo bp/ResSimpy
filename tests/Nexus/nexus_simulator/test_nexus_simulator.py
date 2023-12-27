@@ -547,8 +547,15 @@ def test_get_check_oil_gas_types_for_models_different_types(mocker):
                               "line 1\nline 2\nGASWATER",
                               "line 1\nGASWATER",
                               "GASWATER"
-                              )
-                         ])
+                              ),
+                             ("Line 1\nAnother LIne\nSURFACE Network 1	Includes/nexus_data/surface_1.dat",
+                              "SURFACE Network 1	Includes/nexus_data/surface_2.dat",
+                              "line 1\nAPI",
+                                "line 1\nAPI",
+                                "API"
+                              ),
+
+])
 def test_get_check_oil_gas_types_for_models_same_types(mocker, fcs_file_contents_1, fcs_file_contents_2,
                                                        surface_file_contents_1, surface_file_contents_2, expected_type):
     # Checks that the correct oil / gas type is returned.
@@ -1293,9 +1300,9 @@ def test_get_separator(mocker: MockerFixture, fcs_file_contents: str):
         sep_file.line_locations = [(0, uuid.uuid4())]
         sep_files.append(sep_file)
 
-    loaded_sep = {1: NexusSeparatorMethod(file=sep_files[0], input_number=1),
-                  2: NexusSeparatorMethod(file=sep_files[1], input_number=2),
-                  3: NexusSeparatorMethod(file=sep_files[2], input_number=3),
+    loaded_sep = {1: NexusSeparatorMethod(file=sep_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                  2: NexusSeparatorMethod(file=sep_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                  3: NexusSeparatorMethod(file=sep_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH),
                   }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1336,9 +1343,9 @@ def test_get_water(mocker: MockerFixture, fcs_file_contents: str):
         wat_file.line_locations = [(0, uuid.uuid4())]
         wat_files.append(wat_file)
 
-    loaded_wat = {1: NexusWaterMethod(file=wat_files[0], input_number=1),
-                  2: NexusWaterMethod(file=wat_files[1], input_number=2),
-                  3: NexusWaterMethod(file=wat_files[2], input_number=3),
+    loaded_wat = {1: NexusWaterMethod(file=wat_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                  2: NexusWaterMethod(file=wat_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                  3: NexusWaterMethod(file=wat_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH),
                   }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1381,9 +1388,9 @@ def test_get_equil(mocker: MockerFixture, fcs_file_contents: str):
         eq_file.line_locations = [(0, uuid.uuid4())]
         eq_files.append(eq_file)
 
-    loaded_equil = {1: NexusEquilMethod(file=eq_files[0], input_number=1),
-                    2: NexusEquilMethod(file=eq_files[1], input_number=2),
-                    3: NexusEquilMethod(file=eq_files[2], input_number=3)
+    loaded_equil = {1: NexusEquilMethod(file=eq_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                    2: NexusEquilMethod(file=eq_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                    3: NexusEquilMethod(file=eq_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH)
                     }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1424,9 +1431,9 @@ def test_get_rock(mocker: MockerFixture, fcs_file_contents: str):
         rock_file.line_locations = [(0, uuid.uuid4())]
         rock_files.append(rock_file)
 
-    loaded_rocks = {1: NexusRockMethod(file=rock_files[0], input_number=1),
-                    2: NexusRockMethod(file=rock_files[1], input_number=2),
-                    3: NexusRockMethod(file=rock_files[2], input_number=3),
+    loaded_rocks = {1: NexusRockMethod(file=rock_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                    2: NexusRockMethod(file=rock_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                    3: NexusRockMethod(file=rock_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH),
                     }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1469,9 +1476,9 @@ def test_get_relperm(mocker: MockerFixture, fcs_file_contents: str):
         relpm_file.line_locations = [(0, uuid.uuid4())]
         relpm_files.append(relpm_file)
 
-    loaded_relperms = {1: NexusRelPermMethod(file=relpm_files[0], input_number=1),
-                       2: NexusRelPermMethod(file=relpm_files[1], input_number=2),
-                       3: NexusRelPermMethod(file=relpm_files[2], input_number=3),
+    loaded_relperms = {1: NexusRelPermMethod(file=relpm_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                       2: NexusRelPermMethod(file=relpm_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                       3: NexusRelPermMethod(file=relpm_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH),
                        }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1512,9 +1519,9 @@ def test_get_valve(mocker: MockerFixture, fcs_file_contents: str):
         valve_file.line_locations = [(0, uuid.uuid4())]
         valve_files.append(valve_file)
 
-    loaded_valves = {1: NexusValveMethod(file=valve_files[0], input_number=1),
-                     2: NexusValveMethod(file=valve_files[1], input_number=2),
-                     3: NexusValveMethod(file=valve_files[2], input_number=3),
+    loaded_valves = {1: NexusValveMethod(file=valve_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                     2: NexusValveMethod(file=valve_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                     3: NexusValveMethod(file=valve_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH),
                      }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1554,9 +1561,9 @@ def test_get_aquifer(mocker: MockerFixture, fcs_file_contents: str):
         aq_file.line_locations = [(0, uuid.uuid4())]
         aq_files.append(aq_file)
 
-    loaded_aquifers = {1: NexusAquiferMethod(file=aq_files[0], input_number=1),
-                       2: NexusAquiferMethod(file=aq_files[1], input_number=2),
-                       3: NexusAquiferMethod(file=aq_files[2], input_number=3)
+    loaded_aquifers = {1: NexusAquiferMethod(file=aq_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                       2: NexusAquiferMethod(file=aq_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                       3: NexusAquiferMethod(file=aq_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH)
                        }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1596,9 +1603,9 @@ def test_get_hydraulics(mocker: MockerFixture, fcs_file_contents: str):
         hyd_file.line_locations = [(0, uuid.uuid4())]
         hyd_files.append(hyd_file)
 
-    loaded_hyds = {1: NexusHydraulicsMethod(file=hyd_files[0], input_number=1),
-                   2: NexusHydraulicsMethod(file=hyd_files[1], input_number=2),
-                   3: NexusHydraulicsMethod(file=hyd_files[2], input_number=3)
+    loaded_hyds = {1: NexusHydraulicsMethod(file=hyd_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                   2: NexusHydraulicsMethod(file=hyd_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                   3: NexusHydraulicsMethod(file=hyd_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH)
                    }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
@@ -1637,9 +1644,9 @@ def test_get_gaslift(mocker: MockerFixture, fcs_file_contents: str):
         gl_file.line_locations = [(0, uuid.uuid4())]
         gl_files.append(gl_file)
 
-    loaded_gaslift = {1: NexusGasliftMethod(file=gl_files[0], input_number=1),
-                      2: NexusGasliftMethod(file=gl_files[1], input_number=2),
-                      3: NexusGasliftMethod(file=gl_files[2], input_number=3)
+    loaded_gaslift = {1: NexusGasliftMethod(file=gl_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                      2: NexusGasliftMethod(file=gl_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                      3: NexusGasliftMethod(file=gl_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH)
                       }
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')

@@ -7,6 +7,7 @@ from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator
 
+
 @pytest.mark.parametrize("file_contents", [
     # basic_test
     ('''TIME 01/01/2019
@@ -14,9 +15,22 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     NAME    CTRL   CTRLCOND   CTRLCONS   CTRLMETHOD   CALCMETHOD   CALCCOND   CALCCONS   VALUE   ADDVALUE   REGION   PRIORITY   QMIN   QMIN_NOSHUT   QGUIDE   MAXDPDT   RANKDT   CTRLTYPE   CALCTYPE
     target1   control1   ctrlcnd1   ctrlcons1   ctrlmthd1   calcmthd1   calccond1   calccons1   1.0   11.0   region1   1   1.5   1.8   Formula  1.6   0.9   type1   ctype1
     target2   control2   ctrlcnd2   ctrlcons2   ctrlmthd2   calcmthd2   calccond2   calccons2   2.0   21.0   region2   2   2.5   2.8   NA   2.6   1.9   type2   ctype2
+    ENDTARGET'''),
+    ('''TIME 01/01/2019 ! This target below in guide rate table should be skipped.
+    GUIDERATE
+    TARGET       DTMIN   PHASE   A   B   C   D   E       F   INCREASE    DAMP
+    targetformula    10      OIL     1   0   0.22   0.23   1   0.6 YES         1
+    ENDGUIDERATE
+      PROCS NAME FULL_GAS_BALANCE PRIORITY 20 
+    PROD         = SUM, somestring, ALL1D), ALL1D)
+    ENDPROCS
+     TARGET
+    NAME    CTRL   CTRLCOND   CTRLCONS   CTRLMETHOD   CALCMETHOD   CALCCOND   CALCCONS   VALUE   ADDVALUE   REGION   PRIORITY   QMIN   QMIN_NOSHUT   QGUIDE   MAXDPDT   RANKDT   CTRLTYPE   CALCTYPE
+    target1   control1   ctrlcnd1   ctrlcons1   ctrlmthd1   calcmthd1   calccond1   calccons1   1.0   11.0   region1   1   1.5   1.8   Formula  1.6   0.9   type1   ctype1
+    target2   control2   ctrlcnd2   ctrlcons2   ctrlmthd2   calcmthd2   calccond2   calccons2   2.0   21.0   region2   2   2.5   2.8   NA   2.6   1.9   type2   ctype2
     ENDTARGET'''
     )
-    ],ids=['basic_test'])
+    ],ids=['basic_test', 'guiderate with target column header'])
 def test_read_target(mocker, file_contents):
     # Arrange
     fcs_file_contents = '''

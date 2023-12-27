@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import os
 from typing import Optional, MutableMapping
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusSeparatorMethod import NexusSeparatorMethod
 from ResSimpy.Separator import Separator
@@ -20,8 +21,10 @@ class NexusSeparatorMethods(Separator):
     __inputs: MutableMapping[int, NexusSeparatorMethod]
     __files: dict[int, NexusFile]
     __properties_loaded: bool = False  # Used in lazy loading
+    __model_unit_system: UnitSystem
 
-    def __init__(self, inputs: Optional[MutableMapping[int, NexusSeparatorMethod]] = None,
+    def __init__(self, model_unit_system: UnitSystem,
+                 inputs: Optional[MutableMapping[int, NexusSeparatorMethod]] = None,
                  files: Optional[dict[int, NexusFile]] = None) -> None:
         if inputs:
             self.__inputs = inputs
@@ -31,6 +34,7 @@ class NexusSeparatorMethods(Separator):
             self.__files = files
         else:
             self.__files = {}
+        self.__model_unit_system = model_unit_system
         super().__init__()
 
     def __repr__(self) -> str:
@@ -67,7 +71,8 @@ class NexusSeparatorMethods(Separator):
                     raise ValueError(f'Unable to find separator file: {separator_file}')
                 if os.path.isfile(separator_file.location):
                     # Create NexusSeparatorMethod object
-                    self.__inputs[table_num] = NexusSeparatorMethod(file=separator_file, input_number=table_num)
+                    self.__inputs[table_num] = NexusSeparatorMethod(file=separator_file, input_number=table_num,
+                                                                    model_unit_system=self.__model_unit_system)
                     # Populate object with separator properties in input file
                     self.__inputs[table_num].read_properties()
         self.__properties_loaded = True

@@ -15,27 +15,27 @@ Critical Pressure	psia	kPa	(kg/cm2)	bars	psia
 Critical Temperature	degrees F	degrees C	degrees C	degrees C	degrees C
 Critical Volume ft3/lbmole  m3/kgmole   m3/kgmole   m3/kgmole   cc/gmole
 Density	lb/ft3	kg/m3	kg/m3	kg/m3	gm/cc
-Formation Volume Factor (Oil)	RB/STB	m3/STM3	m3/STM3	m3/STM3	cc/stcc
-Formation Volume Factor (Gas)	RB/MSCF	m3/STM3	m3/STM3	m3/STM3	cc/stcc
-Gas-Liquid Ratio (Gas-Oil Ratio)	MSCF/STB	SM3/STM3	SM3/STM3	SM3/STM3	stcc/stcc
+Formation Volume Factor (Oil)	rb/stb	m3/stm3	m3/stm3	m3/stm3	cc/stcc
+Formation Volume Factor (Gas)	rb/mscf	m3/stm3	m3/stm3	m3/stm3	cc/stcc
+Gas-Liquid Ratio (Gas-Oil Ratio)	mscf/stb	stm3/stm3	stm3/stm3	stm3/stm3	stcc/stcc
 Gravity Gradient	psi/ft	kPa/m	kg/cm2/m	bars/m	psi/cm
 Heat Capacity   BTU/lb-F    kJ/kg-K kJ/kg-K kJ/kg-K J/g-K
 Length	ft	m	m	m	cm
-Liquid-Gas Ratio (Oil-Gas Ratio)    STB/MSCF    STM3/SM3	STM3/SM3	STM3/SM3	stcc/stcc
-Moles	lb-moles	kg-moles	kg-moles	kg-moles	gmmoles
-Molar Density	lb-moles/ft3	kg-moles/m3	kg-moles/m3	kg-moles/m3	gmmoles/cm3
-Molar Rates	lb-moles/day	kg-moles/day	kg-moles/day	kg-moles/day	gmmoles/hour
+Liquid-Gas Ratio (Oil-Gas Ratio)    stb/mscf    stm3/stm3	stm3/stm3	stm3/stm3	stcc/stcc
+Moles	lb-moles	kg-moles	kg-moles	kg-moles	gm-moles
+Molar Density	lb-moles/ft3	kg-moles/m3	kg-moles/m3	kg-moles/m3	gm-moles/cm3
+Molar Rates	lb-moles/day	kg-moles/day	kg-moles/day	kg-moles/day	gm-moles/hour
 Permeability	md	md	md	md	md
 Pressure	psia	kPa	kg/cm2	bars	psia
-Reservoir Rates	RB/day	m3/day	m3/day	m3/day	cc/hour
-Reservoir Volumes	MRB	k m3	k m3	k m3	k cc
+Reservoir Rates	rb/day	m3/day	m3/day	m3/day	cc/hour
+Reservoir Volumes	mrb	k m3	k m3	k m3	k cc
 Saturation Fraction	fraction	fraction	fraction	fraction	fraction
-Solution Gas-Oil Ratio	MSCF/STB	SM3/STM3	SM3/STM3	SM3/STM3	stcc/stcc
-Solution Oil-Gas Ratio	STB/MSCF    STM3/SM3	STM3/SM3	STM3/SM3	stcc/stcc
-Surface Rates (Liquid)	STB/day	STM3/day	STM3/day	STM3/day	stcc/hour
-Surface Rates (Gas)	MSCF/day	SM3/day	SM3/day	SM3/day	stcc/hour
-Surface Volumes (Gas)	MMSCF	k STM3	k STM3	k STM3	k stcc
-Surface Volumes (Liquid)	MSTB	k STM3	k STM3	k STM3	k stcc
+Solution Gas-Oil Ratio	mscf/stb	stm3/stm3	stm3/stm3	stm3/stm3	stcc/stcc
+Solution Oil-Gas Ratio	stb/mscf    stm3/stm3	stm3/stm3	stm3/stm3	stcc/stcc
+Surface Rates (Liquid)	stb/day	stm3/day	stm3/day	stm3/day	stcc/hour
+Surface Rates (Gas)	mscf/day	stm3/day	stm3/day	stm3/day	stcc/hour
+Surface Volumes (Gas)	mmscf	k stm3	k stm3	k stm3	k stcc
+Surface Volumes (Liquid)	mstb	k stm3	k stm3	k stm3	k stcc
 Temperature	degrees F	degrees C	degrees C	degrees C	degrees C
 Time	days	days	days	days	hours
 Tracer Concentrations	fraction	fraction	fraction	fraction	fraction
@@ -85,12 +85,12 @@ class Area(UnitDimension):
 
 class AcousticImpedance(UnitDimension):
     """Units for acoustic impedance."""
-    english = 'ft/sec·(g/cm3)'
-    metric = 'm/sec·(kg/m3)'
-    metkgcm2 = 'm/sec·(kg/m3)'
-    metbar = 'm/sec·(kg/m3)'
-    lab = 'cm/sec·(g/cm3)'
-    metric_atm = 'm/sec·(kg/m3)'
+    english = 'ft/sec(g/cm3)'
+    metric = 'm/sec(kg/m3)'
+    metkgcm2 = 'm/sec(kg/m3)'
+    metbar = 'm/sec(kg/m3)'
+    lab = 'cm/sec(g/cm3)'
+    metric_atm = 'm/sec(kg/m3)'
 
 
 class AcousticWaveVelocity(UnitDimension):
@@ -171,34 +171,34 @@ class Density(UnitDimension):
     metric_atm = 'kg/m3'
 
 
-class FormationVolumeFactorOil(UnitDimension):
+class FormationVolumeFactorLiquid(UnitDimension):
     """Units for formation volume factor oil."""
-    english = 'RB/STB'
-    metric = 'm3/STM3'
-    metkgcm2 = 'm3/STM3'
-    metbar = 'm3/STM3'
+    english = 'rb/stb'
+    metric = 'm3/stm3'
+    metkgcm2 = 'm3/stm3'
+    metbar = 'm3/stm3'
     lab = 'cc/stcc'
-    metric_atm = 'm3/STM3'
+    metric_atm = 'm3/stm3'
 
 
 class FormationVolumeFactorGas(UnitDimension):
     """Units for formation volume factor gas."""
-    english = 'RB/MSCF'
-    metric = 'm3/STM3'
-    metkgcm2 = 'm3/STM3'
-    metbar = 'm3/STM3'
+    english = 'rb/mscf'
+    metric = 'm3/stm3'
+    metkgcm2 = 'm3/stm3'
+    metbar = 'm3/stm3'
     lab = 'cc/stcc'
-    metric_atm = 'm3/STM3'
+    metric_atm = 'm3/stm3'
 
 
 class GasLiquidRatio(UnitDimension):
     """Units for gas liquid ratio."""
-    english = 'MSCF/STB'
-    metric = 'SM3/STM3'
-    metkgcm2 = 'SM3/STM3'
-    metbar = 'SM3/STM3'
+    english = 'mscf/stb'
+    metric = 'stm3/stm3'
+    metkgcm2 = 'stm3/stm3'
+    metbar = 'stm3/stm3'
     lab = 'stcc/stcc'
-    metric_atm = 'SM3/STM3'
+    metric_atm = 'stm3/stm3'
 
 
 class GravityGradient(UnitDimension):
@@ -227,7 +227,7 @@ class Moles(UnitDimension):
     metric = 'kg-moles'
     metkgcm2 = 'kg-moles'
     metbar = 'kg-moles'
-    lab = 'gmmoles'
+    lab = 'gm-moles'
     metric_atm = 'kg-moles'
 
 
@@ -237,7 +237,7 @@ class MolarDensity(UnitDimension):
     metric = 'kg-moles/m3'
     metkgcm2 = 'kg-moles/m3'
     metbar = 'kg-moles/m3'
-    lab = 'gmmoles/cm3'
+    lab = 'gm-moles/cm3'
     metric_atm = 'kg-moles/m3'
 
 
@@ -247,7 +247,7 @@ class MolarRates(UnitDimension):
     metric = 'kg-moles/day'
     metkgcm2 = 'kg-moles/day'
     metbar = 'kg-moles/day'
-    lab = 'gmmoles/hour'
+    lab = 'gm-moles/hour'
     metric_atm = 'kg-moles/day'
 
 
@@ -283,7 +283,7 @@ class DeltaPressure(UnitDimension):
 
 class ReservoirRates(UnitDimension):
     """Units for reservoir rates."""
-    english = 'RB/day'
+    english = 'rb/day'
     metric = 'm3/day'
     metkgcm2 = 'm3/day'
     metbar = 'm3/day'
@@ -291,9 +291,9 @@ class ReservoirRates(UnitDimension):
     metric_atm = 'm3/day'
 
 
-class ReservoirVolumes(UnitDimension):
-    """Units for reservoir volumes."""
-    english = 'MRB'
+class ReservoirVolumeThousand(UnitDimension):
+    """Units for reservoir volumes, in thousands."""
+    english = 'mrb'
     metric = 'k m3'
     metkgcm2 = 'k m3'
     metbar = 'k m3'
@@ -313,62 +313,62 @@ class SaturationFraction(UnitDimension):
 
 class SolutionGasOilRatio(UnitDimension):
     """Units for solution gas oil ratio."""
-    english = 'MSCF/STB'
-    metric = 'SM3/STM3'
-    metkgcm2 = 'SM3/STM3'
-    metbar = 'SM3/STM3'
+    english = 'mscf/stb'
+    metric = 'stm3/stm3'
+    metkgcm2 = 'stm3/stm3'
+    metbar = 'stm3/stm3'
     lab = 'stcc/stcc'
-    metric_atm = 'SM3/STM3'
+    metric_atm = 'stm3/stm3'
 
 
 class SolutionOilGasRatio(UnitDimension):
     """Units for solution oil gas ratio."""
-    english = 'STB/MSCF'
-    metric = 'STM3/SM3'
-    metkgcm2 = 'STM3/SM3'
-    metbar = 'STM3/SM3'
+    english = 'stb/mscf'
+    metric = 'stm3/stm3'
+    metkgcm2 = 'stm3/stm3'
+    metbar = 'stm3/stm3'
     lab = 'stcc/stcc'
-    metric_atm = 'STM3/SM3'
+    metric_atm = 'stm3/stm3'
 
 
 class SurfaceRatesLiquid(UnitDimension):
     """Units for surface rates liquid."""
-    english = 'STB/day'
-    metric = 'STM3/day'
-    metkgcm2 = 'STM3/day'
-    metbar = 'STM3/day'
+    english = 'stb/day'
+    metric = 'stm3/day'
+    metkgcm2 = 'stm3/day'
+    metbar = 'stm3/day'
     lab = 'stcc/hour'
-    metric_atm = 'STM3/day'
+    metric_atm = 'stm3/day'
 
 
 class SurfaceRatesGas(UnitDimension):
     """Units for surface rates gas."""
-    english = 'MSCF/day'
-    metric = 'SM3/day'
-    metkgcm2 = 'SM3/day'
-    metbar = 'SM3/day'
+    english = 'mscf/day'
+    metric = 'stm3/day'
+    metkgcm2 = 'stm3/day'
+    metbar = 'stm3/day'
     lab = 'stcc/hour'
-    metric_atm = 'SM3/day'
+    metric_atm = 'stm3/day'
 
 
 class SurfaceVolumesGas(UnitDimension):
     """Units for surface volumes gas."""
-    english = 'MMSCF'
-    metric = 'k STM3'
-    metkgcm2 = 'k STM3'
-    metbar = 'k STM3'
+    english = 'mmscf'
+    metric = 'k stm3'
+    metkgcm2 = 'k stm3'
+    metbar = 'k stm3'
     lab = 'k stcc'
-    metric_atm = 'k STM3'
+    metric_atm = 'k stm3'
 
 
 class SurfaceVolumesLiquid(UnitDimension):
     """Units for surface volumes liquid."""
-    english = 'MSTB'
-    metric = 'k STM3'
-    metkgcm2 = 'k STM3'
-    metbar = 'k STM3'
+    english = 'mstb'
+    metric = 'k stm3'
+    metkgcm2 = 'k stm3'
+    metbar = 'k stm3'
     lab = 'k stcc'
-    metric_atm = 'k STM3'
+    metric_atm = 'k stm3'
 
 
 class Temperature(UnitDimension):
@@ -391,6 +391,16 @@ class Time(UnitDimension):
     metric_atm = 'days'
 
 
+class InverseTime(UnitDimension):
+    """Units for 1/time."""
+    english = '1/days'
+    metric = '1/days'
+    metkgcm2 = '1/days'
+    metbar = '1/days'
+    lab = '1/hours'
+    metric_atm = '1/days'
+
+
 class TracerConcentrations(UnitDimension):
     """Units for tracer concentrations."""
     english = 'fraction'
@@ -403,12 +413,12 @@ class TracerConcentrations(UnitDimension):
 
 class Transmissibility(UnitDimension):
     """Units for transmissibility."""
-    english = 'ft3·cp/day/psi'
-    metric = 'm3·cp/day/kPa'
-    metkgcm2 = 'm3·cp/day/kg/cm2'
-    metbar = 'm3·cp/day/bars'
-    lab = 'cc·cp/hour/psi'
-    metric_atm = 'm3·cp/day/atm'
+    english = 'ft3*cp/day/psi'
+    metric = 'm3*cp/day/kPa'
+    metkgcm2 = 'm3*cp/day/kg/cm2'
+    metbar = 'm3*cp/day/bars'
+    lab = 'cc*cp/hour/psi'
+    metric_atm = 'm3*cp/day/atm'
 
 
 class Viscosity(UnitDimension):
@@ -431,14 +441,24 @@ class Volume(UnitDimension):
     metric_atm = 'm3'
 
 
+class ReservoirVolume(UnitDimension):
+    """Units for reservoir volume."""
+    english = 'rb'
+    metric = 'm3'
+    metkgcm2 = 'm3'
+    metbar = 'm3'
+    lab = 'cc'
+    metric_atm = 'm3'
+
+
 class LiquidGasRatio(UnitDimension):
     """Liquid gas ratio units."""
-    english = 'STB/MSCF'
-    metric = 'STM3/SM3'
-    metkgcm2 = 'STM3/SM3'
-    metbar = 'STM3/SM3'
+    english = 'stb/mscf'
+    metric = 'stm3/stm3'
+    metkgcm2 = 'stm3/stm3'
+    metbar = 'stm3/stm3'
     lab = 'stcc/stcc'
-    metric_atm = 'STM3/SM3'
+    metric_atm = 'stm3/stm3'
 
 
 class Roughness(UnitDimension):
@@ -523,19 +543,59 @@ class PermeabilityThickness(UnitDimension):
 
 class NonDarcySkin(UnitDimension):
     """Non darcy skin units."""
-    english = 'day/MSCF'
-    metric = 'day/SM3'
-    metkgcm2 = 'day/SM3'
-    metbar = 'day/SM3'
+    english = 'day/mscf'
+    metric = 'day/stm3'
+    metkgcm2 = 'day/stm3'
+    metbar = 'day/stm3'
     lab = 'hour/stcc'
-    metric_atm = 'day/SM3'
+    metric_atm = 'day/stm3'
 
 
 class ProductivityIndex(UnitDimension):
     """Productivity index units."""
-    english = 'STB/day/psi'
-    metric = 'STM3/day/kPa'
-    metkgcm2 = 'STM3/day/kg/cm2'
-    metbar = 'STM3/day/bars'
+    english = 'stb/day/psi'
+    metric = 'stm3/day/kPa'
+    metkgcm2 = 'stm3/day/kg/cm2'
+    metbar = 'stm3/day/bars'
     lab = 'stcc/hour/psi'
-    metric_atm = 'STM3/day/atm'
+    metric_atm = 'stm3/day/atm'
+
+
+class ReservoirProductivityIndex(UnitDimension):
+    """Productivity index reservoir units."""
+    english = 'rb/day/psi'
+    metric = 'm3/day/kPa'
+    metkgcm2 = 'm3/day/kg/cm2'
+    metbar = 'm3/day/bars'
+    lab = 'cc/hour/psi'
+    metric_atm = 'm3/day/atm'
+
+
+class ReservoirVolumeOverPressure(UnitDimension):
+    """Reservoir volume over pressure, for instance as needed for Carter-Tracy constant."""
+    english = 'rb/psia'
+    metric = 'm3/kPa'
+    metkgcm2 = 'm3/kg/cm2'
+    metbar = 'm3/bars'
+    lab = 'cc/psia'
+    metric_atm = 'stm3/day/atm'
+
+
+class ValveCoefficient(UnitDimension):
+    """Valve coefficient units."""
+    english = 'psi(lb/ft3)/(lb/s)2'
+    metric = 'kPa(kg/m3)/(kg/s)2'
+    metkgcm2 = '(kg/cm2) (kg/m3)/(kg/s)2'
+    metbar = 'bar(kg/m3)/(kg/s)2'
+    lab = 'psi(gm/cc)/(gm/s)2'
+    metric_atm = 'atm(kg/m3)/(kg/s)2'
+
+
+class InterfacialTension(UnitDimension):
+    """Interfacial tension units."""
+    english = 'dynes/cm'
+    metric = 'dynes/cm'
+    metkgcm2 = 'dynes/cm'
+    metbar = 'dynes/cm'
+    lab = 'dynes/cm'
+    metric_atm = 'dynes/cm'

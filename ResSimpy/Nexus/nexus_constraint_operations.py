@@ -74,6 +74,10 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
 
             trimmed_line = trimmed_line.replace(next_value, "", 1)
             # extract the attribute name for the given nexus constraint token
+            if property_map.get(token_value, None) is None:
+                # if the next token found along isn't a valid property then move to the next line.
+                break
+
             attribute = property_map[token_value][0]
             next_value = get_next_value(0, [trimmed_line])
             if next_value is None:

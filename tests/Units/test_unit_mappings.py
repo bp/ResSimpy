@@ -12,6 +12,15 @@ from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusPVTMethod import NexusPVTMethod
+from ResSimpy.Nexus.DataModels.NexusAquiferMethod import NexusAquiferMethod
+from ResSimpy.Nexus.DataModels.NexusEquilMethod import NexusEquilMethod
+from ResSimpy.Nexus.DataModels.NexusGasliftMethod import NexusGasliftMethod
+from ResSimpy.Nexus.DataModels.NexusHydraulicsMethod import NexusHydraulicsMethod
+from ResSimpy.Nexus.DataModels.NexusValveMethod import NexusValveMethod
+from ResSimpy.Nexus.DataModels.NexusRelPermMethod import NexusRelPermMethod
+from ResSimpy.Nexus.DataModels.NexusRockMethod import NexusRockMethod
+from ResSimpy.Nexus.DataModels.NexusSeparatorMethod import NexusSeparatorMethod
+from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterMethod
 from ResSimpy.Units.Units import Area
 from ResSimpy.Units.AttributeMappings.ConstraintUnitMapping import ConstraintUnits
 from ResSimpy.ISODateTime import ISODateTime
@@ -36,12 +45,12 @@ def test_unit_system_enum_to_variable(unit_system, expected_result):
 
 
 @pytest.mark.parametrize('attribute, unit_system, expected_result', [
-    ('max_surface_water_rate', UnitSystem.ENGLISH, 'STB/day'),
-    ('max_lgr_perfplus', UnitSystem.METRIC, 'STM3/SM3'),
+    ('max_surface_water_rate', UnitSystem.ENGLISH, 'stb/day'),
+    ('max_lgr_perfplus', UnitSystem.METRIC, 'stm3/stm3'),
     ('min_reverse_reservoir_water_rate', UnitSystem.LAB, 'cc/hour'),
-    ('max_surface_oil_rate', UnitSystem.METRIC_ATM, 'STM3/day'),
-    ('max_surface_gas_rate', UnitSystem.METBAR, 'SM3/day'),
-    ('max_surface_liquid_rate', UnitSystem.METKGCM2, 'STM3/day'),
+    ('max_surface_oil_rate', UnitSystem.METRIC_ATM, 'stm3/day'),
+    ('max_surface_gas_rate', UnitSystem.METBAR, 'stm3/day'),
+    ('max_surface_liquid_rate', UnitSystem.METKGCM2, 'stm3/day'),
     ('max_reservoir_oil_rate', UnitSystem.METRIC, 'm3/day'),
     ('max_reservoir_gas_rate', UnitSystem.METRIC, 'm3/day'),
     ('min_pressure', UnitSystem.METRIC, 'kPa'),
@@ -83,7 +92,7 @@ def test_get_unit_error():
 
 
 @pytest.mark.parametrize('data_object, attribute, expected_result, upper', [
-    (NexusConstraint, 'max_surface_water_rate', 'STB/day', False),
+    (NexusConstraint, 'max_surface_water_rate', 'stb/day', False),
     (NexusNode, 'depth', 'ft', False),
     (NexusNodeConnection, 'diameter', 'in', False),
     (NexusWellbore, 'measured_depth_in', 'ft', False),
@@ -116,13 +125,13 @@ def test_get_unit_for_attribute(mocker, data_object, attribute, expected_result,
     ('temp', 'degrees F'),
     ('roughness', 'in'),
     ('inner_diameter', 'in'),
-    ('productivity_index', 'STB/day/psi'),
+    ('productivity_index', 'stb/day/psi'),
     ('rate_mult', ''),
     ('dp_add', 'psi'),
     ('dt_add', 'degrees F'),
     ('well_index_mult', ''),
-    ('vip_productivity_index', 'STB/day/psi'),
-    ('d_factor', 'day/MSCF'),
+    ('vip_productivity_index', 'stb/day/psi'),
+    ('d_factor', 'day/mscf'),
     ('gas_mobility', ''),
     ('drill_order_benefit', ''),
     ('heat_transfer_coeff', 'BTU/(hr*ft2*F)'),
@@ -204,7 +213,7 @@ def test_object_attribute_property_completion():
                        (units.angle_a, 'degrees'),
                        (units.angle_v, 'degrees'),
                        (units.perm_thickness_ovr, 'md*ft'),
-                       (units.dfactor, 'day/MSCF'),
+                       (units.dfactor, 'day/mscf'),
                        (units.rel_perm_method, ''),
                        (units.status, ''),
                        (units.grid, ''),
@@ -240,16 +249,16 @@ def test_object_attribute_property_completion():
 
 
 @pytest.mark.parametrize('attribute, expected_unit', [
-    ('max_gor', 'SM3/STM3'),
-    ('max_gor_plug', 'SM3/STM3'),
-    ('max_gor_plugplus', 'SM3/STM3'),
-    ('max_gor_perf', 'SM3/STM3'),
-    ('max_gor_perfplus', 'SM3/STM3'),
-    ('max_lgr', 'STM3/SM3'),
-    ('max_lgr_plug', 'STM3/SM3'),
-    ('max_lgr_plugplus', 'STM3/SM3'),
-    ('max_lgr_perf', 'STM3/SM3'),
-    ('max_lgr_perfplus', 'STM3/SM3'),
+    ('max_gor', 'stm3/stm3'),
+    ('max_gor_plug', 'stm3/stm3'),
+    ('max_gor_plugplus', 'stm3/stm3'),
+    ('max_gor_perf', 'stm3/stm3'),
+    ('max_gor_perfplus', 'stm3/stm3'),
+    ('max_lgr', 'stm3/stm3'),
+    ('max_lgr_plug', 'stm3/stm3'),
+    ('max_lgr_plugplus', 'stm3/stm3'),
+    ('max_lgr_perf', 'stm3/stm3'),
+    ('max_lgr_perfplus', 'stm3/stm3'),
     ('max_hc_moles_rate', 'kg-moles/day'),
     ('max_reverse_hc_moles_rate', 'kg-moles/day'),
     ('min_hc_moles_rate', 'kg-moles/day'),
@@ -286,29 +295,29 @@ def test_object_attribute_property_completion():
     ('max_watercut_plug', 'fraction'),
     ('max_wor_perf', 'fraction'),
     ('max_wor_perfplus', 'fraction'),
-    ('max_surface_gas_rate', 'SM3/day'),
-    ('max_reverse_surface_gas_rate', 'SM3/day'),
-    ('min_surface_gas_rate', 'SM3/day'),
-    ('min_reverse_surface_gas_rate', 'SM3/day'),
-    ('qmult_gas_rate', 'SM3/day'),
-    ('max_surface_oil_rate', 'STM3/day'),
-    ('max_surface_water_rate', 'STM3/day'),
-    ('max_surface_liquid_rate', 'STM3/day'),
-    ('max_reverse_surface_oil_rate', 'STM3/day'),
-    ('max_reverse_surface_water_rate', 'STM3/day'),
-    ('max_reverse_surface_liquid_rate', 'STM3/day'),
-    ('min_surface_oil_rate', 'STM3/day'),
-    ('min_surface_water_rate', 'STM3/day'),
-    ('min_surface_liquid_rate', 'STM3/day'),
-    ('min_reverse_surface_oil_rate', 'STM3/day'),
-    ('min_reverse_surface_water_rate', 'STM3/day'),
-    ('min_reverse_surface_liquid_rate', 'STM3/day'),
-    ('qmult_oil_rate', 'STM3/day'),
-    ('qmult_water_rate', 'STM3/day'),
-    ('max_cum_gas_prod', 'k STM3'),
-    ('max_cum_oil_prod', 'k STM3'),
-    ('max_cum_water_prod', 'k STM3'),
-    ('max_cum_liquid_prod', 'k STM3'),
+    ('max_surface_gas_rate', 'stm3/day'),
+    ('max_reverse_surface_gas_rate', 'stm3/day'),
+    ('min_surface_gas_rate', 'stm3/day'),
+    ('min_reverse_surface_gas_rate', 'stm3/day'),
+    ('qmult_gas_rate', 'stm3/day'),
+    ('max_surface_oil_rate', 'stm3/day'),
+    ('max_surface_water_rate', 'stm3/day'),
+    ('max_surface_liquid_rate', 'stm3/day'),
+    ('max_reverse_surface_oil_rate', 'stm3/day'),
+    ('max_reverse_surface_water_rate', 'stm3/day'),
+    ('max_reverse_surface_liquid_rate', 'stm3/day'),
+    ('min_surface_oil_rate', 'stm3/day'),
+    ('min_surface_water_rate', 'stm3/day'),
+    ('min_surface_liquid_rate', 'stm3/day'),
+    ('min_reverse_surface_oil_rate', 'stm3/day'),
+    ('min_reverse_surface_water_rate', 'stm3/day'),
+    ('min_reverse_surface_liquid_rate', 'stm3/day'),
+    ('qmult_oil_rate', 'stm3/day'),
+    ('qmult_water_rate', 'stm3/day'),
+    ('max_cum_gas_prod', 'k stm3'),
+    ('max_cum_oil_prod', 'k stm3'),
+    ('max_cum_water_prod', 'k stm3'),
+    ('max_cum_liquid_prod', 'k stm3'),
     ('min_temperature', 'degrees C'),
 ])
 def test_object_attribute_property_constraint(attribute, expected_unit):
@@ -333,6 +342,28 @@ def test_object_no_unit_system():
     (NexusPVTMethod, 'pressure', 'PSIA', True, UnitSystem.ENGLISH),
     (NexusPVTMethod, 'oil_density', 'kg/m3', False, UnitSystem.METRIC),
     (NexusPVTMethod, 'gas_heat_capacity_at_constant_volume', 'kJ/(kg*K)', False, UnitSystem.METBAR),
+    (NexusAquiferMethod, 'initial_aquifer_pressure', 'PSIA', True, UnitSystem.ENGLISH),
+    (NexusAquiferMethod, 'total_compressibility', 'kPa-1', False, UnitSystem.METRIC),
+    (NexusAquiferMethod, 'time_conversion_factor', '1/days', False, UnitSystem.METBAR),
+    (NexusEquilMethod, 'initial_pressure', 'PSIA', True, UnitSystem.ENGLISH),
+    (NexusEquilMethod, 'datum_depth', 'm', False, UnitSystem.METRIC),
+    (NexusEquilMethod, 'oil_api_gravity', '', False, UnitSystem.METBAR),
+    (NexusGasliftMethod, 'gas_liquid_ratio', 'MSCF/STB', True, UnitSystem.ENGLISH),
+    (NexusGasliftMethod, 'surface_oil_rate', 'stm3/day', False, UnitSystem.METRIC),
+    (NexusGasliftMethod, 'pressure', 'bars', False, UnitSystem.METBAR),
+    (NexusHydraulicsMethod, 'surface_wet_gas_rate', 'MSCF/DAY', True, UnitSystem.ENGLISH),
+    (NexusHydraulicsMethod, 'oilcut', '', False, UnitSystem.METRIC),
+    (NexusHydraulicsMethod, 'roughness', 'mm', False, UnitSystem.METBAR),
+    (NexusValveMethod, 'valve_coefficient', 'kPa(kg/m3)/(kg/s)2', False, UnitSystem.METRIC),
+    (NexusRelPermMethod, 'water_oil_capillary_pressure', 'PSIA', True, UnitSystem.ENGLISH),
+    (NexusRelPermMethod, 'interfacial_tension_threshold_for_relperm_adjustment', 'dynes/cm', False, UnitSystem.METRIC),
+    (NexusRockMethod, 'rock_compressibility', 'PSI-1', True, UnitSystem.ENGLISH),
+    (NexusRockMethod, 'reference_pressure', 'bars', False, UnitSystem.METBAR),
+    (NexusSeparatorMethod, 'temperature', 'DEGREES F', True, UnitSystem.ENGLISH),
+    (NexusSeparatorMethod, 'pressure', 'bars', False, UnitSystem.METBAR),
+    (NexusWaterMethod, 'water_compressibility', 'PSI-1', True, UnitSystem.ENGLISH),
+    (NexusWaterMethod, 'reference_pressure', 'kPa', False, UnitSystem.METRIC),
+    (NexusWaterMethod, 'water_density', 'kg/m3', False, UnitSystem.METBAR),
 ])
 def test_get_unit_for_dynamic_property_attribute(data_object, attribute, expected_result, upper, unitsystem):
     """A test to check if DynamicProperty.get_unit_for_attribute method works as expected."""
@@ -349,6 +380,28 @@ def test_get_unit_for_dynamic_property_attribute(data_object, attribute, expecte
     (NexusPVTMethod, 'API', '', True, UnitSystem.ENGLISH),
     (NexusPVTMethod, 'BO', 'M3/STM3', True, UnitSystem.METBAR),
     (NexusPVTMethod, 'GOR', 'stcc/stcc', False, UnitSystem.LAB),
+    (NexusAquiferMethod, 'BAQ', 'RB/PSIA', True, UnitSystem.ENGLISH),
+    (NexusAquiferMethod, 'RO', 'M', True, UnitSystem.METBAR),
+    (NexusAquiferMethod, 'VISC', 'cp', False, UnitSystem.LAB),
+    (NexusEquilMethod, 'PINIT', 'PSIA', True, UnitSystem.ENGLISH),
+    (NexusEquilMethod, 'GOC', 'M', True, UnitSystem.METBAR),
+    (NexusEquilMethod, 'TINIT', 'degrees C', False, UnitSystem.LAB),
+    (NexusGasliftMethod, 'QOIL', 'STB/DAY', True, UnitSystem.ENGLISH),
+    (NexusGasliftMethod, 'PRESSURE', 'BARS', True, UnitSystem.METBAR),
+    (NexusGasliftMethod, 'GOR', 'stcc/stcc', False, UnitSystem.LAB),
+    (NexusHydraulicsMethod, 'LENGTH', 'FT', True, UnitSystem.ENGLISH),
+    (NexusHydraulicsMethod, 'MMW', '', True, UnitSystem.METBAR),
+    (NexusHydraulicsMethod, 'DATUM', 'cm', False, UnitSystem.LAB),
+    (NexusValveMethod, 'VC', 'PSI(LB/FT3)/(LB/S)2', True, UnitSystem.ENGLISH),
+    (NexusRelPermMethod, 'PCGO', 'PSIA', True, UnitSystem.ENGLISH),
+    (NexusRelPermMethod, 'TENI', 'DYNES/CM', True, UnitSystem.METBAR),
+    (NexusRockMethod, 'PREF', 'PSIA', True, UnitSystem.ENGLISH),
+    (NexusRockMethod, 'CR', '(BARS)-1', True, UnitSystem.METBAR),
+    (NexusSeparatorMethod, 'TEMP', 'DEGREES F', True, UnitSystem.ENGLISH),
+    (NexusSeparatorMethod, 'PRES', 'BARS', True, UnitSystem.METBAR),
+    (NexusWaterMethod, 'DENW', 'LB/FT3', True, UnitSystem.ENGLISH),
+    (NexusWaterMethod, 'BW', 'M3/STM3', True, UnitSystem.METBAR),
+    (NexusWaterMethod, 'VISW', 'cp', False, UnitSystem.LAB),
 ])
 def test_get_unit_for_dynamic_property_keyword(data_object, keyword, expected_result, upper, unitsystem):
     """A test to check if DynamicProperty.get_unit_for_keyword method works as expected."""
@@ -365,7 +418,8 @@ def test_get_unit_for_dynamic_property_keyword(data_object, keyword, expected_re
 def test_object_attribute_property_pvt():
     # Arrange
     prop_file = NexusFile(location='test/file/prop.dat')
-    test_object = NexusPVTMethod(file=prop_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
+    test_object = NexusPVTMethod(file=prop_file, input_number=1, properties={'UNIT_SYSTEM': UnitSystem.ENGLISH},
+                                 model_unit_system=UnitSystem.METRIC)
     units = test_object.units
     # Act
     result_expected = [(units.pressure, 'psia'),
@@ -378,13 +432,13 @@ def test_object_attribute_property_pvt():
                        (units.molecular_weight_of_residual_oil, ''),
                        (units.oil_viscosity, 'cp'),
                        (units.gas_viscosity, 'cp'),
-                       (units.oil_formation_volume_factor, 'RB/STB'),
-                       (units.gas_formation_volume_factor, 'RB/MSCF'),
-                       (units.solution_gas_oil_ratio, 'MSCF/STB'),
-                       (units.solution_oil_gas_ratio, 'STB/MSCF'),
+                       (units.oil_formation_volume_factor, 'rb/stb'),
+                       (units.gas_formation_volume_factor, 'rb/mscf'),
+                       (units.solution_gas_oil_ratio, 'mscf/stb'),
+                       (units.solution_oil_gas_ratio, 'stb/mscf'),
                        (units.saturation_pressure, 'psia'),
-                       (units.gas_oil_ratio, 'MSCF/STB'),
-                       (units.oil_gas_ratio, 'STB/MSCF'),
+                       (units.gas_oil_ratio, 'mscf/stb'),
+                       (units.oil_gas_ratio, 'stb/mscf'),
                        (units.gas_heat_capacity_at_constant_volume, 'BTU/(lb*F)'),
                        (units.gas_heat_capacity_at_constant_pressure, 'BTU/(lb*F)'),
                        (units.oil_fvf_over_oil_fvf_at_saturation_pressure, ''),
@@ -396,6 +450,247 @@ def test_object_attribute_property_pvt():
                        (units.critical_pressure, 'psia'),
                        (units.critical_temperature, 'degrees F'),
                        (units.critical_volume, 'ft3/lbmole'),
+                       ]
+    # Assert
+    for result, expected in result_expected:
+        assert result == expected
+
+
+def test_object_attribute_property_aquifer():
+    # Arrange
+    prop_file = NexusFile(location='test/file/prop.dat')
+    test_object = NexusAquiferMethod(file=prop_file, input_number=1, properties={'UNIT_SYSTEM': UnitSystem.ENGLISH},
+                                     model_unit_system=UnitSystem.METRIC)
+    units = test_object.units
+    # Act
+    result_expected = [(units.carter_tracy_constant, 'rb/psia'),
+                       (units.total_compressibility, 'psi-1'),
+                       (units.porosity, ''),
+                       (units.thickness, 'ft'),
+                       (units.radius_to_inner_perimeter, 'ft'),
+                       (units.radius_to_exterior_perimeter, 'ft'),
+                       (units.fraction_of_circular_boundary, ''),
+                       (units.linear_aquifer_width, 'ft'),
+                       (units.linear_aquifer_length, 'ft'),
+                       (units.time_conversion_factor, '1/days'),
+                       (units.viscosity, 'cp'),
+                       (units.permeability, 'md'),
+                       (units.initial_aquifer_pressure, 'psia'),
+                       (units.datum_depth, 'ft'),
+                       (units.productivity_index, 'rb/day/psi'),
+                       (units.initial_encroachable_water_volume, 'rb'),
+                       (units.initial_aquifer_volume, 'rb'),
+                       ]
+    # Assert
+    for result, expected in result_expected:
+        assert result == expected
+
+
+def test_object_attribute_property_equil():
+    # Arrange
+    prop_file = NexusFile(location='test/file/prop.dat')
+    test_object = NexusEquilMethod(file=prop_file, input_number=1, properties={'UNIT_SYSTEM': UnitSystem.ENGLISH},
+                                   model_unit_system=UnitSystem.METRIC)
+    units = test_object.units
+    # Act
+    result_expected = [(units.initial_pressure, 'psia'),
+                       (units.datum_depth, 'ft'),
+                       (units.depth, 'ft'),
+                       (units.x, 'ft'),
+                       (units.y, 'ft'),
+                       (units.temperature, 'degrees F'),
+                       (units.initial_temperature, 'degrees F'),
+                       (units.gas_oil_contact_depth, 'ft'),
+                       (units.water_oil_contact_depth, 'ft'),
+                       (units.gas_water_contact_depth, 'ft'),
+                       (units.gas_oil_capillary_pressure_at_gas_oil_contact, 'psia'),
+                       (units.water_oil_capillary_pressure_at_water_oil_contact, 'psia'),
+                       (units.gas_water_capillary_pressure_at_gas_water_contact, 'psia'),
+                       (units.saturation_pressure, 'psia'),
+                       (units.oil_api_gravity, ''),
+                       ]
+    # Assert
+    for result, expected in result_expected:
+        assert result == expected
+
+
+def test_object_attribute_property_gaslift():
+    # Arrange
+    prop_file = NexusFile(location='test/file/prop.dat')
+    test_object = NexusGasliftMethod(file=prop_file, input_number=1, properties={'UNIT_SYSTEM': UnitSystem.ENGLISH},
+                                     model_unit_system=UnitSystem.METRIC)
+    units = test_object.units
+    # Act
+    result_expected = [(units.surface_oil_rate, 'stb/day'),
+                       (units.surface_liquid_rate, 'stb/day'),
+                       (units.pressure, 'psia'),
+                       (units.watercut, ''),
+                       (units.gas_liquid_ratio, 'mscf/stb'),
+                       (units.gas_oil_ratio, 'mscf/stb'),
+                       ]
+    # Assert
+    for result, expected in result_expected:
+        assert result == expected
+
+
+def test_object_attribute_property_valve():
+    # Arrange
+    prop_file = NexusFile(location='test/file/prop.dat')
+    test_object = NexusValveMethod(file=prop_file, input_number=1, properties={'UNIT_SYSTEM': UnitSystem.ENGLISH},
+                                   model_unit_system=UnitSystem.METRIC)
+    units = test_object.units
+    # Act
+    result_expected = [(units.valve_coefficient, 'psi(lb/ft3)/(lb/s)2'),
+                       ]
+    # Assert
+    for result, expected in result_expected:
+        assert result == expected
+
+
+def test_object_attribute_property_hydraulics():
+    # Arrange
+    prop_file = NexusFile(location='test/file/prop.dat')
+    test_object = NexusHydraulicsMethod(file=prop_file, input_number=1, properties={'UNIT_SYSTEM': UnitSystem.ENGLISH},
+                                        model_unit_system=UnitSystem.METRIC)
+    units = test_object.units
+    # Act
+    result_expected = [(units.surface_oil_rate, 'stb/day'),
+                       (units.surface_liquid_rate, 'stb/day'),
+                       (units.surface_water_rate, 'stb/day'),
+                       (units.surface_gas_rate, 'mscf/day'),
+                       (units.surface_wet_gas_rate, 'mscf/day'),
+                       (units.mean_molecular_weight, ''),
+                       (units.watercut, ''),
+                       (units.oilcut, ''),
+                       (units.inlet_pressure, 'psia'),
+                       (units.outlet_pressure, 'psia'),
+                       (units.bottomhole_pressure, 'psia'),
+                       (units.tubinghead_pressure, 'psia'),
+                       (units.gas_liquid_ratio, 'mscf/stb'),
+                       (units.gas_oil_ratio, 'mscf/stb'),
+                       (units.oil_gas_ratio, 'stb/mscf'),
+                       (units.water_gas_ratio, 'stb/mscf'),
+                       (units.gas_water_ratio, 'mscf/stb'),
+                       (units.water_wet_gas_ratio, 'stb/mscf'),
+                       (units.length, 'ft'),
+                       (units.datum_depth, 'ft'),
+                       (units.depth_change, 'ft'),
+                       (units.hydraulic_table_vertical_distance, 'ft'),
+                       (units.injected_fluid_pressure_gradient, 'psi/ft'),
+                       (units.viscosity, 'cp'),
+                       (units.diameter, 'in'),
+                       (units.roughness, 'in'),
+                       ]
+    # Assert
+    for result, expected in result_expected:
+        assert result == expected
+
+    # === Test VIP-compatible form of ratio units
+    test_object = NexusHydraulicsMethod(file=prop_file, input_number=1,
+                                        model_unit_system=UnitSystem.ENGLISH,
+                                        ratio_thousands=False
+                                        )
+    units = test_object.units
+    # Act
+    result_expected = [(units.surface_oil_rate, 'stb/day'),
+                       (units.surface_liquid_rate, 'stb/day'),
+                       (units.surface_water_rate, 'stb/day'),
+                       (units.surface_gas_rate, 'mscf/day'),
+                       (units.surface_wet_gas_rate, 'mscf/day'),
+                       (units.mean_molecular_weight, ''),
+                       (units.watercut, ''),
+                       (units.oilcut, ''),
+                       (units.inlet_pressure, 'psia'),
+                       (units.outlet_pressure, 'psia'),
+                       (units.bottomhole_pressure, 'psia'),
+                       (units.tubinghead_pressure, 'psia'),
+                       (units.gas_liquid_ratio, 'scf/stb'),
+                       (units.gas_oil_ratio, 'scf/stb'),
+                       (units.oil_gas_ratio, 'stb/mmscf'),
+                       (units.water_gas_ratio, 'stb/mmscf'),
+                       (units.gas_water_ratio, 'scf/stb'),
+                       (units.water_wet_gas_ratio, 'stb/mmscf'),
+                       (units.length, 'ft'),
+                       (units.datum_depth, 'ft'),
+                       (units.depth_change, 'ft'),
+                       (units.hydraulic_table_vertical_distance, 'ft'),
+                       (units.injected_fluid_pressure_gradient, 'psi/ft'),
+                       (units.viscosity, 'cp'),
+                       (units.diameter, 'in'),
+                       (units.roughness, 'in'),
+                       ]
+    # Assert
+    for result, expected in result_expected:
+        assert result == expected
+
+
+def test_object_attribute_property_relperm():
+    # Arrange
+    prop_file = NexusFile(location='test/file/prop.dat')
+    test_object = NexusRelPermMethod(file=prop_file, input_number=1, properties={'UNIT_SYSTEM': UnitSystem.ENGLISH},
+                                     model_unit_system=UnitSystem.METRIC)
+    units = test_object.units
+    # Act
+    result_expected = [(units.water_oil_capillary_pressure, 'psia'),
+                       (units.gas_oil_capillary_pressure, 'psia'),
+                       (units.gas_water_capillary_pressure, 'psia'),
+                       (units.interfacial_tension_threshold_for_relperm_adjustment, 'dynes/cm'),
+                       (units.reference_interfacial_tension_for_capillary_pressure_adjustment, 'dynes/cm'),
+                       ]
+    # Assert
+    for result, expected in result_expected:
+        assert result == expected
+
+
+def test_object_attribute_property_rock():
+    # Arrange
+    prop_file = NexusFile(location='test/file/prop.dat')
+    test_object = NexusRockMethod(file=prop_file, input_number=1, properties={'UNIT_SYSTEM': UnitSystem.ENGLISH},
+                                  model_unit_system=UnitSystem.METRIC)
+    units = test_object.units
+    # Act
+    result_expected = [(units.pressure, 'psia'),
+                       (units.rock_compressibility, 'psi-1'),
+                       (units.delta_pressure, 'psi'),
+                       (units.rock_permeability_compressibility, 'psi-1'),
+                       (units.reference_pressure, 'psia'),
+                       ]
+    # Assert
+    for result, expected in result_expected:
+        assert result == expected
+
+
+def test_object_attribute_property_separator():
+    # Arrange
+    prop_file = NexusFile(location='test/file/prop.dat')
+    test_object = NexusSeparatorMethod(file=prop_file, input_number=1, properties={'UNIT_SYSTEM': UnitSystem.ENGLISH},
+                                       model_unit_system=UnitSystem.METRIC)
+    units = test_object.units
+    # Act
+    result_expected = [(units.pressure, 'psia'),
+                       (units.temperature, 'degrees F'),
+                       (units.standard_temperature, 'degrees F'),
+                       (units.standard_pressure, 'psia'),
+                       ]
+    # Assert
+    for result, expected in result_expected:
+        assert result == expected
+
+
+def test_object_attribute_property_water():
+    # Arrange
+    prop_file = NexusFile(location='test/file/prop.dat')
+    test_object = NexusWaterMethod(file=prop_file, input_number=1, properties={'UNIT_SYSTEM': UnitSystem.ENGLISH},
+                                   model_unit_system=UnitSystem.METRIC)
+    units = test_object.units
+    # Act
+    result_expected = [(units.reference_pressure, 'psia'),
+                       (units.temperature, 'degrees F'),
+                       (units.water_density, 'lb/ft3'),
+                       (units.water_compressibility, 'psi-1'),
+                       (units.water_formation_volume_factor, 'rb/stb'),
+                       (units.water_viscosity, 'cp'),
+                       (units.water_viscosity_compressibility, 'psi-1'),
                        ]
     # Assert
     for result, expected in result_expected:

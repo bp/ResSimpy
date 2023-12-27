@@ -4,6 +4,7 @@ import warnings
 from typing import Optional, Sequence
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 import ResSimpy.Nexus.nexus_file_operations as nfo
+import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
@@ -139,7 +140,7 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
                     wellspec_file_units = unit
 
         if nfo.check_token('DATEFORMAT', line):
-            new_date_format_str = nfo.get_token_value(token='DATEFORMAT', token_line=line, file_list=file_as_list)
+            new_date_format_str = fo.get_token_value(token='DATEFORMAT', token_line=line, file_list=file_as_list)
 
             if new_date_format_str is None:
                 raise ValueError(f"Cannot find the date format associated with the DATEFORMAT card in {line=} at line"
@@ -158,7 +159,7 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
             date_format = DateFormat[converted_format_str]
 
         if nfo.check_token('TIME', line):
-            current_date = nfo.get_token_value(token='TIME', token_line=line, file_list=file_as_list)
+            current_date = fo.get_token_value(token='TIME', token_line=line, file_list=file_as_list)
             if current_date is None:
                 raise ValueError(f"Cannot find the date associated with the TIME card in {line=} at line number \
                                  {index}")
@@ -350,7 +351,7 @@ def __load_wellspec_table_headings(header_index: int, header_values: dict[str, N
             header_line = line.upper()
             header_index = index
             # Map the headers (first time get the expected value as check token guarantees at least 1 value)
-            next_column_heading = nfo.get_expected_next_value(start_line_index=0, file_as_list=[line]).upper()
+            next_column_heading = fo.get_expected_next_value(start_line_index=0, file_as_list=[line]).upper()
             trimmed_line = header_line
 
             while next_column_heading is not None:

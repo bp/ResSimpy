@@ -10,6 +10,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_list_nexus_water_params
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Utils.invert_nexus_map import invert_nexus_map
+from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import WaterUnits
 
 
 @dataclass  # Doesn't need to write an _init_, _eq_ methods, etc.
@@ -27,13 +28,13 @@ class NexusWaterParams:
     """
 
     # General parameters
-    compressibility: Optional[float] = None
-    formation_volume_factor: Optional[float] = None
-    viscosity: Optional[float] = None
-    viscosity_compressibility: Optional[float] = None
+    water_compressibility: Optional[float] = None
+    water_formation_volume_factor: Optional[float] = None
+    water_viscosity: Optional[float] = None
+    water_viscosity_compressibility: Optional[float] = None
     temperature: Optional[float] = None
     salinity: Optional[float] = None
-    density: Optional[float] = None
+    water_density: Optional[float] = None
 
 
 @dataclass(kw_only=True, repr=False)  # Doesn't need to write an _init_, _eq_ methods, etc.
@@ -56,8 +57,10 @@ class NexusWaterMethod(DynamicProperty):
                      pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
     parameters: list[NexusWaterParams] = field(default_factory=get_empty_list_nexus_water_params)
+    unit_system: UnitSystem
 
-    def __init__(self, file: NexusFile, input_number: int, reference_pressure: Optional[float] = None,
+    def __init__(self, file: NexusFile, input_number: int, model_unit_system: UnitSystem,
+                 reference_pressure: Optional[float] = None,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None,
                  parameters: Optional[list[NexusWaterParams]] = None) -> None:
@@ -70,24 +73,34 @@ class NexusWaterMethod(DynamicProperty):
             self.parameters = parameters
         else:
             self.parameters = []
+        self.unit_system = model_unit_system
         super().__init__(input_number=input_number, file=file)
 
     @staticmethod
-    def nexus_mapping() -> dict[str, tuple[str, type]]:
-        """Returns a dictionary of mapping from nexus keyword to attribute name."""
-
-        nexus_mapping: dict[str, tuple[str, type]] = {
-            'DENW': ('density', float),
-            'CW': ('compressibility', float),
-            'BW': ('formation_volume_factor', float),
-            'VISW': ('viscosity', float),
-            'CVW': ('viscosity_compressibility', float)
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """Gets the mapping of nexus keywords to attribute definitions."""
+        keywords: dict[str, tuple[str, type]] = {
+            'TEMP': ('temperature', float),
+            'PREF': ('reference_pressure', float),
+            'DENW': ('water_density', float),
+            'CW': ('water_compressibility', float),
+            'BW': ('water_formation_volume_factor', float),
+            'VISW': ('water_viscosity', float),
+            'CVW': ('water_viscosity_compressibility', float)
             }
-        return nexus_mapping
+        return keywords
+
+    @property
+    def units(self) -> WaterUnits:
+        """Returns the attribute to unit map for the Water method."""
+        # Specify unit system, if provided
+        if 'UNIT_SYSTEM' in self.properties.keys() and isinstance(self.properties['UNIT_SYSTEM'], UnitSystem):
+            self.unit_system = self.properties['UNIT_SYSTEM']
+        return WaterUnits(unit_system=self.unit_system)
 
     def to_string(self) -> str:
         """Create string with water data, in Nexus file format."""
-        param_to_nexus_keyword_map = invert_nexus_map(NexusWaterMethod.nexus_mapping())
+        param_to_nexus_keyword_map = invert_nexus_map(NexusWaterMethod.get_keyword_mapping())
 
         printable_str = ''
         water_dict = self.properties
@@ -125,7 +138,7 @@ class NexusWaterMethod(DynamicProperty):
                     sal_val = water_param_dict['salinity']
                 space_prefix += '    '
             for key in param_to_nexus_keyword_map.keys():
-                if water_param_dict[key]:
+                if key in water_param_dict and water_param_dict[key] is not None and key != 'temperature':
                     printable_str += f'{space_prefix}{param_to_nexus_keyword_map[key]} {water_param_dict[key]}\n'
         return printable_str
 
@@ -135,6 +148,10 @@ class NexusWaterMethod(DynamicProperty):
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
+
+        # Specify unit system, if provided
+        if 'UNIT_SYSTEM' in self.properties.keys() and isinstance(self.properties['UNIT_SYSTEM'], UnitSystem):
+            self.unit_system = self.properties['UNIT_SYSTEM']
 
         # Initialize properties
         water_props_dict_none: dict[str, Optional[float]] = {'DENW': None, 'CW': None, 'BW': None,
@@ -163,11 +180,11 @@ class NexusWaterMethod(DynamicProperty):
                 # Append new parameters to list of water parameters
                 params = NexusWaterParams(temperature=temp,
                                           salinity=sal,
-                                          density=water_props_dict['DENW'],
-                                          compressibility=water_props_dict['CW'],
-                                          formation_volume_factor=water_props_dict['BW'],
-                                          viscosity=water_props_dict['VISW'],
-                                          viscosity_compressibility=water_props_dict['CVW']
+                                          water_density=water_props_dict['DENW'],
+                                          water_compressibility=water_props_dict['CW'],
+                                          water_formation_volume_factor=water_props_dict['BW'],
+                                          water_viscosity=water_props_dict['VISW'],
+                                          water_viscosity_compressibility=water_props_dict['CVW']
                                           )
                 self.parameters.append(params)
                 # Reset property dictionary
@@ -189,10 +206,10 @@ class NexusWaterMethod(DynamicProperty):
             # Append new parameters to list of water parameters
             params = NexusWaterParams(temperature=temp,
                                       salinity=sal,
-                                      density=water_props_dict['DENW'],
-                                      compressibility=water_props_dict['CW'],
-                                      formation_volume_factor=water_props_dict['BW'],
-                                      viscosity=water_props_dict['VISW'],
-                                      viscosity_compressibility=water_props_dict['CVW']
+                                      water_density=water_props_dict['DENW'],
+                                      water_compressibility=water_props_dict['CW'],
+                                      water_formation_volume_factor=water_props_dict['BW'],
+                                      water_viscosity=water_props_dict['VISW'],
+                                      water_viscosity_compressibility=water_props_dict['CVW']
                                       )
             self.parameters.append(params)

@@ -4,6 +4,7 @@ import pytest
 from ResSimpy.Nexus.DataModels.NexusEquilMethod import NexusEquilMethod
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
+from ResSimpy.Nexus.NexusEquilMethods import NexusEquilMethods
 
 @pytest.mark.parametrize("file_contents, expected_equil_properties",
     [("""
@@ -229,7 +230,7 @@ def test_read_equil_properties_from_file(mocker, file_contents, expected_equil_p
         del file_contents_as_list[2]
 
     eq_file = NexusFile(location='', file_content_as_list=file_contents_as_list)
-    equil_obj = NexusEquilMethod(file=eq_file, input_number=1)
+    equil_obj = NexusEquilMethod(file=eq_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
 
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -250,7 +251,7 @@ def test_read_equil_properties_from_file(mocker, file_contents, expected_equil_p
 def test_nexus_equil_repr():
     # Arrange
     eq_file = NexusFile(location='test/file/equil.dat')
-    equil_obj = NexusEquilMethod(file=eq_file, input_number=1)
+    equil_obj = NexusEquilMethod(file=eq_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
     equil_obj.properties = {'PINIT': 3600., 'DINIT': 9035., 'GOC': 8800., 'WOC': 9950., 'PCGOC': 0., 'PCWOC': 0.,
                             'PSAT': 3400., 'X': 50., 'Y': -50., 'VIP_INIT': '3 4 5 7', 'CRINIT': '', 
                             'AUTOGOC_COMP': 'USE_CLOSEST_OIL', 'OVERREAD': ['SG', 'SW', 'PRESSURE'],
@@ -292,6 +293,60 @@ COMPOSITION X 50.0 Y -50.0
 
     # Act
     result = equil_obj.__repr__()
+
+    # Assert
+    assert result == expected_output
+
+
+def test_nexus_equil_methods_repr():
+    # Arrange
+    eq_file = NexusFile(location='test/file/equil.dat')
+    properties = {'UNIT_SYSTEM': UnitSystem.ENGLISH,
+                  'DESC': ['This is first line of description', 'and this is second line of description'],
+                  'PINIT': 3600, 'DINIT': 9035, 'GOC': 8800, 'WOC': 9950, 'PSAT': 3600
+                  }
+    equil_obj = NexusEquilMethod(file=eq_file, input_number=1, model_unit_system=UnitSystem.ENGLISH,
+                                 properties=properties)
+    equil_methods_obj = NexusEquilMethods(model_unit_system=UnitSystem.ENGLISH, inputs={1: equil_obj,
+                                                                                        2: equil_obj})
+    expected_output = """
+--------------------------------
+EQUIL method 1
+--------------------------------
+
+FILE_PATH: test/file/equil.dat
+
+ENGLISH
+DESC This is first line of description
+DESC and this is second line of description
+PINIT 3600
+DINIT 9035
+GOC 8800
+WOC 9950
+PSAT 3600
+
+
+
+--------------------------------
+EQUIL method 2
+--------------------------------
+
+FILE_PATH: test/file/equil.dat
+
+ENGLISH
+DESC This is first line of description
+DESC and this is second line of description
+PINIT 3600
+DINIT 9035
+GOC 8800
+WOC 9950
+PSAT 3600
+
+
+"""
+
+    # Act
+    result = equil_methods_obj.__repr__()
 
     # Assert
     assert result == expected_output

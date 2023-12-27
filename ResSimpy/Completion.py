@@ -1,8 +1,8 @@
 """The base class for all Well Completions."""
 from __future__ import annotations
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Sequence
 
 from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
@@ -40,7 +40,6 @@ class Completion(DataObjectMixin, ABC):
         rel_perm_method (Optional[int]): rel perm method to use for the completion. 'IRELPM' in Nexus
         status (Optional[str]): the status of the layer, can be 'ON' or 'OFF'
         peaceman_well_block_radius (Optional[float]): The pressure equivalent radius of the grid block
-
     """
 
     __date: str
@@ -62,7 +61,7 @@ class Completion(DataObjectMixin, ABC):
     __rel_perm_method: Optional[int] = None
     __status: Optional[str] = None
     __iso_date: Optional[ISODateTime] = None
-    __date_format: Optional[DateFormatEnum.DateFormat] = None
+    _date_format: Optional[DateFormatEnum.DateFormat] = None
     __start_date: Optional[str] = None
     __unit_system: Optional[UnitSystem] = None
     __peaceman_well_block_radius: Optional[float] = None
@@ -77,6 +76,7 @@ class Completion(DataObjectMixin, ABC):
                  peaceman_well_block_radius: Optional[float] = None, start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None) -> None:
         super().__init__({})
+        self._date_format = date_format
         self.__well_radius = well_radius
         self.__date = date
         self.__i = i
@@ -95,7 +95,6 @@ class Completion(DataObjectMixin, ABC):
         self.__dfactor = dfactor
         self.__rel_perm_method = rel_perm_method
         self.__status = status
-        self.__date_format = date_format
         self.__start_date = start_date
         self.__iso_date = self.set_iso_date()
         self.__unit_system = unit_system
@@ -184,7 +183,7 @@ class Completion(DataObjectMixin, ABC):
 
     @property
     def date_format(self):
-        return self.__date_format
+        return self._date_format
 
     @property
     def start_date(self):
@@ -200,3 +199,34 @@ class Completion(DataObjectMixin, ABC):
     @property
     def units(self) -> CompletionUnits:
         return CompletionUnits(self.unit_system)
+
+    @property
+    def completion_is_shutin(self) -> bool:
+        """Determines if the supplied completion is a shut-in or not."""
+        return not self.completion_is_perforation
+
+    @property
+    def perforations(self) -> Sequence[Completion]:
+        """Returns a list of all of the perforations for the well."""
+        raise NotImplementedError("This method has not been implemented for this simulator yet")
+
+    @property
+    def first_perforation(self) -> Optional[Completion]:
+        """Returns the first perforation for the well."""
+        raise NotImplementedError("This method has not been implemented for this simulator yet")
+
+    @property
+    def shutins(self) -> Sequence[Completion]:
+        """Returns a list of all of the perforations for the well."""
+        raise NotImplementedError("This method has not been implemented for this simulator yet")
+
+    @property
+    def last_shutin(self) -> Optional[Completion]:
+        """Returns the first perforation for the well."""
+        raise NotImplementedError("This method has not been implemented for this simulator yet")
+
+    @property
+    @abstractmethod
+    def completion_is_perforation(self) -> bool:
+        """Determines if the supplied completion is a perforation or not."""
+        raise NotImplementedError("Implement this in the derived class")

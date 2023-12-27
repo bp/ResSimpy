@@ -118,6 +118,8 @@ class NexusNetwork(Network):
                           'QMULT': NexusConstraint,
                           'CONDEFAULTS': None,
                           'TARGET': NexusTarget,
+                          'GUIDERATE': None,
+                          'PROCS': None,
                           },
                 start_date=self.__model.start_date,
                 default_units=self.__model.default_units,

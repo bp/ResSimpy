@@ -11,6 +11,7 @@ from ResSimpy.Nexus.NexusKeywords.hyd_keywords import HYD_KEYWORDS_VALUE_FLOAT, 
 from ResSimpy.Nexus.NexusKeywords.hyd_keywords import HYD_ALQ_KEYWORD, HYD_ALQ_OPTIONS
 from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 from ResSimpy.DynamicProperty import DynamicProperty
+from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import HydraulicsUnits
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -32,15 +33,61 @@ class NexusHydraulicsMethod(DynamicProperty):
     file: NexusFile
     properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                      dict[str, Union[float, pd.DataFrame]]]] = field(default_factory=get_empty_dict_union)
+    unit_system: UnitSystem
+    ratio_thousands: bool
 
-    def __init__(self, file: NexusFile, input_number: int,
+    def __init__(self, file: NexusFile, input_number: int, model_unit_system: UnitSystem,
+                 ratio_thousands: bool = True,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
         if properties is not None:
             self.properties = properties
         else:
             self.properties = {}
+        self.unit_system = model_unit_system
+        self.ratio_thousands = ratio_thousands
         super().__init__(input_number=input_number, file=file)
+
+    @staticmethod
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """Gets the mapping of nexus keywords to attribute definitions."""
+        keywords: dict[str, tuple[str, type]] = {
+            'QOIL': ('surface_oil_rate', float),
+            'QLIQ': ('surface_liquid_rate', float),
+            'QWAT': ('surface_water_rate', float),
+            'QGAS': ('surface_gas_rate', float),
+            'QWGAS': ('surface_wet_gas_rate', float),
+            'MMW': ('mean_molecular_weight', float),
+            'WCUT': ('watercut', float),
+            'OCUT': ('oilcut', float),
+            'PIN': ('inlet_pressure', float),
+            'POUT': ('outlet_pressure', float),
+            'BHP': ('bottomhole_pressure', float),
+            'THP': ('tubinghead_pressure', float),
+            'GLR': ('gas_liquid_ratio', float),
+            'GOR': ('gas_oil_ratio', float),
+            'OGR': ('oil_gas_ratio', float),
+            'WGR': ('water_gas_ratio', float),
+            'GWR': ('gas_water_ratio', float),
+            'WWGR': ('water_wet_gas_ratio', float),
+            'LENGTH': ('length', float),
+            'DATUM': ('datum_depth', float),
+            'DZ': ('depth_change', float),
+            'DZW': ('hydraulic_table_vertical_distance', float),
+            'GRAD': ('injected_fluid_pressure_gradient', float),
+            'VISC': ('viscosity', float),
+            'DIAM': ('diameter', float),
+            'ROUGHNESS': ('roughness', float),
+        }
+        return keywords
+
+    @property
+    def units(self) -> HydraulicsUnits:
+        """Returns the attribute to unit map for the Hydraulics method."""
+        # Specify unit system, if provided
+        if 'UNIT_SYSTEM' in self.properties.keys() and isinstance(self.properties['UNIT_SYSTEM'], UnitSystem):
+            self.unit_system = self.properties['UNIT_SYSTEM']
+        return HydraulicsUnits(unit_system=self.unit_system, ratio_thousands=self.ratio_thousands)
 
     def to_string(self) -> str:
         """Create string with hydraulics data in Nexus file format."""
@@ -99,6 +146,10 @@ class NexusHydraulicsMethod(DynamicProperty):
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
+
+        # Specify unit system, if provided
+        if 'UNIT_SYSTEM' in self.properties.keys() and isinstance(self.properties['UNIT_SYSTEM'], UnitSystem):
+            self.unit_system = self.properties['UNIT_SYSTEM']
 
         # Initialize flags and containers to use to record properties as we iterate through aquifer file contents
         # Dictionary to record start and ending indices for tables
@@ -188,6 +239,10 @@ class NexusHydraulicsMethod(DynamicProperty):
                 hyd_table_pressure_key = ''  # Determines what type of pressures are in table, i.e., PIN, POUT or BHP
                 for pkey in HYD_PRESSURE_KEYWORDS:
                     if pkey in self.properties.keys():
+                        if pkey == 'THP':
+                            # For VIP compatibility, indicates units
+                            # for GOR/GLR are SCF/STB rather than MSCF/STB
+                            self.ratio_thousands = False
                         hyd_table_pressure_key = pressure_keyword_map[pkey]
                         break
                 hyd_df_header_names = hyd_df_header_names + \

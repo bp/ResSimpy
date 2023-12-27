@@ -173,8 +173,22 @@ from tests.utility_for_tests import get_fake_nexus_simulator
       ''',
       ({'date': '01/01/2019', 'name': 'well1', 'max_avg_comp_dp': 1024.2, 'gor_limit_exponent': 9999.0, 'unit_system': UnitSystem.ENGLISH},
         )),
+    # MULT keyword with a number after it
+    ('''
+CONSTRAINTS
+well1 QOSMAX MULT      9999
+ENDCONSTRAINTS
+
+QMULT
+WELL       QOIL        QGAS        QWATER
+well1      0           0.0         0
+ENDQMULT ''',
+         ({'date': '01/01/2019', 'name': 'well1', 'use_qmult_qoil_surface_rate': True,
+    'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 0.0, 'qmult_gas_rate': 0.0, 'qmult_water_rate': 0.0, 'well_name':'well1'},
+          )
+     ),
     ], ids=['basic_test', 'Change in Time', 'more Keywords', 'constraint table', 'multiple constraints on same well',
-    'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword', 'GORLIM_drawdowncards'])
+    'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword', 'GORLIM_drawdowncards', 'MULT keyword with a number after it'])
 def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'
@@ -354,3 +368,40 @@ def test_nexus_constraint_repr(mocker):
     # Assert
     assert repr_result == expected_repr
     assert str_result == expected_str
+
+def test_nexus_constraints_skip_procs(mocker):
+    # Arrange
+    surface_content = '''TIME 04/10/2019
+
+PROCS NAME PROCNAME 
+	IF(TIME > 0.0) THEN
+ DO something
+ENDPROCS
+
+CONSTRAINTS
+   WELL1 QOSMAX 6100.7
+ENDCONSTRAINTS'''
+
+    fcs_file_data = '''RUN_UNITS ENGLISH
+
+    DATEFORMAT DD/MM/YYYY
+
+    RECURRENT_FILES
+    RUNCONTROL ref_runcontrol.dat
+    SURFACE Network 1 surface.dat'''
+    runcontrol_data = 'START 01/01/2020'
+
+    def mock_open_wrapper(filename,  mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'fcs_file.dat': fcs_file_data,
+            'surface.dat': surface_content,
+            'ref_runcontrol.dat': runcontrol_data,
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+    model = NexusSimulator('fcs_file.dat')
+    # Act
+    constraint = model.network.constraints.get_all()['WELL1'][0]
+    # Assert
+    assert constraint.date == '04/10/2019'

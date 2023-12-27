@@ -11,9 +11,11 @@ from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_TABLE_KEYWORDS, EQ
 from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_COMPOSITION_OPTIONS
 from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_KEYWORDS
 from ResSimpy.DynamicProperty import DynamicProperty
+from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import EquilUnits
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
+import ResSimpy.FileOperations.file_operations as fo
 
 
 @dataclass(kw_only=True, repr=False)  # Doesn't need to write an _init_, _eq_ methods, etc.
@@ -33,15 +35,49 @@ class NexusEquilMethod(DynamicProperty):
     properties: dict[str, Union[str, int, float, Enum, list[str],
                                 pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
+    unit_system: UnitSystem
 
-    def __init__(self, file: NexusFile, input_number: int,
+    def __init__(self, file: NexusFile, input_number: int, model_unit_system: UnitSystem,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
         if properties is not None:
             self.properties = properties
         else:
             self.properties = {}
+        self.unit_system = model_unit_system
         super().__init__(input_number=input_number, file=file)
+
+    @staticmethod
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """Gets the mapping of nexus keywords to attribute definitions."""
+        keywords: dict[str, tuple[str, type]] = {
+            'PINIT': ('initial_pressure', float),
+            'DINIT': ('datum_depth', float),
+            'DEPTH': ('depth', float),
+            'X': ('x', float),
+            'Y': ('y', float),
+            'TINIT': ('initial_temperature', float),
+            'TEMP': ('temperature', float),
+            'GOC': ('gas_oil_contact_depth', float),
+            'WOC': ('water_oil_contact_depth', float),
+            'GOC_PALEO': ('gas_oil_contact_depth', float),
+            'WOC_PALEO': ('water_oil_contact_depth', float),
+            'GWC': ('gas_water_contact_depth', float),
+            'PCGOC': ('gas_oil_capillary_pressure_at_gas_oil_contact', float),
+            'PCWOC': ('water_oil_capillary_pressure_at_water_oil_contact', float),
+            'PCGWC': ('gas_water_capillary_pressure_at_gas_water_contact', float),
+            'PSAT': ('saturation_pressure', float),
+            'API': ('oil_api_gravity', float),
+        }
+        return keywords
+
+    @property
+    def units(self) -> EquilUnits:
+        """Returns the attribute to unit map for the Equil method."""
+        # Specify unit system, if provided
+        if 'UNIT_SYSTEM' in self.properties.keys() and isinstance(self.properties['UNIT_SYSTEM'], UnitSystem):
+            self.unit_system = self.properties['UNIT_SYSTEM']
+        return EquilUnits(unit_system=self.unit_system)
 
     def to_string(self) -> str:
         """Create string with equilibration data in Nexus file format."""
@@ -76,7 +112,10 @@ class NexusEquilMethod(DynamicProperty):
             elif key == 'OVERREAD':
                 if isinstance(value, list):
                     printable_str += f"OVERREAD {' '.join(value)}\n"
-            elif key not in ['SORWMN', 'SORGMN', 'SGCMN', 'VAITS_TOLSG', 'VAITS_TOLSW',
+            elif key == 'DESC' and isinstance(value, list):
+                for desc_line in value:
+                    printable_str += 'DESC ' + desc_line + '\n'
+            elif key not in ['DESC', 'SORWMN', 'SORGMN', 'SGCMN', 'VAITS_TOLSG', 'VAITS_TOLSW',
                              'OVERREAD', 'INTSAT', 'VAITS', 'MOBILE', 'X', 'Y']:
                 printable_str += f'{key} {value}\n'
         printable_str += '\n'
@@ -88,6 +127,10 @@ class NexusEquilMethod(DynamicProperty):
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
+
+        # Specify unit system, if provided
+        if 'UNIT_SYSTEM' in self.properties.keys() and isinstance(self.properties['UNIT_SYSTEM'], UnitSystem):
+            self.unit_system = self.properties['UNIT_SYSTEM']
 
         # Initialize properties
         equil_table_indices: dict[str, list[int]] = {}
@@ -123,7 +166,7 @@ class NexusEquilMethod(DynamicProperty):
             if [i for i in line.split() if i in EQUIL_INTSAT_KEYWORDS]:
                 for key in EQUIL_INTSAT_KEYWORDS:
                     if nfo.check_token(key, line):
-                        if nfo.get_token_value(key, line, file_as_list) == 'MOBILE':
+                        if fo.get_token_value(key, line, file_as_list) == 'MOBILE':
                             self.properties[key] = 'MOBILE'
                         else:
                             self.properties[key] = ''

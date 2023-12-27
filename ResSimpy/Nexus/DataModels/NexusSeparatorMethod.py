@@ -10,6 +10,7 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.NexusKeywords.separator_keywords import SEPARATOR_KEYS_INT, SEPARATOR_KEYS_FLOAT
 from ResSimpy.Nexus.NexusKeywords.separator_keywords import SEPARATOR_KEYWORDS
 from ResSimpy.DynamicProperty import DynamicProperty
+from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import SeparatorUnits
 from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 
 
@@ -31,8 +32,10 @@ class NexusSeparatorMethod(DynamicProperty):
     properties: dict[str, Union[str, int, float, Enum, list[str],
                      pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
+    unit_system: UnitSystem
 
-    def __init__(self, file: NexusFile, input_number: int, separator_type: Optional[str] = None,
+    def __init__(self, file: NexusFile, input_number: int, model_unit_system: UnitSystem,
+                 separator_type: Optional[str] = None,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
         if separator_type is not None:
@@ -41,7 +44,27 @@ class NexusSeparatorMethod(DynamicProperty):
             self.properties = properties
         else:
             self.properties = {}
+        self.unit_system = model_unit_system
         super().__init__(input_number=input_number, file=file)
+
+    @staticmethod
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """Gets the mapping of nexus keywords to attribute definitions."""
+        keywords: dict[str, tuple[str, type]] = {
+            'TEMP': ('temperature', float),
+            'PRES': ('pressure', float),
+            'TEMP_STD': ('standard_temperature', float),
+            'PRES_STD': ('standard_pressure', float),
+        }
+        return keywords
+
+    @property
+    def units(self) -> SeparatorUnits:
+        """Returns the attribute to unit map for the separator method."""
+        # Specify unit system, if provided
+        if 'UNIT_SYSTEM' in self.properties.keys() and isinstance(self.properties['UNIT_SYSTEM'], UnitSystem):
+            self.unit_system = self.properties['UNIT_SYSTEM']
+        return SeparatorUnits(unit_system=self.unit_system)
 
     def to_string(self) -> str:
         """Create string with separator data in Nexus file format."""
@@ -77,6 +100,10 @@ class NexusSeparatorMethod(DynamicProperty):
 
         # Check for common input data
         nfo.check_for_and_populate_common_input_data(file_as_list, self.properties)
+
+        # Specify unit system, if provided
+        if 'UNIT_SYSTEM' in self.properties.keys() and isinstance(self.properties['UNIT_SYSTEM'], UnitSystem):
+            self.unit_system = self.properties['UNIT_SYSTEM']
 
         # Initialize flags and containers used to record properties as we iterate through separator file contents
         # List to record start and ending indices for tables
