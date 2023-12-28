@@ -159,9 +159,13 @@ def test_generate_file_include_structure_origin_path(mocker):
     nexus_file_include2 = NexusFile(location=include_full_file_path_2, include_locations=[],
                                     origin=include_full_file_path_1,
                                     include_objects=None, file_content_as_list=['second_file'])
+    nexus_file_include2._location_in_including_file = 'inc_file2.inc'
+
     nexus_file_include1 = NexusFile(location=include_full_file_path_1, include_locations=[include_full_file_path_2],
                                     origin=file_path, include_objects=[nexus_file_include2],
                                     file_content_as_list=['inc file contents INCLUDE inc_file2.inc'])
+    nexus_file_include1._location_in_including_file = 'nexus_data/inc_file1.inc'
+
     expected_nexus_file = NexusFile(location=expected_location, include_locations=expected_includes_list,
                                     origin=None, include_objects=[nexus_file_include1],
                                     file_content_as_list=['basic_file INCLUDE nexus_data/inc_file1.inc'])
@@ -263,6 +267,7 @@ def test_generate_file_include_structure_skip_array(mocker, test_file_contents):
                                     origin=file_path, include_objects=None,
                                     file_content_as_list=None)
     nexus_file_include1._input_file_location='nexus_data/inc_file1.inc'
+    nexus_file_include1._location_in_including_file = 'nexus_data/inc_file1.inc'
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -343,6 +348,7 @@ def test_generate_file_include_structure_skip_file_with_nested_array(mocker: Moc
     expected_included_file = NexusFile(location=expected_include_file_path, include_locations=None,
                                     origin=file_path, include_objects=None,
                                     file_content_as_list=expected_file_contents_as_list)
+    expected_included_file._location_in_including_file = 'nexus_data/inc_file1.inc'
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={

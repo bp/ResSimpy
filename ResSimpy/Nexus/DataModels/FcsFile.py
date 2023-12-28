@@ -15,8 +15,7 @@ if sys.version_info >= (3, 11):
 else:
     from typing_extensions import Self
 
-from ResSimpy.Utils.factory_methods import get_empty_dict_int_nexus_file, get_empty_list_str, \
-    get_empty_list_nexus_file, get_empty_list_file
+from ResSimpy.Utils.factory_methods import get_empty_dict_int_nexus_file, get_empty_list_str, get_empty_list_file
 from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
@@ -186,7 +185,7 @@ class FcsNexusFile(NexusFile):
                 )
                 full_file_path = nfo.get_full_file_path(value, origin_path)
                 nexus_file = NexusFile.generate_file_include_structure(
-                    value, origin=fcs_file_path, recursive=recursive, top_level_file=True)
+                    file_path=value, origin=fcs_file_path, recursive=recursive, top_level_file=True)
                 fcs_property = getattr(fcs_file, cls.fcs_keyword_map_multi()[key])
                 # manually initialise if the property is still a None after class instantiation
                 if fcs_property is None:
@@ -204,7 +203,7 @@ class FcsNexusFile(NexusFile):
             elif key in cls.fcs_keyword_map_single():
                 full_file_path = nfo.get_full_file_path(value, origin_path)
                 nexus_file = NexusFile.generate_file_include_structure(
-                    value, origin=fcs_file_path, recursive=recursive, top_level_file=True)
+                    file_path=value, origin=fcs_file_path, recursive=recursive, top_level_file=True)
                 setattr(fcs_file, cls.fcs_keyword_map_single()[key], nexus_file)
                 fcs_file.include_objects.append(nexus_file)
                 fcs_file.include_locations.append(full_file_path)

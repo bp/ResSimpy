@@ -364,7 +364,7 @@ ENGLISH
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+    dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
@@ -411,7 +411,7 @@ DAQI 9600
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+    dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
@@ -444,7 +444,7 @@ PSAT 3600
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+    dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
@@ -480,7 +480,7 @@ PRESSURE 2500 4500
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+    dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
@@ -546,7 +546,7 @@ NOCHK
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+    dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
@@ -578,7 +578,7 @@ ENDVALVE
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+    dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
@@ -684,7 +684,7 @@ HYSTERESIS KRG LINEAR MAXTRAP 0.2 NOMOD
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+    dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
@@ -734,7 +734,7 @@ TOLREV_SW 0.01
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+    dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
@@ -778,7 +778,7 @@ WATERMETHOD 1
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+    dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,

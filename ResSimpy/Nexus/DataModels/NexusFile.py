@@ -2,11 +2,10 @@
 from __future__ import annotations
 
 import os.path
-from dataclasses import dataclass, field
-from typing import Optional, Generator, Sequence
-
 # Use correct Self type depending upon Python version
 import sys
+from dataclasses import dataclass, field
+from typing import Optional, Generator, Sequence
 
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -56,12 +55,12 @@ class NexusFile(File):
                  linked_user: Optional[str] = None,
                  last_modified: Optional[datetime] = None,
                  array_skipped: bool = False) -> None:
+
         super().__init__(location=location, file_content_as_list=file_content_as_list, include_objects=include_objects)
         if origin is not None:
             self.location = nfo.get_full_file_path(location, origin)
         else:
             self.location = location
-        self._location_in_including_file = location
         self.include_locations: Optional[list[str]] = get_empty_list_str() if include_locations is None else \
             include_locations
         self.origin: Optional[str] = origin
@@ -89,6 +88,7 @@ class NexusFile(File):
         Returns:
             NexusFile: a class instance for NexusFile with knowledge of include files
         """
+
         def __get_pathlib_path_details(full_file_path: str):
             if full_file_path == "" or full_file_path is None:
                 return None
@@ -657,7 +657,9 @@ class NexusFile(File):
             include_file (NexusFile): include object whose path is being modified
         """
         # try and find the path of the file that should be replaced (i.e. how it is currently written in the file)
-        if self.include_locations is None or not self.include_locations or include_file.location_in_including_file is None:
+        if self.include_locations is None\
+                or not self.include_locations \
+                or include_file.location_in_including_file is None:
             raise ValueError('No include locations found and therefore cannot update include path')
         file_path_to_replace = include_file.location_in_including_file
         file_content = self.file_content_as_list

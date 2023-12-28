@@ -32,6 +32,7 @@ class File(FileBase):
                  include_objects: Optional[Sequence[File]] = None, create_as_modified: bool = False) -> None:
 
         self.location = location
+        self._location_in_including_file = location
         self.include_objects: Optional[list[File]] = get_empty_list_file() \
             if include_objects is None else include_objects
         if file_content_as_list is None:
@@ -40,6 +41,21 @@ class File(FileBase):
             self.file_content_as_list = file_content_as_list
         self.__id = uuid.uuid4()
         self.__file_modified = create_as_modified
+
+    @property
+    def id(self) -> UUID:
+        """Unique identifier for each Node object."""
+        return self.__id
+
+    @property
+    def file_modified(self) -> bool:
+        """Whether the file has been modified since the last file write."""
+        return self.__file_modified
+
+    @property
+    def location_in_including_file(self) -> str:
+        """The location of the file as it is written after the INCLUDE token in the file including it."""
+        return self._location_in_including_file
 
     def update_include_location_in_file_as_list(self, new_path: str, include_file: File) -> None:
         raise NotImplementedError("Implement this in the derived class.")
@@ -100,20 +116,6 @@ class File(FileBase):
                 fi.write(file_str)
             # reset the modified file state
             self._file_modified_set(False)
-
-    @property
-    def id(self) -> UUID:
-        """Unique identifier for each Node object."""
-        return self.__id
-
-    @property
-    def file_modified(self) -> bool:
-        return self.__file_modified
-
-    @property
-    def location_in_including_file(self) -> str:
-        """The location of the file as it is written after the INCLUDE token in the file including it."""
-        return self._location_in_including_file
 
     def _file_modified_set(self, value: bool) -> None:
         self.__file_modified = value
