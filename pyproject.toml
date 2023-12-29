@@ -28,7 +28,7 @@ typing-extensions = "^4.8"
 
 [tool.poetry.group.dev.dependencies]
 pytest-mock = "^3.9"
-pytest = "^7.1"
+pytest = "^7.4"
 coverage = "^6.5"
 flake8 = "^6"
 mypy = "^1.2"
