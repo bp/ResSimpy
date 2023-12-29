@@ -72,7 +72,7 @@ class File(FileBase):
     def write_to_file(self, new_file_path: None | str = None, write_includes: bool = False,
                       write_out_all_files: bool = False, overwrite_file: bool = False) -> None:
         """Writes to file specified in self.location the strings contained in the list self.file_content_as_list.
-        
+
         Args:
             new_file_path (None | str): writes to self.location if left as None. Otherwise writes to new_file_name.
             write_includes (bool): If True will write out all include files within the file. Defaults to False.
