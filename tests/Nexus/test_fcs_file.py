@@ -16,7 +16,7 @@ RUN_UNITS ENGLISH
 DATEFORMAT DD/MM/YYYY
 GRID_FILES
 	 STRUCTURED_GRID nexus_data/mp2020_structured_grid_1_reg_update.dat
-	 OPTIONS /root_folder\\nexus_data/nexus_data/mp2020_ref_options_reg_update.dat'''
+	 OPTIONS /root_folder/nexus_data/nexus_data/mp2020_ref_options_reg_update.dat'''
 
     structured_grid_contents = 'structured_grid_contents'
     options_file_contents = 'options_file_contents'
@@ -24,7 +24,7 @@ GRID_FILES
     fcs_path = '/root_folder/test_fcs.fcs'
     root_folder = '/root_folder'
     structured_grid_path = os.path.join(root_folder, 'nexus_data/mp2020_structured_grid_1_reg_update.dat')
-    options_file_path = os.path.join(root_folder, 'nexus_data/nexus_data/mp2020_ref_options_reg_update.dat')
+    options_file_path = '/root_folder/nexus_data/nexus_data/mp2020_ref_options_reg_update.dat'
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -53,7 +53,7 @@ GRID_FILES
                                          'DESC reservoir1\n', 'RUN_UNITS ENGLISH\n', 'DATEFORMAT DD/MM/YYYY\n',
                                          'GRID_FILES\n',
                                          '	 STRUCTURED_GRID nexus_data/mp2020_structured_grid_1_reg_update.dat\n',
-                                         '	 OPTIONS /root_folder\\nexus_data/nexus_data/mp2020_ref_options_reg_update.dat', ],
+                                         '	 OPTIONS /root_folder/nexus_data/nexus_data/mp2020_ref_options_reg_update.dat', ],
                                      structured_grid_file=expected_structured_grid_file,
                                      options_file=expected_options_file, include_locations=expected_includes)
     expected_fcs_file.files_info = [(fcs_path, None, None),
