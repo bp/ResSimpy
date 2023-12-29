@@ -5,8 +5,7 @@ from uuid import UUID
 
 import pandas as pd
 
-
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
     from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterParams
     from ResSimpy.File import File

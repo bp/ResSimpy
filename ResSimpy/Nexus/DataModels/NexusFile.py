@@ -325,7 +325,7 @@ class NexusFile(File):
                 for obj in self.include_objects:
                     # TODO: Remove this code once these methods have been moved to the File base class
                     if not isinstance(obj, NexusFile):
-                        raise TypeError("")
+                        raise TypeError("File is of incorrect type")
 
                     if obj.location == incfile_location:
                         include_file = obj

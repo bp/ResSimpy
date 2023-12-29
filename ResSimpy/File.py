@@ -81,16 +81,15 @@ class File(FileBase):
             Otherwise will raise an error if the file already exists.
         """
         # overwrite File base class method to allow for write_includes
-        if new_file_path is None and overwrite_file:
-            # In this case just overwrite the file with the existing path:
-            new_file_path = self.location
-        elif new_file_path is None and not overwrite_file:
-            raise ValueError('No file path to write to, and overwrite_file set to False')
+        if new_file_path is None:
+            if overwrite_file:
+                # In this case just overwrite the file with the existing path:
+                new_file_path = self.location
+            else:
+                raise ValueError('No file path to write to, and overwrite_file set to False')
+
         if self.file_content_as_list is None:
             raise ValueError(f'No file data to write out, instead found {self.file_content_as_list}')
-
-        if new_file_path is None:
-            raise ValueError('No file path to write to.')
 
         # create directories that do not exist
         if not os.path.exists(os.path.dirname(new_file_path)):
@@ -106,7 +105,7 @@ class File(FileBase):
                     file.file_content_as_list = fo.load_file_as_list(file.location)
 
                 if file.file_content_as_list is None:
-                    warnings.warn(f'No content found for file: {file}. Not writing file.')
+                    warnings.warn(f'No content found for file: {file.location}. Not writing file.')
                     continue
                 # this distinguishes the include file name from other includes in other files.
                 # this could be moved to a folder name instead rather than affecting the include file name?
