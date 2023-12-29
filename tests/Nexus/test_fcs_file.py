@@ -463,10 +463,13 @@ def test_move_model_files_duplicate_file(mocker):
     some other content
     INCLUDE grid.dat'''
 
+    run_control_content = "START 01/01/2024"
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             'test_fcs.fcs': fcs_content,
             'nexus_data/structured_grid.dat': structured_grid_content,
+            'nexus_data/nexus_data/runcontrol.dat' : run_control_content,
             os.path.join('nexus_data', 'grid.dat'): 'grid_inc content',
         }).return_value
         return mock_open

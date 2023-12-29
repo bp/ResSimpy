@@ -54,9 +54,10 @@ class NexusFile(File):
                  file_content_as_list: Optional[list[str]] = None,
                  linked_user: Optional[str] = None,
                  last_modified: Optional[datetime] = None,
-                 array_skipped: bool = False) -> None:
+                 file_loading_skipped: bool = False) -> None:
 
-        super().__init__(location=location, file_content_as_list=file_content_as_list, include_objects=include_objects)
+        super().__init__(location=location, file_content_as_list=file_content_as_list, include_objects=include_objects,
+                         file_loading_skipped=file_loading_skipped)
         if origin is not None:
             self.location = nfo.get_full_file_path(location, origin)
         else:
@@ -70,7 +71,6 @@ class NexusFile(File):
             self.line_locations = []
         self.linked_user = linked_user
         self.last_modified = last_modified
-        self.__array_skipped = array_skipped
 
     @classmethod
     def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True,
@@ -134,9 +134,7 @@ class NexusFile(File):
             file_as_list = nfo.load_file_as_list(full_file_path)
         except FileNotFoundError:
             # handle if a file can't be found
-            location = file_path
-
-            nexus_file_class = cls(location=location,
+            nexus_file_class = cls(location=file_path,
                                    include_locations=None,
                                    origin=origin,
                                    include_objects=None,
@@ -223,7 +221,7 @@ class NexusFile(File):
                                file_content_as_list=None,
                                linked_user=user,
                                last_modified=last_changed,
-                               array_skipped=True)
+                               file_loading_skipped=True)
                 if includes_objects is None:
                     raise ValueError('include_objects is None - recursion failure.')
                 skip_next_include = False

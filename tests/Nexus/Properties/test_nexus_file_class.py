@@ -265,7 +265,7 @@ def test_generate_file_include_structure_skip_array(mocker, test_file_contents):
 
     nexus_file_include1 = NexusFile(location=include_full_file_path_1, include_locations=None,
                                     origin=file_path, include_objects=None,
-                                    file_content_as_list=None)
+                                    file_content_as_list=None, file_loading_skipped=True)
     nexus_file_include1._input_file_location='nexus_data/inc_file1.inc'
     nexus_file_include1._location_in_including_file = 'nexus_data/inc_file1.inc'
 
@@ -285,8 +285,8 @@ def test_generate_file_include_structure_skip_array(mocker, test_file_contents):
 
     # Assert
     assert len(nexus_file.include_objects) == 1
-    assert nexus_file.__getattribute__('_NexusFile__array_skipped') is False
-    assert nexus_file.include_objects[0].__getattribute__('_NexusFile__array_skipped') is True
+    assert nexus_file.file_loading_skipped is False
+    assert nexus_file.include_objects[0].file_loading_skipped is True
     assert nexus_file.include_objects[0] == expected_result
 
 @pytest.mark.parametrize("file_with_nested_grid_array_contents, expected_file_contents", [
@@ -388,7 +388,7 @@ KZ CON 1
     expected_nested_include_file_path = os.path.join('/origin/path', 'nexus_data', nested_include_file_location)
     expected_nested_included_file = NexusFile(location=nested_include_file_location, include_locations=None,
                                     origin=expected_include_file_path, include_objects=None,
-                                    file_content_as_list=[])
+                                    file_content_as_list=['another file'])
 
     expected_included_file = NexusFile(location=expected_include_file_path, include_locations=[expected_nested_include_file_path],
                                     origin=file_path, include_objects=[expected_nested_included_file],
@@ -406,7 +406,7 @@ KZ CON 1
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    nexus_file = NexusFile.generate_file_include_structure(file_path, skip_arrays=True)
+    nexus_file = NexusFile.generate_file_include_structure(file_path, skip_arrays=False)
 
     # Assert
     assert len(nexus_file.include_objects) == 1
