@@ -23,19 +23,20 @@ GRID_FILES
 
     fcs_path = '/root_folder/test_fcs.fcs'
     root_folder = '/root_folder'
+    structured_grid_path = os.path.join(root_folder, 'nexus_data/mp2020_structured_grid_1_reg_update.dat')
+    options_file_path = os.path.join(root_folder, 'nexus_data/nexus_data/mp2020_ref_options_reg_update.dat')
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             '/root_folder/test_fcs.fcs': fcs_content,
-            '/root_folder\\nexus_data/mp2020_structured_grid_1_reg_update.dat': structured_grid_contents,
-            '/root_folder\\nexus_data/nexus_data/mp2020_ref_options_reg_update.dat': options_file_contents
+            structured_grid_path: structured_grid_contents,
+            options_file_path: options_file_contents
         }).return_value
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
     mocker.patch("os.path.isfile", lambda x: True)
-    structured_grid_path = os.path.join(root_folder, 'nexus_data/mp2020_structured_grid_1_reg_update.dat')
-    options_file_path = os.path.join(root_folder, 'nexus_data/nexus_data/mp2020_ref_options_reg_update.dat')
+
     expected_includes = [structured_grid_path, options_file_path]
     expected_structured_grid_file = NexusFile(location=structured_grid_path,
                                               origin=fcs_path, include_locations=None,
