@@ -2,6 +2,9 @@
 from __future__ import annotations
 from abc import ABC
 from dataclasses import dataclass
+
+import numpy as np
+import pandas as pd
 from typing import Optional
 from ResSimpy.File import File
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
@@ -17,6 +20,7 @@ class DynamicProperty(ABC):
 
     input_number: int
     file: File
+    properties: dict
 
     def __init__(self, input_number: int, file: File) -> None:
         self.input_number: int = input_number
@@ -55,3 +59,33 @@ class DynamicProperty(ABC):
         if overwrite_file is True:
             self.file.file_content_as_list = new_file_contents
             self.file.write_to_file(overwrite_file=overwrite_file)
+
+    @property
+    def ranges(self) -> dict[str, tuple[float, float]]:
+        """Returns a dictionary of the ranges of the dynamic properties."""
+        ranges: dict[str, tuple[float, float]] = {}
+        for prop, prop_value in self.properties.items():
+            existing_range: tuple[float, float] = ranges.get(prop, (np.nan, np.nan))
+            if isinstance(prop_value, pd.DataFrame):
+                for col in prop_value.columns:
+                    existing_range = ranges.get(col, (np.nan, np.nan))
+                    ranges[col] = (np.nanmin((*existing_range, prop_value[col].min())),
+                                   np.nanmax((*existing_range, prop_value[col].max())))
+            elif isinstance(prop_value, str):
+                # try to convert the string to a list of floats
+                split_prop_value = prop_value.split()
+                try:
+                    split_prop_value_as_float = [float(val) for val in split_prop_value]
+                except ValueError:
+                    # if it can't be converted to a list of floats, then continue to the next property
+                    continue
+                if len(split_prop_value_as_float) == 0:
+                    # skip if the list is empty
+                    continue
+                ranges[prop] = (np.nanmin((*existing_range, min(split_prop_value_as_float))),
+                                np.nanmax((*existing_range, max(split_prop_value_as_float))))
+            elif isinstance(prop_value, float):
+                ranges[prop] = (prop_value, prop_value)
+            else:
+                continue
+        return ranges
