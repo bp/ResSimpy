@@ -426,6 +426,7 @@ def test_nexus_hydraulics_ranges():
                                                       2830., 2836., 2848., 2916., 2926., 2946.]
                                              }),
                   'DATGRAD': 'GRAD',
+                  'DEPTH': 10000.0,
                   'WATINJ': {'GRAD': 0.433, 'VISC': 0.7, 'LENGTH': 9000,
                              'ROUGHNESS': 1e-5, 'DZ': 8000, 'DIAM': 7},
                   'NOCHK': ''}
@@ -449,4 +450,5 @@ def test_nexus_hydraulics_ranges():
                       'IWCUT': (1, 1),
                         'IGOR': (1, 2),
                         'IQOIL': (1, 3),
+                      'DEPTH': (10000.0, 10000.0),
                       }

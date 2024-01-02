@@ -17,6 +17,7 @@ class DynamicProperty(ABC):
 
     input_number: int
     file: File
+    properties: dict
 
     def __init__(self, input_number: int, file: File) -> None:
         self.input_number: int = input_number
