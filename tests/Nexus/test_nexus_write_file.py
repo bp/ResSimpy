@@ -2,8 +2,10 @@ from unittest.mock import Mock, MagicMock
 import pytest
 import numpy as np
 import pandas as pd
-from ResSimpy.Enums.UnitsEnum import SUnits, TemperatureUnits, UnitSystem
+from pytest_mock import MockerFixture
 
+from ResSimpy.Enums.UnitsEnum import SUnits, TemperatureUnits, UnitSystem
+from ResSimpy.File import File
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusPVTMethod import NexusPVTMethod
@@ -18,7 +20,7 @@ from ResSimpy.Nexus.DataModels.NexusSeparatorMethod import NexusSeparatorMethod
 from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterMethod, NexusWaterParams
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
-from tests.utility_for_tests import check_file_read_write_is_correct
+from tests.utility_for_tests import check_file_read_write_is_correct, get_fake_nexus_simulator
 from tests.multifile_mocker import mock_multiple_files
 
 
@@ -98,7 +100,6 @@ def test_write_to_file(mocker, fcs_file_contents, wells_file, expected_result):
     check_file_read_write_is_correct(expected_file_contents=expected_result,
                                      modifying_mock_open=writing_mock_open,
                                      mocker_fixture=mocker, write_file_name='/my/wellspec/file.dat')
-
 
 @pytest.mark.parametrize('fcs_file_contents, wells_file, expected_result, expected_removed_completion_line, '
 'expected_obj_locations', [
@@ -346,7 +347,7 @@ def test_write_file_makedirs(mocker, folder_exists, expected_number_calls, ):
     assert writing_mock_open.call_args_list[0][0][0] == new_file_location
 
 
-def test_nexus_pvt_write_to_file(mocker):
+def test_nexus_pvt_write_to_new_file(mocker):
     # Arrange
     pfile = NexusFile(location='/my/orig_prop/file.dat')
     properties = {'API': 30.0, 'SPECG': 0.6, 'UNIT_SYSTEM': UnitSystem.ENGLISH, 'DESC': ['This is first line of description',
@@ -364,13 +365,37 @@ ENGLISH
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+    dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
                                      modifying_mock_open=writing_mock_open,
                                      mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
 
+
+def test_nexus_pvt_write_to_new_file_existing_file_raises_error(mocker):
+    # Arrange
+    pfile = NexusFile(location='/my/orig_prop/file.dat')
+    properties = {'API': 30.0, 'SPECG': 0.6, 'UNIT_SYSTEM': UnitSystem.ENGLISH, 'DESC': ['This is first line of description',
+                                                                                         'and this is second line of description']}
+    dataobj = NexusPVTMethod(file=pfile, input_number=1, model_unit_system=UnitSystem.ENGLISH, pvt_type='BLACKOIL',
+                             properties=properties)
+    expected_result = '''DESC This is first line of description
+DESC and this is second line of description
+BLACKOIL API 30.0 SPECG 0.6
+ENGLISH
+'''
+
+    # make a mock for the write operation
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+
+    # Act
+    with pytest.raises(ValueError) as ve:
+        dataobj.write_to_file(new_file_path=None, overwrite_file=False) # Must either specify new path or overwrite existing one.
+
+    # Assert
+    assert ve.value.args[0] == 'Please specify either overwrite_file as True or provide new_file_location.'
 
 def test_nexus_aquifer_write_to_file(mocker):
     # Arrange
@@ -411,7 +436,7 @@ DAQI 9600
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+    dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
@@ -444,7 +469,7 @@ PSAT 3600
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+    dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
@@ -480,7 +505,7 @@ PRESSURE 2500 4500
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+    dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
@@ -546,7 +571,7 @@ NOCHK
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+    dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
@@ -578,7 +603,7 @@ ENDVALVE
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+    dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
@@ -684,7 +709,7 @@ HYSTERESIS KRG LINEAR MAXTRAP 0.2 NOMOD
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+    dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
@@ -734,7 +759,7 @@ TOLREV_SW 0.01
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+    dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
@@ -778,7 +803,7 @@ WATERMETHOD 1
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+    dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
@@ -816,9 +841,72 @@ CVW 0.001
     mocker.patch("builtins.open", writing_mock_open)
 
     # Act
-    dataobj.write_to_file(new_file_location='/my/prop/file.dat')
+    dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_result,
                                      modifying_mock_open=writing_mock_open,
                                      mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
+
+
+def test_nexus_pvt_write_to_existing_file(mocker):
+    # Arrange
+    fcs_file_contents = '''PVT Method 1 /my/prop/file.dat
+'''
+    pvt_file_contents = '''DESC This is first line of description
+DESC and this is second line of description
+BLACKOIL API 30.0 SPECG 0.6
+ENGLISH
+'''
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'fcs_file.fcs': fcs_file_contents,
+            '/my/prop/file.dat': pvt_file_contents,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    mock_nexus_sim = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='fcs_file.fcs', mock_open=False)
+    mock_nexus_sim.pvt.inputs[1].properties['API'] = 40.0
+    expected_result = '''DESC This is first line of description
+DESC and this is second line of description
+BLACKOIL API 40.0 SPECG 0.6
+ENGLISH
+'''
+
+    # make a mock for the write operation
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+
+    # Act
+    mock_nexus_sim.pvt.inputs[1].write_to_file(overwrite_file=True)
+
+    # Assert
+    check_file_read_write_is_correct(expected_file_contents=expected_result,
+                                     modifying_mock_open=writing_mock_open,
+                                     mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
+
+
+def test_write_includes_empty_include_raises_warning(mocker:MockerFixture, recwarn):
+    # Arrange
+    included_file = NexusFile(location='included_file.dat', file_content_as_list=None)
+    included_file.file_content_as_list = None
+
+    including_file_content = 'INCLUDE included_file.dat'
+    including_file = NexusFile(location='including_file.dat', file_content_as_list=[including_file_content],
+                          include_objects=[included_file], include_locations=['included_file.dat'])
+
+    open_mock = mocker.mock_open()
+    mocker.patch("builtins.open", open_mock)
+    mocker.patch("os.makedirs", open_mock)
+
+    file_exists_mock = mocker.MagicMock(return_value=False)
+    mocker.patch("os.path.exists", file_exists_mock)
+
+    # Act
+    including_file.write_to_file(write_includes=True, new_file_path='/newdir/including_file.dat')
+
+    # Assert
+    assert len(recwarn) == 1
+    assert recwarn[0].message.args[0] == 'No content found for file: included_file.dat. Not writing file.'

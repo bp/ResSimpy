@@ -15,8 +15,7 @@ if sys.version_info >= (3, 11):
 else:
     from typing_extensions import Self
 
-from ResSimpy.Utils.factory_methods import get_empty_dict_int_nexus_file, get_empty_list_str, \
-    get_empty_list_nexus_file
+from ResSimpy.Utils.factory_methods import get_empty_dict_int_nexus_file, get_empty_list_str, get_empty_list_file
 from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
@@ -149,7 +148,7 @@ class FcsNexusFile(NexusFile):
             FcsNexusFile: instance of a FcsNexusFile for a given fcs file path
         """
         fcs_file = cls(location=fcs_file_path)
-        fcs_file.include_objects = get_empty_list_nexus_file()
+        fcs_file.include_objects = get_empty_list_file()
         fcs_file.file_content_as_list = get_empty_list_str()
         fcs_file.include_locations = get_empty_list_str()
 
@@ -186,7 +185,7 @@ class FcsNexusFile(NexusFile):
                 )
                 full_file_path = nfo.get_full_file_path(value, origin_path)
                 nexus_file = NexusFile.generate_file_include_structure(
-                    value, origin=fcs_file_path, recursive=recursive, top_level_file=True)
+                    file_path=value, origin=fcs_file_path, recursive=recursive, top_level_file=True)
                 fcs_property = getattr(fcs_file, cls.fcs_keyword_map_multi()[key])
                 # manually initialise if the property is still a None after class instantiation
                 if fcs_property is None:
@@ -204,7 +203,7 @@ class FcsNexusFile(NexusFile):
             elif key in cls.fcs_keyword_map_single():
                 full_file_path = nfo.get_full_file_path(value, origin_path)
                 nexus_file = NexusFile.generate_file_include_structure(
-                    value, origin=fcs_file_path, recursive=recursive, top_level_file=True)
+                    file_path=value, origin=fcs_file_path, recursive=recursive, top_level_file=True)
                 setattr(fcs_file, cls.fcs_keyword_map_single()[key], nexus_file)
                 fcs_file.include_objects.append(nexus_file)
                 fcs_file.include_locations.append(full_file_path)
@@ -351,7 +350,7 @@ class FcsNexusFile(NexusFile):
         self.write_to_file(new_file_path, write_includes=False)
 
     def update_model_files(self) -> None:
-        """Updates all the modified files and the fcs in the model. Keeps file names and paths the same.
+        """Updates all the modified files in the model. Keeps file names and paths the same.
         Warning: this method overwrites the existing files!
         """
         # Loop through all files in the model, writing out the contents if they have been modified.
@@ -370,9 +369,6 @@ class FcsNexusFile(NexusFile):
             for method_number, file in file_dict.items():
                 if file.file_modified:
                     file.write_to_file(write_includes=True, write_out_all_files=False, overwrite_file=True)
-
-        # write out the final fcs file
-        self.write_to_file(self.location, write_includes=False, overwrite_file=True)
 
     def change_file_path(self, new_file_path: str, token: str, method_number: int | None = None) -> bool:
         """Switch the file path for a new file_path based on the value of the associated keyword in the fcs.

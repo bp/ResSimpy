@@ -282,18 +282,14 @@ def check_property_in_line(
     # Check unit system specification
     if check_token('ENGLISH', line):
         property_dict['UNIT_SYSTEM'] = UnitSystem.ENGLISH
-        property_dict['TEMP_UNIT'] = TemperatureUnits.FAHR
     if check_token('METRIC', line):
         property_dict['UNIT_SYSTEM'] = UnitSystem.METRIC
-        property_dict['TEMP_UNIT'] = TemperatureUnits.CELSIUS
     if check_token('METKG/CM2', line):
         property_dict['UNIT_SYSTEM'] = UnitSystem.METKGCM2
     if check_token('METBAR', line):
         property_dict['UNIT_SYSTEM'] = UnitSystem.METBAR
-        property_dict['TEMP_UNIT'] = TemperatureUnits.CELSIUS
     if check_token('LAB', line):
         property_dict['UNIT_SYSTEM'] = UnitSystem.LAB
-        property_dict['TEMP_UNIT'] = TemperatureUnits.CELSIUS
     # Check to see if salinity unit is provided
     if check_token('SUNITS', line):
         s_units_value = get_expected_token_value('SUNITS', line, file_as_list)

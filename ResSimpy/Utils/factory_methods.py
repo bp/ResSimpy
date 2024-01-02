@@ -5,9 +5,10 @@ from uuid import UUID
 
 import pandas as pd
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
     from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterParams
+    from ResSimpy.File import File
 
 
 # Factory methods for generating empty lists with typing
@@ -42,6 +43,11 @@ def get_empty_hysteresis_dict() -> dict[str, Union[str, float, dict[str,
 
 def get_empty_list_str_nexus_file() -> list[Union[str, NexusFile]]:
     value: list[Union[str, NexusFile]] = []
+    return value
+
+
+def get_empty_list_file() -> list[File]:
+    value: list[File] = []
     return value
 
 
