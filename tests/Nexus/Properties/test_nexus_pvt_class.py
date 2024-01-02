@@ -703,3 +703,52 @@ EOSOPTIONS PR
 
     # Assert
     assert result == expected_output
+
+def test_pvt_method_ranges():
+    # Arrange
+    pvt_file = NexusFile(location='test/file/pvt.dat')
+    pvt_obj = NexusPVTMethod(file=pvt_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
+    pvt_obj.pvt_type = 'BLACKOIL'
+    pvt_obj.properties = {'API': 30.0, 'SPECG': 0.6,
+                          'UNIT_SYSTEM': UnitSystem.ENGLISH, 'DESC': ['This is first line of description',
+                                                                      'and this is second line of description'
+                                                                      ],
+                          'SATURATED': pd.DataFrame({'PRES': [14.7, 115., 2515, 3515],
+                                                     'BO': [1.05, 1.08, 1.25, 1.33],
+                                                     'BG': [225, 25, 1.089, 0.787],
+                                                     'RS': [0.005, 0.045, 0.505, 0.69],
+                                                     'VO': [3.93, 2.78, 0.99, 0.79],
+                                                     'VG': [0.0105, 0.0109, 0.0193, 0.0193]
+                                                     }),
+                          'UNSATOIL_PSAT': {'2000.0': pd.DataFrame({'PRES': [2515, 3515],
+                                                                    'BO': [1.25, 1.24],
+                                                                    'VO': [0.99, 0.98]
+                                                                    }),
+                                            '1900.0': pd.DataFrame({'PRES': [2515, 3515],
+                                                                    'BO': [1.25, 1.24],
+                                                                    'VO': [0.99, 0.98]
+                                                                    })
+                                            },
+                          'UNSATGAS_PRES': {'3515.0': pd.DataFrame({'RV': [0.0],
+                                                                    'BG': [0.787],
+                                                                    'VG': [0.0193]
+                                                                    }),
+                                            '3415.0': pd.DataFrame({'RV': [0.0],
+                                                                    'BG': [0.787],
+                                                                    'VG': [0.0193]
+                                                                    })
+                                            }
+                          }
+    expected_result = {'PRES': (14.7, 3515.0),
+                       'BO': (1.05, 1.33),
+                       'BG': (0.787, 225.0),
+                       'RS': (0.005, 0.69),
+                       'VO': (0.79, 3.93),
+                       'VG': (0.0105, 0.0193),
+                       'API': (30.0, 30.0),
+                       'SPECG': (0.6, 0.6),
+                       }
+    # Act
+    result = pvt_obj.ranges
+    # Assert
+    assert result == expected_result
