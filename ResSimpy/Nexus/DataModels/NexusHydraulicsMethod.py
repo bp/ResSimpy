@@ -270,14 +270,14 @@ class NexusHydraulicsMethod(DynamicProperty):
                 # try to convert the string to a list of floats
                 split_prop_value = prop_value.split()
                 try:
-                    split_prop_value = [float(val) for val in split_prop_value]
+                    split_prop_value_as_float = [float(val) for val in split_prop_value]
                 except ValueError:
                     # if it can't be converted to a list of floats, then continue to the next property
                     continue
-                if len(split_prop_value) == 0:
+                if len(split_prop_value_as_float) == 0:
                     # skip if the list is empty
                     continue
-                ranges[prop] = (min(split_prop_value), max(split_prop_value))
+                ranges[prop] = (min(split_prop_value_as_float), max(split_prop_value_as_float))
             elif isinstance(prop_value, float):
                 ranges[prop] = (prop_value, prop_value)
             else:
