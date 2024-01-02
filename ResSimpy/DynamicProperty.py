@@ -9,6 +9,7 @@ from typing import Optional
 from ResSimpy.File import File
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 
+
 @dataclass
 class DynamicProperty(ABC):
     """The abstract base class for dynamic property simulator inputs, for use in inputs such as PVT, relperm, etc.
