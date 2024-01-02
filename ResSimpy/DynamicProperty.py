@@ -37,21 +37,21 @@ class DynamicProperty(ABC):
         """Write dynamic property data to string."""
         raise NotImplementedError('Implement in the derived class.')
 
-    def write_to_file(self, overwrite_existing: bool = False, new_file_location: Optional[str] = None) -> None:
+    def write_to_file(self, new_file_path: Optional[str] = None, overwrite_file: bool = False) -> None:
         """Write dynamic property data to file."""
         printable_str = self.to_string()
         new_file_contents = printable_str.splitlines(keepends=True)
-        if overwrite_existing is True and new_file_location is not None:
+        if overwrite_file is True and new_file_path is not None:
             raise ValueError('Please specify only one of either overwrite_existing or new_file_location.')
 
-        if new_file_location is not None:
-            new_file = File(file_content_as_list=new_file_contents, location=new_file_location)
-            new_file.write_to_file()
+        if new_file_path is not None:
+            new_file = File(file_content_as_list=new_file_contents, location=new_file_path, create_as_modified=True)
+            new_file.write_to_file(new_file_path=new_file_path, overwrite_file=True)
             return
-        elif overwrite_existing is False:
-            raise ValueError('Please specify either overwrite_existing as True or provide new_file_location.')
+        elif overwrite_file is False:
+            raise ValueError('Please specify either overwrite_file as True or provide new_file_location.')
 
         # Overwriting existing file contents
-        if overwrite_existing is True:
+        if overwrite_file is True:
             self.file.file_content_as_list = new_file_contents
-            self.file.write_to_file()
+            self.file.write_to_file(overwrite_file=overwrite_file)

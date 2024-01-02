@@ -1065,11 +1065,14 @@ def test_add_completion_include_files(mocker, fcs_file_contents, wells_file,
     expected_include_file = NexusFile(location=include_file_path, include_locations=[],
                                       origin='/my/wellspec/file.dat', include_objects=None,
                                       file_content_as_list=expected_result)
+    expected_include_file._location_in_including_file = 'include_file.dat'
 
     expected_wells_file_as_list = wells_file.splitlines(keepends=True)
     expected_wells_file = NexusFile(location='/my/wellspec/file.dat', include_objects=[expected_include_file],
                                     include_locations=[include_file_path], origin=fcs_file_path,
                                     file_content_as_list=expected_wells_file_as_list)
+    expected_wells_file._location_in_including_file = '/my/wellspec/file.dat'
+
     # Act
     # test adding a load of completions sequentially
     mock_nexus_sim.wells.add_completion(well_name='well1', completion_properties=add_perf_dict,

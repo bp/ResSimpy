@@ -159,9 +159,13 @@ def test_generate_file_include_structure_origin_path(mocker):
     nexus_file_include2 = NexusFile(location=include_full_file_path_2, include_locations=[],
                                     origin=include_full_file_path_1,
                                     include_objects=None, file_content_as_list=['second_file'])
+    nexus_file_include2._location_in_including_file = 'inc_file2.inc'
+
     nexus_file_include1 = NexusFile(location=include_full_file_path_1, include_locations=[include_full_file_path_2],
                                     origin=file_path, include_objects=[nexus_file_include2],
                                     file_content_as_list=['inc file contents INCLUDE inc_file2.inc'])
+    nexus_file_include1._location_in_including_file = 'nexus_data/inc_file1.inc'
+
     expected_nexus_file = NexusFile(location=expected_location, include_locations=expected_includes_list,
                                     origin=None, include_objects=[nexus_file_include1],
                                     file_content_as_list=['basic_file INCLUDE nexus_data/inc_file1.inc'])
@@ -261,7 +265,9 @@ def test_generate_file_include_structure_skip_array(mocker, test_file_contents):
 
     nexus_file_include1 = NexusFile(location=include_full_file_path_1, include_locations=None,
                                     origin=file_path, include_objects=None,
-                                    file_content_as_list=None)
+                                    file_content_as_list=None, file_loading_skipped=True)
+    nexus_file_include1._input_file_location='nexus_data/inc_file1.inc'
+    nexus_file_include1._location_in_including_file = 'nexus_data/inc_file1.inc'
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -279,8 +285,8 @@ def test_generate_file_include_structure_skip_array(mocker, test_file_contents):
 
     # Assert
     assert len(nexus_file.include_objects) == 1
-    assert nexus_file.__getattribute__('_NexusFile__array_skipped') is False
-    assert nexus_file.include_objects[0].__getattribute__('_NexusFile__array_skipped') is True
+    assert nexus_file.file_loading_skipped is False
+    assert nexus_file.include_objects[0].file_loading_skipped is True
     assert nexus_file.include_objects[0] == expected_result
 
 @pytest.mark.parametrize("file_with_nested_grid_array_contents, expected_file_contents", [
@@ -342,6 +348,7 @@ def test_generate_file_include_structure_skip_file_with_nested_array(mocker: Moc
     expected_included_file = NexusFile(location=expected_include_file_path, include_locations=None,
                                     origin=file_path, include_objects=None,
                                     file_content_as_list=expected_file_contents_as_list)
+    expected_included_file._location_in_including_file = 'nexus_data/inc_file1.inc'
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -381,11 +388,12 @@ KZ CON 1
     expected_nested_include_file_path = os.path.join('/origin/path', 'nexus_data', nested_include_file_location)
     expected_nested_included_file = NexusFile(location=nested_include_file_location, include_locations=None,
                                     origin=expected_include_file_path, include_objects=None,
-                                    file_content_as_list=[])
+                                    file_content_as_list=['another file'])
 
     expected_included_file = NexusFile(location=expected_include_file_path, include_locations=[expected_nested_include_file_path],
                                     origin=file_path, include_objects=[expected_nested_included_file],
                                     file_content_as_list=file_contents.splitlines(keepends=True))
+    expected_included_file._location_in_including_file = 'nexus_data/inc_file1.inc'
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -398,7 +406,7 @@ KZ CON 1
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    nexus_file = NexusFile.generate_file_include_structure(file_path, skip_arrays=True)
+    nexus_file = NexusFile.generate_file_include_structure(file_path, skip_arrays=False)
 
     # Assert
     assert len(nexus_file.include_objects) == 1
@@ -866,7 +874,7 @@ def test_update_include_location_in_file_as_list(mocker, file_content, expected_
     assert nexus_file.file_content_as_list == expected_file_content.splitlines(keepends=True)
     assert nexus_file.include_locations == [expected_path]
     assert include_file.location == expected_path
-    assert include_file.input_file_location == 'New_FiLe_Path.inc'
+    assert include_file.location_in_including_file == 'New_FiLe_Path.inc'
     assert nexus_file.file_modified
 
 
