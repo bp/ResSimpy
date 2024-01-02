@@ -20,7 +20,7 @@ from ResSimpy.Nexus.DataModels.NexusSeparatorMethod import NexusSeparatorMethod
 from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterMethod, NexusWaterParams
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
-from tests.utility_for_tests import check_file_read_write_is_correct
+from tests.utility_for_tests import check_file_read_write_is_correct, get_fake_nexus_simulator
 from tests.multifile_mocker import mock_multiple_files
 
 
@@ -867,12 +867,7 @@ ENGLISH
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    ls_dir = Mock(side_effect=lambda x: [])
-    mocker.patch('os.listdir', ls_dir)
-    fcs_file_exists = Mock(side_effect=lambda x: True)
-    mocker.patch('os.path.isfile', fcs_file_exists)
-
-    mock_nexus_sim = NexusSimulator('fcs_file.fcs')
+    mock_nexus_sim = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='fcs_file.fcs', mock_open=False)
     mock_nexus_sim.pvt.inputs[1].properties['API'] = 40.0
     expected_result = '''DESC This is first line of description
 DESC and this is second line of description
