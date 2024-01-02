@@ -63,12 +63,12 @@ class DynamicProperty(ABC):
     @property
     def ranges(self) -> dict[str, tuple[float, float]]:
         """Returns a dictionary of the ranges of the dynamic properties."""
-        ranges = {}
+        ranges: dict[str, tuple[float, float]] = {}
         for prop, prop_value in self.properties.items():
             existing_range: tuple[float, float] = ranges.get(prop, (np.nan, np.nan))
             if isinstance(prop_value, pd.DataFrame):
                 for col in prop_value.columns:
-                    existing_range: tuple[float] = ranges.get(col, (np.nan, np.nan))
+                    existing_range = ranges.get(col, (np.nan, np.nan))
                     ranges[col] = (np.nanmin((*existing_range, prop_value[col].min())),
                                    np.nanmax((*existing_range, prop_value[col].max())))
             elif isinstance(prop_value, str):
