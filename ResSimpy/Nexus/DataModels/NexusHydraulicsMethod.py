@@ -257,3 +257,29 @@ class NexusHydraulicsMethod(DynamicProperty):
         # Correctly set WATINJ properties, if needed
         if found_waterinj:
             self.properties['WATINJ'] = watinj_dict
+
+    @property
+    def ranges(self) -> dict[str, tuple[float, float]]:
+        """Returns a dictionary of the ranges of the hydraulics properties."""
+        ranges = {}
+        for prop, prop_value in self.properties.items():
+            if isinstance(prop_value, pd.DataFrame) and prop == 'HYD_TABLE':
+                for col in prop_value.columns:
+                    ranges[col] = (prop_value[col].min(), prop_value[col].max())
+            elif isinstance(prop_value, str):
+                # try to convert the string to a list of floats
+                split_prop_value = prop_value.split()
+                try:
+                    split_prop_value = [float(val) for val in split_prop_value]
+                except ValueError:
+                    # if it can't be converted to a list of floats, then continue to the next property
+                    continue
+                if len(split_prop_value) == 0:
+                    # skip if the list is empty
+                    continue
+                ranges[prop] = (min(split_prop_value), max(split_prop_value))
+            elif isinstance(prop_value, float):
+                ranges[prop] = (prop_value, prop_value)
+            else:
+                continue
+        return ranges
