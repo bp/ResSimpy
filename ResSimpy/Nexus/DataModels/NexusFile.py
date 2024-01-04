@@ -26,7 +26,7 @@ import os
 from datetime import datetime, timezone
 
 
-@dataclass(kw_only=True, repr=True)
+@dataclass(kw_only=True, repr=False)
 class NexusFile(File):
     """Class to deal with origin and structure of Nexus files and preserve origin of include files.
 

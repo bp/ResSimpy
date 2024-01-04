@@ -1064,3 +1064,28 @@ def test_group_not_found(mocker):
     assert result_include_file.linked_user is None
     assert result_include_file.last_modified is None
     assert warn_msg[0].message.args[0] == 'Unable to find the group for the file at /root/file.dat'
+
+def test_nexusfile_repr(mocker):
+    # Arrange
+    file_content = '''test_file_content\nInCluDE original_include.inc\nINCLUDE'''
+    file_path = '/root/file.dat'
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            file_path: file_content,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+    nexus_file = NexusFile.generate_file_include_structure(file_path)
+    expected_result = f"""FILE PATH: /root/file.dat
+
+Include files: ['{os.path.join(os.path.dirname(file_path), 'original_include.inc')}']
+
+FILE CONTENTS:
+
+test_file_content
+InCluDE original_include.inc
+INCLUDE"""
+    # Act
+    result = repr(nexus_file)
+    # Assert
+    assert result == expected_result
