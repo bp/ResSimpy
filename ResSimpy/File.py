@@ -187,4 +187,6 @@ class File(FileBase):
 
     def pretty_print_contents(self) -> str:
         """Pretty print the file contents."""
+        if self.file_content_as_list is None:
+            return ''
         return ''.join(self.file_content_as_list)
