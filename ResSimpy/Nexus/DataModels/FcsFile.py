@@ -123,7 +123,16 @@ class FcsNexusFile(NexusFile):
                          include_objects=include_objects, file_content_as_list=file_content_as_list)
 
     def __repr__(self) -> str:
-        return generic_repr(self)
+        printable_str = f'fcs file location: {self.location}\n'
+        printable_str += '\tFCS file contains:\n'
+        for file_type in self.fcs_keyword_map_single().values():
+            if getattr(self, file_type) is not None:
+                printable_str += f'\t\t{file_type}: {getattr(self, file_type).location}\n'
+        for multi_file_type in self.fcs_keyword_map_multi().values():
+            multi_file_list = getattr(self, multi_file_type, None)
+            if multi_file_list is not None and len(multi_file_list) > 0:
+                printable_str += f'\t\t{multi_file_type}: {len(multi_file_list)}\n'
+        return printable_str
 
     def __str__(self) -> str:
         return generic_str(self)
