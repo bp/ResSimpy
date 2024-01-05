@@ -154,7 +154,7 @@ def expand_include(file_as_list: list[str], recursive: bool = True) -> tuple[lis
     return expanded_file, inc_file_path
 
 
-def get_full_file_path(file_path: str, origin: str):
+def get_full_file_path(file_path: str, origin: str) -> str:
     """Returns the full file path including the base directories if they aren't present in the string.
 
     Args:
@@ -164,7 +164,7 @@ def get_full_file_path(file_path: str, origin: str):
     if os.path.isabs(file_path):
         return_path = file_path
     else:
-        return_path = str(os.path.join(os.path.dirname(origin), file_path))
+        return_path = os.path.join(os.path.dirname(origin), file_path)
     return return_path
 
 

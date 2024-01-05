@@ -54,3 +54,7 @@ class FileBase(ABC):
     def remove_from_file_as_list(self, index: int, objects_to_remove: Optional[list[UUID]] = None,
                                  string_to_remove: Optional[str] = None) -> None:
         raise NotImplementedError("Implement this in the derived class")
+
+    @abstractmethod
+    def __repr__(self) -> str:
+        raise NotImplementedError("Implement this in the derived class")
