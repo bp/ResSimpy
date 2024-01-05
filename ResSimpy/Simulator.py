@@ -48,7 +48,7 @@ class Simulator(ABC):
         printable_str += f'Full path: {self.model_files.location}\n'
         printable_str += f'Start date: {self.start_date}\n'
         printable_str += f'Date format: {self.get_date_format()}\n'
-        printable_str += f'Default units: {self.default_units}\n'
+        printable_str += f'Default units: {str(self.default_units)}\n'
         return printable_str
 
     """Class Properties"""

@@ -138,7 +138,7 @@ class NexusSimulator(Simulator):
         """Pretty printing NexusSimulator data."""
         printable_str = f'Simulation name: {self.root_name}\n'
         printable_str += super().__repr__()
-        printable_str += f'Run units: {self.default_units}\n'
+        printable_str += f'Run units: {str(self.default_units)}\n'
         # add details from the fcsfile
         printable_str += self.model_files.__repr__()
         return printable_str
