@@ -139,12 +139,14 @@ class NexusSimulator(Simulator):
         printable_str = f'\nOrigin: {self.origin}\n'
         printable_str += f'Full path: {self.model_files.location}\n'
         printable_str += f'Start date: {self.start_date}\n'
+        printable_str += f'Date format: {self.date_format}\n'
         printable_str += f'Run units: {self.run_units}\n'
         printable_str += f'Default units: {self.default_units}\n'
-        printable_str += ''
+        printable_str += '\n'
 
         # add details from the fcsfile
         printable_str += self.model_files.__repr__()
+        return printable_str
 
 
     def remove_temp_from_properties(self):

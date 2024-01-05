@@ -1785,3 +1785,47 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
     assert result_wellbores == expected_wellbores
     assert result_constraints == expected_constraints
     spy.assert_called_once()
+
+def test_nexus_simulator_repr(mocker):
+    # Arrange
+    fcs_content = '''DESC reservoir1
+        RUN_UNITS ENGLISH
+        DATEFORMAT DD/MM/YYYY
+        INITIALIZATION_FILES
+         EQUIL Method 1 equil1.dat
+         EQUIL NORPT Method 2 equil2.dat
+        STRUCTURED_GRID nexus_data/structured_grid.dat
+         OPTIONS nexus_data/nexus_data/options.dat
+         WELLS SET 1 wells.dat
+         HYD NORPT METHOd 3 hyd.dat
+         RUNCONTROL run_control.dat'''
+
+    fcs_path = 'test_fcs.fcs'
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            fcs_path: fcs_content,
+            'nexus_data/structured_grid.dat': '',
+            'nexus_data/nexus_data/options.dat': '',
+            'wells.dat': '',
+            'equil1.dat': '',
+            'equil2.dat': '',
+            'hyd.dat': '',
+        }).return_value
+        return mock_open
+    nexus_sim = NexusSimulator(fcs_path)
+    expected_result = f"""
+Origin: test_fcs.fcs
+Full path: test_fcs.fcs
+Start date: 
+Date format: DateFormat.MM_DD_YYYY
+Run units: UnitSystem.ENGLISH
+Default units: UnitSystem.ENGLISH
+
+{nexus_sim.model_files.__repr__()}"""
+
+    # Act
+    result = repr(nexus_sim)
+
+    # Assert
+    assert result == expected_result
