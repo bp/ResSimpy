@@ -24,6 +24,7 @@ class File(FileBase):
     location: str
     _location_in_including_file: str
     include_objects: Optional[Sequence[File]]
+    include_locations: Optional[list[str]] = None
     file_content_as_list: Optional[list[str]] = field(default=None, repr=False)
     __id: UUID = field(default_factory=lambda: uuid4(), compare=False)
     __file_modified: bool = False
@@ -172,3 +173,20 @@ class File(FileBase):
 
     def find_which_include_file(self, flattened_index: int) -> tuple[File, int]:
         raise NotImplementedError("Implement this in the derived class")
+
+    def __repr__(self) -> str:
+        """A more readable representation of the NexusFile object file data."""
+        repr_string = ''
+
+        repr_string += f'FILE PATH: {self.location}\n\n'
+        repr_string += f'Include files: {self.include_locations}\n\n'
+
+        repr_string += 'FILE CONTENTS:\n\n'
+        repr_string += self.pretty_print_contents()
+        return repr_string
+
+    def pretty_print_contents(self) -> str:
+        """Pretty print the file contents."""
+        if self.file_content_as_list is None:
+            return ''
+        return ''.join(self.file_content_as_list)
