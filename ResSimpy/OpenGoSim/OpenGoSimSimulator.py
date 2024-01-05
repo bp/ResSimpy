@@ -4,6 +4,7 @@ from typing import Optional
 import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.Aquifer import Aquifer
 from ResSimpy.Enums.PenetrationDirectionEnum import PenetrationDirectionEnum
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.Equilibration import Equilibration
 from ResSimpy.File import File
@@ -57,7 +58,7 @@ class OpenGoSimSimulator(Simulator):
         self._network = OpenGoSimNetwork()
         self._grid = None
         self._model_files = File(location=origin)
-
+        self._default_units = UnitSystem.UNDEFINED
         self.__load_model()
 
     @property
