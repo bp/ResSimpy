@@ -19,7 +19,7 @@ from ResSimpy.Utils.factory_methods import get_empty_dict_int_nexus_file, get_em
 from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
-from ResSimpy.Utils.generic_repr import generic_repr, generic_str
+from ResSimpy.Utils.generic_repr import generic_str
 from datetime import datetime
 
 

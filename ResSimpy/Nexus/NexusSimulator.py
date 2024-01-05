@@ -143,7 +143,6 @@ class NexusSimulator(Simulator):
         printable_str += self.model_files.__repr__()
         return printable_str
 
-
     def remove_temp_from_properties(self):
         """Updates model values if the files are moved from a temp directory
         Replaces the first instance of temp/ in the file paths in the nexus simulation file paths.
