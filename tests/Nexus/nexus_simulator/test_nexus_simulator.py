@@ -1814,14 +1814,13 @@ def test_nexus_simulator_repr(mocker):
         }).return_value
         return mock_open
     nexus_sim = NexusSimulator(fcs_path)
-    expected_result = f"""
+    expected_result = f"""Simulation name: test_fcs
 Origin: test_fcs.fcs
 Full path: test_fcs.fcs
 Start date: 
-Date format: DateFormat.MM_DD_YYYY
-Run units: UnitSystem.ENGLISH
+Date format: MM/DD/YYYY
 Default units: UnitSystem.ENGLISH
-
+Run units: UnitSystem.ENGLISH
 {nexus_sim.model_files.__repr__()}"""
 
     # Act

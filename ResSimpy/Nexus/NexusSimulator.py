@@ -136,14 +136,9 @@ class NexusSimulator(Simulator):
 
     def __repr__(self) -> str:
         """Pretty printing NexusSimulator data."""
-        printable_str = f'\nOrigin: {self.origin}\n'
-        printable_str += f'Full path: {self.model_files.location}\n'
-        printable_str += f'Start date: {self.start_date}\n'
-        printable_str += f'Date format: {self.date_format}\n'
-        printable_str += f'Run units: {self.run_units}\n'
-        printable_str += f'Default units: {self.default_units}\n'
-        printable_str += '\n'
-
+        printable_str = f'Simulation name: {self.root_name}\n'
+        printable_str += super().__repr__()
+        printable_str += f'Run units: {self.default_units}\n'
         # add details from the fcsfile
         printable_str += self.model_files.__repr__()
         return printable_str
