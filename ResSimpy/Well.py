@@ -38,6 +38,11 @@ class Well(ABC):
         return self.__unit_system
 
     @property
+    def well_type(self) -> WellType | None:
+        """The type of the well."""
+        return self._well_type
+
+    @property
     def dates_of_completions(self) -> list[str]:
         """Returns a list of dates that the well was changed using a completion."""
 
