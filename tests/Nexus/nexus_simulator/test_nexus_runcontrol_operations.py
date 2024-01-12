@@ -1,5 +1,4 @@
-
-
+import pandas as pd
 import pytest
 
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
@@ -7,7 +6,7 @@ from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.multifile_mocker import mock_multiple_files
 
 from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
-
+from ResSimpy.Nexus.runcontrol_operations import SimControls, GridToProc
 
 @pytest.mark.parametrize(
     "date_format,expected_date_format,run_control_contents,include_file_contents,expected_times", [
@@ -330,3 +329,39 @@ def test_runcontrol_no_start_time(mocker):
 
     # Assert
     assert result == expected_result
+
+def test_load_grid_to_proc():
+    # Arrange
+    options_file_content = '''
+    data to ignore
+    another line
+    15 15 MATRIX
+    GRID
+    1 1 1 
+    GRIDTOPROC ! lp
+GRID PROCESS PORTYPE
+1 1 MATRIX
+2 2 MATRIX
+3 3 MATRIX
+4 4 MATRIX
+1 1 FRAC
+2 2 FRAC
+3 3 FRAC
+4 4 FRAC
+ENDGRIDTOPROC
+! stuff to exclude:
+5 5 FRAC
+'''
+    options_file_content = options_file_content.splitlines(keepends=True)
+    expected_result = GridToProc(grid_to_proc_table=pd.DataFrame({
+        'GRID': [1, 2, 3, 4, 1, 2, 3, 4],
+        'PROCESS': [1, 2, 3, 4, 1, 2, 3, 4],
+        'PORTYPE': ['MATRIX', 'MATRIX', 'MATRIX', 'MATRIX','FRAC', 'FRAC', 'FRAC', 'FRAC']}))
+    sim_controls = SimControls(model=None)
+    expected_number_processors = 4
+    # Act
+    result = sim_controls._load_grid_to_procs(options_file_content)
+
+    # Assert
+    pd.testing.assert_frame_equal(result.grid_to_proc_table, expected_result.grid_to_proc_table)
+    assert sim_controls.number_of_processors == expected_number_processors

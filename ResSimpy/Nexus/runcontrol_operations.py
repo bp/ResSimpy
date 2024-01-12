@@ -1,26 +1,65 @@
 from __future__ import annotations
 
 import warnings
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from functools import cmp_to_key
+
+import pandas as pd
+
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.constants import DATE_WITH_TIME_LENGTH
 
 
+@dataclass
+class GridToProc:
+    """Class for storing the GRIDTOPROC table information from the Options file."""
+    grid_to_proc_table: None | pd.DataFrame = None
+
+    @property
+    def table_header(self) -> str:
+        """Start of the GRIDTOPROC definition table."""
+        return 'GRIDTOPROC'
+
+    @property
+    def table_footer(self) -> str:
+        """End of the GRIDTOPROC definition table."""
+        return 'END' + self.table_header
+
+    def get_number_of_processors(self) -> int:
+        """Returns the number of processors to use for the simulation.
+
+        Returns:
+        -------
+            int: number of processors to use for the simulation
+        """
+        if self.grid_to_proc_table is None:
+            raise ValueError("No GRIDTOPROC table found in the Options file")
+        if 'PROCESS' not in self.grid_to_proc_table.columns:
+            raise ValueError("No PROCESS column found in the GRIDTOPROC table")
+
+        return self.grid_to_proc_table['PROCESS'].max()
+
+
 class SimControls:
+    """Class for controlling all runcontrol and time related functionality."""
     def __init__(self, model) -> None:
-        """Class for controlling all runcontrol and time related functionality
+        """Class for controlling all runcontrol and time related functionality.
+
         Args:
             model: NexusSimulator instance
             __times (None | list[str]): list of times to be included in the runcontrol file
-            __date_format_string (str): How the dates should formatted based on date_format.
-
+            __date_format_string (str): How the dates should be formatted based on date_format.
+            __number_of_processors (int): number of processors to use for the simulation. Comes from Options file in
+            Nexus. Defaults to None when not specified in a GRIDTOPROC table.
         """
         self.__model = model
         self.__times: None | list[str] = None
         self.__date_format_string: str = ''
+        self.__number_of_processors: None | int = None
+        self.__grid_to_proc: None | GridToProc = None
 
     @property
     def date_format_string(self):
@@ -332,3 +371,67 @@ class SimControls:
 
         if self.__model.destination is not None:
             self.__update_times_in_file()
+
+    @property
+    def number_of_processors(self) -> int:
+        """Returns the number of processors to use for the simulation.
+
+        Returns:
+        -------
+            int: number of processors to use for the simulation
+        """
+        if self.__number_of_processors is None:
+            self._load_options_file()
+        return self.__number_of_processors
+
+    def _load_grid_to_procs(self, options_file_as_list: list[str]) -> GridToProc:
+        """Loads the GRIDTOPROC table from the Options file.
+
+        Args:
+            options_file_as_list (list[str]): list of strings with each line from the file a new entry in the list
+
+        Returns:
+            None
+        """
+        grid_to_procs = GridToProc()
+        start_index = None
+        end_index = None
+        for i, line in enumerate(options_file_as_list):
+            if nfo.check_token(grid_to_procs.table_header, line):
+                start_index = i+1
+            if nfo.check_token(grid_to_procs.table_footer, line):
+                end_index = i
+                break
+        if start_index is None or end_index is None:
+            raise ValueError(f"Unable to find {grid_to_procs.table_header} or {grid_to_procs.table_footer} in "
+                             "provided file")
+
+        # read table into the object
+        grid_to_procs.grid_to_proc_table = nfo.read_table_to_df(options_file_as_list[start_index:end_index],
+                                                                keep_comments=False)
+        # get the number of processors
+        self.__number_of_processors = grid_to_procs.get_number_of_processors()
+
+        return grid_to_procs
+
+    def _load_options_file(self) -> None:
+        """Load components of the options file to Objects."""
+        # get the options file:
+        if self.__model.model_files.options_file is None:
+            raise ValueError(f"No options file found for {self.__model.model_files.location=}")
+        options_file_content = self.__model.model_files.options_file.get_flat_list_str_file
+        if options_file_content is None:
+            raise ValueError(f"No file content found in options file {self.__model.model_files.options_file.location=}")
+        self.__grid_to_proc = self._load_grid_to_procs(options_file_content)
+
+    @property
+    def grid_to_proc(self) -> GridToProc:
+        """Returns the GridToProc object.
+
+        Returns:
+        -------
+            GridToProc: GridToProc object
+        """
+        if self.__grid_to_proc is None:
+            self._load_options_file()
+        return self.__grid_to_proc
