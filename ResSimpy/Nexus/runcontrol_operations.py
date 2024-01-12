@@ -373,18 +373,21 @@ class SimControls:
             self.__update_times_in_file()
 
     @property
-    def number_of_processors(self) -> int:
+    def number_of_processors(self) -> int | None:
         """Returns the number of processors to use for the simulation.
 
         Returns:
         -------
             int: number of processors to use for the simulation
         """
-        if self.__number_of_processors is None:
+        if self.__number_of_processors is None and self.grid_to_proc is None:
             self._load_options_file()
+        if self.__number_of_processors is None:
+            # if not explicitly set in a GRIDTOPROC table, return 0
+            return 0
         return self.__number_of_processors
 
-    def _load_grid_to_procs(self, options_file_as_list: list[str]) -> GridToProc:
+    def _load_grid_to_procs(self, options_file_as_list: list[str]) -> GridToProc | None:
         """Loads the GRIDTOPROC table from the Options file.
 
         Args:
@@ -403,8 +406,7 @@ class SimControls:
                 end_index = i
                 break
         if start_index is None or end_index is None:
-            raise ValueError(f"Unable to find {grid_to_procs.table_header} or {grid_to_procs.table_footer} in "
-                             "provided file")
+            return grid_to_procs
 
         # read table into the object
         grid_to_procs.grid_to_proc_table = nfo.read_table_to_df(options_file_as_list[start_index:end_index],
@@ -425,7 +427,7 @@ class SimControls:
         self.__grid_to_proc = self._load_grid_to_procs(options_file_content)
 
     @property
-    def grid_to_proc(self) -> GridToProc:
+    def grid_to_proc(self) -> GridToProc | None:
         """Returns the GridToProc object.
 
         Returns:
