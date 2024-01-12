@@ -97,7 +97,6 @@ class NexusConstraint(Constraint):
 
     """
 
-    name: Optional[str] = None
     well_name: Optional[str] = None
     max_surface_oil_rate: Optional[float] = None
     max_surface_gas_rate: Optional[float] = None
@@ -112,7 +111,6 @@ class NexusConstraint(Constraint):
     max_reservoir_gas_rate: Optional[float] = None
     max_reservoir_water_rate: Optional[float] = None
     max_reservoir_liquid_rate: Optional[float] = None
-    max_reservoir_total_fluids_rate: Optional[float] = None
     max_reservoir_hc_rate: Optional[float] = None
     max_reverse_reservoir_oil_rate: Optional[float] = None
     max_reverse_reservoir_gas_rate: Optional[float] = None
@@ -127,8 +125,6 @@ class NexusConstraint(Constraint):
     max_pressure: Optional[float] = None
     max_wag_water_pressure: Optional[float] = None
     max_wag_gas_pressure: Optional[float] = None
-    bottom_hole_pressure: Optional[float] = None
-    tubing_head_pressure: Optional[float] = None
     min_reverse_surface_oil_rate: Optional[float] = None
     min_reverse_surface_gas_rate: Optional[float] = None
     min_reverse_surface_water_rate: Optional[float] = None

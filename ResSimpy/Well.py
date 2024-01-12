@@ -6,6 +6,7 @@ from typing import Optional, Sequence, Union
 
 from ResSimpy.Completion import Completion
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Enums.WellTypeEnum import WellType
 
 
 @dataclass
@@ -13,11 +14,16 @@ class Well(ABC):
     _completions: list[Completion]
     _well_name: str
     __unit_system: UnitSystem
+    _well_type: Optional[WellType]  # TODO: Make this compulsory once we have fully added well type to the Nexus Well
 
-    def __init__(self, well_name: str, completions: list[Completion], unit_system: UnitSystem) -> None:
+    # Class.
+
+    def __init__(self, well_name: str, completions: list[Completion], unit_system: UnitSystem,
+                 well_type: Optional[WellType] = None) -> None:
         self._well_name = well_name
         self._completions = completions
         self.__unit_system = unit_system
+        self._well_type = well_type
 
     @property
     def completions(self) -> list[Completion]:
