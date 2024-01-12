@@ -25,6 +25,10 @@ class Constraint(DataObjectMixin, ABC):
     max_reservoir_water_rate: Optional[float] = None
     max_reservoir_liquid_rate: Optional[float] = None
 
+    bottom_hole_pressure: Optional[float] = None
+    tubing_head_pressure: Optional[float] = None
+    max_reservoir_total_fluids_rate: Optional[float] = None
+
     @property
     def units(self) -> ConstraintUnits:
         """Returns the attribute to unit map for the constraint."""

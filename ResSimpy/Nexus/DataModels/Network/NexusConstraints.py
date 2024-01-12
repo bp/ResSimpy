@@ -30,7 +30,7 @@ class NexusConstraints(Constraints):
     modifying and removing constraints from the NexusNetwork object. This class is also responsible for
     writing the constraints to the Nexus deck.
     """
-    __constraints: dict[str, list[NexusConstraint]] = field(default_factory=lambda: {})
+    _constraints: dict[str, list[Constraint]] = field(default_factory=lambda: {})
 
     def __init__(self, parent_network: NexusNetwork, model: NexusSimulator) -> None:
         self.__parent_network: NexusNetwork = parent_network
