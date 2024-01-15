@@ -17,6 +17,7 @@ from ResSimpy.Nexus.constants import DATE_WITH_TIME_LENGTH
 class GridToProc:
     """Class for storing the GRIDTOPROC table information from the Options file."""
     grid_to_proc_table: None | pd.DataFrame = None
+    auto_distribute: None | str = None
 
     @property
     def table_header(self) -> str:
@@ -36,11 +37,11 @@ class GridToProc:
             int: number of processors to use for the simulation
         """
         if self.grid_to_proc_table is None:
-            raise ValueError("No GRIDTOPROC table found in the Options file")
-        if 'PROCESS' not in self.grid_to_proc_table.columns:
-            raise ValueError("No PROCESS column found in the GRIDTOPROC table")
-
-        return self.grid_to_proc_table['PROCESS'].max()
+            return 0
+        if 'PROCESS' in self.grid_to_proc_table.columns:
+            return self.grid_to_proc_table['PROCESS'].max()
+        else:
+            return 0
 
 
 class SimControls:
@@ -399,13 +400,17 @@ class SimControls:
         grid_to_procs = GridToProc()
         start_index = None
         end_index = None
+        read_table = True
         for i, line in enumerate(options_file_as_list):
             if nfo.check_token(grid_to_procs.table_header, line):
                 start_index = i+1
+            if start_index is not None and nfo.check_token('AUTO', line):
+                grid_to_procs.auto_distribute = nfo.get_expected_token_value('AUTO', line, options_file_as_list)
+                read_table = False
             if nfo.check_token(grid_to_procs.table_footer, line):
                 end_index = i
                 break
-        if start_index is None or end_index is None:
+        if start_index is None or end_index is None or not read_table:
             return grid_to_procs
 
         # read table into the object
