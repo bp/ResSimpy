@@ -734,5 +734,5 @@ class NexusSimulator(Simulator):
         raise NotImplementedError("Not Implemented Yet")
 
     @property
-    def sim_control(self) -> SimControls:
+    def sim_controls(self) -> SimControls:
         return self._sim_controls
