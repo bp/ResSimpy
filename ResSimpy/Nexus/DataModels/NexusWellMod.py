@@ -28,7 +28,7 @@ class NexusWellMod:
     delta_krg: float | None = None
     perm_thickness_mult: float | None = None
 
-    def __init__(self, wellmod_dict: dict[str, str | float | int]) -> None:
+    def __init__(self, wellmod_dict: dict[str, None | str | float | int]) -> None:
         for key, prop in wellmod_dict.items():
             self.__setattr__(key, prop)
 

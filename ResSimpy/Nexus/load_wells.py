@@ -373,16 +373,16 @@ def __load_wellspec_table_headings(header_index: int, header_values: dict[str, N
     return header_index, headers
 
 
-def __get_inline_well_mod(line: str, current_date: str, unit_system: UnitSystem) -> NexusWellMod:
+def __get_inline_well_mod(line: str, current_date: str, unit_system: UnitSystem | None) -> NexusWellMod:
     """Returns a NexusWellMod object from a WELLMOD line. e.g.
     `WELLMOD well_name KH CON value`.
     """
     keyword_mapping = NexusWellMod.get_keyword_mapping()
     next_value = nfo.get_next_value(0, [line], line)
     counter = 0
-    prop = None
-    method = None
-    well_mod_dict = {'date': current_date, 'unit_system': unit_system}
+    prop: None | str = None
+    method: None | str = None
+    well_mod_dict: dict[str, None | float | int | str] = {'date': current_date, 'unit_system': unit_system}
     trimmed_line = line
     while next_value is not None:
         if next_value.upper() == 'WELLMOD':
@@ -399,6 +399,8 @@ def __get_inline_well_mod(line: str, current_date: str, unit_system: UnitSystem)
                 raise NotImplementedError("WELLMOD with method VAR not implemented")
             else:
                 value_found = float(next_value)
+            if prop is None:
+                raise ValueError(f"Cannot find property name for value {value_found} in {line=}")
             attribute_name = nexus_keyword_to_attribute_name(keyword_mapping, prop)
             well_mod_dict.update({attribute_name: value_found})
             # reset the counter for the next property
