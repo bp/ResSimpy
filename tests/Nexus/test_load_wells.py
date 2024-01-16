@@ -8,6 +8,7 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.DataModels.NexusWellMod import NexusWellMod
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.load_wells import load_wells
 from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
@@ -51,15 +52,8 @@ C    2  2  2  2 (commented line using 'C')
     2  1  3  4.5
     7 6 8   9.11
     """, "well3"),
-                          ("""
-    WELLSPEC well3
-    ! RADW radw
-    JW iw l radw
-    2  1  3  4.5
-    7 6 8   9.11
-    WELLMOD PD---_BB KHMULT CON 0.4""", "well3"),
                           ],
-                         ids=["basic case", "swapped columns", "number name", "comments", "different cases", "WELLMOD"])
+                         ids=["basic case", "swapped columns", "number name", "comments", "different cases"])
 def test_load_basic_wellspec(mocker, file_contents, expected_name):
     # Arrange
     start_date = '01/01/2023'
@@ -122,7 +116,7 @@ APPENDTOFIRSTLINE
     6 7 8   9.11>
     !this is a comment
     
-WELLMOD	RU001	DKH	CON	0
+WELLMOD	DEV2	DKH	CON	0
     """
 
     expected_well_1_completion_1 = NexusCompletion(date=start_date, i=1, j=2, k=3, well_radius=4.5,
@@ -154,7 +148,9 @@ WELLMOD	RU001	DKH	CON	0
                                 unit_system=UnitSystem.ENGLISH)
     expected_well_2 = NexusWell(well_name='DEV2',
                                 completions=[expected_well_2_completion_1, expected_well_2_completion_2,
-                                             expected_well_2_completion_3], unit_system=UnitSystem.ENGLISH)
+                                             expected_well_2_completion_3], unit_system=UnitSystem.ENGLISH,
+                                wellmods=[NexusWellMod(dict(well_name='DEV2', delta_perm_thickness_ovr=0,
+                                                            date=start_date, unit_system=UnitSystem.ENGLISH))])
     expected_well_3 = NexusWell(well_name='WEL1234',
                                 completions=[expected_well_3_completion_1, expected_well_3_completion_2],
                                 unit_system=UnitSystem.ENGLISH)

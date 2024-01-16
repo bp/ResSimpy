@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import warnings
 from typing import Optional, Sequence
+
+from ResSimpy.Nexus.DataModels.NexusWellMod import NexusWellMod
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
@@ -11,6 +13,7 @@ from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
+from ResSimpy.Utils.invert_nexus_map import nexus_keyword_to_attribute_name
 
 
 def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem,
@@ -126,7 +129,7 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
 
     header_index: int = -1
     wellspec_found: bool = False
-    current_date: Optional[str] = None
+    current_date: str = start_date
     wells: list[NexusWell] = []
     well_name_list: list[str] = []
 
@@ -159,10 +162,15 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
             date_format = DateFormat[converted_format_str]
 
         if nfo.check_token('TIME', line):
-            current_date = fo.get_token_value(token='TIME', token_line=line, file_list=file_as_list)
-            if current_date is None:
-                raise ValueError(f"Cannot find the date associated with the TIME card in {line=} at line number \
-                                 {index}")
+            current_date = fo.get_expected_token_value(token='TIME', token_line=line, file_list=file_as_list,
+                                                       custom_message="Cannot find the date associated with the TIME "
+                                                                      f"card in {line=} at line number {index}")
+        if nfo.check_token('WELLMOD', line):
+            wellmod = __get_inline_well_mod(line, current_date=current_date, unit_system=wellspec_file_units)
+            wellmodname = wellmod.well_name
+            if wellmodname not in well_name_list:
+                raise ValueError(f"Cannot find well name {wellmodname} in wellspec file: {nexus_file.location}")
+            wells[well_name_list.index(wellmodname)].wellmods.append(wellmod)
 
         if nfo.check_token('WELLSPEC', uppercase_line):
             initial_well_name = nfo.get_expected_token_value(token='WELLSPEC', token_line=line, file_list=file_as_list,
@@ -197,7 +205,8 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
             if well_name in well_name_list:
                 wells[well_name_list.index(well_name)].completions.extend(completions)
             else:
-                new_well = NexusWell(completions=completions, well_name=well_name, unit_system=wellspec_file_units)
+                new_well = NexusWell(completions=completions, well_name=well_name, unit_system=wellspec_file_units,
+                                     wellmods=[])
                 well_name_list.append(well_name)
                 wells.append(new_well)
             wellspec_found = False
@@ -362,3 +371,41 @@ def __load_wellspec_table_headings(header_index: int, header_values: dict[str, N
             if len(headers) > 0:
                 break
     return header_index, headers
+
+
+def __get_inline_well_mod(line: str, current_date: str, unit_system: UnitSystem) -> NexusWellMod:
+    """Returns a NexusWellMod object from a WELLMOD line. e.g.
+    `WELLMOD well_name KH CON value`.
+    """
+    keyword_mapping = NexusWellMod.get_keyword_mapping()
+    next_value = nfo.get_next_value(0, [line], line)
+    counter = 0
+    prop = None
+    method = None
+    well_mod_dict = {'date': current_date, 'unit_system': unit_system}
+    trimmed_line = line
+    while next_value is not None:
+        if next_value.upper() == 'WELLMOD':
+            pass
+        elif counter == 1:
+            name_for_well_mod = next_value
+            well_mod_dict.update({'well_name': name_for_well_mod})
+        elif counter == 2:
+            prop = next_value
+        elif counter == 3:
+            method = next_value
+        elif counter == 4:
+            if method == 'VAR':
+                raise NotImplementedError("WELLMOD with method VAR not implemented")
+            else:
+                value_found = float(next_value)
+            attribute_name = nexus_keyword_to_attribute_name(keyword_mapping, prop)
+            well_mod_dict.update({attribute_name: value_found})
+            # reset the counter for the next property
+            counter = 1
+
+        trimmed_line = trimmed_line.replace(next_value, "", 1)
+        next_value = nfo.get_next_value(0, [trimmed_line], trimmed_line)
+        counter += 1
+
+    return NexusWellMod(well_mod_dict)

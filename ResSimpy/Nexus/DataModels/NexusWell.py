@@ -6,6 +6,7 @@ from uuid import UUID
 
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.DataModels.NexusWellMod import NexusWellMod
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Well import Well
@@ -13,10 +14,18 @@ from ResSimpy.Well import Well
 
 @dataclass(kw_only=True)
 class NexusWell(Well):
+    """Class for representing a well in Nexus. Consists of a list of completions and a well name."""
+    _wellmods: list[NexusWellMod]
 
-    def __init__(self, well_name: str, completions: Sequence[NexusCompletion], unit_system: UnitSystem) -> None:
+    def __init__(self, well_name: str, completions: Sequence[NexusCompletion], unit_system: UnitSystem,
+                 wellmods: Sequence[NexusWellMod] | None = None) -> None:
         if not isinstance(completions, list):
             completions = list(completions)
+        if wellmods is None:
+            wellmods = []
+        elif not isinstance(wellmods, list):
+            wellmods = list(wellmods)
+        self._wellmods: list[NexusWellMod] = wellmods
         super().__init__(well_name=well_name, completions=completions, unit_system=unit_system)
 
     def __repr__(self) -> str:
@@ -24,6 +33,11 @@ class NexusWell(Well):
 
     def __str__(self) -> str:
         return generic_str(self)
+
+    @property
+    def wellmods(self) -> list[NexusWellMod]:
+        """Property with a list of all the wellmods for the well."""
+        return self._wellmods
 
     def find_completions(self, completion_properties:  dict[str, None | float | int | str] | NexusCompletion) -> \
             list[NexusCompletion]:
