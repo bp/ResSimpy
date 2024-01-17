@@ -10,19 +10,18 @@ from ResSimpy.Well import Well
 
 @dataclass(kw_only=True)
 class OpenGoSimWell(Well):
-    __well_type: WellType
 
     def __init__(self, well_name: str, completions: Sequence[Completion], well_type: WellType) -> None:
-        self.__well_type = well_type
         if not isinstance(completions, list):
             completions = list(completions)
 
-        super().__init__(well_name=well_name, completions=completions, unit_system=UnitSystem.ENGLISH)
+        super().__init__(well_name=well_name, completions=completions, unit_system=UnitSystem.ENGLISH,
+                         well_type=well_type)
 
     @property
-    def well_type(self) -> WellType:
+    def well_type(self) -> WellType | None:
         """The Well Type."""
-        return self.__well_type
+        return self._well_type
 
     @property
     def printable_well_info(self) -> str:
@@ -31,7 +30,7 @@ class OpenGoSimWell(Well):
         well_info = \
             f"""
 Well Name: {self.well_name}
-Well Type: {self.well_type.value}
+Well Type: {self.well_type.value if self.well_type is not None else 'Error: No well type defined'}
 Completions:
 {self.__get_completions_string()}
 Dates well is Changed: {'N/A' if len(self.dates_of_completions) == 0 else printable_dates_of_completions}

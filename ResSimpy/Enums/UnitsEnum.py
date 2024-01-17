@@ -22,3 +22,4 @@ class UnitSystem(str, Enum):
     METKGCM2 = 'METKG/CM2'  # defined as 'METKG/CM2' in Nexus, undefined in Eclipse
     METBAR = 'METBAR'  # defined as 'METBAR' in Nexus, 'METRIC' in Eclipse
     METRIC_ATM = 'PVT-M'  # undefined in Nexus, PVT-M in Eclipse
+    UNDEFINED = 'UNDEFINED'  # Undefined by the simulator

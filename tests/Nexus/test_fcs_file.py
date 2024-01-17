@@ -606,3 +606,45 @@ def test_move_model_files_skipped_array(mocker):
     assert list_of_write_names == expected_files
     assert list_of_write_contents == ['array_content', expected_grid_content, '', expected_fcs_content]
     assert len(list_of_write_names) == 4
+
+def test_fcs_repr(mocker):
+    # Arrange
+    fcs_content = '''DESC reservoir1
+    RUN_UNITS ENGLISH
+    DATEFORMAT DD/MM/YYYY
+    INITIALIZATION_FILES
+     EQUIL Method 1 nexus_data/nexus_data/mp2017hm_ref_equil_01.dat
+     EQUIL NORPT Method 2 nexus_data/nexus_data/mp2017hm_ref_equil_02.dat
+    STRUCTURED_GRID nexus_data/mp2020_structured_grid_1_reg_update.dat
+     OPTIONS nexus_data/nexus_data/mp2020_ref_options_reg_update.dat
+     WELLS SET 1 wells.dat
+     HYD NORPT METHOd 3 hyd.dat'''
+
+    fcs_path = 'test_fcs.fcs'
+
+    expected_result = """fcs file location: test_fcs.fcs
+\tFCS file contains:
+\t\tstructured_grid_file: nexus_data/mp2020_structured_grid_1_reg_update.dat
+\t\toptions_file: nexus_data/nexus_data/mp2020_ref_options_reg_update.dat
+\t\tequil_files: 2
+\t\twell_files: 1
+\t\thyd_files: 1
+"""
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            fcs_path: fcs_content,
+            'nexus_data/nexus_data/mp2017hm_ref_equil_01.dat': 'equil content',
+
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+    mocker.patch("os.path.isfile", lambda x: True)
+
+    fcs = FcsNexusFile.generate_fcs_structure(fcs_file_path=fcs_path)
+
+    # Act
+    result = repr(fcs)
+
+    # Assert
+    assert result == expected_result

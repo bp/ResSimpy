@@ -13,7 +13,11 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 @dataclass(kw_only=True)
 class Constraints(ABC):
     """Abstract base class for constraints."""
-    __constraints: dict[str, list[Constraint]] = field(default_factory=lambda: {})
+    _constraints: dict[str, list[Constraint]] = field(default_factory=lambda: {})
+
+    @property
+    def constraints(self) -> list[Constraint] | dict[str, list[Constraint]]:
+        return self._constraints
 
     @abstractmethod
     def get_all(self, object_name: Optional[str] = None, date: Optional[str] = None) \

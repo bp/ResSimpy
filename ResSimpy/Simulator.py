@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from ResSimpy.Aquifer import Aquifer
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Equilibration import Equilibration
 from ResSimpy.File import File
 from ResSimpy.Gaslift import Gaslift
@@ -39,6 +40,16 @@ class Simulator(ABC):
     _network: Network
     _grid: Optional[Grid]
     _model_files: File
+    _default_units: UnitSystem
+
+    def __repr__(self) -> str:
+        """Pretty printing Simulator data."""
+        printable_str = f'Origin: {self.origin}\n'
+        printable_str += f'Full path: {self.model_files.location}\n'
+        printable_str += f'Start date: {self.start_date}\n'
+        printable_str += f'Date format: {self.get_date_format()}\n'
+        printable_str += f'Default units: {str(self.default_units)}\n'
+        return printable_str
 
     """Class Properties"""
 
@@ -97,6 +108,10 @@ class Simulator(ABC):
     @property
     def network(self) -> Network:
         return self._network
+
+    @property
+    def default_units(self) -> UnitSystem:
+        return self._default_units
 
     @property
     def grid(self) -> Optional[Grid]:

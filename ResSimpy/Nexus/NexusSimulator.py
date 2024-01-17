@@ -134,6 +134,15 @@ class NexusSimulator(Simulator):
         # Load in the model
         self.__load_fcs_file()
 
+    def __repr__(self) -> str:
+        """Pretty printing NexusSimulator data."""
+        printable_str = f'Simulation name: {self.root_name}\n'
+        printable_str += super().__repr__()
+        printable_str += f'Run units: {str(self.default_units)}\n'
+        # add details from the fcsfile
+        printable_str += self.model_files.__repr__()
+        return printable_str
+
     def remove_temp_from_properties(self):
         """Updates model values if the files are moved from a temp directory
         Replaces the first instance of temp/ in the file paths in the nexus simulation file paths.
