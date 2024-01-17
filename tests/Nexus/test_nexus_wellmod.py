@@ -134,12 +134,16 @@ class TestNexusWellMod:
         1  1  2  4.6
         1  1  3  4.7
         TIME 01/01/2022
+        WELLSPEC test_well2
+        JW iw l skin
+        2 2 3 4
         WELLMod test_well SKIN VAR 1.2  55  66  KHMULT    CON 1234.2  DKRW  VAr 10 2 3
         TIME 01/01/2023
         WELLSPEC test_well
         JW iw l radw
         1  1  1  4.5
         WELLMOD test_well SKIN VAR 0.5 KHMULT    CON 1234.2  DKRW  VAr 1.1
+        WELLMOD test_well2 SKIN CON 2
         """
         expected_wellmod_1 = NexusWellMod({'well_name': 'test_well', 'date': '01/01/2022',
                                            'unit_system': self.unit_system, 'skin': [1.2, 55, 66],
@@ -162,6 +166,13 @@ class TestNexusWellMod:
                                                  extra_expected_completion_1, extra_expected_completion_2,
                                                  extra_expected_completion_3, extra_expected_completion_4],
                                     wellmods=[expected_wellmod_1, expected_wellmod_2],
+                                    unit_system=self.unit_system),
+                          NexusWell(well_name='test_well2',
+                                    completions=[NexusCompletion(date='01/01/2022', i=2, j=2, k=3, skin=4,
+                                                                 date_format=self.date_format,
+                                                                 unit_system=self.unit_system)],
+                                    wellmods=[NexusWellMod({'well_name': 'test_well2', 'date': '01/01/2023',
+                                                            'unit_system': self.unit_system, 'skin': 2})],
                                     unit_system=self.unit_system)]
         open_mock = mocker.mock_open(read_data=self.well_file_content + extra_well_file_content)
         mocker.patch("builtins.open", open_mock)
