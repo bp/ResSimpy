@@ -3,6 +3,7 @@ from __future__ import annotations
 import warnings
 from typing import Optional, Sequence
 
+from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.NexusWellMod import NexusWellMod
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -165,8 +166,10 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
             current_date = fo.get_expected_token_value(token='TIME', token_line=line, file_list=file_as_list,
                                                        custom_message="Cannot find the date associated with the TIME "
                                                                       f"card in {line=} at line number {index}")
+
         if nfo.check_token('WELLMOD', line):
-            wellmod = __get_inline_well_mod(line, current_date=current_date, unit_system=wellspec_file_units)
+            wellmod = __get_inline_well_mod(line, current_date=current_date, unit_system=wellspec_file_units,
+                                            wells_loaded=wells, start_date=start_date, date_format=date_format)
             wellmodname = wellmod.well_name
             if wellmodname not in well_name_list:
                 raise ValueError(f"Cannot find well name {wellmodname} in wellspec file: {nexus_file.location}")
@@ -373,17 +376,26 @@ def __load_wellspec_table_headings(header_index: int, header_values: dict[str, N
     return header_index, headers
 
 
-def __get_inline_well_mod(line: str, current_date: str, unit_system: UnitSystem | None) -> NexusWellMod:
+def __get_inline_well_mod(line: str, current_date: str, unit_system: UnitSystem | None,
+                          wells_loaded: list[NexusWell], start_date: str, date_format: DateFormat) -> NexusWellMod:
     """Returns a NexusWellMod object from a WELLMOD line. e.g.
     `WELLMOD well_name KH CON value`.
+
+    Args:
+        line (str): line to extract the wellmod from
+        current_date (str): current date in the file
+        unit_system (UnitSystem | None): Unit system enum
+        wells_loaded (list[NexusWell]): list of wells loaded, used for determining the number of completions in the well
     """
     keyword_mapping = NexusWellMod.get_keyword_mapping()
     next_value = nfo.get_next_value(0, [line], line)
     counter = 0
     prop: None | str = None
     method: None | str = None
-    well_mod_dict: dict[str, None | float | int | str] = {'date': current_date, 'unit_system': unit_system}
+    well_mod_dict: dict[str, None | float | int | str | list[float]] = \
+        {'date': current_date, 'unit_system': unit_system}
     trimmed_line = line
+    name_for_well_mod: None | str = None
     while next_value is not None:
         if next_value.upper() == 'WELLMOD':
             pass
@@ -395,8 +407,19 @@ def __get_inline_well_mod(line: str, current_date: str, unit_system: UnitSystem 
         elif counter == 3:
             method = next_value
         elif counter == 4:
-            if method == 'VAR':
-                raise NotImplementedError("WELLMOD with method VAR not implemented")
+            if method is not None and method.upper() == 'VAR':
+                var_array: list[float] = []
+                current_datetime_as_iso: ISODateTime = ISODateTime.convert_to_iso(current_date, date_format, start_date)
+                number_completions = __get_number_completions(well_name=name_for_well_mod,
+                                                              wells_loaded=wells_loaded, line=line,
+                                                              current_iso_date=current_datetime_as_iso)
+                for i in range(number_completions):
+                    next_value = fo.get_expected_next_value(0, [trimmed_line], trimmed_line)
+                    var_array.append(float(next_value))
+                    trimmed_line = trimmed_line.replace(next_value, "", 1)
+                value_found: list[float] | float = var_array
+                if next_value is None:
+                    raise ValueError(f"Cannot find value for {prop=} in {line=}")
             else:
                 value_found = float(next_value)
             if prop is None:
@@ -411,3 +434,30 @@ def __get_inline_well_mod(line: str, current_date: str, unit_system: UnitSystem 
         counter += 1
 
     return NexusWellMod(well_mod_dict)
+
+
+def __get_number_completions(well_name: str | None, current_iso_date: ISODateTime, wells_loaded: list[NexusWell],
+                             line: str) -> int:
+    """Returns the number of completions for a given well name.
+
+    Args:
+        well_name (str | None): name of the well to find the number of completions for
+        current_date (str): current date in the file
+        wells_loaded (list[NexusWell]): list of wells loaded, used for determining the number of completions in the well
+
+    Returns:
+        int: number of completions for a given well name.
+    """
+    if well_name is None:
+        raise ValueError(f"No well name found for the wellmod in the wellspec file in line:\n{line}")
+    number_completions = 0
+    for well in wells_loaded:
+        if well.well_name != well_name:
+            continue
+
+        completion_dates = [x.iso_date for x in well.completions if x.iso_date <= current_iso_date]
+        # get the most recent completions
+        number_completions = len([x for x in completion_dates if x == max(completion_dates)])
+        break
+
+    return number_completions

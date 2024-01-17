@@ -13,22 +13,22 @@ class NexusWellMod:
     well_name: str
     date: str
     unit_system: UnitSystem | None = None
-    partial_perf: float | None = None
-    permeability_thickness: float | None = None
-    skin: float | None = None
-    well_radius: float | None = None
-    polymer_well_radius: float | None = None
-    polymer_block_radius: float | None = None
-    well_indices: float | None = None
-    rel_perm_method: int | None = None
-    delta_perm_thickness_ovr: float | None = None
-    delta_swr: float | None = None
-    delta_sgr: float | None = None
-    delta_krw: float | None = None
-    delta_krg: float | None = None
-    perm_thickness_mult: float | None = None
+    partial_perf: float | list[float] | None = None
+    permeability_thickness: float | list[float] | None = None
+    skin: float | list[float] | None = None
+    well_radius: float | list[float] | None = None
+    polymer_well_radius: float | list[float] | None = None
+    polymer_block_radius: float | list[float] | None = None
+    well_indices: float | list[float] | None = None
+    rel_perm_method: int | None | list[int] = None
+    delta_perm_thickness_ovr: float | list[float] | None = None
+    delta_swr: float | list[float] | None = None
+    delta_sgr: float | list[float] | None = None
+    delta_krw: float | list[float] | None = None
+    delta_krg: float | list[float] | None = None
+    perm_thickness_mult: float | list[float] | None = None
 
-    def __init__(self, wellmod_dict: dict[str, None | str | float | int]) -> None:
+    def __init__(self, wellmod_dict: dict[str, None | str | float | int | list[float]]) -> None:
         for key, prop in wellmod_dict.items():
             self.__setattr__(key, prop)
 
