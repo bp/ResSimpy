@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional, Any, Literal
 
 from ResSimpy.Network import Network
+from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
@@ -43,6 +44,7 @@ class NexusNetwork(Network):
     constraints: NexusConstraints
     __has_been_loaded: bool = False
     targets: NexusTargets
+    welllists: list[NexusWellList]
 
     def __init__(self, model: NexusSimulator) -> None:
         self.__has_been_loaded: bool = False
@@ -54,6 +56,7 @@ class NexusNetwork(Network):
         self.wellbores: NexusWellbores = NexusWellbores(self)
         self.constraints: NexusConstraints = NexusConstraints(self, model)
         self.targets: NexusTargets = NexusTargets(self)
+        self.welllists: list[NexusWellList] = []
 
     def get_load_status(self) -> bool:
         """Checks load status and loads the network if it hasn't already been loaded."""
@@ -89,18 +92,18 @@ class NexusNetwork(Network):
         Table headers with None next to their name are currently skipped awaiting development.
         """
 
-        def type_check_lists(input: Optional[list[Any] | dict[str, list[NexusConstraint]]]) -> Optional[list[Any]]:
+        def type_check_lists(value: Optional[list[Any] | dict[str, list[NexusConstraint]]]) -> Optional[list[Any]]:
             """Guards against dictionaries coming from the dictionary."""
-            if isinstance(input, dict):
-                raise TypeError(f"Expected a list, instead received a dict: {input}")
-            return input
+            if isinstance(value, dict):
+                raise TypeError(f"Expected a list, instead received a dict: {value}")
+            return value
 
-        def type_check_dicts(input: Optional[list[Any] | dict[str, list[NexusConstraint]]]) -> \
+        def type_check_dicts(value: Optional[list[Any] | dict[str, list[NexusConstraint]]]) -> \
                 Optional[dict[str, list[NexusConstraint]]]:
             """Guards against dictionaries coming from the dictionary."""
-            if isinstance(input, list):
-                raise TypeError(f"Expected a dict, instead received a list: {input}")
-            return input
+            if isinstance(value, list):
+                raise TypeError(f"Expected a dict, instead received a list: {value}")
+            return value
 
         # TODO implement all objects with Nones next to them in the dictionary below
         if self.__model.model_files.surface_files is None:
@@ -120,6 +123,7 @@ class NexusNetwork(Network):
                           'TARGET': NexusTarget,
                           'GUIDERATE': None,
                           'PROCS': None,
+                          'WELLLIST': NexusWellList,
                           },
                 start_date=self.__model.start_date,
                 default_units=self.__model.default_units,
@@ -131,6 +135,12 @@ class NexusNetwork(Network):
             self.wellbores._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLBORE')))
             self.constraints._add_to_memory(type_check_dicts(nexus_obj_dict.get('CONSTRAINTS')))
             self.targets._add_to_memory(type_check_lists(nexus_obj_dict.get('TARGET')))
+
+            # add to welllist
+            well_list_guard_typing = type_check_lists(nexus_obj_dict.get('WELLLIST'))
+            if well_list_guard_typing is not None:
+                only_welllist_objects = [x for x in well_list_guard_typing if isinstance(x, NexusWellList)]
+                self.welllists.extend(only_welllist_objects)
 
         self.__has_been_loaded = True
 

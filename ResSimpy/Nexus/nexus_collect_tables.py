@@ -9,6 +9,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.nexus_constraint_operations import load_inline_constraints
 from ResSimpy.Nexus.nexus_file_operations import check_property_in_line, check_token, get_expected_token_value, \
     check_list_tokens, load_table_to_objects
+from ResSimpy.Nexus.nexus_load_well_list import load_well_lists
 
 
 def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, Any], start_date: Optional[str],
@@ -99,6 +100,12 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                                      nexus_obj_dict=nexus_constraints,
                                                      preserve_previous_object_attributes=True)
 
+            elif token_found == 'WELLLIST':
+                list_objects = load_well_lists(file_as_list=file_as_list[table_start-1:table_end],
+                                               current_date=current_date,
+                                               previous_well_lists=nexus_object_results[token_found],
+                                               )
+
             else:
                 list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
                                                      row_object=table_object_map[token_found],
@@ -126,6 +133,7 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                         nexus_constraints[well_name].append(constraint)
                     else:
                         nexus_constraints[well_name] = [constraint]
+
             elif list_objects is not None and isinstance(list_of_token_obj, list):
                 list_of_token_obj.extend([x[0] for x in list_objects])
                 # add the names from the nodes into the network names for wildcards
