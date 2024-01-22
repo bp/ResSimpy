@@ -741,3 +741,7 @@ class NexusSimulator(Simulator):
     def write_out_new_model(self, new_location: str, new_model_name: str) -> None:
         """Not implemented for Nexus yet."""
         raise NotImplementedError("Not Implemented Yet")
+
+    @property
+    def sim_controls(self) -> SimControls:
+        return self._sim_controls
