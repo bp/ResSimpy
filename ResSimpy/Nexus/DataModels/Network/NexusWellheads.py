@@ -60,12 +60,10 @@ class NexusWellheads(Wellheads):
         raise NotImplementedError('To be implemented')
 
     def load(self, surface_file: File, start_date: str, default_units: UnitSystem) -> None:
-        new_wellheads = collect_all_tables_to_objects(surface_file, {'WELLHEAD': NexusWellhead},
-                                                      start_date=start_date,
-                                                      default_units=default_units)
+        new_wellheads, _ = collect_all_tables_to_objects(surface_file, {'WELLHEAD': NexusWellhead},
+                                                         start_date=start_date,
+                                                         default_units=default_units)
         wellheads_list = new_wellheads.get('WELLHEAD')
-        if isinstance(wellheads_list, dict):
-            raise ValueError('Incompatible data format for additional wells. Expected type "list" instead got "dict"')
         self._add_to_memory(wellheads_list)
 
     def _add_to_memory(self, additional_list: Optional[list[NexusWellhead]]) -> None:

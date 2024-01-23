@@ -9,11 +9,13 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.nexus_constraint_operations import load_inline_constraints
 from ResSimpy.Nexus.nexus_file_operations import check_property_in_line, check_token, get_expected_token_value, \
     check_list_tokens, load_table_to_objects
+from ResSimpy.Nexus.nexus_load_well_list import load_well_lists
 
 
+# TODO refactor the collection of tables to an object with proper typing
 def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, Any], start_date: Optional[str],
                                   default_units: Optional[UnitSystem]) -> \
-        dict[str, list[Any] | dict[str, list[NexusConstraint]]]:
+        tuple[dict[str, list[Any]], dict[str, list[NexusConstraint]]]:
     """Loads all tables from a given file.
 
     Args:
@@ -30,13 +32,15 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
 
     Returns:
     -------
-    dict[str, list[Storage_Object]]: a dictionary of lists of arbitrary objects populated \
-                with properties from the file provided, keyed with the NexusTable name associated with table_object_map.
+    tuple[dict[str, list[DataObject]], dict[str, list[NexusConstraint]]]: a tuple of two dictionaries of lists of \
+    DataObjects. The first element is a dictionary of lists of objects keyed with the NexusTable name associated with \
+    the object. The second element is a dictionary of lists of NexusConstraints keyed with the well name associated \
+    with the constraint.
     """
     current_date = start_date
-    nexus_object_results: dict[str, list[Any] | dict[str, list[NexusConstraint]]] = {x: [] for x in table_object_map}
+    nexus_object_results: dict[str, list[Any]] = {x: [] for x in table_object_map}
     nexus_constraints: dict[str, list[NexusConstraint]] = {}
-    nexus_object_results['CONSTRAINTS'] = nexus_constraints
+
     file_as_list: list[str] = nexus_file.get_flat_list_str_file
     table_start: int = -1
     table_end: int = -1
@@ -99,6 +103,12 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                                      nexus_obj_dict=nexus_constraints,
                                                      preserve_previous_object_attributes=True)
 
+            elif token_found == 'WELLLIST':
+                list_objects = load_well_lists(file_as_list=file_as_list[table_start-1:table_end],
+                                               current_date=current_date,
+                                               previous_well_lists=nexus_object_results[token_found],
+                                               )
+
             else:
                 list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
                                                      row_object=table_object_map[token_found],
@@ -126,6 +136,7 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                         nexus_constraints[well_name].append(constraint)
                     else:
                         nexus_constraints[well_name] = [constraint]
+
             elif list_objects is not None and isinstance(list_of_token_obj, list):
                 list_of_token_obj.extend([x[0] for x in list_objects])
                 # add the names from the nodes into the network names for wildcards
@@ -138,10 +149,8 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                         nexus_file.add_object_locations(obj_id, [correct_line_index])
                     except AttributeError:
                         pass
-            else:
-                list_of_token_obj = nexus_constraints
             # reset indices for further tables
             table_start = -1
             table_end = -1
             token_found = None
-    return nexus_object_results
+    return nexus_object_results, nexus_constraints

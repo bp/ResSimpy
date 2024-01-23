@@ -717,7 +717,7 @@ def test_collect_all_tables_to_objects(mocker, file_contents, node1_props, node2
 
     # Act
 
-    result_dict = ResSimpy.Nexus.nexus_collect_tables.collect_all_tables_to_objects(surface_file,
+    result_dict, _ = ResSimpy.Nexus.nexus_collect_tables.collect_all_tables_to_objects(surface_file,
                                                                                     {'NODES': NexusNode,
                                                                                      'WELLS': NexusNode}, start_date,
                                                                                     default_units=UnitSystem.ENGLISH)
