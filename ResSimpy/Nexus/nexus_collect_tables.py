@@ -32,8 +32,10 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
 
     Returns:
     -------
-    dict[str, list[Storage_Object]]: a dictionary of lists of arbitrary objects populated \
-                with properties from the file provided, keyed with the NexusTable name associated with table_object_map.
+    tuple[dict[str, list[DataObject]], dict[str, list[NexusConstraint]]]: a tuple of two dictionaries of lists of \
+    DataObjects. The first element is a dictionary of lists of objects keyed with the NexusTable name associated with \
+    the object. The second element is a dictionary of lists of NexusConstraints keyed with the well name associated \
+    with the constraint.
     """
     current_date = start_date
     nexus_object_results: dict[str, list[Any]] = {x: [] for x in table_object_map}
