@@ -149,7 +149,7 @@ ENDWELLLIST'''
         nexus_file = NexusFile(location='', file_content_as_list=file_as_list)
 
         # Act
-        nexus_obj_dict = collect_all_tables_to_objects(
+        nexus_obj_dict, _ = collect_all_tables_to_objects(
             nexus_file=nexus_file, table_object_map={'WELLLIST': NexusWellList},
             start_date='01/01/2019',
             default_units=UnitSystem.ENGLISH,

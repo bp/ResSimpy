@@ -110,7 +110,7 @@ class NexusNetwork(Network):
             raise FileNotFoundError('Could not find any surface files associated with the fcs file provided.')
 
         for surface in self.__model.model_files.surface_files.values():
-            nexus_obj_dict = collect_all_tables_to_objects(
+            nexus_obj_dict, constraints = collect_all_tables_to_objects(
                 surface, {'NODECON': NexusNodeConnection,
                           'NODES': NexusNode,
                           'WELLS': NexusWellConnection,
@@ -133,7 +133,7 @@ class NexusNetwork(Network):
             self.well_connections._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLS')))
             self.wellheads._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLHEAD')))
             self.wellbores._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLBORE')))
-            self.constraints._add_to_memory(type_check_dicts(nexus_obj_dict.get('CONSTRAINTS')))
+            self.constraints._add_to_memory(type_check_dicts(constraints))
             self.targets._add_to_memory(type_check_lists(nexus_obj_dict.get('TARGET')))
 
             # add to welllist

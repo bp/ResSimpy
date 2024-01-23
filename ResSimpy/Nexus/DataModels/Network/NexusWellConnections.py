@@ -82,12 +82,10 @@ class NexusWellConnections(WellConnections):
         self.__well_connections.extend(additional_list)
 
     def load(self, surface_file: File, start_date: str, default_units: UnitSystem) -> None:
-        new_well_connections = collect_all_tables_to_objects(surface_file, {'WELLS': NexusWellConnection},
-                                                             start_date=start_date,
-                                                             default_units=default_units)
+        new_well_connections, _ = collect_all_tables_to_objects(surface_file, {'WELLS': NexusWellConnection},
+                                                                start_date=start_date,
+                                                                default_units=default_units)
         cons_list = new_well_connections.get('WELLS')
-        if isinstance(cons_list, dict):
-            raise ValueError('Incompatible data format for additional wells. Expected type "list" instead got "dict"')
         self._add_to_memory(cons_list)
 
     def remove(self, obj_to_remove: dict[str, None | str | float | int] | UUID) -> None:

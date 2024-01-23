@@ -76,12 +76,9 @@ class NexusNodeConnections(NodeConnections):
         """Calls load connections and appends the list of discovered NodeConnections into the NexusNodeConnection \
             object.
         """
-        new_connections = collect_all_tables_to_objects(surface_file, {self.table_header: NexusNodeConnection},
-                                                        start_date=start_date, default_units=default_units)
+        new_connections, _ = collect_all_tables_to_objects(surface_file, {self.table_header: NexusNodeConnection},
+                                                           start_date=start_date, default_units=default_units)
         cons_list = new_connections.get(self.table_header)
-        if isinstance(cons_list, dict):
-            raise ValueError(
-                'Incompatible data format for additional nodecons. Expected type "list" instead got "dict"')
         self._add_to_memory(cons_list)
 
     def _add_to_memory(self, additional_list: Optional[Sequence[NexusNodeConnection]]):

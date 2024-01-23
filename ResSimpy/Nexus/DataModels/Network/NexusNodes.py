@@ -93,13 +93,11 @@ class NexusNodes(Nodes):
             TypeError: if the unit system found in the property check is not a valid enum UnitSystem.
 
         """
-        new_nodes = collect_all_tables_to_objects(surface_file, {'NODES': NexusNode},
-                                                  start_date=start_date,
-                                                  default_units=default_units)
-        cons_list = new_nodes.get('NODES')
-        if isinstance(cons_list, dict):
-            raise ValueError('Incompatible data format for additional wells. Expected type "list" instead got "dict"')
-        self._add_to_memory(cons_list)
+        new_nodes, _ = collect_all_tables_to_objects(surface_file, {'NODES': NexusNode},
+                                                     start_date=start_date,
+                                                     default_units=default_units)
+        nodes_list = new_nodes.get('NODES')
+        self._add_to_memory(nodes_list)
 
     def _add_to_memory(self, additional_list: Optional[list[NexusNode]]) -> None:
         """Extends the nodes object by a list of nodes provided to it.

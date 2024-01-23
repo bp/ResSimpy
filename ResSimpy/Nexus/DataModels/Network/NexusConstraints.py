@@ -83,19 +83,15 @@ class NexusConstraints(Constraints):
     def load(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
         # CONSTRAINT keyword represents a table with a header and columns.
         # CONSTRAINTS keyword represents a list of semi structured constraints with a well_name and then constraints
-        new_constraints = collect_all_tables_to_objects(surface_file,
-                                                        {
-                                                            'CONSTRAINTS': NexusConstraint,
-                                                            'CONSTRAINT': NexusConstraint,
-                                                            'QMULT': NexusConstraint
-                                                        },
-                                                        start_date=start_date,
-                                                        default_units=default_units)
-        cons_list = new_constraints.get('CONSTRAINTS')
-        if isinstance(cons_list, list):
-            raise ValueError(
-                'Incompatible data format for additional constraints. Expected type "dict" instead got "list"')
-        self._add_to_memory(cons_list)
+        _, new_constraints = collect_all_tables_to_objects(surface_file,
+                                                           {
+                                                               'CONSTRAINTS': NexusConstraint,
+                                                               'CONSTRAINT': NexusConstraint,
+                                                               'QMULT': NexusConstraint
+                                                           },
+                                                           start_date=start_date,
+                                                           default_units=default_units)
+        self._add_to_memory(new_constraints)
 
     def _add_to_memory(self, additional_constraints: Optional[dict[str, list[NexusConstraint]]]) -> None:
         """Adds additional constraints to memory within the NexusConstraints object.

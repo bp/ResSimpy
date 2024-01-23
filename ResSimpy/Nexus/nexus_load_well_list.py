@@ -6,7 +6,7 @@ from ResSimpy.Enums.HowEnum import OperationEnum
 
 
 def load_well_lists(file_as_list: list[str], current_date: None | str,
-                    previous_well_lists: None | list | dict = None,
+                    previous_well_lists: None | list[NexusWellList] = None,
                     table_start_index: int = 0) -> list[tuple[NexusWellList, int]]:
     """Loads a well list from a surface network file.
 
@@ -20,7 +20,7 @@ def load_well_lists(file_as_list: list[str], current_date: None | str,
     Returns:
         NexusWellList: A NexusWellList object containing the well list data.
     """
-    if previous_well_lists is None or isinstance(previous_well_lists, dict):
+    if previous_well_lists is None:
         previous_well_lists = []
     if current_date is None:
         current_date = ''

@@ -12,9 +12,10 @@ from ResSimpy.Nexus.nexus_file_operations import check_property_in_line, check_t
 from ResSimpy.Nexus.nexus_load_well_list import load_well_lists
 
 
+# TODO refactor the collection of tables to an object with proper typing
 def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, Any], start_date: Optional[str],
                                   default_units: Optional[UnitSystem]) -> \
-        dict[str, list[Any] | dict[str, list[NexusConstraint]]]:
+        tuple[dict[str, list[Any]], dict[str, list[NexusConstraint]]]:
     """Loads all tables from a given file.
 
     Args:
@@ -35,9 +36,9 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                 with properties from the file provided, keyed with the NexusTable name associated with table_object_map.
     """
     current_date = start_date
-    nexus_object_results: dict[str, list[Any] | dict[str, list[NexusConstraint]]] = {x: [] for x in table_object_map}
+    nexus_object_results: dict[str, list[Any]] = {x: [] for x in table_object_map}
     nexus_constraints: dict[str, list[NexusConstraint]] = {}
-    nexus_object_results['CONSTRAINTS'] = nexus_constraints
+
     file_as_list: list[str] = nexus_file.get_flat_list_str_file
     table_start: int = -1
     table_end: int = -1
@@ -146,10 +147,8 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                         nexus_file.add_object_locations(obj_id, [correct_line_index])
                     except AttributeError:
                         pass
-            else:
-                list_of_token_obj = nexus_constraints
             # reset indices for further tables
             table_start = -1
             table_end = -1
             token_found = None
-    return nexus_object_results
+    return nexus_object_results, nexus_constraints

@@ -92,12 +92,10 @@ class NexusTargets(Targets):
             TypeError: if the unit system found in the property check is not a valid enum UnitSystem.
 
         """
-        new_targets = collect_all_tables_to_objects(surface_file, {'TARGET': NexusTarget},
-                                                    start_date=start_date,
-                                                    default_units=default_units)
+        new_targets, _ = collect_all_tables_to_objects(surface_file, {'TARGET': NexusTarget},
+                                                       start_date=start_date,
+                                                       default_units=default_units)
         cons_list = new_targets.get('TARGET')
-        if isinstance(cons_list, dict):
-            raise ValueError('Incompatible data format for additional wells. Expected type "list" instead got "dict"')
         self._add_to_memory(cons_list)
 
     def _add_to_memory(self, additional_list: Optional[list[NexusTarget]]) -> None:
@@ -134,7 +132,7 @@ class NexusTargets(Targets):
             dictionary taking all the properties for the new target.
             Requires date and a target name.
         """
-        new_object = self.__add_object_operations.add_network_obj(target_to_add, NexusTarget,  self.__parent_network)
+        new_object = self.__add_object_operations.add_network_obj(target_to_add, NexusTarget, self.__parent_network)
         self._add_to_memory([new_object])
 
     def modify(self, target_to_modify: dict[str, None | str | float | int],
