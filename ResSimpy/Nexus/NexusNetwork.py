@@ -24,6 +24,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusWellheads import NexusWellheads
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusTarget import NexusTarget
 from ResSimpy.Nexus.DataModels.Network.NexusTargets import NexusTargets
+from ResSimpy.Nexus.DataModels.Network.NexusWellLists import NexusWellLists
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
@@ -44,7 +45,7 @@ class NexusNetwork(Network):
     constraints: NexusConstraints
     __has_been_loaded: bool = False
     targets: NexusTargets
-    welllists: list[NexusWellList]
+    welllists: NexusWellLists
 
     def __init__(self, model: NexusSimulator) -> None:
         self.__has_been_loaded: bool = False
@@ -56,7 +57,7 @@ class NexusNetwork(Network):
         self.wellbores: NexusWellbores = NexusWellbores(self)
         self.constraints: NexusConstraints = NexusConstraints(self, model)
         self.targets: NexusTargets = NexusTargets(self)
-        self.welllists: list[NexusWellList] = []
+        self.welllists: NexusWellLists = NexusWellLists(self)
 
     def get_load_status(self) -> bool:
         """Checks load status and loads the network if it hasn't already been loaded."""
@@ -135,12 +136,7 @@ class NexusNetwork(Network):
             self.wellbores._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLBORE')))
             self.constraints._add_to_memory(type_check_dicts(constraints))
             self.targets._add_to_memory(type_check_lists(nexus_obj_dict.get('TARGET')))
-
-            # add to welllist
-            well_list_guard_typing = type_check_lists(nexus_obj_dict.get('WELLLIST'))
-            if well_list_guard_typing is not None:
-                only_welllist_objects = [x for x in well_list_guard_typing if isinstance(x, NexusWellList)]
-                self.welllists.extend(only_welllist_objects)
+            self.welllists._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLLIST')))
 
         self.__has_been_loaded = True
 
