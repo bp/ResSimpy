@@ -180,8 +180,8 @@ ENDWELLLIST'''
         expected_result_1 = [well_list, well_list3]
         expected_result_2 = [well_list2, well_list4]
         # Act
-        result = well_lists.get_by_name('well_list_name')
-        result_2 = well_lists.get_by_name('well_list_name_2')
+        result = well_lists.get_all_by_name('well_list_name')
+        result_2 = well_lists.get_all_by_name('well_list_name_2')
         # Assert
         assert result == expected_result_1
         assert result_2 == expected_result_2

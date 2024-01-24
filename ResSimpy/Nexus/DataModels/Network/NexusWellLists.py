@@ -42,7 +42,7 @@ class NexusWellLists(WellLists):
         """End of the Node definition table."""
         return 'ENDWELLLISTS'
 
-    def get_by_name(self, well_list_name: str) -> list[NexusWellList]:
+    def get_all_by_name(self, well_list_name: str) -> list[NexusWellList]:
         """Returns a single WellList with the provided name loaded from the simulator.
 
         Args:
