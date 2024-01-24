@@ -203,7 +203,7 @@ def test_load_wells_multiple_wells_multiple_dates(mocker):
     18 63 1234            1.00002
     
     TIME 15/12/2023
-    WELLSPEC DEV1
+    WELLSPEC dev1
     IW  JW L    RADB   KH! Columns not present above
     1   2  4    1.55   1.423 
     """
