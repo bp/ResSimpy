@@ -171,9 +171,9 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
             wellmod = __get_inline_well_mod(line, current_date=current_date, unit_system=wellspec_file_units,
                                             wells_loaded=wells, start_date=start_date, date_format=date_format)
             wellmodname = wellmod.well_name
-            if wellmodname not in well_name_list:
+            if wellmodname.upper() not in well_name_list:
                 raise ValueError(f"Cannot find well name {wellmodname} in wellspec file: {nexus_file.location}")
-            wells[well_name_list.index(wellmodname)].wellmods.append(wellmod)
+            wells[well_name_list.index(wellmodname.upper())].wellmods.append(wellmod)
 
         if nfo.check_token('WELLSPEC', uppercase_line):
             initial_well_name = nfo.get_expected_token_value(token='WELLSPEC', token_line=line, file_list=file_as_list,
@@ -205,12 +205,12 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
                 nexus_file, header_index, header_values, headers, current_date, end_point_scaling_header_values,
                 date_format, unit_system=wellspec_file_units)
 
-            if well_name in well_name_list:
-                wells[well_name_list.index(well_name)].completions.extend(completions)
+            if well_name.upper() in well_name_list:
+                wells[well_name_list.index(well_name.upper())].completions.extend(completions)
             else:
                 new_well = NexusWell(completions=completions, well_name=well_name, unit_system=wellspec_file_units,
                                      wellmods=[])
-                well_name_list.append(well_name)
+                well_name_list.append(well_name.upper())
                 wells.append(new_well)
             wellspec_found = False
     return wells, date_format
