@@ -141,7 +141,7 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
                     __extract_substring_until_next_invalid_character(character_location, ignore_values,
                                                                      invalid_characters, new_search_string,
                                                                      search_string, value))
-
+                # if the substring is a not an empty string, we've found a value
                 if value != "":
                     value_found = True
                     # Replace the original value with the new requested value
