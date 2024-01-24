@@ -23,6 +23,7 @@ from ResSimpy.Nexus.DataModels.NexusHydraulicsMethod import NexusHydraulicsMetho
 from ResSimpy.Nexus.DataModels.NexusGasliftMethod import NexusGasliftMethod
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
+from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from pytest_mock import MockerFixture
@@ -1660,7 +1661,7 @@ def test_get_gaslift(mocker: MockerFixture, fcs_file_contents: str):
 
 @pytest.mark.parametrize("fcs_file_contents, surface_file_content, node1_props, node2_props, \
 connection1_props, connection2_props, wellconprops1, wellconprops2, wellheadprops1, wellheadprops2, wellboreprops1, \
-wellboreprops2, constraint_props1, constraint_props2",
+wellboreprops2, constraint_props1, constraint_props2, welllist1",
      [(
          'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data/surface.inc',
          '''
@@ -1715,6 +1716,14 @@ C          node1         NA        NA    80    100.5 200.8   1     station      
         GUN_P	ACTIVATE
         GUN_P	PMIN 5 QALLRMAX MULT
         ENDCONSTRAINTS
+        
+        WELLLIST  test_welllist
+        ADD
+        well1
+        well2
+        well3
+        ENDWELLLIST
+        
           ''',
             {'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
                 'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
@@ -1740,11 +1749,12 @@ C          node1         NA        NA    80    100.5 200.8   1     station      
 {'name': 'GUN_P', 'qmult_oil_rate': 128.528, 'qmult_gas_rate': 13776.669, 'qmult_water_rate': 0.0, 'date': '01/03/2025',
 'unit_system': UnitSystem.METBAR, 'active_node':True, 'min_pressure': 5.0, 'convert_qmult_to_reservoir_barrels': True,
 'well_name':'GUN_P'},
+         {'name': 'test_welllist', 'wells': ['well1', 'well2', 'well3'], 'date': '01/03/2025',}
          ),
      ])
 def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node1_props, node2_props,
     connection1_props, connection2_props, wellconprops1, wellconprops2, wellheadprops1, wellheadprops2,
-    wellboreprops1, wellboreprops2, constraint_props1, constraint_props2):
+    wellboreprops1, wellboreprops2, constraint_props1, constraint_props2, welllist1):
     # Arrange
     # Mock out the surface and fcs file
     def mock_open_wrapper(filename, mode):
@@ -1767,6 +1777,7 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
     expected_wellheads = [NexusWellhead(wellheadprops1), NexusWellhead(wellheadprops2)]
     expected_wellbores = [NexusWellbore(wellboreprops1), NexusWellbore(wellboreprops2)]
     expected_constraints = {constraint_props1['name']: [NexusConstraint(constraint_props2)]}
+    expected_welllist = [NexusWellList(**welllist1)]
     # create a mocker spy to check the network loader gets called once
     spy = mocker.spy(nexus_sim._network, 'load')
 
@@ -1777,6 +1788,7 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
     result_wellheads = nexus_sim.network.wellheads.get_all()
     result_wellbores = nexus_sim.network.wellbores.get_all()
     result_constraints = nexus_sim.network.constraints.get_all()
+    result_welllist = nexus_sim.network.welllists.get_all()
     # Assert
     assert result_nodes == expected_nodes
     assert result_cons == expected_cons
@@ -1784,6 +1796,7 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
     assert result_wellheads == expected_wellheads
     assert result_wellbores == expected_wellbores
     assert result_constraints == expected_constraints
+    assert result_welllist == expected_welllist
     spy.assert_called_once()
 
 def test_nexus_simulator_repr(mocker):
