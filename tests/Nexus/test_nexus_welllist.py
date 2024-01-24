@@ -1,6 +1,7 @@
 import pytest
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.DataModels.Network.NexusWellLists import NexusWellLists
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
@@ -157,3 +158,30 @@ ENDWELLLIST'''
         # Assert
         assert nexus_obj_dict['WELLLIST'] == expected_welllists
 
+    def test_get_by_name(self, mocker):
+        # Arrange
+        well_list = NexusWellList(name='well_list_name', wells=['wellname_1', 'wellname_2', 'wellname_3'],
+                                  date='01/01/2020')
+        well_list2 = NexusWellList(name='well_list_name_2',
+                                   wells=['wellname_4', 'wellname_5', 'wellname_6'],
+                                   date='01/01/2020')
+        well_list3 = NexusWellList(name='well_list_name',
+                                     wells=['wellname_2', 'wellname_3'],
+                                     date='01/01/2023')
+        well_list4 = NexusWellList(name='well_list_name_2',
+                                        wells=['wellname_4', 'wellname_5', 'wellname_6'],
+                                        date='01/02/2023')
+        # get a mock network
+
+        mock_nexus_network = mocker.MagicMock()
+        well_lists = NexusWellLists(mock_nexus_network)
+
+        setattr(well_lists, '_NexusWellLists__well_lists', [well_list, well_list2, well_list3, well_list4])
+        expected_result_1 = [well_list, well_list3]
+        expected_result_2 = [well_list2, well_list4]
+        # Act
+        result = well_lists.get_all_by_name('well_list_name')
+        result_2 = well_lists.get_all_by_name('well_list_name_2')
+        # Assert
+        assert result == expected_result_1
+        assert result_2 == expected_result_2
