@@ -80,7 +80,8 @@ def load_file_as_list(file_path: str, strip_comments: bool = False, strip_str: b
 def get_next_value(start_line_index: int, file_as_list: list[str], search_string: None | str = None,
                    ignore_values: None | list[str] = None,
                    replace_with: str | VariableEntry | None = None,
-                   comment_characters: None | list[str] = None) -> Optional[str]:
+                   comment_characters: None | list[str] = None,
+                   single_c_acts_as_comment: bool = True) -> Optional[str]:
     """Gets the next non blank value in a list of lines.
 
     Args:
@@ -91,6 +92,10 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
             Defaults to None.
         replace_with (Union[str, VariableEntry, None], optional): a value to replace the existing value with. \
             Defaults to None.
+        comment_characters (Optional[list[str]], optional): a list of characters that are considered inline comments.
+            Defaults to the Nexus format (!)
+        single_c_acts_as_comment: (bool): whether a single C character at the start of a line should be treated as a
+            comment. Defaults to Nexus setting which is True.
 
     Returns:
         Optional[str]: Next non blank value from the list, if none found returns None
@@ -99,7 +104,7 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
         comment_characters = ['!']
     invalid_characters = ["\n", "\t", " ", ","]
     invalid_characters.extend(comment_characters)
-    
+
     value_found = False
     value = ''
     if search_string is None:
@@ -115,9 +120,10 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
             break
         for character in search_string:
             # move lines once we hit a comment character or new line character,or are at the end of search string
-            if character in comment_characters or character == "\n" or (character_location == 0 and character == "C" and
-                                                            (len(search_string) == 1 or search_string[
-                                                                character_location + 1] == ' ')):
+            starts_with_c_only = (single_c_acts_as_comment and
+                                  (character_location == 0 and character == "C" and
+                                   (len(search_string) == 1 or search_string[character_location + 1] == ' ')))
+            if character in comment_characters or character == "\n" or starts_with_c_only:
                 line_index += 1
                 line_already_skipped = True
                 # If we've reached the end of the file, return None
@@ -131,22 +137,10 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
                 search_string = temp_search_string
                 break
             elif character not in invalid_characters:
-                value_string = search_string[character_location: len(search_string)]
-                for value_character in value_string:
-                    # If we've formed a string we're supposed to ignore, ignore it and get the next value
-                    if ignore_values is not None and (value in ignore_values or value.upper() in ignore_values):
-                        search_string = search_string[character_location: len(search_string)]
-                        new_search_string = True
-                        value = ""
-
-                    if value_character not in invalid_characters:
-                        value += value_character
-
-                    character_location += 1
-
-                    # stop adding to the value once we hit an invalid_character
-                    if value_character in invalid_characters and value != '':
-                        break
+                character_location, new_search_string, search_string, value = (
+                    extract_substring_until_next_invalid_character(character_location, ignore_values,
+                                                                   invalid_characters, new_search_string,
+                                                                   search_string, value))
 
                 if value != "":
                     value_found = True
@@ -162,7 +156,7 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
                             new_value = replace_with
                         elif isinstance(replace_with, VariableEntry):
                             new_line, new_value, value = __replace_with_variable_entry(new_line, original_line,
-                                                                                        replace_with, value)
+                                                                                       replace_with, value)
                         if new_value is None:
                             raise ValueError(f'Value for replacing has returned a null value,\
                             check replace_with input, {replace_with=}')
@@ -184,6 +178,46 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
         return None
 
     return value
+
+
+def extract_substring_until_next_invalid_character(character_location: int,
+                                                   ignore_values: list[str],
+                                                   invalid_characters: list[str],
+                                                   new_search_string: str,
+                                                   search_string: str,
+                                                   value: str) -> tuple[int, bool, str, str]:
+    """Extracts a substring from the search_string until an invalid character is found.
+
+    Args:
+        character_location (int): current location in the search_string
+        ignore_values (list[str]): list of values to ignore if found
+        invalid_characters (list[str]): list of characters that are considered invalid
+        new_search_string (bool): whether we are starting a new search string
+        search_string (str): string to search from within the first indexed line
+        value (str): current value being built up
+    Returns:
+        int: new character location in the search_string
+        bool: whether we are starting a new search string
+        str: new search string if a value has been ignored
+        str: the value that has been built up, or blank if a value has been ignored
+        """
+    value_string = search_string[character_location: len(search_string)]
+    for value_character in value_string:
+        # If we've formed a string we're supposed to ignore, ignore it and get the next value
+        if ignore_values is not None and (value in ignore_values or value.upper() in ignore_values):
+            search_string = search_string[character_location: len(search_string)]
+            new_search_string = True
+            value = ""
+
+        if value_character not in invalid_characters:
+            value += value_character
+
+        character_location += 1
+
+        # stop adding to the value once we hit an invalid_character
+        if value_character in invalid_characters and value != '':
+            break
+    return character_location, new_search_string, search_string, value
 
 
 def __replace_with_variable_entry(new_line: str, original_line: str, replace_with: VariableEntry, value: str):
