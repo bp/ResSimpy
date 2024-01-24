@@ -90,7 +90,7 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
         search_string (str): string to search from within the first indexed line
         ignore_values (Optional[list[str]], optional): a list of values that should be ignored if found. \
             Defaults to None.
-        replace_with (Union[str, VariableEntry, None], optional): a value to replace the existing value with. \
+        replace_with (str | VariableEntry | None], optional): a value to replace the existing value with. \
             Defaults to None.
         comment_characters (Optional[list[str]], optional): a list of characters that are considered inline comments.
             Defaults to the Nexus format (!)
@@ -138,34 +138,18 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
                 break
             elif character not in invalid_characters:
                 character_location, new_search_string, search_string, value = (
-                    extract_substring_until_next_invalid_character(character_location, ignore_values,
-                                                                   invalid_characters, new_search_string,
-                                                                   search_string, value))
+                    __extract_substring_until_next_invalid_character(character_location, ignore_values,
+                                                                     invalid_characters, new_search_string,
+                                                                     search_string, value))
 
                 if value != "":
                     value_found = True
                     # Replace the original value with the new requested value
                     if replace_with is not None:
-                        original_line = file_as_list[line_index]
-                        if not isinstance(original_line, str):
-                            raise ValueError(f'No valid value found, hit INCLUDE statement instead on line number \
-                                            {line_index}')
-                        new_line = original_line
-
-                        if isinstance(replace_with, str):
-                            new_value = replace_with
-                        elif isinstance(replace_with, VariableEntry):
-                            new_line, new_value, value = __replace_with_variable_entry(new_line, original_line,
-                                                                                       replace_with, value)
-                        if new_value is None:
-                            raise ValueError(f'Value for replacing has returned a null value,\
-                            check replace_with input, {replace_with=}')
-                        new_line = new_line.replace(value, new_value, 1)
-                        file_as_list[line_index] = new_line
-
+                        value = __replace_value_in_file_as_list(file_as_list, line_index, replace_with, value)
                     break
 
-            if new_search_string is True:
+            if new_search_string:
                 break
 
             character_location += 1
@@ -180,17 +164,48 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
     return value
 
 
-def extract_substring_until_next_invalid_character(character_location: int,
-                                                   ignore_values: list[str],
-                                                   invalid_characters: list[str],
-                                                   new_search_string: str,
-                                                   search_string: str,
-                                                   value: str) -> tuple[int, bool, str, str]:
+def __replace_value_in_file_as_list(file_as_list: list[str], line_index: int, replace_with: str | VariableEntry,
+                                    value: str) -> str:
+    """Replaces a value in a file_as_list with a new value.
+
+    Args:
+        file_as_list (list[str]): a list of strings containing each line of the file as a new entry
+        line_index (int): line number from file_as_list to replace the value in.
+        replace_with (str | VariableEntry): a value to replace the existing value with.
+        value (str): the value to be replaced.
+
+    Returns:
+        str: the value that has been replaced.
+    """
+    original_line = file_as_list[line_index]
+    if not isinstance(original_line, str):
+        raise ValueError(f'No valid value found, hit INCLUDE statement instead on line number \
+                                            {line_index}')
+    new_line = original_line
+    if isinstance(replace_with, str):
+        new_value = replace_with
+    elif isinstance(replace_with, VariableEntry):
+        new_line, new_value, value = __replace_with_variable_entry(new_line, original_line,
+                                                                   replace_with, value)
+    if new_value is None:
+        raise ValueError(f'Value for replacing has returned a null value,\
+                            check replace_with input, {replace_with=}')
+    new_line = new_line.replace(value, new_value, 1)
+    file_as_list[line_index] = new_line
+    return value
+
+
+def __extract_substring_until_next_invalid_character(character_location: int,
+                                                     ignore_values: list[str] | None,
+                                                     invalid_characters: list[str],
+                                                     new_search_string: bool,
+                                                     search_string: str,
+                                                     value: str) -> tuple[int, bool, str, str]:
     """Extracts a substring from the search_string until an invalid character is found.
 
     Args:
         character_location (int): current location in the search_string
-        ignore_values (list[str]): list of values to ignore if found
+        ignore_values (list[str] | None): list of values to ignore if found
         invalid_characters (list[str]): list of characters that are considered invalid
         new_search_string (bool): whether we are starting a new search string
         search_string (str): string to search from within the first indexed line
@@ -200,7 +215,7 @@ def extract_substring_until_next_invalid_character(character_location: int,
         bool: whether we are starting a new search string
         str: new search string if a value has been ignored
         str: the value that has been built up, or blank if a value has been ignored
-        """
+    """
     value_string = search_string[character_location: len(search_string)]
     for value_character in value_string:
         # If we've formed a string we're supposed to ignore, ignore it and get the next value
