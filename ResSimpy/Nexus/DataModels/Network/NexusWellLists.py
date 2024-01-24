@@ -43,7 +43,7 @@ class NexusWellLists(WellLists):
         return 'ENDWELLLISTS'
 
     def get_all_by_name(self, well_list_name: str) -> list[NexusWellList]:
-        """Returns a single WellList with the provided name loaded from the simulator.
+        """Returns a list of WellLists which match the provided name loaded from the simulator.
 
         Args:
         ----
@@ -51,7 +51,7 @@ class NexusWellLists(WellLists):
 
         Returns:
         -------
-            NexusWellList: the requested with the same name list[NexusWellList]
+            list[NexusWellList]: the requested list of filtered welllists with the same name
         """
         self.__parent_network.get_load_status()
         return [x for x in self.__well_lists if x.name == well_list_name]
