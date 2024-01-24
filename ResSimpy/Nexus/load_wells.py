@@ -452,7 +452,7 @@ def __get_number_completions(well_name: str | None, current_iso_date: ISODateTim
         raise ValueError(f"No well name found for the wellmod in the wellspec file in line:\n{line}")
     number_completions = 0
     for well in wells_loaded:
-        if well.well_name != well_name:
+        if well.well_name.upper() != well_name.upper():
             continue
 
         completion_dates = [x.iso_date for x in well.completions if x.iso_date <= current_iso_date]

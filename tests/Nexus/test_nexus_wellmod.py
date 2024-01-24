@@ -63,7 +63,7 @@ class TestNexusWellMod:
         1  1  1  4.5
         2 2 2 5.5
         WEllMOd test_well_2    SKIN	CON	0.25 !!! WI CON 2
-        WELLMod test_well   KHMULT    CON 1234.2
+        WELLMod TEST_well   KHMULT    CON 1234.2
         TIME 01/01/2021
         WELLMOD test_well_2 PPERF	CON	0.25
         """
