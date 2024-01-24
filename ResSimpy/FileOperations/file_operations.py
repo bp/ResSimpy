@@ -77,9 +77,10 @@ def load_file_as_list(file_path: str, strip_comments: bool = False, strip_str: b
     return file_content
 
 
-def get_next_value(start_line_index: int, file_as_list: list[str], search_string: Optional[str] = None,
-                   ignore_values: Optional[list[str]] = None,
-                   replace_with: Union[str, VariableEntry, None] = None) -> Optional[str]:
+def get_next_value(start_line_index: int, file_as_list: list[str], search_string: None | str = None,
+                   ignore_values: None | list[str] = None,
+                   replace_with: str | VariableEntry | None = None,
+                   comment_characters: None | list[str] = None) -> Optional[str]:
     """Gets the next non blank value in a list of lines.
 
     Args:
@@ -94,7 +95,11 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
     Returns:
         Optional[str]: Next non blank value from the list, if none found returns None
     """
-    invalid_characters = ["\n", "\t", " ", "!", ","]
+    if comment_characters is None:
+        comment_characters = ['!']
+    invalid_characters = ["\n", "\t", " ", ","]
+    invalid_characters.extend(comment_characters)
+    
     value_found = False
     value = ''
     if search_string is None:
@@ -107,69 +112,69 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
         if len(search_string) > 2 and search_string.startswith("\"") and search_string.endswith("\""):
             value += search_string[1:len(search_string) - 1]
             value_found = True
-        else:
-            for character in search_string:
-                # move lines once we hit a comment character or new line character,or are at the end of search string
-                if character == "!" or character == "\n" or (character_location == 0 and character == "C" and
-                                                             (len(search_string) == 1 or search_string[
-                                                                 character_location + 1] == ' ')):
-                    line_index += 1
-                    line_already_skipped = True
-                    # If we've reached the end of the file, return None
-                    if line_index >= len(file_as_list):
-                        return None
-                    # Move to the next line down in file_as_list
-                    temp_search_string = file_as_list[line_index]
-                    if not isinstance(temp_search_string, str):
-                        raise ValueError(f'No valid value found, hit INCLUDE statement instead on line number \
-                            {line_index}')
-                    search_string = temp_search_string
-                    break
-                elif character not in invalid_characters:
-                    value_string = search_string[character_location: len(search_string)]
-                    for value_character in value_string:
-                        # If we've formed a string we're supposed to ignore, ignore it and get the next value
-                        if ignore_values is not None and (value in ignore_values or value.upper() in ignore_values):
-                            search_string = search_string[character_location: len(search_string)]
-                            new_search_string = True
-                            value = ""
+            break
+        for character in search_string:
+            # move lines once we hit a comment character or new line character,or are at the end of search string
+            if character in comment_characters or character == "\n" or (character_location == 0 and character == "C" and
+                                                            (len(search_string) == 1 or search_string[
+                                                                character_location + 1] == ' ')):
+                line_index += 1
+                line_already_skipped = True
+                # If we've reached the end of the file, return None
+                if line_index >= len(file_as_list):
+                    return None
+                # Move to the next line down in file_as_list
+                temp_search_string = file_as_list[line_index]
+                if not isinstance(temp_search_string, str):
+                    raise ValueError(f'No valid value found, hit INCLUDE statement instead on line number \
+                        {line_index}')
+                search_string = temp_search_string
+                break
+            elif character not in invalid_characters:
+                value_string = search_string[character_location: len(search_string)]
+                for value_character in value_string:
+                    # If we've formed a string we're supposed to ignore, ignore it and get the next value
+                    if ignore_values is not None and (value in ignore_values or value.upper() in ignore_values):
+                        search_string = search_string[character_location: len(search_string)]
+                        new_search_string = True
+                        value = ""
 
-                        if value_character not in invalid_characters:
-                            value += value_character
+                    if value_character not in invalid_characters:
+                        value += value_character
 
-                        character_location += 1
+                    character_location += 1
 
-                        # stop adding to the value once we hit an invalid_character
-                        if value_character in invalid_characters and value != '':
-                            break
-
-                    if value != "":
-                        value_found = True
-                        # Replace the original value with the new requested value
-                        if replace_with is not None:
-                            original_line = file_as_list[line_index]
-                            if not isinstance(original_line, str):
-                                raise ValueError(f'No valid value found, hit INCLUDE statement instead on line number \
-                                                {line_index}')
-                            new_line = original_line
-
-                            if isinstance(replace_with, str):
-                                new_value = replace_with
-                            elif isinstance(replace_with, VariableEntry):
-                                new_line, new_value, value = __replace_with_variable_entry(new_line, original_line,
-                                                                                           replace_with, value)
-                            if new_value is None:
-                                raise ValueError(f'Value for replacing has returned a null value,\
-                                check replace_with input, {replace_with=}')
-                            new_line = new_line.replace(value, new_value, 1)
-                            file_as_list[line_index] = new_line
-
+                    # stop adding to the value once we hit an invalid_character
+                    if value_character in invalid_characters and value != '':
                         break
 
-                if new_search_string is True:
+                if value != "":
+                    value_found = True
+                    # Replace the original value with the new requested value
+                    if replace_with is not None:
+                        original_line = file_as_list[line_index]
+                        if not isinstance(original_line, str):
+                            raise ValueError(f'No valid value found, hit INCLUDE statement instead on line number \
+                                            {line_index}')
+                        new_line = original_line
+
+                        if isinstance(replace_with, str):
+                            new_value = replace_with
+                        elif isinstance(replace_with, VariableEntry):
+                            new_line, new_value, value = __replace_with_variable_entry(new_line, original_line,
+                                                                                        replace_with, value)
+                        if new_value is None:
+                            raise ValueError(f'Value for replacing has returned a null value,\
+                            check replace_with input, {replace_with=}')
+                        new_line = new_line.replace(value, new_value, 1)
+                        file_as_list[line_index] = new_line
+
                     break
 
-                character_location += 1
+            if new_search_string is True:
+                break
+
+            character_location += 1
         if not line_already_skipped:
             line_index += 1
         if line_index <= len(file_as_list) - 1:
