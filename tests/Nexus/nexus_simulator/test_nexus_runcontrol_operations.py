@@ -11,6 +11,7 @@ from tests.multifile_mocker import mock_multiple_files
 
 from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
 from ResSimpy.Nexus.runcontrol_operations import SimControls, GridToProc
+from utility_for_tests import get_fake_nexus_simulator
 
 
 @pytest.mark.parametrize(
@@ -432,7 +433,45 @@ def test_load_grid_to_proc_auto():
     assert result == expected_result
 
 
-def test_load_output_requests():
+@pytest.mark.parametrize('file_content', [
+    # basic test
+    ('''FIELD MONTHLY
+      REGIONS TIMESTEP 1030
+      WELLS FREQ 123
+      NETWORK YEARLY'''),
+
+    # test with comments
+    ('''FIELD MONTHLY
+      REGIONS TIMESTEP 1030
+      ! comment
+      
+      WELLS FREQ 123
+      NETWORK YEARLY
+
+      ! comment
+      ! comment
+      ''',
+     ),
+], ids=['basic test', 'test with comments'])
+def test_get_output_request(file_content):
+    date = '01/01/2020'
+    output_type = OutputType.ARRAY
+    # Act
+    result = NexusReporting._get_output_request(table_file_as_list=file_content.splitlines(keepends=True),
+                                                date=date, output_type=output_type)
+    expected_result = [NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/2020', output='FIELD',
+                                          output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None),
+                       NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/2020', output='REGIONS',
+                                          output_frequency=FrequencyEnum.TIMESTEP, output_frequency_number=1030),
+                       NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/2020', output='WELLS',
+                                          output_frequency=FrequencyEnum.FREQ, output_frequency_number=123),
+                       NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/2020', output='NETWORK',
+                                          output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None)]
+    # Assert
+    assert result == expected_result
+
+
+def test_load_output_requests(mocker):
     # Arrange
     file_content = '''START 01/01/1950
     MAPOUT
@@ -445,7 +484,7 @@ def test_load_output_requests():
 ENDMAPOUT
 SPREADSHEET
       FIELD MONTHLY
-      REGIONS	YEARLY
+      REGIONS	FREQ 21
       WELLS YEARLY
       NETWORK YEARLY
 ENDSPREADSHEET
@@ -464,48 +503,32 @@ ENDOUTPUT
     '''
     file_content_as_list = file_content.splitlines(keepends=True)
 
-
-@pytest.mark.parametrize('file_content,expected_output', [
-    # basic test
-    ('''FIELD MONTHLY
-      REGIONS TIMESTEP 1030
-      WELLS FREQ 123
-      NETWORK YEARLY''',
-     [NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/2020', output='FIELD',
-                         output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None),
-      NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/2020', output='REGIONS',
-                         output_frequency=FrequencyEnum.TIMESTEP, output_frequency_number=1030),
-      NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/2020', output='WELLS',
-                         output_frequency=FrequencyEnum.FREQ, output_frequency_number=123),
-      NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/2020', output='NETWORK',
-                         output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None)]
-     ),
-
-    # test with comments
-    ('''FIELD MONTHLY
-      REGIONS TIMESTEP 1030
-      ! comment
-      
-      WELLS FREQ 123
-      NETWORK YEARLY
-
-      ! comment
-      ! comment
-      ''',
-     [NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/2020', output='FIELD',
-                         output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None),
-      NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/2020', output='REGIONS',
-                         output_frequency=FrequencyEnum.TIMESTEP, output_frequency_number=1030),
-      NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/2020', output='WELLS',
-                         output_frequency=FrequencyEnum.FREQ, output_frequency_number=123),
-      NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/2020', output='NETWORK',
-                         output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None)]),
-], ids=['basic test', 'test with comments'])
-def test_get_output_request(file_content, expected_output):
-    date = '01/01/2020'
-    output_type = OutputType.ARRAY
+    expected_ss_output_requests = [
+        NexusOutputRequest(output_type=OutputType.SPREADSHEET, date='01/01/1950', output='FIELD',
+                           output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None),
+        NexusOutputRequest(output_type=OutputType.SPREADSHEET, date='01/01/1950', output='REGIONS',
+                           output_frequency=FrequencyEnum.FREQ, output_frequency_number=21),
+        NexusOutputRequest(output_type=OutputType.SPREADSHEET, date='01/01/1950', output='WELLS',
+                           output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None),
+        NexusOutputRequest(output_type=OutputType.SPREADSHEET, date='01/01/1950', output='NETWORK',
+                           output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None),
+    ]
+    expected_array_output_requests = [
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1950', output='FIELD',
+                           output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1950', output='WELLS',
+                           output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1950', output='MAPS',
+                           output_frequency=FrequencyEnum.FREQ, output_frequency_number=120),
+    ]
+    # fake model
+    model = get_fake_nexus_simulator(mocker)
+    model._start_date = '01/01/1950'
+    nexus_reporting = NexusReporting(model=model)
+    model.model_files.runcontrol_file = NexusFile(location='runcontrol.dat', file_content_as_list=file_content_as_list)
     # Act
-    result = NexusReporting._get_output_request(table_file_as_list=file_content.splitlines(keepends=True),
-                                                date=date, output_type=output_type)
+    nexus_reporting.load_output_requests()
+
     # Assert
-    assert result == expected_output
+    assert nexus_reporting.ss_output_requests == expected_ss_output_requests
+    assert nexus_reporting.array_output_requests == expected_array_output_requests
