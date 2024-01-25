@@ -114,10 +114,13 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
         character_location = 0
         new_search_string = False
         line_already_skipped = False
+
+        # If the string is wrapped in quotation marks, return the full string (including invalid characters)
         if len(search_string) > 2 and search_string.startswith("\"") and search_string.endswith("\""):
             value += search_string[1:len(search_string) - 1]
             value_found = True
             break
+
         for character in search_string:
             # move lines once we hit a comment character or new line character,or are at the end of search string
             starts_with_c_only = (single_c_acts_as_comment and

@@ -415,21 +415,18 @@ def test_get_next_value_multiple_lines(file, expected_result):
     (['C comment line', '1'], '1'),
 ])
 def test_get_next_value_different_comment_char(file, expected_result):
-    # Arrange
-    file = ['\t ', '1']
-    expected_result = '1'
     # Act
     result = nfo.get_next_value(0, file, comment_characters=['#', '!'])
     # Assert
     assert result == expected_result
 
-@pytest.mark.parametrize("single_c_acts_as_comment, expected_result", [
-    (True, '1'),
-    (False, 'C'),
+@pytest.mark.parametrize("file, single_c_acts_as_comment, expected_result", [
+    (['C Comment line ', '1'], True, '1'),
+    (['C Comment line ', '1'], False, 'C'),
+    (['COMMENT line ', '1'], True, 'COMMENT'),
+    (['COMMENT line', '1', ], False, 'COMMENT'),
 ])
-def test_get_next_value_single_c_acts_as_comment(single_c_acts_as_comment, expected_result):
-    # Arrange
-    file = ['C Comment line ', '1']
+def test_get_next_value_single_c_acts_as_comment(file, single_c_acts_as_comment, expected_result):
     # Act
     result = nfo.get_next_value(0, file, single_c_acts_as_comment=single_c_acts_as_comment)
     # Assert
