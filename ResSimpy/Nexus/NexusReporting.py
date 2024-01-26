@@ -19,10 +19,21 @@ class NexusOutputRequest:
 
 
 @dataclass(kw_only=True)
+class NexusOutputContents:
+    """Class for handling the output that Nexus produces."""
+    date: str
+    output_contents: list[str]
+    output_type: OutputType
+    output: str
+
+
+@dataclass(kw_only=True)
 class NexusReporting:
     """Class for handling all Reporting and runcontrol related tasks."""
     ss_output_requests: list[NexusOutputRequest]
     array_output_requests: list[NexusOutputRequest]
+    ss_output_contents: list[NexusOutputContents]
+    array_output_contents: list[NexusOutputContents]
 
     def __init__(self, model) -> None:
         self.__model = model
@@ -74,7 +85,11 @@ class NexusReporting:
 
         # Get the output requests
         ss_output_requests: list[NexusOutputRequest] = []
-        array_output_requests = []
+        array_output_requests: list[NexusOutputRequest] = []
+
+        ss_output_contents: list[NexusOutputContents] = []
+        array_output_contents: list[NexusOutputContents] = []
+
         ss_start_index: int = -1
         array_start_index: int = -1
         current_date = self.__model.start_date
@@ -103,13 +118,40 @@ class NexusReporting:
                                                                    output_type=OutputType.ARRAY)
                 array_output_requests.extend(list_of_output_requests)
 
+            if nfo.check_token('SSOUT', line):
+                ss_start_index = index + 1
+            if ss_start_index > -1 and nfo.check_token('ENDSSOUT', line):
+                ss_end_index = index
+                list_of_output_contents = self._get_output_contents(file_as_list[ss_start_index:ss_end_index],
+                                                                    date=current_date,
+                                                                    output_type=OutputType.SPREADSHEET)
+                ss_output_contents.extend(list_of_output_contents)
+
+            if nfo.check_token('MAPOUT', line) or nfo.check_token('ARRAYOUT', line):
+                ss_start_index = index + 1
+            if ss_start_index > -1 and nfo.check_token('ENDMAPOUT', line) or nfo.check_token('ENDARRAYOUT', line):
+                ss_end_index = index
+                list_of_output_contents = self._get_output_contents(file_as_list[ss_start_index:ss_end_index],
+                                                                    date=current_date,
+                                                                    output_type=OutputType.ARRAY)
+                array_output_contents.extend(list_of_output_contents)
+
+
         self.ss_output_requests = ss_output_requests
         self.array_output_requests = array_output_requests
+        self.ss_output_contents = ss_output_contents
+        self.array_output_contents = array_output_contents
 
     @staticmethod
     def _get_output_request(table_file_as_list: list[str], date: str, output_type: OutputType) \
             -> list[NexusOutputRequest]:
-        """Gets the output objects from the runcontrol file."""
+        """Gets the output objects from the runcontrol file.
+
+        Args:
+            table_file_as_list (list[str]): The table file as a list of strings
+            date (str): The date of the output
+            output_type (OutputType): The output type as an Enum
+        """
         output_request_with_number = ['DT', 'DTTOL', 'FREQ', 'TIMESTEP']
 
         resulting_output_requests: list[NexusOutputRequest] = []
@@ -135,3 +177,34 @@ class NexusReporting:
             resulting_output_requests.append(output_request)
 
         return resulting_output_requests
+
+    @staticmethod
+    def _get_output_contents(table_file_as_list: list[str], date: str, output_type: OutputType)\
+            -> list[NexusOutputContents]:
+        """Gets the output contents from a table.
+
+        Args:
+            table_file_as_list (list[str]): The table file as a list of strings
+            date (str): The date of the output
+            output_type (OutputType): The output type as an Enum
+        """
+        resulting_output_contents: list[NexusOutputContents] = []
+        for line in table_file_as_list:
+            element = nfo.get_next_value(start_line_index=0, file_as_list=[line])
+            if element is None or element == '':
+                continue
+            value = element
+            output_contents = []
+            filter_line = line
+            while value is not None:
+                filter_line = filter_line.replace(value, '', 1)
+                value = nfo.get_next_value(start_line_index=0, file_as_list=[filter_line])
+                if value is not None:
+                    output_contents.append(value)
+
+            output_contents = NexusOutputContents(date=date, output_contents=output_contents,
+                                                  output_type=output_type,
+                                                  output=element)
+            resulting_output_contents.append(output_contents)
+
+        return resulting_output_contents

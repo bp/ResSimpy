@@ -5,7 +5,7 @@ from ResSimpy.Enums.FrequencyEnum import FrequencyEnum
 from ResSimpy.Enums.OutputType import OutputType
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from ResSimpy.Nexus.NexusReporting import NexusReporting, NexusOutputRequest
+from ResSimpy.Nexus.NexusReporting import NexusReporting, NexusOutputRequest, NexusOutputContents
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.multifile_mocker import mock_multiple_files
 
@@ -470,6 +470,49 @@ def test_get_output_request(file_content):
     assert result == expected_result
 
 
+@pytest.mark.parametrize('file_content, expected_result', [
+    # basic test
+    ("""
+WELLS DATE TSNUM QOP QWP COP CWP QWI CWI WCUT WPAVE CGP   QGP  QLP  GOR  BHP SAL 
+! comment
+FIELD DATE TSNUM COP CGP CWP CWI QOP QGP QWP QLP QWI WCUT OREC PAVT PAVH
+
+REGIONS DATE TSNUM COP CGP CWP CWI QOP QGP QWP QWI STOIP ROP RWP RWI CROP CRWP CRWI PDATUMT PDATUMHC COFLUX CWFLUX AQFLUX RVO RVPVH """,
+     [NexusOutputContents(output_type=OutputType.SPREADSHEET, output='WELLS', date='01/01/2020',
+                          output_contents=['DATE', 'TSNUM', 'QOP', 'QWP', 'COP', 'CWP', 'QWI', 'CWI', 'WCUT', 'WPAVE',
+                                           'CGP', 'QGP', 'QLP',
+                                           'GOR', 'BHP', 'SAL']),
+      NexusOutputContents(output_type=OutputType.SPREADSHEET, output='FIELD', date='01/01/2020',
+                          output_contents=['DATE', 'TSNUM', 'COP', 'CGP', 'CWP', 'CWI', 'QOP', 'QGP', 'QWP', 'QLP',
+                                           'QWI', 'WCUT', 'OREC',
+                                           'PAVT', 'PAVH']),
+      NexusOutputContents(output_type=OutputType.SPREADSHEET, output='REGIONS', date='01/01/2020',
+                          output_contents=['DATE', 'TSNUM', 'COP', 'CGP', 'CWP', 'CWI', 'QOP', 'QGP', 'QWP', 'QWI',
+                                           'STOIP', 'ROP', 'RWP',
+                                           'RWI', 'CROP', 'CRWP', 'CRWI', 'PDATUMT', 'PDATUMHC', 'COFLUX', 'CWFLUX',
+                                           'AQFLUX', 'RVO',
+                                           'RVPVH'])
+      ]),
+
+    # Advanced
+    ("""WELLS DATE TSNUM QOP QWP COP CWP QWI CWI ! comment at end of line
+! comment
+FIELD DATE TSNUM COP CGP 
+     """, [NexusOutputContents(output_type=OutputType.SPREADSHEET, output='WELLS', date='01/01/2020',
+                               output_contents=['DATE', 'TSNUM', 'QOP', 'QWP', 'COP', 'CWP', 'QWI', 'CWI']),
+           NexusOutputContents(output_type=OutputType.SPREADSHEET, output='FIELD', date='01/01/2020',
+                               output_contents=['DATE', 'TSNUM', 'COP', 'CGP'])
+           ]),
+],
+                         ids=['basic test', 'advanced'])
+def test_get_output_contents(file_content, expected_result):
+    # Act
+    result = NexusReporting._get_output_contents(table_file_as_list=file_content.splitlines(keepends=True),
+                                                 output_type=OutputType.SPREADSHEET, date='01/01/2020')
+    # Assert
+    assert result == expected_result
+
+
 def test_load_output_requests(mocker):
     # Arrange
     file_content = '''START 01/01/1950
@@ -503,6 +546,9 @@ ENDOUTPUT
 TIME 01/01/1952
 
 TIME 01/10/1953
+SSOUT
+WELLS DATE TSNUM QOP QWP COP
+ENDSSOUT
 OUTPUT
     FIELD YEARLY
     WELLS TIMES
@@ -535,6 +581,37 @@ ENDOUTPUT
         NexusOutputRequest(output_type=OutputType.ARRAY, date='01/10/1953', output='MAPS',
                            output_frequency=FrequencyEnum.FREQ, output_frequency_number=120),
     ]
+
+    expected_ss_output_contents = [
+        NexusOutputContents(output_type=OutputType.SPREADSHEET, output='WELLS', date='01/01/1950',
+                            output_contents=['DATE', 'TSNUM', 'QOP', 'QWP', 'COP', 'CWP', 'QWI', 'CWI', 'WCUT',
+                                             'WPAVE', 'CGP', 'QGP', 'QLP', 'GOR', 'BHP', 'SAL']),
+        NexusOutputContents(output_type=OutputType.SPREADSHEET, output='FIELD', date='01/01/1950',
+                            output_contents=['DATE', 'TSNUM', 'COP', 'CGP', 'CWP', 'CWI', 'QOP', 'QGP', 'QWP', 'QLP',
+                                             'QWI', 'WCUT', 'OREC', 'PAVT', 'PAVH']),
+        NexusOutputContents(output_type=OutputType.SPREADSHEET, output='REGIONS', date='01/01/1950',
+                            output_contents=['DATE', 'TSNUM', 'COP', 'CGP', 'CWP', 'CWI', 'QOP', 'QGP', 'QWP', 'QWI',
+                                             'STOIP', 'ROP', 'RWP', 'RWI', 'CROP', 'CRWP', 'CRWI', 'PDATUMT',
+                                             'PDATUMHC', 'COFLUX', 'CWFLUX', 'AQFLUX', 'RVO', 'RVPVH']),
+        NexusOutputContents(output_type=OutputType.SPREADSHEET, output='WELLS', date='01/10/1953',
+                            output_contents=['DATE', 'TSNUM', 'QOP', 'QWP', 'COP'])
+    ]
+
+    expected_array_output_contents = [
+        NexusOutputContents(output_type=OutputType.ARRAY, output='P', date='01/01/1950',
+                            output_contents=[]),
+        NexusOutputContents(output_type=OutputType.ARRAY, output='PV', date='01/01/1950',
+                            output_contents=[]),
+        NexusOutputContents(output_type=OutputType.ARRAY, output='SAT', date='01/01/1950',
+                            output_contents=['OIL', 'GAS', 'WATER']),
+        NexusOutputContents(output_type=OutputType.ARRAY, output='KR', date='01/01/1950',
+                            output_contents=['OIL', 'WATER']),
+        NexusOutputContents(output_type=OutputType.ARRAY, output='PC', date='01/01/1950',
+                            output_contents=['OIL', 'WATER']),
+        NexusOutputContents(output_type=OutputType.ARRAY, output='SAL', date='01/01/1950',
+                            output_contents=[])
+    ]
+
     # fake model
     model = get_fake_nexus_simulator(mocker)
     model._start_date = '01/01/1950'
@@ -546,3 +623,5 @@ ENDOUTPUT
     # Assert
     assert nexus_reporting.ss_output_requests == expected_ss_output_requests
     assert nexus_reporting.array_output_requests == expected_array_output_requests
+    assert nexus_reporting.ss_output_contents == expected_ss_output_contents
+    assert nexus_reporting.array_output_contents == expected_array_output_contents
