@@ -152,7 +152,6 @@ class NexusReporting:
                                                                     output_type=OutputType.ARRAY)
                 array_output_contents.extend(list_of_output_contents)
 
-
         self.__ss_output_requests = ss_output_requests
         self.__array_output_requests = array_output_requests
         self.__ss_output_contents = ss_output_contents
@@ -195,7 +194,7 @@ class NexusReporting:
         return resulting_output_requests
 
     @staticmethod
-    def _get_output_contents(table_file_as_list: list[str], date: str, output_type: OutputType)\
+    def _get_output_contents(table_file_as_list: list[str], date: str, output_type: OutputType) \
             -> list[NexusOutputContents]:
         """Gets the output contents from a table.
 
@@ -209,7 +208,7 @@ class NexusReporting:
             element = nfo.get_next_value(start_line_index=0, file_as_list=[line])
             if element is None or element == '':
                 continue
-            value = element
+            value: None | str = element
             output_contents = []
             filter_line = line
             while value is not None:
@@ -218,9 +217,9 @@ class NexusReporting:
                 if value is not None:
                     output_contents.append(value)
 
-            output_contents = NexusOutputContents(date=date, output_contents=output_contents,
-                                                  output_type=output_type,
-                                                  output=element)
-            resulting_output_contents.append(output_contents)
+            output_contents_obj = NexusOutputContents(date=date, output_contents=output_contents,
+                                                      output_type=output_type,
+                                                      output=element)
+            resulting_output_contents.append(output_contents_obj)
 
         return resulting_output_contents
