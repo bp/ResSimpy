@@ -11,7 +11,7 @@ from tests.multifile_mocker import mock_multiple_files
 
 from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
 from ResSimpy.Nexus.runcontrol_operations import SimControls, GridToProc
-from utility_for_tests import get_fake_nexus_simulator
+from tests.utility_for_tests import get_fake_nexus_simulator
 
 
 @pytest.mark.parametrize(
