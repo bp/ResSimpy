@@ -30,13 +30,29 @@ class NexusOutputContents:
 @dataclass(kw_only=True)
 class NexusReporting:
     """Class for handling all Reporting and runcontrol related tasks."""
-    ss_output_requests: list[NexusOutputRequest]
-    array_output_requests: list[NexusOutputRequest]
-    ss_output_contents: list[NexusOutputContents]
-    array_output_contents: list[NexusOutputContents]
+    __ss_output_requests: list[NexusOutputRequest]
+    __array_output_requests: list[NexusOutputRequest]
+    __ss_output_contents: list[NexusOutputContents]
+    __array_output_contents: list[NexusOutputContents]
 
     def __init__(self, model) -> None:
         self.__model = model
+
+    @property
+    def ss_output_requests(self) -> list[NexusOutputRequest]:
+        return self.__ss_output_requests
+
+    @property
+    def array_output_requests(self) -> list[NexusOutputRequest]:
+        return self.__array_output_requests
+
+    @property
+    def ss_output_contents(self) -> list[NexusOutputContents]:
+        return self.__ss_output_contents
+
+    @property
+    def array_output_contents(self) -> list[NexusOutputContents]:
+        return self.__array_output_contents
 
     def add_map_properties_to_start_of_grid_file(self):
         """Adds 'map' statements to the start of the grid file to ensure standalone outputs all the required \
@@ -137,10 +153,10 @@ class NexusReporting:
                 array_output_contents.extend(list_of_output_contents)
 
 
-        self.ss_output_requests = ss_output_requests
-        self.array_output_requests = array_output_requests
-        self.ss_output_contents = ss_output_contents
-        self.array_output_contents = array_output_contents
+        self.__ss_output_requests = ss_output_requests
+        self.__array_output_requests = array_output_requests
+        self.__ss_output_contents = ss_output_contents
+        self.__array_output_contents = array_output_contents
 
     @staticmethod
     def _get_output_request(table_file_as_list: list[str], date: str, output_type: OutputType) \
