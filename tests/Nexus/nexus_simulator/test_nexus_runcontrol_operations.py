@@ -450,8 +450,7 @@ def test_load_grid_to_proc_auto():
 
       ! comment
       ! comment
-      ''',
-     ),
+      '''),
 ], ids=['basic test', 'test with comments'])
 def test_get_output_request(file_content):
     date = '01/01/2020'
@@ -493,13 +492,22 @@ WELLS DATE TSNUM QOP QWP COP CWP QWI CWI WCUT WPAVE CGP   QGP  QLP  GOR  BHP SAL
 FIELD DATE TSNUM COP CGP CWP CWI QOP QGP QWP QLP QWI WCUT OREC PAVT PAVH
 REGIONS DATE TSNUM COP CGP CWP CWI QOP QGP QWP QWI STOIP ROP RWP RWI CROP CRWP CRWI PDATUMT PDATUMHC COFLUX CWFLUX AQFLUX RVO RVPVH 
 ENDSSOUT
-
+TIME 01/01/1951
 OUTPUT 
     FIELD MONTHLY
     WELLS YEARLY
     MAPS FREQ 120
 ENDOUTPUT
 
+
+TIME 01/01/1952
+
+TIME 01/10/1953
+OUTPUT
+    FIELD YEARLY
+    WELLS TIMES
+    MAPS FREQ 120
+ENDOUTPUT
     '''
     file_content_as_list = file_content.splitlines(keepends=True)
 
@@ -514,11 +522,17 @@ ENDOUTPUT
                            output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None),
     ]
     expected_array_output_requests = [
-        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1950', output='FIELD',
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1951', output='FIELD',
                            output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None),
-        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1950', output='WELLS',
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1951', output='WELLS',
                            output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None),
-        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1950', output='MAPS',
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1951', output='MAPS',
+                           output_frequency=FrequencyEnum.FREQ, output_frequency_number=120),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/10/1953', output='FIELD',
+                           output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/10/1953', output='WELLS',
+                           output_frequency=FrequencyEnum.TIMES, output_frequency_number=None),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/10/1953', output='MAPS',
                            output_frequency=FrequencyEnum.FREQ, output_frequency_number=120),
     ]
     # fake model

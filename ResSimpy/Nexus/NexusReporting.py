@@ -79,6 +79,11 @@ class NexusReporting:
         array_start_index: int = -1
         current_date = self.__model.start_date
         for index, line in enumerate(file_as_list):
+
+            # check for TIME keyword and update the current date
+            if nfo.check_token('TIME', line):
+                current_date = nfo.get_expected_token_value('TIME', token_line=line, file_list=file_as_list)
+
             if nfo.check_token('SPREADSHEET', line):
                 ss_start_index = index + 1
 
