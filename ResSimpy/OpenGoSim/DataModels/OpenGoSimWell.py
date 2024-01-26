@@ -19,11 +19,6 @@ class OpenGoSimWell(Well):
                          well_type=well_type)
 
     @property
-    def well_type(self) -> WellType | None:
-        """The Well Type."""
-        return self._well_type
-
-    @property
     def printable_well_info(self) -> str:
         """Returns some printable well information in string format."""
         printable_dates_of_completions = ", ".join(self.dates_of_completions)

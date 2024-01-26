@@ -14,9 +14,7 @@ class Well(ABC):
     _completions: list[Completion]
     _well_name: str
     __unit_system: UnitSystem
-    _well_type: Optional[WellType]  # TODO: Make this compulsory once we have fully added well type to the Nexus Well
-
-    # Class.
+    _well_type: Optional[WellType]
 
     def __init__(self, well_name: str, completions: list[Completion], unit_system: UnitSystem,
                  well_type: Optional[WellType] = None) -> None:
@@ -27,20 +25,28 @@ class Well(ABC):
 
     @property
     def completions(self) -> list[Completion]:
+        """A list of all of the completions on the well."""
         return self._completions
 
     @property
     def well_name(self) -> str:
+        """The well name."""
         return self._well_name
 
     @property
     def unit_system(self) -> UnitSystem:
+        """The unit system associated with the properties on this well."""
         return self.__unit_system
 
     @property
     def well_type(self) -> WellType | None:
         """The type of the well."""
         return self._well_type
+
+    @well_type.setter
+    def well_type(self, val: WellType) -> None:
+        """Sets the well type."""
+        self._well_type = val
 
     @property
     def dates_of_completions(self) -> list[str]:

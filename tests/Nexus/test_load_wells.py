@@ -668,13 +668,15 @@ DATEFORMAT     DD/MM/YYYY
     fcs_file_contents = """
     DATEFORMAT DD/MM/YYYY 
     WELLS Set 1 data/wells1.dat
-     WELLS Set 2 data/wells2.dat"""
+     WELLS Set 2 data/wells2.dat
+     SURFACE Network 1 data/surface.date"""
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             'model.fcs': fcs_file_contents,
             'data/wells1.dat': wellspec_1_contents,
-            'data/wells2.dat': wellspec_2_contents
+            'data/wells2.dat': wellspec_2_contents,
+            'data/surface.date': ''
         }).return_value
         return mock_open
 

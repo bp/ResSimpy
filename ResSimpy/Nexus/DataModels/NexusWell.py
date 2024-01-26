@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Optional, Sequence, Union
 from uuid import UUID
 
+from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusWellMod import NexusWellMod
@@ -18,7 +19,7 @@ class NexusWell(Well):
     _wellmods: list[NexusWellMod]
 
     def __init__(self, well_name: str, completions: Sequence[NexusCompletion], unit_system: UnitSystem,
-                 wellmods: Sequence[NexusWellMod] | None = None) -> None:
+                 wellmods: Sequence[NexusWellMod] | None = None, well_type: Optional[WellType] = None) -> None:
         if not isinstance(completions, list):
             completions = list(completions)
         if wellmods is None:
@@ -26,7 +27,8 @@ class NexusWell(Well):
         elif not isinstance(wellmods, list):
             wellmods = list(wellmods)
         self._wellmods: list[NexusWellMod] = wellmods
-        super().__init__(well_name=well_name, completions=completions, unit_system=unit_system)
+        well_type = WellType.PRODUCER if well_type is None else well_type
+        super().__init__(well_name=well_name, completions=completions, unit_system=unit_system, well_type=well_type)
 
     def __repr__(self) -> str:
         return generic_repr(self)

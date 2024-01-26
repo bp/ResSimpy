@@ -25,10 +25,6 @@ class Wells(ABC):
             self._load()
         return self._wells
 
-    @wells.setter
-    def wells(self, value) -> None:
-        self._wells = value
-
     def _load(self) -> None:
         raise NotImplementedError("Implement this in the derived class")
 
@@ -61,22 +57,16 @@ class Wells(ABC):
         raise NotImplementedError("Implement this in the derived class")
 
     def get_wells_overview(self) -> str:
-        if not self._wells_loaded:
-            self._load()
-
         overview: str = ''
-        for well in self._wells:
+        for well in self.wells:
             overview += well.printable_well_info
 
         return overview
 
     def get_wells_dates(self) -> set[str]:
         """Returns a set of the unique dates in the wellspec file over all wells."""
-        if not self._wells_loaded:
-            self._load()
-
         set_dates: set[str] = set()
-        for well in self._wells:
+        for well in self.wells:
             set_dates.update(set(well.dates_of_completions))
 
         return set_dates

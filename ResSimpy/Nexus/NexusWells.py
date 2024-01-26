@@ -17,6 +17,7 @@ from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
+from ResSimpy.Well import Well
 from ResSimpy.Wells import Wells
 from ResSimpy.Nexus.load_wells import load_wells
 import ResSimpy.FileOperations.file_operations as fo
@@ -36,13 +37,26 @@ class NexusWells(Wells):
         model (Simulator): NexusSimulator object that has the instance of wells on.
     """
     __model: NexusSimulator
-    _wells: list[NexusWell] = field(default_factory=list)
     __date_format: DateFormat
+    _wells: list[NexusWell] = field(default_factory=list)
 
     def __init__(self, model: NexusSimulator) -> None:
         self.__model = model
         self.__add_object_operations = AddObjectOperations(NexusCompletion, self.table_header, self.table_footer, model)
         super().__init__()
+
+    @property
+    def wells(self) -> Sequence[Well]:
+        if not self._wells_loaded:
+            self._load()
+
+            # Ensure that the wells have been populated with the information from the network as well
+            self.__model.network.get_load_status()
+        return self._wells
+
+    @wells.setter
+    def wells(self, value) -> None:
+        self._wells = value
 
     @property
     def date_format(self) -> DateFormat:
