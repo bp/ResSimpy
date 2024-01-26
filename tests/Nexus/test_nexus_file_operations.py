@@ -386,7 +386,7 @@ def test_get_expected_token_value_value_present():
     ("a", 'a'),
     ("\"a a\"", 'a a'),
     ("\"ABCD   \"", 'ABCD   '),
-    ('"ABCD"', "ABCD")
+    ('"ABCD"', "ABCD"),
 ])
 def test_get_next_value_single_line(line, expected_result):
     # Act
@@ -399,7 +399,8 @@ def test_get_next_value_single_line(line, expected_result):
     (['\t ', '1'], '1'),
     (['\t ', '\n', '\n', '\n', '\n', '1'], '1'),
     (['!Comment Line 1', '\n', '\n', '\t', ' !Comment Line 2 ', '\n', ' ABCDEFG '], 'ABCDEFG'),
-    (['!"First Value"', '"Second Value"'], 'Second Value')
+    (['!"First Value"', '"Second Value"'], 'Second Value'),
+    (['C comment line', '1'], '1'),
 ])
 def test_get_next_value_multiple_lines(file, expected_result):
     # Act
@@ -407,6 +408,29 @@ def test_get_next_value_multiple_lines(file, expected_result):
     # Assert
     assert result == expected_result
 
+@pytest.mark.parametrize("file, expected_result", [
+    (['\t #comment', '1'], '1'),
+    (['#comment', '1'], '1'),
+    (['1\t #comment', '!another comment', '1'], '1'),
+    (['C comment line', '1'], '1'),
+])
+def test_get_next_value_different_comment_char(file, expected_result):
+    # Act
+    result = nfo.get_next_value(0, file, comment_characters=['#', '!'])
+    # Assert
+    assert result == expected_result
+
+@pytest.mark.parametrize("file, single_c_acts_as_comment, expected_result", [
+    (['C Comment line ', '1'], True, '1'),
+    (['C Comment line ', '1'], False, 'C'),
+    (['COMMENT line ', '1'], True, 'COMMENT'),
+    (['COMMENT line', '1', ], False, 'COMMENT'),
+])
+def test_get_next_value_single_c_acts_as_comment(file, single_c_acts_as_comment, expected_result):
+    # Act
+    result = nfo.get_next_value(0, file, single_c_acts_as_comment=single_c_acts_as_comment)
+    # Assert
+    assert result == expected_result
 
 @pytest.mark.parametrize("line, expected_result", [
     ('\t 1', '1'),
