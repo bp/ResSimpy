@@ -54,10 +54,6 @@ class NexusWells(Wells):
             self.__model.network.get_load_status()
         return self._wells
 
-    @wells.setter
-    def wells(self, value) -> None:
-        self._wells = value
-
     @property
     def date_format(self) -> DateFormat:
         if not self._wells_loaded:

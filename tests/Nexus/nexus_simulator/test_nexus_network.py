@@ -315,6 +315,8 @@ WELLS
   well_prod_1   PRODUCER   94     4039.3     ON        CELLGRAD
   well_inj_wat   WATER      95     4039.3     OFF        CALC
   well_inj_oil      OIL 389 20339 ON CALC
+    well_inj_gas      GAS 389 20339 ON CALC
+        well_prod_other      OTHER_VALUE 389 20339 ON CALC
     ENDWELLS    
 """
 
@@ -333,6 +335,14 @@ IW JW L RADW
 9 10 11 12.1
 
 WELLSPEC well_prod_2
+IW JW L RADW
+13 14 15 16
+
+WELLSPEC well_inj_gas
+IW JW L RADW
+13 14 15 16
+
+WELLSPEC well_prod_other
 IW JW L RADW
 13 14 15 16
 """
@@ -368,8 +378,12 @@ RECURRENT_FILES
     expected_completion_4 = NexusCompletion(date='02/10/2032', i=13, j=14, k=15, well_radius=16.0, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH)
     expected_well_4 = NexusWell(well_name='well_prod_2', completions=[expected_completion_4], unit_system=UnitSystem.ENGLISH,
                                 well_type=WellType.PRODUCER)
+    expected_well_5 = NexusWell(well_name='well_inj_gas', completions=[expected_completion_4], unit_system=UnitSystem.ENGLISH,
+                                well_type=WellType.GAS_INJECTOR)
+    expected_well_6 = NexusWell(well_name='well_prod_other', completions=[expected_completion_4], unit_system=UnitSystem.ENGLISH,
+                                well_type=WellType.PRODUCER)
 
-    expected_wells = [expected_well_1, expected_well_2, expected_well_3, expected_well_4]
+    expected_wells = [expected_well_1, expected_well_2, expected_well_3, expected_well_4, expected_well_5, expected_well_6]
 
     # Act
     result = model.wells.wells
