@@ -55,7 +55,7 @@ class NexusWell(Well):
         """Sets the well type."""
         if not isinstance(val, WellType):
             raise ValueError(f"Invalid well type: {val}")
-        
+
         self._well_type = val
 
     @property
