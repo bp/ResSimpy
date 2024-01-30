@@ -3,9 +3,12 @@ The currently supported elements are nodes, connections, well connections, wellh
 targets.
 """
 from __future__ import annotations
+
+import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional, Any, Literal
 
+from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.Network import Network
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
@@ -43,9 +46,9 @@ class NexusNetwork(Network):
     wellheads: NexusWellheads
     wellbores: NexusWellbores
     constraints: NexusConstraints
-    __has_been_loaded: bool = False
     targets: NexusTargets
     welllists: NexusWellLists
+    __has_been_loaded: bool = False
 
     def __init__(self, model: NexusSimulator) -> None:
         self.__has_been_loaded: bool = False
@@ -139,6 +142,34 @@ class NexusNetwork(Network):
             self.welllists._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLLIST')))
 
         self.__has_been_loaded = True
+        self.__update_well_types()
+
+    def __update_well_types(self) -> None:
+        """Updates the types of all of the wells using information found in the wells table."""
+        for connection in self.well_connections.get_all():
+            if connection.name is None or connection.stream is None:
+                # Connection cannot be used to determine well type, so ignore it.
+                continue
+
+            well_to_modify = self.__model.wells.get(connection.name)
+
+            if well_to_modify is None:
+                warnings.warn(UserWarning(f'Cannot find matching well for {connection.name} declared in surface file.'))
+                continue
+
+            match connection.stream.upper():
+                case 'PRODUCER':
+                    well_type = WellType.PRODUCER
+                case 'GAS':
+                    well_type = WellType.GAS_INJECTOR
+                case 'WATER':
+                    well_type = WellType.WATER_INJECTOR
+                case 'OIL':
+                    well_type = WellType.OIL_INJECTOR
+                case _:
+                    well_type = WellType.PRODUCER
+
+            well_to_modify.well_type = well_type
 
     def get_unique_names_in_network(self) -> list[str]:
         """Extracts all names from a network including all the nodes, wells and connections.

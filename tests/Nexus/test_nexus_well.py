@@ -109,10 +109,13 @@ def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock
     ([], [])
 
 ], ids=['basic case', 'mixture of perf and not perf', 'no perforations', 'using defaults', 'empty list'])
-def test_get_perforations(completions, expected_perforations):
+def test_get_perforations(mocker, completions, expected_perforations):
     # Arrange
+    dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_wells = NexusWells(model=dummy_model)
+
     well = NexusWell(well_name='test well', completions=completions,
-                     unit_system=UnitSystem.ENGLISH)
+                     unit_system=UnitSystem.ENGLISH, parent_wells_instance=dummy_wells)
 
     # Act
     result = well.perforations
@@ -164,10 +167,13 @@ def test_get_perforations(completions, expected_perforations):
     ([], None)
 
 ], ids=['basic case', 'mixture of perf and not perf', 'no perforations', 'empty list'])
-def test_get_first_perforation(completions, expected_perforation):
+def test_get_first_perforation(mocker, completions, expected_perforation):
     # Arrange
+    dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_wells = NexusWells(model=dummy_model)
+
     well = NexusWell(well_name='test well', completions=completions,
-                     unit_system=UnitSystem.ENGLISH)
+                     unit_system=UnitSystem.ENGLISH, parent_wells_instance=dummy_wells)
 
     # Act
     result = well.first_perforation
@@ -240,10 +246,13 @@ def test_get_first_perforation(completions, expected_perforation):
     ([], [])
 
 ], ids=['basic case', 'mixture of perf and not perf', 'no shutins', 'no perf info', 'empty list'])
-def test_get_shutins(completions, expected_shutins):
+def test_get_shutins(mocker, completions, expected_shutins):
     # Arrange
+    dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_wells = NexusWells(model=dummy_model)
+
     well = NexusWell(well_name='test well', completions=completions,
-                     unit_system=UnitSystem.ENGLISH)
+                     unit_system=UnitSystem.ENGLISH, parent_wells_instance=dummy_wells)
 
     # Act
     result = well.shutins
@@ -309,10 +318,13 @@ def test_get_shutins(completions, expected_shutins):
     ([], None)
 
 ], ids=['basic case', 'mixture of perf and not perf', 'only shutins', 'no shutins', 'no perf info', 'empty list'])
-def test_get_last_shutin(completions, expected_shutin):
+def test_get_last_shutin(mocker, completions, expected_shutin):
     # Arrange
+    dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_wells = NexusWells(model=dummy_model)
+
     well = NexusWell(well_name='test well', completions=completions,
-                     unit_system=UnitSystem.ENGLISH)
+                     unit_system=UnitSystem.ENGLISH, parent_wells_instance=dummy_wells)
 
     # Act
     result = well.last_shutin
@@ -321,7 +333,7 @@ def test_get_last_shutin(completions, expected_shutin):
     assert result == expected_shutin
 
 
-def test_printable_well_info():
+def test_printable_well_info(mocker):
     # Arrange
     completion_1 = NexusCompletion(date='01/01/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None,
                                    grid='GRID1', status='ON', date_format=DateFormat.DD_MM_YYYY)
@@ -330,7 +342,10 @@ def test_printable_well_info():
     completion_3 = NexusCompletion(date='01/02/2025', i=1, j=2, k=3, partial_perf=0, date_format=DateFormat.DD_MM_YYYY)
     completions = [completion_1, completion_2, completion_3]
 
-    well = NexusWell(well_name='test well', completions=completions, unit_system=UnitSystem.LAB)
+    dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_wells = NexusWells(model=dummy_model)
+
+    well = NexusWell(well_name='test well', completions=completions, unit_system=UnitSystem.LAB, parent_wells_instance=dummy_wells)
 
     expected_info = \
         """
@@ -347,11 +362,14 @@ def test_printable_well_info():
     assert result == expected_info
 
 
-def test_printable_well_info_missing_info():
+def test_printable_well_info_missing_info(mocker):
     # Arrange
     completions = []
 
-    well = NexusWell(well_name='test well', completions=completions, unit_system=UnitSystem.METRIC)
+    dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_wells = NexusWells(model=dummy_model)
+
+    well = NexusWell(well_name='test well', completions=completions, unit_system=UnitSystem.METRIC, parent_wells_instance=dummy_wells)
 
     expected_info = \
         """
@@ -449,10 +467,13 @@ def test_printable_well_info_missing_info():
 
 ], ids=['Only perforations', 'mixture of perf and not perf', 'no perforations', 'empty list', 'D Values',
         'Mix D values first', 'Mix K values first'])
-def test_get_completion_events(completions, expected_shutin):
+def test_get_completion_events(mocker, completions, expected_shutin):
     # Arrange
+    dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_wells = NexusWells(model=dummy_model)
+
     well = NexusWell(well_name='test well', completions=completions,
-                     unit_system=UnitSystem.METKGCM2)
+                     unit_system=UnitSystem.METKGCM2, parent_wells_instance=dummy_wells)
 
     # Act
     result = well.open_and_shut_events
@@ -491,7 +512,11 @@ def test_find_completion(mocker, existing_completions):
     ]
     completion_to_find_as_completion = NexusCompletion(date='01/02/2023', i=1, j=2, k=3, status='ON',
                                                        date_format=DateFormat.DD_MM_YYYY)
-    well = NexusWell(well_name='test well', completions=existing_completions, unit_system=UnitSystem.METKGCM2)
+
+    dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_wells = NexusWells(model=dummy_model)
+
+    well = NexusWell(well_name='test well', completions=existing_completions, unit_system=UnitSystem.METKGCM2, parent_wells_instance=dummy_wells)
     expected_result = NexusCompletion(date='01/02/2023', i=1, j=2, k=3, status='ON', partial_perf=1,
                                       date_format=DateFormat.DD_MM_YYYY)
 
@@ -508,7 +533,7 @@ def test_find_completion(mocker, existing_completions):
         well.find_completion(completion_to_fail)
 
 
-def test_add_completion():
+def test_add_completion(mocker):
     # Arrange
     new_date = '01/04/2023'
     existing_completions = [
@@ -533,10 +558,13 @@ def test_add_completion():
     expected_completions = [x for x in existing_completions]
     expected_completions.append(new_nexus_completion)
 
+    dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_wells = NexusWells(model=dummy_model)
+
     expected_well = NexusWell(well_name='test well', completions=expected_completions,
-                              unit_system=UnitSystem.METKGCM2)
+                              unit_system=UnitSystem.METKGCM2, parent_wells_instance=dummy_wells)
     well = NexusWell(well_name='test well', completions=existing_completions,
-                     unit_system=UnitSystem.METKGCM2)
+                     unit_system=UnitSystem.METKGCM2, parent_wells_instance=dummy_wells)
     # Act
     well._add_completion_to_memory(date=new_date, completion_properties=new_completion_props,
                                    date_format=DateFormat.DD_MM_YYYY)
@@ -544,7 +572,7 @@ def test_add_completion():
     assert well == expected_well
 
 
-def test_remove_completion_from_memory():
+def test_remove_completion_from_memory(mocker):
     # Arrange
     existing_completions = [
         NexusCompletion(date='01/01/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None, grid='GRID1',
@@ -564,11 +592,15 @@ def test_remove_completion_from_memory():
         NexusCompletion(date='01/03/2023', i=1, j=2, well_indices=0, depth_to_top=1156, depth_to_bottom=1234,
                         status='ON', partial_perf=1, date_format=DateFormat.DD_MM_YYYY),
     ]
+
+    dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_wells = NexusWells(model=dummy_model)
+
     expected_result = NexusWell(well_name='test well', completions=expected_completions_after_removal,
-                                unit_system=UnitSystem.METKGCM2)
+                                unit_system=UnitSystem.METKGCM2, parent_wells_instance=dummy_wells)
     perfs_to_remove = {'date': '01/02/2023', 'i': 1, 'j': 2, }
     remove_well = NexusWell(well_name='test well', completions=existing_completions,
-                            unit_system=UnitSystem.METKGCM2)
+                            unit_system=UnitSystem.METKGCM2, parent_wells_instance=dummy_wells)
 
     # Act
     comp_to_remove = remove_well.find_completions(perfs_to_remove)
@@ -577,7 +609,7 @@ def test_remove_completion_from_memory():
     assert remove_well == expected_result
 
 
-def test_modify_completion():
+def test_modify_completion(mocker):
     # Arrange
     existing_completions = [
         NexusCompletion(date='01/01/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None, grid='GRID1',
@@ -599,8 +631,11 @@ def test_modify_completion():
     completion_id = existing_completions[-1].id
     changes = {'i': 1, 'j': 5, 'k': 6, 'perm_thickness_ovr': 10000.4, 'partial_perf': 0.5}
 
-    well = NexusWell(well_name='test well', completions=existing_completions, unit_system=UnitSystem.METKGCM2)
-    expected_well = NexusWell(well_name='test well', completions=expected_completions, unit_system=UnitSystem.METKGCM2)
+    dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_wells = NexusWells(model=dummy_model)
+
+    well = NexusWell(well_name='test well', completions=existing_completions, unit_system=UnitSystem.METKGCM2, parent_wells_instance=dummy_wells)
+    expected_well = NexusWell(well_name='test well', completions=expected_completions, unit_system=UnitSystem.METKGCM2, parent_wells_instance=dummy_wells)
 
     # Act
     well._modify_completion_in_memory(new_completion_properties=changes, completion_to_modify=completion_id)
@@ -612,6 +647,7 @@ def test_modify_completion():
         NexusCompletion(date='01/03/2023', i=1, j=5, k=6, well_indices=0, depth_to_top=1156, depth_to_bottom=1234,
                         status='ON', partial_perf=0.5, perm_thickness_ovr=10000.4,
                         date_format=DateFormat.DD_MM_YYYY)).id == completion_id
+    assert well == expected_well
 
 
 def test_well_dates(mocker):
@@ -634,9 +670,12 @@ def test_well_dates(mocker):
     mocker.patch('ResSimpy.Nexus.NexusSimulator.NexusSimulator', mock_sim)
     well = NexusWells(mock_sim)
 
+    dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_wells = NexusWells(model=dummy_model)
+
     well.__setattr__('_wells',
-                     [NexusWell(well_name='well1', completions=well_1_completions, unit_system=UnitSystem.METRIC),
-                      NexusWell(well_name='well2', completions=well_2_completions, unit_system=UnitSystem.METRIC)])
+                     [NexusWell(well_name='well1', completions=well_1_completions, unit_system=UnitSystem.METRIC, parent_wells_instance=dummy_wells),
+                      NexusWell(well_name='well2', completions=well_2_completions, unit_system=UnitSystem.METRIC, parent_wells_instance=dummy_wells)])
 
     expected_result = {'01/01/2023', '01/02/2023', '01/03/2023'}
     # Act
@@ -717,8 +756,11 @@ def test_wells_modify(mocker):
                                              date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH)
     expected_completions = well_1_completions[0:2] + [new_nexus_completion_1, new_nexus_completion_2]
 
-    expected_result = [NexusWell(well_name='well1', completions=expected_completions, unit_system=UnitSystem.ENGLISH),
-                       NexusWell(well_name='well2', completions=well_2_completions, unit_system=UnitSystem.ENGLISH)]
+    dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_wells = NexusWells(model=dummy_model)
+
+    expected_result = [NexusWell(well_name='well1', completions=expected_completions, unit_system=UnitSystem.ENGLISH, parent_wells_instance=dummy_wells),
+                       NexusWell(well_name='well2', completions=well_2_completions, unit_system=UnitSystem.ENGLISH, parent_wells_instance=dummy_wells)]
 
     # Act
     wells.modify(well_name='well1', completion_properties_list=[perf_1_to_add, perf_2_to_add],

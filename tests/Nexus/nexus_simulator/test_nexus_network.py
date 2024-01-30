@@ -2,18 +2,26 @@
 import numpy as np
 import pandas as pd
 import pytest
+
+from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnections import NexusWellConnections
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
 from ResSimpy.Nexus.DataModels.Network.NexusWellbores import NexusWellbores
 from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.Network.NexusWellheads import NexusWellheads
+from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnections import NexusNodeConnections
 from ResSimpy.Nexus.DataModels.Network.NexusNodes import NexusNodes
+from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
+from ResSimpy.Nexus.NexusWells import NexusWells
+from tests.multifile_mocker import mock_multiple_files
+from tests.utility_for_tests import get_fake_nexus_simulator
 
 
 @pytest.mark.parametrize('file_contents, node1_props, node2_props',[
@@ -295,6 +303,98 @@ def test_load_well_connections(mocker, file_contents, well_connection_props1, we
     assert result == expected_result
     assert single_connection_result == wellcon1
     pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
+
+
+def test_load_sim_wells_well_type(mocker):
+    """Checks that we retrieve the well type from the surface files correctly."""
+
+    # Arrange
+    surface_file_contents = """TIME 02/10/2032
+METRIC
+WELLS
+  NAME    STREAM   NUMBER   DATUM   CROSSFLOW   CROSS_SHUT
+  well_prod_1   PRODUCER   94     4039.3     ON        CELLGRAD
+  well_inj_wat   WATER      95     4039.3     OFF        CALC
+  well_inj_oil      OIL 389 20339 ON CALC
+    well_inj_gas      GAS 389 20339 ON CALC
+        well_prod_other      OTHER_VALUE 389 20339 ON CALC
+    ENDWELLS    
+"""
+
+    wellspec_file_contents = """
+    TIME 02/10/2032
+WELLSPEC well_prod_1
+    IW JW L RADW
+    1  2  3  4.5  
+    
+WELLSPEC well_inj_wat
+      IW JW L RADW
+    5 6 7 8
+    
+WELLSPEC well_inj_oil
+IW JW L RADW
+9 10 11 12.1
+
+WELLSPEC well_prod_2
+IW JW L RADW
+13 14 15 16
+
+WELLSPEC well_inj_gas
+IW JW L RADW
+13 14 15 16
+
+WELLSPEC well_prod_other
+IW JW L RADW
+13 14 15 16
+"""
+
+    fcs_file_contents = """
+DATEFORMAT DD/MM/YYYY    
+RECURRENT_FILES
+	 WELLS Set 1        wells.dat
+	 SURFACE Network 1  surface.dat
+"""
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'model.fcs': fcs_file_contents,
+            'wells.dat': wellspec_file_contents,
+            'surface.dat': surface_file_contents
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    model = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='model.fcs', mock_open=False)
+
+    parent_wells_instance = NexusWells(model=model)
+    model._wells = parent_wells_instance
+
+    expected_completion_1 = NexusCompletion(date='02/10/2032', i=1, j=2, k=3, well_radius=4.5, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH)
+    expected_well_1 = NexusWell(well_name='well_prod_1', completions=[expected_completion_1], unit_system=UnitSystem.ENGLISH,
+                                well_type=WellType.PRODUCER, parent_wells_instance=parent_wells_instance)
+    expected_completion_2 = NexusCompletion(date='02/10/2032', i=5, j=6, k=7, well_radius=8.0, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH)
+    expected_well_2 = NexusWell(well_name='well_inj_wat', completions=[expected_completion_2], unit_system=UnitSystem.ENGLISH,
+                                well_type=WellType.WATER_INJECTOR, parent_wells_instance=parent_wells_instance)
+    expected_completion_3 = NexusCompletion(date='02/10/2032', i=9, j=10, k=11, well_radius=12.1, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH)
+    expected_well_3 = NexusWell(well_name='well_inj_oil', completions=[expected_completion_3], unit_system=UnitSystem.ENGLISH,
+                                well_type=WellType.OIL_INJECTOR, parent_wells_instance=parent_wells_instance)
+    expected_completion_4 = NexusCompletion(date='02/10/2032', i=13, j=14, k=15, well_radius=16.0, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH)
+    expected_well_4 = NexusWell(well_name='well_prod_2', completions=[expected_completion_4], unit_system=UnitSystem.ENGLISH,
+                                well_type=WellType.PRODUCER, parent_wells_instance=parent_wells_instance)
+    expected_well_5 = NexusWell(well_name='well_inj_gas', completions=[expected_completion_4], unit_system=UnitSystem.ENGLISH,
+                                well_type=WellType.GAS_INJECTOR, parent_wells_instance=parent_wells_instance)
+    expected_well_6 = NexusWell(well_name='well_prod_other', completions=[expected_completion_4], unit_system=UnitSystem.ENGLISH,
+                                well_type=WellType.PRODUCER, parent_wells_instance=parent_wells_instance)
+
+    expected_wells = [expected_well_1, expected_well_2, expected_well_3, expected_well_4, expected_well_5, expected_well_6]
+
+    # Act
+    result = model.wells.wells
+
+    # Assert
+    assert result[1].well_type == WellType.WATER_INJECTOR
+    assert result == expected_wells
 
 
 @pytest.mark.parametrize('file_contents, wellhead_props_1, wellhead_props_2', [

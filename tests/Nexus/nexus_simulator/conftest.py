@@ -1,5 +1,7 @@
 import pytest
 
+from tests.Nexus.conftest import mock_out_file_datetime_operations # This import allows us to run tests individually
+# (forces it to check the 'parent' conftest as well).
 
 @pytest.fixture(scope="function", autouse=True)
 def simulation(mocker):
@@ -9,5 +11,3 @@ def simulation(mocker):
     mocker.patch("os.listdir", listdir_mock)
     # Create an override for isfile checks
     mocker.patch("os.path.isfile", lambda x: True)
-
-

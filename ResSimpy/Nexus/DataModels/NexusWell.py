@@ -1,9 +1,10 @@
 """Class for representing a well in Nexus. Consists of a list of completions and a well name."""
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Optional, Sequence, Union
+from typing import Optional, Sequence, Union, TYPE_CHECKING
 from uuid import UUID
 
+from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusWellMod import NexusWellMod
@@ -11,14 +12,20 @@ from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Well import Well
 
+if TYPE_CHECKING:
+    from ResSimpy.Nexus.NexusWells import NexusWells
+
 
 @dataclass(kw_only=True)
 class NexusWell(Well):
     """Class for representing a well in Nexus. Consists of a list of completions and a well name."""
     _wellmods: list[NexusWellMod]
+    _parent_wells_instance: NexusWells
 
     def __init__(self, well_name: str, completions: Sequence[NexusCompletion], unit_system: UnitSystem,
-                 wellmods: Sequence[NexusWellMod] | None = None) -> None:
+                 parent_wells_instance: NexusWells, wellmods: Sequence[NexusWellMod] | None = None,
+                 well_type: Optional[WellType] = None) -> None:
+        self._parent_wells_instance = parent_wells_instance
         if not isinstance(completions, list):
             completions = list(completions)
         if wellmods is None:
@@ -26,7 +33,8 @@ class NexusWell(Well):
         elif not isinstance(wellmods, list):
             wellmods = list(wellmods)
         self._wellmods: list[NexusWellMod] = wellmods
-        super().__init__(well_name=well_name, completions=completions, unit_system=unit_system)
+        well_type = WellType.PRODUCER if well_type is None else well_type
+        super().__init__(well_name=well_name, completions=completions, unit_system=unit_system, well_type=well_type)
 
     def __repr__(self) -> str:
         return generic_repr(self)
@@ -35,11 +43,27 @@ class NexusWell(Well):
         return generic_str(self)
 
     @property
+    def well_type(self) -> WellType | None:
+        """The type of the well."""
+
+        # Ensure that the wells have been populated with the information from the network as well
+        self._parent_wells_instance.model.network.get_load_status()
+        return self._well_type
+
+    @well_type.setter
+    def well_type(self, val: WellType) -> None:
+        """Sets the well type."""
+        if not isinstance(val, WellType):
+            raise ValueError(f"Invalid well type: {val}")
+
+        self._well_type = val
+
+    @property
     def wellmods(self) -> list[NexusWellMod]:
         """Property with a list of all the wellmods for the well."""
         return self._wellmods
 
-    def find_completions(self, completion_properties:  dict[str, None | float | int | str] | NexusCompletion) -> \
+    def find_completions(self, completion_properties: dict[str, None | float | int | str] | NexusCompletion) -> \
             list[NexusCompletion]:
         """Returns a list of all completions that match the completion properties provided.
 
