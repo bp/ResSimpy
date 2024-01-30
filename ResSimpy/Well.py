@@ -46,6 +46,9 @@ class Well(ABC):
     @well_type.setter
     def well_type(self, val: WellType) -> None:
         """Sets the well type."""
+        if not isinstance(val, WellType):
+            raise ValueError(f"Invalid well type: {val}")
+
         self._well_type = val
 
     @property

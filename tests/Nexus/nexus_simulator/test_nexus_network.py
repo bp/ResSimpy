@@ -19,6 +19,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusNodeConnections import NexusNodeConn
 from ResSimpy.Nexus.DataModels.Network.NexusNodes import NexusNodes
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
+from ResSimpy.Nexus.NexusWells import NexusWells
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator
 
@@ -366,22 +367,25 @@ RECURRENT_FILES
 
     model = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='model.fcs', mock_open=False)
 
+    parent_wells_instance = NexusWells(model=model)
+    model._wells = parent_wells_instance
+
     expected_completion_1 = NexusCompletion(date='02/10/2032', i=1, j=2, k=3, well_radius=4.5, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH)
     expected_well_1 = NexusWell(well_name='well_prod_1', completions=[expected_completion_1], unit_system=UnitSystem.ENGLISH,
-                                well_type=WellType.PRODUCER)
+                                well_type=WellType.PRODUCER, parent_wells_instance=parent_wells_instance)
     expected_completion_2 = NexusCompletion(date='02/10/2032', i=5, j=6, k=7, well_radius=8.0, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH)
     expected_well_2 = NexusWell(well_name='well_inj_wat', completions=[expected_completion_2], unit_system=UnitSystem.ENGLISH,
-                                well_type=WellType.WATER_INJECTOR)
+                                well_type=WellType.WATER_INJECTOR, parent_wells_instance=parent_wells_instance)
     expected_completion_3 = NexusCompletion(date='02/10/2032', i=9, j=10, k=11, well_radius=12.1, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH)
     expected_well_3 = NexusWell(well_name='well_inj_oil', completions=[expected_completion_3], unit_system=UnitSystem.ENGLISH,
-                                well_type=WellType.OIL_INJECTOR)
+                                well_type=WellType.OIL_INJECTOR, parent_wells_instance=parent_wells_instance)
     expected_completion_4 = NexusCompletion(date='02/10/2032', i=13, j=14, k=15, well_radius=16.0, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH)
     expected_well_4 = NexusWell(well_name='well_prod_2', completions=[expected_completion_4], unit_system=UnitSystem.ENGLISH,
-                                well_type=WellType.PRODUCER)
+                                well_type=WellType.PRODUCER, parent_wells_instance=parent_wells_instance)
     expected_well_5 = NexusWell(well_name='well_inj_gas', completions=[expected_completion_4], unit_system=UnitSystem.ENGLISH,
-                                well_type=WellType.GAS_INJECTOR)
+                                well_type=WellType.GAS_INJECTOR, parent_wells_instance=parent_wells_instance)
     expected_well_6 = NexusWell(well_name='well_prod_other', completions=[expected_completion_4], unit_system=UnitSystem.ENGLISH,
-                                well_type=WellType.PRODUCER)
+                                well_type=WellType.PRODUCER, parent_wells_instance=parent_wells_instance)
 
     expected_wells = [expected_well_1, expected_well_2, expected_well_3, expected_well_4, expected_well_5, expected_well_6]
 
@@ -389,6 +393,7 @@ RECURRENT_FILES
     result = model.wells.wells
 
     # Assert
+    assert result[1].well_type == WellType.WATER_INJECTOR
     assert result == expected_wells
 
 

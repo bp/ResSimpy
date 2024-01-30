@@ -13,11 +13,9 @@ import pandas as pd
 from ResSimpy.Enums.HowEnum import OperationEnum
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
-from ResSimpy.Well import Well
 from ResSimpy.Wells import Wells
 from ResSimpy.Nexus.load_wells import load_wells
 import ResSimpy.FileOperations.file_operations as fo
@@ -26,6 +24,7 @@ from ResSimpy.Utils.invert_nexus_map import attribute_name_to_nexus_keyword
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+    from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 
 
 @dataclass(kw_only=True)
@@ -46,13 +45,9 @@ class NexusWells(Wells):
         super().__init__()
 
     @property
-    def wells(self) -> Sequence[Well]:
-        if not self._wells_loaded:
-            self._load()
-
-            # Ensure that the wells have been populated with the information from the network as well
-            self.__model.network.get_load_status()
-        return self._wells
+    def model(self) -> NexusSimulator:
+        """The model object that contains this NexusWells instance."""
+        return self.__model
 
     @property
     def date_format(self) -> DateFormat:
@@ -108,7 +103,7 @@ class NexusWells(Wells):
                 warnings.warn(f'Well file location has not been found for {well_file}')
                 continue
             new_wells, date_format = load_wells(nexus_file=well_file, start_date=self.__model.start_date,
-                                                default_units=self.__model.default_units,
+                                                default_units=self.__model.default_units, parent_wells_instance=self,
                                                 model_date_format=self.__model.date_format)
 
             self._wells += new_wells

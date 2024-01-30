@@ -8,9 +8,11 @@ from pytest_mock import MockerFixture
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
+from ResSimpy.Nexus.NexusWells import NexusWells
 from ResSimpy.Nexus.load_wells import load_wells
 
 from tests.multifile_mocker import mock_multiple_files
+from tests.utility_for_tests import get_fake_nexus_simulator
 
 
 def mock_different_includes(mocker, filename, test_file_contents, inc_file_content1, inc_file_content2='',
@@ -427,6 +429,9 @@ KZ CON 1
                          )
 def test_file_object_locations(mocker, test_file_contents, expected_results):
     # Arrange
+    dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_wells = NexusWells(model=dummy_model)
+
     mocker.patch.object(uuid, 'uuid4', side_effect=['file_uuid', 'uuid1', 'uuid2'])
 
     def mock_open_wrapper(filename, mode):
@@ -440,7 +445,7 @@ def test_file_object_locations(mocker, test_file_contents, expected_results):
     wells_file = NexusFile.generate_file_include_structure(file_path='wells.dat', skip_arrays=True, )
 
     # Act
-    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH, model_date_format=DateFormat.DD_MM_YYYY)
+    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH, model_date_format=DateFormat.DD_MM_YYYY, parent_wells_instance=dummy_wells)
     result = wells_file.object_locations
 
     # Assert
@@ -750,6 +755,9 @@ continuation''')
                          )
 def test_update_object_locations(mocker, test_file_contents, expected_results):
     # Arrange
+    dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_wells = NexusWells(model=dummy_model)
+
     mocker.patch.object(uuid, 'uuid4', side_effect=['file_uuid', 'uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5'])
 
     def mock_open_wrapper(filename, mode):
@@ -762,7 +770,7 @@ def test_update_object_locations(mocker, test_file_contents, expected_results):
 
     wells_file = NexusFile.generate_file_include_structure(file_path='wells.dat', skip_arrays=True, )
     # load the uuids
-    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH, model_date_format=DateFormat.DD_MM_YYYY)
+    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH, model_date_format=DateFormat.DD_MM_YYYY, parent_wells_instance=dummy_wells)
 
     # Act
     # effectively add 2 lines at location 5

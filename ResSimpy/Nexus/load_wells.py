@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Optional, Sequence
+from typing import Optional, Sequence, TYPE_CHECKING
 
 from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.NexusWellMod import NexusWellMod
@@ -9,15 +9,19 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
 from ResSimpy.Utils.invert_nexus_map import nexus_keyword_to_attribute_name
 
+from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 
-def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem,
+if TYPE_CHECKING:
+    from ResSimpy.Nexus.NexusWells import NexusWells
+
+
+def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem, parent_wells_instance: NexusWells,
                model_date_format: DateFormat) -> tuple[Sequence[NexusWell], DateFormat]:
     """Loads a list of Nexus Well instances and populates it with the wells completions over time from a wells file.
 
@@ -209,7 +213,7 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
                 wells[well_name_list.index(well_name)].completions.extend(completions)
             else:
                 new_well = NexusWell(completions=completions, well_name=well_name, unit_system=wellspec_file_units,
-                                     wellmods=[])
+                                     wellmods=[], parent_wells_instance=parent_wells_instance)
                 well_name_list.append(well_name)
                 wells.append(new_well)
             wellspec_found = False
