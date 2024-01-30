@@ -1099,3 +1099,41 @@ INCLUDE"""
     result = repr(nexus_file)
     # Assert
     assert result == expected_result
+
+
+def test_get_full_network_nexus_file(mocker):
+    # Arrange
+    file_path = '/origin/path/test_file_path.dat'
+    include_full_file_path_1 = os.path.join('/origin/path', 'nexus_data/inc_file1.inc')
+    include_full_file_path_2 = os.path.join('/origin/path', 'nexus_data', 'inc_file2.inc')
+    include_full_file_path_3 = os.path.join('/origin/path', 'nexus_data/inc_file3.inc')
+    expected_includes_list = [include_full_file_path_1]
+    expected_location = '/origin/path/test_file_path.dat'
+
+    nexus_file_include2 = NexusFile(location=include_full_file_path_2, include_locations=[],
+                                    origin=include_full_file_path_1,
+                                    include_objects=None, file_content_as_list=['second_file'])
+    nexus_file_include2._location_in_including_file = 'inc_file2.inc'
+
+    nexus_file_include1 = NexusFile(location=include_full_file_path_1, include_locations=[include_full_file_path_2],
+                                    origin=file_path, include_objects=[nexus_file_include2],
+                                    file_content_as_list=['inc file contents INCLUDE inc_file2.inc'])
+    nexus_file_include1._location_in_including_file = 'nexus_data/inc_file1.inc'
+
+    nexus_file_include3 = NexusFile(location='nexus_data/inc_file3.inc', include_locations=[],
+                                    origin=file_path, include_objects=None,
+                                    file_content_as_list=['third_file'])
+
+    nexus_file = NexusFile(location=expected_location, include_locations=expected_includes_list,
+                                    origin=None, include_objects=[nexus_file_include1, nexus_file_include3],
+                                    file_content_as_list=['basic_file INCLUDE nexus_data/inc_file1.inc'])
+
+    expected_from_list = [None, file_path, include_full_file_path_1, file_path]
+    expected_to_list = [file_path, include_full_file_path_1, include_full_file_path_2, include_full_file_path_3]
+
+    # Act
+    from_list, to_list = nexus_file.get_full_network()
+
+    # Assert
+    assert from_list == expected_from_list
+    assert to_list == expected_to_list

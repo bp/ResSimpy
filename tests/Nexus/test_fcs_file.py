@@ -5,8 +5,9 @@ from unittest.mock import Mock, MagicMock
 import pytest
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.multifile_mocker import mock_multiple_files
-from tests.utility_for_tests import generic_fcs, check_file_read_write_is_correct
+from tests.utility_for_tests import generic_fcs, check_file_read_write_is_correct, get_fake_nexus_simulator
 
 
 def test_fcs_file(mocker):
@@ -240,16 +241,10 @@ def test_get_full_network(mocker):
     expected_to_list = [
         'test_fcs.fcs',
         'nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',
-        'nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',
-        'nexus_data/nexus_data/mp2017hm_ref_equil_02.dat',
         'nexus_data/nexus_data/mp2017hm_ref_equil_02.dat',
         'nexus_data/mp2020_structured_grid_1_reg_update.dat',
-        'nexus_data/mp2020_structured_grid_1_reg_update.dat',
-        'nexus_data/nexus_data/mp2020_ref_options_reg_update.dat',
         'nexus_data/nexus_data/mp2020_ref_options_reg_update.dat',
         'wells.dat',
-        'wells.dat',
-        'hyd.dat',
         'hyd.dat',
     ]
 
@@ -261,66 +256,12 @@ def test_get_full_network(mocker):
         'test_fcs.fcs',
         'test_fcs.fcs',
         'test_fcs.fcs',
-        'test_fcs.fcs',
-        'test_fcs.fcs',
-        'test_fcs.fcs',
-        'test_fcs.fcs',
-        'test_fcs.fcs',
-        'test_fcs.fcs',
     ]
 
-    equil1 = NexusFile(location='nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',
-                       origin=fcs_path, include_locations=None,
-                       include_objects=None, file_content_as_list=None)
-    equil_2 = NexusFile(location='nexus_data/nexus_data/mp2017hm_ref_equil_02.dat',
-                        origin=fcs_path, include_locations=None,
-                        include_objects=None, file_content_as_list=None)
-    structured_grid_file = NexusFile(location='nexus_data/mp2020_structured_grid_1_reg_update.dat',
-                                     origin=fcs_path, include_locations=None,
-                                     include_objects=None, file_content_as_list=None)
-    options_file = NexusFile(location='nexus_data/nexus_data/mp2020_ref_options_reg_update.dat', include_locations=None,
-                             origin=fcs_path, include_objects=None, file_content_as_list=None)
-    wells_file = NexusFile(location='wells.dat', origin=fcs_path, include_locations=None, include_objects=None,
-                           file_content_as_list=None)
-    hyd_method_file = NexusFile(location='hyd.dat', origin=fcs_path, include_locations=None,
-                                include_objects=None, file_content_as_list=None)
-
-    equil_files = {1: equil1, 2: equil_2, }
-    include_objects = [equil1, equil_2, structured_grid_file, options_file,
-                       wells_file, hyd_method_file]
-    fcs_contents_as_list = ['DESC reservoir1',
-                            '    RUN_UNITS ENGLISH',
-                            '    DATEFORMAT DD/MM/YYYY',
-                            '    INITIALIZATION_FILES',
-                            '	 EQUIL Method 1 ',
-                            equil1,
-                            '',
-                            '	 EQUIL Method 2 ',
-                            equil_2,
-                            '',
-                            '    STRUCTURED_GRID ',
-                            structured_grid_file,
-                            '',
-                            '	 OPTIONS ',
-                            options_file,
-                            '',
-                            '     ',
-                            'WELLS SET 1 ',
-                            wells_file,
-                            '',
-                            '',
-                            '     HYD METHOd 3 ',
-                            hyd_method_file,
-                            '',
-                            ]
-    compiled_fcs_file = FcsNexusFile(location=fcs_path, origin=None, include_objects=include_objects,
-                                     equil_files=equil_files, structured_grid_file=structured_grid_file,
-                                     options_file=options_file, well_files={1: wells_file},
-                                     hyd_files={3: hyd_method_file},
-                                     file_content_as_list=fcs_contents_as_list, include_locations=[])
+    model = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='test_fcs.fcs', mock_open=False)
 
     # Act
-    from_list, to_list = compiled_fcs_file.get_full_network()
+    from_list, to_list = model.model_files.get_full_network()
 
     # Assert
     assert to_list == expected_to_list

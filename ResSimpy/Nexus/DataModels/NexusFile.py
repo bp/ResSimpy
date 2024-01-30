@@ -390,22 +390,24 @@ class NexusFile(File):
                 is a connection between two files.
         """
         depth: int = 0
+        # base case of recursion
         from_list = [self.origin]
         to_list = [self.location]
         if max_depth is not None:
             depth = max_depth
-        if self.file_content_as_list is None:
+        if self.include_objects is None:
             return from_list, to_list
-        for row in self.file_content_as_list:
-            if isinstance(row, NexusFile):
-                if max_depth is None or depth > 0:
-                    level_down_max_depth = None if max_depth is None else depth - 1
-                    temp_from_list, temp_to_list = row.export_network_lists()
-                    from_list.extend(temp_from_list)
-                    to_list.extend(temp_to_list)
-                    temp_from_list, temp_to_list = row.get_full_network(max_depth=level_down_max_depth)
-                    from_list.extend(temp_from_list)
-                    to_list.extend(temp_to_list)
+        # otherwise iterate over the include objects and recursively call the function
+        for include_file in self.include_objects:
+            if max_depth is not None and depth == 0:
+                # if we have reached the max depth of the recursion then break and return
+                break
+            if not isinstance(include_file, NexusFile):
+                continue
+            level_down_max_depth = None if max_depth is None else depth - 1
+            temp_from_list, temp_to_list = include_file.get_full_network(max_depth=level_down_max_depth)
+            from_list.extend(temp_from_list)
+            to_list.extend(temp_to_list)
         return from_list, to_list
 
     def add_object_locations(self, obj_uuid: UUID, line_indices: list[int]) -> None:
