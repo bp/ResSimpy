@@ -1131,9 +1131,16 @@ def test_get_full_network_nexus_file(mocker):
     expected_from_list = [None, file_path, include_full_file_path_1, file_path]
     expected_to_list = [file_path, include_full_file_path_1, include_full_file_path_2, include_full_file_path_3]
 
+    expected_shallow_from_list = [None, file_path, file_path]
+    expected_shallow_to_list = [file_path, include_full_file_path_1, include_full_file_path_3]
     # Act
     from_list, to_list = nexus_file.get_full_network()
+
+    shallow_from_list, shallow_to_list = nexus_file.get_full_network(max_depth=1)
 
     # Assert
     assert from_list == expected_from_list
     assert to_list == expected_to_list
+
+    assert shallow_from_list == expected_shallow_from_list
+    assert shallow_to_list == expected_shallow_to_list
