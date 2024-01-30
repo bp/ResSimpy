@@ -25,7 +25,7 @@ from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
-from ResSimpy.Nexus.NexusReporting import Reporting
+from ResSimpy.Nexus.NexusReporting import NexusReporting
 from ResSimpy.Nexus.NexusWells import NexusWells
 from ResSimpy.Nexus.runcontrol_operations import SimControls
 from ResSimpy.Nexus.logfile_operations import Logging
@@ -119,7 +119,7 @@ class NexusSimulator(Simulator):
         self._gaslift: NexusGasliftMethods = NexusGasliftMethods(model_unit_system=self.default_units)
         # Nexus operations modules
         self._sim_controls: SimControls = SimControls(self)
-        self.reporting: Reporting = Reporting(self)
+        self.reporting: NexusReporting = NexusReporting(self)
         self._structured_grid_operations: StructuredGridOperations = StructuredGridOperations(self)
         self.logging: Logging = Logging(self)
         self.__lazy_loading: bool = lazy_loading
