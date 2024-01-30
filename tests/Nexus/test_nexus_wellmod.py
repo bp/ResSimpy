@@ -70,14 +70,14 @@ class TestNexusWellMod:
         1  1  1  4.5
         2 2 2 5.5
         WEllMOd test_well_2    SKIN	CON	0.25 !!! WI CON 2
-        WELLMod test_well   KHMULT    CON 1234.2
+        WELLMod TEST_well   KHMULT    CON 1234.2
         TIME 01/01/2021
         WELLMOD test_well_2 PPERF	CON	0.25
         """
         well_file_content = self.well_file_content + extra_content
         expected_wellmod_1 = NexusWellMod({'well_name': 'test_well_2', 'date': '01/01/2020',
                                                 'unit_system': self.unit_system, 'skin': 0.25})
-        expected_wellmod_2 = NexusWellMod({'well_name': 'test_well', 'date': '01/01/2020',
+        expected_wellmod_2 = NexusWellMod({'well_name': 'TEST_well', 'date': '01/01/2020',
                                              'unit_system': self.unit_system, 'perm_thickness_mult': 1234.2})
         expected_wellmod_3 = NexusWellMod({'well_name': 'test_well_2', 'date': '01/01/2021',
                                                 'unit_system': self.unit_system, 'partial_perf': 0.25})

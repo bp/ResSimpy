@@ -1,13 +1,18 @@
 import pandas as pd
 import pytest
 
+from ResSimpy.Enums.FrequencyEnum import FrequencyEnum
+from ResSimpy.Enums.OutputType import OutputType
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
+from ResSimpy.Nexus.NexusReporting import NexusReporting, NexusOutputRequest, NexusOutputContents
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.multifile_mocker import mock_multiple_files
 
 from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
 from ResSimpy.Nexus.runcontrol_operations import SimControls, GridToProc
+from tests.utility_for_tests import get_fake_nexus_simulator
+
 
 @pytest.mark.parametrize(
     "date_format,expected_date_format,run_control_contents,include_file_contents,expected_times", [
@@ -16,7 +21,8 @@ from ResSimpy.Nexus.runcontrol_operations import SimControls, GridToProc
          "TIME 0.1\nTIME 10/15/1983\n "
          "invalidtime", ['0.1', '10/15/1983']),
         # Non-USA date format, times in run control and include files
-        ("DD/MM/YYYY", DateFormat.DD_MM_YYYY, "START 01/01/1980\nINCLUDE  \n! Comment \n   path/to/include\nTIME 01/01/1981\nTIME 0.1",
+        ("DD/MM/YYYY", DateFormat.DD_MM_YYYY,
+         "START 01/01/1980\nINCLUDE  \n! Comment \n   path/to/include\nTIME 01/01/1981\nTIME 0.1",
          "TIME 0.3\nTIME 15/10/1983\nTIME 1503.1\nTIME 15/12/1996",
          ['0.1', '0.3', '01/01/1981', '15/10/1983', '1503.1', '15/12/1996']),
         # Non-USA date format, times in include file only
@@ -24,7 +30,8 @@ from ResSimpy.Nexus.runcontrol_operations import SimControls, GridToProc
          "TIME 0.1\nTIME 15/10/1983\n invalidtime\nTIME 1503.1\nTIME 15/12/2021",
          ['0.1', '15/10/1983', '1503.1', '15/12/2021']),
         # Non-USA date format, times in run control only, but include file declared
-        ("DD/MM/YYYY", DateFormat.DD_MM_YYYY, "START 01/01/1980\nINCLUDE     path/to/include\nTIME 19/08/2025\nTIME 0.1\nTIME 50000",
+        ("DD/MM/YYYY", DateFormat.DD_MM_YYYY,
+         "START 01/01/1980\nINCLUDE     path/to/include\nTIME 19/08/2025\nTIME 0.1\nTIME 50000",
          "",
          ['0.1', '19/08/2025', '50000']),
         # Non-USA date format, times with times as well as dates
@@ -101,38 +108,44 @@ def test_load_run_control_invalid_times(mocker, date_format, run_control_content
     "expected_times",
     [
         # USA date format, replace
-        ("MM/DD/YYYY", DateFormat.MM_DD_YYYY, "START 01/01/1980\nINCLUDE     path/to/include", "TIME 0.1\nTIME 10/15/1983\n ",
+        ("MM/DD/YYYY", DateFormat.MM_DD_YYYY, "START 01/01/1980\nINCLUDE     path/to/include",
+         "TIME 0.1\nTIME 10/15/1983\n ",
          ['01/01/2001', '12/15/2000', '08/08/2008', '0.1', '08/07/2008'], 'REPLACE',
          ['0.1', '12/15/2000', '01/01/2001', '08/07/2008', '08/08/2008']),
         # Non-USA date format, merge
-        ("DD/MM/YYYY", DateFormat.DD_MM_YYYY, "START 01/01/1980\nINCLUDE     path/to/include\nTIME 01/01/1981\nTIME 0.1",
-         "TIME 0.3\nTIME 15/10/1983\n invalidtime\nTIME 1503.1\nTIME 15/12/1998",
-         ['01/01/2001', '15/12/2000', '08/08/1998',
-             '0.1', '08/07/2008', '01/02/1981'], 'merge',
-         ['0.1', '0.3', '01/01/1981', '01/02/1981', '15/10/1983', '1503.1', '08/08/1998', '15/12/1998', '15/12/2000',
-          '01/01/2001', '08/07/2008']),
+        (
+                "DD/MM/YYYY", DateFormat.DD_MM_YYYY,
+                "START 01/01/1980\nINCLUDE     path/to/include\nTIME 01/01/1981\nTIME 0.1",
+                "TIME 0.3\nTIME 15/10/1983\n invalidtime\nTIME 1503.1\nTIME 15/12/1998",
+                ['01/01/2001', '15/12/2000', '08/08/1998',
+                 '0.1', '08/07/2008', '01/02/1981'], 'merge',
+                ['0.1', '0.3', '01/01/1981', '01/02/1981', '15/10/1983', '1503.1', '08/08/1998', '15/12/1998',
+                 '15/12/2000',
+                 '01/01/2001', '08/07/2008']),
         # Non-USA date format, replace
         ("DD/MM/YYYY", DateFormat.DD_MM_YYYY, "START 01/01/1980\nINCLUDE     path/to/include",
          "TIME 0.1\nTIME 15/10/1983\ntimeer invalidtime\nTIME 1503.1\nTIME 15/12/2021",
          ['01/01/2001', '15/12/2000', '08/08/1998', '0.1',
-             '08/07/2025', '01/02/1981'], 'replace',
+          '08/07/2025', '01/02/1981'], 'replace',
          ['0.1', '01/02/1981', '08/08/1998', '15/12/2000', '01/01/2001', '08/07/2025']),
         # Non-USA date format, reset
         ("DD/MM/YYYY", DateFormat.DD_MM_YYYY, "START 01/01/1980\nINCLUDE     path/to/include",
          "TIME 0.1\nTIME 15/10/1983\ntimer invalidtime\nTIME 1503.1\nTIME 15/12/2021",
          ['01/01/2001', '15/12/2000', '08/08/1998',
-             '0.1', '08/07/2025', '01/02/1981'], 'reset',
+          '0.1', '08/07/2025', '01/02/1981'], 'reset',
          []),
         # Non-USA date format, remove
-        ("DD/MM/YYYY", DateFormat.DD_MM_YYYY, "START 01/01/1980\nINCLUDE     path/to/include\nTIME 01/01/1981\nTIME 0.1",
-         "TIME 0.3\nTIME 15/10/1983\nytime invalidtime\nTIME 1503.1\nTIME 15/12/1996\nTIME 01/01/2000\nSTOP\n",
-         ['0.3', '01/01/1981', '01/01/2000', '08/05/2015'], 'REMOVE',
-         ['0.1', '15/10/1983', '1503.1', '15/12/1996']),
+        (
+                "DD/MM/YYYY", DateFormat.DD_MM_YYYY,
+                "START 01/01/1980\nINCLUDE     path/to/include\nTIME 01/01/1981\nTIME 0.1",
+                "TIME 0.3\nTIME 15/10/1983\nytime invalidtime\nTIME 1503.1\nTIME 15/12/1996\nTIME 01/01/2000\nSTOP\n",
+                ['0.3', '01/01/1981', '01/01/2000', '08/05/2015'], 'REMOVE',
+                ['0.1', '15/10/1983', '1503.1', '15/12/1996']),
         # Non-USA date format, replace, duplicate in run control
         ("DD/MM/YYYY", DateFormat.DD_MM_YYYY, "START 01/01/1980\nINCLUDE     path/to/include",
          "TIME 01/01/1980\nTIME 15/10/1983\nxtime invalidtime\nTIME 1503.1\nTIME 15/12/2021",
          ['01/01/2001', '15/12/2000', '08/08/1998', '0.1',
-             '08/07/2025', '01/02/1981'], 'replace',
+          '08/07/2025', '01/02/1981'], 'replace',
          ['0.1', '01/02/1981', '08/08/1998', '15/12/2000', '01/01/2001', '08/07/2025']),
     ])
 def test_modify_times(mocker, date_format, expected_date_format,
@@ -188,33 +201,38 @@ def test_modify_times(mocker, date_format, expected_date_format,
     "expected_times",
     [
         # USA date format, replace
-        ("MM/DD/YYYY", DateFormat.MM_DD_YYYY, "START 12/01/1980\nINCLUDE     path/to/include", "TIME 0.1\nTIME 10/15/1983\ntimee ",
+        ("MM/DD/YYYY", DateFormat.MM_DD_YYYY, "START 12/01/1980\nINCLUDE     path/to/include",
+         "TIME 0.1\nTIME 10/15/1983\ntimee ",
          ['01/01/2001', '12/15/2000', '08/08/2008', '0.1',
-             '01/12/1980', '08/07/2008'], 'REPLACE',
+          '01/12/1980', '08/07/2008'], 'REPLACE',
          ['0.1', '10/15/1983']),
         # Non-USA date format, merge
-        ("DD/MM/YYYY", DateFormat.DD_MM_YYYY, "START 01/01/1980\nINCLUDE     path/to/include\nTIME 01/01/1981\nTIME 0.1",
-         "TIME 0.3\nTIME 15/10/1983\n invalidtime\nTIME 1503.1\nTIME 15/12/1998",
-         ['01/01/2001', '15/12/2000', '08/08/1998',
-             '0.1', '08/07/2008', '01/02/1979'], 'merge',
-         ['0.1', '0.3', '01/01/1981', '15/10/1983', '1503.1', '15/12/1998']),
+        (
+                "DD/MM/YYYY", DateFormat.DD_MM_YYYY,
+                "START 01/01/1980\nINCLUDE     path/to/include\nTIME 01/01/1981\nTIME 0.1",
+                "TIME 0.3\nTIME 15/10/1983\n invalidtime\nTIME 1503.1\nTIME 15/12/1998",
+                ['01/01/2001', '15/12/2000', '08/08/1998',
+                 '0.1', '08/07/2008', '01/02/1979'], 'merge',
+                ['0.1', '0.3', '01/01/1981', '15/10/1983', '1503.1', '15/12/1998']),
         # Non-USA date format, replace
         ("DD/MM/YYYY", DateFormat.DD_MM_YYYY, "START 01/01/1980\nINCLUDE     path/to/include",
          "TIME 0.1\nTIME 15/10/1983\ntimee invalidtime\nTIME 1503.1\nTIME 15/12/2021",
          ['01/01/2001', '15/12/2000', '08/08/1998', '0.1',
-             '08/07/1970', '01/02/1981'], 'replace',
+          '08/07/1970', '01/02/1981'], 'replace',
          ['0.1', '15/10/1983', '1503.1', '15/12/2021']),
         # Non-USA date format, reset
         ("DD/MM/YYYY", DateFormat.DD_MM_YYYY, "START 01/12/1980\nINCLUDE     path/to/include",
          "TIME 0.1\nTIME 15/10/1983\nttime invalidtime\nTIME 1503.1\nTIME 15/12/2021\nSTOP\n",
          ['01/01/2001', '15/12/2000', '08/08/1998',
-             '0.1', '12/01/1980', '01/02/1981'], 'reset',
+          '0.1', '12/01/1980', '01/02/1981'], 'reset',
          ['0.1', '15/10/1983', '1503.1', '15/12/2021']),
         # Non-USA date format, remove
-        ("DD/MM/YYYY", DateFormat.DD_MM_YYYY, "START 01/01/1985\nINCLUDE     path/to/include\nTIME 01/01/1986\nTIME 0.1",
-         "TIME 0.3\nTIME 15/10/1993\n invalidtime\nTIME 1503.1\nTIME 15/12/1996\nTIME 01/01/2000",
-         ['0.3', '01/01/1981', '01/01/2000', '08/08/1981'], 'REMOVE',
-         ['0.1', '0.3', '01/01/1986', '1503.1', '15/10/1993', '15/12/1996', '01/01/2000']),
+        (
+                "DD/MM/YYYY", DateFormat.DD_MM_YYYY,
+                "START 01/01/1985\nINCLUDE     path/to/include\nTIME 01/01/1986\nTIME 0.1",
+                "TIME 0.3\nTIME 15/10/1993\n invalidtime\nTIME 1503.1\nTIME 15/12/1996\nTIME 01/01/2000",
+                ['0.3', '01/01/1981', '01/01/2000', '08/08/1981'], 'REMOVE',
+                ['0.1', '0.3', '01/01/1986', '1503.1', '15/10/1993', '15/12/1996', '01/01/2000']),
     ])
 def test_modify_times_invalid_date(mocker, date_format, expected_date_format,
                                    run_control_contents, include_file_contents, new_times, operation, expected_times):
@@ -298,7 +316,7 @@ def test_load_run_control_file_write_times_to_run_control(mocker, fcs_content, r
 
 def test_runcontrol_no_start_time(mocker):
     # Arrange
-    fcs_data ='''RUN_UNITS     ENGLISH
+    fcs_data = '''RUN_UNITS     ENGLISH
     DEFAULT_UNITS ENGLISH
     DATEFORMAT    DD/MM/YYYY
     RUNCONTROL            runcontrol.dat     '''
@@ -319,7 +337,7 @@ def test_runcontrol_no_start_time(mocker):
         mock_open = mock_multiple_files(mocker, filename,
                                         potential_file_dict={'test.fcs': fcs_data,
                                                              r'runcontrol.dat': runcontrol_data,
-                                                           }).return_value
+                                                             }).return_value
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
@@ -330,6 +348,7 @@ def test_runcontrol_no_start_time(mocker):
 
     # Assert
     assert result == expected_result
+
 
 def test_load_grid_to_proc():
     # Arrange
@@ -357,8 +376,8 @@ ENDGRIDTOPROC
     expected_result = GridToProc(grid_to_proc_table=pd.DataFrame({
         'GRID': [1, 2, 3, 4, 1, 2, 3, 4],
         'PROCESS': [1, 2, 3, 4, 1, 2, 3, 4],
-        'PORTYPE': ['MATRIX', 'MATRIX', 'MATRIX', 'MATRIX','FRAC', 'FRAC', 'FRAC', 'FRAC']}),
-    auto_distribute=None)
+        'PORTYPE': ['MATRIX', 'MATRIX', 'MATRIX', 'MATRIX', 'FRAC', 'FRAC', 'FRAC', 'FRAC']}),
+        auto_distribute=None)
     sim_controls = SimControls(model=None)
     expected_number_processors = 4
     # Act
@@ -367,6 +386,7 @@ ENDGRIDTOPROC
     # Assert
     pd.testing.assert_frame_equal(result.grid_to_proc_table, expected_result.grid_to_proc_table)
     assert sim_controls.number_of_processors == expected_number_processors
+
 
 def test_load_grid_to_proc_no_grid_to_proc(mocker):
     # Arrange
@@ -394,6 +414,7 @@ def test_load_grid_to_proc_no_grid_to_proc(mocker):
     assert result == expected_result
     assert sim_controls.number_of_processors == expected_number_processors
 
+
 def test_load_grid_to_proc_auto():
     # Arrange
     options_file_content = '''
@@ -410,3 +431,197 @@ def test_load_grid_to_proc_auto():
 
     # Assert
     assert result == expected_result
+
+
+@pytest.mark.parametrize('file_content', [
+    # basic test
+    ('''FIELD MONTHLY
+      REGIONS TIMESTEP 1030
+      WELLS FREQ 123
+      NETWORK YEARLY'''),
+
+    # test with comments
+    ('''FIELD MONTHLY
+      REGIONS TIMESTEP 1030
+      ! comment
+      
+      WELLS FREQ 123
+      NETWORK YEARLY
+
+      ! comment
+      ! comment
+      '''),
+], ids=['basic test', 'test with comments'])
+def test_get_output_request(file_content):
+    date = '01/01/2020'
+    output_type = OutputType.ARRAY
+    # Act
+    result = NexusReporting._get_output_request(table_file_as_list=file_content.splitlines(keepends=True),
+                                                date=date, output_type=output_type)
+    expected_result = [NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/2020', output='FIELD',
+                                          output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None),
+                       NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/2020', output='REGIONS',
+                                          output_frequency=FrequencyEnum.TIMESTEP, output_frequency_number=1030),
+                       NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/2020', output='WELLS',
+                                          output_frequency=FrequencyEnum.FREQ, output_frequency_number=123),
+                       NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/2020', output='NETWORK',
+                                          output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None)]
+    # Assert
+    assert result == expected_result
+
+
+@pytest.mark.parametrize('file_content, expected_result', [
+    # basic test
+    ("""
+WELLS DATE TSNUM QOP QWP COP CWP QWI CWI WCUT WPAVE CGP   QGP  QLP  GOR  BHP SAL 
+! comment
+FIELD DATE TSNUM COP CGP CWP CWI QOP QGP QWP QLP QWI WCUT OREC PAVT PAVH
+
+REGIONS DATE TSNUM COP CGP CWP CWI QOP QGP QWP QWI STOIP ROP RWP RWI CROP CRWP CRWI PDATUMT PDATUMHC COFLUX CWFLUX AQFLUX RVO RVPVH """,
+     [NexusOutputContents(output_type=OutputType.SPREADSHEET, output='WELLS', date='01/01/2020',
+                          output_contents=['DATE', 'TSNUM', 'QOP', 'QWP', 'COP', 'CWP', 'QWI', 'CWI', 'WCUT', 'WPAVE',
+                                           'CGP', 'QGP', 'QLP',
+                                           'GOR', 'BHP', 'SAL']),
+      NexusOutputContents(output_type=OutputType.SPREADSHEET, output='FIELD', date='01/01/2020',
+                          output_contents=['DATE', 'TSNUM', 'COP', 'CGP', 'CWP', 'CWI', 'QOP', 'QGP', 'QWP', 'QLP',
+                                           'QWI', 'WCUT', 'OREC',
+                                           'PAVT', 'PAVH']),
+      NexusOutputContents(output_type=OutputType.SPREADSHEET, output='REGIONS', date='01/01/2020',
+                          output_contents=['DATE', 'TSNUM', 'COP', 'CGP', 'CWP', 'CWI', 'QOP', 'QGP', 'QWP', 'QWI',
+                                           'STOIP', 'ROP', 'RWP',
+                                           'RWI', 'CROP', 'CRWP', 'CRWI', 'PDATUMT', 'PDATUMHC', 'COFLUX', 'CWFLUX',
+                                           'AQFLUX', 'RVO',
+                                           'RVPVH'])
+      ]),
+
+    # Advanced
+    ("""WELLS DATE TSNUM QOP QWP COP CWP QWI CWI ! comment at end of line
+! comment
+FIELD DATE TSNUM COP CGP 
+     """, [NexusOutputContents(output_type=OutputType.SPREADSHEET, output='WELLS', date='01/01/2020',
+                               output_contents=['DATE', 'TSNUM', 'QOP', 'QWP', 'COP', 'CWP', 'QWI', 'CWI']),
+           NexusOutputContents(output_type=OutputType.SPREADSHEET, output='FIELD', date='01/01/2020',
+                               output_contents=['DATE', 'TSNUM', 'COP', 'CGP'])
+           ]),
+],
+                         ids=['basic test', 'advanced'])
+def test_get_output_contents(file_content, expected_result):
+    # Act
+    result = NexusReporting._get_output_contents(table_file_as_list=file_content.splitlines(keepends=True),
+                                                 output_type=OutputType.SPREADSHEET, date='01/01/2020')
+    # Assert
+    assert result == expected_result
+
+
+def test_load_output_requests(mocker):
+    # Arrange
+    file_content = '''START 01/01/1950
+    MAPOUT
+   P
+   PV
+   SAT OIL GAS WATER
+   KR OIL WATER
+   PC OIL WATER
+   SAL
+ENDMAPOUT
+SPREADSHEET
+      FIELD MONTHLY
+      REGIONS	FREQ 21
+      WELLS YEARLY
+      NETWORK YEARLY
+ENDSPREADSHEET
+    SSOUT
+WELLS DATE TSNUM QOP QWP COP CWP QWI CWI WCUT WPAVE CGP   QGP  QLP  GOR  BHP SAL 
+FIELD DATE TSNUM COP CGP CWP CWI QOP QGP QWP QLP QWI WCUT OREC PAVT PAVH
+REGIONS DATE TSNUM COP CGP CWP CWI QOP QGP QWP QWI STOIP ROP RWP RWI CROP CRWP CRWI PDATUMT PDATUMHC COFLUX CWFLUX AQFLUX RVO RVPVH 
+ENDSSOUT
+TIME 01/01/1951
+OUTPUT 
+    FIELD MONTHLY
+    WELLS YEARLY
+    MAPS FREQ 120
+ENDOUTPUT
+
+
+TIME 01/01/1952
+
+TIME 01/10/1953
+SSOUT
+WELLS DATE TSNUM QOP QWP COP
+ENDSSOUT
+OUTPUT
+    FIELD YEARLY
+    WELLS TIMES
+    MAPS FREQ 120
+ENDOUTPUT
+    '''
+    file_content_as_list = file_content.splitlines(keepends=True)
+
+    expected_ss_output_requests = [
+        NexusOutputRequest(output_type=OutputType.SPREADSHEET, date='01/01/1950', output='FIELD',
+                           output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None),
+        NexusOutputRequest(output_type=OutputType.SPREADSHEET, date='01/01/1950', output='REGIONS',
+                           output_frequency=FrequencyEnum.FREQ, output_frequency_number=21),
+        NexusOutputRequest(output_type=OutputType.SPREADSHEET, date='01/01/1950', output='WELLS',
+                           output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None),
+        NexusOutputRequest(output_type=OutputType.SPREADSHEET, date='01/01/1950', output='NETWORK',
+                           output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None),
+    ]
+    expected_array_output_requests = [
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1951', output='FIELD',
+                           output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1951', output='WELLS',
+                           output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1951', output='MAPS',
+                           output_frequency=FrequencyEnum.FREQ, output_frequency_number=120),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/10/1953', output='FIELD',
+                           output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/10/1953', output='WELLS',
+                           output_frequency=FrequencyEnum.TIMES, output_frequency_number=None),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/10/1953', output='MAPS',
+                           output_frequency=FrequencyEnum.FREQ, output_frequency_number=120),
+    ]
+
+    expected_ss_output_contents = [
+        NexusOutputContents(output_type=OutputType.SPREADSHEET, output='WELLS', date='01/01/1950',
+                            output_contents=['DATE', 'TSNUM', 'QOP', 'QWP', 'COP', 'CWP', 'QWI', 'CWI', 'WCUT',
+                                             'WPAVE', 'CGP', 'QGP', 'QLP', 'GOR', 'BHP', 'SAL']),
+        NexusOutputContents(output_type=OutputType.SPREADSHEET, output='FIELD', date='01/01/1950',
+                            output_contents=['DATE', 'TSNUM', 'COP', 'CGP', 'CWP', 'CWI', 'QOP', 'QGP', 'QWP', 'QLP',
+                                             'QWI', 'WCUT', 'OREC', 'PAVT', 'PAVH']),
+        NexusOutputContents(output_type=OutputType.SPREADSHEET, output='REGIONS', date='01/01/1950',
+                            output_contents=['DATE', 'TSNUM', 'COP', 'CGP', 'CWP', 'CWI', 'QOP', 'QGP', 'QWP', 'QWI',
+                                             'STOIP', 'ROP', 'RWP', 'RWI', 'CROP', 'CRWP', 'CRWI', 'PDATUMT',
+                                             'PDATUMHC', 'COFLUX', 'CWFLUX', 'AQFLUX', 'RVO', 'RVPVH']),
+        NexusOutputContents(output_type=OutputType.SPREADSHEET, output='WELLS', date='01/10/1953',
+                            output_contents=['DATE', 'TSNUM', 'QOP', 'QWP', 'COP'])
+    ]
+
+    expected_array_output_contents = [
+        NexusOutputContents(output_type=OutputType.ARRAY, output='P', date='01/01/1950',
+                            output_contents=[]),
+        NexusOutputContents(output_type=OutputType.ARRAY, output='PV', date='01/01/1950',
+                            output_contents=[]),
+        NexusOutputContents(output_type=OutputType.ARRAY, output='SAT', date='01/01/1950',
+                            output_contents=['OIL', 'GAS', 'WATER']),
+        NexusOutputContents(output_type=OutputType.ARRAY, output='KR', date='01/01/1950',
+                            output_contents=['OIL', 'WATER']),
+        NexusOutputContents(output_type=OutputType.ARRAY, output='PC', date='01/01/1950',
+                            output_contents=['OIL', 'WATER']),
+        NexusOutputContents(output_type=OutputType.ARRAY, output='SAL', date='01/01/1950',
+                            output_contents=[])
+    ]
+
+    # fake model
+    model = get_fake_nexus_simulator(mocker)
+    model._start_date = '01/01/1950'
+    nexus_reporting = NexusReporting(model=model)
+    model.model_files.runcontrol_file = NexusFile(location='runcontrol.dat', file_content_as_list=file_content_as_list)
+    # Act
+    nexus_reporting.load_output_requests()
+
+    # Assert
+    assert nexus_reporting.ss_output_requests == expected_ss_output_requests
+    assert nexus_reporting.array_output_requests == expected_array_output_requests
+    assert nexus_reporting.ss_output_contents == expected_ss_output_contents
+    assert nexus_reporting.array_output_contents == expected_array_output_contents
