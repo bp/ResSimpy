@@ -247,28 +247,6 @@ class NexusFile(File):
 
         return nexus_file_class
 
-    def export_network_lists(self):
-        """Exports lists of connections from and to for use in network graphs.
-
-        Raises:
-            ValueError: If the from and to lists are not the same length
-
-        Returns:
-            tuple[list]: list of to and from file paths where the equivalent indexes relate to a connection
-        """
-        from_list = [self.origin]
-        to_list = [self.location]
-        if not [self.origin]:
-            to_list = []
-        if self.include_locations is not None:
-            from_list += [self.location] * len(self.include_locations)
-            to_list += self.include_locations
-        if len(from_list) != len(to_list):
-            raise ValueError(
-                f"{from_list=} and {to_list=} are not the same length")
-
-        return from_list, to_list
-
     @dataclass
     class FileIndex:
         index: int
@@ -657,7 +635,7 @@ class NexusFile(File):
             include_file (NexusFile): include object whose path is being modified
         """
         # try and find the path of the file that should be replaced (i.e. how it is currently written in the file)
-        if self.include_locations is None\
+        if self.include_locations is None \
                 or not self.include_locations \
                 or include_file.location_in_including_file is None:
             raise ValueError('No include locations found and therefore cannot update include path')
