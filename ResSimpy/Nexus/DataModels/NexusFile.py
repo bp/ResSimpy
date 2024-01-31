@@ -247,28 +247,6 @@ class NexusFile(File):
 
         return nexus_file_class
 
-    def export_network_lists(self):
-        """Exports lists of connections from and to for use in network graphs.
-
-        Raises:
-            ValueError: If the from and to lists are not the same length
-
-        Returns:
-            tuple[list]: list of to and from file paths where the equivalent indexes relate to a connection
-        """
-        from_list = [self.origin]
-        to_list = [self.location]
-        if not [self.origin]:
-            to_list = []
-        if self.include_locations is not None:
-            from_list += [self.location] * len(self.include_locations)
-            to_list += self.include_locations
-        if len(from_list) != len(to_list):
-            raise ValueError(
-                f"{from_list=} and {to_list=} are not the same length")
-
-        return from_list, to_list
-
     @dataclass
     class FileIndex:
         index: int
@@ -390,22 +368,24 @@ class NexusFile(File):
                 is a connection between two files.
         """
         depth: int = 0
+        # base case of recursion
         from_list = [self.origin]
         to_list = [self.location]
         if max_depth is not None:
             depth = max_depth
-        if self.file_content_as_list is None:
+        if self.include_objects is None:
             return from_list, to_list
-        for row in self.file_content_as_list:
-            if isinstance(row, NexusFile):
-                if max_depth is None or depth > 0:
-                    level_down_max_depth = None if max_depth is None else depth - 1
-                    temp_from_list, temp_to_list = row.export_network_lists()
-                    from_list.extend(temp_from_list)
-                    to_list.extend(temp_to_list)
-                    temp_from_list, temp_to_list = row.get_full_network(max_depth=level_down_max_depth)
-                    from_list.extend(temp_from_list)
-                    to_list.extend(temp_to_list)
+        # otherwise iterate over the include objects and recursively call the function
+        for include_file in self.include_objects:
+            if max_depth is not None and depth == 0:
+                # if we have reached the max depth of the recursion then break and return
+                break
+            if not isinstance(include_file, NexusFile):
+                continue
+            level_down_max_depth = None if max_depth is None else depth - 1
+            temp_from_list, temp_to_list = include_file.get_full_network(max_depth=level_down_max_depth)
+            from_list.extend(temp_from_list)
+            to_list.extend(temp_to_list)
         return from_list, to_list
 
     def add_object_locations(self, obj_uuid: UUID, line_indices: list[int]) -> None:
@@ -655,7 +635,7 @@ class NexusFile(File):
             include_file (NexusFile): include object whose path is being modified
         """
         # try and find the path of the file that should be replaced (i.e. how it is currently written in the file)
-        if self.include_locations is None\
+        if self.include_locations is None \
                 or not self.include_locations \
                 or include_file.location_in_including_file is None:
             raise ValueError('No include locations found and therefore cannot update include path')
