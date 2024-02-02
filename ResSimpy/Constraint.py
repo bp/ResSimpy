@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from ResSimpy.DataObjectMixin import DataObjectMixin
+from ResSimpy.Enums.ConstraintEnums import ConstraintControlMode
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Units.AttributeMappings.ConstraintUnitMapping import ConstraintUnits
 
@@ -13,6 +14,7 @@ from ResSimpy.Units.AttributeMappings.ConstraintUnitMapping import ConstraintUni
 @dataclass(repr=False)
 class Constraint(DataObjectMixin, ABC):
     """Base class object for storing data related to well and node constraints."""
+    # TODO: Add docstrings for this class
     name: Optional[str] = None
     date: Optional[str] = None
     unit_system: Optional[UnitSystem] = None
@@ -24,7 +26,7 @@ class Constraint(DataObjectMixin, ABC):
     max_reservoir_gas_rate: Optional[float] = None
     max_reservoir_water_rate: Optional[float] = None
     max_reservoir_liquid_rate: Optional[float] = None
-
+    control_mode: ConstraintControlMode = ConstraintControlMode.ORAT
     bottom_hole_pressure: Optional[float] = None
     tubing_head_pressure: Optional[float] = None
     max_reservoir_total_fluids_rate: Optional[float] = None

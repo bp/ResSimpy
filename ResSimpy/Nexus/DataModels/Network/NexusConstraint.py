@@ -209,13 +209,13 @@ class NexusConstraint(Constraint):
         nexus_mapping: dict[str, tuple[str, type]] = {
             'WELL': ('well_name', str),
             'NAME': ('name', str),
-            # Specialkeywords - QMULT
+            # Special keywords - QMULT
             'QALLRMAX_MULT': ('convert_qmult_to_reservoir_barrels', bool),
             'QOSMAX_MULT': ('use_qmult_qoil_surface_rate', bool),
             'QWSMAX_MULT': ('use_qmult_qwater_surface_rate', bool),
             'QGSMAX_MULT': ('use_qmult_qgas_surface_rate', bool),
             'QLIQSMAX_MULT': ('use_qmult_qoilqwat_surface_rate', bool),
-            # SpecialClearkeywords
+            # SpecialClear keywords
             'CLEAR': ('clear_all', bool),
             'CLEARQ': ('clear_q', bool),
             'CLEARP': ('clear_p', bool),
