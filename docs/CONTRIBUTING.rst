@@ -37,7 +37,7 @@ Development environment setup
 
 2. Set up a Python environment
    **Note: due to a requirement of one of the dependencies, you will need to use a 64-bit installation of Python when working with ResSimpy.**
-   The RESQPY project uses `Poetry <https://python-poetry.org/>`_ for dependency management and environment setup. Please `install Poetry <https://python-poetry.org/docs/master/#installing-with-pip>`_ first if you have not already done so.
+   The ResSimpy project uses `Poetry <https://python-poetry.org/>`_ for dependency management and environment setup. Please `install Poetry <https://python-poetry.org/docs/master/#installing-with-pip>`_ first if you have not already done so.
    With Poetry installed, please then install the `Poetry Dynamic Versioning Plugin <https://github.com/mtkennerly/poetry-dynamic-versioning>`_.
    **Note: some Windows PCs run into issues related to the default Maximum path limit. If you receive errors when creating a Poetry virtual environment, please try `enabling long paths <https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=registry>`_.
 
