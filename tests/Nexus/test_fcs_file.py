@@ -680,4 +680,4 @@ def test_fcs_file_user(mocker):
     result = fcs.linked_user
 
     # Assert
-    assert result == 'user_value'
+    assert result == 'USER:GROUP'

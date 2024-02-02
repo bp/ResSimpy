@@ -169,6 +169,10 @@ class FcsNexusFile(NexusFile):
             fcs_file_path, origin=None)
         fcs_file.files_info.append((fcs_nexus_file.location, fcs_nexus_file.linked_user,
                                     fcs_nexus_file.last_modified))
+
+        fcs_file.linked_user = fcs_nexus_file.linked_user
+        fcs_file.last_modified = fcs_nexus_file.last_modified
+
         flat_fcs_file_content = fcs_nexus_file.get_flat_list_str_file
         if flat_fcs_file_content is None or fcs_file.file_content_as_list is None:
             raise ValueError(f'FCS file not found, no content for {fcs_file_path=}')
