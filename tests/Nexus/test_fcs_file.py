@@ -1,4 +1,5 @@
 import os
+import pathlib
 from io import StringIO
 from unittest.mock import Mock, MagicMock
 
@@ -589,3 +590,35 @@ def test_fcs_repr(mocker):
 
     # Assert
     assert result == expected_result
+
+
+def test_fcs_file_user(mocker):
+    # Arrange
+    fcs_content = '''DESC reservoir1
+    RUN_UNITS ENGLISH
+    DATEFORMAT DD/MM/YYYY'''
+
+    fcs_path = 'test_fcs.fcs'
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            fcs_path: fcs_content,
+
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    mocker.patch("os.path.isfile", lambda x: True)
+    # Mock out pathlib and stat libraries
+    owner_mock = mocker.MagicMock(return_value='USER')
+    group_mock = mocker.MagicMock(return_value='GROUP')
+    mocker.patch.object(pathlib.Path, 'owner', owner_mock)
+    mocker.patch.object(pathlib.Path, 'group', group_mock)
+
+    fcs = FcsNexusFile.generate_fcs_structure(fcs_file_path=fcs_path)
+
+    # Act
+    result = fcs.linked_user
+
+    # Assert
+    assert result == 'USER:GROUP'
