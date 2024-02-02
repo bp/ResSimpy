@@ -14,8 +14,8 @@ def mock_out_file_datetime_operations(mocker, request):
         dt_mock.fromtimestamp.return_value = None
 
     # Mock out pathlib and stat libraries
-    owner_mock = mocker.MagicMock(return_value='user_value')
-    group_mock = mocker.MagicMock(return_value='group_value')
+    owner_mock = mocker.MagicMock(return_value=None)
+    group_mock = mocker.MagicMock(return_value=None)
     mocker.patch.object(pathlib.Path, 'owner', owner_mock)
     mocker.patch.object(pathlib.Path, 'group', group_mock)
 
