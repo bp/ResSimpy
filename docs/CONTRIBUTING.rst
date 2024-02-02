@@ -33,7 +33,7 @@ Development environment setup
    .. code-block:: bash
 
       git clone <url from GitHub>
-      cd resqpy
+      cd ResSimpy
 
 2. Set up a Python environment
    **Note: due to a requirement of one of the dependencies, you will need to use a 64-bit installation of Python when working with ResSimpy.**
