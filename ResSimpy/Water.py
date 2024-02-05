@@ -12,5 +12,5 @@ class Water(ABC):
 
     @property
     def inputs(self):
-        """Collection of water property methods, as a dictionary."""
+        """A Collection of water property methods, as a dictionary."""
         raise NotImplementedError("Implement this in the derived class")

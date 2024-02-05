@@ -13,5 +13,5 @@ class Aquifer(ABC):
 
     @property
     def inputs(self):
-        """Collection of aquifer inputs, as a dictionary."""
+        """A Collection of aquifer inputs, as a dictionary."""
         raise NotImplementedError("Implement this in the derived class")

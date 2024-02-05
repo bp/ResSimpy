@@ -12,5 +12,5 @@ class Hydraulics(ABC):
 
     @property
     def inputs(self):
-        """Collection of hydraulics inputs, as a dictionary."""
+        """A Collection of hydraulics inputs, as a dictionary."""
         raise NotImplementedError("Implement this in the derived class")
