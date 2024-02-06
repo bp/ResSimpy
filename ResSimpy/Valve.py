@@ -12,4 +12,5 @@ class Valve(ABC):
 
     @property
     def inputs(self):
+        """A Collection of valve property inputs, as a dictionary."""
         raise NotImplementedError("Implement this in the derived class")
