@@ -109,17 +109,17 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
                 else:
                     # otherwise take a copy of the previous constraint and add the additional properties
                     new_constraint = constraint(properties_dict)
-                    __update_control_mode(new_constraint)
+                    update_constraint_control_mode(new_constraint)
                     well_constraints.append(new_constraint)
                     nexus_file.add_object_locations(new_constraint.id, [index + start_line_index])
             else:
                 new_constraint = constraint(properties_dict)
-                __update_control_mode(new_constraint)
+                update_constraint_control_mode(new_constraint)
                 existing_constraints[name_of_node] = [new_constraint]
                 nexus_file.add_object_locations(new_constraint.id, [index + start_line_index])
 
 
-def __update_control_mode(existing_constraint: NexusConstraint) -> None:
+def update_constraint_control_mode(existing_constraint: NexusConstraint) -> None:
     """Updates the constraint object with a control mode property set based upon the rates in the constraint."""
     # Check for QMULT tables that will determine the control mode
     if existing_constraint.convert_qmult_to_reservoir_barrels is not None:
@@ -128,14 +128,14 @@ def __update_control_mode(existing_constraint: NexusConstraint) -> None:
     if existing_constraint.use_qmult_qoil_surface_rate is not None:
         existing_constraint.control_mode = ConstraintControlMode.ORAT
         return
-    if existing_constraint.use_qmult_qwater_surface_rate is not None:
-        existing_constraint.control_mode = ConstraintControlMode.WRAT
+    if existing_constraint.use_qmult_qoilqwat_surface_rate is not None:
+        existing_constraint.control_mode = ConstraintControlMode.LRAT
         return
     if existing_constraint.use_qmult_qgas_surface_rate is not None:
         existing_constraint.control_mode = ConstraintControlMode.GRAT
         return
-    if existing_constraint.use_qmult_qoilqwat_surface_rate is not None:
-        existing_constraint.control_mode = ConstraintControlMode.LRAT
+    if existing_constraint.use_qmult_qwater_surface_rate is not None:
+        existing_constraint.control_mode = ConstraintControlMode.WRAT
         return
 
     # Go through the order of precedence to select the most likely control mode
