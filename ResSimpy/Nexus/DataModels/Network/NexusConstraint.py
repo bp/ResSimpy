@@ -215,7 +215,7 @@ class NexusConstraint(Constraint):
             'QWSMAX_MULT': ('use_qmult_qwater_surface_rate', bool),
             'QGSMAX_MULT': ('use_qmult_qgas_surface_rate', bool),
             'QLIQSMAX_MULT': ('use_qmult_qoilqwat_surface_rate', bool),
-            # SpecialClear keywords
+            # Special Clear keywords
             'CLEAR': ('clear_all', bool),
             'CLEARQ': ('clear_q', bool),
             'CLEARP': ('clear_p', bool),
