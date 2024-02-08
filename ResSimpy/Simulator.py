@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional
 
 from ResSimpy.Aquifer import Aquifer
 from ResSimpy.Enums.UnitsEnum import UnitSystem
@@ -38,7 +37,7 @@ class Simulator(ABC):
     _hydraulics: Hydraulics
     _gaslift: Gaslift
     _network: Network
-    _grid: Optional[Grid]
+    _grid: None | Grid
     _model_files: File
     _default_units: UnitSystem
 
@@ -114,7 +113,7 @@ class Simulator(ABC):
         return self._default_units
 
     @property
-    def grid(self) -> Optional[Grid]:
+    def grid(self) -> None | Grid:
         """Pass the grid information to the front end."""
         return self._grid
 
@@ -123,7 +122,7 @@ class Simulator(ABC):
         return self._origin
 
     @origin.setter
-    def origin(self, value: Optional[str]) -> None:
+    def origin(self, value: None | str) -> None:
         if value is None:
             raise ValueError(f'Origin path to model is required. Instead got {value}.')
         self._origin: str = value.strip()
