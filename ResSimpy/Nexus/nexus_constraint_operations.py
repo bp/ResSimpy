@@ -106,6 +106,7 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
                 if latest_constraint.date == current_date:
                     latest_constraint.update(properties_dict, nones_overwrite)
                     nexus_file.add_object_locations(latest_constraint.id, [index + start_line_index])
+                    update_constraint_control_mode(latest_constraint)
                 else:
                     # otherwise take a copy of the previous constraint and add the additional properties
                     new_constraint = constraint(properties_dict)

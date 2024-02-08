@@ -546,7 +546,7 @@ def test_load_constraints_sets_control_modes_best_guess(mocker: MockerFixture, f
     assert result['well1'][0] == expected_constraints['well1'][0]
     assert result == expected_constraints
 
-    expected_warning = f"""Multiple rates present for constraint so selecting best guess for control mode. Constraint properties: 
+    expected_warning = f"""Multiple rates present for constraint so selecting best guess for control mode. Constraint properties:
 {result['well1'][0].__repr__()}"""
     assert recwarn[0].message.args[0] == expected_warning
     assert len(recwarn) == 1
