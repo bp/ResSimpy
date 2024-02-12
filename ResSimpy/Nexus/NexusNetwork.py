@@ -5,11 +5,14 @@ targets.
 from __future__ import annotations
 
 import warnings
+import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional, Any, Literal
 
 from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.Network import Network
+from ResSimpy.Nexus.DataModels.Network.NexusProc import NexusProc
+from ResSimpy.Nexus.DataModels.Network.NexusProcs import NexusProcs
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
@@ -29,6 +32,8 @@ from ResSimpy.Nexus.DataModels.Network.NexusTarget import NexusTarget
 from ResSimpy.Nexus.DataModels.Network.NexusTargets import NexusTargets
 from ResSimpy.Nexus.DataModels.Network.NexusWellLists import NexusWellLists
 
+import ResSimpy.FileOperations.file_operations as fo
+
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
@@ -46,6 +51,7 @@ class NexusNetwork(Network):
     wellheads: NexusWellheads
     wellbores: NexusWellbores
     constraints: NexusConstraints
+    procs: NexusProcs
     targets: NexusTargets
     welllists: NexusWellLists
     __has_been_loaded: bool = False
@@ -61,6 +67,7 @@ class NexusNetwork(Network):
         self.constraints: NexusConstraints = NexusConstraints(self, model)
         self.targets: NexusTargets = NexusTargets(self)
         self.welllists: NexusWellLists = NexusWellLists(self)
+        self.procs: NexusProcs = NexusProcs(self)
 
     def get_load_status(self) -> bool:
         """Checks load status and loads the network if it hasn't already been loaded."""
@@ -90,6 +97,59 @@ class NexusNetwork(Network):
         if network_file is None:
             raise ValueError(f'No file found for {method_number=}, instead found {network_file=}')
         return network_file
+
+    def __load_procs(self) -> list[NexusProc]:
+        """This private function searches the surface file for Nexus procedures, stores data related procedures, and
+            returns a list of Nexus procedure objects.
+        """
+
+        loaded_procs: list[NexusProc] = []
+
+        for file in self.__model.model_files.surface_files.values():
+
+            # for every surface file, grab the lines as a list
+            file_contents = file.file_content_as_list
+
+            # boolean to determine if we are interested in a specific line or not
+            grab_line = False
+
+            # the contents of a specific procedure as a list
+            proc_contents = []
+
+            # initialize the time to the start date of the model, name, and priority
+            time = self.__model.start_date
+            name_ = None
+            priority_ = None
+
+            for line in file_contents:
+
+                # check for TIME keyword
+                if fo.check_token('TIME', line=line):
+                    time = fo.get_token_value(token='TIME', file_list=line, token_line=line)
+
+                # check for keyword ENDPROCS to signal end of the procedure
+                if fo.check_token('ENDPROCS', line=line):
+
+                    proc_obj = NexusProc(contents=proc_contents, date=time, name=name_, priority=priority_)
+                    loaded_procs.append(proc_obj)
+                    grab_line = False
+                    # *IMPORTANT*: reset proc_contents after a procedure has ended!
+                    proc_contents = []
+
+                if grab_line:
+                    proc_contents.append(line)
+
+                if fo.check_token('PROCS', line=line):
+                    # next check if it has a NAME and PRIORITY
+                    if fo.check_token('NAME', line=line):
+                        name_ = fo.get_token_value(token='NAME', file_list=line, token_line=line)
+                    if fo.check_token('PRIORITY', line=line):
+                        priority_ = int(fo.get_token_value(token='PRIORITY', file_list=line, token_line=line))
+
+                    grab_line = True
+
+        return loaded_procs
+
 
     def load(self) -> None:
         """Loads all the objects from the surface files in the Simulator class.
@@ -140,6 +200,11 @@ class NexusNetwork(Network):
             self.constraints._add_to_memory(type_check_dicts(constraints))
             self.targets._add_to_memory(type_check_lists(nexus_obj_dict.get('TARGET')))
             self.welllists._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLLIST')))
+
+
+            add_procs_to_mem = self.__load_procs()
+            self.procs._add_to_memory(add_procs_to_mem)
+
 
         self.__has_been_loaded = True
         self.__update_well_types()
