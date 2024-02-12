@@ -17,11 +17,31 @@ class NexusProc:
         self.__priority = priority
         self.__contents = contents
 
+    @property
+    def contents(self) -> list[str]:
+        """The contents of the main body of the procedure."""
+        return self.__contents
+
+    @property
+    def date(self) -> str:
+        """The date that the procedure occurred."""
+        return self.__date
+
+    @property
+    def priority(self) -> Optional[int]:
+        """The priority of the procedure."""
+        return self.__priority
+
+    @property
+    def name(self) -> Optional[str]:
+        """The name of the procedure."""
+        return self.__name
+
     @staticmethod
     def get_keyword_mapping() -> Mapping[str, tuple[str, type]]:
         """Gets the mapping of nexus keywords to attribute definitions."""
         keywords = {
             'NAME': ('name', str),
             'PRIORITY': ('priority', str)
-            }
+        }
         return keywords
