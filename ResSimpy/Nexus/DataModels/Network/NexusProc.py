@@ -19,22 +19,22 @@ class NexusProc:
 
     @property
     def contents(self) -> list[str]:
-        """The contents of the main body of the procedure."""
+        """Returns the contents of the main body of the procedure."""
         return self.__contents
 
     @property
     def date(self) -> str:
-        """The date that the procedure occurred."""
+        """Returns the date that the procedure occurred."""
         return self.__date
 
     @property
     def priority(self) -> Optional[int]:
-        """The priority of the procedure."""
+        """Returns the priority of the procedure."""
         return self.__priority
 
     @property
     def name(self) -> Optional[str]:
-        """The name of the procedure."""
+        """Returns the name of the procedure."""
         return self.__name
 
     @staticmethod
