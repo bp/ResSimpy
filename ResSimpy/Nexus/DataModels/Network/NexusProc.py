@@ -1,16 +1,17 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Mapping
 
 
 @dataclass(kw_only=True, repr=True)
-class NexusProc():
+class NexusProc:
     """Class that represents a single nexus procedure."""
     __date: str
     __name: Optional[str]
     __priority: Optional[int]
     __contents: list[str]
 
-    def __init__(self, date: str, contents: list[str], name: Optional[str] = None, priority: Optional[int] = None):
+    def __init__(self, date: str, contents: list[str], name: Optional[str] = None, priority: Optional[int] = None) -> \
+            None:
         self.__date = date
         self.__name = name
         self.__priority = priority
@@ -24,4 +25,3 @@ class NexusProc():
             'PRIORITY': ('priority', str)
             }
         return keywords
-
