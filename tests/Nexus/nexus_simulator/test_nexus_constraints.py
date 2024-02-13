@@ -2,6 +2,9 @@ import uuid
 from unittest.mock import Mock
 import pandas as pd
 import pytest
+from pytest_mock import MockerFixture
+
+from ResSimpy.Enums.ConstraintEnums import ConstraintControlMode
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -18,9 +21,9 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     ENDCONSTRAINTS
     ''',
     ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
-    'unit_system': UnitSystem.ENGLISH},
+    'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.LRAT},
      {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
-      'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH})),
+      'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.LRAT})),
 
     #'Change in Time'
     ('''CONSTRAINTS
@@ -32,12 +35,14 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     well1	 QLIQSMAX 	5000
     well2	 QWSMAX 	0.0  QLIQSMAX 20.5
     ENDCONSTRAINTS''',
-    ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,'unit_system': UnitSystem.ENGLISH},
+    ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0,
+      'max_surface_water_rate': 0,'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.LRAT},
      {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
-      'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
-     {'date': '01/01/2020', 'name': 'well1', 'max_surface_liquid_rate': 5000.0, 'unit_system': UnitSystem.ENGLISH},
+      'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.LRAT},
+     {'date': '01/01/2020', 'name': 'well1', 'max_surface_liquid_rate': 5000.0, 'unit_system': UnitSystem.ENGLISH,
+      'control_mode': ConstraintControlMode.LRAT},
    {'date': '01/01/2020', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_surface_liquid_rate': 20.5,
-    'unit_system': UnitSystem.ENGLISH}
+    'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.LRAT}
      )),
     #'more Keywords'
      ('''CONSTRAINTS
@@ -45,10 +50,10 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     well2	 PMAX 	0.0  QLIQMIN 10000.0 QLIQMIN- 15.5 WORPLUGPLUS 85 CWLIM 155554
     ENDCONSTRAINTS''',
     ({'date': '01/01/2019', 'name': 'well1', 'max_reverse_reservoir_hc_rate': 3884.0, 'min_pressure': 0,
-    'unit_system': UnitSystem.ENGLISH},
+    'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.BHP},
     {'date': '01/01/2019', 'name': 'well2', 'max_pressure': 0, 'min_reservoir_liquid_rate': 10000.0,
     'min_reverse_reservoir_liquid_rate': 15.5, 'max_wor_plug_plus': 85, 'max_cum_water_prod': 155554,
-    'unit_system': UnitSystem.ENGLISH})),
+    'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.BHP})),
 
     #'constraint table'
     ('''CONSTRAINT
@@ -61,10 +66,11 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     well1	 QLIQSMAX 	1000.0
     ENDCONSTRAINTS
     ''', ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0.0,
-    'unit_system': UnitSystem.ENGLISH},
+    'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.LRAT},
     {'date': '01/01/2019', 'name': 'well2', 'max_surface_liquid_rate': 0.0, 'max_surface_water_rate': 10000,
-    'unit_system': UnitSystem.ENGLISH},
-    {'date': '01/12/2023', 'name': 'well1', 'max_surface_liquid_rate': 1000.0, 'unit_system': UnitSystem.ENGLISH},
+    'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.LRAT},
+    {'date': '01/12/2023', 'name': 'well1', 'max_surface_liquid_rate': 1000.0, 'unit_system': UnitSystem.ENGLISH,
+     'control_mode': ConstraintControlMode.LRAT},
     )),
 
     #'multiple constraints on same well'
@@ -74,7 +80,7 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     well1   thp     2000    ! comment
     ENDCONSTRAINTS''',
     ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000.0, 'min_pressure': 1700.0,
-    'tubing_head_pressure': 2000.0, 'unit_system': UnitSystem.ENGLISH},)
+    'tubing_head_pressure': 2000.0, 'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.LRAT},)
     ),
 
     #'inline before table'
@@ -90,11 +96,11 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     ENDCONSTRAINT
     
     ''', ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000.0,
-            'unit_system': UnitSystem.ENGLISH, 'max_wor': 95.0},
+            'unit_system': UnitSystem.ENGLISH, 'max_wor': 95.0, 'control_mode': ConstraintControlMode.LRAT},
     {'date': '01/12/2023', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0.0,
-    'unit_system': UnitSystem.ENGLISH},
+    'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.LRAT},
     {'date': '01/12/2023', 'name': 'well2', 'max_surface_liquid_rate': 0.0, 'max_surface_water_rate': 10000,
-    'unit_system': UnitSystem.ENGLISH},
+    'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.LRAT},
     )),
 
     #'QMULT'
@@ -111,11 +117,14 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     ENDQMULT
     ''',
     ({'date': '01/01/2019', 'name': 'well1', 'use_qmult_qoilqwat_surface_rate': True, 'use_qmult_qoil_surface_rate': True,
-    'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 121.0, 'qmult_gas_rate': 53.6, 'qmult_water_rate': 2.5, 'well_name':'well1'},
+    'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 121.0, 'qmult_gas_rate': 53.6, 'qmult_water_rate': 2.5,
+      'well_name':'well1', 'control_mode': ConstraintControlMode.ORAT},
      {'date': '01/01/2019', 'name': 'well2', 'max_qmult_total_reservoir_rate': 0.0, 'unit_system': UnitSystem.ENGLISH,
-     'qmult_oil_rate': 211.0, 'qmult_gas_rate': 102.4, 'qmult_water_rate': 35.7, 'well_name':'well2'},
+     'qmult_oil_rate': 211.0, 'qmult_gas_rate': 102.4, 'qmult_water_rate': 35.7, 'well_name':'well2',
+      'control_mode': ConstraintControlMode.BHP},
     {'date': '01/01/2019', 'name': 'well3', 'convert_qmult_to_reservoir_barrels': True,
-    'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 10.2, 'qmult_gas_rate': 123, 'qmult_water_rate': 203, 'well_name':'well3'},
+    'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 10.2, 'qmult_gas_rate': 123, 'qmult_water_rate': 203,
+     'well_name':'well3', 'control_mode': ConstraintControlMode.RESV},
       )),
 
     #'Clearing Constraints'
@@ -137,13 +146,16 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     ENDCONSTRAINTS
     
     ''', ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000.0,
-            'unit_system': UnitSystem.ENGLISH, 'max_wor': 95.0},
+            'unit_system': UnitSystem.ENGLISH, 'max_wor': 95.0, 'control_mode': ConstraintControlMode.LRAT},
     {'date': '01/01/2019', 'name': 'well2', 'max_surface_liquid_rate': 1.8, 'max_pressure': 10000.2,
-        'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True,},
-    {'date': '01/12/2023', 'name': 'well1', 'unit_system': UnitSystem.ENGLISH, 'clear_q': True},
-    {'date': '01/12/2023', 'name': 'well2', 'unit_system': UnitSystem.ENGLISH, 'clear_all': True},
+        'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True,
+     'control_mode': ConstraintControlMode.ORAT},
+    {'date': '01/12/2023', 'name': 'well1', 'unit_system': UnitSystem.ENGLISH, 'clear_q': True,
+     'control_mode': ConstraintControlMode.BHP},
+    {'date': '01/12/2023', 'name': 'well2', 'unit_system': UnitSystem.ENGLISH, 'clear_all': True,
+     'control_mode': ConstraintControlMode.BHP},
     {'date': '01/01/2024', 'name': 'well1', 'max_surface_oil_rate': 1.8,
-        'unit_system': UnitSystem.ENGLISH},
+        'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.ORAT},
     )),
 
     #'activate keyword'
@@ -160,9 +172,9 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     ENDCONSTRAINTS
     ''',
     ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 0.0, 'active_node': False,
-    'unit_system': UnitSystem.ENGLISH},
+    'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.LRAT},
      {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'active_node': False,
-      'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
+      'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.LRAT},
       )),
 
     #'GORLIM_drawdowncards'
@@ -171,7 +183,8 @@ from tests.utility_for_tests import get_fake_nexus_simulator
       well1	 DPBHAVG 1024.2  DPBHMX OFF  GORLIM NONE EXPONENT 9999
       ENDCONSTRAINTS
       ''',
-      ({'date': '01/01/2019', 'name': 'well1', 'max_avg_comp_dp': 1024.2, 'gor_limit_exponent': 9999.0, 'unit_system': UnitSystem.ENGLISH},
+      ({'date': '01/01/2019', 'name': 'well1', 'max_avg_comp_dp': 1024.2, 'gor_limit_exponent': 9999.0,
+        'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.BHP},
         )),
     # MULT keyword with a number after it
     ('''
@@ -184,8 +197,8 @@ WELL       QOIL        QGAS        QWATER
 well1      0           0.0         0
 ENDQMULT ''',
          ({'date': '01/01/2019', 'name': 'well1', 'use_qmult_qoil_surface_rate': True,
-    'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 0.0, 'qmult_gas_rate': 0.0, 'qmult_water_rate': 0.0, 'well_name':'well1'},
-          )
+    'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 0.0, 'qmult_gas_rate': 0.0, 'qmult_water_rate': 0.0,
+           'well_name':'well1', 'control_mode': ConstraintControlMode.ORAT},)
      ),
     ], ids=['basic_test', 'Change in Time', 'more Keywords', 'constraint table', 'multiple constraints on same well',
     'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword', 'GORLIM_drawdowncards', 'MULT keyword with a number after it'])
@@ -229,11 +242,314 @@ def test_load_constraints(mocker, file_contents, expected_content):
     expected_df['date'] = pd.to_datetime(expected_df['date'])
     expected_df = expected_df.sort_values('date').reset_index(drop=True)
     # Assert
-    assert result == expected_constraints
     assert result_single == expected_single_name_constraint
+    assert result == expected_constraints
     pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
     assert result_date_filtered == expected_date_filtered_constraints
 
+
+@pytest.mark.parametrize("file_contents, expected_constraints", [
+    # One rate present
+
+    ("""
+ CONSTRAINTS
+    well1	 QOSMAX 	1234.0
+    ENDCONSTRAINTS
+    
+    """,
+     {'well1': [NexusConstraint(properties_dict={'control_mode': ConstraintControlMode.ORAT,
+                                                 'unit_system': UnitSystem.ENGLISH, 'name': 'well1',
+                                                 'max_surface_oil_rate': 1234.0, 'date': '02/04/2024'})]}
+     ),
+
+    ("""
+CONSTRAINTS
+   well1	 QLIQSMAX 	1234.0
+   ENDCONSTRAINTS
+
+   """,
+     {'well1': [NexusConstraint(properties_dict={'control_mode': ConstraintControlMode.LRAT,
+                                                 'unit_system': UnitSystem.ENGLISH, 'name': 'well1',
+                                                 'max_surface_liquid_rate': 1234.0, 'date': '02/04/2024'})]}
+     ),
+
+    ("""
+CONSTRAINTS
+   well1	 QGSMAX 	1234.0
+   ENDCONSTRAINTS
+
+   """,
+     {'well1': [NexusConstraint(properties_dict={'control_mode': ConstraintControlMode.GRAT,
+                                                 'unit_system': UnitSystem.ENGLISH, 'name': 'well1',
+                                                 'max_surface_gas_rate': 1234.0, 'date': '02/04/2024'})]}
+     ),
+
+    ("""
+CONSTRAINTS
+   well1	 QWSMAX 	1234.0
+   ENDCONSTRAINTS
+
+   """,
+     {'well1': [NexusConstraint(properties_dict={'control_mode': ConstraintControlMode.WRAT,
+                                                 'unit_system': UnitSystem.ENGLISH, 'name': 'well1',
+                                                 'max_surface_water_rate': 1234.0, 'date': '02/04/2024'})]}
+     ),
+
+    # No rates -> use BHP
+
+    ("""
+CONSTRAINTS
+   well1	 QHCMIN 	1234.0
+   ENDCONSTRAINTS
+
+   """,
+     {'well1': [NexusConstraint(properties_dict={'control_mode': ConstraintControlMode.BHP,
+                                                 'unit_system': UnitSystem.ENGLISH, 'name': 'well1',
+                                                 'min_reservoir_hc_rate': 1234.0, 'date': '02/04/2024'})]}
+     ),
+
+    # MULT table present -> That is the control mode, regardless of other factors
+
+    ("""
+CONSTRAINTS
+   well1	 QGSMAX 	1234.0 QALLRMAX        MULT
+   ENDCONSTRAINTS
+   
+   QMULT
+WELL QOIL QGAS QWATER
+well1 121.0 53.6 2.5
+ENDQMULT
+   """,
+     {'well1': [NexusConstraint(properties_dict={'control_mode': ConstraintControlMode.RESV,
+                                                 'unit_system': UnitSystem.ENGLISH, 'name': 'well1',
+                                                 'max_surface_gas_rate': 1234.0, 'date': '02/04/2024',
+                                                 'qmult_oil_rate': 121.0, 'qmult_gas_rate': 53.6,
+                                                 'qmult_water_rate': 2.5, 'convert_qmult_to_reservoir_barrels': True,
+                                                 'well_name': 'well1'})]}
+     ),
+
+    ("""
+CONSTRAINTS
+   well1	 QGSMAX 	1234.0 QWSMAX        MULT
+   ENDCONSTRAINTS
+
+   QMULT
+WELL QOIL QGAS QWATER
+well1 121.0 53.6 2.5
+ENDQMULT
+   """,
+     {'well1': [NexusConstraint(properties_dict={'control_mode': ConstraintControlMode.WRAT,
+                                                 'unit_system': UnitSystem.ENGLISH, 'name': 'well1',
+                                                 'max_surface_gas_rate': 1234.0, 'date': '02/04/2024',
+                                                 'qmult_oil_rate': 121.0, 'qmult_gas_rate': 53.6,
+                                                 'qmult_water_rate': 2.5, 'use_qmult_qwater_surface_rate': True,
+                                                 'well_name': 'well1'})]}
+     ),
+
+    ("""
+CONSTRAINTS
+   well1	 QGSMAX 	1234.0 QGSMAX        MULT
+   ENDCONSTRAINTS
+
+   QMULT
+WELL QOIL QGAS QWATER
+well1 121.0 53.6 2.5
+ENDQMULT
+   """,
+     {'well1': [NexusConstraint(properties_dict={'control_mode': ConstraintControlMode.GRAT,
+                                                 'unit_system': UnitSystem.ENGLISH, 'name': 'well1',
+                                                 'max_surface_gas_rate': 1234.0, 'date': '02/04/2024',
+                                                 'qmult_oil_rate': 121.0, 'qmult_gas_rate': 53.6,
+                                                 'qmult_water_rate': 2.5, 'use_qmult_qgas_surface_rate': True,
+                                                 'well_name': 'well1'})]}
+     ),
+
+    ("""
+CONSTRAINTS
+   well1	 QGSMAX 	1234.0 QLIQSMAX        MULT
+   ENDCONSTRAINTS
+
+   QMULT
+WELL QOIL QGAS QWATER
+well1 121.0 53.6 2.5
+ENDQMULT
+   """,
+     {'well1': [NexusConstraint(properties_dict={'control_mode': ConstraintControlMode.LRAT,
+                                                 'unit_system': UnitSystem.ENGLISH, 'name': 'well1',
+                                                 'max_surface_gas_rate': 1234.0, 'date': '02/04/2024',
+                                                 'qmult_oil_rate': 121.0, 'qmult_gas_rate': 53.6,
+                                                 'qmult_water_rate': 2.5, 'use_qmult_qoilqwat_surface_rate': True,
+                                                 'well_name': 'well1'})]}
+     ),
+
+    ("""
+CONSTRAINTS
+   well1	 QGSMAX 	1234.0 QOSMAX        MULT
+   ENDCONSTRAINTS
+
+   QMULT
+WELL QOIL QGAS QWATER
+well1 121.0 53.6 2.5
+ENDQMULT
+   """,
+     {'well1': [NexusConstraint(properties_dict={'control_mode': ConstraintControlMode.ORAT,
+                                                 'unit_system': UnitSystem.ENGLISH, 'name': 'well1',
+                                                 'max_surface_gas_rate': 1234.0, 'date': '02/04/2024',
+                                                 'qmult_oil_rate': 121.0, 'qmult_gas_rate': 53.6,
+                                                 'qmult_water_rate': 2.5, 'use_qmult_qoil_surface_rate': True,
+                                                 'well_name': 'well1'})]}
+     ),
+
+    # Changing across dates, multiple wells
+    ("""
+CONSTRAINTS
+   well1	 QGSMAX 	1234.0 QOSMAX        MULT
+   well2 QLIQSMAX 	5678.0
+   ENDCONSTRAINTS
+
+   QMULT
+WELL QOIL QGAS QWATER
+well1 121.0 53.6 2.5
+ENDQMULT
+
+TIME 05/04/2025
+CONSTRAINTS
+   well1	 QWSMAX   1234.5
+   well2 QGSMAX 	20.02
+   ENDCONSTRAINTS
+
+   """,
+     {'well1': [NexusConstraint(properties_dict={'control_mode': ConstraintControlMode.ORAT,
+                                                 'unit_system': UnitSystem.ENGLISH, 'name': 'well1',
+                                                 'max_surface_gas_rate': 1234.0, 'date': '02/04/2024',
+                                                 'qmult_oil_rate': 121.0, 'qmult_gas_rate': 53.6,
+                                                 'qmult_water_rate': 2.5, 'use_qmult_qoil_surface_rate': True,
+                                                 'well_name': 'well1'}),
+                NexusConstraint(properties_dict={'control_mode': ConstraintControlMode.WRAT,
+                                                 'unit_system': UnitSystem.ENGLISH, 'name': 'well1',
+                                                 'max_surface_water_rate': 1234.5, 'date': '05/04/2025'})],
+
+      'well2': [NexusConstraint(properties_dict={'control_mode': ConstraintControlMode.LRAT,
+                                                 'unit_system': UnitSystem.ENGLISH, 'name': 'well2',
+                                                 'max_surface_liquid_rate': 5678.0, 'date': '02/04/2024'}),
+                NexusConstraint(properties_dict={'control_mode': ConstraintControlMode.GRAT,
+                                                 'unit_system': UnitSystem.ENGLISH, 'name': 'well2',
+                                                 'max_surface_gas_rate': 20.02, 'date': '05/04/2025'})]
+      }
+     ),
+
+    ], ids=['single_oil_rate', 'single_liquid_rate', 'single_gas_rate', 'single_water_rate', 'no rates',
+            'all QMULT present', 'water QMULT present', 'gas QMULT present', 'liquid QMULT present',
+            'oil QMULT present', 'multiple dates and wells'])
+def test_load_constraints_sets_control_modes(mocker: MockerFixture, file_contents: str,
+                                                  expected_constraints: dict[str, list[NexusConstraint]]):
+    # Arrange
+    fcs_contents = """RECURRENT_FILES 
+    SURFACE Network 1 data/surface.dat"""
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'fcs_file.fcs': fcs_contents,
+            'data/surface.dat': file_contents,
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    model = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='fcs_file.fcs', mock_open=False)
+    model._start_date = '02/04/2024'
+
+    # Act
+    result = model.network.constraints.get_all()
+
+    # Assert
+    assert result['well1'][0] == expected_constraints['well1'][0]
+    assert result == expected_constraints
+
+
+@pytest.mark.parametrize("file_contents, expected_constraints", [
+    # Oil over liquid
+    ("""
+ CONSTRAINTS
+    well1	 QOSMAX 	1234.0 QLIQSMAX 	5678.0
+    ENDCONSTRAINTS
+
+    """,
+     {'well1': [NexusConstraint(properties_dict={'control_mode': ConstraintControlMode.ORAT,
+                                                 'unit_system': UnitSystem.ENGLISH, 'name': 'well1',
+                                                 'max_surface_oil_rate': 1234.0, 'max_surface_liquid_rate': 5678.0,
+                                                 'date': '02/04/2024'})]}
+     ),
+
+    # liquid over gas
+    ("""
+CONSTRAINTS
+   well1	 QGSMAX 	1234.0 QLIQSMAX 	5678.0
+   ENDCONSTRAINTS
+
+   """,
+     {'well1': [NexusConstraint(properties_dict={'control_mode': ConstraintControlMode.LRAT,
+                                                 'unit_system': UnitSystem.ENGLISH, 'name': 'well1',
+                                                 'max_surface_gas_rate': 1234.0, 'max_surface_liquid_rate': 5678.0,
+                                                 'date': '02/04/2024'})]}
+     ),
+
+    # gas over water
+    ("""
+CONSTRAINTS
+   well1	 QWSMAX 	1234.0 QGSMAX 	5678.0
+   ENDCONSTRAINTS
+
+   """,
+     {'well1': [NexusConstraint(properties_dict={'control_mode': ConstraintControlMode.GRAT,
+                                                 'unit_system': UnitSystem.ENGLISH, 'name': 'well1',
+                                                 'max_surface_water_rate': 1234.0, 'max_surface_gas_rate': 5678.0,
+                                                 'date': '02/04/2024'})]}
+     ),
+
+    # oil over water
+    ("""
+CONSTRAINTS
+   well1	 QOSMAX 	1234.0 QGSMAX 	5678.0
+   ENDCONSTRAINTS
+
+   """,
+     {'well1': [NexusConstraint(properties_dict={'control_mode': ConstraintControlMode.ORAT,
+                                                 'unit_system': UnitSystem.ENGLISH, 'name': 'well1',
+                                                 'max_surface_oil_rate': 1234.0, 'max_surface_gas_rate': 5678.0,
+                                                 'date': '02/04/2024'})]}
+     ),
+], ids=['oil over liquid', 'liquid over gas', 'gas over water', 'oil over water'])
+def test_load_constraints_sets_control_modes_best_guess(mocker: MockerFixture, file_contents: str,
+                                                  expected_constraints: dict[str, list[NexusConstraint]], recwarn):
+    # Multiple rates (precedence is oil > liquid > gas > water) + raise warning
+    # Arrange
+    fcs_contents = """RECURRENT_FILES 
+    SURFACE Network 1 data/surface.dat"""
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'fcs_file.fcs': fcs_contents,
+            'data/surface.dat': file_contents,
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    model = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='fcs_file.fcs', mock_open=False)
+    model._start_date = '02/04/2024'
+
+    # Act
+    result = model.network.constraints.get_all()
+
+    # Assert
+    assert result['well1'][0] == expected_constraints['well1'][0]
+    assert result == expected_constraints
+
+    expected_warning = f"""Multiple rates present for constraint so selecting best guess for control mode. Constraint properties:
+{result['well1'][0].__repr__()}"""
+    assert recwarn[0].message.args[0] == expected_warning
+    assert len(recwarn) == 1
 
 @pytest.mark.parametrize('file_contents, object_locations', [
         ('''CONSTRAINTS

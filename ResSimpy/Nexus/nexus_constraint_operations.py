@@ -1,13 +1,16 @@
 """Key functions for reading in nexus constraints and populating objects with the data."""
 from __future__ import annotations
 
+import warnings
 from typing import Optional, TYPE_CHECKING
 
+from ResSimpy.Enums.ConstraintEnums import ConstraintControlMode
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.nexus_file_operations import get_next_value, correct_datatypes
 from ResSimpy.Utils.invert_nexus_map import nexus_keyword_to_attribute_name
 import fnmatch
+
 if TYPE_CHECKING:
     from ResSimpy.File import File
 
@@ -103,16 +106,61 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
                 if latest_constraint.date == current_date:
                     latest_constraint.update(properties_dict, nones_overwrite)
                     nexus_file.add_object_locations(latest_constraint.id, [index + start_line_index])
+                    update_constraint_control_mode(latest_constraint)
                 else:
                     # otherwise take a copy of the previous constraint and add the additional properties
                     new_constraint = constraint(properties_dict)
+                    update_constraint_control_mode(new_constraint)
                     well_constraints.append(new_constraint)
                     nexus_file.add_object_locations(new_constraint.id, [index + start_line_index])
             else:
-                nexus_constraint = constraint(properties_dict)
+                new_constraint = constraint(properties_dict)
+                update_constraint_control_mode(new_constraint)
+                existing_constraints[name_of_node] = [new_constraint]
+                nexus_file.add_object_locations(new_constraint.id, [index + start_line_index])
 
-                existing_constraints[name_of_node] = [nexus_constraint]
-                nexus_file.add_object_locations(nexus_constraint.id, [index + start_line_index])
+
+def update_constraint_control_mode(existing_constraint: NexusConstraint) -> None:
+    """Updates the constraint object with a control mode property set based upon the rates in the constraint."""
+    # Check for QMULT tables that will determine the control mode
+    if existing_constraint.convert_qmult_to_reservoir_barrels is not None:
+        existing_constraint.control_mode = ConstraintControlMode.RESV
+        return
+    if existing_constraint.use_qmult_qoil_surface_rate is not None:
+        existing_constraint.control_mode = ConstraintControlMode.ORAT
+        return
+    if existing_constraint.use_qmult_qoilqwat_surface_rate is not None:
+        existing_constraint.control_mode = ConstraintControlMode.LRAT
+        return
+    if existing_constraint.use_qmult_qgas_surface_rate is not None:
+        existing_constraint.control_mode = ConstraintControlMode.GRAT
+        return
+    if existing_constraint.use_qmult_qwater_surface_rate is not None:
+        existing_constraint.control_mode = ConstraintControlMode.WRAT
+        return
+
+    # Go through the order of precedence to select the most likely control mode
+    rates_present = 0
+
+    if existing_constraint.max_surface_water_rate is not None:
+        existing_constraint.control_mode = ConstraintControlMode.WRAT
+        rates_present += 1
+    if existing_constraint.max_surface_gas_rate is not None:
+        existing_constraint.control_mode = ConstraintControlMode.GRAT
+        rates_present += 1
+    if existing_constraint.max_surface_liquid_rate is not None:
+        existing_constraint.control_mode = ConstraintControlMode.LRAT
+        rates_present += 1
+    if existing_constraint.max_surface_oil_rate is not None:
+        existing_constraint.control_mode = ConstraintControlMode.ORAT
+        rates_present += 1
+
+    if rates_present == 0:
+        existing_constraint.control_mode = ConstraintControlMode.BHP
+    elif rates_present > 1:
+        warnings.warn(f"""Multiple rates present for constraint so selecting best guess for control mode. Constraint \
+properties:
+{existing_constraint.__repr__()}""")
 
 
 def __clear_constraints(token_value, constraint) -> dict[str, None]:
