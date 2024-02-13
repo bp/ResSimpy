@@ -40,16 +40,29 @@ class NexusSolverParameters(SolverParameters):
 
         timestep_method_enum = TimeSteppingMethod.impes
         current_solver_param_token = None
+        current_date = self.start_date
         solver_parameter_for_timestep = NexusSolverParameter(date=self.start_date)
         for line in self.file_content:
-            # refactor to a time blocked out section of the file.
             # maybe put a for loop in here for all the potential starting tokens?
+            if fo.check_token(token='TIME', line=line):
+                # append the existing solver parameter to the list
+                if solver_parameter_for_timestep != NexusSolverParameter(date=current_date,
+                                                                         timestepping_method=timestep_method_enum):
+                    # prevent blank solver parameters from being added to the list
+                    read_in_solver_parameter.append(solver_parameter_for_timestep)
+                # create a new solver parameter object for the new time block
+                current_date = fo.get_expected_token_value('TIME', line, file_list=self.file_content)
+                solver_parameter_for_timestep = NexusSolverParameter(date=current_date)
+                # reset the current_solver_param_token
+                current_solver_param_token = None
 
+            # see if we get any DT blocks
             if fo.check_token(token='DT', line=line):
                 current_solver_param_token = 'DT'
                 dt_token_value = fo.get_expected_token_value('DT', line, file_list=self.file_content)
                 solver_parameter_for_timestep = (
                     self.__get_dt_token_values(dt_token_value, line, solver_parameter_for_timestep))
+
             if current_solver_param_token == 'DT' and not fo.check_token(token='DT', line=line):
                 next_value = fo.get_next_value(0, file_as_list=[line])
                 if next_value is not None and next_value in DT_KEYWORDS:
@@ -64,8 +77,8 @@ class NexusSolverParameters(SolverParameters):
                 else:
                     timestep_method_enum = TimeSteppingMethod.impes
 
-        # set the timestepping_method in the object
-        solver_parameter_for_timestep.timestepping_method = timestep_method_enum
+            # set the timestepping_method in the object
+            solver_parameter_for_timestep.timestepping_method = timestep_method_enum
 
         read_in_solver_parameter.append(solver_parameter_for_timestep)
 
