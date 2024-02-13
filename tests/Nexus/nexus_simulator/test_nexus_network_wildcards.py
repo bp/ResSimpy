@@ -1,4 +1,6 @@
 import pytest
+
+from ResSimpy.Enums.ConstraintEnums import ConstraintControlMode
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Enums.UnitsEnum import UnitSystem
@@ -17,8 +19,10 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     CONSTRAINTS
     well_*   QWSMAX 100
     ENDCONSTRAINTS''',
-    [{'name': 'well_prod', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'unit_system': UnitSystem.ENGLISH},
-    {'name': 'well_inj', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'unit_system': UnitSystem.ENGLISH}],
+    [{'name': 'well_prod', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'unit_system': UnitSystem.ENGLISH,
+      'control_mode': ConstraintControlMode.WRAT},
+    {'name': 'well_inj', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'unit_system': UnitSystem.ENGLISH,
+     'control_mode': ConstraintControlMode.WRAT}],
     ),
 
     # with extra nodes
@@ -33,8 +37,10 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     CONSTRAINTS
     well_*   QWSMAX 100
     ENDCONSTRAINTS''',
-    [{'name': 'well_prod', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'unit_system': UnitSystem.ENGLISH},
-    {'name': 'well_inj', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'unit_system': UnitSystem.ENGLISH}],
+    [{'name': 'well_prod', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'unit_system': UnitSystem.ENGLISH,
+      'control_mode': ConstraintControlMode.WRAT},
+    {'name': 'well_inj', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'unit_system': UnitSystem.ENGLISH,
+     'control_mode': ConstraintControlMode.WRAT}],
     ),
 
     # with extra constraints
@@ -50,8 +56,9 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     well_prod   QOSMAX 102.2
     ENDCONSTRAINTS''',
     [{'name': 'well_prod', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'max_surface_oil_rate': 102.2,
-      'unit_system': UnitSystem.ENGLISH},
-    {'name': 'well_inj', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'unit_system': UnitSystem.ENGLISH}],
+      'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.ORAT},
+    {'name': 'well_inj', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'unit_system': UnitSystem.ENGLISH,
+     'control_mode': ConstraintControlMode.WRAT}],
     ),
 
     # wildcard in the middle + case sensitivity
@@ -66,7 +73,7 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     C*1  QWSMAX 100 QOSMAX 2.02
     ENDCONSTRAINTS''',
     [{'name': 'CP01', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'max_surface_oil_rate': 2.02,
-      'unit_system': UnitSystem.ENGLISH},
+      'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.ORAT},
     ],
     ),
 

@@ -44,6 +44,9 @@ def to_dict(nexus_object: Any, keys_in_nexus_style: bool = False, add_date: bool
         if isinstance(unit_sys, UnitSystem):
             result_dict['unit_system'] = unit_sys.value
 
+    if hasattr(nexus_object, 'control_mode'):
+        result_dict['control_mode'] = getattr(nexus_object, 'control_mode')
+
     if not include_nones:
         result_dict = {k: v for k, v in result_dict.items() if v is not None}
     return result_dict
