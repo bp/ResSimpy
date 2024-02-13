@@ -11,7 +11,7 @@ from ResSimpy.SolverParameters import SolverParameters
 from ResSimpy.FileOperations import file_operations as fo
 
 class NexusSolverParameters(SolverParameters):
-    def __init__(self, runcontrol_file: list[str], start_date: str, ) -> None:
+    def __init__(self, runcontrol_file: list[str], start_date: str ) -> None:
         """NexusSolverParameters class constructor.
 
         Args:

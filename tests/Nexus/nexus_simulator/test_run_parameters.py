@@ -74,6 +74,7 @@ class TestNexusSolverParameters:
                                     METHOD IMPLICIT
                                     TIME 01/05/2020
                                     DT MIN 10
+                                    MAXINCREASE 21
                                     TIME 01/06/2020
                                     TIME 01/07/2020
                                     DT MAX 101''',
@@ -86,6 +87,7 @@ class TestNexusSolverParameters:
                                                         ),
                                    NexusSolverParameter(date='01/05/2020',
                                                         dt_min=10.0,
+                                                        dt_max_increase=21.0,
                                                         timestepping_method=TimeSteppingMethod.implicit,
                                                         ),
                                    NexusSolverParameter(date='01/07/2020',
@@ -94,6 +96,31 @@ class TestNexusSolverParameters:
                                                         ),
                                    ]),
 
+                                 # Solver keywords
+                                 ('''START 01/01/2020
+                                 SOLVER RESERVOIR CYCLELength 10
+                                                  MAXCYCLES 100
+                                                  GLOBALTOL 0.0001
+                                        ALL       ITERATIVE
+                                        
+                                        NOCUT
+                                        PRECON_ILU DROPTOL 0.1
+                                        
+                                        FACILITIES NOGRID
+                                        KSUB_METHOD OrTHoMIN    
+                                    
+                                 ''',
+                                  [NexusSolverParameter(date='01/01/2020',
+                                                        solver_reservoir_cycle_length=10.0,
+                                                        solver_reservoir_max_cycles=100.0,
+                                                        solver_reservoir_globaltol=0.0001,
+                                                        solver_reservoir_equation_solver='',
+                                                        solver_timestep_cut=False,
+                                                        solver_precon='PRECON_ILU DROPTOL 0.1',   ## TODO THINK ABOUT THIS
+                                                        solver_facilities='NOGRID',
+                                                        solver_ksub_method='OrTHoMIN',
+                                                        ),
+                                   ]),
                              ],
                              ids=['basic_test', 'more_DT_keywords', 'TIME_dependent_runcontrols'])
     def test_load_run_parameters(self, mocker, file_content, expected_result):
