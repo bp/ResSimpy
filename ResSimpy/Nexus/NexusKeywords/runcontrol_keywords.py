@@ -25,3 +25,27 @@ RUNCONTROL_KEYWORDS = ['2PHASE', 'ADJUSTTOTIME', 'ALL', 'ALLOW', 'AQFLUX', 'ARRA
                        'TARGETS', 'TC', 'THP', 'TIME', 'TIMES', 'TNEXT', 'TOLS', 'TOTAL', 'TRANS', 'TSNUM', 'VIPUNITS',
                        'VISC', 'VOLCON', 'WATER', 'WCUT', 'WELL', 'WELLPLOT', 'WELLS', 'WOR', 'WPAVE', 'WPPV', 'WPWBC',
                        'X', 'Y', 'YEARLY', 'Z']
+
+# Keywords that follow DT in the runctrl file
+DT_KEYWORDS = ['AUTO', 'MIN', 'MAX', 'MAXINCREASE', 'CON', 'VIPTS', 'QMAXPROD', 'QMAXINJ', 'CONNOPEN', 'MAXINCAFCUT',
+               'ADJUSTTOTIME', 'REDUCEAFCUT', 'WCYCLE', 'GCYCLE', 'VIP_MAXINCREASE', 'VIP_MAXINCAFCUT']
+
+# Keywords that follow DCMAX, DCRPT, D*_MAX_VIP, VOLRPT in the runctrl file
+DCMAX_KEYWORDS = ['IMPES', 'IMPLICIT', 'ALL']
+
+
+# Keywords that are found on their own with a token/value pair in the runctrl file
+SOLO_KEYWORDS = ['MAXNEWTONS', 'MAXBADNETS', 'CUTFACTOR', 'NEGMASSCUT', 'DVOLLIM', 'DZLIM', 'DSLIM', 'DPLIM', 'DMOBLIM',
+                    'DSGLIM', 'NEGFLOWLIM', 'NEGMASSAQU', 'KRDAMP', 'VOLERR_PREV', 'SGCTOL', 'EGSGTOL', 'SGCPERFTOL',
+                    'LINE_SEARCH', 'PERFP_DAMP']
+
+# Keywords that follow IMPSTAB in the runctrl file
+IMPSTAB_KEYWORDS = ['OFF', 'ON', 'COATS', 'PEACEMAN', 'SKIPMASSCFL', 'USEMASSCFL']
+IMPSTAB_KEYWORDS_WITH_VALUES = ['TARGETCFL', 'LIMITCFL', 'NOCUTS', 'MAXCUTS', 'SKIPBLOCKDCMAX']
+
+# Keywords that follow TOLS in the runctrl file
+TOLS_KEYWORDS = ['VOLCON', 'MASS', 'TARGET', 'WELLMBAL', 'PERF']
+
+PERFREV_KEYWORDS = ['ALLOW', 'ALLOWALL', 'DISALLOW']
+
+IMPLICITMBAL_KEYWORDS = ['OFF', 'ON', 'NEGMOB', 'NEGMASS', 'VBAL', 'NOVBAL']
