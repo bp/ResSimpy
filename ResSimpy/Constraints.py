@@ -13,10 +13,10 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 @dataclass(kw_only=True)
 class Constraints(ABC):
     """Abstract base class for constraints."""
-    _constraints: dict[str, list[Constraint]] = field(default_factory=dict)
+    _constraints: Mapping[str, Sequence[Constraint]] | list[Constraint] = field(default_factory=dict)
 
     @property
-    def constraints(self) -> list[Constraint] | dict[str, list[Constraint]]:
+    def constraints(self) -> Mapping[str, Sequence[Constraint]] | list[Constraint]:
         return self._constraints
 
     @abstractmethod

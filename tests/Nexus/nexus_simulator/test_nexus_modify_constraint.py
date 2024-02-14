@@ -31,7 +31,7 @@ def test_find_constraint(mocker):
     existing_constraints = {'well1': [NexusConstraint(x) for x in well1_constraint_props],
                             'well2': [NexusConstraint(x) for x in well2_constraint_props]}
 
-    constraints.__setattr__('_NexusConstraints__constraints', existing_constraints)
+    constraints.__setattr__('_constraints', existing_constraints)
     mock_nexus_network.constraints = constraints
     expected_constraint = NexusConstraint(well1_constraint_props[2])
     find_constraint_dict = {'date': '01/01/2024', 'name': 'well1', 'max_wor': 95.0}
@@ -63,7 +63,7 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
     existing_constraints = {'well1': [NexusConstraint(x) for x in well1_constraint_props],
                             'well2': [NexusConstraint(x) for x in well2_constraint_props]}
 
-    constraints.__setattr__('_NexusConstraints__constraints', existing_constraints)
+    constraints.__setattr__('_constraints', existing_constraints)
     mock_nexus_network.constraints = constraints
 
     find_constraint_dict = {'name': 'well1', 'max_wor': 95.0}
