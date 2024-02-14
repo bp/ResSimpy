@@ -99,7 +99,7 @@ class TestNexusSolverParameters:
                                  # Solver keywords
                                  ('''START 01/01/2020
                                  SOLVER RESERVOIR CYCLELength 10
-                                                  MAXCYCLES 100
+                                                  MAXcycLES 100
                                                   GLOBALTOL 0.0001
                                         ALL       ITERATIVE
                                         
@@ -114,15 +114,18 @@ class TestNexusSolverParameters:
                                                         solver_reservoir_cycle_length=10.0,
                                                         solver_reservoir_max_cycles=100.0,
                                                         solver_reservoir_globaltol=0.0001,
-                                                        solver_reservoir_equation_solver='',
+                                                        solver_reservoir_equation_solver=None,
+                                                        solver_all_equation_solver='ITERATIVE',
                                                         solver_timestep_cut=False,
-                                                        solver_precon='PRECON_ILU DROPTOL 0.1',   ## TODO THINK ABOUT THIS
+                                                        solver_precon='PRECON_ILU',
+                                                        solver_precon_setting='DROPTOL',
+                                                        solver_precon_value=0.1,
                                                         solver_facilities='NOGRID',
                                                         solver_ksub_method='OrTHoMIN',
                                                         ),
                                    ]),
                              ],
-                             ids=['basic_test', 'more_DT_keywords', 'TIME_dependent_runcontrols'])
+                             ids=['basic_test', 'more_DT_keywords', 'TIME_dependent_runcontrols', 'Solver_keywords'])
     def test_load_run_parameters(self, mocker, file_content, expected_result):
         # Arrange
 

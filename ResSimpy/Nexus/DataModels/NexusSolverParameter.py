@@ -44,6 +44,8 @@ class NexusSolverParameter(SolverParameter):
     solver_timestep_cut: bool = True  # Default is CUT
 
     solver_precon: str | None = None
+    solver_precon_setting: str | None = None
+    solver_precon_value: float | None = None
     solver_facilities: str | None = None
     solver_ksub_method: str | None = None
     solver_dual_solver: bool = True  # Default is ON
@@ -59,7 +61,7 @@ class NexusSolverParameter(SolverParameter):
     @staticmethod
     def dt_keyword_mapping() -> dict[str, tuple[str, type]]:
         # DT keywords
-        dt_keyword_map = {
+        dt_keyword_map: dict[str, tuple[str, type]] = {
 
             'AUTO': ('dt_auto', float),
             'MIN': ('dt_min', float),
@@ -87,8 +89,8 @@ class NexusSolverParameter(SolverParameter):
             'ALL CYCLELENGTH': ('solver_all_cycle_length', float),
             'ALL MAXCYCLES': ('solver_all_max_cycles', float),
             'ALL GLOBALTOL': ('solver_all_globaltol', float),
-            'ALL ITERATIVE': ('solver_precon', str),
-            'ALL DIRECT': ('solver_precon', str),
+            'ALL ITERATIVE': ('solver_all_equation_solver', str),
+            'ALL DIRECT': ('solver_all_equation_solver', str),
 
             'RESERVOIR CYCLELENGTH': ('solver_reservoir_cycle_length', float),
             'RESERVOIR MAXCYCLES': ('solver_reservoir_max_cycles', float),
