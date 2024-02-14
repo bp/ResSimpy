@@ -45,7 +45,7 @@ class TestNexusSolverParameters:
             GCYCLE 0.9
             VIP_MAXINCREASE 1.0
             VIP_MAXINCAFCUT 1.1
-            NEGMASSAQU
+            NEGMASSAQU 2
             
             ''',
              [NexusSolverParameter(date='01/01/2020',
@@ -60,6 +60,7 @@ class TestNexusSolverParameters:
                                    dt_gcycle=0.9,
                                    dt_vip_maxincrease=1.0,
                                    dt_vip_maxincafcut=1.1,
+                                   negmassaqu=2.0,
                                    ),
               ]),
 
@@ -227,8 +228,8 @@ class TestNexusSolverParameters:
                                    impstab_target_cfl=0.2,
                                    impstab_limit_cfl=0.3,
                                    impstab_skip_block_dcmax=20,
-                                      ),
-                                   ]),
+                                   ),
+              ]),
 
             # GRIDSOLVER keywords
             ('''START 01/01/2020
@@ -251,12 +252,58 @@ class TestNexusSolverParameters:
                                    perfrev='ALLOW',
                                    ),
               ]),
-
-            #
+            # SOLO_KEYWORDS
+            ('''START 01/01/2020
+            MAXNEWTONS 100
+            MAXBADNETS 200
+            CUTFACTOR 0.1
+            NEGMASSCUT 0.2
+            DVOLLIM 0.3
+            DZLIM 0.4
+            DSLIM 0.5
+            DPLIM 0.6
+            DMOBLIM 0.7
+            DSGLIM 0.8
+            NEGFLOWLIM 0.9
+            NEGMASSAQU 1.0
+            KRDAMP 1.1
+            VOLERR_PREV 1.2
+            SGCTOL 1.3
+            EGSGTOL 1.4
+            SGCPERFTOL 1.5
+            LINE_SEARCH 1.6
+            PERFP_DAMP 1.7
+            ''',
+             [NexusSolverParameter(date='01/01/2020',
+                                   maxnewtons=100,
+                                   maxbadnets=200,
+                                   cutfactor=0.1,
+                                   negmasscut=0.2,
+                                   dvollim=0.3,
+                                   dzlim=0.4,
+                                   dslim=0.5,
+                                   dplim=0.6,
+                                   dmoblim=0.7,
+                                   dsglim=0.8,
+                                   negflowlim=0.9,
+                                   negmassaqu=1.0,
+                                   krdamp=1.1,
+                                   volerr_prev=1.2,
+                                   sgctol=1.3,
+                                   egsgtol=1.4,
+                                   sgcperftol=1.5,
+                                   line_search=1.6,
+                                   perfp_damp=1.7,
+                                   ),
+              ]),
+            # TODO:
+            # TOLS keywords
+            # DCMAX_KEYWORDS
+            # Keywords in a line
         ],
         ids=['basic_test', 'more_DT_keywords', 'TIME_dependent_runcontrols', 'Solver_keywords',
              'Combined_solver_and_dt', 'Duplicate_keywords_in_a_given_timestep', 'All_solver_keywords',
-             'Implicit_Mbal_keywords', 'Impstab_keywords', 'GRIDSOLVER_keywords'])
+             'Implicit_Mbal_keywords', 'Impstab_keywords', 'GRIDSOLVER_keywords', 'Solo keywords'])
     def test_load_run_parameters(self, mocker, file_content, expected_result):
         # Arrange
 

@@ -165,6 +165,14 @@ class NexusSolverParameters(SolverParameters):
             if fo.check_token(token='PERFREV', line=line):
                 solver_parameter_for_timestep.perfrev = fo.get_expected_token_value('PERFREV', line,
                                                                                     file_list=self.file_content)
+
+            for keyword in ['MAXNEWTONS', 'MAXBADNETS', 'CUTFACTOR', 'NEGMASSCUT', 'DVOLLIM', 'DZLIM', 'DSLIM', 'DPLIM',
+                            'DMOBLIM', 'DSGLIM', 'NEGFLOWLIM', 'NEGMASSAQU', 'KRDAMP', 'VOLERR_PREV', 'SGCTOL',
+                            'EGSGTOL', 'SGCPERFTOL', 'LINE_SEARCH', 'PERFP_DAMP']:
+                if fo.check_token(token=keyword, line=line):
+                    solver_parameter_for_timestep = (
+                        self.__get_solo_token_values(keyword, line, solver_parameter_for_timestep))
+
         read_in_solver_parameter.append(solver_parameter_for_timestep)
 
         # finally assign the read in solver parameters to the class variable
@@ -236,5 +244,13 @@ class NexusSolverParameters(SolverParameters):
 
         value = fo.get_expected_token_value(grid_solver_method, line, file_list=self.file_content)
 
+        solver_parameter_for_timestep.__setattr__(attribute_value, type_assignment(value))
+        return solver_parameter_for_timestep
+
+    def __get_solo_token_values(self, keyword, line, solver_parameter_for_timestep):
+        keyword_mapping = NexusSolverParameter.solo_keyword_mapping()
+        attribute_value, type_assignment = keyword_mapping[keyword.upper()]
+
+        value = fo.get_expected_token_value(keyword, line, file_list=self.file_content)
         solver_parameter_for_timestep.__setattr__(attribute_value, type_assignment(value))
         return solver_parameter_for_timestep

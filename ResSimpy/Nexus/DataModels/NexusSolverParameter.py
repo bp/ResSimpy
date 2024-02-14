@@ -77,6 +77,26 @@ class NexusSolverParameter(SolverParameter):
 
     perfrev: str | None = None
 
+    maxnewtons: float | None = None
+    maxbadnets: float | None = None
+    cutfactor: float | None = None
+    negmasscut: float | None = None
+    dvollim: float | None = None
+    dzlim: float | None = None
+    dslim: float | None = None
+    dplim: float | None = None
+    dmoblim: float | None = None
+    dsglim: float | None = None
+    negflowlim: float | None = None
+    negmassaqu: float | None = None
+    krdamp: float | None = None
+    volerr_prev: float | None = None
+    sgctol: float | None = None
+    egsgtol: float | None = None
+    sgcperftol: float | None = None
+    line_search: float | None = None
+    perfp_damp: float | None = None
+
     def _write_out_solver_param_block(self):
         raise NotImplementedError
 
@@ -177,10 +197,37 @@ class NexusSolverParameter(SolverParameter):
         return gridsolver_keyword_map
 
     @staticmethod
+    def solo_keyword_mapping() -> dict[str, tuple[str, type]]:
+        # Solo keywords
+        solo_keyword_map: dict[str, tuple[str, type]] = {
+            'MAXNEWTONS': ('maxnewtons', float),
+            'MAXBADNETS': ('maxbadnets', float),
+            'CUTFACTOR': ('cutfactor', float),
+            'NEGMASSCUT': ('negmasscut', float),
+            'DVOLLIM': ('dvollim', float),
+            'DZLIM': ('dzlim', float),
+            'DSLIM': ('dslim', float),
+            'DPLIM': ('dplim', float),
+            'DMOBLIM': ('dmoblim', float),
+            'DSGLIM': ('dsglim', float),
+            'NEGFLOWLIM': ('negflowlim', float),
+            'NEGMASSAQU': ('negmassaqu', float),
+            'KRDAMP': ('krdamp', float),
+            'VOLERR_PREV': ('volerr_prev', float),
+            'SGCTOL': ('sgctol', float),
+            'EGSGTOL': ('egsgtol', float),
+            'SGCPERFTOL': ('sgcperftol', float),
+            'LINE_SEARCH': ('line_search', float),
+            'PERFP_DAMP': ('perfp_damp', float),
+        }
+        return solo_keyword_map
+
+    @staticmethod
     def keyword_mapping() -> dict[str, tuple[str, type]]:
         # DT keywords
         dt_keyword_map = NexusSolverParameter.dt_keyword_mapping()
         solver_keyword_map = NexusSolverParameter.solver_keyword_mapping()
+        gridsolver_keyword_map = NexusSolverParameter.gridsolver_keyword_mapping()
         # Method keyword
         misc_keyword_map = {
             'METHOD': ('timestepping_method', TimeSteppingMethod),
@@ -189,5 +236,5 @@ class NexusSolverParameter(SolverParameter):
         }
 
         # Combine the keyword maps
-        keyword_map = {**dt_keyword_map, **misc_keyword_map, **solver_keyword_map}
+        keyword_map = {**dt_keyword_map, **misc_keyword_map, **solver_keyword_map, **gridsolver_keyword_map}
         return keyword_map
