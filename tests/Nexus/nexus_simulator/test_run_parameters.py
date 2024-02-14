@@ -238,6 +238,8 @@ class TestNexusSolverParameters:
             PRESS_RED 0.1
             GRID_RED 0.2
             IMPLICIT_RED 0.3
+            
+            PERFREV ALLOW
             ''',
              [NexusSolverParameter(date='01/01/2020',
                                    gridsolver_implicit_coupling_setting='OFF',
@@ -246,6 +248,7 @@ class TestNexusSolverParameters:
                                    gridsolver_press_reduction=0.1,
                                    gridsolver_grid_reduction=0.2,
                                    gridsolver_implicit_reduction=0.3,
+                                   perfrev='ALLOW',
                                    ),
               ]),
 

@@ -75,6 +75,8 @@ class NexusSolverParameter(SolverParameter):
     gridsolver_implicit_reduction: float | None = None
     gridsolver_grid_reduction: float | None = None
 
+    perfrev: str | None = None
+
     def _write_out_solver_param_block(self):
         raise NotImplementedError
 
@@ -183,6 +185,7 @@ class NexusSolverParameter(SolverParameter):
         misc_keyword_map = {
             'METHOD': ('timestepping_method', TimeSteppingMethod),
             'IMPLICITMBAL': ('implicit_mbal', str),
+            'PERFREV': ('perfrev', str),
         }
 
         # Combine the keyword maps

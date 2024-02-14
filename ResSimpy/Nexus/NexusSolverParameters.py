@@ -162,7 +162,9 @@ class NexusSolverParameters(SolverParameters):
                 if next_value is not None and next_value in GRIDSOLVER_KEYWORDS:
                     solver_parameter_for_timestep = self.__get_gridsolver_token_values(next_value, line,
                                                                                        solver_parameter_for_timestep)
-
+            if fo.check_token(token='PERFREV', line=line):
+                solver_parameter_for_timestep.perfrev = fo.get_expected_token_value('PERFREV', line,
+                                                                                    file_list=self.file_content)
         read_in_solver_parameter.append(solver_parameter_for_timestep)
 
         # finally assign the read in solver parameters to the class variable
