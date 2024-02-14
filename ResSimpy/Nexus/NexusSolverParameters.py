@@ -6,7 +6,8 @@ from typing import Sequence
 from ResSimpy.Enums.TimeSteppingMethodEnum import TimeSteppingMethod
 from ResSimpy.Nexus.DataModels.NexusSolverParameter import NexusSolverParameter
 from ResSimpy.Nexus.NexusKeywords.runcontrol_keywords import (DT_KEYWORDS, SOLVER_SCOPE_KEYWORDS,
-                                                              SOLVER_SCOPED_KEYWORDS, SOLVER_KEYWORDS)
+                                                              SOLVER_SCOPED_KEYWORDS, SOLVER_KEYWORDS,
+                                                              IMPSTAB_KEYWORDS)
 from ResSimpy.SolverParameter import SolverParameter
 from ResSimpy.SolverParameters import SolverParameters
 from ResSimpy.FileOperations import file_operations as fo
@@ -135,6 +136,22 @@ class NexusSolverParameters(SolverParameters):
                 # set the timestepping_method in the object
                 solver_parameter_for_timestep.timestepping_method = timestep_method_enum
 
+            if fo.check_token(token='IMPLICITMBAL', line=line):
+                solver_parameter_for_timestep.implicit_mbal = fo.get_expected_token_value('IMPLICITMBAL', line,
+                                                                                          file_list=self.file_content)
+
+            if fo.check_token(token='IMPSTAB', line=line):
+                current_solver_param_token = 'IMPSTAB'
+                impstab_token_value = fo.get_token_value('IMPSTAB', line, file_list=self.file_content)
+                if impstab_token_value is not None:
+                    solver_parameter_for_timestep.impstab_on = impstab_token_value.upper() == 'ON'
+
+            if current_solver_param_token == 'IMPSTAB' and not fo.check_token(token='IMPSTAB', line=line):
+                next_value = fo.get_next_value(0, file_as_list=[line])
+                if next_value is not None and next_value in IMPSTAB_KEYWORDS:
+                    solver_parameter_for_timestep = self.__get_impstab_token_values(next_value, line,
+                                                                                    solver_parameter_for_timestep)
+
         read_in_solver_parameter.append(solver_parameter_for_timestep)
 
         # finally assign the read in solver parameters to the class variable
@@ -182,3 +199,19 @@ class NexusSolverParameters(SolverParameters):
         attribute_value, type_assignment = keyword_mapping[lookup_attribute_value]
 
         return attribute_value, type_assignment
+
+    def __get_impstab_token_values(self, token_value: str, line: str,
+                                   solver_parameter_for_timestep: NexusSolverParameter) -> NexusSolverParameter:
+        keyword_mapping = NexusSolverParameter.impstab_keyword_mapping()
+        attribute_value, type_assignment = keyword_mapping[token_value.upper()]
+
+        value = fo.get_expected_token_value(token_value, line, file_list=self.file_content)
+        if token_value == 'USEMASSCFL':
+            value = ''
+        elif token_value == 'COATS':
+            value = 'COATS'
+        elif token_value == 'PEACEMAN':
+            value = 'PEACEMAN'
+
+        solver_parameter_for_timestep.__setattr__(attribute_value, type_assignment(value))
+        return solver_parameter_for_timestep

@@ -29,6 +29,7 @@ class NexusSolverParameter(SolverParameter):
     dt_gcycle: float | None = None
     dt_vip_maxincrease: float | None = None
     dt_vip_maxincafcut: float | None = None
+
     solver_reservoir_cycle_length: float | None = None
     solver_reservoir_max_cycles: float | None = None
     solver_reservoir_globaltol: float | None = None
@@ -54,6 +55,17 @@ class NexusSolverParameter(SolverParameter):
     solver_pressure_coupling: str | None = None
     solver_pseudo_slack: bool | None = None
     solver_mumps_solver: str | None = None
+
+    implicit_mbal: str | None = None
+
+    impstab_on: bool = False  # Default is OFF
+    impstab_criteria: str | None = None
+    impstab_skip_mass_cfl: bool = False  # Default is USEMASSCFL
+    impstab_target_cfl: float | None = None
+    impstab_limit_cfl: float | None = None
+    impstab_no_cuts: float | None = None
+    impstab_max_cuts: float | None = None
+    impstab_skip_block_dcmax: float | None = None
 
     def _write_out_solver_param_block(self):
         raise NotImplementedError
@@ -123,15 +135,34 @@ class NexusSolverParameter(SolverParameter):
         return solver_keyword_map
 
     @staticmethod
+    def impstab_keyword_mapping() -> dict[str, tuple[str, type]]:
+        # IMPSTAB keywords
+        impstab_keyword_map = {
+            'OFF': ('impstab_on', bool),
+            'ON': ('impstab_on', bool),
+            'COATS': ('impstab_criteria', str),
+            'PEACEMAN': ('impstab_criteria', str),
+            'SKIPMASSCFL': ('impstab_skip_mass_cfl', bool),
+            'USEMASSCFL': ('impstab_skip_mass_cfl', bool),
+            'TARGETCFL': ('impstab_target_cfl', float),
+            'LIMITCFL': ('impstab_limit_cfl', float),
+            'NOCUTS': ('impstab_no_cuts', float),
+            'MAXCUTS': ('impstab_max_cuts', float),
+            'SKIPBLOCKDCMAX': ('impstab_skip_block_dcmax', float),
+        }
+        return impstab_keyword_map
+
+    @staticmethod
     def keyword_mapping() -> dict[str, tuple[str, type]]:
         # DT keywords
         dt_keyword_map = NexusSolverParameter.dt_keyword_mapping()
-
+        solver_keyword_map = NexusSolverParameter.solver_keyword_mapping()
         # Method keyword
-        method_keyword_map = {
-            'METHOD': ('timestepping_method', TimeSteppingMethod)
+        misc_keyword_map = {
+            'METHOD': ('timestepping_method', TimeSteppingMethod),
+            'IMPLICITMBAL': ('implicit_mbal', str),
         }
 
         # Combine the keyword maps
-        keyword_map = {**dt_keyword_map, **method_keyword_map}
+        keyword_map = {**dt_keyword_map, **misc_keyword_map, **solver_keyword_map}
         return keyword_map

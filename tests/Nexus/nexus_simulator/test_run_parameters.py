@@ -186,6 +186,7 @@ class TestNexusSolverParameters:
             SOLVER GLOBAL CYCLELENGTH 10
             MAXCYCLES 100
             DUAL_SOLVER OFF
+            
             PSEUDO_SLACK ON
             MUMPS_SOLVER ON
             PRESSURE_COUPLING GEA
@@ -203,9 +204,35 @@ class TestNexusSolverParameters:
                                    ),
               ]),
 
+            # Implicit Mbal keywords
+            ('''START 01/01/2020
+            IMPLICITMBAL NEGMASS''',
+             [NexusSolverParameter(date='01/01/2020',
+                                   implicit_mbal='NEGMASS',
+                                   ),
+              ]),
+            # Impstab keywords
+            ('''START 01/01/2020
+            IMPSTAB OFF
+            COATS
+            
+            SKIPMASSCFL
+            TARGETCFL 0.2
+            LIMITCFL 0.3
+            SKIPBLOCKDCMAX 20''',
+             [NexusSolverParameter(date='01/01/2020',
+                                   impstab_on=False,
+                                   impstab_criteria='COATS',
+                                   impstab_skip_mass_cfl=True,
+                                   impstab_target_cfl=0.2,
+                                   impstab_limit_cfl=0.3,
+                                   impstab_skip_block_dcmax=20,
+                                      ),
+                                   ]),
         ],
         ids=['basic_test', 'more_DT_keywords', 'TIME_dependent_runcontrols', 'Solver_keywords',
-             'Combined_solver_and_dt', 'Duplicate_keywords_in_a_given_timestep', 'All_solver_keywords'])
+             'Combined_solver_and_dt', 'Duplicate_keywords_in_a_given_timestep', 'All_solver_keywords',
+             'Implicit_Mbal_keywords', 'Impstab_keywords'])
     def test_load_run_parameters(self, mocker, file_content, expected_result):
         # Arrange
 
