@@ -5,7 +5,7 @@ writing the constraints to the Nexus deck. An instance of this is held within th
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Optional, Mapping, Sequence, cast
+from typing import TYPE_CHECKING, Optional, cast
 from uuid import UUID
 
 import pandas as pd
@@ -30,15 +30,15 @@ class NexusConstraints(Constraints):
     modifying and removing constraints from the NexusNetwork object. This class is also responsible for
     writing the constraints to the Nexus deck.
     """
-    _constraints: dict[str, list[Constraint]] = field(default_factory=dict)
+    _constraints: dict[str, list[NexusConstraint]] = field(default_factory=dict)
 
     def __init__(self, parent_network: NexusNetwork, model: NexusSimulator) -> None:
         self.__parent_network: NexusNetwork = parent_network
-        self.__constraints: dict[str, list[NexusConstraint]] = {}
+        self._constraints: dict[str, list[NexusConstraint]] = {}
         self.__model: NexusSimulator = model
 
     def get_all(self, object_name: Optional[str] = None, date: Optional[str] = None) -> \
-            Mapping[str, Sequence[NexusConstraint]]:
+            dict[str, list[NexusConstraint]]:
         """Get the constraints of the existing model with optional parameters to filter for name and date
         Args:
             object_name (Optional[str]): name of the connection, node or wellname to return. Defaults to None.
@@ -49,9 +49,9 @@ class NexusConstraints(Constraints):
         self.__parent_network.get_load_status()
 
         if object_name is None:
-            constraints_to_return = self.__constraints
+            constraints_to_return = self._constraints
         else:
-            constraints_to_return = {k: v for k, v in self.__constraints.items() if k == object_name}
+            constraints_to_return = {k: v for k, v in self._constraints.items() if k == object_name}
 
         if date is None:
             return constraints_to_return
@@ -70,8 +70,8 @@ class NexusConstraints(Constraints):
                 a change in constraint.
         """
         self.__parent_network.get_load_status()
-        list_constraints = []
-        for well_constraints in self.__constraints.values():
+        list_constraints: list[Constraint] = []
+        for well_constraints in self._constraints.values():
             list_constraints.extend(well_constraints)
         obj_to_dataframe(list_constraints)
 
@@ -99,11 +99,11 @@ class NexusConstraints(Constraints):
 
         Args:
         ----
-            additional_constraints (list[NexusConstraint]): additional constraints to add as a list
+            additional_constraints (Optional[dict[str, list[NexusConstraint]]]): additional constraints to add as a list
         """
         if additional_constraints is None:
             return
-        self.__constraints.update(additional_constraints)
+        self._constraints.update(additional_constraints)
 
     def find_by_properties(self, object_name: str, constraint_dict: dict[str, None | float | str | int]) -> \
             NexusConstraint:
@@ -159,7 +159,7 @@ class NexusConstraints(Constraints):
         surface_file = self.__find_which_surface_file_from_id(constraint_id)
         surface_file.remove_object_from_file_as_list([constraint_id])
         # remove from memory
-        for name, list_constraints in self.__constraints.items():
+        for name, list_constraints in self._constraints.items():
             for i, constraint in enumerate(list_constraints):
                 if constraint.id == constraint_id:
                     list_constraints.pop(i)

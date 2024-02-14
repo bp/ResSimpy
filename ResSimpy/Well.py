@@ -63,7 +63,7 @@ class Well(ABC):
         return dates_changed
 
     @property
-    def perforations(self) -> Sequence[Completion]:
+    def perforations(self) -> list[Completion]:
         """Returns a list of all of the perforations for the well."""
 
         activations = filter(lambda x: x.completion_is_perforation, self._completions)
