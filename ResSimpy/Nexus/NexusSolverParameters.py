@@ -160,13 +160,15 @@ class NexusSolverParameters(SolverParameters):
         if solver_token_value in SOLVER_SCOPE_KEYWORDS:
             property_set = fo.get_expected_token_value(solver_token_value, line, file_list=[line])
             attribute_value, type_assignment = self.__get_solver_attribute_value(solver_token_value, property_set)
-            value = fo.get_token_value(property_set, line, file_list=self.file_content)
+            value = fo.get_expected_token_value(property_set, line, file_list=self.file_content)
 
         else:
             attribute_value, type_assignment = keyword_mapping[solver_token_value]
             value = fo.get_expected_token_value(solver_token_value, line, file_list=self.file_content)
         if type_assignment == bool:
-            value = value.upper() == 'ON'
+            # set to True if the value is 'ON' and False if the value is 'OFF' (the bool conversion happens
+            # by type_assignment)
+            value = '' if value.upper() == 'OFF' else value
         solver_parameter_for_timestep.__setattr__(attribute_value, type_assignment(value))
         return solver_parameter_for_timestep
 
