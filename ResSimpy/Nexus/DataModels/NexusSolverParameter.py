@@ -12,7 +12,7 @@ class NexusSolverParameter(SolverParameter):
     Nexus is time-dependent for the solver parameters.
     """
     date: str
-    timestepping_method: TimeSteppingMethod = TimeSteppingMethod.impes
+    timestepping_method: TimeSteppingMethod | None = None
     dt_auto: float | None = None
     dt_min: float | None = None
     dt_max: float | None = None

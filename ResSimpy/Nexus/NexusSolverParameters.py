@@ -40,7 +40,7 @@ class NexusSolverParameters(SolverParameters):
         read_in_solver_parameter: list[NexusSolverParameter] = []
         # read in the solver parameters from the runcontrol file
 
-        timestep_method_enum = TimeSteppingMethod.impes
+        timestep_method_enum = None
         current_solver_param_token = None
         current_date = self.start_date
         solver_parameter_for_timestep = NexusSolverParameter(date=self.start_date)
@@ -50,8 +50,7 @@ class NexusSolverParameters(SolverParameters):
             # maybe put a for loop in here for all the potential starting tokens?
             if fo.check_token(token='TIME', line=line):
                 # append the existing solver parameter to the list
-                if solver_parameter_for_timestep != NexusSolverParameter(date=current_date,
-                                                                         timestepping_method=timestep_method_enum):
+                if solver_parameter_for_timestep != NexusSolverParameter(date=current_date):
                     # prevent blank solver parameters from being added to the list
                     read_in_solver_parameter.append(solver_parameter_for_timestep)
                 # create a new solver parameter object for the new time block
@@ -133,9 +132,8 @@ class NexusSolverParameters(SolverParameters):
                     timestep_method_enum = TimeSteppingMethod.implicit
                 else:
                     timestep_method_enum = TimeSteppingMethod.impes
-
-            # set the timestepping_method in the object
-            solver_parameter_for_timestep.timestepping_method = timestep_method_enum
+                # set the timestepping_method in the object
+                solver_parameter_for_timestep.timestepping_method = timestep_method_enum
 
         read_in_solver_parameter.append(solver_parameter_for_timestep)
 
