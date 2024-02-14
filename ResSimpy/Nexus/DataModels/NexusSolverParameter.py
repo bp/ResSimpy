@@ -67,6 +67,14 @@ class NexusSolverParameter(SolverParameter):
     impstab_max_cuts: float | None = None
     impstab_skip_block_dcmax: float | None = None
 
+    gridsolver_implicit_coupling_setting: str | None = None
+    gridsolver_impes_coupling_setting: str | None = None
+    gridsolver_implicit_precon_setting: str | None = None
+    gridsolver_cpr_pressure_equation: str | None = None
+    gridsolver_press_reduction: float | None = None
+    gridsolver_implicit_reduction: float | None = None
+    gridsolver_grid_reduction: float | None = None
+
     def _write_out_solver_param_block(self):
         raise NotImplementedError
 
@@ -151,6 +159,20 @@ class NexusSolverParameter(SolverParameter):
             'SKIPBLOCKDCMAX': ('impstab_skip_block_dcmax', float),
         }
         return impstab_keyword_map
+
+    @staticmethod
+    def gridsolver_keyword_mapping() -> dict[str, tuple[str, type]]:
+        # GRIDSOLVER keywords
+        gridsolver_keyword_map = {
+            'IMPLICIT_COUPLING': ('gridsolver_implicit_coupling_setting', str),
+            'IMPES_COUPLING': ('gridsolver_impes_coupling_setting', str),
+            'IMPLICIT_PRECON': ('gridsolver_implicit_precon_setting', str),
+            'CPR_PRESSURE_EQUATION': ('gridsolver_cpr_pressure_equation', str),
+            'PRESS_RED': ('gridsolver_press_reduction', float),
+            'IMPLICIT_RED': ('gridsolver_implicit_reduction', float),
+            'GRID_RED': ('gridsolver_grid_reduction', float),
+        }
+        return gridsolver_keyword_map
 
     @staticmethod
     def keyword_mapping() -> dict[str, tuple[str, type]]:

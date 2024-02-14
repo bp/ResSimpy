@@ -7,7 +7,7 @@ from ResSimpy.Enums.TimeSteppingMethodEnum import TimeSteppingMethod
 from ResSimpy.Nexus.DataModels.NexusSolverParameter import NexusSolverParameter
 from ResSimpy.Nexus.NexusKeywords.runcontrol_keywords import (DT_KEYWORDS, SOLVER_SCOPE_KEYWORDS,
                                                               SOLVER_SCOPED_KEYWORDS, SOLVER_KEYWORDS,
-                                                              IMPSTAB_KEYWORDS)
+                                                              IMPSTAB_KEYWORDS, GRIDSOLVER_KEYWORDS)
 from ResSimpy.SolverParameter import SolverParameter
 from ResSimpy.SolverParameters import SolverParameters
 from ResSimpy.FileOperations import file_operations as fo
@@ -152,6 +152,17 @@ class NexusSolverParameters(SolverParameters):
                     solver_parameter_for_timestep = self.__get_impstab_token_values(next_value, line,
                                                                                     solver_parameter_for_timestep)
 
+            if fo.check_token(token='GRIDSOLVER', line=line):
+                current_solver_param_token = 'GRIDSOLVER'
+                grid_solver_method = fo.get_expected_token_value('GRIDSOLVER', line, file_list=[line])
+                solver_parameter_for_timestep = self.__get_gridsolver_token_values(grid_solver_method,
+                                                                                   line, solver_parameter_for_timestep)
+            if current_solver_param_token == 'GRIDSOLVER' and not fo.check_token(token='GRIDSOLVER', line=line):
+                next_value = fo.get_next_value(0, file_as_list=[line])
+                if next_value is not None and next_value in GRIDSOLVER_KEYWORDS:
+                    solver_parameter_for_timestep = self.__get_gridsolver_token_values(next_value, line,
+                                                                                       solver_parameter_for_timestep)
+
         read_in_solver_parameter.append(solver_parameter_for_timestep)
 
         # finally assign the read in solver parameters to the class variable
@@ -212,6 +223,16 @@ class NexusSolverParameters(SolverParameters):
             value = 'COATS'
         elif token_value == 'PEACEMAN':
             value = 'PEACEMAN'
+
+        solver_parameter_for_timestep.__setattr__(attribute_value, type_assignment(value))
+        return solver_parameter_for_timestep
+
+    def __get_gridsolver_token_values(self, grid_solver_method: str, line: str,
+                                      solver_parameter_for_timestep: NexusSolverParameter) -> NexusSolverParameter:
+        keyword_mapping = NexusSolverParameter.gridsolver_keyword_mapping()
+        attribute_value, type_assignment = keyword_mapping[grid_solver_method.upper()]
+
+        value = fo.get_expected_token_value(grid_solver_method, line, file_list=self.file_content)
 
         solver_parameter_for_timestep.__setattr__(attribute_value, type_assignment(value))
         return solver_parameter_for_timestep

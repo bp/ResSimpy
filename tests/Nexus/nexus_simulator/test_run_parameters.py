@@ -229,10 +229,31 @@ class TestNexusSolverParameters:
                                    impstab_skip_block_dcmax=20,
                                       ),
                                    ]),
+
+            # GRIDSOLVER keywords
+            ('''START 01/01/2020
+            GRIDSOLVER IMPLICIT_COUPLING OFF
+            IMPES_COUPLING ON
+            CPR_PRESSURE_EQUATION OFF
+            PRESS_RED 0.1
+            GRID_RED 0.2
+            IMPLICIT_RED 0.3
+            ''',
+             [NexusSolverParameter(date='01/01/2020',
+                                   gridsolver_implicit_coupling_setting='OFF',
+                                   gridsolver_impes_coupling_setting='ON',
+                                   gridsolver_cpr_pressure_equation='OFF',
+                                   gridsolver_press_reduction=0.1,
+                                   gridsolver_grid_reduction=0.2,
+                                   gridsolver_implicit_reduction=0.3,
+                                   ),
+              ]),
+
+            #
         ],
         ids=['basic_test', 'more_DT_keywords', 'TIME_dependent_runcontrols', 'Solver_keywords',
              'Combined_solver_and_dt', 'Duplicate_keywords_in_a_given_timestep', 'All_solver_keywords',
-             'Implicit_Mbal_keywords', 'Impstab_keywords'])
+             'Implicit_Mbal_keywords', 'Impstab_keywords', 'GRIDSOLVER_keywords'])
     def test_load_run_parameters(self, mocker, file_content, expected_result):
         # Arrange
 
