@@ -52,7 +52,7 @@ class NexusSolverParameter(SolverParameter):
     solver_system_reduced: bool = True  # Default is ON
     solver_nbad: float | None = None
     solver_pressure_coupling: str | None = None
-    solver_pseudo_slack: str | None = None
+    solver_pseudo_slack: bool | None = None
     solver_mumps_solver: str | None = None
 
     def _write_out_solver_param_block(self):
@@ -117,7 +117,7 @@ class NexusSolverParameter(SolverParameter):
             'PRESSURE_COUPLING': ('solver_pressure_coupling', str),
             'KSUB_METHOD': ('solver_ksub_method', str),
             'FACILITIES': ('solver_facilities', str),
-            'PSEUDO_SLACK': ('solver_pseudo_slack', str),
+            'PSEUDO_SLACK': ('solver_pseudo_slack', bool),
             'MUMPS_SOLVER': ('solver_mumps_solver', str),
         }
         return solver_keyword_map

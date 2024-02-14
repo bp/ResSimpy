@@ -165,7 +165,8 @@ class NexusSolverParameters(SolverParameters):
         else:
             attribute_value, type_assignment = keyword_mapping[solver_token_value]
             value = fo.get_expected_token_value(solver_token_value, line, file_list=self.file_content)
-
+        if type_assignment == bool:
+            value = value.upper() == 'ON'
         solver_parameter_for_timestep.__setattr__(attribute_value, type_assignment(value))
         return solver_parameter_for_timestep
 
