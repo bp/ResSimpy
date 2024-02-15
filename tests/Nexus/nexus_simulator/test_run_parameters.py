@@ -328,8 +328,6 @@ class TestNexusSolverParameters:
                                       volrpt_all=0.3,
                                    volrpt_impes=0.4,
                                       ),
-                                   
-                                   ),
               ]),
 
             # Keywords in a line
