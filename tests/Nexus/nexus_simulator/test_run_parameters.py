@@ -316,10 +316,19 @@ class TestNexusSolverParameters:
             # DCMAX_KEYWORDS
             ('''START 01/01/2020
             DCMAX IMPES 0.1
-                IMPLICIT 0.2''',
+                IMPLICIT 0.2
+            VOLRPT ALL 0.3
+            IMPEs 0.4
+            
+            ''',
+
              [NexusSolverParameter(date='01/01/2020',
                                    dcmax_impes=0.1,
                                    dcmax_implicit=0.2,
+                                      volrpt_all=0.3,
+                                   volrpt_impes=0.4,
+                                      ),
+                                   
                                    ),
               ]),
 

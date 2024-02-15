@@ -305,7 +305,7 @@ class NexusSolverParameter(SolverParameter):
         return keyword_map
 
     @staticmethod
-    def get_max_change_attribute_name(keyword: str, value: str) -> str:
+    def get_max_change_attribute_name(keyword: str, value: str) -> tuple[str, type]:
         """Keywords of the form 'DCRPT, DCMAX, D*_MAX_VIP, VOLRPT' have a different attribute name for the value.
 
         Args:
@@ -313,7 +313,7 @@ class NexusSolverParameter(SolverParameter):
             value (str): the value following the keyword to get the attribute for e.g. 'IMPES', 'IMPLICIT', 'ALL'
 
         Returns:
-            str: The attribute name for the value
+            str, type: The attribute name for the value, the type of the value
         """
         attribute = keyword.lower()
-        return attribute+'_'+value.lower()
+        return attribute+'_'+value.lower(), float

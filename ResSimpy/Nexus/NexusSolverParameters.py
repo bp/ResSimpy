@@ -8,7 +8,7 @@ from ResSimpy.Nexus.DataModels.NexusSolverParameter import NexusSolverParameter
 from ResSimpy.Nexus.NexusKeywords.runcontrol_keywords import (DT_KEYWORDS, SOLVER_SCOPE_KEYWORDS,
                                                               SOLVER_SCOPED_KEYWORDS, SOLVER_KEYWORDS,
                                                               IMPSTAB_KEYWORDS, GRIDSOLVER_KEYWORDS, SOLO_KEYWORDS,
-                                                              TOLS_KEYWORDS, DCMAX_KEYWORDS)
+                                                              TOLS_KEYWORDS, DCMAX_KEYWORDS, MAX_CHANGE_KEYWORDS)
 from ResSimpy.SolverParameter import SolverParameter
 from ResSimpy.SolverParameters import SolverParameters
 from ResSimpy.FileOperations import file_operations as fo
@@ -51,15 +51,9 @@ class NexusSolverParameters(SolverParameters):
             'DT': DT_KEYWORDS,
             'GRIDSOLVER': GRIDSOLVER_KEYWORDS,
             'TOLS': TOLS_KEYWORDS,
-            'DCMAX': DCMAX_KEYWORDS,
-            'DCRPT': DCMAX_KEYWORDS,
-            'VOLRPT': DCMAX_KEYWORDS,
-            'DZMAX_VIP': DCMAX_KEYWORDS,
-            'DPMAX_VIP': DCMAX_KEYWORDS,
-            'DSMAX_VIP': DCMAX_KEYWORDS,
-            'DVMAX_VIP': DCMAX_KEYWORDS,
-            'DCRPT_VIP': DCMAX_KEYWORDS,
         }
+        solver_parameters_that_work_with_generic_function.update({key: DCMAX_KEYWORDS for key in MAX_CHANGE_KEYWORDS})
+
         for line in self.file_content:
             # maybe put a for loop in here for all the potential starting tokens?
             if fo.check_token(token='TIME', line=line):
@@ -237,9 +231,14 @@ class NexusSolverParameters(SolverParameters):
                                           ) -> NexusSolverParameter:
         """Get the values for the generic KEYWORD VALUE format when following a token like DT, TOLS, GRIDSOLVER, etc."""
         # get the keyword mapping for the current solver parameter section
-        keyword_mapping = self.__get_keyword_mapping_for_current_solver_param(current_solver_param_token)
-        # get the ressimpy attribute name
-        attribute_value, type_assignment = keyword_mapping[next_token.upper()]
+        if current_solver_param_token in MAX_CHANGE_KEYWORDS:
+            attribute_value, type_assignment = (
+                NexusSolverParameter.get_max_change_attribute_name(keyword=current_solver_param_token,
+                                                                   value=next_token))
+        else:
+            keyword_mapping = self.__get_keyword_mapping_for_current_solver_param(current_solver_param_token)
+            # get the ressimpy attribute name
+            attribute_value, type_assignment = keyword_mapping[next_token.upper()]
 
         value = fo.get_expected_token_value(next_token, line, file_list=self.file_content)
         # add the value to the solver_parameter_for_timestep object
