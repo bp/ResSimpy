@@ -53,7 +53,6 @@ class NexusSolverParameters(SolverParameters):
         read_in_solver_parameter: list[NexusSolverParameter] = []
         # read in the solver parameters from the runcontrol file
 
-        timestep_method_enum = None
         current_solver_param_token = None
         current_date = self.start_date
         solver_parameter_for_timestep = NexusSolverParameter(date=self.start_date)
