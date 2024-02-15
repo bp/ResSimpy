@@ -158,7 +158,7 @@ class NexusSolverParameters(SolverParameters):
                     not fo.check_token(token=current_solver_param_token, line=line)):
                 next_value = fo.get_next_value(0, file_as_list=[line])
                 valid_keywords = solver_parameters_that_work_with_generic_function[current_solver_param_token]
-                if next_value is not None and next_value in valid_keywords:
+                if next_value is not None and next_value.upper() in valid_keywords:
                     solver_parameter_for_timestep = (
                         self.__get_generic_solver_token_values(next_value, line, solver_parameter_for_timestep,
                                                                current_solver_param_token))
