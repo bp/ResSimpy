@@ -107,7 +107,33 @@ class NexusSolverParameter(SolverParameter):
     dcmax_impes: float | None = None
     dcmax_all: float | None = None
 
+    dcrpt_implicit: float | None = None
+    dcrpt_impes: float | None = None
+    dcrpt_all: float | None = None
 
+    volrpt_implicit: float | None = None
+    volrpt_impes: float | None = None
+    volrpt_all: float | None = None
+
+    dcrpt_vip_implicit: float | None = None
+    dcrpt_vip_impes: float | None = None
+    dcrpt_vip_all: float | None = None
+
+    dzmax_vip_implicit: float | None = None
+    dzmax_vip_impes: float | None = None
+    dzmax_vip_all: float | None = None
+
+    dpmax_vip_implicit: float | None = None
+    dpmax_vip_impes: float | None = None
+    dpmax_vip_all: float | None = None
+
+    dvmax_vip_implicit: float | None = None
+    dvmax_vip_impes: float | None = None
+    dvmax_vip_all: float | None = None
+
+    dsmax_vip_implicit: float | None = None
+    dsmax_vip_impes: float | None = None
+    dsmax_vip_all: float | None = None
 
     def _write_out_solver_param_block(self):
         raise NotImplementedError
@@ -277,3 +303,17 @@ class NexusSolverParameter(SolverParameter):
         keyword_map = {**dt_keyword_map, **misc_keyword_map, **solver_keyword_map, **gridsolver_keyword_map,
                        **tols_keyword_map, **impstab_keyword_map, **solo_keyword_map}
         return keyword_map
+
+    @staticmethod
+    def get_max_change_attribute_name(keyword: str, value: str) -> str:
+        """Keywords of the form 'DCRPT, DCMAX, D*_MAX_VIP, VOLRPT' have a different attribute name for the value.
+
+        Args:
+            keyword (str): The keyword to get the attribute for
+            value (str): the value following the keyword to get the attribute for e.g. 'IMPES', 'IMPLICIT', 'ALL'
+
+        Returns:
+            str: The attribute name for the value
+        """
+        attribute = keyword.lower()
+        return attribute+'_'+value.lower()
