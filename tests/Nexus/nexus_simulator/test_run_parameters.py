@@ -314,12 +314,21 @@ class TestNexusSolverParameters:
                                    ),
               ]),
             # DCMAX_KEYWORDS
+            ('''START 01/01/2020
+            DCMAX IMPES 0.1
+                IMPLICIT 0.2''',
+             [NexusSolverParameter(date='01/01/2020',
+                                   dcmax_impes=0.1,
+                                   dcmax_implicit=0.2,
+                                   ),
+              ]),
+
             # Keywords in a line
         ],
         ids=['basic_test', 'more_DT_keywords', 'TIME_dependent_runcontrols', 'Solver_keywords',
              'Combined_solver_and_dt', 'Duplicate_keywords_in_a_given_timestep', 'All_solver_keywords',
              'Implicit_Mbal_keywords', 'Impstab_keywords', 'GRIDSOLVER_keywords', 'Solo keywords',
-             'TOLS_keywords', ])  # 'DCMAX_KEYWORDS', 'Keywords_in_a_line'])
+             'TOLS_keywords', 'DCMAX_KEYWORDS', ])  # 'Keywords_in_a_line'])
     def test_load_run_parameters(self, mocker, file_content, expected_result):
         # Arrange
 

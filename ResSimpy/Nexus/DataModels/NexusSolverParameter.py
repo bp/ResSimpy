@@ -103,6 +103,11 @@ class NexusSolverParameter(SolverParameter):
     tols_wellmbal: float | None = None
     tols_perf: float | None = None
 
+    dcmax_implicit: float | None = None
+    dcmax_impes: float | None = None
+    dcmax_all: float | None = None
+
+
 
     def _write_out_solver_param_block(self):
         raise NotImplementedError
@@ -240,6 +245,16 @@ class NexusSolverParameter(SolverParameter):
             'PERF': ('tols_perf', float),
         }
         return tols_keyword_map
+
+    @staticmethod
+    def dcmax_keyword_mapping() -> dict[str, tuple[str, type]]:
+        # DCMAX keywords
+        dcmax_keyword_map: dict[str, tuple[str, type]] = {
+            'IMPES': ('dcmax_impes', float),
+            'IMPLICIT': ('dcmax_implicit', float),
+            'ALL': ('dcmax_all', float),
+        }
+        return dcmax_keyword_map
 
     @staticmethod
     def keyword_mapping() -> dict[str, tuple[str, type]]:

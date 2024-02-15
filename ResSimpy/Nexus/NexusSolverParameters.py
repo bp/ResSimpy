@@ -50,6 +50,7 @@ class NexusSolverParameters(SolverParameters):
         solver_parameters_that_work_with_generic_function = {'DT': DT_KEYWORDS,
                                                              'GRIDSOLVER': GRIDSOLVER_KEYWORDS,
                                                              'TOLS': TOLS_KEYWORDS,
+                                                             'DCMAX': ['IMPES', 'IMPLICIT', 'ALL'],
                                                              }
         for line in self.file_content:
             # maybe put a for loop in here for all the potential starting tokens?
@@ -226,24 +227,27 @@ class NexusSolverParameters(SolverParameters):
                                           solver_parameter_for_timestep: NexusSolverParameter,
                                           current_solver_param_token: str
                                           ) -> NexusSolverParameter:
-
+        """Get the values for the generic KEYWORD VALUE format when following a token like DT, TOLS, GRIDSOLVER, etc."""
         # get the keyword mapping for the current solver parameter section
         keyword_mapping = self.__get_keyword_mapping_for_current_solver_param(current_solver_param_token)
         # get the ressimpy attribute name
         attribute_value, type_assignment = keyword_mapping[next_token.upper()]
 
         value = fo.get_expected_token_value(next_token, line, file_list=self.file_content)
+        # add the value to the solver_parameter_for_timestep object
         solver_parameter_for_timestep.__setattr__(attribute_value, type_assignment(value))
         return solver_parameter_for_timestep
 
     def __get_keyword_mapping_for_current_solver_param(self, current_solver_param_token: str) -> (
             dict)[str, tuple[str, type]]:
+        """Get the keyword mapping for the current solver parameter section."""
         solver_param_to_keyword_mapping = {'DT': NexusSolverParameter.dt_keyword_mapping(),
                                            'SOLVER': NexusSolverParameter.solver_keyword_mapping(),
                                            'IMPSTAB': NexusSolverParameter.impstab_keyword_mapping(),
                                            'GRIDSOLVER': NexusSolverParameter.gridsolver_keyword_mapping(),
                                            'SOLO': NexusSolverParameter.solo_keyword_mapping(),
                                            'TOLS': NexusSolverParameter.tols_keyword_mapping(),
+                                           'DCMAX': NexusSolverParameter.dcmax_keyword_mapping(),
                                            }
         keyword_mapping = solver_param_to_keyword_mapping[current_solver_param_token]
         return keyword_mapping
