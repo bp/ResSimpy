@@ -298,12 +298,28 @@ class TestNexusSolverParameters:
               ]),
             # TODO:
             # TOLS keywords
+            ('''START 01/01/2020
+            TOLS VOLCON 0.1
+            MASS 0.2
+            TARGET 0.3
+            WELLMBAL 0.4
+            PERF 0.5
+            ''',
+             [NexusSolverParameter(date='01/01/2020',
+                                   tols_volcon=0.1,
+                                   tols_mass=0.2,
+                                   tols_target=0.3,
+                                   tols_wellmbal=0.4,
+                                   tols_perf=0.5,
+                                   ),
+              ]),
             # DCMAX_KEYWORDS
             # Keywords in a line
         ],
         ids=['basic_test', 'more_DT_keywords', 'TIME_dependent_runcontrols', 'Solver_keywords',
              'Combined_solver_and_dt', 'Duplicate_keywords_in_a_given_timestep', 'All_solver_keywords',
-             'Implicit_Mbal_keywords', 'Impstab_keywords', 'GRIDSOLVER_keywords', 'Solo keywords'])
+             'Implicit_Mbal_keywords', 'Impstab_keywords', 'GRIDSOLVER_keywords', 'Solo keywords',
+             'TOLS_keywords', ])  # 'DCMAX_KEYWORDS', 'Keywords_in_a_line'])
     def test_load_run_parameters(self, mocker, file_content, expected_result):
         # Arrange
 

@@ -7,7 +7,8 @@ from ResSimpy.Enums.TimeSteppingMethodEnum import TimeSteppingMethod
 from ResSimpy.Nexus.DataModels.NexusSolverParameter import NexusSolverParameter
 from ResSimpy.Nexus.NexusKeywords.runcontrol_keywords import (DT_KEYWORDS, SOLVER_SCOPE_KEYWORDS,
                                                               SOLVER_SCOPED_KEYWORDS, SOLVER_KEYWORDS,
-                                                              IMPSTAB_KEYWORDS, GRIDSOLVER_KEYWORDS)
+                                                              IMPSTAB_KEYWORDS, GRIDSOLVER_KEYWORDS, SOLO_KEYWORDS,
+                                                              TOLS_KEYWORDS)
 from ResSimpy.SolverParameter import SolverParameter
 from ResSimpy.SolverParameters import SolverParameters
 from ResSimpy.FileOperations import file_operations as fo
@@ -46,7 +47,10 @@ class NexusSolverParameters(SolverParameters):
         current_date = self.start_date
         solver_parameter_for_timestep = NexusSolverParameter(date=self.start_date)
         current_solver_scope = 'ALL'
-
+        solver_parameters_that_work_with_generic_function = {'DT': DT_KEYWORDS,
+                                                             'GRIDSOLVER': GRIDSOLVER_KEYWORDS,
+                                                             'TOLS': TOLS_KEYWORDS,
+                                                             }
         for line in self.file_content:
             # maybe put a for loop in here for all the potential starting tokens?
             if fo.check_token(token='TIME', line=line):
@@ -59,19 +63,6 @@ class NexusSolverParameters(SolverParameters):
                 solver_parameter_for_timestep = NexusSolverParameter(date=current_date)
                 # reset the current_solver_param_token
                 current_solver_param_token = None
-
-            # see if we get any DT blocks
-            if fo.check_token(token='DT', line=line):
-                current_solver_param_token = 'DT'
-                dt_token_value = fo.get_expected_token_value('DT', line, file_list=self.file_content)
-                solver_parameter_for_timestep = (
-                    self.__get_dt_token_values(dt_token_value, line, solver_parameter_for_timestep))
-
-            if current_solver_param_token == 'DT' and not fo.check_token(token='DT', line=line):
-                next_value = fo.get_next_value(0, file_as_list=[line])
-                if next_value is not None and next_value in DT_KEYWORDS:
-                    solver_parameter_for_timestep = (self.__get_dt_token_values(next_value, line,
-                                                                                solver_parameter_for_timestep))
 
             # see if we get any SOLVER blocks
             if fo.check_token(token='SOLVER', line=line):
@@ -152,41 +143,35 @@ class NexusSolverParameters(SolverParameters):
                     solver_parameter_for_timestep = self.__get_impstab_token_values(next_value, line,
                                                                                     solver_parameter_for_timestep)
 
-            if fo.check_token(token='GRIDSOLVER', line=line):
-                current_solver_param_token = 'GRIDSOLVER'
-                grid_solver_method = fo.get_expected_token_value('GRIDSOLVER', line, file_list=[line])
-                solver_parameter_for_timestep = self.__get_gridsolver_token_values(grid_solver_method,
-                                                                                   line, solver_parameter_for_timestep)
-            if current_solver_param_token == 'GRIDSOLVER' and not fo.check_token(token='GRIDSOLVER', line=line):
+            for possible_solver_param_tokens in solver_parameters_that_work_with_generic_function:
+                if fo.check_token(token=possible_solver_param_tokens, line=line):
+                    current_solver_param_token = possible_solver_param_tokens
+                    grid_solver_method = fo.get_expected_token_value(current_solver_param_token, line, file_list=[line])
+                    solver_parameter_for_timestep = (
+                        self.__get_generic_solver_token_values(grid_solver_method, line, solver_parameter_for_timestep,
+                                                               current_solver_param_token))
+
+            if (current_solver_param_token in solver_parameters_that_work_with_generic_function and
+                    not fo.check_token(token=current_solver_param_token, line=line)):
                 next_value = fo.get_next_value(0, file_as_list=[line])
-                if next_value is not None and next_value in GRIDSOLVER_KEYWORDS:
-                    solver_parameter_for_timestep = self.__get_gridsolver_token_values(next_value, line,
-                                                                                       solver_parameter_for_timestep)
+                valid_keywords = solver_parameters_that_work_with_generic_function[current_solver_param_token]
+                if next_value is not None and next_value in valid_keywords:
+                    solver_parameter_for_timestep = (
+                        self.__get_generic_solver_token_values(next_value, line, solver_parameter_for_timestep,
+                                                               current_solver_param_token))
             if fo.check_token(token='PERFREV', line=line):
                 solver_parameter_for_timestep.perfrev = fo.get_expected_token_value('PERFREV', line,
                                                                                     file_list=self.file_content)
 
-            for keyword in ['MAXNEWTONS', 'MAXBADNETS', 'CUTFACTOR', 'NEGMASSCUT', 'DVOLLIM', 'DZLIM', 'DSLIM', 'DPLIM',
-                            'DMOBLIM', 'DSGLIM', 'NEGFLOWLIM', 'NEGMASSAQU', 'KRDAMP', 'VOLERR_PREV', 'SGCTOL',
-                            'EGSGTOL', 'SGCPERFTOL', 'LINE_SEARCH', 'PERFP_DAMP']:
+            for keyword in SOLO_KEYWORDS:
                 if fo.check_token(token=keyword, line=line):
-                    solver_parameter_for_timestep = (
-                        self.__get_solo_token_values(keyword, line, solver_parameter_for_timestep))
+                    self.__get_generic_solver_token_values(keyword, line, solver_parameter_for_timestep,
+                                                           'SOLO')
 
         read_in_solver_parameter.append(solver_parameter_for_timestep)
 
         # finally assign the read in solver parameters to the class variable
         self.__solver_parameters = read_in_solver_parameter
-
-    def __get_dt_token_values(self, dt_token_value: str, line: str,
-                              solver_parameter_for_timestep: NexusSolverParameter) -> NexusSolverParameter:
-        keyword_mapping = NexusSolverParameter.dt_keyword_mapping()
-        attribute_value, type_assignment = keyword_mapping[dt_token_value.upper()]
-
-        value = fo.get_expected_token_value(dt_token_value, line, file_list=self.file_content)
-
-        solver_parameter_for_timestep.__setattr__(attribute_value, type_assignment(value))
-        return solver_parameter_for_timestep
 
     def __get_solver_token_values(self, solver_token_value: str, line: str,
                                   solver_parameter_for_timestep: NexusSolverParameter) -> NexusSolverParameter:
@@ -237,20 +222,28 @@ class NexusSolverParameters(SolverParameters):
         solver_parameter_for_timestep.__setattr__(attribute_value, type_assignment(value))
         return solver_parameter_for_timestep
 
-    def __get_gridsolver_token_values(self, grid_solver_method: str, line: str,
-                                      solver_parameter_for_timestep: NexusSolverParameter) -> NexusSolverParameter:
-        keyword_mapping = NexusSolverParameter.gridsolver_keyword_mapping()
-        attribute_value, type_assignment = keyword_mapping[grid_solver_method.upper()]
+    def __get_generic_solver_token_values(self, next_token: str, line: str,
+                                          solver_parameter_for_timestep: NexusSolverParameter,
+                                          current_solver_param_token: str
+                                          ) -> NexusSolverParameter:
 
-        value = fo.get_expected_token_value(grid_solver_method, line, file_list=self.file_content)
+        # get the keyword mapping for the current solver parameter section
+        keyword_mapping = self.__get_keyword_mapping_for_current_solver_param(current_solver_param_token)
+        # get the ressimpy attribute name
+        attribute_value, type_assignment = keyword_mapping[next_token.upper()]
 
+        value = fo.get_expected_token_value(next_token, line, file_list=self.file_content)
         solver_parameter_for_timestep.__setattr__(attribute_value, type_assignment(value))
         return solver_parameter_for_timestep
 
-    def __get_solo_token_values(self, keyword, line, solver_parameter_for_timestep):
-        keyword_mapping = NexusSolverParameter.solo_keyword_mapping()
-        attribute_value, type_assignment = keyword_mapping[keyword.upper()]
-
-        value = fo.get_expected_token_value(keyword, line, file_list=self.file_content)
-        solver_parameter_for_timestep.__setattr__(attribute_value, type_assignment(value))
-        return solver_parameter_for_timestep
+    def __get_keyword_mapping_for_current_solver_param(self, current_solver_param_token: str) -> (
+            dict)[str, tuple[str, type]]:
+        solver_param_to_keyword_mapping = {'DT': NexusSolverParameter.dt_keyword_mapping(),
+                                           'SOLVER': NexusSolverParameter.solver_keyword_mapping(),
+                                           'IMPSTAB': NexusSolverParameter.impstab_keyword_mapping(),
+                                           'GRIDSOLVER': NexusSolverParameter.gridsolver_keyword_mapping(),
+                                           'SOLO': NexusSolverParameter.solo_keyword_mapping(),
+                                           'TOLS': NexusSolverParameter.tols_keyword_mapping(),
+                                           }
+        keyword_mapping = solver_param_to_keyword_mapping[current_solver_param_token]
+        return keyword_mapping

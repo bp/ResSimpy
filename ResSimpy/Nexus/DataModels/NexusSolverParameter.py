@@ -97,6 +97,13 @@ class NexusSolverParameter(SolverParameter):
     line_search: float | None = None
     perfp_damp: float | None = None
 
+    tols_volcon: float | None = None
+    tols_mass: float | None = None
+    tols_target: float | None = None
+    tols_wellmbal: float | None = None
+    tols_perf: float | None = None
+
+
     def _write_out_solver_param_block(self):
         raise NotImplementedError
 
@@ -223,11 +230,27 @@ class NexusSolverParameter(SolverParameter):
         return solo_keyword_map
 
     @staticmethod
+    def tols_keyword_mapping() -> dict[str, tuple[str, type]]:
+        # TOLS keywords
+        tols_keyword_map: dict[str, tuple[str, type]] = {
+            'VOLCON': ('tols_volcon', float),
+            'MASS': ('tols_mass', float),
+            'TARGET': ('tols_target', float),
+            'WELLMBAL': ('tols_wellmbal', float),
+            'PERF': ('tols_perf', float),
+        }
+        return tols_keyword_map
+
+    @staticmethod
     def keyword_mapping() -> dict[str, tuple[str, type]]:
         # DT keywords
         dt_keyword_map = NexusSolverParameter.dt_keyword_mapping()
         solver_keyword_map = NexusSolverParameter.solver_keyword_mapping()
         gridsolver_keyword_map = NexusSolverParameter.gridsolver_keyword_mapping()
+        tols_keyword_map = NexusSolverParameter.tols_keyword_mapping()
+        impstab_keyword_map = NexusSolverParameter.impstab_keyword_mapping()
+        solo_keyword_map = NexusSolverParameter.solo_keyword_mapping()
+
         # Method keyword
         misc_keyword_map = {
             'METHOD': ('timestepping_method', TimeSteppingMethod),
@@ -236,5 +259,6 @@ class NexusSolverParameter(SolverParameter):
         }
 
         # Combine the keyword maps
-        keyword_map = {**dt_keyword_map, **misc_keyword_map, **solver_keyword_map, **gridsolver_keyword_map}
+        keyword_map = {**dt_keyword_map, **misc_keyword_map, **solver_keyword_map, **gridsolver_keyword_map,
+                       **tols_keyword_map, **impstab_keyword_map, **solo_keyword_map}
         return keyword_map
