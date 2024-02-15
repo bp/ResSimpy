@@ -1,19 +1,19 @@
+from unittest.mock import Mock
+
 import pytest
 
 from ResSimpy.Enums.TimeSteppingMethodEnum import TimeSteppingMethod
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusSolverParameter import NexusSolverParameter
+from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from ResSimpy.Nexus.NexusSolverParameters import NexusSolverParameters
+from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator
 
 
 class TestNexusSolverParameters:
     start_date = '01/01/2020'
-
-    @pytest.mark.parametrize(
-        'file_content, expected_result',
-        [
-            # basic_test
-            ('''START 01/01/2020
+    basic_data = '''START 01/01/2020
                                  !     Timestep controls
                                  DT AUTO 0.1
                                     MIN 0.001
@@ -21,7 +21,20 @@ class TestNexusSolverParameters:
                                     MAXINCREASE 8.
                                     !     Timestepping method
                                     METHOD IMPLICIT
-                                    ''',
+                                    '''
+    # mock fcs file and runcontrol file
+    fcs_file_path = '/path/fcs_file.fcs'
+    runcontrol_path = '/runcontrol_file.dat'
+    fcs_content = f'''DESC reservoir1
+    RUN_UNITS ENGLISH
+    DATEFORMAT DD/MM/YYYY
+    RUNCONTROL {runcontrol_path}
+    '''
+    @pytest.mark.parametrize(
+        'file_content, expected_result',
+        [
+            # basic_test
+            (basic_data,
              [NexusSolverParameter(date='01/01/2020',
                                    dt_auto=0.1,
                                    dt_min=0.001,
@@ -325,13 +338,13 @@ class TestNexusSolverParameters:
              [NexusSolverParameter(date='01/01/2020',
                                    dcmax_impes=0.1,
                                    dcmax_implicit=0.2,
-                                      volrpt_all=0.3,
+                                   volrpt_all=0.3,
                                    volrpt_impes=0.4,
-                                      ),
+                                   ),
               ]),
 
             # Keywords in a line
-            
+
         ],
         ids=['basic_test', 'more_DT_keywords', 'TIME_dependent_runcontrols', 'Solver_keywords',
              'Combined_solver_and_dt', 'Duplicate_keywords_in_a_given_timestep', 'All_solver_keywords',
@@ -339,11 +352,48 @@ class TestNexusSolverParameters:
              'TOLS_keywords', 'DCMAX_KEYWORDS', ])  # 'Keywords_in_a_line'])
     def test_load_run_parameters(self, mocker, file_content, expected_result):
         # Arrange
+        def mock_open_wrapper(filename, mode):
+            mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+                '/path/fcs_file.fcs': self.fcs_content,
+                '/runcontrol_file.dat': file_content
+            }).return_value
+            return mock_open
+        mocker.patch("builtins.open", mock_open_wrapper)
 
-        solver_params = NexusSolverParameters(start_date=self.start_date,
-                                              runcontrol_file=file_content.splitlines(keepends=True))
+        mock_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
+        mock_sim.start_date = self.start_date
+
+        solver_params = NexusSolverParameters(mock_sim)
         # Act
         result = solver_params.solver_parameters
 
+        # Assert
+        assert result == expected_result
+
+    def test_load_run_parameters_from_sim(self, mocker):
+        # Arrange
+
+        def mock_open_wrapper(filename, mode):
+            mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+                self.fcs_file_path: self.fcs_content,
+                self.runcontrol_path: self.basic_data,
+            }).return_value
+            return mock_open
+
+        mocker.patch("builtins.open", mock_open_wrapper)
+        fcs_file_exists = Mock(side_effect=lambda x: True)
+        mocker.patch('os.path.isfile', fcs_file_exists)
+
+        nexus_sim = NexusSimulator(self.fcs_file_path)
+        nexus_sim.start_date = self.start_date
+        expected_result = [NexusSolverParameter(date='01/01/2020',
+                                                dt_auto=0.1,
+                                                dt_min=0.001,
+                                                dt_max=60.0,
+                                                dt_max_increase=8.0,
+                                                timestepping_method=TimeSteppingMethod.implicit,
+                                                )]
+        # Act
+        result = nexus_sim.sim_controls.solver_parameters
         # Assert
         assert result == expected_result

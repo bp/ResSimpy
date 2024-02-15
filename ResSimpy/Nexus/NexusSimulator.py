@@ -118,11 +118,11 @@ class NexusSimulator(Simulator):
         self._hydraulics: NexusHydraulicsMethods = NexusHydraulicsMethods(model_unit_system=self.default_units)
         self._gaslift: NexusGasliftMethods = NexusGasliftMethods(model_unit_system=self.default_units)
         # Nexus operations modules
-        self._sim_controls: SimControls = SimControls(self)
+        self.logging: Logging = Logging(self)
         self.reporting: NexusReporting = NexusReporting(self)
         self._structured_grid_operations: StructuredGridOperations = StructuredGridOperations(self)
-        self.logging: Logging = Logging(self)
         self.__lazy_loading: bool = lazy_loading
+        self._sim_controls: SimControls = SimControls(self)
 
         if destination is not None and destination != '':
             self.set_output_path(path=destination.strip())
@@ -133,6 +133,8 @@ class NexusSimulator(Simulator):
         self._model_files: FcsNexusFile
         # Load in the model
         self.__load_fcs_file()
+
+
 
     def __repr__(self) -> str:
         """Pretty printing NexusSimulator data."""

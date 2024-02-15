@@ -4,13 +4,16 @@ import warnings
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from functools import cmp_to_key
+from typing import Sequence
 
 import pandas as pd
 
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
+from ResSimpy.Nexus.NexusSolverParameters import NexusSolverParameters
 from ResSimpy.Nexus.constants import DATE_WITH_TIME_LENGTH
+from ResSimpy.SolverParameter import SolverParameter
 
 
 @dataclass
@@ -61,6 +64,7 @@ class SimControls:
         self.__date_format_string: str = ''
         self.__number_of_processors: None | int = None
         self.__grid_to_proc: None | GridToProc = None
+        self.__solver_parameters: NexusSolverParameters = NexusSolverParameters(model)
 
     @property
     def date_format_string(self):
@@ -442,3 +446,13 @@ class SimControls:
         if self.__grid_to_proc is None:
             self._load_options_file()
         return self.__grid_to_proc
+
+    @property
+    def solver_parameters(self) -> Sequence[SolverParameter]:
+        """Returns the NexusSolverParameters object.
+
+        Returns:
+        -------
+            NexusSolverParameters: NexusSolverParameters object
+        """
+        return self.__solver_parameters.solver_parameters

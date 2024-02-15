@@ -1,7 +1,9 @@
 """Holds the class for the NexusSolverParams which handles loading and storing of the series of
 NexusSolverParam data objects.
 """
-from typing import Sequence
+from __future__ import annotations
+
+from typing import Sequence, TYPE_CHECKING
 
 from ResSimpy.Enums.TimeSteppingMethodEnum import TimeSteppingMethod
 from ResSimpy.Nexus.DataModels.NexusSolverParameter import NexusSolverParameter
@@ -13,18 +15,22 @@ from ResSimpy.SolverParameter import SolverParameter
 from ResSimpy.SolverParameters import SolverParameters
 from ResSimpy.FileOperations import file_operations as fo
 
+if TYPE_CHECKING:
+    from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+
 
 class NexusSolverParameters(SolverParameters):
-    def __init__(self, runcontrol_file: list[str], start_date: str) -> None:
+    def __init__(self, model: NexusSimulator) -> None:
         """NexusSolverParameters class constructor.
 
         Args:
-            runcontrol_file (list[str]): flattened file content as a list of strings from the run control.
+            model (NexusSimulator): Originating NexusSimulator object.
             start_date (str): Start date of the simulation.
         """
         self.__solver_parameters: Sequence[NexusSolverParameter] | None = None
-        self.start_date = start_date
-        self.file_content = runcontrol_file
+        self.__model = model
+        self.file_content = None
+        self.start_date = ''
 
     @property
     def solver_parameters(self) -> Sequence[SolverParameter]:
@@ -39,6 +45,9 @@ class NexusSolverParameters(SolverParameters):
         self.__solver_parameters = value
 
     def load(self) -> None:
+        self.file_content = self.__model.model_files.runcontrol_file.get_flat_list_str_file
+        self.start_date = self.__model.start_date
+
         read_in_solver_parameter: list[NexusSolverParameter] = []
         # read in the solver parameters from the runcontrol file
 
