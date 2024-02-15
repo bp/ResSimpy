@@ -29,7 +29,7 @@ class NexusSolverParameters(SolverParameters):
         """
         self.__solver_parameters: Sequence[NexusSolverParameter] | None = None
         self.__model = model
-        self.file_content = None
+        self.file_content = ['']
         self.start_date = ''
 
     @property
@@ -45,6 +45,8 @@ class NexusSolverParameters(SolverParameters):
         self.__solver_parameters = value
 
     def load(self) -> None:
+        if self.__model.model_files.runcontrol_file is None:
+            raise ValueError('No runcontrol file found when trying to load solver parameters.')
         self.file_content = self.__model.model_files.runcontrol_file.get_flat_list_str_file
         self.start_date = self.__model.start_date
 

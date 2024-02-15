@@ -134,8 +134,6 @@ class NexusSimulator(Simulator):
         # Load in the model
         self.__load_fcs_file()
 
-
-
     def __repr__(self) -> str:
         """Pretty printing NexusSimulator data."""
         printable_str = f'Simulation name: {self.root_name}\n'
