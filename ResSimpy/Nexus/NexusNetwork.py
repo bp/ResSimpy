@@ -4,6 +4,7 @@ targets.
 """
 from __future__ import annotations
 
+import re
 import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional, Any, Literal
@@ -104,6 +105,12 @@ class NexusNetwork(Network):
 
         loaded_procs: list[NexusProc] = []
 
+        def is_comment(single_str: str) -> bool:
+            if single_str.strip().startswith('!'):
+                return True
+            else:
+                return False
+
         files_dict = self.__model.model_files.surface_files
         if files_dict is None:
             raise ValueError('Surface files not found for this model.')
@@ -125,6 +132,9 @@ class NexusNetwork(Network):
             time = self.__model.start_date
             name_ = None
             priority_ = None
+            # initialize an empty proc object, so we can use its staticmethod reset_nexus_proc_function_counts
+            proc_obj = NexusProc()
+            nexus_proc_function_counts = proc_obj.reset_nexus_proc_function_counts()
 
             for line in file_contents:
 
@@ -137,11 +147,20 @@ class NexusNetwork(Network):
                     proc_obj = NexusProc(contents=proc_contents, date=time, name=name_, priority=priority_)
                     loaded_procs.append(proc_obj)
                     grab_line = False
+
                     # *IMPORTANT*: reset proc_contents after a procedure has ended!
+                    # *IMPORTANT*: reset proc function count dict after a procedure has ended!
                     proc_contents = []
+                    nexus_proc_function_counts = proc_obj.reset_nexus_proc_function_counts()
 
                 if grab_line:
                     proc_contents.append(line)
+                    # loop over the basic nexus functions and count the occurrences in the proc
+                    # skip the comments
+                    if is_comment(line) is not True:
+                        for function in nexus_proc_function_counts.keys():
+                            if re.search(function, line):
+                                nexus_proc_function_counts[function] += 1
 
                 if fo.check_token('PROCS', line=line):
                     # next check if it has a NAME and PRIORITY
