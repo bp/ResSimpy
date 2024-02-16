@@ -98,18 +98,13 @@ class NexusNetwork(Network):
             raise ValueError(f'No file found for {method_number=}, instead found {network_file=}')
         return network_file
 
+    @property
     def __load_procs(self) -> list[NexusProc]:
         """This private function searches the surface file for Nexus procedures, stores data related procedures, and
         returns a list of Nexus procedure objects.
         """
 
         loaded_procs: list[NexusProc] = []
-
-        def is_comment(single_str: str) -> bool:
-            if single_str.strip().startswith('!'):
-                return True
-            else:
-                return False
 
         files_dict = self.__model.model_files.surface_files
         if files_dict is None:
@@ -145,6 +140,7 @@ class NexusNetwork(Network):
                 # check for keyword ENDPROCS to signal end of the procedure
                 if fo.check_token('ENDPROCS', line=line):
                     proc_obj = NexusProc(contents=proc_contents, date=time, name=name_, priority=priority_)
+                    proc_obj.contents_breakdown = nexus_proc_function_counts
                     loaded_procs.append(proc_obj)
                     grab_line = False
 
@@ -156,11 +152,10 @@ class NexusNetwork(Network):
                 if grab_line:
                     proc_contents.append(line)
                     # loop over the basic nexus functions and count the occurrences in the proc
-                    # skip the comments
-                    if is_comment(line) is not True:
-                        for function in nexus_proc_function_counts.keys():
-                            if re.search(function, line):
-                                nexus_proc_function_counts[function] += 1
+                    # split out and ignore the comments with line.split
+                    for function in nexus_proc_function_counts.keys():
+                        if re.search(function, line.split('!')[0]):
+                            nexus_proc_function_counts[function] += 1
 
                 if fo.check_token('PROCS', line=line):
                     # next check if it has a NAME and PRIORITY
@@ -224,7 +219,7 @@ class NexusNetwork(Network):
             self.targets._add_to_memory(type_check_lists(nexus_obj_dict.get('TARGET')))
             self.welllists._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLLIST')))
 
-            add_procs_to_mem = self.__load_procs()
+            add_procs_to_mem = self.__load_procs
             self.procs._add_to_memory(add_procs_to_mem)
 
         self.__has_been_loaded = True

@@ -21,13 +21,6 @@ class NexusProc:
         self.__contents = contents
         self.__contents_breakdown = self.reset_nexus_proc_function_counts()
 
-        # if contents_breakdown is not None:
-        #     #self.__contents_breakdown = self.reset_nexus_proc_function_counts()
-        #     raise ValueError('Invalid argument specified. Contents_breakdown must have type None.')
-        #
-        # else:
-        #     self.__contents_breakdown = self.reset_nexus_proc_function_counts()
-
     @property
     def contents(self) -> list[str]:
         """Returns the contents of the main body of the procedure."""
@@ -50,7 +43,16 @@ class NexusProc:
 
     @property
     def contents_breakdown(self) -> dict[str, int]:
+        """Returns the dictionary counts of the proc functions."""
         return self.__contents_breakdown
+
+    # setter must always follow the property
+    @contents_breakdown.setter
+    def contents_breakdown(self, value):
+        if isinstance(value, dict):
+            self.__contents_breakdown = value
+        else:
+            raise TypeError('Arg must be a dictionary.')
 
     @staticmethod
     def get_keyword_mapping() -> Mapping[str, tuple[str, type]]:
@@ -96,4 +98,3 @@ class NexusProc:
         return (nexus_basic_proc_functions | nexus_functions_manipulate_lists |
                 nexus_functions_to_retrieve_network_data | nexus_functions_change_network_data |
                 nexus_other_functions)
-

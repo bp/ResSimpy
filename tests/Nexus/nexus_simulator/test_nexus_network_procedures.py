@@ -294,19 +294,12 @@ ENDPROCS
 
     surface_file = NexusFile(location='surface.dat', file_content_as_list=surface_file_contents.splitlines())
 
-    # create object
-    # date must be the same as the start_date
-    expected_proc = NexusProc(date='01/01/2023', contents=["THIS IS RANDOM TEXT"], name ='STATIC_VARS', priority=1)
-
     # create a nexus network object
     dummy_model = get_fake_nexus_simulator(mocker)
     dummy_model._start_date = start_date
     dummy_model.model_files.surface_files = {1: surface_file}
 
     nexus_net = NexusNetwork(model=dummy_model)
-
-    # list of expected procedures
-    expected_result = [expected_proc]
 
     nexus_procs = NexusProcs(parent_network=nexus_net)
     nexus_net.procs = nexus_procs
@@ -321,3 +314,80 @@ ENDPROCS
     assert result[0].priority == 1
     assert result[0].name == 'STATIC_VARS'
     # assert result == expected_result
+
+
+def test_load_nexus_procedures_proc_func_counts_basic(mocker):
+    # Arrange
+    # mock out a surface file:
+    # this is required
+    start_date = '01/01/2023'
+
+    surface_file_contents = """PROCS
+IF(MAX(X) > MIN(X)) THEN
+PRINTOUT(X)
+ENDIF
+ENDPROCS
+    """
+
+    surface_file = NexusFile(location='surface.dat', file_content_as_list=surface_file_contents.splitlines())
+
+    # create a nexus network object
+    dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_model._start_date = start_date
+    dummy_model.model_files.surface_files = {1: surface_file}
+
+    nexus_net = NexusNetwork(model=dummy_model)
+
+    nexus_procs = NexusProcs(parent_network=nexus_net)
+    nexus_net.procs = nexus_procs
+
+    # Act
+    # nexus_procs.load(surface_file, start_date, default_units=UnitSystem.ENGLISH)
+    result = nexus_procs.get_all()
+
+    # Assert
+    assert result[0].date == '01/01/2023'
+    assert result[0].contents == ['IF(MAX(X) > MIN(X)) THEN', 'PRINTOUT(X)', 'ENDIF']
+    assert result[0].contents_breakdown['MAX'] == 1
+    assert result[0].contents_breakdown['MIN'] == 1
+    assert result[0].contents_breakdown['PRINTOUT'] == 1
+    #
+
+
+def test_load_nexus_procedures_proc_func_multiple_counts(mocker):
+    # Arrange
+    # mock out a surface file:
+    # this is required
+    start_date = '01/01/2023'
+
+    surface_file_contents = """PROCS
+IF(ABS(-MAX(X)) > MIN(X)) THEN
+PRINTOUT(2*ABS(X))
+PRINTOUT(5*ABS(X))
+ENDIF
+ENDPROCS
+    """
+
+    surface_file = NexusFile(location='surface.dat', file_content_as_list=surface_file_contents.splitlines())
+
+    # create a nexus network object
+    dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_model._start_date = start_date
+    dummy_model.model_files.surface_files = {1: surface_file}
+
+    nexus_net = NexusNetwork(model=dummy_model)
+
+    nexus_procs = NexusProcs(parent_network=nexus_net)
+    nexus_net.procs = nexus_procs
+
+    # Act
+    # nexus_procs.load(surface_file, start_date, default_units=UnitSystem.ENGLISH)
+    result = nexus_procs.get_all()
+
+    # Assert
+    assert result[0].date == '01/01/2023'
+    assert result[0].contents == ['IF(ABS(-MAX(X)) > MIN(X)) THEN', 'PRINTOUT(2*ABS(X))', 'PRINTOUT(5*ABS(X))', 'ENDIF']
+    assert result[0].contents_breakdown['MAX'] == 1
+    assert result[0].contents_breakdown['MIN'] == 1
+    assert result[0].contents_breakdown['PRINTOUT'] == 2
+    assert result[0].contents_breakdown['ABS'] == 3
