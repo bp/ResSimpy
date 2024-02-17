@@ -101,7 +101,7 @@ class NexusNetwork(Network):
     @property
     def __load_procs(self) -> list[NexusProc]:
         """This private function searches the surface file for Nexus procedures, stores data related procedures, and
-        returns a list of Nexus procedure objects.
+        returns a list of Nexus procedure objects. It also collects and stores Nexus Proc function frequencies.
         """
 
         loaded_procs: list[NexusProc] = []
@@ -139,13 +139,24 @@ class NexusNetwork(Network):
 
                 # check for keyword ENDPROCS to signal end of the procedure
                 if fo.check_token('ENDPROCS', line=line):
+
+                    # create the proc object
                     proc_obj = NexusProc(contents=proc_contents, date=time, name=name_, priority=priority_)
+
+                    # set the proc function counts
                     proc_obj.contents_breakdown = nexus_proc_function_counts
+
+                    # DO and IF statements are always combined with ENDIF and ENDDO, therefore dividing by 2 will take
+                    # care of the over-counting
+                    proc_obj.contents_breakdown['IF'] = int(proc_obj.contents_breakdown['IF']/2)
+                    proc_obj.contents_breakdown['DO'] = int(proc_obj.contents_breakdown['DO']/2)
+
+                    # append the fresh object to the list
                     loaded_procs.append(proc_obj)
-                    grab_line = False
 
                     # *IMPORTANT*: reset proc_contents after a procedure has ended!
                     # *IMPORTANT*: reset proc function count dict after a procedure has ended!
+                    grab_line = False
                     proc_contents = []
                     nexus_proc_function_counts = proc_obj.reset_nexus_proc_function_counts()
 
@@ -153,9 +164,18 @@ class NexusNetwork(Network):
                     proc_contents.append(line)
                     # loop over the basic nexus functions and count the occurrences in the proc
                     # split out and ignore the comments with line.split
+                    # calling len on re.findall will return the number of times it found it in the line
+                    # if re.findall did not find the string it will return an empty list
+                    # note that the length of an empty list is zero
                     for function in nexus_proc_function_counts.keys():
-                        if re.search(function, line.split('!')[0]):
-                            nexus_proc_function_counts[function] += 1
+                        # special cases arise because some proc functions are one char long (i.e. Q and P)
+                        # the search string must be adjusted to avoid over counting when such cases arise
+                        if len(function) == 1:
+                            nexus_proc_function_counts[function] += (
+                                len(re.findall(function + '\\s*\\(', line.upper().split('!')[0])))
+                        else:
+                            nexus_proc_function_counts[function] += (
+                                len(re.findall(function, line.upper().split('!')[0])))
 
                 if fo.check_token('PROCS', line=line):
                     # next check if it has a NAME and PRIORITY

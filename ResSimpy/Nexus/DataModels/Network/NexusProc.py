@@ -1,5 +1,11 @@
 from dataclasses import dataclass
 from typing import Optional, Mapping
+from ResSimpy.Nexus.NexusKeywords.proc_keywords import PREDEFINED_VARS, CONDITIONAL_KEYWORDS, NEXUS_ALL_PROC_FUNCS
+
+
+# set custom error message
+class SetError(Exception):
+    pass
 
 
 @dataclass(kw_only=True, repr=True)
@@ -14,7 +20,7 @@ class NexusProc:
     def __init__(self, date: Optional[str] = None,
                  contents: Optional[list[str]] = None,
                  name: Optional[str] = None,
-                 priority: Optional[int] = None) -> None:     # contents_breakdown: Optional[dict[str, int]] = None
+                 priority: Optional[int] = None) -> None:
         self.__date = date
         self.__name = name
         self.__priority = priority
@@ -22,12 +28,12 @@ class NexusProc:
         self.__contents_breakdown = self.reset_nexus_proc_function_counts()
 
     @property
-    def contents(self) -> list[str]:
+    def contents(self) -> Optional[list[str]]:
         """Returns the contents of the main body of the procedure."""
         return self.__contents
 
     @property
-    def date(self) -> str:
+    def date(self) -> Optional[str]:
         """Returns the date that the procedure occurred."""
         return self.__date
 
@@ -49,10 +55,13 @@ class NexusProc:
     # setter must always follow the property
     @contents_breakdown.setter
     def contents_breakdown(self, value):
-        if isinstance(value, dict):
+        # ensures this param is a dict with length equal to the Nexus proc functions
+        if (isinstance(value, dict)) and (len(value) == len(self.reset_nexus_proc_function_counts())):
             self.__contents_breakdown = value
         else:
-            raise TypeError('Arg must be a dictionary.')
+            raise SetError('This parameter is for internal use and should not be set by the user.\n'
+                           'This parameter must be a dictionary where the keys are defined according to the 2022\n'
+                           'Nexus Keyword Manual page 1013.')
 
     @staticmethod
     def get_keyword_mapping() -> Mapping[str, tuple[str, type]]:
@@ -65,36 +74,16 @@ class NexusProc:
 
     @staticmethod
     def reset_nexus_proc_function_counts() -> dict[str, int]:
-
         """This function initializes and returns a dict of built-in Nexus proc functions. Please refer to page
-        662 of the Nexus Keyword manual for a description of the functions.
+        1013 of the 2022 Nexus Keyword manual for a description of the functions.
 
             Returns: A dictionary of Nexus proc functions where the key is the specific function and the value is
         the count, initialized to zero.
         """
 
-        # basic nexus proc functions - page 662 of Nexus keyword manual
-        nexus_basic_proc_functions = {'ABS': 0, 'ACCUMULATE': 0, 'ANY': 0, 'ALL': 0, 'COUNT': 0, 'MAX': 0,
-                                      'MAXVAL': 0, 'MIN': 0, 'MINVAL': 0, 'POWER': 0, 'PRINTOUT': 0, 'SET_VALUE': 0,
-                                      'SIZE': 0, 'SUM': 0}
+        predef_vars = dict(zip(PREDEFINED_VARS, [0] * len(PREDEFINED_VARS)))
+        cond = dict(zip(CONDITIONAL_KEYWORDS, [0] * len(CONDITIONAL_KEYWORDS)))
+        all_proc_funcs = dict(zip(NEXUS_ALL_PROC_FUNCS, [0] * len(NEXUS_ALL_PROC_FUNCS)))
+        to_search = predef_vars | cond | all_proc_funcs
 
-        # nexus functions that manipulate lists - page 673 of Nexus keyword manual
-        nexus_functions_manipulate_lists = {'FILTER': 0, 'INTERSECT': 0, 'MASK': 0, 'SORT': 0, 'UNION': 0}
-
-        # nexus functions to retrieve network data - page 676 of Nexus keyword manual
-        nexus_functions_to_retrieve_network_data = {'CONC': 0, 'CONPARAM': 0, 'CUM': 0, 'GET_CONSTRAINT': 0,
-                                                    'GET_TARGET': 0, 'GET_TGTCON': 0, 'GLR': 0, 'GOR': 0,
-                                                    'IS_ACTIVE': 0, 'IS_BACK_FLOWING': 0, 'IS_FLOWING': 0,
-                                                    'IS_NOT_FLOWING': 0, 'IS_SHUTIN': 0, 'OGR': 0, 'P': 0,
-                                                    'PERF_LOOP': 0, 'Q': 0, 'QP': 0, 'VALVE_SETTING': 0,
-                                                    'WAGPARAM': 0, 'WCUT': 0, 'WGR': 0, 'WOR': 0}
-        # nexus functions that change network data
-        nexus_functions_change_network_data = {'ABANDON': 0, 'ACTIVATE': 0, 'CONSTRAINT': 0, 'DEACTIVATE': 0,
-                                               'DRILL': 0, 'GLR_SHUT': 0, 'NEXT_METHOD': 0}
-        nexus_other_functions = {'GET_DT': 0, 'SET_DEBUG': 0, 'GET_TIME': 0, 'SET_LOG': 0, 'SET_PRINT': 0,
-                                 'SET_DT': 0}
-
-        # merge the dicts using | operator and return it
-        return (nexus_basic_proc_functions | nexus_functions_manipulate_lists |
-                nexus_functions_to_retrieve_network_data | nexus_functions_change_network_data |
-                nexus_other_functions)
+        return to_search
