@@ -6,12 +6,13 @@ from ResSimpy.Enums.TimeSteppingMethodEnum import TimeSteppingMethod
 from ResSimpy.SolverParameter import SolverParameter
 
 
-@dataclass
+@dataclass(kw_only=True)
 class NexusSolverParameter(SolverParameter):
     """Data object storing the solver parameters for the Nexus Simulation runs.
     Nexus is time-dependent for the solver parameters.
     """
-    date: str
+
+    # Time Stepping options
     timestepping_method: TimeSteppingMethod | None = None
     dt_auto: float | None = None
     dt_min: float | None = None
@@ -30,6 +31,7 @@ class NexusSolverParameter(SolverParameter):
     dt_vip_maxincrease: float | None = None
     dt_vip_maxincafcut: float | None = None
 
+    # Solver Options for grid/specific reservoir/all
     solver_reservoir_cycle_length: float | None = None
     solver_reservoir_max_cycles: float | None = None
     solver_reservoir_globaltol: float | None = None
@@ -42,8 +44,9 @@ class NexusSolverParameter(SolverParameter):
     solver_all_max_cycles: float | None = None
     solver_all_globaltol: float | None = None
     solver_all_equation_solver: str | None = None
-    solver_timestep_cut: bool = True  # Default is CUT
 
+    # Independent Solver options and settings
+    solver_timestep_cut: bool = True  # Default is CUT
     solver_precon: str | None = None
     solver_precon_setting: str | None = None
     solver_precon_value: float | None = None
@@ -56,8 +59,10 @@ class NexusSolverParameter(SolverParameter):
     solver_pseudo_slack: bool | None = None
     solver_mumps_solver: str | None = None
 
+    # Material balance options
     implicit_mbal: str | None = None
 
+    # Implicit stability (IMPSTAB) options
     impstab_on: bool = False  # Default is OFF
     impstab_criteria: str | None = None
     impstab_skip_mass_cfl: bool = False  # Default is USEMASSCFL
@@ -67,6 +72,7 @@ class NexusSolverParameter(SolverParameter):
     impstab_max_cuts: float | None = None
     impstab_skip_block_dcmax: float | None = None
 
+    # Gridsolver options
     gridsolver_implicit_coupling_setting: str | None = None
     gridsolver_impes_coupling_setting: str | None = None
     gridsolver_implicit_precon_setting: str | None = None
@@ -75,8 +81,10 @@ class NexusSolverParameter(SolverParameter):
     gridsolver_implicit_reduction: float | None = None
     gridsolver_grid_reduction: float | None = None
 
+    # PERFREV options
     perfrev: str | None = None
 
+    # maximum change and other settings for the simulation
     maxnewtons: float | None = None
     maxbadnets: float | None = None
     cutfactor: float | None = None
@@ -97,12 +105,14 @@ class NexusSolverParameter(SolverParameter):
     line_search: float | None = None
     perfp_damp: float | None = None
 
+    # tolerances
     tols_volcon: float | None = None
     tols_mass: float | None = None
     tols_target: float | None = None
     tols_wellmbal: float | None = None
     tols_perf: float | None = None
 
+    # settings for implicit, impes grids.
     dcmax_implicit: float | None = None
     dcmax_impes: float | None = None
     dcmax_all: float | None = None
@@ -136,10 +146,14 @@ class NexusSolverParameter(SolverParameter):
     dsmax_vip_all: float | None = None
 
     def _write_out_solver_param_block(self):
+        """Writes out the solver parameter block for an instance of NexusSolverParameter."""
         raise NotImplementedError
 
     @staticmethod
     def dt_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """Gets the keyword mapping from simulator keyword to ResSimpy attribute and the type of the object.
+        Associated with the DT keywords in Nexus. e.g. of the form "DT MAX 50".
+        """
         # DT keywords
         dt_keyword_map: dict[str, tuple[str, type]] = {
 
@@ -164,6 +178,9 @@ class NexusSolverParameter(SolverParameter):
 
     @staticmethod
     def solver_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """Gets the keyword mapping from simulator keyword to ResSimpy attribute and the type of the object.
+        Associated with the SOLVER keywords in Nexus. e.g. of the form "SOLVER ALL CYCLELENGTH 10".
+        """
         # Solver keywords
         solver_keyword_map = {
             'ALL CYCLELENGTH': ('solver_all_cycle_length', float),
@@ -204,6 +221,9 @@ class NexusSolverParameter(SolverParameter):
 
     @staticmethod
     def impstab_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """Gets the keyword mapping from simulator keyword to ResSimpy attribute and the type of the object.
+        Associated with the IMPSTAB keywords in Nexus. e.g. of the form "IMPSTAB TARGETCFL 0.5".
+        """
         # IMPSTAB keywords
         impstab_keyword_map = {
             'OFF': ('impstab_on', bool),
@@ -222,6 +242,9 @@ class NexusSolverParameter(SolverParameter):
 
     @staticmethod
     def gridsolver_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """Gets the keyword mapping from simulator keyword to ResSimpy attribute and the type of the object.
+        Associated with the GRIDSOLVER keywords in Nexus. e.g. of the form "GRIDSOLVER PRESS_RED 0.5".
+        """
         # GRIDSOLVER keywords
         gridsolver_keyword_map = {
             'IMPLICIT_COUPLING': ('gridsolver_implicit_coupling_setting', str),
@@ -236,6 +259,9 @@ class NexusSolverParameter(SolverParameter):
 
     @staticmethod
     def solo_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """Gets the keyword mapping from simulator keyword to ResSimpy attribute and the type of the object.
+        Associated with the keywords that are found on their own in a runcontrol file.".
+        """
         # Solo keywords
         solo_keyword_map: dict[str, tuple[str, type]] = {
             'MAXNEWTONS': ('maxnewtons', float),
@@ -262,6 +288,9 @@ class NexusSolverParameter(SolverParameter):
 
     @staticmethod
     def tols_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """Gets the keyword mapping from simulator keyword to ResSimpy attribute and the type of the object.
+        Associated with the TOLS keywords in Nexus. e.g. of the form "TOLS VOLCON 100.5".
+        """
         # TOLS keywords
         tols_keyword_map: dict[str, tuple[str, type]] = {
             'VOLCON': ('tols_volcon', float),
@@ -274,6 +303,9 @@ class NexusSolverParameter(SolverParameter):
 
     @staticmethod
     def dcmax_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """Gets the keyword mapping from simulator keyword to ResSimpy attribute and the type of the object.
+        Associated with the DCMAX keywords in Nexus. e.g. of the form "DCMAX IMPES 0.5".
+        """
         # DCMAX keywords
         dcmax_keyword_map: dict[str, tuple[str, type]] = {
             'IMPES': ('dcmax_impes', float),
@@ -284,6 +316,9 @@ class NexusSolverParameter(SolverParameter):
 
     @staticmethod
     def keyword_mapping() -> dict[str, tuple[str, type]]:
+        """Gets the keyword mapping from simulator keyword to ResSimpy attribute and the type of the object.
+        Compiled keywords for all ResSimpy attributes apart from the
+        """
         # DT keywords
         dt_keyword_map = NexusSolverParameter.dt_keyword_mapping()
         solver_keyword_map = NexusSolverParameter.solver_keyword_mapping()
