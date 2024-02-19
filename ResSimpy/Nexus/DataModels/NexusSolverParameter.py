@@ -317,7 +317,7 @@ class NexusSolverParameter(SolverParameter):
     @staticmethod
     def keyword_mapping() -> dict[str, tuple[str, type]]:
         """Gets the keyword mapping from simulator keyword to ResSimpy attribute and the type of the object.
-        Compiled keywords for all ResSimpy attributes apart from the
+        Compiled keywords for all ResSimpy attributes apart from the DCMAX keywords.
         """
         # DT keywords
         dt_keyword_map = NexusSolverParameter.dt_keyword_mapping()
