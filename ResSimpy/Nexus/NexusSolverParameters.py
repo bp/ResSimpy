@@ -86,49 +86,8 @@ class NexusSolverParameters(SolverParameters):
                 current_solver_scope = solver_token_value
 
             if current_solver_param_token == 'SOLVER' and not fo.check_token(token='SOLVER', line=line):
-                next_value = fo.get_next_value(0, file_as_list=[line])
-                next_value = next_value.upper() if next_value is not None else None
-                if next_value in SOLVER_SCOPE_KEYWORDS:
-                    current_solver_scope = next_value
-                    # get the value of the next token and assign it to the solver_parameter_for_timestep object
-                    solver_scoped_keyword = fo.get_expected_token_value(next_value, line, file_list=self.file_content)
-                    attribute_value, type_assignment = self.__get_solver_attribute_value(
-                        current_solver_scope, solver_scoped_keyword)
-                    value = fo.get_token_value(solver_scoped_keyword, line, file_list=[line])
-                    if value is not None:
-                        solver_parameter_for_timestep.__setattr__(attribute_value, type_assignment(value))
-                    else:
-                        # cover for the fact that it may not have a next value
-                        solver_parameter_for_timestep.__setattr__(attribute_value,
-                                                                  type_assignment(solver_scoped_keyword))
-
-                elif next_value in ['ITERATIVE', 'DIRECT']:
-                    attribute_value, type_assignment = self.__get_solver_attribute_value(
-                        current_solver_scope, next_value)
-                    solver_parameter_for_timestep.__setattr__(attribute_value, type_assignment(next_value))
-
-                elif next_value in SOLVER_SCOPED_KEYWORDS:
-                    # if the first value we find is in the SOLVER_SCOPED_KEYWORDS, then we have a keyword that is
-                    # not a token, but a value referring to a scope. So we can directly get the value and assign it
-                    # to the solver_parameter_for_timestep object.
-                    attribute_value, type_assignment = self.__get_solver_attribute_value(
-                        current_solver_scope, next_value)
-                    value = fo.get_token_value(next_value, line, file_list=self.file_content)
-                    solver_parameter_for_timestep.__setattr__(attribute_value, type_assignment(value))
-
-                elif next_value in ['NOCUT', 'CUT']:
-                    solver_parameter_for_timestep.solver_timestep_cut = next_value == 'CUT'
-                elif next_value in ['PRECON_ILU', 'PRECON_AMG', 'PRECON_AMG_RS']:
-                    solver_parameter_for_timestep.solver_precon = next_value
-                    precon_setting = fo.get_token_value(next_value, line, file_list=[line])
-                    if precon_setting is not None:
-                        precon_value_num = fo.get_expected_token_value(precon_setting, line,
-                                                                       file_list=self.file_content)
-                        solver_parameter_for_timestep.solver_precon_value = float(precon_value_num)
-                        solver_parameter_for_timestep.solver_precon_setting = precon_setting
-                elif next_value in SOLVER_KEYWORDS:
-                    solver_parameter_for_timestep = self.__get_solver_token_values(next_value,
-                                                                                   line, solver_parameter_for_timestep)
+                solver_parameter_for_timestep = self.__set_solver_parameters(current_solver_scope, line,
+                                                                             solver_parameter_for_timestep)
 
             if fo.check_token(token='METHOD', line=line):
                 timestep_method = fo.get_expected_token_value('METHOD', line, file_list=self.file_content)
@@ -186,6 +145,54 @@ class NexusSolverParameters(SolverParameters):
         # finally assign the read in solver parameters to the class variable
         self.__solver_parameters = read_in_solver_parameter
 
+    def __set_solver_parameters(self, current_solver_scope: str, line: str,
+                                solver_parameter_for_timestep: NexusSolverParameter) -> NexusSolverParameter:
+        """Sets the solver parameters for the SOLVER keyword in the NexusSolverParameter object."""
+        next_value = fo.get_next_value(0, file_as_list=[line])
+        next_value = next_value.upper() if next_value is not None else None
+        if next_value in SOLVER_SCOPE_KEYWORDS:
+            current_solver_scope = next_value
+            # get the value of the next token and assign it to the solver_parameter_for_timestep object
+            solver_scoped_keyword = fo.get_expected_token_value(next_value, line, file_list=self.file_content)
+            attribute_value, type_assignment = self.__get_solver_attribute_value(
+                current_solver_scope, solver_scoped_keyword)
+            value = fo.get_token_value(solver_scoped_keyword, line, file_list=[line])
+            if value is not None:
+                solver_parameter_for_timestep.__setattr__(attribute_value, type_assignment(value))
+            else:
+                # cover for the fact that it may not have a next value
+                solver_parameter_for_timestep.__setattr__(attribute_value,
+                                                          type_assignment(solver_scoped_keyword))
+
+        elif next_value in ['ITERATIVE', 'DIRECT']:
+            attribute_value, type_assignment = self.__get_solver_attribute_value(
+                current_solver_scope, next_value)
+            solver_parameter_for_timestep.__setattr__(attribute_value, type_assignment(next_value))
+
+        elif next_value in SOLVER_SCOPED_KEYWORDS:
+            # if the first value we find is in the SOLVER_SCOPED_KEYWORDS, then we have a keyword that is
+            # not a token, but a value referring to a scope. So we can directly get the value and assign it
+            # to the solver_parameter_for_timestep object.
+            attribute_value, type_assignment = self.__get_solver_attribute_value(
+                current_solver_scope, next_value)
+            value = fo.get_token_value(next_value, line, file_list=self.file_content)
+            solver_parameter_for_timestep.__setattr__(attribute_value, type_assignment(value))
+
+        elif next_value in ['NOCUT', 'CUT']:
+            solver_parameter_for_timestep.solver_timestep_cut = next_value == 'CUT'
+        elif next_value in ['PRECON_ILU', 'PRECON_AMG', 'PRECON_AMG_RS']:
+            solver_parameter_for_timestep.solver_precon = next_value
+            precon_setting = fo.get_token_value(next_value, line, file_list=[line])
+            if precon_setting is not None:
+                precon_value_num = fo.get_expected_token_value(precon_setting, line,
+                                                               file_list=self.file_content)
+                solver_parameter_for_timestep.solver_precon_value = float(precon_value_num)
+                solver_parameter_for_timestep.solver_precon_setting = precon_setting
+        elif next_value in SOLVER_KEYWORDS:
+            solver_parameter_for_timestep = self.__get_solver_token_values(next_value,
+                                                                           line, solver_parameter_for_timestep)
+        return solver_parameter_for_timestep
+
     def __get_solver_token_values(self, solver_token_value: str, line: str,
                                   solver_parameter_for_timestep: NexusSolverParameter) -> NexusSolverParameter:
         """Get the values for the SOLVER KEYWORD VALUE format."""
@@ -224,13 +231,15 @@ class NexusSolverParameters(SolverParameters):
         keyword_mapping = NexusSolverParameter.impstab_keyword_mapping()
         attribute_value, type_assignment = keyword_mapping[token_value.upper()]
 
-        value = fo.get_expected_token_value(token_value, line, file_list=self.file_content)
-        if token_value == 'USEMASSCFL':
-            value = ''
-        elif token_value == 'COATS':
-            value = 'COATS'
-        elif token_value == 'PEACEMAN':
-            value = 'PEACEMAN'
+        match token_value:
+            case 'USEMASSCFL':
+                value = ''
+            case 'COATS':
+                value = 'COATS'
+            case 'PEACEMAN':
+                value = 'PEACEMAN'
+            case _:
+                value = fo.get_expected_token_value(token_value, line, file_list=self.file_content)
 
         solver_parameter_for_timestep.__setattr__(attribute_value, type_assignment(value))
         return solver_parameter_for_timestep
