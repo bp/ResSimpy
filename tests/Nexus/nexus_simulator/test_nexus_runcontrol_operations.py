@@ -635,3 +635,75 @@ TIME 24/01/1999
     assert nexus_reporting.array_output_requests == expected_array_output_requests
     assert nexus_reporting.ss_output_contents == expected_ss_output_contents
     assert nexus_reporting.array_output_contents == expected_array_output_contents
+
+def test_add_array_output_request(mocker):
+    # Arrange
+    runcontrol_content = '''START 01/01/1950
+                    TIME 01/01/1951
+                    TIME 01/02/1951
+                    TIME 01/05/1951
+                    OUTPUT 
+                        FIELD MONTHLY
+                    ENDOUTPUT
+                    TIME 01/01/1952
+                    STOP
+                    '''
+
+    expected_result = '''START 01/01/1950
+                    TIME 01/01/1951
+                    TIME 01/02/1951
+
+OUTPUT
+
+RFT TNEXT
+ENDOUTPUT
+
+                    TIME 01/05/1951
+                    OUTPUT 
+                        FIELD MONTHLY
+                    ENDOUTPUT
+                    TIME 01/01/1952
+                    STOP
+                    '''.splitlines(keepends=True)
+    # fake model
+    fcs_file_contents = '''
+        RUN_UNITS ENGLISH
+        DATEFORMAT DD/MM/YYYY
+        RECURRENT_FILES
+        RUNCONTROL /nexus_data/runcontrol.dat
+        SURFACE Network 1  /surface_file_01.dat
+        '''
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            '/path/fcs_file.fcs': fcs_file_contents,
+            '/nexus_data/runcontrol.dat': runcontrol_content}
+                                        ).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+    model = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
+
+    nexus_reporting = NexusReporting(model=model)
+
+    nexus_reporting.load_output_requests()
+    new_output_request = NexusOutputRequest(date='01/02/1951', output='RFT', output_type=OutputType.ARRAY,
+                                            output_frequency=FrequencyEnum.TNEXT, output_frequency_number=None)
+
+    # Act
+    nexus_reporting._add_array_output_request(new_output_request)
+    result = model.model_files.runcontrol_file.file_content_as_list
+
+    # Assert
+    assert result == expected_result
+
+
+def test_output_request_to_table_line():
+    # Arrange
+    output_req = NexusOutputRequest(date='01/02/1951', output='RFT', output_type=OutputType.ARRAY,
+                                    output_frequency=FrequencyEnum.TNEXT, output_frequency_number=None)
+    expected_result = 'RFT TNEXT'
+    # Act
+    result = output_req.to_table_line(headers=[])
+
+    # Assert
+    assert result == expected_result
