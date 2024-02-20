@@ -540,6 +540,8 @@ OUTPUT
     FIELD MONTHLY
     WELLS YEARLY
     MAPS FREQ 120
+    RFT     MONTHLY
+    RFTFILE ON
 ENDOUTPUT
 
 
@@ -553,7 +555,9 @@ OUTPUT
     FIELD YEARLY
     WELLS TIMES
     MAPS FREQ 120
+    RFTFILE TNEXT
 ENDOUTPUT
+TIME 24/01/1999
     '''
     file_content_as_list = file_content.splitlines(keepends=True)
 
@@ -574,12 +578,18 @@ ENDOUTPUT
                            output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None),
         NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1951', output='MAPS',
                            output_frequency=FrequencyEnum.FREQ, output_frequency_number=120),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1951', output='RFT',
+                           output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1951', output='RFTFILE',
+                           output_frequency=FrequencyEnum.ON, output_frequency_number=None),
         NexusOutputRequest(output_type=OutputType.ARRAY, date='01/10/1953', output='FIELD',
                            output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None),
         NexusOutputRequest(output_type=OutputType.ARRAY, date='01/10/1953', output='WELLS',
                            output_frequency=FrequencyEnum.TIMES, output_frequency_number=None),
         NexusOutputRequest(output_type=OutputType.ARRAY, date='01/10/1953', output='MAPS',
                            output_frequency=FrequencyEnum.FREQ, output_frequency_number=120),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/10/1953', output='RFTFILE',
+                           output_frequency=FrequencyEnum.TNEXT,output_frequency_number=None)
     ]
 
     expected_ss_output_contents = [
