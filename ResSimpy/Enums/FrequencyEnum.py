@@ -18,3 +18,4 @@ class FrequencyEnum(Enum):
     TIMESTEP = 10
     TSTART = 11
     OFF = 12
+    ON = 13

@@ -540,6 +540,8 @@ OUTPUT
     FIELD MONTHLY
     WELLS YEARLY
     MAPS FREQ 120
+    RFT     MONTHLY
+    RFTFILE ON
 ENDOUTPUT
 
 
@@ -576,6 +578,10 @@ TIME 24/01/1999
                            output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None),
         NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1951', output='MAPS',
                            output_frequency=FrequencyEnum.FREQ, output_frequency_number=120),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1951', output='RFT',
+                           output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1951', output='RFTFILE',
+                           output_frequency=FrequencyEnum.ON, output_frequency_number=None),
         NexusOutputRequest(output_type=OutputType.ARRAY, date='01/10/1953', output='FIELD',
                            output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None),
         NexusOutputRequest(output_type=OutputType.ARRAY, date='01/10/1953', output='WELLS',
