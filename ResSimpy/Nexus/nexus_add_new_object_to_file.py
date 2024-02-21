@@ -169,8 +169,9 @@ class AddObjectOperations:
             new_table_as_list.append('TIME ' + obj_date)
         new_table_as_list += [self.table_header]
         headers = [k for k, v in nexus_mapping.items() if v[0] in object_properties]
-        write_out_headers = ' '.join(headers)
-        new_table_as_list.append(write_out_headers)
+        if headers:
+            write_out_headers = ' '.join(headers)
+            new_table_as_list.append(write_out_headers)
         new_table_as_list.append(new_obj.to_table_line(headers=headers))
         new_table_as_list.append(self.table_footer)
         new_table_as_list = [x + '\n' if not x.endswith('\n') else x for x in new_table_as_list]
@@ -259,7 +260,7 @@ class AddObjectOperations:
                 id_line_locs = [insert_line_index]
 
             # if we have passed the date or if we're at the end of the file write out the table
-            if date_comparison > 0:
+            if date_comparison > 0 or nfo.check_token('STOP', line):
                 new_table, obj_in_table_index = self.write_out_new_table_containing_object(
                     obj_date=date, object_properties=object_properties, date_found=date_found, new_obj=new_object)
                 additional_content.extend(new_table)

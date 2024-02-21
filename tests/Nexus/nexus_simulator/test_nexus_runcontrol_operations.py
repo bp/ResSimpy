@@ -644,7 +644,6 @@ TIME 24/01/1999
                     TIME 01/02/1951
 
 OUTPUT
-
 RFT TNEXT
 ENDOUTPUT
 
@@ -662,7 +661,6 @@ ENDOUTPUT
 
 TIME 01/03/1951
 OUTPUT
-
 RFT TNEXT
 ENDOUTPUT
 
@@ -685,7 +683,26 @@ RFT TNEXT
                     TIME 01/01/1952
                     STOP
                     '''),
-], ids=['basic test - at existing time stamp', 'at a new timestamp', 'existing timestep with an OUTPUT'])
+    # At the end of the file
+    ('01/01/1953', '''START 01/01/1950
+                    TIME 01/01/1951
+                    TIME 01/02/1951
+                    TIME 01/05/1951
+                    OUTPUT 
+                        FIELD MONTHLY
+                    ENDOUTPUT
+                    TIME 01/01/1952
+
+TIME 01/01/1953
+OUTPUT
+RFT TNEXT
+ENDOUTPUT
+
+                    STOP
+                    '''),
+
+], ids=['basic test - at existing time stamp', 'at a new timestamp', 'existing timestep with an OUTPUT',
+        'At the end of the file'])
 def test_add_array_output_request(mocker, new_rft_date, expected_result):
     # Arrange
     runcontrol_content = '''START 01/01/1950
