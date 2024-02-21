@@ -753,7 +753,7 @@ def test_output_request_to_table_line():
     # Arrange
     output_req = NexusOutputRequest(date='01/02/1951', output='RFT', output_type=OutputType.ARRAY,
                                     output_frequency=FrequencyEnum.TNEXT, output_frequency_number=None)
-    expected_result = 'RFT TNEXT'
+    expected_result = 'RFT TNEXT\n'
     # Act
     result = output_req.to_table_line(headers=[])
 
