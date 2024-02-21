@@ -26,6 +26,7 @@ class NexusOutputRequest(DataObjectMixin):
         result = f'{self.output} {self.output_frequency.name}'
         if self.output_frequency_number is not None:
             result += ' ' + str(self.output_frequency_number)
+        result += '\n'
         return result
 
     @property
@@ -256,4 +257,5 @@ class NexusReporting:
                                                         file_to_add_to=self.__model.model_files.runcontrol_file,
                                                         new_object=output_request,
                                                         object_properties=obj_props,
+                                                        skip_reading_headers=True,
                                                         )

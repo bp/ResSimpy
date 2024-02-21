@@ -195,7 +195,8 @@ class AddObjectOperations:
         return name, date
 
     def add_object_to_file(self, date: str, file_as_list: list[str], file_to_add_to: File, new_object: T,
-                           object_properties: dict[str, None | str | float | int]) -> None:
+                           object_properties: dict[str, None | str | float | int], skip_reading_headers: bool = False) \
+            -> None:
         """Finds where the object should be added based on the date and existing tables.
 
         Args:
@@ -205,7 +206,8 @@ class AddObjectOperations:
             new_object (Any): an object with a to_dict, table_header, table_footer, get_keyword_mapping and to_string
             methods.
             object_properties (dict[str, None | str | float | int]): dictionary containing new attributes of the object.
-
+            skip_reading_headers (bool): if True skips reading the headers and just adds the new object to the file.
+            Used for when objects do not have header tables.
         """
         # initialise some useful variables
         additional_content: list[str] = []
@@ -234,10 +236,14 @@ class AddObjectOperations:
             # find a table that exists in that date
             if nfo.check_token(self.table_header, line) and date_index != -1:
                 # get the header of the table
-                header_index, headers, headers_original = self.get_and_write_new_header(
-                    additional_headers, object_properties, file_as_list, index, nexus_mapping, file_to_add_to
-                    )
-                continue
+                if skip_reading_headers:
+                    header_index = index
+                    headers = headers_original
+                else:
+                    header_index, headers, headers_original = self.get_and_write_new_header(
+                        additional_headers, object_properties, file_as_list, index, nexus_mapping, file_to_add_to
+                        )
+                    continue
 
             if header_index != -1 and index > header_index:
                 # check for valid rows + fill extra columns with NA

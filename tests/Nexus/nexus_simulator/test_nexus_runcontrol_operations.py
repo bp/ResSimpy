@@ -636,20 +636,10 @@ TIME 24/01/1999
     assert nexus_reporting.ss_output_contents == expected_ss_output_contents
     assert nexus_reporting.array_output_contents == expected_array_output_contents
 
-def test_add_array_output_request(mocker):
-    # Arrange
-    runcontrol_content = '''START 01/01/1950
-                    TIME 01/01/1951
-                    TIME 01/02/1951
-                    TIME 01/05/1951
-                    OUTPUT 
-                        FIELD MONTHLY
-                    ENDOUTPUT
-                    TIME 01/01/1952
-                    STOP
-                    '''
 
-    expected_result = '''START 01/01/1950
+@pytest.mark.parametrize('new_rft_date, expected_result',[
+    # basic test - at existing time stamp
+    ('01/02/1951', '''START 01/01/1950
                     TIME 01/01/1951
                     TIME 01/02/1951
 
@@ -664,7 +654,52 @@ ENDOUTPUT
                     ENDOUTPUT
                     TIME 01/01/1952
                     STOP
-                    '''.splitlines(keepends=True)
+                    '''),
+    # at a new timestamp
+    ('01/03/1951', '''START 01/01/1950
+                    TIME 01/01/1951
+                    TIME 01/02/1951
+
+TIME 01/03/1951
+OUTPUT
+
+RFT TNEXT
+ENDOUTPUT
+
+                    TIME 01/05/1951
+                    OUTPUT 
+                        FIELD MONTHLY
+                    ENDOUTPUT
+                    TIME 01/01/1952
+                    STOP
+                    '''),
+    # at an existing timestep with an OUTPUT field defined already
+    ('01/05/1951', '''START 01/01/1950
+                    TIME 01/01/1951
+                    TIME 01/02/1951
+                    TIME 01/05/1951
+                    OUTPUT 
+                        FIELD MONTHLY
+RFT TNEXT
+                    ENDOUTPUT
+                    TIME 01/01/1952
+                    STOP
+                    '''),
+], ids=['basic test - at existing time stamp', 'at a new timestamp', 'existing timestep with an OUTPUT'])
+def test_add_array_output_request(mocker, new_rft_date, expected_result):
+    # Arrange
+    runcontrol_content = '''START 01/01/1950
+                    TIME 01/01/1951
+                    TIME 01/02/1951
+                    TIME 01/05/1951
+                    OUTPUT 
+                        FIELD MONTHLY
+                    ENDOUTPUT
+                    TIME 01/01/1952
+                    STOP
+                    '''
+
+    expected_result = expected_result.splitlines(keepends=True)
     # fake model
     fcs_file_contents = '''
         RUN_UNITS ENGLISH
@@ -686,7 +721,7 @@ ENDOUTPUT
     nexus_reporting = NexusReporting(model=model)
 
     nexus_reporting.load_output_requests()
-    new_output_request = NexusOutputRequest(date='01/02/1951', output='RFT', output_type=OutputType.ARRAY,
+    new_output_request = NexusOutputRequest(date=new_rft_date, output='RFT', output_type=OutputType.ARRAY,
                                             output_frequency=FrequencyEnum.TNEXT, output_frequency_number=None)
 
     # Act
