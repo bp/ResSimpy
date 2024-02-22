@@ -1777,7 +1777,7 @@ C          node1         NA        NA    80    100.5 200.8   1     station      
  'unit_system': UnitSystem.METBAR, 'well_name':'GUN_P'},
 {'name': 'GUN_P', 'qmult_oil_rate': 128.528, 'qmult_gas_rate': 13776.669, 'qmult_water_rate': 0.0, 'date': '01/03/2025',
 'unit_system': UnitSystem.METBAR, 'active_node':True, 'min_pressure': 5.0, 'convert_qmult_to_reservoir_barrels': True,
-'well_name':'GUN_P', 'control_mode': ConstraintControlMode.RESV},
+'well_name':'GUN_P', 'control_mode': ConstraintControlMode.RESERVOIR_FLUID_RATE},
          {'name': 'test_welllist', 'wells': ['well1', 'well2', 'well3'], 'date': '01/03/2025',}
          ),
      ])
