@@ -6,7 +6,6 @@ from ResSimpy.Nexus.NexusKeywords.proc_keywords import PREDEFINED_VARS, CONDITIO
 # set custom error message
 class SetError(Exception):
     """A SetError message will appear when the user tries to wrongly set the attribute contents_breakdown."""
-    pass
 
 
 @dataclass(kw_only=True, repr=True)
@@ -24,15 +23,15 @@ class NexusProc:
                  priority: Optional[int] = None) -> None:
         """Initialize the attributes of the class.
 
-           Attributes:
-                      date: The date the procedure occured.
-                      name: The name of the procedure.
-                  priority: An integer describing the relative priority of the procedure.
-                  contents: The entire contents of the procedure (everything written between PROC and ENDPROC).
+        Attributes:
+                date: The date the procedure occured.
+                name: The name of the procedure.
+                priority: An integer describing the relative priority of the procedure.
+                contents: The entire contents of the procedure (everything written between PROC and ENDPROC).
         contents_breakdown: A dictionary of counts for built-in nexus proc functions used in the procedure.
 
-           Methods:
-                   reset_nexus_proc_function_counts(): Returns a dictionary of zero counts for the nexus proc functions.
+        Methods:
+                reset_nexus_proc_function_counts(): Returns a dictionary of zero counts for the nexus proc functions.
         """
 
         self.__date = date
