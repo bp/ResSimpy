@@ -172,6 +172,7 @@ class NexusNetwork(Network):
                         # the search string must be adjusted to avoid over counting when such cases arise
                         if len(function) == 1:
                             nexus_proc_function_counts[function] += (
+                                # the regex ensures that cases such as P    ( are captured
                                 len(re.findall(function + '\\s*\\(', line.upper().split('!')[0])))
                         else:
                             nexus_proc_function_counts[function] += (
