@@ -26,7 +26,7 @@ class Constraint(DataObjectMixin, ABC):
     max_reservoir_gas_rate: Optional[float] = None
     max_reservoir_water_rate: Optional[float] = None
     max_reservoir_liquid_rate: Optional[float] = None
-    control_mode: ConstraintControlMode = ConstraintControlMode.ORAT
+    control_mode: ConstraintControlMode = ConstraintControlMode.OIL_RATE
     bottom_hole_pressure: Optional[float] = None
     tubing_head_pressure: Optional[float] = None
     max_reservoir_total_fluids_rate: Optional[float] = None
