@@ -124,35 +124,35 @@ def update_constraint_control_mode(existing_constraint: NexusConstraint) -> None
     """Updates the constraint object with a control mode property set based upon the rates in the constraint."""
     # Check for QMULT tables that will determine the control mode
     if existing_constraint.convert_qmult_to_reservoir_barrels is not None:
-        existing_constraint.control_mode = ConstraintControlMode.RESV
+        existing_constraint.control_mode = ConstraintControlMode.RESERVOIR_FLUID_RATE
         return
     if existing_constraint.use_qmult_qoil_surface_rate is not None:
-        existing_constraint.control_mode = ConstraintControlMode.ORAT
+        existing_constraint.control_mode = ConstraintControlMode.OIL_RATE
         return
     if existing_constraint.use_qmult_qoilqwat_surface_rate is not None:
-        existing_constraint.control_mode = ConstraintControlMode.LRAT
+        existing_constraint.control_mode = ConstraintControlMode.LIQUID_RATE
         return
     if existing_constraint.use_qmult_qgas_surface_rate is not None:
-        existing_constraint.control_mode = ConstraintControlMode.GRAT
+        existing_constraint.control_mode = ConstraintControlMode.GAS_RATE
         return
     if existing_constraint.use_qmult_qwater_surface_rate is not None:
-        existing_constraint.control_mode = ConstraintControlMode.WRAT
+        existing_constraint.control_mode = ConstraintControlMode.WATER_RATE
         return
 
     # Go through the order of precedence to select the most likely control mode
     rates_present = 0
 
     if existing_constraint.max_surface_water_rate is not None:
-        existing_constraint.control_mode = ConstraintControlMode.WRAT
+        existing_constraint.control_mode = ConstraintControlMode.WATER_RATE
         rates_present += 1
     if existing_constraint.max_surface_gas_rate is not None:
-        existing_constraint.control_mode = ConstraintControlMode.GRAT
+        existing_constraint.control_mode = ConstraintControlMode.GAS_RATE
         rates_present += 1
     if existing_constraint.max_surface_liquid_rate is not None:
-        existing_constraint.control_mode = ConstraintControlMode.LRAT
+        existing_constraint.control_mode = ConstraintControlMode.LIQUID_RATE
         rates_present += 1
     if existing_constraint.max_surface_oil_rate is not None:
-        existing_constraint.control_mode = ConstraintControlMode.ORAT
+        existing_constraint.control_mode = ConstraintControlMode.OIL_RATE
         rates_present += 1
 
     if rates_present == 0:
