@@ -76,5 +76,6 @@ class NexusRockMethods(Rock):
         self.__properties_loaded = True
 
     @property
-    def model_unit_system(self):
+    def model_unit_system(self) -> UnitSystem:
+        """Return the model unit system."""
         return self.__model_unit_system

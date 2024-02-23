@@ -76,4 +76,5 @@ class NexusEquilMethods(Equilibration):
 
     @property
     def model_unit_system(self) -> UnitSystem:
+        """Return the model unit system."""
         return self.__model_unit_system
