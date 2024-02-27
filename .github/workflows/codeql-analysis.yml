@@ -10,7 +10,7 @@ on:
     # branches: [ master ]
   # schedule:
     # 10:16 on Fridays
-   # - cron: '16 10 * * 5'
+   # - cron: '16 10 * * 5' 
 
 jobs:
   analyze:
