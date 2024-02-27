@@ -169,9 +169,10 @@ class AddObjectOperations:
             new_table_as_list.append('TIME ' + obj_date)
         new_table_as_list += [self.table_header]
         headers = [k for k, v in nexus_mapping.items() if v[0] in object_properties]
-        write_out_headers = ' '.join(headers)
-        new_table_as_list.append(write_out_headers)
-        new_table_as_list.append(new_obj.to_table_line(headers))
+        if headers:
+            write_out_headers = ' '.join(headers)
+            new_table_as_list.append(write_out_headers)
+        new_table_as_list.append(new_obj.to_table_line(headers=headers))
         new_table_as_list.append(self.table_footer)
         new_table_as_list = [x + '\n' if not x.endswith('\n') else x for x in new_table_as_list]
         new_table_as_list.append('\n')
@@ -195,7 +196,8 @@ class AddObjectOperations:
         return name, date
 
     def add_object_to_file(self, date: str, file_as_list: list[str], file_to_add_to: File, new_object: T,
-                           object_properties: dict[str, None | str | float | int]) -> None:
+                           object_properties: dict[str, None | str | float | int], skip_reading_headers: bool = False) \
+            -> None:
         """Finds where the object should be added based on the date and existing tables.
 
         Args:
@@ -205,7 +207,8 @@ class AddObjectOperations:
             new_object (Any): an object with a to_dict, table_header, table_footer, get_keyword_mapping and to_string
             methods.
             object_properties (dict[str, None | str | float | int]): dictionary containing new attributes of the object.
-
+            skip_reading_headers (bool): if True skips reading the headers and just adds the new object to the file.
+            Used for when objects do not have header tables.
         """
         # initialise some useful variables
         additional_content: list[str] = []
@@ -234,10 +237,14 @@ class AddObjectOperations:
             # find a table that exists in that date
             if nfo.check_token(self.table_header, line) and date_index != -1:
                 # get the header of the table
-                header_index, headers, headers_original = self.get_and_write_new_header(
-                    additional_headers, object_properties, file_as_list, index, nexus_mapping, file_to_add_to
-                    )
-                continue
+                if skip_reading_headers:
+                    header_index = index
+                    headers = headers_original
+                else:
+                    header_index, headers, headers_original = self.get_and_write_new_header(
+                        additional_headers, object_properties, file_as_list, index, nexus_mapping, file_to_add_to
+                        )
+                    continue
 
             if header_index != -1 and index > header_index:
                 # check for valid rows + fill extra columns with NA
@@ -253,7 +260,7 @@ class AddObjectOperations:
                 id_line_locs = [insert_line_index]
 
             # if we have passed the date or if we're at the end of the file write out the table
-            if date_comparison > 0:
+            if date_comparison > 0 or nfo.check_token('STOP', line):
                 new_table, obj_in_table_index = self.write_out_new_table_containing_object(
                     obj_date=date, object_properties=object_properties, date_found=date_found, new_obj=new_object)
                 additional_content.extend(new_table)

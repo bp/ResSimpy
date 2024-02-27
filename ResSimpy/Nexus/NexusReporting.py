@@ -4,18 +4,39 @@ from dataclasses import dataclass
 
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
+from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.FrequencyEnum import FrequencyEnum
 from ResSimpy.Enums.OutputType import OutputType
+from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
+from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 
 
 @dataclass(kw_only=True)
-class NexusOutputRequest:
+class NexusOutputRequest(DataObjectMixin):
     """Class for handling output requests in Nexus."""
     date: str
     output: str
     output_type: OutputType
     output_frequency: FrequencyEnum
     output_frequency_number: None | float
+
+    def to_table_line(self, headers: list[str]) -> str:
+        """String representation of the single line within an Output request table."""
+        _ = headers
+        result = f'{self.output} {self.output_frequency.name}'
+        if self.output_frequency_number is not None:
+            result += ' ' + str(self.output_frequency_number)
+        result += '\n'
+        return result
+
+    @property
+    def units(self) -> BaseUnitMapping:
+        return BaseUnitMapping(unit_system=None)
+
+    @staticmethod
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """No keywords for this class, returns an empty dict."""
+        return {}
 
 
 @dataclass(kw_only=True)
@@ -35,8 +56,13 @@ class NexusReporting:
     __ss_output_contents: list[NexusOutputContents]
     __array_output_contents: list[NexusOutputContents]
 
+    table_header = 'OUTPUT'
+    table_footer = 'ENDOUTPUT'
+
     def __init__(self, model) -> None:
         self.__model = model
+        self.__add_object_operations = AddObjectOperations(NexusOutputRequest, self.table_header, self.table_footer,
+                                                           model)
 
     @property
     def ss_output_requests(self) -> list[NexusOutputRequest]:
@@ -223,3 +249,19 @@ class NexusReporting:
             resulting_output_contents.append(output_contents_obj)
 
         return resulting_output_contents
+
+    def _add_array_output_request(self, output_request: NexusOutputRequest) -> None:
+        """Adds an output request to the array output requests list.
+
+        Args:
+            output_request (NexusOutputRequest): The output request to add the model and associated in memory files.
+        """
+        file_as_list = self.__model.model_files.runcontrol_file.get_flat_list_str_file
+        obj_props = output_request.to_dict(add_units=False)
+        self.__add_object_operations.add_object_to_file(date=output_request.date,
+                                                        file_as_list=file_as_list,
+                                                        file_to_add_to=self.__model.model_files.runcontrol_file,
+                                                        new_object=output_request,
+                                                        object_properties=obj_props,
+                                                        skip_reading_headers=True,
+                                                        )
