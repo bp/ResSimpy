@@ -101,7 +101,7 @@ class NexusSimulator(Simulator):
         self.__write_times: bool = write_times
         self.__manual_fcs_tidy_call: bool = manual_fcs_tidy_call
 
-        self.__default_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
+        self._default_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
 
         self._network: NexusNetwork = NexusNetwork(model=self)
         self._wells: NexusWells = NexusWells(self)
@@ -192,7 +192,7 @@ class NexusSimulator(Simulator):
     @property
     def default_units(self):
         """Returns the default units."""
-        return self.__default_units
+        return self._default_units
 
     @property
     def run_units(self):
@@ -459,7 +459,7 @@ class NexusSimulator(Simulator):
             elif nfo.check_token('DEFAULT_UNITS', line):
                 value = fo.get_token_value('DEFAULT_UNITS', line, fcs_content_with_includes)
                 if value is not None:
-                    self.__default_units = UnitSystem(value.upper())
+                    self._default_units = UnitSystem(value.upper())
 
         # Load in the other files
 
