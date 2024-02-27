@@ -4,13 +4,13 @@ name: CodeQL
 
 on:
   push:
-    branches: [ master, upgrade_codeql_version ]
+    branches: [ master ]
   # pull_request:
     # The branches below must be a subset of the branches above
     # branches: [ master ]
-  # schedule:
+  schedule:
     # 10:16 on Fridays
-   # - cron: '16 10 * * 5'
+    - cron: '16 10 * * 5'
 
 jobs:
   analyze:
