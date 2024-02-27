@@ -73,3 +73,8 @@ class NexusHydraulicsMethods(Hydraulics):
                                                                      model_unit_system=self.__model_unit_system)
                     self.__inputs[table_num].read_properties()  # Populate object with hydraulics props
         self.__properties_loaded = True
+
+    @property
+    def model_unit_system(self) -> UnitSystem:
+        """Return the model unit system."""
+        return self.__model_unit_system
