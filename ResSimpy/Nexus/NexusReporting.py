@@ -35,6 +35,7 @@ class NexusOutputRequest(DataObjectMixin):
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """No keywords for this class, returns an empty dict."""
         return {}
 
 
@@ -250,6 +251,11 @@ class NexusReporting:
         return resulting_output_contents
 
     def _add_array_output_request(self, output_request: NexusOutputRequest) -> None:
+        """Adds an output request to the array output requests list.
+
+        Args:
+            output_request (NexusOutputRequest): The output request to add the model and associated in memory files.
+            """
         file_as_list = self.__model.model_files.runcontrol_file.get_flat_list_str_file
         obj_props = output_request.to_dict(add_units=False)
         self.__add_object_operations.add_object_to_file(date=output_request.date,
