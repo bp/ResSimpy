@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class GridFunctionTypeEnum(Enum):
     """Enum representing the different grid function types."""
     POLYN = 'POLYN'

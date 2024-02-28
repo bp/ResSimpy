@@ -293,12 +293,14 @@ def summarize_model_functions(function_list_to_parse: list[list[str]]) -> pd.Dat
 
     return function_summary_df
 
+
 def create_grid_array_function_objects(array_functions_as_list: list[list[str]]) -> list[NexusGridArrayFunction]:
     store_array_functions: list[NexusGridArrayFunction] = []
     for function_number, array_function in enumerate(array_functions_as_list, 1):
         new_grid_array_function_obj = object_from_array_function_block(array_function, function_number)
         store_array_functions.append(new_grid_array_function_obj)
     return store_array_functions
+
 
 def object_from_array_function_block(array_function: list[str], function_number: int) -> NexusGridArrayFunction:
     region_type = ''
@@ -317,7 +319,8 @@ def object_from_array_function_block(array_function: list[str], function_number:
                 continue
             if len(words) == 2:
                 if words[1] not in GRID_ARRAY_KEYWORDS:
-                    warnings.warn(f'Function {function_number + 1}:  Function table entries will be excluded from summary df.')
+                    warnings.warn(f'Function {function_number + 1}:  '
+                                  'Function table entries will be excluded from summary df.')
                     function_type = 'function table'
                 else:
                     region_type = words[1]
@@ -325,7 +328,8 @@ def object_from_array_function_block(array_function: list[str], function_number:
                     try:
                         region_number_list = [round(float(i)) for i in region_number_list]
                     except ValueError:
-                        warnings.warn(f'ValueError at function {function_number + 1}: could not convert string to integer.')
+                        warnings.warn(f'ValueError at function {function_number + 1}: '
+                                      'could not convert string to integer.')
 
         if 'ANALYT' in modified_line:
             function_type = words[1]

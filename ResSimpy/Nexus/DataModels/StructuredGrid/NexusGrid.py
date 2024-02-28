@@ -305,9 +305,8 @@ class NexusGrid(Grid):
             self.load_faults()
         return self.__faults_df
 
-
     @property
-    def array_functions(self) -> list[NexusGridArrayFunction]:
+    def array_functions(self) -> Optional[list[NexusGridArrayFunction]]:
         """Returns a list of the array functions defined in the structured grid file."""
         if self.__grid_array_functions is None:
             self.load_array_functions()
