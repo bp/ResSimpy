@@ -69,7 +69,6 @@ class NexusWellConnection(WellConnection):
     add_tubing: Optional[int] = None
     tracer: Optional[str] = None
     con_type: Optional[str] = None
-    hyd_method: Optional[str] = None
     pvt_method: Optional[int] = None
     water_method: Optional[int] = None
     bat_method: Optional[int] = None
