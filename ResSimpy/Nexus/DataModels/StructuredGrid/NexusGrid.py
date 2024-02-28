@@ -8,6 +8,7 @@ from typing import Optional, TYPE_CHECKING
 
 from ResSimpy.Grid import Grid, VariableEntry
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGridArrayFunction import NexusGridArrayFunction
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.Nexus.array_function_operations as afo
@@ -50,6 +51,7 @@ class NexusGrid(Grid):
         self.__grid_faults_loaded: bool = False
         self.__grid_properties_loaded: bool = False
         self.__grid_nexus_file: Optional[NexusFile] = grid_nexus_file
+        self.__grid_array_functions: Optional[list[NexusGridArrayFunction]] = None
 
     def __wrap(self, value):
         if isinstance(value, tuple | list | set | frozenset):
@@ -248,6 +250,7 @@ class NexusGrid(Grid):
         if self.__grid_file_contents is None:
             raise ValueError("Cannot load array functions as grid file cannot not found")
         self.__array_functions_list = afo.collect_all_function_blocks(self.__grid_file_contents)
+        self.__grid_array_functions = afo.create_grid_array_function_objects(self.__array_functions_list)
         self.__array_functions_df = afo.summarize_model_functions(self.__array_functions_list)
         self.__array_functions_loaded = True
 
@@ -301,3 +304,11 @@ class NexusGrid(Grid):
         if not self.__grid_faults_loaded:
             self.load_faults()
         return self.__faults_df
+
+
+    @property
+    def array_functions(self) -> list[NexusGridArrayFunction]:
+        """Returns a list of the array functions defined in the structured grid file."""
+        if self.__grid_array_functions is None:
+            self.load_array_functions()
+        return self.__grid_array_functions

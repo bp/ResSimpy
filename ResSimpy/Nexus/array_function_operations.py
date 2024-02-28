@@ -4,6 +4,9 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 import pandas as pd
 from typing import Union
 import warnings
+
+from ResSimpy.Enums.GridFunctionTypes import GridFunctionTypeEnum
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGridArrayFunction import NexusGridArrayFunction
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEYWORDS
 
 
@@ -289,3 +292,62 @@ def summarize_model_functions(function_list_to_parse: list[list[str]]) -> pd.Dat
     function_summary_df = function_summary_df.set_index('FUNCTION #')
 
     return function_summary_df
+
+def create_grid_array_function_objects(array_functions_as_list: list[list[str]]) -> list[NexusGridArrayFunction]:
+    store_array_functions: list[NexusGridArrayFunction] = []
+    for function_number, array_function in enumerate(array_functions_as_list, 1):
+        new_grid_array_function_obj = object_from_array_function_block(array_function, function_number)
+        store_array_functions.append(new_grid_array_function_obj)
+    return store_array_functions
+
+def object_from_array_function_block(array_function: list[str], function_number: int) -> NexusGridArrayFunction:
+    region_type = ''
+    region_number_list = []
+    function_type = ''
+    function_coefficients = []
+    input_array_list = []
+    output_array_list = []
+    function_type_enum = None
+
+    for li, line in enumerate(array_function):
+        modified_line = line.upper()
+        words = modified_line.split()
+        if 'FUNCTION' in modified_line:
+            if len(words) == 1:
+                continue
+            if len(words) == 2:
+                if words[1] not in GRID_ARRAY_KEYWORDS:
+                    warnings.warn(f'Function {function_number + 1}:  Function table entries will be excluded from summary df.')
+                    function_type = 'function table'
+                else:
+                    region_type = words[1]
+                    region_number_list = array_function[li + 1].split()
+                    try:
+                        region_number_list = [round(float(i)) for i in region_number_list]
+                    except ValueError:
+                        warnings.warn(f'ValueError at function {function_number + 1}: could not convert string to integer.')
+
+        if 'ANALYT' in modified_line:
+            function_type = words[1]
+            function_type_enum = GridFunctionTypeEnum(function_type)
+            if len(words) > 2:
+                # remove the first 2 words in line, and set the rest to coefficients
+                function_coefficients = words[2:]
+                # convert string coefficient values to numerical, if possible:
+                try:
+                    function_coefficients = [float(i) for i in function_coefficients]
+                except ValueError:
+                    warnings.warn(f'ValueError at function {function_number + 1}: could not convert string to float.')
+
+        if 'OUTPUT' in modified_line and 'RANGE' not in modified_line:
+            input_array_list = words[:words.index('OUTPUT')]
+            output_array_list = words[words.index('OUTPUT') + 1:]
+    new_grid_array_function = NexusGridArrayFunction(
+        region_type=region_type,
+        region_number=region_number_list,
+        function_type=function_type_enum,
+        input_array=input_array_list,
+        output_array=output_array_list,
+        function_values=function_coefficients
+    )
+    return new_grid_array_function
