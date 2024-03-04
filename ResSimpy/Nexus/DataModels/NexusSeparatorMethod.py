@@ -12,6 +12,7 @@ from ResSimpy.Nexus.NexusKeywords.separator_keywords import SEPARATOR_KEYWORDS
 from ResSimpy.DynamicProperty import DynamicProperty
 from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import SeparatorUnits
 from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
+from ResSimpy.Enums.FluidTypeEnums import SeparatorType
 
 
 @dataclass(kw_only=True, repr=False)  # Doesn't need to write an _init_, _eq_ methods, etc.
@@ -28,14 +29,14 @@ class NexusSeparatorMethod(DynamicProperty):
     """
 
     file: NexusFile
-    separator_type: Optional[str] = None
+    separator_type: Optional[SeparatorType] = None
     properties: dict[str, Union[str, int, float, Enum, list[str],
                      pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
     unit_system: UnitSystem
 
     def __init__(self, file: NexusFile, input_number: int, model_unit_system: UnitSystem,
-                 separator_type: Optional[str] = None,
+                 separator_type: Optional[SeparatorType] = None,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
         if separator_type is not None:
@@ -75,10 +76,10 @@ class NexusSeparatorMethod(DynamicProperty):
                 for desc_line in value:
                     printable_str += 'DESC ' + desc_line + '\n'
             elif key == 'SEPARATOR_TABLE' and isinstance(value, pd.DataFrame):
-                if self.separator_type == 'GASPLANT':
+                if self.separator_type == SeparatorType.GASPLANT:
                     printable_str += 'RECFAC_TABLE\n'
                 printable_str += value.to_string(na_rep='', index=False) + '\n'
-                if self.separator_type == 'GASPLANT':
+                if self.separator_type == SeparatorType.GASPLANT:
                     printable_str += 'ENDRECFAC_TABLE\n'
                 printable_str += '\n'
             elif isinstance(value, Enum):
@@ -116,13 +117,13 @@ class NexusSeparatorMethod(DynamicProperty):
 
             # Determine separator type, i.e., EOS multistage, gas plant data or black oil
             if nfo.check_token('TEMP', line):  # EOS multistage separator table
-                self.separator_type = 'EOS'
+                self.separator_type = SeparatorType.EOS
                 sep_table_indices[0] = line_indx  # Specify EOS multistage separator table starting index
                 start_reading_table = True
                 line_indx += 1
                 continue
             elif nfo.check_token('KEYCPTLIST', line):  # Gas plant data
-                self.separator_type = 'GASPLANT'
+                self.separator_type = SeparatorType.GASPLANT
                 elems = line.split('!')[0].split()
                 cpt_index = elems.index('KEYCPTLIST')
                 if 'KEYCPTLIST' not in self.properties.keys():
@@ -130,7 +131,7 @@ class NexusSeparatorMethod(DynamicProperty):
                 line_indx += 1
                 continue
             elif nfo.check_token('BOSEP', line):  # Black oil separator table
-                self.separator_type = 'BLACKOIL'
+                self.separator_type = SeparatorType.BLACKOIL
                 self.properties['BOSEP'] = ''
                 line_indx += 1
                 continue
@@ -146,7 +147,7 @@ class NexusSeparatorMethod(DynamicProperty):
                         self.properties[key] = int(nfo.get_expected_token_value(key, line, file_as_list))
 
             # Find starting index for black oil separator table
-            if self.separator_type == 'BLACKOIL':
+            if self.separator_type == SeparatorType.BLACKOIL:
                 if nfo.check_token('KVOIL', line):
                     sep_table_indices[0] = line_indx
                     start_reading_table = True
@@ -155,7 +156,7 @@ class NexusSeparatorMethod(DynamicProperty):
 
             # Find ending index for EOS multistage and black oil separator tables
             if start_reading_table:
-                if self.separator_type in ['EOS', 'BLACKOIL']:
+                if self.separator_type in [SeparatorType.EOS, SeparatorType.BLACKOIL]:
                     for keyword in SEPARATOR_KEYWORDS:
                         if nfo.check_token(keyword, line):
                             sep_table_indices[1] = line_indx
@@ -163,7 +164,7 @@ class NexusSeparatorMethod(DynamicProperty):
                             break
 
             # Find starting and ending indices for gas plant separator table
-            if self.separator_type == 'GASPLANT':
+            if self.separator_type == SeparatorType.GASPLANT:
                 if nfo.check_token('RECFAC_TABLE', line):
                     sep_table_indices[0] = line_indx + 1
                     start_reading_table = True

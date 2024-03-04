@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Enums.FluidTypeEnums import PvtType
 
 from ResSimpy.Nexus.DataModels.NexusPVTMethod import NexusPVTMethod
 from ResSimpy.Enums.UnitsEnum import UnitSystem, TemperatureUnits
@@ -34,7 +35,7 @@ from ResSimpy.Nexus.NexusPVTMethods import NexusPVTMethods
     PRES BO VO
     2515 1.25 0.99
     3515 1.24 0.98
-    """, {'PVT_TYPE': 'BLACKOIL', 'API': 30.0, 'SPECG': 0.6,
+    """, {'PVT_TYPE': PvtType.BLACKOIL, 'API': 30.0, 'SPECG': 0.6,
           'UNIT_SYSTEM': UnitSystem.ENGLISH, 'DESC': ['This is first line of description',
                                              'and this is second line of description'
                                              ],
@@ -72,7 +73,7 @@ from ResSimpy.Nexus.NexusPVTMethods import NexusPVTMethods
     PRES BO VO
     2515 1.25 0.99
     3515 1.24 0.98
-    """, {'PVT_TYPE': 'BLACKOIL', 'API': 30.0, 'SPECG': 0.6,
+    """, {'PVT_TYPE': PvtType.BLACKOIL, 'API': 30.0, 'SPECG': 0.6,
           'OIL': pd.DataFrame({'PRES': [14.7, 115., 2515, 3515],
                                 'BO': [1.05, 1.08, 1.25, 1.33],
                                 'RS': [0.005, 0.045, 0.505, 0.69],
@@ -99,7 +100,7 @@ from ResSimpy.Nexus.NexusPVTMethods import NexusPVTMethods
     115. 1.08 0.045 2.78
     2515 1.25 0.505 0.99
     3515 1.33 0.69 0.79
-    """, {'PVT_TYPE': 'WATEROIL', 'DENOIL': 55.185,
+    """, {'PVT_TYPE': PvtType.WATEROIL, 'DENOIL': 55.185,
           'UNIT_SYSTEM': UnitSystem.ENGLISH,
           'OIL': pd.DataFrame({'PRES': [14.7, 115., 2515, 3515],
                                 'BO': [1.05, 1.08, 1.25, 1.33],
@@ -135,7 +136,7 @@ from ResSimpy.Nexus.NexusPVTMethods import NexusPVTMethods
     RV BG VG
     0.0 0.787 0.0193
     
-    """, {'PVT_TYPE': 'BLACKOIL', 'API': 30.0, 'SPECG': 0.6,
+    """, {'PVT_TYPE': PvtType.BLACKOIL, 'API': 30.0, 'SPECG': 0.6,
           'UNIT_SYSTEM': UnitSystem.ENGLISH, 'DESC': ['This is first line of description',
                                              'and this is second line of description'
                                              ],
@@ -165,7 +166,7 @@ from ResSimpy.Nexus.NexusPVTMethods import NexusPVTMethods
     2515 1.089 0.0193
     3515 0.787 0.0193
     
-    """, {'PVT_TYPE': 'GASWATER', 'SPECG': 0.6,
+    """, {'PVT_TYPE': PvtType.GASWATER, 'SPECG': 0.6,
           'GAS': pd.DataFrame({'PRES': [14.7, 115., 2515, 3515],
                                 'BG': [225, 25, 1.089, 0.787],
                                 'VG': [0.0105, 0.0109, 0.0193, 0.0193]
@@ -224,7 +225,7 @@ from ResSimpy.Nexus.NexusPVTMethods import NexusPVTMethods
                         6        3.1e-2
                         ENDPEDTUNE
     
-    """, {'PVT_TYPE': 'EOS', 'UNIT_SYSTEM': UnitSystem.ENGLISH, 'TEMP_UNIT': TemperatureUnits.FAHR,
+    """, {'PVT_TYPE': PvtType.EOS, 'UNIT_SYSTEM': UnitSystem.ENGLISH, 'TEMP_UNIT': TemperatureUnits.FAHR,
           'DESC': ['SPE 5'], 'TEMP': 160.0, 'NHC': 6, 'COMPONENTS': ['C1', 'C3', 'C6', 'C10', 'C15', 'C20'],
           'EOSOPTIONS': {'EOS_METHOD': 'PR',
                          'EOS_OPT_PRIMARY_LIST': ['ZGIBBS', 'FLASH_GIBBS_ON', 'STKATZOFF', 'CAPILLARYFLASH', 'VISPE'],
@@ -282,7 +283,7 @@ from ResSimpy.Nexus.NexusPVTMethods import NexusPVTMethods
                  TRANS_TEST INCRP PHASEFRAC 0.05
                  VISPE
     
-    """, {'PVT_TYPE': 'EOS', 'UNIT_SYSTEM': UnitSystem.ENGLISH, 'TEMP_UNIT': TemperatureUnits.RANKINE,
+    """, {'PVT_TYPE': PvtType.EOS, 'UNIT_SYSTEM': UnitSystem.ENGLISH, 'TEMP_UNIT': TemperatureUnits.RANKINE,
           'DESC': ['EOS EXAMPLE WITH NO TABLES'], 'NHC': 5, 'COMPONENTS': ['C1', 'C2', 'C3-4', 'C5-6', 'C7+'],
           'TEMP': 520.0,
           'EOSOPTIONS': {'EOS_METHOD': 'PR',
@@ -353,7 +354,7 @@ from ResSimpy.Nexus.NexusPVTMethods import NexusPVTMethods
                         C3-4 C5-6 -0.025
                         ENDVISKKIJ
     
-    """, {'PVT_TYPE': 'EOS', 'UNIT_SYSTEM': UnitSystem.ENGLISH, 'TEMP_UNIT': TemperatureUnits.RANKINE,
+    """, {'PVT_TYPE': PvtType.EOS, 'UNIT_SYSTEM': UnitSystem.ENGLISH, 'TEMP_UNIT': TemperatureUnits.RANKINE,
           'DESC': ['EOS EXAMPLE WITH PEDERSON VISCOSITY COEFFICIENTS MODIFIED'], 'NHC': 5,
           'COMPONENTS': ['C1', 'C2', 'C3-4', 'C5-6', 'C7+'],
           'TEMP': 520.0,
@@ -392,7 +393,7 @@ def test_read_pvt_properties_from_file(mocker, file_contents, expected_pvt_prope
 
     # Assert
     assert pvt_obj.pvt_type == expected_pvt_properties['PVT_TYPE']
-    if pvt_obj.pvt_type == 'EOS':
+    if pvt_obj.pvt_type == PvtType.EOS:
         eos_opts = pvt_obj.eos_options
         assert pvt_obj.eos_temp == expected_pvt_properties['TEMP']
         assert pvt_obj.eos_nhc == expected_pvt_properties['NHC']
@@ -416,7 +417,7 @@ def test_nexus_blackoil_pvt_repr():
     # Arrange
     pvt_file = NexusFile(location='test/file/pvt.dat')
     pvt_obj = NexusPVTMethod(file=pvt_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
-    pvt_obj.pvt_type = 'BLACKOIL'
+    pvt_obj.pvt_type = PvtType.BLACKOIL
     pvt_obj.properties = {'API': 30.0, 'SPECG': 0.6,
           'UNIT_SYSTEM': UnitSystem.ENGLISH, 'DESC': ['This is first line of description',
                                              'and this is second line of description'
@@ -480,7 +481,7 @@ def test_nexus_eos_pvt_repr():
     # Arrange
     pvt_file = NexusFile(location='test/file/pvt.dat')
     pvt_obj = NexusPVTMethod(file=pvt_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
-    pvt_obj.pvt_type = 'EOS'
+    pvt_obj.pvt_type = PvtType.EOS
     pvt_obj.eos_nhc = 6
     pvt_obj.eos_components = ['C1', 'C3', 'C6', 'C10', 'C15', 'C20']
     pvt_obj.eos_temp = 160.
@@ -567,7 +568,7 @@ EOSOPTIONS PR
 def test_nexus_pvt_methods_repr():
     # Arrange
     pvt_file = NexusFile(location='test/file/pvt.dat')
-    pvt_type = 'EOS'
+    pvt_type = PvtType.EOS
     eos_nhc = 6
     eos_components = ['C1', 'C3', 'C6', 'C10', 'C15', 'C20']
     eos_temp = 160.
@@ -704,11 +705,12 @@ EOSOPTIONS PR
     # Assert
     assert result == expected_output
 
+
 def test_pvt_method_ranges():
     # Arrange
     pvt_file = NexusFile(location='test/file/pvt.dat')
     pvt_obj = NexusPVTMethod(file=pvt_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
-    pvt_obj.pvt_type = 'BLACKOIL'
+    pvt_obj.pvt_type = PvtType.BLACKOIL
     pvt_obj.properties = {'API': 30.0, 'SPECG': 0.6,
                           'UNIT_SYSTEM': UnitSystem.ENGLISH, 'DESC': ['This is first line of description',
                                                                       'and this is second line of description'
