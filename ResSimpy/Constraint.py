@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from typing import Optional
 
 from ResSimpy.DataObjectMixin import DataObjectMixin
-from ResSimpy.Enums.ConstraintEnums import ConstraintControlMode
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Units.AttributeMappings.ConstraintUnitMapping import ConstraintUnits
 
@@ -26,7 +25,6 @@ class Constraint(DataObjectMixin, ABC):
     max_reservoir_gas_rate: Optional[float] = None
     max_reservoir_water_rate: Optional[float] = None
     max_reservoir_liquid_rate: Optional[float] = None
-    control_mode: ConstraintControlMode = ConstraintControlMode.OIL_RATE
     bottom_hole_pressure: Optional[float] = None
     tubing_head_pressure: Optional[float] = None
     max_reservoir_total_fluids_rate: Optional[float] = None
