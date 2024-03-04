@@ -5,6 +5,7 @@ import pandas as pd
 from pytest_mock import MockerFixture
 
 from ResSimpy.Enums.UnitsEnum import SUnits, TemperatureUnits, UnitSystem
+from ResSimpy.Enums.FluidTypeEnums import PvtType, SeparatorType
 from ResSimpy.File import File
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -352,7 +353,7 @@ def test_nexus_pvt_write_to_new_file(mocker):
     pfile = NexusFile(location='/my/orig_prop/file.dat')
     properties = {'API': 30.0, 'SPECG': 0.6, 'UNIT_SYSTEM': UnitSystem.ENGLISH, 'DESC': ['This is first line of description',
                                                                                          'and this is second line of description']}
-    dataobj = NexusPVTMethod(file=pfile, input_number=1, model_unit_system=UnitSystem.ENGLISH, pvt_type='BLACKOIL',
+    dataobj = NexusPVTMethod(file=pfile, input_number=1, model_unit_system=UnitSystem.ENGLISH, pvt_type=PvtType.BLACKOIL,
                              properties=properties)
     expected_result = '''DESC This is first line of description
 DESC and this is second line of description
@@ -378,13 +379,8 @@ def test_nexus_pvt_write_to_new_file_existing_file_raises_error(mocker):
     pfile = NexusFile(location='/my/orig_prop/file.dat')
     properties = {'API': 30.0, 'SPECG': 0.6, 'UNIT_SYSTEM': UnitSystem.ENGLISH, 'DESC': ['This is first line of description',
                                                                                          'and this is second line of description']}
-    dataobj = NexusPVTMethod(file=pfile, input_number=1, model_unit_system=UnitSystem.ENGLISH, pvt_type='BLACKOIL',
+    dataobj = NexusPVTMethod(file=pfile, input_number=1, model_unit_system=UnitSystem.ENGLISH, pvt_type=PvtType.BLACKOIL,
                              properties=properties)
-    expected_result = '''DESC This is first line of description
-DESC and this is second line of description
-BLACKOIL API 30.0 SPECG 0.6
-ENGLISH
-'''
 
     # make a mock for the write operation
     writing_mock_open = mocker.mock_open()
@@ -396,6 +392,7 @@ ENGLISH
 
     # Assert
     assert ve.value.args[0] == 'Please specify either overwrite_file as True or provide new_file_location.'
+
 
 def test_nexus_aquifer_write_to_file(mocker):
     # Arrange
@@ -788,7 +785,7 @@ def test_nexus_separator_write_to_file(mocker):
                                                    }),
                   'WATERMETHOD': 1}
     dataobj = NexusSeparatorMethod(file=pfile, input_number=1, model_unit_system=UnitSystem.ENGLISH,
-                                   properties=properties, separator_type='EOS')
+                                   properties=properties, separator_type=SeparatorType.EOS)
     expected_result = """DESC This is first line of description
 DESC and this is second line of description
 ENGLISH

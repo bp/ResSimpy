@@ -13,6 +13,7 @@ from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_EOSOPTIONS_PRIMARY_KEY
 from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_EOSOPTIONS_TRANS_TEST_KEYS, PVT_EOSOPTIONS_PHASEID_KEYS
 from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_EOSOPTIONS_TERTIARY_KEYS, PVT_ALL_TABLE_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_UNSAT_TABLE_INDICES
+from ResSimpy.Enums.FluidTypeEnums import PvtType
 from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 from ResSimpy.DynamicProperty import DynamicProperty
 from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import PVTUnits
@@ -43,7 +44,7 @@ class NexusPVTMethod(DynamicProperty):
 
     # General parameters
     file: NexusFile
-    pvt_type: Optional[str] = None
+    pvt_type: Optional[PvtType] = None
     eos_nhc: Optional[int] = None  # Number of hydrocarbon components
     eos_temp: Optional[float] = None  # Default temperature for EOS method
     eos_components: Optional[list[str]] = field(default_factory=get_empty_list_str)
@@ -57,7 +58,7 @@ class NexusPVTMethod(DynamicProperty):
     unit_system: UnitSystem
 
     def __init__(self, file: NexusFile, input_number: int, model_unit_system: UnitSystem,
-                 pvt_type: Optional[str] = None,
+                 pvt_type: Optional[PvtType] = None,
                  eos_nhc: Optional[int] = None, eos_temp: Optional[float] = None,
                  eos_components: Optional[list[str]] = None,
                  eos_options: Optional[dict[str, Union[str, int, float, pd.DataFrame, list[str], dict[str, float],
@@ -137,7 +138,7 @@ class NexusPVTMethod(DynamicProperty):
             for desc_line in pvt_dict['DESC']:
                 printable_str += 'DESC ' + desc_line + '\n'
         # Print PVT type and associated properties
-        printable_str += f'{self.pvt_type}'
+        printable_str += '' if self.pvt_type is None else f'{self.pvt_type.value}'
         if self.eos_nhc is not None:
             printable_str += f' NHC {self.eos_nhc}'
         for pvt_key in PVT_BLACKOIL_PRIMARY_KEYWORDS:
@@ -372,7 +373,7 @@ class NexusPVTMethod(DynamicProperty):
             # Determine PVT type, i.e., BLACKOIL, WATEROIL, EOS, etc.
             for pvt_type in PVT_TYPE_KEYWORDS:
                 if nfo.check_token(pvt_type, line):
-                    self.pvt_type = pvt_type
+                    self.pvt_type = PvtType[pvt_type]
 
             # Extract blackoil fluid density parameters
             for fluid_param in PVT_BLACKOIL_PRIMARY_KEYWORDS:
