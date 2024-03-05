@@ -1,13 +1,12 @@
 import uuid
 import pytest
 
-from ResSimpy.Enums.ConstraintEnums import ConstraintControlMode
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from tests.multifile_mocker import mock_multiple_files
-from tests.utility_for_tests import check_file_read_write_is_correct, get_fake_nexus_simulator, uuid_side_effect
+from tests.utility_for_tests import  get_fake_nexus_simulator, uuid_side_effect
 
 
 def test_find_constraint(mocker):
@@ -99,10 +98,9 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
     ''',
     {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0,
                          'max_reverse_surface_liquid_rate': 10000.0,
-                         'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH,
-     'control_mode': ConstraintControlMode.LIQUID_RATE},
+                         'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
     [{'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
-    'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.LIQUID_RATE}
+    'unit_system': UnitSystem.ENGLISH}
     ], 1),
 
 
@@ -120,10 +118,9 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
     ''',
      {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0,
                          'max_reverse_surface_liquid_rate': 10000.0,
-                         'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH,
-     'control_mode': ConstraintControlMode.LIQUID_RATE},
+                         'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
      [{'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
-    'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.LIQUID_RATE}], 2),
+    'unit_system': UnitSystem.ENGLISH}], 2),
 
     (''' TIME 01/01/2019
     CONSTRAINTS
@@ -151,14 +148,13 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
     ''',
     {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0,
                          'max_reverse_surface_liquid_rate': 10000.0,
-                         'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH,
-     'control_mode': ConstraintControlMode.LIQUID_RATE},
+                         'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
     [{'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
-    'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.LIQUID_RATE},
+    'unit_system': UnitSystem.ENGLISH},
     {'date': '01/02/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000, 'max_surface_water_rate': 10,
-    'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.LIQUID_RATE},
+    'unit_system': UnitSystem.ENGLISH},
     {'date': '01/02/2019', 'name': 'well2', 'max_surface_liquid_rate': 10000.0, 'max_surface_water_rate': 0,
-           'max_wor': 15.5, 'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.LIQUID_RATE}
+           'max_wor': 15.5, 'unit_system': UnitSystem.ENGLISH},
     ], 2),
 
     (''' TIME 01/01/2019
@@ -176,10 +172,9 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
     ''',
     {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0,
                          'max_reverse_surface_liquid_rate': 10000.0,
-                         'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH,
-     'control_mode': ConstraintControlMode.LIQUID_RATE},
+                         'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
     [{'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
-    'unit_system': UnitSystem.ENGLISH, 'control_mode': ConstraintControlMode.LIQUID_RATE},
+    'unit_system': UnitSystem.ENGLISH},
     ], 1),
 
     (''' TIME 01/01/2019
@@ -203,11 +198,10 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
     ENDQMULT
     ''',
      {'date': '01/01/2019', 'name': 'well2', 'max_qmult_total_reservoir_rate': 0.0, 'unit_system': UnitSystem.ENGLISH,
-     'qmult_oil_rate': 211.0, 'qmult_gas_rate': 102.4, 'qmult_water_rate': 35.7, 'well_name':'well2',
-     'control_mode': ConstraintControlMode.BHP},
+     'qmult_oil_rate': 211.0, 'qmult_gas_rate': 102.4, 'qmult_water_rate': 35.7, 'well_name':'well2'},
      [{'date': '01/01/2019', 'name': 'well1', 'use_qmult_qoilqwat_surface_rate': True, 'use_qmult_qoil_surface_rate': True,
     'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 121.0, 'qmult_gas_rate': 53.6, 'qmult_water_rate': 2.5,
-      'well_name':'well1', 'control_mode': ConstraintControlMode.OIL_RATE}], 2),
+      'well_name':'well1'}], 2),
     ], ids=['basic_test', 'over multiple lines', 'multiple_dates', 'constraint_table','qmult_table'])
 def test_remove_constraint(mocker, file_contents, expected_result_file,
                            constraint_to_remove, expected_constraints, expected_number_writes):
@@ -266,8 +260,7 @@ def test_remove_constraint(mocker, file_contents, expected_result_file,
         well2	 QWSMAX 	0.0
 well3 QOSMAX 100 ! test user comments
         ENDCONSTRAINTS''',
-    {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
-     'control_mode': ConstraintControlMode.OIL_RATE},
+    {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH},
     1,
     {'uuid1': [2, 4], 'uuid2': [3],'uuid3': [5]}
     ),
@@ -282,8 +275,7 @@ well3 QOSMAX 100
 ENDCONSTRAINTS
 
 ''',
-    {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
-     'control_mode': ConstraintControlMode.OIL_RATE},
+    {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH},
     1,
     {'uuid1': [2]}
     ),
@@ -307,8 +299,7 @@ ENDCONSTRAINTS
     TIME 01/01/2020
     TIME 01/02/2020
 ''',
-    {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/04/2019', 'unit_system': UnitSystem.ENGLISH,
-     'control_mode': ConstraintControlMode.OIL_RATE},
+    {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/04/2019', 'unit_system': UnitSystem.ENGLISH},
     1,
     {'uuid1': [6]}
     ),
@@ -328,8 +319,7 @@ ENDQMULT
 
 ''',
     {'name': 'node#2', 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
-                'use_qmult_qoilqwat_surface_rate': True, 'qmult_oil_rate': 200.0, 'qmult_water_rate': 4052.12,
-     'control_mode': ConstraintControlMode.LIQUID_RATE},
+                'use_qmult_qoilqwat_surface_rate': True, 'qmult_oil_rate': 200.0, 'qmult_water_rate': 4052.12},
     1,
     {'uuid1': [2, 6]}
     ),
@@ -357,7 +347,7 @@ ENDQMULT
 ''',
 {'name': 'new_well', 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
  'use_qmult_qoilqwat_surface_rate': True, 'qmult_oil_rate': 3.14, 'qmult_gas_rate': 50.2,
- 'qmult_water_rate': 420.232, 'control_mode': ConstraintControlMode.OIL_RATE},
+ 'qmult_water_rate': 420.232},
 2,
 {'uuid1': [2, 7], 'uuid2': [3, 8]}
 ),
@@ -407,7 +397,7 @@ TIME 01/03/2020
 ''',
     {'name': 'new_well', 'date': '01/01/2020', 'unit_system': UnitSystem.ENGLISH,
      'use_qmult_qoilqwat_surface_rate': True, 'qmult_oil_rate': 3.14, 'qmult_gas_rate': 50.2,
-     'qmult_water_rate': 420.232, 'control_mode': ConstraintControlMode.OIL_RATE},
+     'qmult_water_rate': 420.232},
     2,
     {'uuid1': [2, 6], 'uuid2': [10, 15], 'uuid3': [11, 16]}
     ),
