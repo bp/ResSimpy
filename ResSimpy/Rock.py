@@ -14,3 +14,6 @@ class Rock(ABC):
     def inputs(self):
         """A Collection of rock property inputs, as a dictionary."""
         raise NotImplementedError("Implement this in the derived class")
+
+    def to_string(self):
+        raise NotImplementedError('Implement this in the derived class.')

@@ -13,4 +13,7 @@ class Separator(ABC):
     @property
     def inputs(self):
         """A Collection of separator property inputs, as a dictionary."""
-        raise NotImplementedError("Implement this in the derived class")
+        raise NotImplementedError("Implement this in the derived class.")
+
+    def to_string(self):
+        raise NotImplementedError('Implement this in the derived class.')
