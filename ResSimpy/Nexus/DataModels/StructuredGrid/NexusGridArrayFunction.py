@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from enum import Enum
+from ResSimpy.Enums.GridFunctionTypes import GridFunctionTypeEnum
 from typing import Optional
 
 
@@ -9,7 +9,7 @@ class NexusGridArrayFunction:
     region_number: Optional[list[int]] = None
     input_array: Optional[list[str]] = None
     output_array: Optional[list[str]] = None
-    function_type: Optional[Enum] = None
+    function_type: Optional[GridFunctionTypeEnum] = None
     function_values: Optional[list[float]] = None
 
     blocks: Optional[list[int]] = None

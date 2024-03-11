@@ -303,12 +303,17 @@ def create_grid_array_function_objects(array_functions_as_list: list[list[str]])
 
 
 def object_from_array_function_block(array_function: list[str], function_number: int) -> NexusGridArrayFunction:
-    region_type = ''
-    region_number_list = []
-    function_type = ''
-    function_coefficients = []
-    input_array_list = []
-    output_array_list = []
+    region_type = None
+    region_number_list = None
+    function_type = None
+    function_coefficients = None
+    input_array_list = None
+    output_array_list = None
+    block_array = None
+    grid_name = None
+    input_range_list = None
+    output_range_list = None
+    drange_list = None
     function_type_enum = None
 
     for li, line in enumerate(array_function):
@@ -319,39 +324,82 @@ def object_from_array_function_block(array_function: list[str], function_number:
                 continue
             if len(words) == 2:
                 if words[1] not in GRID_ARRAY_KEYWORDS:
-                    warnings.warn(f'Function {function_number + 1}:  '
+                    warnings.warn(f'Function {function_number}:  '
+                                  f'Line: {modified_line} '
                                   'Function table entries will be excluded from summary df.')
                     function_type = 'function table'
                 else:
                     region_type = words[1]
-                    region_number_list = array_function[li + 1].split()
+                    region_number_list0 = array_function[li + 1].split()
                     try:
-                        region_number_list = [round(float(i)) for i in region_number_list]
+                        region_number_list = [round(float(i)) for i in region_number_list0]
                     except ValueError:
-                        warnings.warn(f'ValueError at function {function_number + 1}: '
+                        warnings.warn(f'ValueError at function {function_number}: '
                                       'could not convert string to integer.')
+
+        if 'BLOCKS' in modified_line:
+            block_array = [int(x) for x in words[1:7]]
+
+        if 'GRID' in modified_line:
+            grid_indx = words.index('GRID')
+            if len(words) > grid_indx+1:
+                grid_name = words[grid_indx+1]
+
+        if 'RANGE' in modified_line and 'INPUT' in modified_line:
+            split_range_input = modified_line.split('INPUT')[1].split()
+            if len(split_range_input) % 2 == 0:  # Should be an even number of entries
+                try:
+                    # Create pair-wise min-max tuples in a list
+                    input_range_iterator = iter([float(i) for i in split_range_input])
+                    input_range_list = list(zip(input_range_iterator, input_range_iterator))
+                except ValueError:
+                    warnings.warn(f'ValueError at function {function_number}: could not convert string to float.')
+            else:
+                raise ValueError(f'RANGE INPUT for function {function_number} has an odd number of entries.')
+
+        if 'RANGE' in modified_line and 'OUTPUT' in modified_line:
+            split_range_output = modified_line.split('OUTPUT')[1].split()
+            if len(split_range_output) % 2 == 0:  # Should be an even number of entries
+                try:
+                    # Create pair-wise min-max tuples in a list
+                    output_range_iterator = iter([float(i) for i in split_range_output])
+                    output_range_list = list(zip(output_range_iterator, output_range_iterator))
+                except ValueError:
+                    warnings.warn(f'ValueError at function {function_number}: could not convert string to float.')
+            else:
+                raise ValueError(f'RANGE OUTPUT for function {function_number} has an odd number of entries.')
+
+        if 'DRANGE' in modified_line:
+            warnings.warn(f'Function {function_number}: Function table entries will be excluded from summary df.')
+            drange_list = [float(x) for x in words[1:]]
+            function_type = 'function table'
 
         if 'ANALYT' in modified_line:
             function_type = words[1]
             function_type_enum = GridFunctionTypeEnum(function_type)
             if len(words) > 2:
                 # remove the first 2 words in line, and set the rest to coefficients
-                function_coefficients = words[2:]
+                function_coefficients0 = words[2:]
                 # convert string coefficient values to numerical, if possible:
                 try:
-                    function_coefficients = [float(i) for i in function_coefficients]
+                    function_coefficients = [float(i) for i in function_coefficients0]
                 except ValueError:
-                    warnings.warn(f'ValueError at function {function_number + 1}: could not convert string to float.')
+                    warnings.warn(f'ValueError at function {function_number}: could not convert string to float.')
 
         if 'OUTPUT' in modified_line and 'RANGE' not in modified_line:
             input_array_list = words[:words.index('OUTPUT')]
             output_array_list = words[words.index('OUTPUT') + 1:]
     new_grid_array_function = NexusGridArrayFunction(
         region_type=region_type,
+        blocks=block_array,
+        grid_name=grid_name,
         region_number=region_number_list,
         function_type=function_type_enum,
         input_array=input_array_list,
         output_array=output_array_list,
-        function_values=function_coefficients
+        function_values=function_coefficients,
+        input_range=input_range_list,
+        output_range=output_range_list,
+        drange=drange_list
     )
     return new_grid_array_function
