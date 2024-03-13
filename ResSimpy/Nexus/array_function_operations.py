@@ -315,6 +315,15 @@ def summarize_model_functions(function_list_to_parse: list[list[str]]) -> pd.Dat
 
 
 def create_grid_array_function_objects(array_functions_as_list: list[list[str]]) -> list[NexusGridArrayFunction]:
+    """Function that creates a list of grid array function objects, from a list of functions as a list of strings
+    output from collect_all_function_blocks.
+
+    Args:
+        array_functions_as_list (list[list[str]]): List of function blocks, each represented as a list of strings
+
+    Returns:
+        list[NexusGridArrayFunction]: List of grid array function objects
+    """
     store_array_functions: list[NexusGridArrayFunction] = []
     # Enumerate functions, with second argument specifying the index value from which the counter is to be started
     for function_number, array_function in enumerate(array_functions_as_list, 1):
