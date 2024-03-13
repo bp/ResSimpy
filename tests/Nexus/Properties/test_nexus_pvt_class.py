@@ -465,7 +465,7 @@ UNSATOIL PSAT 1900.0
 """
 UNSATGAS PRES 3515.0
 """ + pvt_obj.properties['UNSATGAS_PRES']['3515.0'].to_string(na_rep='', index=False) + '\n' + \
-  """
+"""
 UNSATGAS PRES 3415.0
 """ + pvt_obj.properties['UNSATGAS_PRES']['3415.0'].to_string(na_rep='', index=False) + '\n\n'
 

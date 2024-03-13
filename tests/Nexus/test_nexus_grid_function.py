@@ -249,10 +249,8 @@ def test_object_from_array_function_block(function_number, function_list, expect
     assert result == expected_grid_array_function_obj
 
 
-def test_tabular_array_function_block():
-
-    # Arrange
-    input_file = '''FUNCTION 1
+@pytest.mark.parametrize("input_file, expected_result",
+                         [('''FUNCTION 1
 WORKA5 OUTPUT WORKA1
 
 ! Section 1
@@ -267,34 +265,127 @@ WORKA5 OUTPUT WORKA1
 6  5.
 7  4.
 
+INCLUDE /random/path
+
 FUNCTION
 ANALYT POLYN 3.0 2 1.0 0
 BLOCKS 1 5 1 7 1 9
 KX OUTPUT KY KZ
 
+IEQUIL CON 1
+''',
+                           [
+                            NexusGridArrayFunction(
+                                function_type=GridFunctionTypeEnum.FUNCTION_TABLE,
+                                input_array=['WORKA5'],
+                                output_array=['WORKA1'],
+                                function_table_m=1,
+                                function_table=pd.DataFrame({'WORKA5': [1, 2, 3, 4, 5, 6, 7],
+                                                            'WORKA1': [10., 9., 8., 7., 6., 5., 4.]})),
+                            NexusGridArrayFunction(
+                                blocks=[1, 5, 1, 7, 1, 9],
+                                function_type=GridFunctionTypeEnum.POLYN,
+                                input_array=['KX'],
+                                output_array=['KY', 'KZ'],
+                                function_values=[3.0, 2.0, 1.0, 0.0])
+                            ]
+                           ),
+                          ('''FUNCTION 1 2.0 3.0 4.0
+WORKA5 OUTPUT WORKA1
+
+! Section 1
+1 10.  ! S1
+2  9.
+3  8.  ! S3
+
+! Section 2
+4  7.
+5  6.
+! Section 3
+6  5.
+7  4.
+
 INCLUDE /random/path
 
-IEQUIL CON 1
-'''
+FUNCTION
+ANALYT POLYN 3.0 2 1.0 0
+BLOCKS 1 5 1 7 1 9
+KX OUTPUT KY KZ
 
+IEQUIL CON 1
+''',
+                           [
+                            NexusGridArrayFunction(
+                                function_type=GridFunctionTypeEnum.FUNCTION_TABLE,
+                                input_array=['WORKA5'],
+                                output_array=['WORKA1'],
+                                function_table_m=1,
+                                function_table_p_list=[2., 3., 4.],
+                                function_table=pd.DataFrame({'WORKA5': [1, 2, 3, 4, 5, 6, 7],
+                                                            'WORKA1': [10., 9., 8., 7., 6., 5., 4.]})),
+                            NexusGridArrayFunction(
+                                blocks=[1, 5, 1, 7, 1, 9],
+                                function_type=GridFunctionTypeEnum.POLYN,
+                                input_array=['KX'],
+                                output_array=['KY', 'KZ'],
+                                function_values=[3.0, 2.0, 1.0, 0.0])
+                            ]
+                           ),
+                          ('''FUNCTION IREGION 1 2.0 3.0 4.0
+6 7 8 9
+DRANGE 0.1 0.2 0.3
+WORKA5 OUTPUT WORKA1
+
+
+! Section 1
+1 10.  ! S1
+2  9.
+3  8.  ! S3
+
+! Section 2
+4  7.
+5  6.
+! Section 3
+6  5.
+7  4.
+
+INCLUDE /random/path
+
+FUNCTION
+ANALYT POLYN 3.0 2 1.0 0
+BLOCKS 1 5 1 7 1 9
+KX OUTPUT KY KZ
+
+IEQUIL CON 1
+''',
+                           [
+                            NexusGridArrayFunction(
+                                region_type='IREGION',
+                                region_number=[6, 7, 8, 9],
+                                function_type=GridFunctionTypeEnum.FUNCTION_TABLE,
+                                input_array=['WORKA5'],
+                                output_array=['WORKA1'],
+                                function_table_m=1,
+                                function_table_p_list=[2., 3., 4.],
+                                drange=[0.1, 0.2, 0.3],
+                                function_table=pd.DataFrame({'WORKA5': [1, 2, 3, 4, 5, 6, 7],
+                                                            'WORKA1': [10., 9., 8., 7., 6., 5., 4.]})),
+                            NexusGridArrayFunction(
+                                blocks=[1, 5, 1, 7, 1, 9],
+                                function_type=GridFunctionTypeEnum.POLYN,
+                                input_array=['KX'],
+                                output_array=['KY', 'KZ'],
+                                function_values=[3.0, 2.0, 1.0, 0.0])
+                            ]
+                           )
+                          ],
+                         ids=['basic_function_table', 'ft_m_and_ps', 'ft_w_iregion'])
+def test_tabular_array_function_block(input_file, expected_result):
+
+    # Arrange
     file = NexusFile(location='path/to/file.dat',
                      file_content_as_list=[str(line) for line in input_file.splitlines(keepends=True)])
 
-    expected_result = [
-     NexusGridArrayFunction(
-        function_type=GridFunctionTypeEnum.FUNCTION_TABLE,
-        input_array=['WORKA5'],
-        output_array=['WORKA1'],
-        function_table_m=1,
-        function_table=pd.DataFrame({'WORKA5': [1, 2, 3, 4, 5, 6, 7],
-                                     'WORKA1': [10., 9., 8., 7., 6., 5., 4.]})),
-     NexusGridArrayFunction(
-        blocks=[1, 5, 1, 7, 1, 9],
-        function_type=GridFunctionTypeEnum.POLYN,
-        input_array=['KX'],
-        output_array=['KY', 'KZ'],
-        function_values=[3.0, 2.0, 1.0, 0.0])
-    ]
     grid = NexusGrid(file)
 
     # Act
@@ -305,11 +396,10 @@ IEQUIL CON 1
         if result is not None and len(result) > 0 and result[i] is not None:
             result_dict = result[i].__dict__
         else:
-            raise AssertionError('Result has the wrong format or is None.')
+            raise AssertionError('result has the wrong format or is None.')
         expected_result_dict = expected_result[i].__dict__
         for key in expected_result_dict.keys():
             if isinstance(expected_result_dict[key], pd.DataFrame):
                 pd.testing.assert_frame_equal(result_dict[key], expected_result_dict[key])
-                print(key)
             else:
                 assert result_dict[key] == expected_result_dict[key]
