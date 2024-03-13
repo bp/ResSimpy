@@ -2,12 +2,12 @@
 from __future__ import annotations
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import pandas as pd
-from typing import Union
+from typing import Optional, Union
 import warnings
 
 from ResSimpy.Enums.GridFunctionTypes import GridFunctionTypeEnum
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGridArrayFunction import NexusGridArrayFunction
-from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEYWORDS
+from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEYWORDS, STRUCTURED_GRID_KEYWORDS
 
 
 def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
@@ -22,18 +22,38 @@ def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
     function_list = []
     function_body: list[str] = []
     reading_function = False
+    look_for_table_end = False
+    analyt_flag = False  # boolean to determine if specific function is of analytical or tabular form
 
     for i, line in enumerate(file_as_list):
         if nfo.check_token('FUNCTION', line):
             function_body = []
             reading_function = True
+            analyt_flag = False
+            look_for_table_end = False
         if reading_function:
             # remove all comments following the first '!' in a line.
+            if 'ANALYT' in line:
+                analyt_flag = True
             modified_line = line.split('!', 1)[0]
             function_body.append(modified_line.strip())
-            if nfo.check_token('OUTPUT', modified_line) and not nfo.check_token('RANGE', modified_line):
-                function_list.append(function_body)
-                reading_function = False
+            if analyt_flag:
+                if nfo.check_token('OUTPUT', modified_line) and not nfo.check_token('RANGE', modified_line):
+                    function_list.append(function_body)
+                    reading_function = False
+            else:  # tabular form
+                if nfo.check_token('OUTPUT', modified_line) and not nfo.check_token('RANGE', modified_line):
+                    look_for_table_end = True
+                    continue
+                if i < len(file_as_list)-1 and look_for_table_end:
+                    end_function = False
+                    for keyword in STRUCTURED_GRID_KEYWORDS + GRID_ARRAY_KEYWORDS + ['INCLUDE']:
+                        if nfo.check_token(keyword, file_as_list[i+1]):
+                            end_function = True
+                    if end_function:
+                        function_list.append(function_body)
+                        reading_function = False
+
     # remove null values
     function_list = [list(filter(None, x)) for x in function_list]
 
@@ -296,6 +316,7 @@ def summarize_model_functions(function_list_to_parse: list[list[str]]) -> pd.Dat
 
 def create_grid_array_function_objects(array_functions_as_list: list[list[str]]) -> list[NexusGridArrayFunction]:
     store_array_functions: list[NexusGridArrayFunction] = []
+    # Enumerate functions, with second argument specifying the index value from which the counter is to be started
     for function_number, array_function in enumerate(array_functions_as_list, 1):
         new_grid_array_function_obj = object_from_array_function_block(array_function, function_number)
         store_array_functions.append(new_grid_array_function_obj)
@@ -303,31 +324,46 @@ def create_grid_array_function_objects(array_functions_as_list: list[list[str]])
 
 
 def object_from_array_function_block(array_function: list[str], function_number: int) -> NexusGridArrayFunction:
-    region_type = None
-    region_number_list = None
-    function_type = None
-    function_coefficients = None
-    input_array_list = None
-    output_array_list = None
-    block_array = None
-    grid_name = None
-    input_range_list = None
-    output_range_list = None
-    drange_list = None
-    function_type_enum = None
+    """Function to transform function attributes in a list, as output from collect_all_function_blocks, to a
+    NexusGridArrayFunction object.
 
+    Args:
+        array_function (list[str]): List of function block lines as a list of strings
+        function_number (int): function counter (order of function in Nexus grid inputs)
+
+    Returns:
+        NexusGridArrayFunction: _Object holding grid array function attributes, such as region type, blocks, etc.
+    """
+    region_type: Optional[str] = None
+    region_number_list: Optional[list[int]] = None
+    input_array_list: Optional[list[str]] = None
+    output_array_list: Optional[list[str]] = None
+    function_coefficients: Optional[list[float]] = None
+    block_array: Optional[list[int]] = None
+    grid_name: Optional[str] = None
+    input_range_list: Optional[list[tuple[float, float]]] = None
+    output_range_list: Optional[list[tuple[float, float]]] = None
+    drange_list: Optional[list[float]] = None
+    function_type_enum: Optional[GridFunctionTypeEnum] = None
+    function_table: Optional[pd.DataFrame] = None
+    function_table_m: Optional[int] = None
+    function_table_p_list: Optional[list[float]] = None
+
+    output_line_headers: list[str] = []
     for li, line in enumerate(array_function):
         modified_line = line.upper()
         words = modified_line.split()
         if 'FUNCTION' in modified_line:
-            if len(words) == 1:
+            if len(words) == 1:  # When FUNCTION is the only word in the line
                 continue
-            if len(words) == 2:
+            if len(words) == 2:  # When FUNCTION reg_type are the only words on the line
                 if words[1] not in GRID_ARRAY_KEYWORDS:
-                    warnings.warn(f'Function {function_number}:  '
-                                  f'Line: {modified_line} '
-                                  'Function table entries will be excluded from summary df.')
-                    function_type = 'function table'
+                    function_type_enum = GridFunctionTypeEnum.FUNCTION_TABLE
+                    try:
+                        function_table_m = int(words[1])
+                    except ValueError:
+                        warnings.warn(f'ValueError at function {function_number}: '
+                                      'could not convert string to int.')
                 else:
                     region_type = words[1]
                     region_number_list0 = array_function[li + 1].split()
@@ -336,6 +372,38 @@ def object_from_array_function_block(array_function: list[str], function_number:
                     except ValueError:
                         warnings.warn(f'ValueError at function {function_number}: '
                                       'could not convert string to integer.')
+            if len(words) > 2:
+                if words[1] in GRID_ARRAY_KEYWORDS:
+                    region_type = words[1]
+                    region_number_list0 = array_function[li + 1].split()
+                    try:
+                        region_number_list = [round(float(i)) for i in region_number_list0]
+                    except ValueError:
+                        warnings.warn(f'ValueError at function {function_number}: '
+                                      'could not convert string to integer.')
+                    try:
+                        function_table_m = int(words[2])
+                    except ValueError:
+                        warnings.warn(f'ValueError at function {function_number}: '
+                                      'could not convert string to int.')
+                    if len(words) > 3:
+                        try:
+                            function_table_p_list = [float(i) for i in words[3:]]
+                        except ValueError:
+                            warnings.warn(f'ValueError at function {function_number}: '
+                                          'could not convert string to float.')
+                else:
+                    try:
+                        function_table_m = int(words[1])
+                    except ValueError:
+                        warnings.warn(f'ValueError at function {function_number}: '
+                                      'could not convert string to int.')
+                    if len(words) > 2:
+                        try:
+                            function_table_p_list = [float(i) for i in words[2:]]
+                        except ValueError:
+                            warnings.warn(f'ValueError at function {function_number}: '
+                                          'could not convert string to float.')
 
         if 'BLOCKS' in modified_line:
             block_array = [int(x) for x in words[1:7]]
@@ -372,11 +440,10 @@ def object_from_array_function_block(array_function: list[str], function_number:
         if 'DRANGE' in modified_line:
             warnings.warn(f'Function {function_number}: Function table entries will be excluded from summary df.')
             drange_list = [float(x) for x in words[1:]]
-            function_type = 'function table'
+            function_type_enum = GridFunctionTypeEnum.FUNCTION_TABLE
 
         if 'ANALYT' in modified_line:
-            function_type = words[1]
-            function_type_enum = GridFunctionTypeEnum(function_type)
+            function_type_enum = GridFunctionTypeEnum[words[1]]
             if len(words) > 2:
                 # remove the first 2 words in line, and set the rest to coefficients
                 function_coefficients0 = words[2:]
@@ -386,9 +453,18 @@ def object_from_array_function_block(array_function: list[str], function_number:
                 except ValueError:
                     warnings.warn(f'ValueError at function {function_number}: could not convert string to float.')
 
+        if len(output_line_headers) > 0:
+            function_type_enum = GridFunctionTypeEnum.FUNCTION_TABLE
+            function_table = nfo.read_table_to_df(array_function[li:], noheader=True)
+            function_table.columns = output_line_headers
+            output_line_headers = []
+
         if 'OUTPUT' in modified_line and 'RANGE' not in modified_line:
             input_array_list = words[:words.index('OUTPUT')]
             output_array_list = words[words.index('OUTPUT') + 1:]
+            output_line_headers = input_array_list + output_array_list
+
+    # Create output NexusGridArrayFunction object
     new_grid_array_function = NexusGridArrayFunction(
         region_type=region_type,
         blocks=block_array,
@@ -400,6 +476,9 @@ def object_from_array_function_block(array_function: list[str], function_number:
         function_values=function_coefficients,
         input_range=input_range_list,
         output_range=output_range_list,
-        drange=drange_list
+        drange=drange_list,
+        function_table=function_table,
+        function_table_m=function_table_m,
+        function_table_p_list=function_table_p_list
     )
     return new_grid_array_function

@@ -18,3 +18,4 @@ class GridFunctionTypeEnum(Enum):
     MULT = 'MULT'
     MIN = 'MIN'
     MAX = 'MAX'
+    FUNCTION_TABLE = 'FUNCTION_TABLE'
