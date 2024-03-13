@@ -16,6 +16,11 @@ class Wells(ABC):
     _wells_loaded: bool = False
 
     def __init__(self, assume_loaded: bool = False) -> None:
+        """Initialises the Wells class.
+
+        Args:
+            assume_loaded (bool): whether the class should assume that the Wells have already been loaded.
+        """
         self._wells_loaded = assume_loaded
         self._wells = []
 
@@ -37,27 +42,43 @@ class Wells(ABC):
     def get_df(self) -> pd.DataFrame:
         raise NotImplementedError("Implement this in the derived class")
 
-    def modify(self, well_name: str, completion_properties_list: list[dict[str, None | float | int | str]],
-               how: OperationEnum = OperationEnum.ADD) -> None:
+    def modify(
+        self,
+        well_name: str,
+        completion_properties_list: list[dict[str, None | float | int | str]],
+        how: OperationEnum = OperationEnum.ADD,
+    ) -> None:
         raise NotImplementedError("Implement this in the derived class")
 
-    def add_completion(self, well_name: str, completion_properties: dict[str, None | float | int | str],
-                       preserve_previous_completions: bool = True, comments: Optional[str] = None) -> None:
+    def add_completion(
+        self,
+        well_name: str,
+        completion_properties: dict[str, None | float | int | str],
+        preserve_previous_completions: bool = True,
+        comments: Optional[str] = None,
+    ) -> None:
         raise NotImplementedError("Implement this in the derived class")
 
-    def remove_completion(self, well_name: str,
-                          completion_properties: Optional[dict[str, None | float | int | str]] = None,
-                          completion_id: Optional[UUID] = None) -> None:
+    def remove_completion(
+        self,
+        well_name: str,
+        completion_properties: Optional[dict[str, None | float | int | str]] = None,
+        completion_id: Optional[UUID] = None,
+    ) -> None:
         raise NotImplementedError("Implement this in the derived class")
 
-    def modify_completion(self, well_name: str, properties_to_modify: dict[str, None | float | int | str],
-                          completion_to_change: Optional[dict[str, None | float | int | str]] = None,
-                          completion_id: Optional[UUID] = None,
-                          comments: Optional[str] = None) -> None:
+    def modify_completion(
+        self,
+        well_name: str,
+        properties_to_modify: dict[str, None | float | int | str],
+        completion_to_change: Optional[dict[str, None | float | int | str]] = None,
+        completion_id: Optional[UUID] = None,
+        comments: Optional[str] = None,
+    ) -> None:
         raise NotImplementedError("Implement this in the derived class")
 
     def get_wells_overview(self) -> str:
-        overview: str = ''
+        overview: str = ""
         for well in self.wells:
             overview += well.printable_well_info
 
