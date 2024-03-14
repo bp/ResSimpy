@@ -14,3 +14,6 @@ class Equilibration(ABC):
     @property
     def inputs(self):
         raise NotImplementedError("Implement this in the derived class")
+
+    def to_string(self):
+        raise NotImplementedError('Implement this in the derived class.')

@@ -6,7 +6,7 @@ from typing import Any, Optional
 from ResSimpy.File import File
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.Nexus.nexus_constraint_operations import load_inline_constraints, update_constraint_control_mode
+from ResSimpy.Nexus.nexus_constraint_operations import load_inline_constraints
 from ResSimpy.Nexus.nexus_file_operations import check_property_in_line, check_token, get_expected_token_value, \
     check_list_tokens, load_table_to_objects
 from ResSimpy.Nexus.nexus_load_well_list import load_well_lists
@@ -125,7 +125,6 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                     if isinstance(constraint, NexusConstraint):
                         obj_id = constraint.id
                         well_name = constraint.name
-                        update_constraint_control_mode(constraint)
                     else:
                         obj_id = constraint
                         well_name = None
