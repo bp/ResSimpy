@@ -11,7 +11,7 @@ from ResSimpy.WellConnection import WellConnection
 class NexusWellConnection(WellConnection):
     """Nexus implementation of the Well Connection class.
 
-Attributes:
+    Attributes:
     stream (str): Stream identifier (STREAM)
     number (int): Identification number (NUMBER)
     scale (float): Scaling factor (SCALE)
