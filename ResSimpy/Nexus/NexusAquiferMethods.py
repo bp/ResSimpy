@@ -25,6 +25,13 @@ class NexusAquiferMethods(Aquifer):
 
     def __init__(self, model_unit_system: UnitSystem, inputs: Optional[MutableMapping[int, NexusAquiferMethod]] = None,
                  files: Optional[dict[int, NexusFile]] = None) -> None:
+        """Initialises the NexusAquiferMethods class.
+
+        Args:
+            model_unit_system (UnitSystem): ??
+            inputs (Optional[MutableMapping[int, NexusAquiferMethod]]): ??
+            files (Optional[dict[int, NexusFile]]): ??
+        """
         if inputs:
             self.__inputs = inputs
         else:

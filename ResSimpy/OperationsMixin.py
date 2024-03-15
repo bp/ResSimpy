@@ -13,6 +13,11 @@ if TYPE_CHECKING:
 
 class NetworkOperationsMixIn(ABC):
     def __init__(self, parent_network: Network) -> None:
+        """Initialises the NetworkOperationsMixIn class.
+
+        Args:
+            parent_network (Network): ??
+        """
         self.__parent_network = parent_network
 
     @abstractmethod

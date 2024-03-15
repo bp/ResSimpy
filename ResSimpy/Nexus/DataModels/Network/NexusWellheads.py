@@ -28,6 +28,11 @@ class NexusWellheads(Wellheads):
     __wellheads: list[NexusWellhead] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork) -> None:
+        """Initialises the NexusWellheads class.
+
+        Args:
+            parent_network (NexusNetwork): ??
+        """
         self.__parent_network: NexusNetwork = parent_network
         self.__wellheads: list[NexusWellhead] = []
         self.__add_object_operations = AddObjectOperations(NexusWellhead, self.table_header, self.table_footer,

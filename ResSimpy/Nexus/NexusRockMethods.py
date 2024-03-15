@@ -26,6 +26,13 @@ class NexusRockMethods(Rock):
     def __init__(self, model_unit_system: UnitSystem,
                  inputs: Optional[MutableMapping[int, NexusRockMethod]] = None,
                  files: Optional[dict[int, NexusFile]] = None) -> None:
+        """Initialises the NexusRockMethods class.
+
+        Args:
+            model_unit_system (UnitSystem): ??
+            inputs (Optional[MutableMapping[int, NexusRockMethod]]): ??
+            files (Optional[dict[int, NexusFile]]): ??
+        """
         if inputs:
             self.__inputs = inputs
         else:

@@ -16,6 +16,11 @@ class DataObjectMixin(ABC):
     __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False, repr=False)
 
     def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
+        """Initialises the DataObjectMixin class.
+
+        Args:
+            properties_dict (dict[str, None | int | str | float]): make the call signature equivalent to subclasses. ??
+        """
         # properties dict is a parameter to make the call signature equivalent to subclasses.
         self.__id = uuid.uuid4()
         if properties_dict:

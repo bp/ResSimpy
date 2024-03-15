@@ -18,6 +18,14 @@ class Well(ABC):
 
     def __init__(self, well_name: str, completions: list[Completion], unit_system: UnitSystem,
                  well_type: Optional[WellType] = None) -> None:
+        """Initialises the ConstraintUnits class.
+
+        Args:
+            well_name (str): ??
+            completions (list[Completion]): ??
+            unit_system (None | UnitSystem): ??
+            well_type (Optional[WellType]): ??
+        """
         self._well_name = well_name
         self._completions = completions
         self.__unit_system = unit_system

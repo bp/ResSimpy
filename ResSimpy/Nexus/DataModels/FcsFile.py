@@ -90,6 +90,43 @@ class FcsNexusFile(NexusFile):
             adsorption_files: Optional[dict[int, NexusFile]] = None,
             flux_in_files: Optional[dict[int, NexusFile]] = None
     ) -> None:
+        """Initialises the FcsNexusFile class.
+
+        Args:
+            location: str, ??
+            include_locations: Optional[list[str]],
+            origin: Optional[str],
+            include_objects: Optional[list[NexusFile],
+            file_content_as_list: Optional[list[str]],
+            restart_file: Optional[NexusFile],
+            structured_grid_file: Optional[NexusFile],
+            options_file: Optional[NexusFile],
+            runcontrol_file: Optional[NexusFile],
+            override_file: Optional[NexusFile],
+            eos_default_file: Optional[NexusFile],
+            well_files: Optional[dict[int, NexusFile],
+            surface_files: Optional[dict[int, NexusFile],
+            rock_files: Optional[dict[int, NexusFile],
+            relperm_files: Optional[dict[int, NexusFile],
+            pvt_files: Optional[dict[int, NexusFile],
+            water_files: Optional[dict[int, NexusFile],
+            equil_files: Optional[dict[int, NexusFile],
+            tracer_init_files: Optional[dict[int, NexusFile],
+            aquifer_files: Optional[dict[int, NexusFile],
+            hyd_files: Optional[dict[int, NexusFile],
+            valve_files: Optional[dict[int, NexusFile],
+            separator_files: Optional[dict[int, NexusFile],
+            ipr_files: Optional[dict[int, NexusFile],
+            gas_lift_files: Optional[dict[int, NexusFile],
+            pump_files: Optional[dict[int, NexusFile],
+            compressor_files: Optional[dict[int, NexusFile],
+            choke_files: Optional[dict[int, NexusFile],
+            icd_files: Optional[dict[int, NexusFile],
+            esp_files: Optional[dict[int, NexusFile],
+            polymer_files: Optional[dict[int, NexusFile],
+            adsorption_files: Optional[dict[int, NexusFile],
+            flux_in_files: Optional[dict[int, NexusFile]
+        """
         self.restart_file = restart_file
         self.structured_grid_file = structured_grid_file
         self.options_file = options_file

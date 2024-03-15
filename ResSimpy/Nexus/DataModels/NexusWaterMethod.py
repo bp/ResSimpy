@@ -64,6 +64,17 @@ class NexusWaterMethod(DynamicProperty):
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None,
                  parameters: Optional[list[NexusWaterParams]] = None) -> None:
+        """Initialises the NexusWaterMethod class.
+
+        Args:
+            file (NexusFile): ??
+            input_number (int): ??
+            model_unit_system (UnitSystem): ??
+            reference_pressure (Optional[float]): ??
+            properties (Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                                 dict[str, Union[float, pd.DataFrame]]]]]): ??
+            parameters (Optional[list[NexusWaterParams]]): ??
+        """
         self.reference_pressure = reference_pressure
         if properties is not None:
             self.properties = properties

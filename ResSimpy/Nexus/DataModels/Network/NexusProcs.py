@@ -18,6 +18,11 @@ class NexusProcs:
     __procs: list[NexusProc] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork) -> None:
+        """Initialises the NexusProcs class.
+
+        Args:
+            parent_network (NexusNetwork): ??
+        """
         self.__parent_network: NexusNetwork = parent_network
         self.__procs = []
 

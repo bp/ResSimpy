@@ -8,6 +8,11 @@ class OpenGoSimNetwork(Network):
     # Class to be implemented later
 
     def __init__(self) -> None:
+        """Initialises the OpenGoSimNetwork class.
+
+        Args:
+            To be implemented later ??
+        """
         self.nodes = None
         self.connections = None
         self.constraints = None

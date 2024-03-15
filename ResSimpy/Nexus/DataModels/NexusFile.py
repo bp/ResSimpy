@@ -55,7 +55,17 @@ class NexusFile(File):
                  linked_user: Optional[str] = None,
                  last_modified: Optional[datetime] = None,
                  file_loading_skipped: bool = False) -> None:
+        """Initialises the NexusFile class.
 
+        Args:
+            include_locations (Optional[list[str]]): ??
+            origin (Optional[str]): ??
+            include_objects (Optional[Sequence[File]]): ??
+            file_content_as_list (Optional[list[str]]): ??
+            linked_user (Optional[str]): ??
+            last_modified (Optional[datetime]): ??
+            file_loading_skipped (bool): ??
+        """
         super().__init__(location=location, file_content_as_list=file_content_as_list, include_objects=include_objects,
                          file_loading_skipped=file_loading_skipped)
         if origin is not None:

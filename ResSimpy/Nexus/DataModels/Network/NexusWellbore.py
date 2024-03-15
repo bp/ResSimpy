@@ -39,6 +39,11 @@ class NexusWellbore(Wellbore):
     water_method: Optional[int] = None
 
     def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
+        """Initialises the NexusWellbore class.
+
+        Args:
+            properties_dict (dict): ??
+        """
         # call the init of the DataObjectMixin
         super(Wellbore, self).__init__({})
         for key, prop in properties_dict.items():

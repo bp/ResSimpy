@@ -31,6 +31,11 @@ class NexusNodes(Nodes):
     __nodes: list[NexusNode] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork) -> None:
+        """Initialises the NexusNodes class.
+
+        Args:
+            parent_network (NexusNetwork): ??
+        """
         self.__parent_network: NexusNetwork = parent_network
         self.__nodes: list[NexusNode] = []
         self.__add_object_operations = AddObjectOperations(NexusNode, self.table_header, self.table_footer,

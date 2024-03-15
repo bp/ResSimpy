@@ -39,6 +39,16 @@ class NexusSeparatorMethod(DynamicProperty):
                  separator_type: Optional[SeparatorType] = None,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
+        """Initialises the NexusSeparatorMethod class.
+
+        Args:
+            file (NexusFile): ??
+            input_number (int): ??
+            model_unit_system (UnitSystem): ??
+            separator_type (Optional[SeparatorType]): ??
+            properties (Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                                 dict[str, Union[float, pd.DataFrame]]]]]): ??
+        """
         if separator_type is not None:
             self.separator_type = separator_type
         if properties is not None:

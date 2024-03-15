@@ -84,6 +84,11 @@ class ConstraintUnits(BaseUnitMapping):
     }
 
     def __init__(self, unit_system: None | UnitSystem) -> None:
+        """Initialises the ConstraintUnits class.
+
+        Args:
+            unit_system (None | UnitSystem): ??
+        """
         super().__init__(unit_system=unit_system)
 
     @property

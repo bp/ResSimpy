@@ -60,6 +60,11 @@ class NexusReporting:
     table_footer = 'ENDOUTPUT'
 
     def __init__(self, model) -> None:
+        """Initialises the NexusReporting class.
+
+        Args:
+            model (type??): ??
+        """
         self.__model = model
         self.__add_object_operations = AddObjectOperations(NexusOutputRequest, self.table_header, self.table_footer,
                                                            model)

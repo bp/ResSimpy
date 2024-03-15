@@ -13,6 +13,13 @@ if TYPE_CHECKING:
 
 class RemoveObjectOperations:
     def __init__(self, network: Optional[NexusNetwork], table_header: str, table_footer: str) -> None:
+        """Initialises the RemoveObjectOperations class.
+
+        Args:
+            network (Optional[NexusNetwork]): ??
+            table_header (str): ??
+            table_footer (str): ??
+        """
         self.table_header = table_header
         self.table_footer = table_footer
         self.__network = network

@@ -199,6 +199,11 @@ class NexusConstraint(Constraint):
     clear_p: Optional[bool] = None
 
     def __init__(self, properties_dict: dict[str, None | int | str | float | UnitSystem]) -> None:
+        """Initialises the NexusConstraint class.
+
+        Args:
+            properties_dict: dict ??
+        """
         super(Constraint, self).__init__({})
         for key, prop in properties_dict.items():
             self.__setattr__(key, prop)

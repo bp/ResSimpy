@@ -75,6 +75,32 @@ class Completion(DataObjectMixin, ABC):
                  status: Optional[str] = None, date_format: Optional[DateFormatEnum.DateFormat] = None,
                  peaceman_well_block_radius: Optional[float] = None, start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None) -> None:
+        """Initialises the Completion class.
+
+        Args:
+            date: str, ??
+            i: Optional[int],
+            j: Optional[int],
+            k: Optional[int],
+            skin: Optional[float],
+            depth: Optional[float],
+            well_radius: Optional[float],
+            x: Optional[float],
+            y: Optional[float],
+            angle_a: Optional[float],
+            angle_v: Optional[float],
+            grid: Optional[str],
+            depth_to_top: Optional[float],
+            depth_to_bottom: Optional[float],
+            perm_thickness_ovr: Optional[float],
+            dfactor: Optional[float],
+            rel_perm_method: Optional[int],
+            status: Optional[str],
+            date_format: Optional[DateFormatEnum.DateFormat],
+            peaceman_well_block_radius: Optional[float],
+            start_date: Optional[str],
+            unit_system: Optional[UnitSystem]
+        """
         super().__init__({})
         self._date_format = date_format
         self.__well_radius = well_radius

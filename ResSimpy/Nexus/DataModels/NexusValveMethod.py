@@ -34,6 +34,15 @@ class NexusValveMethod(DynamicProperty):
     def __init__(self, file: NexusFile, input_number: int, model_unit_system: UnitSystem,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
+        """Initialises the NexusValveMethod class.
+
+        Args:
+            file (NexusFile): ??
+            input_number (int): ??
+            model_unit_system (UnitSystem): ??
+            properties (Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                                 dict[str, Union[float, pd.DataFrame]]]]]): ??
+        """
         if properties is not None:
             self.properties = properties
         else:

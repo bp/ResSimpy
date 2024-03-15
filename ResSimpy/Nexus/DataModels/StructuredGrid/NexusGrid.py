@@ -38,6 +38,11 @@ class NexusGrid(Grid):
     __grid_nexus_file: Optional[NexusFile] = None
 
     def __init__(self, grid_nexus_file: Optional[NexusFile] = None) -> None:
+        """Initialises the NexusGrid class.
+
+        Args:
+            grid_nexus_file (Optional[NexusFile]): ??
+        """
         super().__init__()
         self.__array_functions_list: Optional[list[str]] = None
         self.__array_functions_df: Optional[pd.DataFrame] = None

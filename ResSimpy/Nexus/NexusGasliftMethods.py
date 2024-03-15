@@ -25,6 +25,13 @@ class NexusGasliftMethods(Gaslift):
     def __init__(self, model_unit_system: UnitSystem,
                  inputs: Optional[MutableMapping[int, NexusGasliftMethod]] = None,
                  files: Optional[dict[int, NexusFile]] = None) -> None:
+        """Initialises the NexusGasliftMethods class.
+
+        Args:
+            model_unit_system (UnitSystem): ??
+            inputs (Optional[MutableMapping[int, NexusGasliftMethod]]): ??
+            files (Optional[dict[int, NexusFile]]): ??
+        """
         if inputs:
             self.__inputs = inputs
         else:

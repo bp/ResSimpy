@@ -23,6 +23,12 @@ class DynamicProperty(ABC):
     properties: dict
 
     def __init__(self, input_number: int, file: File) -> None:
+        """Initialises the DynamicProperty class.
+
+        Args:
+            input_number (int): Method, table or input number, in order as entered in the simulation input deck.
+            file (File): ??
+        """
         self.input_number: int = input_number
         self.file: File = file
 

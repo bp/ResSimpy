@@ -17,6 +17,7 @@ class Wells(ABC):
 
     def __init__(self, assume_loaded: bool = False) -> None:
         """Initialises the Wells class.
+
         Args:
             assume_loaded (bool): whether the class should assume that the Wells have already been loaded.
         """

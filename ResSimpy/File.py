@@ -34,7 +34,13 @@ class File(FileBase):
                  file_content_as_list: Optional[list[str]] = None,
                  include_objects: Optional[Sequence[File]] = None, create_as_modified: bool = False,
                  file_loading_skipped: bool = False) -> None:
+        """Initialises the File class.
 
+        Args:
+            file_content_as_list (Optional[list[str]]): ??
+            include_objects (Optional[Sequence[File]]): ??
+            file_loading_skipped (bool): ??
+        """
         self.location = location
         self._location_in_including_file = location
         self.include_objects: Optional[list[File]] = get_empty_list_file() \

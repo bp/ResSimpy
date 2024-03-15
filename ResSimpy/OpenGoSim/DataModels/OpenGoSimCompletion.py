@@ -17,6 +17,17 @@ class OpenGoSimCompletion(Completion):
     def __init__(self, date: str, i: Optional[int] = None, j: Optional[int] = None, k: Optional[int] = None,
                  penetration_direction: Optional[PenetrationDirectionEnum] = None, is_open: Optional[bool] = None,
                  refinement_name: Optional[str] = None) -> None:
+        """Initialises the OpenGoSimCompletion class.
+
+        Args:
+            date (str): ??
+            i (Optional[int]): ??
+            j (Optional[int]): ??
+            k (Optional[int]): ??
+            penetration_direction (Optional[PenetrationDirectionEnum]): ??
+            is_open (Optional[bool]): ??
+            refinement_name (Optional[str]): ??
+        """
         self.__penetration_direction = penetration_direction
         self.__is_open = is_open if is_open is not None else True
         self.__refinement_name = refinement_name

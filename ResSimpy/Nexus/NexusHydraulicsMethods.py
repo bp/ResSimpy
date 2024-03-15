@@ -25,6 +25,13 @@ class NexusHydraulicsMethods(Hydraulics):
     def __init__(self, model_unit_system: UnitSystem,
                  inputs: Optional[MutableMapping[int, NexusHydraulicsMethod]] = None,
                  files: Optional[dict[int, NexusFile]] = None) -> None:
+        """Initialises the NexusHydraulicsMethods class.
+
+        Args:
+            model_unit_system (UnitSystem): ??
+            inputs (Optional[MutableMapping[int, NexusHydraulicsMethod]]): ??
+            files (Optional[dict[int, NexusFile]]): ??
+        """
         if inputs:
             self.__inputs = inputs
         else:

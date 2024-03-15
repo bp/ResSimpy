@@ -33,6 +33,11 @@ class NexusConstraints(Constraints):
     _constraints: dict[str, list[NexusConstraint]] = field(default_factory=dict)
 
     def __init__(self, parent_network: NexusNetwork, model: NexusSimulator) -> None:
+        """Initialises the NexusConstraints class.
+
+        Args:
+            _constraints: dict ??
+        """
         self.__parent_network: NexusNetwork = parent_network
         self._constraints: dict[str, list[NexusConstraint]] = {}
         self.__model: NexusSimulator = model

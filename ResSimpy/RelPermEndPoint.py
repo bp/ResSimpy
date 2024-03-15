@@ -37,6 +37,32 @@ class RelPermEndPoint(ABC):
                  kro_sgl: Optional[float] = None, kro_sgr: Optional[float] = None, krw_sgl: Optional[float] = None,
                  krw_sgr: Optional[float] = None, krg_sgrw: Optional[float] = None, sgtr: Optional[float] = None,
                  sotr: Optional[float] = None) -> None:
+        """Initialises the RelPermEndPoint class.
+
+        Args:
+            swl: Optional[float]: ??
+            swr: Optional[float]: ??
+            swu: Optional[float]: ??
+            sgl: Optional[float]: ??
+            sgr: Optional[float]: ??
+            sgu: Optional[float]: ??
+            swro: Optional[float]: ??
+            sgro: Optional[float]: ??
+            sgrw: Optional[float]: ??
+            krw_swro: Optional[float]: ??
+            krw_swu: Optional[float]: ??
+            krg_sgro: Optional[float]: ??
+            krg_sgu: Optional[float]: ??
+            kro_swl: Optional[float]: ??
+            kro_swr: Optional[float]: ??
+            kro_sgl: Optional[float]: ??
+            kro_sgr: Optional[float]: ??
+            krw_sgl: Optional[float]: ??
+            krw_sgr: Optional[float]: ??
+            krg_sgrw: Optional[float]: ??
+            sgtr: Optional[float]: ??
+            sotr: Optional[float]: ??
+        """
         self.__swl = swl
         self.__swr = swr
         self.__swu = swu

@@ -65,6 +65,21 @@ class NexusPVTMethod(DynamicProperty):
                                        tuple[str, dict[str, float]], dict[str, pd.DataFrame]]]] = None,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
+        """Initialises the NexusGasliftMethod class.
+
+        Args:
+            file (NexusFile): ??
+            input_number (int): ??
+            model_unit_system (UnitSystem): ??
+            pvt_type (Optional[PvtType]): ??
+            eos_nhc (Optional[int]): ??
+            eos_temp (Optional[float]): ??
+            eos_components (Optional[list[str]]): ??
+            eos_options (Optional[dict[str, Union[str, int, float, pd.DataFrame, list[str], dict[str, float],
+                                       tuple[str, dict[str, float]], dict[str, pd.DataFrame]]]]): ??
+            properties (Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                                 dict[str, Union[float, pd.DataFrame]]]]]): ??
+        """
         if pvt_type is not None:
             self.pvt_type = pvt_type
         if eos_nhc is not None:

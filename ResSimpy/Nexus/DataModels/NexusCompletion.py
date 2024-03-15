@@ -84,7 +84,58 @@ class NexusCompletion(Completion):
                  start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None,
                  ) -> None:
+        """Initialises the NexusCompletion class.
 
+        Args:
+            date: str ??
+            i: Optional[int]
+            j: Optional[int]
+            k: Optional[int]
+            skin: Optional[float]
+            depth: Optional[float]
+            well_radius: Optional[float]
+            x: Optional[float]
+            y: Optional[float]
+            angle_a: Optional[float]
+            angle_v: Optional[float]
+            grid: Optional[str]
+            measured_depth: Optional[float]
+            well_indices: Optional[float]
+            depth_to_top: Optional[float]
+            depth_to_bottom: Optional[float]
+            depth_to_top_str: Optional[str]
+            depth_to_bottom_str: Optional[str]
+            rel_perm_method: Optional[int]
+            dfactor: Optional[float]
+            status: Optional[str]
+            partial_perf: Optional[float]
+            cell_number: Optional[int]
+            perm_thickness_ovr: Optional[float]
+            peaceman_well_block_radius: Optional[float]
+            fracture_mult: Optional[float]
+            sector: Union[None, str, int]
+            well_group: Optional[str]
+            zone: Optional[int]
+            angle_open_flow: Optional[float]
+            temperature: Optional[float]
+            flowsector: Optional[int]
+            parent_node: Optional[str]
+            mdcon: Optional[float]
+            pressure_avg_pattern: Optional[int]
+            length: Optional[float]
+            permeability: Optional[float]
+            non_darcy_model: Optional[str]
+            comp_dz: Optional[float]
+            layer_assignment: Optional[int]
+            polymer_bore_radius: Optional[float]
+            polymer_well_radius: Optional[float]
+            portype: Optional[str]
+            rel_perm_end_point: Optional[NexusRelPermEndPoint]
+            kh_mult: Optional[float]
+            date_format: Optional[DateFormatEnum.DateFormat]
+            start_date: Optional[str]
+            unit_system: Optional[UnitSystem]
+        """
         self.__measured_depth = measured_depth
 
         self.__well_indices = well_indices  # TODO: rename this to singular

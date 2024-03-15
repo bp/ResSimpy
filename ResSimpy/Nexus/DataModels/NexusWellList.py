@@ -10,6 +10,13 @@ class NexusWellList(WellList):
     """Class for representing a single WellList or group for the Nexus model."""
 
     def __init__(self, name: str, wells: list[str], date: str) -> None:
+        """Initialises the NexusWellList class.
+
+        Args:
+            name (str): ??
+            wells (list[str]): ??
+            date (str): ??
+        """
         super().__init__(name=name, wells=wells, date=date)
 
     @staticmethod

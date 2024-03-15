@@ -29,6 +29,11 @@ class NexusWellMod:
     perm_thickness_mult: float | list[float] | None = None
 
     def __init__(self, wellmod_dict: dict[str, None | str | float | int | list[float]]) -> None:
+        """Initialises the NexusWellMod class.
+
+        Args:
+            wellmod_dict (dict[str, None | str | float | int | list[float]]): ??
+        """
         for key, prop in wellmod_dict.items():
             self.__setattr__(key, prop)
 

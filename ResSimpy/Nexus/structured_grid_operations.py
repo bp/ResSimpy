@@ -10,6 +10,11 @@ if TYPE_CHECKING:
 
 class StructuredGridOperations:
     def __init__(self, model: NexusSimulator) -> None:
+        """Initialises the StructuredGridOperations class.
+
+        Args:
+            model (NexusSimulator): ??
+        """
         self.__model: NexusSimulator = model
 
     @staticmethod

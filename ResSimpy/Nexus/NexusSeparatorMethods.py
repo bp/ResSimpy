@@ -26,6 +26,13 @@ class NexusSeparatorMethods(Separator):
     def __init__(self, model_unit_system: UnitSystem,
                  inputs: Optional[MutableMapping[int, NexusSeparatorMethod]] = None,
                  files: Optional[dict[int, NexusFile]] = None) -> None:
+        """Initialises the NexusSeparatorMethods class.
+
+        Args:
+            model_unit_system (UnitSystem): ??
+            inputs (Optional[MutableMapping[int, NexusSeparatorMethod]]): ??
+            files (Optional[dict[int, NexusFile]]): ??
+        """
         if inputs:
             self.__inputs = inputs
         else:

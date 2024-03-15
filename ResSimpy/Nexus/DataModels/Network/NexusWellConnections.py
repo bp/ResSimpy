@@ -32,6 +32,11 @@ class NexusWellConnections(WellConnections):
     __well_connections: list[NexusWellConnection] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork) -> None:
+        """Initialises the NexusWellConnections class.
+
+        Args:
+            parent_network (NexusNetwork): ??
+        """
         self.__parent_network: NexusNetwork = parent_network
         self.__well_connections: list[NexusWellConnection] = []
         self.__add_object_operations = AddObjectOperations(NexusWellConnection, self.table_header, self.table_footer,
