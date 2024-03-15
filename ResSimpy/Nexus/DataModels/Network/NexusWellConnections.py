@@ -17,6 +17,7 @@ from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
+from ResSimpy.WellConnection import WellConnection
 from ResSimpy.WellConnections import WellConnections
 
 if TYPE_CHECKING:
@@ -72,7 +73,7 @@ class NexusWellConnections(WellConnections):
     def get_overview(self) -> str:
         raise NotImplementedError('To be implemented')
 
-    def _add_to_memory(self, additional_list: Optional[list[NexusWellConnection]]) -> None:
+    def _add_to_memory(self, additional_list: Optional[list[WellConnection]]) -> None:
         """Extends the nodes object by a list of connections provided to it.
 
         Args:

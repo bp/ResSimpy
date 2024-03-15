@@ -13,10 +13,10 @@ if TYPE_CHECKING:
 class WellConnections(NetworkOperationsMixIn, ABC):
     _well_connections: list[WellConnection]
 
-    def __init__(self, parent_network: Network,
-                 well_connections: Optional[list[WellConnection]] = None) -> None:
+    def __init__(self, parent_network: Network, well_connections: Optional[list[WellConnection]] = None) -> None:
+        super().__init__(parent_network)
         self.__parent_network: Network = parent_network
-        self._well_connections: list[WellConnection] = well_connections
+        self._well_connections: list[WellConnection] = well_connections if well_connections is not None else []
 
     @property
     def _network_element_name(self) -> Literal['well_connections']:
