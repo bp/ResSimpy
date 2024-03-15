@@ -29,11 +29,12 @@ class NexusWellConnections(WellConnections):
     connections in a NexusNetwork. It is stored as an instance in the NexusNetwork class as "well_connections".
     In Nexus this is the WELLS table.
     """
-    __well_connections: list[NexusWellConnection] = field(default_factory=list)
+    _well_connections: list[NexusWellConnection] = field(default_factory=list)
 
-    def __init__(self, parent_network: NexusNetwork) -> None:
+    def __init__(self, parent_network: NexusNetwork,
+                 well_connections: Optional[list[NexusWellConnection]] = None) -> None:
         self.__parent_network: NexusNetwork = parent_network
-        self.__well_connections: list[NexusWellConnection] = []
+        self._well_connections: list[NexusWellConnection] = well_connections if well_connections is not None else []
         self.__add_object_operations = AddObjectOperations(NexusWellConnection, self.table_header, self.table_footer,
                                                            self.__parent_network.model)
         self.__remove_object_operations = RemoveObjectOperations(self.__parent_network, self.table_header,
@@ -43,7 +44,7 @@ class NexusWellConnections(WellConnections):
     def get_all(self) -> list[NexusWellConnection]:
         """Returns a list of well connections loaded from the simulator."""
         self.__parent_network.get_load_status()
-        return self.__well_connections
+        return self._well_connections
 
     def get_by_name(self, name: str) -> Optional[NexusWellConnection]:
         """Returns a single well connection with the provided name loaded from the simulator.
@@ -56,7 +57,7 @@ class NexusWellConnections(WellConnections):
         """
         self.__parent_network.get_load_status()
         to_return = filter(lambda x: False if x.name is None else x.name.upper() == name.upper(),
-                           self.__well_connections)
+                           self._well_connections)
         return next(to_return, None)
 
     def get_df(self) -> pd.DataFrame:
@@ -66,7 +67,7 @@ class NexusWellConnections(WellConnections):
             connection.
         """
         self.__parent_network.get_load_status()
-        return obj_to_dataframe(self.__well_connections)
+        return obj_to_dataframe(self._well_connections)
 
     def get_overview(self) -> str:
         raise NotImplementedError('To be implemented')
@@ -79,7 +80,7 @@ class NexusWellConnections(WellConnections):
         """
         if additional_list is None:
             return
-        self.__well_connections.extend(additional_list)
+        self._well_connections.extend(additional_list)
 
     def load(self, surface_file: File, start_date: str, default_units: UnitSystem) -> None:
         new_well_connections, _ = collect_all_tables_to_objects(surface_file, {'WELLS': NexusWellConnection},
@@ -97,7 +98,7 @@ class NexusWellConnections(WellConnections):
 
         """
         self.__remove_object_operations.remove_object_from_network_main(
-            obj_to_remove, self._network_element_name, self.__well_connections)
+            obj_to_remove, self._network_element_name, self._well_connections)
 
     def add(self, obj_to_remove: dict[str, None | str | float | int]) -> None:
         """Adds a well connection to a network, taking a dictionary with properties for the new well connection.
