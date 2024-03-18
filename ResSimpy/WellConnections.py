@@ -1,7 +1,7 @@
 from __future__ import annotations
 from abc import ABC
-from dataclasses import dataclass
-from typing import Literal, Optional, TYPE_CHECKING
+from dataclasses import dataclass, field
+from typing import Literal, Optional, TYPE_CHECKING, Sequence
 
 from ResSimpy.OperationsMixin import NetworkOperationsMixIn
 from ResSimpy.WellConnection import WellConnection
@@ -11,12 +11,12 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class WellConnections(NetworkOperationsMixIn, ABC):
-    _well_connections: list[WellConnection]
+    _well_connections: Sequence[WellConnection] = field(default_factory=list)
 
-    def __init__(self, parent_network: Network, well_connections: Optional[list[WellConnection]] = None) -> None:
+    def __init__(self, parent_network: Network) -> None:
         super().__init__(parent_network)
         self.__parent_network: Network = parent_network
-        self._well_connections: list[WellConnection] = well_connections if well_connections is not None else []
+        self._well_connections = []
 
     @property
     def _network_element_name(self) -> Literal['well_connections']:
@@ -30,4 +30,9 @@ class WellConnections(NetworkOperationsMixIn, ABC):
         """
         if additional_list is None:
             return
+        if not isinstance(additional_list, list):
+            additional_list = list(additional_list)
+        if not isinstance(self._well_connections, list):
+            self._well_connections = list(self._well_connections)
+
         self._well_connections.extend(additional_list)

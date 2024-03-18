@@ -16,10 +16,10 @@ class Network(ABC):
     nodes: Optional[Nodes]
     connections: Optional[NodeConnections]
     constraints: Optional[Constraints]
-    targets: Optional[Targets]
-    well_connections: Optional[WellConnections]
-    wellheads: Optional[Wellheads]
-    wellbores: Optional[Wellbores]
+    targets: Optional[Targets] = None
+    well_connections: Optional[WellConnections] = None
+    wellheads: Optional[Wellheads] = None
+    wellbores: Optional[Wellbores] = None
     __has_been_loaded: bool = False
 
     @abstractmethod
