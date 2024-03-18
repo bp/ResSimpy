@@ -8,6 +8,9 @@ from typing import Optional
 class VariableEntry:
     modifier: Optional[str] = None
     value: Optional[str] = None
+    # make a boolean to indicate if a keyword is found in an include file
+    # assume initially that it is not
+    keyword_in_include_file: bool = False
 
 
 @dataclass(kw_only=True)

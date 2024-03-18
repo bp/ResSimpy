@@ -5,6 +5,7 @@ import copy
 import pandas as pd
 from dataclasses import dataclass
 from typing import Optional, TYPE_CHECKING
+import warnings
 
 from ResSimpy.Grid import Grid, VariableEntry
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -37,6 +38,8 @@ class NexusGrid(Grid):
     __grid_faults_loaded: bool = False
     __grid_properties_loaded: bool = False
     __grid_nexus_file: Optional[NexusFile] = None
+    __corp: VariableEntry
+    __iequil: VariableEntry
 
     def __init__(self, grid_nexus_file: Optional[NexusFile] = None) -> None:
         super().__init__()
@@ -52,6 +55,8 @@ class NexusGrid(Grid):
         self.__grid_properties_loaded: bool = False
         self.__grid_nexus_file: Optional[NexusFile] = grid_nexus_file
         self.__grid_array_functions: Optional[list[NexusGridArrayFunction]] = None
+        self.__corp: VariableEntry = VariableEntry()
+        self.__iequil: VariableEntry = VariableEntry()
 
     def __wrap(self, value):
         if isinstance(value, tuple | list | set | frozenset):
@@ -119,8 +124,10 @@ class NexusGrid(Grid):
         if self.__grid_nexus_file is None or self.__grid_file_contents is None or self.__grid_file_nested is None:
             raise ValueError("Grid file not found, cannot load grid properties")
 
-        file_as_list = self.__grid_file_contents
-        for line in file_as_list:
+        file_as_list = nfo.strip_file_of_comments(self.__grid_file_contents, comment_characters= ['!','C'])
+
+        for idx, line in enumerate(file_as_list):
+            print(line)
 
             # Load in the basic properties
             properties_to_load = [
@@ -139,12 +146,20 @@ class NexusGrid(Grid):
                 PropertyToLoad('PERMZ', ['VALUE', 'MULT', 'CON'], self._kz),
                 PropertyToLoad('PERMK', ['VALUE', 'MULT', 'CON'], self._kz),
                 PropertyToLoad('KK', ['VALUE', 'MULT', 'CON'], self._kz),
+                PropertyToLoad('CORP', ['VALUE'], self.__corp),
+                PropertyToLoad('IEQUIL', ['VALUE', 'CON'], self.__iequil)
             ]
 
             for token_property in properties_to_load:
                 for modifier in token_property.modifiers:
+                    # execute the load
                     StructuredGridOperations.load_token_value_if_present(
                         token_property.token, modifier, token_property.property, line, file_as_list, ['INCLUDE'])
+                    # handle if corp is in an include file
+                    if token_property.token == 'CORP':
+                        if (token_property.property.modifier == 'VALUE') and \
+                            ('INCLUDE' not in token_property.property.value):
+                            token_property.property.keyword_in_include_file = True
 
             # Load in grid dimensions
             if nfo.check_token('NX', line):
@@ -305,9 +320,28 @@ class NexusGrid(Grid):
             self.load_faults()
         return self.__faults_df
 
+    def __keyword_in_include_file_warning(self, var_entry_obj: VariableEntry) -> None:
+
+        if var_entry_obj.keyword_in_include_file is True:
+            warnings.warn('Bad simulation practice: This keyword is in the include file.')
+        else:
+            return None
+
+
+
     @property
     def array_functions(self) -> Optional[list[NexusGridArrayFunction]]:
         """Returns a list of the array functions defined in the structured grid file."""
         if self.__grid_array_functions is None:
             self.load_array_functions()
         return self.__grid_array_functions
+    @property
+    def corp(self) -> VariableEntry:
+        self.load_grid_properties_if_not_loaded()
+        self.__keyword_in_include_file_warning(self.__corp)
+
+        return self.__corp
+    @property
+    def iequil(self) -> VariableEntry:
+        self.load_grid_properties_if_not_loaded()
+        return self.__iequil
