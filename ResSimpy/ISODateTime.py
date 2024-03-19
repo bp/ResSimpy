@@ -60,10 +60,16 @@ class ISODateTime(datetime):
                 converted_date = ISODateTime.strptime(start_date, '%m/%d/%Y') + timedelta(days=float(date))
 
         elif date_format == DateFormat.DD_MM_YYYY:
-            converted_date = ISODateTime.strptime(date, '%d/%m/%Y')
+            try:
+                converted_date = ISODateTime.strptime(date, '%d/%m/%Y')
+            except ValueError: # Handling the case where a time has been added
+                converted_date = ISODateTime.strptime(date, '%d/%m/%Y(%H:%M:%S)')
 
         elif date_format == DateFormat.MM_DD_YYYY:
-            converted_date = ISODateTime.strptime(date, '%m/%d/%Y')
+            try:
+                converted_date = ISODateTime.strptime(date, '%m/%d/%Y')
+            except ValueError: # Handling the case where a time has been added
+                converted_date = ISODateTime.strptime(date, '%m/%d/%Y(%H:%M:%S)')
 
         elif date_format == DateFormat.DD_MMM_YYYY:
             converted_date = ISODateTime.strptime(date, '%d %b %Y')
