@@ -8,6 +8,81 @@ from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
 from tests.multifile_mocker import mock_multiple_files
 
 
+@pytest.mark.parametrize("structured_grid_file_contents, expected_corp, expected_iequil",
+                         [
+                             ("! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
+                              "\nother text\n\nCORP VALUE\n "
+                              "INCLUDE /tcchou/scratch2/isebo0/Testing/TDRM/MayallEnsComp_ESMDA/Includes/juliana.cor\n "
+                              "IEQUIL CON\n"
+                              "1\n!ANOTHER COMMENT \n",  # end structured_grid_file_contents
+                              "/tcchou/scratch2/isebo0/Testing/TDRM/MayallEnsComp_ESMDA/Includes/juliana.cor",
+                              1),
+                         ])
+def test_load_structured_grid_file_iequil_corp(mocker, structured_grid_file_contents, expected_corp, expected_iequil):
+    """Read in Structured Grid File"""
+    # Arrange
+    fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+
+    def mock_open_wrapper(filename, mode): # for some reason mode arg is needed even though not used
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'testpath1/nexus_run.fcs': fcs_file,
+                                         structured_grid_name: structured_grid_file_contents,
+                '/tcchou/scratch2/isebo0/Testing/TDRM/MayallEnsComp_ESMDA/Includes/juliana.cor': ''}).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+    sim_obj = NexusSimulator(origin='testpath1/nexus_run.fcs')
+    result = sim_obj.grid
+
+    # Assert
+    # note that iequil is a nexus specific grid array and is an integer
+    assert result.iequil.modifier == 'CON'
+    assert result.iequil.value == 1
+    assert result.corp.modifier == 'VALUE'
+    assert result.corp.value == '/tcchou/scratch2/isebo0/Testing/TDRM/MayallEnsComp_ESMDA/Includes/juliana.cor'
+
+
+def test_grid_arr_in_include_file(mocker):
+    # Arrange
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents = """ARRAYS ROOT
+! grid
+INCLUDE /tcchou/scratch2/isebo0/Testing/TDRM/MayallEnsComp_ESMDA/Includes/juliana.cor
+LIST"""
+
+    included_file_contents = """C ---------------------------
+C  File-name: model1.cor
+C  Created: 08-MAR-2005 14:41:27
+C
+C
+C
+C
+C
+CORP VALUE"""
+
+    included_file_location = '/tcchou/scratch2/isebo0/Testing/TDRM/MayallEnsComp_ESMDA/Includes/juliana.cor'
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'testpath1/nexus_run.fcs': fcs_file_contents,
+                                         '/run_control/path': '',
+                                         structured_grid_name: structured_grid_file_contents,
+                                         included_file_location: included_file_contents
+                                         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    sim_obj = NexusSimulator(origin='testpath1/nexus_run.fcs')
+    result = sim_obj.grid
+
+    # Assert
+    assert result.corp.keyword_in_include_file is True
+    assert result.corp.value == '/tcchou/scratch2/isebo0/Testing/TDRM/MayallEnsComp_ESMDA/Includes/juliana.cor'
+
+
 @pytest.mark.parametrize("structured_grid_file_contents, expected_net_to_gross, expected_porosity, expected_range_x,"
                          "expected_range_y, expected_range_z",
                          [

@@ -40,6 +40,7 @@ class NexusGrid(Grid):
     __grid_nexus_file: Optional[NexusFile] = None
     __corp: VariableEntry
     __iequil: VariableEntry
+    __pvmult: VariableEntry
 
     def __init__(self, grid_nexus_file: Optional[NexusFile] = None) -> None:
         super().__init__()
@@ -57,6 +58,7 @@ class NexusGrid(Grid):
         self.__grid_array_functions: Optional[list[NexusGridArrayFunction]] = None
         self.__corp: VariableEntry = VariableEntry()
         self.__iequil: VariableEntry = VariableEntry()
+        self.__pvmult: VariableEntry = VariableEntry()
 
     def __wrap(self, value):
         if isinstance(value, tuple | list | set | frozenset):
@@ -148,6 +150,7 @@ class NexusGrid(Grid):
                 PropertyToLoad('PERMZ', ['VALUE', 'MULT', 'CON'], self._kz),
                 PropertyToLoad('PERMK', ['VALUE', 'MULT', 'CON'], self._kz),
                 PropertyToLoad('KK', ['VALUE', 'MULT', 'CON'], self._kz),
+                PropertyToLoad('PVMULT', ['VALUE', 'MULT', 'CON'], self.__pvmult),
                 PropertyToLoad('CORP', ['VALUE'], self.__corp),
                 PropertyToLoad('IEQUIL', ['VALUE', 'CON'], self.__iequil)
             ]
@@ -341,4 +344,11 @@ class NexusGrid(Grid):
     @property
     def iequil(self) -> VariableEntry:
         self.load_grid_properties_if_not_loaded()
+        # convert to integer
+        self.__iequil.value = int(self.__iequil.value)
         return self.__iequil
+
+    @property
+    def pvtmult(self) -> VariableEntry:
+        self.load_grid_properties_if_not_loaded()
+        return self.__pvmult
