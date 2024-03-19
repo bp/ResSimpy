@@ -41,6 +41,8 @@ class NexusGrid(Grid):
     __corp: VariableEntry
     __iequil: VariableEntry
     __pvmult: VariableEntry
+    # handle the work arrays there could up to nine
+
 
     def __init__(self, grid_nexus_file: Optional[NexusFile] = None) -> None:
         super().__init__()

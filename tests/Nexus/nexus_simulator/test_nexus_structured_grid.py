@@ -12,10 +12,10 @@ from tests.multifile_mocker import mock_multiple_files
                          [
                              ("! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
                               "\nother text\n\nCORP VALUE\n "
-                              "INCLUDE /tcchou/scratch2/isebo0/Testing/TDRM/MayallEnsComp_ESMDA/Includes/juliana.cor\n "
+                              "INCLUDE /XXX/XXX/XXX/Testing/TDRM/ESMDA/Includes/xxx.cor\n "
                               "IEQUIL CON\n"
                               "1\n!ANOTHER COMMENT \n",  # end structured_grid_file_contents
-                              "/tcchou/scratch2/isebo0/Testing/TDRM/MayallEnsComp_ESMDA/Includes/juliana.cor",
+                              "/XXX/XXX/XXX/Testing/TDRM/ESMDA/Includes/xxx.cor",
                               1),
                          ])
 def test_load_structured_grid_file_iequil_corp(mocker, structured_grid_file_contents, expected_corp, expected_iequil):
@@ -28,7 +28,7 @@ def test_load_structured_grid_file_iequil_corp(mocker, structured_grid_file_cont
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
                                         {'testpath1/nexus_run.fcs': fcs_file,
                                          structured_grid_name: structured_grid_file_contents,
-                '/tcchou/scratch2/isebo0/Testing/TDRM/MayallEnsComp_ESMDA/Includes/juliana.cor': ''}).return_value
+                '/XXX/XXX/XXX/Testing/TDRM/ESMDA/Includes/xxx.cor': ''}).return_value
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
@@ -40,20 +40,17 @@ def test_load_structured_grid_file_iequil_corp(mocker, structured_grid_file_cont
     assert result.iequil.modifier == 'CON'
     assert result.iequil.value == 1
     assert result.corp.modifier == 'VALUE'
-    assert result.corp.value == '/tcchou/scratch2/isebo0/Testing/TDRM/MayallEnsComp_ESMDA/Includes/juliana.cor'
+    assert result.corp.value == '/XXX/XXX/XXX/Testing/TDRM/ESMDA/Includes/xxx.cor'
 
 
-def test_grid_arr_in_include_file(mocker):
-    # Arrange
-    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
-    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
-    structured_grid_file_contents = """ARRAYS ROOT
+@pytest.mark.parametrize('structured_grid_file_contents, include_file_contents',
+                         [
+                             ("""ARRAYS ROOT
 ! grid
-INCLUDE /tcchou/scratch2/isebo0/Testing/TDRM/MayallEnsComp_ESMDA/Includes/juliana.cor
-LIST"""
-
-    included_file_contents = """C ---------------------------
-C  File-name: model1.cor
+INCLUDE /XXX/XXX/XXX/Testing/TDRM/ESMDA/Includes/xxx.cor
+LIST""",  # end structured grid_file_contents and begin include_file_contents
+                              """C ---------------------------
+C  File-name: xx.cor
 C  Created: 08-MAR-2005 14:41:27
 C
 C
@@ -61,15 +58,49 @@ C
 C
 C
 CORP VALUE"""
+                             ),
+                             ("""ARRAYS ROOT
+! grid
+NX  NY  NZ
+10  10  10
+INCLUDE /XXX/XXX/XXX/Testing/TDRM/ESMDA/Includes/xxx.cor
+LIST""",  # ends structured_grid_file_contents
+                              """C ---------------------------
+C  File-name: xx.cor
+C  Created: 08-MAR-2005 14:41:27
+C
+CORP VALUE
+C This is a comment that comes after the keyword."""
 
-    included_file_location = '/tcchou/scratch2/isebo0/Testing/TDRM/MayallEnsComp_ESMDA/Includes/juliana.cor'
+                             ),
+                             ("""ARRAYS ROOT
+! grid
+NX  NY  NZ
+10  10  10
+INCLUDE /XXX/XXX/XXX/Testing/TDRM/ESMDA/Includes/xxx.cor
+LIST""",  # ends structured grid_file_contents
+                              """CORP VALUE
+C GRID BLOCK: I =   1 , J =   1 , K =   1  
+2265.261168 18412.34172 6006.48864 2697.769032 18432.059328 6010.983336 
+2879.984664 17767.1724 5972.663592 2456.761464 17751.621408 5976.206856 
+2265.261168 18412.34172 6104.91264 2697.769032 18432.059328 6109.407336 
+2879.984664 17767.1724 6071.087592 2456.761464 17751.621408 6074.630856"""
+                             )
+
+                         ])
+def test_grid_arr_in_include_file(mocker, structured_grid_file_contents, include_file_contents):
+    # Arrange
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+
+    include_file_location = '/XXX/XXX/XXX/Testing/TDRM/ESMDA/Includes/xxx.cor'
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
                                         {'testpath1/nexus_run.fcs': fcs_file_contents,
                                          '/run_control/path': '',
                                          structured_grid_name: structured_grid_file_contents,
-                                         included_file_location: included_file_contents
+                                         include_file_location: include_file_contents
                                          }).return_value
         return mock_open
 
@@ -80,7 +111,7 @@ CORP VALUE"""
 
     # Assert
     assert result.corp.keyword_in_include_file is True
-    assert result.corp.value == '/tcchou/scratch2/isebo0/Testing/TDRM/MayallEnsComp_ESMDA/Includes/juliana.cor'
+    assert result.corp.value == '/XXX/XXX/XXX/Testing/TDRM/ESMDA/Includes/xxx.cor'
 
 
 @pytest.mark.parametrize("structured_grid_file_contents, expected_net_to_gross, expected_porosity, expected_range_x,"
