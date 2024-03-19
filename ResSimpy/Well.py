@@ -21,10 +21,10 @@ class Well(ABC):
         """Initialises the ConstraintUnits class.
 
         Args:
-            well_name (str): ??
-            completions (list[Completion]): ??
-            unit_system (None | UnitSystem): ??
-            well_type (Optional[WellType]): ??
+            well_name (str): The name of the well.
+            completions (list[Completion]): A list of all of the completions on the well.
+            unit_system (None | UnitSystem): The unit system associated with the properties on this well.
+            well_type (Optional[WellType]): The type of the well represented by a WellType Enum.
         """
         self._well_name = well_name
         self._completions = completions

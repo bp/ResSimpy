@@ -37,11 +37,11 @@ class NexusValveMethod(DynamicProperty):
         """Initialises the NexusValveMethod class.
 
         Args:
-            file (NexusFile): ??
-            input_number (int): ??
-            model_unit_system (UnitSystem): ??
+            file (NexusFile): NexusFile object associated with the valve method.
+            input_number (int): method number for the valve method.
+            model_unit_system (UnitSystem): unit system used in the model.
             properties (Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                 dict[str, Union[float, pd.DataFrame]]]]]): ??
+                                 dict[str, Union[float, pd.DataFrame]]]]]): The properties found in the valve method.
         """
         if properties is not None:
             self.properties = properties

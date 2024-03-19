@@ -13,9 +13,9 @@ class NexusWellList(WellList):
         """Initialises the NexusWellList class.
 
         Args:
-            name (str): ??
-            wells (list[str]): ??
-            date (str): ??
+            name (str): Name of the welllist.
+            wells (list[str]): List of well names in the welllist.
+            date (str): Date when the welllist is defined. Persists until the next date is defined.
         """
         super().__init__(name=name, wells=wells, date=date)
 

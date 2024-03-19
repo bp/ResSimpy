@@ -202,7 +202,7 @@ class NexusConstraint(Constraint):
         """Initialises the NexusConstraint class.
 
         Args:
-            properties_dict: dict ??
+            properties_dict (dict): dict of the properties to set on the object.
         """
         super(Constraint, self).__init__({})
         for key, prop in properties_dict.items():

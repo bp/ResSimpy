@@ -26,7 +26,8 @@ if TYPE_CHECKING:
 @dataclass(kw_only=True)
 class NexusNodes(Nodes):
     """Class to store and manipulate the nodes in a NexusNetwork.
-    It is stored as an instance in the NexusNetwork class as "nodes".
+    It is stored as an instance in the NexusNetwork class as "nodes". A list of nodes in the network are stored in
+    memory these can be accessed through the get_all method.
     """
     __nodes: list[NexusNode] = field(default_factory=list)
 
@@ -34,7 +35,7 @@ class NexusNodes(Nodes):
         """Initialises the NexusNodes class.
 
         Args:
-            parent_network (NexusNetwork): ??
+            parent_network (NexusNetwork): The network that the nodes are a part of.
         """
         self.__parent_network: NexusNetwork = parent_network
         self.__nodes: list[NexusNode] = []

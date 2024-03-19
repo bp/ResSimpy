@@ -21,7 +21,7 @@ class NexusWellLists(WellLists):
         """Initialises the NexusWellLists class.
 
         Args:
-            parent_network (NexusNetwork): ??
+            parent_network (NexusNetwork): The network that the well lists are a part of.
         """
         self.__parent_network: NexusNetwork = parent_network
         self.__well_lists: list[NexusWellList] = []

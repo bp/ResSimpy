@@ -58,13 +58,14 @@ class NexusFile(File):
         """Initialises the NexusFile class.
 
         Args:
-            include_locations (Optional[list[str]]): ??
-            origin (Optional[str]): ??
-            include_objects (Optional[Sequence[File]]): ??
-            file_content_as_list (Optional[list[str]]): ??
-            linked_user (Optional[str]): ??
-            last_modified (Optional[datetime]): ??
-            file_loading_skipped (bool): ??
+            location: str: The file path to the fcs file.
+            include_locations: Optional[list[str]]: list of file paths to the included files.
+            origin: Optional[str]: The file path to the file that included this file. None for top level files.
+            include_objects: Optional[list[NexusFile]: list of NexusFile objects that are included in this file.
+            file_content_as_list: Optional[list[str]]: list of strings representing the content of the file.
+            linked_user (Optional[str]): user or owner of the file. Defaults to None
+            last_modified (Optional[datetime]): last modified date of the file, Defaults to None
+            file_loading_skipped (bool): If set to True, the file loading was skipped. Defaults to False.
         """
         super().__init__(location=location, file_content_as_list=file_content_as_list, include_objects=include_objects,
                          file_loading_skipped=file_loading_skipped)

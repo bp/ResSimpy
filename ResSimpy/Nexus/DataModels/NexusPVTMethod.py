@@ -23,7 +23,7 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
 
 
-@dataclass(kw_only=True, repr=False)  # Doesn't need to write an _init_, _eq_ methods, etc.
+@dataclass(kw_only=True, repr=False)
 class NexusPVTMethod(DynamicProperty):
     """Class to hold Nexus PVT properties.
 
@@ -68,17 +68,18 @@ class NexusPVTMethod(DynamicProperty):
         """Initialises the NexusGasliftMethod class.
 
         Args:
-            file (NexusFile): ??
-            input_number (int): ??
-            model_unit_system (UnitSystem): ??
-            pvt_type (Optional[PvtType]): ??
-            eos_nhc (Optional[int]): ??
-            eos_temp (Optional[float]): ??
-            eos_components (Optional[list[str]]): ??
+            file (NexusFile): NexusFile object associated with the PVT method.
+            input_number (int): method number for the PVT method.
+            model_unit_system (UnitSystem): unit system from the model.
+            pvt_type (Optional[PvtType]): Type of PVT method, e.g., BLACKOIL, GASWATER or EOS. Defaults to None.
+            eos_nhc (Optional[int]): Number of hydrocarbon components for EOS method. Defaults to None.
+            eos_temp (Optional[float]): Default temperature for EOS method. Defaults to None.
+            eos_components (Optional[list[str]]): Specifies component names for EOS method. Defaults to None.
             eos_options (Optional[dict[str, Union[str, int, float, pd.DataFrame, list[str], dict[str, float],
-                                       tuple[str, dict[str, float]], dict[str, pd.DataFrame]]]]): ??
+                                       tuple[str, dict[str, float]], dict[str, pd.DataFrame]]]]): Dictionary containing
+                                        various EOS options as specified in the PVT file. Defaults to None.
             properties (Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                 dict[str, Union[float, pd.DataFrame]]]]]): ??
+                                 dict[str, Union[float, pd.DataFrame]]]]]): dictionary of properties for the PVT method.
         """
         if pvt_type is not None:
             self.pvt_type = pvt_type

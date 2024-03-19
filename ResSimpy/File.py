@@ -37,9 +37,9 @@ class File(FileBase):
         """Initialises the File class.
 
         Args:
-            file_content_as_list (Optional[list[str]]): ??
-            include_objects (Optional[Sequence[File]]): ??
-            file_loading_skipped (bool): ??
+            file_content_as_list (Optional[list[str]]): The file content as a list of strings.
+            include_objects (Optional[Sequence[File]]): The files included in the file.
+            file_loading_skipped (bool): Whether the file loading was skipped due to the file being too large an array.
         """
         self.location = location
         self._location_in_including_file = location

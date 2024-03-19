@@ -13,7 +13,7 @@ class StructuredGridOperations:
         """Initialises the StructuredGridOperations class.
 
         Args:
-            model (NexusSimulator): ??
+            model (NexusSimulator): Parent model object which the StructuredGridOperations class is associated with.
         """
         self.__model: NexusSimulator = model
 

@@ -7,8 +7,8 @@ class FcsConfig:
         """Initialises the FcsConfig class.
 
         Args:
-            destination: ??
-            nexus_data_name: ??
+            destination: The destination directory for the output data.
+            nexus_data_name: The name of the data directory in the Nexus model.
         """
         self.output_dir = destination
         self.use_reservoir_names = True

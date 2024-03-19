@@ -67,7 +67,7 @@ class NexusNodeConnection(NodeConnection):
         """Initialises the NexusNodeConnection class.
 
         Args:
-            properties_dict (dict): ??
+            properties_dict (dict): A dictionary of properties to set on the node.
         """
         # call the init of the DataObjectMixin
         super(NodeConnection, self).__init__({})

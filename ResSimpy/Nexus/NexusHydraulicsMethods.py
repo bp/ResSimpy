@@ -28,9 +28,10 @@ class NexusHydraulicsMethods(Hydraulics):
         """Initialises the NexusHydraulicsMethods class.
 
         Args:
-            model_unit_system (UnitSystem): ??
-            inputs (Optional[MutableMapping[int, NexusHydraulicsMethod]]): ??
-            files (Optional[dict[int, NexusFile]]): ??
+            model_unit_system (UnitSystem): Unit system used in the model.
+            inputs (Optional[MutableMapping[int, NexusHydraulicsMethod]]): Collection of Nexus hydraulics methods.
+            files (Optional[dict[int, NexusFile]]): Collection of hydraulics files, as defined in Nexus fcs file.
+                Keyed by the method number.
         """
         if inputs:
             self.__inputs = inputs

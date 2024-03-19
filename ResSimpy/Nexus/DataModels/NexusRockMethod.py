@@ -40,11 +40,12 @@ class NexusRockMethod(DynamicProperty):
         """Initialises the NexusRockMethod class.
 
         Args:
-            file (NexusFile): ??
-            input_number (int): ??
-            model_unit_system (UnitSystem): ??
+            file (NexusFile): Nexus file containing the rock method.
+            input_number (int): method number for the rock method
+            model_unit_system (UnitSystem): unit system from the model
             properties (Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                 dict[str, Union[float, pd.DataFrame]]]]]): ??
+                                 dict[str, Union[float, pd.DataFrame]]]]]): dictionary of the properties for the rock
+                                    method. Defaults to None.
         """
         if properties is not None:
             self.properties = properties

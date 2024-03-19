@@ -32,7 +32,7 @@ class NexusWellMod:
         """Initialises the NexusWellMod class.
 
         Args:
-            wellmod_dict (dict[str, None | str | float | int | list[float]]): ??
+            wellmod_dict (dict[str, None | str | float | int | list[float]]): Dictionary of wellmod properties.
         """
         for key, prop in wellmod_dict.items():
             self.__setattr__(key, prop)

@@ -33,7 +33,7 @@ class NexusTargets(Targets):
         """Initialises the NexusTargets class.
 
         Args:
-            parent_network (NexusNetwork): ??
+            parent_network (NexusNetwork): The network that the targets are a part of.
         """
         self.__parent_network: NexusNetwork = parent_network
         self.__targets: list[NexusTarget] = []

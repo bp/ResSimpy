@@ -16,7 +16,7 @@ class NetworkOperationsMixIn(ABC):
         """Initialises the NetworkOperationsMixIn class.
 
         Args:
-            parent_network (Network): ??
+            parent_network (Network): The parent network that the object is a part of.
         """
         self.__parent_network = parent_network
 

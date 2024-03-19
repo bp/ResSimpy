@@ -41,7 +41,7 @@ class OpenGoSimSimulator(Simulator):
         """Initialises the OpenGoSimSimulator class.
 
         Args:
-            origin (str): ??
+            origin (str): The path to the model file.
         """
         super().__init__()
         self._origin = origin

@@ -14,7 +14,7 @@ class BaseUnitMapping(ABC):
         """Initialises the BaseUnitMapping class.
 
         Args:
-            unit_system (None | UnitSystem): ??
+            unit_system (None | UnitSystem): The unit system to use for the unit mapping.
         """
         self.unit_system = unit_system
 

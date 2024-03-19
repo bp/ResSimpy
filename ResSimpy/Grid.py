@@ -25,11 +25,7 @@ class Grid(ABC):
     _kz: VariableEntry
 
     def __init__(self) -> None:
-        """Initialises the Grid class.
-
-        Args:
-            ??
-        """
+        """Initialises the Grid class."""
         self._netgrs = VariableEntry()
         self._porosity = VariableEntry()
         self._sw = VariableEntry()

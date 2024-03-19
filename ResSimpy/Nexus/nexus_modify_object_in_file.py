@@ -12,7 +12,7 @@ class ModifyObjectOperations:
         """Initialises the ModifyObjectOperations class.
 
         Args:
-            object_to_modify (Any): ??
+            object_to_modify (Any): Passed in object to modify and pass back out.
         """
         self.object_to_modify = object_to_modify
 

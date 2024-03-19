@@ -12,7 +12,7 @@ class NexusTarget(Target):
         """Initialises the NexusTarget class.
 
         Args:
-            properties_dict (dict): ??
+            properties_dict (dict): A dictionary of properties to set on the object.
         """
         # call the init of the DataObjectMixin
         super(Target, self).__init__({})

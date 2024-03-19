@@ -16,9 +16,9 @@ class RemoveObjectOperations:
         """Initialises the RemoveObjectOperations class.
 
         Args:
-            network (Optional[NexusNetwork]): ??
-            table_header (str): ??
-            table_footer (str): ??
+            network (Optional[NexusNetwork]): NexusNetwork object to remove the object from.
+            table_header (str): The string that represents the start of the table in the file.
+            table_footer (str): The string that represents the end of the table in the file.
         """
         self.table_header = table_header
         self.table_footer = table_footer

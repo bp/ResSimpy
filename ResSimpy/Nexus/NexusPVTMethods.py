@@ -29,9 +29,10 @@ class NexusPVTMethods(PVT):
         """Initialises the NexusPVTMethods class.
 
         Args:
-            model_unit_system (UnitSystem): ??
-            inputs (Optional[MutableMapping[int, NexusPVTMethod]]): ??
-            files (Optional[dict[int, NexusFile]]): ??
+            model_unit_system (UnitSystem): Unit system used in the model.
+            inputs (Optional[MutableMapping[int, NexusPVTMethod]]): Collection of Nexus PVT property methods.
+            files (Optional[dict[int, NexusFile]]): Collection of PVT property files, as defined in Nexus fcs file.
+                Keyed by the method number.
         """
         if inputs:
             self.__inputs = inputs

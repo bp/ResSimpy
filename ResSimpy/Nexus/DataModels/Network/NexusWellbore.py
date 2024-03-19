@@ -42,7 +42,7 @@ class NexusWellbore(Wellbore):
         """Initialises the NexusWellbore class.
 
         Args:
-            properties_dict (dict): ??
+            properties_dict (dict): dict of the properties to set on the object.
         """
         # call the init of the DataObjectMixin
         super(Wellbore, self).__init__({})

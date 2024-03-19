@@ -62,7 +62,7 @@ class NexusWellhead(Wellhead):
         """Initialises the NexusWellhead class.
 
         Args:
-            properties_dict (dict): ??
+            properties_dict (dict): dict of the properties to set on the object.
         """
         super(Wellhead, self).__init__({})
         for key, prop in properties_dict.items():

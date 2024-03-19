@@ -21,7 +21,7 @@ class NexusProcs:
         """Initialises the NexusProcs class.
 
         Args:
-            parent_network (NexusNetwork): ??
+            parent_network (NexusNetwork): The network that the procedures are a part of.
         """
         self.__parent_network: NexusNetwork = parent_network
         self.__procs = []

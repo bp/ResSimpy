@@ -36,7 +36,7 @@ class NexusNodeConnections(NodeConnections):
         """Initialises the NexusNodeConnections class.
 
         Args:
-            parent_network (NexusNetwork): ??
+            parent_network (NexusNetwork): The network that the connections are a part of.
         """
         self.__parent_network: NexusNetwork = parent_network
         self.__connections: list[NexusNodeConnection] = []

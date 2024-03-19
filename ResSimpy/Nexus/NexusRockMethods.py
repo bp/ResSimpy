@@ -29,9 +29,10 @@ class NexusRockMethods(Rock):
         """Initialises the NexusRockMethods class.
 
         Args:
-            model_unit_system (UnitSystem): ??
-            inputs (Optional[MutableMapping[int, NexusRockMethod]]): ??
-            files (Optional[dict[int, NexusFile]]): ??
+            model_unit_system (UnitSystem): Unit system used in the model.
+            inputs (Optional[MutableMapping[int, NexusRockMethod]]): Collection of Nexus rock property methods.
+            files (Optional[dict[int, NexusFile]]): Collection of rock property files, as defined in Nexus fcs file.
+                Keyed by the method number.
         """
         if inputs:
             self.__inputs = inputs

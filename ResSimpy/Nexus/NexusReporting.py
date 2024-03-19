@@ -7,6 +7,7 @@ import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.FrequencyEnum import FrequencyEnum
 from ResSimpy.Enums.OutputType import OutputType
+from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 
@@ -59,11 +60,11 @@ class NexusReporting:
     table_header = 'OUTPUT'
     table_footer = 'ENDOUTPUT'
 
-    def __init__(self, model) -> None:
+    def __init__(self, model: NexusSimulator) -> None:
         """Initialises the NexusReporting class.
 
         Args:
-            model (type??): ??
+            model (NexusSimulator): The Nexus model to get the reporting information from.
         """
         self.__model = model
         self.__add_object_operations = AddObjectOperations(NexusOutputRequest, self.table_header, self.table_footer,

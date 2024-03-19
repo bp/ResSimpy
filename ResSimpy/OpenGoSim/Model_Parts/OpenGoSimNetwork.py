@@ -11,7 +11,7 @@ class OpenGoSimNetwork(Network):
         """Initialises the OpenGoSimNetwork class.
 
         Args:
-            To be implemented later ??
+            To be implemented later.
         """
         self.nodes = None
         self.connections = None

@@ -100,7 +100,7 @@ class NexusWellConnection(WellConnection):
         """Initialises the NexusWellConnection class.
 
         Args:
-            properties_dict (dict): ??
+            properties_dict (dict): A dictionary of properties to set on the object.
         """
         # call the init of the DataObjectMixin
         super(WellConnection, self).__init__({})

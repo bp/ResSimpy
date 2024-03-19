@@ -27,7 +27,7 @@ class DynamicProperty(ABC):
 
         Args:
             input_number (int): Method, table or input number, in order as entered in the simulation input deck.
-            file (File): ??
+            file (File): The File that the dynamic property is read from.
         """
         self.input_number: int = input_number
         self.file: File = file

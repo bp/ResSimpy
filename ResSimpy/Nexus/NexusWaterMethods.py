@@ -29,9 +29,10 @@ class NexusWaterMethods(Water):
         """Initialises the NexusWaterMethods class.
 
         Args:
-            model_unit_system (UnitSystem): ??
-            inputs (Optional[MutableMapping[int, NexusWaterMethod]]): ??
-            files (Optional[dict[int, NexusFile]]): ??
+            model_unit_system (UnitSystem): Unit system used in the model.
+            inputs (Optional[MutableMapping[int, NexusWaterMethod]]): Collection of Nexus water property methods.
+            files (Optional[dict[int, NexusFile]]): Collection of water property files, as defined in Nexus fcs file.
+                Keyed by the method number.
         """
         if inputs:
             self.__inputs = inputs

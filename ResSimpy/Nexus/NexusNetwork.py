@@ -60,7 +60,7 @@ class NexusNetwork(Network):
         """Initialises the NexusNetwork class.
 
         Args:
-            model (NexusSimulator): ??
+            model (NexusSimulator): NexusSimulator object to be used to loading of the network object.
         """
         self.__has_been_loaded: bool = False
         self.__model: NexusSimulator = model

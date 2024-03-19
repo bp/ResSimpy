@@ -93,41 +93,64 @@ class FcsNexusFile(NexusFile):
         """Initialises the FcsNexusFile class.
 
         Args:
-            location: str, ??
-            include_locations: Optional[list[str]],
-            origin: Optional[str],
-            include_objects: Optional[list[NexusFile],
-            file_content_as_list: Optional[list[str]],
-            restart_file: Optional[NexusFile],
-            structured_grid_file: Optional[NexusFile],
-            options_file: Optional[NexusFile],
-            runcontrol_file: Optional[NexusFile],
-            override_file: Optional[NexusFile],
-            eos_default_file: Optional[NexusFile],
-            well_files: Optional[dict[int, NexusFile],
-            surface_files: Optional[dict[int, NexusFile],
-            rock_files: Optional[dict[int, NexusFile],
-            relperm_files: Optional[dict[int, NexusFile],
-            pvt_files: Optional[dict[int, NexusFile],
-            water_files: Optional[dict[int, NexusFile],
-            equil_files: Optional[dict[int, NexusFile],
-            tracer_init_files: Optional[dict[int, NexusFile],
-            aquifer_files: Optional[dict[int, NexusFile],
-            hyd_files: Optional[dict[int, NexusFile],
-            valve_files: Optional[dict[int, NexusFile],
-            separator_files: Optional[dict[int, NexusFile],
-            ipr_files: Optional[dict[int, NexusFile],
-            gas_lift_files: Optional[dict[int, NexusFile],
-            pump_files: Optional[dict[int, NexusFile],
-            compressor_files: Optional[dict[int, NexusFile],
-            choke_files: Optional[dict[int, NexusFile],
-            icd_files: Optional[dict[int, NexusFile],
-            esp_files: Optional[dict[int, NexusFile],
-            polymer_files: Optional[dict[int, NexusFile],
-            adsorption_files: Optional[dict[int, NexusFile],
-            flux_in_files: Optional[dict[int, NexusFile]
+            location: str: The file path to the fcs file.
+            include_locations: Optional[list[str]]: list of file paths to the included files.
+            origin: Optional[str]: The file path to the file that included this file. None for top level files.
+            include_objects: Optional[list[NexusFile]: list of NexusFile objects that are included in this file.
+            file_content_as_list: Optional[list[str]]: list of strings representing the content of the file.
+            restart_file: Optional[NexusFile]: The restart file for the fcs file.
+            structured_grid_file: Optional[NexusFile]: The structured grid file for the fcs file.
+            options_file: Optional[NexusFile]: The options file for the fcs file.
+            runcontrol_file: Optional[NexusFile]: The runcontrol file for the fcs file.
+            override_file: Optional[NexusFile]: The override file for the fcs file.
+            eos_default_file: Optional[NexusFile]: The eos default file for the fcs file.
+            well_files: Optional[dict[int, NexusFile]: Collection of well files for the fcs file. Indexed by method
+            number.
+            surface_files: Optional[dict[int, NexusFile]: Collection of surface files for the fcs file. Indexed by
+            method number.
+            rock_files: Optional[dict[int, NexusFile]: Collection of rock files for the fcs file. Indexed by method
+            number.
+            relperm_files: Optional[dict[int, NexusFile]: Collection of relperm files for the fcs file. Indexed by
+            method number.
+            pvt_files: Optional[dict[int, NexusFile]: Collection of pvt files for the fcs file. Indexed by method
+            number.
+            water_files: Optional[dict[int, NexusFile]: Collection of water files for the fcs file. Indexed by method
+            number.
+            equil_files: Optional[dict[int, NexusFile]: Collection of equil files for the fcs file. Indexed by method
+            number.
+            tracer_init_files: Optional[dict[int, NexusFile]: Collection of tracer init files for the fcs file. Indexed
+            by method number.
+            aquifer_files: Optional[dict[int, NexusFile]: Collection of aquifer files for the fcs file. Indexed by
+            method number.
+            hyd_files: Optional[dict[int, NexusFile]: Collection of hyd files for the fcs file. Indexed by method
+            number.
+            valve_files: Optional[dict[int, NexusFile]: Collection of valve files for the fcs file. Indexed by method
+            number.
+            separator_files: Optional[dict[int, NexusFile]: Collection of separator files for the fcs file. Indexed by
+            method number.
+            ipr_files: Optional[dict[int, NexusFile]: Collection of ipr files for the fcs file. Indexed by method
+            number.
+            gas_lift_files: Optional[dict[int, NexusFile]: Collection of gas lift files for the fcs file. Indexed by
+            method number.
+            pump_files: Optional[dict[int, NexusFile]: Collection of pump files for the fcs file. Indexed by method
+            number.
+            compressor_files: Optional[dict[int, NexusFile]: Collection of compressor files for the fcs file. Indexed by
+            method number.
+            choke_files: Optional[dict[int, NexusFile]: Collection of choke files for the fcs file. Indexed by method
+            number.
+            icd_files: Optional[dict[int, NexusFile]: Collection of icd files for the fcs file. Indexed by method
+            number.
+            esp_files: Optional[dict[int, NexusFile]: Collection of esp files for the fcs file. Indexed by method
+            number.
+            polymer_files: Optional[dict[int, NexusFile]: Collection of polymer files for the fcs file. Indexed by
+            method number.
+            adsorption_files: Optional[dict[int, NexusFile]: Collection of adsorption files for the fcs file. Indexed by
+            method number.
+            flux_in_files: Optional[dict[int, NexusFile]: Collection of flux in files for the fcs file. Indexed by
+            method number.
         """
         self.restart_file = restart_file
+
         self.structured_grid_file = structured_grid_file
         self.options_file = options_file
         self.runcontrol_file = runcontrol_file
@@ -359,6 +382,7 @@ class FcsNexusFile(NexusFile):
             to the new fcs file path
             case_suffix (str): suffix to append to the end of the file name e.g. case_1
         """
+
         def new_include_file_name(file_name: str) -> str:
             """Returns the new include file name based on the original file name plus the suffix provided."""
             file_name = os.path.basename(file_name)

@@ -31,7 +31,7 @@ class NexusWellheads(Wellheads):
         """Initialises the NexusWellheads class.
 
         Args:
-            parent_network (NexusNetwork): ??
+            parent_network (NexusNetwork): The network that the wellheads are a part of.
         """
         self.__parent_network: NexusNetwork = parent_network
         self.__wellheads: list[NexusWellhead] = []

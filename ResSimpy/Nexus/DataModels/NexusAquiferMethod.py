@@ -44,7 +44,8 @@ class NexusAquiferMethod(DynamicProperty):
             input_number (int): ??
             model_unit_system (UnitSystem): ??
             properties (Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                 dict[str, Union[float, pd.DataFrame]]]]]): ??
+                                 dict[str, Union[float, pd.DataFrame]]]]]): dictionary of properties for the aquifer
+                                 method. Defaults to None.
         """
         if properties is not None:
             self.properties = properties

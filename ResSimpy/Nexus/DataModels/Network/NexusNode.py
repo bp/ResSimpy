@@ -19,7 +19,7 @@ class NexusNode(Node):
         """Initialises the NexusNode class.
 
         Args:
-            properties_dict (dict): ??
+            properties_dict (dict): A dictionary of properties to set on the node.
         """
         # call the init of the DataObjectMixin
         super(Node, self).__init__({})
