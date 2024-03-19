@@ -222,7 +222,7 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
 
 def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
                                       header_values: dict[str, None | int | float | str],
-                                      headers: list[str], start_date: str,
+                                      headers: list[str], date: str,
                                       end_point_scaling_header_values: dict[str, None | int | float | str],
                                       date_format: DateFormat,
                                       unit_system: UnitSystem,
@@ -235,7 +235,7 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
         header_values (dict[str, Union[Optional[int], Optional[float], Optional[str]]]): dictionary of column \
             headings to populate from the table
         headers (list[str]): list of strings containing the headers from the wellspec table
-        start_date (str): date to populate the completion class with.
+        date (str): date to populate the completion class with.
 
     Returns:
         list[NexusCompletion]: list of nexus completions for a given table.
@@ -283,7 +283,7 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
             new_rel_perm_end_point = None
 
         new_completion = NexusCompletion(
-            date=start_date,
+            date=date,
             i=convert_header_value_int('IW'),
             j=convert_header_value_int('JW'),
             k=convert_header_value_int('L'),
