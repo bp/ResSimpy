@@ -62,13 +62,13 @@ class ISODateTime(datetime):
         elif date_format == DateFormat.DD_MM_YYYY:
             try:
                 converted_date = ISODateTime.strptime(date, '%d/%m/%Y')
-            except ValueError: # Handling the case where a time has been added
+            except ValueError:  # Handling the case where a time has been added
                 converted_date = ISODateTime.strptime(date, '%d/%m/%Y(%H:%M:%S)')
 
         elif date_format == DateFormat.MM_DD_YYYY:
             try:
                 converted_date = ISODateTime.strptime(date, '%m/%d/%Y')
-            except ValueError: # Handling the case where a time has been added
+            except ValueError:  # Handling the case where a time has been added
                 converted_date = ISODateTime.strptime(date, '%m/%d/%Y(%H:%M:%S)')
 
         elif date_format == DateFormat.DD_MMM_YYYY:
