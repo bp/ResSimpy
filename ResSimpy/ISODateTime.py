@@ -73,10 +73,10 @@ class ISODateTime(datetime):
 
         elif date_format == DateFormat.DD_MMM_YYYY:
             converted_date = ISODateTime.strptime(date, '%d %b %Y')
-            
+
         elif date_format == DateFormat.DD_MM_YYYY_h_m_s:
             converted_date = ISODateTime.strptime(date, '%d/%m/%Y(%H:%M:%S)')
-            
+
         elif date_format == DateFormat.MM_DD_YYYY_h_m_s:
             converted_date = ISODateTime.strptime(date, '%m/%d/%Y(%H:%M:%S)')
 
