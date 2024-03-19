@@ -76,7 +76,7 @@ class SeparatorUnits(BaseUnitMapping):
         """Initialises the SeparatorUnits class.
 
         Args:
-            unit_system (None | UnitSystem): ??
+            unit_system (None | UnitSystem): unit system to get the unit from.
         """
         super().__init__(unit_system=unit_system)
 
@@ -115,7 +115,7 @@ class RockUnits(BaseUnitMapping):
         """Initialises the RockUnits class.
 
         Args:
-            unit_system (None | UnitSystem): ??
+            unit_system (None | UnitSystem): unit system to get the unit from.
         """
         super().__init__(unit_system=unit_system)
 
@@ -160,7 +160,7 @@ class RelPermUnits(BaseUnitMapping):
         """Initialises the RelPermUnits class.
 
         Args:
-            unit_system (None | UnitSystem): ??
+            unit_system (None | UnitSystem): unit system to get the unit from.
         """
         super().__init__(unit_system=unit_system)
 
@@ -205,7 +205,7 @@ class HydraulicsUnits(BaseUnitMapping):
         """Initialises the HydraulicsUnits class.
 
         Args:
-            unit_system (None | UnitSystem): ??
+            unit_system (None | UnitSystem): unit system to get the unit from.
         """
         self.ratio_thousands = ratio_thousands
         super().__init__(unit_system=unit_system)
@@ -407,7 +407,7 @@ class EquilUnits(BaseUnitMapping):
         """Initialises the EquilUnits class.
 
         Args:
-            unit_system (None | UnitSystem): ??
+            unit_system (None | UnitSystem): unit system to get the unit from.
         """
         super().__init__(unit_system=unit_system)
 
@@ -512,7 +512,7 @@ class AquiferUnits(BaseUnitMapping):
         """Initialises the AquiferUnits class.
 
         Args:
-            unit_system (None | UnitSystem): ??
+            unit_system (None | UnitSystem): unit system to get the unit from.
         """
         super().__init__(unit_system=unit_system)
 
@@ -629,7 +629,7 @@ class PVTUnits(BaseUnitMapping):
         """Initialises the PVTUnits class.
 
         Args:
-            unit_system (None | UnitSystem): ??
+            unit_system (None | UnitSystem): unit system to get the unit from.
         """
         super().__init__(unit_system=unit_system)
 

@@ -67,13 +67,14 @@ class NexusWaterMethod(DynamicProperty):
         """Initialises the NexusWaterMethod class.
 
         Args:
-            file (NexusFile): ??
-            input_number (int): ??
-            model_unit_system (UnitSystem): ??
-            reference_pressure (Optional[float]): ??
-            properties (Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                 dict[str, Union[float, pd.DataFrame]]]]]): ??
-            parameters (Optional[list[NexusWaterParams]]): ??
+            file (NexusFile): Nexus water file object
+            input_number (int): Water method number in Nexus fcs file
+            reference_pressure (float): Reference pressure for BW and, if CVW is present, for VISW
+            properties (dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                        dict[str, Union[float, pd.DataFrame]]]]):
+                Dictionary holding properties for generic dynamic method. Defaults to empty dictionary.
+            parameters (list[NexusWaterParams]): list of water parameters, such as density, viscosity, etc.
+            model_unit_system (UnitSystem): unit system used in the model.
         """
         self.reference_pressure = reference_pressure
         if properties is not None:
