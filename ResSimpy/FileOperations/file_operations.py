@@ -21,19 +21,22 @@ def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,
     Returns:
         list[str]: a list of strings containing each line of the file as a new entry without comments
     """
-    # TODO: support VIP comment out single C character at the start of a line
     if comment_characters is None:
         comment_characters = ['!']
     file_as_list = list(filter(None, file_as_list))
 
-    # remove any empty lines
-    # regex: look back and forward 1 character from an ! and check if it's a quotation mark and
-    # exclude it from the match if it is
     file_without_comments = file_as_list
 
     for comment_character in comment_characters:
-        file_without_comments = [re.split(fr'(?<!\"){comment_character}(?!\")', x)[0]
-                                 for x in file_without_comments if x and x[0] != comment_character]
+        if comment_character == 'C':  # handle VIP comment with single C character at the start of a line
+            file_without_comments = [line for line in file_without_comments if not line.startswith('C ') and not
+                                     line.strip() == 'C']
+        else:
+            # remove any empty lines
+            # regex: look back and forward 1 character from an ! and check if it's a quotation mark and
+            # exclude it from the match if it is
+            file_without_comments = [re.split(fr'(?<!\"){comment_character}(?!\")', x)[0]
+                                     for x in file_without_comments if x and x[0] != comment_character]
 
     flat_file = '\n'.join(file_without_comments)
 

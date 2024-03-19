@@ -14,7 +14,7 @@ class StructuredGridOperations:
 
     @staticmethod
     def load_token_value_if_present(token: str, modifier: str, token_property: VariableEntry,
-                                    line: str, file_as_list: list[str],
+                                    line: str, file_as_list: list[str], line_indx: int,
                                     ignore_values: Optional[list[str]] = None) -> None:
         """Gets a token's value if there is one and loads it into the token_property.
 
@@ -24,6 +24,8 @@ class StructuredGridOperations:
             modifier (str): any modifiers applied to the token e.g. 'MULT'
             token_property (VariableEntry): VariableEntry object to store the modifier and value pair into
             line (str): line to search for the token in
+            line_indx (int): index of line in file_as_list
+            file_as_list (list[str]): a list of strings containing each line of the file as a new entry
             ignore_values (Optional[list[str]], optional): values to be ignored. Defaults to None.
 
         Raises:
@@ -49,6 +51,25 @@ class StructuredGridOperations:
                 if numerical_value is not None and value_to_multiply is not None:
                     token_property.modifier = 'MULT'
                     token_property.value = f"{numerical_value} {value_to_multiply}"
+            elif modifier == 'VALUE':
+                value = fo.get_token_value(token_modifier, line, file_as_list, ignore_values=ignore_values)
+                if value is None:
+                    # Could be 'cut short' by us excluding the rest of a file
+                    token_property.value = None
+                    token_property.modifier = modifier
+                else:
+                    # Check if VALUE modifier is followed by a numeric string or an INCLUDE file
+                    if value.replace('*', '').isnumeric() or 'INCLUDE' in file_as_list[line_indx+1]:
+                        token_property.value = value
+                        token_property.modifier = modifier
+                    else:  # The grid array keyword is likely inside an include file, presented on previous line
+                        if 'INCLUDE' in file_as_list[line_indx-1]:
+                            token_property.modifier = modifier
+                            token_property.value = file_as_list[line_indx-1].split('INCLUDE')[1].strip()
+                            token_property.keyword_in_include_file = True
+                        else:
+                            raise ValueError(
+                                f'No suitable value found after {token_modifier} keyword in line: {line}')
             else:
                 value = fo.get_token_value(token_modifier, line, file_as_list, ignore_values=ignore_values)
                 if value is None:

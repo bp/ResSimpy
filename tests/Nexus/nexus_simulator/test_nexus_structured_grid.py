@@ -13,10 +13,10 @@ from tests.multifile_mocker import mock_multiple_files
                          [
                              ("! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
                               "\nother text\n\nNETGRS VALUE\n INCLUDE /path_to_netgrs_file/include_net_to_gross.inc\n POROSITY "
-                              "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc",
+                              "VALUE\n!ANOTHER COMMENT \nINCLUDE path/to/porosity.inc",
                               "/path_to_netgrs_file/include_net_to_gross.inc", "path/to/porosity.inc", 1, 2, 3),
                              ("! Grid dimensions\nNX NY NZ\n111 123 321\ntest string\nPOROSITY VALUE\n!random text\n"
-                              "porosity_file.inc\nNETGRS VALUE\n!Comment Line 1\n\n!Comment Line 2\nINCLUDE   "
+                              "INCLUDE porosity_file.inc\nNETGRS VALUE\n!Comment Line 1\n\n!Comment Line 2\nINCLUDE   "
                               "/path/to/netgrs_file\nother text\n\n",
                               "/path/to/netgrs_file", "porosity_file.inc", 111, 123, 321)
                          ])
@@ -94,22 +94,22 @@ INCLUDE includes/Another_structured_grid_01.inc"""
                          [
                              ("! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
                               "\nother text\n\nNETGRS VALUE\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\n POROSITY "
-                              "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc",
+                              "VALUE\n!ANOTHER COMMENT \nINCLUDE path/to/porosity.inc",
                               "/path_to_netgrs_file/net_to_gross.inc", "path/to/porosity.inc", "VALUE", "VALUE", 1, 2,
                               3),
                              ("! Grid dimensions\nNX NY NZ\n111 123 321\ntest string\nPOROSITY VALUE\n!random text\n"
-                              "porosity_file.inc\nNETGRS VALUE\n!Comment Line 1\n\n!Comment Line 2\nINCLUDE   "
+                              "INCLUDE porosity_file.inc\nNETGRS VALUE\n!Comment Line 1\n\n!Comment Line 2\nINCLUDE   "
                               "/path/to/netgrs_file\nother text\n\n",
                               "/path/to/netgrs_file", "porosity_file.inc", "VALUE", "VALUE", 111, 123, 321),
                              ("! Grid dimensions\nNX NY NZ\n999 9 9\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
                               "\nother text\n\nNETGRS CON\n 0.55\n POROSITY "
-                              "VALUE\n!ANOTHER COMMENT \npath/to/porosity2.inc",
+                              "VALUE\n!ANOTHER COMMENT \nINCLUDE path/to/porosity2.inc",
                               "0.55", "path/to/porosity2.inc", "CON", "VALUE", 999, 9, 9),
                              ("! Grid dimensions\nNX NY NZ\n8 5 \t6\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
-                              "\nother text\n\nNETGRS VALUE\n\t ntg_file.dat\n POROSITY CON\n!ANOTHER COMMENT \n3",
+                              "\nother text\n\nNETGRS VALUE\n\t INCLUDE ntg_file.dat\n POROSITY CON\n!ANOTHER COMMENT \n3",
                               "ntg_file.dat", "3", "VALUE", "CON", 8, 5, 6),
                              ("! Grid dimensions\nNX   NY   NZ\n69   30    1\ntest string\nDUMMY VALUE\n!ioeheih\ntext"
-                              "\nother text\n\nNETGRS VALUE\n\t ntg_file.dat\n POROSITY CON\n!ANOTHER COMMENT \n3",
+                              "\nother text\n\nNETGRS VALUE\n\t INCLUDE ntg_file.dat\n POROSITY CON\n!ANOTHER COMMENT \n3",
                               "ntg_file.dat", "3", "VALUE", "CON", 69, 30, 1),
                          ])
 def test_load_structured_grid_file_dict_basic_properties(mocker, structured_grid_file_contents,
@@ -170,11 +170,11 @@ def test_load_structured_grid_file_fails(mocker):
 @pytest.mark.parametrize("structured_grid_file_contents, expected_water_saturation_modifier, "
                          "expected_water_saturation_value",
                          [
-                             ("SW VALUE\n /path/to/SW.inc",
+                             ("SW VALUE\n INCLUDE /path/to/SW.inc",
                               "VALUE", "/path/to/SW.inc"),
                              ("SW CON\n0.6", "CON", "0.6"),
                              ("Random VALUE\nSW CON 0.33\nOTHER VALUE", "CON", "0.33"),
-                             ("CON VALUE\nSW VALUE\tSW_FILE.inc",
+                             ("CON VALUE\nSW VALUE\t\nINCLUDE SW_FILE.inc",
                               "VALUE", "SW_FILE.inc"),
                          ])
 def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
@@ -212,20 +212,20 @@ def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
 @pytest.mark.parametrize("structured_grid_file_contents, expected_kx_value,expected_kx_modifier, expected_ky_value, "
                          "expected_ky_modifier, expected_kz_value, expected_kz_modifier",
                          [
-                             ("KX VALUE\n /path/to/kx.inc\nKY MULT\n12 KX\n KZ VALUE\n\n\n kz.inc", "/path/to/kx.inc",
+                             ("KX VALUE\n INCLUDE /path/to/kx.inc\nKY MULT\n12 KX\n KZ VALUE\n\n\n INCLUDE kz.inc", "/path/to/kx.inc",
                               "VALUE", "12 KX", "MULT", "kz.inc", "VALUE"),
-                             ("KX VALUE\n /path/to/kx.inc\nKY VALUE\n\t/path/to/kx.inc\n KZ MULT\n\n\n\t0.1 KX",
+                             ("KX VALUE\n INCLUDE /path/to/kx.inc\nKY VALUE\n\t/path/to/kx.inc\n KZ MULT\n\n\n\t0.1 KX",
                               "/path/to/kx.inc",
                               "VALUE", "/path/to/kx.inc", "VALUE", "0.1 KX", "MULT"),
-                             ("KX VALUE\n!Comment \n kx.inc\nKY MULT\n\t1 KX\n KZ MULT\n\n!3 KX\n 1 KX",
+                             ("KX VALUE\n!Comment \n INCLUDE kx.inc\nKY MULT\n\t1 KX\n KZ MULT\n\n!3 KX\n 1 KX",
                               "kx.inc", "VALUE", "1 KX", "MULT", "1 KX", "MULT"),
-                             ("KX MULT\n0.000001 KY\nKY VALUE\n\tky.inc\n KZ VALUE\n!COMMENT test\n\n /path/to/kz.inc",
+                             ("KX MULT\n0.000001 KY\nKY VALUE\n\tINCLUDE ky.inc\n KZ VALUE\n!COMMENT test\n\n INCLUDE /path/to/kz.inc",
                               "0.000001 KY", "MULT", "ky.inc", "VALUE", "/path/to/kz.inc", "VALUE"),
-                             ("KX MULT\n 0.1 KY\nKY VALUE\n\t ky.inc\n KZ VALUE\n!COMMENT test\n\n /path/to/kz.inc",
+                             ("KX MULT\n 0.1 KY\nKY VALUE\n\t INCLUDE ky.inc\n KZ VALUE\n!COMMENT test\n\n INCLUDE /path/to/kz.inc",
                               "0.1 KY", "MULT", "ky.inc", "VALUE", "/path/to/kz.inc", "VALUE"),
-                             ("KX VALUE\n /path/to/kx.inc\nKY VALUE\n\t/path/to/kx.inc\n KZ MULT\n\n\n\t\n\t 0.1\tKX",
+                             ("KX VALUE\n INCLUDE /path/to/kx.inc\nKY VALUE\n\tINCLUDE /path/to/kx.inc\n KZ MULT\n\n\n\t\n\t 0.1\tKX",
                               "/path/to/kx.inc", "VALUE", "/path/to/kx.inc", "VALUE", "0.1 KX", "MULT"),
-                             ("KX VALUE\n kx.inc\nKY MULT\n1 KX\n KZ MULT\n12 Ky",
+                             ("KX VALUE\n INCLUDE kx.inc\nKY MULT\n1 KX\n KZ MULT\n12 Ky",
                               "kx.inc", "VALUE", "1 KX", "MULT", "12 Ky", "MULT"),
                              ("KX CON\n 0.11333\nKY MULT\n1 KX\n KZ MULT\n12 Ky",
                               "0.11333", "CON", "1 KX", "MULT", "12 Ky", "MULT"),
@@ -235,7 +235,7 @@ def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
                               "0.11333", "CON", "1 PERMI", "MULT", "12 PERMJ", "MULT"),
                              ("KI CON\n 0.11333\nKJ MULT\n1 KI\n KK MULT\n12 KI",
                               "0.11333", "CON", "1 KI", "MULT", "12 KI", "MULT"),
-                            ("!KX VALUE\nKX VALUE\n /path/to/kx.inc\nKY MULT\n12 KX\n KZ VALUE\n\n\n kz.inc", "/path/to/kx.inc",
+                            ("!KX VALUE\nKX VALUE\n INCLUDE /path/to/kx.inc\nKY MULT\n12 KX\n KZ VALUE\n\n\n INCLUDE kz.inc", "/path/to/kx.inc",
                               "VALUE", "12 KX", "MULT", "kz.inc", "VALUE"),
                          ])
 def test_load_structured_grid_file_k_values(mocker, structured_grid_file_contents, expected_kx_value,
@@ -309,7 +309,7 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
 
     structured_grid_file = "! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text " \
                            "\nother text\n\n NETGRS VALUE\n\n!C\n\n  INCLUDE  /path_to_netgrs_file/net_to_gross.inc\n POROSITY " \
-                           "VALUE\n !ANOTHER COMMENT \n\tINCLUDE path/to/porosity.inc\nKX MULT\n 0.1 KY\nKY VALUE\n\t ky.inc\n " \
+                           "VALUE\n !ANOTHER COMMENT \n\tINCLUDE path/to/porosity.inc\nKX MULT\n 0.1 KY\nKY VALUE\n\t INCLUDE ky.inc\n " \
                            "KZ VALUE\n!COMMENT test\n\n INCLUDE /path/to/kz.inc !Comment\n\t SW VALUE\n INCLUDE sw_file.inc"
 
     new_structured_grid_dictionary = {"porosity": new_porosity, "sw": new_sw, "netgrs": new_netgrs, "kx": new_kx,
@@ -373,7 +373,7 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
                               "\n POROSITY VALUE\n"),
                              ("! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
                               "\nother text\n\nNETGRS CON\n 1.11111\n POROSITY "
-                              "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc",
+                              "VALUE\n!ANOTHER COMMENT \nINCLUDE path/to/porosity.inc",
                               "dummy text\nother text\n\nNETGRS CON\n 1.11111\n POROSITY VALUE\n"),
                              ("! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
                               "\nother text\n\tNETGRS VALUE\n INCLUDE NETGRS_FILE.inc !Inline Comment\n !Comment "

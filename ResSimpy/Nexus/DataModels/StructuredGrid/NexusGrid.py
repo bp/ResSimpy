@@ -124,10 +124,12 @@ class NexusGrid(Grid):
         if self.__grid_nexus_file is None or self.__grid_file_contents is None or self.__grid_file_nested is None:
             raise ValueError("Grid file not found, cannot load grid properties")
 
-        file_as_list = nfo.strip_file_of_comments(self.__grid_file_contents, comment_characters= ['!','C'])
+        # Strip file of comments
+        file_as_list = nfo.strip_file_of_comments(self.__grid_file_contents, comment_characters=['!', 'C'])
+        # Ignore blank lines
+        file_as_list = [line for line in file_as_list if not line.strip() == '']
 
         for idx, line in enumerate(file_as_list):
-            print(line)
 
             # Load in the basic properties
             properties_to_load = [
@@ -154,12 +156,7 @@ class NexusGrid(Grid):
                 for modifier in token_property.modifiers:
                     # execute the load
                     StructuredGridOperations.load_token_value_if_present(
-                        token_property.token, modifier, token_property.property, line, file_as_list, ['INCLUDE'])
-                    # handle if corp is in an include file
-                    if token_property.token == 'CORP':
-                        if (token_property.property.modifier == 'VALUE') and \
-                            ('INCLUDE' not in token_property.property.value):
-                            token_property.property.keyword_in_include_file = True
+                        token_property.token, modifier, token_property.property, line, file_as_list, idx, ['INCLUDE'])
 
             # Load in grid dimensions
             if nfo.check_token('NX', line):
@@ -323,11 +320,9 @@ class NexusGrid(Grid):
     def __keyword_in_include_file_warning(self, var_entry_obj: VariableEntry) -> None:
 
         if var_entry_obj.keyword_in_include_file is True:
-            warnings.warn('Bad simulation practice: This keyword is in the include file.')
+            warnings.warn('Grid array keyword in include file. This is not recommended simulation practice.')
         else:
             return None
-
-
 
     @property
     def array_functions(self) -> Optional[list[NexusGridArrayFunction]]:
@@ -335,12 +330,14 @@ class NexusGrid(Grid):
         if self.__grid_array_functions is None:
             self.load_array_functions()
         return self.__grid_array_functions
+
     @property
     def corp(self) -> VariableEntry:
         self.load_grid_properties_if_not_loaded()
         self.__keyword_in_include_file_warning(self.__corp)
 
         return self.__corp
+
     @property
     def iequil(self) -> VariableEntry:
         self.load_grid_properties_if_not_loaded()
