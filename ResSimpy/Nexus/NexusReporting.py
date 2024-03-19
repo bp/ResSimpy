@@ -1,15 +1,19 @@
 """Class for handling all Reporting and runcontrol related tasks."""
+from __future__ import annotations
+
 import warnings
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.FrequencyEnum import FrequencyEnum
 from ResSimpy.Enums.OutputType import OutputType
-from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
+if TYPE_CHECKING:
+    from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
 
 @dataclass(kw_only=True)
@@ -262,6 +266,8 @@ class NexusReporting:
         Args:
             output_request (NexusOutputRequest): The output request to add the model and associated in memory files.
         """
+        if self.__model.model_files.runcontrol_file is None:
+            raise ValueError("No file found for runcontrol file path.")
         file_as_list = self.__model.model_files.runcontrol_file.get_flat_list_str_file
         obj_props = output_request.to_dict(add_units=False)
         self.__add_object_operations.add_object_to_file(date=output_request.date,
