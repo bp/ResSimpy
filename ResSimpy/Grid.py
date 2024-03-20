@@ -7,7 +7,7 @@ from typing import Optional
 @dataclass
 class VariableEntry:
     modifier: Optional[str] = None
-    value: Optional[str] = None
+    value: Optional[str, int] = None
     # make a boolean to indicate if a keyword is found in an include file
     # assume initially that it is not
     keyword_in_include_file: bool = False

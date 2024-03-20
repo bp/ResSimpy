@@ -41,8 +41,18 @@ class NexusGrid(Grid):
     __corp: VariableEntry
     __iequil: VariableEntry
     __pvmult: VariableEntry
-    # handle the work arrays there could up to nine
-
+    __worka1: VariableEntry
+    __worka2: VariableEntry
+    __worka3: VariableEntry
+    __worka4: VariableEntry
+    __worka5: VariableEntry
+    __worka6: VariableEntry
+    __worka7: VariableEntry
+    __worka8: VariableEntry
+    __worka9: VariableEntry
+    __modx: VariableEntry
+    __mody: VariableEntry
+    __modz: VariableEntry
 
     def __init__(self, grid_nexus_file: Optional[NexusFile] = None) -> None:
         super().__init__()
@@ -61,6 +71,18 @@ class NexusGrid(Grid):
         self.__corp: VariableEntry = VariableEntry()
         self.__iequil: VariableEntry = VariableEntry()
         self.__pvmult: VariableEntry = VariableEntry()
+        self.__worka1: VariableEntry = VariableEntry()
+        self.__worka2: VariableEntry = VariableEntry()
+        self.__worka3: VariableEntry = VariableEntry()
+        self.__worka4: VariableEntry = VariableEntry()
+        self.__worka5: VariableEntry = VariableEntry()
+        self.__worka6: VariableEntry = VariableEntry()
+        self.__worka7: VariableEntry = VariableEntry()
+        self.__worka8: VariableEntry = VariableEntry()
+        self.__worka9: VariableEntry = VariableEntry()
+        self.__modx: VariableEntry = VariableEntry()
+        self.__mody: VariableEntry = VariableEntry()
+        self.__modz: VariableEntry = VariableEntry()
 
     def __wrap(self, value):
         if isinstance(value, tuple | list | set | frozenset):
@@ -154,7 +176,17 @@ class NexusGrid(Grid):
                 PropertyToLoad('KK', ['VALUE', 'MULT', 'CON'], self._kz),
                 PropertyToLoad('PVMULT', ['VALUE', 'MULT', 'CON'], self.__pvmult),
                 PropertyToLoad('CORP', ['VALUE'], self.__corp),
-                PropertyToLoad('IEQUIL', ['VALUE', 'CON'], self.__iequil)
+                PropertyToLoad('IEQUIL', ['VALUE', 'CON'], self.__iequil),
+                PropertyToLoad('WORKA1', ['VALUE', 'CON'], self.__worka1),
+                PropertyToLoad('WORKA2', ['VALUE', 'CON'], self.__worka2),
+                PropertyToLoad('WORKA3', ['VALUE', 'CON'], self.__worka3),
+                PropertyToLoad('WORKA4', ['VALUE', 'CON'], self.__worka4),
+                PropertyToLoad('WORKA5', ['VALUE', 'CON'], self.__worka5),
+                PropertyToLoad('WORKA6', ['VALUE', 'CON'], self.__worka6),
+                PropertyToLoad('WORKA7', ['VALUE', 'CON'], self.__worka7),
+                PropertyToLoad('WORKA8', ['VALUE', 'CON'], self.__worka8),
+                PropertyToLoad('WORKA9', ['VALUE', 'CON'], self.__worka9),
+                PropertyToLoad('MODX', [], self.__modx)
             ]
 
             for token_property in properties_to_load:
@@ -354,3 +386,53 @@ class NexusGrid(Grid):
     def pvtmult(self) -> VariableEntry:
         self.load_grid_properties_if_not_loaded()
         return self.__pvmult
+
+    @property
+    def worka1(self) -> VariableEntry:
+        self.load_grid_properties_if_not_loaded()
+        return self.__worka1
+
+    @property
+    def worka2(self) -> VariableEntry:
+        self.load_grid_properties_if_not_loaded()
+        return self.__worka2
+
+    @property
+    def worka3(self) -> VariableEntry:
+        self.load_grid_properties_if_not_loaded()
+        return self.__worka3
+
+    @property
+    def worka4(self) -> VariableEntry:
+        self.load_grid_properties_if_not_loaded()
+        return self.__worka4
+
+    @property
+    def worka5(self) -> VariableEntry:
+        self.load_grid_properties_if_not_loaded()
+        return self.__worka5
+
+    @property
+    def worka6(self) -> VariableEntry:
+        self.load_grid_properties_if_not_loaded()
+        return self.__worka6
+
+    @property
+    def worka7(self) -> VariableEntry:
+        self.load_grid_properties_if_not_loaded()
+        return self.__worka7
+
+    @property
+    def worka8(self) -> VariableEntry:
+        self.load_grid_properties_if_not_loaded()
+        return self.__worka8
+
+    @property
+    def worka9(self) -> VariableEntry:
+        self.load_grid_properties_if_not_loaded()
+        return self.__worka9
+
+    @property
+    def modx(self) -> VariableEntry:
+        self.load_grid_properties_if_not_loaded()
+        return self.__modx
