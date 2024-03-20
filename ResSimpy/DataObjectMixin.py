@@ -16,6 +16,11 @@ class DataObjectMixin(ABC):
     __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False, repr=False)
 
     def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
+        """Initialises the DataObjectMixin class.
+
+        Args:
+            properties_dict (dict): dict of the properties to set on the object.
+        """
         # properties dict is a parameter to make the call signature equivalent to subclasses.
         self.__id = uuid.uuid4()
         if properties_dict:
@@ -32,11 +37,11 @@ class DataObjectMixin(ABC):
         """Returns a dictionary of the attributes of the object.
 
         Args:
-            include_nones (bool):
             keys_in_keyword_style (bool): if True returns the key values as simulator keywords, otherwise returns the \
                 attribute name as stored by ressimpy.
             add_date (bool): if True adds the date to the dictionary
             add_units (bool): if True adds the units to the dictionary
+            include_nones (bool): if True includes None values from the object in the dictionary.
 
         Returns:
             a dictionary keyed by attributes and values as the value of the attribute

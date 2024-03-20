@@ -37,6 +37,16 @@ class NexusAquiferMethod(DynamicProperty):
     def __init__(self, file: NexusFile, input_number: int, model_unit_system: UnitSystem,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
+        """Initialises the NexusAquiferMethod class.
+
+        Args:
+            file (NexusFile): NexusFile object associated with the aquifer method.
+            input_number (int): method number for the aquifer method.
+            model_unit_system (UnitSystem): unit system used in the model.
+            properties (Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                                 dict[str, Union[float, pd.DataFrame]]]]]): dictionary of properties for the aquifer
+                                 method. Defaults to None.
+        """
         if properties is not None:
             self.properties = properties
         else:

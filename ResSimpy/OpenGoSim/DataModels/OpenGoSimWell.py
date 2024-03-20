@@ -12,6 +12,13 @@ from ResSimpy.Well import Well
 class OpenGoSimWell(Well):
 
     def __init__(self, well_name: str, completions: Sequence[Completion], well_type: WellType) -> None:
+        """Initialises the OpenGoSimWell class.
+
+        Args:
+            well_name (str): The name of the well.
+            completions (Sequence[Completion]): The completions of the well.
+            well_type (WellType): The type of the well as a WellType Enum.
+        """
         if not isinstance(completions, list):
             completions = list(completions)
 

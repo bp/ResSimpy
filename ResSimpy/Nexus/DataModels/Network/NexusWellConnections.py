@@ -27,11 +27,17 @@ if TYPE_CHECKING:
 class NexusWellConnections(WellConnections):
     """Class for handling well connections in the Nexus Network. This class is used to store and manipulate the well
     connections in a NexusNetwork. It is stored as an instance in the NexusNetwork class as "well_connections".
-    In Nexus this is the WELLS table.
+    In Nexus this is the WELLS table. The list of well connections can be accessed in the NexusNetwork class through the
+    get_all method.
     """
     __well_connections: list[NexusWellConnection] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork) -> None:
+        """Initialises the NexusWellConnections class.
+
+        Args:
+            parent_network (NexusNetwork): The network that the well connections are a part of.
+        """
         self.__parent_network: NexusNetwork = parent_network
         self.__well_connections: list[NexusWellConnection] = []
         self.__add_object_operations = AddObjectOperations(NexusWellConnection, self.table_header, self.table_footer,

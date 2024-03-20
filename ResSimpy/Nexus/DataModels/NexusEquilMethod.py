@@ -40,6 +40,16 @@ class NexusEquilMethod(DynamicProperty):
     def __init__(self, file: NexusFile, input_number: int, model_unit_system: UnitSystem,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
+        """Initialises the NexusEquilMethod class.
+
+        Args:
+            file (NexusFile): NexusFile object associated with the equil method.
+            input_number (int): method number for the equil method.
+            model_unit_system (UnitSystem): unit system used in the model.
+            properties (Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                                 dict[str, Union[float, pd.DataFrame]]]]]): dictionary of key properties for the equil
+                                    method. Defaults to None.
+        """
         if properties is not None:
             self.properties = properties
         else:

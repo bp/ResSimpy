@@ -42,6 +42,17 @@ class NexusRelPermMethod(DynamicProperty):
                                       dict[str, Union[float, pd.DataFrame]]]]] = None,
                  hysteresis_params: Optional[dict[str, Union[str, float, dict[str, Union[str, float,
                                              dict[str, Union[str, float]]]]]]] = None) -> None:
+        """Initialises the NexusRelPermMethod class.
+
+        Args:
+            file (NexusFile): Nexus file object associated with the relperm method
+            input_number (int): method number for the relperm method
+            model_unit_system (UnitSystem): unit system from the model
+            properties (Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                                dict[str, Union[float, pd.DataFrame]]]]]): properties for the relperm method.
+            hysteresis_params (Optional[dict[str, Union[str, float, dict[str, Union[str, float,
+                                dict[str, Union[str, float]]]]]]]): hysteresis parameters for the relperm method.
+        """
         if properties is not None:
             self.properties = properties
         else:

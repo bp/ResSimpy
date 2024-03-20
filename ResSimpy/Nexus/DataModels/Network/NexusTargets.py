@@ -30,6 +30,11 @@ class NexusTargets(Targets):
     __targets: list[NexusTarget] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork) -> None:
+        """Initialises the NexusTargets class.
+
+        Args:
+            parent_network (NexusNetwork): The network that the targets are a part of.
+        """
         self.__parent_network: NexusNetwork = parent_network
         self.__targets: list[NexusTarget] = []
         self.__add_object_operations = AddObjectOperations(None, self.table_header,
