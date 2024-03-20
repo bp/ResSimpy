@@ -1,3 +1,5 @@
+"""Abstract base class for holding the network data for holding all components of the production networks."""
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional
@@ -13,6 +15,7 @@ from ResSimpy.Wellheads import Wellheads
 
 @dataclass(kw_only=True, init=False)
 class Network(ABC):
+    """Abstract base class for holding the network data for holding all components of the production networks."""
     nodes: Optional[Nodes]
     connections: Optional[NodeConnections]
     constraints: Optional[Constraints]
