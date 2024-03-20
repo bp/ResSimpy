@@ -1,13 +1,15 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Union
 
 
 @dataclass
 class VariableEntry:
     modifier: Optional[str] = None
-    value: Optional[str, int] = None
+    value: Optional[Union[str, int]] = None
+    # need a parameter for MOD
+    mods: Optional[dict[str,str]] = None
     # make a boolean to indicate if a keyword is found in an include file
     # assume initially that it is not
     keyword_in_include_file: bool = False

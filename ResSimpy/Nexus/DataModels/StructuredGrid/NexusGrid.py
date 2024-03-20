@@ -159,7 +159,7 @@ class NexusGrid(Grid):
 
             # Load in the basic properties
             properties_to_load = [
-                PropertyToLoad('NETGRS', ['VALUE', 'CON'], self._netgrs),
+                PropertyToLoad('NETGRS', ['VALUE', 'CON', 'ZVAR'], self._netgrs),
                 PropertyToLoad('POROSITY', ['VALUE', 'CON'], self._porosity),
                 PropertyToLoad('SW', ['VALUE', 'CON'], self._sw),
                 PropertyToLoad('KX', ['VALUE', 'MULT', 'CON'], self._kx),
@@ -186,7 +186,7 @@ class NexusGrid(Grid):
                 PropertyToLoad('WORKA7', ['VALUE', 'CON'], self.__worka7),
                 PropertyToLoad('WORKA8', ['VALUE', 'CON'], self.__worka8),
                 PropertyToLoad('WORKA9', ['VALUE', 'CON'], self.__worka9),
-                PropertyToLoad('MODX', [], self.__modx)
+                PropertyToLoad('MODX', ['VALUE'], self.__modx)
             ]
 
             for token_property in properties_to_load:

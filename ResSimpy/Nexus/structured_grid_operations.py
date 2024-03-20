@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 from ResSimpy.Grid import VariableEntry
+from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEYWORDS, STRUCTURED_GRID_KEYWORDS
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
 
@@ -62,6 +63,9 @@ class StructuredGridOperations:
                     if value.replace('*', '').isnumeric() or 'INCLUDE' in file_as_list[line_indx+1]:
                         token_property.value = value
                         token_property.modifier = modifier
+                        #keith ---
+                        #if 'MODX' in file_as_list[line_indx + 2]:
+                            #token_property.mods = {'MODX': file_as_list[line_indx + 3].strip()}
                     else:  # The grid array keyword is likely inside an include file, presented on previous line
                         if 'INCLUDE' in file_as_list[line_indx-1]:
                             token_property.modifier = modifier
@@ -78,6 +82,41 @@ class StructuredGridOperations:
                     token_property.modifier = modifier
                 token_property.value = value
                 token_property.modifier = modifier
+
+            # looping through the rest of the file looking for potential mod cards for this token
+            mod_dict: dict[str, list[int]] = {}
+            for i in range(line_indx+1, len(file_as_list)):
+                if nfo.check_token('MODX', file_as_list[i]):
+                    mod_dict['MODX'] = [i+1, i+2]
+                if nfo.check_token('MODY', file_as_list[i]):
+                    mod_dict['MODY'] = [i+1, i+2]
+                if nfo.check_token('MODZ', file_as_list[i]):
+                    mod_dict['MODZ'] = [i+1, i+2]
+                if nfo.check_token('MOD', file_as_list[i]):
+                    mod_dict['MOD'] = [i+1, len(file_as_list)]
+                    found_end_of_mod_table = False
+                    for j in range(i, len(file_as_list)):
+                        for keyword in STRUCTURED_GRID_KEYWORDS + GRID_ARRAY_KEYWORDS:
+                            if nfo.check_token(keyword, file_as_list[j]):
+                                mod_dict['MOD'][1] = j
+                                found_end_of_mod_table = True
+                                break
+                        if found_end_of_mod_table:
+                            break
+                for keyword in GRID_ARRAY_KEYWORDS:
+                    if nfo.check_token(keyword, file_as_list[i]):
+                        break
+
+
+            for key in mod_dict.keys():
+                mod_table = nfo.read_table_to_df(file_as_list[mod_dict[key][0]:mod_dict[key][1]], noheader=True)
+                mod_table.columns = ['i1', 'i2', 'j1', 'j2', 'k1', 'k2', '#v']
+                if token_property.mods is not None:
+                    token_property.mods[key] = mod_table
+                else:
+                    token_property.mods = {key: mod_table}
+
+
 
     @staticmethod
     def replace_value(file_as_list: list[str], old_property: VariableEntry, new_property: VariableEntry,
