@@ -24,6 +24,17 @@ class WellConnection(DataObjectMixin, ABC):
     roughness: Optional[float] = None
     inner_diameter: Optional[float] = None
     productivity_index: Optional[float] = None
+    hyd_method: Optional[str] = None
+    crossflow: Optional[str] = None
+    crossshut: Optional[str] = None
+    inj_mobility: Optional[str] = None
+    polymer: Optional[str] = None
+    stream: Optional[str] = None
+    group: Optional[str] = None
+    i: Optional[int] = None
+    j: Optional[int] = None
+    drainage_radius: Optional[float] = None
+    pvt_method: Optional[int] = None
 
     @property
     def units(self) -> NetworkUnits:
