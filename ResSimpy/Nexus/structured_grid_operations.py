@@ -1,9 +1,12 @@
 from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
+
+import pandas as pd
 from ResSimpy.Grid import VariableEntry
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEYWORDS, STRUCTURED_GRID_KEYWORDS
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
+from ResSimpy.Utils.general_utilities import check_if_string_is_float
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
@@ -43,29 +46,41 @@ class StructuredGridOperations:
         if nfo.check_token(token, line) and fo.get_token_value(token, line, file_as_list) == modifier:
             # If we are loading a multiple, load the two relevant values, otherwise just the next value
             if modifier == 'MULT':
-                numerical_value = nfo.get_expected_token_value(token_modifier, line, file_as_list, ignore_values=None)
+                numerical_value = nfo.get_expected_token_value(modifier, line, file_as_list, ignore_values=None)
                 if numerical_value is None:
                     raise ValueError(
                         f'No numerical value found after {token_modifier} keyword in line: {line}')
-                value_to_multiply = fo.get_token_value(token_modifier, line, file_as_list,
+                value_to_multiply = fo.get_token_value(modifier, line, file_as_list,
                                                        ignore_values=[numerical_value])
                 if numerical_value is not None and value_to_multiply is not None:
                     token_property.modifier = 'MULT'
                     token_property.value = f"{numerical_value} {value_to_multiply}"
-            elif modifier == 'VALUE':
-                value = fo.get_token_value(token_modifier, line, file_as_list, ignore_values=ignore_values)
+            else:
+                value = fo.get_token_value(modifier, line, file_as_list, ignore_values=ignore_values)
                 if value is None:
                     # Could be 'cut short' by us excluding the rest of a file
                     token_property.value = None
                     token_property.modifier = modifier
                 else:
                     # Check if VALUE modifier is followed by a numeric string or an INCLUDE file
-                    if value.replace('*', '').isnumeric() or 'INCLUDE' in file_as_list[line_indx+1]:
+                    if 'INCLUDE' in file_as_list[line_indx+1]:
                         token_property.value = value
                         token_property.modifier = modifier
-                        #keith ---
-                        #if 'MODX' in file_as_list[line_indx + 2]:
-                            #token_property.mods = {'MODX': file_as_list[line_indx + 3].strip()}
+                    elif check_if_string_is_float(value):
+                        start_indx = line_indx+1
+                        end_indx = len(file_as_list)
+                        found_end_value = False
+                        for i in range(start_indx, len(file_as_list)):
+                            for keyword in STRUCTURED_GRID_KEYWORDS + GRID_ARRAY_KEYWORDS:
+                                if nfo.check_token(keyword, file_as_list[i]):
+                                    end_indx = i
+                                    found_end_value = True
+                                    break
+                            if found_end_value:
+                                break
+                        token_property.modifier = modifier
+                        token_property.value = '\n'.join(file_as_list[start_indx:end_indx]).strip()
+
                     else:  # The grid array keyword is likely inside an include file, presented on previous line
                         if 'INCLUDE' in file_as_list[line_indx-1]:
                             token_property.modifier = modifier
@@ -74,49 +89,59 @@ class StructuredGridOperations:
                         else:
                             raise ValueError(
                                 f'No suitable value found after {token_modifier} keyword in line: {line}')
-            else:
-                value = fo.get_token_value(token_modifier, line, file_as_list, ignore_values=ignore_values)
-                if value is None:
-                    # Could be 'cut short' by us excluding the rest of a file
-                    token_property.value = None
-                    token_property.modifier = modifier
-                token_property.value = value
-                token_property.modifier = modifier
 
             # looping through the rest of the file looking for potential mod cards for this token
-            mod_dict: dict[str, list[int]] = {}
+            mod_start_end: dict[str, list[list[int]]] = {}  # field(default_factory=get_empty_dict_list_str)
+            break_flag = False
             for i in range(line_indx+1, len(file_as_list)):
                 if nfo.check_token('MODX', file_as_list[i]):
-                    mod_dict['MODX'] = [i+1, i+2]
+                    mod_start_end['MODX'] = [[i+1, i+2]]
                 if nfo.check_token('MODY', file_as_list[i]):
-                    mod_dict['MODY'] = [i+1, i+2]
+                    mod_start_end['MODY'] = [[i+1, i+2]]
                 if nfo.check_token('MODZ', file_as_list[i]):
-                    mod_dict['MODZ'] = [i+1, i+2]
+                    mod_start_end['MODZ'] = [[i+1, i+2]]
                 if nfo.check_token('MOD', file_as_list[i]):
-                    mod_dict['MOD'] = [i+1, len(file_as_list)]
+                    if 'MOD' in mod_start_end.keys():  # Already found a prior mod for this token, append
+                        mod_start_end['MOD'].append([i+1, len(file_as_list)])
+                    else:
+                        mod_start_end['MOD'] = [[i+1, len(file_as_list)]]
                     found_end_of_mod_table = False
-                    for j in range(i, len(file_as_list)):
+                    for j in range(i+1, len(file_as_list)):
                         for keyword in STRUCTURED_GRID_KEYWORDS + GRID_ARRAY_KEYWORDS:
                             if nfo.check_token(keyword, file_as_list[j]):
-                                mod_dict['MOD'][1] = j
+                                mod_start_end['MOD'][-1][1] = j
                                 found_end_of_mod_table = True
                                 break
                         if found_end_of_mod_table:
                             break
                 for keyword in GRID_ARRAY_KEYWORDS:
                     if nfo.check_token(keyword, file_as_list[i]):
+                        break_flag = True
                         break
+                if break_flag:
+                    break
 
-
-            for key in mod_dict.keys():
-                mod_table = nfo.read_table_to_df(file_as_list[mod_dict[key][0]:mod_dict[key][1]], noheader=True)
-                mod_table.columns = ['i1', 'i2', 'j1', 'j2', 'k1', 'k2', '#v']
-                if token_property.mods is not None:
-                    token_property.mods[key] = mod_table
-                else:
-                    token_property.mods = {key: mod_table}
-
-
+            for key in mod_start_end.keys():
+                for i in range(len(mod_start_end[key])):
+                    if mod_start_end[key][i][1] > mod_start_end[key][i][0]:
+                        mod_table = nfo.read_table_to_df(
+                            file_as_list[mod_start_end[key][i][0]:mod_start_end[key][i][1]], noheader=True)
+                        if len(mod_table.columns) == 7:
+                            mod_table.columns = ['i1', 'i2', 'j1', 'j2', 'k1', 'k2', '#v']
+                        elif len(mod_table.columns) == 8:
+                            mod_table[8] = mod_table[6].astype(str) + mod_table[7].astype(str)
+                            mod_table = mod_table.drop([6, 7], axis=1)
+                        else:
+                            raise ValueError(
+                                    f'Unsuitable mod card for {token_modifier} keyword in line: {line}')
+                        if token_property.mods is not None:
+                            if key in token_property.mods.keys():
+                                orig_mod_tab = token_property.mods[key].copy()
+                                token_property.mods[key] = pd.concat([orig_mod_tab, mod_table]).reset_index(drop=True)
+                            else:
+                                token_property.mods[key] = mod_table
+                        else:
+                            token_property.mods = {key: mod_table}
 
     @staticmethod
     def replace_value(file_as_list: list[str], old_property: VariableEntry, new_property: VariableEntry,

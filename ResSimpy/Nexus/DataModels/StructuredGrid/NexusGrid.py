@@ -40,7 +40,13 @@ class NexusGrid(Grid):
     __grid_nexus_file: Optional[NexusFile] = None
     __corp: VariableEntry
     __iequil: VariableEntry
+    __ipvt: VariableEntry
+    __iwater: VariableEntry
+    __irelpm: VariableEntry
+    __irock: VariableEntry
+    __itran: VariableEntry
     __pvmult: VariableEntry
+    __livecell: VariableEntry
     __worka1: VariableEntry
     __worka2: VariableEntry
     __worka3: VariableEntry
@@ -50,9 +56,6 @@ class NexusGrid(Grid):
     __worka7: VariableEntry
     __worka8: VariableEntry
     __worka9: VariableEntry
-    __modx: VariableEntry
-    __mody: VariableEntry
-    __modz: VariableEntry
 
     def __init__(self, grid_nexus_file: Optional[NexusFile] = None) -> None:
         super().__init__()
@@ -70,7 +73,13 @@ class NexusGrid(Grid):
         self.__grid_array_functions: Optional[list[NexusGridArrayFunction]] = None
         self.__corp: VariableEntry = VariableEntry()
         self.__iequil: VariableEntry = VariableEntry()
+        self.__ipvt: VariableEntry = VariableEntry()
+        self.__iwater: VariableEntry = VariableEntry()
+        self.__irelpm: VariableEntry = VariableEntry()
+        self.__irock: VariableEntry = VariableEntry()
+        self.__itran: VariableEntry = VariableEntry()
         self.__pvmult: VariableEntry = VariableEntry()
+        self.__livecell: VariableEntry = VariableEntry()
         self.__worka1: VariableEntry = VariableEntry()
         self.__worka2: VariableEntry = VariableEntry()
         self.__worka3: VariableEntry = VariableEntry()
@@ -159,34 +168,30 @@ class NexusGrid(Grid):
 
             # Load in the basic properties
             properties_to_load = [
-                PropertyToLoad('NETGRS', ['VALUE', 'CON', 'ZVAR'], self._netgrs),
-                PropertyToLoad('POROSITY', ['VALUE', 'CON'], self._porosity),
-                PropertyToLoad('SW', ['VALUE', 'CON'], self._sw),
-                PropertyToLoad('KX', ['VALUE', 'MULT', 'CON'], self._kx),
-                PropertyToLoad('PERMX', ['VALUE', 'MULT', 'CON'], self._kx),
-                PropertyToLoad('PERMI', ['VALUE', 'MULT', 'CON'], self._kx),
-                PropertyToLoad('KI', ['VALUE', 'MULT', 'CON'], self._kx),
-                PropertyToLoad('KY', ['VALUE', 'MULT', 'CON'], self._ky),
-                PropertyToLoad('PERMY', ['VALUE', 'MULT', 'CON'], self._ky),
-                PropertyToLoad('PERMJ', ['VALUE', 'MULT', 'CON'], self._ky),
-                PropertyToLoad('KJ', ['VALUE', 'MULT', 'CON'], self._ky),
-                PropertyToLoad('KZ', ['VALUE', 'MULT', 'CON'], self._kz),
-                PropertyToLoad('PERMZ', ['VALUE', 'MULT', 'CON'], self._kz),
-                PropertyToLoad('PERMK', ['VALUE', 'MULT', 'CON'], self._kz),
-                PropertyToLoad('KK', ['VALUE', 'MULT', 'CON'], self._kz),
-                PropertyToLoad('PVMULT', ['VALUE', 'MULT', 'CON'], self.__pvmult),
+                PropertyToLoad('NETGRS', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self._netgrs),
+                PropertyToLoad('POROSITY', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self._porosity),
+                PropertyToLoad('SW', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self._sw),
+                PropertyToLoad('KX', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self._kx),
+                PropertyToLoad('KY', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self._ky),
+                PropertyToLoad('KZ', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self._kz),
+                PropertyToLoad('PVMULT', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__pvmult),
                 PropertyToLoad('CORP', ['VALUE'], self.__corp),
-                PropertyToLoad('IEQUIL', ['VALUE', 'CON'], self.__iequil),
-                PropertyToLoad('WORKA1', ['VALUE', 'CON'], self.__worka1),
-                PropertyToLoad('WORKA2', ['VALUE', 'CON'], self.__worka2),
-                PropertyToLoad('WORKA3', ['VALUE', 'CON'], self.__worka3),
-                PropertyToLoad('WORKA4', ['VALUE', 'CON'], self.__worka4),
-                PropertyToLoad('WORKA5', ['VALUE', 'CON'], self.__worka5),
-                PropertyToLoad('WORKA6', ['VALUE', 'CON'], self.__worka6),
-                PropertyToLoad('WORKA7', ['VALUE', 'CON'], self.__worka7),
-                PropertyToLoad('WORKA8', ['VALUE', 'CON'], self.__worka8),
-                PropertyToLoad('WORKA9', ['VALUE', 'CON'], self.__worka9),
-                PropertyToLoad('MODX', ['VALUE'], self.__modx)
+                PropertyToLoad('IEQUIL', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__iequil),
+                PropertyToLoad('IPVT', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__ipvt),
+                PropertyToLoad('IWATER', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__iwater),
+                PropertyToLoad('IRELPM', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__irelpm),
+                PropertyToLoad('IROCK', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__irock),
+                PropertyToLoad('ITRAN', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__itran),
+                PropertyToLoad('LIVECELL', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__livecell),
+                PropertyToLoad('WORKA1', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__worka1),
+                PropertyToLoad('WORKA2', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__worka2),
+                PropertyToLoad('WORKA3', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__worka3),
+                PropertyToLoad('WORKA4', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__worka4),
+                PropertyToLoad('WORKA5', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__worka5),
+                PropertyToLoad('WORKA6', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__worka6),
+                PropertyToLoad('WORKA7', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__worka7),
+                PropertyToLoad('WORKA8', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__worka8),
+                PropertyToLoad('WORKA9', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__worka9)
             ]
 
             for token_property in properties_to_load:
@@ -378,12 +383,41 @@ class NexusGrid(Grid):
     @property
     def iequil(self) -> VariableEntry:
         self.load_grid_properties_if_not_loaded()
-        # convert to integer
-        self.__iequil.value = int(self.__iequil.value)
+        self.__iequil.value
         return self.__iequil
 
     @property
-    def pvtmult(self) -> VariableEntry:
+    def ipvt(self) -> VariableEntry:
+        self.load_grid_properties_if_not_loaded()
+        return self.__ipvt
+
+    @property
+    def iwater(self) -> VariableEntry:
+        self.load_grid_properties_if_not_loaded()
+        return self.__iwater
+
+    @property
+    def irelpm(self) -> VariableEntry:
+        self.load_grid_properties_if_not_loaded()
+        return self.__irelpm
+
+    @property
+    def irock(self) -> VariableEntry:
+        self.load_grid_properties_if_not_loaded()
+        return self.__irock
+
+    @property
+    def itran(self) -> VariableEntry:
+        self.load_grid_properties_if_not_loaded()
+        return self.__itran
+
+    @property
+    def livecell(self) -> VariableEntry:
+        self.load_grid_properties_if_not_loaded()
+        return self.__livecell
+
+    @property
+    def pvmult(self) -> VariableEntry:
         self.load_grid_properties_if_not_loaded()
         return self.__pvmult
 
