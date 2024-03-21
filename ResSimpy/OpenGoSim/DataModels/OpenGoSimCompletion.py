@@ -17,6 +17,18 @@ class OpenGoSimCompletion(Completion):
     def __init__(self, date: str, i: Optional[int] = None, j: Optional[int] = None, k: Optional[int] = None,
                  penetration_direction: Optional[PenetrationDirectionEnum] = None, is_open: Optional[bool] = None,
                  refinement_name: Optional[str] = None) -> None:
+        """Initialises the OpenGoSimCompletion class.
+
+        Args:
+            date (str): The date of the completion.
+            i (Optional[int]): The i index of the completion.
+            j (Optional[int]): The j index of the completion.
+            k (Optional[int]): The k index of the completion.
+            penetration_direction (Optional[PenetrationDirectionEnum]): The direction of the penetration for the
+            completion.
+            is_open (Optional[bool]): Whether the completion is open or closed. If True the completion is open.
+            refinement_name (Optional[str]): The grid refinement name that the completion is applied to.
+        """
         self.__penetration_direction = penetration_direction
         self.__is_open = is_open if is_open is not None else True
         self.__refinement_name = refinement_name

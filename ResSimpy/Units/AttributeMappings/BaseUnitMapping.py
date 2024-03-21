@@ -11,6 +11,11 @@ class BaseUnitMapping(ABC):
     attribute_map: Mapping[str, UnitDimension]
 
     def __init__(self, unit_system: None | UnitSystem) -> None:
+        """Initialises the BaseUnitMapping class.
+
+        Args:
+            unit_system (None | UnitSystem): The unit system to use for the unit mapping.
+        """
         self.unit_system = unit_system
 
     def get_unit_for_attribute(self, attribute_name: str, uppercase: bool = False) -> str:

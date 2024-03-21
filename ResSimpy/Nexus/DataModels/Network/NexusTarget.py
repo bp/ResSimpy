@@ -9,6 +9,11 @@ from ResSimpy.Target import Target
 class NexusTarget(Target):
     """Class that represents a single nexus target in the NexusSimulator."""
     def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
+        """Initialises the NexusTarget class.
+
+        Args:
+            properties_dict (dict): A dictionary of properties to set on the object.
+        """
         # call the init of the DataObjectMixin
         super(Target, self).__init__({})
         for key, prop in properties_dict.items():

@@ -1,5 +1,4 @@
-"""Abstract base class for holding the well connections data for holding all components of the production networks.
-"""
+"""Abstract base class for holding the well connections data for holding all components of the production networks."""
 from __future__ import annotations
 from abc import ABC
 from dataclasses import dataclass, field

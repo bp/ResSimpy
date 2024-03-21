@@ -16,6 +16,11 @@ class NexusNode(Node):
     station: Optional[str] = None
 
     def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
+        """Initialises the NexusNode class.
+
+        Args:
+            properties_dict (dict): A dictionary of properties to set on the node.
+        """
         # call the init of the DataObjectMixin
         super(Node, self).__init__({})
         for key, prop in properties_dict.items():

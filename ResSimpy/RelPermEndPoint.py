@@ -37,6 +37,46 @@ class RelPermEndPoint(ABC):
                  kro_sgl: Optional[float] = None, kro_sgr: Optional[float] = None, krw_sgl: Optional[float] = None,
                  krw_sgr: Optional[float] = None, krg_sgrw: Optional[float] = None, sgtr: Optional[float] = None,
                  sotr: Optional[float] = None) -> None:
+        """Initialises the RelPermEndPoint class.
+
+        Args:
+            swl (Optional[float], optional): the lowest water saturation value. Defaults to None.
+            swr (Optional[float], optional): the residual water saturation value. Defaults to None.
+            swu (Optional[float], optional): the maximum water saturation. Defaults to None.
+            sgl (Optional[float], optional): the minimum gas saturation value (Ordinarily the value is
+                zero). Defaults to None.
+            sgr (Optional[float], optional): the residual gas saturation value. Defaults to None.
+            sgu (Optional[float], optional): the maximum gas saturation. Defaults to None.
+            swro (Optional[float], optional): the water saturation value at residual oil. Defaults to None.
+            sgro (Optional[float], optional): the gas saturation value at residue oil saturation. Defaults
+                to None.
+            sgrw (Optional[float], optional): the gas saturation at residual water saturation. Defaults
+                to None.
+            krw_swro (Optional[float], optional): the relative permeability to water at the residual
+                oil saturation. Defaults to None.
+            krw_swu (Optional[float], optional): the relative permeability to water at the maximum
+                water saturation. Defaults to None.
+            krg_sgro (Optional[float], optional): the relative permeability to gas at the residual
+                oil saturation. Defaults to None.
+            krg_sgu (Optional[float], optional): the relative permeability to gas at the maximum gas
+                saturation. Defaults to None.
+            kro_swl (Optional[float], optional): the relative permeability to oil at the minimum water
+                saturation. Defaults to None.
+            kro_swr (Optional[float], optional): the relative permeability to oil at the residual water
+                saturation. Defaults to None.
+            kro_sgl (Optional[float], optional): the relative permeability to oil at the minimum gas
+                saturation. Defaults to None.
+            kro_sgr (Optional[float], optional): the relative permeability to oil at the residual gas
+                saturation. Defaults to None.
+            krw_sgl (Optional[float], optional): the relative permeability to water at the minimum gas
+                saturation. Defaults to None.
+            krw_sgr (Optional[float], optional): the relative permeability to water at the residual gas
+                saturation. Defaults to None.
+            krg_sgrw (Optional[float], optional): the relative permeability to gas at the residual water
+                saturation. Defaults to None.
+            sgtr (Optional[float], optional): the maximum trapped gas saturation. Defaults to None.
+            sotr (Optional[float], optional): the maximum trapped oil saturation. Defaults to None.
+        """
         self.__swl = swl
         self.__swr = swr
         self.__swu = swu
