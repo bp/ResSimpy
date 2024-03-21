@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import warnings
 from typing import Optional, Sequence, TYPE_CHECKING
+from datetime import datetime, timedelta
 
 from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.NexusWellMod import NexusWellMod
@@ -167,9 +168,22 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
             date_format = DateFormat[converted_format_str]
 
         if nfo.check_token('TIME', line):
-            current_date = fo.get_expected_token_value(token='TIME', token_line=line, file_list=file_as_list,
+            time_value = fo.get_expected_token_value(token='TIME', token_line=line, file_list=file_as_list,
                                                        custom_message="Cannot find the date associated with the TIME "
                                                                       f"card in {line=} at line number {index}")
+            if time_value.upper() != 'PLUS':
+                current_date = time_value
+            else:
+                plus_value = fo.get_expected_token_value(token='PLUS', token_line=line, file_list=file_as_list,
+                                                       custom_message="Cannot find the date associated with the TIME PLUS "
+                                                                      f"card in {line=} at line number {index}")
+                new_datetime = ISODateTime.convert_to_iso(current_date, date_format, start_date) + timedelta(days=float(plus_value))
+                
+                if date_format == DateFormat.DD_MM_YYYY:
+                    current_date = new_datetime.strftime('%d/%m/%Y')
+                elif date_format == DateFormat.MM_DD_YYYY:
+                    current_date = new_datetime.strftime('%m/%d/%Y')
+                
 
         if nfo.check_token('WELLMOD', line):
             wellmod = __get_inline_well_mod(line, current_date=current_date, unit_system=wellspec_file_units,
