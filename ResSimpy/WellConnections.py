@@ -1,3 +1,5 @@
+"""Abstract base class for holding the well connections data for holding all components of the production networks.
+"""
 from __future__ import annotations
 from abc import ABC
 from dataclasses import dataclass, field
@@ -11,9 +13,18 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class WellConnections(NetworkOperationsMixIn, ABC):
+    """Abstract base class for holding the well connections data for holding all components of the production
+    networks.
+    """
     _well_connections: Sequence[WellConnection] = field(default_factory=list)
 
     def __init__(self, parent_network: Network) -> None:
+        """Abstract base class for holding the well connections data for holding all components of the
+        production networks.
+
+        Args:
+            parent_network (Network): The parent network object that the well connections belong to.
+        """
         super().__init__(parent_network)
         self.__parent_network: Network = parent_network
         self._well_connections = []
