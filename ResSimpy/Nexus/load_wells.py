@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import warnings
 from typing import Optional, Sequence, TYPE_CHECKING
-from datetime import timedelta
+from datetime import time, timedelta
 
 from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.NexusWellMod import NexusWellMod
@@ -181,9 +181,15 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
                     current_date, date_format, start_date) + timedelta(days=float(plus_value))
 
                 if date_format == DateFormat.DD_MM_YYYY:
-                    current_date = new_datetime.strftime('%d/%m/%Y')
+                    if new_datetime.time() == time(0, 0, 0, 0):
+                        current_date = new_datetime.strftime('%d/%m/%Y')
+                    else:
+                        current_date = new_datetime.strftime('%d/%m/%Y(%H:%M:%S)')
                 elif date_format == DateFormat.MM_DD_YYYY:
-                    current_date = new_datetime.strftime('%m/%d/%Y')
+                    if new_datetime.time() == time(0, 0, 0, 0):
+                        current_date = new_datetime.strftime('%m/%d/%Y')
+                    else:
+                        current_date = new_datetime.strftime('%m/%d/%Y(%H:%M:%S)')
 
         if nfo.check_token('WELLMOD', line):
             wellmod = __get_inline_well_mod(line, current_date=current_date, unit_system=wellspec_file_units,
