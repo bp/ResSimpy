@@ -303,6 +303,113 @@ LIST"""  # ends structured_grid_file_contents
     assert result.corp.value == 'path/corp_01.inc'
 
 
+def test_load_structured_grid_file_iregion(mocker):
+    """Read in Structured Grid File where properties are in a nested include file"""
+    # Arrange
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents = """ARRAYS ROOT
+! grid
+NX  NY  NZ
+10  10  10
+IREGION CON
+2  
+MOD
+30 38  1  30  1  1  =1   
+C 13 20  1 30  1  1  =1     
+25 32  1 30  1  1  =1      
+LIST"""  # ends structured_grid_file_contents
+
+    # set up dataframe
+    i1 = [30, 25]
+    i2 = [38, 32]
+    j1 = [1, 1]
+    j2 = [30, 30]
+    k1 = [1, 1]
+    k2 = [1, 1]
+    v = ['=1', '=1']
+    expected_df = pd.DataFrame({'i1': i1, 'i2': i2, 'j1': j1, 'j2': j2, 'k1': k1, 'k2': k2, '#v': v})
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'testpath1/nexus_run.fcs': fcs_file_contents,
+                                         '/run_control/path': '',
+                                         structured_grid_name: structured_grid_file_contents,
+                                         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
+    result = simulation.grid
+
+    # Assert
+    # note that iregion is a dict
+    assert result.iregion['IREG1'].keyword_in_include_file is False
+    pd.testing.assert_frame_equal(result.iregion['IREG1'].mods['MOD'], expected_df)
+    assert result.iregion['IREG1'].modifier == 'CON'
+    assert result.iregion['IREG1'].value == '2'
+
+
+def test_load_structured_grid_file_iregion_multiple(mocker):
+    """Read in Structured Grid File where properties are in a nested include file"""
+    # Arrange
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents = """ARRAYS ROOT
+! grid
+NX  NY  NZ
+10  10  10
+IREGION CON
+2  
+MOD
+30 38  1  30  1  1  = 1       
+IREGION inj_02 CON
+3
+MOD
+30 38  1  30  1  1  = 1
+MOD
+31 39  1  30  1  1  = 1 
+LIST"""  # ends structured_grid_file_contents
+
+    # set up dataframe
+    i1 = [30, 31]
+    i2 = [38, 39]
+    j1 = [1, 1]
+    j2 = [30, 30]
+    k1 = [1, 1]
+    k2 = [1, 1]
+    v = ['=1', '=1']
+    ireg1_expected_df = (
+        pd.DataFrame({'i1': [30], 'i2': [38], 'j1': [1], 'j2': [30], 'k1': [1], 'k2': [1], '#v': ['=1']}))
+    ireg2_expected_df = (
+        pd.DataFrame({'i1': i1, 'i2': i2, 'j1': j1, 'j2': j2, 'k1': k1, 'k2': k2, '#v': v}))
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'testpath1/nexus_run.fcs': fcs_file_contents,
+                                         '/run_control/path': '',
+                                         structured_grid_name: structured_grid_file_contents,
+                                         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
+    result = simulation.grid
+
+    # Assert
+    # note that iregion is a dict
+    assert result.iregion['IREG1'].keyword_in_include_file is False
+    assert result.iregion['inj_02'].keyword_in_include_file is False
+    pd.testing.assert_frame_equal(result.iregion['IREG1'].mods['MOD'], ireg1_expected_df)
+    pd.testing.assert_frame_equal(result.iregion['inj_02'].mods['MOD'], ireg2_expected_df)
+    assert result.iregion['IREG1'].modifier == 'CON'
+    assert result.iregion['inj_02'].modifier == 'CON'
+    assert result.iregion['IREG1'].value == '2'
+    assert result.iregion['inj_02'].value == '3'
 @pytest.mark.parametrize("structured_grid_file_contents, expected_net_to_gross, expected_porosity, expected_range_x,"
                          "expected_range_y, expected_range_z",
                          [
