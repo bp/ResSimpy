@@ -248,7 +248,7 @@ def __extract_substring_until_next_invalid_character(character_location: int,
         character_location += 1
 
         # stop adding to the value once we hit an invalid_character
-        if value_character in invalid_characters and value != '' and not confirm_exclude:
+        if value_character in invalid_characters and value != '':
             break
     return character_location, new_search_string, search_string, value
 
