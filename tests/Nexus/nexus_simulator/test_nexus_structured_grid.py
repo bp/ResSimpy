@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import pytest
-from ResSimpy.Grid import VariableEntry
+from ResSimpy.Grid import GridArrayDefinition
 from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
@@ -509,7 +509,7 @@ def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
                          [
                              ("KX VALUE\n INCLUDE /path/to/kx.inc\nKY MULT\n12 KX\n KZ VALUE\n\n\n INCLUDE kz.inc", "/path/to/kx.inc",
                               "VALUE", "12 KX", "MULT", "kz.inc", "VALUE"),
-                             ("KX VALUE\n INCLUDE /path/to/kx.inc\nKY VALUE\n\t/path/to/kx.inc\n KZ MULT\n\n\n\t0.1 KX",
+                             ("KX VALUE\n INCLUDE /path/to/kx.inc\nKY VALUE\n\tINCLUDE /path/to/kx.inc\n KZ MULT\n\n\n\t0.1 KX",
                               "/path/to/kx.inc",
                               "VALUE", "/path/to/kx.inc", "VALUE", "0.1 KX", "MULT"),
                              ("KX VALUE\n!Comment \n INCLUDE kx.inc\nKY MULT\n\t1 KX\n KZ MULT\n\n!3 KX\n 1 KX",
@@ -530,7 +530,7 @@ def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
                               "0.11333", "CON", "1 PERMI", "MULT", "12 PERMJ", "MULT"),
                              ("KI CON\n 0.11333\nKJ MULT\n1 KI\n KK MULT\n12 KI",
                               "0.11333", "CON", "1 KI", "MULT", "12 KI", "MULT"),
-                            ("!KX VALUE\nKX VALUE\n INCLUDE /path/to/kx.inc\nKY MULT\n12 KX\n KZ VALUE\n\n\n INCLUDE kz.inc", "/path/to/kx.inc",
+                             ("!KX VALUE\nKX VALUE\n INCLUDE /path/to/kx.inc\nKY MULT\n12 KX\n KZ VALUE\n\n\n INCLUDE kz.inc", "/path/to/kx.inc",
                               "VALUE", "12 KX", "MULT", "kz.inc", "VALUE"),
                          ])
 def test_load_structured_grid_file_k_values(mocker, structured_grid_file_contents, expected_kx_value,
@@ -572,30 +572,30 @@ def test_load_structured_grid_file_k_values(mocker, structured_grid_file_content
 
 @pytest.mark.parametrize("new_porosity, new_sw, new_netgrs, new_kx, new_ky, new_kz",
                          [
-                             (VariableEntry("VALUE", "porosity_2.inc"), VariableEntry("CON", "0.33"),
-                              VariableEntry(
-                                  "VALUE", "/new/netgrs_2.inc"), VariableEntry("VALUE", "KX.INC"),
-                              VariableEntry("MULT", "0.1 KX"), VariableEntry("VALUE", "path/to/kz.inc")),
+                             (GridArrayDefinition("VALUE", "porosity_2.inc"), GridArrayDefinition("CON", "0.33"),
+                              GridArrayDefinition(
+                                  "VALUE", "/new/netgrs_2.inc"), GridArrayDefinition("VALUE", "KX.INC"),
+                              GridArrayDefinition("MULT", "0.1 KX"), GridArrayDefinition("VALUE", "path/to/kz.inc")),
 
-                             (VariableEntry("VALUE", "porosity_2.inc"), VariableEntry("CON", "0.33"),
-                              VariableEntry(
-                                  "VALUE", "/new/netgrs_2.inc"), VariableEntry("VALUE", "KX.INC"),
-                              VariableEntry("CON", "1.111113"), VariableEntry("VALUE", "path/to/kz.inc")),
+                             (GridArrayDefinition("VALUE", "porosity_2.inc"), GridArrayDefinition("CON", "0.33"),
+                              GridArrayDefinition(
+                                  "VALUE", "/new/netgrs_2.inc"), GridArrayDefinition("VALUE", "KX.INC"),
+                              GridArrayDefinition("CON", "1.111113"), GridArrayDefinition("VALUE", "path/to/kz.inc")),
 
-                             (VariableEntry("VALUE", "/path/porosity_2.inc"), VariableEntry("VALUE", "sw_file.inc"),
-                              VariableEntry(
-                                  "VALUE", "/new/netgrs_2.inc"), VariableEntry("CON", "123"),
-                              VariableEntry("CON", "1.111113"), VariableEntry("MULT", "1 KX")),
+                             (GridArrayDefinition("VALUE", "/path/porosity_2.inc"), GridArrayDefinition("VALUE", "sw_file.inc"),
+                              GridArrayDefinition(
+                                  "VALUE", "/new/netgrs_2.inc"), GridArrayDefinition("CON", "123"),
+                              GridArrayDefinition("CON", "1.111113"), GridArrayDefinition("MULT", "1 KX")),
 
-                             (VariableEntry("CON", "123456"), VariableEntry("CON", "0.000041"),
-                              VariableEntry("CON", "1.1"), VariableEntry(
+                             (GridArrayDefinition("CON", "123456"), GridArrayDefinition("CON", "0.000041"),
+                              GridArrayDefinition("CON", "1.1"), GridArrayDefinition(
                                   "MULT", "0.1 KY"),
-                              VariableEntry("CON", "1.111113"), VariableEntry("MULT", "10 KX")),
+                              GridArrayDefinition("CON", "1.111113"), GridArrayDefinition("MULT", "10 KX")),
 
-                             (VariableEntry("VALUE", "/path/porosity/file.inc"), VariableEntry("VALUE", "sw_file2.inc"),
-                              VariableEntry("VALUE", "netgrs_3.inc"), VariableEntry(
+                             (GridArrayDefinition("VALUE", "/path/porosity/file.inc"), GridArrayDefinition("VALUE", "sw_file2.inc"),
+                              GridArrayDefinition("VALUE", "netgrs_3.inc"), GridArrayDefinition(
                                   "VALUE", "path/to/kx.inc"),
-                              VariableEntry("VALUE", "path/to/ky.inc"), VariableEntry("VALUE", "path/to/KZ.inc")),
+                              GridArrayDefinition("VALUE", "path/to/ky.inc"), GridArrayDefinition("VALUE", "path/to/KZ.inc")),
                          ])
 def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, new_kx, new_ky, new_kz):
     """Test saving values passed from the front end to the structured grid file and update the class"""

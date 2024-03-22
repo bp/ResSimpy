@@ -7,9 +7,10 @@ from dataclasses import dataclass
 from typing import Optional, TYPE_CHECKING
 import warnings
 
-from ResSimpy.Grid import Grid, VariableEntry
+from ResSimpy.Grid import Grid, GridArrayDefinition
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGridArrayFunction import NexusGridArrayFunction
+from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_FORMAT_KEYWORDS
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.Nexus.array_function_operations as afo
@@ -24,7 +25,7 @@ if TYPE_CHECKING:
 class PropertyToLoad:
     token: str
     modifiers: list[str]
-    property: VariableEntry
+    property: GridArrayDefinition | dict[str, GridArrayDefinition]
 
 
 @dataclass(kw_only=True)
@@ -38,24 +39,25 @@ class NexusGrid(Grid):
     __grid_faults_loaded: bool = False
     __grid_properties_loaded: bool = False
     __grid_nexus_file: Optional[NexusFile] = None
-    __corp: VariableEntry
-    __iequil: VariableEntry
-    __ipvt: VariableEntry
-    __iwater: VariableEntry
-    __irelpm: VariableEntry
-    __irock: VariableEntry
-    __itran: VariableEntry
-    __pvmult: VariableEntry
-    __livecell: VariableEntry
-    __worka1: VariableEntry
-    __worka2: VariableEntry
-    __worka3: VariableEntry
-    __worka4: VariableEntry
-    __worka5: VariableEntry
-    __worka6: VariableEntry
-    __worka7: VariableEntry
-    __worka8: VariableEntry
-    __worka9: VariableEntry
+    __corp: GridArrayDefinition
+    __iequil: GridArrayDefinition
+    __ipvt: GridArrayDefinition
+    __iwater: GridArrayDefinition
+    __irelpm: GridArrayDefinition
+    __irock: GridArrayDefinition
+    __itran: GridArrayDefinition
+    __iregion: dict[str, GridArrayDefinition]
+    __pvmult: GridArrayDefinition
+    __livecell: GridArrayDefinition
+    __worka1: GridArrayDefinition
+    __worka2: GridArrayDefinition
+    __worka3: GridArrayDefinition
+    __worka4: GridArrayDefinition
+    __worka5: GridArrayDefinition
+    __worka6: GridArrayDefinition
+    __worka7: GridArrayDefinition
+    __worka8: GridArrayDefinition
+    __worka9: GridArrayDefinition
 
     def __init__(self, grid_nexus_file: Optional[NexusFile] = None) -> None:
         super().__init__()
@@ -71,27 +73,28 @@ class NexusGrid(Grid):
         self.__grid_properties_loaded: bool = False
         self.__grid_nexus_file: Optional[NexusFile] = grid_nexus_file
         self.__grid_array_functions: Optional[list[NexusGridArrayFunction]] = None
-        self.__corp: VariableEntry = VariableEntry()
-        self.__iequil: VariableEntry = VariableEntry()
-        self.__ipvt: VariableEntry = VariableEntry()
-        self.__iwater: VariableEntry = VariableEntry()
-        self.__irelpm: VariableEntry = VariableEntry()
-        self.__irock: VariableEntry = VariableEntry()
-        self.__itran: VariableEntry = VariableEntry()
-        self.__pvmult: VariableEntry = VariableEntry()
-        self.__livecell: VariableEntry = VariableEntry()
-        self.__worka1: VariableEntry = VariableEntry()
-        self.__worka2: VariableEntry = VariableEntry()
-        self.__worka3: VariableEntry = VariableEntry()
-        self.__worka4: VariableEntry = VariableEntry()
-        self.__worka5: VariableEntry = VariableEntry()
-        self.__worka6: VariableEntry = VariableEntry()
-        self.__worka7: VariableEntry = VariableEntry()
-        self.__worka8: VariableEntry = VariableEntry()
-        self.__worka9: VariableEntry = VariableEntry()
-        self.__modx: VariableEntry = VariableEntry()
-        self.__mody: VariableEntry = VariableEntry()
-        self.__modz: VariableEntry = VariableEntry()
+        self.__corp: GridArrayDefinition = GridArrayDefinition()
+        self.__iequil: GridArrayDefinition = GridArrayDefinition()
+        self.__ipvt: GridArrayDefinition = GridArrayDefinition()
+        self.__iwater: GridArrayDefinition = GridArrayDefinition()
+        self.__irelpm: GridArrayDefinition = GridArrayDefinition()
+        self.__irock: GridArrayDefinition = GridArrayDefinition()
+        self.__itran: GridArrayDefinition = GridArrayDefinition()
+        self.__iregion: dict[str, GridArrayDefinition] = {}
+        self.__pvmult: GridArrayDefinition = GridArrayDefinition()
+        self.__livecell: GridArrayDefinition = GridArrayDefinition()
+        self.__worka1: GridArrayDefinition = GridArrayDefinition()
+        self.__worka2: GridArrayDefinition = GridArrayDefinition()
+        self.__worka3: GridArrayDefinition = GridArrayDefinition()
+        self.__worka4: GridArrayDefinition = GridArrayDefinition()
+        self.__worka5: GridArrayDefinition = GridArrayDefinition()
+        self.__worka6: GridArrayDefinition = GridArrayDefinition()
+        self.__worka7: GridArrayDefinition = GridArrayDefinition()
+        self.__worka8: GridArrayDefinition = GridArrayDefinition()
+        self.__worka9: GridArrayDefinition = GridArrayDefinition()
+        self.__modx: GridArrayDefinition = GridArrayDefinition()
+        self.__mody: GridArrayDefinition = GridArrayDefinition()
+        self.__modz: GridArrayDefinition = GridArrayDefinition()
 
     def __wrap(self, value):
         if isinstance(value, tuple | list | set | frozenset):
@@ -99,12 +102,12 @@ class NexusGrid(Grid):
         else:
             return value
 
-    def update_properties_from_dict(self, data: dict[str, int | VariableEntry]) -> None:
+    def update_properties_from_dict(self, data: dict[str, int | GridArrayDefinition]) -> None:
         """Allows you to update properties on the class using the provided dict of values.
 
         Args:
         ----
-                data dict[str, int | VariableEntry]: the dictionary of values to update on the class
+                data dict[str, int | GridArrayDefinition]: the dictionary of values to update on the class
         """
         # Use the dict provided to populate the properties in the class
         if data is not None:
@@ -115,11 +118,11 @@ class NexusGrid(Grid):
         # Prevent reload from disk
         self.__grid_properties_loaded = True
 
-    def to_dict(self) -> dict[str, Optional[int] | VariableEntry]:
+    def to_dict(self) -> dict[str, Optional[int] | GridArrayDefinition]:
         self.load_grid_properties_if_not_loaded()
 
         original_dict = self.__dict__
-        new_dict: dict[str, Optional[int] | VariableEntry] = {}
+        new_dict: dict[str, Optional[int] | GridArrayDefinition] = {}
         for key in original_dict.keys():
             new_key = key
             if new_key[0] == '_':
@@ -168,39 +171,40 @@ class NexusGrid(Grid):
 
             # Load in the basic properties
             properties_to_load = [
-                PropertyToLoad('NETGRS', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self._netgrs),
-                PropertyToLoad('POROSITY', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self._porosity),
-                PropertyToLoad('SW', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self._sw),
-                PropertyToLoad('KX', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self._kx),
-                PropertyToLoad('KI', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self._kx),
-                PropertyToLoad('PERMX', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self._kx),
-                PropertyToLoad('PERMI', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self._kx),
-                PropertyToLoad('KY', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self._ky),
-                PropertyToLoad('KJ', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self._ky),
-                PropertyToLoad('PERMY', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self._ky),
-                PropertyToLoad('PERMJ', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self._ky),
-                PropertyToLoad('KZ', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self._kz),
-                PropertyToLoad('KK', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self._kz),
-                PropertyToLoad('PERMZ', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self._kz),
-                PropertyToLoad('PERMK', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self._kz),
-                PropertyToLoad('PVMULT', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__pvmult),
+                PropertyToLoad('NETGRS', GRID_ARRAY_FORMAT_KEYWORDS, self._netgrs),
+                PropertyToLoad('POROSITY', GRID_ARRAY_FORMAT_KEYWORDS, self._porosity),
+                PropertyToLoad('SW', GRID_ARRAY_FORMAT_KEYWORDS, self._sw),
+                PropertyToLoad('KX', GRID_ARRAY_FORMAT_KEYWORDS, self._kx),
+                PropertyToLoad('KI', GRID_ARRAY_FORMAT_KEYWORDS, self._kx),
+                PropertyToLoad('PERMX', GRID_ARRAY_FORMAT_KEYWORDS, self._kx),
+                PropertyToLoad('PERMI', GRID_ARRAY_FORMAT_KEYWORDS, self._kx),
+                PropertyToLoad('KY', GRID_ARRAY_FORMAT_KEYWORDS, self._ky),
+                PropertyToLoad('KJ', GRID_ARRAY_FORMAT_KEYWORDS, self._ky),
+                PropertyToLoad('PERMY', GRID_ARRAY_FORMAT_KEYWORDS, self._ky),
+                PropertyToLoad('PERMJ', GRID_ARRAY_FORMAT_KEYWORDS, self._ky),
+                PropertyToLoad('KZ', GRID_ARRAY_FORMAT_KEYWORDS, self._kz),
+                PropertyToLoad('KK', GRID_ARRAY_FORMAT_KEYWORDS, self._kz),
+                PropertyToLoad('PERMZ', GRID_ARRAY_FORMAT_KEYWORDS, self._kz),
+                PropertyToLoad('PERMK', GRID_ARRAY_FORMAT_KEYWORDS, self._kz),
+                PropertyToLoad('PVMULT', GRID_ARRAY_FORMAT_KEYWORDS, self.__pvmult),
                 PropertyToLoad('CORP', ['VALUE'], self.__corp),
-                PropertyToLoad('IEQUIL', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__iequil),
-                PropertyToLoad('IPVT', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__ipvt),
-                PropertyToLoad('IWATER', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__iwater),
-                PropertyToLoad('IRELPM', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__irelpm),
-                PropertyToLoad('IROCK', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__irock),
-                PropertyToLoad('ITRAN', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__itran),
-                PropertyToLoad('LIVECELL', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__livecell),
-                PropertyToLoad('WORKA1', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__worka1),
-                PropertyToLoad('WORKA2', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__worka2),
-                PropertyToLoad('WORKA3', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__worka3),
-                PropertyToLoad('WORKA4', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__worka4),
-                PropertyToLoad('WORKA5', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__worka5),
-                PropertyToLoad('WORKA6', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__worka6),
-                PropertyToLoad('WORKA7', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__worka7),
-                PropertyToLoad('WORKA8', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__worka8),
-                PropertyToLoad('WORKA9', ['VALUE', 'MULT', 'CON', 'ZVAR', 'LAYER'], self.__worka9)
+                PropertyToLoad('IEQUIL', GRID_ARRAY_FORMAT_KEYWORDS, self.__iequil),
+                PropertyToLoad('IPVT', GRID_ARRAY_FORMAT_KEYWORDS, self.__ipvt),
+                PropertyToLoad('IWATER', GRID_ARRAY_FORMAT_KEYWORDS, self.__iwater),
+                PropertyToLoad('IRELPM', GRID_ARRAY_FORMAT_KEYWORDS, self.__irelpm),
+                PropertyToLoad('IROCK', GRID_ARRAY_FORMAT_KEYWORDS, self.__irock),
+                PropertyToLoad('ITRAN', GRID_ARRAY_FORMAT_KEYWORDS, self.__itran),
+                PropertyToLoad('IREGION', GRID_ARRAY_FORMAT_KEYWORDS, self.__iregion),
+                PropertyToLoad('LIVECELL', GRID_ARRAY_FORMAT_KEYWORDS, self.__livecell),
+                PropertyToLoad('WORKA1', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka1),
+                PropertyToLoad('WORKA2', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka2),
+                PropertyToLoad('WORKA3', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka3),
+                PropertyToLoad('WORKA4', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka4),
+                PropertyToLoad('WORKA5', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka5),
+                PropertyToLoad('WORKA6', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka6),
+                PropertyToLoad('WORKA7', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka7),
+                PropertyToLoad('WORKA8', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka8),
+                PropertyToLoad('WORKA9', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka9)
             ]
 
             for token_property in properties_to_load:
@@ -262,7 +266,7 @@ class NexusGrid(Grid):
         return loaded_structured_grid_file
 
     @staticmethod
-    def update_structured_grid_file(grid_dict: dict[str, VariableEntry | int], model: NexusSimulator) -> None:
+    def update_structured_grid_file(grid_dict: dict[str, GridArrayDefinition | int], model: NexusSimulator) -> None:
         """Save values passed from the front end to the structured grid file and update the class.
 
         Args:
@@ -368,7 +372,7 @@ class NexusGrid(Grid):
             self.load_faults()
         return self.__faults_df
 
-    def __keyword_in_include_file_warning(self, var_entry_obj: VariableEntry) -> None:
+    def __keyword_in_include_file_warning(self, var_entry_obj: GridArrayDefinition) -> None:
 
         if var_entry_obj.keyword_in_include_file is True:
             warnings.warn('Grid array keyword in include file. This is not recommended simulation practice.')
@@ -383,99 +387,104 @@ class NexusGrid(Grid):
         return self.__grid_array_functions
 
     @property
-    def corp(self) -> VariableEntry:
+    def corp(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         self.__keyword_in_include_file_warning(self.__corp)
 
         return self.__corp
 
     @property
-    def iequil(self) -> VariableEntry:
+    def iequil(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         self.__iequil.value
         return self.__iequil
 
     @property
-    def ipvt(self) -> VariableEntry:
+    def ipvt(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self.__ipvt
 
     @property
-    def iwater(self) -> VariableEntry:
+    def iwater(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self.__iwater
 
     @property
-    def irelpm(self) -> VariableEntry:
+    def irelpm(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self.__irelpm
 
     @property
-    def irock(self) -> VariableEntry:
+    def irock(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self.__irock
 
     @property
-    def itran(self) -> VariableEntry:
+    def itran(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self.__itran
 
     @property
-    def livecell(self) -> VariableEntry:
+    def iregion(self) -> dict[str, GridArrayDefinition]:
+        self.load_grid_properties_if_not_loaded()
+        return self.__iregion
+
+    @property
+    def livecell(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self.__livecell
 
     @property
-    def pvmult(self) -> VariableEntry:
+    def pvmult(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self.__pvmult
 
     @property
-    def worka1(self) -> VariableEntry:
+    def worka1(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self.__worka1
 
     @property
-    def worka2(self) -> VariableEntry:
+    def worka2(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self.__worka2
 
     @property
-    def worka3(self) -> VariableEntry:
+    def worka3(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self.__worka3
 
     @property
-    def worka4(self) -> VariableEntry:
+    def worka4(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self.__worka4
 
     @property
-    def worka5(self) -> VariableEntry:
+    def worka5(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self.__worka5
 
     @property
-    def worka6(self) -> VariableEntry:
+    def worka6(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self.__worka6
 
     @property
-    def worka7(self) -> VariableEntry:
+    def worka7(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self.__worka7
 
     @property
-    def worka8(self) -> VariableEntry:
+    def worka8(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self.__worka8
 
     @property
-    def worka9(self) -> VariableEntry:
+    def worka9(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self.__worka9
 
     @property
-    def modx(self) -> VariableEntry:
+    def modx(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self.__modx

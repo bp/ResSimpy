@@ -2,8 +2,9 @@ from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 
 import pandas as pd
-from ResSimpy.Grid import VariableEntry
+from ResSimpy.Grid import GridArrayDefinition
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEYWORDS, STRUCTURED_GRID_KEYWORDS
+from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_FORMAT_KEYWORDS
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.Utils.general_utilities import check_if_string_is_float
@@ -17,7 +18,8 @@ class StructuredGridOperations:
         self.__model: NexusSimulator = model
 
     @staticmethod
-    def load_token_value_if_present(token: str, modifier: str, token_property: VariableEntry,
+    def load_token_value_if_present(token: str, modifier: str,
+                                    token_property: GridArrayDefinition | dict[str, GridArrayDefinition],
                                     line: str, file_as_list: list[str], line_indx: int,
                                     ignore_values: Optional[list[str]] = None) -> None:
         """Gets a token's value if there is one and loads it into the token_property.
@@ -26,11 +28,12 @@ class StructuredGridOperations:
         ----
             token (str): the token being searched for. e.g. 'PERMX'
             modifier (str): any modifiers applied to the token e.g. 'MULT'
-            token_property (VariableEntry): VariableEntry object to store the modifier and value pair into
+            token_property (GridArrayDefinition | dict[str, GridArrayDefinition]):
+                GridArrayDefinition or dict of GridArrayDefinition object to store the modifier and value pair into
             line (str): line to search for the token in
             line_indx (int): index of line in file_as_list
             file_as_list (list[str]): a list of strings containing each line of the file as a new entry
-            ignore_values (Optional[list[str]], optional): values to be ignored. Defaults to None.
+            ignore_values (Optional[list[str]]): values to be ignored. Defaults to None.
 
         Raises:
         ------
@@ -41,9 +44,27 @@ class StructuredGridOperations:
 
         if ignore_values is None:
             ignore_values = []
-        token_modifier = f"{token} {modifier}"
+        region_name: str = ''
+        modifier_found = False
+        token_found = nfo.check_token(token, line)
+        found_modifier = line.strip().split()[-1]
+        if token_found:
+            token_next_value = fo.get_token_value(token, line, file_as_list)
+        else:
+            return
+        if token_next_value == found_modifier:
+            modifier_found = token_next_value == modifier
+            token_modifier = f"{token} {modifier}"
+        # If IREGION and the region_group is named
+        elif token == 'IREGION' and found_modifier in GRID_ARRAY_FORMAT_KEYWORDS and len(line.strip().split()) == 3:
+            region_name = line.strip().split()[1]
+            modifier_found = found_modifier == modifier
+            token_modifier = f"{token} {region_name} {modifier}"
+        if token == 'IREGION' and isinstance(token_property, dict):
+            if region_name == '':
+                region_name = f"IREG{len(token_property.keys())+1}"
 
-        if nfo.check_token(token, line) and fo.get_token_value(token, line, file_as_list) == modifier:
+        if token_found and modifier_found:
             # If we are loading a multiple, load the two relevant values, otherwise just the next value
             if modifier == 'MULT':
                 numerical_value = nfo.get_expected_token_value(modifier, line, file_as_list, ignore_values=None)
@@ -53,19 +74,34 @@ class StructuredGridOperations:
                 value_to_multiply = fo.get_token_value(modifier, line, file_as_list,
                                                        ignore_values=[numerical_value])
                 if numerical_value is not None and value_to_multiply is not None:
-                    token_property.modifier = 'MULT'
-                    token_property.value = f"{numerical_value} {value_to_multiply}"
+                    if not isinstance(token_property, dict):
+                        token_property.modifier = 'MULT'
+                        token_property.value = f"{numerical_value} {value_to_multiply}"
+                    elif region_name != '':  # IREGION
+                        token_property[region_name] = GridArrayDefinition()
+                        token_property[region_name].modifier = 'MULT'
+                        token_property[region_name].value = f"{numerical_value} {value_to_multiply}"
             else:
                 value = fo.get_token_value(modifier, line, file_as_list, ignore_values=ignore_values)
                 if value is None:
                     # Could be 'cut short' by us excluding the rest of a file
-                    token_property.value = None
-                    token_property.modifier = modifier
+                    if not isinstance(token_property, dict):
+                        token_property.value = None
+                        token_property.modifier = modifier
+                    elif region_name != '':  # IREGION
+                        token_property[region_name] = GridArrayDefinition()
+                        token_property[region_name].modifier = modifier
+                        token_property[region_name].value = None
                 else:
                     # Check if VALUE modifier is followed by a numeric string or an INCLUDE file
                     if 'INCLUDE' in file_as_list[line_indx+1]:
-                        token_property.value = value
-                        token_property.modifier = modifier
+                        if not isinstance(token_property, dict):
+                            token_property.value = value
+                            token_property.modifier = modifier
+                        elif region_name != '':  # IREGION
+                            token_property[region_name] = GridArrayDefinition()
+                            token_property[region_name].modifier = modifier
+                            token_property[region_name].value = value
                     elif check_if_string_is_float(value):
                         start_indx = line_indx+1
                         end_indx = len(file_as_list)
@@ -78,14 +114,25 @@ class StructuredGridOperations:
                                     break
                             if found_end_value:
                                 break
-                        token_property.modifier = modifier
-                        token_property.value = '\n'.join(file_as_list[start_indx:end_indx]).strip()
-
+                        if not isinstance(token_property, dict):
+                            token_property.modifier = modifier
+                            token_property.value = '\n'.join(file_as_list[start_indx:end_indx]).strip()
+                        elif region_name != '':  # IREGION
+                            token_property[region_name] = GridArrayDefinition()
+                            token_property[region_name].modifier = modifier
+                            token_property[region_name].value = '\n'.join(file_as_list[start_indx:end_indx]).strip()
                     else:  # The grid array keyword is likely inside an include file, presented on previous line
                         if 'INCLUDE' in file_as_list[line_indx-1]:
-                            token_property.modifier = modifier
-                            token_property.value = file_as_list[line_indx-1].split('INCLUDE')[1].strip()
-                            token_property.keyword_in_include_file = True
+                            if not isinstance(token_property, dict):
+                                token_property.modifier = modifier
+                                token_property.value = file_as_list[line_indx-1].split('INCLUDE')[1].strip()
+                                token_property.keyword_in_include_file = True
+                            elif region_name != '':  # IREGION
+                                token_property[region_name] = GridArrayDefinition()
+                                token_property[region_name].modifier = modifier
+                                token_property[region_name].value \
+                                    = file_as_list[line_indx-1].split('INCLUDE')[1].strip()
+                                token_property[region_name].keyword_in_include_file = True
                         else:
                             raise ValueError(
                                 f'No suitable value found after {token_modifier} keyword in line: {line}')
@@ -135,17 +182,31 @@ class StructuredGridOperations:
                         else:
                             raise ValueError(
                                     f'Unsuitable mod card for {token_modifier} keyword in line: {line}')
-                        if token_property.mods is not None:
-                            if key in token_property.mods.keys():
-                                orig_mod_tab = token_property.mods[key].copy()
-                                token_property.mods[key] = pd.concat([orig_mod_tab, mod_table]).reset_index(drop=True)
+                        if not isinstance(token_property, dict):
+                            if token_property.mods is not None:
+                                if key in token_property.mods.keys():
+                                    orig_mod_tab = token_property.mods[key].copy()
+                                    token_property.mods[key] = \
+                                        pd.concat([orig_mod_tab, mod_table]).reset_index(drop=True)
+                                else:
+                                    token_property.mods[key] = mod_table
                             else:
-                                token_property.mods[key] = mod_table
-                        else:
-                            token_property.mods = {key: mod_table}
+                                token_property.mods = {key: mod_table}
+                        else:  # IREGION
+                            if token_property[region_name].mods is not None:
+                                tmp_dict = token_property[region_name].mods
+                                if isinstance(tmp_dict, dict):
+                                    if key in tmp_dict.keys():
+                                        orig_mod_tab = tmp_dict[key].copy()
+                                        tmp_dict[key] = \
+                                            pd.concat([orig_mod_tab, mod_table]).reset_index(drop=True)
+                                    else:
+                                        tmp_dict[key] = mod_table
+                            else:
+                                token_property[region_name].mods = {key: mod_table}
 
     @staticmethod
-    def replace_value(file_as_list: list[str], old_property: VariableEntry, new_property: VariableEntry,
+    def replace_value(file_as_list: list[str], old_property: GridArrayDefinition, new_property: GridArrayDefinition,
                       token_name: str) -> None:
         """Replace the value and token + modifier with the new values.
 
@@ -166,7 +227,7 @@ class StructuredGridOperations:
             if nfo.check_token(old_token_modifier, line):
                 # If we are replacing a mult, replace the first value with a blank
                 if old_property.modifier == 'MULT':
-                    dummy_value = VariableEntry('MULT', '')
+                    dummy_value = GridArrayDefinition('MULT', '')
                     fo.get_token_value(old_token_modifier, line, file_as_list, ignore_values=ignore_values,
                                        replace_with=dummy_value)
 
