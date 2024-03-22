@@ -12,10 +12,10 @@ from tests.multifile_mocker import mock_multiple_files
                          [
                              ("! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
                               "\nother text\n\nCORP VALUE\n "
-                              "INCLUDE /XXX/XXX/XXX/Testing/TDRM/ESMDA/Includes/xxx.cor\n "
+                              "INCLUDE /XXX/XXX/XXX/Testing/XXX/XXX/Includes/xxx.cor\n "
                               "IEQUIL CON\n"
                               "1\n!ANOTHER COMMENT \n",  # end structured_grid_file_contents
-                              "/XXX/XXX/XXX/Testing/TDRM/ESMDA/Includes/xxx.cor",
+                              "/XXX/XXX/XXX/Testing/XXX/XXX/Includes/xxx.cor",
                               1),
                          ])
 def test_load_structured_grid_file_iequil_corp(mocker, structured_grid_file_contents, expected_corp, expected_iequil):
@@ -24,11 +24,11 @@ def test_load_structured_grid_file_iequil_corp(mocker, structured_grid_file_cont
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
     structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
 
-    def mock_open_wrapper(filename, mode): # for some reason mode arg is needed even though not used
+    def mock_open_wrapper(filename, mode):  # for some reason mode arg is needed even though not used
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
                                         {'testpath1/nexus_run.fcs': fcs_file,
                                          structured_grid_name: structured_grid_file_contents,
-                '/XXX/XXX/XXX/Testing/TDRM/ESMDA/Includes/xxx.cor': ''}).return_value
+                '/XXX/XXX/XXX/Testing/XXX/XXX/Includes/xxx.cor': ''}).return_value
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
@@ -38,16 +38,16 @@ def test_load_structured_grid_file_iequil_corp(mocker, structured_grid_file_cont
     # Assert
     # note that iequil is a nexus specific grid array and is an integer
     assert result.iequil.modifier == 'CON'
-    assert result.iequil.value == 1
+    assert result.iequil.value == '1'
     assert result.corp.modifier == 'VALUE'
-    assert result.corp.value == '/XXX/XXX/XXX/Testing/TDRM/ESMDA/Includes/xxx.cor'
+    assert result.corp.value == '/XXX/XXX/XXX/Testing/XXX/XXX/Includes/xxx.cor'
 
 
 @pytest.mark.parametrize('structured_grid_file_contents, include_file_contents',
                          [
                              ("""ARRAYS ROOT
 ! grid
-INCLUDE /XXX/XXX/XXX/Testing/TDRM/ESMDA/Includes/xxx.cor
+INCLUDE /XXX/XXX/XXX/Testing/XXX/XXX/Includes/xxx.cor
 LIST""",  # end structured grid_file_contents and begin include_file_contents
                               """C ---------------------------
 C  File-name: xx.cor
@@ -63,11 +63,30 @@ CORP VALUE"""
 ! grid
 NX  NY  NZ
 10  10  10
-INCLUDE /XXX/XXX/XXX/Testing/TDRM/ESMDA/Includes/xxx.cor
+INCLUDE /XXX/XXX/XXX/Testing/XXX/XXX/Includes/xxx.cor
 LIST""",  # ends structured_grid_file_contents
                               """C ---------------------------
 C  File-name: xx.cor
 C  Created: 08-MAR-2005 14:41:27
+C
+C
+C
+C
+C
+C
+C
+C
+C
+C
+C
+C
+C
+C
+C
+C
+C
+C
+C
 C
 CORP VALUE
 C This is a comment that comes after the keyword."""
@@ -77,7 +96,7 @@ C This is a comment that comes after the keyword."""
 ! grid
 NX  NY  NZ
 10  10  10
-INCLUDE /XXX/XXX/XXX/Testing/TDRM/ESMDA/Includes/xxx.cor
+INCLUDE /XXX/XXX/XXX/Testing/XXX/XXX/Includes/xxx.cor
 LIST""",  # ends structured grid_file_contents
                               """CORP VALUE
 C GRID BLOCK: I =   1 , J =   1 , K =   1  
@@ -93,7 +112,7 @@ def test_grid_arr_in_include_file(mocker, structured_grid_file_contents, include
     fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
     structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
 
-    include_file_location = '/XXX/XXX/XXX/Testing/TDRM/ESMDA/Includes/xxx.cor'
+    include_file_location = '/XXX/XXX/XXX/Testing/XXX/XXX/Includes/xxx.cor'
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
@@ -111,7 +130,177 @@ def test_grid_arr_in_include_file(mocker, structured_grid_file_contents, include
 
     # Assert
     assert result.corp.keyword_in_include_file is True
-    assert result.corp.value == '/XXX/XXX/XXX/Testing/TDRM/ESMDA/Includes/xxx.cor'
+    assert result.corp.value == '/XXX/XXX/XXX/Testing/XXX/XXX/Includes/xxx.cor'
+
+
+def test_load_structured_grid_file_multiple_mods(mocker):
+    """Read in Structured Grid File where properties are in a nested include file"""
+    # Arrange
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents = """ARRAYS ROOT
+! grid
+NX  NY  NZ
+10  10  10
+
+NETGRS ZVAR
+INCLUDE path/netgrs_01.inc
+MOD
+68  68 34 34  1  1 =0.34
+68  68 34 34  2  2 =0.2
+MOD
+68  68 34 34  8 10 =0.69
+MOD
+68  68 34 34 11 14 =0.85
+68  68 34 34 15 15 =0.52
+MOD
+68  68 34 34 16 16 =0.79
+56  56 36 36  1  1 =0.67
+LIST
+"""  # ends structured_grid_file_contents
+
+    #include_file_contents = '0.425 0.255 3*0.662 0.376 0.000 3*0.453 4*0.884 0.412 0.788 12*0.000'
+    #include_file_location = os.path.join('testpath1', r'includes/netgrs_01.inc')
+
+    # set up dataframe
+    i1 = [68]*6 + [56]
+    i2 = [68]*6 + [56]
+    j1 = [34]*6 + [36]
+    j2 = [34]*6 + [36]
+    k1 = [1, 2, 8, 11, 15, 16, 1]
+    k2 = [1, 2, 10, 14, 15, 16, 1]
+    v = ['=0.34', '=0.2', '=0.69', '=0.85', '=0.52', '=0.79', '=0.67']
+    expected_df = pd.DataFrame({'i1': i1, 'i2': i2, 'j1': j1, 'j2': j2, 'k1': k1, 'k2': k2, '#v': v})
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'testpath1/nexus_run.fcs': fcs_file_contents,
+                                         '/run_control/path': '',
+                                         structured_grid_name: structured_grid_file_contents,
+                                         #include_file_location: include_file_contents
+                                         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
+    result = simulation.grid
+
+    # Assert
+    assert result.netgrs.keyword_in_include_file is False
+    pd.testing.assert_frame_equal(result.netgrs.mods['MOD'], expected_df)
+    assert result.netgrs.modifier == 'ZVAR'
+    assert result.netgrs.value == 'path/netgrs_01.inc'
+
+
+def test_load_structured_grid_file_mod_with_space(mocker):
+    """Read in Structured Grid File where properties are in a nested include file"""
+    # Arrange
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents = """ARRAYS ROOT
+! grid
+NX  NY  NZ
+10  10  10
+
+NETGRS ZVAR
+INCLUDE path/netgrs_01.inc
+MOD
+68  68 34 34  1  1 = 0.34
+68  68 34 34  2  2 = 0.2
+"""  # ends structured_grid_file_contents
+
+    #include_file_contents = '0.425 0.255 3*0.662 0.376 0.000 3*0.453 4*0.884 0.412 0.788 12*0.000'
+    #include_file_location = os.path.join('testpath1', r'includes/netgrs_01.inc')
+
+    # set up dataframe
+    i1 = [68]*2
+    i2 = [68]*2
+    j1 = [34]*2
+    j2 = [34]*2
+    k1 = [1, 2]
+    k2 = [1, 2]
+    v = ['=0.34', '=0.2']
+    expected_df = pd.DataFrame({'i1': i1, 'i2': i2, 'j1': j1, 'j2': j2, 'k1': k1, 'k2': k2, '#v': v})
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'testpath1/nexus_run.fcs': fcs_file_contents,
+                                         '/run_control/path': '',
+                                         structured_grid_name: structured_grid_file_contents,
+                                         #include_file_location: include_file_contents
+                                         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
+    result = simulation.grid
+
+    # Assert
+    assert result.netgrs.keyword_in_include_file is False
+    pd.testing.assert_frame_equal(result.netgrs.mods['MOD'], expected_df)
+    assert result.netgrs.modifier == 'ZVAR'
+    assert result.netgrs.value == 'path/netgrs_01.inc'
+
+
+def test_load_structured_grid_file_corp_modx_mody_modz(mocker):
+    """Read in Structured Grid File where properties are in a nested include file"""
+    # Arrange
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents = """ARRAYS ROOT
+! grid
+NX  NY  NZ
+10  10  10
+
+CORP VALUE
+INCLUDE path/corp_01.inc
+MODX
+1 298   1 216   1 120 +1421587
+MODY
+1 298   1 216   1 120 +1421587
+MODZ
+1 298   1 216   1 120 +1421587
+LIST"""  # ends structured_grid_file_contents
+
+    include_file_contents = '0.425 0.255 3*0.662 0.376 0.000 3*0.453 4*0.884 0.412 0.788 12*0.000'
+    include_file_location = os.path.join('testpath1', r'includes/corp_01.inc')
+
+    # set up dataframe
+    i1 = [1]
+    i2 = [298]
+    j1 = [1]
+    j2 = [216]
+    k1 = [1]
+    k2 = [120]
+    v = [1421587]
+    expected_modx_df = pd.DataFrame({'i1': i1, 'i2': i2, 'j1': j1, 'j2': j2, 'k1': k1, 'k2': k2, '#v': v})
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'testpath1/nexus_run.fcs': fcs_file_contents,
+                                         '/run_control/path': '',
+                                         structured_grid_name: structured_grid_file_contents,
+                                         #include_file_location: include_file_contents
+                                         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
+    result = simulation.grid
+
+    # Assert
+    assert result.corp.keyword_in_include_file is False
+    pd.testing.assert_frame_equal(result.corp.mods['MODX'], expected_modx_df)
+    pd.testing.assert_frame_equal(result.corp.mods['MODY'], expected_modx_df)
+    pd.testing.assert_frame_equal(result.corp.mods['MODZ'], expected_modx_df)
+    assert result.corp.modifier == 'VALUE'
+    assert result.corp.value == 'path/corp_01.inc'
 
 
 @pytest.mark.parametrize("structured_grid_file_contents, expected_net_to_gross, expected_porosity, expected_range_x,"
@@ -165,7 +354,7 @@ def test_load_structured_grid_file_basic_properties_nested_includes(mocker):
     structured_grid_file_contents = """ARRAYS ROOT
 ! grid
 INCLUDE includes/Another_structured_grid_01.inc"""
-    included_file_contents = """POROSITY CON 0.3\n ! Grid dimensions\nNX NY NZ\n3  4 5\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
+    included_file_contents = """POROSITY CON\n 0.3\n ! Grid dimensions\nNX NY NZ\n3  4 5\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
                               "\nother text\n\nNETGRS VALUE\n 14 616 8371 81367136  \n 
                               !Should have stopped reading by this point \n POROSITY "
                               "CON 0.5\n"""
@@ -279,7 +468,7 @@ def test_load_structured_grid_file_fails(mocker):
                              ("SW VALUE\n INCLUDE /path/to/SW.inc",
                               "VALUE", "/path/to/SW.inc"),
                              ("SW CON\n0.6", "CON", "0.6"),
-                             ("Random VALUE\nSW CON 0.33\nOTHER VALUE", "CON", "0.33"),
+                             ("Random VALUE\nSW CON\n 0.33\nOTHER VALUE", "CON", "0.33"),
                              ("CON VALUE\nSW VALUE\t\nINCLUDE SW_FILE.inc",
                               "VALUE", "SW_FILE.inc"),
                          ])

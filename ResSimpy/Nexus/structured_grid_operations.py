@@ -131,6 +131,7 @@ class StructuredGridOperations:
                         elif len(mod_table.columns) == 8:
                             mod_table[8] = mod_table[6].astype(str) + mod_table[7].astype(str)
                             mod_table = mod_table.drop([6, 7], axis=1)
+                            mod_table.columns = ['i1', 'i2', 'j1', 'j2', 'k1', 'k2', '#v']
                         else:
                             raise ValueError(
                                     f'Unsuitable mod card for {token_modifier} keyword in line: {line}')
