@@ -29,10 +29,20 @@ class NexusConstraints(Constraints):
     """Class that holds all the constraints for a NexusNetwork object. This class is responsible for loading,
     modifying and removing constraints from the NexusNetwork object. This class is also responsible for
     writing the constraints to the Nexus deck.
+
+    Attributes:
+        constraints: dict[str, list[NexusConstraint]]: dictionary of all constraints defined within a model,
+        keyed by the node or well name.
     """
     _constraints: dict[str, list[NexusConstraint]] = field(default_factory=dict)
 
     def __init__(self, parent_network: NexusNetwork, model: NexusSimulator) -> None:
+        """Initialises the NexusConstraints class.
+
+        Args:
+            parent_network (NexusNetwork): the network object that the constraints are associated with.
+            model (NexusSimulator): the model object that the constraints are associated with.
+        """
         self.__parent_network: NexusNetwork = parent_network
         self._constraints: dict[str, list[NexusConstraint]] = {}
         self.__model: NexusSimulator = model

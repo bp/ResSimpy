@@ -38,6 +38,11 @@ class OpenGoSimSimulator(Simulator):
     __final_date: Optional[str]
 
     def __init__(self, origin: str) -> None:
+        """Initialises the OpenGoSimSimulator class.
+
+        Args:
+            origin (str): The path to the model file.
+        """
         super().__init__()
         self._origin = origin
         self._wells: OpenGoSimWells = OpenGoSimWells()

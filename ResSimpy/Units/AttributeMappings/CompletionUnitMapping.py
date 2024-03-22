@@ -55,6 +55,11 @@ class CompletionUnits(BaseUnitMapping):
     }
 
     def __init__(self, unit_system: None | UnitSystem) -> None:
+        """Initialises the CompletionUnits class.
+
+        Args:
+            unit_system (None | UnitSystem): The unit system to use for the unit mapping.
+        """
         super().__init__(unit_system=unit_system)
 
     @property

@@ -75,6 +75,33 @@ class Completion(DataObjectMixin, ABC):
                  status: Optional[str] = None, date_format: Optional[DateFormatEnum.DateFormat] = None,
                  peaceman_well_block_radius: Optional[float] = None, start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None) -> None:
+        """Initialises the Completion class.
+
+        Args:
+            date: (str): The starting date of the completion.
+            i: (Optional[int]): The structured grid cell location in the x direction.
+            j: (Optional[int]): The structured grid cell location in the y direction.
+            k: Optional[int]: The structured grid cell location in the z direction.
+            skin: Optional[float]: The skin value for the completion.
+            depth: Optional[float]: The depth of the completion.
+            well_radius: Optional[float]: The well radius.
+            x: Optional[float]: The x location of the well in distance units/coordinates.
+            y: Optional[float]: The y location of the well in distance units/coordinates.
+            angle_a: Optional[float]: the angle relative to the local I axis.
+            angle_v: Optional[float]: the angle relative to the true vertical axis (global Z axis).
+            grid: Optional[str]: the grid name to which the completion data applies.
+            depth_to_top: Optional[float]: depth to the top of a completion interval.
+            depth_to_bottom: Optional[float]: depth to the bottom of the completion interval.
+            perm_thickness_ovr: Optional[float]: permeability thickness override value to use for the
+            completion interval.
+            dfactor: Optional[float]: non-darcy factor to use for rate dependent skin calculations.
+            rel_perm_method: Optional[int]: rel perm method to use for the completion.
+            status: Optional[str]: the status of the layer, can be 'ON' or 'OFF'
+            date_format: Optional[DateFormatEnum.DateFormat]: The date format to use for the date as an enum.
+            peaceman_well_block_radius: Optional[float]: The pressure equivalent radius of the grid block
+            start_date: Optional[str]: The start date of the simulation.
+            unit_system: Optional[UnitSystem]: The unit system to use for the completion.
+        """
         super().__init__({})
         self._date_format = date_format
         self.__well_radius = well_radius

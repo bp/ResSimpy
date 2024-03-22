@@ -40,6 +40,16 @@ class NexusHydraulicsMethod(DynamicProperty):
                  ratio_thousands: bool = True,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
+        """Initialises the NexusHydraulicsMethod class.
+
+        Args:
+            file (NexusFile): ??
+            input_number (int): ??
+            model_unit_system (UnitSystem): ??
+            ratio_thousands (bool): ??
+            properties (Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                                 dict[str, Union[float, pd.DataFrame]]]]]): ??
+        """
         if properties is not None:
             self.properties = properties
         else:
