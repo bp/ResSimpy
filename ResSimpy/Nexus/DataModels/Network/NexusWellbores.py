@@ -26,11 +26,17 @@ if TYPE_CHECKING:
 @dataclass
 class NexusWellbores(Wellbores):
     """Class for handling wellbores in the Nexus Network. This class is used to store and manipulate the wellbores in a
-    NexusNetwork. It is stored as an instance in the NexusNetwork class as "wellbores".
+    NexusNetwork. It is stored as an instance in the NexusNetwork class as "wellbores". The list of wellbores can be
+    accessed in the NexusNetwork class through the get_all method.
     """
     __wellbores: list[NexusWellbore] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork) -> None:
+        """Initialises the NexusWellbores class.
+
+        Args:
+            parent_network (NexusNetwork): The network that the wellbores are a part of.
+        """
         self.__parent_network: NexusNetwork = parent_network
         self.__wellbores: list[NexusWellbore] = []
         self.__add_object_operations = AddObjectOperations(NexusWellbore, self.table_header, self.table_footer,

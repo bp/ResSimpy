@@ -4,6 +4,12 @@ from dataclasses import dataclass
 @dataclass
 class FcsConfig:
     def __init__(self, destination, nexus_data_name="data") -> None:
+        """Initialises the FcsConfig class.
+
+        Args:
+            destination: The destination directory for the output data.
+            nexus_data_name: The name of the data directory in the Nexus model.
+        """
         self.output_dir = destination
         self.use_reservoir_names = True
         self.abs_paths_to_keep: list[str] = []

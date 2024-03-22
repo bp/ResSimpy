@@ -22,6 +22,14 @@ class AddObjectOperations:
 
     def __init__(self, obj_type: Optional[type[T]], table_header: str, table_footer: str,
                  model: NexusSimulator) -> None:
+        """Initialises the AddObjectOperations class.
+
+        Args:
+            obj_type (Optional[type[T]]): type of object to add to the file.
+            table_header (str): The string that represents the start of the table in the file.
+            table_footer (str): The string that represents the end of the table in the file.
+            model (NexusSimulator): model to add the object to.
+        """
         self.__model = model
         self.table_header = table_header
         self.table_footer = table_footer

@@ -64,6 +64,11 @@ class NexusNodeConnection(NodeConnection):
     acceleration_pressure_gradient_mult: Optional[float] = None
 
     def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
+        """Initialises the NexusNodeConnection class.
+
+        Args:
+            properties_dict (dict): A dictionary of properties to set on the node.
+        """
         # call the init of the DataObjectMixin
         super(NodeConnection, self).__init__({})
         for key, prop in properties_dict.items():

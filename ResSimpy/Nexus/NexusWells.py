@@ -40,6 +40,11 @@ class NexusWells(Wells):
     _wells: list[NexusWell] = field(default_factory=list)
 
     def __init__(self, model: NexusSimulator) -> None:
+        """Initialises the NexusWells class.
+
+        Args:
+            model (NexusSimulator)
+        """
         self.__model = model
         self.__add_object_operations = AddObjectOperations(NexusCompletion, self.table_header, self.table_footer, model)
         super().__init__()

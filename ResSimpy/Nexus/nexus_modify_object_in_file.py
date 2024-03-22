@@ -9,6 +9,11 @@ if TYPE_CHECKING:
 
 class ModifyObjectOperations:
     def __init__(self, object_to_modify: Any) -> None:
+        """Initialises the ModifyObjectOperations class.
+
+        Args:
+            object_to_modify (Any): Passed in object to modify and pass back out.
+        """
         self.object_to_modify = object_to_modify
 
     def modify_network_object(self, object_to_modify: dict[str, None | str | float | int],

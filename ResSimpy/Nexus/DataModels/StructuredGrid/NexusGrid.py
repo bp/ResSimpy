@@ -60,6 +60,12 @@ class NexusGrid(Grid):
     __worka9: GridArrayDefinition
 
     def __init__(self, grid_nexus_file: Optional[NexusFile] = None) -> None:
+        """Initialises the NexusGrid class.
+
+        Args:
+            grid_nexus_file (Optional[NexusFile]): the NexusFile representation of a structured grid file for \
+                reading and interpreting the grid properties from.
+        """
         super().__init__()
         self.__array_functions_list: Optional[list[list[str]]] = None
         self.__array_functions_df: Optional[pd.DataFrame] = None

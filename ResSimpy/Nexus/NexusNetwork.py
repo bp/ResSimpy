@@ -57,6 +57,11 @@ class NexusNetwork(Network):
     __has_been_loaded: bool = False
 
     def __init__(self, model: NexusSimulator) -> None:
+        """Initialises the NexusNetwork class.
+
+        Args:
+            model (NexusSimulator): NexusSimulator object to be used to loading of the network object.
+        """
         self.__has_been_loaded: bool = False
         self.__model: NexusSimulator = model
         self.nodes: NexusNodes = NexusNodes(self)

@@ -1,8 +1,10 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional
 import pandas as pd
+from typing import Optional, Sequence
+
+from ResSimpy.GridArrayFunction import GridArrayFunction
 
 
 @dataclass
@@ -31,12 +33,14 @@ class Grid(ABC):
     _kz: GridArrayDefinition
 
     def __init__(self) -> None:
+        """Initialises the Grid class."""
         self._netgrs = GridArrayDefinition()
         self._porosity = GridArrayDefinition()
         self._sw = GridArrayDefinition()
         self._kx = GridArrayDefinition()
         self._ky = GridArrayDefinition()
         self._kz = GridArrayDefinition()
+
         # Grid dimensions
         self._range_x: Optional[int] = None
         self._range_y: Optional[int] = None
@@ -101,4 +105,9 @@ class Grid(ABC):
 
     @abstractmethod
     def update_properties_from_dict(self, data: dict[str, int | GridArrayDefinition]) -> None:
+        raise NotImplementedError("Implement this in the derived class")
+
+    @property
+    def array_functions(self) -> Optional[Sequence[GridArrayFunction]]:
+        """Returns a list of the array functions defined in the structured grid file."""
         raise NotImplementedError("Implement this in the derived class")

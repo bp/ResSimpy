@@ -26,6 +26,14 @@ class NexusValveMethods(Valve):
     def __init__(self, model_unit_system: UnitSystem,
                  inputs: Optional[MutableMapping[int, NexusValveMethod]] = None,
                  files: Optional[dict[int, NexusFile]] = None) -> None:
+        """Initialises the NexusValveMethods class.
+
+        Args:
+            model_unit_system (UnitSystem): Unit system used in the model.
+            inputs (Optional[MutableMapping[int, NexusValveMethod]]): Collection of Nexus valve property methods.
+            files (Optional[dict[int, NexusFile]]): Collection of valve property files, as defined in Nexus fcs file.
+                Keyed by the method number.
+        """
         if inputs:
             self.__inputs = inputs
         else:

@@ -84,7 +84,69 @@ class NexusCompletion(Completion):
                  start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None,
                  ) -> None:
+        """Initialises the NexusCompletion class.
 
+        Args:
+            date: str representing the date of the completion
+            i: (Optional[int]): The structured grid cell location in the x direction.
+            j: (Optional[int]): The structured grid cell location in the y direction.
+            k: Optional[int]: The structured grid cell location in the z direction.
+            skin: Optional[float]: The skin value for the completion.
+            depth: Optional[float]: The depth of the completion.
+            well_radius: Optional[float]: The well radius.
+            x: Optional[float]: The x location of the well in distance units/coordinates.
+            y: Optional[float]: The y location of the well in distance units/coordinates.
+            angle_a: Optional[float]: the angle relative to the local I axis.
+            angle_v: Optional[float]: the angle relative to the true vertical axis (global Z axis).
+            grid: Optional[str]: the grid name to which the completion data applies.
+            depth_to_top: Optional[float]: depth to the top of a completion interval.
+            depth_to_bottom: Optional[float]: depth to the bottom of the completion interval.
+            perm_thickness_ovr: Optional[float]: permeability thickness override value to use for the
+            completion interval.
+            dfactor: Optional[float]: non-darcy factor to use for rate dependent skin calculations.
+            rel_perm_method: Optional[int]: rel perm method to use for the completion.
+            status: Optional[str]: the status of the layer, can be 'ON' or 'OFF'
+            date_format: Optional[DateFormatEnum.DateFormat]: The date format to use for the date as an enum.
+            peaceman_well_block_radius: Optional[float]: The pressure equivalent radius of the grid block
+            start_date: Optional[str]: The start date of the simulation.
+            unit_system: Optional[UnitSystem]: The unit system to use for the completion.
+            measured_depth: Optional[float]: Measured depth of a completion. 'MD' in Nexus
+            well_indices: Optional[float]: Well index used to calculate performance of the completion. 'WI' in Nexus
+            depth_to_top_str: Optional[str]: when depth to top is provided as a string it covers all the completion.
+            depth_to_bottom_str: Optional[str]: When depth to bottom is provided as a string it covers all the
+            completion.
+            rel_perm_method: Optional[int]: The relative permeability method number to use for the completion.
+            dfactor: Optional[float]: The non-darcy factor to use for rate dependent skin calculations.
+            status: Optional[str]: The status of the layer, can be 'ON' or 'OFF'
+            partial_perf: Optional[float]: Partial penetration factor. 'PPERF' in Nexus
+            cell_number: Optional[int]: cell number for the completion in unstructured grids.
+            perm_thickness_ovr: Optional[float]: Permeability thickness override value to use for the completion.
+            peaceman_well_block_radius: Optional[float]: The pressure equivalent radius of the grid block.
+            fracture_mult: Optional[float]: The multiplier for the fracture.
+            sector: Union[None, str, int]: The section of the wellbore to which this completion flows.
+            well_group: Optional[str]: The group of the well.
+            zone: Optional[int]: The zone of the well.
+            angle_open_flow: Optional[float]: The angle of the open flow.
+            temperature: Optional[float]: The temperature of the completion.
+            flowsector: Optional[int]: The flow sector of the completion.
+            parent_node: Optional[str]: The parent node of the completion.
+            mdcon: Optional[float]: The mdcon of the completion.
+            pressure_avg_pattern: Optional[int]: The block pattern to take the pressure for the completion inflow.
+            length: Optional[float]: The length of the completion.
+            permeability: Optional[float]: The permeability of the completion.
+            non_darcy_model: Optional[str]: The non-darcy model to use for the completion.
+            comp_dz: Optional[float]: the dz of the completion.
+            layer_assignment: Optional[int]: The layer assignment of the completion.
+            polymer_bore_radius: Optional[float]: The effective polymer bore radius of the completion.
+            polymer_well_radius: Optional[float]: The effective polymer well radius of the completion.
+            portype: Optional[str]: The pore type for the completion FRACTURE OR MATRIX. 'PORTYPE' in Nexus
+            rel_perm_end_point: Optional[NexusRelPermEndPoint]: instance of the NexusRelPermEndPoint class holding the
+            rel perm end point data settings.
+            kh_mult: Optional[float]: The multiplier that is applied to the permeability-thickness. 'KHMULT' in Nexus.
+            date_format: Optional[DateFormatEnum.DateFormat]: The date format to use for the date as an enum.
+            start_date: Optional[str]: The start date of the simulation.
+            unit_system: Optional[UnitSystem]: The unit system to use for the completion.
+        """
         self.__measured_depth = measured_depth
 
         self.__well_indices = well_indices  # TODO: rename this to singular

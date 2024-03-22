@@ -16,6 +16,11 @@ class WaterUnits(BaseUnitMapping):
     """Unit types for the attributes of water methods."""
 
     def __init__(self, unit_system: None | UnitSystem) -> None:
+        """Initialises the WaterUnits class.
+
+        Args:
+            unit_system (None | UnitSystem): The unit system to use for the unit mapping.
+        """
         super().__init__(unit_system=unit_system)
 
     attribute_map: Mapping[str, UnitDimension] = {
@@ -68,6 +73,11 @@ class SeparatorUnits(BaseUnitMapping):
     """Unit types for the attributes of separator methods."""
 
     def __init__(self, unit_system: None | UnitSystem) -> None:
+        """Initialises the SeparatorUnits class.
+
+        Args:
+            unit_system (None | UnitSystem): unit system to get the unit from.
+        """
         super().__init__(unit_system=unit_system)
 
     attribute_map: Mapping[str, UnitDimension] = {
@@ -102,6 +112,11 @@ class RockUnits(BaseUnitMapping):
     """Unit types for the attributes of rock methods."""
 
     def __init__(self, unit_system: None | UnitSystem) -> None:
+        """Initialises the RockUnits class.
+
+        Args:
+            unit_system (None | UnitSystem): unit system to get the unit from.
+        """
         super().__init__(unit_system=unit_system)
 
     attribute_map: Mapping[str, UnitDimension] = {
@@ -142,6 +157,11 @@ class RelPermUnits(BaseUnitMapping):
     """Unit types for the attributes of relative permeability and capillary pressure methods."""
 
     def __init__(self, unit_system: None | UnitSystem) -> None:
+        """Initialises the RelPermUnits class.
+
+        Args:
+            unit_system (None | UnitSystem): unit system to get the unit from.
+        """
         super().__init__(unit_system=unit_system)
 
     attribute_map: Mapping[str, UnitDimension] = {
@@ -182,6 +202,11 @@ class HydraulicsUnits(BaseUnitMapping):
     """Unit types for the attributes of hydraulics, gaslift, valve, etc. methods."""
 
     def __init__(self, unit_system: None | UnitSystem, ratio_thousands: bool = True) -> None:
+        """Initialises the HydraulicsUnits class.
+
+        Args:
+            unit_system (None | UnitSystem): unit system to get the unit from.
+        """
         self.ratio_thousands = ratio_thousands
         super().__init__(unit_system=unit_system)
 
@@ -379,6 +404,11 @@ class EquilUnits(BaseUnitMapping):
     """Unit types for the attributes of equilibration methods."""
 
     def __init__(self, unit_system: None | UnitSystem) -> None:
+        """Initialises the EquilUnits class.
+
+        Args:
+            unit_system (None | UnitSystem): unit system to get the unit from.
+        """
         super().__init__(unit_system=unit_system)
 
     attribute_map: Mapping[str, UnitDimension] = {
@@ -479,6 +509,11 @@ class AquiferUnits(BaseUnitMapping):
     """Unit types for the attributes of Aquifer methods."""
 
     def __init__(self, unit_system: None | UnitSystem) -> None:
+        """Initialises the AquiferUnits class.
+
+        Args:
+            unit_system (None | UnitSystem): unit system to get the unit from.
+        """
         super().__init__(unit_system=unit_system)
 
     attribute_map: Mapping[str, UnitDimension] = {
@@ -591,6 +626,11 @@ class PVTUnits(BaseUnitMapping):
     """Unit types for the attributes of PVT methods."""
 
     def __init__(self, unit_system: None | UnitSystem) -> None:
+        """Initialises the PVTUnits class.
+
+        Args:
+            unit_system (None | UnitSystem): unit system to get the unit from.
+        """
         super().__init__(unit_system=unit_system)
 
     attribute_map: Mapping[str, UnitDimension] = {

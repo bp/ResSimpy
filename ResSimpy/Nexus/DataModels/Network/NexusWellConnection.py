@@ -12,50 +12,50 @@ class NexusWellConnection(WellConnection):
     """Nexus implementation of the Well Connection class.
 
     Attributes:
-        stream (str): COMMENT (STREAM)
-        number (int): COMMENT (NUMBER)
-        scale (float): COMMENT (SCALE)
-        bhdepth (float): COMMENT (BHDEPTH)
-        datum_depth (float): COMMENT (DATUM)
-        x_pos (float): COMMENT (X)
-        y_pos (float): COMMENT (Y)
-        gradient_calc (str): COMMENT (DATGRAD)
-        length (float): COMMENT (LENGTH)
-        bottomhole_measured_depth (float): COMMENT (BHMD)
-        add_tubing (int): COMMENT (ADDTUBING)
-        diameter (float): COMMENT (DIAM)
-        inner_diameter (float): COMMENT (INNERDIAM)
-        roughness (float): COMMENT (ROUGHNESS)
-        tracer (str): COMMENT (TRACERS)
-        con_type (str): COMMENT (TYPE)
-        hyd_method (str): COMMENT (METHOD)
-        pvt_method (int): COMMENT (IPVT)
-        water_method (int): COMMENT (IWAT)
-        bat_method (int): COMMENT (IBAT)
-        temperature (float): COMMENT (TEMP)
-        elevation_profile (str): COMMENT (ELEVPR)
-        temperature_profile (str): COMMENT (TEMPPR)
-        inj_mobility (str): COMMENT (INJMOB)
-        crossshut (str): COMMENT (CROSS_SHUT)
-        crossflow (str): COMMENT (CROSSFLOW)
-        on_time (float): COMMENT (ONTIME)
-        heat_transfer_coeff (float): COMMENT (HTC)
-        well_index_mult (float): COMMENT (WIMULT)
-        productivity_index (float): COMMENT (PI)
-        vip_productivity_index (str): COMMENT (VIPPI)
-        productivity_index_phase (str): COMMENT (PIPHASE)
-        d_factor (float): COMMENT (D)
-        non_darcy_flow_model (str): COMMENT (ND)
-        non_darcy_flow_method (str): COMMENT (DPERF)
-        gas_mobility (float): COMMENT (GASMOB)
-        capillary_number_model (str): COMMENT (CN)
-        dp_add (float): COMMENT (DPADD)
-        dt_add (float): COMMENT (DTADD)
-        rate_mult (float): COMMENT (RATEMULT)
-        polymer (str): COMMENT (POLYMER)
-        station (str): COMMENT (STATION)
-        drill_queue (str): COMMENT (ASSCDR)
-        drill_order_benefit (float): COMMENT (BENEFIT).
+    stream (str): Stream identifier (STREAM)
+    number (int): Identification number (NUMBER)
+    scale (float): Scaling factor (SCALE)
+    bhdepth (float): Bottomhole depth (BHDEPTH)
+    datum_depth (float): Depth relative to a datum (DATUM)
+    x_pos (float): X-coordinate position (X)
+    y_pos (float): Y-coordinate position (Y)
+    gradient_calc (str): Gradient calculation method (DATGRAD)
+    length (float): Length of the well connection (LENGTH)
+    bottomhole_measured_depth (float): Measured depth of the bottom hole (BHMD)
+    add_tubing (int): Additional tubing indicator (ADDTUBING)
+    diameter (float): Diameter of the well connection (DIAM)
+    inner_diameter (float): Inner diameter of the well connection (INNERDIAM)
+    roughness (float): Pipe roughness (ROUGHNESS)
+    tracer (str): Tracer substance identifier (TRACERS)
+    con_type (str): Connection type (TYPE)
+    hyd_method (str): Hydraulic method (METHOD)
+    pvt_method (int): PVT method (IPVT)
+    water_method (int): Water method (IWAT)
+    bat_method (int): Bat method (IBAT)
+    temperature (float): Temperature (TEMP)
+    elevation_profile (str): Elevation profile identifier (ELEVPR)
+    temperature_profile (str): Temperature profile identifier (TEMPPR)
+    inj_mobility (str): Injection mobility identifier (INJMOB)
+    crossshut (str): Cross-shut identifier (CROSS_SHUT)
+    crossflow (str): Crossflow identifier (CROSSFLOW)
+    on_time (float): On-time duration (ONTIME)
+    heat_transfer_coeff (float): Heat transfer coefficient (HTC)
+    well_index_mult (float): Well index multiplier (WIMULT)
+    productivity_index (float): Productivity index (PI)
+    vip_productivity_index (str): VIP productivity index identifier (VIPPI)
+    productivity_index_phase (str): Productivity index phase identifier (PIPHASE)
+    d_factor (float): Non-Darcy D-factor (D)
+    non_darcy_flow_model (str): Non-Darcy flow model identifier (ND)
+    non_darcy_flow_method (str): Non-Darcy flow method identifier (DPERF)
+    gas_mobility (float): Gas mobility value (GASMOB)
+    capillary_number_model (str): Capillary number model identifier (CN)
+    dp_add (float): Additional pressure drop (DPADD)
+    dt_add (float): Additional temperature change (DTADD)
+    rate_mult (float): Rate multiplier (RATEMULT)
+    polymer (str): Polymer identifier (POLYMER)
+    station (str): Station identifier (STATION)
+    drill_queue (str): Drill queue identifier (ASSCDR)
+    drill_order_benefit (float): Benefit of the drill order (BENEFIT)
     """
 
     bh_node_name: Optional[str] = None
@@ -69,7 +69,6 @@ class NexusWellConnection(WellConnection):
     add_tubing: Optional[int] = None
     tracer: Optional[str] = None
     con_type: Optional[str] = None
-    hyd_method: Optional[str] = None
     pvt_method: Optional[int] = None
     water_method: Optional[int] = None
     bat_method: Optional[int] = None
@@ -97,6 +96,11 @@ class NexusWellConnection(WellConnection):
     drill_order_benefit: Optional[float] = None
 
     def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
+        """Initialises the NexusWellConnection class.
+
+        Args:
+            properties_dict (dict): A dictionary of properties to set on the object.
+        """
         # call the init of the DataObjectMixin
         super(WellConnection, self).__init__({})
         for key, prop in properties_dict.items():
