@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 import ResSimpy.Nexus.nexus_collect_tables
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -8,6 +9,9 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from unittest.mock import Mock
+
+from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+from tests.multifile_mocker import mock_multiple_files
 
 
 @pytest.mark.parametrize("line_string, token, expected_result",
@@ -431,6 +435,26 @@ def test_get_next_value_single_c_acts_as_comment(file, single_c_acts_as_comment,
     result = nfo.get_next_value(0, file, single_c_acts_as_comment=single_c_acts_as_comment)
     # Assert
     assert result == expected_result
+
+@pytest.mark.parametrize("line, ignore, expected_result", [
+    ('test 1', [], 'test'),
+    ('test 1', ['test'], '1'),
+    ('test 1', None, 'test'),
+    ('test 1', ['TEST'], '1'),
+    ('test 1', ['something_else'], 'test'),
+    ('test', ['test'], None),
+    ('exclude end', ['exclude', 'end'], None),
+    ('Include /path/to/include/folder/file.dat another', ['INCLUDE'], '/path/to/include/folder/file.dat'),
+    ('KX Include /path/to/include/folder/file.dat another', ['kx', 'INCLUDE'], '/path/to/include/folder/file.dat'),
+    ('KX include includes/folder/file.dat another', ['kx', 'include'], 'includes/folder/file.dat'),
+    ('exclude excludepartoflongertext 1', ['exclude'], 'excludepartoflongertext'),
+])
+def test_get_next_value_ignore(line:str,  ignore:list[str], expected_result: str):
+    # Act
+    result = nfo.get_next_value(0, [line], ignore_values=ignore)
+    # Assert
+    assert result == expected_result
+
 
 @pytest.mark.parametrize("line, expected_result", [
     ('\t 1', '1'),

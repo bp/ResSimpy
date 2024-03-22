@@ -220,20 +220,35 @@ def __extract_substring_until_next_invalid_character(character_location: int,
         str: the value that has been built up, or blank if a value has been ignored
     """
     value_string = search_string[character_location: len(search_string)]
+    if ignore_values is not None:
+        ignore_values = [x.upper() for x in ignore_values]
+    confirm_exclude: bool = False
+
     for value_character in value_string:
-        # If we've formed a string we're supposed to ignore, ignore it and get the next value
-        if ignore_values is not None and (value in ignore_values or value.upper() in ignore_values):
+        if value_character not in invalid_characters:
+            value += value_character
+
+        if confirm_exclude and value_character in invalid_characters:
+            # String to ignore found, ignore it and get the next value
             search_string = search_string[character_location: len(search_string)]
             new_search_string = True
             value = ""
 
-        if value_character not in invalid_characters:
-            value += value_character
+        confirm_exclude = False
+
+        # If we've formed a string value we're supposed to ignore, check the next character ends the value on the next
+        # loop through. Avoids us excluding values that happen to occur in a longer string.
+        if ignore_values is not None and value.upper() in ignore_values:
+            if character_location >= len(value_string) - 1:
+                value = ""
+                break
+            else:
+                confirm_exclude = True
 
         character_location += 1
 
         # stop adding to the value once we hit an invalid_character
-        if value_character in invalid_characters and value != '':
+        if value_character in invalid_characters and value != '' and not confirm_exclude:
             break
     return character_location, new_search_string, search_string, value
 
