@@ -133,6 +133,50 @@ def test_grid_arr_in_include_file(mocker, structured_grid_file_contents, include
     assert result.corp.value == '/XXX/XXX/XXX/Testing/XXX/XXX/Includes/xxx.cor'
 
 
+@pytest.mark.parametrize('structured_grid_file_contents, include_file_contents',
+                         [
+                             ("""ARRAYS ROOT
+! grid
+INCLUDE /XXX/XXX/XXX/Testing/XXX/XXX/Includes/xxx.ireg.inc
+LIST""",  # end structured grid_file_contents and begin include_file_contents
+                              """C ---------------------------
+C  File-name: xx.ireg.inc
+C  Created: 08-MAR-2005 14:41:27
+C
+C
+C
+C
+C
+IREGION VALUE"""
+                              )
+
+                         ])
+def test_grid_arr_in_include_file_ireg(mocker, structured_grid_file_contents, include_file_contents):
+    # Arrange
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+
+    include_file_location = '/XXX/XXX/XXX/Testing/XXX/XXX/Includes/xxx.ireg.inc'
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+        {'testpath1/nexus_run.fcs': fcs_file_contents,
+         '/run_control/path': '',
+         structured_grid_name: structured_grid_file_contents,
+         include_file_location: include_file_contents
+         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    sim_obj = NexusSimulator(origin='testpath1/nexus_run.fcs')
+    result = sim_obj.grid
+
+    # Assert
+    assert result.iregion['IREG1'].keyword_in_include_file is True
+    assert result.iregion['IREG1'].value == '/XXX/XXX/XXX/Testing/XXX/XXX/Includes/xxx.ireg.inc'
+
+
 def test_load_structured_grid_file_multiple_mods(mocker):
     """Read in Structured Grid File where properties are in a nested include file"""
     # Arrange
