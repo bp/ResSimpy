@@ -205,8 +205,6 @@ class StructuredGridOperations:
                                         orig_mod_tab = tmp_dict[key].copy()
                                         tmp_dict[key] = \
                                             pd.concat([orig_mod_tab, mod_table]).reset_index(drop=True)
-                                    else:
-                                        tmp_dict[key] = mod_table
                             else:
                                 token_property[region_name].mods = {key: mod_table}
 

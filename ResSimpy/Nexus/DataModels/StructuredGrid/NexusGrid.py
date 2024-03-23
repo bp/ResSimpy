@@ -489,8 +489,3 @@ class NexusGrid(Grid):
     def worka9(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self.__worka9
-
-    @property
-    def modx(self) -> GridArrayDefinition:
-        self.load_grid_properties_if_not_loaded()
-        return self.__modx

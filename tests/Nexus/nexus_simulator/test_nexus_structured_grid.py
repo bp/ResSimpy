@@ -312,6 +312,38 @@ def test_load_structured_grid_file_iregion(mocker):
 ! grid
 NX  NY  NZ
 10  10  10
+WORKA1 CON
+1
+WORKA2 CON
+1
+WORKA3 CON
+1
+WORKA4 CON
+1
+WORKA5 CON
+1
+WORKA6 CON
+1
+WORKA7 CON
+1
+WORKA8 CON
+1
+WORKA9 CON
+1
+IPVT CON
+1
+IROCK CON
+1
+ITRAN CON
+1
+IRELPERM CON
+1
+PVMULT CON
+1
+LIVECELL CON
+1
+IWATER CON
+1
 IREGION CON
 2  
 MOD
@@ -350,6 +382,21 @@ LIST"""  # ends structured_grid_file_contents
     pd.testing.assert_frame_equal(result.iregion['IREG1'].mods['MOD'], expected_df)
     assert result.iregion['IREG1'].modifier == 'CON'
     assert result.iregion['IREG1'].value == '2'
+    assert result.worka1.value == '1'
+    assert result.worka2.value == '1'
+    assert result.worka3.value == '1'
+    assert result.worka4.value == '1'
+    assert result.worka5.value == '1'
+    assert result.worka6.value == '1'
+    assert result.worka7.value == '1'
+    assert result.worka8.value == '1'
+    assert result.worka9.value == '1'
+    assert result.ipvt.value == '1'
+    assert result.iwater.value == '1'
+    assert result.irock.value == '1'
+    assert result.pvmult.value == '1'
+    assert result.itran.value == '1'
+    assert result.livecell.value == '1'
 
 
 def test_load_structured_grid_file_iregion_multiple(mocker):
@@ -361,8 +408,8 @@ def test_load_structured_grid_file_iregion_multiple(mocker):
 ! grid
 NX  NY  NZ
 10  10  10
-IREGION CON
-2  
+IREGION VALUE
+INCLUDE /path/to/file.inc 
 MOD
 30 38  1  30  1  1  = 1       
 IREGION inj_02 CON
@@ -370,7 +417,11 @@ IREGION inj_02 CON
 MOD
 30 38  1  30  1  1  = 1
 MOD
-31 39  1  30  1  1  = 1 
+31 39  1  30  1  1  = 1
+IREGION inj_03 CON
+4
+IREGION inj_04 MULT
+1 IEQUIL
 LIST"""  # ends structured_grid_file_contents
 
     # set up dataframe
@@ -406,10 +457,16 @@ LIST"""  # ends structured_grid_file_contents
     assert result.iregion['inj_02'].keyword_in_include_file is False
     pd.testing.assert_frame_equal(result.iregion['IREG1'].mods['MOD'], ireg1_expected_df)
     pd.testing.assert_frame_equal(result.iregion['inj_02'].mods['MOD'], ireg2_expected_df)
-    assert result.iregion['IREG1'].modifier == 'CON'
+    assert result.iregion['IREG1'].modifier == 'VALUE'
     assert result.iregion['inj_02'].modifier == 'CON'
-    assert result.iregion['IREG1'].value == '2'
+    assert result.iregion['IREG1'].value == '/path/to/file.inc'
     assert result.iregion['inj_02'].value == '3'
+    assert result.iregion['inj_03'].value == '4'
+    assert result.iregion['inj_03'].modifier == 'CON'
+    assert result.iregion['inj_04'].value == '1 IEQUIL'
+    assert result.iregion['inj_04'].modifier == 'MULT'
+
+
 @pytest.mark.parametrize("structured_grid_file_contents, expected_net_to_gross, expected_porosity, expected_range_x,"
                          "expected_range_y, expected_range_z",
                          [
