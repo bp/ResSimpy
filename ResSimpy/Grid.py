@@ -9,6 +9,14 @@ from ResSimpy.GridArrayFunction import GridArrayFunction
 
 @dataclass
 class GridArrayDefinition:
+    """Initialises the NexusGrid class.
+
+    Args:
+        modifier (Optional[str]): the modifier for the grid array property (e.g. CON, MULT, etc.)
+        value (Optional[str]): the actual values for the grid array property in question. Can be an include file.
+        mods (Optional[dict[str, pd.DataFrame]): if the grid array has an associated mod card we capture it.
+        keyword_in_include_file (bool): an indicator to tell you if the grid array keyword was found in an inc file
+    """
     modifier: Optional[str] = None
     value: Optional[str] = None
     # need a parameter for MOD cards
