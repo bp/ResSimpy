@@ -737,3 +737,106 @@ DATEFORMAT     DD/MM/YYYY
     assert model.wells.date_format == expected_well_2_format
     assert model.wells.wells[1].completions[0].date_format == expected_well_2_format
     assert model.wells.get_wells_overview() == expected_wells_overview
+
+
+def test_load_wells_plus_time_card_dd_mm_yyyy(mocker):
+    # Arrange
+    start_date = '01/01/2023'
+    expected_date = '15/01/2023'
+    date_format = DateFormat.DD_MM_YYYY
+    
+    wellspec_contents = f"""
+DATEFORMAT     DD/MM/YYYY
+    TIME 14/01/2023
+    TIME PLUS 1
+    WELLSPEC WELL1
+    IW JW L RADW
+    1  2  3  4.5
+"""
+
+    dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_wells = NexusWells(model=dummy_model)
+
+    expected_completion_1 = NexusCompletion(date=expected_date, i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None,
+                                            grid=None, date_format=date_format, unit_system=UnitSystem.ENGLISH)
+
+    # mock out open to return our test file contents
+    open_mock = mocker.mock_open(read_data=wellspec_contents)
+    mocker.patch("builtins.open", open_mock)
+    wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
+    # Act
+    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH,
+                              model_date_format=date_format, parent_wells_instance=dummy_wells)[0]
+
+    # Assert
+    # Deep compare expected and received wells
+    assert result_wells[0].completions[0].date == expected_date
+    assert result_wells[0].completions[0] == expected_completion_1
+
+def test_load_wells_plus_time_card_mm_dd_yyyy(mocker):
+    # Arrange
+    start_date = '01/01/2023'
+    expected_date = '03/18/2023'
+    date_format = DateFormat.MM_DD_YYYY
+    
+    wellspec_contents = f"""
+DATEFORMAT     MM/DD/YYYY
+    TIME 03/14/2023
+    TIME PLUS 4
+    WELLSPEC WELL1
+    IW JW L RADW
+    1  2  3  4.5
+"""
+
+    dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_wells = NexusWells(model=dummy_model)
+
+    expected_completion_1 = NexusCompletion(date=expected_date, i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None,
+                                            grid=None, date_format=date_format, unit_system=UnitSystem.ENGLISH)
+
+    # mock out open to return our test file contents
+    open_mock = mocker.mock_open(read_data=wellspec_contents)
+    mocker.patch("builtins.open", open_mock)
+    wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
+    # Act
+    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH,
+                              model_date_format=date_format, parent_wells_instance=dummy_wells)[0]
+
+    # Assert
+    # Deep compare expected and received wells
+    assert result_wells[0].completions[0].date == expected_date
+    assert result_wells[0].completions[0] == expected_completion_1
+
+def test_load_wells_plus_time_card_dd_mm_yyyy_decimal(mocker):
+    # Arrange
+    start_date = '01/01/2023'
+    expected_date = '25/04/2023(16:48:00)'
+    date_format = DateFormat.DD_MM_YYYY
+    
+    wellspec_contents = f"""
+DATEFORMAT     DD/MM/YYYY
+    TIME 23/04/2023
+    TIME PLUS 2.7
+    WELLSPEC WELL1
+    IW JW L RADW
+    1  2  3  4.5
+"""
+
+    dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_wells = NexusWells(model=dummy_model)
+
+    expected_completion_1 = NexusCompletion(date=expected_date, i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None,
+                                            grid=None, date_format=date_format, unit_system=UnitSystem.ENGLISH)
+
+    # mock out open to return our test file contents
+    open_mock = mocker.mock_open(read_data=wellspec_contents)
+    mocker.patch("builtins.open", open_mock)
+    wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
+    # Act
+    result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH,
+                              model_date_format=date_format, parent_wells_instance=dummy_wells)[0]
+
+    # Assert
+    # Deep compare expected and received wells
+    assert result_wells[0].completions[0].date == expected_date
+    assert result_wells[0].completions[0] == expected_completion_1

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import warnings
 from typing import Optional, Sequence, TYPE_CHECKING
+from datetime import time, timedelta
 
 from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.NexusWellMod import NexusWellMod
@@ -167,9 +168,28 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
             date_format = DateFormat[converted_format_str]
 
         if nfo.check_token('TIME', line):
-            current_date = fo.get_expected_token_value(token='TIME', token_line=line, file_list=file_as_list,
-                                                       custom_message="Cannot find the date associated with the TIME "
-                                                                      f"card in {line=} at line number {index}")
+            time_value = fo.get_expected_token_value(token='TIME', token_line=line, file_list=file_as_list,
+                                                     custom_message="Cannot find the date associated with the TIME "
+                                                                    f"card in {line=} at line number {index}")
+            if time_value.upper() != 'PLUS':
+                current_date = time_value
+            else:
+                plus_value = fo.get_expected_token_value(token='PLUS', token_line=line, file_list=file_as_list,
+                                                         custom_message="Cannot find the date associated with the TIME "
+                                                         f"PLUS card in {line=} at line number {index}")
+                new_datetime = ISODateTime.convert_to_iso(
+                    current_date, date_format, start_date) + timedelta(days=float(plus_value))
+
+                if date_format == DateFormat.DD_MM_YYYY:
+                    if new_datetime.time() == time(0, 0, 0, 0):
+                        current_date = new_datetime.strftime('%d/%m/%Y')
+                    else:
+                        current_date = new_datetime.strftime('%d/%m/%Y(%H:%M:%S)')
+                elif date_format == DateFormat.MM_DD_YYYY:
+                    if new_datetime.time() == time(0, 0, 0, 0):
+                        current_date = new_datetime.strftime('%m/%d/%Y')
+                    else:
+                        current_date = new_datetime.strftime('%m/%d/%Y(%H:%M:%S)')
 
         if nfo.check_token('WELLMOD', line):
             wellmod = __get_inline_well_mod(line, current_date=current_date, unit_system=wellspec_file_units,
@@ -222,7 +242,7 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
 
 def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
                                       header_values: dict[str, None | int | float | str],
-                                      headers: list[str], start_date: str,
+                                      headers: list[str], date: str,
                                       end_point_scaling_header_values: dict[str, None | int | float | str],
                                       date_format: DateFormat,
                                       unit_system: UnitSystem,
@@ -235,7 +255,7 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
         header_values (dict[str, Union[Optional[int], Optional[float], Optional[str]]]): dictionary of column \
             headings to populate from the table
         headers (list[str]): list of strings containing the headers from the wellspec table
-        start_date (str): date to populate the completion class with.
+        date (str): date to populate the completion class with.
 
     Returns:
         list[NexusCompletion]: list of nexus completions for a given table.
@@ -283,7 +303,7 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
             new_rel_perm_end_point = None
 
         new_completion = NexusCompletion(
-            date=start_date,
+            date=date,
             i=convert_header_value_int('IW'),
             j=convert_header_value_int('JW'),
             k=convert_header_value_int('L'),
