@@ -378,7 +378,8 @@ class NexusGrid(Grid):
             self.load_faults()
         return self.__faults_df
 
-    def __keyword_in_include_file_warning(self, var_entry_obj: GridArrayDefinition) -> None:
+    @staticmethod
+    def __keyword_in_include_file_warning(var_entry_obj: GridArrayDefinition) -> None:
 
         if var_entry_obj.keyword_in_include_file is True:
             warnings.warn('Grid array keyword in include file. This is not recommended simulation practice.')
@@ -395,7 +396,7 @@ class NexusGrid(Grid):
     @property
     def corp(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
-        self.__keyword_in_include_file_warning(self.__corp)
+        NexusGrid.__keyword_in_include_file_warning(self.__corp)
 
         return self.__corp
 

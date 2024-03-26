@@ -108,7 +108,7 @@ class StructuredGridOperations:
         else:
             value = fo.get_token_value(modifier, line, file_as_list, ignore_values=ignore_values)
             if value is None:
-                # Could be 'cut short' by us excluding the rest of a file
+                # Could be 'cut short' by us excluding the rest of a file.
                 if not isinstance(token_property, dict):
                     token_property.value = None
                     token_property.modifier = modifier
