@@ -299,7 +299,7 @@ class StructuredGridOperations:
     def __extract_mod_positions(line_indx: int, file_as_list: list[str]) -> dict[str, list[list[int]]]:
         """Finds the positions where MOD exists."""
 
-        mod_start_end: dict[str, list[list[int]]] = {}  # field(default_factory=get_empty_dict_list_str)
+        mod_start_end: dict[str, list[list[int]]] = {}
         break_flag = False
         for i in range(line_indx + 1, len(file_as_list)):
             if nfo.check_token('MODX', file_as_list[i]):

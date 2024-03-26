@@ -402,7 +402,6 @@ class NexusGrid(Grid):
     @property
     def iequil(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
-        self.__iequil.value
         return self.__iequil
 
     @property
