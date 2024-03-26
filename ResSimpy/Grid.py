@@ -1,15 +1,29 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+import pandas as pd
 from typing import Optional, Sequence
 
 from ResSimpy.GridArrayFunction import GridArrayFunction
 
 
 @dataclass
-class VariableEntry:
+class GridArrayDefinition:
+    """Initialises the NexusGrid class.
+
+    Args:
+        modifier (Optional[str]): the modifier for the grid array property (e.g. CON, MULT, etc.)
+        value (Optional[str]): the actual values for the grid array property in question. Can be an include file.
+        mods (Optional[dict[str, pd.DataFrame]): if the grid array has an associated mod card we capture it.
+        keyword_in_include_file (bool): an indicator to tell you if the grid array keyword was found in an inc file
+    """
     modifier: Optional[str] = None
     value: Optional[str] = None
+    # need a parameter for MOD cards
+    mods: Optional[dict[str, pd.DataFrame]] = None
+    # make a boolean to indicate if a keyword is found in an include file
+    # assume initially that it is not
+    keyword_in_include_file: bool = False
 
 
 @dataclass(kw_only=True)
@@ -19,21 +33,22 @@ class Grid(ABC):
     _range_y: Optional[int]
     _range_z: Optional[int]
 
-    _netgrs: VariableEntry
-    _porosity: VariableEntry
-    _sw: VariableEntry
-    _kx: VariableEntry
-    _ky: VariableEntry
-    _kz: VariableEntry
+    _netgrs: GridArrayDefinition
+    _porosity: GridArrayDefinition
+    _sw: GridArrayDefinition
+    _kx: GridArrayDefinition
+    _ky: GridArrayDefinition
+    _kz: GridArrayDefinition
 
     def __init__(self) -> None:
         """Initialises the Grid class."""
-        self._netgrs = VariableEntry()
-        self._porosity = VariableEntry()
-        self._sw = VariableEntry()
-        self._kx = VariableEntry()
-        self._ky = VariableEntry()
-        self._kz = VariableEntry()
+        self._netgrs = GridArrayDefinition()
+        self._porosity = GridArrayDefinition()
+        self._sw = GridArrayDefinition()
+        self._kx = GridArrayDefinition()
+        self._ky = GridArrayDefinition()
+        self._kz = GridArrayDefinition()
+
         # Grid dimensions
         self._range_x: Optional[int] = None
         self._range_y: Optional[int] = None
@@ -93,11 +108,11 @@ class Grid(ABC):
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
-    def to_dict(self) -> dict[str, Optional[int] | VariableEntry]:
+    def to_dict(self) -> dict[str, Optional[int] | GridArrayDefinition]:
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
-    def update_properties_from_dict(self, data: dict[str, int | VariableEntry]) -> None:
+    def update_properties_from_dict(self, data: dict[str, int | GridArrayDefinition]) -> None:
         raise NotImplementedError("Implement this in the derived class")
 
     @property

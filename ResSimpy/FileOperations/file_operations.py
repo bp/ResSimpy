@@ -2,7 +2,7 @@ from functools import partial
 from typing import Optional, Union
 import re
 
-from ResSimpy.Grid import VariableEntry
+from ResSimpy.Grid import GridArrayDefinition
 
 
 def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,
@@ -21,19 +21,22 @@ def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,
     Returns:
         list[str]: a list of strings containing each line of the file as a new entry without comments
     """
-    # TODO: support VIP comment out single C character at the start of a line
     if comment_characters is None:
         comment_characters = ['!']
     file_as_list = list(filter(None, file_as_list))
 
-    # remove any empty lines
-    # regex: look back and forward 1 character from an ! and check if it's a quotation mark and
-    # exclude it from the match if it is
     file_without_comments = file_as_list
 
     for comment_character in comment_characters:
-        file_without_comments = [re.split(fr'(?<!\"){comment_character}(?!\")', x)[0]
-                                 for x in file_without_comments if x and x[0] != comment_character]
+        if comment_character == 'C':  # handle VIP comment with single C character at the start of a line
+            file_without_comments = [line for line in file_without_comments if not line.startswith('C ') and not
+                                     line.strip() == 'C']
+        else:
+            # remove any empty lines
+            # regex: look back and forward 1 character from an ! and check if it's a quotation mark and
+            # exclude it from the match if it is
+            file_without_comments = [re.split(fr'(?<!\"){comment_character}(?!\")', x)[0]
+                                     for x in file_without_comments if x and x[0] != comment_character]
 
     flat_file = '\n'.join(file_without_comments)
 
@@ -79,7 +82,7 @@ def load_file_as_list(file_path: str, strip_comments: bool = False, strip_str: b
 
 def get_next_value(start_line_index: int, file_as_list: list[str], search_string: None | str = None,
                    ignore_values: None | list[str] = None,
-                   replace_with: str | VariableEntry | None = None,
+                   replace_with: str | GridArrayDefinition | None = None,
                    comment_characters: None | list[str] = None,
                    single_c_acts_as_comment: bool = True) -> Optional[str]:
     """Gets the next non blank value in a list of lines.
@@ -167,7 +170,7 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
     return value
 
 
-def __replace_value_in_file_as_list(file_as_list: list[str], line_index: int, replace_with: str | VariableEntry,
+def __replace_value_in_file_as_list(file_as_list: list[str], line_index: int, replace_with: str | GridArrayDefinition,
                                     value: str) -> str:
     """Replaces a value in a file_as_list with a new value.
 
@@ -187,7 +190,7 @@ def __replace_value_in_file_as_list(file_as_list: list[str], line_index: int, re
     new_line = original_line
     if isinstance(replace_with, str):
         new_value = replace_with
-    elif isinstance(replace_with, VariableEntry):
+    elif isinstance(replace_with, GridArrayDefinition):
         new_line, new_value, value = __replace_with_variable_entry(new_line, original_line,
                                                                    replace_with, value)
     if new_value is None:
@@ -253,7 +256,7 @@ def __extract_substring_until_next_invalid_character(character_location: int,
     return character_location, new_search_string, search_string, value
 
 
-def __replace_with_variable_entry(new_line: str, original_line: str, replace_with: VariableEntry, value: str):
+def __replace_with_variable_entry(new_line: str, original_line: str, replace_with: GridArrayDefinition, value: str):
     new_value = replace_with.value if replace_with.value is not None else ''
     if replace_with.modifier != 'VALUE':
         new_line = new_line.replace('INCLUDE ', '')
@@ -318,7 +321,7 @@ def value_in_file(token: str, file: list[str]) -> bool:
 
 def get_token_value(token: str, token_line: str, file_list: list[str],
                     ignore_values: Optional[list[str]] = None,
-                    replace_with: Union[str, VariableEntry, None] = None) -> Optional[str]:
+                    replace_with: Union[str, GridArrayDefinition, None] = None) -> Optional[str]:
     """Gets the value following a token if supplied with a line containing the token.
 
     Arguments:
@@ -359,7 +362,7 @@ def get_token_value(token: str, token_line: str, file_list: list[str],
 
 def get_expected_token_value(token: str, token_line: str, file_list: list[str],
                              ignore_values: Optional[list[str]] = None,
-                             replace_with: Union[str, VariableEntry, None] = None,
+                             replace_with: Union[str, GridArrayDefinition, None] = None,
                              custom_message: Optional[str] = None) -> str:
     """Function that returns the result of get_token_value if a value is found, otherwise it raises a ValueError.
 
@@ -424,7 +427,7 @@ def load_in_three_part_date(initial_token: str, token_line: str, file_as_list: l
 
 def get_expected_next_value(start_line_index: int, file_as_list: list[str], search_string: Optional[str] = None,
                             ignore_values: Optional[list[str]] = None,
-                            replace_with: Union[str, VariableEntry, None] = None,
+                            replace_with: Union[str, GridArrayDefinition, None] = None,
                             custom_message: Optional[str] = None) -> str:
     """Gets the next non blank value in a list of lines.
 

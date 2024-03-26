@@ -22,7 +22,7 @@ GRID_GEOMETRY_ARRAYS = ['CORP', 'EIGHT', 'DX', 'DY', 'DZ', 'DXB', 'DYB', 'DZB', 
 
 GRID_OPERATION_KEYWORDS = ['ADD', 'SUB', 'DIV', 'MULT', 'EQ']
 
-GRID_ARRAY_FORMAT_KEYWORDS = ['VALUE', 'XVAR', 'YVAR', 'ZVAR']
+GRID_ARRAY_FORMAT_KEYWORDS = ['CON', 'VALUE', 'XVAR', 'YVAR', 'ZVAR', 'MULT', 'LAYER']
 
 GRID_ARRAY_KEYWORDS = INTEGER_ARRAYS + WORK_ARRAYS + ROCK_ARRAYS + USER_INIT_ARRAYS + MULTIPLIER_ARRAYS + \
                       PROPERTY_ARRAYS + GRID_GEOMETRY_ARRAYS
@@ -39,4 +39,4 @@ STRUCTURED_GRID_KEYWORDS = ['ADD', 'ALL', 'ANALYT', 'ARRAYS', 'B', 'BLOCKS', 'C'
                             'PRINT', 'PV', 'PVMULT', 'RANGE', 'RIGHTHANDED', 'ROOT', 'SALINITY', 'SG', 'SGL', 'SGR',
                             'SGRO', 'SGRW', 'SGU', 'SINF', 'STD', 'SW', 'SWL', 'SWR', 'SWRO', 'SWRO_LS', 'SWU', 'TMX',
                             'TMY', 'TMZ', 'TOLPV', 'TX', 'TY', 'TZ', 'V98', 'VALUE', 'WATER', 'WINDOW', 'WORKA1', 'X',
-                            'XREG', 'Z', 'ZVAR']
+                            'XREG', 'Z', 'ZVAR', 'LIST']
