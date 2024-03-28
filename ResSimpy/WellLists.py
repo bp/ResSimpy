@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import Literal, Sequence
 
 
@@ -16,12 +16,12 @@ class WellLists(ABC):
     """Class for representing a set of WellList objects for the model."""
     __well_lists: Sequence[WellList]
 
-    def __init__(self, welllists: Sequence[WellList] = None):
+    def __init__(self, welllists: Sequence[WellList]) -> None:
         """Initialises the WellLists class.
 
         Args:
             welllists (Sequence[WellList]): List of WellList objects.
-            """
+        """
         self.__well_lists = welllists
 
     @property
