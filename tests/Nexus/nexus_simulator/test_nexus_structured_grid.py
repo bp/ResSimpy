@@ -380,7 +380,7 @@ IROCK CON
 1
 ITRAN CON
 1
-IRELPERM CON
+IRELPM CON
 1
 PVMULT CON
 1
@@ -441,6 +441,7 @@ LIST"""  # ends structured_grid_file_contents
     assert result.pvmult.value == '1'
     assert result.itran.value == '1'
     assert result.livecell.value == '1'
+    assert result.irelpm.value == '1'
 
 
 def test_load_structured_grid_file_iregion_multiple(mocker):
