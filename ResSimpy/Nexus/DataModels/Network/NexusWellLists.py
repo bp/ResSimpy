@@ -33,7 +33,7 @@ class NexusWellLists(WellLists):
 
     @property
     def welllists(self) -> list[NexusWellList]:
-        """Returns all WellList names."""
+        """Returns list of all WellList objects."""
         self.__parent_network.get_load_status()
         return self.__well_lists
 
