@@ -98,9 +98,6 @@ class NexusGrid(Grid):
         self.__worka7: GridArrayDefinition = GridArrayDefinition()
         self.__worka8: GridArrayDefinition = GridArrayDefinition()
         self.__worka9: GridArrayDefinition = GridArrayDefinition()
-        self.__modx: GridArrayDefinition = GridArrayDefinition()
-        self.__mody: GridArrayDefinition = GridArrayDefinition()
-        self.__modz: GridArrayDefinition = GridArrayDefinition()
 
     def __wrap(self, value):
         if isinstance(value, tuple | list | set | frozenset):
