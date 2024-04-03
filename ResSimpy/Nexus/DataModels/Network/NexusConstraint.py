@@ -129,10 +129,6 @@ class NexusConstraint(Constraint):
     min_reverse_surface_gas_rate: Optional[float] = None
     min_reverse_surface_water_rate: Optional[float] = None
     min_reverse_surface_liquid_rate: Optional[float] = None
-    min_surface_oil_rate: Optional[float] = None
-    min_surface_gas_rate: Optional[float] = None
-    min_surface_water_rate: Optional[float] = None
-    min_surface_liquid_rate: Optional[float] = None
     min_reservoir_oil_rate: Optional[float] = None
     min_reservoir_gas_rate: Optional[float] = None
     min_reservoir_water_rate: Optional[float] = None
