@@ -42,6 +42,7 @@ from tests.utility_for_tests import get_fake_nexus_simulator
    {'date': '01/01/2020', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_surface_liquid_rate': 20.5,
     'unit_system': UnitSystem.ENGLISH}
      )),
+
     #'more Keywords'
      ('''CONSTRAINTS
     well1	 QHCMAX- 	3884.0  PMIN 	0
@@ -193,8 +194,28 @@ ENDQMULT ''',
     'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 0.0, 'qmult_gas_rate': 0.0, 'qmult_water_rate': 0.0,
            'well_name':'well1'},)
      ),
+
+    # 'Change in Time, loading in pressure also'
+    ('''CONSTRAINTS
+ well1	 QLIQSMAX 	3884.0  QWSMAX 	0 PMAX 3000
+ well2	 QWSMAX 	0.0  QLIQSMAX- 10000.0 QLIQSMAX 15.5 PMIN 1200
+ ENDCONSTRAINTS
+ TIME 01/01/2020
+ CONSTRAINTS
+ well1	 QLIQSMAX 	5000
+ well2	 QWSMAX 	0.0  QLIQSMAX 20.5
+ ENDCONSTRAINTS''',
+     ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0,
+       'max_surface_water_rate': 0, 'unit_system': UnitSystem.ENGLISH, 'max_pressure': 3000},
+      {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
+       'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH, 'min_pressure': 1200},
+      {'date': '01/01/2020', 'name': 'well1', 'max_surface_liquid_rate': 5000.0, 'unit_system': UnitSystem.ENGLISH},
+      {'date': '01/01/2020', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_surface_liquid_rate': 20.5,
+       'unit_system': UnitSystem.ENGLISH}
+      )),
     ], ids=['basic_test', 'Change in Time', 'more Keywords', 'constraint table', 'multiple constraints on same well',
-    'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword', 'GORLIM_drawdowncards', 'MULT keyword with a number after it'])
+    'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword', 'GORLIM_drawdowncards',
+    'MULT keyword with a number after it', 'loading in pressure'])
 def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'
