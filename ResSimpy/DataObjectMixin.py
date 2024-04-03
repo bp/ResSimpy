@@ -2,8 +2,11 @@
 import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from typing import Optional
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.ISODateTime import ISODateTime
+from ResSimpy.Nexus.NexusEnums import DateFormatEnum
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Utils import to_dict_generic
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
@@ -14,8 +17,11 @@ from ResSimpy.Utils.obj_to_table_string import to_table_line
 class DataObjectMixin(ABC):
     """Base class representing a data object in ResSimpy."""
     __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False, repr=False)
+    __iso_date: Optional[ISODateTime] = None
+    _date_format: Optional[DateFormatEnum.DateFormat] = None
 
-    def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
+    def __init__(self, properties_dict: dict[str, None | int | str | float],
+                 date_format: Optional[DateFormatEnum.DateFormat] = None) -> None:
         """Initialises the DataObjectMixin class.
 
         Args:
@@ -23,6 +29,9 @@ class DataObjectMixin(ABC):
         """
         # properties dict is a parameter to make the call signature equivalent to subclasses.
         self.__id = uuid.uuid4()
+        if date_format is not None:
+            self._date_format = date_format
+            self.__iso_date = self.set_iso_date()
         if properties_dict:
             raise ValueError('No properties should be passed to the DataObjectMixin')
 
@@ -31,6 +40,13 @@ class DataObjectMixin(ABC):
 
     def __str__(self) -> str:
         return generic_str(self)
+
+    @property
+    def iso_date(self):
+        return self.__iso_date
+
+    def set_iso_date(self) -> ISODateTime:
+        return ISODateTime.convert_to_iso(self.date, self.date_format, self.start_date)
 
     def to_dict(self, keys_in_keyword_style: bool = False, add_date: bool = True, add_units: bool = True,
                 include_nones: bool = True) -> dict[str, None | str | int | float]:
