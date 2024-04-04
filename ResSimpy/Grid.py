@@ -39,8 +39,9 @@ class Grid(ABC):
     _kx: GridArrayDefinition
     _ky: GridArrayDefinition
     _kz: GridArrayDefinition
+    _grid_properties_loaded: bool = False
 
-    def __init__(self) -> None:
+    def __init__(self, assume_loaded: bool = False) -> None:
         """Initialises the Grid class."""
         self._netgrs = GridArrayDefinition()
         self._porosity = GridArrayDefinition()
@@ -53,6 +54,7 @@ class Grid(ABC):
         self._range_x: Optional[int] = None
         self._range_y: Optional[int] = None
         self._range_z: Optional[int] = None
+        self._grid_properties_loaded = assume_loaded
 
     @property
     def range_x(self):
