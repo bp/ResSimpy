@@ -370,7 +370,7 @@ class NexusGrid(Grid):
 
     def get_faults_df(self) -> Optional[pd.DataFrame]:
         """Returns the fault definition and transmissility multiplier information as a dataframe."""
-
+        self.load_grid_properties_if_not_loaded()
         if not self.__grid_faults_loaded:
             self.load_faults()
         return self.__faults_df
@@ -386,6 +386,7 @@ class NexusGrid(Grid):
     @property
     def array_functions(self) -> Optional[list[NexusGridArrayFunction]]:
         """Returns a list of the array functions defined in the structured grid file."""
+        self.load_grid_properties_if_not_loaded()
         if self.__grid_array_functions is None:
             self.load_array_functions()
         return self.__grid_array_functions
