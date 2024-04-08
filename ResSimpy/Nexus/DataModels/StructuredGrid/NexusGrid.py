@@ -37,7 +37,6 @@ class NexusGrid(Grid):
     __grid_file_nested: Optional[list[str]] = None
     __faults_df: Optional[pd.DataFrame] = None
     __grid_faults_loaded: bool = False
-    __grid_properties_loaded: bool = False
     __grid_nexus_file: Optional[NexusFile] = None
     __corp: GridArrayDefinition
     __iequil: GridArrayDefinition
@@ -59,14 +58,14 @@ class NexusGrid(Grid):
     __worka8: GridArrayDefinition
     __worka9: GridArrayDefinition
 
-    def __init__(self, grid_nexus_file: Optional[NexusFile] = None) -> None:
+    def __init__(self, grid_nexus_file: Optional[NexusFile] = None, assume_loaded: bool = False) -> None:
         """Initialises the NexusGrid class.
 
         Args:
             grid_nexus_file (Optional[NexusFile]): the NexusFile representation of a structured grid file for \
                 reading and interpreting the grid properties from.
         """
-        super().__init__()
+        super().__init__(assume_loaded=assume_loaded)
         self.__array_functions_list: Optional[list[list[str]]] = None
         self.__array_functions_df: Optional[pd.DataFrame] = None
         self.__array_functions_loaded: bool = False
@@ -75,8 +74,6 @@ class NexusGrid(Grid):
         self.__grid_file_nested: Optional[list[str]] = None if grid_nexus_file is None else \
             grid_nexus_file.file_content_as_list
         self.__faults_df: Optional[pd.DataFrame] = None
-        self.__grid_faults_loaded: bool = False
-        self.__grid_properties_loaded: bool = False
         self.__grid_nexus_file: Optional[NexusFile] = grid_nexus_file
         self.__grid_array_functions: Optional[list[NexusGridArrayFunction]] = None
         self.__corp: GridArrayDefinition = GridArrayDefinition()
@@ -119,7 +116,7 @@ class NexusGrid(Grid):
                 setattr(self, private_name, self.__wrap(value))
 
         # Prevent reload from disk
-        self.__grid_properties_loaded = True
+        self._grid_properties_loaded = True
 
     def to_dict(self) -> dict[str, Optional[int] | GridArrayDefinition]:
         self.load_grid_properties_if_not_loaded()
@@ -159,7 +156,7 @@ class NexusGrid(Grid):
             return value, next_line
 
         # If we've already loaded the grid properties, don't do so again.
-        if self.__grid_properties_loaded:
+        if self._grid_properties_loaded:
             return
 
         if self.__grid_nexus_file is None or self.__grid_file_contents is None or self.__grid_file_nested is None:
@@ -239,7 +236,7 @@ class NexusGrid(Grid):
                 self._range_y = int(second_value)
                 self._range_z = int(third_value)
 
-        self.__grid_properties_loaded = True
+        self._grid_properties_loaded = True
 
     @classmethod
     def load_structured_grid_file(cls: type[NexusGrid], structured_grid_file: NexusFile,
@@ -370,7 +367,7 @@ class NexusGrid(Grid):
 
     def get_faults_df(self) -> Optional[pd.DataFrame]:
         """Returns the fault definition and transmissility multiplier information as a dataframe."""
-
+        self.load_grid_properties_if_not_loaded()
         if not self.__grid_faults_loaded:
             self.load_faults()
         return self.__faults_df
@@ -386,6 +383,7 @@ class NexusGrid(Grid):
     @property
     def array_functions(self) -> Optional[list[NexusGridArrayFunction]]:
         """Returns a list of the array functions defined in the structured grid file."""
+        self.load_grid_properties_if_not_loaded()
         if self.__grid_array_functions is None:
             self.load_array_functions()
         return self.__grid_array_functions
