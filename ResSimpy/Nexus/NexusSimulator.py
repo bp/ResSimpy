@@ -350,6 +350,7 @@ class NexusSimulator(Simulator):
     @staticmethod
     def get_fluid_type(surface_file_content: list[str]) -> str:
         """Gets the fluid type for a single model from a surface file.
+        Defaults to BLACKOIL if no explicit fluid type is found.
 
         Args:
             surface_file_content (str): list of strings with a new line per entry from the surface file
