@@ -118,7 +118,7 @@ class NexusNetwork(Network):
         for file in files_dict.values():
 
             # for every surface file, grab the lines as a list
-            file_contents = file.file_content_as_list
+            file_contents = file.get_flat_list_str_file
             if file_contents is None:
                 raise ValueError(f'No file contents found for surface file {file.location}.')
 
