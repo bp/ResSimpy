@@ -306,23 +306,15 @@ class NexusSimulator(Simulator):
         """
         fluid_type = None
         for model in models:
+            model_obj = NexusSimulator(origin=model)
             model_fluid_type = None
-            fcs_file = NexusFile.generate_file_include_structure(model).get_flat_list_str_file
-            surface_filename = None
-            if fcs_file is None:
-                warnings.warn(UserWarning(f'No file found for {model}'))
-                continue
-            for line in fcs_file:
-                if nfo.check_token("SURFACE Network 1", line):
-                    surface_filename = nfo.get_expected_token_value(token="SURFACE Network 1", token_line=line,
-                                                                    file_list=fcs_file)
-                    break
-
-            if surface_filename is not None:
-                surface_filename = surface_filename if os.path.isabs(surface_filename) else \
-                    os.path.dirname(model) + "/" + surface_filename
+            # get the first surface method and expand out all include files
+            if model_obj.model_files.surface_files is None or model_obj.model_files.surface_files[1].location is None:
+                raise ValueError(f"No surface file found for {model}")
+            surface_file_content = model_obj.model_files.surface_files[1].get_flat_list_str_file
+            if surface_file_content is not None:
                 model_fluid_type = NexusSimulator.get_fluid_type(
-                    surface_file_name=surface_filename)
+                    surface_file_content=surface_file_content)
 
             if fluid_type is None:
                 fluid_type = model_fluid_type
@@ -348,7 +340,7 @@ class NexusSimulator(Simulator):
             if nfo.check_token("EOS", line):
                 eos_string += line
                 eos_found = True
-            elif eos_found:
+            elif eos_found and nfo.get_next_value(0, [line]) is not None:
                 eos_string += line
             if nfo.check_token("COMPONENTS", line):
                 break
@@ -356,22 +348,18 @@ class NexusSimulator(Simulator):
         return eos_string
 
     @staticmethod
-    def get_fluid_type(surface_file_name: str) -> str:
+    def get_fluid_type(surface_file_content: list[str]) -> str:
         """Gets the fluid type for a single model from a surface file.
 
         Args:
-            surface_file_name (str): path to the surface file in a Nexus model
-
-        Raises:
-            ValueError: if no fluid type is found within the provided file path
+            surface_file_content (str): list of strings with a new line per entry from the surface file
 
         Returns:
             str: fluid type as one of [BLACKOIL, WATEROIL, GASWATER, API] or the full details from an EOS model
         """
-        surface_file = nfo.load_file_as_list(surface_file_name)
         fluid_type = None
 
-        for line in surface_file:
+        for line in surface_file_content:
             if nfo.check_token("BLACKOIL", line):
                 fluid_type = "BLACKOIL"
                 break
@@ -382,13 +370,12 @@ class NexusSimulator(Simulator):
                 fluid_type = "GASWATER"
                 break
             elif nfo.check_token("EOS", line):
-                fluid_type = NexusSimulator.get_eos_details(surface_file)
+                fluid_type = NexusSimulator.get_eos_details(surface_file_content)
             elif nfo.check_token("API", line):
                 fluid_type = "API"
-
         if fluid_type is None:
-            raise ValueError("No Oil / Gas type detected")
-
+            warnings.warn("No explicit fluid type found in the file. Defaulting to BLACKOIL", UserWarning)
+            fluid_type = "BLACKOIL"
         return fluid_type
 
     def get_model_oil_type(self) -> str:
@@ -402,7 +389,7 @@ class NexusSimulator(Simulator):
         """
         if self.model_files.surface_files is None or self.model_files.surface_files[1].location is None:
             raise ValueError("No value found for the path to the surface file")
-        return NexusSimulator.get_fluid_type(self.model_files.surface_files[1].location)
+        return NexusSimulator.get_fluid_type(self.model_files.surface_files[1].get_flat_list_str_file)
 
     def check_output_path(self) -> None:
         """Confirms that the output path has been set (used to stop accidental writing operations in the original
