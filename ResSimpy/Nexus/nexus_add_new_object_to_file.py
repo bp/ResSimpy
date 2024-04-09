@@ -100,8 +100,11 @@ class AddObjectOperations:
         header_index, headers = nfo.get_table_header(file_as_list=table, header_values=keyword_map)
         header_index += index
         headers_original = copy.copy(headers)
+
+        keys_to_skip = ['date', 'unit_system', 'date_format', 'start_date']
+
         for key in object_properties:
-            if key == 'date' or key == 'unit_system' or key == 'date_format':
+            if key in keys_to_skip:
                 continue
             if inverted_nexus_map[key] not in headers:
                 headers.append(inverted_nexus_map[key])

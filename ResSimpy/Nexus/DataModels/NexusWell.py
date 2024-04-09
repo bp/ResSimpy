@@ -138,6 +138,7 @@ class NexusWell(Well):
         """
         completion_properties['date'] = date
         completion_properties['unit_system'] = self.unit_system
+        completion_properties['start_date'] = self._parent_wells_instance.start_date
         new_completion = NexusCompletion.from_dict(completion_properties, date_format)
         if completion_index is None:
             completion_index = len(self._completions)

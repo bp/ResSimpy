@@ -23,10 +23,11 @@ def test_load_wells_multiple_dates_formats_DD_MM_YYYY_h_m_s(mocker):
     """
 
     expected_well_1_completion_1 = NexusCompletion(date='31/08/2023(19:13:01)', i=1, j=2, k=3, well_radius=4.5,
-                                                   date_format=date_format, unit_system=UnitSystem.ENGLISH)
+                                                   date_format=date_format, unit_system=UnitSystem.ENGLISH,
+                                                   start_date=start_date)
     expected_well_1_completion_2 = NexusCompletion(date='31/08/2023(19:13:01)', i=6, j=7, k=8, well_radius=9.11,
-                                                   date_format=date_format, unit_system=UnitSystem.ENGLISH)
-    
+                                                   date_format=date_format, unit_system=UnitSystem.ENGLISH,
+                                                   start_date=start_date)
 
     dummy_model = get_fake_nexus_simulator(mocker)
     dummy_wells = NexusWells(model=dummy_model)
@@ -34,7 +35,7 @@ def test_load_wells_multiple_dates_formats_DD_MM_YYYY_h_m_s(mocker):
     expected_well_1 = NexusWell(well_name='DEV1',
                                 completions=[expected_well_1_completion_1, expected_well_1_completion_2],
                                 unit_system=UnitSystem.ENGLISH, parent_wells_instance=dummy_wells)
-    
+
     expected_wells = [expected_well_1]
 
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -47,7 +48,8 @@ def test_load_wells_multiple_dates_formats_DD_MM_YYYY_h_m_s(mocker):
 
     # Assert
     assert result_wells == expected_wells
-    
+
+
 def test_load_wells_multiple_dates_formats_MM_DD_YYYY_h_m_s(mocker):
     # Arrange
     start_date = '01/01/2023'
@@ -63,10 +65,11 @@ def test_load_wells_multiple_dates_formats_MM_DD_YYYY_h_m_s(mocker):
     """
 
     expected_well_1_completion_1 = NexusCompletion(date='10/24/2023(19:13:01)', i=1, j=2, k=3, well_radius=4.5,
-                                                   date_format=date_format, unit_system=UnitSystem.ENGLISH)
+                                                   date_format=date_format, unit_system=UnitSystem.ENGLISH,
+                                                   start_date=start_date)
     expected_well_1_completion_2 = NexusCompletion(date='10/24/2023(19:13:01)', i=6, j=7, k=8, well_radius=9.11,
-                                                   date_format=date_format, unit_system=UnitSystem.ENGLISH)
-    
+                                                   date_format=date_format, unit_system=UnitSystem.ENGLISH,
+                                                   start_date=start_date)
 
     dummy_model = get_fake_nexus_simulator(mocker)
     dummy_wells = NexusWells(model=dummy_model)
@@ -74,7 +77,7 @@ def test_load_wells_multiple_dates_formats_MM_DD_YYYY_h_m_s(mocker):
     expected_well_1 = NexusWell(well_name='DEV1',
                                 completions=[expected_well_1_completion_1, expected_well_1_completion_2],
                                 unit_system=UnitSystem.ENGLISH, parent_wells_instance=dummy_wells)
-    
+
     expected_wells = [expected_well_1]
 
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -87,7 +90,8 @@ def test_load_wells_multiple_dates_formats_MM_DD_YYYY_h_m_s(mocker):
 
     # Assert
     assert result_wells == expected_wells
-    
+
+
 def test_load_wells_multiple_dates_formats_DD_MM_YYYY_with_time_added(mocker):
     # Arrange
     start_date = '01/01/2023'
@@ -103,10 +107,11 @@ def test_load_wells_multiple_dates_formats_DD_MM_YYYY_with_time_added(mocker):
     """
 
     expected_well_1_completion_1 = NexusCompletion(date='31/08/2023(19:13:01)', i=1, j=2, k=3, well_radius=4.5,
-                                                   date_format=date_format, unit_system=UnitSystem.ENGLISH)
+                                                   date_format=date_format, unit_system=UnitSystem.ENGLISH,
+                                                   start_date=start_date)
     expected_well_1_completion_2 = NexusCompletion(date='31/08/2023(19:13:01)', i=6, j=7, k=8, well_radius=9.11,
-                                                   date_format=date_format, unit_system=UnitSystem.ENGLISH)
-    
+                                                   date_format=date_format, unit_system=UnitSystem.ENGLISH,
+                                                   start_date=start_date)
 
     dummy_model = get_fake_nexus_simulator(mocker)
     dummy_wells = NexusWells(model=dummy_model)
@@ -114,7 +119,7 @@ def test_load_wells_multiple_dates_formats_DD_MM_YYYY_with_time_added(mocker):
     expected_well_1 = NexusWell(well_name='DEV1',
                                 completions=[expected_well_1_completion_1, expected_well_1_completion_2],
                                 unit_system=UnitSystem.ENGLISH, parent_wells_instance=dummy_wells)
-    
+
     expected_wells = [expected_well_1]
 
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -127,7 +132,8 @@ def test_load_wells_multiple_dates_formats_DD_MM_YYYY_with_time_added(mocker):
 
     # Assert
     assert result_wells == expected_wells
-    
+
+
 def test_load_wells_multiple_dates_formats_MM_DD_YYYY_with_time_added(mocker):
     # Arrange
     start_date = '01/01/2023'
@@ -143,10 +149,11 @@ def test_load_wells_multiple_dates_formats_MM_DD_YYYY_with_time_added(mocker):
     """
 
     expected_well_1_completion_1 = NexusCompletion(date='10/24/2023(19:13:01)', i=1, j=2, k=3, well_radius=4.5,
-                                                   date_format=date_format, unit_system=UnitSystem.ENGLISH)
+                                                   date_format=date_format, unit_system=UnitSystem.ENGLISH,
+                                                   start_date=start_date)
     expected_well_1_completion_2 = NexusCompletion(date='10/24/2023(19:13:01)', i=6, j=7, k=8, well_radius=9.11,
-                                                   date_format=date_format, unit_system=UnitSystem.ENGLISH)
-    
+                                                   date_format=date_format, unit_system=UnitSystem.ENGLISH,
+                                                   start_date=start_date)
 
     dummy_model = get_fake_nexus_simulator(mocker)
     dummy_wells = NexusWells(model=dummy_model)
@@ -154,7 +161,7 @@ def test_load_wells_multiple_dates_formats_MM_DD_YYYY_with_time_added(mocker):
     expected_well_1 = NexusWell(well_name='DEV1',
                                 completions=[expected_well_1_completion_1, expected_well_1_completion_2],
                                 unit_system=UnitSystem.ENGLISH, parent_wells_instance=dummy_wells)
-    
+
     expected_wells = [expected_well_1]
 
     open_mock = mocker.mock_open(read_data=file_contents)
