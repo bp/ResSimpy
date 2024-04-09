@@ -140,7 +140,7 @@ class Simulator(ABC):
 
     @staticmethod
     @abstractmethod
-    def get_fluid_type(surface_file_name: str) -> str:
+    def get_fluid_type(surface_file_content: list[str]) -> str:
         raise NotImplementedError("This method has not been implemented for this simulator yet")
 
     @abstractmethod
