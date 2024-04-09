@@ -1892,7 +1892,7 @@ Run units: UnitSystem.ENGLISH
     test_data
     """, "GASWATER"),
     ("""EOS NHC 7 COMPONENTS C1 C2 C3 C4 C5 C6 C7+""",
-    "EOS NHC 7 COMPONENTS C1 C2 C3 C4 C5 C6 C7+"),
+     "EOS NHC 7 COMPONENTS C1 C2 C3 C4 C5 C6 C7+"),
     ("""test data filler
 ! comment
 EOS NHC 7

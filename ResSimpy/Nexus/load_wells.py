@@ -227,7 +227,7 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
             # Load in each line of the table
             completions = __load_wellspec_table_completions(
                 nexus_file, header_index, header_values, headers, current_date, end_point_scaling_header_values,
-                date_format, unit_system=wellspec_file_units)
+                date_format, unit_system=wellspec_file_units, start_date=start_date)
 
             if well_name.upper() in well_name_list:
                 wells[well_name_list.index(well_name.upper())].completions.extend(completions)
@@ -246,6 +246,7 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
                                       end_point_scaling_header_values: dict[str, None | int | float | str],
                                       date_format: DateFormat,
                                       unit_system: UnitSystem,
+                                      start_date: None | str = None,
                                       ) -> list[NexusCompletion]:
     """Loads a completion table in for a single WELLSPEC keyword. \
         Loads in the next available completions following a WELLSPEC keyword and a header line.
@@ -256,6 +257,11 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
             headings to populate from the table
         headers (list[str]): list of strings containing the headers from the wellspec table
         date (str): date to populate the completion class with.
+        end_point_scaling_header_values (dict): dictionary containing the header values for thes special end point
+        scaling columns.
+        date_format (DateFormat): date format as a DateFormat Enum to use for the completion.
+        unit_system (UnitSystem): unit system as a UnitSystem Enum to use for the completion.
+        start_date (Optional[str]): start date of the model.
 
     Returns:
         list[NexusCompletion]: list of nexus completions for a given table.
@@ -350,6 +356,7 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
             kh_mult=convert_header_value_float('KHMULT'),
             date_format=date_format,
             unit_system=unit_system,
+            start_date=start_date,
         )
 
         nexus_file.add_object_locations(new_completion.id, [index + header_index + 1])

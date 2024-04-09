@@ -1014,3 +1014,70 @@ def test_load_wells_plus_time_wellspec_card_mm_dd_yyyy_decimal_with_time(mocker)
     assert result_wells[0].completions[0] == expected_completion_1
     assert result_wells[1].completions[0].date == expected_date_2
     assert result_wells[1].completions[0] == expected_completion_2
+
+def test_load_wells_start_date_issue(mocker):
+    # Arrange
+    runcontrol_file = """START 30/04/1995
+
+METHOD IMPES
+IMPSTAB OFF
+
+DT AUTO 0.01
+   MIN 0.00001
+   MAX 100
+"""
+    wells_data = """
+        WELLSPEC test_well_1
+    IW   JW   L    RADW
+55  55  22  0.354
+11  44  33  0.354
+
+    TIME 59.5
+    WELLSPEC test_well_2
+    IW   JW   L    RADW
+13  14  015  0.354
+16  17  018  0.354
+"""
+    fcs_file = """RUN_UNITS ENGLISH
+DATEFORMAT DD/MM/YYYY
+RUNCONTROL runcontrol.dat
+WELLS set 1 wells.dat"""
+    expected_result = NexusWell(well_name='test_well_1',
+                                completions=[NexusCompletion(date='30/04/1995', i=55, j=55, k=22, well_radius=0.354,
+                                                             date_format=DateFormat.DD_MM_YYYY,
+                                                             unit_system=UnitSystem.ENGLISH,
+                                                             start_date='30/04/1995'),
+                                             NexusCompletion(date='30/04/1995', i=11, j=44, k=33, well_radius=0.354,
+                                                             date_format=DateFormat.DD_MM_YYYY,
+                                                             unit_system=UnitSystem.ENGLISH,
+                                                             start_date='30/04/1995')],
+                                unit_system=UnitSystem.ENGLISH, parent_wells_instance=None)
+    expected_result_2 = NexusWell(well_name='test_well_2',
+                                  completions=[NexusCompletion(date='59.5', i=13, j=14, k=15, well_radius=0.354,
+                                                               date_format=DateFormat.DD_MM_YYYY,
+                                                               unit_system=UnitSystem.ENGLISH,
+                                                               start_date='30/04/1995'),
+                                               NexusCompletion(date='59.5', i=16, j=17, k=18, well_radius=0.354,
+                                                               date_format=DateFormat.DD_MM_YYYY,
+                                                               unit_system=UnitSystem.ENGLISH,
+                                                               start_date='30/04/1995')],
+                                  unit_system=UnitSystem.ENGLISH, parent_wells_instance=None)
+
+    # mock out above
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'model.fcs': fcs_file,
+            'runcontrol.dat': runcontrol_file,
+            'wells.dat': wells_data
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='model.fcs', mock_open=False)
+
+    # Act
+    wells = nexus_sim.wells.get_all()
+
+    # Assert
+    assert wells[0] == expected_result
+    assert wells[1] == expected_result_2
