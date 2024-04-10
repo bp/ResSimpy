@@ -212,7 +212,8 @@ class NexusGrid(Grid):
                 for modifier in token_property.modifiers:
                     # execute the load
                     StructuredGridOperations.load_token_value_if_present(
-                        token_property.token, modifier, token_property.property, line, file_as_list, idx, ['INCLUDE'])
+                        token_property.token, modifier, token_property.property, line, file_as_list, idx,
+                        ['INCLUDE', 'NOLIST'])
 
             # Load in grid dimensions
             if nfo.check_token('NX', line):

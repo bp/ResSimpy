@@ -56,7 +56,7 @@ class StructuredGridOperations:
         token_modifier: str = ''
 
         if token_found:
-            token_next_value = fo.get_token_value(token, line, file_as_list)
+            token_next_value = fo.get_token_value(token, line, file_as_list, ignore_values=ignore_values)
         else:
             return
         if token_next_value == found_modifier:
@@ -91,12 +91,12 @@ class StructuredGridOperations:
         """A function that begins the process of populating the grid away."""
 
         if modifier == 'MULT':
-            numerical_value = nfo.get_expected_token_value(modifier, line, file_as_list, ignore_values=None)
+            numerical_value = nfo.get_expected_token_value(modifier, line, file_as_list, ignore_values=ignore_values)
             if numerical_value is None:
                 raise ValueError(
                     f'No numerical value found after {token_modifier} keyword in line: {line}')
             value_to_multiply = fo.get_token_value(modifier, line, file_as_list,
-                                                   ignore_values=[numerical_value])
+                                                   ignore_values=[numerical_value, *ignore_values])
             if numerical_value is not None and value_to_multiply is not None:
                 if not isinstance(token_property, dict):
                     token_property.modifier = 'MULT'
@@ -118,7 +118,12 @@ class StructuredGridOperations:
                     token_property[region_name].value = None
             else:
                 # Check if VALUE modifier is followed by a numeric string or an INCLUDE file
-                if 'INCLUDE' in file_as_list[line_indx + 1]:
+                line_to_check = file_as_list[line_indx + 1]
+                # Check next couple of lines in case next line contains one of ignore_values
+                for i in range(line_indx+1, min(line_indx+3, len(file_as_list))):
+                    if value in file_as_list[i]:
+                        line_to_check = file_as_list[i]
+                if 'INCLUDE' in line_to_check:
                     if not isinstance(token_property, dict):
                         token_property.value = value
                         token_property.modifier = modifier

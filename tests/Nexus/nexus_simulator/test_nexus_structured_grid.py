@@ -100,9 +100,9 @@ INCLUDE /XXX/XXX/XXX/Testing/XXX/XXX/Includes/xxx.cor
 LIST""",  # ends structured grid_file_contents
                               """CORP VALUE
 C GRID BLOCK: I =   1 , J =   1 , K =   1  
-2265.261168 18412.34172 6006.48864 2697.769032 18432.059328 6010.983336 
-2879.984664 17767.1724 5972.663592 2456.761464 17751.621408 5976.206856 
-2265.261168 18412.34172 6104.91264 2697.769032 18432.059328 6109.407336 
+2265.261168 18412.34172 6006.48864 2697.769032 18432.059328 6010.983336
+2879.984664 17767.1724 5972.663592 2456.761464 17751.621408 5976.206856
+2265.261168 18412.34172 6104.91264 2697.769032 18432.059328 6109.407336
 2879.984664 17767.1724 6071.087592 2456.761464 17751.621408 6074.630856"""
                              )
 
@@ -597,7 +597,7 @@ INCLUDE includes/Another_structured_grid_01.inc"""
                          "expected_range_z",
                          [
                              ("! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
-                              "\nother text\n\nNETGRS VALUE\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\n POROSITY "
+                              "\nother text\n\nNETGRS VALUE\n NOLIST\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\nLIST\n POROSITY "
                               "VALUE\n!ANOTHER COMMENT \nINCLUDE path/to/porosity.inc",
                               "/path_to_netgrs_file/net_to_gross.inc", "path/to/porosity.inc", "VALUE", "VALUE", 1, 2,
                               3),
