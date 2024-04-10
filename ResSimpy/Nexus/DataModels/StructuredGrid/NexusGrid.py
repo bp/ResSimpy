@@ -176,6 +176,7 @@ class NexusGrid(Grid):
             properties_to_load = [
                 PropertyToLoad('NETGRS', GRID_ARRAY_FORMAT_KEYWORDS, self._netgrs),
                 PropertyToLoad('POROSITY', GRID_ARRAY_FORMAT_KEYWORDS, self._porosity),
+                PropertyToLoad('POR', GRID_ARRAY_FORMAT_KEYWORDS, self._porosity),
                 PropertyToLoad('SW', GRID_ARRAY_FORMAT_KEYWORDS, self._sw),
                 PropertyToLoad('KX', GRID_ARRAY_FORMAT_KEYWORDS, self._kx),
                 PropertyToLoad('KI', GRID_ARRAY_FORMAT_KEYWORDS, self._kx),

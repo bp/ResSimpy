@@ -601,7 +601,7 @@ INCLUDE includes/Another_structured_grid_01.inc"""
                               "VALUE\n!ANOTHER COMMENT \nINCLUDE path/to/porosity.inc",
                               "/path_to_netgrs_file/net_to_gross.inc", "path/to/porosity.inc", "VALUE", "VALUE", 1, 2,
                               3),
-                             ("! Grid dimensions\nNX NY NZ\n111 123 321\ntest string\nPOROSITY VALUE\n!random text\n"
+                             ("! Grid dimensions\nNX NY NZ\n111 123 321\ntest string\nPOR VALUE\n!random text\n"
                               "INCLUDE porosity_file.inc\nNETGRS VALUE\n!Comment Line 1\n\n!Comment Line 2\nINCLUDE   "
                               "/path/to/netgrs_file\nother text\n\n",
                               "/path/to/netgrs_file", "porosity_file.inc", "VALUE", "VALUE", 111, 123, 321),
