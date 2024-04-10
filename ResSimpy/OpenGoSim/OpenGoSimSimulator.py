@@ -213,7 +213,7 @@ WELLS
         self._wells._wells_loaded = True
 
     @staticmethod
-    def get_fluid_type(surface_file_name: str) -> str:
+    def get_fluid_type(surface_file_content: list[str]) -> str:
         raise NotImplementedError("Not implemented for OGS yet")
 
     def set_output_path(self, path: str) -> None:

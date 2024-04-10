@@ -590,13 +590,13 @@ def test_get_check_oil_gas_types_for_models_same_types(mocker, fcs_file_contents
                               ),
                              ("Line 1\nAnother LIne\nSURFACE Network 1	Includes/nexus_data/surface_1.dat",
                               "SURFACE Network 1	Includes/nexus_data/surface_2.dat",
-                              "line 1\nline 2\nWATEROIL",
+                              "line 1\nline 2\nBLACKOIL",
                               "line 1\nWATER",
                               ""
                               ),
                              ("Line 1\nAnother LIne\nSURFACE Network 1	Includes/nexus_data/surface_1.dat",
                               "SURFACE Network 1	Includes/nexus_data/surface_2.dat",
-                              "line 1\nline 2\nGASWATER",
+                              "line 1\nline 2\nBLACKOIL",
                               "line 1\nGAWATER",
                               ""
                               )
@@ -616,7 +616,7 @@ def test_get_check_oil_gas_types_for_models_no_type_found(mocker, fcs_file_conte
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act / Assert
-    with pytest.raises(ValueError):
+    with pytest.warns(UserWarning):
         NexusSimulator.get_check_oil_gas_types_for_models(models)
 
 def test_get_check_oil_gas_types_for_models_different_types(mocker):
@@ -1868,3 +1868,46 @@ Run units: UnitSystem.ENGLISH
 
     # Assert
     assert result == expected_result
+
+
+@pytest.mark.parametrize("surface_file_contents, expected_result", [
+    ("surface file text here", "BLACKOIL"),
+    ("""
+    BLACKOIL
+       CONDEFAULTS
+        CONTYPE   TYPE  METHOD
+        WELLBORE LUMPED CELLAVG
+        ENDCONDEFAULTS
+        WELLCONTROL WELLHEAD
+
+         NODECON
+         """, "BLACKOIL"),
+    ("""UNITS
+    WATEROIL
+    test_data
+    """, "WATEROIL"),
+    # create more tests here
+    ("""WATERGAS
+    GASWATER
+    test_data
+    """, "GASWATER"),
+    ("""EOS NHC 7 COMPONENTS C1 C2 C3 C4 C5 C6 C7+""",
+    "EOS NHC 7 COMPONENTS C1 C2 C3 C4 C5 C6 C7+"),
+    ("""test data filler
+! comment
+EOS NHC 7
+   ! comment 
+COMPONENTS C1 C2 C3 C4 C5 C6 C7+""",
+     """EOS NHC 7
+COMPONENTS C1 C2 C3 C4 C5 C6 C7+"""),
+
+    ], ids=["default case", "BLACKOIL", "WATEROIL", "GASWATER", "EOS", "EOS with comments"])
+def test_get_fluid_type(surface_file_contents, expected_result):
+    # Arrange
+    surface_file_contents_as_list = surface_file_contents.splitlines(keepends=True)
+
+    # Act
+    fluid_type = NexusSimulator.get_fluid_type(surface_file_contents_as_list)
+
+    # Assert
+    assert fluid_type == expected_result
