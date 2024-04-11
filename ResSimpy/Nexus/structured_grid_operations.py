@@ -131,7 +131,7 @@ class StructuredGridOperations:
                         token_property[region_name] = GridArrayDefinition()
                         token_property[region_name].modifier = modifier
                         token_property[region_name].value = value
-                elif check_if_string_is_float(value):
+                elif check_if_string_is_float(value[0]):
                     start_indx = line_indx + 1
                     end_indx = len(file_as_list)
                     found_end_value = False
@@ -145,11 +145,13 @@ class StructuredGridOperations:
                             break
                     if not isinstance(token_property, dict):
                         token_property.modifier = modifier
-                        token_property.value = '\n'.join(file_as_list[start_indx:end_indx]).strip()
+                        token_property.value = '\n'.join([line.strip()
+                                                          for line in file_as_list[start_indx:end_indx]]).strip()
                     elif region_name != '':  # IREGION
                         token_property[region_name] = GridArrayDefinition()
                         token_property[region_name].modifier = modifier
-                        token_property[region_name].value = '\n'.join(file_as_list[start_indx:end_indx]).strip()
+                        token_property[region_name].value = '\n'.join([line.strip() for line in
+                                                                       file_as_list[start_indx:end_indx]]).strip()
                 else:  # The grid array keyword is likely inside an include file, presented on previous line
                     if 'INCLUDE' in file_as_list[line_indx - 1]:
                         if not isinstance(token_property, dict):
