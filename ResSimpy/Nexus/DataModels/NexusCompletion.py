@@ -289,9 +289,11 @@ class NexusCompletion(Completion):
             dict[str, None | str | int | float]:
 
         # overwrite add_units to be False for completions as they currently do not contain units.
-        attribute_dict = to_dict(self, keys_in_keyword_style, add_date, add_units=False,
-                                 include_nones=include_nones)
+        attribute_dict = to_dict(self, keys_in_keyword_style, add_date, add_units=False, include_nones=include_nones)
+        parent_attribute_dict = super().to_dict(keys_in_keyword_style=keys_in_keyword_style, add_date=add_date,
+                                                add_units=False, include_nones=include_nones)
 
+        attribute_dict.update(parent_attribute_dict)
         if self.rel_perm_end_point is not None:
             attribute_dict.update(self.rel_perm_end_point.to_dict())
         return attribute_dict
