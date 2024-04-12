@@ -7,7 +7,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import  get_fake_nexus_simulator, uuid_side_effect
-
+from copy import deepcopy
 
 def test_find_constraint(mocker):
     # Arrange
@@ -262,7 +262,7 @@ well3 QOSMAX 100 ! test user comments
         ENDCONSTRAINTS''',
     {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH},
     1,
-    {'uuid1': [2, 4], 'uuid2': [3],'uuid3': [5]}
+    {'uuid1': [2, 4], 'uuid2': [3], 'new_obj_uuid': [5]}
     ),
 
     # add new table
@@ -277,7 +277,7 @@ ENDCONSTRAINTS
 ''',
     {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH},
     1,
-    {'uuid1': [2]}
+    {'new_obj_uuid': [2]}
     ),
 
 # add new table
@@ -301,7 +301,7 @@ ENDCONSTRAINTS
 ''',
     {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/04/2019', 'unit_system': UnitSystem.ENGLISH},
     1,
-    {'uuid1': [6]}
+    {'new_obj_uuid': [6]}
     ),
 
 # add QMULT table
@@ -321,7 +321,7 @@ ENDQMULT
     {'name': 'node#2', 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
                 'use_qmult_qoilqwat_surface_rate': True, 'qmult_oil_rate': 200.0, 'qmult_water_rate': 4052.12},
     1,
-    {'uuid1': [2, 6]}
+    {'new_obj_uuid': [2, 6]}
     ),
 
 # add QMULT table to existing QMULT
@@ -349,7 +349,7 @@ ENDQMULT
  'use_qmult_qoilqwat_surface_rate': True, 'qmult_oil_rate': 3.14, 'qmult_gas_rate': 50.2,
  'qmult_water_rate': 420.232},
 2,
-{'uuid1': [2, 7], 'uuid2': [3, 8]}
+{'uuid1': [2, 7], 'new_obj_uuid': [3, 8]}
 ),
 
 # more time cards with qmult
@@ -399,11 +399,33 @@ TIME 01/03/2020
      'use_qmult_qoilqwat_surface_rate': True, 'qmult_oil_rate': 3.14, 'qmult_gas_rate': 50.2,
      'qmult_water_rate': 420.232},
     2,
-    {'uuid1': [2, 6], 'uuid2': [10, 15], 'uuid3': [11, 16]}
+    {'uuid1': [2, 6], 'uuid2': [10, 15], 'new_obj_uuid': [11, 16]}
     ),
 
+    # at the end of the TIMEs in the file
+    ('''TIME 01/01/2019
+        CONSTRAINTS
+        well2    QLIQSMAX- 10000.0 QLIQSMAX 15.5
+        well1	 QLIQSMAX 	3884.0  QWSMAX 	0
+        well2	 QWSMAX 	0.0
+        ENDCONSTRAINTS''',
+    '''TIME 01/01/2019
+        CONSTRAINTS
+        well2    QLIQSMAX- 10000.0 QLIQSMAX 15.5
+        well1	 QLIQSMAX 	3884.0  QWSMAX 	0
+        well2	 QWSMAX 	0.0
+        ENDCONSTRAINTS
+TIME 01/01/2020
+CONSTRAINTS
+well3 QOSMAX 100 ! test user comments
+ENDCONSTRAINTS
+''',
+    {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/01/2020', 'unit_system': UnitSystem.ENGLISH},
+    1,
+    {'uuid1': [2, 4], 'uuid2': [3], 'new_obj_uuid': [5]}
+    ),
 ], ids=['basic_test', 'add new table', 'add to new date', 'add QMULT table', 'add QMULT table to existing QMULT',
-        'more time cards with qmult'])
+        'more time cards with qmult', 'at the end'])
 def test_add_constraint(mocker, file_contents, expected_file_contents, new_constraint, expected_number_writes,
                         expected_uuid):
     # Arrange
@@ -429,12 +451,26 @@ def test_add_constraint(mocker, file_contents, expected_file_contents, new_const
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
 
-    # patch in uuids for the constraints
+    # patch in uuids for the existing constraints
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
                                                     'uuid4', 'uuid5', 'uuid6'])
+    # load the network and constraints (this assings the uuids)
+    existing_constraints = nexus_sim.network.constraints.get_all()
+
+    well_name = new_constraint['name']
+    expected_constraints = deepcopy(existing_constraints)
+    add_to_expected = expected_constraints.get(well_name, None)
+    if add_to_expected is None:
+        expected_constraints[well_name] = [NexusConstraint(new_constraint)]
+    else:
+        expected_constraints[well_name].append(NexusConstraint(new_constraint))
+
+    mocker.patch.object(uuid, 'uuid4', side_effect=['new_obj_uuid'])
+
     # Act
     nexus_sim.network.constraints.add(new_constraint, comments='test user comments')
     # Assert
+    assert nexus_sim.network.constraints.get_all() == expected_constraints
     assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
     assert nexus_sim.model_files.surface_files[1].object_locations == expected_uuid
 

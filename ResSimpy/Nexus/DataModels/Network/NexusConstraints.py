@@ -252,7 +252,7 @@ class NexusConstraints(Constraints):
                     date_index = index
                     continue
 
-                elif date_comparison > 0 and date_index >= 0:
+                elif date_comparison > 0 and date_index < 0:
                     # if a date that is greater than the additional constraint then we have overshot and need to
                     # add in a new table or time card
                     # this is the case where we don't need to write a new time card
@@ -270,7 +270,7 @@ class NexusConstraints(Constraints):
                 constraint_string = new_constraint.to_table_line([])
                 new_constraint_text.append(constraint_string)
                 id_line_locs = [new_constraint_index]
-            elif index == len(file_as_list) - 1 and date_index >= 0 and not nfo.check_token('ENDQMULT', line):
+            elif index == len(file_as_list) - 1 and date_index < 0 and not nfo.check_token('ENDQMULT', line):
                 # if we're on the final line of the file and we haven't yet set a constraint index
                 new_table_needed = True
                 new_constraint_index = index
