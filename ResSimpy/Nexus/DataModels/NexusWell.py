@@ -1,6 +1,6 @@
 """Class for representing a well in Nexus. Consists of a list of completions and a well name."""
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Sequence, Union, TYPE_CHECKING
 from uuid import UUID
 
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 class NexusWell(Well):
     """Class for representing a well in Nexus. Consists of a list of completions and a well name."""
     _wellmods: list[NexusWellMod]
-    _parent_wells_instance: NexusWells
+    _parent_wells_instance: NexusWells = field(compare=False)
 
     def __init__(self, well_name: str, completions: Sequence[NexusCompletion], unit_system: UnitSystem,
                  parent_wells_instance: NexusWells, wellmods: Sequence[NexusWellMod] | None = None,
@@ -138,6 +138,7 @@ class NexusWell(Well):
         """
         completion_properties['date'] = date
         completion_properties['unit_system'] = self.unit_system
+        completion_properties['start_date'] = self._parent_wells_instance.start_date
         new_completion = NexusCompletion.from_dict(completion_properties, date_format)
         if completion_index is None:
             completion_index = len(self._completions)

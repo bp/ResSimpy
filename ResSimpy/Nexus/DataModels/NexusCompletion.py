@@ -375,13 +375,14 @@ class NexusCompletion(Completion):
     @classmethod
     def from_dict(cls, input_dictionary: dict[str, None | float | int | str], date_format: DateFormat) -> Self:
         """Generates a NexusCompletion from a dictionary."""
+        skip_mapping_keys = ['date', 'date_format', 'unit_system', 'start_date']
         for input_attr in input_dictionary:
-            if input_attr == 'date' or input_attr == 'unit_system' or input_attr == 'date_format':
+            if input_attr in skip_mapping_keys:
                 continue
             elif input_attr not in cls.valid_attributes():
                 raise AttributeError(f'Unexpected keyword "{input_attr}" found within {input_dictionary}')
         date = input_dictionary.get('date', None)
-        date_format_str = input_dictionary.get('date_format')
+        date_format_str = input_dictionary.get('date_format', None)
         if date_format_str is not None and isinstance(date_format_str, str):
             converted_date_format_str = date_format_str.replace('/', '_')
             completion_date_format = DateFormat[converted_date_format_str]

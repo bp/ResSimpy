@@ -35,8 +35,8 @@ class NexusWells(Wells):
     Arguments:
         model (Simulator): NexusSimulator object that has the instance of wells on.
     """
-    __model: NexusSimulator
-    __date_format: DateFormat
+    __model: NexusSimulator = field(compare=False)
+    __date_format: DateFormat = field(repr=False)
     _wells: list[NexusWell] = field(default_factory=list)
 
     def __init__(self, model: NexusSimulator) -> None:
@@ -53,6 +53,10 @@ class NexusWells(Wells):
     def model(self) -> NexusSimulator:
         """The model object that contains this NexusWells instance."""
         return self.__model
+
+    @property
+    def start_date(self) -> str:
+        return self.__model.start_date
 
     @property
     def date_format(self) -> DateFormat:
