@@ -208,6 +208,7 @@ def test_remove_node(mocker, file_contents, expected_file_contents, node_to_remo
         SURFACE Network 1  /surface_file_01.dat
         '''
     runcontrol_contents = '''START 01/01/2019'''
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -448,6 +449,7 @@ def test_add_node(mocker, file_contents, expected_file_contents, node_to_add, ex
         SURFACE Network 1  /surface_file_01.dat
         '''
     runcontrol_contents = '''START 01/01/2019'''
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -499,9 +501,9 @@ TIME 01/01/2024
 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
 {'depth': 10, 'station': 'station_2'},
 [{'name': 'new_node', 'type': 'WELLHEAD', 'depth': 10, 'station': 'station_2',
-'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH, '_DataObjectMixin__id': 'uuid3'},
 {'name': 'keep_node', 'type': 'WELL', 'depth': 1020, 'station': 'staTION2',
-'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH, '_DataObjectMixin__id': 'uuid2'},
 ],
 2  # no. writes
 ),
@@ -527,9 +529,9 @@ TIME 01/01/2024
 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
 {'depth': None, 'station': 'station_2'},
 [{'name': 'new_node', 'type': 'WELLHEAD', 'depth': None, 'station': 'station_2',
-'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH, '_DataObjectMixin__id': 'uuid3'},
 {'name': 'keep_node', 'type': 'WELL', 'depth': 1020, 'station': 'staTION2',
-'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH, '_DataObjectMixin__id': 'uuid2'},
 ],
 2  # no. writes
 ),
@@ -556,9 +558,9 @@ TIME 01/01/2024
 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
 {'temp': 100, 'station': 'station_2'},
 [{'name': 'new_node', 'type': 'WELLHEAD', 'temp': 100, 'depth': 1167.3, 'station': 'station_2',
-'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH, '_DataObjectMixin__id': 'uuid3'},
 {'name': 'keep_node', 'type': 'WELL', 'depth': 1020, 'station': 'staTION2',
-'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH, '_DataObjectMixin__id': 'uuid2'},
 ],
 2  # no. writes
 ),
@@ -592,8 +594,8 @@ def test_modify_node(mocker, file_contents, expected_file_contents, node_to_modi
 
     expected_nodes = [NexusNode(node) for node in expected_nodes]
     expected_nodes.sort(key=lambda x: x.name)
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
 
-    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
     # Act
     nexus_sim.network.nodes.modify(node_to_modify, modified_properties)
     # compare sets as order doesn't matter

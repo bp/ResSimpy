@@ -3,6 +3,7 @@ import datetime
 import pytest
 
 from ResSimpy.ISODateTime import ISODateTime
+from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
@@ -100,6 +101,19 @@ def test_start_date_decimal_mmddyyyyFormat():
 def test_date_decimal_ddmmyyyyFormat():
     # Arrange
     completion = NexusCompletion(date='5.5', date_format=DateFormat.DD_MM_YYYY, start_date='14/01/2022')
+    expected_iso_date = datetime.datetime(2022, 1, 19, 12, 0, 0)
+
+    # Act
+    result_date = completion.iso_date
+
+    # Assert
+    assert result_date == expected_iso_date
+
+
+@pytest.mark.maintain_datetime_behaviour
+def test_date_decimal_ddmmyyyyFormat_more_classes():
+    # Arrange
+    completion = NexusNode(date='5.5', date_format=DateFormat.DD_MM_YYYY, start_date='14/01/2022', properties_dict={})
     expected_iso_date = datetime.datetime(2022, 1, 19, 12, 0, 0)
 
     # Act

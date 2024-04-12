@@ -1,12 +1,12 @@
 """The base class for all Well Completions."""
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional, Sequence
 
 from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.NexusEnums import DateFormatEnum
 from ResSimpy.Units.AttributeMappings.CompletionUnitMapping import CompletionUnits
 
@@ -42,7 +42,7 @@ class Completion(DataObjectMixin, ABC):
         peaceman_well_block_radius (Optional[float]): The pressure equivalent radius of the grid block
     """
 
-    __date: str
+    _date: str
     __i: Optional[int] = None
     __j: Optional[int] = None
     __k: Optional[int] = None
@@ -100,10 +100,9 @@ class Completion(DataObjectMixin, ABC):
             start_date: Optional[str]: The start date of the simulation.
             unit_system: Optional[UnitSystem]: The unit system to use for the completion.
         """
-        super().__init__(date_format=date_format, properties_dict={})
-        # self._date_format = date_format
+        super().__init__()
         self.__well_radius = well_radius
-        self.__date = date
+        self._date = date
         self.__i = i
         self.__j = j
         self.__k = k
@@ -123,6 +122,7 @@ class Completion(DataObjectMixin, ABC):
         self.__start_date = start_date
         self.__unit_system = unit_system
         self.__peaceman_well_block_radius = peaceman_well_block_radius
+        self._date_format = date_format
 
     @property
     def well_radius(self):
@@ -130,7 +130,7 @@ class Completion(DataObjectMixin, ABC):
 
     @property
     def date(self):
-        return self.__date
+        return self._date
 
     @property
     def i(self):

@@ -4,6 +4,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
+from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.WellConnection import WellConnection
 
 
@@ -95,16 +97,26 @@ class NexusWellConnection(WellConnection):
     drill_queue: Optional[str] = None
     drill_order_benefit: Optional[float] = None
 
-    def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
+    def __init__(self, properties_dict: dict[str, None | int | str | float], date: Optional[str] = None,
+                 date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
+                 unit_system: Optional[UnitSystem] = None) -> None:
         """Initialises the NexusWellConnection class.
 
         Args:
             properties_dict (dict): A dictionary of properties to set on the object.
         """
-        # call the init of the DataObjectMixin
-        super(WellConnection, self).__init__({})
+        protected_attributes = ['date', 'date_format', 'start_date', 'unit_system']
+        self._date = date
+        self._unit_system = unit_system
+        self._date_format = date_format
+        self._start_date = start_date
+
+        # Loop through the properties dict if one is provided and set those attributes
         for key, prop in properties_dict.items():
+            if key in protected_attributes:
+                key = '_' + key
             self.__setattr__(key, prop)
+
         if self.name is not None:
             self.bh_node_name = self.name + '%bh'
             self.wh_node_name = self.name + '%wh'

@@ -12,8 +12,6 @@ from ResSimpy.Units.AttributeMappings.NetworkUnitMapping import NetworkUnits
 class NodeConnection(DataObjectMixin, ABC):
     """Base class object for storing data related to nodeconnections."""
     name: Optional[str] = None
-    date: Optional[str] = None
-    unit_system: Optional[UnitSystem] = None
 
     node_in: Optional[str] = None
     node_out: Optional[str] = None

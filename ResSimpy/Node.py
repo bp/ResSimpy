@@ -14,8 +14,6 @@ class Node(DataObjectMixin, ABC):
     name: Optional[str] = None
     type: Optional[str] = None
     depth: Optional[float] = None
-    date: Optional[str] = None
-    unit_system: Optional[UnitSystem] = None
 
     @property
     def units(self) -> NetworkUnits:

@@ -11,8 +11,6 @@ from ResSimpy.Units.AttributeMappings.NetworkUnitMapping import NetworkUnits
 @dataclass(repr=False)
 class WellConnection(DataObjectMixin, ABC):
     name: Optional[str] = None
-    date: Optional[str] = None
-    unit_system: Optional[UnitSystem] = None
 
     bhdepth: Optional[float] = None
     datum_depth: Optional[float] = None

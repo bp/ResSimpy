@@ -1,22 +1,34 @@
 """Class that represents a single nexus target in the NexusSimulator."""
 from __future__ import annotations
 from dataclasses import dataclass
+from typing import Optional
+
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Target import Target
 
 
 @dataclass(kw_only=True, repr=False)
 class NexusTarget(Target):
     """Class that represents a single nexus target in the NexusSimulator."""
-    def __init__(self, properties_dict: dict[str, None | int | str | float]) -> None:
+    def __init__(self, properties_dict: dict[str, None | int | str | float], date: Optional[str] = None,
+                 date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
+                 unit_system: Optional[UnitSystem] = None) -> None:
         """Initialises the NexusTarget class.
 
         Args:
             properties_dict (dict): A dictionary of properties to set on the object.
         """
-        # call the init of the DataObjectMixin
-        super(Target, self).__init__({})
+        protected_attributes = ['date', 'date_format', 'start_date', 'unit_system']
+        self._date = date
+        self._unit_system = unit_system
+        self._date_format = date_format
+        self._start_date = start_date
+
+        # Loop through the properties dict if one is provided and set those attributes
         for key, prop in properties_dict.items():
+            if key in protected_attributes:
+                key = '_' + key
             self.__setattr__(key, prop)
 
     @staticmethod

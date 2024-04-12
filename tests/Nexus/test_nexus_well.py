@@ -111,6 +111,7 @@ def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock
 ], ids=['basic case', 'mixture of perf and not perf', 'no perforations', 'using defaults', 'empty list'])
 def test_get_perforations(mocker, completions, expected_perforations):
     # Arrange
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     dummy_model = get_fake_nexus_simulator(mocker)
     dummy_wells = NexusWells(model=dummy_model)
 

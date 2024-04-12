@@ -7,6 +7,7 @@ from typing import Optional
 
 from ResSimpy.Constraint import Constraint
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
 
 @dataclass(repr=False)
@@ -194,14 +195,24 @@ class NexusConstraint(Constraint):
     clear_alq: Optional[bool] = None
     clear_p: Optional[bool] = None
 
-    def __init__(self, properties_dict: dict[str, None | int | str | float | UnitSystem]) -> None:
+    def __init__(self, properties_dict: dict[str, None | int | str | float | UnitSystem], date: Optional[str] = None,
+                 date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
+                 unit_system: Optional[UnitSystem] = None) -> None:
         """Initialises the NexusConstraint class.
 
         Args:
             properties_dict (dict): dict of the properties to set on the object.
         """
-        super(Constraint, self).__init__({})
+        protected_attributes = ['date', 'date_format', 'start_date', 'unit_system']
+        self._date = date
+        self._unit_system = unit_system
+        self._date_format = date_format
+        self._start_date = start_date
+
+        # Loop through the properties dict if one is provided and set those attributes
         for key, prop in properties_dict.items():
+            if key in protected_attributes:
+                key = '_' + key
             self.__setattr__(key, prop)
 
     @staticmethod

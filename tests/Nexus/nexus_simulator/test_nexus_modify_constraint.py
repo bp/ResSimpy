@@ -211,6 +211,7 @@ def test_remove_constraint(mocker, file_contents, expected_result_file,
     RECURRENT_FILES
     RUNCONTROL nexus_data/runcontrol.dat
     SURFACE Network 1  /surface_file_01.dat'''
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={

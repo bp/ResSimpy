@@ -755,6 +755,7 @@ def test_collect_all_tables_to_objects(mocker, file_contents, node1_props, node2
     # Arrange
     # mock out a surface file:
     start_date = '01/01/2023'
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
 
     node_1 = NexusNode(node1_props)

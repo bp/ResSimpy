@@ -36,7 +36,7 @@ class NexusWells(Wells):
         model (Simulator): NexusSimulator object that has the instance of wells on.
     """
     __model: NexusSimulator
-    __date_format: DateFormat
+    __date_format: DateFormat = DateFormat.MM_DD_YYYY
     _wells: list[NexusWell] = field(default_factory=list)
 
     def __init__(self, model: NexusSimulator) -> None:
@@ -56,6 +56,7 @@ class NexusWells(Wells):
 
     @property
     def date_format(self) -> DateFormat:
+        # If we haven't loaded in the wells file, load it in case date format is specified there.
         if not self._wells_loaded:
             self._load()
         return self.__date_format

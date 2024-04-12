@@ -1,5 +1,5 @@
 """Base class representing a data object in ResSimpy."""
-import uuid
+from uuid import uuid4, UUID
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Optional
@@ -12,28 +12,18 @@ from ResSimpy.Utils import to_dict_generic
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Utils.obj_to_table_string import to_table_line
 
+def get_uuid():
+    return uuid4()
 
 @dataclass()
 class DataObjectMixin(ABC):
     """Base class representing a data object in ResSimpy."""
-    __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False, repr=False)
-    __iso_date: Optional[ISODateTime] = None
+    __id: UUID = field(default_factory=lambda: uuid4())
+    _iso_date: Optional[ISODateTime] = None
     _date_format: Optional[DateFormatEnum.DateFormat] = None
-
-    def __init__(self, properties_dict: dict[str, None | int | str | float],
-                 date_format: Optional[DateFormatEnum.DateFormat] = None) -> None:
-        """Initialises the DataObjectMixin class.
-
-        Args:
-            properties_dict (dict): dict of the properties to set on the object.
-        """
-        # properties dict is a parameter to make the call signature equivalent to subclasses.
-        self.__id = uuid.uuid4()
-        if date_format is not None:
-            self._date_format = date_format
-            self.__iso_date = self.set_iso_date()
-        if properties_dict:
-            raise ValueError('No properties should be passed to the DataObjectMixin')
+    _date: Optional[str] = None
+    _start_date: Optional[str] = None
+    _unit_system: Optional[UnitSystem] = None
 
     def __repr__(self) -> str:
         return generic_repr(self)
@@ -42,11 +32,30 @@ class DataObjectMixin(ABC):
         return generic_str(self)
 
     @property
-    def iso_date(self):
-        return self.__iso_date
+    def iso_date(self) -> ISODateTime:
+        if self._iso_date is None:
+            self.set_iso_date()
+        return self._iso_date
 
-    def set_iso_date(self) -> ISODateTime:
-        return ISODateTime.convert_to_iso(self.date, self.date_format, self.start_date)
+    @property
+    def date(self) -> Optional[str]:
+        return self._date
+
+    @property
+    def start_date(self) -> Optional[str]:
+        return self._start_date
+
+    @property
+    def date_format(self) -> Optional[DateFormatEnum]:
+        return self._date_format
+
+    @property
+    def unit_system(self) -> Optional[UnitSystem]:
+        return self._unit_system
+
+    def set_iso_date(self) -> None:
+        """Updates the ISO Date property"""
+        self._iso_date = ISODateTime.convert_to_iso(self.date, self.date_format, self.start_date)
 
     def to_dict(self, keys_in_keyword_style: bool = False, add_date: bool = True, add_units: bool = True,
                 include_nones: bool = True) -> dict[str, None | str | int | float]:
@@ -80,7 +89,7 @@ class DataObjectMixin(ABC):
         return to_table_line(self, headers)
 
     @property
-    def id(self) -> uuid.UUID:
+    def id(self) -> UUID:
         """Unique identifier for each object."""
         return self.__id
 

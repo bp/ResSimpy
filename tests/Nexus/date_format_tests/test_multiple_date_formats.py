@@ -12,7 +12,7 @@ def test_load_wells_multiple_dates_formats_DD_MM_YYYY_h_m_s(mocker):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.DD_MM_YYYY_h_m_s
-
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     file_contents = """
     
     TIME 31/08/2023(19:13:01) !232 days

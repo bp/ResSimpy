@@ -2,8 +2,9 @@ import uuid
 from unittest.mock import Mock
 import pandas as pd
 import pytest
-from pytest_mock import MockerFixture
 
+# import ResSimpy
+# from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -219,8 +220,11 @@ ENDQMULT ''',
 def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
+
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
     expected_constraints = {}
+
     for constraint in expected_content:
         well_name = constraint['name']
         if expected_constraints.get(well_name, None) is not None:
@@ -260,7 +264,6 @@ def test_load_constraints(mocker, file_contents, expected_content):
     assert result == expected_constraints
     pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
     assert result_date_filtered == expected_date_filtered_constraints
-
 
 @pytest.mark.parametrize('file_contents, object_locations', [
         ('''CONSTRAINTS

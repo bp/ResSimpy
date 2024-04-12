@@ -125,10 +125,11 @@ def test_load_nexus_nodes(mocker, file_contents, node1_props, node2_props):
     # Arrange
     # mock out a surface file:
     start_date = '01/01/2023'
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
 
-    node_1 = NexusNode(node1_props)
-    node_2 = NexusNode(node2_props)
+    node_1 = NexusNode(properties_dict=node1_props)
+    node_2 = NexusNode(properties_dict=node2_props)
 
     mock_nexus_network = mocker.MagicMock()
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
