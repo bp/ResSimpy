@@ -100,9 +100,9 @@ INCLUDE /XXX/XXX/XXX/Testing/XXX/XXX/Includes/xxx.cor
 LIST""",  # ends structured grid_file_contents
                               """CORP VALUE
 C GRID BLOCK: I =   1 , J =   1 , K =   1  
-2265.261168 18412.34172 6006.48864 2697.769032 18432.059328 6010.983336 
-2879.984664 17767.1724 5972.663592 2456.761464 17751.621408 5976.206856 
-2265.261168 18412.34172 6104.91264 2697.769032 18432.059328 6109.407336 
+2265.261168 18412.34172 6006.48864 2697.769032 18432.059328 6010.983336
+2879.984664 17767.1724 5972.663592 2456.761464 17751.621408 5976.206856
+2265.261168 18412.34172 6104.91264 2697.769032 18432.059328 6109.407336
 2879.984664 17767.1724 6071.087592 2456.761464 17751.621408 6074.630856"""
                              )
 
@@ -188,6 +188,7 @@ NX  NY  NZ
 10  10  10
 
 NETGRS ZVAR
+NOLIST
 INCLUDE path/netgrs_01.inc
 MOD
 68  68 34 34  1  1 =0.34
@@ -253,6 +254,16 @@ INCLUDE path/netgrs_01.inc
 MOD
 68  68 34 34  1  1 = 0.34
 68  68 34 34  2  2 = 0.2
+
+IREGION ZVAR
+3*1
+3*2
+4*3
+
+IRELPM XVAR
+3*1
+3*2
+4*3
 """  # ends structured_grid_file_contents
 
     #include_file_contents = '0.425 0.255 3*0.662 0.376 0.000 3*0.453 4*0.884 0.412 0.788 12*0.000'
@@ -288,6 +299,11 @@ MOD
     pd.testing.assert_frame_equal(result.netgrs.mods['MOD'], expected_df)
     assert result.netgrs.modifier == 'ZVAR'
     assert result.netgrs.value == 'path/netgrs_01.inc'
+    assert result.iregion['IREG1'].modifier == 'ZVAR'
+    assert result.iregion['IREG1'].value == '3*1\n3*2\n4*3'
+    assert result.irelpm.modifier == 'XVAR'
+    assert result.irelpm.value == '3*1\n3*2\n4*3'
+
 
 
 def test_load_structured_grid_file_corp_modx_mody_modz(mocker):
@@ -597,11 +613,11 @@ INCLUDE includes/Another_structured_grid_01.inc"""
                          "expected_range_z",
                          [
                              ("! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
-                              "\nother text\n\nNETGRS VALUE\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\n POROSITY "
+                              "\nother text\n\nNETGRS VALUE\n NOLIST\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\nLIST\n POROSITY "
                               "VALUE\n!ANOTHER COMMENT \nINCLUDE path/to/porosity.inc",
                               "/path_to_netgrs_file/net_to_gross.inc", "path/to/porosity.inc", "VALUE", "VALUE", 1, 2,
                               3),
-                             ("! Grid dimensions\nNX NY NZ\n111 123 321\ntest string\nPOROSITY VALUE\n!random text\n"
+                             ("! Grid dimensions\nNX NY NZ\n111 123 321\ntest string\nPOR VALUE\n!random text\n"
                               "INCLUDE porosity_file.inc\nNETGRS VALUE\n!Comment Line 1\n\n!Comment Line 2\nINCLUDE   "
                               "/path/to/netgrs_file\nother text\n\n",
                               "/path/to/netgrs_file", "porosity_file.inc", "VALUE", "VALUE", 111, 123, 321),
