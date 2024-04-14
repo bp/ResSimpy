@@ -36,6 +36,9 @@ class Grid(ABC):
     _netgrs: GridArrayDefinition
     _porosity: GridArrayDefinition
     _sw: GridArrayDefinition
+    _sg: GridArrayDefinition
+    _pressure: GridArrayDefinition
+    _temperature: GridArrayDefinition
     _kx: GridArrayDefinition
     _ky: GridArrayDefinition
     _kz: GridArrayDefinition
@@ -46,6 +49,9 @@ class Grid(ABC):
         self._netgrs = GridArrayDefinition()
         self._porosity = GridArrayDefinition()
         self._sw = GridArrayDefinition()
+        self._sg = GridArrayDefinition()
+        self._pressure = GridArrayDefinition()
+        self._temperature = GridArrayDefinition()
         self._kx = GridArrayDefinition()
         self._ky = GridArrayDefinition()
         self._kz = GridArrayDefinition()
@@ -85,6 +91,21 @@ class Grid(ABC):
     def sw(self):
         self.load_grid_properties_if_not_loaded()
         return self._sw
+
+    @property
+    def sg(self):
+        self.load_grid_properties_if_not_loaded()
+        return self._sg
+
+    @property
+    def pressure(self):
+        self.load_grid_properties_if_not_loaded()
+        return self._pressure
+
+    @property
+    def temperature(self):
+        self.load_grid_properties_if_not_loaded()
+        return self._temperature
 
     @property
     def kx(self):
