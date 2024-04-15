@@ -113,7 +113,10 @@ class NexusConstraints(Constraints):
         """
         if additional_constraints is None:
             return
-        self._constraints.update(additional_constraints)
+        for name, constraints in additional_constraints.items():
+            existing_constraints = self._constraints.get(name, [])
+            existing_constraints.extend(constraints)
+            self._constraints[name] = existing_constraints
 
     def find_by_properties(self, object_name: str, constraint_dict: dict[str, None | float | str | int]) -> \
             NexusConstraint:
@@ -252,12 +255,13 @@ class NexusConstraints(Constraints):
                     date_index = index
                     continue
 
-                elif date_comparison > 0 and date_index < 0:
+                elif date_comparison > 0 and date_index >= 0:
                     # if a date that is greater than the additional constraint then we have overshot and need to
                     # add in a new table or time card
                     # this is the case where we don't need to write a new time card
                     new_table_needed = True
                     new_constraint_index = index - 1
+
                 elif date_comparison > 0:
                     new_table_needed = True
                     new_date_needed = True
@@ -273,7 +277,14 @@ class NexusConstraints(Constraints):
             elif index == len(file_as_list) - 1 and date_index < 0 and not nfo.check_token('ENDQMULT', line):
                 # if we're on the final line of the file and we haven't yet set a constraint index
                 new_table_needed = True
-                new_constraint_index = index
+                new_constraint_index = index + 1
+                new_date_needed = True
+                if add_qmults:
+                    new_qmults_table_needed = True
+            elif index == len(file_as_list) - 1 and date_index == 0 and not nfo.check_token('ENDQMULT', line):
+                new_table_needed = True
+                new_constraint_index = index + 1
+                new_date_needed = False
                 if add_qmults:
                     new_qmults_table_needed = True
 
@@ -285,7 +296,8 @@ class NexusConstraints(Constraints):
                 new_constraint_text.append('CONSTRAINTS\n')
                 new_constraint_text.append(new_constraint.to_table_line([]))
                 new_constraint_text.append('ENDCONSTRAINTS\n')
-                id_line_locs = [new_constraint_index + len(new_constraint_text) - 2]
+                new_constraint_text.append('\n')
+                id_line_locs = [new_constraint_index + len(new_constraint_text) - 3]
 
             if add_qmults and new_qmults_table_needed:
                 new_constraint_text.extend(new_constraint.write_qmult_table())

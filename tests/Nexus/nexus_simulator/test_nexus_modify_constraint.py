@@ -270,6 +270,7 @@ well3 QOSMAX 100 ! test user comments
 
 ''',
     '''TIME 01/01/2019
+
 CONSTRAINTS ! test user comments
 well3 QOSMAX 100
 ENDCONSTRAINTS
@@ -277,10 +278,10 @@ ENDCONSTRAINTS
 ''',
     {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH},
     1,
-    {'new_obj_uuid': [2]}
+    {'new_obj_uuid': [3]}
     ),
 
-# add new table
+# add to new date
     ('''TIME 01/01/2019
     TIME 01/02/2019
 
@@ -296,6 +297,7 @@ TIME 01/04/2019 ! test user comments
 CONSTRAINTS
 well3 QOSMAX 100
 ENDCONSTRAINTS
+
     TIME 01/01/2020
     TIME 01/02/2020
 ''',
@@ -309,19 +311,20 @@ ENDCONSTRAINTS
 
 ''',
     '''TIME 01/01/2019
+
 CONSTRAINTS ! test user comments
 node#2 QLIQSMAX MULT
 ENDCONSTRAINTS
+
 QMULT
 WELL QOIL QGAS QWATER
 node#2 200.0 NA 4052.12
 ENDQMULT
-
 ''',
     {'name': 'node#2', 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
                 'use_qmult_qoilqwat_surface_rate': True, 'qmult_oil_rate': 200.0, 'qmult_water_rate': 4052.12},
     1,
-    {'new_obj_uuid': [2, 6]}
+    {'new_obj_uuid': [3, 8]}
     ),
 
 # add QMULT table to existing QMULT
@@ -408,24 +411,87 @@ TIME 01/03/2020
         well2    QLIQSMAX- 10000.0 QLIQSMAX 15.5
         well1	 QLIQSMAX 	3884.0  QWSMAX 	0
         well2	 QWSMAX 	0.0
-        ENDCONSTRAINTS''',
+        ENDCONSTRAINTS
+''',
     '''TIME 01/01/2019
         CONSTRAINTS
         well2    QLIQSMAX- 10000.0 QLIQSMAX 15.5
         well1	 QLIQSMAX 	3884.0  QWSMAX 	0
         well2	 QWSMAX 	0.0
         ENDCONSTRAINTS
-TIME 01/01/2020
+TIME 01/01/2020 ! test user comments
 CONSTRAINTS
-well3 QOSMAX 100 ! test user comments
+well3 QOSMAX 100
 ENDCONSTRAINTS
+
 ''',
     {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/01/2020', 'unit_system': UnitSystem.ENGLISH},
     1,
-    {'uuid1': [2, 4], 'uuid2': [3], 'new_obj_uuid': [5]}
+    {'uuid1': [2, 4], 'uuid2': [3], 'new_obj_uuid': [8]}
     ),
+
+    # existing time card
+('''TIME 01/01/2019
+        CONSTRAINTS
+        well2    QLIQSMAX- 10000.0 QLIQSMAX 15.5
+        well1	 QLIQSMAX 	3884.0  QWSMAX 	0
+        well2	 QWSMAX 	0.0
+        ENDCONSTRAINTS
+''',
+'''TIME 01/01/2019
+        CONSTRAINTS
+        well2    QLIQSMAX- 10000.0 QLIQSMAX 15.5
+        well1	 QLIQSMAX 	3884.0  QWSMAX 	0
+        well2	 QWSMAX 	0.0
+well2 QOSMAX 100 ! test user comments
+        ENDCONSTRAINTS
+''',
+    {'name': 'well2', 'max_surface_oil_rate': 100, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH},
+    1,
+    {'uuid1': [2, 4], 'uuid2': [3], 'new_obj_uuid': [5]},
+    ),
+
+    # existing time cards
+    ('''TIME 01/01/2019
+    ! comment
+    CONSTRAINTS
+    well1 qosmax 100
+    ENDCONSTRAINTS
+    
+    TIME 01/01/2020
+    CONSTRAINTS
+    well1 qliqsmax 123
+    ENDCONSTRAINTS
+    
+    TIME 01/02/2020
+    COnstraints
+    well1 qwsmax 123
+    ENDCONSTRAINTS
+''',
+    '''TIME 01/01/2019
+    ! comment
+    CONSTRAINTS
+    well1 qosmax 100
+    ENDCONSTRAINTS
+    
+    TIME 01/01/2020
+    CONSTRAINTS
+    well1 qliqsmax 123
+well1 PMAX 100 ! test user comments
+    ENDCONSTRAINTS
+    
+    TIME 01/02/2020
+    COnstraints
+    well1 qwsmax 123
+    ENDCONSTRAINTS
+''',
+     {'name': 'well1', 'max_pressure': 100, 'date': '01/01/2020', 'unit_system': UnitSystem.ENGLISH},
+     1,
+     {'uuid1': [3], 'uuid2': [8], 'uuid3': [14], 'new_obj_uuid': [9]},
+     )
+
 ], ids=['basic_test', 'add new table', 'add to new date', 'add QMULT table', 'add QMULT table to existing QMULT',
-        'more time cards with qmult', 'at the end'])
+        'more time cards with qmult', 'at the end', 'existing time card', 'existing time cards'])
 def test_add_constraint(mocker, file_contents, expected_file_contents, new_constraint, expected_number_writes,
                         expected_uuid):
     # Arrange
