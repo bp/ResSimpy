@@ -705,7 +705,7 @@ def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
     base_structured_grid_file = "! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text " \
                                 "\nother text\n\n,NETGRS VALUE\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\n POROSITY " \
-                                "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc "
+                                "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc \n"
 
     structured_grid_file = base_structured_grid_file + structured_grid_file_contents
     structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
@@ -766,7 +766,7 @@ def test_load_structured_grid_file_k_values(mocker, structured_grid_file_content
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
     base_structured_grid_file = "! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text " \
                                 "\nother text\n\n,NETGRS VALUE\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\n POROSITY " \
-                                "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc "
+                                "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc \n"
 
     structured_grid_file = base_structured_grid_file + structured_grid_file_contents
     structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
@@ -1251,6 +1251,9 @@ SGL CON
 SGR CON
 0.01
 
+SGU CON
+1.0
+
 SWRO CON
 0.9
 
@@ -1291,6 +1294,9 @@ KRO_SGL CON
 1
 
 KRO_SGR CON
+1
+
+KRW_SGL CON
 1
 
 KRW_SGL CON
@@ -1397,6 +1403,7 @@ LIST"""  # ends structured_grid_file_contents
     assert result.swu.value == '1'
     assert result.sgl.value == '0'
     assert result.sgr.value == '0.01'
+    assert result.sgu.value == '1.0'
     assert result.swro.value == '0.9'
     assert result.swro_ls.value == '0.95'
     assert result.sgro.value == '0.8'
@@ -1411,6 +1418,7 @@ LIST"""  # ends structured_grid_file_contents
     assert result.kro_swr.value == '0.9'
     assert result.kro_sgl.value == '1'
     assert result.kro_sgr.value == '1'
+    assert result.krw_sgl.value == '1'
     assert result.krw_sgr.value == '0.9'
     assert result.sgtr.value == '.2'
     assert result.sotr.value == '0.1'
