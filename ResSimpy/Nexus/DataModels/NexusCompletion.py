@@ -288,10 +288,9 @@ class NexusCompletion(Completion):
     def to_dict(self, keys_in_keyword_style: bool = False, add_date=True, add_units=False, include_nones=True) -> \
             dict[str, None | str | int | float]:
 
-        # overwrite add_units to be False for completions as they currently do not contain units.
-        attribute_dict = to_dict(self, keys_in_keyword_style, add_date, add_units=False, include_nones=include_nones)
+        attribute_dict = to_dict(self, keys_in_keyword_style, add_date=add_date, add_units=add_units, include_nones=include_nones)
         parent_attribute_dict = super().to_dict(keys_in_keyword_style=keys_in_keyword_style, add_date=add_date,
-                                                add_units=False, include_nones=include_nones)
+                                                add_units=add_units, include_nones=include_nones)
 
         attribute_dict.update(parent_attribute_dict)
         if self.rel_perm_end_point is not None:
