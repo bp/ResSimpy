@@ -144,7 +144,7 @@ class NexusSimulator(Simulator):
         return printable_str
 
     @staticmethod
-    def _attr_info_to_tuple(sim_attr: Union[dict, list]) -> Union[str, tuple[tuple[tuple[str, Any], ...], ...]]:
+    def _attr_info_to_tuple(sim_attr: Union[dict, list]) -> tuple[tuple[tuple[str, Any], ...], ...]:
         """Convert the network constraints/wells completions attribute to a tuple of tuples so that it is hashable.
 
         Args:
@@ -152,18 +152,12 @@ class NexusSimulator(Simulator):
 
         Returns: Tuple[Tuple[Tuple[str, Union[str, float, bool]], ...], ...]: tuple of tuples
         """
-        # check if attributes are empty
-        if sim_attr == {}:
-            return "Network constraints are empty."
-
-        elif sim_attr == []:
-            return "Wells completions are empty."
-
-        elif isinstance(sim_attr, dict):
+        if isinstance(sim_attr, dict):
             lst_of_tuples = [tuple(nexus_constraint.to_dict(add_units=False, include_nones=False).items())
                              for wells in sim_attr
+                             if sim_attr.get(wells)
                              for nexus_constraint in sim_attr.get(wells)]
-        elif isinstance(sim_attr, list) and sim_attr != []:
+        elif isinstance(sim_attr, list):
             lst_of_tuples = [tuple(el.to_dict(add_units=False, include_nones=False).items())
                              for nexus_completion in sim_attr
                              for el in nexus_completion.completions]
