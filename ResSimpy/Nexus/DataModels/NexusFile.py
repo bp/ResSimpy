@@ -100,7 +100,7 @@ class NexusFile(File):
             NexusFile: a class instance for NexusFile with knowledge of include files
         """
 
-        def __get_pathlib_path_details(full_file_path: str):
+        def __get_pathlib_path_details(full_file_path: str) -> str:
             if full_file_path == "" or full_file_path is None:
                 return None
             pathlib_path = pathlib.Path(full_file_path)
@@ -128,7 +128,7 @@ class NexusFile(File):
                 return owner
             return None
 
-        def __get_datetime_from_os_stat(full_file_path: str):
+        def __get_datetime_from_os_stat(full_file_path: str) -> datetime:
             if full_file_path == "" or full_file_path is None:
                 return None
             stat_obj = os.stat(full_file_path)

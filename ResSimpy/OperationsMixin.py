@@ -41,7 +41,7 @@ class NetworkOperationsMixIn(ABC):
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
-    def _add_to_memory(self, additional_objs: Optional[list[Any]]):
+    def _add_to_memory(self, additional_objs: Optional[list[Any]]) -> None:
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod

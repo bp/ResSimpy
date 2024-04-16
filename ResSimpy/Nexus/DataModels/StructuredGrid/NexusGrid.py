@@ -99,7 +99,7 @@ class NexusGrid(Grid):
         self.__worka8: GridArrayDefinition = GridArrayDefinition()
         self.__worka9: GridArrayDefinition = GridArrayDefinition()
 
-    def __wrap(self, value):
+    def __wrap(self, value) -> any:
         if isinstance(value, tuple | list | set | frozenset):
             return type(value)([self.__wrap(v) for v in value])
         else:
