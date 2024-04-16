@@ -35,7 +35,7 @@ class NexusWells(Wells):
     Arguments:
         model (Simulator): NexusSimulator object that has the instance of wells on.
     """
-    __model: NexusSimulator = field(compare=False)
+    __model: NexusSimulator = field(compare=False, repr=False)
     __date_format: DateFormat = field(repr=False)
     _wells: list[NexusWell] = field(default_factory=list)
 
