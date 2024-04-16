@@ -131,7 +131,7 @@ class StructuredGridOperations:
                         token_property[region_name] = GridArrayDefinition()
                         token_property[region_name].modifier = modifier
                         token_property[region_name].value = value
-                elif check_if_string_is_float(value[0]):
+                elif check_if_string_is_float(value[0]) or value[0] == '.':
                     start_indx = line_indx + 1
                     end_indx = len(file_as_list)
                     found_end_value = False
