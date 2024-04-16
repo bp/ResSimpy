@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import os
 import warnings
-from typing import Any, Union, Optional
+from typing import Any, Union, Tuple, Optional
 
 import resqpy.model as rq
 from datetime import datetime
@@ -142,6 +142,58 @@ class NexusSimulator(Simulator):
         # add details from the fcsfile
         printable_str += self.model_files.__repr__()
         return printable_str
+
+    @staticmethod
+    def _attr_info_to_tuple(sim_attr: Union[dict, list]) -> Tuple[Tuple[Tuple[str, Any], ...], ...]:
+        """
+        Convert the network constraints attribute to a tuple of tuples so that it is hashable
+
+        Args:
+            sim_attr (Union[dict, list]): dict if network constraints attribute, list if wells completions attribute
+
+        Returns: Tuple[Tuple[Tuple[str, Union[str, float, bool]], ...], ...]: tuple of tuples
+        """
+        lst_of_tuples = []
+        if isinstance(sim_attr, dict):
+            lst_of_tuples = [tuple(nexus_constraint.to_dict(add_units=False, include_nones=False).items())
+                             for wells in sim_attr
+                             for nexus_constraint in sim_attr.get(wells)]
+        else:
+            lst_of_tuples = [tuple(el.to_dict(add_units=False, include_nones=False).items())
+                             for nexus_completion in sim_attr
+                             for el in nexus_completion.completions]
+        # Network constraints example:
+        # tuple(lst of tuples)= ((('name', '7a-2'), ('min_pressure', 14.5), ('date', '01/11/2004')),
+        # (('name', '7a-2'),('min_pressure', 14.5),('max_surface_oil_rate', 11408.8),('date', '01/01/2005')))
+
+        # Wells completions example:
+        # tuple(lst of tuples)= ((('i', 37), ('j', 57), ('k', 1), ('well_radius', 0.3), ('date', '01/11/1999')),
+        # (('i', 37), ('j', 57), ('k', 3), ('well_radius', 0.3), ('date', '01/11/1999')))
+        return tuple(lst_of_tuples)
+
+    def network_wells_tuple(self) -> Union[str, tuple]:
+        network_attr = self.network.constraints.get_all()
+        wells_attr = self.wells.get_all()
+
+        # check if the attributes are empty
+        if not network_attr and not wells_attr:
+            return "Network constraints and wells completions are empty. No hash value generated."
+
+        network_tuple = self._attr_info_to_tuple(network_attr)
+        wells_tuple = self._attr_info_to_tuple(wells_attr)
+        return network_tuple, wells_tuple
+
+    def __hash__(self):
+        hash_attr_tuple = self.network_wells_tuple()
+        if isinstance(hash_attr_tuple, tuple):
+            return hash(hash_attr_tuple)
+        # return "Network constraints and wells completions are empty. No hash value generated." if
+        return hash_attr_tuple
+
+    def __eq__(self, other):
+        if isinstance(other, NexusSimulator):
+            return self.network_wells_tuple() == other.network_wells_tuple()
+        return NotImplemented
 
     def remove_temp_from_properties(self):
         """Updates model values if the files are moved from a temp directory

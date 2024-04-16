@@ -1911,3 +1911,138 @@ def test_get_fluid_type(surface_file_contents, expected_result):
 
     # Assert
     assert fluid_type == expected_result
+
+
+def test_attr_info_to_tuple(mocker):
+    # Arrange
+    mock_simulator = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusSimulator', mock_simulator)
+
+    # network
+    constraint1 = {'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0}
+    constraint2 = {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0,
+                   'max_reverse_surface_liquid_rate': 10000.0, 'max_surface_liquid_rate': None}
+
+    nexus_constraint_dict = {"SP200": [NexusConstraint(constraint1), NexusConstraint(constraint2)]}
+
+    # wells
+    date_format = DateFormat.DD_MM_YYYY
+    expected_well_completion_1 = NexusCompletion(date='01/03/2023', i=1, j=2, k=3, skin=8.9, depth=7.56,
+                                                 well_radius=4.5, x=None, y=1.24,
+                                                 grid='GRID_A', measured_depth=1.38974, date_format=date_format)
+
+    expected_well_completion_2 = NexusCompletion(date='01/03/2023', i=6, j=None, k=8, skin=4.52, depth=8.955,
+                                                 well_radius=None, x=9000.48974, y=2, angle_a=1, angle_v=5.68,
+                                                 grid='GRID_B', measured_depth=1.568, date_format=date_format,
+                                                 unit_system=UnitSystem.ENGLISH)
+
+    dummy_wells = NexusWells(model=mock_simulator)
+    nexus_well_lst = [NexusWell(well_name='WELL_3',
+                                completions=[expected_well_completion_1, expected_well_completion_2],
+                                unit_system=UnitSystem.ENGLISH, parent_wells_instance=dummy_wells)]
+
+    expected_network = ((('name', 'well1'), ('max_surface_liquid_rate', 3884.0), ('date', '01/01/2019')),
+                        (('name', 'well2'), ('max_surface_water_rate', 0.0),
+                        ('max_reverse_surface_liquid_rate', 10000.0), ('date', '01/01/2019')))
+    expected_wells = ((('i', 1), ('j', 2), ('k', 3), ('measured_depth', 1.38974), ('skin', 8.9), ('depth', 7.56),
+                       ('y', 1.24), ('grid', 'GRID_A'), ('well_radius', 4.5), ('date', '01/03/2023')),
+                      (('i', 6), ('k', 8), ('measured_depth', 1.568), ('skin', 4.52), ('depth', 8.955),
+                       ('x', 9000.48974), ('y', 2), ('angle_a', 1), ('angle_v', 5.68), ('grid', 'GRID_B'),
+                       ('date', '01/03/2023')))
+
+    # Act
+    network_attr = NexusSimulator._attr_info_to_tuple(nexus_constraint_dict)
+    wells_attr = NexusSimulator._attr_info_to_tuple(nexus_well_lst)
+
+    # Assert
+    assert network_attr == expected_network
+    assert wells_attr == expected_wells
+
+
+@pytest.mark.parametrize("network_return_value, wells_return_value, expected_result", [
+    ("network attribute", "wells attribute", ("return_value", "return_value")),
+    ({}, "wells attribute", ("return_value", "return_value")),
+    ("network attribute", [], ("return_value", "return_value")),
+    ({}, [], "Network constraints and wells completions are empty. No hash value generated.")
+])
+def test_network_wells_tuple(mocker, network_return_value, wells_return_value, expected_result):
+    # Arrange
+    mock_simulator = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusSimulator', mock_simulator)
+    mock_simulator.network.constraints.get_all.return_value = network_return_value
+    mock_simulator.wells.get_all.return_value = wells_return_value
+
+    mock_simulator._attr_info_to_tuple.return_value = "return_value"
+
+    # Act
+    result = NexusSimulator.network_wells_tuple(mock_simulator)
+
+    # Assert
+    assert result == expected_result
+
+
+def test_hash_tuple(mocker):
+    # Arrange
+    mock_simulator = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusSimulator', mock_simulator)
+    mock_simulator.network_wells_tuple.return_value = (("tuple1", "tuple3"), ("tuple2", "tuple4"))
+    expected_result = hash((("tuple1", "tuple3"), ("tuple2", "tuple4")))
+
+    # Act
+    result = NexusSimulator.__hash__(mock_simulator)
+
+    # Assert
+    assert result == expected_result
+
+
+def test_hash_tuple_empty(mocker):
+    # Arrange
+    mock_simulator = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusSimulator', mock_simulator)
+    mock_simulator.network_wells_tuple.return_value = ("Network constraints and wells completions are empty. "
+                                                       "No hash value generated.")
+
+    # Act
+    result = NexusSimulator.__hash__(mock_simulator)
+
+    # Assert
+    expected_result = "Network constraints and wells completions are empty. No hash value generated."
+    assert result == expected_result
+
+
+@pytest.mark.parametrize("return_value1, return_value2, expected_result", [
+    ((("tuple1", "tuple3"), ("tuple2", "tuple4")), (("tuple1", "tuple3"), ("tuple2", "tuple4")), True),
+    ((("tuple1", "tuple3"), ("tuple2", "tuple4")), (("tuple1", "tuple5"), ("tuple3", "tuple4")), False),
+])
+def test_eq(mocker, return_value1, return_value2, expected_result):
+    # Arrange
+    mock_simulator1 = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusSimulator', mock_simulator1)
+    mock_network_wells_tuple1 = mocker.MagicMock(return_value=return_value1)
+    sim1 = NexusSimulator('test/path/file1.fcs')
+    mocker.patch.object(sim1, 'network_wells_tuple', mock_network_wells_tuple1)
+
+    mock_simulator2 = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusSimulator', mock_simulator2)
+    mock_network_wells_tuple2 = mocker.MagicMock(return_value=return_value2)
+    sim2 = NexusSimulator('test/path/file1.fcs')
+    mocker.patch.object(sim2, 'network_wells_tuple', mock_network_wells_tuple2)
+
+    # Act
+    result = sim1.__eq__(sim2)
+
+    # Assert
+    assert result == expected_result
+
+
+def test_eq(mocker):
+    # Arrange
+    mock_simulator1 = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusSimulator', mock_simulator1)
+    sim1 = NexusSimulator('test/path/file1.fcs')
+
+    # Act
+    result = sim1.__eq__("Not a NexusSimulator object")
+
+    # Assert
+    assert result == NotImplemented
