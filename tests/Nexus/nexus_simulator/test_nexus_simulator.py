@@ -1959,6 +1959,23 @@ def test_attr_info_to_tuple(mocker):
     assert wells_attr == expected_wells
 
 
+def test_attr_info_to_tuple_empty(mocker):
+    # Arrange
+    mock_simulator = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusSimulator', mock_simulator)
+
+    nexus_constraint_dict = {}
+    nexus_well_lst = []
+
+    # Act
+    network_attr = NexusSimulator._attr_info_to_tuple(nexus_constraint_dict)
+    wells_attr = NexusSimulator._attr_info_to_tuple(nexus_well_lst)
+
+    # Assert
+    assert network_attr == "Network constraints are empty."
+    assert wells_attr == "Wells completions are empty."
+
+
 @pytest.mark.parametrize("network_return_value, wells_return_value, expected_result", [
     ("network attribute", "wells attribute", ("return_value", "return_value")),
     ({}, "wells attribute", ("return_value", "return_value")),
