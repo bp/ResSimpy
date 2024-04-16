@@ -194,10 +194,9 @@ class NexusSimulator(Simulator):
         # mypy suggests that hash return value can only be int,
         # so it will return a hash value of 0 if both attributes are empty
         else:
-            print(hash_attr_tuple)
             return 0
 
-    def __eq__(self, other) -> Union[bool, 'NotImplemented']:
+    def __eq__(self, other) -> bool:
         if isinstance(other, NexusSimulator):
             return self.network_wells_tuple() == other.network_wells_tuple()
         return NotImplemented
