@@ -169,10 +169,37 @@ class NexusConstraints(Constraints):
         surface_file = self.__find_which_surface_file_from_id(constraint_id)
         surface_file.remove_object_from_file_as_list([constraint_id])
         # remove from memory
+        removed_constraint = None
         for name, list_constraints in self._constraints.items():
             for i, constraint in enumerate(list_constraints):
                 if constraint.id == constraint_id:
-                    list_constraints.pop(i)
+                    removed_constraint = list_constraints.pop(i)
+        # remove the constraints table if there are no more for that date timestamp
+        if removed_constraint is None:
+            raise ValueError(f'No constraint found with {constraint_id=}')
+        date_of_constraint_removed = removed_constraint.date
+        if not any(z for x, y in self._constraints.items() for z in y if z.date == date_of_constraint_removed):
+            self.__remove_empty_constraint_table(date_of_constraint_removed, surface_file=surface_file)
+
+    def __remove_empty_constraint_table(self, date: str, surface_file: NexusFile):
+        """Removes a constraint table for a given date if it has no other dates for that constraint."""
+        file_content = surface_file.get_flat_list_str_file
+        constraints_line_number = -1
+        end_constraints_line_number = -1
+        found_date = False
+        for i, line in enumerate(file_content):
+            if nfo.check_token('TIME', line) and \
+                    nfo.get_expected_token_value(token='TIME', token_line=line, file_list=file_content[i:]) == date:
+                found_date = True
+            if found_date and nfo.check_token('CONSTRAINTS', line):
+                constraints_line_number = i
+            elif found_date and nfo.check_token('ENDCONSTRAINTS', line):
+                end_constraints_line_number = i
+            if constraints_line_number > 0 and end_constraints_line_number > 0:
+                break
+        if end_constraints_line_number > constraints_line_number:
+            surface_file.remove_from_file_as_list(end_constraints_line_number)
+            surface_file.remove_from_file_as_list(constraints_line_number)
 
     def __find_which_surface_file_from_id(self, constraint_id: UUID) -> NexusFile:
         """Finds the surface file with the object id requested."""
