@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import os
 import warnings
-from typing import Any, Union, Tuple, Optional
+from typing import Any, Union, Optional
 
 import resqpy.model as rq
 from datetime import datetime
@@ -144,9 +144,8 @@ class NexusSimulator(Simulator):
         return printable_str
 
     @staticmethod
-    def _attr_info_to_tuple(sim_attr: Union[dict, list]) -> Tuple[Tuple[Tuple[str, Any], ...], ...]:
-        """
-        Convert the network constraints attribute to a tuple of tuples so that it is hashable
+    def _attr_info_to_tuple(sim_attr: Union[dict, list]) -> tuple[tuple[tuple[str, Any], ...], ...]:
+        """Convert the network constraints/wells completions attribute to a tuple of tuples so that it is hashable.
 
         Args:
             sim_attr (Union[dict, list]): dict if network constraints attribute, list if wells completions attribute
@@ -172,6 +171,12 @@ class NexusSimulator(Simulator):
         return tuple(lst_of_tuples)
 
     def network_wells_tuple(self) -> Union[str, tuple]:
+        """Returns a tuple of the network constraints and wells completions attributes.
+
+        Returns:
+            Union[str, tuple]: tuple of the network constraints and wells completions attributes or a string
+            if both the attributes return empty
+        """
         network_attr = self.network.constraints.get_all()
         wells_attr = self.wells.get_all()
 
@@ -183,14 +188,14 @@ class NexusSimulator(Simulator):
         wells_tuple = self._attr_info_to_tuple(wells_attr)
         return network_tuple, wells_tuple
 
-    def __hash__(self):
+    def __hash__(self) -> Union[int, str]:
         hash_attr_tuple = self.network_wells_tuple()
         if isinstance(hash_attr_tuple, tuple):
             return hash(hash_attr_tuple)
         # return "Network constraints and wells completions are empty. No hash value generated." if
         return hash_attr_tuple
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> Union[bool, NotImplemented]:
         if isinstance(other, NexusSimulator):
             return self.network_wells_tuple() == other.network_wells_tuple()
         return NotImplemented
