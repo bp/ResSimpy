@@ -178,6 +178,8 @@ class NexusConstraints(Constraints):
         if removed_constraint is None:
             raise ValueError(f'No constraint found with {constraint_id=}')
         date_of_constraint_removed = removed_constraint.date
+        if date_of_constraint_removed is None:
+            return
         if not any(z for x, y in self._constraints.items() for z in y if z.date == date_of_constraint_removed):
             self.__remove_empty_constraint_table(date_of_constraint_removed, surface_file=surface_file)
 
