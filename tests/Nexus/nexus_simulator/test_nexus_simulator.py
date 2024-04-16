@@ -2006,7 +2006,7 @@ def test_hash_tuple_empty(mocker):
     result = NexusSimulator.__hash__(mock_simulator)
 
     # Assert
-    expected_result = "Network constraints and wells completions are empty. No hash value generated."
+    expected_result = 0
     assert result == expected_result
 
 

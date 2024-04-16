@@ -152,7 +152,6 @@ class NexusSimulator(Simulator):
 
         Returns: Tuple[Tuple[Tuple[str, Union[str, float, bool]], ...], ...]: tuple of tuples
         """
-        lst_of_tuples = []
         if isinstance(sim_attr, dict):
             lst_of_tuples = [tuple(nexus_constraint.to_dict(add_units=False, include_nones=False).items())
                              for wells in sim_attr
@@ -185,17 +184,20 @@ class NexusSimulator(Simulator):
             return "Network constraints and wells completions are empty. No hash value generated."
 
         network_tuple = self._attr_info_to_tuple(network_attr)
-        wells_tuple = self._attr_info_to_tuple(wells_attr)
+        wells_tuple = self._attr_info_to_tuple([wells_attr])
         return network_tuple, wells_tuple
 
-    def __hash__(self) -> Union[int, str]:
+    def __hash__(self) -> int:
         hash_attr_tuple = self.network_wells_tuple()
         if isinstance(hash_attr_tuple, tuple):
             return hash(hash_attr_tuple)
-        # return "Network constraints and wells completions are empty. No hash value generated." if
-        return hash_attr_tuple
+        # mypy suggests that hash return value can only be int,
+        # so it will return a hash value of 0 if both attributes are empty
+        else:
+            print(hash_attr_tuple)
+            return 0
 
-    def __eq__(self, other) -> Union[bool, NotImplemented]:
+    def __eq__(self, other) -> Union[bool, 'NotImplemented']:
         if isinstance(other, NexusSimulator):
             return self.network_wells_tuple() == other.network_wells_tuple()
         return NotImplemented
