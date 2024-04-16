@@ -114,6 +114,7 @@ class NexusConstraints(Constraints):
         if additional_constraints is None:
             return
         for name, constraints in additional_constraints.items():
+            # this does not guarantee the constraints are ordered by datetime
             existing_constraints = self._constraints.get(name, [])
             existing_constraints.extend(constraints)
             self._constraints[name] = existing_constraints
