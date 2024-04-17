@@ -148,19 +148,24 @@ class NexusSimulator(Simulator):
         """Convert the network constraints/wells completions attribute to a tuple of tuples so that it is hashable.
 
         Args:
-            sim_attr (Union[dict, list]): dict if network constraints attribute, list if wells completions attribute
+            sim_attr (Union[dict, list]): dict of {well name: [NexusConstraint]} for self.network.constraints.get_all(),
+            list of [NexusWell objects] for self.wells.get_all()
 
         Returns: Tuple[Tuple[Tuple[str, Union[str, float, bool]], ...], ...]: tuple of tuples
         """
+        lst_of_tuples = []
         if isinstance(sim_attr, dict):
-            lst_of_tuples = [tuple(nexus_constraint.to_dict(add_units=False, include_nones=False).items())
-                             for wells in sim_attr
-                             if sim_attr.get(wells)
-                             for nexus_constraint in sim_attr.get(wells)]
+            for wells, nexus_constraint in sim_attr.items():
+                for constraints in nexus_constraint:
+                    network_dict = constraints.to_dict(add_units=False, include_nones=False)
+                    lst_of_tuples.append(tuple(network_dict.items()))
+
         elif isinstance(sim_attr, list):
-            lst_of_tuples = [tuple(el.to_dict(add_units=False, include_nones=False).items())
-                             for nexus_completion in sim_attr
-                             for el in nexus_completion.completions]
+            for nexus_completion in sim_attr:
+                for el in nexus_completion.completions:
+                    well_dict = el.to_dict(add_units=False, include_nones=False)
+                    lst_of_tuples.append(tuple(well_dict.items()))
+
         # Network constraints example:
         # tuple(lst of tuples)= ((('name', '7a-2'), ('min_pressure', 14.5), ('date', '01/11/2004')),
         # (('name', '7a-2'),('min_pressure', 14.5),('max_surface_oil_rate', 11408.8),('date', '01/01/2005')))

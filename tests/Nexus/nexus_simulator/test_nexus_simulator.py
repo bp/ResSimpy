@@ -2035,7 +2035,7 @@ def test_eq(mocker, return_value1, return_value2, expected_result):
     assert result == expected_result
 
 
-def test_eq(mocker):
+def test_eq_not_simulator(mocker):
     # Arrange
     mock_simulator1 = mocker.MagicMock()
     mocker.patch('ResSimpy.Nexus.NexusSimulator', mock_simulator1)
