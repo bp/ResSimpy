@@ -569,7 +569,7 @@ well1 200.0 NA 4052.12
 ENDQMULT
 ''',
          '''TIME 01/01/2019
-        CONSTRAINTS
+CONSTRAINTS
 well1 QLIQSMAX MULT
 ENDCONSTRAINTS
 QMULT
@@ -579,7 +579,7 @@ ENDQMULT
 ''',
          {'name': 'well1', 'date': '01/01/2019'},
          {'name': 'well1', 'date': '01/01/2019', 'qmult_oil_rate': 1000.0, 'qmult_water_rate': 1.31,
-          'qmult_gas_rate': 10},
+          'qmult_gas_rate': 10, 'use_qmult_qoilqwat_surface_rate': True},
          4,
          {'uuid1': [2, 6]}
          )
