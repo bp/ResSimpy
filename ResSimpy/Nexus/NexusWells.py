@@ -35,7 +35,7 @@ class NexusWells(Wells):
     Arguments:
         model (Simulator): NexusSimulator object that has the instance of wells on.
     """
-    __model: NexusSimulator = field(compare=False)
+    __model: NexusSimulator = field(compare=False, repr=False)
     __date_format: DateFormat = field(repr=False)
     _wells: list[NexusWell] = field(default_factory=list)
 
@@ -377,6 +377,9 @@ class NexusWells(Wells):
         file_content = wellspec_file.get_flat_list_str_file
         wellspec_index = -1
         header_index = -1
+        if not fo.value_in_file('TIME', file_content):
+            # if we have no completion date in the file then we have effectively found the right TIME
+            completion_date_found = True
         for index, line in enumerate(file_content):
             if fo.check_token('TIME', line) and fo.get_expected_token_value('TIME', line, [line]) == \
                     completion_date:
