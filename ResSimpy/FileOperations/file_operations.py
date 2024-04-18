@@ -256,7 +256,8 @@ def __extract_substring_until_next_invalid_character(character_location: int,
     return character_location, new_search_string, search_string, value
 
 
-def __replace_with_variable_entry(new_line: str, original_line: str, replace_with: GridArrayDefinition, value: str):
+def __replace_with_variable_entry(new_line: str, original_line: str, replace_with: GridArrayDefinition, value: str)\
+        -> tuple[str, str, str]:
     new_value = replace_with.value if replace_with.value is not None else ''
     if replace_with.modifier != 'VALUE':
         new_line = new_line.replace('INCLUDE ', '')

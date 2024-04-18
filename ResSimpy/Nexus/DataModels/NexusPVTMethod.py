@@ -222,7 +222,7 @@ class NexusPVTMethod(DynamicProperty):
         return printable_str
 
     def __populate_eos_opts_to_tertiary_keys(self, primary_key: str, primary_key_default_val: str, single_line: str,
-                                             line_list: list[str], list_of_secondary_keys: list[str]):
+                                             line_list: list[str], list_of_secondary_keys: list[str]) -> None:
         """Utility function to populate complex EOS options structures, from primary to tertiary keyword level.
         Applies to TRANSITION, TRANS_TEST and PHASEID Nexus EOS options.
 
