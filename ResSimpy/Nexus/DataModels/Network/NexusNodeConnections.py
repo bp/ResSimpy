@@ -86,7 +86,7 @@ class NexusNodeConnections(NodeConnections):
         cons_list = new_connections.get(self.table_header)
         self._add_to_memory(cons_list)
 
-    def _add_to_memory(self, additional_list: Optional[Sequence[NexusNodeConnection]]):
+    def _add_to_memory(self, additional_list: Optional[Sequence[NexusNodeConnection]]) -> None:
         """Extends the nodes object by a list of nodes provided to it.
 
         Args:

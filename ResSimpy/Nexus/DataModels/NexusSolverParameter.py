@@ -145,7 +145,7 @@ class NexusSolverParameter(SolverParameter):
     dsmax_vip_impes: float | None = None
     dsmax_vip_all: float | None = None
 
-    def _write_out_solver_param_block(self):
+    def _write_out_solver_param_block(self) -> None:
         """Writes out the solver parameter block for an instance of NexusSolverParameter."""
         raise NotImplementedError
 
