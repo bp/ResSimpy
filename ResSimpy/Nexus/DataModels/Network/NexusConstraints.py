@@ -180,6 +180,8 @@ class NexusConstraints(Constraints):
         date_of_constraint_removed = removed_constraint.date
         if date_of_constraint_removed is None:
             return
+        # search the loaded constraints for constraints on the same date as the removed constraint
+        # if there are none then remove the table
         if not any(z for x, y in self._constraints.items() for z in y if z.date == date_of_constraint_removed):
             self.__remove_empty_token_table(date_of_constraint_removed, surface_file=surface_file, token='CONSTRAINTS')
             self.__remove_empty_token_table(date_of_constraint_removed, surface_file=surface_file, token='QMULT',
