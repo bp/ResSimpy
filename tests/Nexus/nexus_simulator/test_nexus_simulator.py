@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime, timezone
 
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
+from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
 from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
@@ -24,6 +25,8 @@ from ResSimpy.Nexus.DataModels.NexusGasliftMethod import NexusGasliftMethod
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
+from ResSimpy.Nexus.NexusNetwork import NexusNetwork
+from ResSimpy.Nexus.load_wells import load_wells
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from pytest_mock import MockerFixture
@@ -95,7 +98,7 @@ def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock
 
 
 def check_file_read_write_is_correct_for_windows(expected_file_contents: str, modifying_mock_open: Mock,
-                                     mocker_fixture: MockerFixture):
+                                                 mocker_fixture: MockerFixture):
     assert len(modifying_mock_open.call_args_list) == 2
     assert modifying_mock_open.call_args_list[0] == mocker_fixture.call(
         "\my\file\path", 'r')
@@ -107,6 +110,7 @@ def check_file_read_write_is_correct_for_windows(expected_file_contents: str, mo
         call for call in modifying_mock_open.mock_calls if 'call().write' in str(call)]
     assert len(list_of_writes) == 1
     assert list_of_writes[0].args[0] == expected_file_contents
+
 
 @pytest.mark.parametrize(
     "run_control_path, expected_root, expected_run_control_path, date_format, expected_date_format", [
@@ -130,6 +134,7 @@ def test_load_fcs_file_no_output_no_include_file(mocker, run_control_path, expec
     assert simulation.date_format is expected_date_format
     open_mock.assert_called_with(expected_full_path, 'r')
 
+
 @pytest.mark.parametrize(
     "run_control_path, expected_root, expected_run_control_path, date_format, expected_date_format", [
         # Providing an absolute path to the fcs file + USA date format
@@ -152,6 +157,8 @@ def test_load_fcs_space_in_filename(mocker, run_control_path, expected_root, exp
     assert simulation.run_control_file_path == expected_full_path
     assert simulation.date_format is expected_date_format
     open_mock.assert_called_with(expected_full_path, 'r')
+
+
 @pytest.mark.parametrize(
     "fcs_file_contents, expected_date_format", [
         ("RUNCONTROL /path/to/run/control\n  DATE_FORMAT MM/DD/YYYY", DateFormat.MM_DD_YYYY),
@@ -160,7 +167,9 @@ def test_load_fcs_space_in_filename(mocker, run_control_path, expected_root, exp
         ("RUNCONTROL c:\path\to\run\control\n  DATE_FORMAT MM/DD/YYYY", DateFormat.MM_DD_YYYY),
         ("RUNCONTROL c:\path\to\run\control\n  DATE_FORMAT DD/MM/YYYY", DateFormat.DD_MM_YYYY),
         ("RUNCONTROL c:\path\to\run\control\n", DateFormat.MM_DD_YYYY),
-    ], ids=['US date format', 'non-us date format', 'default (us format)', 'Win US Date Format', 'Win non-us date format', 'Win default (us format)', ])
+    ],
+    ids=['US date format', 'non-us date format', 'default (us format)', 'Win US Date Format', 'Win non-us date format',
+         'Win default (us format)', ])
 def test_load_fcs_date_format(mocker, fcs_file_contents, expected_date_format):
     # Arrange
     open_mock = mocker.mock_open(read_data=fcs_file_contents)
@@ -172,30 +181,32 @@ def test_load_fcs_date_format(mocker, fcs_file_contents, expected_date_format):
     # Assert
     assert simulation.date_format is expected_date_format
 
+
 def test_get_users_linked_with_files(mocker):
     # Arrange 
     fcs_file = "RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\n"
     open_mock = mocker.mock_open(read_data=fcs_file)
-    modified_time=datetime(2018, 6, 30, 8, 18, 10,tzinfo=timezone.utc)
+    modified_time = datetime(2018, 6, 30, 8, 18, 10, tzinfo=timezone.utc)
     dt_mock = mocker.MagicMock()
-    mocker.patch('datetime.datetime',dt_mock)
+    mocker.patch('datetime.datetime', dt_mock)
     dt_mock.fromtimestamp.return_value = modified_time
-    
+
     mocker.patch("builtins.open", open_mock)
     path_mock = mocker.MagicMock()
     mocker.patch('pathlib.Path', path_mock)
     path_mock.return_value.owner.return_value = "Mock-User"
     path_mock.return_value.group.return_value = "Mock-Group"
-    
+
     os_mock = mocker.MagicMock()
-    mocker.patch('os.stat',os_mock)
+    mocker.patch('os.stat', os_mock)
     os_mock.return_value.st_mtime = 1530346690
-  
+
     simulation = NexusSimulator(origin="Path.fcs")
-    
-    expected_result = [("Path.fcs","Mock-User:Mock-Group",modified_time),("run_control.inc","Mock-User:Mock-Group",modified_time)]
+
+    expected_result = [("Path.fcs", "Mock-User:Mock-Group", modified_time),
+                       ("run_control.inc", "Mock-User:Mock-Group", modified_time)]
     # Act
-    
+
     result = simulation.get_users_linked_with_files()
     mocker.stopall()
     assert result == expected_result
@@ -232,33 +243,32 @@ def test_get_users_linked_with_files_error_raised(mocker):
     # Assert
     assert result == expected_result
 
+
 def test_get_users_with_files_for_multiple_files(mocker):
-    
-    fcs_file = 'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'     
-     
-     
+    fcs_file = 'DESC Test model\n\nRUN_UNITS ENGLISH\n\nDEFAULT_UNITS ENGLISH\nDATEFORMAT MM/DD/YYYY\n\nGRID_FILES\n\tSTRUCTURED_GRID\tIncludes/grid_data/main_grid.dat'
+
     open_mock = mocker.mock_open(read_data=fcs_file)
-    modified_time=datetime(2018, 6, 30, 8, 18, 10,tzinfo=timezone.utc)
+    modified_time = datetime(2018, 6, 30, 8, 18, 10, tzinfo=timezone.utc)
     dt_mock = mocker.MagicMock()
-    mocker.patch('datetime.datetime',dt_mock)
+    mocker.patch('datetime.datetime', dt_mock)
     dt_mock.fromtimestamp.return_value = modified_time
-    
+
     mocker.patch("builtins.open", open_mock)
     path_mock = mocker.MagicMock()
     mocker.patch('pathlib.Path', path_mock)
     path_mock.return_value.owner.return_value = "Mock-User"
     path_mock.return_value.group.return_value = "Mock-Group"
-    
+
     os_mock = mocker.MagicMock()
-    mocker.patch('os.stat',os_mock)
+    mocker.patch('os.stat', os_mock)
     os_mock.return_value.st_mtime = 1530346690
-  
+
     simulation = NexusSimulator(origin="Path.fcs")
-    
-    expected_result = [("Path.fcs","Mock-User:Mock-Group",modified_time),
-                       ("Includes/grid_data/main_grid.dat","Mock-User:Mock-Group",modified_time)]
+
+    expected_result = [("Path.fcs", "Mock-User:Mock-Group", modified_time),
+                       ("Includes/grid_data/main_grid.dat", "Mock-User:Mock-Group", modified_time)]
     # Act
-    
+
     result = simulation.get_users_linked_with_files()
     mocker.stopall()
     assert result == expected_result
@@ -348,8 +358,8 @@ def test_output_to_existing_directory(mocker):
 
     exists_mock = mocker.Mock(return_value=True)
     mocker.patch("os.path.exists", exists_mock)
-    
-     # Act + Assert
+
+    # Act + Assert
     with pytest.raises(FileExistsError):
         NexusSimulator(origin='test/Path.fcs',
                        destination='original_output_path')
@@ -472,8 +482,8 @@ def test_load_fcs_file_raises_error_for_undefined_run_units(mocker, fcs_file):
                                      'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nsurface network 1 	file/path/location/surface.inc',
                                      'testpath1', 'file/path/location/surface.inc'),
                              (
-                                 'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data\\Includes\\nexus_data\\surface_simplified_06082018.inc',
-                                 'testpath1', 'nexus_data\\Includes\\nexus_data\\surface_simplified_06082018.inc')
+                                     'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data\\Includes\\nexus_data\\surface_simplified_06082018.inc',
+                                     'testpath1', 'nexus_data\\Includes\\nexus_data\\surface_simplified_06082018.inc')
                          ])
 def test_get_abs_surface_file_path(mocker, fcs_file, expected_root, expected_extracted_path):
     # Arrange
@@ -484,12 +494,11 @@ def test_get_abs_surface_file_path(mocker, fcs_file, expected_root, expected_ext
     # Act
     simulation = NexusSimulator(origin='testpath1/Path.fcs')
     result = simulation.get_surface_file_path()
-    
 
     # Assert
     assert result == expected_result
 
-    
+
 @pytest.mark.skip("Re-enable once the run code has been established")
 def test_run_simulator(mocker):
     """Testing the Simulator run code"""
@@ -554,11 +563,11 @@ def test_get_check_oil_gas_types_for_models_different_types(mocker):
                              ("Line 1\nAnother LIne\nSURFACE Network 1	Includes/nexus_data/surface_1.dat",
                               "SURFACE Network 1	Includes/nexus_data/surface_2.dat",
                               "line 1\nAPI",
-                                "line 1\nAPI",
-                                "API"
+                              "line 1\nAPI",
+                              "API"
                               ),
 
-])
+                         ])
 def test_get_check_oil_gas_types_for_models_same_types(mocker, fcs_file_contents_1, fcs_file_contents_2,
                                                        surface_file_contents_1, surface_file_contents_2, expected_type):
     # Checks that the correct oil / gas type is returned.
@@ -619,6 +628,7 @@ def test_get_check_oil_gas_types_for_models_no_type_found(mocker, fcs_file_conte
     with pytest.warns(UserWarning):
         NexusSimulator.get_check_oil_gas_types_for_models(models)
 
+
 def test_get_check_oil_gas_types_for_models_different_types(mocker):
     # Checks that a Value error is raised if the surface files contain different oil / gas types
     # Arrange
@@ -639,6 +649,7 @@ def test_get_check_oil_gas_types_for_models_different_types(mocker):
     # Act / Assert
     with pytest.raises(ValueError):
         NexusSimulator.get_check_oil_gas_types_for_models(models)
+
 
 @pytest.mark.parametrize("original_file_contents, expected_file_contents, token, new_value, add_to_start",
                          [("test 3", "test ABC3", "TEST", "ABC3", False),
@@ -740,6 +751,7 @@ def test_update_token_file_value(mocker, original_file_contents, expected_file_c
                                      modifying_mock_open=modifying_mock_open,
                                      mocker_fixture=mocker)
 
+
 @pytest.mark.parametrize("original_file_contents, expected_file_contents, token, new_value, add_to_start",
                          [("test 3", "test ABC3", "TEST", "ABC3", False),
                           ("""!     Fluid model for network
@@ -837,8 +849,9 @@ def test_update_token_file_value(mocker, original_file_contents, expected_file_c
 
     # Assert
     check_file_read_write_is_correct_for_windows(expected_file_contents=expected_file_contents,
-                                     modifying_mock_open=modifying_mock_open,
-                                     mocker_fixture=mocker)
+                                                 modifying_mock_open=modifying_mock_open,
+                                                 mocker_fixture=mocker)
+
 
 @pytest.mark.parametrize("original_file_contents, expected_file_contents, token",
                          [
@@ -930,8 +943,9 @@ def test_comment_out_file_value(mocker, original_file_contents, expected_file_co
 
     # Assert
     check_file_read_write_is_correct_for_windows(expected_file_contents=expected_file_contents,
-                                     modifying_mock_open=modifying_mock_open,
-                                     mocker_fixture=mocker)
+                                                 modifying_mock_open=modifying_mock_open,
+                                                 mocker_fixture=mocker)
+
 
 def test_add_map_statements(mocker):
     """Testing the functionality to comment out a line containing a specific token"""
@@ -986,6 +1000,7 @@ PLOTBINARY
                                      modifying_mock_open=modifying_mock_open,
                                      mocker_fixture=mocker)
 
+
 def test_add_map_statements_windows(mocker):
     """Testing the functionality to comment out a line containing a specific token"""
     # Arrange
@@ -1036,8 +1051,9 @@ PLOTBINARY
 
     # Assert
     check_file_read_write_is_correct_for_windows(expected_file_contents=expected_file_contents,
-                                     modifying_mock_open=modifying_mock_open,
-                                     mocker_fixture=mocker)
+                                                 modifying_mock_open=modifying_mock_open,
+                                                 mocker_fixture=mocker)
+
 
 # TODO: move these methods to a separate WELLS test file
 @pytest.mark.parametrize("fcs_file_contents", [
@@ -1083,6 +1099,7 @@ def test_get_all(mocker: MockerFixture, fcs_file_contents: str):
                                             start_date='', model_date_format=DateFormat.MM_DD_YYYY,
                                             parent_wells_instance=simulation.wells)
 
+
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
        WelLS sEt 1 my\wellspec\file.dat
@@ -1123,7 +1140,7 @@ def test_get_wells_windows(mocker: MockerFixture, fcs_file_contents: str):
     assert result == loaded_wells
     mock_load_wells.assert_called_once_with(nexus_file=expected_well_file,
                                             default_units=UnitSystem.ENGLISH,
-                                            start_date='', model_date_format = DateFormat.MM_DD_YYYY,
+                                            start_date='', model_date_format=DateFormat.MM_DD_YYYY,
                                             parent_wells_instance=simulation.wells)
 
 
@@ -1210,6 +1227,8 @@ def test_get(mocker: MockerFixture, fcs_file_contents: str):
                                             default_units=UnitSystem.ENGLISH,
                                             start_date='', model_date_format=DateFormat.MM_DD_YYYY,
                                             parent_wells_instance=simulation.wells)
+
+
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
        WelLS set 1 my\\wellspec\\file.dat
@@ -1276,13 +1295,14 @@ def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
             os.path.join('path', 'my/pvt/file2.dat'): '',
             os.path.join('path', 'my/pvt/file3.dat'): '',
             'path/nexus_run.fcs': fcs_file_contents,
-            }).return_value
+        }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
 
     pvt_files = []
     for i in range(3):
-        pvt_file = NexusFile(location=f'my/pvt/file{i+1}.dat', origin='path/nexus_run.fcs')
+        pvt_file = NexusFile(location=f'my/pvt/file{i + 1}.dat', origin='path/nexus_run.fcs')
         pvt_file.line_locations = [(0, uuid.uuid4())]
         pvt_files.append(pvt_file)
 
@@ -1298,6 +1318,7 @@ def test_get_pvt(mocker: MockerFixture, fcs_file_contents: str):
 
     # Assert
     assert result == loaded_pvt
+
 
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
@@ -1318,13 +1339,14 @@ def test_get_separator(mocker: MockerFixture, fcs_file_contents: str):
             os.path.join('path', 'my/separator/file2.dat'): '',
             os.path.join('path', 'my/separator/file3.dat'): '',
             'path/nexus_run.fcs': fcs_file_contents,
-            }).return_value
+        }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
 
     sep_files = []
     for i in range(3):
-        sep_file = NexusFile(location=f'my/separator/file{i+1}.dat', origin='path/nexus_run.fcs')
+        sep_file = NexusFile(location=f'my/separator/file{i + 1}.dat', origin='path/nexus_run.fcs')
         sep_file.line_locations = [(0, uuid.uuid4())]
         sep_files.append(sep_file)
 
@@ -1361,13 +1383,14 @@ def test_get_water(mocker: MockerFixture, fcs_file_contents: str):
             os.path.join('path', 'my/water/file2.dat'): '',
             os.path.join('path', 'my/water/file3.dat'): '',
             'path/nexus_run.fcs': fcs_file_contents,
-            }).return_value
+        }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
 
     wat_files = []
     for i in range(3):
-        wat_file = NexusFile(location=f'my/water/file{i+1}.dat', origin='path/nexus_run.fcs')
+        wat_file = NexusFile(location=f'my/water/file{i + 1}.dat', origin='path/nexus_run.fcs')
         wat_file.line_locations = [(0, uuid.uuid4())]
         wat_files.append(wat_file)
 
@@ -1383,8 +1406,6 @@ def test_get_water(mocker: MockerFixture, fcs_file_contents: str):
 
     # Assert
     assert result == loaded_wat
-
-
 
 
 @pytest.mark.parametrize("fcs_file_contents", [
@@ -1406,13 +1427,14 @@ def test_get_equil(mocker: MockerFixture, fcs_file_contents: str):
             os.path.join('path', 'my/equil/file2.dat'): '',
             os.path.join('path', 'my/equil/file3.dat'): '',
             'path/nexus_run.fcs': fcs_file_contents,
-            }).return_value
+        }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
 
     eq_files = []
     for i in range(3):
-        eq_file = NexusFile(location=f'my/equil/file{i+1}.dat', origin='path/nexus_run.fcs')
+        eq_file = NexusFile(location=f'my/equil/file{i + 1}.dat', origin='path/nexus_run.fcs')
         eq_file.line_locations = [(0, uuid.uuid4())]
         eq_files.append(eq_file)
 
@@ -1449,13 +1471,14 @@ def test_get_rock(mocker: MockerFixture, fcs_file_contents: str):
             os.path.join('path', 'my/rock/file2.dat'): '',
             os.path.join('path', 'my/rock/file3.dat'): '',
             'path/nexus_run.fcs': fcs_file_contents,
-            }).return_value
+        }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
 
     rock_files = []
     for i in range(3):
-        rock_file = NexusFile(location=f'my/rock/file{i+1}.dat', origin='path/nexus_run.fcs')
+        rock_file = NexusFile(location=f'my/rock/file{i + 1}.dat', origin='path/nexus_run.fcs')
         rock_file.line_locations = [(0, uuid.uuid4())]
         rock_files.append(rock_file)
 
@@ -1494,13 +1517,14 @@ def test_get_relperm(mocker: MockerFixture, fcs_file_contents: str):
             os.path.join('path', 'my/relpm/file2.dat'): '',
             os.path.join('path', 'my/relpm/file3.dat'): '',
             'path/nexus_run.fcs': fcs_file_contents,
-            }).return_value
+        }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
 
     relpm_files = []
     for i in range(3):
-        relpm_file = NexusFile(location=f'my/relpm/file{i+1}.dat', origin='path/nexus_run.fcs')
+        relpm_file = NexusFile(location=f'my/relpm/file{i + 1}.dat', origin='path/nexus_run.fcs')
         relpm_file.line_locations = [(0, uuid.uuid4())]
         relpm_files.append(relpm_file)
 
@@ -1537,13 +1561,14 @@ def test_get_valve(mocker: MockerFixture, fcs_file_contents: str):
             os.path.join('path', 'my/valve/file2.dat'): '',
             os.path.join('path', 'my/valve/file3.dat'): '',
             'path/nexus_run.fcs': fcs_file_contents,
-            }).return_value
+        }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
 
     valve_files = []
     for i in range(3):
-        valve_file = NexusFile(location=f'my/valve/file{i+1}.dat', origin='path/nexus_run.fcs')
+        valve_file = NexusFile(location=f'my/valve/file{i + 1}.dat', origin='path/nexus_run.fcs')
         valve_file.line_locations = [(0, uuid.uuid4())]
         valve_files.append(valve_file)
 
@@ -1579,13 +1604,14 @@ def test_get_aquifer(mocker: MockerFixture, fcs_file_contents: str):
             os.path.join('path', 'my/aquifer/file2.dat'): '',
             os.path.join('path', 'my/aquifer/file3.dat'): '',
             'path/nexus_run.fcs': fcs_file_contents,
-            }).return_value
+        }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
 
     aq_files = []
     for i in range(3):
-        aq_file = NexusFile(location=f'my/aquifer/file{i+1}.dat', origin='path/nexus_run.fcs')
+        aq_file = NexusFile(location=f'my/aquifer/file{i + 1}.dat', origin='path/nexus_run.fcs')
         aq_file.line_locations = [(0, uuid.uuid4())]
         aq_files.append(aq_file)
 
@@ -1621,13 +1647,14 @@ def test_get_hydraulics(mocker: MockerFixture, fcs_file_contents: str):
             os.path.join('path', 'my/hyd/file2.dat'): '',
             os.path.join('path', 'my/hyd/file3.dat'): '',
             'path/nexus_run.fcs': fcs_file_contents,
-            }).return_value
+        }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
 
     hyd_files = []
     for i in range(3):
-        hyd_file = NexusFile(location=f'my/hyd/file{i+1}.dat', origin='path/nexus_run.fcs')
+        hyd_file = NexusFile(location=f'my/hyd/file{i + 1}.dat', origin='path/nexus_run.fcs')
         hyd_file.line_locations = [(0, uuid.uuid4())]
         hyd_files.append(hyd_file)
 
@@ -1643,6 +1670,7 @@ def test_get_hydraulics(mocker: MockerFixture, fcs_file_contents: str):
 
     # Assert
     assert result == loaded_hyds
+
 
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
@@ -1662,13 +1690,14 @@ def test_get_gaslift(mocker: MockerFixture, fcs_file_contents: str):
             os.path.join('path', 'my/gaslift/file2.dat'): '',
             os.path.join('path', 'my/gaslift/file3.dat'): '',
             'path/nexus_run.fcs': fcs_file_contents,
-            }).return_value
+        }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
 
     gl_files = []
     for i in range(3):
-        gl_file = NexusFile(location=f'my/gaslift/file{i+1}.dat', origin='path/nexus_run.fcs')
+        gl_file = NexusFile(location=f'my/gaslift/file{i + 1}.dat', origin='path/nexus_run.fcs')
         gl_file.line_locations = [(0, uuid.uuid4())]
         gl_files.append(gl_file)
 
@@ -1689,9 +1718,9 @@ def test_get_gaslift(mocker: MockerFixture, fcs_file_contents: str):
 @pytest.mark.parametrize("fcs_file_contents, surface_file_content, node1_props, node2_props, \
 connection1_props, connection2_props, wellconprops1, wellconprops2, wellheadprops1, wellheadprops2, wellboreprops1, \
 wellboreprops2, constraint_props1, constraint_props2, welllist1",
-     [(
-         'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data/surface.inc',
-         '''
+                         [(
+                                 'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data/surface.inc',
+                                 '''
          CONDEFAULTS
         CONTYPE   TYPE  METHOD
         WELLBORE LUMPED CELLAVG
@@ -1752,36 +1781,50 @@ C          node1         NA        NA    80    100.5 200.8   1     station      
         ENDWELLLIST
         
           ''',
-            {'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
-                'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-            {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': 10.21085, 'y_pos': 3524.23, 'number': 2,
-                'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-            {'name': 'CP01', 'node_in': 'CP01', 'node_out': 'wh_cp01', 'con_type': 'PIPE', 'hyd_method': '2',
-            'delta_depth': 7002.67, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-            {'name': 'cp01_gaslift', 'node_in': 'GAS', 'node_out': 'CP01', 'con_type': 'GASLIFT', 'hyd_method': None,
-            'delta_depth': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-            {'name': 'R001', 'stream': 'PRODUCER', 'datum_depth': 10350.0, 'crossflow': 'OFF', 'crossshut': 'OFF',
-            'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH},
-            {'name': 'R002', 'stream': 'PRODUCER', 'datum_depth': 10350.0, 'crossflow': 'ON', 'crossshut': 'OFF',
-             'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH},
-{'well': 'R001', 'name': 'tubing', 'depth': 50.2, 'wellhead_type': 'PIPE', 'hyd_method': 2, 'date': '01/03/2025', 'unit_system': UnitSystem.ENGLISH},
-{'well': 'R-0_02', 'name': 'TH-03', 'depth': 0, 'wellhead_type': 'PIPE', 'hyd_method': 1, 'date': '01/03/2025', 'unit_system': UnitSystem.ENGLISH},
+                                 {'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5,
+                                  'y_pos': 300.5, 'number': 1,
+                                  'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+                                 {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None,
+                                  'x_pos': 10.21085, 'y_pos': 3524.23, 'number': 2,
+                                  'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+                                 {'name': 'CP01', 'node_in': 'CP01', 'node_out': 'wh_cp01', 'con_type': 'PIPE',
+                                  'hyd_method': '2',
+                                  'delta_depth': 7002.67, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+                                 {'name': 'cp01_gaslift', 'node_in': 'GAS', 'node_out': 'CP01', 'con_type': 'GASLIFT',
+                                  'hyd_method': None,
+                                  'delta_depth': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+                                 {'name': 'R001', 'stream': 'PRODUCER', 'datum_depth': 10350.0, 'crossflow': 'OFF',
+                                  'crossshut': 'OFF',
+                                  'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH},
+                                 {'name': 'R002', 'stream': 'PRODUCER', 'datum_depth': 10350.0, 'crossflow': 'ON',
+                                  'crossshut': 'OFF',
+                                  'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH},
+                                 {'well': 'R001', 'name': 'tubing', 'depth': 50.2, 'wellhead_type': 'PIPE',
+                                  'hyd_method': 2, 'date': '01/03/2025', 'unit_system': UnitSystem.ENGLISH},
+                                 {'well': 'R-0_02', 'name': 'TH-03', 'depth': 0, 'wellhead_type': 'PIPE',
+                                  'hyd_method': 1, 'date': '01/03/2025', 'unit_system': UnitSystem.ENGLISH},
 
-{'name': 'well1', 'bore_type': 'PIPE', 'hyd_method': "BEGGS", 'diameter': 3.5, 'date': '01/03/2025',
- 'unit_system': UnitSystem.ENGLISH},
-{'name': 'well2', 'hyd_method': "BRILL", 'diameter': 3.25, 'flowsect': 2, 'roughness': 0.2002,
- 'date': '01/03/2025', 'unit_system': UnitSystem.ENGLISH},
- {'name': 'GUN_P', 'qmult_oil_rate': 128.528, 'qmult_gas_rate': 13776.669, 'qmult_water_rate': 0.0, 'date': '01/03/2025',
- 'unit_system': UnitSystem.METBAR, 'well_name':'GUN_P'},
-{'name': 'GUN_P', 'qmult_oil_rate': 128.528, 'qmult_gas_rate': 13776.669, 'qmult_water_rate': 0.0, 'date': '01/03/2025',
-'unit_system': UnitSystem.METBAR, 'active_node':True, 'min_pressure': 5.0, 'convert_qmult_to_reservoir_barrels': True,
-'well_name':'GUN_P'},
-         {'name': 'test_welllist', 'wells': ['well1', 'well2', 'well3'], 'date': '01/03/2025',}
-         ),
-     ])
+                                 {'name': 'well1', 'bore_type': 'PIPE', 'hyd_method': "BEGGS", 'diameter': 3.5,
+                                  'date': '01/03/2025',
+                                  'unit_system': UnitSystem.ENGLISH},
+                                 {'name': 'well2', 'hyd_method': "BRILL", 'diameter': 3.25, 'flowsect': 2,
+                                  'roughness': 0.2002,
+                                  'date': '01/03/2025', 'unit_system': UnitSystem.ENGLISH},
+                                 {'name': 'GUN_P', 'qmult_oil_rate': 128.528, 'qmult_gas_rate': 13776.669,
+                                  'qmult_water_rate': 0.0, 'date': '01/03/2025',
+                                  'unit_system': UnitSystem.METBAR, 'well_name': 'GUN_P'},
+                                 {'name': 'GUN_P', 'qmult_oil_rate': 128.528, 'qmult_gas_rate': 13776.669,
+                                  'qmult_water_rate': 0.0, 'date': '01/03/2025',
+                                  'unit_system': UnitSystem.METBAR, 'active_node': True, 'min_pressure': 5.0,
+                                  'convert_qmult_to_reservoir_barrels': True,
+                                  'well_name': 'GUN_P'},
+                                 {'name': 'test_welllist', 'wells': ['well1', 'well2', 'well3'], 'date': '01/03/2025', }
+                         ),
+                         ])
 def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node1_props, node2_props,
-    connection1_props, connection2_props, wellconprops1, wellconprops2, wellheadprops1, wellheadprops2,
-    wellboreprops1, wellboreprops2, constraint_props1, constraint_props2, welllist1):
+                           connection1_props, connection2_props, wellconprops1, wellconprops2, wellheadprops1,
+                           wellheadprops2,
+                           wellboreprops1, wellboreprops2, constraint_props1, constraint_props2, welllist1):
     # Arrange
     # Mock out the surface and fcs file
     def mock_open_wrapper(filename, mode):
@@ -1826,6 +1869,7 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
     assert result_welllist == expected_welllist
     spy.assert_called_once()
 
+
 def test_nexus_simulator_repr(mocker):
     # Arrange
     fcs_content = '''DESC reservoir1
@@ -1853,6 +1897,7 @@ def test_nexus_simulator_repr(mocker):
             'hyd.dat': '',
         }).return_value
         return mock_open
+
     nexus_sim = NexusSimulator(fcs_path)
     expected_result = f"""Simulation name: test_fcs
 Origin: test_fcs.fcs
@@ -1892,7 +1937,7 @@ Run units: UnitSystem.ENGLISH
     test_data
     """, "GASWATER"),
     ("""EOS NHC 7 COMPONENTS C1 C2 C3 C4 C5 C6 C7+""",
-    "EOS NHC 7 COMPONENTS C1 C2 C3 C4 C5 C6 C7+"),
+     "EOS NHC 7 COMPONENTS C1 C2 C3 C4 C5 C6 C7+"),
     ("""test data filler
 ! comment
 EOS NHC 7
@@ -1901,7 +1946,7 @@ COMPONENTS C1 C2 C3 C4 C5 C6 C7+""",
      """EOS NHC 7
 COMPONENTS C1 C2 C3 C4 C5 C6 C7+"""),
 
-    ], ids=["default case", "BLACKOIL", "WATEROIL", "GASWATER", "EOS", "EOS with comments"])
+], ids=["default case", "BLACKOIL", "WATEROIL", "GASWATER", "EOS", "EOS with comments"])
 def test_get_fluid_type(surface_file_contents, expected_result):
     # Arrange
     surface_file_contents_as_list = surface_file_contents.splitlines(keepends=True)
@@ -1913,10 +1958,9 @@ def test_get_fluid_type(surface_file_contents, expected_result):
     assert fluid_type == expected_result
 
 
-def test_attr_info_to_tuple(mocker):
+def test_hash_and_attr_info_to_tuple(mocker):
     # Arrange
-    mock_simulator = mocker.MagicMock()
-    mocker.patch('ResSimpy.Nexus.NexusSimulator', mock_simulator)
+    fake_simulator = get_fake_nexus_simulator(mocker)
 
     # network
     constraint1 = {'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0}
@@ -1924,6 +1968,13 @@ def test_attr_info_to_tuple(mocker):
                    'max_reverse_surface_liquid_rate': 10000.0, 'max_surface_liquid_rate': None}
 
     nexus_constraint_dict = {"SP200": [NexusConstraint(constraint1), NexusConstraint(constraint2)]}
+    dummy_nexus_network = NexusNetwork(model=fake_simulator)
+    dummy_nexus_network._NexusNetwork__has_been_loaded = True
+    fake_simulator._network = dummy_nexus_network
+
+    constraints = NexusConstraints(dummy_nexus_network, fake_simulator)
+    constraints.__setattr__('_constraints', nexus_constraint_dict)
+    dummy_nexus_network.constraints = constraints
 
     # wells
     date_format = DateFormat.DD_MM_YYYY
@@ -1936,14 +1987,17 @@ def test_attr_info_to_tuple(mocker):
                                                  grid='GRID_B', measured_depth=1.568, date_format=date_format,
                                                  unit_system=UnitSystem.ENGLISH)
 
-    dummy_wells = NexusWells(model=mock_simulator)
+    dummy_wells = NexusWells(model=fake_simulator)
     nexus_well_lst = [NexusWell(well_name='WELL_3',
                                 completions=[expected_well_completion_1, expected_well_completion_2],
                                 unit_system=UnitSystem.ENGLISH, parent_wells_instance=dummy_wells)]
+    completions = NexusWells(fake_simulator)
+    completions._wells = nexus_well_lst
+    fake_simulator._wells = completions
 
     expected_network = ((('name', 'well1'), ('max_surface_liquid_rate', 3884.0), ('date', '01/01/2019')),
                         (('name', 'well2'), ('max_surface_water_rate', 0.0),
-                        ('max_reverse_surface_liquid_rate', 10000.0), ('date', '01/01/2019')))
+                         ('max_reverse_surface_liquid_rate', 10000.0), ('date', '01/01/2019')))
     expected_wells = ((('i', 1), ('j', 2), ('k', 3), ('measured_depth', 1.38974), ('skin', 8.9), ('depth', 7.56),
                        ('y', 1.24), ('grid', 'GRID_A'), ('well_radius', 4.5), ('date', '01/03/2023')),
                       (('i', 6), ('k', 8), ('measured_depth', 1.568), ('skin', 4.52), ('depth', 8.955),
@@ -1951,88 +2005,115 @@ def test_attr_info_to_tuple(mocker):
                        ('date', '01/03/2023')))
 
     # Act
-    network_attr = NexusSimulator._attr_info_to_tuple(nexus_constraint_dict)
-    wells_attr = NexusSimulator._attr_info_to_tuple(nexus_well_lst)
+    network_attr = fake_simulator._attr_info_to_tuple(nexus_constraint_dict)
+    wells_attr = fake_simulator._attr_info_to_tuple(nexus_well_lst)
+    result_hash = hash(fake_simulator)
 
     # Assert
     assert network_attr == expected_network
     assert wells_attr == expected_wells
+    assert result_hash == hash((network_attr, wells_attr))
 
 
-@pytest.mark.parametrize("network_return_value, wells_return_value, expected_result", [
-    ("network attribute", "wells attribute", ("return_value", "return_value")),
-    ({}, "wells attribute", ("return_value", "return_value")),
-    ("network attribute", [], ("return_value", "return_value")),
-    ({}, [], "Network constraints and wells completions are empty. No hash value generated.")
-])
-def test_network_wells_tuple(mocker, network_return_value, wells_return_value, expected_result):
+def test_network_wells_tuple(mocker):
     # Arrange
+    mock_attr1 = {'key1': 'value1'}
+    mock_attr2 = ['NexusWell1', 'NexusWell2']
+
     mock_simulator = mocker.MagicMock()
     mocker.patch('ResSimpy.Nexus.NexusSimulator', mock_simulator)
-    mock_simulator.network.constraints.get_all.return_value = network_return_value
-    mock_simulator.wells.get_all.return_value = wells_return_value
-
-    mock_simulator._attr_info_to_tuple.return_value = "return_value"
+    mock_simulator.network.constraints.get_all.return_value = mock_attr1
+    mock_simulator.wells.get_all.return_value = mock_attr2
+    mock_simulator._attr_info_to_tuple.side_effect = ['network_tuple', 'wells_tuple']
 
     # Act
     result = NexusSimulator.network_wells_tuple(mock_simulator)
 
     # Assert
-    assert result == expected_result
-
-
-def test_hash_tuple(mocker):
-    # Arrange
-    mock_simulator = mocker.MagicMock()
-    mocker.patch('ResSimpy.Nexus.NexusSimulator', mock_simulator)
-    mock_simulator.network_wells_tuple.return_value = (("tuple1", "tuple3"), ("tuple2", "tuple4"))
-    expected_result = hash((("tuple1", "tuple3"), ("tuple2", "tuple4")))
-
-    # Act
-    result = NexusSimulator.__hash__(mock_simulator)
-
-    # Assert
-    assert result == expected_result
+    mock_simulator.network.constraints.get_all.assert_called_once()
+    mock_simulator.wells.get_all.assert_called_once()
+    mock_simulator._attr_info_to_tuple.assert_has_calls([mocker.call(mock_attr1), mocker.call(mock_attr2)])
+    assert result == ('network_tuple', 'wells_tuple')
 
 
 def test_hash_tuple_empty(mocker):
     # Arrange
-    mock_simulator = mocker.MagicMock()
-    mocker.patch('ResSimpy.Nexus.NexusSimulator', mock_simulator)
-    mock_simulator.network_wells_tuple.return_value = ("Network constraints and wells completions are empty. "
-                                                       "No hash value generated.")
-
-    # Act
-    result = NexusSimulator.__hash__(mock_simulator)
-
-    # Assert
-    expected_result = 0
-    assert result == expected_result
-
-
-@pytest.mark.parametrize("return_value1, return_value2, expected_result", [
-    ((("tuple1", "tuple3"), ("tuple2", "tuple4")), (("tuple1", "tuple3"), ("tuple2", "tuple4")), True),
-    ((("tuple1", "tuple3"), ("tuple2", "tuple4")), (("tuple1", "tuple5"), ("tuple3", "tuple4")), False),
-])
-def test_eq(mocker, return_value1, return_value2, expected_result):
     # Arrange
-    mock_simulator1 = mocker.MagicMock()
-    mocker.patch('ResSimpy.Nexus.NexusSimulator', mock_simulator1)
-    mock_network_wells_tuple1 = mocker.MagicMock(return_value=return_value1)
-    sim1 = NexusSimulator('test/path/file1.fcs')
-    mocker.patch.object(sim1, 'network_wells_tuple', mock_network_wells_tuple1)
+    fake_simulator = get_fake_nexus_simulator(mocker)
 
-    mock_simulator2 = mocker.MagicMock()
-    mocker.patch('ResSimpy.Nexus.NexusSimulator', mock_simulator2)
-    mock_network_wells_tuple2 = mocker.MagicMock(return_value=return_value2)
-    sim2 = NexusSimulator('test/path/file1.fcs')
-    mocker.patch.object(sim2, 'network_wells_tuple', mock_network_wells_tuple2)
+    # network
+    nexus_constraint_dict = {}
+    dummy_nexus_network = NexusNetwork(model=fake_simulator)
+    dummy_nexus_network._NexusNetwork__has_been_loaded = True
+    fake_simulator._network = dummy_nexus_network
+
+    constraints = NexusConstraints(dummy_nexus_network, fake_simulator)
+    constraints.__setattr__('_constraints', nexus_constraint_dict)
+    dummy_nexus_network.constraints = constraints
+
+    # wells
+    nexus_well_lst = []
+    completions = NexusWells(fake_simulator)
+    completions._wells = nexus_well_lst
+    fake_simulator._wells = completions
 
     # Act
-    result = sim1.__eq__(sim2)
+    result_hash = hash(fake_simulator)
 
     # Assert
-    assert result == expected_result
+    assert result_hash == hash(((), ()))
+
+
+def test_eq(mocker):
+    # Arrange
+    fake_simulator1 = get_fake_nexus_simulator(mocker)
+    fake_simulator2 = get_fake_nexus_simulator(mocker)
+
+    # Simulator 1
+    constraint1 = {'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0}
+
+    nexus_constraint_dict = {"SP200": [NexusConstraint(constraint1)]}
+    dummy_nexus_network = NexusNetwork(model=fake_simulator1)
+    dummy_nexus_network._NexusNetwork__has_been_loaded = True
+    fake_simulator1._network = dummy_nexus_network
+
+    constraints = NexusConstraints(dummy_nexus_network, fake_simulator1)
+    constraints.__setattr__('_constraints', nexus_constraint_dict)
+    dummy_nexus_network.constraints = constraints
+
+    # Simulator 2
+    # only 'name' is changed
+    constraint2 = {'date': '01/01/2019', 'name': 'well2', 'max_surface_liquid_rate': 3884.0}
+
+    nexus_constraint_dict2 = {"SP200": [NexusConstraint(constraint2)]}
+    dummy_nexus_network2 = NexusNetwork(model=fake_simulator2)
+    dummy_nexus_network2._NexusNetwork__has_been_loaded = True
+    fake_simulator2._network = dummy_nexus_network2
+
+    constraints2 = NexusConstraints(dummy_nexus_network2, fake_simulator2)
+    constraints2.__setattr__('_constraints', nexus_constraint_dict2)
+    dummy_nexus_network.constraints = constraints2
+
+    # we keep both wells from simulator1 and simulator2 the same
+    date_format = DateFormat.DD_MM_YYYY
+    expected_well_completion_1 = NexusCompletion(date='01/03/2023', i=1, j=2, k=3, skin=8.9, depth=7.56,
+                                                 well_radius=4.5, x=None, y=1.24,
+                                                 grid='GRID_A', measured_depth=1.38974, date_format=date_format)
+
+    dummy_wells = NexusWells(model=fake_simulator1)
+    nexus_well_lst = [NexusWell(well_name='WELL_3',
+                                completions=[expected_well_completion_1],
+                                unit_system=UnitSystem.ENGLISH, parent_wells_instance=dummy_wells)]
+    completions = NexusWells(fake_simulator1)
+    completions._wells = nexus_well_lst
+    fake_simulator1._wells = completions
+    fake_simulator2._wells = completions
+
+    # Act
+    result = fake_simulator1.__eq__(fake_simulator2)
+
+    # Assert
+    assert result is False
 
 
 def test_eq_not_simulator(mocker):

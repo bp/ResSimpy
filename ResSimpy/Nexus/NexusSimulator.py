@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import os
 import warnings
-from typing import Any, Union, Optional
+from typing import Any, Union, Optional, Sequence
 
 import resqpy.model as rq
 from datetime import datetime
@@ -144,7 +144,8 @@ class NexusSimulator(Simulator):
         return printable_str
 
     @staticmethod
-    def _attr_info_to_tuple(sim_attr: Union[dict, list]) -> tuple[tuple[tuple[str, Any], ...], ...]:
+    def _attr_info_to_tuple(sim_attr: Union[dict, Sequence])\
+            -> tuple[tuple[tuple[str, Union[str, bool, float]], ...], ...]:
         """Convert the network constraints/wells completions attribute to a tuple of tuples so that it is hashable.
 
         Args:
@@ -166,40 +167,24 @@ class NexusSimulator(Simulator):
                     well_dict = el.to_dict(add_units=False, include_nones=False)
                     lst_of_tuples.append(tuple(well_dict.items()))
 
-        # Network constraints example:
-        # tuple(lst of tuples)= ((('name', '7a-2'), ('min_pressure', 14.5), ('date', '01/11/2004')),
-        # (('name', '7a-2'),('min_pressure', 14.5),('max_surface_oil_rate', 11408.8),('date', '01/01/2005')))
-
-        # Wells completions example:
-        # tuple(lst of tuples)= ((('i', 37), ('j', 57), ('k', 1), ('well_radius', 0.3), ('date', '01/11/1999')),
-        # (('i', 37), ('j', 57), ('k', 3), ('well_radius', 0.3), ('date', '01/11/1999')))
         return tuple(lst_of_tuples)
 
-    def network_wells_tuple(self) -> Union[str, tuple]:
+    def network_wells_tuple(self) -> tuple:
         """Returns a tuple of the network constraints and wells completions attributes.
 
         Returns:
-            Union[str, tuple]: tuple of the network constraints and wells completions attributes or a string
-            if both the attributes return empty
+            Union[tuple]: tuple of the network constraints and wells completions attributes
         """
         network_attr = self.network.constraints.get_all()
         wells_attr = self.wells.get_all()
 
-        if not network_attr and not wells_attr:
-            return "Network constraints and wells completions are empty. No hash value generated."
-
         network_tuple = self._attr_info_to_tuple(network_attr)
-        wells_tuple = self._attr_info_to_tuple([wells_attr])
+        wells_tuple = self._attr_info_to_tuple(wells_attr)
         return network_tuple, wells_tuple
 
     def __hash__(self) -> int:
         hash_attr_tuple = self.network_wells_tuple()
-        if isinstance(hash_attr_tuple, tuple):
-            return hash(hash_attr_tuple)
-        # mypy suggests that hash return value can only be int,
-        # so it will return a hash value of 0 if both attributes are empty
-        else:
-            return 0
+        return hash(hash_attr_tuple)
 
     def __eq__(self, other) -> bool:
         if isinstance(other, NexusSimulator):
