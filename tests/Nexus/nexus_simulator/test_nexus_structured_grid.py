@@ -1453,8 +1453,9 @@ def test_nested_includes_with_grid_array_keywords(mocker):
     include_file_location_kx ='/inc_file_kx.inc'
 
     include_file_contents = ('''KY VALUE 
-                                INCLUDE /inc_file2.inc''')
-    include_file_contents_2 = 'some content that should be skipped'
+                                INCLUDE /inc_file2.inc
+                                ''')
+    include_file_contents_2 = 'some content\n that should\n be skipped'
     include_file_contents_kx = 'some content that should be skipped'
 
     def mock_open_wrapper(filename, mode):
@@ -1471,10 +1472,13 @@ def test_nested_includes_with_grid_array_keywords(mocker):
 
     sim_obj = NexusSimulator(origin='/nexus_run.fcs')
 
-    expected_ky_result = GridArrayDefinition(modifier='VALUE', value='inc_file2.inc', mods=None)
+    expected_kx_result = GridArrayDefinition(modifier='VALUE', value='/inc_file_kx.inc', mods=None)
+    expected_ky_result = GridArrayDefinition(modifier='VALUE', value='/inc_file2.inc', mods=None)
 
     # Act
-    result = sim_obj.grid.ky
+    result_kx = sim_obj.grid.kx
+    result_ky = sim_obj.grid.ky
 
     # Assert
-    assert result == expected_ky_result
+    assert result_kx == expected_kx_result
+    assert result_ky == expected_ky_result
