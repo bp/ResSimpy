@@ -33,7 +33,7 @@ def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
             look_for_table_end = False
         if reading_function:
             # remove all comments following the first '!' in a line.
-            if 'ANALYT' in line:
+            if nfo.check_token('ANALYT', line):
                 analyt_flag = True
             modified_line = line.split('!', 1)[0]
             function_body.append(modified_line.strip())
@@ -47,7 +47,7 @@ def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
                     continue
                 if i < len(file_as_list)-1 and look_for_table_end:
                     end_function = False
-                    for keyword in STRUCTURED_GRID_KEYWORDS + GRID_ARRAY_KEYWORDS + ['INCLUDE']:
+                    for keyword in STRUCTURED_GRID_KEYWORDS + GRID_ARRAY_KEYWORDS: # + ['INCLUDE']:
                         if nfo.check_token(keyword, file_as_list[i+1]):
                             end_function = True
                     if end_function:
