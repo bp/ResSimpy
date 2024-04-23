@@ -26,7 +26,6 @@ from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
-from ResSimpy.Nexus.load_wells import load_wells
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from pytest_mock import MockerFixture
@@ -2007,7 +2006,7 @@ def test_hash_and_attr_info_to_tuple(mocker):
     # Act
     network_attr = fake_simulator._attr_info_to_tuple(nexus_constraint_dict)
     wells_attr = fake_simulator._attr_info_to_tuple(nexus_well_lst)
-    result_hash = hash(fake_simulator)
+    result_hash = fake_simulator.hash_network_wells()
 
     # Assert
     assert network_attr == expected_network
@@ -2015,7 +2014,11 @@ def test_hash_and_attr_info_to_tuple(mocker):
     assert result_hash == hash((network_attr, wells_attr))
 
 
-def test_network_wells_tuple(mocker):
+@pytest.mark.parametrize("attr_info_to_tuple_return_value, expected_result", [
+    (['network_tuple', 'wells_tuple'], ('network_tuple', 'wells_tuple')),
+    ([(), ()], ((), ()))
+])
+def test_network_wells_tuple(mocker, attr_info_to_tuple_return_value, expected_result):
     # Arrange
     mock_attr1 = {'key1': 'value1'}
     mock_attr2 = ['NexusWell1', 'NexusWell2']
@@ -2024,7 +2027,7 @@ def test_network_wells_tuple(mocker):
     mocker.patch('ResSimpy.Nexus.NexusSimulator', mock_simulator)
     mock_simulator.network.constraints.get_all.return_value = mock_attr1
     mock_simulator.wells.get_all.return_value = mock_attr2
-    mock_simulator._attr_info_to_tuple.side_effect = ['network_tuple', 'wells_tuple']
+    mock_simulator._attr_info_to_tuple.side_effect = attr_info_to_tuple_return_value
 
     # Act
     result = NexusSimulator.network_wells_tuple(mock_simulator)
@@ -2033,7 +2036,7 @@ def test_network_wells_tuple(mocker):
     mock_simulator.network.constraints.get_all.assert_called_once()
     mock_simulator.wells.get_all.assert_called_once()
     mock_simulator._attr_info_to_tuple.assert_has_calls([mocker.call(mock_attr1), mocker.call(mock_attr2)])
-    assert result == ('network_tuple', 'wells_tuple')
+    assert result == expected_result
 
 
 def test_hash_tuple_empty(mocker):
@@ -2057,14 +2060,11 @@ def test_hash_tuple_empty(mocker):
     completions._wells = nexus_well_lst
     fake_simulator._wells = completions
 
-    # Act
-    result_hash = hash(fake_simulator)
-
     # Assert
-    assert result_hash == hash(((), ()))
+    assert fake_simulator.hash_network_wells() == hash(((), ()))
 
 
-def test_eq(mocker):
+def test_wells_and_network_equal(mocker):
     # Arrange
     fake_simulator1 = get_fake_nexus_simulator(mocker)
     fake_simulator2 = get_fake_nexus_simulator(mocker)
@@ -2082,8 +2082,7 @@ def test_eq(mocker):
     dummy_nexus_network.constraints = constraints
 
     # Simulator 2
-    # only 'name' is changed
-    constraint2 = {'date': '01/01/2019', 'name': 'well2', 'max_surface_liquid_rate': 3884.0}
+    constraint2 = {'date': '01/01/2019', 'name': 'well2', 'max_surface_liquid_rate': 234.0}
 
     nexus_constraint_dict2 = {"SP200": [NexusConstraint(constraint2)]}
     dummy_nexus_network2 = NexusNetwork(model=fake_simulator2)
@@ -2094,11 +2093,10 @@ def test_eq(mocker):
     constraints2.__setattr__('_constraints', nexus_constraint_dict2)
     dummy_nexus_network.constraints = constraints2
 
-    # we keep both wells from simulator1 and simulator2 the same
     date_format = DateFormat.DD_MM_YYYY
-    expected_well_completion_1 = NexusCompletion(date='01/03/2023', i=1, j=2, k=3, skin=8.9, depth=7.56,
-                                                 well_radius=4.5, x=None, y=1.24,
-                                                 grid='GRID_A', measured_depth=1.38974, date_format=date_format)
+    expected_well_completion_1 = NexusCompletion(date='13/09/2023', i=1, j=5, k=2, skin=8.9, depth=7.56,
+                                                 well_radius=4.5, x=None, y=10.24,
+                                                 grid='GRID_A', measured_depth=2.0, date_format=date_format)
 
     dummy_wells = NexusWells(model=fake_simulator1)
     nexus_well_lst = [NexusWell(well_name='WELL_3',
@@ -2110,20 +2108,51 @@ def test_eq(mocker):
     fake_simulator2._wells = completions
 
     # Act
-    result = fake_simulator1.__eq__(fake_simulator2)
+    same_result = fake_simulator1.wells_and_network_equal(fake_simulator1)
+    diff_result = fake_simulator1.wells_and_network_equal(fake_simulator2)
 
     # Assert
-    assert result is False
+    assert same_result is True
+    assert diff_result is False
+    with pytest.raises(TypeError):
+        fake_simulator1.wells_and_network_equal("Not a NexusSimulator object")
 
 
-def test_eq_not_simulator(mocker):
+def test_wells_and_network_equal_empty(mocker):
     # Arrange
-    mock_simulator1 = mocker.MagicMock()
-    mocker.patch('ResSimpy.Nexus.NexusSimulator', mock_simulator1)
-    sim1 = NexusSimulator('test/path/file1.fcs')
+    fake_simulator1 = get_fake_nexus_simulator(mocker)
+    fake_simulator2 = get_fake_nexus_simulator(mocker)
+
+    # Simulator 1
+    constraint1 = {}
+
+    nexus_constraint_dict = {}
+    dummy_nexus_network = NexusNetwork(model=fake_simulator1)
+    dummy_nexus_network._NexusNetwork__has_been_loaded = True
+    fake_simulator1._network = dummy_nexus_network
+
+    constraints = NexusConstraints(dummy_nexus_network, fake_simulator1)
+    constraints.__setattr__('_constraints', nexus_constraint_dict)
+    dummy_nexus_network.constraints = constraints
+
+    # Simulator 2
+    constraint2 = {}
+
+    nexus_constraint_dict2 = {}
+    dummy_nexus_network2 = NexusNetwork(model=fake_simulator2)
+    dummy_nexus_network2._NexusNetwork__has_been_loaded = True
+    fake_simulator2._network = dummy_nexus_network2
+
+    constraints2 = NexusConstraints(dummy_nexus_network2, fake_simulator2)
+    constraints2.__setattr__('_constraints', nexus_constraint_dict2)
+    dummy_nexus_network.constraints = constraints2
+
+    nexus_well_lst = []
+    completions = NexusWells(fake_simulator1)
+    completions._wells = nexus_well_lst
+    fake_simulator1._wells = completions
+    fake_simulator2._wells = completions
 
     # Act
-    result = sim1.__eq__("Not a NexusSimulator object")
-
-    # Assert
-    assert result == NotImplemented
+    with pytest.raises(ValueError):
+        fake_simulator1.wells_and_network_equal(fake_simulator2)

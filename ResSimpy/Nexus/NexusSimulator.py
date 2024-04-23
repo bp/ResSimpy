@@ -148,9 +148,8 @@ class NexusSimulator(Simulator):
             -> tuple[tuple[tuple[str, Union[str, bool, float]], ...], ...]:
         """Convert the network constraints/wells completions attribute to a tuple of tuples so that it is hashable.
 
-        Args:
-            sim_attr (Union[dict, list]): dict of {well name: [NexusConstraint]} for self.network.constraints.get_all(),
-            list of [NexusWell objects] for self.wells.get_all()
+        Args: sim_attr (Union[dict, Sequence]): dict of {well name: [NexusConstraint]} for
+        self.network.constraints.get_all(), list of [NexusWell objects] for self.wells.get_all()
 
         Returns: Tuple[Tuple[Tuple[str, Union[str, float, bool]], ...], ...]: tuple of tuples
         """
@@ -173,7 +172,7 @@ class NexusSimulator(Simulator):
         """Returns a tuple of the network constraints and wells completions attributes.
 
         Returns:
-            Union[tuple]: tuple of the network constraints and wells completions attributes
+            tuple: tuple of the network constraints and wells completions attributes
         """
         network_attr = self.network.constraints.get_all()
         wells_attr = self.wells.get_all()
@@ -182,14 +181,38 @@ class NexusSimulator(Simulator):
         wells_tuple = self._attr_info_to_tuple(wells_attr)
         return network_tuple, wells_tuple
 
-    def __hash__(self) -> int:
+    def hash_network_wells(self) -> int:
+        """Hashes the network constraints and wells completions attributes.
+
+        Returns:
+            int: hash value of the network constraints and wells completions attributes
+        """
         hash_attr_tuple = self.network_wells_tuple()
         return hash(hash_attr_tuple)
 
-    def __eq__(self, other) -> bool:
+    def wells_and_network_equal(self, other) -> bool:
+        """Compares the network constraints and wells completions of two NexusSimulator objects.
+
+        Args:
+            other (NexusSimulator): NexusSimulator object to compare with
+
+        Returns:
+            Union[bool]: Returns True if the network constraints and wells completions are equal, False otherwise.
+
+        Raises:
+            ValueError: if both models have no network constraints or wells completions.
+            TypeError: if the other object is not a NexusSimulator object.
+        """
         if isinstance(other, NexusSimulator):
+            base_class_tuple = self.network_wells_tuple()
+            other_class_tuple = other.network_wells_tuple()
+            if base_class_tuple == ((), ()) and other_class_tuple == ((), ()):
+                # if base_class_tuple and other_class_tuple both return empty tuple, that means both of them /
+                # have no network constraints or wells completions
+                raise ValueError("Both models have empty network constraints or wells completions. Unable to compare.")
             return self.network_wells_tuple() == other.network_wells_tuple()
-        return NotImplemented
+        raise TypeError(f"Unable to compare {type(self)} with {other}. Ensure that {other} is of type NexusSimulator. "
+                        f"{other} has {type(other)}")
 
     def remove_temp_from_properties(self):
         """Updates model values if the files are moved from a temp directory
