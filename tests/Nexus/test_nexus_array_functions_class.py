@@ -99,6 +99,10 @@ ANALYT  max
  KX KY OUTPUT KX KY
 some line
 
+FUNCTION
+ ANALYT POLYN 2.0
+ RANGE INPUT 4 5 6
+ WORKA6 OUTPUT WORKA7
     """
     expected_functions = [['Function IREGION', '8 9 10', 'ANALYT     log', 'WORKA3    OUTPUT  KX'],
                           ['FUNCTION', 'ANALYT log10', 'WORKA3 OUTPUT KX'],
