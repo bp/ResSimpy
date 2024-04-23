@@ -335,7 +335,8 @@ class NexusFile(File):
                         yield row
 
                     yield from include_file.iterate_line(file_index=file_index, max_depth=level_down_max_depth,
-                                                         parent=parent, prefix_line=prefix_line)
+                                                         parent=parent, prefix_line=prefix_line,
+                                                         keep_include_references=keep_include_references)
 
                     new_entry = (file_index.index, self.id)
                     if new_entry not in parent.line_locations:

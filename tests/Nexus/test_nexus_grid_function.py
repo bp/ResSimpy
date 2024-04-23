@@ -270,8 +270,8 @@ INCLUDE /random/path
 FUNCTION
 ANALYT POLYN 3.0 2 1.0 0
 BLOCKS 1 5 1 7 1 9
+!  RANGE INPUT 4 5 6
 KX OUTPUT KY KZ
-
 IEQUIL CON 1
 ''',
                            [
