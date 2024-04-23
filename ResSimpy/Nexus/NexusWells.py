@@ -43,7 +43,7 @@ class NexusWells(Wells):
         """Initialises the NexusWells class.
 
         Args:
-            model (NexusSimulator)
+            model (NexusSimulator): The model object that contains this NexusWells instance.
         """
         self.__model = model
         self.__add_object_operations = AddObjectOperations(NexusCompletion, self.table_header, self.table_footer, model)
