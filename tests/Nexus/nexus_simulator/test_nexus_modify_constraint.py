@@ -6,8 +6,8 @@ from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from tests.multifile_mocker import mock_multiple_files
-from tests.utility_for_tests import get_fake_nexus_simulator, uuid_side_effect
-
+from tests.utility_for_tests import  get_fake_nexus_simulator, uuid_side_effect
+from copy import deepcopy
 
 def test_find_constraint(mocker):
     # Arrange
@@ -298,37 +298,36 @@ def test_remove_constraint(mocker, file_contents, expected_result_file,
         well2	 QWSMAX 	0.0
 well3 QOSMAX 100 ! test user comments
         ENDCONSTRAINTS''',
-                              {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/01/2019',
-                               'unit_system': UnitSystem.ENGLISH},
-                              1,
-                              {'uuid1': [2, 4], 'uuid2': [3], 'uuid3': [5]}
-                              ),
+    {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH},
+    1,
+    {'uuid1': [2, 4], 'uuid2': [3], 'new_obj_uuid': [5]}
+    ),
 
                              # add new table
                              ('''TIME 01/01/2019
 
 ''',
-                              '''TIME 01/01/2019
+    '''TIME 01/01/2019
+
 CONSTRAINTS ! test user comments
 well3 QOSMAX 100
 ENDCONSTRAINTS
 
 ''',
-                              {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/01/2019',
-                               'unit_system': UnitSystem.ENGLISH},
-                              1,
-                              {'uuid1': [2]}
-                              ),
+    {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH},
+    1,
+    {'new_obj_uuid': [3]}
+    ),
 
-                             # add new table
-                             ('''TIME 01/01/2019
+# add to new date
+    ('''TIME 01/01/2019
     TIME 01/02/2019
 
     TIME 01/03/2019
     TIME 01/01/2020
     TIME 01/02/2020
 ''',
-                              '''TIME 01/01/2019
+    '''TIME 01/01/2019
     TIME 01/02/2019
 
     TIME 01/03/2019
@@ -336,38 +335,38 @@ TIME 01/04/2019 ! test user comments
 CONSTRAINTS
 well3 QOSMAX 100
 ENDCONSTRAINTS
+
     TIME 01/01/2020
     TIME 01/02/2020
 ''',
-                              {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/04/2019',
-                               'unit_system': UnitSystem.ENGLISH},
-                              1,
-                              {'uuid1': [6]}
-                              ),
+    {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/04/2019', 'unit_system': UnitSystem.ENGLISH},
+    1,
+    {'new_obj_uuid': [6]}
+    ),
 
-                             # add QMULT table
-                             ('''TIME 01/01/2019
+# add QMULT table
+    ('''TIME 01/01/2019
 
 ''',
-                              '''TIME 01/01/2019
+    '''TIME 01/01/2019
+
 CONSTRAINTS ! test user comments
 node#2 QLIQSMAX MULT
 ENDCONSTRAINTS
+
 QMULT
 WELL QOIL QGAS QWATER
 node#2 200.0 NA 4052.12
 ENDQMULT
-
 ''',
-                              {'name': 'node#2', 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
-                               'use_qmult_qoilqwat_surface_rate': True, 'qmult_oil_rate': 200.0,
-                               'qmult_water_rate': 4052.12},
-                              1,
-                              {'uuid1': [2, 6]}
-                              ),
+    {'name': 'node#2', 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
+                'use_qmult_qoilqwat_surface_rate': True, 'qmult_oil_rate': 200.0, 'qmult_water_rate': 4052.12},
+    1,
+    {'new_obj_uuid': [3, 8]}
+    ),
 
-                             # add QMULT table to existing QMULT
-                             ('''TIME 01/01/2019
+# add QMULT table to existing QMULT
+    ('''TIME 01/01/2019
 CONSTRAINTS
 node#2 QLIQSMAX MULT
 ENDCONSTRAINTS
@@ -376,7 +375,7 @@ WELL QOIL QGAS QWATER
 node#2 200.0 NA 4052.12
 ENDQMULT
 ''',
-                              '''TIME 01/01/2019
+    '''TIME 01/01/2019
 CONSTRAINTS
 node#2 QLIQSMAX MULT
 new_well QLIQSMAX MULT ! test user comments
@@ -387,15 +386,15 @@ node#2 200.0 NA 4052.12
 new_well 3.14 50.2 420.232
 ENDQMULT
 ''',
-                              {'name': 'new_well', 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
-                               'use_qmult_qoilqwat_surface_rate': True, 'qmult_oil_rate': 3.14, 'qmult_gas_rate': 50.2,
-                               'qmult_water_rate': 420.232},
-                              2,
-                              {'uuid1': [2, 7], 'uuid2': [3, 8]}
-                              ),
+{'name': 'new_well', 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
+ 'use_qmult_qoilqwat_surface_rate': True, 'qmult_oil_rate': 3.14, 'qmult_gas_rate': 50.2,
+ 'qmult_water_rate': 420.232},
+2,
+{'uuid1': [2, 7], 'new_obj_uuid': [3, 8]}
+),
 
-                             # more time cards with qmult
-                             ('''TIME 01/01/2019
+# more time cards with qmult
+    ('''TIME 01/01/2019
 CONSTRAINTS
 well1 QOSMAX 1025 
 ENDCONSTRAINTS
@@ -415,7 +414,7 @@ TIME 01/02/2020
 !comment
 TIME 01/03/2020
 ''',
-                              '''TIME 01/01/2019
+    '''TIME 01/01/2019
 CONSTRAINTS
 well1 QOSMAX 1025 
 ENDCONSTRAINTS
@@ -437,16 +436,100 @@ TIME 01/02/2020
 !comment
 TIME 01/03/2020
 ''',
-                              {'name': 'new_well', 'date': '01/01/2020', 'unit_system': UnitSystem.ENGLISH,
-                               'use_qmult_qoilqwat_surface_rate': True, 'qmult_oil_rate': 3.14, 'qmult_gas_rate': 50.2,
-                               'qmult_water_rate': 420.232},
-                              2,
-                              {'uuid1': [2, 6], 'uuid2': [10, 15], 'uuid3': [11, 16]}
-                              ),
+    {'name': 'new_well', 'date': '01/01/2020', 'unit_system': UnitSystem.ENGLISH,
+     'use_qmult_qoilqwat_surface_rate': True, 'qmult_oil_rate': 3.14, 'qmult_gas_rate': 50.2,
+     'qmult_water_rate': 420.232},
+    2,
+    {'uuid1': [2, 6], 'uuid2': [10, 15], 'new_obj_uuid': [11, 16]}
+    ),
 
-                         ], ids=['basic_test', 'add new table', 'add to new date', 'add QMULT table',
-                                 'add QMULT table to existing QMULT',
-                                 'more time cards with qmult'])
+    # at the end of the TIMEs in the file
+    ('''TIME 01/01/2019
+        CONSTRAINTS
+        well2    QLIQSMAX- 10000.0 QLIQSMAX 15.5
+        well1	 QLIQSMAX 	3884.0  QWSMAX 	0
+        well2	 QWSMAX 	0.0
+        ENDCONSTRAINTS
+''',
+    '''TIME 01/01/2019
+        CONSTRAINTS
+        well2    QLIQSMAX- 10000.0 QLIQSMAX 15.5
+        well1	 QLIQSMAX 	3884.0  QWSMAX 	0
+        well2	 QWSMAX 	0.0
+        ENDCONSTRAINTS
+TIME 01/01/2020 ! test user comments
+CONSTRAINTS
+well3 QOSMAX 100
+ENDCONSTRAINTS
+
+''',
+    {'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/01/2020', 'unit_system': UnitSystem.ENGLISH},
+    1,
+    {'uuid1': [2, 4], 'uuid2': [3], 'new_obj_uuid': [8]}
+    ),
+
+    # existing time card
+('''TIME 01/01/2019
+        CONSTRAINTS
+        well2    QLIQSMAX- 10000.0 QLIQSMAX 15.5
+        well1	 QLIQSMAX 	3884.0  QWSMAX 	0
+        well2	 QWSMAX 	0.0
+        ENDCONSTRAINTS
+''',
+'''TIME 01/01/2019
+        CONSTRAINTS
+        well2    QLIQSMAX- 10000.0 QLIQSMAX 15.5
+        well1	 QLIQSMAX 	3884.0  QWSMAX 	0
+        well2	 QWSMAX 	0.0
+well2 QOSMAX 100 ! test user comments
+        ENDCONSTRAINTS
+''',
+    {'name': 'well2', 'max_surface_oil_rate': 100, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH},
+    1,
+    {'uuid1': [2, 4], 'uuid2': [3], 'new_obj_uuid': [5]},
+    ),
+
+    # existing time cards
+    ('''TIME 01/01/2019
+    ! comment
+    CONSTRAINTS
+    well1 qosmax 100
+    ENDCONSTRAINTS
+    
+    TIME 01/01/2020
+    CONSTRAINTS
+    well1 qliqsmax 123
+    ENDCONSTRAINTS
+    
+    TIME 01/02/2020
+    COnstraints
+    well1 qwsmax 123
+    ENDCONSTRAINTS
+''',
+    '''TIME 01/01/2019
+    ! comment
+    CONSTRAINTS
+    well1 qosmax 100
+    ENDCONSTRAINTS
+    
+    TIME 01/01/2020
+    CONSTRAINTS
+    well1 qliqsmax 123
+well1 PMAX 100 ! test user comments
+    ENDCONSTRAINTS
+    
+    TIME 01/02/2020
+    COnstraints
+    well1 qwsmax 123
+    ENDCONSTRAINTS
+''',
+     {'name': 'well1', 'max_pressure': 100, 'date': '01/01/2020', 'unit_system': UnitSystem.ENGLISH},
+     1,
+     {'uuid1': [3], 'uuid2': [8], 'uuid3': [14], 'new_obj_uuid': [9]},
+     )
+
+], ids=['basic_test', 'add new table', 'add to new date', 'add QMULT table', 'add QMULT table to existing QMULT',
+        'more time cards with qmult', 'at the end of the TIMEs in the file', 'existing time card', 'existing time cards'])
 def test_add_constraint(mocker, file_contents, expected_file_contents, new_constraint, expected_number_writes,
                         expected_uuid):
     # Arrange
@@ -473,12 +556,26 @@ def test_add_constraint(mocker, file_contents, expected_file_contents, new_const
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
 
-    # patch in uuids for the constraints
+    # patch in uuids for the existing constraints
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
                                                     'uuid4', 'uuid5', 'uuid6'])
+    # load the network and constraints (this assings the uuids)
+    existing_constraints = nexus_sim.network.constraints.get_all()
+
+    well_name = new_constraint['name']
+    expected_constraints = deepcopy(existing_constraints)
+    add_to_expected = expected_constraints.get(well_name, None)
+    if add_to_expected is None:
+        expected_constraints[well_name] = [NexusConstraint(new_constraint)]
+    else:
+        expected_constraints[well_name].append(NexusConstraint(new_constraint))
+
+    mocker.patch.object(uuid, 'uuid4', side_effect=['new_obj_uuid'])
+
     # Act
     nexus_sim.network.constraints.add(new_constraint, comments='test user comments')
     # Assert
+    assert nexus_sim.network.constraints.get_all() == expected_constraints
     assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(
         keepends=True)
     assert nexus_sim.model_files.surface_files[1].object_locations == expected_uuid
@@ -553,13 +650,13 @@ def test_write_qmult_table():
         well2    QLIQSMAX- 10000.0 QLIQSMAX 15.5
 well1 QWSMAX 1000.0 QLIQSMAX 3884.0
         ENDCONSTRAINTS''',
-         {'name': 'well1', 'date': '01/01/2019', 'max_surface_water_rate': 0},
-         {'name': 'well1', 'date': '01/01/2019', 'max_surface_water_rate': 1000.0},
-         2,
-         {'uuid0': [2], 'uuid2': [3]}
-         ),
-        # qmult_test
-        ('''TIME 01/01/2019
+    {'name': 'well1', 'date': '01/01/2019', 'max_surface_water_rate': 0},
+    {'name': 'well1', 'date': '01/01/2019', 'max_surface_water_rate': 1000.0},
+    2,
+    {'uuid0': [2], 'uuid2': [3]}
+    ),
+   # qmult_test
+    ('''TIME 01/01/2019
         CONSTRAINTS
 well1 QLIQSMAX MULT
 ENDCONSTRAINTS
@@ -569,9 +666,11 @@ well1 200.0 NA 4052.12
 ENDQMULT
 ''',
          '''TIME 01/01/2019
+
 CONSTRAINTS
 well1 QLIQSMAX MULT
 ENDCONSTRAINTS
+
 QMULT
 WELL QOIL QGAS QWATER
 well1 1000.0 10 1.31
@@ -581,7 +680,7 @@ ENDQMULT
          {'name': 'well1', 'date': '01/01/2019', 'qmult_oil_rate': 1000.0, 'qmult_water_rate': 1.31,
           'qmult_gas_rate': 10, 'use_qmult_qoilqwat_surface_rate': True},
          4,
-         {'uuid1': [2, 6]}
+         {'uuid1': [3, 8]}
          )
     ], ids=['basic_test', 'qmult_test'])
 def test_modify_constraints(mocker, file_contents, expected_file_contents, current_constraint, new_constraint,

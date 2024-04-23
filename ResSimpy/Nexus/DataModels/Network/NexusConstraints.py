@@ -113,7 +113,11 @@ class NexusConstraints(Constraints):
         """
         if additional_constraints is None:
             return
-        self._constraints.update(additional_constraints)
+        for name, constraints in additional_constraints.items():
+            # this does not guarantee the constraints are ordered by datetime
+            existing_constraints = self._constraints.get(name, [])
+            existing_constraints.extend(constraints)
+            self._constraints[name] = existing_constraints
 
     def find_by_properties(self, object_name: str, constraint_dict: dict[str, None | float | str | int]) -> \
             NexusConstraint:
@@ -283,6 +287,7 @@ class NexusConstraints(Constraints):
         new_table_needed = False
         new_date_needed = False
         new_qmults_table_needed = False
+        correct_for_padding = 0
         # check for need to add qmult table
         qmult_keywords = ['qmult_oil_rate', 'qmult_gas_rate', 'qmult_water_rate']
         # if any of the qmults are defined in the new constraint then add a qmult table
@@ -291,6 +296,9 @@ class NexusConstraints(Constraints):
             # pad the file if it is empty or only has one line
             new_table_needed = True
             file_as_list.append('\n')
+            # ensure the padding is added to the file through the new_constraint_text at the end of the file.
+            new_constraint_text.append('\n')
+            correct_for_padding = -1
         for index, line in enumerate(file_as_list):
             if nfo.check_token('TIME', line):
                 constraint_date_from_file = nfo.get_expected_token_value('TIME', line, [line])
@@ -305,6 +313,7 @@ class NexusConstraints(Constraints):
                     # this is the case where we don't need to write a new time card
                     new_table_needed = True
                     new_constraint_index = index - 1
+
                 elif date_comparison > 0:
                     new_table_needed = True
                     new_date_needed = True
@@ -317,10 +326,17 @@ class NexusConstraints(Constraints):
                 constraint_string = new_constraint.to_table_line([])
                 new_constraint_text.append(constraint_string)
                 id_line_locs = [new_constraint_index]
-            elif index == len(file_as_list) - 1 and date_index >= 0 and not nfo.check_token('ENDQMULT', line):
+            elif index == len(file_as_list) - 1 and date_index < 0 and not nfo.check_token('ENDQMULT', line):
                 # if we're on the final line of the file and we haven't yet set a constraint index
                 new_table_needed = True
-                new_constraint_index = index
+                new_constraint_index = index + 1
+                new_date_needed = True
+                if add_qmults:
+                    new_qmults_table_needed = True
+            elif index == len(file_as_list) - 1 and date_index == 0 and not nfo.check_token('ENDQMULT', line):
+                new_table_needed = True
+                new_constraint_index = index + 1
+                new_date_needed = False
                 if add_qmults:
                     new_qmults_table_needed = True
 
@@ -332,12 +348,15 @@ class NexusConstraints(Constraints):
                 new_constraint_text.append('CONSTRAINTS\n')
                 new_constraint_text.append(new_constraint.to_table_line([]))
                 new_constraint_text.append('ENDCONSTRAINTS\n')
-                id_line_locs = [new_constraint_index + len(new_constraint_text) - 2]
+                new_constraint_text.append('\n')
+                line_id = new_constraint_index + len(new_constraint_text) - 3 + correct_for_padding
+                id_line_locs = [line_id]
 
             if add_qmults and new_qmults_table_needed:
                 new_constraint_text.extend(new_constraint.write_qmult_table())
                 # add id location for the qmult table as well
-                id_line_locs.append(new_constraint_index + len(new_constraint_text) - 2)
+                line_id = new_constraint_index + len(new_constraint_text) - 2 + correct_for_padding
+                id_line_locs.append(line_id)
                 add_qmults = False
             elif add_qmults and nfo.check_token('ENDQMULT', line) and date_comparison == 0:
                 # find the end of the table of qmults that already exist
