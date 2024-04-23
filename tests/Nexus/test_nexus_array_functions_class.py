@@ -99,6 +99,20 @@ ANALYT  max
  KX KY OUTPUT KX KY
 some line
 
+
+  
+!WORKA7 CON
+!1.0
+!
+!FUNCTION
+!  ANALYT POLYN 2.0 
+!  RANGE INPUT 4 5 6
+!  WORKA6 OUTPUT WORKA7
+!
+!FUNCTION
+!  ANALYT MULT
+!  KXEFF FRAC WORKA7 OUTPUT KXEFF FRAC 
+
 FUNCTION
  ANALYT POLYN 2.0
  RANGE INPUT 4 5 6
@@ -120,30 +134,34 @@ FUNCTION
                           ['FUNCTION IREGION', '8 9 10', 'GRID ROOT', 'BLOCKS 1 20 1  40 1 10',
                            'RANGE  INPUT 1 2  a 2000', 'RANGE output 2000 3000', 'ANALYT    mult',
                            'WORKA3 ky OUTPUT KX'], ['FUNCTION', 'ANALYT min', 'KX KY OUTPUT KY'],
-                          ['FUNCTION', 'ANALYT  max', 'KX KY OUTPUT KX KY']]
+                          ['FUNCTION', 'ANALYT  max', 'KX KY OUTPUT KX KY'],
+                          ['FUNCTION', 'ANALYT POLYN 2.0', 'RANGE INPUT 4 5 6', 'WORKA6 OUTPUT WORKA7']]
 
-    data_dict = {'FUNCTION #': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], \
+    data_dict = {'FUNCTION #': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], \
             'notation': ['KX = ln|WORKA3|', 'KX = log10|WORKA3|', 'POROSITY = 1.4*(POROSITY^4) +1.3*(POROSITY^3) +1.2*(POROSITY^2) +1.1*POROSITY +1.0',
             'KX = | WORKA3 |', 'KX = e^KX', 'KX = 10^KX', 'KX = SQRT|WORKA3|', 'KX = (KX if KX >= 1000.0; 500.0 otherwise)',
             'KX = (KY if KY <= 500.0; 1000.0 otherwise)', 'KX = WORKA3 + KY', 'KZ = KX - KY', 'KZ = (KX / KY if KY != 0; KX otherwise)',
-            'KX = WORKA3 * KY', 'KY = min(KX, KY)', 'KX = max(KX, KY)'],
-            'blocks [i1,i2,j1,j2,k1,k2]': ['', '', '', [1, 30, 1, 30, 1, 5], '', '', '', '', '', '', '', '', [1, 20, 1, 40, 1, 10], '', ''], \
-            'region_type': ['IREGION', '', 'IREGION', '', '', '', '', '', '', '', '', '', 'IREGION', '', ''],
-            'region_numbers':  [[8, 9, 10], '', [8, 9, 10], '', '', '', '', '', '', '', '', '', [8, 9, 10], '', ''],
-            'func_type': ['LOG', 'LOG10', 'POLYN', 'ABS', 'EXP', 'EXP10', 'SQRT', 'GE', 'LE', 'ADD', 'SUBT', 'DIV', 'MULT', 'MIN', 'MAX'],
-            'func_coeff': ['', '', [1.4, 1.3, 1.2, 1.1, 1.0], '', '', '', '', [1000, 500], [500, 1000], '', '', '', '', '', ''],
-            'grid': ['', '', '', '', '', '', '', '', '', '', '', '', 'ROOT', '', ''],
-            'range_input': ['', '', '', '', '', '', '', '', '', '', '', '', ['1', '2', 'A', '2000'], '', ''],
-            'range_output': ['', '', '', '', '', '', '', '', '', '', '', '', [2000, 3000], '', ''],
-            'drange': ['', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-            'input_arrays': [['WORKA3'], ['WORKA3'], ['POROSITY'], ['WORKA3'], ['KX'], ['KX'], ['WORKA3'], ['KX'], ['KY'], ['WORKA3', 'KY'], ['KX', 'KY'], ['KX', 'KY'], ['WORKA3', 'KY'], ['KX', 'KY'], ['KX', 'KY']],
-            'output_arrays': [['KX'], ['KX'], ['POROSITY'], ['KX'], ['KX'], ['KX'], ['KX'], ['KX'], ['KX'], ['KX'], ['KZ'], ['KZ'], ['KX'], ['KY'], ['KX', 'KY']],
-            'i1': ['', '', '', '1', '', '', '', '', '', '', '', '', '1', '', ''], \
-            'i2': ['', '', '', '30', '', '', '', '', '', '', '', '', '20', '', ''], \
-            'j1': ['', '', '', '1', '', '', '', '', '', '', '', '', '1', '', ''], \
-            'j2': ['', '', '', '30', '', '', '', '', '', '', '', '', '40', '', ''], \
-            'k1': ['', '', '', '1', '', '', '', '', '', '', '', '', '1', '', ''], \
-            'k2': ['', '', '', '5', '', '', '', '', '', '', '', '', '10', '', ''], \
+            'KX = WORKA3 * KY', 'KY = min(KX, KY)', 'KX = max(KX, KY)', 'WORKA7 = 2.0'],
+            'blocks [i1,i2,j1,j2,k1,k2]': ['', '', '', [1, 30, 1, 30, 1, 5], '', '', '', '', '', '', '', '', [1, 20, 1, 40, 1, 10], '', '', ''], \
+            'region_type': ['IREGION', '', 'IREGION', '', '', '', '', '', '', '', '', '', 'IREGION', '', '', ''],
+            'region_numbers':  [[8, 9, 10], '', [8, 9, 10], '', '', '', '', '', '', '', '', '', [8, 9, 10], '', '', ''],
+            'func_type': ['LOG', 'LOG10', 'POLYN', 'ABS', 'EXP', 'EXP10', 'SQRT', 'GE', 'LE', 'ADD', 'SUBT', 'DIV', 'MULT', 'MIN', 'MAX', 'POLYN'],
+            'func_coeff': ['', '', [1.4, 1.3, 1.2, 1.1, 1.0], '', '', '', '', [1000, 500], [500, 1000], '', '', '', '', '', '', [2.0]],
+            'grid': ['', '', '', '', '', '', '', '', '', '', '', '', 'ROOT', '', '', ''],
+            'range_input': ['', '', '', '', '', '', '', '', '', '', '', '', ['1', '2', 'A', '2000'], '', '', [4, 5, 6]],
+            'range_output': ['', '', '', '', '', '', '', '', '', '', '', '', [2000, 3000], '', '', ''],
+            'drange': ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '',''],
+            'input_arrays': [['WORKA3'], ['WORKA3'], ['POROSITY'], ['WORKA3'], ['KX'], ['KX'], ['WORKA3'], ['KX'], ['KY'],
+                             ['WORKA3', 'KY'], ['KX', 'KY'], ['KX', 'KY'], ['WORKA3', 'KY'], ['KX', 'KY'], ['KX', 'KY'],
+                             ['WORKA6']],
+            'output_arrays': [['KX'], ['KX'], ['POROSITY'], ['KX'], ['KX'], ['KX'], ['KX'], ['KX'], ['KX'], ['KX'],
+                              ['KZ'], ['KZ'], ['KX'], ['KY'], ['KX', 'KY'], ['WORKA7']],
+            'i1': ['', '', '', '1', '', '', '', '', '', '', '', '', '1', '', '', ''], \
+            'i2': ['', '', '', '30', '', '', '', '', '', '', '', '', '20', '', '', ''], \
+            'j1': ['', '', '', '1', '', '', '', '', '', '', '', '', '1', '', '', ''], \
+            'j2': ['', '', '', '30', '', '', '', '', '', '', '', '', '40', '', '', ''], \
+            'k1': ['', '', '', '1', '', '', '', '', '', '', '', '', '1', '', '', ''], \
+            'k2': ['', '', '', '5', '', '', '', '', '', '', '', '', '10', '', '', ''], \
             }
 
     expected_functions_df = pd.DataFrame(data_dict)
