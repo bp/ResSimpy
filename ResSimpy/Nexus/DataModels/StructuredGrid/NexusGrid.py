@@ -4,7 +4,7 @@ from __future__ import annotations
 import copy
 import pandas as pd
 from dataclasses import dataclass
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Any
 import warnings
 
 from ResSimpy.Grid import Grid, GridArrayDefinition
@@ -198,7 +198,7 @@ class NexusGrid(Grid):
         self.__multbv: GridArrayDefinition = GridArrayDefinition()
         self.__pv: GridArrayDefinition = GridArrayDefinition()
 
-    def __wrap(self, value):
+    def __wrap(self, value) -> Any:
         if isinstance(value, tuple | list | set | frozenset):
             return type(value)([self.__wrap(v) for v in value])
         else:

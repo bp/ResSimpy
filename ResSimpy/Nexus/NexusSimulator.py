@@ -415,7 +415,7 @@ class NexusSimulator(Simulator):
         if self.__destination is not None and os.path.dirname(self._origin) != os.path.dirname(self.__destination):
             self._origin = self.__destination + "/" + os.path.basename(self.__original_fcs_file_path)
 
-    def __load_fcs_file(self):
+    def __load_fcs_file(self) -> None:
         """Loads in the information from the supplied FCS file into the class instance.
         Loads in the paths for runcontrol, structured grid and the first surface network.
         Loads in the values for dateformat and run units.

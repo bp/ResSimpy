@@ -17,15 +17,16 @@ def test_find_constraint(mocker):
 
     constraints = NexusConstraints(mock_nexus_network, mock_nexus_sim)
     well1_constraint_props = ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000.0,
-                              'unit_system': UnitSystem.ENGLISH, 'max_wor': 95.0},
+                               'unit_system': UnitSystem.ENGLISH, 'max_wor': 95.0},
                               {'date': '01/12/2023', 'name': 'well1', 'max_surface_liquid_rate': None, 'max_wor': 95.0,
-                              'unit_system': UnitSystem.ENGLISH},
+                               'unit_system': UnitSystem.ENGLISH},
                               {'date': '01/01/2024', 'name': 'well1', 'max_wor': 95.0, 'max_surface_oil_rate': 1.8,
-                              'unit_system': UnitSystem.ENGLISH},
+                               'unit_system': UnitSystem.ENGLISH},
                               )
-    well2_constraint_props = ({'date': '01/01/2019', 'name': 'well2', 'max_surface_liquid_rate': 1.8, 'max_pressure': 10000.2,
-                               'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True},
-                              {'date': '01/12/2023', 'name': 'well2', 'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True})
+    well2_constraint_props = (
+    {'date': '01/01/2019', 'name': 'well2', 'max_surface_liquid_rate': 1.8, 'max_pressure': 10000.2,
+     'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True},
+    {'date': '01/12/2023', 'name': 'well2', 'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True})
 
     existing_constraints = {'well1': [NexusConstraint(x) for x in well1_constraint_props],
                             'well2': [NexusConstraint(x) for x in well2_constraint_props]}
@@ -55,9 +56,10 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
                               {'date': '01/01/2024', 'name': 'well1', 'max_wor': 95.0, 'max_surface_oil_rate': 1.8,
                                'unit_system': UnitSystem.ENGLISH},
                               )
-    well2_constraint_props = ({'date': '01/01/2019', 'name': 'well2', 'max_surface_liquid_rate': 1.8, 'max_pressure': 10000.2,
-                               'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True},
-                              {'date': '01/12/2023', 'name': 'well2', 'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True})
+    well2_constraint_props = (
+    {'date': '01/01/2019', 'name': 'well2', 'max_surface_liquid_rate': 1.8, 'max_pressure': 10000.2,
+     'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True},
+    {'date': '01/12/2023', 'name': 'well2', 'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True})
 
     existing_constraints = {'well1': [NexusConstraint(x) for x in well1_constraint_props],
                             'well2': [NexusConstraint(x) for x in well2_constraint_props]}
@@ -84,45 +86,48 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
     assert "Instead found: 0 matching constraints" in str(ve.value)
 
 
-@pytest.mark.parametrize("file_contents, expected_result_file, constraint_to_remove, expected_constraints, expected_number_writes", [
-    (''' TIME 01/01/2019
+@pytest.mark.parametrize(
+    "file_contents, expected_result_file, constraint_to_remove, expected_constraints, expected_number_writes", [
+        # basic_test
+        (''' TIME 01/01/2019
     CONSTRAINTS
     well1	 QLIQSMAX 	3884.0  QWSMAX 	0
     well2	 QWSMAX 	0.0  QLIQSMAX- 10000.0 QLIQSMAX 15.5
     ENDCONSTRAINTS
     ''',
-     ''' TIME 01/01/2019
+         ''' TIME 01/01/2019
     CONSTRAINTS
     well1	 QLIQSMAX 	3884.0  QWSMAX 	0
     ENDCONSTRAINTS
     ''',
-    {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0,
-                         'max_reverse_surface_liquid_rate': 10000.0,
-                         'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
-    [{'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
-    'unit_system': UnitSystem.ENGLISH}
-    ], 1),
+         {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0,
+          'max_reverse_surface_liquid_rate': 10000.0,
+          'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
+         [{'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
+           'unit_system': UnitSystem.ENGLISH}
+          ], 1),
 
-
-    (''' TIME 01/01/2019
+        # over multiple lines
+        (''' TIME 01/01/2019
     CONSTRAINTS
     well2    QLIQSMAX- 10000.0 QLIQSMAX 15.5
     well1	 QLIQSMAX 	3884.0  QWSMAX 	0
     well2	 QWSMAX 	0.0
     ENDCONSTRAINTS
     ''',
-    ''' TIME 01/01/2019
+         ''' TIME 01/01/2019
     CONSTRAINTS
     well1	 QLIQSMAX 	3884.0  QWSMAX 	0
     ENDCONSTRAINTS
     ''',
-     {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0,
-                         'max_reverse_surface_liquid_rate': 10000.0,
-                         'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
-     [{'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
-    'unit_system': UnitSystem.ENGLISH}], 2),
+         {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0,
+          'max_reverse_surface_liquid_rate': 10000.0,
+          'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
+         [{'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
+           'unit_system': UnitSystem.ENGLISH}], 2),
 
-    (''' TIME 01/01/2019
+        # multiple dates
+        (''' TIME 01/01/2019
     CONSTRAINTS
     well2    QLIQSMAX- 10000.0 QLIQSMAX 15.5
     well1	 QLIQSMAX 	3884.0  QWSMAX 	0
@@ -135,7 +140,7 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
     well2	 QWSMAX 	0.0
     ENDCONSTRAINTS
     ''',
-    ''' TIME 01/01/2019
+         ''' TIME 01/01/2019
     CONSTRAINTS
     well1	 QLIQSMAX 	3884.0  QWSMAX 	0
     ENDCONSTRAINTS
@@ -146,38 +151,40 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
     well2	 QWSMAX 	0.0
     ENDCONSTRAINTS
     ''',
-    {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0,
-                         'max_reverse_surface_liquid_rate': 10000.0,
-                         'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
-    [{'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
-    'unit_system': UnitSystem.ENGLISH},
-    {'date': '01/02/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000, 'max_surface_water_rate': 10,
-    'unit_system': UnitSystem.ENGLISH},
-    {'date': '01/02/2019', 'name': 'well2', 'max_surface_liquid_rate': 10000.0, 'max_surface_water_rate': 0,
+         {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0,
+          'max_reverse_surface_liquid_rate': 10000.0,
+          'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
+         [{'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
+           'unit_system': UnitSystem.ENGLISH},
+          {'date': '01/02/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000, 'max_surface_water_rate': 10,
+           'unit_system': UnitSystem.ENGLISH},
+          {'date': '01/02/2019', 'name': 'well2', 'max_surface_liquid_rate': 10000.0, 'max_surface_water_rate': 0,
            'max_wor': 15.5, 'unit_system': UnitSystem.ENGLISH},
-    ], 2),
+          ], 2),
 
-    (''' TIME 01/01/2019
+        # constraint table
+        (''' TIME 01/01/2019
     CONSTRAINT
     NAME    QLIQSMAX    QWSMAX  QLIQSMAX-
     well1	3884.0   	0       NA
     well2   15.5        0       10000
     ENDCONSTRAINT
     ''',
-    ''' TIME 01/01/2019
+         ''' TIME 01/01/2019
     CONSTRAINT
     NAME    QLIQSMAX    QWSMAX  QLIQSMAX-
     well1	3884.0   	0       NA
     ENDCONSTRAINT
     ''',
-    {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0,
-                         'max_reverse_surface_liquid_rate': 10000.0,
-                         'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
-    [{'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
-    'unit_system': UnitSystem.ENGLISH},
-    ], 1),
+         {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0,
+          'max_reverse_surface_liquid_rate': 10000.0,
+          'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
+         [{'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
+           'unit_system': UnitSystem.ENGLISH},
+          ], 1),
 
-    (''' TIME 01/01/2019
+        # qmult table
+        (''' TIME 01/01/2019
     CONSTRAINTS
     well1	 QLIQSMAX 	MULT  QOSMAX 	MULT
     well2	 QALLRMAX 	0
@@ -188,7 +195,7 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
     well2 211.0 102.4 35.7
     ENDQMULT
     ''',
-''' TIME 01/01/2019
+         ''' TIME 01/01/2019
     CONSTRAINTS
     well1	 QLIQSMAX 	MULT  QOSMAX 	MULT
     ENDCONSTRAINTS
@@ -197,12 +204,40 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
     well1 121.0 53.6 2.5
     ENDQMULT
     ''',
-     {'date': '01/01/2019', 'name': 'well2', 'max_qmult_total_reservoir_rate': 0.0, 'unit_system': UnitSystem.ENGLISH,
-     'qmult_oil_rate': 211.0, 'qmult_gas_rate': 102.4, 'qmult_water_rate': 35.7, 'well_name':'well2'},
-     [{'date': '01/01/2019', 'name': 'well1', 'use_qmult_qoilqwat_surface_rate': True, 'use_qmult_qoil_surface_rate': True,
-    'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 121.0, 'qmult_gas_rate': 53.6, 'qmult_water_rate': 2.5,
-      'well_name':'well1'}], 2),
-    ], ids=['basic_test', 'over multiple lines', 'multiple_dates', 'constraint_table','qmult_table'])
+         {'date': '01/01/2019', 'name': 'well2', 'max_qmult_total_reservoir_rate': 0.0,
+          'unit_system': UnitSystem.ENGLISH,
+          'qmult_oil_rate': 211.0, 'qmult_gas_rate': 102.4, 'qmult_water_rate': 35.7, 'well_name': 'well2'},
+         [{'date': '01/01/2019', 'name': 'well1', 'use_qmult_qoilqwat_surface_rate': True,
+           'use_qmult_qoil_surface_rate': True,
+           'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 121.0, 'qmult_gas_rate': 53.6, 'qmult_water_rate': 2.5,
+           'well_name': 'well1'}], 2),
+        # empty constraint table
+        ('''TIME 01/01/2019
+    
+    TIME 01/01/2020
+    CONSTRAINTS
+    well1     QLIQSMAX 	3884.0  QWSMAX 	0
+    ENDCONSTRAINTS
+    TIME 01/01/2021
+    CONSTRAINTS
+    well2     QOSMAX 199  QWSMAX 	0
+    ENDCONSTRAINTS
+    ''',
+         '''TIME 01/01/2019
+    
+    TIME 01/01/2020
+    TIME 01/01/2021
+    CONSTRAINTS
+    well2     QOSMAX 199  QWSMAX 	0
+    ENDCONSTRAINTS
+    ''',
+         {'date': '01/01/2020', 'name': 'well1', 'max_surface_water_rate': 0.0, 'max_surface_liquid_rate': 3884.0,
+          'unit_system': UnitSystem.ENGLISH},
+         [{'date': '01/01/2021', 'name': 'well2', 'max_surface_water_rate': 0, 'max_surface_oil_rate': 199,
+           'unit_system': UnitSystem.ENGLISH}], 1
+         ),
+    ], ids=['basic_test', 'over multiple lines', 'multiple_dates', 'constraint_table', 'qmult_table',
+            'empty_constraint_table'])
 def test_remove_constraint(mocker, file_contents, expected_result_file,
                            constraint_to_remove, expected_constraints, expected_number_writes):
     # Arrange
@@ -216,8 +251,9 @@ def test_remove_constraint(mocker, file_contents, expected_result_file,
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             '/path/fcs_file.fcs': fcs_file_contents,
             '/surface_file_01.dat': file_contents,
-            }).return_value
+        }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
 
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
@@ -245,15 +281,17 @@ def test_remove_constraint(mocker, file_contents, expected_result_file,
     assert result['well2'] == expected_constraint_dict['well2']
     assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_result_file.splitlines(keepends=True)
 
-@pytest.mark.parametrize("file_contents, expected_file_contents, new_constraint, expected_number_writes, expected_uuid", [
-    # basic_test
-    ('''TIME 01/01/2019
+
+@pytest.mark.parametrize("file_contents, expected_file_contents, new_constraint, expected_number_writes, expected_uuid",
+                         [
+                             # basic_test
+                             ('''TIME 01/01/2019
         CONSTRAINTS
         well2    QLIQSMAX- 10000.0 QLIQSMAX 15.5
         well1	 QLIQSMAX 	3884.0  QWSMAX 	0
         well2	 QWSMAX 	0.0
         ENDCONSTRAINTS''',
-    '''TIME 01/01/2019
+                              '''TIME 01/01/2019
         CONSTRAINTS
         well2    QLIQSMAX- 10000.0 QLIQSMAX 15.5
         well1	 QLIQSMAX 	3884.0  QWSMAX 	0
@@ -265,8 +303,8 @@ well3 QOSMAX 100 ! test user comments
     {'uuid1': [2, 4], 'uuid2': [3], 'new_obj_uuid': [5]}
     ),
 
-    # add new table
-    ('''TIME 01/01/2019
+                             # add new table
+                             ('''TIME 01/01/2019
 
 ''',
     '''TIME 01/01/2019
@@ -491,7 +529,7 @@ well1 PMAX 100 ! test user comments
      )
 
 ], ids=['basic_test', 'add new table', 'add to new date', 'add QMULT table', 'add QMULT table to existing QMULT',
-        'more time cards with qmult', 'at the end', 'existing time card', 'existing time cards'])
+        'more time cards with qmult', 'at the end of the TIMEs in the file', 'existing time card', 'existing time cards'])
 def test_add_constraint(mocker, file_contents, expected_file_contents, new_constraint, expected_number_writes,
                         expected_uuid):
     # Arrange
@@ -509,8 +547,9 @@ def test_add_constraint(mocker, file_contents, expected_file_contents, new_const
             '/path/fcs_file.fcs': fcs_file_contents,
             '/surface_file_01.dat': file_contents,
             '/nexus_data/runcontrol.dat': runcontrol_contents}
-            ).return_value
+                                        ).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
     # make a mock for the write operation
@@ -537,39 +576,40 @@ def test_add_constraint(mocker, file_contents, expected_file_contents, new_const
     nexus_sim.network.constraints.add(new_constraint, comments='test user comments')
     # Assert
     assert nexus_sim.network.constraints.get_all() == expected_constraints
-    assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
+    assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(
+        keepends=True)
     assert nexus_sim.model_files.surface_files[1].object_locations == expected_uuid
 
 
 @pytest.mark.parametrize("constraint, expected_string", [
-# basic_test
-({'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH},
-'well3 QOSMAX 100\n'
-),
-# more columns
-({'name': 'well_2933', 'max_reservoir_liquid_rate': 100.14, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
-'min_reservoir_oil_rate': 150.27, 'max_gor': 21020, 'max_reservoir_total_fluids_rate': 123.13},
-'well_2933 GORMAX 21020 QLIQMAX 100.14 QALLMAX 123.13 QOMIN 150.27\n'
-),
+    # basic_test
+    ({'name': 'well3', 'max_surface_oil_rate': 100, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH},
+     'well3 QOSMAX 100\n'
+     ),
+    # more columns
+    ({'name': 'well_2933', 'max_reservoir_liquid_rate': 100.14, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
+      'min_reservoir_oil_rate': 150.27, 'max_gor': 21020, 'max_reservoir_total_fluids_rate': 123.13},
+     'well_2933 GORMAX 21020 QLIQMAX 100.14 QALLMAX 123.13 QOMIN 150.27\n'
+     ),
 
-# Activate
-({'name': 'well_2933', 'max_reservoir_liquid_rate': 100.14, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
-'active_node': True},
-'well_2933 QLIQMAX 100.14 ACTIVATE\n'
-),
+    # Activate
+    ({'name': 'well_2933', 'max_reservoir_liquid_rate': 100.14, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
+      'active_node': True},
+     'well_2933 QLIQMAX 100.14 ACTIVATE\n'
+     ),
 
-# deactivate
-({'name': 'well_2933', 'max_reservoir_liquid_rate': 100.14, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
-'active_node': False},
-'well_2933 QLIQMAX 100.14 DEACTIVATE\n'
-),
+    # deactivate
+    ({'name': 'well_2933', 'max_reservoir_liquid_rate': 100.14, 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
+      'active_node': False},
+     'well_2933 QLIQMAX 100.14 DEACTIVATE\n'
+     ),
 
-# clear and special keywords
-({'name': 'node#2', 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH, 'clear_p': True,
-'convert_qmult_to_reservoir_barrels': True,
-},
-'node#2 QALLRMAX MULT CLEARP\n'
-),
+    # clear and special keywords
+    ({'name': 'node#2', 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH, 'clear_p': True,
+      'convert_qmult_to_reservoir_barrels': True,
+      },
+     'node#2 QALLRMAX MULT CLEARP\n'
+     ),
 ], ids=['basic_test', 'more columns', 'Activate', 'Deactivate', 'clear and special keywords'])
 def test_constraint_to_string(constraint, expected_string):
     # Arrange
@@ -583,26 +623,29 @@ def test_constraint_to_string(constraint, expected_string):
 def test_write_qmult_table():
     # Arrange
     constraint_props = {'name': 'node#2', 'date': '01/01/2019', 'unit_system': UnitSystem.ENGLISH,
-        'use_qmult_qoilqwat_surface_rate': True, 'qmult_oil_rate': 200.0, 'qmult_water_rate': 4052.12}
+                        'use_qmult_qoilqwat_surface_rate': True, 'qmult_oil_rate': 200.0, 'qmult_water_rate': 4052.12}
     constraint = NexusConstraint(constraint_props)
     expected_qmult_table = ['QMULT\n',
                             'WELL QOIL QGAS QWATER\n',
                             'node#2 200.0 NA 4052.12\n',
                             'ENDQMULT\n'
-    ]
+                            ]
     # Act
     result_qmult_table = constraint.write_qmult_table()
     # Assert
     assert result_qmult_table == expected_qmult_table
 
-@pytest.mark.parametrize("file_contents, expected_file_contents, current_constraint, new_constraint, expected_number_writes, expected_uuid", [
-    # basic_test
-    ('''TIME 01/01/2019
+
+@pytest.mark.parametrize(
+    "file_contents, expected_file_contents, current_constraint, new_constraint, expected_number_writes, expected_uuid",
+    [
+        # basic_test
+        ('''TIME 01/01/2019
         CONSTRAINTS
         well2    QLIQSMAX- 10000.0 QLIQSMAX 15.5
         well1	 QLIQSMAX 	3884.0  QWSMAX 	0
         ENDCONSTRAINTS''',
-    '''TIME 01/01/2019
+         '''TIME 01/01/2019
         CONSTRAINTS
         well2    QLIQSMAX- 10000.0 QLIQSMAX 15.5
 well1 QWSMAX 1000.0 QLIQSMAX 3884.0
@@ -622,21 +665,24 @@ WELL QOIL QGAS QWATER
 well1 200.0 NA 4052.12
 ENDQMULT
 ''',
-'''TIME 01/01/2019
-        CONSTRAINTS
+         '''TIME 01/01/2019
+
+CONSTRAINTS
 well1 QLIQSMAX MULT
 ENDCONSTRAINTS
+
 QMULT
 WELL QOIL QGAS QWATER
 well1 1000.0 10 1.31
 ENDQMULT
 ''',
-    {'name': 'well1', 'date': '01/01/2019'},
-    {'name': 'well1', 'date': '01/01/2019', 'qmult_oil_rate': 1000.0, 'qmult_water_rate': 1.31, 'qmult_gas_rate': 10},
-    4,
-    {'uuid1': [2, 6]}
-    )
-    ],ids=['basic_test', 'qmult_test'])
+         {'name': 'well1', 'date': '01/01/2019'},
+         {'name': 'well1', 'date': '01/01/2019', 'qmult_oil_rate': 1000.0, 'qmult_water_rate': 1.31,
+          'qmult_gas_rate': 10, 'use_qmult_qoilqwat_surface_rate': True},
+         4,
+         {'uuid1': [3, 8]}
+         )
+    ], ids=['basic_test', 'qmult_test'])
 def test_modify_constraints(mocker, file_contents, expected_file_contents, current_constraint, new_constraint,
                             expected_number_writes, expected_uuid):
     # Arrange
@@ -654,8 +700,9 @@ def test_modify_constraints(mocker, file_contents, expected_file_contents, curre
             '/path/fcs_file.fcs': fcs_file_contents,
             '/surface_file_01.dat': file_contents,
             '/nexus_data/runcontrol.dat': runcontrol_contents}
-            ).return_value
+                                        ).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
     # make a mock for the write operation
@@ -667,23 +714,25 @@ def test_modify_constraints(mocker, file_contents, expected_file_contents, curre
     # Act
     nexus_sim.network.constraints.modify('well1', current_constraint, new_constraint)
     # Assert
-    assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
+    assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(
+        keepends=True)
     assert nexus_sim.model_files.surface_files[1].object_locations == expected_uuid
 
-@pytest.mark.parametrize('current_constraint, new_constraint, error_msg',[
-# well name not found
-({'name': 'well1', 'date': '01/01/2019', 'max_surface_oil_rate': 10},
-{'name': 'well1', 'date': '01/01/2019', 'max_surface_oil_rate': 1000.0},
- "No constraints found with name='well1'"),
 
-# constraint not matching
-({'name': 'well_not_found', 'date': '01/01/2019', 'max_surface_oil_rate': 10},
-{'name': 'well_not_found', 'date': '01/01/2019', 'max_surface_oil_rate': 1000.0},
- 'No unique matching constraints with the properties provided.Instead found: 0 matching constraints.'
- ),
+@pytest.mark.parametrize('current_constraint, new_constraint, error_msg', [
+    # well name not found
+    ({'name': 'well1', 'date': '01/01/2019', 'max_surface_oil_rate': 10},
+     {'name': 'well1', 'date': '01/01/2019', 'max_surface_oil_rate': 1000.0},
+     "No constraints found with name='well1'"),
+
+    # constraint not matching
+    ({'name': 'well_not_found', 'date': '01/01/2019', 'max_surface_oil_rate': 10},
+     {'name': 'well_not_found', 'date': '01/01/2019', 'max_surface_oil_rate': 1000.0},
+     'No unique matching constraints with the properties provided.Instead found: 0 matching constraints.'
+     ),
 
 ], ids=['well name not', 'constraint not matching']
-)
+                         )
 def test_modify_constraint_no_constraint_found(mocker, current_constraint, new_constraint,
                                                error_msg):
     # Arrange
@@ -700,13 +749,15 @@ def test_modify_constraint_no_constraint_found(mocker, current_constraint, new_c
     CONSTRAINTS
     well_not_found QOSMAX 100
     ENDCONSTRAINTS'''
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             '/path/fcs_file.fcs': fcs_file_contents,
             '/surface_file_01.dat': surface_file,
             '/nexus_data/runcontrol.dat': runcontrol_contents}
-            ).return_value
+                                        ).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
     # make a mock for the write operation
@@ -721,6 +772,7 @@ def test_modify_constraint_no_constraint_found(mocker, current_constraint, new_c
         nexus_sim.network.constraints.modify(current_constraint['name'], current_constraint, new_constraint)
     assert str(ve.value) == error_msg
 
+
 def test_add_constraint_no_name_given(mocker):
     # Arrange
     model = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
@@ -732,7 +784,7 @@ def test_add_constraint_no_name_given(mocker):
 
     # Act and Assert
     with pytest.raises(ValueError) as ve:
-        constraints.add(constraint_to_add={'max_surface_oil_rate': 10},)
+        constraints.add(constraint_to_add={'max_surface_oil_rate': 10}, )
     assert str(ve.value) == 'Input arguments or constraint_to_add dictionary must contain a name for the node.'
     with pytest.raises(ValueError) as ve:
         constraints.add(constraint_to_add=empty_constraint)
