@@ -169,10 +169,54 @@ class NexusConstraints(Constraints):
         surface_file = self.__find_which_surface_file_from_id(constraint_id)
         surface_file.remove_object_from_file_as_list([constraint_id])
         # remove from memory
+        removed_constraint = None
         for name, list_constraints in self._constraints.items():
             for i, constraint in enumerate(list_constraints):
                 if constraint.id == constraint_id:
-                    list_constraints.pop(i)
+                    removed_constraint = list_constraints.pop(i)
+        # remove the constraints table if there are no more for that date timestamp
+        if removed_constraint is None:
+            raise ValueError(f'No constraint found with {constraint_id=}')
+        date_of_constraint_removed = removed_constraint.date
+        if date_of_constraint_removed is None:
+            return
+        # search the loaded constraints for constraints on the same date as the removed constraint
+        # if there are none then remove the table
+        if not any(z for x, y in self._constraints.items() for z in y if z.date == date_of_constraint_removed):
+            self.__remove_empty_token_table(date_of_constraint_removed, surface_file=surface_file, token='CONSTRAINTS')
+            self.__remove_empty_token_table(date_of_constraint_removed, surface_file=surface_file, token='QMULT',
+                                            remove_header=True)
+        return
+
+    def __remove_empty_token_table(self, date: str, surface_file: NexusFile, token='CONSTRAINTS',
+                                   remove_header=False) -> None:
+        """Removes a table for a given date if it has no other dates for that constraint."""
+        # TODO promote this to a higher level function
+        keyword_map = {x: y[0] for x, y in NexusConstraint.get_keyword_mapping().items()}
+        file_content = surface_file.get_flat_list_str_file
+        token_line_number = -1
+        end_token_line_number = -1
+        found_date = False
+        for i, line in enumerate(file_content):
+            if nfo.check_token('TIME', line) and \
+                    nfo.get_expected_token_value(token='TIME', token_line=line, file_list=file_content[i:]) == date:
+                found_date = True
+            if found_date and nfo.check_token(token, line):
+                token_line_number = i
+            elif found_date and nfo.check_token('END'+token, line):
+                end_token_line_number = i
+            if token_line_number > 0 and end_token_line_number > 0:
+                break
+        if end_token_line_number > token_line_number:
+            if remove_header:
+                header_index, headers = nfo.get_table_header(file_content[token_line_number:end_token_line_number],
+                                                             keyword_map)
+                header_index = token_line_number + header_index
+            # remove the last one first to avoid index errors
+            surface_file.remove_from_file_as_list(end_token_line_number)
+            if remove_header:
+                surface_file.remove_from_file_as_list(header_index)
+            surface_file.remove_from_file_as_list(token_line_number)
 
     def __find_which_surface_file_from_id(self, constraint_id: UUID) -> NexusFile:
         """Finds the surface file with the object id requested."""
@@ -243,7 +287,10 @@ class NexusConstraints(Constraints):
         qmult_keywords = ['qmult_oil_rate', 'qmult_gas_rate', 'qmult_water_rate']
         # if any of the qmults are defined in the new constraint then add a qmult table
         add_qmults = any(getattr(new_constraint, x, None) for x in qmult_keywords)
-
+        if len(file_as_list) < 2:
+            # pad the file if it is empty or only has one line
+            new_table_needed = True
+            file_as_list.append('\n')
         for index, line in enumerate(file_as_list):
             if nfo.check_token('TIME', line):
                 constraint_date_from_file = nfo.get_expected_token_value('TIME', line, [line])
