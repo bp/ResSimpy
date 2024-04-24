@@ -190,7 +190,7 @@ WORKA6 OUTPUT WORKA7
     assert func_list == expected_functions
 
 
-def test_odd_range_input_to_obj(recwarn, functions_list):
+def test_odd_range_input_to_obj(recwarn):
     # Arrange
     functions_list = ['FUNCTION', 'ANALYT POLYN 2.0', 'RANGE INPUT 4 5 6', 'WORKA6 OUTPUT WORKA7']
 
