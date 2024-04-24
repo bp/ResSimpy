@@ -1,7 +1,11 @@
 import pandas as pd
+
+from ResSimpy.Enums.GridFunctionTypes import GridFunctionTypeEnum
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGridArrayFunction import NexusGridArrayFunction
+from ResSimpy.Nexus.array_function_operations import object_from_array_function_block
 from tests.multifile_mocker import mock_multiple_files
 from pandas.testing import assert_frame_equal
 
@@ -114,9 +118,9 @@ some line
 !  KXEFF FRAC WORKA7 OUTPUT KXEFF FRAC 
 
 FUNCTION
- ANALYT POLYN 2.0
- RANGE INPUT 4 5 6
- WORKA6 OUTPUT WORKA7
+ANALYT POLYN 2.0
+RANGE INPUT 4 5 6
+WORKA6 OUTPUT WORKA7
     """
     expected_functions = [['Function IREGION', '8 9 10', 'ANALYT     log', 'WORKA3    OUTPUT  KX'],
                           ['FUNCTION', 'ANALYT log10', 'WORKA3 OUTPUT KX'],
@@ -184,3 +188,27 @@ FUNCTION
     assert_frame_equal(expected_functions_df, func_summary_df)
     assert len(func_summary_df) == len(expected_functions)
     assert func_list == expected_functions
+
+
+def test_odd_range_input_to_obj(recwarn, functions_list):
+    # Arrange
+    functions_list = ['FUNCTION', 'ANALYT POLYN 2.0', 'RANGE INPUT 4 5 6', 'WORKA6 OUTPUT WORKA7']
+
+    expected_object = NexusGridArrayFunction(
+        function_type=GridFunctionTypeEnum.POLYN,
+        function_values=[2.0],
+        input_range=[(4, 5)],
+        output_array=['WORKA7'],
+        input_array=['WORKA6']
+    )
+
+    # Act
+    func_obj = object_from_array_function_block(array_function=functions_list,
+                                                function_number=1)
+    # Assert
+    assert func_obj == expected_object
+    assert len(recwarn) == 1
+    user_warning = recwarn.pop(UserWarning)
+    assert str(user_warning.message) == """RANGE INPUT for function 1 has an odd number of entries.
+Ignoring the last value: \"6\" from the range input.
+In line: \"RANGE INPUT 4 5 6\""""

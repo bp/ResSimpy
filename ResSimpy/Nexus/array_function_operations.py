@@ -425,10 +425,11 @@ def object_from_array_function_block(array_function: list[str], function_number:
         if nfo.check_token('RANGE', modified_line) and nfo.check_token('INPUT', modified_line):
             split_range_input = modified_line.split('INPUT')[1].split()
             if len(split_range_input) % 2 == 1:  # Should be an even number of entries
-                warnings.warn(f'RANGE INPUT for function {function_number} has an odd number of entries.'
-                              f'In line: {modified_line}')
                 # Remove the last entry, which is not a pair
-                split_range_input = split_range_input[:-1]
+                dropped_range_input = split_range_input.pop()
+                warnings.warn(f'RANGE INPUT for function {function_number} has an odd number of entries.\n'
+                              f'Ignoring the last value: "{dropped_range_input}" from the range input.\n'
+                              f'In line: "{modified_line}"')
             try:
                 # Create pair-wise min-max tuples in a list
                 input_range_iterator = iter([float(i) for i in split_range_input])
@@ -439,10 +440,11 @@ def object_from_array_function_block(array_function: list[str], function_number:
         if nfo.check_token('RANGE', modified_line) and nfo.check_token('OUTPUT', modified_line):
             split_range_output = modified_line.split('OUTPUT')[1].split()
             if len(split_range_output) % 2 == 1:  # Should be an even number of entries
-                warnings.warn(f'RANGE OUTPUT for function {function_number} has an odd number of entries.'
-                              f'In line: {modified_line}')
                 # Remove the last entry, which is not a pair
-                split_range_output = split_range_output[:-1]
+                dropped_range_output = split_range_output.pop()
+                warnings.warn(f'RANGE OUTPUT for function {function_number} has an odd number of entries.\n'
+                              f'Ignoring the last value "{dropped_range_output}" from range output.\n'
+                              f'In line: "{modified_line}"')
             try:
                 # Create pair-wise min-max tuples in a list
                 output_range_iterator = iter([float(i) for i in split_range_output])
