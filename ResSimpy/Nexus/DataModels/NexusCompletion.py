@@ -285,7 +285,8 @@ class NexusCompletion(Completion):
     def depth_to_bottom_str(self):
         return self.__depth_to_bottom_str
 
-    def to_dict(self, keys_in_keyword_style: bool = False, add_date=True, add_units=False, include_nones=True) -> \
+    def to_dict(self, keys_in_keyword_style: bool = False, add_date: bool = True, add_units: bool = False,
+                include_nones: bool = True) -> \
             dict[str, None | str | int | float]:
 
         attribute_dict = to_dict(self, keys_in_keyword_style, add_date=add_date,
