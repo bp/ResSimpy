@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class FcsConfig:
-    def __init__(self, destination, nexus_data_name: str = "data") -> None:
+    def __init__(self, destination: str, nexus_data_name: str = "data") -> None:
         """Initialises the FcsConfig class.
 
         Args:

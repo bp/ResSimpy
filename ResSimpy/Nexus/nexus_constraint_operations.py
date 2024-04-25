@@ -115,7 +115,7 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
                 nexus_file.add_object_locations(new_constraint.id, [index + start_line_index])
 
 
-def __clear_constraints(token_value: str, constraint) -> dict[str, None]:
+def __clear_constraints(token_value: str, constraint: type[NexusConstraint]) -> dict[str, None]:
     """Replicates behaviour of the clear keyword in nexus constraints by creating a dictionary filled with
     Nones for the relevant parameters.
     """
