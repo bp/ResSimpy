@@ -264,7 +264,7 @@ class NexusFile(File):
 
     def iterate_line(self, file_index: Optional[FileIndex] = None, max_depth: Optional[int] = None,
                      parent: Optional[NexusFile] = None, prefix_line: Optional[str] = None,
-                     keep_include_references=False) -> \
+                     keep_include_references: bool = False) -> \
             Generator[str, None, None]:
         """Generator object for iterating over a list of strings with nested NexusFile objects in them.
 

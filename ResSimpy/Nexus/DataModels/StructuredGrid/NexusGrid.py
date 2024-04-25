@@ -198,7 +198,7 @@ class NexusGrid(Grid):
         self.__multbv: GridArrayDefinition = GridArrayDefinition()
         self.__pv: GridArrayDefinition = GridArrayDefinition()
 
-    def __wrap(self, value) -> Any:
+    def __wrap(self, value: Any) -> Any:
         if isinstance(value, tuple | list | set | frozenset):
             return type(value)([self.__wrap(v) for v in value])
         else:

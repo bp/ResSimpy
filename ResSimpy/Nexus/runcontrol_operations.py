@@ -71,7 +71,7 @@ class SimControls:
         return self.__date_format_string
 
     @date_format_string.setter
-    def date_format_string(self, value) -> None:
+    def date_format_string(self, value: str) -> None:
         self.__date_format_string = value
 
     @property
