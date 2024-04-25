@@ -23,10 +23,9 @@ class TestNexusWellMod:
         7 6 8   9.11
         '''
     expected_completion_1 = NexusCompletion(date=start_date, i=1, j=2, k=3, well_radius=4.5,
-                                            date_format=date_format, unit_system=unit_system)
+                                            date_format=date_format, unit_system=unit_system, start_date=start_date)
     expected_completion_2 = NexusCompletion(date=start_date, i=6, j=7, k=8, well_radius=9.11,
-                                            date_format=date_format,
-                                            unit_system=unit_system)
+                                            date_format=date_format, unit_system=unit_system, start_date=start_date)
 
     @pytest.mark.parametrize('wellfile_content, expected_wellmod_dict', [
         # simple_wellmod
@@ -46,7 +45,9 @@ class TestNexusWellMod:
         expected_wellmods = [NexusWellMod(expected_wellmod_dict)]
 
         dummy_model = get_fake_nexus_simulator(mocker)
+        dummy_model.start_date = self.start_date
         dummy_wells = NexusWells(model=dummy_model)
+        dummy_wells.__setattr__('_NexusWells__date_format', DateFormat.DD_MM_YYYY)
 
         expected_wells = [NexusWell(well_name='test_well',
                                     completions=[self.expected_completion_1, self.expected_completion_2],
@@ -84,10 +85,11 @@ class TestNexusWellMod:
 
         expected_completion_test_well_2_1 = NexusCompletion(date=self.start_date, i=1, j=1, k=1, skin=None,
                                                             well_radius=4.5, date_format=self.date_format,
-                                                            unit_system=self.unit_system)
+                                                            unit_system=self.unit_system, start_date=self.start_date)
         expected_completion_test_well_2_2 = NexusCompletion(date=self.start_date, i=2, j=2, k=2,
                                                             skin=None, well_radius=5.5,
-                                                            date_format=self.date_format, unit_system=self.unit_system)
+                                                            date_format=self.date_format, unit_system=self.unit_system,
+                                                            start_date=self.start_date)
 
         dummy_model = get_fake_nexus_simulator(mocker)
         dummy_wells = NexusWells(model=dummy_model)
@@ -166,13 +168,17 @@ class TestNexusWellMod:
                                              'perm_thickness_mult': 1234.2, 'delta_krw': [1.1]})
 
         extra_expected_completion_1 = NexusCompletion(date='01/01/2021', i=1, j=1, k=1, well_radius=4.5,
-                                                      date_format=self.date_format, unit_system=self.unit_system)
+                                                      date_format=self.date_format, unit_system=self.unit_system,
+                                                      start_date=self.start_date)
         extra_expected_completion_2 = NexusCompletion(date='01/01/2021', i=1, j=1, k=2, well_radius=4.6,
-                                                      date_format=self.date_format, unit_system=self.unit_system)
+                                                      date_format=self.date_format, unit_system=self.unit_system,
+                                                      start_date=self.start_date)
         extra_expected_completion_3 = NexusCompletion(date='01/01/2021', i=1, j=1, k=3, well_radius=4.7,
-                                                        date_format=self.date_format, unit_system=self.unit_system)
+                                                        date_format=self.date_format, unit_system=self.unit_system,
+                                                      start_date=self.start_date)
         extra_expected_completion_4 = NexusCompletion(date='01/01/2023', i=1, j=1, k=1, well_radius=4.5,
-                                                      date_format=self.date_format, unit_system=self.unit_system)
+                                                      date_format=self.date_format, unit_system=self.unit_system,
+                                                      start_date=self.start_date)
 
         dummy_model = get_fake_nexus_simulator(mocker)
         dummy_wells = NexusWells(model=dummy_model)
@@ -186,7 +192,8 @@ class TestNexusWellMod:
                           NexusWell(well_name='test_well2',
                                     completions=[NexusCompletion(date='01/01/2022', i=2, j=2, k=3, skin=4,
                                                                  date_format=self.date_format,
-                                                                 unit_system=self.unit_system)],
+                                                                 unit_system=self.unit_system,
+                                                                 start_date=self.start_date)],
                                     wellmods=[NexusWellMod({'well_name': 'test_well2', 'date': '01/01/2023',
                                                             'unit_system': self.unit_system, 'skin': 2})],
                                     unit_system=self.unit_system, parent_wells_instance=dummy_wells)]

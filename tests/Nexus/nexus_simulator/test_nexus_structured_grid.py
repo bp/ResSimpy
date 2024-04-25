@@ -100,9 +100,9 @@ INCLUDE /XXX/XXX/XXX/Testing/XXX/XXX/Includes/xxx.cor
 LIST""",  # ends structured grid_file_contents
                               """CORP VALUE
 C GRID BLOCK: I =   1 , J =   1 , K =   1  
-2265.261168 18412.34172 6006.48864 2697.769032 18432.059328 6010.983336 
-2879.984664 17767.1724 5972.663592 2456.761464 17751.621408 5976.206856 
-2265.261168 18412.34172 6104.91264 2697.769032 18432.059328 6109.407336 
+2265.261168 18412.34172 6006.48864 2697.769032 18432.059328 6010.983336
+2879.984664 17767.1724 5972.663592 2456.761464 17751.621408 5976.206856
+2265.261168 18412.34172 6104.91264 2697.769032 18432.059328 6109.407336
 2879.984664 17767.1724 6071.087592 2456.761464 17751.621408 6074.630856"""
                              )
 
@@ -188,6 +188,7 @@ NX  NY  NZ
 10  10  10
 
 NETGRS ZVAR
+NOLIST
 INCLUDE path/netgrs_01.inc
 MOD
 68  68 34 34  1  1 =0.34
@@ -253,6 +254,16 @@ INCLUDE path/netgrs_01.inc
 MOD
 68  68 34 34  1  1 = 0.34
 68  68 34 34  2  2 = 0.2
+
+IREGION ZVAR
+3*1
+3*2
+4*3
+
+IRELPM XVAR
+3*1
+3*2
+4*3
 """  # ends structured_grid_file_contents
 
     #include_file_contents = '0.425 0.255 3*0.662 0.376 0.000 3*0.453 4*0.884 0.412 0.788 12*0.000'
@@ -288,6 +299,11 @@ MOD
     pd.testing.assert_frame_equal(result.netgrs.mods['MOD'], expected_df)
     assert result.netgrs.modifier == 'ZVAR'
     assert result.netgrs.value == 'path/netgrs_01.inc'
+    assert result.iregion['IREG1'].modifier == 'ZVAR'
+    assert result.iregion['IREG1'].value == '3*1\n3*2\n4*3'
+    assert result.irelpm.modifier == 'XVAR'
+    assert result.irelpm.value == '3*1\n3*2\n4*3'
+
 
 
 def test_load_structured_grid_file_corp_modx_mody_modz(mocker):
@@ -597,11 +613,11 @@ INCLUDE includes/Another_structured_grid_01.inc"""
                          "expected_range_z",
                          [
                              ("! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text"
-                              "\nother text\n\nNETGRS VALUE\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\n POROSITY "
+                              "\nother text\n\nNETGRS VALUE\n NOLIST\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\nLIST\n POROSITY "
                               "VALUE\n!ANOTHER COMMENT \nINCLUDE path/to/porosity.inc",
                               "/path_to_netgrs_file/net_to_gross.inc", "path/to/porosity.inc", "VALUE", "VALUE", 1, 2,
                               3),
-                             ("! Grid dimensions\nNX NY NZ\n111 123 321\ntest string\nPOROSITY VALUE\n!random text\n"
+                             ("! Grid dimensions\nNX NY NZ\n111 123 321\ntest string\nPOR VALUE\n!random text\n"
                               "INCLUDE porosity_file.inc\nNETGRS VALUE\n!Comment Line 1\n\n!Comment Line 2\nINCLUDE   "
                               "/path/to/netgrs_file\nother text\n\n",
                               "/path/to/netgrs_file", "porosity_file.inc", "VALUE", "VALUE", 111, 123, 321),
@@ -689,7 +705,7 @@ def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
     base_structured_grid_file = "! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text " \
                                 "\nother text\n\n,NETGRS VALUE\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\n POROSITY " \
-                                "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc "
+                                "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc \n"
 
     structured_grid_file = base_structured_grid_file + structured_grid_file_contents
     structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
@@ -750,7 +766,7 @@ def test_load_structured_grid_file_k_values(mocker, structured_grid_file_content
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
     base_structured_grid_file = "! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text " \
                                 "\nother text\n\n,NETGRS VALUE\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\n POROSITY " \
-                                "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc "
+                                "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc \n"
 
     structured_grid_file = base_structured_grid_file + structured_grid_file_contents
     structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
@@ -1144,3 +1160,325 @@ def test_included_fault_tables(mocker):
     faults_df = faults_df.astype(comparison_types)
     # Assert
     pd.testing.assert_frame_equal(expected_df, faults_df)
+
+
+def test_load_structured_grid_file_nocorp(mocker):
+    """Read in Structured Grid File where properties are in a nested include file"""
+    # Arrange
+    fcs_file_contents = "RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents = """ARRAYS ROOT
+! grid
+NX  NY  NZ
+ 5   5   3
+
+DX VALUE
+75*100
+
+DY CON
+100
+
+DZ CON
+10
+
+DZNET CON
+9
+
+DEPTH LAYER
+25*5000
+
+MDEPTH LAYER
+25*5005
+
+SG ZVAR
+1.
+2*0
+
+SW ZVAR
+2*0
+1.
+
+P ZVAR
+1000
+1100
+1200
+
+TEMP ZVAR
+100
+101
+102
+
+COMPR CON
+3e-6
+
+ICOARS CON
+1
+
+IALPHAF CON
+1
+
+IPOLYMER CON
+1
+
+IADSORPTION CON
+1
+
+ISECTOR CON
+1
+MOD
+30 38  1  30  1  1  =1
+C 13 20  1 30  1  1  =1
+25 32  1 30  1  1  =1
+
+ITRACER CON
+1
+
+IGRID CON
+1
+
+SWL CON
+0.
+
+SWR CON
+0.1
+
+SWU CON
+1
+
+SGL CON
+0
+
+SGR CON
+0.01
+
+SGU CON
+1.0
+
+SWRO CON
+0.9
+
+SWRO_LS CON
+0.95
+
+SGRO CON
+0.8
+
+SGRW CON
+0.8
+
+KRW_SWRO CON
+1
+
+KRWS_LS CON
+1
+
+KRW_SWU CON
+1
+
+KRG_SGRO CON
+1
+
+KRG_SGU CON
+1
+
+KRG_SGRW CON
+1
+
+KRO_SWL CON
+1
+
+KRO_SWR CON
+0.9
+
+KRO_SGL CON
+1
+
+KRO_SGR CON
+1
+
+KRW_SGL CON
+1
+
+KRW_SGL CON
+1
+
+KRW_SGR CON
+0.9
+
+SGTR CON
+.2
+
+SOTR CON
+0.1
+
+SWLPC CON
+0.2
+
+SGLPC CON
+0.1
+
+PCW_SWL CON
+5
+
+PCG_SGU CON
+6
+
+CHLORIDE CON
+0.3
+
+CALCIUM CON
+0.03
+
+SALINITY CON
+1.1
+
+API CON
+20
+
+TMX CON
+1
+
+TMY CON
+1
+
+TMZ CON
+1
+
+MULTBV CON
+1
+
+PV CON
+20000
+
+LIST"""  # ends structured_grid_file_contents
+
+    # set up dataframe
+    i1 = [30, 25]
+    i2 = [38, 32]
+    j1 = [1, 1]
+    j2 = [30, 30]
+    k1 = [1, 1]
+    k2 = [1, 1]
+    v = ['=1', '=1']
+    expected_df = pd.DataFrame({'i1': i1, 'i2': i2, 'j1': j1, 'j2': j2, 'k1': k1, 'k2': k2, '#v': v})
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'testpath1/nexus_run.fcs': fcs_file_contents, '/run_control/path': '',
+            structured_grid_name: structured_grid_file_contents}).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
+    result = simulation.grid
+
+    # Assert
+    # note that iregion is a dict
+    assert result.isector.keyword_in_include_file is False
+    pd.testing.assert_frame_equal(result.isector.mods['MOD'], expected_df)
+    assert result.dx.modifier == 'VALUE'
+    assert result.dx.value == '75*100'
+    assert result.dy.value == '100'
+    assert result.dz.value == '10'
+    assert result.dznet.value == '9'
+    assert result.depth.modifier == 'LAYER'
+    assert result.depth.value == '25*5000'
+    assert result.mdepth.value == '25*5005'
+    assert result.sg.modifier == 'ZVAR'
+    assert result.sg.value == '1.\n2*0'
+    assert result.sw.value == '2*0\n1.'
+    assert result.pressure.value == '1000\n1100\n1200'
+    assert result.temperature.value == '100\n101\n102'
+    assert result.compr.value == '3e-6'
+    assert result.icoars.value == '1'
+    assert result.ialphaf.value == '1'
+    assert result.ipolymer.value == '1'
+    assert result.iadsorption.value == '1'
+    assert result.itracer.value == '1'
+    assert result.igrid.value == '1'
+    assert result.swl.value == '0.'
+    assert result.swr.value == '0.1'
+    assert result.swu.value == '1'
+    assert result.sgl.value == '0'
+    assert result.sgr.value == '0.01'
+    assert result.sgu.value == '1.0'
+    assert result.swro.value == '0.9'
+    assert result.swro_ls.value == '0.95'
+    assert result.sgro.value == '0.8'
+    assert result.sgrw.value == '0.8'
+    assert result.krw_swro.value == '1'
+    assert result.krws_ls.value == '1'
+    assert result.krw_swu.value == '1'
+    assert result.krg_sgro.value == '1'
+    assert result.krg_sgu.value == '1'
+    assert result.krg_sgrw.value == '1'
+    assert result.kro_swl.value == '1'
+    assert result.kro_swr.value == '0.9'
+    assert result.kro_sgl.value == '1'
+    assert result.kro_sgr.value == '1'
+    assert result.krw_sgl.value == '1'
+    assert result.krw_sgr.value == '0.9'
+    assert result.sgtr.value == '.2'
+    assert result.sotr.value == '0.1'
+    assert result.swlpc.value == '0.2'
+    assert result.sglpc.value == '0.1'
+    assert result.pcw_swl.value == '5'
+    assert result.pcg_sgu.value == '6'
+    assert result.chloride.value == '0.3'
+    assert result.calcium.value == '0.03'
+    assert result.salinity.value == '1.1'
+    assert result.api.value == '20'
+    assert result.tmx.value == '1'
+    assert result.tmy.value == '1'
+    assert result.tmz.value == '1'
+    assert result.multbv.value == '1'
+    assert result.pv.value == '20000'
+
+
+def test_nested_includes_with_grid_array_keywords(mocker):
+    # Arrange
+
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID /test_structured_grid.dat"
+    structured_grid_name = '/test_structured_grid.dat'
+    structured_grid_file_contents = '''! Array data
+    KX VALUE
+    INCLUDE /inc_file_kx.inc
+    
+    INCLUDE /inc_file1.inc'''
+
+    include_file_location = '/inc_file1.inc'
+    include_file_location_2 = '/inc_file2.inc'
+    include_file_location_kx ='/inc_file_kx.inc'
+
+    include_file_contents = ('''KY VALUE 
+                                INCLUDE /inc_file2.inc
+                                ''')
+    include_file_contents_2 = 'some content\n that should\n be skipped'
+    include_file_contents_kx = 'some content that should be skipped'
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+                                        {'/nexus_run.fcs': fcs_file_contents,
+                                         '/run_control/path': '',
+                                         structured_grid_name: structured_grid_file_contents,
+                                         include_file_location: include_file_contents,
+                                         include_file_location_2: include_file_contents_2,
+                                            include_file_location_kx: include_file_contents_kx
+                                         }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    sim_obj = NexusSimulator(origin='/nexus_run.fcs')
+
+    expected_kx_result = GridArrayDefinition(modifier='VALUE', value='/inc_file_kx.inc', mods=None)
+    expected_ky_result = GridArrayDefinition(modifier='VALUE', value='/inc_file2.inc', mods=None)
+
+    # Act
+    result_kx = sim_obj.grid.kx
+    result_ky = sim_obj.grid.ky
+
+    # Assert
+    assert result_kx == expected_kx_result
+    assert result_ky == expected_ky_result

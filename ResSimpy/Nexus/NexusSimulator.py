@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import os
 import warnings
-from typing import Any, Union, Optional
+from typing import Any, Union, Optional, Sequence
 
 import resqpy.model as rq
 from datetime import datetime
@@ -142,6 +142,77 @@ class NexusSimulator(Simulator):
         # add details from the fcsfile
         printable_str += self.model_files.__repr__()
         return printable_str
+
+    @staticmethod
+    def _attr_info_to_tuple(sim_attr: Union[dict, Sequence])\
+            -> tuple[tuple[tuple[str, Union[str, bool, float]], ...], ...]:
+        """Convert the network constraints/wells completions attribute to a tuple of tuples so that it is hashable.
+
+        Args: sim_attr (Union[dict, Sequence]): dict of {well name: [NexusConstraint]} for
+        self.network.constraints.get_all(), list of [NexusWell objects] for self.wells.get_all()
+
+        Returns: Tuple[Tuple[Tuple[str, Union[str, float, bool]], ...], ...]: tuple of tuples
+        """
+        lst_of_tuples = []
+        if isinstance(sim_attr, dict):
+            for wells, nexus_constraint in sim_attr.items():
+                for constraints in nexus_constraint:
+                    network_dict = constraints.to_dict(add_units=False, include_nones=False)
+                    lst_of_tuples.append(tuple(network_dict.items()))
+
+        elif isinstance(sim_attr, list):
+            for nexus_completion in sim_attr:
+                for el in nexus_completion.completions:
+                    well_dict = el.to_dict(add_units=False, include_nones=False)
+                    lst_of_tuples.append(tuple(well_dict.items()))
+
+        return tuple(lst_of_tuples)
+
+    def network_wells_tuple(self) -> tuple:
+        """Returns a tuple of the network constraints and wells completions attributes.
+
+        Returns:
+            tuple: tuple of the network constraints and wells completions attributes
+        """
+        network_attr = self.network.constraints.get_all()
+        wells_attr = self.wells.get_all()
+
+        network_tuple = self._attr_info_to_tuple(network_attr)
+        wells_tuple = self._attr_info_to_tuple(wells_attr)
+        return network_tuple, wells_tuple
+
+    def hash_network_wells(self) -> int:
+        """Hashes the network constraints and wells completions attributes.
+
+        Returns:
+            int: hash value of the network constraints and wells completions attributes
+        """
+        hash_attr_tuple = self.network_wells_tuple()
+        return hash(hash_attr_tuple)
+
+    def wells_and_network_equal(self, other) -> bool:
+        """Compares the network constraints and wells completions of two NexusSimulator objects.
+
+        Args:
+            other (NexusSimulator): NexusSimulator object to compare with
+
+        Returns:
+            Union[bool]: Returns True if the network constraints and wells completions are equal, False otherwise.
+
+        Raises:
+            ValueError: if both models have no network constraints or wells completions.
+            TypeError: if the other object is not a NexusSimulator object.
+        """
+        if isinstance(other, NexusSimulator):
+            base_class_tuple = self.network_wells_tuple()
+            other_class_tuple = other.network_wells_tuple()
+            if base_class_tuple == ((), ()) and other_class_tuple == ((), ()):
+                # if base_class_tuple and other_class_tuple both return empty tuple, that means both of them /
+                # have no network constraints or wells completions
+                raise ValueError("Both models have empty network constraints or wells completions. Unable to compare.")
+            return self.network_wells_tuple() == other.network_wells_tuple()
+        raise TypeError(f"Unable to compare {type(self)} with {other}. Ensure that {other} is of type NexusSimulator. "
+                        f"{other} has {type(other)}")
 
     def remove_temp_from_properties(self):
         """Updates model values if the files are moved from a temp directory
@@ -306,23 +377,15 @@ class NexusSimulator(Simulator):
         """
         fluid_type = None
         for model in models:
+            model_obj = NexusSimulator(origin=model)
             model_fluid_type = None
-            fcs_file = NexusFile.generate_file_include_structure(model).get_flat_list_str_file
-            surface_filename = None
-            if fcs_file is None:
-                warnings.warn(UserWarning(f'No file found for {model}'))
-                continue
-            for line in fcs_file:
-                if nfo.check_token("SURFACE Network 1", line):
-                    surface_filename = nfo.get_expected_token_value(token="SURFACE Network 1", token_line=line,
-                                                                    file_list=fcs_file)
-                    break
-
-            if surface_filename is not None:
-                surface_filename = surface_filename if os.path.isabs(surface_filename) else \
-                    os.path.dirname(model) + "/" + surface_filename
+            # get the first surface method and expand out all include files
+            if model_obj.model_files.surface_files is None or model_obj.model_files.surface_files[1].location is None:
+                raise ValueError(f"No surface file found for {model}")
+            surface_file_content = model_obj.model_files.surface_files[1].get_flat_list_str_file
+            if surface_file_content is not None:
                 model_fluid_type = NexusSimulator.get_fluid_type(
-                    surface_file_name=surface_filename)
+                    surface_file_content=surface_file_content)
 
             if fluid_type is None:
                 fluid_type = model_fluid_type
@@ -348,7 +411,7 @@ class NexusSimulator(Simulator):
             if nfo.check_token("EOS", line):
                 eos_string += line
                 eos_found = True
-            elif eos_found:
+            elif eos_found and nfo.get_next_value(0, [line]) is not None:
                 eos_string += line
             if nfo.check_token("COMPONENTS", line):
                 break
@@ -356,22 +419,19 @@ class NexusSimulator(Simulator):
         return eos_string
 
     @staticmethod
-    def get_fluid_type(surface_file_name: str) -> str:
+    def get_fluid_type(surface_file_content: list[str]) -> str:
         """Gets the fluid type for a single model from a surface file.
+        Defaults to BLACKOIL if no explicit fluid type is found.
 
         Args:
-            surface_file_name (str): path to the surface file in a Nexus model
-
-        Raises:
-            ValueError: if no fluid type is found within the provided file path
+            surface_file_content (str): list of strings with a new line per entry from the surface file
 
         Returns:
             str: fluid type as one of [BLACKOIL, WATEROIL, GASWATER, API] or the full details from an EOS model
         """
-        surface_file = nfo.load_file_as_list(surface_file_name)
         fluid_type = None
 
-        for line in surface_file:
+        for line in surface_file_content:
             if nfo.check_token("BLACKOIL", line):
                 fluid_type = "BLACKOIL"
                 break
@@ -382,13 +442,12 @@ class NexusSimulator(Simulator):
                 fluid_type = "GASWATER"
                 break
             elif nfo.check_token("EOS", line):
-                fluid_type = NexusSimulator.get_eos_details(surface_file)
+                fluid_type = NexusSimulator.get_eos_details(surface_file_content)
             elif nfo.check_token("API", line):
                 fluid_type = "API"
-
         if fluid_type is None:
-            raise ValueError("No Oil / Gas type detected")
-
+            warnings.warn("No explicit fluid type found in the file. Defaulting to BLACKOIL", UserWarning)
+            fluid_type = "BLACKOIL"
         return fluid_type
 
     def get_model_oil_type(self) -> str:
@@ -402,7 +461,7 @@ class NexusSimulator(Simulator):
         """
         if self.model_files.surface_files is None or self.model_files.surface_files[1].location is None:
             raise ValueError("No value found for the path to the surface file")
-        return NexusSimulator.get_fluid_type(self.model_files.surface_files[1].location)
+        return NexusSimulator.get_fluid_type(self.model_files.surface_files[1].get_flat_list_str_file)
 
     def check_output_path(self) -> None:
         """Confirms that the output path has been set (used to stop accidental writing operations in the original
@@ -427,7 +486,7 @@ class NexusSimulator(Simulator):
         if self.__destination is not None and os.path.dirname(self._origin) != os.path.dirname(self.__destination):
             self._origin = self.__destination + "/" + os.path.basename(self.__original_fcs_file_path)
 
-    def __load_fcs_file(self):
+    def __load_fcs_file(self) -> None:
         """Loads in the information from the supplied FCS file into the class instance.
         Loads in the paths for runcontrol, structured grid and the first surface network.
         Loads in the values for dateformat and run units.

@@ -1,4 +1,3 @@
-
 import numpy as np
 import pandas as pd
 import pytest
@@ -24,19 +23,20 @@ from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator
 
 
-@pytest.mark.parametrize('file_contents, node1_props, node2_props',[
-('''NODES
+@pytest.mark.parametrize('file_contents, node1_props, node2_props', [
+    ('''NODES
   NAME                           TYPE       DEPTH   TEMP
  ! Riser Nodes
   node1                         NA            NA      #
   node_2        WELLHEAD     1167.3 # 
   ENDNODES
 ''',
-{'name': 'node1', 'type': None, 'depth': None,  'temp': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/01/2023',
-    'unit_system': UnitSystem.ENGLISH}
-    ),
-('''NODES
+     {'name': 'node1', 'type': None, 'depth': None, 'temp': None, 'date': '01/01/2023',
+      'unit_system': UnitSystem.ENGLISH},
+     {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/01/2023',
+      'unit_system': UnitSystem.ENGLISH}
+     ),
+    ('''NODES
   NAME       TYPE       DEPTH   TemP    X     Y       NUMBER  StatiON
  ! Riser Nodes
   node1         NA        NA    60.5    100.5 300.5   1     station
@@ -45,12 +45,13 @@ from tests.utility_for_tests import get_fake_nexus_simulator
   content outside of the node statement
   node1         NA        NA    60.5    10.5 3.5   1     station_null
   ''',
-{'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
-    'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': 10.21085, 'y_pos': 3524.23, 'number': 2,
-    'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH}
-  ),
-('''NODES
+     {'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
+      'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+     {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': 10.21085, 'y_pos': 3524.23,
+      'number': 2,
+      'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH}
+     ),
+    ('''NODES
   NAME                           TYPE       DEPTH   TEMP
  ! Riser Nodes
   node1                         NA            NA      #
@@ -62,11 +63,12 @@ from tests.utility_for_tests import get_fake_nexus_simulator
   node_2        WELLHEAD     1167.3 # 
   ENDNODES
 ''',
-{'name': 'node1', 'type': None, 'depth': None,  'temp': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/02/2023',
-    'unit_system': UnitSystem.ENGLISH}
-    ),
-('''NODES
+     {'name': 'node1', 'type': None, 'depth': None, 'temp': None, 'date': '01/01/2023',
+      'unit_system': UnitSystem.ENGLISH},
+     {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/02/2023',
+      'unit_system': UnitSystem.ENGLISH}
+     ),
+    ('''NODES
   NAME                           TYPE       DEPTH   TEMP
  ! Riser Nodes
   node1                         NA            NA      #
@@ -79,11 +81,12 @@ from tests.utility_for_tests import get_fake_nexus_simulator
   node_2        WELLHEAD     1167.3 # 
   ENDNODES
 ''',
-{'name': 'node1', 'type': None, 'depth': None,  'temp': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/02/2023',
-    'unit_system': UnitSystem.METRIC}
-    ),
-('''NODES
+     {'name': 'node1', 'type': None, 'depth': None, 'temp': None, 'date': '01/01/2023',
+      'unit_system': UnitSystem.ENGLISH},
+     {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/02/2023',
+      'unit_system': UnitSystem.METRIC}
+     ),
+    ('''NODES
   NAME       TYPE       DEPTH   TemP    X     Y       NUMBER  StatiON
  ! Riser Nodes
   node1         NA        NA    60.5    100.5 300.5   1     station
@@ -95,14 +98,13 @@ ENDNODES
   content outside of the node statement
   node1         NA        NA    60.5    10.5 3.5   1     station_null
   ''',
-{'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
-    'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': None, 'y_pos': None, 'number': 2,
-    'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH}
-  ),
+     {'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
+      'station': 'station', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+     {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': None, 'y_pos': None, 'number': 2,
+      'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH}
+     ),
 
-
-('''TIME 01/01/2023
+    ('''TIME 01/01/2023
   TIME 01/01/2024
 NODES
   NAME          TEMP    TYPE
@@ -115,12 +117,13 @@ NODES
   test_node3 WELLHEAD 1167.3 100 100 ! NODES
 ENDNODES
 ''',
-{'name': 'test_node2', 'type': 'WELL', 'temp': 100, 'date': '01/01/2024', 'unit_system': UnitSystem.ENGLISH},
-{'name': 'test_node3', 'type': 'WELLHEAD', 'depth': 1167.3, 'x_pos': 100, 'y_pos': 100, 'date': '01/01/2025', 'unit_system': UnitSystem.ENGLISH},
-)
+     {'name': 'test_node2', 'type': 'WELL', 'temp': 100, 'date': '01/01/2024', 'unit_system': UnitSystem.ENGLISH},
+     {'name': 'test_node3', 'type': 'WELLHEAD', 'depth': 1167.3, 'x_pos': 100, 'y_pos': 100, 'date': '01/01/2025',
+      'unit_system': UnitSystem.ENGLISH},
+     )
 ],
-ids=['basic', 'all columns', 'times', 'units', 'two tables', 'keyword in column']
-)
+                         ids=['basic', 'all columns', 'times', 'units', 'two tables', 'keyword in column']
+                         )
 def test_load_nexus_nodes(mocker, file_contents, node1_props, node2_props):
     # Arrange
     # mock out a surface file:
@@ -150,8 +153,8 @@ def test_load_nexus_nodes(mocker, file_contents, node1_props, node2_props):
         assert single_node_result.depth / 2 == 1167.3 / 2
 
 
-@pytest.mark.parametrize('file_contents, node1_props, node2_props',[
-('''NODES
+@pytest.mark.parametrize('file_contents, node1_props, node2_props', [
+    ('''NODES
   NAME       TYPE       DEPTH   TemP    X     Y       NUMBER  StatiON
  ! Riser Nodes
   node1         NA        NA    60.5    100.5 300.5   1     station
@@ -160,11 +163,12 @@ def test_load_nexus_nodes(mocker, file_contents, node1_props, node2_props):
   content outside of the node statement
   node1         NA        NA    60.5    10.5 3.5   1     station_null
   ''',
-{'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
-    'station': 'station', 'date': '01/01/2023', 'unit_system': 'ENGLISH'},
-{'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': 10.21085, 'y_pos': 3524.23, 'number': 2,
-    'station': 'station2', 'date': '01/01/2023', 'unit_system': 'ENGLISH'}
-  )],)
+     {'name': 'node1', 'type': None, 'depth': None, 'temp': 60.5, 'x_pos': 100.5, 'y_pos': 300.5, 'number': 1,
+      'station': 'station', 'date': '01/01/2023', 'unit_system': 'ENGLISH'},
+     {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': 10.21085, 'y_pos': 3524.23,
+      'number': 2,
+      'station': 'station2', 'date': '01/01/2023', 'unit_system': 'ENGLISH'}
+     )], )
 def test_get_node_df(mocker, file_contents, node1_props, node2_props):
     # Arrange
     start_date = '01/01/2023'
@@ -180,20 +184,21 @@ def test_get_node_df(mocker, file_contents, node1_props, node2_props):
     result = nexus_nodes.get_df()
 
     # Assert
-    pd.testing.assert_frame_equal(result, expected_df,)
+    pd.testing.assert_frame_equal(result, expected_df, )
 
-@pytest.mark.parametrize('file_contents, connection1_props, connection2_props',[
-('''NODECON
+
+@pytest.mark.parametrize('file_contents, connection1_props, connection2_props', [
+    ('''NODECON
 	NAME            NODEIN    NODEOUT       TYPE        METHOD    DDEPTH
 	CP01            CP01      wh_cp01       PIPE        2          7002.67
 	cp01_gaslift    GAS       CP01          GASLIFT     NONE        NA ! Checked NODECON 13/05/2020 
 	ENDNODECON
 	''',
-	{'name': 'CP01', 'node_in': 'CP01', 'node_out': 'wh_cp01', 'con_type': 'PIPE', 'hyd_method': '2',
-	'delta_depth': 7002.67, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-	{'name': 'cp01_gaslift', 'node_in': 'GAS', 'node_out': 'CP01', 'con_type': 'GASLIFT', 'hyd_method': None,
-	'delta_depth': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},),
-(	'''NODES
+     {'name': 'CP01', 'node_in': 'CP01', 'node_out': 'wh_cp01', 'con_type': 'PIPE', 'hyd_method': '2',
+      'delta_depth': 7002.67, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+     {'name': 'cp01_gaslift', 'node_in': 'GAS', 'node_out': 'CP01', 'con_type': 'GASLIFT', 'hyd_method': None,
+      'delta_depth': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},),
+    ('''NODES
   NAME       TYPE       DEPTH   TemP    X     Y       NUMBER  StatiON
  ! Riser Nodes
   node1         NA        NA    60.5    100.5 300.5   1     station
@@ -204,11 +209,11 @@ def test_get_node_df(mocker, file_contents, node1_props, node2_props):
 	CP01            CP01      wh_cp01       PIPE        2          7002.67  20486
 	cp01_gaslift    GAS       CP01          GASLIFT     NONE        NA    1000.23! Checked NODECON 13/05/2020 
 	ENDNODECON''',
-    {'name': 'CP01', 'node_in': 'CP01', 'node_out': 'wh_cp01', 'con_type': 'PIPE', 'hyd_method': '2',
-    'delta_depth': 7002.67, 'dp_add': 20486, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-    {'name': 'cp01_gaslift', 'node_in': 'GAS', 'node_out': 'CP01', 'con_type': 'GASLIFT', 'hyd_method': None,
-    'delta_depth': None, 'dp_add': 1000.23, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},),
-(	''' TIME 01/02/2023
+     {'name': 'CP01', 'node_in': 'CP01', 'node_out': 'wh_cp01', 'con_type': 'PIPE', 'hyd_method': '2',
+      'delta_depth': 7002.67, 'dp_add': 20486, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+     {'name': 'cp01_gaslift', 'node_in': 'GAS', 'node_out': 'CP01', 'con_type': 'GASLIFT', 'hyd_method': None,
+      'delta_depth': None, 'dp_add': 1000.23, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},),
+    (''' TIME 01/02/2023
   NODECON
 	NAME            NODEIN    NODEOUT       TYPE        METHOD    DDEPTH
 	CP01            CP01      wh_cp01       PIPE        2          7002.67
@@ -218,24 +223,27 @@ def test_get_node_df(mocker, file_contents, node1_props, node2_props):
 		NAME            NODEIN    NODEOUT       TYPE        METHOD    DDEPTH
 	cp01_gaslift    GAS       CP01          GASLIFT     NONE        NA ! Checked NODECON 13/05/2020 
 	ENDNODECON''',
-    {'name': 'CP01', 'node_in': 'CP01', 'node_out': 'wh_cp01', 'con_type': 'PIPE', 'hyd_method': '2',
-    'delta_depth': 7002.67, 'date': '01/02/2023', 'unit_system': UnitSystem.ENGLISH},
-    {'name': 'cp01_gaslift', 'node_in': 'GAS', 'node_out': 'CP01', 'con_type': 'GASLIFT', 'hyd_method': None,
-    'delta_depth': None, 'date': '01/03/2023', 'unit_system': UnitSystem.ENGLISH},),
-('''NODECON
+     {'name': 'CP01', 'node_in': 'CP01', 'node_out': 'wh_cp01', 'con_type': 'PIPE', 'hyd_method': '2',
+      'delta_depth': 7002.67, 'date': '01/02/2023', 'unit_system': UnitSystem.ENGLISH},
+     {'name': 'cp01_gaslift', 'node_in': 'GAS', 'node_out': 'CP01', 'con_type': 'GASLIFT', 'hyd_method': None,
+      'delta_depth': None, 'date': '01/03/2023', 'unit_system': UnitSystem.ENGLISH},),
+    ('''NODECON
   NAME    NODEIN        NODEOUT       TYPE      METHOD    IPVT  ELEVPR   MDIN     MDOUT DIAM  ROUGHNESS    HTC  TEMPPR    TEMPIN  TEMPOUT
   CP01   dccfr1        pseudo_prd_1  PIPE      HAG_BEG     NA  R0302E04 NA        NA   9.500    0.0476  8.000  prtempr    100.3     300
   prd_2   pseudo_prd_1  pseudo_prd_2  PIPE      HAG_BEG     NA  R0308E03 NA        NA   9.130    0.0018  8.000  prtempr   100     10.3
 !prd_3   prd_3         prd_3         PIPE      HAG_BEG     NA  R0308E03 NA        NA   9.130    0.0018  8.000  prtempr    200     NA
   ENDNODECON''',
-    {'name': 'CP01', 'node_in': 'dccfr1', 'node_out': 'pseudo_prd_1', 'con_type': 'PIPE', 'hyd_method': 'HAG_BEG',
-    'elevation_profile': 'R0302E04','diameter': 9.500, 'roughness':0.0476, 'heat_transfer_coeff': 8.000,
-    'temperature_profile': 'prtempr', 'temperature_in': 100.3, 'temperature_out': 300, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-    {'name': 'prd_2', 'node_in': 'pseudo_prd_1', 'node_out': 'pseudo_prd_2', 'con_type': 'PIPE', 'hyd_method': 'HAG_BEG',
-    'elevation_profile': 'R0308E03', 'diameter': 9.130, 'roughness':0.0018, 'heat_transfer_coeff':8.000,
-    'temperature_profile': 'prtempr', 'temperature_in': 100, 'temperature_out': 10.3, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},),
+     {'name': 'CP01', 'node_in': 'dccfr1', 'node_out': 'pseudo_prd_1', 'con_type': 'PIPE', 'hyd_method': 'HAG_BEG',
+      'elevation_profile': 'R0302E04', 'diameter': 9.500, 'roughness': 0.0476, 'heat_transfer_coeff': 8.000,
+      'temperature_profile': 'prtempr', 'temperature_in': 100.3, 'temperature_out': 300, 'date': '01/01/2023',
+      'unit_system': UnitSystem.ENGLISH},
+     {'name': 'prd_2', 'node_in': 'pseudo_prd_1', 'node_out': 'pseudo_prd_2', 'con_type': 'PIPE',
+      'hyd_method': 'HAG_BEG',
+      'elevation_profile': 'R0308E03', 'diameter': 9.130, 'roughness': 0.0018, 'heat_transfer_coeff': 8.000,
+      'temperature_profile': 'prtempr', 'temperature_in': 100, 'temperature_out': 10.3, 'date': '01/01/2023',
+      'unit_system': UnitSystem.ENGLISH},),
 
-	], ids=['basic', 'other_tables', 'time changes two tables', 'More Columns'])
+], ids=['basic', 'other_tables', 'time changes two tables', 'More Columns'])
 def test_load_connections(mocker, file_contents, connection1_props, connection2_props):
     # Arrange
     start_date = '01/01/2023'
@@ -261,10 +269,11 @@ def test_load_connections(mocker, file_contents, connection1_props, connection2_
     # check for correct float types
     if single_connection_result.depth is not None:
         assert single_connection_result.depth / 2 == 7002.67 / 2
-    pd.testing.assert_frame_equal(result_df, expected_df,)
+    pd.testing.assert_frame_equal(result_df, expected_df, )
 
-@pytest.mark.parametrize('file_contents, well_connection_props1, well_connection_props2',[
-(''' TIME 02/10/2032
+
+@pytest.mark.parametrize('file_contents, well_connection_props1, well_connection_props2', [
+    (''' TIME 02/10/2032
 METRIC
 WELLS
   NAME    STREAM   NUMBER   DATUM   CROSSFLOW   CROSS_SHUT
@@ -273,13 +282,14 @@ WELLS
   bad_data
     ENDWELLS
 ''',
-{'name': 'prod', 'stream': 'PRODUCER', 'number': 94, 'datum_depth': 4039.3, 'crossflow': 'ON', 'crossshut': 'CELLGRAD',
-'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
-{'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 4039.3, 'crossflow': 'OFF', 'crossshut': 'CALC',
-'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
-)
+     {'name': 'prod', 'stream': 'PRODUCER', 'number': 94, 'datum_depth': 4039.3, 'crossflow': 'ON',
+      'crossshut': 'CELLGRAD',
+      'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
+     {'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 4039.3, 'crossflow': 'OFF', 'crossshut': 'CALC',
+      'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
+     )
 ])
-def test_load_well_connections(mocker, file_contents, well_connection_props1, well_connection_props2,):
+def test_load_well_connections(mocker, file_contents, well_connection_props1, well_connection_props2, ):
     # Arrange
     start_date = '01/01/2023'
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
@@ -292,7 +302,6 @@ def test_load_well_connections(mocker, file_contents, well_connection_props1, we
     nexus_well_cons = NexusWellConnections(mock_nexus_network)
     expected_df = pd.DataFrame([well_connection_props1, well_connection_props2])
     expected_df = expected_df.fillna(value=np.nan).dropna(axis=1, how='all')
-
 
     # Act
     nexus_well_cons.load(surface_file, start_date, default_units=UnitSystem.ENGLISH)
@@ -354,16 +363,19 @@ DATEFORMAT DD/MM/YYYY
 RECURRENT_FILES
 	 WELLS Set 1        wells.dat
 	 SURFACE Network 1  surface.dat
+	 RUNCONTROL runcontrol.dat
 """
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             'model.fcs': fcs_file_contents,
             'wells.dat': wellspec_file_contents,
-            'surface.dat': surface_file_contents
+            'surface.dat': surface_file_contents,
+            'runcontrol.dat': 'START 01/01/2018'
         }).return_value
         return mock_open
 
+    start_date = '01/01/2018'
     mocker.patch("builtins.open", mock_open_wrapper)
 
     model = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='model.fcs', mock_open=False)
@@ -371,24 +383,40 @@ RECURRENT_FILES
     parent_wells_instance = NexusWells(model=model)
     model._wells = parent_wells_instance
 
-    expected_completion_1 = NexusCompletion(date='02/10/2032', i=1, j=2, k=3, well_radius=4.5, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH)
-    expected_well_1 = NexusWell(well_name='well_prod_1', completions=[expected_completion_1], unit_system=UnitSystem.ENGLISH,
+    expected_completion_1 = NexusCompletion(date='02/10/2032', i=1, j=2, k=3, well_radius=4.5,
+                                            date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH,
+                                            start_date=start_date)
+    expected_well_1 = NexusWell(well_name='well_prod_1', completions=[expected_completion_1],
+                                unit_system=UnitSystem.ENGLISH,
                                 well_type=WellType.PRODUCER, parent_wells_instance=parent_wells_instance)
-    expected_completion_2 = NexusCompletion(date='02/10/2032', i=5, j=6, k=7, well_radius=8.0, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH)
-    expected_well_2 = NexusWell(well_name='well_inj_wat', completions=[expected_completion_2], unit_system=UnitSystem.ENGLISH,
+    expected_completion_2 = NexusCompletion(date='02/10/2032', i=5, j=6, k=7, well_radius=8.0,
+                                            date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH,
+                                            start_date=start_date)
+    expected_well_2 = NexusWell(well_name='well_inj_wat', completions=[expected_completion_2],
+                                unit_system=UnitSystem.ENGLISH,
                                 well_type=WellType.WATER_INJECTOR, parent_wells_instance=parent_wells_instance)
-    expected_completion_3 = NexusCompletion(date='02/10/2032', i=9, j=10, k=11, well_radius=12.1, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH)
-    expected_well_3 = NexusWell(well_name='well_inj_oil', completions=[expected_completion_3], unit_system=UnitSystem.ENGLISH,
+    expected_completion_3 = NexusCompletion(date='02/10/2032', i=9, j=10, k=11, well_radius=12.1,
+                                            date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH,
+                                            start_date=start_date)
+
+    expected_well_3 = NexusWell(well_name='well_inj_oil', completions=[expected_completion_3],
+                                unit_system=UnitSystem.ENGLISH,
                                 well_type=WellType.OIL_INJECTOR, parent_wells_instance=parent_wells_instance)
-    expected_completion_4 = NexusCompletion(date='02/10/2032', i=13, j=14, k=15, well_radius=16.0, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH)
-    expected_well_4 = NexusWell(well_name='well_prod_2', completions=[expected_completion_4], unit_system=UnitSystem.ENGLISH,
+    expected_completion_4 = NexusCompletion(date='02/10/2032', i=13, j=14, k=15, well_radius=16.0,
+                                            date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH,
+                                            start_date=start_date)
+    expected_well_4 = NexusWell(well_name='well_prod_2', completions=[expected_completion_4],
+                                unit_system=UnitSystem.ENGLISH,
                                 well_type=WellType.PRODUCER, parent_wells_instance=parent_wells_instance)
-    expected_well_5 = NexusWell(well_name='well_inj_gas', completions=[expected_completion_4], unit_system=UnitSystem.ENGLISH,
+    expected_well_5 = NexusWell(well_name='well_inj_gas', completions=[expected_completion_4],
+                                unit_system=UnitSystem.ENGLISH,
                                 well_type=WellType.GAS_INJECTOR, parent_wells_instance=parent_wells_instance)
-    expected_well_6 = NexusWell(well_name='well_prod_other', completions=[expected_completion_4], unit_system=UnitSystem.ENGLISH,
+    expected_well_6 = NexusWell(well_name='well_prod_other', completions=[expected_completion_4],
+                                unit_system=UnitSystem.ENGLISH,
                                 well_type=WellType.PRODUCER, parent_wells_instance=parent_wells_instance)
 
-    expected_wells = [expected_well_1, expected_well_2, expected_well_3, expected_well_4, expected_well_5, expected_well_6]
+    expected_wells = [expected_well_1, expected_well_2, expected_well_3, expected_well_4, expected_well_5,
+                      expected_well_6]
 
     # Act
     result = model.wells.wells
@@ -399,15 +427,17 @@ RECURRENT_FILES
 
 
 @pytest.mark.parametrize('file_contents, wellhead_props_1, wellhead_props_2', [
-(''' TIME 01/03/2019
+    (''' TIME 01/03/2019
 WELLHEAD
 WELL NAME DEPTH TYPE METHOD
 !ru	TH-ru	100	PIPE 	3	
 R001	tubing	50.2	PIPE 	2	!ENDWELLHEAD
 R-0_02	TH-03	0	PIPE 	1! comment
 	ENDWELLHEAD''',
-{'well': 'R001', 'name': 'tubing', 'depth': 50.2, 'wellhead_type': 'PIPE', 'hyd_method': 2, 'date': '01/03/2019', 'unit_system': UnitSystem.ENGLISH},
-{'well': 'R-0_02', 'name': 'TH-03', 'depth': 0, 'wellhead_type': 'PIPE', 'hyd_method': 1, 'date': '01/03/2019', 'unit_system': UnitSystem.ENGLISH},)
+     {'well': 'R001', 'name': 'tubing', 'depth': 50.2, 'wellhead_type': 'PIPE', 'hyd_method': 2, 'date': '01/03/2019',
+      'unit_system': UnitSystem.ENGLISH},
+     {'well': 'R-0_02', 'name': 'TH-03', 'depth': 0, 'wellhead_type': 'PIPE', 'hyd_method': 1, 'date': '01/03/2019',
+      'unit_system': UnitSystem.ENGLISH},)
 
 ])
 def test_load_wellhead(mocker, file_contents, wellhead_props_1, wellhead_props_2):
@@ -435,8 +465,9 @@ def test_load_wellhead(mocker, file_contents, wellhead_props_1, wellhead_props_2
     assert single_wellhead == wellhead1
     pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
 
+
 @pytest.mark.parametrize('file_contents, wellboreprops1, wellboreprops2', [
-(''' TIME 01/03/2019
+    (''' TIME 01/03/2019
 WELLBORE
 WELL METHOD DIAM TYPE
 well1 BEGGS 3.5 PIPE
@@ -446,10 +477,10 @@ WELL METHOD DIAM FLOWSECT ROUGHNESS
 well2 BRILL 3.25 2      0.2002
 ENDWELLBORE
 	''',
-{'name': 'well1', 'bore_type': 'PIPE', 'hyd_method': "BEGGS", 'diameter': 3.5, 'date': '01/03/2019',
- 'unit_system': UnitSystem.ENGLISH},
-{'name': 'well2', 'hyd_method': "BRILL", 'diameter': 3.25, 'flowsect': 2, 'roughness': 0.2002,
- 'date': '01/03/2019', 'unit_system': UnitSystem.ENGLISH},)
+     {'name': 'well1', 'bore_type': 'PIPE', 'hyd_method': "BEGGS", 'diameter': 3.5, 'date': '01/03/2019',
+      'unit_system': UnitSystem.ENGLISH},
+     {'name': 'well2', 'hyd_method': "BRILL", 'diameter': 3.25, 'flowsect': 2, 'roughness': 0.2002,
+      'date': '01/03/2019', 'unit_system': UnitSystem.ENGLISH},)
 ])
 def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
     # Arrange

@@ -41,7 +41,8 @@ def nexus_token_found(line_to_check: str, valid_list: list[str] = VALID_NEXUS_KE
 
 def get_previous_value(file_as_list: list[str], search_before: Optional[str] = None,
                        ignore_values: Optional[list[str]] = None) -> Optional[str]:
-    """Gets the previous non blank value in a list of lines. Starts from the last line working backwards.
+    """Gets the previous non-blank value in a list of lines. Starts from the last instance of search_before,
+    working backwards.
 
     Args:
         file_as_list (list[str]): a list of strings containing each line of the file as a new entry,
@@ -51,7 +52,7 @@ def get_previous_value(file_as_list: list[str], search_before: Optional[str] = N
                     Defaults to None.
 
     Returns:
-        Optional[str]: Next non blank value from the list, if none found returns None
+        Optional[str]: Next non-blank value from the list, if none found returns None
     """
 
     # Reverse the order of the lines
@@ -63,21 +64,23 @@ def get_previous_value(file_as_list: list[str], search_before: Optional[str] = N
         file_as_list[0] = file_as_list[0][0: search_before_location]
 
     previous_value: str = ''
-
+    first_line = True
     for line in file_as_list:
         string_to_search: str = line
-
         # Retrieve all of the values in the line, then return the last one found if one is found.
         # Otherwise search the next line
         next_value = get_next_value(0, [string_to_search], ignore_values=ignore_values)
 
-        while next_value is not None and search_before != next_value:
+        while next_value is not None and (search_before != next_value or not first_line):
             previous_value = next_value
             string_to_search = string_to_search.replace(next_value, '')
             next_value = get_next_value(0, [string_to_search], ignore_values=ignore_values)
 
         if previous_value != '':
             return previous_value
+
+        # If we are not on the first line, we can search the whole line
+        first_line = False
 
     # Start of file reached, no values found
     return None

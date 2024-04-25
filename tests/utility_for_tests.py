@@ -45,6 +45,7 @@ def get_fake_nexus_simulator(mocker: MockerFixture, fcs_file_path: str = '/path/
 
     return fake_nexus_sim
 
+
 def uuid_side_effect():
     """Generates an infinite sequence of overwrites for uuid calls."""
     num = 0
@@ -54,7 +55,7 @@ def uuid_side_effect():
 
 
 def generic_fcs(mocker):
-
+    """Generates a set of fake FCS file contents."""
     fcs_path = 'test_fcs.fcs'
 
     fcs_content = '''DESC reservoir1

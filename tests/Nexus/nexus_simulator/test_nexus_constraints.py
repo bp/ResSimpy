@@ -403,14 +403,22 @@ def test_nexus_constraints_skip_procs(mocker):
     # Arrange
     surface_content = '''TIME 04/10/2019
 
-PROCS NAME PROCNAME 
+PROCS NAME START_SEAM_TUNING  CLEAR PRIORITY 2
 	IF(TIME > 0.0) THEN
  DO something
+ NODELIST, STATIC, WELLHEADS, BHNODES_INJ
+ ENDDO
+ ENDIF
 ENDPROCS
+PROCABORT ARRAYBOUNDS
 
+PROCS NAME SETOPTIONS  CLEAR PRIORITY 1
+
+INCLUDE procs_file.dat
 CONSTRAINTS
    WELL1 QOSMAX 6100.7
-ENDCONSTRAINTS'''
+ENDCONSTRAINTS
+'''
 
     fcs_file_data = '''RUN_UNITS ENGLISH
 
@@ -421,11 +429,19 @@ ENDCONSTRAINTS'''
     SURFACE Network 1 surface.dat'''
     runcontrol_data = 'START 01/01/2020'
 
+    extra_procs_data = '''
+	IF(TIME > 0.0) THEN
+ DO something
+ NODELIST, STATIC, WELLHEADS, BHNODES_INJ
+ ENDDO
+ ENDIF
+ENDPROCS'''
     def mock_open_wrapper(filename,  mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             'fcs_file.dat': fcs_file_data,
             'surface.dat': surface_content,
             'ref_runcontrol.dat': runcontrol_data,
+            'procs_file.dat': extra_procs_data,
         }).return_value
         return mock_open
 
@@ -433,5 +449,7 @@ ENDCONSTRAINTS'''
     model = NexusSimulator('fcs_file.dat')
     # Act
     constraint = model.network.constraints.get_all()['WELL1'][0]
+    procs = model.network.procs.get_all()
     # Assert
     assert constraint.date == '04/10/2019'
+    assert len(procs) == 2

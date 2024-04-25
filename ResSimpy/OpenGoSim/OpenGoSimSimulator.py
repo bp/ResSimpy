@@ -103,7 +103,7 @@ WELLS
                     if token.upper() == 'TIME':
                         self.__load_in_time_block(model_as_list[index:])
 
-    def __load_in_time_block(self, remaining_text: list[str]):
+    def __load_in_time_block(self, remaining_text: list[str]) -> None:
         # Load in the TIME block of the model.
         for index, line in enumerate(remaining_text):
             if line_contains_block_ending(line):
@@ -116,7 +116,7 @@ WELLS
                 self.__final_date = fo.load_in_three_part_date(initial_token='FINAL_DATE', token_line=line,
                                                                file_as_list=remaining_text, start_index=index)
 
-    def __load_in_simulation_block(self, remaining_text: list[str]):
+    def __load_in_simulation_block(self, remaining_text: list[str]) -> None:
         # Load in the SIMULATION block of the model.
         for line in remaining_text:
             if line_contains_block_ending(line):
@@ -126,7 +126,7 @@ WELLS
                 self.__simulation_type = SimulationType.SUBSURFACE if value.upper() == 'SUBSURFACE' \
                     else SimulationType.GEOMECHANICS_SUBSURFACE
 
-    def __load_in_well_data_block(self, remaining_text: list[str]):
+    def __load_in_well_data_block(self, remaining_text: list[str]) -> None:
         # Load in the WELL_DATA block of the model.
         completions_to_add: list[OpenGoSimCompletion] = []
         unique_completions: list[OpenGoSimCompletion] = []
@@ -213,7 +213,7 @@ WELLS
         self._wells._wells_loaded = True
 
     @staticmethod
-    def get_fluid_type(surface_file_name: str) -> str:
+    def get_fluid_type(surface_file_content: list[str]) -> str:
         raise NotImplementedError("Not implemented for OGS yet")
 
     def set_output_path(self, path: str) -> None:

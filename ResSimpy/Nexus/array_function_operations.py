@@ -375,7 +375,7 @@ def object_from_array_function_block(array_function: list[str], function_number:
                                       'could not convert string to int.')
                 else:
                     region_type = words[1]
-                    region_number_list0 = array_function[li + 1].split()
+                    region_number_list0 = array_function[li + 1].replace(',', ' ').split()
                     try:
                         region_number_list = [round(float(i)) for i in region_number_list0]
                     except ValueError:
@@ -384,7 +384,7 @@ def object_from_array_function_block(array_function: list[str], function_number:
             if len(words) > 2:
                 if words[1] in GRID_ARRAY_KEYWORDS:
                     region_type = words[1]
-                    region_number_list0 = array_function[li + 1].split()
+                    region_number_list0 = array_function[li + 1].replace(',', ' ').split()
                     try:
                         region_number_list = [round(float(i)) for i in region_number_list0]
                     except ValueError:

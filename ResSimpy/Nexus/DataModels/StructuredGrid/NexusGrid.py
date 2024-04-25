@@ -4,7 +4,7 @@ from __future__ import annotations
 import copy
 import pandas as pd
 from dataclasses import dataclass
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Any
 import warnings
 
 from ResSimpy.Grid import Grid, GridArrayDefinition
@@ -39,6 +39,57 @@ class NexusGrid(Grid):
     __grid_faults_loaded: bool = False
     __grid_nexus_file: Optional[NexusFile] = None
     __corp: GridArrayDefinition
+    __dx: GridArrayDefinition
+    __dy: GridArrayDefinition
+    __dz: GridArrayDefinition
+    __depth: GridArrayDefinition
+    __mdepth: GridArrayDefinition
+    __dznet: GridArrayDefinition
+    __compr: GridArrayDefinition
+    __icoars: GridArrayDefinition
+    __ialphaf: GridArrayDefinition
+    __ipolymer: GridArrayDefinition
+    __iadsorption: GridArrayDefinition
+    __itracer: GridArrayDefinition
+    __igrid: GridArrayDefinition
+    __isector: GridArrayDefinition
+    __swl: GridArrayDefinition
+    __swr: GridArrayDefinition
+    __swu: GridArrayDefinition
+    __sgl: GridArrayDefinition
+    __sgr: GridArrayDefinition
+    __sgu: GridArrayDefinition
+    __swro: GridArrayDefinition
+    __swro_ls: GridArrayDefinition
+    __sgro: GridArrayDefinition
+    __sgrw: GridArrayDefinition
+    __krw_swro: GridArrayDefinition
+    __krws_ls: GridArrayDefinition
+    __krw_swu: GridArrayDefinition
+    __krg_sgro: GridArrayDefinition
+    __krg_sgu: GridArrayDefinition
+    __krg_sgrw: GridArrayDefinition
+    __kro_swl: GridArrayDefinition
+    __kro_swr: GridArrayDefinition
+    __kro_sgl: GridArrayDefinition
+    __kro_sgr: GridArrayDefinition
+    __krw_sgl: GridArrayDefinition
+    __krw_sgr: GridArrayDefinition
+    __sgtr: GridArrayDefinition
+    __sotr: GridArrayDefinition
+    __swlpc: GridArrayDefinition
+    __sglpc: GridArrayDefinition
+    __pcw_swl: GridArrayDefinition
+    __pcg_sgu: GridArrayDefinition
+    __chloride: GridArrayDefinition
+    __calcium: GridArrayDefinition
+    __salinity: GridArrayDefinition
+    __api: GridArrayDefinition
+    __tmx: GridArrayDefinition
+    __tmy: GridArrayDefinition
+    __tmz: GridArrayDefinition
+    __multbv: GridArrayDefinition
+    __pv: GridArrayDefinition
     __iequil: GridArrayDefinition
     __ipvt: GridArrayDefinition
     __iwater: GridArrayDefinition
@@ -95,8 +146,59 @@ class NexusGrid(Grid):
         self.__worka7: GridArrayDefinition = GridArrayDefinition()
         self.__worka8: GridArrayDefinition = GridArrayDefinition()
         self.__worka9: GridArrayDefinition = GridArrayDefinition()
+        self.__dx: GridArrayDefinition = GridArrayDefinition()
+        self.__dy: GridArrayDefinition = GridArrayDefinition()
+        self.__dz: GridArrayDefinition = GridArrayDefinition()
+        self.__depth: GridArrayDefinition = GridArrayDefinition()
+        self.__mdepth: GridArrayDefinition = GridArrayDefinition()
+        self.__dznet: GridArrayDefinition = GridArrayDefinition()
+        self.__compr: GridArrayDefinition = GridArrayDefinition()
+        self.__icoars: GridArrayDefinition = GridArrayDefinition()
+        self.__ialphaf: GridArrayDefinition = GridArrayDefinition()
+        self.__ipolymer: GridArrayDefinition = GridArrayDefinition()
+        self.__iadsorption: GridArrayDefinition = GridArrayDefinition()
+        self.__itracer: GridArrayDefinition = GridArrayDefinition()
+        self.__igrid: GridArrayDefinition = GridArrayDefinition()
+        self.__isector: GridArrayDefinition = GridArrayDefinition()
+        self.__swl: GridArrayDefinition = GridArrayDefinition()
+        self.__swr: GridArrayDefinition = GridArrayDefinition()
+        self.__swu: GridArrayDefinition = GridArrayDefinition()
+        self.__sgl: GridArrayDefinition = GridArrayDefinition()
+        self.__sgr: GridArrayDefinition = GridArrayDefinition()
+        self.__sgu: GridArrayDefinition = GridArrayDefinition()
+        self.__swro: GridArrayDefinition = GridArrayDefinition()
+        self.__swro_ls: GridArrayDefinition = GridArrayDefinition()
+        self.__sgro: GridArrayDefinition = GridArrayDefinition()
+        self.__sgrw: GridArrayDefinition = GridArrayDefinition()
+        self.__krw_swro: GridArrayDefinition = GridArrayDefinition()
+        self.__krws_ls: GridArrayDefinition = GridArrayDefinition()
+        self.__krw_swu: GridArrayDefinition = GridArrayDefinition()
+        self.__krg_sgro: GridArrayDefinition = GridArrayDefinition()
+        self.__krg_sgu: GridArrayDefinition = GridArrayDefinition()
+        self.__krg_sgrw: GridArrayDefinition = GridArrayDefinition()
+        self.__kro_swl: GridArrayDefinition = GridArrayDefinition()
+        self.__kro_swr: GridArrayDefinition = GridArrayDefinition()
+        self.__kro_sgl: GridArrayDefinition = GridArrayDefinition()
+        self.__kro_sgr: GridArrayDefinition = GridArrayDefinition()
+        self.__krw_sgl: GridArrayDefinition = GridArrayDefinition()
+        self.__krw_sgr: GridArrayDefinition = GridArrayDefinition()
+        self.__sgtr: GridArrayDefinition = GridArrayDefinition()
+        self.__sotr: GridArrayDefinition = GridArrayDefinition()
+        self.__swlpc: GridArrayDefinition = GridArrayDefinition()
+        self.__sglpc: GridArrayDefinition = GridArrayDefinition()
+        self.__pcw_swl: GridArrayDefinition = GridArrayDefinition()
+        self.__pcg_sgu: GridArrayDefinition = GridArrayDefinition()
+        self.__chloride: GridArrayDefinition = GridArrayDefinition()
+        self.__calcium: GridArrayDefinition = GridArrayDefinition()
+        self.__salinity: GridArrayDefinition = GridArrayDefinition()
+        self.__api: GridArrayDefinition = GridArrayDefinition()
+        self.__tmx: GridArrayDefinition = GridArrayDefinition()
+        self.__tmy: GridArrayDefinition = GridArrayDefinition()
+        self.__tmz: GridArrayDefinition = GridArrayDefinition()
+        self.__multbv: GridArrayDefinition = GridArrayDefinition()
+        self.__pv: GridArrayDefinition = GridArrayDefinition()
 
-    def __wrap(self, value):
+    def __wrap(self, value) -> Any:
         if isinstance(value, tuple | list | set | frozenset):
             return type(value)([self.__wrap(v) for v in value])
         else:
@@ -167,51 +269,119 @@ class NexusGrid(Grid):
         # Ignore blank lines
         file_as_list = [line for line in file_as_list if not line.strip() == '']
 
+        properties_to_load = [
+            PropertyToLoad('NETGRS', GRID_ARRAY_FORMAT_KEYWORDS, self._netgrs),
+            PropertyToLoad('POROSITY', GRID_ARRAY_FORMAT_KEYWORDS, self._porosity),
+            PropertyToLoad('POR', GRID_ARRAY_FORMAT_KEYWORDS, self._porosity),
+            PropertyToLoad('SW', GRID_ARRAY_FORMAT_KEYWORDS, self._sw),
+            PropertyToLoad('SG', GRID_ARRAY_FORMAT_KEYWORDS, self._sg),
+            PropertyToLoad('PRESSURE', GRID_ARRAY_FORMAT_KEYWORDS, self._pressure),
+            PropertyToLoad('P', GRID_ARRAY_FORMAT_KEYWORDS, self._pressure),
+            PropertyToLoad('TEMPERATURE', GRID_ARRAY_FORMAT_KEYWORDS, self._temperature),
+            PropertyToLoad('TEMP', GRID_ARRAY_FORMAT_KEYWORDS, self._temperature),
+            PropertyToLoad('KX', GRID_ARRAY_FORMAT_KEYWORDS, self._kx),
+            PropertyToLoad('KI', GRID_ARRAY_FORMAT_KEYWORDS, self._kx),
+            PropertyToLoad('PERMX', GRID_ARRAY_FORMAT_KEYWORDS, self._kx),
+            PropertyToLoad('PERMI', GRID_ARRAY_FORMAT_KEYWORDS, self._kx),
+            PropertyToLoad('KY', GRID_ARRAY_FORMAT_KEYWORDS, self._ky),
+            PropertyToLoad('KJ', GRID_ARRAY_FORMAT_KEYWORDS, self._ky),
+            PropertyToLoad('PERMY', GRID_ARRAY_FORMAT_KEYWORDS, self._ky),
+            PropertyToLoad('PERMJ', GRID_ARRAY_FORMAT_KEYWORDS, self._ky),
+            PropertyToLoad('KZ', GRID_ARRAY_FORMAT_KEYWORDS, self._kz),
+            PropertyToLoad('KK', GRID_ARRAY_FORMAT_KEYWORDS, self._kz),
+            PropertyToLoad('PERMZ', GRID_ARRAY_FORMAT_KEYWORDS, self._kz),
+            PropertyToLoad('PERMK', GRID_ARRAY_FORMAT_KEYWORDS, self._kz),
+            PropertyToLoad('PVMULT', GRID_ARRAY_FORMAT_KEYWORDS, self.__pvmult),
+            PropertyToLoad('CORP', ['VALUE'], self.__corp),
+            PropertyToLoad('IEQUIL', GRID_ARRAY_FORMAT_KEYWORDS, self.__iequil),
+            PropertyToLoad('IPVT', GRID_ARRAY_FORMAT_KEYWORDS, self.__ipvt),
+            PropertyToLoad('IWATER', GRID_ARRAY_FORMAT_KEYWORDS, self.__iwater),
+            PropertyToLoad('IRELPM', GRID_ARRAY_FORMAT_KEYWORDS, self.__irelpm),
+            PropertyToLoad('IROCK', GRID_ARRAY_FORMAT_KEYWORDS, self.__irock),
+            PropertyToLoad('ITRAN', GRID_ARRAY_FORMAT_KEYWORDS, self.__itran),
+            PropertyToLoad('IREGION', GRID_ARRAY_FORMAT_KEYWORDS, self.__iregion),
+            PropertyToLoad('LIVECELL', GRID_ARRAY_FORMAT_KEYWORDS, self.__livecell),
+            PropertyToLoad('WORKA1', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka1),
+            PropertyToLoad('WORKA2', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka2),
+            PropertyToLoad('WORKA3', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka3),
+            PropertyToLoad('WORKA4', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka4),
+            PropertyToLoad('WORKA5', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka5),
+            PropertyToLoad('WORKA6', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka6),
+            PropertyToLoad('WORKA7', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka7),
+            PropertyToLoad('WORKA8', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka8),
+            PropertyToLoad('WORKA9', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka9),
+            PropertyToLoad('DX', GRID_ARRAY_FORMAT_KEYWORDS, self.__dx),
+            PropertyToLoad('DY', GRID_ARRAY_FORMAT_KEYWORDS, self.__dy),
+            PropertyToLoad('DZ', GRID_ARRAY_FORMAT_KEYWORDS, self.__dz),
+            PropertyToLoad('DEPTH', GRID_ARRAY_FORMAT_KEYWORDS, self.__depth),
+            PropertyToLoad('MDEPTH', GRID_ARRAY_FORMAT_KEYWORDS, self.__mdepth),
+            PropertyToLoad('DZNET', GRID_ARRAY_FORMAT_KEYWORDS, self.__dznet),
+            PropertyToLoad('COMPR', GRID_ARRAY_FORMAT_KEYWORDS, self.__compr),
+            PropertyToLoad('CR', GRID_ARRAY_FORMAT_KEYWORDS, self.__compr),
+            PropertyToLoad('ICOARS', GRID_ARRAY_FORMAT_KEYWORDS, self.__icoars),
+            PropertyToLoad('IALPHAF', GRID_ARRAY_FORMAT_KEYWORDS, self.__ialphaf),
+            PropertyToLoad('IPOLYMER', GRID_ARRAY_FORMAT_KEYWORDS, self.__ipolymer),
+            PropertyToLoad('IADSORPTION', GRID_ARRAY_FORMAT_KEYWORDS, self.__iadsorption),
+            PropertyToLoad('ITRACER', GRID_ARRAY_FORMAT_KEYWORDS, self.__itracer),
+            PropertyToLoad('IGRID', GRID_ARRAY_FORMAT_KEYWORDS, self.__igrid),
+            PropertyToLoad('ISECTOR', GRID_ARRAY_FORMAT_KEYWORDS, self.__isector),
+            PropertyToLoad('SWL', GRID_ARRAY_FORMAT_KEYWORDS, self.__swl),
+            PropertyToLoad('SWR', GRID_ARRAY_FORMAT_KEYWORDS, self.__swr),
+            PropertyToLoad('SWU', GRID_ARRAY_FORMAT_KEYWORDS, self.__swu),
+            PropertyToLoad('SGL', GRID_ARRAY_FORMAT_KEYWORDS, self.__sgl),
+            PropertyToLoad('SGR', GRID_ARRAY_FORMAT_KEYWORDS, self.__sgr),
+            PropertyToLoad('SGU', GRID_ARRAY_FORMAT_KEYWORDS, self.__sgu),
+            PropertyToLoad('SWRO', GRID_ARRAY_FORMAT_KEYWORDS, self.__swro),
+            PropertyToLoad('SWRO_LS', GRID_ARRAY_FORMAT_KEYWORDS, self.__swro_ls),
+            PropertyToLoad('SGRO', GRID_ARRAY_FORMAT_KEYWORDS, self.__sgro),
+            PropertyToLoad('SGRW', GRID_ARRAY_FORMAT_KEYWORDS, self.__sgrw),
+            PropertyToLoad('KRW_SWRO', GRID_ARRAY_FORMAT_KEYWORDS, self.__krw_swro),
+            PropertyToLoad('KRWRO', GRID_ARRAY_FORMAT_KEYWORDS, self.__krw_swro),
+            PropertyToLoad('KRWS_LS', GRID_ARRAY_FORMAT_KEYWORDS, self.__krws_ls),
+            PropertyToLoad('KRW_SWU', GRID_ARRAY_FORMAT_KEYWORDS, self.__krw_swu),
+            PropertyToLoad('KRG_SGRO', GRID_ARRAY_FORMAT_KEYWORDS, self.__krg_sgro),
+            PropertyToLoad('KRGRO', GRID_ARRAY_FORMAT_KEYWORDS, self.__krg_sgro),
+            PropertyToLoad('KRG_SGU', GRID_ARRAY_FORMAT_KEYWORDS, self.__krg_sgu),
+            PropertyToLoad('KRG_SGRW', GRID_ARRAY_FORMAT_KEYWORDS, self.__krg_sgrw),
+            PropertyToLoad('KRGRW', GRID_ARRAY_FORMAT_KEYWORDS, self.__krg_sgrw),
+            PropertyToLoad('KRO_SWL', GRID_ARRAY_FORMAT_KEYWORDS, self.__kro_swl),
+            PropertyToLoad('KROLW', GRID_ARRAY_FORMAT_KEYWORDS, self.__kro_swl),
+            PropertyToLoad('KRO_SWR', GRID_ARRAY_FORMAT_KEYWORDS, self.__kro_swr),
+            PropertyToLoad('KRO_SGL', GRID_ARRAY_FORMAT_KEYWORDS, self.__kro_sgl),
+            PropertyToLoad('KRO_SGR', GRID_ARRAY_FORMAT_KEYWORDS, self.__kro_sgr),
+            PropertyToLoad('KRW_SGL', GRID_ARRAY_FORMAT_KEYWORDS, self.__krw_sgl),
+            PropertyToLoad('KRW_SGR', GRID_ARRAY_FORMAT_KEYWORDS, self.__krw_sgr),
+            PropertyToLoad('SGTR', GRID_ARRAY_FORMAT_KEYWORDS, self.__sgtr),
+            PropertyToLoad('SOTR', GRID_ARRAY_FORMAT_KEYWORDS, self.__sotr),
+            PropertyToLoad('SWLPC', GRID_ARRAY_FORMAT_KEYWORDS, self.__swlpc),
+            PropertyToLoad('SGLPC', GRID_ARRAY_FORMAT_KEYWORDS, self.__sglpc),
+            PropertyToLoad('PCW_SWL', GRID_ARRAY_FORMAT_KEYWORDS, self.__pcw_swl),
+            PropertyToLoad('PCG_SGU', GRID_ARRAY_FORMAT_KEYWORDS, self.__pcg_sgu),
+            PropertyToLoad('CHLORIDE', GRID_ARRAY_FORMAT_KEYWORDS, self.__chloride),
+            PropertyToLoad('CALCIUM', GRID_ARRAY_FORMAT_KEYWORDS, self.__calcium),
+            PropertyToLoad('SALINITY', GRID_ARRAY_FORMAT_KEYWORDS, self.__salinity),
+            PropertyToLoad('SAL', GRID_ARRAY_FORMAT_KEYWORDS, self.__salinity),
+            PropertyToLoad('API', GRID_ARRAY_FORMAT_KEYWORDS, self.__api),
+            PropertyToLoad('TMX', GRID_ARRAY_FORMAT_KEYWORDS, self.__tmx),
+            PropertyToLoad('TMY', GRID_ARRAY_FORMAT_KEYWORDS, self.__tmy),
+            PropertyToLoad('TMZ', GRID_ARRAY_FORMAT_KEYWORDS, self.__tmz),
+            PropertyToLoad('MULTBV', GRID_ARRAY_FORMAT_KEYWORDS, self.__multbv),
+            PropertyToLoad('PV', GRID_ARRAY_FORMAT_KEYWORDS, self.__pv)
+        ]
+
+        possible_properties = [prop.token for prop in properties_to_load]
+
         for idx, line in enumerate(file_as_list):
 
             # Load in the basic properties
-            properties_to_load = [
-                PropertyToLoad('NETGRS', GRID_ARRAY_FORMAT_KEYWORDS, self._netgrs),
-                PropertyToLoad('POROSITY', GRID_ARRAY_FORMAT_KEYWORDS, self._porosity),
-                PropertyToLoad('SW', GRID_ARRAY_FORMAT_KEYWORDS, self._sw),
-                PropertyToLoad('KX', GRID_ARRAY_FORMAT_KEYWORDS, self._kx),
-                PropertyToLoad('KI', GRID_ARRAY_FORMAT_KEYWORDS, self._kx),
-                PropertyToLoad('PERMX', GRID_ARRAY_FORMAT_KEYWORDS, self._kx),
-                PropertyToLoad('PERMI', GRID_ARRAY_FORMAT_KEYWORDS, self._kx),
-                PropertyToLoad('KY', GRID_ARRAY_FORMAT_KEYWORDS, self._ky),
-                PropertyToLoad('KJ', GRID_ARRAY_FORMAT_KEYWORDS, self._ky),
-                PropertyToLoad('PERMY', GRID_ARRAY_FORMAT_KEYWORDS, self._ky),
-                PropertyToLoad('PERMJ', GRID_ARRAY_FORMAT_KEYWORDS, self._ky),
-                PropertyToLoad('KZ', GRID_ARRAY_FORMAT_KEYWORDS, self._kz),
-                PropertyToLoad('KK', GRID_ARRAY_FORMAT_KEYWORDS, self._kz),
-                PropertyToLoad('PERMZ', GRID_ARRAY_FORMAT_KEYWORDS, self._kz),
-                PropertyToLoad('PERMK', GRID_ARRAY_FORMAT_KEYWORDS, self._kz),
-                PropertyToLoad('PVMULT', GRID_ARRAY_FORMAT_KEYWORDS, self.__pvmult),
-                PropertyToLoad('CORP', ['VALUE'], self.__corp),
-                PropertyToLoad('IEQUIL', GRID_ARRAY_FORMAT_KEYWORDS, self.__iequil),
-                PropertyToLoad('IPVT', GRID_ARRAY_FORMAT_KEYWORDS, self.__ipvt),
-                PropertyToLoad('IWATER', GRID_ARRAY_FORMAT_KEYWORDS, self.__iwater),
-                PropertyToLoad('IRELPM', GRID_ARRAY_FORMAT_KEYWORDS, self.__irelpm),
-                PropertyToLoad('IROCK', GRID_ARRAY_FORMAT_KEYWORDS, self.__irock),
-                PropertyToLoad('ITRAN', GRID_ARRAY_FORMAT_KEYWORDS, self.__itran),
-                PropertyToLoad('IREGION', GRID_ARRAY_FORMAT_KEYWORDS, self.__iregion),
-                PropertyToLoad('LIVECELL', GRID_ARRAY_FORMAT_KEYWORDS, self.__livecell),
-                PropertyToLoad('WORKA1', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka1),
-                PropertyToLoad('WORKA2', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka2),
-                PropertyToLoad('WORKA3', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka3),
-                PropertyToLoad('WORKA4', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka4),
-                PropertyToLoad('WORKA5', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka5),
-                PropertyToLoad('WORKA6', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka6),
-                PropertyToLoad('WORKA7', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka7),
-                PropertyToLoad('WORKA8', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka8),
-                PropertyToLoad('WORKA9', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka9)
-            ]
-
-            for token_property in properties_to_load:
+            line_start_token = nfo.get_next_value(0, [line])
+            if line_start_token is not None and line_start_token.upper() in possible_properties:
+                token_property = properties_to_load[possible_properties.index(line_start_token)]
                 for modifier in token_property.modifiers:
                     # execute the load
                     StructuredGridOperations.load_token_value_if_present(
-                        token_property.token, modifier, token_property.property, line, file_as_list, idx, ['INCLUDE'])
+                        token_property.token, modifier, token_property.property, line, file_as_list, idx,
+                        ['INCLUDE', 'NOLIST'])
 
             # Load in grid dimensions
             if nfo.check_token('NX', line):
@@ -484,3 +654,258 @@ class NexusGrid(Grid):
     def worka9(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self.__worka9
+
+    @property
+    def dx(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__dx
+
+    @property
+    def dy(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__dy
+
+    @property
+    def dz(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__dz
+
+    @property
+    def depth(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__depth
+
+    @property
+    def mdepth(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__mdepth
+
+    @property
+    def dznet(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__dznet
+
+    @property
+    def compr(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__compr
+
+    @property
+    def icoars(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__icoars
+
+    @property
+    def ialphaf(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__ialphaf
+
+    @property
+    def ipolymer(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__ipolymer
+
+    @property
+    def iadsorption(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__iadsorption
+
+    @property
+    def itracer(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__itracer
+
+    @property
+    def igrid(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__igrid
+
+    @property
+    def isector(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__isector
+
+    @property
+    def swl(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__swl
+
+    @property
+    def swr(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__swr
+
+    @property
+    def swu(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__swu
+
+    @property
+    def sgl(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__sgl
+
+    @property
+    def sgr(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__sgr
+
+    @property
+    def sgu(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__sgu
+
+    @property
+    def swro(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__swro
+
+    @property
+    def swro_ls(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__swro_ls
+
+    @property
+    def sgro(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__sgro
+
+    @property
+    def sgrw(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__sgrw
+
+    @property
+    def krw_swro(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__krw_swro
+
+    @property
+    def krws_ls(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__krws_ls
+
+    @property
+    def krw_swu(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__krw_swu
+
+    @property
+    def krg_sgro(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__krg_sgro
+
+    @property
+    def krg_sgu(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__krg_sgu
+
+    @property
+    def krg_sgrw(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__krg_sgrw
+
+    @property
+    def kro_swl(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__kro_swl
+
+    @property
+    def kro_swr(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__kro_swr
+
+    @property
+    def kro_sgl(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__kro_sgl
+
+    @property
+    def kro_sgr(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__kro_sgr
+
+    @property
+    def krw_sgl(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__krw_sgl
+
+    @property
+    def krw_sgr(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__krw_sgr
+
+    @property
+    def sgtr(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__sgtr
+
+    @property
+    def sotr(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__sotr
+
+    @property
+    def swlpc(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__swlpc
+
+    @property
+    def sglpc(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__sglpc
+
+    @property
+    def pcw_swl(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__pcw_swl
+
+    @property
+    def pcg_sgu(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__pcg_sgu
+
+    @property
+    def chloride(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__chloride
+
+    @property
+    def calcium(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__calcium
+
+    @property
+    def salinity(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__salinity
+
+    @property
+    def api(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__api
+
+    @property
+    def tmx(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__tmx
+
+    @property
+    def tmy(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__tmy
+
+    @property
+    def tmz(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__tmz
+
+    @property
+    def multbv(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__multbv
+
+    @property
+    def pv(self) -> GridArrayDefinition:
+        self.load_grid_properties_if_not_loaded()
+        return self.__pv

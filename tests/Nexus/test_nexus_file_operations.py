@@ -479,7 +479,7 @@ def test_get_previous_value_single_line(line, expected_result):
     ('\t 21 1', '1', '21'),
     ('KX INCLUDE', 'INCLUDE', 'KX'),
     ('  \t INCLUDE', 'INCLUDE', None),
-    ('  \t test INCLUDE !INCLUDE', 'INCLUDE', 'test')
+    ('  \t test INCLUDE !INCLUDE', 'INCLUDE', 'test'),
 ])
 def test_get_previous_value_single_line_specify_search_before(line, search_before, expected_result):
     # Act
@@ -492,13 +492,14 @@ def test_get_previous_value_single_line_specify_search_before(line, search_befor
     (['\t ', '1', '       INCLUDE'], 'INCLUDE', '1'),
     (['\t ', '\n', '     \n', '\n', '\n', '1'], '1', None),
     (['\t ', '1\n', '     \n', '\n', '12 \n', '1'], '1', '12'),
-    (['\t ', '3\n', '     \n', '\n', '12 1', '1'], '1', '12'),
+    (['\t ', '3\n', '     \n', '\n', '12 1', '1'], '1', '1'),
     ([' ABCDEFG ', '!Comment Line 1', '\n', '\n', '\t', ' !Comment Line 2 ', '\n' 'START_TEXT'], 'START_TEXT',
      'ABCDEFG'),
     ([' ABCDEFG ', '!Comment Line 1', '\n', '\n', '\t', ' !Comment Line 2 ', '\n', '12_3 START_TEXT'], 'START_TEXT',
      '12_3'),
     (['1', '2 ', ' 3', '!4', ' START_TEXT 5'], 'START_TEXT', '3'),
-    (['1', '2 ', ' 3', '!4', '1 START_TEXT 5'], 'START_TEXT', '1')
+    (['1', '2 ', ' 3', '!4', '1 START_TEXT 5'], 'START_TEXT', '1'),
+    ([' Token INCLUDE /path VALUE HIJK',  '\n' 'INCLUDE /file_name'], 'INCLUDE', 'HIJK'),
 ])
 def test_get_previous_value_multiple_lines_specify_search_before(file, search_before, expected_result):
     # Act

@@ -288,11 +288,12 @@ class NexusCompletion(Completion):
     def to_dict(self, keys_in_keyword_style: bool = False, add_date=True, add_units=False, include_nones=True) -> \
             dict[str, None | str | int | float]:
 
-        # overwrite add_units to be False for completions as they currently do not contain units.
-        attribute_dict = to_dict(self, keys_in_keyword_style, add_date, add_units=add_units,
-                                 include_nones=include_nones)
+        attribute_dict = to_dict(self, keys_in_keyword_style, add_date=add_date,
+                                 add_units=add_units, include_nones=include_nones)
+        parent_attribute_dict = super().to_dict(keys_in_keyword_style=keys_in_keyword_style, add_date=add_date,
+                                                add_units=add_units, include_nones=include_nones)
 
-        attribute_dict.update(super().to_dict(add_units=False))
+        attribute_dict.update(parent_attribute_dict)
         if self.rel_perm_end_point is not None:
             attribute_dict.update(self.rel_perm_end_point.to_dict())
         return attribute_dict
@@ -375,13 +376,14 @@ class NexusCompletion(Completion):
     @classmethod
     def from_dict(cls, input_dictionary: dict[str, None | float | int | str], date_format: DateFormat) -> Self:
         """Generates a NexusCompletion from a dictionary."""
+        skip_mapping_keys = ['date', 'date_format', 'unit_system', 'start_date']
         for input_attr in input_dictionary:
-            if input_attr == 'date' or input_attr == 'unit_system' or input_attr == 'date_format':
+            if input_attr in skip_mapping_keys:
                 continue
             elif input_attr not in cls.valid_attributes():
                 raise AttributeError(f'Unexpected keyword "{input_attr}" found within {input_dictionary}')
         date = input_dictionary.get('date', None)
-        date_format_str = input_dictionary.get('date_format')
+        date_format_str = input_dictionary.get('date_format', None)
         if date_format_str is not None and isinstance(date_format_str, str):
             converted_date_format_str = date_format_str.replace('/', '_')
             completion_date_format = DateFormat[converted_date_format_str]

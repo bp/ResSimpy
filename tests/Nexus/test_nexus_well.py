@@ -536,31 +536,36 @@ def test_find_completion(mocker, existing_completions):
 
 def test_add_completion(mocker):
     # Arrange
+    start_date = '01/01/2023'
     new_date = '01/04/2023'
     existing_completions = [
         NexusCompletion(date='01/01/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None, grid='GRID1',
-                        well_indices=1, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.METKGCM2),
+                        well_indices=1, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.METKGCM2,
+                        start_date=start_date),
         NexusCompletion(date='01/02/2023', i=1, j=2, k=3, status='ON', partial_perf=1,
-                        date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.METKGCM2),
+                        date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.METKGCM2, start_date=start_date),
         NexusCompletion(date='01/02/2023', i=1, j=2, well_indices=0, depth_to_top=1156, depth_to_bottom=1234,
                         status='ON', partial_perf=1, date_format=DateFormat.DD_MM_YYYY,
-                        unit_system=UnitSystem.METKGCM2),
+                        unit_system=UnitSystem.METKGCM2, start_date=start_date),
         NexusCompletion(date='01/02/2023', i=1, j=2, k=5, well_indices=3, status='ON', partial_perf=1,
-                        date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.METKGCM2),
+                        date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.METKGCM2, start_date=start_date),
         NexusCompletion(date='01/03/2023', i=1, j=2, well_indices=0, depth_to_top=1156, depth_to_bottom=1234,
                         status='ON', partial_perf=1, date_format=DateFormat.DD_MM_YYYY,
-                        unit_system=UnitSystem.METKGCM2),
+                        unit_system=UnitSystem.METKGCM2, start_date=start_date),
     ]
     new_completion_props = {'i': 3, 'j': 3, 'k': 5, 'well_radius': 1005.2, 'date_format': DateFormat.DD_MM_YYYY}
 
     new_nexus_completion = NexusCompletion(date=new_date, i=3, j=3, k=5, well_radius=1005.2,
-                                           date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.METKGCM2)
+                                           date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.METKGCM2,
+                                           start_date=start_date)
 
     expected_completions = [x for x in existing_completions]
     expected_completions.append(new_nexus_completion)
 
     dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_model.start_date = start_date
     dummy_wells = NexusWells(model=dummy_model)
+    dummy_wells.__setattr__('_NexusWells__date_format', DateFormat.DD_MM_YYYY)
 
     expected_well = NexusWell(well_name='test well', completions=expected_completions,
                               unit_system=UnitSystem.METKGCM2, parent_wells_instance=dummy_wells)
@@ -694,9 +699,10 @@ def test_wells_modify(mocker):
     DATEFORMAT DD/MM/YYYY
 
     RECURRENT_FILES
-    RUNCONTROL ref_runcontrol.dat
+    RUNCONTROL /ref_runcontrol.dat
     WELLS Set 1 /my/wellspec/file.dat'''
     runcontrol_data = 'START 01/01/2020'
+    start_date = '01/01/2020'
     wells_file = '''TIME 01/01/2020
     well
     TIME 01/01/2023
@@ -720,7 +726,7 @@ def test_wells_modify(mocker):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             'fcs_file.fcs': fcs_file_data,
             '/my/wellspec/file.dat': wells_file,
-            'ref_runcontrol.dat': runcontrol_data,
+            '/ref_runcontrol.dat': runcontrol_data,
         }).return_value
         return mock_open
 
@@ -730,17 +736,20 @@ def test_wells_modify(mocker):
 
     well_1_completions = [
         NexusCompletion(date='01/01/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None, grid='GRID1',
-                        well_indices=1, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH),
+                        well_indices=1, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH,
+                        start_date=start_date),
         NexusCompletion(date='01/02/2023', i=1, j=2, k=3, status='ON', partial_perf=1,
-                        date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH),
+                        date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH, start_date=start_date),
         NexusCompletion(date='01/02/2023', i=1, j=2, k=5, well_indices=0, depth_to_top=1156, depth_to_bottom=1234,
-                        status='ON', partial_perf=1, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH)]
+                        status='ON', partial_perf=1, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH,
+                        start_date=start_date)]
 
     well_2_completions = [
         NexusCompletion(date='01/02/2023', i=1, j=2, k=5, well_indices=3, status='ON', partial_perf=1,
-                        date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH),
+                        date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH, start_date=start_date),
         NexusCompletion(date='01/02/2023', i=1, j=2, well_indices=0, depth_to_top=1156, depth_to_bottom=1234,
-                        status='ON', partial_perf=1, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH)]
+                        status='ON', partial_perf=1, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH,
+                        start_date=start_date)]
 
     wells = nexus_sim.wells
 
@@ -752,16 +761,21 @@ def test_wells_modify(mocker):
                       'depth_to_bottom': 1234}
 
     new_nexus_completion_1 = NexusCompletion(date=date, i=3, j=3, k=5, well_radius=1005.2,
-                                             date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH)
+                                             date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH,
+                                             start_date=start_date)
     new_nexus_completion_2 = NexusCompletion(date=date, i=1, j=2, k=6, permeability=1005.2,
-                                             date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH)
+                                             date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH,
+                                             start_date=start_date)
     expected_completions = well_1_completions[0:2] + [new_nexus_completion_1, new_nexus_completion_2]
 
     dummy_model = get_fake_nexus_simulator(mocker)
+    dummy_model._start_date = start_date
     dummy_wells = NexusWells(model=dummy_model)
 
-    expected_result = [NexusWell(well_name='well1', completions=expected_completions, unit_system=UnitSystem.ENGLISH, parent_wells_instance=dummy_wells),
-                       NexusWell(well_name='well2', completions=well_2_completions, unit_system=UnitSystem.ENGLISH, parent_wells_instance=dummy_wells)]
+    expected_result = [NexusWell(well_name='well1', completions=expected_completions, unit_system=UnitSystem.ENGLISH,
+                                 parent_wells_instance=dummy_wells),
+                       NexusWell(well_name='well2', completions=well_2_completions, unit_system=UnitSystem.ENGLISH,
+                                 parent_wells_instance=dummy_wells)]
 
     # Act
     wells.modify(well_name='well1', completion_properties_list=[perf_1_to_add, perf_2_to_add],
