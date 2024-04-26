@@ -192,8 +192,8 @@ class NexusConstraints(Constraints):
                                             remove_header=True)
         return
 
-    def __remove_empty_token_table(self, date: str, surface_file: NexusFile, token='CONSTRAINTS',
-                                   remove_header=False) -> None:
+    def __remove_empty_token_table(self, date: str, surface_file: NexusFile, token: str = 'CONSTRAINTS',
+                                   remove_header: bool = False) -> None:
         """Removes a table for a given date if it has no other dates for that constraint."""
         # TODO promote this to a higher level function
         keyword_map = {x: y[0] for x, y in NexusConstraint.get_keyword_mapping().items()}
@@ -207,7 +207,7 @@ class NexusConstraints(Constraints):
                 found_date = True
             if found_date and nfo.check_token(token, line):
                 token_line_number = i
-            elif found_date and nfo.check_token('END'+token, line):
+            elif found_date and nfo.check_token('END' + token, line):
                 end_token_line_number = i
             if token_line_number > 0 and end_token_line_number > 0:
                 break

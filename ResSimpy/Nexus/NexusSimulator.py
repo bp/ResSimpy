@@ -190,7 +190,7 @@ class NexusSimulator(Simulator):
         hash_attr_tuple = self.network_wells_tuple()
         return hash(hash_attr_tuple)
 
-    def wells_and_network_equal(self, other) -> bool:
+    def wells_and_network_equal(self, other: NexusSimulator) -> bool:
         """Compares the network constraints and wells completions of two NexusSimulator objects.
 
         Args:
