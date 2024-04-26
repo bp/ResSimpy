@@ -102,12 +102,10 @@ def test_write_to_file(mocker, fcs_file_contents, wells_file, expected_result):
                                      modifying_mock_open=writing_mock_open,
                                      mocker_fixture=mocker, write_file_name='/my/wellspec/file.dat')
 
-@pytest.mark.parametrize('fcs_file_contents, wells_file, expected_result, expected_removed_completion_line, '
+@pytest.mark.parametrize('wells_file, expected_result, remove_perf_date, expected_removed_completion_line,'
 'expected_obj_locations', [
-('''DATEFORMAT DD/MM/YYYY
-WelLS sEt 1 /my/wellspec/file.dat''',
-
-''' ! wells file:
+# basic test
+(''' ! wells file:
 TIME 01/01/2020
 WELLSPEC well1
 iw jw l radw
@@ -140,13 +138,11 @@ WELLSPEC well1
 iw jw l radw
 1  2  3 4.5
 ''',
+ '01/03/2020',
 10, [[4], [9], [14]]),
 
-
-('''DATEFORMAT DD/MM/YYYY
-WelLS sEt 1 /my/wellspec/file.dat''',
-
-'''
+# Test when there is only 1 completion to remove
+('''
 TIME 01/01/2020
 WELLSPEC well1
 iw jw l radw
@@ -173,15 +169,55 @@ WELLSPEC well2
 iw jw l radw
 5 6 4 3.2
 ''',
+ '01/03/2020',
 9, [[4], [10]]),
-], ids=['basic_test', 'only 1 completion to remove'] )
-def test_remove_completion_write_to_file(mocker, fcs_file_contents, wells_file, expected_result,
+    # Test when there is no TIME card in the wells file
+    (
+    '''WELLSPEC well1
+    iw jw l radw
+    1  2  3 4.5
+    4  5  6 4.2
+
+    WELLSPEC well2
+    iw jw l radw
+    5 6 4 3.2
+    ''',
+    '''WELLSPEC well1
+    iw jw l radw
+    1  2  3 4.5
+
+    WELLSPEC well2
+    iw jw l radw
+    5 6 4 3.2
+    ''',
+    '01/01/2020',
+    3, [[2], [6]]),
+
+    # Remove empty wellspec no time card
+    ('''WELLSPEC well1
+    iw jw l radw
+    4  5  6 4.2
+
+    WELLSPEC well2
+    iw jw l radw
+    5 6 4 3.2
+    ''',
+    '''
+    WELLSPEC well2
+    iw jw l radw
+    5 6 4 3.2
+    ''',
+    '01/01/2020',
+    2, [[3]]),
+], ids=['basic_test', 'only 1 completion to remove', 'No TIME card', 'empty wellspec no time card'])
+def test_remove_completion_write_to_file(mocker, wells_file, expected_result, remove_perf_date,
         expected_removed_completion_line, expected_obj_locations, ):
     # Arrange
     start_date = '01/01/2020'
-    remove_perf_date = '01/03/2020'
     fcs_file_path = 'fcs_file.fcs'
 
+    fcs_file_contents = '''DATEFORMAT DD/MM/YYYY
+    WelLS sEt 1 /my/wellspec/file.dat'''
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             fcs_file_path: fcs_file_contents,
@@ -196,8 +232,8 @@ def test_remove_completion_write_to_file(mocker, fcs_file_contents, wells_file, 
     mocker.patch('os.path.isfile', fcs_file_exists)
 
     mock_nexus_sim = NexusSimulator('fcs_file.fcs')
-    mock_nexus_sim._wells._load() # Manually call load_wells to simulate loading in wells before we change the open mock.
     mock_nexus_sim.start_date = start_date
+    mock_nexus_sim._wells._load() # Manually call load_wells to simulate loading in wells before we change the open mock.
     remove_perf_dict = {'date': remove_perf_date, 'i': 4, 'j': 5, 'k': 6, 'well_radius': 4.2}
     well_files = mock_nexus_sim.model_files.well_files[1]
     object_locations = well_files.object_locations

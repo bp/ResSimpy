@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import os
 import warnings
-from typing import Any, Union, Optional
+from typing import Any, Union, Optional, Sequence
 
 import resqpy.model as rq
 from datetime import datetime
@@ -142,6 +142,77 @@ class NexusSimulator(Simulator):
         # add details from the fcsfile
         printable_str += self.model_files.__repr__()
         return printable_str
+
+    @staticmethod
+    def _attr_info_to_tuple(sim_attr: Union[dict, Sequence])\
+            -> tuple[tuple[tuple[str, Union[str, bool, float]], ...], ...]:
+        """Convert the network constraints/wells completions attribute to a tuple of tuples so that it is hashable.
+
+        Args: sim_attr (Union[dict, Sequence]): dict of {well name: [NexusConstraint]} for
+        self.network.constraints.get_all(), list of [NexusWell objects] for self.wells.get_all()
+
+        Returns: Tuple[Tuple[Tuple[str, Union[str, float, bool]], ...], ...]: tuple of tuples
+        """
+        lst_of_tuples = []
+        if isinstance(sim_attr, dict):
+            for wells, nexus_constraint in sim_attr.items():
+                for constraints in nexus_constraint:
+                    network_dict = constraints.to_dict(add_units=False, include_nones=False)
+                    lst_of_tuples.append(tuple(network_dict.items()))
+
+        elif isinstance(sim_attr, list):
+            for nexus_completion in sim_attr:
+                for el in nexus_completion.completions:
+                    well_dict = el.to_dict(add_units=False, include_nones=False)
+                    lst_of_tuples.append(tuple(well_dict.items()))
+
+        return tuple(lst_of_tuples)
+
+    def network_wells_tuple(self) -> tuple:
+        """Returns a tuple of the network constraints and wells completions attributes.
+
+        Returns:
+            tuple: tuple of the network constraints and wells completions attributes
+        """
+        network_attr = self.network.constraints.get_all()
+        wells_attr = self.wells.get_all()
+
+        network_tuple = self._attr_info_to_tuple(network_attr)
+        wells_tuple = self._attr_info_to_tuple(wells_attr)
+        return network_tuple, wells_tuple
+
+    def hash_network_wells(self) -> int:
+        """Hashes the network constraints and wells completions attributes.
+
+        Returns:
+            int: hash value of the network constraints and wells completions attributes
+        """
+        hash_attr_tuple = self.network_wells_tuple()
+        return hash(hash_attr_tuple)
+
+    def wells_and_network_equal(self, other) -> bool:
+        """Compares the network constraints and wells completions of two NexusSimulator objects.
+
+        Args:
+            other (NexusSimulator): NexusSimulator object to compare with
+
+        Returns:
+            Union[bool]: Returns True if the network constraints and wells completions are equal, False otherwise.
+
+        Raises:
+            ValueError: if both models have no network constraints or wells completions.
+            TypeError: if the other object is not a NexusSimulator object.
+        """
+        if isinstance(other, NexusSimulator):
+            base_class_tuple = self.network_wells_tuple()
+            other_class_tuple = other.network_wells_tuple()
+            if base_class_tuple == ((), ()) and other_class_tuple == ((), ()):
+                # if base_class_tuple and other_class_tuple both return empty tuple, that means both of them /
+                # have no network constraints or wells completions
+                raise ValueError("Both models have empty network constraints or wells completions. Unable to compare.")
+            return self.network_wells_tuple() == other.network_wells_tuple()
+        raise TypeError(f"Unable to compare {type(self)} with {other}. Ensure that {other} is of type NexusSimulator. "
+                        f"{other} has {type(other)}")
 
     def remove_temp_from_properties(self):
         """Updates model values if the files are moved from a temp directory
