@@ -12,13 +12,23 @@ from ResSimpy.Enums.FrequencyEnum import FrequencyEnum
 from ResSimpy.Enums.OutputType import OutputType
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
+from ResSimpy.output_request import OutputRequest, OutputContents
+
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
 
 @dataclass(kw_only=True)
-class NexusOutputRequest(DataObjectMixin):
-    """Class for handling output requests in Nexus."""
+class NexusOutputRequest(DataObjectMixin, OutputRequest):
+    """Class for handling output requests in Nexus.
+
+    Attributes:
+        date (str): Date of the output request.
+        output (str): Output request.
+        output_type (OutputType): Type of output request.
+        output_frequency (FrequencyEnum): Frequency of the output request.
+        output_frequency_number (None | float): Number of the frequency of the output request.
+    """
     date: str
     output: str
     output_type: OutputType
@@ -45,7 +55,7 @@ class NexusOutputRequest(DataObjectMixin):
 
 
 @dataclass(kw_only=True)
-class NexusOutputContents:
+class NexusOutputContents(OutputContents):
     """Class for handling the output that Nexus produces."""
     date: str
     output_contents: list[str]
