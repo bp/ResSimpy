@@ -484,9 +484,11 @@ class NexusGrid(Grid):
             text_file.write(new_file_str)
 
     def load_array_functions(self) -> None:
-        if self.__grid_file_contents is None:
+        # for function arrays we need the expanded file contents without includes
+        if self.__grid_nexus_file is None or self.__grid_nexus_file.get_flat_list_str_file is None:
             raise ValueError("Cannot load array functions as grid file cannot not found")
-        self.__array_functions_list = afo.collect_all_function_blocks(self.__grid_file_contents)
+        file_contents = self.__grid_nexus_file.get_flat_list_str_file
+        self.__array_functions_list = afo.collect_all_function_blocks(file_contents)
         self.__grid_array_functions = afo.create_grid_array_function_objects(self.__array_functions_list)
         self.__array_functions_df = afo.summarize_model_functions(self.__array_functions_list)
         self.__array_functions_loaded = True
