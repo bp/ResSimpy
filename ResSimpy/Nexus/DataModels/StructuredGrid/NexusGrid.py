@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from typing import Optional, TYPE_CHECKING, Any
 import warnings
 
-from ResSimpy.File import File
 from ResSimpy.Grid import Grid, GridArrayDefinition
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGridArrayFunction import NexusGridArrayFunction
@@ -410,7 +409,7 @@ class NexusGrid(Grid):
         self._grid_properties_loaded = True
 
     @classmethod
-    def load_structured_grid_file(cls: type[NexusGrid], structured_grid_file: File,
+    def load_structured_grid_file(cls: type[NexusGrid], structured_grid_file: NexusFile,
                                   lazy_loading: bool = True) -> NexusGrid:
         """Loads in a structured grid file with all grid properties, and the array functions defined with 'FUNCTION'.
         Other grid modifiers are currently not supported.
