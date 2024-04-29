@@ -66,7 +66,7 @@ class NexusProc:
         return self.__contents_breakdown
 
     @contents_breakdown.setter
-    def contents_breakdown(self, value) -> None:
+    def contents_breakdown(self, value: dict) -> None:
         # ensures this param is a dict with length equal to the Nexus proc functions
         if (isinstance(value, dict)) and (len(value) == len(self.reset_nexus_proc_function_counts())):
             self.__contents_breakdown = value

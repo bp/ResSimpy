@@ -190,7 +190,7 @@ class NexusSimulator(Simulator):
         hash_attr_tuple = self.network_wells_tuple()
         return hash(hash_attr_tuple)
 
-    def wells_and_network_equal(self, other) -> bool:
+    def wells_and_network_equal(self, other: NexusSimulator) -> bool:
         """Compares the network constraints and wells completions of two NexusSimulator objects.
 
         Args:
@@ -652,7 +652,7 @@ class NexusSimulator(Simulator):
         with open(file_path, "w") as text_file:
             text_file.write(new_file_str)
 
-    def update_fcs_file_value(self, token, new_value, add_to_start=False):
+    def update_fcs_file_value(self, token: str, new_value: str, add_to_start: bool = False):
         """Updates a value in the FCS file."""
         self.update_file_value(self.__new_fcs_file_path, token=token, new_value=new_value, add_to_start=add_to_start)
 

@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import pandas as pd
 from typing import Optional, Sequence
 
+from ResSimpy.File import File
 from ResSimpy.GridArrayFunction import GridArrayFunction
 
 
@@ -123,7 +124,7 @@ class Grid(ABC):
         return self._kz
 
     @abstractmethod
-    def load_structured_grid_file(self, structure_grid_file, lazy_loading) -> Grid:
+    def load_structured_grid_file(self, structure_grid_file: File, lazy_loading: bool) -> Grid:
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
