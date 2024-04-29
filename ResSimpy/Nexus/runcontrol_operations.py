@@ -4,17 +4,19 @@ import warnings
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from functools import cmp_to_key
-from typing import Sequence
+from typing import Sequence, TYPE_CHECKING
 
 import pandas as pd
 
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+
 from ResSimpy.Nexus.NexusSolverParameters import NexusSolverParameters
 from ResSimpy.Nexus.constants import DATE_WITH_TIME_LENGTH
 from ResSimpy.SolverParameter import SolverParameter
+if TYPE_CHECKING:
+    from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
 
 @dataclass

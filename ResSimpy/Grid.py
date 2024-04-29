@@ -4,8 +4,8 @@ from dataclasses import dataclass
 import pandas as pd
 from typing import Optional, Sequence
 
+from ResSimpy.File import File
 from ResSimpy.GridArrayFunction import GridArrayFunction
-from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 
 
 @dataclass
@@ -124,7 +124,7 @@ class Grid(ABC):
         return self._kz
 
     @abstractmethod
-    def load_structured_grid_file(self, structure_grid_file: NexusFile, lazy_loading: bool) -> Grid:
+    def load_structured_grid_file(self, structure_grid_file: File, lazy_loading: bool) -> Grid:
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
