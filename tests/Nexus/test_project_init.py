@@ -20,3 +20,5 @@ def test_top_level_imports(mocker):
     # Assert
     assert result is not None
     assert result_2 is not None
+    assert type(result) is NexusSimulator
+    assert type(result_2) is NexusSimulator
