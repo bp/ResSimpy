@@ -486,7 +486,8 @@ def __get_number_completions(well_name: str | None, current_iso_date: ISODateTim
         if well.well_name.upper() != well_name.upper():
             continue
 
-        completion_dates = [x.iso_date for x in well.completions if x.iso_date is not None and x.iso_date <= current_iso_date]
+        completion_dates = [x.iso_date for x in well.completions if x.iso_date is not None and x.iso_date
+                            <= current_iso_date]
         # get the most recent completions
         number_completions = len([x for x in completion_dates if x == max(completion_dates)])
         break

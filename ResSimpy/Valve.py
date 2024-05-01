@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from abc import ABC
+from typing import Mapping
 
 from ResSimpy.DynamicProperty import DynamicProperty
 
@@ -13,6 +14,6 @@ class Valve(ABC):
     """
 
     @property
-    def inputs(self) -> dict[int, DynamicProperty]:
+    def inputs(self) -> Mapping[int, DynamicProperty]:
         """A Collection of valve property inputs, as a dictionary."""
         raise NotImplementedError("Implement this in the derived class")

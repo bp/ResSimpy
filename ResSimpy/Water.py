@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from abc import ABC
-from typing import MutableMapping, Mapping
+from typing import Mapping
 
 from ResSimpy.DynamicProperty import DynamicProperty
 

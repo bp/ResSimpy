@@ -227,7 +227,8 @@ class NexusSimulator(Simulator):
         if self.__new_fcs_file_path is None:
             raise ValueError(
                 "No __new_fcs_file_path found, can't remove temporary properties from file path")
-        if self.model_files.surface_files is None or self.model_files.surface_files[1] is None or self.model_files.surface_files[1].location is None:
+        if self.model_files.surface_files is None or self.model_files.surface_files[1] is None \
+                or self.model_files.surface_files[1].location is None:
             raise ValueError(
                 "No __surface_file_path found, can't remove temporary properties from file path")
 

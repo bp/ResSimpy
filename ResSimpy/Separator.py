@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from abc import ABC
+from typing import Mapping
 
 from ResSimpy.DynamicProperty import DynamicProperty
 
@@ -13,7 +14,7 @@ class Separator(ABC):
     """
 
     @property
-    def inputs(self) -> dict[int, DynamicProperty]:
+    def inputs(self) -> Mapping[int, DynamicProperty]:
         """A Collection of separator property inputs, as a dictionary."""
         raise NotImplementedError("Implement this in the derived class.")
 

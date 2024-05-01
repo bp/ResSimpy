@@ -1,6 +1,7 @@
 """This module contains the abstract base class for a collection of equilibration inputs."""
 from dataclasses import dataclass
 from abc import ABC
+from typing import Mapping
 
 from ResSimpy.DynamicProperty import DynamicProperty
 
@@ -14,7 +15,7 @@ class Equilibration(ABC):
     """
 
     @property
-    def inputs(self) -> dict[int, DynamicProperty]:
+    def inputs(self) -> Mapping[int, DynamicProperty]:
         raise NotImplementedError("Implement this in the derived class")
 
     def to_string(self) -> str:
