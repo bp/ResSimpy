@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from abc import ABC
 
+from ResSimpy.DynamicProperty import DynamicProperty
+
 
 @dataclass(kw_only=True)
 class PVT(ABC):
@@ -11,6 +13,6 @@ class PVT(ABC):
     """
 
     @property
-    def inputs(self):
+    def inputs(self) -> dict[int, DynamicProperty]:
         """A Collection of PVT inputs, as a dictionary."""
         raise NotImplementedError("Implement this in the derived class")

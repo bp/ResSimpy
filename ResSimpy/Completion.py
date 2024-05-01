@@ -8,6 +8,7 @@ from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.NexusEnums import DateFormatEnum
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Units.AttributeMappings.CompletionUnitMapping import CompletionUnits
 
 
@@ -128,79 +129,79 @@ class Completion(DataObjectMixin, ABC):
         self.__peaceman_well_block_radius = peaceman_well_block_radius
 
     @property
-    def well_radius(self):
+    def well_radius(self) -> float:
         return self.__well_radius
 
     @property
-    def date(self):
+    def date(self) -> str:
         return self.__date
 
     @property
-    def iso_date(self):
+    def iso_date(self) -> ISODateTime:
         return self.__iso_date
 
     @property
-    def i(self):
+    def i(self) -> int | None:
         return self.__i
 
     @property
-    def j(self):
+    def j(self) -> int | None:
         return self.__j
 
     @property
-    def k(self):
+    def k(self) -> int | None:
         return self.__k
 
     @property
-    def skin(self):
+    def skin(self) -> float | None:
         return self.__skin
 
     @property
-    def depth(self):
+    def depth(self) -> float | None:
         return self.__depth
 
     @property
-    def x(self):
+    def x(self) -> float | None:
         return self.__x
 
     @property
-    def y(self):
+    def y(self) -> float | None:
         return self.__y
 
     @property
-    def angle_a(self):
+    def angle_a(self) -> float | None:
         return self.__angle_a
 
     @property
-    def angle_v(self):
+    def angle_v(self) -> float | None:
         return self.__angle_v
 
     @property
-    def grid(self):
+    def grid(self) -> str | None:
         return self.__grid
 
     @property
-    def depth_to_top(self):
+    def depth_to_top(self) -> float | None:
         return self.__depth_to_top
 
     @property
-    def depth_to_bottom(self):
+    def depth_to_bottom(self) -> float | None:
         return self.__depth_to_bottom
 
     @property
-    def perm_thickness_ovr(self):
+    def perm_thickness_ovr(self) -> float | None:
         return self.__perm_thickness_ovr
 
     @property
-    def dfactor(self):
+    def dfactor(self) -> float | None:
         return self.__dfactor
 
     @property
-    def rel_perm_method(self):
+    def rel_perm_method(self) -> int | None:
         return self.__rel_perm_method
 
     @property
-    def status(self):
+    def status(self) -> str | None:
         return self.__status
 
     @property
@@ -209,18 +210,18 @@ class Completion(DataObjectMixin, ABC):
         return self.__peaceman_well_block_radius
 
     @property
-    def date_format(self):
+    def date_format(self) -> DateFormat | None:
         return self._date_format
 
     @property
-    def start_date(self):
+    def start_date(self) -> float | None:
         return self.__start_date
 
     def set_iso_date(self) -> ISODateTime:
         return ISODateTime.convert_to_iso(self.date, self.date_format, self.start_date)
 
     @property
-    def unit_system(self):
+    def unit_system(self) -> UnitSystem | None:
         return self.__unit_system
 
     @property

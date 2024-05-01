@@ -345,7 +345,7 @@ class NexusConstraint(Constraint):
             }
         return nexus_mapping
 
-    def update(self, new_data: dict[str, None | int | str | float | UnitSystem], nones_overwrite: bool = False):
+    def update(self, new_data: dict[str, None | int | str | float | UnitSystem], nones_overwrite: bool = False) -> None:
         """Updates attributes in the object based on the dictionary provided."""
         for k, v in new_data.items():
             if v is not None or nones_overwrite:

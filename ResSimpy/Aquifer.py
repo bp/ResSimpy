@@ -2,6 +2,8 @@
 from dataclasses import dataclass
 from abc import ABC
 
+from ResSimpy.DynamicProperty import DynamicProperty
+
 
 @dataclass(kw_only=True)
 class Aquifer(ABC):
@@ -12,6 +14,6 @@ class Aquifer(ABC):
     """
 
     @property
-    def inputs(self):
+    def inputs(self) -> dict[int, DynamicProperty]:
         """A Collection of aquifer inputs, as a dictionary."""
         raise NotImplementedError("Implement this in the derived class")

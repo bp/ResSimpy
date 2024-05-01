@@ -68,7 +68,7 @@ class NexusHydraulicsMethods(Hydraulics):
     def files(self) -> dict[int, NexusFile]:
         return self.__files
 
-    def load_hydraulics_methods(self):
+    def load_hydraulics_methods(self) -> None:
         # Read in hydraulics properties from Nexus hydraulics method files
         if self.__files is not None and len(self.__files) > 0:  # Check if hydraulics files exist
             for table_num in self.__files.keys():  # For each hydraulics property method

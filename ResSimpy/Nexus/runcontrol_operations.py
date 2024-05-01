@@ -67,7 +67,7 @@ class SimControls:
         self.__solver_parameters: NexusSolverParameters = NexusSolverParameters(model)
 
     @property
-    def date_format_string(self):
+    def date_format_string(self) -> str:
         return self.__date_format_string
 
     @date_format_string.setter
@@ -75,7 +75,7 @@ class SimControls:
         self.__date_format_string = value
 
     @property
-    def times(self):
+    def times(self) -> list[str]:
         return self.__times if self.__times is not None else []
 
     @staticmethod
@@ -286,7 +286,7 @@ class SimControls:
         with open(filename, "w") as text_file:
             text_file.write(new_file_str)
 
-    def load_run_control_file(self):
+    def load_run_control_file(self) -> None:
         """Loads the run control information into the class instance. \
             If the write_times attribute is True then it expands out any INCLUDE files with the times found within
         Raises:
@@ -336,7 +336,7 @@ class SimControls:
 
         self.modify_times(content=times, operation='replace')
 
-    def modify_times(self, content: None | list[str] = None, operation: str = 'merge'):
+    def modify_times(self, content: None | list[str] = None, operation: str = 'merge') -> None:
         """Modifies the output times in the simulation.
 
         Args:

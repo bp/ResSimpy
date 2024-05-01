@@ -69,7 +69,7 @@ class NexusRockMethods(Rock):
     def files(self) -> dict[int, NexusFile]:
         return self.__files
 
-    def load_rock_methods(self):
+    def load_rock_methods(self) -> None:
         # Read in rock properties from Nexus rock method files
         if self.__files is not None and len(self.__files) > 0:  # Check if rock files exist
             for table_num in self.__files.keys():  # For each rock property method

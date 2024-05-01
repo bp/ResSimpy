@@ -90,7 +90,7 @@ class NexusReporting:
     def array_output_contents(self) -> list[NexusOutputContents]:
         return self.__array_output_contents
 
-    def add_map_properties_to_start_of_grid_file(self):
+    def add_map_properties_to_start_of_grid_file(self) -> None:
         """Adds 'map' statements to the start of the grid file to ensure standalone outputs all the required \
         properties. Writes out to the same structured grid file path provided.
 

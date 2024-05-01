@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from abc import ABC
 
+from ResSimpy.DynamicProperty import DynamicProperty
+
 
 @dataclass(kw_only=True)
 class Gaslift(ABC):
@@ -11,5 +13,5 @@ class Gaslift(ABC):
     """
 
     @property
-    def inputs(self):
+    def inputs(self) -> dict[int, DynamicProperty]:
         raise NotImplementedError("Implement this in the derived class")

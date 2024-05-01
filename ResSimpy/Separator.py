@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from abc import ABC
 
+from ResSimpy.DynamicProperty import DynamicProperty
+
 
 @dataclass(kw_only=True)
 class Separator(ABC):
@@ -11,9 +13,9 @@ class Separator(ABC):
     """
 
     @property
-    def inputs(self):
+    def inputs(self) -> dict[int, DynamicProperty]:
         """A Collection of separator property inputs, as a dictionary."""
         raise NotImplementedError("Implement this in the derived class.")
 
-    def to_string(self):
+    def to_string(self) -> str:
         raise NotImplementedError('Implement this in the derived class.')

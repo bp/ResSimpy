@@ -12,7 +12,7 @@ class SolverParameters(ABC):
     __solver_parameters: Sequence[SolverParameter]
 
     @abstractmethod
-    def load(self):
+    def load(self) -> None:
         """Loads the solver parameters given to the simulator."""
         raise NotImplementedError("Implement this in the derived class.")
 
