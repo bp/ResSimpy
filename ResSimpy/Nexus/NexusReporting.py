@@ -36,7 +36,7 @@ class NexusReporting(Reporting):
             model (NexusSimulator): The Nexus model to get the reporting information from.
         """
         super().__init__(model)
-        self.__model = model
+        self.__model: NexusSimulator = model
         self.__add_object_operations = AddObjectOperations(NexusOutputRequest, self.table_header, self.table_footer,
                                                            model)
         if assume_loaded:

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Sequence, TYPE_CHECKING
 
 from ResSimpy.output_request import OutputRequest, OutputContents
