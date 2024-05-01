@@ -115,7 +115,7 @@ class Well(ABC):
         return well_info
 
     @property
-    def open_and_shut_events(self) -> list[tuple[str, Union[int, tuple[float, float]]]]:
+    def open_and_shut_events(self) -> list[tuple[str, int | tuple[float, float]]]:
         """Returns a list of dates and values representing either the layer, or the depths of each perforation."""
         events = []
         using_k_values: Optional[bool] = None

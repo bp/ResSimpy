@@ -129,7 +129,7 @@ class Completion(DataObjectMixin, ABC):
         self.__peaceman_well_block_radius = peaceman_well_block_radius
 
     @property
-    def well_radius(self) -> float:
+    def well_radius(self) -> float | None:
         return self.__well_radius
 
     @property
@@ -137,7 +137,7 @@ class Completion(DataObjectMixin, ABC):
         return self.__date
 
     @property
-    def iso_date(self) -> ISODateTime:
+    def iso_date(self) -> ISODateTime | None:
         return self.__iso_date
 
     @property
@@ -214,10 +214,10 @@ class Completion(DataObjectMixin, ABC):
         return self._date_format
 
     @property
-    def start_date(self) -> float | None:
+    def start_date(self) -> str | None:
         return self.__start_date
 
-    def set_iso_date(self) -> ISODateTime:
+    def set_iso_date(self) -> ISODateTime | None:
         return ISODateTime.convert_to_iso(self.date, self.date_format, self.start_date)
 
     @property

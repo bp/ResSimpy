@@ -652,7 +652,6 @@ class NexusSimulator(Simulator):
         with open(file_path, "w") as text_file:
             text_file.write(new_file_str)
 
-
     def update_fcs_file_value(self, token: str, new_value: str, add_to_start: bool = False) -> None:
         """Updates a value in the FCS file."""
         self.update_file_value(self.__new_fcs_file_path, token=token, new_value=new_value, add_to_start=add_to_start)
@@ -744,7 +743,7 @@ class NexusSimulator(Simulator):
             return {}
         return self._grid.to_dict()
 
-    def get_abs_structured_grid_path(self, filename: str) -> None:
+    def get_abs_structured_grid_path(self, filename: str) -> str:
         """Returns the absolute path to the Structured Grid file."""
         if self.model_files.structured_grid_file is None:
             raise ValueError(
