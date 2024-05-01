@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import warnings
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -11,46 +11,67 @@ from ResSimpy.Enums.FrequencyEnum import FrequencyEnum
 from ResSimpy.Enums.OutputType import OutputType
 from ResSimpy.Nexus.DataModels.NexusReportingRequests import NexusOutputRequest, NexusOutputContents
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
+from ResSimpy.Reporting import Reporting
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
 
 @dataclass(kw_only=True)
-class NexusReporting:
+class NexusReporting(Reporting):
     """Class for handling all Reporting and runcontrol related tasks."""
     __ss_output_requests: list[NexusOutputRequest]
     __array_output_requests: list[NexusOutputRequest]
     __ss_output_contents: list[NexusOutputContents]
     __array_output_contents: list[NexusOutputContents]
+    __load_status: bool = field(default=False, repr=False, compare=False)
 
     table_header = 'OUTPUT'
     table_footer = 'ENDOUTPUT'
 
-    def __init__(self, model: NexusSimulator) -> None:
+    def __init__(self, model: NexusSimulator, assume_loaded: bool = False) -> None:
         """Initialises the NexusReporting class.
 
         Args:
             model (NexusSimulator): The Nexus model to get the reporting information from.
         """
+        super().__init__(model)
         self.__model = model
         self.__add_object_operations = AddObjectOperations(NexusOutputRequest, self.table_header, self.table_footer,
                                                            model)
+        if assume_loaded:
+            self.__load_status = True
+        self.__ss_output_requests = []
+        self.__ss_output_contents = []
+        self.__array_output_requests = []
+        self.__array_output_contents = []
 
     @property
     def ss_output_requests(self) -> list[NexusOutputRequest]:
+        """Gets the spreadsheet and tabulated output requests."""
+        if not self.__load_status:
+            self.load_output_requests()
         return self.__ss_output_requests
 
     @property
-    def array_output_requests(self) -> list[NexusOutputRequest]:
-        return self.__array_output_requests
-
-    @property
     def ss_output_contents(self) -> list[NexusOutputContents]:
+        """Gets the contents requested for spreadsheet and tabulated results."""
+        if not self.__load_status:
+            self.load_output_requests()
         return self.__ss_output_contents
 
     @property
+    def array_output_requests(self) -> list[NexusOutputRequest]:
+        """Gets the array output requests."""
+        if not self.__load_status:
+            self.load_output_requests()
+        return self.__array_output_requests
+
+    @property
     def array_output_contents(self) -> list[NexusOutputContents]:
+        """Gets the contents requested to be output for the arrays."""
+        if not self.__load_status:
+            self.load_output_requests()
         return self.__array_output_contents
 
     def add_map_properties_to_start_of_grid_file(self):
@@ -155,6 +176,7 @@ class NexusReporting:
         self.__array_output_requests = array_output_requests
         self.__ss_output_contents = ss_output_contents
         self.__array_output_contents = array_output_contents
+        self.__load_status = True
 
     @staticmethod
     def _get_output_request(table_file_as_list: list[str], date: str, output_type: OutputType) \

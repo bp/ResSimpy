@@ -14,6 +14,7 @@ from ResSimpy.Hydraulics import Hydraulics
 from ResSimpy.Network import Network
 from ResSimpy.PVT import PVT
 from ResSimpy.RelPerm import RelPerm
+from ResSimpy.Reporting import Reporting
 from ResSimpy.Rock import Rock
 from ResSimpy.Separator import Separator
 from ResSimpy.Valve import Valve
@@ -40,6 +41,7 @@ class Simulator(ABC):
     _grid: None | Grid
     _model_files: File
     _default_units: UnitSystem
+    _reporting: Reporting
 
     def __repr__(self) -> str:
         """Pretty printing Simulator data."""

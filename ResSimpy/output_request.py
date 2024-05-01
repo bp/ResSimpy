@@ -36,4 +36,5 @@ class OutputContents(ABC):
 
     date: str
     output: str
+    output_contents: list[str]
     output_type: OutputType
