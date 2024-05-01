@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Optional, TYPE_CHECKING, Any
 import warnings
 
+from ResSimpy.File import File
 from ResSimpy.Grid import Grid, GridArrayDefinition
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGridArrayFunction import NexusGridArrayFunction
@@ -198,7 +199,7 @@ class NexusGrid(Grid):
         self.__multbv: GridArrayDefinition = GridArrayDefinition()
         self.__pv: GridArrayDefinition = GridArrayDefinition()
 
-    def __wrap(self, value) -> Any:
+    def __wrap(self, value: Any) -> Any:
         if isinstance(value, tuple | list | set | frozenset):
             return type(value)([self.__wrap(v) for v in value])
         else:
@@ -409,7 +410,7 @@ class NexusGrid(Grid):
         self._grid_properties_loaded = True
 
     @classmethod
-    def load_structured_grid_file(cls: type[NexusGrid], structured_grid_file: NexusFile,
+    def load_structured_grid_file(cls: type[NexusGrid], structured_grid_file: File,
                                   lazy_loading: bool = True) -> NexusGrid:
         """Loads in a structured grid file with all grid properties, and the array functions defined with 'FUNCTION'.
         Other grid modifiers are currently not supported.
@@ -425,6 +426,9 @@ class NexusGrid(Grid):
         if structured_grid_file.location is None:
             raise ValueError(f"No file path given or found for structured grid file path. \
                 Instead got {structured_grid_file.location}")
+
+        if not isinstance(structured_grid_file, NexusFile):
+            raise ValueError(f"Cannot load file of type {type(structured_grid_file)}.")
 
         loaded_structured_grid_file = cls(grid_nexus_file=structured_grid_file)
 
@@ -484,9 +488,11 @@ class NexusGrid(Grid):
             text_file.write(new_file_str)
 
     def load_array_functions(self) -> None:
-        if self.__grid_file_contents is None:
+        # for function arrays we need the expanded file contents without includes
+        if self.__grid_nexus_file is None or self.__grid_nexus_file.get_flat_list_str_file is None:
             raise ValueError("Cannot load array functions as grid file cannot not found")
-        self.__array_functions_list = afo.collect_all_function_blocks(self.__grid_file_contents)
+        file_contents = self.__grid_nexus_file.get_flat_list_str_file
+        self.__array_functions_list = afo.collect_all_function_blocks(file_contents)
         self.__grid_array_functions = afo.create_grid_array_function_objects(self.__array_functions_list)
         self.__array_functions_df = afo.summarize_model_functions(self.__array_functions_list)
         self.__array_functions_loaded = True

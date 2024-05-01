@@ -57,7 +57,7 @@ class Simulator(ABC):
         return self._start_date
 
     @start_date.setter
-    def start_date(self, value) -> None:
+    def start_date(self, value: str) -> None:
         self._start_date = value
 
     @property

@@ -159,7 +159,7 @@ class File(FileBase):
         raise NotImplementedError("Implement this in the derived class")
 
     @staticmethod
-    def insert_comments(additional_content: list[str], comments) -> list[str]:
+    def insert_comments(additional_content: list[str], comments: str) -> list[str]:
         raise NotImplementedError("Implement this in the derived class")
 
     def get_object_locations_for_id(self, obj_id: UUID) -> list[int]:

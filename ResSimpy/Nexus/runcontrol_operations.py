@@ -4,16 +4,19 @@ import warnings
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from functools import cmp_to_key
-from typing import Sequence
+from typing import Sequence, TYPE_CHECKING
 
 import pandas as pd
 
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
+
 from ResSimpy.Nexus.NexusSolverParameters import NexusSolverParameters
 from ResSimpy.Nexus.constants import DATE_WITH_TIME_LENGTH
 from ResSimpy.SolverParameter import SolverParameter
+if TYPE_CHECKING:
+    from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
 
 @dataclass
@@ -49,7 +52,7 @@ class GridToProc:
 
 class SimControls:
     """Class for controlling all runcontrol and time related functionality."""
-    def __init__(self, model) -> None:
+    def __init__(self, model: NexusSimulator) -> None:
         """Class for controlling all runcontrol and time related functionality.
 
         Args:
@@ -71,7 +74,7 @@ class SimControls:
         return self.__date_format_string
 
     @date_format_string.setter
-    def date_format_string(self, value) -> None:
+    def date_format_string(self, value: str) -> None:
         self.__date_format_string = value
 
     @property
