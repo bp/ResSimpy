@@ -210,7 +210,7 @@ class Completion(DataObjectMixin, ABC):
         return self.__peaceman_well_block_radius
 
     @property
-    def date_format(self) -> DateFormat | None:
+    def date_format(self) -> Optional[DateFormat]:
         return self._date_format
 
     @property

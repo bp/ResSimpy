@@ -158,7 +158,7 @@ class Logging:
         files = os.listdir(folder_path)
         original_fcs_file_location = os.path.basename(self.__model.original_fcs_file_path)
         log_file_name = os.path.splitext(original_fcs_file_location)[
-                            0] + ".log" if from_startup else self.__model.root_name + ".log"
+                            0] + ".log" if from_startup or self.__model.root_name is None else self.__model.root_name + ".log"
 
         if log_file_name in files:
             if from_startup:

@@ -95,7 +95,7 @@ class NexusSimulator(Simulator):
         self.__new_fcs_file_path: str = self.origin
         self.__nexus_data_name: str = nexus_data_name
         self.__run_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
-        self.root_name: str = root_name
+        self.__root_name = root_name
         self.use_american_run_units: bool = False
         self.use_american_input_units: bool = False
         self.__write_times: bool = write_times
@@ -221,18 +221,18 @@ class NexusSimulator(Simulator):
         Raises:
             ValueError: if any of [__structured_grid_file_path, __new_fcs_file_path, __surface_file_path] are None.
         """
-        if self.model_files.structured_grid_file.location is None:
+        if self.model_files.structured_grid_file is None or self.model_files.structured_grid_file.location is None:
             raise ValueError(
                 "No structured_grid_file_path found, can't remove temporary properties from file path")
         if self.__new_fcs_file_path is None:
             raise ValueError(
                 "No __new_fcs_file_path found, can't remove temporary properties from file path")
-        if self.model_files.surface_files[1] is None or self.model_files.surface_files[1].location is None:
+        if self.model_files.surface_files is None or self.model_files.surface_files[1] is None or self.model_files.surface_files[1].location is None:
             raise ValueError(
                 "No __surface_file_path found, can't remove temporary properties from file path")
 
         self._origin = self._origin.replace('temp/', '', 1)
-        self.__root_name = self.__root_name.replace('temp/', '', 1)
+        self.__root_name = '' if self.root_name is None else self.root_name.replace('temp/', '', 1)
         self.model_files.structured_grid_file.location = \
             self.model_files.structured_grid_file.location.replace('temp/', '', 1)
         self.__new_fcs_file_path = self.__new_fcs_file_path.replace('temp/', '', 1)
@@ -256,9 +256,9 @@ class NexusSimulator(Simulator):
         return self._network
 
     @property
-    def structured_grid_path(self) -> str:
+    def structured_grid_path(self) -> Optional[str]:
         """Returns the location of the structured grid file."""
-        return self.model_files.structured_grid_file.location
+        return None if self.model_files.structured_grid_file is None else self.model_files.structured_grid_file.location
 
     @property
     def default_units(self) -> UnitSystem:
@@ -271,7 +271,7 @@ class NexusSimulator(Simulator):
         return self.__run_units
 
     @property
-    def new_fcs_name(self) -> str:
+    def new_fcs_name(self) -> Optional[str]:
         """Returns the new name for the FCS file without the fcs extension."""
         return self.__root_name
 
@@ -284,11 +284,11 @@ class NexusSimulator(Simulator):
         return self.__original_fcs_file_path
 
     @property
-    def root_name(self) -> str:
+    def root_name(self) -> Optional[str]:
         return self.__root_name
 
     @root_name.setter
-    def root_name(self, value: str) -> None:
+    def root_name(self, value: Optional[str]) -> None:
         """Returns the name of the fcs file without the .fcs extension.
 
         Returns:
