@@ -2,10 +2,11 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import pandas as pd
-from typing import Optional, Sequence
-
-from ResSimpy.File import File
+from typing import Optional, Sequence, TYPE_CHECKING
 from ResSimpy.GridArrayFunction import GridArrayFunction
+
+if TYPE_CHECKING:
+    from ResSimpy.File import File
 
 
 @dataclass
