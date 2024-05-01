@@ -5,7 +5,8 @@ from ResSimpy.Enums.FrequencyEnum import FrequencyEnum
 from ResSimpy.Enums.OutputType import OutputType
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from ResSimpy.Nexus.NexusReporting import NexusReporting, NexusOutputRequest, NexusOutputContents
+from ResSimpy.Nexus.NexusReporting import NexusReporting
+from ResSimpy.Nexus.DataModels.NexusReportingRequests import NexusOutputRequest, NexusOutputContents
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.multifile_mocker import mock_multiple_files
 
