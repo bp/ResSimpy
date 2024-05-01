@@ -653,7 +653,7 @@ class NexusSimulator(Simulator):
             text_file.write(new_file_str)
 
 
-    def update_fcs_file_value(self, token: str, new_value: str, add_to_start: bool = False):
+    def update_fcs_file_value(self, token: str, new_value: str, add_to_start: bool = False) -> None:
         """Updates a value in the FCS file."""
         self.update_file_value(self.__new_fcs_file_path, token=token, new_value=new_value, add_to_start=add_to_start)
 
