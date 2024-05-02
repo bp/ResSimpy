@@ -36,7 +36,7 @@ The following Python code examples demonstrate how to perform some simple operat
 
 ### Step 1: Import the library
 ```python
-from ResSimpy.Nexus.NexusSimulator import NexusSimulator as Simulator
+from ResSimpy import NexusSimulator as Simulator
 ```
 
 ###  Step 2: Initialise the model

@@ -12,3 +12,11 @@
 """
 
 __version__ = "0.0.0"  # Set at build time
+
+from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+from ResSimpy.OpenGoSim.OpenGoSimSimulator import OpenGoSimSimulator
+
+__all__ = [
+    "NexusSimulator",
+    "OpenGoSimSimulator",
+   ]
