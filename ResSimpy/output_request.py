@@ -1,12 +1,14 @@
 from dataclasses import dataclass
 from abc import ABC
 
+from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.FrequencyEnum import FrequencyEnum
 from ResSimpy.Enums.OutputType import OutputType
+from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 
 
 @dataclass(kw_only=True)
-class OutputRequest(ABC):
+class OutputRequest(DataObjectMixin, ABC):
     """Class to hold data input for an Output Request.
 
     Attributes:
@@ -22,6 +24,15 @@ class OutputRequest(ABC):
     output_type: OutputType
     output_frequency: FrequencyEnum
     output_frequency_number: None | float
+
+    @staticmethod
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """No keywords for this class, returns an empty dict."""
+        return {}
+
+    @property
+    def units(self) -> BaseUnitMapping:
+        return BaseUnitMapping(unit_system=None)
 
 
 @dataclass(kw_only=True)

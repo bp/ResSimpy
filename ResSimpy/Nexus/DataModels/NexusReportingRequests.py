@@ -4,15 +4,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.FrequencyEnum import FrequencyEnum
 from ResSimpy.Enums.OutputType import OutputType
-from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.output_request import OutputRequest, OutputContents
 
 
 @dataclass(kw_only=True)
-class NexusOutputRequest(DataObjectMixin, OutputRequest):
+class NexusOutputRequest(OutputRequest):
     """Class for handling output requests in Nexus.
 
     Attributes:
@@ -36,15 +34,6 @@ class NexusOutputRequest(DataObjectMixin, OutputRequest):
             result += ' ' + str(self.output_frequency_number)
         result += '\n'
         return result
-
-    @property
-    def units(self) -> BaseUnitMapping:
-        return BaseUnitMapping(unit_system=None)
-
-    @staticmethod
-    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
-        """No keywords for this class, returns an empty dict."""
-        return {}
 
 
 @dataclass(kw_only=True)
