@@ -33,7 +33,7 @@ class FileBase(ABC):
 
     @staticmethod
     @abstractmethod
-    def insert_comments(additional_content: list[str], comments) -> list[str]:
+    def insert_comments(additional_content: list[str], comments: str) -> list[str]:
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod

@@ -33,7 +33,7 @@ def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
             look_for_table_end = False
         if reading_function:
             # remove all comments following the first '!' in a line.
-            if 'ANALYT' in line:
+            if nfo.check_token('ANALYT', line):
                 analyt_flag = True
             modified_line = line.split('!', 1)[0]
             function_body.append(modified_line.strip())
@@ -45,7 +45,7 @@ def collect_all_function_blocks(file_as_list: list[str]) -> list[list[str]]:
                 if nfo.check_token('OUTPUT', modified_line) and not nfo.check_token('RANGE', modified_line):
                     look_for_table_end = True
                     continue
-                if i < len(file_as_list)-1 and look_for_table_end:
+                if i < len(file_as_list) - 1 and look_for_table_end:
                     end_function = False
                     for keyword in STRUCTURED_GRID_KEYWORDS + GRID_ARRAY_KEYWORDS + ['INCLUDE']:
                         if nfo.check_token(keyword, file_as_list[i+1]):
@@ -95,7 +95,7 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
         for li, line in enumerate(block):
             modified_line = line.upper()
             words = modified_line.split()
-            if 'BLOCKS' in modified_line:
+            if nfo.check_token('BLOCKS', modified_line):
                 i1 = words[1]
                 i2 = words[2]
                 j1 = words[3]
@@ -105,7 +105,7 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                 blocks_list = words[1:7]
                 blocks_list = [round(float(i)) for i in blocks_list]
 
-            if 'FUNCTION' in modified_line:
+            if nfo.check_token('FUNCTION', modified_line):
                 if len(words) == 1:
                     continue
                 if len(words) == 2:
@@ -123,7 +123,7 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                 if len(words) > 2:  # TODO: deal with tabular function option keywords
                     warnings.warn(f'Function {b + 1}:  Function table entries will be excluded from summary df.')
                     function_type = 'function table'
-            if 'ANALYT' in modified_line:
+            if nfo.check_token('ANALYT', modified_line):
                 function_type = words[1]
                 if len(words) > 2:
                     # remove the first 2 words in line, and set the rest to coefficients
@@ -134,27 +134,27 @@ def create_function_parameters_df(function_list_to_parse: list[list[str]]) -> pd
                     except ValueError:
                         warnings.warn(f'ValueError at function {b + 1}: could not convert string to float.')
 
-            if 'GRID' in modified_line:
+            if nfo.check_token('GRID', modified_line):
                 grid_name = words[1]
-            if 'RANGE' in modified_line and 'INPUT' in modified_line:
+            if nfo.check_token('RANGE', modified_line) and nfo.check_token('INPUT', modified_line):
                 input_arrays_min_max_list = words[2:]
                 # convert string range_input values to numerical, if possible:
                 try:
                     input_arrays_min_max_list = [float(i) for i in input_arrays_min_max_list]
                 except ValueError:
                     warnings.warn(f'ValueError at function {b + 1}: could not convert string to float.')
-            if 'RANGE' in modified_line and 'OUTPUT' in modified_line:
+            if nfo.check_token('RANGE', modified_line) and nfo.check_token('OUTPUT', modified_line):
                 output_arrays_min_max_list = words[2:]
                 # convert string range_input values to numerical, if possible:
                 try:
                     output_arrays_min_max_list = [float(i) for i in output_arrays_min_max_list]
                 except ValueError:
                     warnings.warn(f'ValueError at function {b + 1}: could not convert string to float.')
-            if 'DRANGE' in modified_line:
+            if nfo.check_token('DRANGE', modified_line):
                 warnings.warn(f'Function {b + 1}: Function table entries will be excluded from summary df.')
                 drange_list = words[1:]
                 function_type = 'function table'
-            if 'OUTPUT' in modified_line and 'RANGE' not in modified_line:
+            if nfo.check_token('OUTPUT', modified_line) and not nfo.check_token('RANGE', modified_line):
                 input_array_list = words[:words.index('OUTPUT')]
                 output_array_list = words[words.index('OUTPUT') + 1:]
         # Create the row that holds function data
@@ -362,7 +362,7 @@ def object_from_array_function_block(array_function: list[str], function_number:
     for li, line in enumerate(array_function):
         modified_line = line.upper()
         words = modified_line.split()
-        if 'FUNCTION' in modified_line:
+        if nfo.check_token('FUNCTION', modified_line):
             if len(words) == 1:  # When FUNCTION is the only word in the line
                 continue
             if len(words) == 2:  # When FUNCTION reg_type are the only words on the line
@@ -414,44 +414,50 @@ def object_from_array_function_block(array_function: list[str], function_number:
                             warnings.warn(f'ValueError at function {function_number}: '
                                           'could not convert string to float.')
 
-        if 'BLOCKS' in modified_line:
+        if nfo.check_token('BLOCKS', modified_line):
             block_array = [int(x) for x in words[1:7]]
 
-        if 'GRID' in modified_line:
+        if nfo.check_token('GRID', modified_line):
             grid_indx = words.index('GRID')
             if len(words) > grid_indx+1:
                 grid_name = words[grid_indx+1]
 
-        if 'RANGE' in modified_line and 'INPUT' in modified_line:
+        if nfo.check_token('RANGE', modified_line) and nfo.check_token('INPUT', modified_line):
             split_range_input = modified_line.split('INPUT')[1].split()
-            if len(split_range_input) % 2 == 0:  # Should be an even number of entries
-                try:
-                    # Create pair-wise min-max tuples in a list
-                    input_range_iterator = iter([float(i) for i in split_range_input])
-                    input_range_list = list(zip(input_range_iterator, input_range_iterator))
-                except ValueError:
-                    warnings.warn(f'ValueError at function {function_number}: could not convert string to float.')
-            else:
-                raise ValueError(f'RANGE INPUT for function {function_number} has an odd number of entries.')
+            if len(split_range_input) % 2 == 1:  # Should be an even number of entries
+                # Remove the last entry, which is not a pair
+                dropped_range_input = split_range_input.pop()
+                warnings.warn(f'RANGE INPUT for function {function_number} has an odd number of entries.\n'
+                              f'Ignoring the last value: "{dropped_range_input}" from the range input.\n'
+                              f'In line: "{modified_line}"')
+            try:
+                # Create pair-wise min-max tuples in a list
+                input_range_iterator = iter([float(i) for i in split_range_input])
+                input_range_list = list(zip(input_range_iterator, input_range_iterator))
+            except ValueError:
+                warnings.warn(f'ValueError at function {function_number}: could not convert string to float.')
 
-        if 'RANGE' in modified_line and 'OUTPUT' in modified_line:
+        if nfo.check_token('RANGE', modified_line) and nfo.check_token('OUTPUT', modified_line):
             split_range_output = modified_line.split('OUTPUT')[1].split()
-            if len(split_range_output) % 2 == 0:  # Should be an even number of entries
-                try:
-                    # Create pair-wise min-max tuples in a list
-                    output_range_iterator = iter([float(i) for i in split_range_output])
-                    output_range_list = list(zip(output_range_iterator, output_range_iterator))
-                except ValueError:
-                    warnings.warn(f'ValueError at function {function_number}: could not convert string to float.')
-            else:
-                raise ValueError(f'RANGE OUTPUT for function {function_number} has an odd number of entries.')
+            if len(split_range_output) % 2 == 1:  # Should be an even number of entries
+                # Remove the last entry, which is not a pair
+                dropped_range_output = split_range_output.pop()
+                warnings.warn(f'RANGE OUTPUT for function {function_number} has an odd number of entries.\n'
+                              f'Ignoring the last value "{dropped_range_output}" from range output.\n'
+                              f'In line: "{modified_line}"')
+            try:
+                # Create pair-wise min-max tuples in a list
+                output_range_iterator = iter([float(i) for i in split_range_output])
+                output_range_list = list(zip(output_range_iterator, output_range_iterator))
+            except ValueError:
+                warnings.warn(f'ValueError at function {function_number}: could not convert string to float.')
 
-        if 'DRANGE' in modified_line:
+        if nfo.check_token('DRANGE', modified_line):
             warnings.warn(f'Function {function_number}: Function table entries will be excluded from summary df.')
             drange_list = [float(x) for x in words[1:]]
             function_type_enum = GridFunctionTypeEnum.FUNCTION_TABLE
 
-        if 'ANALYT' in modified_line:
+        if nfo.check_token('ANALYT', modified_line):
             function_type_enum = GridFunctionTypeEnum[words[1]]
             if len(words) > 2:
                 # remove the first 2 words in line, and set the rest to coefficients
@@ -468,7 +474,7 @@ def object_from_array_function_block(array_function: list[str], function_number:
             function_table.columns = output_line_headers
             output_line_headers = []
 
-        if 'OUTPUT' in modified_line and 'RANGE' not in modified_line:
+        if nfo.check_token('OUTPUT', modified_line) and not nfo.check_token('RANGE', modified_line):
             input_array_list = words[:words.index('OUTPUT')]
             output_array_list = words[words.index('OUTPUT') + 1:]
             output_line_headers = input_array_list + output_array_list
