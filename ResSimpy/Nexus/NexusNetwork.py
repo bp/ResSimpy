@@ -222,6 +222,7 @@ class NexusNetwork(Network):
                 surface, {'NODECON': NexusNodeConnection,
                           'NODES': NexusNode,
                           'WELLS': NexusWellConnection,
+                          'GASWELLS': NexusWellConnection,
                           'WELLHEAD': NexusWellhead,
                           'WELLBORE': NexusWellbore,
                           'CONSTRAINTS': NexusConstraint,
@@ -239,6 +240,7 @@ class NexusNetwork(Network):
             self.nodes._add_to_memory(type_check_lists(nexus_obj_dict.get('NODES')))
             self.connections._add_to_memory(type_check_lists(nexus_obj_dict.get('NODECON')))
             self.well_connections._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLS')))
+            self.well_connections._add_to_memory(type_check_lists(nexus_obj_dict.get('GASWELLS')))
             self.wellheads._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLHEAD')))
             self.wellbores._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLBORE')))
             self.constraints._add_to_memory(type_check_dicts(constraints))
