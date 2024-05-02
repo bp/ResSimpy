@@ -95,7 +95,7 @@ class NexusSimulator(Simulator):
         self.__new_fcs_file_path: str = self.origin
         self.__nexus_data_name: str = nexus_data_name
         self.__run_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
-        self.root_name = root_name
+        self.root_name: str = root_name
         self.use_american_run_units: bool = False
         self.use_american_input_units: bool = False
         self.__write_times: bool = write_times
