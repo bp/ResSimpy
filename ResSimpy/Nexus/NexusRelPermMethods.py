@@ -69,7 +69,7 @@ class NexusRelPermMethods(RelPerm):
     def files(self) -> dict[int, NexusFile]:
         return self.__files
 
-    def load_relperm_methods(self):
+    def load_relperm_methods(self) -> None:
         # Read in relperm properties from Nexus relperm method files
         if self.__files is not None and len(self.__files) > 0:  # Check if relperm files exist
             for table_num in self.__files.keys():  # For each relperm property method

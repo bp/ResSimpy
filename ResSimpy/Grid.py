@@ -65,62 +65,62 @@ class Grid(ABC):
         self._grid_properties_loaded = assume_loaded
 
     @property
-    def range_x(self):
+    def range_x(self) -> int | None:
         self.load_grid_properties_if_not_loaded()
         return self._range_x
 
     @property
-    def range_y(self):
+    def range_y(self) -> int | None:
         self.load_grid_properties_if_not_loaded()
         return self._range_y
 
     @property
-    def range_z(self):
+    def range_z(self) -> int | None:
         self.load_grid_properties_if_not_loaded()
         return self._range_z
 
     @property
-    def netgrs(self):
+    def netgrs(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self._netgrs
 
     @property
-    def porosity(self):
+    def porosity(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self._porosity
 
     @property
-    def sw(self):
+    def sw(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self._sw
 
     @property
-    def sg(self):
+    def sg(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self._sg
 
     @property
-    def pressure(self):
+    def pressure(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self._pressure
 
     @property
-    def temperature(self):
+    def temperature(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self._temperature
 
     @property
-    def kx(self):
+    def kx(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self._kx
 
     @property
-    def ky(self):
+    def ky(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self._ky
 
     @property
-    def kz(self):
+    def kz(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self._kz
 

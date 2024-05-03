@@ -69,7 +69,7 @@ class NexusValveMethods(Valve):
     def valve_files(self) -> dict[int, NexusFile]:
         return self.__files
 
-    def load_valve_methods(self):
+    def load_valve_methods(self) -> None:
         # Read in valve properties from Nexus valve method files
         if self.__files is not None and len(self.__files) > 0:  # Check if valve files exist
             for table_num in self.__files.keys():  # For each valve property method

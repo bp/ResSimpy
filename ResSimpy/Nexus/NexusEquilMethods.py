@@ -68,7 +68,7 @@ class NexusEquilMethods(Equilibration):
     def files(self) -> dict[int, NexusFile]:
         return self.__files
 
-    def load_equil_methods(self):
+    def load_equil_methods(self) -> None:
         # Read in equil properties from Nexus equil method files
         if self.__files is not None and len(self.__files) > 0:  # Check if equil files exist
             for table_num in self.__files.keys():  # For each equil property method

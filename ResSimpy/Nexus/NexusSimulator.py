@@ -214,25 +214,26 @@ class NexusSimulator(Simulator):
         raise TypeError(f"Unable to compare {type(self)} with {other}. Ensure that {other} is of type NexusSimulator. "
                         f"{other} has {type(other)}")
 
-    def remove_temp_from_properties(self):
+    def remove_temp_from_properties(self) -> None:
         """Updates model values if the files are moved from a temp directory
         Replaces the first instance of temp/ in the file paths in the nexus simulation file paths.
 
         Raises:
             ValueError: if any of [__structured_grid_file_path, __new_fcs_file_path, __surface_file_path] are None.
         """
-        if self.model_files.structured_grid_file.location is None:
+        if self.model_files.structured_grid_file is None or self.model_files.structured_grid_file.location is None:
             raise ValueError(
                 "No structured_grid_file_path found, can't remove temporary properties from file path")
         if self.__new_fcs_file_path is None:
             raise ValueError(
                 "No __new_fcs_file_path found, can't remove temporary properties from file path")
-        if self.model_files.surface_files[1] is None or self.model_files.surface_files[1].location is None:
+        if self.model_files.surface_files is None or self.model_files.surface_files[1] is None \
+                or self.model_files.surface_files[1].location is None:
             raise ValueError(
                 "No __surface_file_path found, can't remove temporary properties from file path")
 
         self._origin = self._origin.replace('temp/', '', 1)
-        self.__root_name = self.__root_name.replace('temp/', '', 1)
+        self.__root_name = '' if self.root_name is None else self.root_name.replace('temp/', '', 1)
         self.model_files.structured_grid_file.location = \
             self.model_files.structured_grid_file.location.replace('temp/', '', 1)
         self.__new_fcs_file_path = self.__new_fcs_file_path.replace('temp/', '', 1)
@@ -256,22 +257,22 @@ class NexusSimulator(Simulator):
         return self._network
 
     @property
-    def structured_grid_path(self):
+    def structured_grid_path(self) -> Optional[str]:
         """Returns the location of the structured grid file."""
-        return self.model_files.structured_grid_file.location
+        return None if self.model_files.structured_grid_file is None else self.model_files.structured_grid_file.location
 
     @property
-    def default_units(self):
+    def default_units(self) -> UnitSystem:
         """Returns the default units."""
         return self._default_units
 
     @property
-    def run_units(self):
+    def run_units(self) -> UnitSystem:
         """Returns the run units."""
         return self.__run_units
 
     @property
-    def new_fcs_name(self):
+    def new_fcs_name(self) -> Optional[str]:
         """Returns the new name for the FCS file without the fcs extension."""
         return self.__root_name
 
@@ -280,15 +281,15 @@ class NexusSimulator(Simulator):
         return self.__write_times
 
     @property
-    def original_fcs_file_path(self):
+    def original_fcs_file_path(self) -> str:
         return self.__original_fcs_file_path
 
     @property
-    def root_name(self):
+    def root_name(self) -> Optional[str]:
         return self.__root_name
 
     @root_name.setter
-    def root_name(self, value: str) -> None:
+    def root_name(self, value: Optional[str]) -> None:
         """Returns the name of the fcs file without the .fcs extension.
 
         Returns:
@@ -652,7 +653,7 @@ class NexusSimulator(Simulator):
         with open(file_path, "w") as text_file:
             text_file.write(new_file_str)
 
-    def update_fcs_file_value(self, token: str, new_value: str, add_to_start: bool = False):
+    def update_fcs_file_value(self, token: str, new_value: str, add_to_start: bool = False) -> None:
         """Updates a value in the FCS file."""
         self.update_file_value(self.__new_fcs_file_path, token=token, new_value=new_value, add_to_start=add_to_start)
 
@@ -688,7 +689,7 @@ class NexusSimulator(Simulator):
         """
         return self._sim_controls.get_date_format(self.date_format)
 
-    def modify(self, operation: str, section: str, keyword: str, content: list[str]):
+    def modify(self, operation: str, section: str, keyword: str, content: list[str]) -> None:
         """Generic modify method to modify part of the input deck. \
         Operations are dependent on the section being modified.
 
@@ -743,7 +744,7 @@ class NexusSimulator(Simulator):
             return {}
         return self._grid.to_dict()
 
-    def get_abs_structured_grid_path(self, filename: str):
+    def get_abs_structured_grid_path(self, filename: str) -> str:
         """Returns the absolute path to the Structured Grid file."""
         if self.model_files.structured_grid_file is None:
             raise ValueError(
@@ -754,13 +755,13 @@ class NexusSimulator(Simulator):
                 Please provide a path to the structured grid")
         return os.path.dirname(grid_path) + '/' + filename
 
-    def get_surface_file_path(self):
+    def get_surface_file_path(self) -> str:
         """Get the surface file path."""
         if self.model_files.surface_files is None or self.model_files.surface_files[1] is None:
             raise ValueError('No path found for surface file.')
         return self.model_files.surface_files[1].location
 
-    def load_network(self):
+    def load_network(self) -> None:
         """Populates nodes and connections from a surface file."""
         self._network.load()
 

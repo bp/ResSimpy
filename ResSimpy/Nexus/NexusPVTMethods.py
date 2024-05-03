@@ -69,7 +69,7 @@ class NexusPVTMethods(PVT):
     def files(self) -> dict[int, NexusFile]:
         return self.__files
 
-    def load_pvt_methods(self):
+    def load_pvt_methods(self) -> None:
         # Read in pvt properties from Nexus pvt method files
         if self.__files is not None and len(self.__files) > 0:  # Check if pvt files exist
             for table_num in self.__files.keys():  # For each pvt property method

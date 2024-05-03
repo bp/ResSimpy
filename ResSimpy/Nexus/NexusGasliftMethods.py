@@ -68,7 +68,7 @@ class NexusGasliftMethods(Gaslift):
     def files(self) -> dict[int, NexusFile]:
         return self.__files
 
-    def load_gaslift_methods(self):
+    def load_gaslift_methods(self) -> None:
         # Read in gaslift properties from Nexus gaslift method files
         if self.__files is not None and len(self.__files) > 0:  # Check if gaslift files exist
             for table_num in self.__files.keys():  # For each gaslift property method
