@@ -65,10 +65,9 @@ select = ["E", "F", "W", "C90", "N",  "UP", "YTT", "ANN", "S", "BLE", "D", "PLE"
 ignore = ["UP007",  "ANN101", "N999", "UP035", "S105", "N802", "S106", "S107", "UP015", "ANN401", "ANN102", "D202",
     "D105", "D203", "D213", "RUF010", "I001", "B028", "COM812", "PD901",
     # To fix later:
-   "ANN201", # Types
     "C901", # Complexity
     "D102", "D100", "D103", "D101", "D205", "D401", "D417", "D104", "D106", # Docstrings
-    "FA100", # TODO need to remove references to Union, Optional, capital lettered typing (e.g. List)
+    # TODO need to remove references to Union, Optional, capital lettered typing (e.g. List)
              # from typings module.
     ]
 exclude = ["./tests"]

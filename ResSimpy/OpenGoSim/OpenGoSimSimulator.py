@@ -18,6 +18,7 @@ from ResSimpy.OpenGoSim.OpenGoSimKeywords.OpenGoSimKeywords import OPENGOSIM_KEY
 from ResSimpy.OpenGoSim.OpenGoSimWells import OpenGoSimWells
 from ResSimpy.PVT import PVT
 from ResSimpy.RelPerm import RelPerm
+from ResSimpy.Reporting import Reporting
 from ResSimpy.Rock import Rock
 from ResSimpy.Separator import Separator
 from ResSimpy.Simulator import Simulator
@@ -64,6 +65,7 @@ class OpenGoSimSimulator(Simulator):
         self._grid = None
         self._model_files = File(location=origin)
         self._default_units = UnitSystem.UNDEFINED
+        self._reporting = Reporting(self)
         self.__load_model()
 
     @property

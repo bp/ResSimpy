@@ -182,107 +182,107 @@ class NexusCompletion(Completion):
                          unit_system=unit_system, peaceman_well_block_radius=peaceman_well_block_radius)
 
     @property
-    def measured_depth(self):
+    def measured_depth(self) -> float | None:
         return self.__measured_depth
 
     @property
-    def well_indices(self):
+    def well_indices(self) -> float | None:
         return self.__well_indices
 
     @property
-    def partial_perf(self):
+    def partial_perf(self) -> float | None:
         return self.__partial_perf
 
     @property
-    def cell_number(self):
+    def cell_number(self) -> int | None:
         return self.__cell_number
 
     @property
-    def portype(self):
+    def portype(self) -> str | None:
         return self.__portype
 
     @property
-    def fracture_mult(self):
+    def fracture_mult(self) -> float | None:
         return self.__fracture_mult
 
     @property
-    def sector(self):
+    def sector(self) -> None | str | int:
         return self.__sector
 
     @property
-    def well_group(self):
+    def well_group(self) -> str | None:
         return self.__well_group
 
     @property
-    def zone(self):
+    def zone(self) -> int | None:
         return self.__zone
 
     @property
-    def angle_open_flow(self):
+    def angle_open_flow(self) -> float | None:
         return self.__angle_open_flow
 
     @property
-    def temperature(self):
+    def temperature(self) -> float | None:
         return self.__temperature
 
     @property
-    def flowsector(self):
+    def flowsector(self) -> int | None:
         return self.__flowsector
 
     @property
-    def parent_node(self):
+    def parent_node(self) -> str | None:
         return self.__parent_node
 
     @property
-    def mdcon(self):
+    def mdcon(self) -> float | None:
         return self.__mdcon
 
     @property
-    def pressure_avg_pattern(self):
+    def pressure_avg_pattern(self) -> int | None:
         return self.__pressure_avg_pattern
 
     @property
-    def length(self):
+    def length(self) -> float | None:
         return self.__length
 
     @property
-    def permeability(self):
+    def permeability(self) -> float | None:
         return self.__permeability
 
     @property
-    def non_darcy_model(self):
+    def non_darcy_model(self) -> str | None:
         return self.__non_darcy_model
 
     @property
-    def comp_dz(self):
+    def comp_dz(self) -> float | None:
         return self.__comp_dz
 
     @property
-    def layer_assignment(self):
+    def layer_assignment(self) -> int | None:
         return self.__layer_assignment
 
     @property
-    def polymer_block_radius(self):
+    def polymer_block_radius(self) -> float | None:
         return self.__polymer_block_radius
 
     @property
-    def polymer_well_radius(self):
+    def polymer_well_radius(self) -> float | None:
         return self.__polymer_well_radius
 
     @property
-    def rel_perm_end_point(self):
+    def rel_perm_end_point(self) -> NexusRelPermEndPoint | None:
         return self.__rel_perm_end_point
 
     @property
-    def kh_mult(self):
+    def kh_mult(self) -> float | None:
         return self.__kh_mult
 
     @property
-    def depth_to_top_str(self):
+    def depth_to_top_str(self) -> str | None:
         return self.__depth_to_top_str
 
     @property
-    def depth_to_bottom_str(self):
+    def depth_to_bottom_str(self) -> str | None:
         return self.__depth_to_bottom_str
 
     def to_dict(self, keys_in_keyword_style: bool = False, add_date: bool = True, add_units: bool = False,

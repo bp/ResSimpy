@@ -86,7 +86,7 @@ def get_previous_value(file_as_list: list[str], search_before: Optional[str] = N
     return None
 
 
-def create_templated_file(template_location: str, substitutions: dict, output_file_name: str):
+def create_templated_file(template_location: str, substitutions: dict, output_file_name: str) -> None:
     """Creates a new text file at the requested destination substituting the supplied values.
 
     Args:

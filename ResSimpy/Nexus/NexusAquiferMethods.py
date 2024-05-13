@@ -68,7 +68,7 @@ class NexusAquiferMethods(Aquifer):
     def files(self) -> dict[int, NexusFile]:
         return self.__files
 
-    def load_aquifer_methods(self):
+    def load_aquifer_methods(self) -> None:
         # Read in aquifer properties from Nexus aquifer method files
         if self.__files is not None and len(self.__files) > 0:  # Check if aquifer files exist
             for table_num in self.__files.keys():  # For each aquifer property method

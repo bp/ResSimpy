@@ -79,11 +79,14 @@ class NexusWellConnections(WellConnections):
         raise NotImplementedError('To be implemented')
 
     def load(self, surface_file: File, start_date: str, default_units: UnitSystem) -> None:
-        new_well_connections, _ = collect_all_tables_to_objects(surface_file, {'WELLS': NexusWellConnection},
+        new_well_connections, _ = collect_all_tables_to_objects(surface_file, {'WELLS': NexusWellConnection,
+                                                                               'GASWELLS': NexusWellConnection},
                                                                 start_date=start_date,
                                                                 default_units=default_units)
         cons_list = new_well_connections.get('WELLS')
+        gas_cons_list = new_well_connections.get('GASWELLS')
         self._add_to_memory(cons_list)
+        self._add_to_memory(gas_cons_list)
 
     def remove(self, obj_to_remove: dict[str, None | str | float | int] | UUID) -> None:
         """Remove a wellbore from the network based on the properties matching a dictionary or id.

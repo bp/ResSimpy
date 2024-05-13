@@ -72,7 +72,7 @@ class NexusSeparatorMethods(Separator):
     def files(self) -> dict[int, NexusFile]:
         return self.__files
 
-    def load_separator_methods(self):
+    def load_separator_methods(self) -> None:
         # Read in separator properties from Nexus separator method files
         if self.__files is not None and len(self.__files) > 0:  # Check if separator files exist
             for table_num in self.__files.keys():  # For each separator property method

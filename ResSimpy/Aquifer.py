@@ -1,6 +1,9 @@
 """Abstract base class for aquifer inputs."""
 from dataclasses import dataclass
 from abc import ABC
+from typing import Mapping
+
+from ResSimpy.DynamicProperty import DynamicProperty
 
 
 @dataclass(kw_only=True)
@@ -12,6 +15,6 @@ class Aquifer(ABC):
     """
 
     @property
-    def inputs(self):
+    def inputs(self) -> Mapping[int, DynamicProperty]:
         """A Collection of aquifer inputs, as a dictionary."""
         raise NotImplementedError("Implement this in the derived class")

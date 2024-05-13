@@ -317,6 +317,67 @@ def test_load_well_connections(mocker, file_contents, well_connection_props1, we
     pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
 
 
+def test_load_gaswell_connections(mocker):
+    # Arrange
+    file_contents = """ TIME 01/01/2019
+METRIC
+
+TIME 01/01/2020
+WELLS
+NAME     	STREAM    NUMBER  DATUM DATGRAD	CROSSFLOW CROSS_SHUT
+P01	  	PRODUCER     1    14000 MOBGRAD	    OFF        OFF
+P02	  	PRODUCER     2    14000 MOBGRAD	    OFF        OFF
+I01     WATER       95    15000 MOBGRAD     OFF        CALC
+ENDWELLS
+
+
+GASWELLS
+NAME 		D 		DPERF GASMOB
+P01		1.123e-5	INVKH	#
+ENDGASWELLS
+
+TIME 01/01/2021
+
+GASWELLS
+NAME 		D 		DPERF GASMOB
+P02		2.345e-5	random	#
+ENDGASWELLS
+
+"""
+    well_connection_props1 = {'name': 'P01', 'stream': 'PRODUCER', 'number': 1, 'datum_depth': 14000,
+                              'gradient_calc': 'MOBGRAD', 'crossflow': 'OFF', 'crossshut': 'OFF',
+                              'date': '01/01/2020', 'unit_system': UnitSystem.METRIC}
+    well_connection_props2 = {'name': 'P02', 'stream': 'PRODUCER', 'number': 2, 'datum_depth': 14000,
+                              'gradient_calc': 'MOBGRAD', 'crossflow': 'OFF', 'crossshut': 'OFF',
+                              'date': '01/01/2020', 'unit_system': UnitSystem.METRIC}
+    well_connection_props3 = {'name': 'I01', 'stream': 'WATER', 'number': 95, 'datum_depth': 15000,
+                              'gradient_calc': 'MOBGRAD', 'crossflow': 'OFF', 'crossshut': 'CALC',
+                              'date': '01/01/2020', 'unit_system': UnitSystem.METRIC}
+    well_connection_props4 = {'name': 'P01', 'd_factor': 1.123e-5, 'non_darcy_flow_method': 'INVKH',
+                              'gas_mobility': None, 'date': '01/01/2020', 'unit_system': UnitSystem.METRIC}
+    well_connection_props5 = {'name': 'P02', 'd_factor': 2.345e-5, 'non_darcy_flow_method': 'random',
+                              'gas_mobility': None, 'date': '01/01/2021', 'unit_system': UnitSystem.METRIC}
+    start_date = '01/01/2019'
+    surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
+
+    wellcon1 = NexusWellConnection(well_connection_props1)
+    wellcon2 = NexusWellConnection(well_connection_props2)
+    wellcon3 = NexusWellConnection(well_connection_props3)
+    wellcon4 = NexusWellConnection(well_connection_props4)
+    wellcon5 = NexusWellConnection(well_connection_props5)
+    expected_result = [wellcon1, wellcon2, wellcon3, wellcon4, wellcon5]
+    mock_nexus_network = mocker.MagicMock()
+    mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
+    nexus_well_cons = NexusWellConnections(mock_nexus_network)
+
+    # Act
+    nexus_well_cons.load(surface_file, start_date, default_units=UnitSystem.ENGLISH)
+    result = nexus_well_cons.get_all()
+
+    # Assert
+    assert result == expected_result
+
+
 def test_load_sim_wells_well_type(mocker):
     """Checks that we retrieve the well type from the surface files correctly."""
 
