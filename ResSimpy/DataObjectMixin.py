@@ -12,14 +12,12 @@ from ResSimpy.Utils import to_dict_generic
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Utils.obj_to_table_string import to_table_line
 
-def get_uuid():
-    return uuid4()
 
 @dataclass()
 class DataObjectMixin(ABC):
     """Base class representing a data object in ResSimpy."""
     __id: UUID = field(default_factory=lambda: uuid4())
-    _iso_date: Optional[ISODateTime] = None
+    __iso_date: Optional[ISODateTime] = None
     _date_format: Optional[DateFormatEnum.DateFormat] = None
     _date: Optional[str] = None
     _start_date: Optional[str] = None
@@ -33,13 +31,18 @@ class DataObjectMixin(ABC):
 
     @property
     def iso_date(self) -> ISODateTime:
-        if self._iso_date is None:
+        if self.__iso_date is None:
             self.set_iso_date()
-        return self._iso_date
+        return self.__iso_date
 
     @property
     def date(self) -> Optional[str]:
         return self._date
+
+    @date.setter
+    def date(self, value: str) -> None:
+        self._date = value
+        self.set_iso_date()
 
     @property
     def start_date(self) -> Optional[str]:
@@ -55,10 +58,10 @@ class DataObjectMixin(ABC):
 
     def set_iso_date(self) -> None:
         """Updates the ISO Date property"""
-        self._iso_date = ISODateTime.convert_to_iso(self.date, self.date_format, self.start_date)
+        self.__iso_date = ISODateTime.convert_to_iso(self.date, self.date_format, self.start_date)
 
     def to_dict(self, keys_in_keyword_style: bool = False, add_date: bool = True, add_units: bool = True,
-                include_nones: bool = True) -> dict[str, None | str | int | float]:
+                include_nones: bool = True, units_as_string: bool = True, include_id: bool = False) -> dict[str, None | str | int | float]:
         """Returns a dictionary of the attributes of the object.
 
         Args:
@@ -67,12 +70,13 @@ class DataObjectMixin(ABC):
             add_date (bool): if True adds the date to the dictionary
             add_units (bool): if True adds the units to the dictionary
             include_nones (bool): if True includes None values from the object in the dictionary.
+            units_as_string (bool): If True, converts the object's units to a string value rather than an enum.
 
         Returns:
             a dictionary keyed by attributes and values as the value of the attribute
         """
         result_dict = to_dict_generic.to_dict(self, keys_in_keyword_style, add_date=add_date, add_units=add_units,
-                                              include_nones=include_nones)
+                                              include_nones=include_nones, units_as_string=units_as_string)
         return result_dict
 
     def to_table_line(self, headers: list[str]) -> str:

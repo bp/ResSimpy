@@ -51,7 +51,6 @@ class NexusNodeConnection(NodeConnection):
     seawater_profile: Optional[str] = None
     rate_mult: Optional[float] = None
     polymer: Optional[str] = None
-    unit_system: Optional[UnitSystem] = None
     dp_add: Optional[float] = None
     dt_add: Optional[float] = None
     temperature_in: Optional[float] = None
@@ -72,6 +71,8 @@ class NexusNodeConnection(NodeConnection):
         Args:
             properties_dict (dict): A dictionary of properties to set on the node.
         """
+
+        super().__init__()
 
         protected_attributes = ['date', 'date_format', 'start_date', 'unit_system']
         self._date = date

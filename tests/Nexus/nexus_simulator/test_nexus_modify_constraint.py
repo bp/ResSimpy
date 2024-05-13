@@ -246,7 +246,6 @@ def test_remove_constraint(mocker, file_contents, expected_result_file,
     RECURRENT_FILES
     RUNCONTROL nexus_data/runcontrol.dat
     SURFACE Network 1  /surface_file_01.dat'''
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -259,6 +258,8 @@ def test_remove_constraint(mocker, file_contents, expected_result_file,
 
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
 
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
+
     # make a mock for the write operation
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
@@ -270,6 +271,8 @@ def test_remove_constraint(mocker, file_contents, expected_result_file,
             expected_constraint_dict[node_name] = [NexusConstraint(constraint_dict)]
         else:
             expected_constraint_dict[node_name].append(NexusConstraint(constraint_dict))
+
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid1', 'uuid2', 'uuid3'])
 
     # Act
     nexus_sim.network.constraints.get_all()
@@ -551,6 +554,8 @@ def test_add_constraint(mocker, file_contents, expected_file_contents, new_const
                                         ).return_value
         return mock_open
 
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4'])
+
     mocker.patch("builtins.open", mock_open_wrapper)
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
     # make a mock for the write operation
@@ -558,20 +563,23 @@ def test_add_constraint(mocker, file_contents, expected_file_contents, new_const
     mocker.patch("builtins.open", writing_mock_open)
 
     # patch in uuids for the existing constraints
-    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
-                                                    'uuid4', 'uuid5', 'uuid6'])
-    # load the network and constraints (this assings the uuids)
+    # mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
+    #                                                 'uuid4', 'uuid5', 'uuid6'])
+    # load the network and constraints (this assigns the uuids)
     existing_constraints = nexus_sim.network.constraints.get_all()
 
     well_name = new_constraint['name']
+    new_constraint['_DataObjectMixin__id'] = 'new_obj_uuid'
     expected_constraints = deepcopy(existing_constraints)
     add_to_expected = expected_constraints.get(well_name, None)
+
     if add_to_expected is None:
         expected_constraints[well_name] = [NexusConstraint(new_constraint)]
     else:
         expected_constraints[well_name].append(NexusConstraint(new_constraint))
 
-    mocker.patch.object(uuid, 'uuid4', side_effect=['new_obj_uuid'])
+    # Mark out the new objected with the id 'new_obj_uuid'
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['new_obj_uuid'])
 
     # Act
     nexus_sim.network.constraints.add(new_constraint, comments='test user comments')

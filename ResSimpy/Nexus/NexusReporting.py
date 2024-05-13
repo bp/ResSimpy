@@ -10,6 +10,7 @@ import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.FrequencyEnum import FrequencyEnum
 from ResSimpy.Enums.OutputType import OutputType
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 if TYPE_CHECKING:
@@ -19,11 +20,21 @@ if TYPE_CHECKING:
 @dataclass(kw_only=True)
 class NexusOutputRequest(DataObjectMixin):
     """Class for handling output requests in Nexus."""
-    date: str
+    # TODO: Create tests for this class that use different date formats
     output: str
     output_type: OutputType
     output_frequency: FrequencyEnum
     output_frequency_number: None | float
+
+    def __init__(self, date: str, output: str, output_type: OutputType, output_frequency: FrequencyEnum,
+                 output_frequency_number: None | float, date_format: DateFormat = DateFormat.MM_DD_YYYY) -> None:
+        super().__init__()
+        self._date_format = date_format
+        self.date = date
+        self.output = output
+        self.output_type = output_type
+        self.output_frequency = output_frequency
+        self.output_frequency_number = output_frequency_number
 
     def to_table_line(self, headers: list[str]) -> str:
         """String representation of the single line within an Output request table."""

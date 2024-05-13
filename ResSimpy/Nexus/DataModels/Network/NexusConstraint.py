@@ -203,6 +203,7 @@ class NexusConstraint(Constraint):
         Args:
             properties_dict (dict): dict of the properties to set on the object.
         """
+        super().__init__()
         protected_attributes = ['date', 'date_format', 'start_date', 'unit_system']
         self._date = date
         self._unit_system = unit_system
@@ -358,9 +359,12 @@ class NexusConstraint(Constraint):
 
     def update(self, new_data: dict[str, None | int | str | float | UnitSystem], nones_overwrite: bool = False):
         """Updates attributes in the object based on the dictionary provided."""
-        for k, v in new_data.items():
-            if v is not None or nones_overwrite:
-                setattr(self, k, v)
+        protected_attributes = ['date', 'date_format', 'start_date', 'unit_system']
+        for key, value in new_data.items():
+            if key in protected_attributes:
+                key = '_' + key
+            if value is not None or nones_overwrite:
+                setattr(self, key, value)
 
     def to_table_line(self, headers: list[str]) -> str:
         """String representation of the constraint for entry to an inline constraint table.

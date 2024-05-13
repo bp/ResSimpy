@@ -247,7 +247,9 @@ def test_get_node_df(mocker, file_contents, node1_props, node2_props):
 def test_load_connections(mocker, file_contents, connection1_props, connection2_props):
     # Arrange
     start_date = '01/01/2023'
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
+
     # set up objects from the dictionaries
     con1 = NexusNodeConnection(connection1_props)
     con2 = NexusNodeConnection(connection2_props)

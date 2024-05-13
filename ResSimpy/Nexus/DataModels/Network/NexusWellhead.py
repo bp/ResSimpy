@@ -68,6 +68,8 @@ class NexusWellhead(Wellhead):
         Args:
             properties_dict (dict): dict of the properties to set on the object.
         """
+        super().__init__()
+
         protected_attributes = ['date', 'date_format', 'start_date', 'unit_system']
         self._date = date
         self._unit_system = unit_system

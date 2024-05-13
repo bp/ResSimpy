@@ -42,7 +42,6 @@ class Completion(DataObjectMixin, ABC):
         peaceman_well_block_radius (Optional[float]): The pressure equivalent radius of the grid block
     """
 
-    _date: str
     __i: Optional[int] = None
     __j: Optional[int] = None
     __k: Optional[int] = None
@@ -60,7 +59,6 @@ class Completion(DataObjectMixin, ABC):
     __dfactor: Optional[float] = None
     __rel_perm_method: Optional[int] = None
     __status: Optional[str] = None
-    __start_date: Optional[str] = None
     __unit_system: Optional[UnitSystem] = None
     __peaceman_well_block_radius: Optional[float] = None
 
@@ -102,7 +100,9 @@ class Completion(DataObjectMixin, ABC):
         """
         super().__init__()
         self.__well_radius = well_radius
-        self._date = date
+        self._date_format = date_format
+        self._start_date = start_date
+        self.date = date
         self.__i = i
         self.__j = j
         self.__k = k
@@ -119,18 +119,12 @@ class Completion(DataObjectMixin, ABC):
         self.__dfactor = dfactor
         self.__rel_perm_method = rel_perm_method
         self.__status = status
-        self.__start_date = start_date
         self.__unit_system = unit_system
         self.__peaceman_well_block_radius = peaceman_well_block_radius
-        self._date_format = date_format
 
     @property
     def well_radius(self):
         return self.__well_radius
-
-    @property
-    def date(self):
-        return self._date
 
     @property
     def i(self):
@@ -204,10 +198,6 @@ class Completion(DataObjectMixin, ABC):
     @property
     def date_format(self):
         return self._date_format
-
-    @property
-    def start_date(self):
-        return self.__start_date
 
     @property
     def unit_system(self):

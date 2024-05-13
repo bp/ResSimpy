@@ -4,7 +4,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 
 
 def to_dict(nexus_object: Any, keys_in_nexus_style: bool = False, add_date: bool = True, add_units: bool = True,
-            include_nones: bool = True) -> dict[str, None | str | int | float]:
+            include_nones: bool = True, units_as_string: bool = True) -> dict[str, None | str | int | float]:
     """Returns a dictionary of the attributes of a Nexus object. Requires a nexus mapping dictionary.
         Useful for creating dataframes of objects.
 
@@ -42,7 +42,7 @@ def to_dict(nexus_object: Any, keys_in_nexus_style: bool = False, add_date: bool
                 'Unit system was requested from the object but does not have a unit system associated with it.'
                 f'Try setting add_units to False. Full contents of the object: {nexus_object}')
         if isinstance(unit_sys, UnitSystem):
-            result_dict['unit_system'] = unit_sys.value
+            result_dict['unit_system'] = unit_sys.value if units_as_string else unit_sys
 
     if hasattr(nexus_object, 'control_mode'):
         result_dict['control_mode'] = getattr(nexus_object, 'control_mode')

@@ -3,8 +3,6 @@ from unittest.mock import Mock
 import pandas as pd
 import pytest
 
-# import ResSimpy
-# from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -372,8 +370,9 @@ def test_constraint_ids(mocker, file_contents, object_locations):
 
     model = NexusSimulator('fcs_file.dat')
 
-    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
-                                                    'uuid4', 'uuid5', 'uuid6', 'uuid7'])
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6',
+                                                                'uuid7'])
+
     # Act
     model.network.constraints.get_all()
 

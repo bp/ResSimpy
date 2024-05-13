@@ -105,7 +105,10 @@ class NexusWellConnection(WellConnection):
         Args:
             properties_dict (dict): A dictionary of properties to set on the object.
         """
+        super().__init__()
+
         protected_attributes = ['date', 'date_format', 'start_date', 'unit_system']
+
         self._date = date
         self._unit_system = unit_system
         self._date_format = date_format
