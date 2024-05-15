@@ -797,30 +797,40 @@ def test_load_structured_grid_file_k_values(mocker, structured_grid_file_content
 
 @pytest.mark.parametrize("new_porosity, new_sw, new_netgrs, new_kx, new_ky, new_kz",
                          [
-                             (GridArrayDefinition("VALUE", "porosity_2.inc"), GridArrayDefinition("CON", "0.33"),
-                              GridArrayDefinition(
-                                  "VALUE", "/new/netgrs_2.inc"), GridArrayDefinition("VALUE", "KX.INC"),
-                              GridArrayDefinition("MULT", "0.1 KX"), GridArrayDefinition("VALUE", "path/to/kz.inc")),
+                             (GridArrayDefinition("VALUE", "porosity_2.inc"),
+                              GridArrayDefinition("CON", "0.33"),
+                              GridArrayDefinition("VALUE", "/new/netgrs_2.inc"),
+                              GridArrayDefinition("VALUE", "KX.INC"),
+                              GridArrayDefinition("MULT", "0.1 KX"),
+                              GridArrayDefinition("VALUE", "path/to/kz.inc")),
 
-                             (GridArrayDefinition("VALUE", "porosity_2.inc"), GridArrayDefinition("CON", "0.33"),
-                              GridArrayDefinition(
-                                  "VALUE", "/new/netgrs_2.inc"), GridArrayDefinition("VALUE", "KX.INC"),
-                              GridArrayDefinition("CON", "1.111113"), GridArrayDefinition("VALUE", "path/to/kz.inc")),
+                             (GridArrayDefinition("VALUE", "porosity_2.inc"),
+                              GridArrayDefinition("CON", "0.33"),
+                              GridArrayDefinition("VALUE", "/new/netgrs_2.inc"),
+                              GridArrayDefinition("VALUE", "KX.INC"),
+                              GridArrayDefinition("CON", "1.111113"),
+                              GridArrayDefinition("VALUE", "path/to/kz.inc")),
 
-                             (GridArrayDefinition("VALUE", "/path/porosity_2.inc"), GridArrayDefinition("VALUE", "sw_file.inc"),
-                              GridArrayDefinition(
-                                  "VALUE", "/new/netgrs_2.inc"), GridArrayDefinition("CON", "123"),
-                              GridArrayDefinition("CON", "1.111113"), GridArrayDefinition("MULT", "1 KX")),
+                             (GridArrayDefinition("VALUE", "/path/porosity_2.inc"),
+                              GridArrayDefinition("VALUE", "sw_file.inc"),
+                              GridArrayDefinition("VALUE", "/new/netgrs_2.inc"),
+                              GridArrayDefinition("CON", "123"),
+                              GridArrayDefinition("CON", "1.111113"),
+                              GridArrayDefinition("MULT", "1 KX")),
 
-                             (GridArrayDefinition("CON", "123456"), GridArrayDefinition("CON", "0.000041"),
-                              GridArrayDefinition("CON", "1.1"), GridArrayDefinition(
-                                  "MULT", "0.1 KY"),
-                              GridArrayDefinition("CON", "1.111113"), GridArrayDefinition("MULT", "10 KX")),
+                             (GridArrayDefinition("CON", "123456"),
+                              GridArrayDefinition("CON", "0.000041"),
+                              GridArrayDefinition("CON", "1.1"),
+                              GridArrayDefinition("MULT", "0.1 KY"),
+                              GridArrayDefinition("CON", "1.111113"),
+                              GridArrayDefinition("MULT", "10 KX")),
 
-                             (GridArrayDefinition("VALUE", "/path/porosity/file.inc"), GridArrayDefinition("VALUE", "sw_file2.inc"),
-                              GridArrayDefinition("VALUE", "netgrs_3.inc"), GridArrayDefinition(
-                                  "VALUE", "path/to/kx.inc"),
-                              GridArrayDefinition("VALUE", "path/to/ky.inc"), GridArrayDefinition("VALUE", "path/to/KZ.inc")),
+                             (GridArrayDefinition("VALUE", "/path/porosity/file.inc"),
+                              GridArrayDefinition("VALUE", "sw_file2.inc"),
+                              GridArrayDefinition("VALUE", "netgrs_3.inc"),
+                              GridArrayDefinition("VALUE", "path/to/kx.inc"),
+                              GridArrayDefinition("VALUE", "path/to/ky.inc"),
+                              GridArrayDefinition("VALUE", "path/to/KZ.inc")),
                          ])
 def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, new_kx, new_ky, new_kz):
     """Test saving values passed from the front end to the structured grid file and update the class"""
