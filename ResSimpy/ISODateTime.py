@@ -31,7 +31,7 @@ class ISODateTime(datetime):
             return False
 
     @classmethod
-    def convert_to_iso(cls, date: str, date_format: Optional[DateFormat],
+    def convert_to_iso(cls: type[ISODateTime], date: str, date_format: Optional[DateFormat],
                        start_date: Optional[str] = None) -> ISODateTime:
         """Converts an ordinary date to an ISODate format.
 
@@ -87,6 +87,6 @@ class ISODateTime(datetime):
         return converted_date
 
     @classmethod
-    def datetime_to_iso(cls, date: datetime, datetime_format: str = '%Y-%m-%d') -> ISODateTime:
+    def datetime_to_iso(cls: type[ISODateTime], date: datetime, datetime_format: str = '%Y-%m-%d') -> ISODateTime:
         """Converts datetime object to ISODateTime object."""
         return ISODateTime.strptime(str(date), datetime_format)

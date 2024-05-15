@@ -198,7 +198,7 @@ class FcsNexusFile(NexusFile):
         return generic_str(self)
 
     @classmethod
-    def generate_fcs_structure(cls, fcs_file_path: str, recursive: bool = True) -> Self:
+    def generate_fcs_structure(cls: type[Self], fcs_file_path: str, recursive: bool = True) -> Self:
         """Creates an instance of the FcsNexusFile, populates it through looking through the different keywords \
             in the FCS and assigning the paths to objects.
 

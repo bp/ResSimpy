@@ -84,8 +84,9 @@ class NexusFile(File):
         self.last_modified = last_modified
 
     @classmethod
-    def generate_file_include_structure(cls, file_path: str, origin: Optional[str] = None, recursive: bool = True,
-                                        skip_arrays: bool = True, top_level_file: bool = True) -> Self:
+    def generate_file_include_structure(cls: type[Self], file_path: str, origin: Optional[str] = None,
+                                        recursive: bool = True, skip_arrays: bool = True,
+                                        top_level_file: bool = True) -> Self:
         """Generates a nexus file instance for a provided text file with information storing the included files.
 
         Args:

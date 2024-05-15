@@ -375,7 +375,8 @@ class NexusCompletion(Completion):
         return [v[0] for v in NexusCompletion.get_keyword_mapping().values()]
 
     @classmethod
-    def from_dict(cls, input_dictionary: dict[str, None | float | int | str], date_format: DateFormat) -> Self:
+    def from_dict(cls: type[Self], input_dictionary: dict[str, None | float | int | str],
+                  date_format: DateFormat) -> Self:
         """Generates a NexusCompletion from a dictionary."""
         skip_mapping_keys = ['date', 'date_format', 'unit_system', 'start_date']
         for input_attr in input_dictionary:
