@@ -10,6 +10,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from unittest.mock import Mock
 
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.multifile_mocker import mock_multiple_files
 
@@ -594,7 +595,8 @@ def test_load_table_to_objects_basic():
         kh: int
         k: float
 
-        def __init__(self, properties_dict):
+        def __init__(self, properties_dict, date: str | None = None, date_format: DateFormat | None = None,
+                     unit_system: UnitSystem | None = None):
             for key, prop in properties_dict.items():
                 self.__setattr__(key, prop)
 
@@ -626,20 +628,20 @@ def test_load_table_to_objects_date_units():
         kh: int
         k: float
 
-        def __init__(self, properties_dict):
+        def __init__(self, properties_dict, date: str | None = None, date_format: DateFormat | None = None,
+                     unit_system: UnitSystem | None = None):
             for key, prop in properties_dict.items():
                 self.__setattr__(key, prop)
 
     # but should be added to this class:
     @dataclass
     class TestClassUnitDates:
-        date: str
-        unit_system: UnitSystem
         name: str
         kh: int
         k: float
 
-        def __init__(self, properties_dict):
+        def __init__(self, properties_dict, date: str | None = None, date_format: DateFormat | None = None,
+                     unit_system: UnitSystem | None = None):
             for key, prop in properties_dict.items():
                 self.__setattr__(key, prop)
 

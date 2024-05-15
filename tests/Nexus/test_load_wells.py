@@ -1086,6 +1086,9 @@ DT AUTO 0.01
 DATEFORMAT DD/MM/YYYY
 RUNCONTROL runcontrol.dat
 WELLS set 1 wells.dat"""
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+                                                                'uuid_6', 'uuid_7'])
+
     expected_result = NexusWell(well_name='test_well_1',
                                 completions=[NexusCompletion(date='30/04/1995', i=55, j=55, k=22, well_radius=0.354,
                                                              date_format=DateFormat.DD_MM_YYYY,
@@ -1118,6 +1121,9 @@ WELLS set 1 wells.dat"""
     mocker.patch("builtins.open", mock_open_wrapper)
 
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='model.fcs', mock_open=False)
+
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+                                                                'uuid_6', 'uuid_7']) # Reset the ID allocation
 
     # Act
     wells = nexus_sim.wells.get_all()

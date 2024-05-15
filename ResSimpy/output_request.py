@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from abc import ABC
+from typing import Optional
 
 from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.FrequencyEnum import FrequencyEnum
 from ResSimpy.Enums.OutputType import OutputType
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 
 
@@ -19,11 +21,21 @@ class OutputRequest(DataObjectMixin, ABC):
         output_frequency_number (None | float): Number of the frequency of the output request.
     """
 
-    date: str
     output: str
     output_type: OutputType
     output_frequency: FrequencyEnum
     output_frequency_number: None | float
+
+    def __init__(self, date: str, output: str, output_type: OutputType, output_frequency: FrequencyEnum,
+                 output_frequency_number: Optional[float] = None, date_format: Optional[DateFormat] = None,
+                 start_date: Optional[str] = None) -> None:
+
+        super().__init__(date=date, date_format=date_format, start_date=start_date)
+
+        self.output = output
+        self.output_type = output_type
+        self.output_frequency = output_frequency
+        self.output_frequency_number = output_frequency_number
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:

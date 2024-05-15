@@ -101,7 +101,7 @@ def test_generic_repr_str(mocker):
     # mock out id
 
     expected_repr = ("GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=<UnitSystem.METRIC: 'METRIC'>, "
-                     "date='01/01/2030', attr_4='world', _GenericTest__id='uuid1')")
+                     "date='01/01/2030', attr_4='world', GenericTest__id='uuid1')")
     expected_str = ("GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=<UnitSystem.METRIC: 'METRIC'>, "
                      "date='01/01/2030', attr_4='world')")
     # Act Assert

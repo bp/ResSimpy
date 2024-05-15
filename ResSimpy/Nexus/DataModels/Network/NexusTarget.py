@@ -20,10 +20,12 @@ class NexusTarget(Target):
             properties_dict (dict): A dictionary of properties to set on the object.
         """
         protected_attributes = ['date', 'date_format', 'start_date', 'unit_system']
-        self._date = date
-        self._unit_system = unit_system
+        super().__init__()
+
         self._date_format = date_format
         self._start_date = start_date
+        self._date = date
+        self._unit_system = unit_system
 
         # Loop through the properties dict if one is provided and set those attributes
         for key, prop in properties_dict.items():

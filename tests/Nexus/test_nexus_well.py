@@ -111,17 +111,23 @@ def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock
 ], ids=['basic case', 'mixture of perf and not perf', 'no perforations', 'using defaults', 'empty list'])
 def test_get_perforations(mocker, completions, expected_perforations):
     # Arrange
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     dummy_model = get_fake_nexus_simulator(mocker)
     dummy_wells = NexusWells(model=dummy_model)
 
     well = NexusWell(well_name='test well', completions=completions,
                      unit_system=UnitSystem.ENGLISH, parent_wells_instance=dummy_wells)
 
+    for c, perforation in enumerate(expected_perforations):
+        perforation._DataObjectMixin__id = f'uuid_{c}'
+
     # Act
     result = well.perforations
 
     # Assert
+    # Ignore different Ids
+    for c, perforation in enumerate(result):
+        perforation._DataObjectMixin__id = f'uuid_{c}'
+
     assert result == expected_perforations
 
 
@@ -176,10 +182,15 @@ def test_get_first_perforation(mocker, completions, expected_perforation):
     well = NexusWell(well_name='test well', completions=completions,
                      unit_system=UnitSystem.ENGLISH, parent_wells_instance=dummy_wells)
 
+    if expected_perforation is not None:
+        expected_perforation._DataObjectMixin__id = 'uuid_1'
+
     # Act
     result = well.first_perforation
 
     # Assert
+    if result is not None:
+        result._DataObjectMixin__id = 'uuid_1'
     assert result == expected_perforation
 
 
@@ -249,16 +260,25 @@ def test_get_first_perforation(mocker, completions, expected_perforation):
 ], ids=['basic case', 'mixture of perf and not perf', 'no shutins', 'no perf info', 'empty list'])
 def test_get_shutins(mocker, completions, expected_shutins):
     # Arrange
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+                                                                'uuid_6', 'uuid_7'])
+
     dummy_model = get_fake_nexus_simulator(mocker)
     dummy_wells = NexusWells(model=dummy_model)
 
     well = NexusWell(well_name='test well', completions=completions,
                      unit_system=UnitSystem.ENGLISH, parent_wells_instance=dummy_wells)
 
+    for c, perforation in enumerate(expected_shutins):
+        perforation._DataObjectMixin__id = f'uuid_{c}'
+
     # Act
     result = well.shutins
 
     # Assert
+    for c, perforation in enumerate(result):
+        perforation._DataObjectMixin__id = f'uuid_{c}'
+
     assert result == expected_shutins
 
 
@@ -321,16 +341,24 @@ def test_get_shutins(mocker, completions, expected_shutins):
 ], ids=['basic case', 'mixture of perf and not perf', 'only shutins', 'no shutins', 'no perf info', 'empty list'])
 def test_get_last_shutin(mocker, completions, expected_shutin):
     # Arrange
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+                                                                'uuid_6', 'uuid_7'])
+
     dummy_model = get_fake_nexus_simulator(mocker)
     dummy_wells = NexusWells(model=dummy_model)
 
     well = NexusWell(well_name='test well', completions=completions,
                      unit_system=UnitSystem.ENGLISH, parent_wells_instance=dummy_wells)
 
+    if expected_shutin is not None:
+        expected_shutin._DataObjectMixin__id = 'uuid_1'
+
     # Act
     result = well.last_shutin
 
     # Assert
+    if result is not None:
+        result._DataObjectMixin__id = 'uuid_1'
     assert result == expected_shutin
 
 
@@ -511,8 +539,15 @@ def test_find_completion(mocker, existing_completions):
         NexusCompletion(date='01/02/2023', i=1, j=2, k=5, well_indices=3, status='ON', partial_perf=1,
                         date_format=DateFormat.DD_MM_YYYY),
     ]
+
     completion_to_find_as_completion = NexusCompletion(date='01/02/2023', i=1, j=2, k=3, status='ON',
                                                        date_format=DateFormat.DD_MM_YYYY)
+
+    for c, perforation in enumerate(existing_completions):
+        perforation._DataObjectMixin__id = f'uuid_{c}'
+
+    for c, perforation in enumerate(expected_completions):
+        perforation._DataObjectMixin__id = f'uuid_{c+1}'
 
     dummy_model = get_fake_nexus_simulator(mocker)
     dummy_wells = NexusWells(model=dummy_model)
@@ -520,6 +555,7 @@ def test_find_completion(mocker, existing_completions):
     well = NexusWell(well_name='test well', completions=existing_completions, unit_system=UnitSystem.METKGCM2, parent_wells_instance=dummy_wells)
     expected_result = NexusCompletion(date='01/02/2023', i=1, j=2, k=3, status='ON', partial_perf=1,
                                       date_format=DateFormat.DD_MM_YYYY)
+    expected_result._DataObjectMixin__id = 'uuid_1'
 
     # Act
     result = well.find_completion(completion_to_find)
@@ -538,6 +574,7 @@ def test_add_completion(mocker):
     # Arrange
     start_date = '01/01/2023'
     new_date = '01/04/2023'
+
     existing_completions = [
         NexusCompletion(date='01/01/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None, grid='GRID1',
                         well_indices=1, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.METKGCM2,
@@ -559,6 +596,8 @@ def test_add_completion(mocker):
                                            date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.METKGCM2,
                                            start_date=start_date)
 
+    new_nexus_completion._DataObjectMixin__id = 'new_uuid'
+
     expected_completions = [x for x in existing_completions]
     expected_completions.append(new_nexus_completion)
 
@@ -571,6 +610,9 @@ def test_add_completion(mocker):
                               unit_system=UnitSystem.METKGCM2, parent_wells_instance=dummy_wells)
     well = NexusWell(well_name='test well', completions=existing_completions,
                      unit_system=UnitSystem.METKGCM2, parent_wells_instance=dummy_wells)
+
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='new_uuid')
+
     # Act
     well._add_completion_to_memory(date=new_date, completion_properties=new_completion_props,
                                    date_format=DateFormat.DD_MM_YYYY)
@@ -580,6 +622,10 @@ def test_add_completion(mocker):
 
 def test_remove_completion_from_memory(mocker):
     # Arrange
+
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+                                                                'uuid_6', 'uuid_7'])
+
     existing_completions = [
         NexusCompletion(date='01/01/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None, grid='GRID1',
                         well_indices=1, date_format=DateFormat.DD_MM_YYYY),
@@ -599,6 +645,9 @@ def test_remove_completion_from_memory(mocker):
                         status='ON', partial_perf=1, date_format=DateFormat.DD_MM_YYYY),
     ]
 
+    expected_completions_after_removal[0]._DataObjectMixin__id = 'uuid_1'
+    expected_completions_after_removal[1]._DataObjectMixin__id = 'uuid_5'
+
     dummy_model = get_fake_nexus_simulator(mocker)
     dummy_wells = NexusWells(model=dummy_model)
 
@@ -611,12 +660,16 @@ def test_remove_completion_from_memory(mocker):
     # Act
     comp_to_remove = remove_well.find_completions(perfs_to_remove)
     remove_well._remove_completions_from_memory(completions_to_remove=comp_to_remove)
+
     # Assert
     assert remove_well == expected_result
 
 
 def test_modify_completion(mocker):
     # Arrange
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+                                                                'uuid_6', 'uuid_7'])
+
     existing_completions = [
         NexusCompletion(date='01/01/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None, grid='GRID1',
                         well_indices=1, date_format=DateFormat.DD_MM_YYYY),
@@ -633,6 +686,9 @@ def test_modify_completion(mocker):
     changed_completion = NexusCompletion(date='01/03/2023', i=1, j=5, k=6, well_indices=0, depth_to_top=1156,
                                          depth_to_bottom=1234, status='ON', partial_perf=0.5,
                                          perm_thickness_ovr=10000.4, date_format=DateFormat.DD_MM_YYYY)
+
+    changed_completion._DataObjectMixin__id = 'uuid_5'
+
     expected_completions = existing_completions[:-1] + [changed_completion]
     completion_id = existing_completions[-1].id
     changes = {'i': 1, 'j': 5, 'k': 6, 'perm_thickness_ovr': 10000.4, 'partial_perf': 0.5}
@@ -732,6 +788,8 @@ def test_wells_modify(mocker):
 
     mocker.patch("builtins.open", mock_open_wrapper)
 
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
+
     nexus_sim = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='fcs_file.fcs', mock_open=False)
 
     well_1_completions = [
@@ -781,6 +839,7 @@ def test_wells_modify(mocker):
     wells.modify(well_name='well1', completion_properties_list=[perf_1_to_add, perf_2_to_add],
                  how=OperationEnum.ADD)
     wells.modify(well_name='well1', completion_properties_list=[perf_to_remove], how=OperationEnum.REMOVE)
+
     # Assert
     assert wells.get_all()[0].completions == expected_result[0].completions
 
@@ -1327,9 +1386,12 @@ def test_object_locations_updating(mocker, well_file_data, expected_uuid):
     RUNCONTROL ref_runcontrol.dat
     WELLS Set 1 wells.dat'''
     runcontrol_data = 'START 01/01/2020'
+
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5',
+                                                    'uuid6', 'uuid7']) # Mocking the object IDs
+
     mocker.patch.object(uuid, 'uuid4', side_effect=['file_uuid', 'runcontrol_uuid', 'wells_file_uuid',
-                                                    '1', 'wells_file_uuid', 'uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5',
-                                                    'uuid6', 'uuid7'])
+                                                    '1', 'wells_file_uuid']) # Mocking the file IDs
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={

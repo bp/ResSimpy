@@ -7,6 +7,7 @@ from typing import Optional
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.NexusEnums import DateFormatEnum
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Utils import to_dict_generic
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
@@ -22,6 +23,14 @@ class DataObjectMixin(ABC):
     _date: Optional[str] = None
     _start_date: Optional[str] = None
     _unit_system: Optional[UnitSystem] = None
+
+    def __init__(self, date: Optional[str] = None,  date_format: Optional[DateFormat] = None,
+                 start_date: Optional[str] = None, unit_system: Optional[UnitSystem] = None) -> None:
+        self.__id = uuid4()
+        self._date_format = date_format
+        self._start_date = start_date
+        self._unit_system = unit_system
+        self._date = date
 
     def __repr__(self) -> str:
         return generic_repr(self)

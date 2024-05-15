@@ -394,7 +394,8 @@ class NexusCompletion(Completion):
             raise AttributeError(f'No date provided for the completion, instead got {date=}')
 
         date = str(date)
-        constructed_class = cls(date=date, date_format=completion_date_format)
+        constructed_class = cls(date=date, date_format=completion_date_format,
+                                start_date=input_dictionary['start_date'])
         constructed_class.update(input_dictionary)
         return constructed_class
 

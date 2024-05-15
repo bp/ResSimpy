@@ -52,6 +52,7 @@ def test_add_connection(mocker, file_contents, expected_file_contents, connectio
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
+
     # make a mock for the write operation
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
@@ -59,7 +60,11 @@ def test_add_connection(mocker, file_contents, expected_file_contents, connectio
     expected_cons = [NexusNodeConnection(node) for node in expected_connections]
     expected_cons.sort(key=lambda x: x.name)
 
-    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
+    expected_cons[0]._DataObjectMixin__id = 'uuid_1'
+    expected_cons[1]._DataObjectMixin__id = 'uuid_2'
+
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+                                                                'uuid_6', 'uuid_7'])
     # Act
     nexus_sim.network.connections.add(connection_to_add)
     # compare sets as order doesn't matter
@@ -105,6 +110,9 @@ def test_remove_connection(mocker, file_contents, expected_file_contents, connec
             '''
         runcontrol_contents = '''START 01/01/2019'''
 
+        mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+                                                                    'uuid_6', 'uuid_7'])
+
         def mock_open_wrapper(filename, mode):
             mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
                 '/path/fcs_file.fcs': fcs_file_contents,
@@ -119,8 +127,8 @@ def test_remove_connection(mocker, file_contents, expected_file_contents, connec
         mocker.patch("builtins.open", writing_mock_open)
 
         expected_connection = [NexusNodeConnection(node) for node in expected_connection]
+        expected_connection[0]._DataObjectMixin__id = 'uuid_3'
 
-        mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
         # Act
         nexus_sim.network.connections.remove(connection_to_remove)
         result_nodes = nexus_sim.network.connections.get_all()
@@ -187,10 +195,15 @@ def test_modify_connections(mocker, file_contents, expected_file_contents, obj_t
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
 
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_3'])
+
     expected_objs = [NexusNodeConnection(node) for node in expected_objs]
     expected_objs.sort(key=lambda x: x.name)
 
-    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
+    # mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
+
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+                                                                'uuid_6', 'uuid_7'])
     # Act
     nexus_sim.network.connections.modify(obj_to_modify, modified_properties)
     # compare sets as order doesn't matter

@@ -432,7 +432,10 @@ def test_file_object_locations(mocker, test_file_contents, expected_results):
     dummy_model = get_fake_nexus_simulator(mocker)
     dummy_wells = NexusWells(model=dummy_model)
 
-    mocker.patch.object(uuid, 'uuid4', side_effect=['file_uuid', 'uuid1', 'uuid2'])
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5',
+                                                    'uuid6', 'uuid7'])  # Mocking the object IDs
+
+    mocker.patch.object(uuid, 'uuid4', side_effect=['file_uuid'])  # Mocking the file IDs
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -758,7 +761,10 @@ def test_update_object_locations(mocker, test_file_contents, expected_results):
     dummy_model = get_fake_nexus_simulator(mocker)
     dummy_wells = NexusWells(model=dummy_model)
 
-    mocker.patch.object(uuid, 'uuid4', side_effect=['file_uuid', 'uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5'])
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5',
+                                                    'uuid6', 'uuid7'])  # Mocking the object IDs
+
+    mocker.patch.object(uuid, 'uuid4', side_effect=['file_uuid'])  # Mocking the file IDs
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
