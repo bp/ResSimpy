@@ -572,6 +572,8 @@ class NexusGrid(Grid):
     def __add_absolute_path_to_grid_array_definition(self, grid_array_definition: GridArrayDefinition,
                                                      line_index_of_include_file: int) -> None:
         # cover the trivial case where the path is already absolute
+        if grid_array_definition.value is None:
+            return
         if os.path.isabs(grid_array_definition.value):
             grid_array_definition.absolute_path = grid_array_definition.value
             return
@@ -579,6 +581,8 @@ class NexusGrid(Grid):
             return
         file_containing_include_line, _ = self.__grid_nexus_file.find_which_include_file(line_index_of_include_file)
         # find the include path from within this include file
+        if file_containing_include_line.include_objects is None:
+            return
         matching_includes = [x for x in file_containing_include_line.include_objects if
                              grid_array_definition.value in x.location]
         if len(matching_includes) == 0:
