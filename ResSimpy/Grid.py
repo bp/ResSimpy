@@ -18,14 +18,13 @@ class GridArrayDefinition:
         value (Optional[str]): the actual values for the grid array property in question. Can be an include file.
         mods (Optional[dict[str, pd.DataFrame]): if the grid array has an associated mod card we capture it.
         keyword_in_include_file (bool): an indicator to tell you if the grid array keyword was found in an inc file
+        absolute_path (Optional[str]): the absolute path to the path if value is an include file.
     """
     modifier: Optional[str] = None
     value: Optional[str] = None
-    # need a parameter for MOD cards
     mods: Optional[dict[str, pd.DataFrame]] = None
-    # make a boolean to indicate if a keyword is found in an include file
-    # assume initially that it is not
     keyword_in_include_file: bool = False
+    absolute_path: Optional[str] = None
 
 
 @dataclass(kw_only=True)
