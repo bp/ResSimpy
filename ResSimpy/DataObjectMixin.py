@@ -26,6 +26,14 @@ class DataObjectMixin(ABC):
 
     def __init__(self, date: Optional[str] = None,  date_format: Optional[DateFormat] = None,
                  start_date: Optional[str] = None, unit_system: Optional[UnitSystem] = None) -> None:
+        """Initialises the DataObjectMixin Class.
+
+        Args:
+            date (Optional[str]): The date of the object.
+            date_format (Optional[DateFormat]): The date format of the object.
+            start_date (Optional[str]): The start date of the model (required if the date is in numerical format).
+            unit_system (Optional[UnitSystem]): The unit system of the object.
+        """
         self.__id = uuid4()
         self._date_format = date_format
         self._start_date = start_date
@@ -66,11 +74,11 @@ class DataObjectMixin(ABC):
         return self._unit_system
 
     def set_iso_date(self) -> None:
-        """Updates the ISO Date property"""
+        """Updates the ISO Date property."""
         self.__iso_date = ISODateTime.convert_to_iso(self.date, self.date_format, self.start_date)
 
     def to_dict(self, keys_in_keyword_style: bool = False, add_date: bool = True, add_units: bool = True,
-                include_nones: bool = True, units_as_string: bool = True, include_id: bool = False) -> dict[str, None | str | int | float]:
+                include_nones: bool = True, units_as_string: bool = True) -> dict[str, None | str | int | float]:
         """Returns a dictionary of the attributes of the object.
 
         Args:

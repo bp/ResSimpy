@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import warnings
 from typing import Optional
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from datetime import datetime, timedelta
@@ -50,7 +52,8 @@ class ISODateTime(datetime):
         converted_date = None
 
         if date_format is None:
-            raise ValueError('Please provide a date format')
+            warnings.warn(f"No date format provided for date at {date}, assuming MM/DD/YYYY")
+            date_format = DateFormat.MM_DD_YYYY
 
         if ISODateTime.isfloat(date) and start_date is None:
             raise ValueError('Please provide start date when date is numeric')

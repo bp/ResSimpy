@@ -798,7 +798,7 @@ def test_add_constraint_no_name_given(mocker):
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
     constraints = NexusConstraints(mock_nexus_network, model)
 
-    empty_constraint = NexusConstraint({})
+    empty_constraint = NexusConstraint({'date': '01/01/2020'})
 
     # Act and Assert
     with pytest.raises(ValueError) as ve:

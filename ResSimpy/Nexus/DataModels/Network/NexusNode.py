@@ -3,7 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Node import Node
@@ -40,21 +39,6 @@ class NexusNode(Node):
             if key in protected_attributes:
                 key = '_' + key
             self.__setattr__(key, prop)
-
-
-        # TODO: Complete this code and make it generic
-        # if 'date' in properties_dict.keys():
-        #     self._date = properties_dict['date']
-        # else:
-        #     self._date = date
-        #
-        # if 'unit_system' in properties_dict.keys():
-        #     self._unit_system = properties_dict['unit_system']
-        # else:
-        #     self._unit_system = unit_system
-        #
-        # self._date_format = date_format
-        # self._start_date = start_date
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:

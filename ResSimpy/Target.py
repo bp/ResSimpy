@@ -1,10 +1,8 @@
 from __future__ import annotations
-import uuid
 from abc import ABC
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 from ResSimpy.DataObjectMixin import DataObjectMixin
-from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Units.AttributeMappings.NetworkUnitMapping import NetworkUnits
 
 

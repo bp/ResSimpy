@@ -1,7 +1,6 @@
 """Data structure for holding wellmod data for the NexusWell class."""
 from dataclasses import dataclass
 
-from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Utils.to_dict_generic import to_dict
