@@ -29,6 +29,17 @@ class OutputRequest(DataObjectMixin, ABC):
     def __init__(self, date: str, output: str, output_type: OutputType, output_frequency: FrequencyEnum,
                  output_frequency_number: Optional[float] = None, date_format: Optional[DateFormat] = None,
                  start_date: Optional[str] = None) -> None:
+        """Initialises the OutputRequest class.
+
+        Args:
+            date (str): Date of the output request.
+            output (str): Output request.
+            output_type (OutputType): Type of output request.
+            output_frequency (FrequencyEnum): Frequency of the output request.
+            output_frequency_number (None | float): Number of the frequency of the output request.
+            date_format (Optional[DateFormat]): The date format of the object.
+            start_date (Optional[str]): The start date of the model (required if the date is in numerical format).
+        """
 
         super().__init__(date=date, date_format=date_format, start_date=start_date)
 
