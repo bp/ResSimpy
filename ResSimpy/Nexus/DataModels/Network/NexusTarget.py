@@ -19,19 +19,30 @@ class NexusTarget(Target):
         Args:
             properties_dict (dict): A dictionary of properties to set on the object.
         """
-        protected_attributes = ['date', 'date_format', 'start_date', 'unit_system']
         super().__init__()
 
-        self._date_format = date_format
-        self._start_date = start_date
-        self._date = date
-        self._unit_system = unit_system
+        # Set the date related properties, then set the date, automatically setting the ISODate
+        protected_attributes = ['date_format', 'start_date', 'unit_system']
+
+        for attribute in protected_attributes:
+            if attribute in properties_dict:
+                self.__setattr__(f"_{attribute}", properties_dict[attribute])
+
+        if date_format is not None:
+            self._date_format = date_format
+
+        if start_date is not None:
+            self._start_date = start_date
+
+        if unit_system is not None:
+            self._unit_system = unit_system
+
+        self.date = date if date is not None else properties_dict['date']
 
         # Loop through the properties dict if one is provided and set those attributes
-        for key, prop in properties_dict.items():
-            if key in protected_attributes:
-                key = '_' + key
-            self.__setattr__(key, prop)
+        remaining_properties = [x for x in properties_dict.keys() if x not in protected_attributes]
+        for key in remaining_properties:
+            self.__setattr__(key, properties_dict[key])
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
