@@ -13,7 +13,7 @@ from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Utils.obj_to_table_string import to_table_line
 
 
-@dataclass()
+@dataclass(kw_only=True)
 class DataObjectMixin(ABC):
     """Base class representing a data object in ResSimpy."""
     __id: UUID = field(default_factory=lambda: uuid4())
@@ -23,9 +23,11 @@ class DataObjectMixin(ABC):
     _start_date: Optional[str] = None
     _unit_system: Optional[UnitSystem] = None
 
-    def __init__(self, date: Optional[str] = None,  date_format: Optional[DateFormat] = None,
+    # TODO: Find a way to remove the dummy parameter below that doesn't break typing in nexus_add_new_object_to_file.
+    def __init__(self, _: dict[str, str | float | int | None] = {}, date: Optional[str] = None,
+                 date_format: Optional[DateFormat] = None,
                  start_date: Optional[str] = None, unit_system: Optional[UnitSystem] = None) -> None:
-        """Initialises the DataObjectMixin Class.
+        """Initialises the DataObjectMixin Class. First '_' parameter is a dummy parameter for type compatibility.
 
         Args:
             date (Optional[str]): The date of the object.

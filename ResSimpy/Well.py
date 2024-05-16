@@ -126,10 +126,12 @@ class Well(ABC):
                 continue
             if completion.k is not None and using_k_values is not False:
                 using_k_values = True
-                events.append((completion.date, completion.k))
+                if completion.date is not None:
+                    events.append((completion.date, completion.k))
             elif completion.depth_to_top is not None and using_k_values is not True \
                     and completion.depth_to_bottom is not None:
                 using_k_values = False
-                events.append((completion.date, (completion.depth_to_top, completion.depth_to_bottom)))
+                if completion.date is not None:
+                    events.append((completion.date, (completion.depth_to_top, completion.depth_to_bottom)))
 
         return events

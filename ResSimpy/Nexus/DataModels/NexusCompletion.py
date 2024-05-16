@@ -286,13 +286,14 @@ class NexusCompletion(Completion):
         return self.__depth_to_bottom_str
 
     def to_dict(self, keys_in_keyword_style: bool = False, add_date: bool = True, add_units: bool = False,
-                include_nones: bool = True) -> \
+                include_nones: bool = True, units_as_string: bool = True) -> \
             dict[str, None | str | int | float]:
 
         attribute_dict = to_dict(self, keys_in_keyword_style, add_date=add_date,
                                  add_units=add_units, include_nones=include_nones)
         parent_attribute_dict = super().to_dict(keys_in_keyword_style=keys_in_keyword_style, add_date=add_date,
-                                                add_units=add_units, include_nones=include_nones)
+                                                add_units=add_units, include_nones=include_nones,
+                                                units_as_string=units_as_string)
 
         attribute_dict.update(parent_attribute_dict)
         if self.rel_perm_end_point is not None:
@@ -395,6 +396,10 @@ class NexusCompletion(Completion):
             raise AttributeError(f'No date provided for the completion, instead got {date=}')
 
         date = str(date)
+
+        if 'start_date' not in input_dictionary or not isinstance(input_dictionary['start_date'], str):
+            raise ValueError(f"Invalid start date found: {input_dictionary}")
+
         constructed_class = cls(date=date, date_format=completion_date_format,
                                 start_date=input_dictionary['start_date'])
         constructed_class.update(input_dictionary)
