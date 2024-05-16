@@ -90,7 +90,12 @@ class NexusNodeConnection(NodeConnection):
         if unit_system is not None:
             self._unit_system = unit_system
 
-        self.date = date if date is not None else properties_dict['date']
+        if date is None:
+            if 'date' not in properties_dict or not isinstance(properties_dict['date'], str):
+                raise ValueError(f"No valid Date found for object with properties: {properties_dict}")
+            self.date = properties_dict['date']
+        else:
+            self.date = date
 
         # Loop through the properties dict if one is provided and set those attributes
         remaining_properties = [x for x in properties_dict.keys() if x not in protected_attributes]

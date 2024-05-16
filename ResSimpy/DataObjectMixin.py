@@ -6,7 +6,6 @@ from typing import Optional
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.ISODateTime import ISODateTime
-from ResSimpy.Nexus.NexusEnums import DateFormatEnum
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Utils import to_dict_generic
@@ -19,7 +18,7 @@ class DataObjectMixin(ABC):
     """Base class representing a data object in ResSimpy."""
     __id: UUID = field(default_factory=lambda: uuid4())
     __iso_date: ISODateTime = field(init=False, repr=True)
-    _date_format: Optional[DateFormatEnum.DateFormat] = None
+    _date_format: Optional[DateFormat] = None
     _date: Optional[str] = None
     _start_date: Optional[str] = None
     _unit_system: Optional[UnitSystem] = None
@@ -66,7 +65,7 @@ class DataObjectMixin(ABC):
         return self._start_date
 
     @property
-    def date_format(self) -> Optional[DateFormatEnum]:
+    def date_format(self) -> Optional[DateFormat]:
         return self._date_format
 
     @property
@@ -75,6 +74,9 @@ class DataObjectMixin(ABC):
 
     def set_iso_date(self) -> None:
         """Updates the ISO Date property."""
+        if self.date is None:
+            raise ValueError("Cannot set ISO Date without a date.")
+
         self.__iso_date = ISODateTime.convert_to_iso(self.date, self.date_format, self.start_date)
 
     def to_dict(self, keys_in_keyword_style: bool = False, add_date: bool = True, add_units: bool = True,

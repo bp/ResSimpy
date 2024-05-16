@@ -65,7 +65,7 @@ class Well(ABC):
 
         dates_changed: list[str] = []
         for completion in self._completions:
-            if completion.date not in dates_changed:
+            if completion.date not in dates_changed and completion.date is not None:
                 dates_changed.append(completion.date)
 
         return dates_changed
