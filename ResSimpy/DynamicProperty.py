@@ -1,6 +1,6 @@
 """Base class for handling any dynamic property simulator inputs, for use in inputs such as PVT, relperm, etc."""
 from __future__ import annotations
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 import numpy as np
@@ -33,7 +33,7 @@ class DynamicProperty(ABC):
         self.file: File = file
 
     @property
-    # @abstractmethod
+    @abstractmethod
     def units(self) -> BaseUnitMapping:
         """Returns the attribute to unit map for the constraint."""
         raise NotImplementedError('Implement in the derived class.')
