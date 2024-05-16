@@ -373,10 +373,11 @@ class NexusConstraint(Constraint):
         """Updates attributes in the object based on the dictionary provided."""
         protected_attributes = ['date', 'date_format', 'start_date', 'unit_system']
         for key, value in new_data.items():
+            modified_key = key
             if key in protected_attributes:
-                key = '_' + key
+                modified_key = '_' + key
             if value is not None or nones_overwrite:
-                setattr(self, key, value)
+                setattr(self, modified_key, value)
 
     def to_table_line(self, headers: list[str]) -> str:
         """String representation of the constraint for entry to an inline constraint table.

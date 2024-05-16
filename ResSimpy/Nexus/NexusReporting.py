@@ -9,7 +9,6 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.Enums.FrequencyEnum import FrequencyEnum
 from ResSimpy.Enums.OutputType import OutputType
-from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.DataModels.NexusReportingRequests import NexusOutputRequest, NexusOutputContents
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Reporting import Reporting
@@ -20,17 +19,6 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class NexusReporting(Reporting):
-    # TODO: Create tests for this class that use different date formats
-
-    def __init__(self, date: str, output: str, output_type: OutputType, output_frequency: FrequencyEnum,
-                 output_frequency_number: None | float, date_format: DateFormat = DateFormat.MM_DD_YYYY) -> None:
-        super().__init__()
-        self._date_format = date_format
-        self.date = date
-        self.output = output
-        self.output_type = output_type
-        self.output_frequency = output_frequency
-        self.output_frequency_number = output_frequency_number
     """Class for handling all Reporting and runcontrol related tasks."""
     __ss_output_requests: list[NexusOutputRequest]
     __array_output_requests: list[NexusOutputRequest]
