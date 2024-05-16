@@ -386,11 +386,11 @@ def test_nexus_constraint_repr(mocker):
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     constraint = NexusConstraint({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0,
                                   'max_surface_water_rate': 0})
-    expected_repr = ("NexusConstraint(id='uuid1', ISO_Date='2019-01-01T00:00:00', date='01/01/2019', name='well1', "
-                     "max_surface_water_rate=0, max_surface_liquid_rate=3884.0)")
-    expected_str = ("NexusConstraint(_DataObjectMixin__iso_date=ISODateTime(2019,T1,T1,T0,T0), _date='01/01/2019', "
+    expected_repr = ("NexusConstraint(id='uuid1', date='01/01/2019', name='well1', "
+                     "max_surface_water_rate=0, max_surface_liquid_rate=3884.0, ISO_Date='2019-01-01T00:00:00')")
+    expected_str = ("NexusConstraint(_date='01/01/2019', "
                     "name='well1', max_surface_water_rate=0, "
-                     "max_surface_liquid_rate=3884.0)")
+                     "max_surface_liquid_rate=3884.0, _DataObjectMixin__iso_date=ISODateTime(2019,T1,T1,T0,T0))")
     # Act
     repr_result = constraint.__repr__()
     str_result = constraint.__str__()
