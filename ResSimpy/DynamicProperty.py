@@ -77,6 +77,9 @@ class DynamicProperty(ABC):
                     existing_range = ranges.get(col, (np.nan, np.nan))
                     ranges[col] = (np.nanmin((*existing_range, prop_value[col].min())),
                                    np.nanmax((*existing_range, prop_value[col].max())))
+            elif isinstance(prop_value, np.ndarray):
+                ranges[prop] = (np.nanmin((*existing_range, min(prop_value))),
+                                np.nanmax((*existing_range, max(prop_value))))
             elif isinstance(prop_value, str):
                 # try to convert the string to a list of floats
                 split_prop_value = prop_value.split()

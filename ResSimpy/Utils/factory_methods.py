@@ -3,6 +3,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Union
 from uuid import UUID
 
+import numpy as np
 import pandas as pd
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -18,9 +19,10 @@ def get_empty_list_str() -> list[str]:
 
 
 # Factory method for generating empty dictionary with typing
-def get_empty_dict_union() -> dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+def get_empty_dict_union() -> dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
                                    dict[str, Union[float, pd.DataFrame]]]]:
-    value: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] = {}
+    value: dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
+                           dict[str, Union[float, pd.DataFrame]]]] = {}
     return value
 
 

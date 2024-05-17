@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional, Union
+import numpy as np
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.DynamicProperty import DynamicProperty
@@ -53,7 +54,7 @@ class NexusWaterMethod(DynamicProperty):
 
     file: NexusFile
     reference_pressure: Optional[float] = None
-    properties: dict[str, Union[str, int, float, Enum, list[str],
+    properties: dict[str, Union[str, int, float, Enum, list[str], np.ndarray,
                      pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
     parameters: list[NexusWaterParams] = field(default_factory=get_empty_list_nexus_water_params)
@@ -61,7 +62,7 @@ class NexusWaterMethod(DynamicProperty):
 
     def __init__(self, file: NexusFile, input_number: int, model_unit_system: UnitSystem,
                  reference_pressure: Optional[float] = None,
-                 properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                 properties: Optional[dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None,
                  parameters: Optional[list[NexusWaterParams]] = None) -> None:
         """Initialises the NexusWaterMethod class.
