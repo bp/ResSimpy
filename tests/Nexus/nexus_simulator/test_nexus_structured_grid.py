@@ -1467,20 +1467,21 @@ LIST"""  # ends structured_grid_file_contents
 def test_nested_includes_with_grid_array_keywords(mocker):
     # Arrange
 
-    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID /test_structured_grid.dat"
-    structured_grid_name = '/test_structured_grid.dat'
+    structured_grid_path = '/nexus_files/test_structured_grid.dat'
+    fcs_file_contents = (f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID "
+                         f"{structured_grid_path}")
     structured_grid_file_contents = '''! Array data
     KX VALUE
     INCLUDE /inc_file_kx.inc
     
-    INCLUDE /inc_file1.inc'''
+    INCLUDE grid/inc_file1.inc'''
 
-    include_file_location = '/inc_file1.inc'
-    include_file_location_2 = '/inc_file2.inc'
+    include_file_location = os.path.join('/nexus_files', 'grid/inc_file1.inc')
+    include_file_location_2 = os.path.join('/nexus_files/grid', 'inc_file2.inc')
     include_file_location_kx = '/inc_file_kx.inc'
 
     include_file_contents = ('''KY VALUE 
-                                INCLUDE /inc_file2.inc
+                                INCLUDE inc_file2.inc
                                 ''')
     include_file_contents_2 = 'some content\n that should\n be skipped'
     include_file_contents_kx = 'some content that should be skipped'
@@ -1489,7 +1490,7 @@ def test_nested_includes_with_grid_array_keywords(mocker):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
         {'/nexus_run.fcs': fcs_file_contents,
          '/run_control/path': '',
-         structured_grid_name: structured_grid_file_contents,
+         structured_grid_path: structured_grid_file_contents,
          include_file_location: include_file_contents,
          include_file_location_2: include_file_contents_2,
          include_file_location_kx: include_file_contents_kx
@@ -1502,8 +1503,8 @@ def test_nested_includes_with_grid_array_keywords(mocker):
 
     expected_kx_result = GridArrayDefinition(modifier='VALUE', value='/inc_file_kx.inc', mods=None,
                                              absolute_path='/inc_file_kx.inc')
-    expected_ky_result = GridArrayDefinition(modifier='VALUE', value='/inc_file2.inc', mods=None,
-                                             absolute_path='/inc_file2.inc')
+    expected_ky_result = GridArrayDefinition(modifier='VALUE', value='inc_file2.inc', mods=None,
+                                             absolute_path=os.path.join('/nexus_files', 'grid', 'inc_file2.inc'))
 
     # Act
     result_kx = sim_obj.grid.kx
