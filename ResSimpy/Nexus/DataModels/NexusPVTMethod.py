@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional, Union
+import numpy as np
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusKeywords.pvt_keywords import PVT_BLACKOIL_PRIMARY_KEYWORDS, PVT_TYPE_KEYWORDS, PVT_KEYWORDS
@@ -52,7 +53,7 @@ class NexusPVTMethod(DynamicProperty):
         str, int, float, pd.DataFrame, list[str], dict[str, float], tuple[str, dict[str, float]], dict[
             str, pd.DataFrame]]] \
         = field(default_factory=get_empty_eosopt_dict_union)
-    properties: dict[str, Union[str, int, float, Enum, list[str],
+    properties: dict[str, Union[str, int, float, Enum, list[str], np.ndarray,
                                 pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
     unit_system: UnitSystem
@@ -63,7 +64,7 @@ class NexusPVTMethod(DynamicProperty):
                  eos_components: Optional[list[str]] = None,
                  eos_options: Optional[dict[str, Union[str, int, float, pd.DataFrame, list[str], dict[str, float],
                                        tuple[str, dict[str, float]], dict[str, pd.DataFrame]]]] = None,
-                 properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                 properties: Optional[dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
         """Initialises the NexusGasliftMethod class.
 
