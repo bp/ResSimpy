@@ -19,7 +19,7 @@ class DataObjectMixin(ABC):
     __id: UUID = field(default_factory=lambda: uuid4())
     __iso_date: ISODateTime = field(init=False, repr=True)
     _date_format: Optional[DateFormat] = None
-    _date: Optional[str] = None
+    __date: Optional[str] = None
     _start_date: Optional[str] = None
     _unit_system: Optional[UnitSystem] = None
 
@@ -39,7 +39,7 @@ class DataObjectMixin(ABC):
         self._date_format = date_format
         self._start_date = start_date
         self._unit_system = unit_system
-        self._date = date
+        self.__date = date
 
     def __repr__(self) -> str:
         return generic_repr(self)
@@ -55,11 +55,11 @@ class DataObjectMixin(ABC):
 
     @property
     def date(self) -> Optional[str]:
-        return self._date
+        return self.__date
 
     @date.setter
     def date(self, value: str) -> None:
-        self._date = value
+        self.__date = value
         self.set_iso_date()
 
     @property

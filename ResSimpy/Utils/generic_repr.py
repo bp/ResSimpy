@@ -20,9 +20,11 @@ def generic_repr(input_class: Any) -> str:
     sanitised_attrs = {}
     for key in filtered_attrs.keys():
         if key == '_DataObjectMixin__id':
-            sanitised_key = 'id'
+            sanitised_key = 'ID'
         elif key == '_DataObjectMixin__iso_date':
             sanitised_key = 'ISO_Date'
+        elif key == '_DataObjectMixin__date':
+            sanitised_key = 'Date'
         elif key[0] == '_':
             sanitised_key = key[1:] if key[1] != '_' else key[2:]
         else:
