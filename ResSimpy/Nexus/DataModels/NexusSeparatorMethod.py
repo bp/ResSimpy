@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional, Union
+import numpy as np
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
@@ -30,14 +31,14 @@ class NexusSeparatorMethod(DynamicProperty):
 
     file: NexusFile
     separator_type: Optional[SeparatorType] = None
-    properties: dict[str, Union[str, int, float, Enum, list[str],
+    properties: dict[str, Union[str, int, float, Enum, list[str], np.ndarray,
                      pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
         = field(default_factory=get_empty_dict_union)
     unit_system: UnitSystem
 
     def __init__(self, file: NexusFile, input_number: int, model_unit_system: UnitSystem,
                  separator_type: Optional[SeparatorType] = None,
-                 properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                 properties: Optional[dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
         """Initialises the NexusSeparatorMethod class.
 

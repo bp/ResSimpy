@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import re
 from typing import Optional, Union
+import numpy as np
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusKeywords.hyd_keywords import HYD_ARRAY_KEYWORDS, HYD_TABLE_HEADER_COLS, HYD_KEYWORDS
@@ -31,14 +32,14 @@ class NexusHydraulicsMethod(DynamicProperty):
 
     # General parameters
     file: NexusFile
-    properties: dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+    properties: dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
                      dict[str, Union[float, pd.DataFrame]]]] = field(default_factory=get_empty_dict_union)
     unit_system: UnitSystem
     ratio_thousands: bool
 
     def __init__(self, file: NexusFile, input_number: int, model_unit_system: UnitSystem,
                  ratio_thousands: bool = True,
-                 properties: Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
+                 properties: Optional[dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
         """Initialises the NexusHydraulicsMethod class.
 
@@ -123,13 +124,18 @@ class NexusHydraulicsMethod(DynamicProperty):
                 printable_str += f'{key}'
                 if 'ALQ_PARAM' in hyd_dict.keys():
                     printable_str += f" {hyd_dict['ALQ_PARAM']}"
-                printable_str += f' {value}\n'
+                if isinstance(value, np.ndarray):
+                    printable_str += f" {' '.join([str(val) for val in value])}\n"
+                else:
+                    printable_str += f' {value}\n'
             elif key == 'WATINJ' and isinstance(value, dict):
                 printable_str += f'{key}\n'
                 for watinj_key in value.keys():
                     printable_str += f'    {watinj_key} {value[watinj_key]}\n'
             elif key not in ['ALQ', 'ALQ_PARAM', 'WATINJ']:
-                if value == '':
+                if isinstance(value, np.ndarray):
+                    printable_str += f"{key} {' '.join([str(val) for val in value])}\n"
+                elif value == '':
                     printable_str += f'{key}\n'
                 else:
                     printable_str += f'{key} {value}\n'
@@ -184,7 +190,7 @@ class NexusHydraulicsMethod(DynamicProperty):
                     keyword_index = line_elems.index(next_val)
                 else:
                     keyword_index = line_elems.index(potential_keyword)
-                self.properties[potential_keyword] = ' '.join(line_elems[keyword_index+1:])
+                self.properties[potential_keyword] = np.fromstring(' '.join(line_elems[keyword_index+1:]), sep=' ')
 
             # Create WATINJ property if needed
             if nfo.check_token('WATINJ', line):

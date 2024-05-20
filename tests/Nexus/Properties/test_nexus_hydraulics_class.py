@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import pytest
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -8,9 +9,9 @@ from ResSimpy.Nexus.NexusHydraulicsMethods import NexusHydraulicsMethods
 
 # TODO: refactor as a class
 
+
 @pytest.mark.parametrize("file_contents, expected_hydraulics_properties",
-    [(
-    """
+                         [("""
     DESC Hydraulics Data
 
     ENGLISH
@@ -30,10 +31,10 @@ from ResSimpy.Nexus.NexusHydraulicsMethods import NexusHydraulicsMethods
        2     1     3  1947. 2039.
     """, {'DESC': ['Hydraulics Data'],
           'UNIT_SYSTEM': UnitSystem.ENGLISH,
-          'QOIL': '1.0 1000. 3000.',
-          'GOR': '0.0 0.5',
-          'WCUT': '0.0',
-          'THP': '100. 500.',
+          'QOIL': np.array([1.0, 1000., 3000.]),
+          'GOR': np.array([0.0, 0.5]),
+          'WCUT': np.array([0.0]),
+          'THP': np.array([100., 500.]),
           'HYD_TABLE': pd.DataFrame({'IGOR': [1, 1, 1, 2, 2, 2],
                                      'IWCUT': [1, 1, 1, 1, 1, 1],
                                      'IQOIL': [1, 2, 3, 1, 2, 3],
@@ -84,10 +85,10 @@ from ResSimpy.Nexus.NexusHydraulicsMethods import NexusHydraulicsMethods
     DATGRAD GRAD
     """, {'DESC': ['Hydraulics Data'],
           'UNIT_SYSTEM': UnitSystem.ENGLISH,
-          'QLIQ': '1.0 1000. 3000.',
-          'GLR': '0.0 0.5',
-          'WCUT': '0.0',
-          'POUT': '100. 500.',
+          'QLIQ': np.array([1.0, 1000., 3000.]),
+          'GLR': np.array([0.0, 0.5]),
+          'WCUT': np.array([0.0]),
+          'POUT': np.array([100., 500.]),
           'LENGTH': 10000., 'DATUM': 8000., 'NOCHK': '', 'DATGRAD': 'GRAD',
           'WATINJ': {'GRAD': 0.433, 'VISC': 0.7, 'LENGTH': 9000,
                      'ROUGHNESS': 1e-5, 'DZ': 8000, 'DIAM': 7},
@@ -131,11 +132,11 @@ from ResSimpy.Nexus.NexusHydraulicsMethods import NexusHydraulicsMethods
        2     1     2      3  2033. 2130. 2224. 2548. 2946.
     """, {'DESC': ['Hydraulics Data'],
           'UNIT_SYSTEM': UnitSystem.ENGLISH,
-          'QOIL': '1.0 1000. 3000.',
-          'GOR': '0.0 0.5',
-          'WCUT': '0.0',
-          'ALQ': '0.0 50.0',
-          'THP': '100. 500. 900. 1400. 2000.',
+          'QOIL': np.array([1.0, 1000., 3000.]),
+          'GOR': np.array([0.0, 0.5]),
+          'WCUT': np.array([0.0]),
+          'ALQ': np.array([0.0, 50.0]),
+          'THP': np.array([100., 500., 900., 1400., 2000.]),
           'HYD_TABLE': pd.DataFrame({'IGOR': [1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2],
                                      'IWCUT': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                                      'IALQ': [1, 1, 1, 2, 2, 2, 1, 1, 1, 2, 2, 2],
@@ -190,12 +191,12 @@ from ResSimpy.Nexus.NexusHydraulicsMethods import NexusHydraulicsMethods
                              2946.
     """, {'DESC': ['Hydraulics Data'],
           'UNIT_SYSTEM': UnitSystem.ENGLISH,
-          'QOIL': '1.0 1000. 3000.',
-          'GOR': '0.0 0.5',
-          'WCUT': '0.0',
-          'ALQ': '0.0 50.0',
+          'QOIL': np.array([1.0, 1000., 3000.]),
+          'GOR': np.array([0.0, 0.5]),
+          'WCUT': np.array([0.0]),
+          'ALQ': np.array([0.0, 50.0]),
           'ALQ_PARAM': 'GASRATE',
-          'THP': '100. 500. 900. 1400. 2000.',
+          'THP': np.array([100., 500., 900., 1400., 2000.]),
           'HYD_TABLE': pd.DataFrame({'IGOR': [1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2],
                                      'IWCUT': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                                      'IALQ': [1, 1, 1, 2, 2, 2, 1, 1, 1, 2, 2, 2],
@@ -232,6 +233,8 @@ def test_read_hydraulics_properties_from_file(mocker, file_contents, expected_hy
     for key in expected_hydraulics_properties:
         if isinstance(expected_hydraulics_properties[key], pd.DataFrame):
             pd.testing.assert_frame_equal(expected_hydraulics_properties[key], props[key])
+        elif isinstance(expected_hydraulics_properties[key], np.ndarray):
+            np.testing.assert_array_equal(expected_hydraulics_properties[key], props[key])
         elif isinstance(expected_hydraulics_properties[key], dict):
             for subkey in expected_hydraulics_properties[key].keys():
                 if isinstance(expected_hydraulics_properties[key][subkey], pd.DataFrame):
@@ -248,12 +251,12 @@ def test_nexus_hydraulics_repr():
     hyd_obj = NexusHydraulicsMethod(file=hyd_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
     hyd_obj.properties = {'DESC': ['Hydraulics Data'],
                           'UNIT_SYSTEM': UnitSystem.ENGLISH,
-                          'QOIL': '1.0 1000. 3000.',
-                          'GOR': '0.0 0.5',
-                          'WCUT': '0.0',
-                          'ALQ': '0.0 50.0',
+                          'QOIL': np.array([1.0, 1000., 3000.]),
+                          'GOR': np.array([0.0, 0.5]),
+                          'WCUT': np.array([0.0]),
+                          'ALQ': np.array([0.0, 50.0]),
                           'ALQ_PARAM': 'GASRATE',
-                          'THP': '100. 500. 900. 1400. 2000.',
+                          'THP': np.array([100., 500., 900., 1400., 2000.]),
                           'HYD_TABLE': pd.DataFrame({'IGOR': [1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2],
                                                      'IWCUT': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                                                      'IALQ': [1, 1, 1, 2, 2, 2, 1, 1, 1, 2, 2, 2],
@@ -278,11 +281,11 @@ FILE_PATH: test/file/hyd.dat
 
 DESC Hydraulics Data
 ENGLISH
-QOIL 1.0 1000. 3000.
+QOIL 1.0 1000.0 3000.0
 GOR 0.0 0.5
 WCUT 0.0
 ALQ GASRATE 0.0 50.0
-THP 100. 500. 900. 1400. 2000.
+THP 100.0 500.0 900.0 1400.0 2000.0
 """ + hyd_obj.properties['HYD_TABLE'].to_string(na_rep='', index=False) + '\n' + \
 """
 DATGRAD GRAD
@@ -309,12 +312,12 @@ def test_nexus_hydraulics_methods_repr():
     hyd_file = NexusFile(location='test/file/hyd.dat')
     properties = {'DESC': ['Hydraulics Data'],
                   'UNIT_SYSTEM': UnitSystem.ENGLISH,
-                  'QOIL': '1.0 1000. 3000.',
-                  'GOR': '0.0 0.5',
-                  'WCUT': '0.0',
-                  'ALQ': '0.0 50.0',
+                  'QOIL': np.array([1.0, 1000., 3000.]),
+                  'GOR': np.array([0.0, 0.5]),
+                  'WCUT': np.array([0.0]),
+                  'ALQ': np.array([0.0, 50.0]),
                   'ALQ_PARAM': 'GASRATE',
-                  'THP': '100. 500. 900. 1400. 2000.',
+                  'THP': np.array([100., 500., 900., 1400., 2000.]),
                   'HYD_TABLE': pd.DataFrame({'IGOR': [1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2],
                                              'IWCUT': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                                              'IALQ': [1, 1, 1, 2, 2, 2, 1, 1, 1, 2, 2, 2],
@@ -346,11 +349,11 @@ FILE_PATH: test/file/hyd.dat
 
 DESC Hydraulics Data
 ENGLISH
-QOIL 1.0 1000. 3000.
+QOIL 1.0 1000.0 3000.0
 GOR 0.0 0.5
 WCUT 0.0
 ALQ GASRATE 0.0 50.0
-THP 100. 500. 900. 1400. 2000.
+THP 100.0 500.0 900.0 1400.0 2000.0
 """ + hyd_obj.properties['HYD_TABLE'].to_string(na_rep='', index=False) + '\n' + \
 """
 DATGRAD GRAD
@@ -373,11 +376,11 @@ FILE_PATH: test/file/hyd.dat
 
 DESC Hydraulics Data
 ENGLISH
-QOIL 1.0 1000. 3000.
+QOIL 1.0 1000.0 3000.0
 GOR 0.0 0.5
 WCUT 0.0
 ALQ GASRATE 0.0 50.0
-THP 100. 500. 900. 1400. 2000.
+THP 100.0 500.0 900.0 1400.0 2000.0
 """ + hyd_obj.properties['HYD_TABLE'].to_string(na_rep='', index=False) + '\n' + \
 """
 DATGRAD GRAD
@@ -399,17 +402,18 @@ NOCHK
     # Assert
     assert result == expected_output
 
+
 def test_nexus_hydraulics_ranges():
     # Arrange
     hyd_file = NexusFile(location='test/file/hyd.dat')
     properties = {'DESC': ['Hydraulics Data'],
                   'UNIT_SYSTEM': UnitSystem.ENGLISH,
-                  'QOIL': '1.0 1000. 3000.',
-                  'GOR': '0.0 0.5',
-                  'WCUT': '0.0',
-                  'ALQ': '0.0 50.0',
+                  'QOIL': np.array([1.0, 1000., 3000.]),
+                  'GOR': np.array([0.0, 0.5]),
+                  'WCUT': np.array([0.0]),
+                  'ALQ': np.array([0.0, 50.0]),
                   'ALQ_PARAM': 'GASRATE',
-                  'THP': '100. 500. 900. 1400. 2000.',
+                  'THP': np.array([100., 500., 900., 1400., 2000.]),
                   'HYD_TABLE': pd.DataFrame({'IGOR': [1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2],
                                              'IWCUT': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                                              'IALQ': [1, 1, 1, 2, 2, 2, 1, 1, 1, 2, 2, 2],
