@@ -47,8 +47,7 @@ class NexusHydraulicsMethod(DynamicProperty):
             input_number (int): method number for the hydraulics method.
             model_unit_system (UnitSystem): unit system used in the model.
             ratio_thousands (bool): ??
-            properties (Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]]]):
-                dictionary of key properties for the hydraulics method. Defaults to None.
+            properties: dictionary of key properties for the hydraulics method. Defaults to None.
         """
         if properties is not None:
             self.properties = properties
