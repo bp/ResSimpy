@@ -132,10 +132,8 @@ class NexusTargets(Targets):
     def add(self, target_to_add: dict[str, None | str | float | int]) -> None:
         """Adds a target to a network, taking a dictionary with properties for the new node.
 
-        Args:
-            target_to_add (dict[str, None | str | float | int]):
-            dictionary taking all the properties for the new target.
-            Requires date and a target name.
+        Args: target_to_add (dict[str, None | str | float | int]): dictionary taking all the properties for the new
+        target. Requires date and a target name.
         """
         new_object = self.__add_object_operations.add_network_obj(target_to_add, NexusTarget, self.__parent_network)
         self._add_to_memory([new_object])

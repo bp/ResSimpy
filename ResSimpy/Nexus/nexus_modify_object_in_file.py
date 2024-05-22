@@ -27,6 +27,7 @@ class ModifyObjectOperations:
             object_to_modify (dict[str, None | str | float | int]): dictionary containing attributes to match in the
             existing object set. Requires an implemented add, remove
             new_properties (dict[str, None | str | float | int]): properties to switch to in the new object
+            network (NexusNetwork): ??
         """
         # TODO apply this to more of the network attributes through the Base Class
         network_attribute_name = self.object_to_modify._network_element_name

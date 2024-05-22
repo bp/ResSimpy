@@ -42,12 +42,14 @@ class NexusSimulator(Simulator):
 
         Args:
             origin (Optional[str], optional): file path to the fcs file. Defaults to None.
+            destination (Optional[str], optional): ??
             root_name (Optional[str], optional): Root file name of the fcs. Defaults to None.
             nexus_data_name (str, optional): Folder name for the nexus data files to be stored in. Defaults to "data".
             write_times (bool, optional): Sets whether the runcontrol file will expand the include files with time \
                 cards in. Defaults to True.
             manual_fcs_tidy_call (bool, optional): Determines whether fcs_tidy should be called - Currently not used. \
                 Defaults to False.
+            lazy_loading(bool): ??
 
         Attributes:
             run_control_file_path (Optional[str]): file path to the run control file - derived from the fcs file

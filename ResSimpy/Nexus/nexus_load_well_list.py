@@ -13,7 +13,7 @@ def load_well_lists(file_as_list: list[str], current_date: None | str,
     Args:
         file_as_list (list[str]): The surface network file as a list of strings.
         current_date (None | str): The current date of the simulation.
-        previous_well_lists (None | list[tuple[NexusWellList, int]]):
+        previous_well_lists (None | list[tuple[NexusWellList, int]]): ??
         The list of tuples of already loaded in NexusWellLists with their starting index. Defaults to None.
         table_start_index (int): The starting index of the table. Defaults to 0.
 
@@ -59,6 +59,7 @@ def load_well_list_from_table(well_list_as_list_str: list[str], current_date: st
     Args:
         well_list_as_list_str (list[str]): The subsection of surface network file as a list of strings.
         current_date (str): The current date of the simulation.
+        well_list_name (str): ??
         previous_well_list (NexusWellList | None): The previous well list. Defaults to None.
 
     Returns:

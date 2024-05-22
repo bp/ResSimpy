@@ -39,9 +39,9 @@ class NexusGasliftMethod(DynamicProperty):
         Args:
             file (NexusFile): NexusFile object associated with the gaslift method
             input_number (int): method number for the gaslift method
-            model_unit_system (UnitSystem): unit system from the model
-            properties (Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                 dict[str, Union[float, pd.DataFrame]]]]]): dictionary of properties for the gaslift
+            model_unit_system (UnitSystem): unit system from the model.
+            properties (Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]]]):
+                dictionary of properties for the gaslift
         """
         if properties is not None:
             self.properties = properties

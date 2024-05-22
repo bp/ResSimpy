@@ -43,12 +43,12 @@ class NexusHydraulicsMethod(DynamicProperty):
         """Initialises the NexusHydraulicsMethod class.
 
         Args:
-            file (NexusFile): ??
-            input_number (int): ??
-            model_unit_system (UnitSystem): ??
+            file (NexusFile): NexusFile object associated with the hydraulics method.
+            input_number (int): method number for the hydraulics method.
+            model_unit_system (UnitSystem): unit system used in the model.
             ratio_thousands (bool): ??
-            properties (Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                 dict[str, Union[float, pd.DataFrame]]]]]): ??
+            properties (Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]]]):
+                dictionary of key properties for the hydraulics method. Defaults to None.
         """
         if properties is not None:
             self.properties = properties

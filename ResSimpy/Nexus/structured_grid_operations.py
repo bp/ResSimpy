@@ -179,6 +179,7 @@ class StructuredGridOperations:
             old_property (VariableEntry): property found in the original file to be replaced
             new_property (VariableEntry): new property to replace the old property with
             token_name (str): name of the token being replaced
+
         Returns:
             None: modifies the file_as_list with the new property
         """

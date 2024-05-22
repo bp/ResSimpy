@@ -116,6 +116,7 @@ class NexusGrid(Grid):
         Args:
             grid_nexus_file (Optional[NexusFile]): the NexusFile representation of a structured grid file for \
                 reading and interpreting the grid properties from.
+            assume_loaded (bool): ??
         """
         super().__init__(assume_loaded=assume_loaded)
         self.__array_functions_list: Optional[list[list[str]]] = None
@@ -210,7 +211,7 @@ class NexusGrid(Grid):
 
         Args:
         ----
-                data dict[str, int | GridArrayDefinition]: the dictionary of values to update on the class
+                data (dict[str, int | GridArrayDefinition]): the dictionary of values to update on the class
         """
         # Use the dict provided to populate the properties in the class
         if data is not None:
@@ -416,9 +417,9 @@ class NexusGrid(Grid):
         Other grid modifiers are currently not supported.
 
         Args:
-        ----
             structured_grid_file (NexusFile): the NexusFile representation of a structured grid file for converting \
                 into a structured grid file class
+            lazy_loading (bool): ??
         Raises:
             AttributeError: if no value is found for the structured grid file path
             ValueError: if when loading the grid no values can be found for the NX NY NZ line.
@@ -444,7 +445,6 @@ class NexusGrid(Grid):
         """Save values passed from the front end to the structured grid file and update the class.
 
         Args:
-        ----
             grid_dict (dict[str, Union[VariableEntry, int]]): dictionary containing grid properties to be replaced
             model (NexusSimulator): an instance of a NexusSimulator object
         Raises:

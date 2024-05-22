@@ -113,7 +113,7 @@ class NexusWell(Well):
 
         Args:
         ----
-            completion_properties (dict | NexusCompletion):
+            completion_properties (dict | NexusCompletion): ??
 
         Returns:
         -------
@@ -133,8 +133,9 @@ class NexusWell(Well):
         Args:
         ----
             date (str): date at which the perforation should be added
-            completion_properties (dict[str, str | float | int]):
-            completion_index (Optional[int]):
+            completion_properties (dict[str, str | float | int]): ??
+            date_format (DateFormat): ??
+            completion_index (Optional[int]): ??
         """
         completion_properties['date'] = date
         completion_properties['unit_system'] = self.unit_system

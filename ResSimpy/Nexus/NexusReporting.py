@@ -34,6 +34,7 @@ class NexusReporting(Reporting):
 
         Args:
             model (NexusSimulator): The Nexus model to get the reporting information from.
+            assume_loaded(bool): ??
         """
         super().__init__(model)
         self.__model: NexusSimulator = model
