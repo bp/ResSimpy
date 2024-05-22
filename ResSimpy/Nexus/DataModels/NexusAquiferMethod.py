@@ -41,8 +41,7 @@ class NexusAquiferMethod(DynamicProperty):
 
         Args:
             file (NexusFile): NexusFile object associated with the aquifer method.
-            input_number (int): method
-            number for the aquifer method.
+            input_number (int): method number for the aquifer method.
             model_unit_system (UnitSystem): unit system used in the model.
             properties: dictionary of properties for the aquifer method. Defaults to None.
         """

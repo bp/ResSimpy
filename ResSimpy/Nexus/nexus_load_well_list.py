@@ -59,7 +59,7 @@ def load_well_list_from_table(well_list_as_list_str: list[str], current_date: st
     Args:
         well_list_as_list_str (list[str]): The subsection of surface network file as a list of strings.
         current_date (str): The current date of the simulation.
-        well_list_name (str): ??
+        well_list_name (str): The name of the well list.
         previous_well_list (NexusWellList | None): The previous well list. Defaults to None.
 
     Returns:

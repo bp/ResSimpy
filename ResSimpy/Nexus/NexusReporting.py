@@ -34,7 +34,7 @@ class NexusReporting(Reporting):
 
         Args:
             model (NexusSimulator): The Nexus model to get the reporting information from.
-            assume_loaded(bool): ??
+            assume_loaded(bool): Create the object assuming the file has already been loaded into memory.
         """
         super().__init__(model)
         self.__model: NexusSimulator = model

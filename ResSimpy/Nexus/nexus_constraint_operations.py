@@ -29,8 +29,8 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
         property_map (dict[str, tuple[str, type]]): Mapping of nexus keywords to attributes
         existing_constraints (dict[str, NexusConstraint]): all existing constraints from previous lines of the \
             surface file
-        nexus_file (File): ??
-        start_line_index (int): ??
+        nexus_file (File): The Nexus file containing the constraints.
+        start_line_index (int): The index of the line in the file to start loading from.
         network_names (Optional[list[str]]): list of names for all nodes, wells and connections in a nexus network.
             Used in deriving constraints from wildcards. Defaults to None
 

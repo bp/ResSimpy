@@ -131,11 +131,10 @@ class NexusWell(Well):
             if index is none then adds it to the end of the perforation list.
 
         Args:
-        ----
             date (str): date at which the perforation should be added
-            completion_properties (dict[str, str | float | int]): ??
-            date_format (DateFormat): ??
-            completion_index (Optional[int]): ??
+            completion_properties (dict[str, str | float | int]): The completion properties.
+            date_format (DateFormat): The date format.
+            completion_index (Optional[int]): The index of the completion being searched for.
         """
         completion_properties['date'] = date
         completion_properties['unit_system'] = self.unit_system

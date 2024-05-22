@@ -230,6 +230,6 @@ WELLS
 
         Args:
         new_location (str): Path to write the contents of the model to.
-        new_model_name (str): ??
+        new_model_name (str): The name for the model that will be created.
         """
         raise NotImplementedError("Not implemented for OGS yet")
