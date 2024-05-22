@@ -113,7 +113,7 @@ class NexusWell(Well):
 
         Args:
         ----
-            completion_properties (dict | NexusCompletion): ??
+            completion_properties (dict | NexusCompletion): The completion properties.
 
         Returns:
         -------

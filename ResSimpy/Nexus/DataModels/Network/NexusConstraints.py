@@ -385,7 +385,7 @@ class NexusConstraints(Constraints):
         constraint properties.
 
         Args:
-            name (str): ??
+            name (str): The well name
             current_constraint (dict[str, None | float | int | str] | Constraint): dictionary or constraint object\
             with enough attributes to identify a unique existing constraint in the model.
             new_constraint_props (dict[str, None | float | int | str] | Constraint): dictionary or constraint to \
