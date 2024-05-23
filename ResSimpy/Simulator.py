@@ -160,5 +160,6 @@ class Simulator(ABC):
 
         Args:
         new_location (str): Path to write the contents of the model to.
+        new_model_name (str): The name for the model that will be created.
         """
         raise NotImplementedError("Implement this method on the derived class")

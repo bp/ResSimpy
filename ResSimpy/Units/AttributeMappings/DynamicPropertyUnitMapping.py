@@ -206,6 +206,7 @@ class HydraulicsUnits(BaseUnitMapping):
 
         Args:
             unit_system (None | UnitSystem): unit system to get the unit from.
+            ratio_thousands (bool): ??
         """
         self.ratio_thousands = ratio_thousands
         super().__init__(unit_system=unit_system)

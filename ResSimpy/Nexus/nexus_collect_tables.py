@@ -25,6 +25,8 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                 the object type to store the data from each row into. Require objects to have a get_keyword_mapping \
                 function
     model: (NexusSimulator): main simulator object
+    start_date (Optional[str]): The model start date.
+    default_units (Optional[UnitSystem]): The default unit system the Nexus model is set to.
 
     Raises:
     ------

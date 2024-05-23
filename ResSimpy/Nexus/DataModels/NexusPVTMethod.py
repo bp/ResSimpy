@@ -76,11 +76,8 @@ class NexusPVTMethod(DynamicProperty):
             eos_nhc (Optional[int]): Number of hydrocarbon components for EOS method. Defaults to None.
             eos_temp (Optional[float]): Default temperature for EOS method. Defaults to None.
             eos_components (Optional[list[str]]): Specifies component names for EOS method. Defaults to None.
-            eos_options (Optional[dict[str, Union[str, int, float, pd.DataFrame, list[str], dict[str, float],
-                                       tuple[str, dict[str, float]], dict[str, pd.DataFrame]]]]): Dictionary containing
-                                        various EOS options as specified in the PVT file. Defaults to None.
-            properties (Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                 dict[str, Union[float, pd.DataFrame]]]]]): dictionary of properties for the PVT method.
+            eos_options: Dictionary containing various EOS options as specified in the PVT file. Defaults to None.
+            properties: dictionary of properties for the PVT method.
         """
         if pvt_type is not None:
             self.pvt_type = pvt_type

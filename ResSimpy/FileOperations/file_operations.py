@@ -375,7 +375,7 @@ def get_expected_token_value(token: str, token_line: str, file_list: list[str],
             Defaults to None.
         replace_with (Union[str, VariableEntry, None], optional):  a value to replace the existing value with. \
             Defaults to None.
-        custom_message Optional[str]: A custom error message if no value is found.
+        custom_message (Optional[str]): A custom error message if no value is found.
 
     Returns:
         str:  The value following the supplied token, if it is present.
@@ -440,7 +440,7 @@ def get_expected_next_value(start_line_index: int, file_as_list: list[str], sear
             Defaults to None.
         replace_with (Union[str, VariableEntry, None], optional): a value to replace the existing value with. \
             Defaults to None.
-        custom_message Optional[str]: A custom error message if no value is found
+        custom_message (Optional[str]): A custom error message if no value is found
 
     Returns:
         str: Next non blank value from the list, if none found raises ValueError

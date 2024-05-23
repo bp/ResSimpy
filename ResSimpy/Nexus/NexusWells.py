@@ -163,13 +163,13 @@ class NexusWells(Wells):
         """Adds a completion to an existing wellspec file.
 
         Args:
-        ----
             well_name (str): well name to update
-            completion_properties (dict[str, float | int | str]: properties of the completion you want to update.
+            completion_properties (dict[str, float | int | str]): properties of the completion you want to update.
             Must contain date of the completion to be added.
             preserve_previous_completions (bool): if true a new perforation added on a TIME card without a \
             wellspec card for that well will preserve the previous completions from the closest TIME card in addition \
             to the new completion
+            comments (Optional[str]): Comments to add to the object line in the file.
         """
         basic_dict: dict[str, float | int | str | None] = {'name': well_name}
         _, completion_date = self.__add_object_operations.check_name_date(basic_dict | completion_properties)
@@ -409,6 +409,7 @@ class NexusWells(Wells):
             completion_to_change (Optional[dict[str, None | float | int | str]]): properties of the existing completion.
             User must provide enough to uniquely identify the completion.
             completion_id (Optional[UUID]): If provided will match against a known UUID for the completion.
+            comments (Optional[str]): Comments to add to the object line in the file.
         """
         well = self.get(well_name)
         if well is None:

@@ -30,6 +30,7 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
         nexus_file (NexusFile): NexusFile containing the wellspec files.
         start_date (str): starting date of the wellspec file as a string.
         default_units (UnitSystem): default units to use if no units are found.
+        parent_wells_instance (NexusWells): The NexusWells object this function will load the wells into.
         model_date_format (DateFormat): Date format specified in the FCS file.
 
     Raises:
@@ -252,6 +253,7 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
         Loads in the next available completions following a WELLSPEC keyword and a header line.
 
     Args:
+        nexus_file (NexusFile): The Nexus file containing the completions.
         header_index (int): index number of the header in the file as list parameter
         header_values (dict[str, Union[Optional[int], Optional[float], Optional[str]]]): dictionary of column \
             headings to populate from the table
@@ -417,6 +419,8 @@ def __get_inline_well_mod(line: str, current_date: str, unit_system: UnitSystem 
         current_date (str): current date in the file
         unit_system (UnitSystem | None): Unit system enum
         wells_loaded (list[NexusWell]): list of wells loaded, used for determining the number of completions in the well
+        start_date (str): The model start date.
+        date_format (DateFormat): The date format.
     """
     keyword_mapping = NexusWellMod.get_keyword_mapping()
     next_value = nfo.get_next_value(0, [line], line)
@@ -475,6 +479,8 @@ def __get_number_completions(well_name: str | None, current_iso_date: ISODateTim
         well_name (str | None): name of the well to find the number of completions for
         current_date (str): current date in the file
         wells_loaded (list[NexusWell]): list of wells loaded, used for determining the number of completions in the well
+        current_iso_date (ISODateTime): The date of the completion in ISO format.
+        line (str): The line in the file.
 
     Returns:
         int: number of completions for a given well name.

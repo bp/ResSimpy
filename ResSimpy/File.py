@@ -37,8 +37,10 @@ class File(FileBase):
         """Initialises the File class.
 
         Args:
+            location (str): The location of the file on disk.
             file_content_as_list (Optional[list[str]]): The file content as a list of strings.
             include_objects (Optional[Sequence[File]]): The files included in the file.
+            create_as_modified (bool): Set the object to modified.
             file_loading_skipped (bool): Whether the file loading was skipped due to the file being too large an array.
         """
         self.location = location
