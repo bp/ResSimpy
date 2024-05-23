@@ -15,7 +15,9 @@ def to_dict(nexus_object: Any, keys_in_nexus_style: bool = False, add_date: bool
             attribute name as stored by ressimpy
         add_date (bool): adds a date attribute if it exists
         add_units (bool): adds a units attribute if it exists.
-        include_nones (bool): If False filters the nones out of the dictionary. Defaults to True
+        include_nones (bool): If False filters the nones out of the dictionary. Defaults to True.
+        units_as_string (bool): If set to true, the unit system will be stored as a string in the dictionary.
+            Defaults to True.
 
     Returns:
     -------

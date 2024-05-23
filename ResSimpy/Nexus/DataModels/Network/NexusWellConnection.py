@@ -103,9 +103,13 @@ class NexusWellConnection(WellConnection):
         """Initialises the NexusWellConnection class.
 
         Args:
-            properties_dict (dict): A dictionary of properties to set on the object.
+            properties_dict (dict): dict of the properties to set on the object.
+            date (Optional[str]): The date of the object.
+            date_format (Optional[DateFormat]): The date format that the object uses.
+            start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
+            unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
         """
-        super().__init__()
+        super().__init__(_date_format=date_format, _start_date=start_date, _unit_system=unit_system)
 
         # Set the date related properties, then set the date, automatically setting the ISODate
         protected_attributes = ['date_format', 'start_date', 'unit_system']
@@ -114,14 +118,10 @@ class NexusWellConnection(WellConnection):
             if attribute in properties_dict:
                 self.__setattr__(f"_{attribute}", properties_dict[attribute])
 
-        if date_format is not None:
-            self._date_format = date_format
-
-        if start_date is not None:
-            self._start_date = start_date
-
-        if unit_system is not None:
-            self._unit_system = unit_system
+        # Loop through the properties dict if one is provided and set those attributes
+        remaining_properties = [x for x in properties_dict.keys() if x not in protected_attributes]
+        for key in remaining_properties:
+            self.__setattr__(key, properties_dict[key])
 
         if date is None:
             if 'date' not in properties_dict or not isinstance(properties_dict['date'], str):
@@ -129,11 +129,6 @@ class NexusWellConnection(WellConnection):
             self.date = properties_dict['date']
         else:
             self.date = date
-
-        # Loop through the properties dict if one is provided and set those attributes
-        remaining_properties = [x for x in properties_dict.keys() if x not in protected_attributes]
-        for key in remaining_properties:
-            self.__setattr__(key, properties_dict[key])
 
         if self.name is not None:
             self.bh_node_name = self.name + '%bh'
