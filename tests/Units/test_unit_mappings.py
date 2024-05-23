@@ -107,7 +107,7 @@ def test_get_unit_for_attribute(mocker, data_object, attribute, expected_result,
     # Arrange
     # patch out convert_to_iso from the ISODateTime module as it is not needed for this test
     mocker.patch.object(ISODateTime, 'convert_to_iso', return_value=ISODateTime(2021, 1, 1))
-    dataobj = data_object({})
+    dataobj = data_object({'date': '01/01/2020'})
     # Act
     result = dataobj.get_unit_for_attribute(attribute_name=attribute, unit_system=UnitSystem.ENGLISH, uppercase=upper)
     # Assert
@@ -188,7 +188,7 @@ def test_get_unit_for_attribute(mocker, data_object, attribute, expected_result,
 ])
 def test_network_unit_properties(attribute, expected_unit):
     # Arrange
-    test_object = NexusNode(dict(date='01/01/2001', unit_system=UnitSystem.ENGLISH))
+    test_object = NexusNode(properties_dict=dict(date='01/01/2001', unit_system=UnitSystem.ENGLISH))
     # Act
     result = getattr(test_object.units, attribute)
     # Assert
@@ -322,7 +322,7 @@ def test_object_attribute_property_completion():
 ])
 def test_object_attribute_property_constraint(attribute, expected_unit):
     # Arrange
-    test_object = NexusConstraint(dict(date='01/01/2001', unit_system=UnitSystem.METRIC))
+    test_object = NexusConstraint(properties_dict=dict(date='01/01/2001', unit_system=UnitSystem.METRIC))
     # Act
     result = getattr(test_object.units, attribute)
     # Assert

@@ -1,5 +1,6 @@
 import pandas as pd
 import pytest
+from pytest_mock import MockerFixture
 
 from ResSimpy.Enums.FrequencyEnum import FrequencyEnum
 from ResSimpy.Enums.OutputType import OutputType
@@ -453,9 +454,10 @@ def test_load_grid_to_proc_auto():
       ! comment
       '''),
 ], ids=['basic test', 'test with comments'])
-def test_get_output_request(file_content):
+def test_get_output_request(file_content: str, mocker: MockerFixture):
     date = '01/01/2020'
     output_type = OutputType.ARRAY
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
     # Act
     result = NexusReporting._get_output_request(table_file_as_list=file_content.splitlines(keepends=True),
                                                 date=date, output_type=output_type)
@@ -561,7 +563,7 @@ ENDOUTPUT
 TIME 24/01/1999
     '''
     file_content_as_list = file_content.splitlines(keepends=True)
-
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
     expected_ss_output_requests = [
         NexusOutputRequest(output_type=OutputType.SPREADSHEET, date='01/01/1950', output='FIELD',
                            output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None),

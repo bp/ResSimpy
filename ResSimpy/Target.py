@@ -1,18 +1,14 @@
 from __future__ import annotations
-import uuid
 from abc import ABC
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 from ResSimpy.DataObjectMixin import DataObjectMixin
-from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Units.AttributeMappings.NetworkUnitMapping import NetworkUnits
 
 
 @dataclass(repr=False)
 class Target(DataObjectMixin, ABC):
     name: Optional[str] = None
-    date: Optional[str] = None
-    unit_system: Optional[UnitSystem] = None
 
     control_quantity: Optional[str] = None
     control_conditions: Optional[str] = None
@@ -32,7 +28,6 @@ class Target(DataObjectMixin, ABC):
     rank_dt: Optional[float] = None
     control_type: Optional[str] = None
     calculation_type: Optional[str] = None
-    __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False)
 
     @property
     def units(self) -> NetworkUnits:

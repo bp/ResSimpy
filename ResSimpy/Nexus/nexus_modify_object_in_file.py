@@ -38,7 +38,7 @@ class ModifyObjectOperations:
         name = str(name)
         network_element = network.find_network_element_with_dict(name, object_to_modify,
                                                                  network_attribute_name)
-        existing_properties = network_element.to_dict(include_nones=False)
+        existing_properties = network_element.to_dict(include_nones=False, units_as_string=False)
         # do the union of the two dicts
         existing_properties.update(new_properties)
 

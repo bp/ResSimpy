@@ -31,6 +31,8 @@ WELL_DATA well_1
 END    
 """
 
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
+
     open_mock = mocker.mock_open(read_data=in_file_contents)
     mocker.patch("builtins.open", open_mock)
     expected_completion_1 = OpenGoSimCompletion(i=1, j=2, k=3, penetration_direction=PenetrationDirectionEnum.Z,
@@ -86,6 +88,8 @@ WELL_DATA well_1
  SHUT
 END    
 """
+
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
 
     open_mock = mocker.mock_open(read_data=in_file_contents)
     mocker.patch("builtins.open", open_mock)
@@ -152,6 +156,8 @@ WELL_DATA well_1
 END    
 """
 
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
+
     open_mock = mocker.mock_open(read_data=in_file_contents)
     mocker.patch("builtins.open", open_mock)
     expected_completion_1 = OpenGoSimCompletion(i=1, j=2, k=3, penetration_direction=PenetrationDirectionEnum.Z,
@@ -217,6 +223,8 @@ WELL_DATA well_1
  SHUT
 END    
 """
+
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
 
     open_mock = mocker.mock_open(read_data=in_file_contents)
     mocker.patch("builtins.open", open_mock)

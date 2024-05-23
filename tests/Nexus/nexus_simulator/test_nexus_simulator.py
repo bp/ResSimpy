@@ -1835,6 +1835,7 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
 
     fcs_file_path = 'fcs_file.fcs'
     nexus_sim = NexusSimulator(fcs_file_path)

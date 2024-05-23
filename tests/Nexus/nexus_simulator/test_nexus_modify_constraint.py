@@ -15,6 +15,9 @@ def test_find_constraint(mocker):
     mock_nexus_network = NexusNetwork(mock_nexus_sim)
     mock_nexus_network.__setattr__('_NexusNetwork__has_been_loaded', True)
 
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+                                                                'uuid_6', 'uuid_7'])
+
     constraints = NexusConstraints(mock_nexus_network, mock_nexus_sim)
     well1_constraint_props = ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000.0,
                                'unit_system': UnitSystem.ENGLISH, 'max_wor': 95.0},
@@ -34,6 +37,7 @@ def test_find_constraint(mocker):
     constraints.__setattr__('_constraints', existing_constraints)
     mock_nexus_network.constraints = constraints
     expected_constraint = NexusConstraint(well1_constraint_props[2])
+    expected_constraint._DataObjectMixin__id = 'uuid_3'
     find_constraint_dict = {'date': '01/01/2024', 'name': 'well1', 'max_wor': 95.0}
     # Act
     result = constraints.find_by_properties('well1', find_constraint_dict)
@@ -87,7 +91,8 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
 
 
 @pytest.mark.parametrize(
-    "file_contents, expected_result_file, constraint_to_remove, expected_constraints, expected_number_writes", [
+    "file_contents, expected_result_file, constraint_to_remove, expected_constraints, expected_number_writes, "
+    "expected_ids", [
         # basic_test
         (''' TIME 01/01/2019
     CONSTRAINTS
@@ -105,7 +110,7 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
           'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
          [{'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
            'unit_system': UnitSystem.ENGLISH}
-          ], 1),
+          ], 1, ['uuid_1']),
 
         # over multiple lines
         (''' TIME 01/01/2019
@@ -124,7 +129,7 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
           'max_reverse_surface_liquid_rate': 10000.0,
           'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
          [{'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
-           'unit_system': UnitSystem.ENGLISH}], 2),
+           'unit_system': UnitSystem.ENGLISH}], 2, ['uuid_2']),
 
         # multiple dates
         (''' TIME 01/01/2019
@@ -160,7 +165,7 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
            'unit_system': UnitSystem.ENGLISH},
           {'date': '01/02/2019', 'name': 'well2', 'max_surface_liquid_rate': 10000.0, 'max_surface_water_rate': 0,
            'max_wor': 15.5, 'unit_system': UnitSystem.ENGLISH},
-          ], 2),
+          ], 2, ['uuid_2', 'uuid_4', 'uuid_3']),
 
         # constraint table
         (''' TIME 01/01/2019
@@ -181,7 +186,7 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
           'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
          [{'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
            'unit_system': UnitSystem.ENGLISH},
-          ], 1),
+          ], 1, ['uuid_1']),
 
         # qmult table
         (''' TIME 01/01/2019
@@ -210,7 +215,7 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
          [{'date': '01/01/2019', 'name': 'well1', 'use_qmult_qoilqwat_surface_rate': True,
            'use_qmult_qoil_surface_rate': True,
            'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 121.0, 'qmult_gas_rate': 53.6, 'qmult_water_rate': 2.5,
-           'well_name': 'well1'}], 2),
+           'well_name': 'well1'}], 2, ['uuid_1']),
         # empty constraint table
         ('''TIME 01/01/2019
     
@@ -234,12 +239,12 @@ def test_find_constraint_too_many_too_few_constraints_found(mocker):
          {'date': '01/01/2020', 'name': 'well1', 'max_surface_water_rate': 0.0, 'max_surface_liquid_rate': 3884.0,
           'unit_system': UnitSystem.ENGLISH},
          [{'date': '01/01/2021', 'name': 'well2', 'max_surface_water_rate': 0, 'max_surface_oil_rate': 199,
-           'unit_system': UnitSystem.ENGLISH}], 1
+           'unit_system': UnitSystem.ENGLISH}], 1, ['uuid_2']
          ),
     ], ids=['basic_test', 'over multiple lines', 'multiple_dates', 'constraint_table', 'qmult_table',
             'empty_constraint_table'])
 def test_remove_constraint(mocker, file_contents, expected_result_file,
-                           constraint_to_remove, expected_constraints, expected_number_writes):
+                           constraint_to_remove, expected_constraints, expected_number_writes, expected_ids):
     # Arrange
     fcs_file_contents = '''RUN_UNITS ENGLISH
     DATEFORMAT DD/MM/YYYY
@@ -263,12 +268,19 @@ def test_remove_constraint(mocker, file_contents, expected_result_file,
     mocker.patch("builtins.open", writing_mock_open)
 
     expected_constraint_dict = {'well1': [], 'well2': []}
-    for constraint_dict in expected_constraints:
+    for c, constraint_dict in enumerate(expected_constraints):
         node_name = constraint_dict['name']
         if node_name not in expected_constraint_dict.keys():
-            expected_constraint_dict[node_name] = [NexusConstraint(constraint_dict)]
+            expected_constraint = NexusConstraint(constraint_dict)
+            expected_constraint._DataObjectMixin__id = expected_ids[c]
+            expected_constraint_dict[node_name] = [expected_constraint]
         else:
-            expected_constraint_dict[node_name].append(NexusConstraint(constraint_dict))
+            expected_constraint = NexusConstraint(constraint_dict)
+            expected_constraint._DataObjectMixin__id = expected_ids[c]
+            expected_constraint_dict[node_name].append(expected_constraint)
+
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+                                                                'uuid_6', 'uuid_7'])
 
     # Act
     nexus_sim.network.constraints.get_all()
@@ -550,6 +562,8 @@ def test_add_constraint(mocker, file_contents, expected_file_contents, new_const
                                         ).return_value
         return mock_open
 
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4'])
+
     mocker.patch("builtins.open", mock_open_wrapper)
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
     # make a mock for the write operation
@@ -557,20 +571,23 @@ def test_add_constraint(mocker, file_contents, expected_file_contents, new_const
     mocker.patch("builtins.open", writing_mock_open)
 
     # patch in uuids for the existing constraints
-    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
-                                                    'uuid4', 'uuid5', 'uuid6'])
-    # load the network and constraints (this assings the uuids)
+    # mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
+    #                                                 'uuid4', 'uuid5', 'uuid6'])
+    # load the network and constraints (this assigns the uuids)
     existing_constraints = nexus_sim.network.constraints.get_all()
 
     well_name = new_constraint['name']
+    new_constraint['_DataObjectMixin__id'] = 'new_obj_uuid'
     expected_constraints = deepcopy(existing_constraints)
     add_to_expected = expected_constraints.get(well_name, None)
+
     if add_to_expected is None:
         expected_constraints[well_name] = [NexusConstraint(new_constraint)]
     else:
         expected_constraints[well_name].append(NexusConstraint(new_constraint))
 
-    mocker.patch.object(uuid, 'uuid4', side_effect=['new_obj_uuid'])
+    # Mark out the new objected with the id 'new_obj_uuid'
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['new_obj_uuid'])
 
     # Act
     nexus_sim.network.constraints.add(new_constraint, comments='test user comments')
@@ -710,7 +727,8 @@ def test_modify_constraints(mocker, file_contents, expected_file_contents, curre
     mocker.patch("builtins.open", writing_mock_open)
 
     # patch in uuids for the constraints
-    mocker.patch.object(uuid, 'uuid4', side_effect=uuid_side_effect())
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=uuid_side_effect())
+
     # Act
     nexus_sim.network.constraints.modify('well1', current_constraint, new_constraint)
     # Assert
@@ -780,7 +798,7 @@ def test_add_constraint_no_name_given(mocker):
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
     constraints = NexusConstraints(mock_nexus_network, model)
 
-    empty_constraint = NexusConstraint({})
+    empty_constraint = NexusConstraint({'date': '01/01/2020'})
 
     # Act and Assert
     with pytest.raises(ValueError) as ve:

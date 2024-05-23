@@ -2,7 +2,6 @@ import uuid
 from unittest.mock import Mock
 import pandas as pd
 import pytest
-from pytest_mock import MockerFixture
 
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
@@ -219,8 +218,11 @@ ENDQMULT ''',
 def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
+
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
     expected_constraints = {}
+
     for constraint in expected_content:
         well_name = constraint['name']
         if expected_constraints.get(well_name, None) is not None:
@@ -260,7 +262,6 @@ def test_load_constraints(mocker, file_contents, expected_content):
     assert result == expected_constraints
     pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
     assert result_date_filtered == expected_date_filtered_constraints
-
 
 @pytest.mark.parametrize('file_contents, object_locations', [
         ('''CONSTRAINTS
@@ -369,8 +370,9 @@ def test_constraint_ids(mocker, file_contents, object_locations):
 
     model = NexusSimulator('fcs_file.dat')
 
-    mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3',
-                                                    'uuid4', 'uuid5', 'uuid6', 'uuid7'])
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6',
+                                                                'uuid7'])
+
     # Act
     model.network.constraints.get_all()
 
@@ -381,13 +383,14 @@ def test_constraint_ids(mocker, file_contents, object_locations):
 def test_nexus_constraint_repr(mocker):
     # Arrange
     # patch the uuid
-    mocker.patch('uuid.uuid4', return_value='uuid1')
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     constraint = NexusConstraint({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0,
                                   'max_surface_water_rate': 0})
-    expected_repr = ("NexusConstraint(_DataObjectMixin__id='uuid1', date='01/01/2019', name='well1', max_surface_liquid_rate=3884.0, "
-                     "max_surface_water_rate=0)")
-    expected_str = ("NexusConstraint(date='01/01/2019', name='well1', max_surface_liquid_rate=3884.0, "
-                     "max_surface_water_rate=0)")
+    expected_repr = ("NexusConstraint(ID='uuid1', Date='01/01/2019', name='well1', "
+                     "max_surface_water_rate=0, max_surface_liquid_rate=3884.0, ISO_Date='2019-01-01T00:00:00')")
+    expected_str = ("NexusConstraint(_DataObjectMixin__date='01/01/2019', "
+                    "name='well1', max_surface_water_rate=0, "
+                     "max_surface_liquid_rate=3884.0, _DataObjectMixin__iso_date=ISODateTime(2019,T1,T1,T0,T0))")
     # Act
     repr_result = constraint.__repr__()
     str_result = constraint.__str__()

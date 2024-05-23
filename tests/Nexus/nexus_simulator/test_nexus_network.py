@@ -128,10 +128,11 @@ def test_load_nexus_nodes(mocker, file_contents, node1_props, node2_props):
     # Arrange
     # mock out a surface file:
     start_date = '01/01/2023'
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
 
-    node_1 = NexusNode(node1_props)
-    node_2 = NexusNode(node2_props)
+    node_1 = NexusNode(properties_dict=node1_props)
+    node_2 = NexusNode(properties_dict=node2_props)
 
     mock_nexus_network = mocker.MagicMock()
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
@@ -246,7 +247,9 @@ def test_get_node_df(mocker, file_contents, node1_props, node2_props):
 def test_load_connections(mocker, file_contents, connection1_props, connection2_props):
     # Arrange
     start_date = '01/01/2023'
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
+
     # set up objects from the dictionaries
     con1 = NexusNodeConnection(connection1_props)
     con2 = NexusNodeConnection(connection2_props)
@@ -291,6 +294,7 @@ WELLS
 def test_load_well_connections(mocker, file_contents, well_connection_props1, well_connection_props2, ):
     # Arrange
     start_date = '01/01/2023'
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
 
     wellcon1 = NexusWellConnection(well_connection_props1)
@@ -355,6 +359,7 @@ ENDGASWELLS
     well_connection_props5 = {'name': 'P02', 'd_factor': 2.345e-5, 'non_darcy_flow_method': 'random',
                               'gas_mobility': None, 'date': '01/01/2021', 'unit_system': UnitSystem.METRIC}
     start_date = '01/01/2019'
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
 
     wellcon1 = NexusWellConnection(well_connection_props1)
@@ -437,6 +442,7 @@ RECURRENT_FILES
 
     start_date = '01/01/2018'
     mocker.patch("builtins.open", mock_open_wrapper)
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
 
     model = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='model.fcs', mock_open=False)
 
@@ -503,6 +509,7 @@ R-0_02	TH-03	0	PIPE 	1! comment
 def test_load_wellhead(mocker, file_contents, wellhead_props_1, wellhead_props_2):
     # Arrange
     start_date = '01/01/2018'
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
 
     wellhead1 = NexusWellhead(wellhead_props_1)
@@ -544,6 +551,7 @@ ENDWELLBORE
 ])
 def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
     # Arrange
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
     start_date = '01/01/2018'
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
 

@@ -1,12 +1,12 @@
 """The base class for all Well Completions."""
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional, Sequence
 
 from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.NexusEnums import DateFormatEnum
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Units.AttributeMappings.CompletionUnitMapping import CompletionUnits
@@ -43,7 +43,6 @@ class Completion(DataObjectMixin, ABC):
         peaceman_well_block_radius (Optional[float]): The pressure equivalent radius of the grid block
     """
 
-    __date: str
     __i: Optional[int] = None
     __j: Optional[int] = None
     __k: Optional[int] = None
@@ -61,9 +60,6 @@ class Completion(DataObjectMixin, ABC):
     __dfactor: Optional[float] = None
     __rel_perm_method: Optional[int] = None
     __status: Optional[str] = None
-    __iso_date: Optional[ISODateTime] = None
-    _date_format: Optional[DateFormatEnum.DateFormat] = None
-    __start_date: Optional[str] = None
     __unit_system: Optional[UnitSystem] = None
     __peaceman_well_block_radius: Optional[float] = None
 
@@ -103,10 +99,11 @@ class Completion(DataObjectMixin, ABC):
             start_date: Optional[str]: The start date of the simulation.
             unit_system: Optional[UnitSystem]: The unit system to use for the completion.
         """
-        super().__init__({})
-        self._date_format = date_format
+        super().__init__()
         self.__well_radius = well_radius
-        self.__date = date
+        self._date_format = date_format
+        self._start_date = start_date
+        self.date = date
         self.__i = i
         self.__j = j
         self.__k = k
@@ -123,22 +120,12 @@ class Completion(DataObjectMixin, ABC):
         self.__dfactor = dfactor
         self.__rel_perm_method = rel_perm_method
         self.__status = status
-        self.__start_date = start_date
-        self.__iso_date = self.set_iso_date()
         self.__unit_system = unit_system
         self.__peaceman_well_block_radius = peaceman_well_block_radius
 
     @property
     def well_radius(self) -> float | None:
         return self.__well_radius
-
-    @property
-    def date(self) -> str:
-        return self.__date
-
-    @property
-    def iso_date(self) -> ISODateTime | None:
-        return self.__iso_date
 
     @property
     def i(self) -> int | None:
@@ -212,13 +199,6 @@ class Completion(DataObjectMixin, ABC):
     @property
     def date_format(self) -> Optional[DateFormat]:
         return self._date_format
-
-    @property
-    def start_date(self) -> str | None:
-        return self.__start_date
-
-    def set_iso_date(self) -> ISODateTime | None:
-        return ISODateTime.convert_to_iso(self.date, self.date_format, self.start_date)
 
     @property
     def unit_system(self) -> UnitSystem | None:

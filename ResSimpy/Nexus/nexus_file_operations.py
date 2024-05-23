@@ -461,13 +461,12 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
                     return_objects.append((existing_constraint.id, index))
                     continue
                 else:
-                    new_object = row_object(keyword_store)
+                    new_object = row_object(properties_dict=keyword_store, date=current_date, unit_system=unit_system)
             else:
-                new_object = row_object(keyword_store)
+                new_object = row_object(properties_dict=keyword_store, date=current_date, unit_system=unit_system)
         else:
-            new_object = row_object(keyword_store)
-        setattr(new_object, 'date', current_date)
-        setattr(new_object, 'unit_system', unit_system)
+            new_object = row_object(properties_dict=keyword_store, date=current_date, unit_system=unit_system)
+
         return_objects.append((new_object, index))
     return return_objects
 

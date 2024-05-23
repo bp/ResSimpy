@@ -12,7 +12,7 @@ def test_load_wells_multiple_dates_formats_DD_MM_YYYY_h_m_s(mocker):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.DD_MM_YYYY_h_m_s
-
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     file_contents = """
     
     TIME 31/08/2023(19:13:01) !232 days
@@ -54,7 +54,7 @@ def test_load_wells_multiple_dates_formats_MM_DD_YYYY_h_m_s(mocker):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.MM_DD_YYYY_h_m_s
-
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     file_contents = """
     
     TIME 10/24/2023(19:13:01) !232 days
@@ -63,6 +63,8 @@ def test_load_wells_multiple_dates_formats_MM_DD_YYYY_h_m_s(mocker):
     1  2  3  4.5
     6 7 8   9.11
     """
+
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
 
     expected_well_1_completion_1 = NexusCompletion(date='10/24/2023(19:13:01)', i=1, j=2, k=3, well_radius=4.5,
                                                    date_format=date_format, unit_system=UnitSystem.ENGLISH,
@@ -96,6 +98,7 @@ def test_load_wells_multiple_dates_formats_DD_MM_YYYY_with_time_added(mocker):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.DD_MM_YYYY
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
 
     file_contents = """
     
@@ -138,6 +141,7 @@ def test_load_wells_multiple_dates_formats_MM_DD_YYYY_with_time_added(mocker):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.MM_DD_YYYY
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
 
     file_contents = """
     

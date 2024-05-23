@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from typing import Optional
 
 from ResSimpy.DataObjectMixin import DataObjectMixin
-from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Units.AttributeMappings.NetworkUnitMapping import NetworkUnits
 
 
@@ -12,8 +11,6 @@ from ResSimpy.Units.AttributeMappings.NetworkUnitMapping import NetworkUnits
 class Wellhead(DataObjectMixin, ABC):
     well: Optional[str] = None
     name: Optional[str] = None
-    date: Optional[str] = None
-    unit_system: Optional[UnitSystem] = None
     wellhead_type: Optional[str] = None
     depth: Optional[float] = None
     x_pos: Optional[float] = None

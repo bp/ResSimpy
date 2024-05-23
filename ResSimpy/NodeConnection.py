@@ -4,7 +4,6 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
 from ResSimpy.DataObjectMixin import DataObjectMixin
-from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Units.AttributeMappings.NetworkUnitMapping import NetworkUnits
 
 
@@ -12,8 +11,6 @@ from ResSimpy.Units.AttributeMappings.NetworkUnitMapping import NetworkUnits
 class NodeConnection(DataObjectMixin, ABC):
     """Base class object for storing data related to nodeconnections."""
     name: Optional[str] = None
-    date: Optional[str] = None
-    unit_system: Optional[UnitSystem] = None
 
     node_in: Optional[str] = None
     node_out: Optional[str] = None

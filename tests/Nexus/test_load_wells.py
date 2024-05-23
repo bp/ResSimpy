@@ -59,6 +59,7 @@ def test_load_basic_wellspec(mocker, file_contents, expected_name):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.DD_MM_YYYY
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
 
     dummy_model = get_fake_nexus_simulator(mocker)
     dummy_wells = NexusWells(model=dummy_model)
@@ -92,7 +93,7 @@ def test_load_basic_wellspec(mocker, file_contents, expected_name):
 def test_load_wells_multiple_wells(mocker):
     # Arrange
     start_date = '01/01/2023'
-
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     date_format = DateFormat.DD_MM_YYYY
 
     file_contents = """
@@ -193,7 +194,7 @@ def test_load_wells_multiple_wells_multiple_dates(mocker):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.DD_MM_YYYY
-
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     file_contents = """
     
     TIME 01/08/2023 !232 days
@@ -290,6 +291,7 @@ def test_load_wells_all_columns_present_structured_grid(mocker):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.DD_MM_YYYY
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
 
     file_contents = """
     TIME 01/03/2023 !658 days
@@ -365,6 +367,7 @@ def test_load_wells_all_columns_unstructured_grid(mocker):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.DD_MM_YYYY
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
 
     # FM and PORTYPE can't appear in the same file in Nexus but we don't care, just store either
     file_contents = """
@@ -408,6 +411,7 @@ def test_load_wells_rel_perm_tables(mocker):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.DD_MM_YYYY
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
 
     file_contents = """WELLSPEC WELL_3
 
@@ -447,8 +451,6 @@ def test_load_wells_rel_perm_tables(mocker):
 
     expected_wells = [expected_well]
 
-    expected_well = NexusWell(well_name='WELL_3', completions=[expected_well_completion_1, expected_well_completion_2],
-                              unit_system=UnitSystem.ENGLISH, parent_wells_instance=dummy_wells)
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)
     wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
@@ -465,6 +467,7 @@ def test_load_wells_na_values_converted_to_none(mocker):
     # Arrange
     start_date = '01/01/2023'
     date_format = DateFormat.DD_MM_YYYY
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
 
     file_contents = """
     TIME 01/03/2023 !658 days
@@ -566,6 +569,7 @@ def test_correct_units_loaded(mocker, file_contents, expected_units):
     # Arrange
     start_date = '01/08/2023'
     date_format = DateFormat.DD_MM_YYYY
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
 
     expected_completion_1 = NexusCompletion(date=start_date, i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None,
                                             grid=None, date_format=date_format, unit_system=expected_units,
@@ -766,6 +770,7 @@ def test_load_wells_plus_time_card_dd_mm_yyyy(mocker):
     start_date = '01/01/2023'
     expected_date = '15/01/2023'
     date_format = DateFormat.DD_MM_YYYY
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     
     wellspec_contents = f"""
 DATEFORMAT     DD/MM/YYYY
@@ -801,6 +806,7 @@ def test_load_wells_plus_time_card_mm_dd_yyyy(mocker):
     start_date = '01/01/2023'
     expected_date = '03/18/2023'
     date_format = DateFormat.MM_DD_YYYY
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     
     wellspec_contents = f"""
 DATEFORMAT     MM/DD/YYYY
@@ -836,6 +842,7 @@ def test_load_wells_plus_time_card_dd_mm_yyyy_decimal(mocker):
     start_date = '01/01/2023'
     expected_date = '25/04/2023(16:48:00)'
     date_format = DateFormat.DD_MM_YYYY
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     
     wellspec_contents = f"""
 DATEFORMAT     DD/MM/YYYY
@@ -871,6 +878,7 @@ def test_load_wells_plus_time_card_mm_dd_yyyy_decimal(mocker):
     start_date = '01/01/2023'
     expected_date = '09/16/2023(07:12:00)'
     date_format = DateFormat.MM_DD_YYYY
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     
     wellspec_contents = f"""
 DATEFORMAT     MM/DD/YYYY
@@ -906,6 +914,7 @@ def test_load_wells_plus_time_card_dd_mm_yyyy_decimal_with_time(mocker):
     start_date = '01/01/2023'
     expected_date = '18/06/2023(23:10:14)'
     date_format = DateFormat.DD_MM_YYYY
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     
     wellspec_contents = f"""
     TIME 18/06/2023(13:34:14)
@@ -940,6 +949,7 @@ def test_load_wells_plus_time_card_mm_dd_yyyy_decimal_with_time(mocker):
     start_date = '01/01/2023'
     expected_date = '04/23/2023(23:10:14)'
     date_format = DateFormat.MM_DD_YYYY
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     
     wellspec_contents = f"""
     TIME 04/23/2023(13:34:14)
@@ -974,6 +984,7 @@ def test_load_wells_plus_time_card_dd_mm_yyyy_decimal_with_time_ending_midnight(
     start_date = '01/01/2023'
     expected_date = '17/11/2023'
     date_format = DateFormat.DD_MM_YYYY
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     
     wellspec_contents = f"""
     TIME 15/11/2023(02:24:00)
@@ -1009,6 +1020,7 @@ def test_load_wells_plus_time_wellspec_card_mm_dd_yyyy_decimal_with_time(mocker)
     expected_date_1 = '04/23/2023(13:34:14)'
     expected_date_2 = '04/23/2023(23:10:14)'
     date_format = DateFormat.MM_DD_YYYY
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     
     wellspec_contents = f"""
     TIME 04/23/2023(13:34:14)
@@ -1074,6 +1086,9 @@ DT AUTO 0.01
 DATEFORMAT DD/MM/YYYY
 RUNCONTROL runcontrol.dat
 WELLS set 1 wells.dat"""
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+                                                                'uuid_6', 'uuid_7'])
+
     expected_result = NexusWell(well_name='test_well_1',
                                 completions=[NexusCompletion(date='30/04/1995', i=55, j=55, k=22, well_radius=0.354,
                                                              date_format=DateFormat.DD_MM_YYYY,
@@ -1106,6 +1121,9 @@ WELLS set 1 wells.dat"""
     mocker.patch("builtins.open", mock_open_wrapper)
 
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='model.fcs', mock_open=False)
+
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+                                                                'uuid_6', 'uuid_7']) # Reset the ID allocation
 
     # Act
     wells = nexus_sim.wells.get_all()

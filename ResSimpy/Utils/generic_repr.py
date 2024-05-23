@@ -15,7 +15,25 @@ def generic_repr(input_class: Any) -> str:
         (str): Pretty representation of the string.
     """
     filtered_attrs = {k: v for k, v in vars(input_class).items() if v is not None}
-    attrs = ', '.join(f"{k}={v!r}" for k, v in filtered_attrs.items())
+
+    # Remove the leading underscores from the repr.
+    sanitised_attrs = {}
+    for key in filtered_attrs.keys():
+        if key == '_DataObjectMixin__id':
+            sanitised_key = 'ID'
+        elif key == '_DataObjectMixin__iso_date':
+            sanitised_key = 'ISO_Date'
+        elif key == '_DataObjectMixin__date':
+            sanitised_key = 'Date'
+        elif key[0] == '_':
+            sanitised_key = key[1:] if key[1] != '_' else key[2:]
+        else:
+            sanitised_key = key
+
+        sanitised_attrs[sanitised_key] = filtered_attrs[key] if sanitised_key != 'ISO_Date' \
+            else str(filtered_attrs[key])
+
+    attrs = ', '.join(f"{k}={v!r}" for k, v in sanitised_attrs.items())
     return f"{input_class.__class__.__name__}({attrs})"
 
 

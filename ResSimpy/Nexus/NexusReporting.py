@@ -254,8 +254,13 @@ class NexusReporting(Reporting):
         """
         if self.__model.model_files.runcontrol_file is None:
             raise ValueError("No file found for runcontrol file path.")
+
+        if output_request.date is None:
+            raise ValueError(f"No date on NexusOutputRequest object: {output_request}")
+
         file_as_list = self.__model.model_files.runcontrol_file.get_flat_list_str_file
         obj_props = output_request.to_dict(add_units=False)
+
         self.__add_object_operations.add_object_to_file(date=output_request.date,
                                                         file_as_list=file_as_list,
                                                         file_to_add_to=self.__model.model_files.runcontrol_file,

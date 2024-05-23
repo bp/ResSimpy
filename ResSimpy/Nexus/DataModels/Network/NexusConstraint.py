@@ -7,6 +7,7 @@ from typing import Optional
 
 from ResSimpy.Constraint import Constraint
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
 
 @dataclass(repr=False)
@@ -194,15 +195,38 @@ class NexusConstraint(Constraint):
     clear_alq: Optional[bool] = None
     clear_p: Optional[bool] = None
 
-    def __init__(self, properties_dict: dict[str, None | int | str | float | UnitSystem]) -> None:
+    def __init__(self, properties_dict: dict[str, None | int | str | float | UnitSystem], date: Optional[str] = None,
+                 date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
+                 unit_system: Optional[UnitSystem] = None) -> None:
         """Initialises the NexusConstraint class.
 
         Args:
             properties_dict (dict): dict of the properties to set on the object.
+            date (Optional[str]): The date of the object.
+            date_format (Optional[DateFormat]): The date format that the object uses.
+            start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
+            unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
         """
-        super(Constraint, self).__init__({})
-        for key, prop in properties_dict.items():
-            self.__setattr__(key, prop)
+        super().__init__(_date_format=date_format, _start_date=start_date, _unit_system=unit_system)
+
+        # Set the date related properties, then set the date, automatically setting the ISODate
+        protected_attributes = ['date_format', 'start_date', 'unit_system']
+
+        for attribute in protected_attributes:
+            if attribute in properties_dict:
+                self.__setattr__(f"_{attribute}", properties_dict[attribute])
+
+        # Loop through the properties dict if one is provided and set those attributes
+        remaining_properties = [x for x in properties_dict.keys() if x not in protected_attributes]
+        for key in remaining_properties:
+            self.__setattr__(key, properties_dict[key])
+
+        if date is None:
+            if 'date' not in properties_dict or not isinstance(properties_dict['date'], str):
+                raise ValueError(f"No valid Date found for object with properties: {properties_dict}")
+            self.date = properties_dict['date']
+        else:
+            self.date = date
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
@@ -347,9 +371,13 @@ class NexusConstraint(Constraint):
 
     def update(self, new_data: dict[str, None | int | str | float | UnitSystem], nones_overwrite: bool = False) -> None:
         """Updates attributes in the object based on the dictionary provided."""
-        for k, v in new_data.items():
-            if v is not None or nones_overwrite:
-                setattr(self, k, v)
+        protected_attributes = ['date', 'date_format', 'start_date', 'unit_system']
+        for key, value in new_data.items():
+            modified_key = key
+            if key in protected_attributes:
+                modified_key = '_' + key
+            if value is not None or nones_overwrite:
+                setattr(self, modified_key, value)
 
     def to_table_line(self, headers: list[str]) -> str:
         """String representation of the constraint for entry to an inline constraint table.

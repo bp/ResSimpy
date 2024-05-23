@@ -56,7 +56,7 @@ TIME 01/01/2024
             '/path/fcs_file.fcs': self.fcs_file_contents,
             '/surface_file_01.dat': self.file_contents,
             '/nexus_data/runcontrol.dat': self.runcontrol_contents}
-            ).return_value
+                                        ).return_value
         return mock_open
 
     def patch_simulator(self, mocker):
@@ -70,12 +70,11 @@ TIME 01/01/2024
         mocker.patch("builtins.open", writing_mock_open)
         return nexus_sim, writing_mock_open
 
-
     @pytest.mark.parametrize('object_type, network_component, expected_file_contents, '
-        'obj_to_modify, modified_properties, expected_objs,', [
-        # NexusWellhead test
-        (NexusWellhead, 'wellheads',
-        '''TIME 01/01/2019
+                             'obj_to_modify, modified_properties, expected_objs, expected_ids', [
+                                 # NexusWellhead test
+                                 (NexusWellhead, 'wellheads',
+                                  '''TIME 01/01/2019
     ! comment
     TIME 01/01/2020
     Something here!
@@ -107,19 +106,25 @@ ENDWELLBORE
 
 TIME 01/01/2024
 ''',
-    {'well': 'testwell', 'name': 'testwell_wellhead', 'date': '01/01/2023', 'depth': 1000},
-    {'name': 'testwell_wellhead', 'x_pos': 1},
-        [
-            {'well': 'testwell', 'name': 'testwell_wellhead', 'date': '01/01/2023', 'depth': 1000, 'x_pos': 1,
-            'y_pos': 302, 'pvt_method': 2, 'water_method': 3, 'unit_system': UnitSystem.ENGLISH},
-            {'well': 'testwell2', 'name': 'testwell_wellhead2', 'date': '01/01/2023', 'depth': 1000, 'x_pos': 102,
-                'y_pos': 302, 'pvt_method': 2, 'water_method': 3, 'unit_system': UnitSystem.ENGLISH},
-            ],
-        ),
+                                  {'well': 'testwell', 'name': 'testwell_wellhead', 'date': '01/01/2023',
+                                   'depth': 1000},
+                                  {'name': 'testwell_wellhead', 'x_pos': 1},
+                                  [
+                                      {'well': 'testwell', 'name': 'testwell_wellhead', 'date': '01/01/2023',
+                                       'depth': 1000, 'x_pos': 1,
+                                       'y_pos': 302, 'pvt_method': 2, 'water_method': 3,
+                                       'unit_system': UnitSystem.ENGLISH},
+                                      {'well': 'testwell2', 'name': 'testwell_wellhead2', 'date': '01/01/2023',
+                                       'depth': 1000, 'x_pos': 102,
+                                       'y_pos': 302, 'pvt_method': 2, 'water_method': 3,
+                                       'unit_system': UnitSystem.ENGLISH},
+                                  ],
+                                  ['uuid_9', 'uuid_6']
+                                  ),
 
-    # NexusWellbore TEST
-    (NexusWellbore, 'wellbores',
-    '''TIME 01/01/2019
+                                 # NexusWellbore TEST
+                                 (NexusWellbore, 'wellbores',
+                                  '''TIME 01/01/2019
     ! comment
     TIME 01/01/2020
     Something here!
@@ -151,19 +156,21 @@ ENDWELLBORE
 
 TIME 01/01/2024
 ''',
-    {'name': 'testwell', 'date': '01/01/2023'},
-        {'name': 'testwell', 'hyd_method': 'NEW_METHOD'},
-        [
-            {'name': 'testwell', 'temperature_profile': 'textdata', 'diameter': 10.2, 'hyd_method': 'NEW_METHOD',
-            'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-            {'name': 'testwell2', 'temperature_profile': 'temppr',
-                'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-            ],
-    ),
+                                  {'name': 'testwell', 'date': '01/01/2023'},
+                                  {'name': 'testwell', 'hyd_method': 'NEW_METHOD'},
+                                  [
+                                      {'name': 'testwell', 'temperature_profile': 'textdata', 'diameter': 10.2,
+                                       'hyd_method': 'NEW_METHOD',
+                                       'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+                                      {'name': 'testwell2', 'temperature_profile': 'temppr',
+                                       'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+                                  ],
+                                  ['uuid_9', 'uuid_8']
+                                  ),
 
-# WELLCONNECTIONS TEST
-    (NexusWellConnection, 'well_connections',
-    '''TIME 01/01/2019
+                                 # WELLCONNECTIONS TEST
+                                 (NexusWellConnection, 'well_connections',
+                                  '''TIME 01/01/2019
     ! comment
     TIME 01/01/2020
     Something here!
@@ -195,19 +202,23 @@ ENDWELLBORE
 
 TIME 01/01/2024
 ''',
-    {'name':'testwell', 'date': '01/01/2023'},
-        {'name': 'testwell', 'crossflow': 'OFF'},
-        [
-            {'name': 'testwell', 'stream': 'PRODUCER', 'number': 94, 'datum_depth': 2020, 'crossflow': 'OFF',
-             'crossshut': 'CELLGRAD', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-            {'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 2020, 'crossflow': 'OFF',
-             'crossshut': 'CALC', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-            ],
-    ),
+                                  {'name': 'testwell', 'date': '01/01/2023'},
+                                  {'name': 'testwell', 'crossflow': 'OFF'},
+                                  [
+                                      {'name': 'testwell', 'stream': 'PRODUCER', 'number': 94, 'datum_depth': 2020,
+                                       'crossflow': 'OFF',
+                                       'crossshut': 'CELLGRAD', 'date': '01/01/2023',
+                                       'unit_system': UnitSystem.ENGLISH},
+                                      {'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 2020,
+                                       'crossflow': 'OFF',
+                                       'crossshut': 'CALC', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+                                  ],
+                                  ['uuid_9', 'uuid_4']
+                                  ),
 
-    # NexusNodeConnection test
-    (NexusNodeConnection, 'connections',
-    '''TIME 01/01/2019
+                                 # NexusNodeConnection test
+                                 (NexusNodeConnection, 'connections',
+                                  '''TIME 01/01/2019
     ! comment
     TIME 01/01/2020
     Something here!
@@ -239,25 +250,34 @@ ENDWELLBORE
 
 TIME 01/01/2024
 ''',
-    {'name':'test_name_2', 'date': '01/01/2023'},
-        {'name': 'test_name_2', 'roughness': 376},
-        [
-            {'name': 'test_name_1', 'node_in': 'test_node', 'node_out': 'test_node_out', 'con_type': 'PIPE', 'roughness': 3.2,
-            'date': '01/01/2023', 'temperature_profile': 'tempprof', 'unit_system': UnitSystem.ENGLISH},
-            {'name': 'test_name_2', 'node_in': 'test_node', 'node_out': 'test_node_out', 'roughness': 376,
-            'con_type': 'PIPE', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
-            ],
-        ),
-        ], ids=['wellhead', 'wellbore', 'wellconnection', 'nodeconnections'])
+                                  {'name': 'test_name_2', 'date': '01/01/2023'},
+                                  {'name': 'test_name_2', 'roughness': 376},
+                                  [
+                                      {'name': 'test_name_1', 'node_in': 'test_node', 'node_out': 'test_node_out',
+                                       'con_type': 'PIPE', 'roughness': 3.2,
+                                       'date': '01/01/2023', 'temperature_profile': 'tempprof',
+                                       'unit_system': UnitSystem.ENGLISH},
+                                      {'name': 'test_name_2', 'node_in': 'test_node', 'node_out': 'test_node_out',
+                                       'roughness': 376,
+                                       'con_type': 'PIPE', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+                                  ],
+                                  ['uuid_1', 'uuid_9']
+                                  ),
+                             ], ids=['wellhead', 'wellbore', 'wellconnection', 'nodeconnections'])
     def test_modify_network_component(self, mocker, object_type, network_component,
                                       expected_file_contents, obj_to_modify,
-                                      modified_properties, expected_objs):
+                                      modified_properties, expected_objs, expected_ids):
         # Arrange
-        mocker.patch.object(uuid, 'uuid4', side_effect=uuid_side_effect)
 
         nexus_sim, writing_mock_open = self.patch_simulator(mocker)
+        mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=expected_ids)
+
         expected_objs = [object_type(obj) for obj in expected_objs]
         expected_objs.sort(key=lambda x: x.name)
+
+        # Reset the ID allocation
+        mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+                                                                'uuid_6', 'uuid_7', 'uuid_8', 'uuid_9'])
 
         # Act
         network_objects = getattr(nexus_sim.network, network_component)
@@ -269,4 +289,4 @@ TIME 01/01/2024
         # Assert
         assert result_nodes == expected_objs
         assert nexus_sim.model_files.surface_files[1].file_content_as_list == \
-            expected_file_contents.splitlines(keepends=True)
+               expected_file_contents.splitlines(keepends=True)
