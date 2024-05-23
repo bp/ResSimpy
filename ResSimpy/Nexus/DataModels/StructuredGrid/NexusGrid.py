@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import copy
+import os
+
 import pandas as pd
 from dataclasses import dataclass
 from typing import Optional, TYPE_CHECKING, Any
@@ -385,6 +387,17 @@ class NexusGrid(Grid):
                         token_property.token, modifier, token_property.property, line, file_as_list, idx,
                         ['INCLUDE', 'NOLIST'])
 
+                    # check for grid array definitions with paths and add absolute paths
+                    grid_array_def = None
+                    if isinstance(token_property.property, dict):
+                        for ireg_name, grid_array_def in token_property.property.items():
+                            if modifier == 'VALUE' and grid_array_def.value is not None:
+                                self.__add_absolute_path_to_grid_array_definition(grid_array_def, idx)
+                    else:
+                        grid_array_def = token_property.property
+                        if modifier == 'VALUE' and grid_array_def.value is not None:
+                            self.__add_absolute_path_to_grid_array_definition(grid_array_def, idx)
+
             # Load in grid dimensions
             if nfo.check_token('NX', line):
                 # Check that the format of the grid is NX followed by NY followed by NZ
@@ -558,6 +571,29 @@ class NexusGrid(Grid):
             warnings.warn('Grid array keyword in include file. This is not recommended simulation practice.')
         else:
             return None
+
+    def __add_absolute_path_to_grid_array_definition(self, grid_array_definition: GridArrayDefinition,
+                                                     line_index_of_include_file: int) -> None:
+        # cover the trivial case where the path is already absolute
+        if grid_array_definition.value is None:
+            return
+        if os.path.isabs(grid_array_definition.value):
+            grid_array_definition.absolute_path = grid_array_definition.value
+            return
+        if self.__grid_nexus_file is None:
+            return
+        file_containing_include_line, _ = self.__grid_nexus_file.find_which_include_file(line_index_of_include_file)
+        # find the include path from within this include file
+        if file_containing_include_line.include_objects is None:
+            return
+        matching_includes = [x for x in file_containing_include_line.include_objects if
+                             grid_array_definition.value in x.location]
+        if len(matching_includes) == 0:
+            return
+        include_file = matching_includes[0]
+
+        absolute_file_path = include_file.location
+        grid_array_definition.absolute_path = absolute_file_path
 
     @property
     def array_functions(self) -> Optional[list[NexusGridArrayFunction]]:
