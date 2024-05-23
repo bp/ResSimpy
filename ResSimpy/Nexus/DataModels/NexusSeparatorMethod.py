@@ -47,9 +47,8 @@ class NexusSeparatorMethod(DynamicProperty):
             input_number (int): method number for the separator method
             model_unit_system (UnitSystem): unit system from the model
             separator_type (Optional[SeparatorType]): type of separator method, e.g., BLACKOIL, GASPLANT or EOS
-            properties (Optional[dict[str, Union[str, int, float, Enum, list[str], pd.DataFrame,
-                                 dict[str, Union[float, pd.DataFrame]]]]]): dictionary of properties for the separator
-                                 method.
+
+            properties: dictionary of properties for the separator method.
         """
         if separator_type is not None:
             self.separator_type = separator_type

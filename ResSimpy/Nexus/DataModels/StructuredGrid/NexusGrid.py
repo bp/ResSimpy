@@ -116,6 +116,7 @@ class NexusGrid(Grid):
         Args:
             grid_nexus_file (Optional[NexusFile]): the NexusFile representation of a structured grid file for \
                 reading and interpreting the grid properties from.
+            assume_loaded (bool): Create the object assuming the grid has already been loaded into memory.
         """
         super().__init__(assume_loaded=assume_loaded)
         self.__array_functions_list: Optional[list[list[str]]] = None
@@ -210,7 +211,7 @@ class NexusGrid(Grid):
 
         Args:
         ----
-                data dict[str, int | GridArrayDefinition]: the dictionary of values to update on the class
+                data (dict[str, int | GridArrayDefinition]): the dictionary of values to update on the class
         """
         # Use the dict provided to populate the properties in the class
         if data is not None:
@@ -416,12 +417,15 @@ class NexusGrid(Grid):
         Other grid modifiers are currently not supported.
 
         Args:
-        ----
             structured_grid_file (NexusFile): the NexusFile representation of a structured grid file for converting \
                 into a structured grid file class
+            lazy_loading (bool): If set to True, parts of the grid will only be loaded in when requested via \
+                properties on the object.
+
         Raises:
             AttributeError: if no value is found for the structured grid file path
             ValueError: if when loading the grid no values can be found for the NX NY NZ line.
+
         """
         if structured_grid_file.location is None:
             raise ValueError(f"No file path given or found for structured grid file path. \
@@ -444,7 +448,6 @@ class NexusGrid(Grid):
         """Save values passed from the front end to the structured grid file and update the class.
 
         Args:
-        ----
             grid_dict (dict[str, Union[VariableEntry, int]]): dictionary containing grid properties to be replaced
             model (NexusSimulator): an instance of a NexusSimulator object
         Raises:
