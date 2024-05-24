@@ -100,7 +100,7 @@ class NexusTargets(Targets):
         new_targets, _ = collect_all_tables_to_objects(surface_file, {'TARGET': NexusTarget},
                                                        start_date=start_date,
                                                        default_units=default_units,
-                                                     date_format=self.__parent_network.model.date_format)
+                                                       date_format=self.__parent_network.model.date_format)
         cons_list = new_targets.get('TARGET')
         self._add_to_memory(cons_list)
 
