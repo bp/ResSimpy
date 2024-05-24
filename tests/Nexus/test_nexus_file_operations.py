@@ -609,7 +609,7 @@ def test_load_table_to_objects_basic():
     expected_result = [(expected_obj_1, 2), (expected_obj_2, 4)]
 
     # Act
-    result = nfo.load_table_to_objects(file_as_list, TestClass, property_map, )
+    result = nfo.load_table_to_objects(file_as_list, TestClass, property_map, date_format=DateFormat.DD_MM_YYYY)
 
     # Assert
     assert result == expected_result
@@ -761,8 +761,8 @@ def test_collect_all_tables_to_objects(mocker, file_contents, node1_props, node2
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
 
-    node_1 = NexusNode(node1_props)
-    node_2 = NexusNode(node2_props)
+    node_1 = NexusNode(node1_props, date_format=DateFormat.MM_DD_YYYY)
+    node_2 = NexusNode(node2_props, date_format=DateFormat.MM_DD_YYYY)
 
     # line locs for this part of the code refers to line loc relative to the table
     expected_result = [node_1, node_2]
@@ -772,7 +772,8 @@ def test_collect_all_tables_to_objects(mocker, file_contents, node1_props, node2
     result_dict, _ = ResSimpy.Nexus.nexus_collect_tables.collect_all_tables_to_objects(surface_file,
                                                                                     {'NODES': NexusNode,
                                                                                      'WELLS': NexusNode}, start_date,
-                                                                                    default_units=UnitSystem.ENGLISH)
+                                                                                    default_units=UnitSystem.ENGLISH,
+                                                                                    date_format=DateFormat.MM_DD_YYYY)
     result = result_dict.get('NODES')
     if result_dict.get('WELLS') is not None:
         result.extend(result_dict.get('WELLS'))

@@ -4,6 +4,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.Network.NexusWellLists import NexusWellLists
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.nexus_load_well_list import load_well_list_from_table, load_well_lists
 
@@ -154,6 +155,7 @@ ENDWELLLIST'''
             nexus_file=nexus_file, table_object_map={'WELLLIST': NexusWellList},
             start_date='01/01/2019',
             default_units=UnitSystem.ENGLISH,
+            date_format=DateFormat.MM_DD_YYYY
         )
         # Assert
         assert nexus_obj_dict['WELLLIST'] == expected_welllists

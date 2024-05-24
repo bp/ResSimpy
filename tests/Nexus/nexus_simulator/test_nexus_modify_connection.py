@@ -2,6 +2,7 @@ import uuid
 import pytest
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator, check_file_read_write_is_correct
 
@@ -57,7 +58,7 @@ def test_add_connection(mocker, file_contents, expected_file_contents, connectio
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
 
-    expected_cons = [NexusNodeConnection(node) for node in expected_connections]
+    expected_cons = [NexusNodeConnection(node, date_format=DateFormat.DD_MM_YYYY) for node in expected_connections]
     expected_cons.sort(key=lambda x: x.name)
 
     expected_cons[0]._DataObjectMixin__id = 'uuid_1'
@@ -126,7 +127,7 @@ def test_remove_connection(mocker, file_contents, expected_file_contents, connec
         writing_mock_open = mocker.mock_open()
         mocker.patch("builtins.open", writing_mock_open)
 
-        expected_connection = [NexusNodeConnection(node) for node in expected_connection]
+        expected_connection = [NexusNodeConnection(node, date_format=DateFormat.DD_MM_YYYY) for node in expected_connection]
         expected_connection[0]._DataObjectMixin__id = 'uuid_3'
 
         # Act
@@ -197,7 +198,7 @@ def test_modify_connections(mocker, file_contents, expected_file_contents, obj_t
 
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_3'])
 
-    expected_objs = [NexusNodeConnection(node) for node in expected_objs]
+    expected_objs = [NexusNodeConnection(node, date_format=DateFormat.DD_MM_YYYY) for node in expected_objs]
     expected_objs.sort(key=lambda x: x.name)
 
     # mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])

@@ -236,6 +236,7 @@ class NexusNetwork(Network):
                           },
                 start_date=self.__model.start_date,
                 default_units=self.__model.default_units,
+                date_format=self.__model.date_format
             )
             self.nodes._add_to_memory(type_check_lists(nexus_obj_dict.get('NODES')))
             self.connections._add_to_memory(type_check_lists(nexus_obj_dict.get('NODECON')))
