@@ -5,6 +5,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConne
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
 from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator, check_file_read_write_is_correct, uuid_side_effect
 
@@ -113,11 +114,11 @@ TIME 01/01/2024
                                       {'well': 'testwell', 'name': 'testwell_wellhead', 'date': '01/01/2023',
                                        'depth': 1000, 'x_pos': 1,
                                        'y_pos': 302, 'pvt_method': 2, 'water_method': 3,
-                                       'unit_system': UnitSystem.ENGLISH},
+                                       'unit_system': UnitSystem.ENGLISH, 'date_format': DateFormat.DD_MM_YYYY},
                                       {'well': 'testwell2', 'name': 'testwell_wellhead2', 'date': '01/01/2023',
                                        'depth': 1000, 'x_pos': 102,
                                        'y_pos': 302, 'pvt_method': 2, 'water_method': 3,
-                                       'unit_system': UnitSystem.ENGLISH},
+                                       'unit_system': UnitSystem.ENGLISH, 'date_format': DateFormat.DD_MM_YYYY},
                                   ],
                                   ['uuid_9', 'uuid_6']
                                   ),
@@ -161,9 +162,11 @@ TIME 01/01/2024
                                   [
                                       {'name': 'testwell', 'temperature_profile': 'textdata', 'diameter': 10.2,
                                        'hyd_method': 'NEW_METHOD',
-                                       'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+                                       'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH,
+                                       'date_format': DateFormat.DD_MM_YYYY},
                                       {'name': 'testwell2', 'temperature_profile': 'temppr',
-                                       'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+                                       'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH,
+                                       'date_format': DateFormat.DD_MM_YYYY},
                                   ],
                                   ['uuid_9', 'uuid_8']
                                   ),
@@ -208,10 +211,11 @@ TIME 01/01/2024
                                       {'name': 'testwell', 'stream': 'PRODUCER', 'number': 94, 'datum_depth': 2020,
                                        'crossflow': 'OFF',
                                        'crossshut': 'CELLGRAD', 'date': '01/01/2023',
-                                       'unit_system': UnitSystem.ENGLISH},
+                                       'unit_system': UnitSystem.ENGLISH, 'date_format': DateFormat.DD_MM_YYYY},
                                       {'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 2020,
                                        'crossflow': 'OFF',
-                                       'crossshut': 'CALC', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+                                       'crossshut': 'CALC', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH,
+                                       'date_format': DateFormat.DD_MM_YYYY},
                                   ],
                                   ['uuid_9', 'uuid_4']
                                   ),
@@ -256,10 +260,11 @@ TIME 01/01/2024
                                       {'name': 'test_name_1', 'node_in': 'test_node', 'node_out': 'test_node_out',
                                        'con_type': 'PIPE', 'roughness': 3.2,
                                        'date': '01/01/2023', 'temperature_profile': 'tempprof',
-                                       'unit_system': UnitSystem.ENGLISH},
+                                       'unit_system': UnitSystem.ENGLISH, 'date_format': DateFormat.DD_MM_YYYY},
                                       {'name': 'test_name_2', 'node_in': 'test_node', 'node_out': 'test_node_out',
                                        'roughness': 376,
-                                       'con_type': 'PIPE', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+                                       'con_type': 'PIPE', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH,
+                                       'date_format': DateFormat.DD_MM_YYYY},
                                   ],
                                   ['uuid_1', 'uuid_9']
                                   ),

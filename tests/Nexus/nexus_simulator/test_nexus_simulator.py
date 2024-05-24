@@ -1841,12 +1841,17 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
     nexus_sim = NexusSimulator(fcs_file_path)
 
     # Create the expected objects
-    expected_nodes = [NexusNode(node1_props), NexusNode(node2_props)]
-    expected_cons = [NexusNodeConnection(connection1_props), NexusNodeConnection(connection2_props)]
-    expected_wellcons = [NexusWellConnection(wellconprops1), NexusWellConnection(wellconprops2)]
-    expected_wellheads = [NexusWellhead(wellheadprops1), NexusWellhead(wellheadprops2)]
-    expected_wellbores = [NexusWellbore(wellboreprops1), NexusWellbore(wellboreprops2)]
-    expected_constraints = {constraint_props1['name']: [NexusConstraint(constraint_props2)]}
+    expected_nodes = [NexusNode(node1_props, date_format=DateFormat.DD_MM_YYYY),
+                      NexusNode(node2_props, date_format=DateFormat.DD_MM_YYYY)]
+    expected_cons = [NexusNodeConnection(connection1_props, date_format=DateFormat.DD_MM_YYYY),
+                     NexusNodeConnection(connection2_props, date_format=DateFormat.DD_MM_YYYY)]
+    expected_wellcons = [NexusWellConnection(wellconprops1, date_format=DateFormat.DD_MM_YYYY),
+                         NexusWellConnection(wellconprops2, date_format=DateFormat.DD_MM_YYYY)]
+    expected_wellheads = [NexusWellhead(wellheadprops1, date_format=DateFormat.DD_MM_YYYY),
+                          NexusWellhead(wellheadprops2, date_format=DateFormat.DD_MM_YYYY)]
+    expected_wellbores = [NexusWellbore(wellboreprops1, date_format=DateFormat.DD_MM_YYYY),
+                          NexusWellbore(wellboreprops2, date_format=DateFormat.DD_MM_YYYY)]
+    expected_constraints = {constraint_props1['name']: [NexusConstraint(constraint_props2, date_format=DateFormat.DD_MM_YYYY)]}
     expected_welllist = [NexusWellList(**welllist1)]
     # create a mocker spy to check the network loader gets called once
     spy = mocker.spy(nexus_sim._network, 'load')

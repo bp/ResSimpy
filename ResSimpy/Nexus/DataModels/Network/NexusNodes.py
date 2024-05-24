@@ -101,7 +101,8 @@ class NexusNodes(Nodes):
         """
         new_nodes, _ = collect_all_tables_to_objects(surface_file, {'NODES': NexusNode},
                                                      start_date=start_date,
-                                                     default_units=default_units)
+                                                     default_units=default_units,
+                                                     date_format=self.__parent_network.model.date_format)
         nodes_list = new_nodes.get('NODES')
         self._add_to_memory(nodes_list)
 

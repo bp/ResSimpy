@@ -766,7 +766,7 @@ def test_wells_modify(mocker):
     iw jw l RADW GRID  skin ANGLV WI  
     1 2 3   4.5  GRID1 NA   NA    1 
     
-    TIME 01/02/2023
+    TIME 14/02/2023
     wellspec well1
     iw jw l  skin ANGLV WI  STAT PPERF DTOP  DBOT
     1 2 3    NA   NA    NA  ON     1     NA    NA
@@ -796,16 +796,16 @@ def test_wells_modify(mocker):
         NexusCompletion(date='01/01/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None, grid='GRID1',
                         well_indices=1, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH,
                         start_date=start_date),
-        NexusCompletion(date='01/02/2023', i=1, j=2, k=3, status='ON', partial_perf=1,
+        NexusCompletion(date='14/02/2023', i=1, j=2, k=3, status='ON', partial_perf=1,
                         date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH, start_date=start_date),
-        NexusCompletion(date='01/02/2023', i=1, j=2, k=5, well_indices=0, depth_to_top=1156, depth_to_bottom=1234,
+        NexusCompletion(date='14/02/2023', i=1, j=2, k=5, well_indices=0, depth_to_top=1156, depth_to_bottom=1234,
                         status='ON', partial_perf=1, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH,
                         start_date=start_date)]
 
     well_2_completions = [
-        NexusCompletion(date='01/02/2023', i=1, j=2, k=5, well_indices=3, status='ON', partial_perf=1,
+        NexusCompletion(date='14/02/2023', i=1, j=2, k=5, well_indices=3, status='ON', partial_perf=1,
                         date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH, start_date=start_date),
-        NexusCompletion(date='01/02/2023', i=1, j=2, well_indices=0, depth_to_top=1156, depth_to_bottom=1234,
+        NexusCompletion(date='14/02/2023', i=1, j=2, well_indices=0, depth_to_top=1156, depth_to_bottom=1234,
                         status='ON', partial_perf=1, date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH,
                         start_date=start_date)]
 

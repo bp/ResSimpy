@@ -2,6 +2,7 @@ import uuid
 import pytest
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator, check_file_read_write_is_correct
 
@@ -231,7 +232,7 @@ def test_remove_node(mocker, file_contents, expected_file_contents, node_to_remo
 
     # Set the expected Ids correctly, then have the test mock out Ids for the actual load method
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=expected_ids)
-    expected_nodes = [NexusNode(node) for node in expected_nodes]
+    expected_nodes = [NexusNode(node, date_format=DateFormat.DD_MM_YYYY) for node in expected_nodes]
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
                                                                 'uuid_6', 'uuid_7'])
 
@@ -473,7 +474,7 @@ def test_add_node(mocker, file_contents, expected_file_contents, node_to_add, ex
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
 
-    expected_nodes = [NexusNode(node) for node in expected_nodes]
+    expected_nodes = [NexusNode(node, date_format=DateFormat.DD_MM_YYYY) for node in expected_nodes]
     expected_nodes.sort(key=lambda x: x.name)
 
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
@@ -601,7 +602,7 @@ def test_modify_node(mocker, file_contents, expected_file_contents, node_to_modi
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
 
-    expected_nodes = [NexusNode(node) for node in expected_nodes]
+    expected_nodes = [NexusNode(node, date_format=DateFormat.DD_MM_YYYY) for node in expected_nodes]
     expected_nodes.sort(key=lambda x: x.name)
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
 

@@ -6,6 +6,7 @@ from typing import Any, Optional
 from ResSimpy.File import File
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.nexus_constraint_operations import load_inline_constraints
 from ResSimpy.Nexus.nexus_file_operations import check_property_in_line, check_token, get_expected_token_value, \
     check_list_tokens, load_table_to_objects
@@ -14,19 +15,20 @@ from ResSimpy.Nexus.nexus_load_well_list import load_well_lists
 
 # TODO refactor the collection of tables to an object with proper typing
 def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, Any], start_date: Optional[str],
-                                  default_units: Optional[UnitSystem]) -> \
+                                  default_units: Optional[UnitSystem], date_format: DateFormat) -> \
         tuple[dict[str, list[Any]], dict[str, list[NexusConstraint]]]:
     """Loads all tables from a given file.
 
     Args:
     ----
-    nexus_file (File): NexusFile representation of the file.
-    table_object_map (dict[str, Storage_Object]): dictionary containing the name of the table as keys and \
-                the object type to store the data from each row into. Require objects to have a get_keyword_mapping \
-                function
-    model: (NexusSimulator): main simulator object
-    start_date (Optional[str]): The model start date.
-    default_units (Optional[UnitSystem]): The default unit system the Nexus model is set to.
+        nexus_file (File): NexusFile representation of the file.
+        table_object_map (dict[str, Storage_Object]): dictionary containing the name of the table as keys and \
+                    the object type to store the data from each row into. Require objects to have a get_keyword_mapping\
+                    function
+        model: (NexusSimulator): main simulator object
+        start_date (Optional[str]): The model start date.
+        default_units (Optional[UnitSystem]): The default unit system the Nexus model is set to.
+        date_format (Optional[DateFormat]): The date format of the object.
 
     Raises:
     ------
@@ -94,6 +96,7 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                         nexus_file=nexus_file,
                                         start_line_index=table_start,
                                         network_names=network_names,
+                                        date_format=date_format
                                         )
 
             elif token_found == 'QMULT' or token_found == 'CONSTRAINT':
@@ -103,7 +106,7 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                                      current_date=current_date,
                                                      unit_system=unit_system,
                                                      nexus_obj_dict=nexus_constraints,
-                                                     preserve_previous_object_attributes=True)
+                                                     preserve_previous_object_attributes=True, date_format=date_format)
 
             elif token_found == 'WELLLIST':
                 list_objects = load_well_lists(file_as_list=file_as_list[table_start-1:table_end],
@@ -116,7 +119,7 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                                      row_object=table_object_map[token_found],
                                                      property_map=property_map,
                                                      current_date=current_date,
-                                                     unit_system=unit_system)
+                                                     unit_system=unit_system, date_format=date_format)
 
             # store objects found into right dictionary
             list_of_token_obj = nexus_object_results[token_found]

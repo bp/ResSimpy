@@ -72,7 +72,8 @@ class NexusWellbores(Wellbores):
     def load(self, surface_file: File, start_date: str, default_units: UnitSystem) -> None:
         new_wellbores, _ = collect_all_tables_to_objects(surface_file, {'WELLBORE': NexusWellbore},
                                                          start_date=start_date,
-                                                         default_units=default_units)
+                                                         default_units=default_units,
+                                                         date_format=self.__parent_network.model.date_format)
         cons_list = new_wellbores.get('WELLBORE')
         self._add_to_memory(cons_list)
 
