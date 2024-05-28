@@ -112,7 +112,7 @@ runs:
         echo "The oidc_scope =${{inputs.oidc_scope}}"
       shell: bash
     - name: Checkout the source code to scan using checkmarx
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         path: src_branch
     - name: Install dependencies
