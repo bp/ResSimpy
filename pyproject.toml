@@ -59,6 +59,8 @@ build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.ruff]
 line-length = 120
+
+[tool.ruff.lint]
 # Rule codes for ruff can be found at: https://beta.ruff.rs/docs/rules/
 select = ["E", "F", "W", "C90", "N",  "UP", "YTT", "ANN", "S", "BLE", "D", "PLE", "PLW", "RUF", "BLE", "ARG", "I",
     "COM", "C4", "PIE", "T20", "PYI", "TID", "INT", "ERA", "PD", "FLY", "NPY"] # To add later: PL, PLR
@@ -72,7 +74,7 @@ ignore = ["UP007",  "ANN101", "N999", "UP035", "S105", "N802", "S106", "S107", "
     ]
 exclude = ["./tests"]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 # Use Google-style docstrings.
 convention = "google"
 
