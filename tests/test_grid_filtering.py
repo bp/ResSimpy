@@ -83,6 +83,6 @@ def test_grid_to_numpy_array(mocker):
     grid._range_y = 3
     grid._range_z = 2
     # Act
-    result = grid.grid_to_numpy_array(grid_array_definition=grid.porosity)
+    result = grid.grid_array_definition_to_numpy_array(grid_array_definition=grid.porosity)
     # Assert
     assert np.array_equal(expected_array, result)

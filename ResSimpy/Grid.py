@@ -191,8 +191,8 @@ class Grid(ABC):
         return file_as_list
 
     @staticmethod
-    def __grid_to_numpy_array(file_as_list: list[str], x_range: None | int, y_range: None | int, z_range: None | int) \
-            -> np.ndarray:
+    def grid_file_as_list_to_numpy_array(file_as_list: list[str], x_range: None | int, y_range: None | int,
+                                         z_range: None | int) -> np.ndarray:
         """Converts a list of strings to a numpy array."""
         # ensure the list of strings is filtered of comments and non-float values
         new_file_as_list = Grid.grid_filter_file_as_list(file_as_list)
@@ -205,7 +205,7 @@ class Grid(ABC):
 
         return grid_array
 
-    def grid_to_numpy_array(self, grid_array_definition: GridArrayDefinition) -> np.ndarray:
+    def grid_array_definition_to_numpy_array(self, grid_array_definition: GridArrayDefinition) -> np.ndarray:
         """Converts a grid array to a numpy array."""
         path = grid_array_definition.absolute_path
         if path is None and grid_array_definition.value is not None:
@@ -213,4 +213,4 @@ class Grid(ABC):
         elif path is None:
             raise FileNotFoundError('No file path found in the grid array definition')
         file_as_list = fo.load_file_as_list(path)
-        return self.__grid_to_numpy_array(file_as_list, self.range_x, self.range_y, self.range_z)
+        return self.grid_file_as_list_to_numpy_array(file_as_list, self.range_x, self.range_y, self.range_z)
