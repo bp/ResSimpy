@@ -6,14 +6,10 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-# import os
-# import sys
-# sys.path.append(os.path.abspath('..'))
-
 project = 'ResSimpy'
-copyright = '2023, BP'
+copyright = '2024, BP'
 author = 'BP'
-release = '0.1.0'
+release = '2.2.2'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
