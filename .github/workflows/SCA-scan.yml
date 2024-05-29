@@ -10,7 +10,7 @@ jobs:
     sast_scan_on_branch:
       runs-on: ubuntu-latest
       steps:
-        - uses: actions/checkout@v3
+        - uses: actions/checkout@v4
         - name: Run SCA scan
           uses: ./.github/actions/sca/branch-scan
           with:
