@@ -49,12 +49,14 @@ class DataObjectMixin(ABC):
 
     @property
     def iso_date(self) -> ISODateTime:
+        """The date of the object in ISO format."""
         if self.__iso_date is None:
             self.set_iso_date()
         return self.__iso_date
 
     @property
     def date(self) -> Optional[str]:
+        """The date of the object as written in the source file."""
         return self.__date
 
     @date.setter
@@ -64,14 +66,17 @@ class DataObjectMixin(ABC):
 
     @property
     def start_date(self) -> Optional[str]:
+        """The start date of the model (required for Nexus objects using a decimal date format)."""
         return self._start_date
 
     @property
     def date_format(self) -> Optional[DateFormat]:
+        """The date format of the date on the object."""
         return self._date_format
 
     @property
     def unit_system(self) -> Optional[UnitSystem]:
+        """The unit system being used in the object."""
         return self._unit_system
 
     def set_iso_date(self) -> None:
