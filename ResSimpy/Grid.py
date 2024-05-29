@@ -156,7 +156,7 @@ class Grid(ABC):
         file_path = grid_array_definition.absolute_path
         if file_path is None and grid_array_definition.value is not None:
             file_path = grid_array_definition.value
-        else:
+        elif grid_array_definition.value is None:
             raise FileNotFoundError('No file path found in the grid array definition')
         file_as_list = fo.load_file_as_list(file_path)
 
@@ -210,7 +210,7 @@ class Grid(ABC):
         path = grid_array_definition.absolute_path
         if path is None and grid_array_definition.value is not None:
             path = grid_array_definition.value
-        else:
+        elif grid_array_definition.value is None:
             raise FileNotFoundError('No file path found in the grid array definition')
         file_as_list = fo.load_file_as_list(path)
         return self.__grid_to_numpy_array(file_as_list, self.range_x, self.range_y, self.range_z)
