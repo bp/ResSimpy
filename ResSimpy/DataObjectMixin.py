@@ -105,7 +105,7 @@ class DataObjectMixin(ABC):
                                               include_nones=include_nones, units_as_string=units_as_string)
         return result_dict
 
-    def to_table_line(self, headers: list[str]) -> str:
+    def to_table_line(self, headers: list[str] | None) -> str:
         """Takes a generic Nexus object and returns the attribute values as a string in the order of headers provided.
         Requires an implemented to_dict method and get_keyword_mapping() method.
 
@@ -116,6 +116,8 @@ class DataObjectMixin(ABC):
             string of the values in the order of the headers provided.
 
         """
+        if headers is None:
+            headers = []
         return to_table_line(self, headers)
 
     @property
