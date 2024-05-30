@@ -145,7 +145,9 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
             elif list_objects is not None and isinstance(list_of_token_obj, list):
                 list_of_token_obj.extend([x[0] for x in list_objects])
                 # add the names from the nodes into the network names for wildcards
-                network_names.extend([x.name for x in list_of_token_obj])
+                # wildcards do not apply to LIST type nexus objects like WELLLIST.
+                if 'LIST' not in token_found:
+                    network_names.extend([x.name for x in list_of_token_obj])
                 for new_object, id_index in list_objects:
                     correct_line_index = id_index + table_start
                     # temporary try statement until all objects have an id property
