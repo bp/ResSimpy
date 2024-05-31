@@ -7,6 +7,7 @@ import pandas as pd
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.File import File
+
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import Network
 

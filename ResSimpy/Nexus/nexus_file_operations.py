@@ -405,7 +405,8 @@ def table_line_reader(keyword_store: dict[str, None | int | float | str], header
 
 
 def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map: dict[str, tuple[str, type]],
-                          current_date: Optional[str] = None, unit_system: Optional[UnitSystem] = None,
+                          date_format: DateFormat, current_date: Optional[str] = None,
+                          unit_system: Optional[UnitSystem] = None,
                           nexus_obj_dict: Optional[dict[str, list[Any]]] = None,
                           preserve_previous_object_attributes: bool = False,
                           ) -> list[tuple[Any, int]]:
@@ -424,6 +425,8 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
         preserve_previous_object_attributes (bool): If True the code will find the latest object with a matching name\
             attribute and will update the object to reflect the latest additional attributes and overriding all \
             matching attributes. Must have a .update() method implemented and a name
+        date_format (Optional[DateFormat]): The date format of the object.
+
     Returns:
         list[obj]: list of tuples containing instances of the class provided for the row_object,
         populated with attributes from the property map dictionary and the line index where it was found
@@ -464,11 +467,14 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
                     return_objects.append((existing_constraint.id, index))
                     continue
                 else:
-                    new_object = row_object(properties_dict=keyword_store, date=current_date, unit_system=unit_system)
+                    new_object = row_object(properties_dict=keyword_store, date=current_date, unit_system=unit_system,
+                                            date_format=date_format)
             else:
-                new_object = row_object(properties_dict=keyword_store, date=current_date, unit_system=unit_system)
+                new_object = row_object(properties_dict=keyword_store, date=current_date, unit_system=unit_system,
+                                        date_format=date_format)
         else:
-            new_object = row_object(properties_dict=keyword_store, date=current_date, unit_system=unit_system)
+            new_object = row_object(properties_dict=keyword_store, date=current_date, unit_system=unit_system,
+                                    date_format=date_format)
 
         return_objects.append((new_object, index))
     return return_objects

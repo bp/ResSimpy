@@ -87,7 +87,8 @@ class NexusNodeConnections(NodeConnections):
             object.
         """
         new_connections, _ = collect_all_tables_to_objects(surface_file, {self.table_header: NexusNodeConnection},
-                                                           start_date=start_date, default_units=default_units)
+                                                           start_date=start_date, default_units=default_units,
+                                                           date_format=self.__parent_network.model.date_format)
         cons_list = new_connections.get(self.table_header)
         self._add_to_memory(cons_list)
 

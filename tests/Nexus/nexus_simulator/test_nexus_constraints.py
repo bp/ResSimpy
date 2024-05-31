@@ -7,6 +7,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator
@@ -226,17 +227,19 @@ def test_load_constraints(mocker, file_contents, expected_content):
     for constraint in expected_content:
         well_name = constraint['name']
         if expected_constraints.get(well_name, None) is not None:
-            expected_constraints[well_name].append(NexusConstraint(constraint))
+            expected_constraints[well_name].append(NexusConstraint(constraint, date_format=DateFormat.MM_DD_YYYY))
         else:
-            expected_constraints[well_name] = [NexusConstraint(constraint)]
+            expected_constraints[well_name] = [NexusConstraint(constraint, date_format=DateFormat.MM_DD_YYYY)]
     expected_date_filtered_constraints = {}
     for constraint in expected_content:
         if constraint['date'] == '01/01/2019':
             well_name = constraint['name']
             if expected_date_filtered_constraints.get(well_name, None) is not None:
-                expected_date_filtered_constraints[well_name].append(NexusConstraint(constraint))
+                expected_date_filtered_constraints[well_name].append(NexusConstraint(constraint,
+                                                                                     date_format=DateFormat.MM_DD_YYYY))
             else:
-                expected_date_filtered_constraints[well_name] = [NexusConstraint(constraint)]
+                expected_date_filtered_constraints[well_name] = [NexusConstraint(constraint,
+                                                                                 date_format=DateFormat.MM_DD_YYYY)]
     expected_single_name_constraint = {'well1': expected_constraints['well1']}
     mock_nexus_network = mocker.MagicMock()
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)

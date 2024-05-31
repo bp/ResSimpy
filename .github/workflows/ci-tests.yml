@@ -15,7 +15,7 @@ jobs:
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         uses: ./.github/actions/prepare-poetry
@@ -37,7 +37,7 @@ jobs:
           mypy_args: ResSimpy --config-file ./.config/mypy
 
       - name: Ruff checks
-        uses: jpetrucciani/ruff-check@0.1.0
+        uses: jpetrucciani/ruff-check@0.3.7
         with:
           path: 'ResSimpy'
 
@@ -60,7 +60,7 @@ jobs:
         python-version: ["3.10", "3.11"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install dependencies
         uses: ./.github/actions/prepare-poetry
@@ -72,13 +72,13 @@ jobs:
 
       - name: Upload pytest artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Unit Test Results (Python ${{ matrix.python-version }})
           path: pytest.xml
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.xml

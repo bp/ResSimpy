@@ -68,7 +68,8 @@ class NexusWellheads(Wellheads):
     def load(self, surface_file: File, start_date: str, default_units: UnitSystem) -> None:
         new_wellheads, _ = collect_all_tables_to_objects(surface_file, {'WELLHEAD': NexusWellhead},
                                                          start_date=start_date,
-                                                         default_units=default_units)
+                                                         default_units=default_units,
+                                                         date_format=self.__parent_network.model.date_format)
         wellheads_list = new_wellheads.get('WELLHEAD')
         self._add_to_memory(wellheads_list)
 
@@ -93,15 +94,15 @@ class NexusWellheads(Wellheads):
         self.__remove_object_operations.remove_object_from_network_main(
             obj_to_remove, self._network_element_name, self.__wellheads)
 
-    def add(self, obj_to_remove: dict[str, None | str | float | int]) -> None:
+    def add(self, obj_to_add: dict[str, None | str | float | int]) -> None:
         """Adds a wellhead to a network, taking a dictionary with properties for the new wellhead.
 
         Args:
-            obj_to_remove (dict[str, None | str | float | int]): dictionary taking all the properties for the new
+            obj_to_add (dict[str, None | str | float | int]): dictionary taking all the properties for the new
             wellhead.
             Requires date and a name.
         """
-        new_object = self.__add_object_operations.add_network_obj(obj_to_remove, NexusWellhead, self.__parent_network)
+        new_object = self.__add_object_operations.add_network_obj(obj_to_add, NexusWellhead, self.__parent_network)
         self._add_to_memory([new_object])
 
     def modify(self, obj_to_modify: dict[str, None | str | float | int],

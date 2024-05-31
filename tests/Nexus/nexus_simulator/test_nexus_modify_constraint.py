@@ -4,6 +4,7 @@ import pytest
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import  get_fake_nexus_simulator, uuid_side_effect
@@ -271,11 +272,11 @@ def test_remove_constraint(mocker, file_contents, expected_result_file,
     for c, constraint_dict in enumerate(expected_constraints):
         node_name = constraint_dict['name']
         if node_name not in expected_constraint_dict.keys():
-            expected_constraint = NexusConstraint(constraint_dict)
+            expected_constraint = NexusConstraint(constraint_dict, date_format=DateFormat.DD_MM_YYYY)
             expected_constraint._DataObjectMixin__id = expected_ids[c]
             expected_constraint_dict[node_name] = [expected_constraint]
         else:
-            expected_constraint = NexusConstraint(constraint_dict)
+            expected_constraint = NexusConstraint(constraint_dict, date_format=DateFormat.DD_MM_YYYY)
             expected_constraint._DataObjectMixin__id = expected_ids[c]
             expected_constraint_dict[node_name].append(expected_constraint)
 

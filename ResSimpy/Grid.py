@@ -1,17 +1,22 @@
+"""Grid base class."""
+
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+import os
 import pandas as pd
-from typing import Optional, Sequence, TYPE_CHECKING
-from ResSimpy.GridArrayFunction import GridArrayFunction
+import numpy as np
 
-if TYPE_CHECKING:
-    from ResSimpy.File import File
+from typing import Optional, Sequence
+from ResSimpy.GridArrayFunction import GridArrayFunction
+from ResSimpy.FileOperations import file_operations as fo
+from ResSimpy.Utils.general_utilities import check_if_string_is_float
+from ResSimpy.File import File
 
 
 @dataclass
 class GridArrayDefinition:
-    """Initialises the NexusGrid class.
+    """A class to define a grid array property.
 
     Args:
         modifier (Optional[str]): the modifier for the grid array property (e.g. CON, MULT, etc.)
@@ -29,6 +34,7 @@ class GridArrayDefinition:
 
 @dataclass(kw_only=True)
 class Grid(ABC):
+    """A base class to represent a collection of grids in a reservoir simulation model."""
     # Grid dimensions
     _range_x: Optional[int]
     _range_y: Optional[int]
@@ -143,3 +149,68 @@ class Grid(ABC):
     def array_functions(self) -> Optional[Sequence[GridArrayFunction]]:
         """Returns a list of the array functions defined in the structured grid file."""
         raise NotImplementedError("Implement this in the derived class")
+
+    @staticmethod
+    def filter_grid_array_definition(grid_array_definition: GridArrayDefinition) -> File:
+        """Checks array files for only float values and returns a new file with only float values."""
+        file_path = grid_array_definition.absolute_path
+        if file_path is None and grid_array_definition.value is not None:
+            file_path = grid_array_definition.value
+        elif file_path is None:
+            raise FileNotFoundError('No file path found in the grid array definition')
+        file_as_list = fo.load_file_as_list(file_path)
+
+        new_file_as_list = Grid.grid_filter_file_as_list(file_as_list)
+
+        # create a new file with the filtered list
+        new_file_path = (os.path.splitext(file_path)[0] + '_filtered' +
+                         os.path.splitext(file_path)[1])
+        new_grid_file = File(location=new_file_path,
+                             file_content_as_list=new_file_as_list,
+                             create_as_modified=True,
+                             )
+
+        return new_grid_file
+
+    @staticmethod
+    def grid_filter_file_as_list(file_as_list: list[str], comment_characters: list[str] | None = None) -> list[str]:
+        """Checks array files for only float values and returns a new file with only float values.
+        This works for grid arrays only. It does not work well with extremely large files.
+
+        Args:
+            file_as_list (list[str]): The file as a list of strings.
+            comment_characters (Optional[list[str]]): The comment characters to filter out. Defaults to None.
+        """
+        if comment_characters is None:
+            comment_characters = ['--', '!', 'C']
+        if fo.value_in_file('INCLUDE', file_as_list):
+            raise NotImplementedError('Nested includes for grid files currently not implemented')
+        file_as_list = fo.strip_file_of_comments(file_as_list, comment_characters=comment_characters)
+        # remove non float values
+        file_as_list = [' '.join([x for x in line.split() if check_if_string_is_float(x)]) for line in file_as_list]
+        return file_as_list
+
+    @staticmethod
+    def grid_file_as_list_to_numpy_array(file_as_list: list[str], x_range: None | int, y_range: None | int,
+                                         z_range: None | int) -> np.ndarray:
+        """Converts a list of strings to a numpy array."""
+        # ensure the list of strings is filtered of comments and non-float values
+        new_file_as_list = Grid.grid_filter_file_as_list(file_as_list)
+
+        array_size = -1
+        if x_range is not None and y_range is not None and z_range is not None:
+            array_size = x_range * y_range * z_range
+
+        grid_array = np.fromstring(' '.join(new_file_as_list), sep=' ', count=array_size)
+
+        return grid_array
+
+    def grid_array_definition_to_numpy_array(self, grid_array_definition: GridArrayDefinition) -> np.ndarray:
+        """Converts a grid array to a numpy array."""
+        path = grid_array_definition.absolute_path
+        if path is None and grid_array_definition.value is not None:
+            path = grid_array_definition.value
+        elif path is None:
+            raise FileNotFoundError('No file path found in the grid array definition')
+        file_as_list = fo.load_file_as_list(path)
+        return self.grid_file_as_list_to_numpy_array(file_as_list, self.range_x, self.range_y, self.range_z)

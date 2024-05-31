@@ -105,7 +105,8 @@ class NexusConstraints(Constraints):
                                                                'QMULT': NexusConstraint
                                                            },
                                                            start_date=start_date,
-                                                           default_units=default_units)
+                                                           default_units=default_units,
+                                                           date_format=self.__model.date_format)
         self._add_to_memory(new_constraints)
 
     def _add_to_memory(self, additional_constraints: Optional[dict[str, list[NexusConstraint]]]) -> None:

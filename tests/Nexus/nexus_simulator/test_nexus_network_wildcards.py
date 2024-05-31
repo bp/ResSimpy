@@ -3,6 +3,7 @@ import pytest
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator
@@ -72,13 +73,19 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     ),
 
     # previous time card
-    ('''TIME 01/01/2019
+    ('''TIME 01/01/2019   
     NODECON
 	NAME            NODEIN    NODEOUT       TYPE        METHOD    DDEPTH
     node_1            node_1      wh_node_1       PIPE        2          7334
     node_2            node_2      wh_node_2       PIPE        2          555
     well_1          well_1        wh_well_2     PIPE          2     23040.2
 	ENDNODECON
+
+    WELLLIST node_welllist
+    ADD
+    node_1
+    ENDWELLLIST
+
 	TIME 01/01/2020
     CONSTRAINTS
     node*  QWSMAX 100 QOSMAX 2.02
@@ -125,9 +132,9 @@ def test_read_wildcard(mocker, file_contents, expected_constraints):
     for constraint in expected_constraints:
         well_name = constraint['name']
         if expected_result.get(well_name, None) is not None:
-            expected_result[well_name].append(NexusConstraint(constraint))
+            expected_result[well_name].append(NexusConstraint(constraint, date_format=DateFormat.DD_MM_YYYY))
         else:
-            expected_result[well_name] = [NexusConstraint(constraint)]
+            expected_result[well_name] = [NexusConstraint(constraint, date_format=DateFormat.DD_MM_YYYY)]
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={

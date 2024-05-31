@@ -86,7 +86,8 @@ class NexusWellConnections(WellConnections):
         new_well_connections, _ = collect_all_tables_to_objects(surface_file, {'WELLS': NexusWellConnection,
                                                                                'GASWELLS': NexusWellConnection},
                                                                 start_date=start_date,
-                                                                default_units=default_units)
+                                                                default_units=default_units,
+                                                                date_format=self.__parent_network.model.date_format)
         cons_list = new_well_connections.get('WELLS')
         gas_cons_list = new_well_connections.get('GASWELLS')
         self._add_to_memory(cons_list)
