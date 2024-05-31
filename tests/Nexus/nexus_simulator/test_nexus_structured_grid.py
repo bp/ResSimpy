@@ -1561,9 +1561,8 @@ def test_load_structured_grid_file_excludes_skip_section(mocker):
     structured_grid_file_contents = """
 ! grid
 NX  NY  NZ
+! 4 5   6
 1   2   3
-
-C NETGRS ZVAR
 
 SKIP ! Start excluding these values
 DY CON
@@ -1571,8 +1570,11 @@ DY CON
 
 DZ CON
 10
-NOSKIP ! Stop excluding and take the remaining values
 
+NX  NY  NZ  !change in values should be ignored
+7   8     9
+
+NOSKIP ! Stop excluding and take the remaining values
 DZNET CON
 9
 
@@ -1594,6 +1596,9 @@ DZNET CON
 
     # Assert
     assert result.range_x == 1
-    assert result.dy.value != '100'
-    assert result.dz.value != '10'
+    assert result.range_y == 2
+    assert result.range_z == 3
     assert result.dznet.value == '9'
+    assert result.dx.value is None
+    assert result.dy.value is None
+    assert result.dz.value is None
