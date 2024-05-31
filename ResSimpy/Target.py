@@ -19,7 +19,7 @@ class Target(DataObjectMixin, ABC):
     calculation_connections: Optional[str] = None
     value: Optional[float] = None
     add_value: Optional[float] = None
-    region: Optional[str] = None
+    region_name: Optional[str] = None
     priority: Optional[int] = None
     minimum_rate: Optional[str] = None
     minimum_rate_no_shut: Optional[float] = None

@@ -58,7 +58,7 @@ class NexusTarget(Target):
             'CALCCONS': ('calculation_connections', str),
             'VALUE': ('value', float),
             'ADDVALUE': ('add_value', float),
-            'REGION': ('region', str),
+            'REGION': ('region_name', str),
             'PRIORITY': ('priority', int),
             'QMIN': ('minimum_rate', float),
             'QMIN_NOSHUT': ('minimum_rate_no_shut', float),
