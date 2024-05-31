@@ -382,6 +382,9 @@ class NexusGrid(Grid):
             # Load in the basic properties
             line_start_token = nfo.get_next_value(0, [line])
 
+            if line_start_token is None:
+                continue
+
             # Confirm we aren't looking at an area that has been commented out. If we are, continue to the next line.
             if line_start_token.upper() == 'NOSKIP':
                 ignore_line = False
