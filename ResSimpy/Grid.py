@@ -175,6 +175,7 @@ class Grid(ABC):
     @staticmethod
     def grid_filter_file_as_list(file_as_list: list[str], comment_characters: list[str] | None = None) -> list[str]:
         """Checks array files for only float values and returns a new file with only float values.
+
         This works for grid arrays only. It does not work well with extremely large files.
 
         Args:
