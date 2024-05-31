@@ -1,1 +1,1 @@
-"""Module for file operations"""
+"""Module for file operations."""
