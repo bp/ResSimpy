@@ -29,8 +29,10 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class NexusWells(Wells):
-    """A class for collecting all NexusWell objects in a NexusSimulator. Handles adding and removing completions
-    as well as rescheduling wells. This is usually accessed through the model.wells property.
+    """A class for collecting all NexusWell objects in a NexusSimulator.
+
+    Handles adding and removing completions as well as rescheduling wells. This is usually accessed through the
+    model.wells property.
 
     Arguments:
         model (Simulator): NexusSimulator object that has the instance of wells on.
@@ -370,8 +372,9 @@ class NexusWells(Wells):
             self.__remove_wellspec_header(str(completion_date), well_name, wellspec_file)
 
     def __remove_wellspec_header(self, completion_date: str, well_name: str, wellspec_file: NexusFile) -> None:
-        """Removes the wellspec and header if the wellspec table is empty\
-        must first check for whether the well has any remaining completions in the wellspec table.
+        """Removes the wellspec and header if the wellspec table is empty.
+
+        Must first check for whether the well has any remaining completions in the wellspec table.
         """
         nexus_mapping = NexusCompletion.get_keyword_mapping()
         completion_date_found = False
@@ -401,7 +404,7 @@ class NexusWells(Wells):
                           completion_to_change: Optional[dict[str, None | float | int | str]] = None,
                           completion_id: Optional[UUID] = None,
                           comments: Optional[str] = None) -> None:
-        """Modify an existing matching completion, preserves attributes and modifies only additional properties
+        """Modify an existing matching completion, preserves attributes and modifies only additional properties \
         found within the provided properties to modify dictionary.
 
         Args:

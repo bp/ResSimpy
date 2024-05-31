@@ -1,6 +1,7 @@
-"""Represents the Nexus implementation of a network. Holds all the network objects and loads them from the simulator.
-The currently supported elements are nodes, connections, well connections, wellheads, wellbores, constraints and
-targets.
+"""Represents the Nexus implementation of a network.
+
+Holds all the network objects and loads them from the simulator. The currently supported elements are nodes,
+connections, well connections, wellheads, wellbores, constraints and targets.
 """
 from __future__ import annotations
 
@@ -40,9 +41,10 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class NexusNetwork(Network):
-    """Represents the Nexus implementation of a network. Holds all the network objects and loads them from the
-    simulator. The currently supported elements are nodes, connections, well connections, wellheads, wellbores,
-    constraints and targets.
+    """Represents the Nexus implementation of a network.
+
+    Holds all the network objects and loads them from the simulator. The currently supported elements are nodes,
+    connections, well connections, wellheads, wellbores, constraints and targets.
     """
     __model: NexusSimulator
     nodes: NexusNodes
@@ -105,7 +107,7 @@ class NexusNetwork(Network):
 
     @property
     def __load_procs(self) -> list[NexusProc]:
-        """This private function searches the surface file for Nexus procedures, stores data related procedures, and
+        """This private function searches the surface file for Nexus procedures, stores data related procedures, and \
         returns a list of Nexus procedure objects. It also collects and stores Nexus Proc function frequencies.
         """
 
@@ -197,6 +199,7 @@ class NexusNetwork(Network):
 
     def load(self) -> None:
         """Loads all the objects from the surface files in the Simulator class.
+
         Table headers with None next to their name are currently skipped awaiting development.
         """
 

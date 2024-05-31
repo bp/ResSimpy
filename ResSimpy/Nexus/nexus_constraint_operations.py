@@ -17,7 +17,7 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
                             unit_system: UnitSystem, property_map: dict[str, tuple[str, type]],
                             existing_constraints: dict[str, list[NexusConstraint]], nexus_file: File,
                             start_line_index: int, network_names: Optional[list[str]] = None) -> None:
-    """Loads table of constraints with the wellname/node first and the constraints following inline
+    """Loads table of constraints with the wellname/node first and the constraints following inline \
         uses previous set of constraints as still applied to the well.
 
     Args:
@@ -118,7 +118,7 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
 
 
 def __clear_constraints(token_value: str, constraint: type[NexusConstraint]) -> dict[str, None]:
-    """Replicates behaviour of the clear keyword in nexus constraints by creating a dictionary filled with
+    """Replicates behaviour of the clear keyword in nexus constraints by creating a dictionary filled with \
     Nones for the relevant parameters.
     """
     match token_value:

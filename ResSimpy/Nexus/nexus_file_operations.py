@@ -42,8 +42,9 @@ def nexus_token_found(line_to_check: str, valid_list: list[str] = VALID_NEXUS_KE
 
 def get_previous_value(file_as_list: list[str], search_before: Optional[str] = None,
                        ignore_values: Optional[list[str]] = None) -> Optional[str]:
-    """Gets the previous non-blank value in a list of lines. Starts from the last instance of search_before,
-    working backwards.
+    """Gets the previous non-blank value in a list of lines.
+
+    Starts from the last instance of search_before, working backwards.
 
     Args:
         file_as_list (list[str]): a list of strings containing each line of the file as a new entry,
@@ -214,6 +215,7 @@ def read_table_to_df(file_as_list: list[str], keep_comments: bool = False, nohea
 
 def clean_up_string(value: str) -> str:
     r"""Removes unwanted characters from a string
+
         unwanted characters: ("\\n", "\\t", "!").
 
     Args:
@@ -233,8 +235,9 @@ def check_for_and_populate_common_input_data(
                             Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
                                   dict[str, Union[float, pd.DataFrame]]]]
 ) -> None:
-    """Loop through lines of Nexus input file content looking for common input data, e.g.,
-    units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
+    """Loop through lines of Nexus input file content looking for common input data.
+
+    e.g., units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
     as defined in Nexus manual. If any found, include in provided property_dict and return.
 
     Args:
@@ -254,8 +257,9 @@ def check_property_in_line(
         property_dict: dict[str,
                             Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
                                   dict[str, Union[float, pd.DataFrame]]]], file_as_list: list[str]) -> None:
-    """Given a line of Nexus input file content looking for common input data, e.g.,
-    units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
+    """Given a line of Nexus input file content looking for common input data.
+
+    e.g., units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,
     as defined in Nexus manual. If any found, include in provided property_dict and return.
 
     Args:
@@ -313,8 +317,7 @@ def check_property_in_line(
 
 
 def looks_like_grid_array(file_path: str, lines2check: int = 10) -> bool:
-    """Returns true if a Nexus include file begins with one of the
-    Nexus grid array keywords.
+    """Returns true if a Nexus include file begins with one of the Nexus grid array keywords.
 
     Args:
         file_path (str): Path to Nexus include file
@@ -491,8 +494,9 @@ def check_list_tokens(list_tokens: list[str], line: str) -> Optional[str]:
 
 def correct_datatypes(value: None | float | str, dtype: type,
                       na_to_none: bool = True) -> None | str | float:
-    """Takes a value and returns the value but converted to specified type. if na_to_none True then will
-        reduce a lot of values to none.
+    """Takes a value and returns the value but converted to specified type.
+
+    If na_to_none True then will reduce a lot of values to none.
 
     Args:
         value (None | int | float | str): value to convert

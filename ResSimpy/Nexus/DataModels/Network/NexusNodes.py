@@ -1,4 +1,5 @@
 """Holds the NexusNodes class which is used to store and manipulate the nodes in a NexusNetwork.
+
 It is stored as an instance in the NexusNetwork class as "nodes".
 """
 
@@ -26,6 +27,7 @@ if TYPE_CHECKING:
 @dataclass(kw_only=True)
 class NexusNodes(Nodes):
     """Class to store and manipulate the nodes in a NexusNetwork.
+
     It is stored as an instance in the NexusNetwork class as "nodes". A list of nodes in the network are stored in
     memory these can be accessed through the get_all method.
     """
@@ -77,7 +79,8 @@ class NexusNodes(Nodes):
         return next(nodes_to_return, None)
 
     def get_df(self) -> pd.DataFrame:
-        """Creates a dataframe representing all processed node data in a surface file
+        """Creates a dataframe representing all processed node data in a surface file.
+
         Returns:
             DataFrame: of the properties of the nodes through time with each row representing a node.
         """
@@ -143,8 +146,10 @@ class NexusNodes(Nodes):
 
     def modify(self, node_to_modify: dict[str, None | str | float | int],
                new_properties: dict[str, None | str | float | int]) -> None:
-        """Modifies an existing node based on a matching dictionary of properties (partial matches allowed if precisely
-         1 matching node is found). Updates the properties with properties in the new_properties dictionary.
+        """Modifies an existing node based on a matching dictionary of properties.
+
+        Partial matches allowed if precisely 1 matching node is found. Updates the properties with properties in the
+        new_properties dictionary.
 
         Args:
             node_to_modify (dict[str, None | str | float | int]): dictionary containing attributes to match in the

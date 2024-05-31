@@ -249,7 +249,8 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
                                       unit_system: UnitSystem,
                                       start_date: None | str = None,
                                       ) -> list[NexusCompletion]:
-    """Loads a completion table in for a single WELLSPEC keyword. \
+    """Loads a completion table in for a single WELLSPEC keyword.
+
         Loads in the next available completions following a WELLSPEC keyword and a header line.
 
     Args:
@@ -411,8 +412,7 @@ def __load_wellspec_table_headings(header_index: int, header_values: dict[str, N
 
 def __get_inline_well_mod(line: str, current_date: str, unit_system: UnitSystem | None,
                           wells_loaded: list[NexusWell], start_date: str, date_format: DateFormat) -> NexusWellMod:
-    """Returns a NexusWellMod object from a WELLMOD line. e.g.
-    `WELLMOD well_name KH CON value`.
+    """Returns a NexusWellMod object from a WELLMOD line. e.g. `WELLMOD well_name KH CON value`.
 
     Args:
         line (str): line to extract the wellmod from

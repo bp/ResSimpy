@@ -92,8 +92,7 @@ class Logging:
 
     @staticmethod
     def get_errors_warnings_string(log_file_line_list: list[str]) -> Optional[str]:
-        """Retrieves the number of warnings and errors from the simulation log output,
-        and formats them as a string.
+        """Retrieves the number of warnings and errors from the simulation log output, and formats them as a string.
 
         Args:
             log_file_line_list (list[str]): log file formatted as a list of strings with \

@@ -402,8 +402,9 @@ class NexusFile(File):
         return from_list, to_list
 
     def add_object_locations(self, obj_uuid: UUID, line_indices: list[int]) -> None:
-        """Adds a uuid to the object_locations dictionary. Used for storing the line numbers where objects are stored
-        within the flattened file_as_list.
+        """Adds a uuid to the object_locations dictionary.
+
+        Used for storing the line numbers where objects are stored within the flattened file_as_list.
 
         Args:
             obj_uuid (UUID): unique identifier of the object being created/stored.
@@ -420,9 +421,10 @@ class NexusFile(File):
             self.object_locations[obj_uuid] = line_indices
 
     def __update_object_locations(self, line_number: int, number_additional_lines: int) -> None:
-        """Updates the object locations in a nexusfile by the additional lines. Used when files have been modified and
-        an addition/removal of lines has occurred. Ensures that the object locations are correct to the actual lines
-        in the file_as_list.
+        """Updates the object locations in a nexusfile by the additional lines.
+
+        Used when files have been modified and an addition/removal of lines has occurred. Ensures that the object
+        locations are correct to the actual lines in the file_as_list.
 
         Args:
             line_number (int): Line number at which the new lines have been added
@@ -449,7 +451,7 @@ class NexusFile(File):
         self.object_locations.pop(obj_uuid, None)
 
     def find_which_include_file(self, flattened_index: int) -> tuple[File, int]:
-        """Given a line index that relates to a position within the flattened file_as_list from the method
+        """Given a line index that relates to a position within the flattened file_as_list from the method \
         get_flat_file_as_list.
 
         Args:

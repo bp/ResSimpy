@@ -109,6 +109,7 @@ class NexusWell(Well):
                         completion_properties: dict[str, None | float | int | str] | NexusCompletion) \
             -> NexusCompletion:
         """Returns precisely one completion which matches all the properties provided.
+
             If several completions match it raise a ValueError.
 
         Args:
@@ -127,8 +128,9 @@ class NexusWell(Well):
 
     def _add_completion_to_memory(self, date: str, completion_properties: dict[str, None | float | int | str],
                                   date_format: DateFormat, completion_index: Optional[int] = None) -> NexusCompletion:
-        """Adds a perforation with the properties specified in completion_properties_list,
-            if index is none then adds it to the end of the perforation list.
+        """Adds a perforation with the properties specified in completion_properties_list.
+
+            If index is none then adds it to the end of the perforation list.
 
         Args:
             date (str): date at which the perforation should be added
@@ -179,7 +181,8 @@ class NexusWell(Well):
 
     def _remove_completions_from_memory(self, completions_to_remove: Sequence[NexusCompletion | UUID]) -> None:
         # TODO improve comparison of dates with datetime libs
-        """Removes completions from a list of completions or completion IDs
+        """Removes completions from a list of completions or completion IDs.
+
         Args:
             completions_to_remove (list[NexusCompletion | UUID]): Completions to be removed.
         """

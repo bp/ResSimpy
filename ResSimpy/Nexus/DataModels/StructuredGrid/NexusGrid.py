@@ -427,6 +427,7 @@ class NexusGrid(Grid):
     def load_structured_grid_file(cls: type[NexusGrid], structured_grid_file: File,
                                   lazy_loading: bool = True) -> NexusGrid:
         """Loads in a structured grid file with all grid properties, and the array functions defined with 'FUNCTION'.
+
         Other grid modifiers are currently not supported.
 
         Args:

@@ -1,6 +1,7 @@
-"""Class for handling wellheads in the Nexus Network. This class is used to store and manipulate the wellheads in \
-a NexusNetwork. It is stored as an instance in the NexusNetwork class as "wellheads".
-In Nexus this is the WELLHEAD table.
+"""Class for handling wellheads in the Nexus Network.
+
+This class is used to store and manipulate the wellheads in a NexusNetwork. It is stored as an instance in the
+NexusNetwork class as "wellheads". In Nexus this is the WELLHEAD table.
 """
 from __future__ import annotations
 from dataclasses import dataclass, field
@@ -106,7 +107,8 @@ class NexusWellheads(Wellheads):
     def modify(self, obj_to_modify: dict[str, None | str | float | int],
                new_properties: dict[str, None | str | float | int]) -> None:
         """Modifies an existing wellhead based on a matching dictionary of properties.
-        (partial matches allowed if precisely 1 matching node is found).
+
+        Partial matches allowed if precisely 1 matching node is found.
         Updates the properties with properties in the new_properties dictionary.
 
         Args:

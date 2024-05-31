@@ -125,7 +125,8 @@ class SimControls:
 
     @staticmethod
     def remove_times_from_file(file_content: list[str], output_file_path: str) -> None:
-        """Removes the times from a file - used for replacing with new times
+        """Removes the times from a file - used for replacing with new times.
+
         Args:
             file_content (list[str]): a list of strings containing each line of the file as a new entry
             output_file_path (str): path to the file to output to.
@@ -244,7 +245,8 @@ class SimControls:
 
     @staticmethod
     def get_date_format(date_format: DateFormat) -> str:
-        """Returns the date format being used by the model
+        """Returns the date format being used by the model.
+
         formats used: ('MM/DD/YYYY', 'DD/MM/YYYY').
         """
 
@@ -290,7 +292,8 @@ class SimControls:
             text_file.write(new_file_str)
 
     def load_run_control_file(self) -> None:
-        """Loads the run control information into the class instance. \
+        """Loads the run control information into the class instance.
+
             If the write_times attribute is True then it expands out any INCLUDE files with the times found within
         Raises:
             ValueError: if the run_control_file attribute is None.

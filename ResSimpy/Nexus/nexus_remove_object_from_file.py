@@ -121,7 +121,7 @@ class RemoveObjectOperations:
                                                                       'wellheads', 'wellbores', 'constraints',
                                                                       'targets'],
                                         existing_objects: list[T]) -> None:
-        """Removes object from file and from the list of objects based on matching a set of attributes provided in a
+        """Removes object from file and from the list of objects based on matching a set of attributes provided in a \
         dictionary or a unique id.
 
         Args:

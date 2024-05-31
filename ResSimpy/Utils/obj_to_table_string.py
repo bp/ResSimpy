@@ -16,6 +16,7 @@ class SupportsKeywordMapping(Protocol):
 
 def to_table_line(obj: SupportsKeywordMapping, headers: list[str]) -> str:
     """Takes a generic Nexus object and returns the attribute values as a string in the order of headers provided.
+
     Requires an implemented to_dict method and get_keyword_mapping() method.
 
     Args:
