@@ -579,8 +579,9 @@ class NexusFile(File):
 
     def remove_from_file_as_list(self, index: int, objects_to_remove: Optional[list[UUID]] = None,
                                  string_to_remove: Optional[str] = None) -> None:
-        """Remove an entry from the file as list. Also updates existing object locations and removes any \
-        specified objects from the object locations dictionary.
+        """Remove an entry from the file as list.
+
+        Also updates existing object locations and removes any specified objects from the object locations dictionary.
 
         Args:
             index (int): index n the calling flat_file_as_list to remove the entry from

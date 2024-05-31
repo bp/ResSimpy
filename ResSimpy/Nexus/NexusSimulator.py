@@ -471,7 +471,7 @@ class NexusSimulator(Simulator):
         return NexusSimulator.get_fluid_type(self.model_files.surface_files[1].get_flat_list_str_file)
 
     def check_output_path(self) -> None:
-        """Confirms that the output path has been set
+        """Confirms that the output path has been set.
 
         (used to stop accidental writing operations in the original directory).
 

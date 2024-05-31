@@ -1,4 +1,6 @@
-"""Class for handling well connections in the Nexus Network. This class is used to store and manipulate the well
+"""Class for handling well connections in the Nexus Network.
+
+This class is used to store and manipulate the well
 connections in a NexusNetwork. It is stored as an instance in the NexusNetwork class as "well_connections".
 In Nexus this is the WELLS table.
 """

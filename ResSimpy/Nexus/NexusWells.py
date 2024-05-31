@@ -1,5 +1,6 @@
-"""A class for collecting all NexusWell objects in a NexusSimulator. Handles adding and removing completions
-as well as rescheduling wells.
+"""A class for collecting all NexusWell objects in a NexusSimulator.
+
+Handles adding and removing completions as well as rescheduling wells.
 """
 from __future__ import annotations
 import warnings

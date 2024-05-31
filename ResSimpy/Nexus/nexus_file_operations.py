@@ -214,7 +214,7 @@ def read_table_to_df(file_as_list: list[str], keep_comments: bool = False, nohea
 
 
 def clean_up_string(value: str) -> str:
-    r"""Removes unwanted characters from a string
+    r"""Removes unwanted characters from a string.
 
         unwanted characters: ("\\n", "\\t", "!").
 
