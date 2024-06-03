@@ -12,7 +12,7 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
 @dataclass(repr=False)
 class NexusConstraint(Constraint):
-    """??
+    """Class representing a single constraint object within the NexusNetwork for a single datetime.
 
     Attributes:
     name (str): name of the well (NAME)
