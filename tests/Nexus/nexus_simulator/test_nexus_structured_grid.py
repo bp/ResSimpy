@@ -1551,3 +1551,54 @@ def test_grid_array_definitions_abs_path(mocker):
 
     # Assert
     assert result_kx == expected_kx_result
+
+
+def test_load_structured_grid_file_excludes_skip_section(mocker):
+    """Read in Structured Grid File, excluding the section marked with SKIP / NOSKIP"""
+    # Arrange
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents = """
+! grid
+NX  NY  NZ
+! 4 5   6
+1   2   3
+
+SKIP ! Start excluding these values
+DY CON
+100
+
+DZ CON
+10
+
+NX  NY  NZ  !change in values should be ignored
+7   8     9
+
+NOSKIP ! Stop excluding and take the remaining values
+DZNET CON
+9
+
+"""
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+        {'testpath1/nexus_run.fcs': fcs_file_contents,
+         '/run_control/path': '',
+         structured_grid_name: structured_grid_file_contents,
+         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
+    result = simulation.grid
+
+    # Assert
+    assert result.range_x == 1
+    assert result.range_y == 2
+    assert result.range_z == 3
+    assert result.dznet.value == '9'
+    assert result.dx.value is None
+    assert result.dy.value is None
+    assert result.dz.value is None
