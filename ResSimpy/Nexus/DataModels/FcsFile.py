@@ -332,13 +332,15 @@ class FcsNexusFile(NexusFile):
         return_dict = dict(single_keywords, **multi_keywords)
         return return_dict
 
-    def move_model_files(self, new_file_path: str, new_include_file_location: str) -> None:
+    def move_model_files(self, new_file_path: str, new_include_file_location: str, overwrite_files: bool = False) -> \
+            None:
         """Moves all the model files to a new location.
 
         Args:
             new_file_path (str): new file path for the fcs file e.g. /new_path/new_fcs_file.fcs
             new_include_file_location (str): new location for the included files either absolute or relative
             to the new fcs file path
+            overwrite_files (bool): whether to overwrite the files if they already exist in the new location
         """
         # Take the original file, find which files have changed and write out those locations
         # figure out where to store the include files:
@@ -358,7 +360,8 @@ class FcsNexusFile(NexusFile):
                 # skip if there is no file
                 continue
             include_name = os.path.join(include_dir, os.path.basename(file.location))
-            file.write_to_file(include_name, write_includes=True, write_out_all_files=True)
+            file.write_to_file(include_name, write_includes=True, write_out_all_files=True,
+                               overwrite_file=overwrite_files)
             self.change_file_path(include_name, keyword)
 
         for keyword, attr_name in self.fcs_keyword_map_multi().items():
@@ -367,11 +370,12 @@ class FcsNexusFile(NexusFile):
                 continue
             for method_number, file in file_dict.items():
                 include_name = os.path.join(include_dir, os.path.basename(file.location))
-                file.write_to_file(include_name, write_includes=True, write_out_all_files=True)
+                file.write_to_file(include_name, write_includes=True, write_out_all_files=True,
+                                   overwrite_file=overwrite_files)
                 self.change_file_path(include_name, keyword, method_number)
 
         # write out the final fcs file
-        self.write_to_file(new_file_path, write_includes=False)
+        self.write_to_file(new_file_path, write_includes=False, overwrite_file=overwrite_files)
 
     def write_out_case(self, new_file_path: str, new_include_file_location: str, case_suffix: str) -> None:
         """Writes out a new simulator with only modified files. For use with creating multiple cases from a base case.

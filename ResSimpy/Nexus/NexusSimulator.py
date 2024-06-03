@@ -790,16 +790,18 @@ class NexusSimulator(Simulator):
 
         self.model_files.update_model_files()
 
-    def move_simulator_files(self, new_file_path: str, new_include_file_location: str) -> None:
+    def move_simulator_files(self, new_file_path: str, new_include_file_location: str,
+                             overwrite_files: bool = False) -> None:
         """Creates a set of simulator files.
 
         Args:
             new_file_path (str): Path to save the new simulator to.
             new_include_file_location (str): Saves included files to a path either absolute or relative to the
             file path provided.
+            overwrite_files (bool): Overwrite files if they already exist. Defaults to False.
         """
 
-        self.model_files.move_model_files(new_file_path, new_include_file_location)
+        self.model_files.move_model_files(new_file_path, new_include_file_location, overwrite_files)
 
     def write_out_new_model(self, new_location: str, new_model_name: str) -> None:
         """Not implemented for Nexus yet."""
