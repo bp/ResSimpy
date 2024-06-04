@@ -4,11 +4,12 @@ from io import StringIO
 from unittest.mock import Mock, MagicMock
 
 import pytest
+
+from ResSimpy import NexusSimulator
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.multifile_mocker import mock_multiple_files
-from tests.utility_for_tests import generic_fcs, check_file_read_write_is_correct, get_fake_nexus_simulator
+from tests.utility_for_tests import generic_fcs, get_fake_nexus_simulator
 
 
 def test_fcs_file(mocker):
@@ -55,7 +56,7 @@ GRID_FILES
                                          'DESC reservoir1\n', 'RUN_UNITS ENGLISH\n', 'DATEFORMAT DD/MM/YYYY\n',
                                          'GRID_FILES\n',
                                          '	 STRUCTURED_GRID nexus_data/mp2020_structured_grid_1_reg_update.dat\n',
-                                         '	 OPTIONS /root_folder/nexus_data/nexus_data/mp2020_ref_options_reg_update.dat', ],
+                                         '	 OPTIONS /root_folder/nexus_data/nexus_data/mp2020_ref_options_reg_update.dat'],
                                      structured_grid_file=expected_structured_grid_file,
                                      options_file=expected_options_file, include_locations=expected_includes)
     expected_fcs_file.files_info = [(fcs_path, None, None),
@@ -96,7 +97,7 @@ def test_fcs_file_multiple_methods(mocker):
     mocker.patch("os.path.isfile", lambda x: True)
     expected_includes = ['nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',
                          'nexus_data/nexus_data/mp2017hm_ref_equil_02.dat',
-                         'nexus_data/nexus_data/mp2017hm_ref_equil_03.dat', ]
+                         'nexus_data/nexus_data/mp2017hm_ref_equil_03.dat']
     expected_equil_1 = NexusFile(location='nexus_data/nexus_data/mp2017hm_ref_equil_01.dat',
                                  origin=fcs_path, include_locations=None,
                                  include_objects=None, file_content_as_list=None)
@@ -178,7 +179,7 @@ def test_fcs_file_all_methods(mocker):
     expected_hyd_method_file = NexusFile(location='hyd.dat', origin=fcs_path, include_locations=None,
                                          include_objects=None, file_content_as_list=None)
 
-    equil_files = {1: expected_equil_1, 2: expected_equil_2, }
+    equil_files = {1: expected_equil_1, 2: expected_equil_2}
     include_objects = [expected_equil_1, expected_equil_2, expected_structured_grid_file, expected_options_file,
                        expected_wells_file, expected_hyd_method_file]
     expected_fcs_contents_as_list = ['DESC reservoir1\n',
@@ -267,6 +268,7 @@ def test_get_full_network(mocker):
     # Assert
     assert to_list == expected_to_list
     assert from_list == expected_from_list
+
 
 def test_update_fcs_file(mocker):
     # Arrange
@@ -412,7 +414,7 @@ def test_move_model_files_duplicate_file(mocker):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             'test_fcs.fcs': fcs_content,
             'nexus_data/structured_grid.dat': structured_grid_content,
-            'nexus_data/nexus_data/runcontrol.dat' : run_control_content,
+            'nexus_data/nexus_data/runcontrol.dat': run_control_content,
             os.path.join('nexus_data', 'grid.dat'): 'grid_inc content',
         }).return_value
         return mock_open
@@ -424,7 +426,7 @@ def test_move_model_files_duplicate_file(mocker):
     fcs = FcsNexusFile.generate_fcs_structure(fcs_path)
 
     new_include_loc = 'nexus_data'
-    expected_files = ['structured_grid_grid.dat', 'structured_grid.dat', 'runcontrol.dat', ]
+    expected_files = ['structured_grid_grid.dat', 'structured_grid.dat', 'runcontrol.dat']
     expected_files = [os.path.join('/data', new_include_loc, x) for x in expected_files]
     expected_files.append('/data/new_fcs.fcs')
 
@@ -461,6 +463,7 @@ def test_move_model_files_duplicate_file(mocker):
     assert list_of_write_names == expected_files
     assert len(list_of_write_names) == 4
 
+
 def test_move_model_files_skipped_array(mocker):
     # Arrange
     fcs_path = 'test_fcs.fcs'
@@ -493,7 +496,7 @@ def test_move_model_files_skipped_array(mocker):
     fcs = FcsNexusFile.generate_fcs_structure(fcs_path)
 
     new_include_loc = 'nexus_data'
-    expected_files = ['structured_grid_arrays.dat', 'structured_grid.dat', 'runcontrol.dat', ]
+    expected_files = ['structured_grid_arrays.dat', 'structured_grid.dat', 'runcontrol.dat']
     expected_files = [os.path.join('/data', new_include_loc, x) for x in expected_files]
     expected_files.append('/data/new_fcs.fcs')
 
@@ -523,6 +526,7 @@ def test_move_model_files_skipped_array(mocker):
     mocker.patch('os.path.exists', file_exists_mock)
 
     append_writes_files_mocker = mocker.mock_open()
+
     def append_file_calls_side_effect(file_name, mode):
         if mode == 'w':
             file_calls.append(file_name)
@@ -549,6 +553,7 @@ def test_move_model_files_skipped_array(mocker):
     assert list_of_write_contents == ['array_content', expected_grid_content, '', expected_fcs_content]
     assert len(list_of_write_names) == 4
 
+
 def test_fcs_repr(mocker):
     # Arrange
     fcs_content = '''DESC reservoir1
@@ -572,6 +577,7 @@ def test_fcs_repr(mocker):
 \t\twell_files: 1
 \t\thyd_files: 1
 """
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             fcs_path: fcs_content,
@@ -592,6 +598,76 @@ def test_fcs_repr(mocker):
     assert result == expected_result
 
 
+@pytest.mark.parametrize('overwrite_files', [True, False], ids=['overwrite_files', 'no_overwrite_files'])
+def test_move_model_files_duplicate(mocker, overwrite_files):
+    # Arrange
+    fcs_path = 'test_fcs.fcs'
+
+    fcs_content = '''DESC reservoir1
+            RUN_UNITS ENGLISH
+            DATEFORMAT DD/MM/YYYY
+            INITIALIZATION_FILES
+        	 EQUIL Method 1 nexus_data/nexus_data/equil.dat
+        	 EQUIL Method 2 nexus_data/nexus_data/equil.dat
+        	  RECURRENT_FILES
+            RUNCONTROL nexus_data/nexus_data/runcontrol.dat
+        	 '''
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'test_fcs.fcs': fcs_content,
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+    fcs_file_exists = Mock(side_effect=lambda x: True)
+    mocker.patch('os.path.isfile', fcs_file_exists)
+
+    mocker.patch("os.listdir", return_value=['runcontrol.dat', 'equil.dat', 'equil.dat', 'new_fcs.fcs'])
+
+    model = NexusSimulator(fcs_path)
+    writing_mock_open = mocker.mock_open()
+    mocker.patch("builtins.open", writing_mock_open)
+
+    new_include_loc = 'nexus_data'
+    expected_files = ['runcontrol.dat', 'equil.dat', 'equil.dat']
+    expected_files = [os.path.join('/data', new_include_loc, x) for x in expected_files]
+    expected_files.append('/data/new_fcs.fcs')
+
+    files_written = []
+
+    # Mock out the file exists
+    def file_exists_side_effect(file_name):
+        if file_name in files_written:
+            return True
+        else:
+            files_written.append(file_name)
+            return False
+
+    mocker.patch('os.path.exists', file_exists_side_effect)
+
+    # mock out makedirs
+    makedirs_mock = MagicMock()
+    mocker.patch('os.makedirs', makedirs_mock)
+
+    # Act
+    if overwrite_files:
+        model.move_simulator_files(new_file_path='/data/new_fcs.fcs', new_include_file_location=new_include_loc,
+                                   overwrite_files=overwrite_files)
+    else:
+        with pytest.raises(ValueError) as ve:
+            model.move_simulator_files(new_file_path='/data/new_fcs.fcs', new_include_file_location=new_include_loc,
+                                       overwrite_files=overwrite_files)
+
+    # Assert
+    if overwrite_files:
+        list_of_write_names = [call.args[0] for call in writing_mock_open.mock_calls if "'w')" in str(call)]
+        assert list_of_write_names == expected_files
+        assert len(list_of_write_names) == 4
+    else:
+        assert str(ve.value) == f'File already exists at {expected_files[2]} and overwrite_file set to False'
+
+
 def test_fcs_file_user(mocker):
     # Arrange
     fcs_content = '''DESC reservoir1
@@ -599,6 +675,7 @@ def test_fcs_file_user(mocker):
     DATEFORMAT DD/MM/YYYY'''
 
     fcs_path = 'test_fcs.fcs'
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             fcs_path: fcs_content,
