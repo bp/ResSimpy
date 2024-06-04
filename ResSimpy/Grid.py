@@ -31,6 +31,20 @@ class GridArrayDefinition:
     keyword_in_include_file: bool = False
     absolute_path: Optional[str] = None
 
+    def load_grid_array_definition_to_file_as_list(self) -> list[str]:
+        """Loads the grid array definition to a file as a list of strings."""
+        path = self.absolute_path
+        if path is None and self.value is not None:
+            path = self.value
+        elif path is None:
+            raise FileNotFoundError('No file path found in the grid array definition')
+        return fo.load_file_as_list(path)
+
+    def get_array(self) -> np.ndarray:
+        """Returns a 1D numpy array from the grid array definition."""
+        file_as_list = self.load_grid_array_definition_to_file_as_list()
+        return Grid.grid_file_as_list_to_numpy_array(file_as_list, None, None, None)
+
 
 @dataclass(kw_only=True)
 class Grid(ABC):
@@ -207,10 +221,5 @@ class Grid(ABC):
 
     def grid_array_definition_to_numpy_array(self, grid_array_definition: GridArrayDefinition) -> np.ndarray:
         """Converts a grid array to a numpy array."""
-        path = grid_array_definition.absolute_path
-        if path is None and grid_array_definition.value is not None:
-            path = grid_array_definition.value
-        elif path is None:
-            raise FileNotFoundError('No file path found in the grid array definition')
-        file_as_list = fo.load_file_as_list(path)
+        file_as_list = grid_array_definition.load_grid_array_definition_to_file_as_list()
         return self.grid_file_as_list_to_numpy_array(file_as_list, self.range_x, self.range_y, self.range_z)
