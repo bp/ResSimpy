@@ -6,6 +6,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 def to_dict(nexus_object: Any, keys_in_nexus_style: bool = False, add_date: bool = True, add_units: bool = True,
             include_nones: bool = True, units_as_string: bool = True) -> dict[str, None | str | int | float]:
     """Returns a dictionary of the attributes of a Nexus object. Requires a nexus mapping dictionary.
+
         Useful for creating dataframes of objects.
 
     Args:

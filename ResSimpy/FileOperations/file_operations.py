@@ -9,6 +9,7 @@ def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,
                            comment_characters: Optional[list[str]] = None,
                            square_bracket_comments: bool = False) -> list[str]:
     """Strips all of the inline, single and multi line comments out of a file.
+
     Comment characters assumed are: ! and square brackets. Escaped characters are ones wrapped in quotation marks.
 
     Args:
@@ -270,7 +271,8 @@ def __replace_with_variable_entry(new_line: str, original_line: str, replace_wit
 
 
 def check_token(token: str, line: str) -> bool:
-    """Checks if the text line contains the supplied token and is not commented out
+    """Checks if the text line contains the supplied token and is not commented out.
+
     Args:
         token (str): keyword value to search the line for
         line (str): string to search the token in

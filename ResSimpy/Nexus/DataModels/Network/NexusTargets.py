@@ -1,5 +1,7 @@
-"""Class for handling targets in the Nexus Network. This class is used to store and manipulate the targets in a
-NexusNetwork. It is stored as an instance in the NexusNetwork class as "targets".
+"""Class for handling targets in the Nexus Network.
+
+This class is used to store and manipulate the targets in a NexusNetwork. It is stored as an instance in the
+NexusNetwork class as "targets".
 """
 from __future__ import annotations
 from dataclasses import dataclass, field
@@ -24,8 +26,10 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class NexusTargets(Targets):
-    """Class for handling targets in the Nexus Network. This class is used to store and manipulate the targets in a
-    NexusNetwork. It is stored as an instance in the NexusNetwork class as "targets".
+    """Class for handling targets in the Nexus Network.
+
+    This class is used to store and manipulate the targets in a NexusNetwork. It is stored as an instance in the
+    NexusNetwork class as "targets".
     """
     __targets: list[NexusTarget] = field(default_factory=list)
 
@@ -75,7 +79,8 @@ class NexusTargets(Targets):
         return next(targets_to_return, None)
 
     def get_df(self) -> pd.DataFrame:
-        """Creates a dataframe representing all processed target data in a surface file
+        """Creates a dataframe representing all processed target data in a surface file.
+
         Returns:
             DataFrame: of the properties of the targets through time with each row representing a target.
         """
@@ -142,8 +147,10 @@ class NexusTargets(Targets):
 
     def modify(self, target_to_modify: dict[str, None | str | float | int],
                new_properties: dict[str, None | str | float | int]) -> None:
-        """Modifies an existing node based on a matching dictionary of properties (partial matches allowed if precisely
-         1 matching node is found). Updates the properties with properties in the new_properties dictionary.
+        """Modifies an existing node based on a matching dictionary of properties.
+
+        Partial matches allowed if precisely 1 matching node is found. Updates the properties with properties in the
+        new_properties dictionary.
 
         Args:
             target_to_modify (dict[str, None | str | float | int]): dictionary containing attributes to match in the

@@ -18,8 +18,9 @@ class ModifyObjectOperations:
 
     def modify_network_object(self, object_to_modify: dict[str, None | str | float | int],
                               new_properties: dict[str, None | str | float | int], network: NexusNetwork) -> None:
-        """Modifies an existing object based on a matching dictionary of properties (partial matches allowed if
-        precisely 1 matching object is found).
+        """Modifies an existing object based on a matching dictionary of properties.
+
+        Partial matches allowed if precisely 1 matching object is found.
         Updates the properties with properties in the new_properties dictionary.
         Applies primarily to network based objects.
 

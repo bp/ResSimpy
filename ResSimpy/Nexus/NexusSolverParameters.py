@@ -1,4 +1,4 @@
-"""Holds the class for the NexusSolverParams which handles loading and storing of the series of
+"""Holds the class for the NexusSolverParams which handles loading and storing of the series of \
 NexusSolverParam data objects.
 """
 from __future__ import annotations

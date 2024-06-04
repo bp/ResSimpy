@@ -68,7 +68,7 @@ ignore = ["UP007",  "ANN101", "N999", "UP035", "S105", "N802", "S106", "S107", "
     "D105", "D203", "D213", "RUF010", "I001", "B028", "COM812", "PD901",
     # To fix later:
     "C901", # Complexity
-    "D102", "D100", "D103", "D101", "D205", "D401", "D104", "D106", # Docstrings
+    "D102", "D100", "D103", "D101", "D205", "D106", # Docstrings
     # TODO need to remove references to Union, Optional, capital lettered typing (e.g. List)
              # from typings module.
     ]

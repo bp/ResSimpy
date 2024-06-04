@@ -86,9 +86,9 @@ class NexusProc:
 
     @staticmethod
     def reset_nexus_proc_function_counts() -> dict[str, int]:
-        """This function initializes and returns a dict of built-in Nexus proc functions. Please refer to page
-        1013 of the 2022 Nexus Keyword manual for a description of the functions.
+        """This function initializes and returns a dict of built-in Nexus proc functions.
 
+        Please refer to page 1013 of the 2022 Nexus Keyword manual for a description of the functions.
             Returns: A dictionary of Nexus proc functions where the key is the specific function and the value is
         the count, initialized to zero.
         """

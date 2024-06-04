@@ -1,4 +1,6 @@
-"""Holds all the node connections in a network. This class is responsible for loading, modifying and removing
+"""Holds all the node connections in a network.
+
+This class is responsible for loading, modifying and removing
 connections from a network. It also holds the list of connections in memory.
 An instance is held within the NexusNetwork class as "connections".
 """
@@ -27,8 +29,10 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class NexusNodeConnections(NodeConnections):
-    """Holds all the node connections in a network. This class is responsible for loading, modifying and removing
-    connections from a network. It also holds the list of connections in memory.
+    """Holds all the node connections in a network.
+
+    This class is responsible for loading, modifying and removing connections from a network. It also holds the list
+    of connections in memory.
     """
     __connections: list[NexusNodeConnection] = field(default_factory=list)
 
@@ -67,7 +71,8 @@ class NexusNodeConnections(NodeConnections):
         return next(connections_to_return, None)
 
     def get_df(self) -> pd.DataFrame:
-        """Creates a dataframe representing all processed node connection data in a surface file
+        """Creates a dataframe representing all processed node connection data in a surface file.
+
         Returns:
             DataFrame: of the properties of the connections through time with each row representing a node.
         """
@@ -123,7 +128,8 @@ class NexusNodeConnections(NodeConnections):
     def modify(self, obj_to_modify: dict[str, None | str | float | int],
                new_properties: dict[str, None | str | float | int]) -> None:
         """Modifies an existing connection based on a matching dictionary of properties.
-        (partial matches allowed if precisely 1 matching node is found).
+
+        Partial matches allowed if precisely 1 matching node is found.
         Updates the properties with properties in the new_properties dictionary.
 
         Args:

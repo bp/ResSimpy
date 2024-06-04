@@ -218,7 +218,8 @@ class NexusSimulator(Simulator):
                         f"{other} has {type(other)}")
 
     def remove_temp_from_properties(self) -> None:
-        """Updates model values if the files are moved from a temp directory
+        """Updates model values if the files are moved from a temp directory.
+
         Replaces the first instance of temp/ in the file paths in the nexus simulation file paths.
 
         Raises:
@@ -368,6 +369,7 @@ class NexusSimulator(Simulator):
     @staticmethod
     def get_check_oil_gas_types_for_models(models: list[str]) -> Optional[str]:
         """Checks for fluid types within a list of paths to models.
+
         Currently limited to checking for the first SURFACE network in a file.
 
         Args:
@@ -425,6 +427,7 @@ class NexusSimulator(Simulator):
     @staticmethod
     def get_fluid_type(surface_file_content: list[str]) -> str:
         """Gets the fluid type for a single model from a surface file.
+
         Defaults to BLACKOIL if no explicit fluid type is found.
 
         Args:
@@ -468,8 +471,9 @@ class NexusSimulator(Simulator):
         return NexusSimulator.get_fluid_type(self.model_files.surface_files[1].get_flat_list_str_file)
 
     def check_output_path(self) -> None:
-        """Confirms that the output path has been set (used to stop accidental writing operations in the original
-        directory).
+        """Confirms that the output path has been set.
+
+        (used to stop accidental writing operations in the original directory).
 
         Raises:
             ValueError: if the destination provided is set to None.
@@ -483,6 +487,7 @@ class NexusSimulator(Simulator):
 
     def set_output_path(self, path: str) -> None:
         """Initialises the output to the declared output location.
+
         If the file is a different directory to the origin path location the function will set the origin
         to the new destination.
         """
@@ -492,6 +497,7 @@ class NexusSimulator(Simulator):
 
     def __load_fcs_file(self) -> None:
         """Loads in the information from the supplied FCS file into the class instance.
+
         Loads in the paths for runcontrol, structured grid and the first surface network.
         Loads in the values for dateformat and run units.
         Attempts to load the run_control_file.
@@ -608,8 +614,9 @@ class NexusSimulator(Simulator):
 
     @staticmethod
     def update_file_value(file_path: str, token: str, new_value: str, add_to_start: bool = False) -> None:
-        """Updates a value in a file if it is present and in the format {TOKEN} {VALUE}. If the token
-        isn't present, it will add the token + value to either the start or end of the file.
+        """Updates a value in a file if it is present and in the format {TOKEN} {VALUE}.
+
+        If the token isn't present, it will add the token + value to either the start or end of the file.
 
         Args:
             file_path (str): path to a file to update the token/value pair in
@@ -687,13 +694,15 @@ class NexusSimulator(Simulator):
             text_file.write(new_file_str)
 
     def get_date_format(self) -> str:
-        """Returns the date format being used by the model
+        """Returns the date format being used by the model.
+
         formats used: ('MM/DD/YYYY', 'DD/MM/YYYY').
         """
         return self._sim_controls.get_date_format(self.date_format)
 
     def modify(self, operation: str, section: str, keyword: str, content: list[str]) -> None:
-        """Generic modify method to modify part of the input deck. \
+        """Generic modify method to modify part of the input deck.
+
         Operations are dependent on the section being modified.
 
         Args:
@@ -785,6 +794,7 @@ class NexusSimulator(Simulator):
 
     def update_simulator_files(self) -> None:
         """Updates the simulator with any changes to the included files. Overwrites existing files.
+
         IMPORTANT: No changes to the model will be saved until this method is called!
         """
 

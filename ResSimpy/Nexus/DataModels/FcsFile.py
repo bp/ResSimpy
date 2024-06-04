@@ -429,6 +429,7 @@ class FcsNexusFile(NexusFile):
 
     def update_model_files(self) -> None:
         """Updates all the modified files in the model. Keeps file names and paths the same.
+
         Warning: this method overwrites the existing files!
         """
         # Loop through all files in the model, writing out the contents if they have been modified.

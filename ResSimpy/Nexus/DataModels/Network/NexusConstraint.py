@@ -12,7 +12,9 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
 @dataclass(repr=False)
 class NexusConstraint(Constraint):
-    """Attributes:
+    """Class representing a single constraint object within the NexusNetwork for a single datetime.
+
+    Attributes:
     name (str): name of the well (NAME)
     max_surface_oil_rate (float): max surface oil rate (QOSMAX)
     max_surface_gas_rate (float): max surface gas rate (QGSMAX)
@@ -420,6 +422,7 @@ class NexusConstraint(Constraint):
 
     def write_qmult_table(self) -> list[str]:
         """Writes out a QMULT table from a constraint that uses the following attributes.
+
         'QOIL': ('qmult_oil_rate', float).
         'QWATER': ('qmult_water_rate', float).
         'QGAS': ('qmult_gas_rate', float).

@@ -1,5 +1,7 @@
-"""Class for handling wellbores in the Nexus Network. This class is used to store and manipulate the wellbores in a
-NexusNetwork. It is stored as an instance in the NexusNetwork class as "wellbores".
+"""Class for handling wellbores in the Nexus Network.
+
+This class is used to store and manipulate the wellbores in a NexusNetwork. It is stored as an instance in the
+NexusNetwork class as "wellbores".
 """
 from __future__ import annotations
 
@@ -25,9 +27,11 @@ if TYPE_CHECKING:
 
 @dataclass
 class NexusWellbores(Wellbores):
-    """Class for handling wellbores in the Nexus Network. This class is used to store and manipulate the wellbores in a
-    NexusNetwork. It is stored as an instance in the NexusNetwork class as "wellbores". The list of wellbores can be
-    accessed in the NexusNetwork class through the get_all method.
+    """Class for handling wellbores in the Nexus Network.
+
+    This class is used to store and manipulate the wellbores in a NexusNetwork. It is stored as an instance in the
+    NexusNetwork class as "wellbores". The list of wellbores can be accessed in the NexusNetwork class through the
+    get_all method.
     """
     __wellbores: list[NexusWellbore] = field(default_factory=list)
 
@@ -113,7 +117,8 @@ class NexusWellbores(Wellbores):
     def modify(self, obj_to_modify: dict[str, None | str | float | int],
                new_properties: dict[str, None | str | float | int]) -> None:
         """Modifies an existing wellbore based on a matching dictionary of properties.
-        (partial matches allowed if precisely 1 matching node is found).
+
+        Partial matches allowed if precisely 1 matching node is found.
         Updates the properties with properties in the new_properties dictionary.
 
         Args:

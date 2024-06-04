@@ -9,6 +9,7 @@ from ResSimpy.SolverParameter import SolverParameter
 @dataclass(kw_only=True)
 class NexusSolverParameter(SolverParameter):
     """Data object storing the solver parameters for the Nexus Simulation runs.
+
     Nexus is time-dependent for the solver parameters.
     """
 
@@ -152,6 +153,7 @@ class NexusSolverParameter(SolverParameter):
     @staticmethod
     def dt_keyword_mapping() -> dict[str, tuple[str, type]]:
         """Gets the keyword mapping from simulator keyword to ResSimpy attribute and the type of the object.
+
         Associated with the DT keywords in Nexus. e.g. of the form "DT MAX 50".
         """
         # DT keywords
@@ -179,6 +181,7 @@ class NexusSolverParameter(SolverParameter):
     @staticmethod
     def solver_keyword_mapping() -> dict[str, tuple[str, type]]:
         """Gets the keyword mapping from simulator keyword to ResSimpy attribute and the type of the object.
+
         Associated with the SOLVER keywords in Nexus. e.g. of the form "SOLVER ALL CYCLELENGTH 10".
         """
         # Solver keywords
@@ -222,6 +225,7 @@ class NexusSolverParameter(SolverParameter):
     @staticmethod
     def impstab_keyword_mapping() -> dict[str, tuple[str, type]]:
         """Gets the keyword mapping from simulator keyword to ResSimpy attribute and the type of the object.
+
         Associated with the IMPSTAB keywords in Nexus. e.g. of the form "IMPSTAB TARGETCFL 0.5".
         """
         # IMPSTAB keywords
@@ -243,6 +247,7 @@ class NexusSolverParameter(SolverParameter):
     @staticmethod
     def gridsolver_keyword_mapping() -> dict[str, tuple[str, type]]:
         """Gets the keyword mapping from simulator keyword to ResSimpy attribute and the type of the object.
+
         Associated with the GRIDSOLVER keywords in Nexus. e.g. of the form "GRIDSOLVER PRESS_RED 0.5".
         """
         # GRIDSOLVER keywords
@@ -260,6 +265,7 @@ class NexusSolverParameter(SolverParameter):
     @staticmethod
     def solo_keyword_mapping() -> dict[str, tuple[str, type]]:
         """Gets the keyword mapping from simulator keyword to ResSimpy attribute and the type of the object.
+
         Associated with the keywords that are found on their own in a runcontrol file.".
         """
         # Solo keywords
@@ -289,6 +295,7 @@ class NexusSolverParameter(SolverParameter):
     @staticmethod
     def tols_keyword_mapping() -> dict[str, tuple[str, type]]:
         """Gets the keyword mapping from simulator keyword to ResSimpy attribute and the type of the object.
+
         Associated with the TOLS keywords in Nexus. e.g. of the form "TOLS VOLCON 100.5".
         """
         # TOLS keywords
@@ -304,6 +311,7 @@ class NexusSolverParameter(SolverParameter):
     @staticmethod
     def dcmax_keyword_mapping() -> dict[str, tuple[str, type]]:
         """Gets the keyword mapping from simulator keyword to ResSimpy attribute and the type of the object.
+
         Associated with the DCMAX keywords in Nexus. e.g. of the form "DCMAX IMPES 0.5".
         """
         # DCMAX keywords
@@ -317,6 +325,7 @@ class NexusSolverParameter(SolverParameter):
     @staticmethod
     def keyword_mapping() -> dict[str, tuple[str, type]]:
         """Gets the keyword mapping from simulator keyword to ResSimpy attribute and the type of the object.
+
         Compiled keywords for all ResSimpy attributes apart from the DCMAX keywords.
         """
         # DT keywords

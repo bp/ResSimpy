@@ -11,8 +11,9 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class NexusProcs:
-    """Class for handling procedures in the Nexus Network. This class is used to store and collect information about
-    certain procedures written in the Nexus surface file.
+    """Class for handling procedures in the Nexus Network.
+
+    This class is used to store and collect information about certain procedures written in the Nexus surface file.
     """
     # need field function to make a new unique empty list
     __procs: list[NexusProc] = field(default_factory=list)

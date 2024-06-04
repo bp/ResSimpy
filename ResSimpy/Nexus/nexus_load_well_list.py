@@ -54,6 +54,7 @@ def get_previous_well_list(well_list_name: str, well_lists: list[NexusWellList])
 def load_well_list_from_table(well_list_as_list_str: list[str], current_date: str, well_list_name: str,
                               previous_well_list: NexusWellList | None = None) -> NexusWellList:
     """Loads a well list from a table taken from a surface network file.
+
     Currently does not support Wildcards in welllists.
 
     Args:

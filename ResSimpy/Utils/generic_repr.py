@@ -3,8 +3,7 @@ from typing import Any
 
 
 def generic_repr(input_class: Any) -> str:
-    """Creates a prettier object representation while removing attributes that are None from that
-    representation.
+    """Creates a prettier object representation while removing attributes that are None from that representation.
 
     Args:
     ----

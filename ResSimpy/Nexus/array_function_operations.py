@@ -315,7 +315,7 @@ def summarize_model_functions(function_list_to_parse: list[list[str]]) -> pd.Dat
 
 
 def create_grid_array_function_objects(array_functions_as_list: list[list[str]]) -> list[NexusGridArrayFunction]:
-    """Function that creates a list of grid array function objects, from a list of functions as a list of strings
+    """Function that creates a list of grid array function objects, from a list of functions as a list of strings \
     output from collect_all_function_blocks.
 
     Args:

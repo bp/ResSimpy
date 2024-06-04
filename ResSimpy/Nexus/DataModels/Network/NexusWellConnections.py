@@ -1,4 +1,6 @@
-"""Class for handling well connections in the Nexus Network. This class is used to store and manipulate the well
+"""Class for handling well connections in the Nexus Network.
+
+This class is used to store and manipulate the well
 connections in a NexusNetwork. It is stored as an instance in the NexusNetwork class as "well_connections".
 In Nexus this is the WELLS table.
 """
@@ -25,10 +27,11 @@ if TYPE_CHECKING:
 
 @dataclass
 class NexusWellConnections(WellConnections):
-    """Class for handling well connections in the Nexus Network. This class is used to store and manipulate the well
-    connections in a NexusNetwork. It is stored as an instance in the NexusNetwork class as "well_connections".
-    In Nexus this is the WELLS table. The list of well connections can be accessed in the NexusNetwork class through the
-    get_all method.
+    """Class for handling well connections in the Nexus Network.
+
+    This class is used to store and manipulate the well connections in a NexusNetwork. It is stored as an instance in
+    the NexusNetwork class as "well_connections". In Nexus this is the WELLS table. The list of well connections can
+    be accessed in the NexusNetwork class through the get_all method.
     """
     _well_connections: list[NexusWellConnection] = field(default_factory=list)
 
@@ -67,7 +70,8 @@ class NexusWellConnections(WellConnections):
         return next(to_return, None)
 
     def get_df(self) -> pd.DataFrame:
-        """Creates a dataframe representing all processed well connections data in a surface file
+        """Creates a dataframe representing all processed well connections data in a surface file.
+
         Returns:
             DataFrame: of the properties of the well connections through time with each row representing a single well \
             connection.
@@ -115,7 +119,8 @@ class NexusWellConnections(WellConnections):
     def modify(self, obj_to_modify: dict[str, None | str | float | int],
                new_properties: dict[str, None | str | float | int]) -> None:
         """Modifies an existing well connection based on a matching dictionary of properties.
-        (partial matches allowed if precisely 1 matching node is found).
+
+        Partial matches allowed if precisely 1 matching node is found.
         Updates the properties with properties in the new_properties dictionary.
 
         Args:

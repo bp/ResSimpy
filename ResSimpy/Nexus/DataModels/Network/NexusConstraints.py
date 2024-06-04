@@ -1,6 +1,8 @@
-"""Class that holds all the constraints for a NexusNetwork object. This class is responsible for loading,
-modifying and removing constraints from the NexusNetwork object. This class is also responsible for
-writing the constraints to the Nexus deck. An instance of this is held within the Network class as "constraints".
+"""Class that holds all the constraints for a NexusNetwork object.
+
+This class is responsible for loading, modifying and removing constraints from the NexusNetwork object. This class is
+also responsible for writing the constraints to the Nexus deck. An instance of this is held within the Network class
+as "constraints".
 """
 from __future__ import annotations
 
@@ -26,9 +28,10 @@ if TYPE_CHECKING:
 
 @dataclass
 class NexusConstraints(Constraints):
-    """Class that holds all the constraints for a NexusNetwork object. This class is responsible for loading,
-    modifying and removing constraints from the NexusNetwork object. This class is also responsible for
-    writing the constraints to the Nexus deck.
+    """Class that holds all the constraints for a NexusNetwork object.
+
+    This class is responsible for loading, modifying and removing constraints from the NexusNetwork object. This
+    class is also responsible for writing the constraints to the Nexus deck.
 
     Attributes:
         constraints: dict[str, list[NexusConstraint]]: dictionary of all constraints defined within a model,
@@ -49,7 +52,8 @@ class NexusConstraints(Constraints):
 
     def get_all(self, object_name: Optional[str] = None, date: Optional[str] = None) -> \
             dict[str, list[NexusConstraint]]:
-        """Get the constraints of the existing model with optional parameters to filter for name and date
+        """Get the constraints of the existing model with optional parameters to filter for name and date.
+
         Args:
             object_name (Optional[str]): name of the connection, node or wellname to return. Defaults to None.
             date (Optional[str]): date in model format to filter the dates to in the constraints
@@ -74,7 +78,8 @@ class NexusConstraints(Constraints):
         return date_filtered_constraints
 
     def get_df(self) -> pd.DataFrame:
-        """Creates a dataframe representing all processed constraint data in a surface file
+        """Creates a dataframe representing all processed constraint data in a surface file.
+
         Returns:
             DataFrame: of the properties of the constraint through time with each row representing \
                 a change in constraint.
@@ -106,6 +111,7 @@ class NexusConstraints(Constraints):
 
     def _add_to_memory(self, additional_constraints: Optional[dict[str, list[NexusConstraint]]]) -> None:
         """Adds additional constraints to memory within the NexusConstraints object.
+
             If user adds constraints list this will not be reflected in the Nexus deck at this time.
 
         Args:
@@ -145,7 +151,8 @@ class NexusConstraints(Constraints):
 
     def remove(self, constraint_dict: Optional[dict[str, None | float | str | int]] = None,
                constraint_id: Optional[UUID] = None) -> None:
-        """Remove a constraint based on closest matching constraint, requires node name and date.\
+        """Remove a constraint based on closest matching constraint, requires node name and date.
+
         Needs one of at least constraint dict or constraint id.
 
         Args:
@@ -382,8 +389,9 @@ class NexusConstraints(Constraints):
                new_constraint_props: dict[str, None | float | int | str | UnitSystem] | Constraint,
                comments: Optional[str] = None) \
             -> None:
-        """Modify an existing constraint. Retains existing constraint values that are not overridden by the new \
-        constraint properties.
+        """Modify an existing constraint.
+
+        Retains existing constraint values that are not overridden by the new constraint properties.
 
         Args:
             name (str): The well name

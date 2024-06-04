@@ -18,7 +18,7 @@ class WellConnections(NetworkOperationsMixIn, ABC):
     _well_connections: Sequence[WellConnection] = field(default_factory=list)
 
     def __init__(self, parent_network: Network) -> None:
-        """Abstract base class for holding the well connections data for holding all components of the
+        """Abstract base class for holding the well connections data for holding all components of the \
         production networks.
 
         Args:
