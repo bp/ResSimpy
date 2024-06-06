@@ -37,3 +37,14 @@ class WellLists(ABC):
     def unique_names(self) -> list[str]:
         """Returns all WellList names."""
         return list({x.name for x in self.welllists})
+
+    def get_all_by_name(self, well_list_name: str) -> Sequence[WellList]:
+        """Returns a single WellList instance by name.
+
+        Args:
+            well_list_name (str): The name of the WellList.
+
+        Returns:
+            WellList: The WellList instance.
+        """
+        return [x for x in self.__well_lists if x.name == well_list_name]
