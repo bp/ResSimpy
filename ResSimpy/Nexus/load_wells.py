@@ -140,8 +140,22 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
     wells: list[NexusWell] = []
     well_name_list: list[str] = []
 
+    exclude_section: bool = False
+
     for index, line in enumerate(file_as_list):
         uppercase_line = line.upper()
+
+        trimmed_line = line.strip()
+
+        # Exclude block comments
+        if len(trimmed_line) > 0 and trimmed_line[0] == '[':
+            exclude_section = True
+
+        if exclude_section:
+            if ']' in trimmed_line and trimmed_line[0] != '!' and trimmed_line[0] != 'C':
+                exclude_section = False
+            else:
+                continue
 
         # If we haven't got the units yet, check to see if this line contains a declaration for them.
         if wellspec_file_units is None:
@@ -291,12 +305,28 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
     completions: list[NexusCompletion] = []
     file_as_list: list[str] = nexus_file.get_flat_list_str_file
 
+    exclude_section = False
+
     for index, line in enumerate(file_as_list[header_index + 1:]):
         # check for end of table lines:
         # TODO update with a more robust table end checker function
         end_of_table = nfo.nexus_token_found(line, WELLS_KEYWORDS)
         if end_of_table:
             return completions
+
+        trimmed_line = line.strip()
+
+        # Exclude block comments
+        if len(trimmed_line) > 0 and trimmed_line[0] == '[':
+            exclude_section = True
+
+        if exclude_section:
+            if ']' in trimmed_line and trimmed_line[0] != '!' and trimmed_line[0] != 'C':
+                exclude_section = False
+                continue
+            else:
+                continue
+
         valid_line, header_values = nfo.table_line_reader(header_values, headers, line)
         # if a valid line is found load a completion otherwise continue
         if not valid_line:
