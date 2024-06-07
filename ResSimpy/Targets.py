@@ -8,7 +8,7 @@ from ResSimpy.OperationsMixin import NetworkOperationsMixIn
 
 @dataclass(kw_only=True)
 class Targets(NetworkOperationsMixIn, ABC):
-    __targets: list[Target] = field(default_factory=list)
+    _targets: list[Target] = field(default_factory=list)
 
     @property
     def _network_element_name(self) -> Literal['targets']:

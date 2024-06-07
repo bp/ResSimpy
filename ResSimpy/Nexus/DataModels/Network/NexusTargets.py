@@ -31,7 +31,7 @@ class NexusTargets(Targets):
     This class is used to store and manipulate the targets in a NexusNetwork. It is stored as an instance in the
     NexusNetwork class as "targets".
     """
-    __targets: list[NexusTarget] = field(default_factory=list)
+    _targets: list[NexusTarget] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork) -> None:
         """Initialises the NexusTargets class.
@@ -40,7 +40,7 @@ class NexusTargets(Targets):
             parent_network (NexusNetwork): The network that the targets are a part of.
         """
         self.__parent_network: NexusNetwork = parent_network
-        self.__targets: list[NexusTarget] = []
+        self._targets: list[NexusTarget] = []
         self.__add_object_operations = AddObjectOperations(None, self.table_header,
                                                            self.table_footer, self.__parent_network.model)
         self.__remove_object_operations = RemoveObjectOperations(self.__parent_network, self.table_header,
@@ -60,7 +60,7 @@ class NexusTargets(Targets):
     def get_all(self) -> Sequence[NexusTarget]:
         """Returns a list of targets loaded from the simulator."""
         self.__parent_network.get_load_status()
-        return self.__targets
+        return self._targets
 
     def get_by_name(self, target_name: str) -> Optional[NexusTarget]:
         """Returns a single target with the provided name loaded from the simulator.
@@ -75,7 +75,7 @@ class NexusTargets(Targets):
 
         """
         targets_to_return = filter(lambda x: False if x.name is None else x.name.upper() == target_name.upper(),
-                                   self.__targets)
+                                   self._targets)
         return next(targets_to_return, None)
 
     def get_df(self) -> pd.DataFrame:
@@ -84,7 +84,7 @@ class NexusTargets(Targets):
         Returns:
             DataFrame: of the properties of the targets through time with each row representing a target.
         """
-        df_store = obj_to_dataframe(self.__targets)
+        df_store = obj_to_dataframe(self._targets)
         return df_store
 
     def get_overview(self) -> str:
@@ -122,7 +122,7 @@ class NexusTargets(Targets):
         """
         if additional_list is None:
             return
-        self.__targets.extend(additional_list)
+        self._targets.extend(additional_list)
 
     def remove(self, target_to_remove: dict[str, None | str | float | int] | UUID) -> None:
         """Remove a node from the network based on the properties matching a dictionary or id.
@@ -133,7 +133,7 @@ class NexusTargets(Targets):
 
         """
         self.__remove_object_operations.remove_object_from_network_main(
-            target_to_remove, self._network_element_name, self.__targets)
+            target_to_remove, self._network_element_name, self._targets)
 
     def add(self, target_to_add: dict[str, None | str | float | int]) -> None:
         """Adds a target to a network, taking a dictionary with properties for the new node.
