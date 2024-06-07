@@ -78,11 +78,14 @@ def test_grid_to_numpy_array(mocker):
     mocker.patch("builtins.open", mock_open_wrapper)
 
     grid = NexusGrid(assume_loaded=True)
-    grid._porosity = GridArrayDefinition(modifier='VALUE', value=file_path, keyword_in_include_file=False)
+    grid._porosity = GridArrayDefinition(modifier='VALUE', value=file_path, keyword_in_include_file=False,
+                                         absolute_path=file_path)
     grid._range_x = 2
     grid._range_y = 3
     grid._range_z = 2
     # Act
     result = grid.grid_array_definition_to_numpy_array(grid_array_definition=grid.porosity)
+    result_from_grid_array = grid.porosity.get_array()
     # Assert
     assert np.array_equal(expected_array, result)
+    assert np.array_equal(expected_array, result_from_grid_array)
