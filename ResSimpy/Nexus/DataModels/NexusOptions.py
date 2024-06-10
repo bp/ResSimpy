@@ -11,7 +11,7 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Utils.factory_methods import get_empty_dynamic_property_dict_union
 from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import OptionsUnits
 from ResSimpy.Nexus.NexusKeywords.options_keywords import OPT_KEYWORDS_VALUE_FLOAT, OPT_SINGLE_KEYWORDS
-from ResSimpy.Nexus.NexusKeywords.options_keywords import OPT_GLOBAL_METHOD_OVERRIDES_KEYWORDS
+from ResSimpy.Nexus.NexusKeywords.options_keywords import OPT_GLOBAL_METHOD_OVERRIDES_KEYWORDS, OPT_ARRAY_KEYWORDS
 from ResSimpy.Utils.general_utilities import check_if_string_is_float
 
 
@@ -145,6 +145,13 @@ class NexusOptions(DynamicProperty):
             potential_keyword = nfo.check_list_tokens(OPT_SINGLE_KEYWORDS, line)
             if potential_keyword is not None:
                 self.properties[potential_keyword] = ''
+
+            # Find option keywords with array values, e.g., BOUNDARY_FLUXIN_SECTORS 1 3 4
+            potential_keyword = nfo.check_list_tokens(OPT_ARRAY_KEYWORDS, line)
+            if potential_keyword is not None:
+                line_elems = line.split('!')[0].split()
+                keyword_index = line_elems.index(potential_keyword)
+                self.properties[potential_keyword] = np.fromstring(' '.join(line_elems[keyword_index+1:]), sep=' ')
 
             # Find global method overrides keywords
             potential_keyword = nfo.check_list_tokens(OPT_GLOBAL_METHOD_OVERRIDES_KEYWORDS, line)
