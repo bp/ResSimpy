@@ -59,6 +59,7 @@ build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.ruff]
 line-length = 120
+exclude = ["tests", "docs", "useful_scripts", ".config", ".github", ".run"]
 
 [tool.ruff.lint]
 # Rule codes for ruff can be found at: https://beta.ruff.rs/docs/rules/
@@ -72,7 +73,6 @@ ignore = ["UP007",  "ANN101", "N999", "UP035", "S105", "N802", "S106", "S107", "
     # TODO need to remove references to Union, Optional, capital lettered typing (e.g. List)
              # from typings module.
     ]
-exclude = ["./tests"]
 
 [tool.ruff.lint.pydocstyle]
 # Use Google-style docstrings.
