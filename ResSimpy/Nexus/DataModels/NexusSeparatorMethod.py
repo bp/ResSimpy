@@ -6,7 +6,7 @@ from typing import Optional, Union
 import numpy as np
 import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.Utils.factory_methods import get_empty_dict_union
+from ResSimpy.Utils.factory_methods import get_empty_dynamic_property_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Nexus.NexusKeywords.separator_keywords import SEPARATOR_KEYS_INT, SEPARATOR_KEYS_FLOAT
 from ResSimpy.Nexus.NexusKeywords.separator_keywords import SEPARATOR_KEYWORDS
@@ -33,7 +33,7 @@ class NexusSeparatorMethod(DynamicProperty):
     separator_type: Optional[SeparatorType] = None
     properties: dict[str, Union[str, int, float, Enum, list[str], np.ndarray,
                      pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
-        = field(default_factory=get_empty_dict_union)
+        = field(default_factory=get_empty_dynamic_property_dict_union)
     unit_system: UnitSystem
 
     def __init__(self, file: NexusFile, input_number: int, model_unit_system: UnitSystem,

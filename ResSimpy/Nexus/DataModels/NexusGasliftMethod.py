@@ -10,7 +10,7 @@ from ResSimpy.Nexus.NexusKeywords.gaslift_keywords import GL_ARRAY_KEYWORDS, GAS
 from ResSimpy.DynamicProperty import DynamicProperty
 from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import HydraulicsUnits
 
-from ResSimpy.Utils.factory_methods import get_empty_dict_union
+from ResSimpy.Utils.factory_methods import get_empty_dynamic_property_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
@@ -28,8 +28,10 @@ class NexusGasliftMethod(DynamicProperty):
 
     # General parameters
     file: NexusFile
-    properties: dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
-                     dict[str, Union[float, pd.DataFrame]]]] = field(default_factory=get_empty_dict_union)
+    properties: dict[str,
+                     Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
+                           dict[str, Union[float, pd.DataFrame]]]] = \
+        field(default_factory=get_empty_dynamic_property_dict_union)
     unit_system: UnitSystem
 
     def __init__(self, file: NexusFile, input_number: int, model_unit_system: UnitSystem,

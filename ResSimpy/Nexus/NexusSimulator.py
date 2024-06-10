@@ -7,6 +7,7 @@ from typing import Any, Union, Optional, Sequence
 
 import resqpy.model as rq
 from datetime import datetime
+from ResSimpy.Nexus.DataModels.NexusOptions import NexusOptions
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
@@ -109,6 +110,7 @@ class NexusSimulator(Simulator):
         self._network: NexusNetwork = NexusNetwork(model=self)
         self._wells: NexusWells = NexusWells(self)
         self._grid: Optional[NexusGrid] = None
+        self._options: Optional[NexusOptions] = None
         # Model dynamic properties
         self._pvt: NexusPVTMethods = NexusPVTMethods(model_unit_system=self.default_units)
         self._separator: NexusSeparatorMethods = NexusSeparatorMethods(model_unit_system=self.default_units)
@@ -530,7 +532,10 @@ class NexusSimulator(Simulator):
                 if value is not None:
                     self._default_units = UnitSystem(value.upper())
 
-        # Load in the other files
+        # Load in the Nexus options information
+        if self.model_files.options_file is not None:
+            self._options = NexusOptions(file=self.model_files.options_file,
+                                         model_unit_system=self.default_units)
 
         # === Load in dynamic properties ===
         # Read in PVT properties from Nexus PVT method files
@@ -820,3 +825,7 @@ class NexusSimulator(Simulator):
     @property
     def sim_controls(self) -> SimControls:
         return self._sim_controls
+
+    @property
+    def options(self) -> NexusOptions | None:
+        return self._options
