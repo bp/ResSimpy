@@ -119,6 +119,8 @@ def test_nexus_options_repr():
                            'PSTD': 14.7,
                            'TSTD': 60.0,
                            'RES_TEMP': 200.0,
+                           'IRF_REPORT': '', 'ZOLTAN': '',
+                           'BOUNDARY_FLUXIN_SECTORS': np.array([1, 2, 3, 4, 5]),
                            'REGDATA': {
                                'Injection_regions': pd.DataFrame({'NAME': ['Reg1', 'Reg2'],
                                                                   'NUMBER': [1, 2],
@@ -127,7 +129,8 @@ def test_nexus_options_repr():
                                'Fruit_regions': pd.DataFrame({'NUMBER': [1, 2, 3],
                                                               'NAME': ['Apple', 'Grape', 'Orange']
                                                               })
-                                        }
+                                        },
+          'STONE2': '', 'NONEQ': 'OFF', 'NOCHK_SAL_TEMP': ''
                            }
     expected_output = """
 FILE_PATH: test/file/options.dat
@@ -137,6 +140,9 @@ ENGLISH
 PSTD 14.7
 TSTD 60.0
 RES_TEMP 200.0
+IRF_REPORT
+ZOLTAN
+BOUNDARY_FLUXIN_SECTORS 1 2 3 4 5
 
 REGDATA Injection_regions
 NAME  NUMBER  IBAT
@@ -150,6 +156,12 @@ REGDATA Fruit_regions
       2  Grape
       3 Orange
 ENDREGDATA
+
+GLOBAL_METHOD_OVERRIDES
+STONE2
+NONEQ OFF
+NOCHK_SAL_TEMP
+ENDGLOBAL_METHOD_OVERRIDES
 
 """
     # Act
