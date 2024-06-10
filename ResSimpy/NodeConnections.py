@@ -8,7 +8,7 @@ from ResSimpy.OperationsMixin import NetworkOperationsMixIn
 
 @dataclass(kw_only=True)
 class NodeConnections(NetworkOperationsMixIn, ABC):
-    __connections: list[NodeConnection] = field(default_factory=list)
+    _connections: list[NodeConnection] = field(default_factory=list)
 
     @property
     def _network_element_name(self) -> Literal['connections']:

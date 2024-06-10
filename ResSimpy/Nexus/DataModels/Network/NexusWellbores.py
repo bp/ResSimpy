@@ -33,7 +33,7 @@ class NexusWellbores(Wellbores):
     NexusNetwork class as "wellbores". The list of wellbores can be accessed in the NexusNetwork class through the
     get_all method.
     """
-    __wellbores: list[NexusWellbore] = field(default_factory=list)
+    _wellbores: list[NexusWellbore] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork) -> None:
         """Initialises the NexusWellbores class.
@@ -42,7 +42,7 @@ class NexusWellbores(Wellbores):
             parent_network (NexusNetwork): The network that the wellbores are a part of.
         """
         self.__parent_network: NexusNetwork = parent_network
-        self.__wellbores: list[NexusWellbore] = []
+        self._wellbores: list[NexusWellbore] = []
         self.__add_object_operations = AddObjectOperations(NexusWellbore, self.table_header, self.table_footer,
                                                            self.__parent_network.model)
         self.__remove_object_operations = RemoveObjectOperations(self.__parent_network, self.table_header,
@@ -52,7 +52,7 @@ class NexusWellbores(Wellbores):
     def get_all(self) -> list[NexusWellbore]:
         """Returns a list of wellbores loaded from the simulator."""
         self.__parent_network.get_load_status()
-        return self.__wellbores
+        return self._wellbores
 
     def get_by_name(self, name: str) -> Optional[NexusWellbore]:
         """Returns a single well connection with the provided name loaded from the simulator.
@@ -64,11 +64,11 @@ class NexusWellbores(Wellbores):
             NexusWellbore: which has the same name as requested
         """
         to_return = filter(lambda x: False if x.name is None else x.name.upper() == name.upper(),
-                           self.__wellbores)
+                           self._wellbores)
         return next(to_return, None)
 
     def get_df(self) -> pd.DataFrame:
-        return obj_to_dataframe(self.__wellbores)
+        return obj_to_dataframe(self._wellbores)
 
     def get_overview(self) -> str:
         raise NotImplementedError('To be implemented')
@@ -90,7 +90,7 @@ class NexusWellbores(Wellbores):
         """
         if additional_list is None:
             return
-        self.__wellbores.extend(additional_list)
+        self._wellbores.extend(additional_list)
 
     def remove(self, obj_to_remove: dict[str, None | str | float | int] | UUID) -> None:
         """Remove a wellbore from the network based on the properties matching a dictionary or id.
@@ -101,7 +101,7 @@ class NexusWellbores(Wellbores):
 
         """
         self.__remove_object_operations.remove_object_from_network_main(
-            obj_to_remove, self._network_element_name, self.__wellbores)
+            obj_to_remove, self._network_element_name, self._wellbores)
 
     def add(self, obj_to_remove: dict[str, None | str | float | int]) -> None:
         """Adds a wellbore to a network, taking a dictionary with properties for the new wellbore.

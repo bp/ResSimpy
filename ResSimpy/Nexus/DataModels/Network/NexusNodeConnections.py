@@ -34,7 +34,7 @@ class NexusNodeConnections(NodeConnections):
     This class is responsible for loading, modifying and removing connections from a network. It also holds the list
     of connections in memory.
     """
-    __connections: list[NexusNodeConnection] = field(default_factory=list)
+    _connections: list[NexusNodeConnection] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork) -> None:
         """Initialises the NexusNodeConnections class.
@@ -43,7 +43,7 @@ class NexusNodeConnections(NodeConnections):
             parent_network (NexusNetwork): The network that the connections are a part of.
         """
         self.__parent_network: NexusNetwork = parent_network
-        self.__connections: list[NexusNodeConnection] = []
+        self._connections: list[NexusNodeConnection] = []
         self.__add_object_operations = AddObjectOperations(NexusNodeConnection, self.table_header, self.table_footer,
                                                            self.__parent_network.model)
         self.__remove_object_operations = RemoveObjectOperations(self.__parent_network, self.table_header,
@@ -62,12 +62,12 @@ class NexusNodeConnections(NodeConnections):
 
     def get_all(self) -> Sequence[NexusNodeConnection]:
         self.__parent_network.get_load_status()
-        return self.__connections
+        return self._connections
 
     def get_by_name(self, connection_name: str) -> Optional[NodeConnection]:
         self.__parent_network.get_load_status()
         connections_to_return = filter(lambda x: False if x.name is None else x.name.upper() == connection_name.upper(),
-                                       self.__connections)
+                                       self._connections)
         return next(connections_to_return, None)
 
     def get_df(self) -> pd.DataFrame:
@@ -77,7 +77,7 @@ class NexusNodeConnections(NodeConnections):
             DataFrame: of the properties of the connections through time with each row representing a node.
         """
         self.__parent_network.get_load_status()
-        return obj_to_dataframe(self.__connections)
+        return obj_to_dataframe(self._connections)
 
     def get_overview(self) -> str:
         raise NotImplementedError('To be implemented')
@@ -100,7 +100,7 @@ class NexusNodeConnections(NodeConnections):
         """
         if additional_list is None:
             return
-        self.__connections.extend(additional_list)
+        self._connections.extend(additional_list)
 
     def remove(self, obj_to_remove: dict[str, None | str | float | int] | UUID) -> None:
         """Remove a wellbore from the network based on the properties matching a dictionary or id.
@@ -111,7 +111,7 @@ class NexusNodeConnections(NodeConnections):
 
         """
         self.__remove_object_operations.remove_object_from_network_main(
-            obj_to_remove, self._network_element_name, self.__connections)
+            obj_to_remove, self._network_element_name, self._connections)
 
     def add(self, obj_to_remove: dict[str, None | str | float | int]) -> None:
         """Adds a connection to a network, taking a dictionary with properties for the new connection.

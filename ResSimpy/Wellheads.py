@@ -8,7 +8,7 @@ from ResSimpy.Wellhead import Wellhead
 
 @dataclass(kw_only=True)
 class Wellheads(NetworkOperationsMixIn, ABC):
-    __wellheads: list[Wellhead] = field(default_factory=list)
+    _wellheads: list[Wellhead] = field(default_factory=list)
 
     @property
     def _network_element_name(self) -> Literal['wellheads']:
