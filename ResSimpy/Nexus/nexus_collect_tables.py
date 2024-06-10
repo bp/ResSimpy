@@ -105,7 +105,7 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                                      property_map=property_map,
                                                      current_date=current_date,
                                                      unit_system=unit_system,
-                                                     nexus_obj_dict=nexus_constraints,
+                                                     constraint_obj_dict=nexus_constraints,
                                                      preserve_previous_object_attributes=True, date_format=date_format)
 
             elif token_found == 'WELLLIST':
@@ -119,7 +119,8 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                                      row_object=table_object_map[token_found],
                                                      property_map=property_map,
                                                      current_date=current_date,
-                                                     unit_system=unit_system, date_format=date_format)
+                                                     unit_system=unit_system, date_format=date_format,
+                                                     network_object_names=network_names)
 
             # store objects found into right dictionary
             list_of_token_obj = nexus_object_results[token_found]

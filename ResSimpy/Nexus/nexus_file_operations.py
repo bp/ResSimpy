@@ -7,6 +7,7 @@ from enum import Enum
 from io import StringIO
 from string import Template
 from typing import Optional, Union, Any
+import fnmatch
 
 import numpy as np
 import pandas as pd
@@ -407,8 +408,9 @@ def table_line_reader(keyword_store: dict[str, None | int | float | str], header
 def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map: dict[str, tuple[str, type]],
                           date_format: DateFormat, current_date: Optional[str] = None,
                           unit_system: Optional[UnitSystem] = None,
-                          nexus_obj_dict: Optional[dict[str, list[Any]]] = None,
+                          constraint_obj_dict: Optional[dict[str, list[Any]]] = None,
                           preserve_previous_object_attributes: bool = False,
+                          network_object_names: Optional[list[str]] = None
                           ) -> list[tuple[Any, int]]:
     """Loads a table row by row to an object provided in the row_object.
 
@@ -420,12 +422,13 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
             e.g. {'NAME': ('name', str)} for the object obj with attribute obj.name
         current_date (Optional[str]): date/time at which the object was found within a recurrent file
         unit_system (Optional[UnitSystem): most recent UnitSystem enum of the file where the object was found
-        nexus_obj_dict (Optional[dict[str, list[Any]]]): list of objects to append to. \
+        constraint_obj_dict (Optional[dict[str, list[Any]]]): list of objects to append to. \
             If None creates an empty list to populate.
         preserve_previous_object_attributes (bool): If True the code will find the latest object with a matching name\
             attribute and will update the object to reflect the latest additional attributes and overriding all \
             matching attributes. Must have a .update() method implemented and a name
         date_format (Optional[DateFormat]): The date format of the object.
+        network_object_names (Optional[str]): A list of all the network object names.
 
     Returns:
         list[obj]: list of tuples containing instances of the class provided for the row_object,
@@ -434,8 +437,8 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
     keyword_map = {x: y[0] for x, y in property_map.items()}
     header_index, headers = get_table_header(file_as_list, keyword_map)
     table_as_list = file_as_list[header_index + 1::]
-    if nexus_obj_dict is None:
-        nexus_obj_dict = {}
+    if constraint_obj_dict is None:
+        constraint_obj_dict = {}
 
     return_objects = []
     for index, line in enumerate(table_as_list, start=header_index + 1):
@@ -454,29 +457,42 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
             # if there is no name try and get it from the well_name instead and align well_name and name
             row_name = keyword_store.get('well_name', None)
             keyword_store['name'] = row_name
-        if preserve_previous_object_attributes and row_name is not None:
-            all_matching_existing_constraints = nexus_obj_dict.get(str(row_name), None)
-            if all_matching_existing_constraints is not None:
-                # use the previous object to update this
-                existing_constraint = all_matching_existing_constraints[-1]
-                new_object_date = getattr(existing_constraint, 'date', None)
-                if new_object_date is not None and new_object_date == current_date:
-                    # otherwise just update the object inplace and don't add it to the return list
-                    existing_constraint.update(keyword_store)
-                    # add just the id back in to track the lines where it came from in the file
-                    return_objects.append((existing_constraint.id, index))
-                    continue
+
+        if not isinstance(keyword_store['name'], str):
+            raise ValueError(f'Cannot find valid well name for object: {keyword_store}')
+
+        if keyword_store['name'].__contains__('*') and network_object_names is not None:
+            # Wildcard found, apply these properties to all objects with a name that matches the name predicate.
+            object_well_names = [x for x in network_object_names if fnmatch.fnmatch(x, keyword_store['name'])]
+            object_well_names = list(set(object_well_names))
+        else:
+            object_well_names = [keyword_store['name']]
+
+        for name in object_well_names:
+            keyword_store['name'] = name
+            if preserve_previous_object_attributes:
+                all_matching_existing_constraints = constraint_obj_dict.get(name, None)
+                if all_matching_existing_constraints is not None:
+                    # use the previous object to update this
+                    existing_constraint = all_matching_existing_constraints[-1]
+                    new_object_date = getattr(existing_constraint, 'date', None)
+                    if new_object_date is not None and new_object_date == current_date:
+                        # otherwise just update the object inplace and don't add it to the return list
+                        existing_constraint.update(keyword_store)
+                        # add just the id back in to track the lines where it came from in the file
+                        return_objects.append((existing_constraint.id, index))
+                        continue
+                    else:
+                        new_object = row_object(properties_dict=keyword_store, date=current_date,
+                                                unit_system=unit_system, date_format=date_format)
                 else:
                     new_object = row_object(properties_dict=keyword_store, date=current_date, unit_system=unit_system,
                                             date_format=date_format)
             else:
                 new_object = row_object(properties_dict=keyword_store, date=current_date, unit_system=unit_system,
                                         date_format=date_format)
-        else:
-            new_object = row_object(properties_dict=keyword_store, date=current_date, unit_system=unit_system,
-                                    date_format=date_format)
 
-        return_objects.append((new_object, index))
+            return_objects.append((new_object, index))
     return return_objects
 
 

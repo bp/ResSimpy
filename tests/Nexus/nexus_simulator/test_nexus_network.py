@@ -582,3 +582,110 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
     assert result == expected_result
     assert single_wellbore == wellbore1
     pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
+
+
+def test_wells_table_expands_out_wildcards(mocker: MockerFixture):
+    """Checks that wildcard names in a WELLS table apply the property to all names that match the wildcard."""
+
+    # Arrange
+    wellspec_file_contents = """
+        TIME 12/06/2024
+    WELLSPEC well_aa
+        IW JW L RADW
+        1  2  3  4.5  
+
+    WELLSPEC well_ab
+          IW JW L RADW
+        5 6 7 8
+
+    WELLSPEC well_c
+    IW JW L RADW
+    9 10 11 12.1
+    """
+
+    surface_file_contents = """TIME 12/06/2024
+    WELLS
+        NAME      STREAM      DATUM
+        well_aa   PRODUCER    1234
+        well_ab   PRODUCER    5678
+        well_c    PRODUCER    9123
+    ENDWELLS
+    
+    TIME 09/07/2024
+    
+    WELLS
+      NAME    ONTIME
+      wel*_a* 0.85
+    ENDWELLS
+    
+    TIME 14/07/2024
+    
+    WELLS
+      NAME    DATUM
+      well_* 4321
+    ENDWELLS     
+    """
+
+    fcs_file_contents = """
+    DATEFORMAT DD/MM/YYYY    
+    RECURRENT_FILES
+    	 WELLS Set 1        wells.dat
+    	 SURFACE Network 1  surface.dat
+    	 RUNCONTROL runcontrol.dat
+    """
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'model.fcs': fcs_file_contents,
+            'wells.dat': wellspec_file_contents,
+            'surface.dat': surface_file_contents,
+            'runcontrol.dat': 'START 01/01/2018 DATEFORMAT DD/MM/YYYY'
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
+
+    model = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='model.fcs', mock_open=False)
+
+    parent_wells_instance = NexusWells(model=model)
+    model._wells = parent_wells_instance
+
+    # Act
+    result = model.network.well_connections.well_connections
+
+    # Assert
+    connections_for_12th_june = [x for x in result if x.date == '12/06/2024']
+
+    connections_for_aa_june = [x for x in connections_for_12th_june if x.name == 'well_aa']
+    assert connections_for_aa_june[0].on_time is None
+    assert connections_for_aa_june[0].datum_depth == 1234
+
+    connections_for_ab_june = [x for x in connections_for_12th_june if x.name == 'well_ab']
+    assert connections_for_ab_june[0].on_time is None
+    assert connections_for_ab_june[0].datum_depth == 5678
+
+    connections_for_c_june = [x for x in connections_for_12th_june if x.name == 'well_c']
+    assert connections_for_c_june[0].on_time is None
+    assert connections_for_c_june[0].datum_depth == 9123
+
+    connections_on_9th_july = [x for x in result if x.date == '09/07/2024']
+    assert len(connections_on_9th_july) == 2
+
+    connections_for_aa_july = [x for x in connections_on_9th_july if x.name == 'well_aa']
+    assert connections_for_aa_july[0].on_time == 0.85
+
+    connections_for_ab_july = [x for x in connections_on_9th_july if x.name == 'well_ab']
+    assert connections_for_ab_july[0].on_time == 0.85
+
+    connections_on_14th_july = [x for x in result if x.date == '14/07/2024']
+    assert len(connections_on_14th_july) == 3
+
+    connections_for_aa_14th_july = [x for x in connections_on_14th_july if x.name == 'well_aa']
+    assert connections_for_aa_14th_july[0].datum_depth == 4321
+
+    connections_for_ab_14th_july = [x for x in connections_on_14th_july if x.name == 'well_ab']
+    assert connections_for_ab_14th_july[0].datum_depth == 4321
+
+    connections_for_c_14th_july = [x for x in connections_on_14th_july if x.name == 'well_c']
+    assert connections_for_c_14th_july[0].datum_depth == 4321
