@@ -177,7 +177,7 @@ ENDWELLLIST'''
         mock_nexus_network = mocker.MagicMock()
         well_lists = NexusWellLists(mock_nexus_network)
 
-        setattr(well_lists, '_NexusWellLists__well_lists', [well_list, well_list2, well_list3, well_list4])
+        well_lists._well_lists = [well_list, well_list2, well_list3, well_list4]
         expected_result_1 = [well_list, well_list3]
         expected_result_2 = [well_list2, well_list4]
         # Act
