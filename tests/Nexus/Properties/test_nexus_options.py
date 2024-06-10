@@ -46,6 +46,13 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
     1       Apple
     2       Grape
     3       Orange
+    ENDREGDATA
+
+    GLOBAL_METHOD_OVERRIDES
+        STONE2
+        NONEQ OFF
+        NOCHK_SAL_TEMP
+    ENDGLOBAL_METHOD_OVERRIDES
     """, {'DESC': ['Simulation Options'],
                                  'UNIT_SYSTEM': UnitSystem.ENGLISH,
                                  'PSTD': 14.7,
@@ -59,8 +66,8 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
                                      'Fruit_regions': pd.DataFrame({'NUMBER': [1, 2, 3],
                                                                     'NAME': ['Apple', 'Grape', 'Orange']
                                                                     })
-                                             }
-          }
+                                             },
+          'STONE2': '', 'NONEQ': 'OFF', 'NOCHK_SAL_TEMP': ''}
                              )
                              ], ids=['basic_options', 'opts_w_regdata']
 )
