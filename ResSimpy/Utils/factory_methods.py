@@ -19,8 +19,8 @@ def get_empty_list_str() -> list[str]:
 
 
 # Factory method for generating empty dictionary for dynamic property methods, with typing
-def get_empty_dynamic_property_dict_union() -> dict[str, Union[str, int, float, Enum, list[str], np.ndarray,
-                                                               pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]]:
+def get_empty_dict_union() -> dict[str, Union[str, int, float, Enum, list[str], np.ndarray,
+                                              pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]]:
     value: dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
                            dict[str, Union[float, pd.DataFrame]]]] = {}
     return value

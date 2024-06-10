@@ -14,7 +14,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 from ResSimpy.DynamicProperty import DynamicProperty
 from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import HydraulicsUnits
 
-from ResSimpy.Utils.factory_methods import get_empty_dynamic_property_dict_union
+from ResSimpy.Utils.factory_methods import get_empty_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
 
@@ -34,7 +34,7 @@ class NexusHydraulicsMethod(DynamicProperty):
     file: NexusFile
     properties: dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
                      dict[str, Union[float, pd.DataFrame]]]] = \
-        field(default_factory=get_empty_dynamic_property_dict_union)
+        field(default_factory=get_empty_dict_union)
     unit_system: UnitSystem
     ratio_thousands: bool
 

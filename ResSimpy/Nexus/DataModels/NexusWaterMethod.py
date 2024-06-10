@@ -8,7 +8,7 @@ import pandas as pd
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.DynamicProperty import DynamicProperty
 from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
-from ResSimpy.Utils.factory_methods import get_empty_dynamic_property_dict_union, get_empty_list_nexus_water_params
+from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_list_nexus_water_params
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Utils.invert_nexus_map import invert_nexus_map
 from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import WaterUnits
@@ -56,7 +56,7 @@ class NexusWaterMethod(DynamicProperty):
     reference_pressure: Optional[float] = None
     properties: dict[str, Union[str, int, float, Enum, list[str], np.ndarray,
                      pd.DataFrame, dict[str, Union[float, pd.DataFrame]]]] \
-        = field(default_factory=get_empty_dynamic_property_dict_union)
+        = field(default_factory=get_empty_dict_union)
     parameters: list[NexusWaterParams] = field(default_factory=get_empty_list_nexus_water_params)
     unit_system: UnitSystem
 

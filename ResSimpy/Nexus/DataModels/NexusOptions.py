@@ -8,7 +8,7 @@ from ResSimpy.Enums.UnitsEnum import TemperatureUnits, UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.DynamicProperty import DynamicProperty
 import ResSimpy.Nexus.nexus_file_operations as nfo
-from ResSimpy.Utils.factory_methods import get_empty_dynamic_property_dict_union
+from ResSimpy.Utils.factory_methods import get_empty_dict_union
 from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import OptionsUnits
 from ResSimpy.Nexus.NexusKeywords.options_keywords import OPT_KEYWORDS_VALUE_FLOAT, OPT_SINGLE_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.options_keywords import OPT_GLOBAL_METHOD_OVERRIDES_KEYWORDS, OPT_ARRAY_KEYWORDS
@@ -21,7 +21,7 @@ class NexusOptions(DynamicProperty):
     file: NexusFile
     properties: dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
                      dict[str, Union[float, pd.DataFrame]]]] = \
-        field(default_factory=get_empty_dynamic_property_dict_union)
+        field(default_factory=get_empty_dict_union)
     unit_system: UnitSystem
     __properties_loaded: bool = False  # Used in lazy loading
 
