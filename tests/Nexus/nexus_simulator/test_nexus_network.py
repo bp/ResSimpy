@@ -611,6 +611,11 @@ def test_wells_table_expands_out_wildcards(mocker: MockerFixture):
         well_c    PRODUCER    9123
     ENDWELLS
     
+    NODECON
+    NAME	 	NODEIN		NODEOUT  	TYPE METHOD   LENGTH
+    well_bc     well_bc    OTH_3R       PIPE 4  NA
+    ENDNODECON
+    
     TIME 09/07/2024
     
     WELLS

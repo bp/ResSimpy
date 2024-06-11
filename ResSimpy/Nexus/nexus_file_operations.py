@@ -410,7 +410,7 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
                           unit_system: Optional[UnitSystem] = None,
                           constraint_obj_dict: Optional[dict[str, list[Any]]] = None,
                           preserve_previous_object_attributes: bool = False,
-                          network_object_names: Optional[list[str]] = None
+                          well_names: Optional[list[str]] = None
                           ) -> list[tuple[Any, int]]:
     """Loads a table row by row to an object provided in the row_object.
 
@@ -428,7 +428,7 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
             attribute and will update the object to reflect the latest additional attributes and overriding all \
             matching attributes. Must have a .update() method implemented and a name
         date_format (Optional[DateFormat]): The date format of the object.
-        network_object_names (Optional[str]): A list of all the network object names.
+        well_names (Optional[str]): A list of all the network object names.
 
     Returns:
         list[obj]: list of tuples containing instances of the class provided for the row_object,
@@ -461,10 +461,9 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
         if not isinstance(keyword_store['name'], str):
             raise ValueError(f'Cannot find valid well name for object: {keyword_store}')
 
-        if keyword_store['name'].__contains__('*') and network_object_names is not None:
+        if keyword_store['name'].__contains__('*') and well_names is not None:
             # Wildcard found, apply these properties to all objects with a name that matches the name predicate.
-            object_well_names = [x for x in network_object_names if fnmatch.fnmatch(x, keyword_store['name'])]
-            object_well_names = list(set(object_well_names))
+            object_well_names = [x for x in well_names if fnmatch.fnmatch(x, keyword_store['name'])]
         else:
             object_well_names = [keyword_store['name']]
 

@@ -11,6 +11,7 @@ from ResSimpy.Nexus.nexus_constraint_operations import load_inline_constraints
 from ResSimpy.Nexus.nexus_file_operations import check_property_in_line, check_token, get_expected_token_value, \
     check_list_tokens, load_table_to_objects
 from ResSimpy.Nexus.nexus_load_well_list import load_well_lists
+from ResSimpy.WellConnection import WellConnection
 
 
 # TODO refactor the collection of tables to an object with proper typing
@@ -51,6 +52,7 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
     property_dict: dict = {}
     token_found: Optional[str] = None
     network_names: list[str] = []
+    well_names: list[str] = []
     for index, line in enumerate(file_as_list):
         # check for changes in unit system
         check_property_in_line(line, property_dict, file_as_list)
@@ -109,7 +111,7 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                                      preserve_previous_object_attributes=True, date_format=date_format)
 
             elif token_found == 'WELLLIST':
-                list_objects = load_well_lists(file_as_list=file_as_list[table_start-1:table_end],
+                list_objects = load_well_lists(file_as_list=file_as_list[table_start - 1:table_end],
                                                current_date=current_date,
                                                previous_well_lists=nexus_object_results[token_found],
                                                )
@@ -120,7 +122,7 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                                      property_map=property_map,
                                                      current_date=current_date,
                                                      unit_system=unit_system, date_format=date_format,
-                                                     network_object_names=network_names)
+                                                     well_names=well_names)
 
             # store objects found into right dictionary
             list_of_token_obj = nexus_object_results[token_found]
@@ -149,6 +151,8 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                 # wildcards do not apply to LIST type nexus objects like WELLLIST.
                 if 'LIST' not in token_found:
                     network_names.extend([x.name for x in list_of_token_obj])
+                if token_found == 'WELLS':
+                    well_names.extend([x.name for x in list_of_token_obj if x.name not in well_names])
                 for new_object, id_index in list_objects:
                     correct_line_index = id_index + table_start
                     # temporary try statement until all objects have an id property
