@@ -11,7 +11,6 @@ from ResSimpy.Nexus.nexus_constraint_operations import load_inline_constraints
 from ResSimpy.Nexus.nexus_file_operations import check_property_in_line, check_token, get_expected_token_value, \
     check_list_tokens, load_table_to_objects
 from ResSimpy.Nexus.nexus_load_well_list import load_well_lists
-from ResSimpy.WellConnection import WellConnection
 
 
 # TODO refactor the collection of tables to an object with proper typing
