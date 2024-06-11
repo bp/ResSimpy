@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class NexusWellheads(Wellheads):
-    __wellheads: list[NexusWellhead] = field(default_factory=list)
+    _wellheads: list[NexusWellhead] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork) -> None:
         """Initialises the NexusWellheads class.
@@ -35,7 +35,7 @@ class NexusWellheads(Wellheads):
             parent_network (NexusNetwork): The network that the wellheads are a part of.
         """
         self.__parent_network: NexusNetwork = parent_network
-        self.__wellheads: list[NexusWellhead] = []
+        self._wellheads: list[NexusWellhead] = []
         self.__add_object_operations = AddObjectOperations(NexusWellhead, self.table_header, self.table_footer,
                                                            self.__parent_network.model)
         self.__remove_object_operations = RemoveObjectOperations(self.__parent_network, self.table_header,
@@ -45,7 +45,7 @@ class NexusWellheads(Wellheads):
     def get_all(self) -> list[NexusWellhead]:
         """Returns a list of wellheads loaded from the simulator."""
         self.__parent_network.get_load_status()
-        return self.__wellheads
+        return self._wellheads
 
     def get_by_name(self, name: str) -> Optional[NexusWellhead]:
         """Returns a single wellhead with the provided name loaded from the simulator.
@@ -56,11 +56,11 @@ class NexusWellheads(Wellheads):
             NexusWellhead: which has the same name as requested
         """
         to_return = filter(lambda x: False if x.name is None else x.name.upper() == name.upper(),
-                           self.__wellheads)
+                           self._wellheads)
         return next(to_return, None)
 
     def get_df(self) -> pd.DataFrame:
-        return obj_to_dataframe(self.__wellheads)
+        return obj_to_dataframe(self._wellheads)
 
     def get_overview(self) -> str:
         raise NotImplementedError('To be implemented')
@@ -81,7 +81,7 @@ class NexusWellheads(Wellheads):
         """
         if additional_list is None:
             return
-        self.__wellheads.extend(additional_list)
+        self._wellheads.extend(additional_list)
 
     def remove(self, obj_to_remove: dict[str, None | str | float | int] | UUID) -> None:
         """Remove a wellhead from the network based on the properties matching a dictionary or id.
@@ -92,7 +92,7 @@ class NexusWellheads(Wellheads):
 
         """
         self.__remove_object_operations.remove_object_from_network_main(
-            obj_to_remove, self._network_element_name, self.__wellheads)
+            obj_to_remove, self._network_element_name, self._wellheads)
 
     def add(self, obj_to_add: dict[str, None | str | float | int]) -> None:
         """Adds a wellhead to a network, taking a dictionary with properties for the new wellhead.
