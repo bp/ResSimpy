@@ -32,7 +32,8 @@ class NexusRockMethod(DynamicProperty):
     # General parameters
     file: NexusFile
     properties: dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
-                                dict[str, Union[float, pd.DataFrame]]]] = field(default_factory=get_empty_dict_union)
+                                dict[str, Union[float, pd.DataFrame]]]] = \
+        field(default_factory=get_empty_dict_union)
     unit_system: UnitSystem
 
     def __init__(self, file: NexusFile, input_number: int, model_unit_system: UnitSystem,

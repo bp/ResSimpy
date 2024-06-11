@@ -804,3 +804,36 @@ class PVTUnits(BaseUnitMapping):
     def critical_volume(self) -> str:
         """Returns the unit for critical_volume."""
         return self.get_unit_for_attribute('critical_volume')
+
+
+class OptionsUnits(BaseUnitMapping):
+    """Unit types for the attributes of simulator options."""
+
+    def __init__(self, unit_system: None | UnitSystem) -> None:
+        """Initialises the OptionsUnits class.
+
+        Args:
+            unit_system (None | UnitSystem): unit system to get the unit from.
+        """
+        super().__init__(unit_system=unit_system)
+
+    attribute_map: Mapping[str, UnitDimension] = {
+        'standard_pressure': Pressure(),
+        'standard_temperature': Temperature(),
+        'reservoir_temperature': Temperature()
+    }
+
+    @property
+    def standard_pressure(self) -> str:
+        """Returns the unit for standard pressure."""
+        return self.get_unit_for_attribute('standard_pressure')
+
+    @property
+    def standard_temperature(self) -> str:
+        """Returns the unit for standard temperature."""
+        return self.get_unit_for_attribute('standard_temperature')
+
+    @property
+    def reservoir_temperature(self) -> str:
+        """Returns the unit for reservoir temperature."""
+        return self.get_unit_for_attribute('reservoir_temperature')

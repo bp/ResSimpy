@@ -21,6 +21,7 @@ from ResSimpy.Nexus.DataModels.NexusRelPermMethod import NexusRelPermMethod
 from ResSimpy.Nexus.DataModels.NexusRockMethod import NexusRockMethod
 from ResSimpy.Nexus.DataModels.NexusSeparatorMethod import NexusSeparatorMethod
 from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterMethod
+from ResSimpy.Nexus.DataModels.NexusOptions import NexusOptions
 from ResSimpy.Units.Units import Area
 from ResSimpy.Units.AttributeMappings.ConstraintUnitMapping import ConstraintUnits
 from ResSimpy.ISODateTime import ISODateTime
@@ -402,6 +403,8 @@ def test_get_unit_for_dynamic_property_attribute(data_object, attribute, expecte
     (NexusWaterMethod, 'DENW', 'LB/FT3', True, UnitSystem.ENGLISH),
     (NexusWaterMethod, 'BW', 'M3/STM3', True, UnitSystem.METBAR),
     (NexusWaterMethod, 'VISW', 'cp', False, UnitSystem.LAB),
+    (NexusOptions, 'PSTD', 'PSIA', True, UnitSystem.ENGLISH),
+    (NexusOptions, 'TSTD', 'degrees C', False, UnitSystem.METRIC),
 ])
 def test_get_unit_for_dynamic_property_keyword(data_object, keyword, expected_result, upper, unitsystem):
     """A test to check if DynamicProperty.get_unit_for_keyword method works as expected."""
@@ -691,6 +694,22 @@ def test_object_attribute_property_water():
                        (units.water_formation_volume_factor, 'rb/stb'),
                        (units.water_viscosity, 'cp'),
                        (units.water_viscosity_compressibility, 'psi-1'),
+                       ]
+    # Assert
+    for result, expected in result_expected:
+        assert result == expected
+
+
+def test_object_attribute_property_options():
+    # Arrange
+    prop_file = NexusFile(location='test/file/options.dat')
+    test_object = NexusOptions(file=prop_file, properties={'UNIT_SYSTEM': UnitSystem.ENGLISH},
+                               model_unit_system=UnitSystem.METRIC)
+    units = test_object.units
+    # Act
+    result_expected = [(units.standard_pressure, 'psia'),
+                       (units.standard_temperature, 'degrees F'),
+                       (units.reservoir_temperature, 'degrees F')
                        ]
     # Assert
     for result, expected in result_expected:
