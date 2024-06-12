@@ -1,12 +1,11 @@
-import pytest
-
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.Network.NexusWellLists import NexusWellLists
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
-from ResSimpy.Nexus.nexus_load_well_list import load_well_list_from_table, load_well_lists
+from ResSimpy.Nexus.nexus_load_well_list import load_well_list_from_table
+from ResSimpy.WellLists import WellLists, WellList
 
 
 class TestNexusWellList:
@@ -25,7 +24,7 @@ ENDWELLLIST'''
         existing_welllist = NexusWellList(name='well_list_name', wells=['test_well', 'test_well2'],
                                           date='01/01/2019')
         expected_welllist = NexusWellList(name='well_list_name', wells=['test_well', 'test_well2',
-        'wellname_1', 'wellname_2', 'wellname_n'],
+                                                                        'wellname_1', 'wellname_2', 'wellname_n'],
                                           date='01/01/2020')
         file_as_list = self.file_content.splitlines()
 
@@ -120,10 +119,10 @@ ENDWELLLIST'''
             NexusWellList(name='well_list_name', wells=['wellname_1', 'wellname_2', 'wellname_3'],
                           date='01/01/2020'),
             NexusWellList(name='well_list_name_2', wells=['wellname_4', 'wellname_5', 'wellname_6'],
-                            date='01/01/2020'),
+                          date='01/01/2020'),
             NexusWellList(name='well_list_name', wells=['wellname_2', 'wellname_3'],
                           date='01/01/2023'),
-            ]
+        ]
 
         file_as_list = '''
         TIME 01/01/2020
@@ -168,17 +167,17 @@ ENDWELLLIST'''
                                    wells=['wellname_4', 'wellname_5', 'wellname_6'],
                                    date='01/01/2020')
         well_list3 = NexusWellList(name='well_list_name',
-                                     wells=['wellname_2', 'wellname_3'],
-                                     date='01/01/2023')
+                                   wells=['wellname_2', 'wellname_3'],
+                                   date='01/01/2023')
         well_list4 = NexusWellList(name='well_list_name_2',
-                                        wells=['wellname_4', 'wellname_5', 'wellname_6'],
-                                        date='01/02/2023')
+                                   wells=['wellname_4', 'wellname_5', 'wellname_6'],
+                                   date='01/02/2023')
         # get a mock network
 
         mock_nexus_network = mocker.MagicMock()
         well_lists = NexusWellLists(mock_nexus_network)
 
-        setattr(well_lists, '_NexusWellLists__well_lists', [well_list, well_list2, well_list3, well_list4])
+        well_lists._well_lists = [well_list, well_list2, well_list3, well_list4]
         expected_result_1 = [well_list, well_list3]
         expected_result_2 = [well_list2, well_list4]
         # Act
@@ -187,3 +186,20 @@ ENDWELLLIST'''
         # Assert
         assert result == expected_result_1
         assert result_2 == expected_result_2
+
+    def test_get_by_name_base_class(self):
+        welllist = WellLists([
+            WellList(name='well_list_name', wells=['wellname_1', 'wellname_2', 'wellname_3'], date='01/01/2020'),
+            WellList(name='well_list_name_2', wells=['wellname_4', 'wellname_5', 'wellname_6'], date='01/01/2020'),
+            WellList(name='well_list_name', wells=['wellname_2', 'wellname_3'], date='01/01/2023'),
+        ])
+
+        expected_result_1 = [
+            WellList(name='well_list_name', wells=['wellname_1', 'wellname_2', 'wellname_3'], date='01/01/2020'),
+            WellList(name='well_list_name', wells=['wellname_2', 'wellname_3'], date='01/01/2023')]
+
+        # Act
+        result = welllist.get_all_by_name('well_list_name')
+
+        # Assert
+        assert result == expected_result_1

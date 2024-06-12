@@ -751,9 +751,7 @@ ENDWELLS
      {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': None, 'y_pos': None, 'number': 2,
       'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
      ),
-],
-                         ids=['basic', 'all columns', 'times', 'units', 'two tables']
-                         )
+], ids=['basic', 'all columns', 'times', 'units', 'two tables'])
 def test_collect_all_tables_to_objects(mocker, file_contents, node1_props, node2_props):
     # Arrange
     # mock out a surface file:

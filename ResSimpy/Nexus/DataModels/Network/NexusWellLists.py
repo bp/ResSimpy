@@ -15,7 +15,7 @@ from ResSimpy.WellLists import WellLists
 @dataclass(kw_only=True)
 class NexusWellLists(WellLists):
     """Class for representing a set of WellList objects for the Nexus model."""
-    __well_lists: list[NexusWellList] = field(default_factory=list)
+    _well_lists: list[NexusWellList] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork) -> None:
         """Initialises the NexusWellLists class.
@@ -24,18 +24,18 @@ class NexusWellLists(WellLists):
             parent_network (NexusNetwork): The network that the well lists are a part of.
         """
         self.__parent_network: NexusNetwork = parent_network
-        self.__well_lists: list[NexusWellList] = []
+        self._well_lists: list[NexusWellList] = []
 
     def get_all(self) -> list[NexusWellList]:
         """Returns all WellList names."""
         self.__parent_network.get_load_status()
-        return self.__well_lists
+        return self._well_lists
 
     @property
     def welllists(self) -> list[NexusWellList]:
         """Returns list of all WellList objects."""
         self.__parent_network.get_load_status()
-        return self.__well_lists
+        return self._well_lists
 
     @property
     def table_header(self) -> str:
@@ -59,10 +59,10 @@ class NexusWellLists(WellLists):
             list[NexusWellList]: the requested list of filtered welllists with the same name
         """
         self.__parent_network.get_load_status()
-        return [x for x in self.__well_lists if x.name == well_list_name]
+        return [x for x in self._well_lists if x.name == well_list_name]
 
     def _add_to_memory(self, additional_list: None | list[NexusWellList]) -> None:
         if additional_list is None:
             return
         only_welllist_objects = [x for x in additional_list if isinstance(x, NexusWellList)]
-        self.__well_lists.extend(only_welllist_objects)
+        self._well_lists.extend(only_welllist_objects)

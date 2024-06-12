@@ -19,7 +19,8 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 from ResSimpy.DynamicProperty import DynamicProperty
 from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import PVTUnits
 
-from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_list_str, get_empty_eosopt_dict_union
+from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_list_str
+from ResSimpy.Utils.factory_methods import get_empty_eosopt_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
 

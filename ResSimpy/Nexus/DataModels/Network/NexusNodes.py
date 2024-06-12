@@ -31,7 +31,7 @@ class NexusNodes(Nodes):
     It is stored as an instance in the NexusNetwork class as "nodes". A list of nodes in the network are stored in
     memory these can be accessed through the get_all method.
     """
-    __nodes: list[NexusNode] = field(default_factory=list)
+    _nodes: list[NexusNode] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork) -> None:
         """Initialises the NexusNodes class.
@@ -40,7 +40,7 @@ class NexusNodes(Nodes):
             parent_network (NexusNetwork): The network that the nodes are a part of.
         """
         self.__parent_network: NexusNetwork = parent_network
-        self.__nodes: list[NexusNode] = []
+        self._nodes: list[NexusNode] = []
         self.__add_object_operations = AddObjectOperations(NexusNode, self.table_header, self.table_footer,
                                                            self.__parent_network.model)
         self.__remove_object_operations = RemoveObjectOperations(self.__parent_network, self.table_header,
@@ -60,7 +60,7 @@ class NexusNodes(Nodes):
     def get_all(self) -> Sequence[NexusNode]:
         """Returns a list of nodes loaded from the simulator."""
         self.__parent_network.get_load_status()
-        return self.__nodes
+        return self._nodes
 
     def get_by_name(self, node_name: str) -> Optional[NexusNode]:
         """Returns a single node with the provided name loaded from the simulator.
@@ -75,7 +75,7 @@ class NexusNodes(Nodes):
 
         """
         nodes_to_return = filter(lambda x: False if x.name is None else x.name.upper() == node_name.upper(),
-                                 self.__nodes)
+                                 self._nodes)
         return next(nodes_to_return, None)
 
     def get_df(self) -> pd.DataFrame:
@@ -84,7 +84,7 @@ class NexusNodes(Nodes):
         Returns:
             DataFrame: of the properties of the nodes through time with each row representing a node.
         """
-        df_store = obj_to_dataframe(self.__nodes)
+        df_store = obj_to_dataframe(self._nodes)
         return df_store
 
     def get_overview(self) -> str:
@@ -122,7 +122,7 @@ class NexusNodes(Nodes):
         """
         if additional_list is None:
             return
-        self.__nodes.extend(additional_list)
+        self._nodes.extend(additional_list)
 
     def remove(self, node_to_remove: dict[str, None | str | float | int] | UUID) -> None:
         """Remove a node from the network based on the properties matching a dictionary or id.
@@ -133,7 +133,7 @@ class NexusNodes(Nodes):
 
         """
         self.__remove_object_operations.remove_object_from_network_main(
-            node_to_remove, self._network_element_name, self.__nodes)
+            node_to_remove, self._network_element_name, self._nodes)
 
     def add(self, node_to_add: dict[str, None | str | float | int]) -> None:
         """Adds a node to a network, taking a dictionary with properties for the new node.
