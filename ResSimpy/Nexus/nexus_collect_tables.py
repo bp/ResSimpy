@@ -72,7 +72,6 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                                       custom_message="Cannot find the date associated with the TIME "
                                                                      f"PLUS card in {line=} at line number {index}")
 
-
                 if current_date is None:
                     raise ValueError("Cannot calculate PLUS date without access to the initial date.")
                 else:
