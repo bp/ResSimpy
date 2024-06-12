@@ -75,7 +75,6 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                 if current_date is None:
                     raise ValueError("Cannot calculate PLUS date without access to the initial date.")
                 else:
-                    "Cannot calculate PLUS date without access to the initial date."
                     new_datetime = ISODateTime.convert_to_iso(
                         current_date, date_format, start_date) + timedelta(days=float(plus_value))
 
