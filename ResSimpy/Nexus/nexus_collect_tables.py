@@ -70,8 +70,9 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                 plus_value = get_expected_token_value(token='PLUS', token_line=line, file_list=file_as_list,
                                                       custom_message="Cannot find the date associated with the TIME "
                                                                      f"PLUS card in {line=} at line number {index}")
-                new_datetime = ISODateTime.convert_to_iso(
-                    current_date, date_format, start_date) + timedelta(days=float(plus_value))
+                if date_format is not None:
+                    new_datetime = ISODateTime.convert_to_iso(
+                        current_date, date_format, start_date) + timedelta(days=float(plus_value))
 
                 if date_format == DateFormat.DD_MM_YYYY:
                     if new_datetime.time() == time(0, 0, 0, 0):
