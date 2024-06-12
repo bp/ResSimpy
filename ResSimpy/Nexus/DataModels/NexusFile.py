@@ -261,6 +261,11 @@ class NexusFile(File):
 
     @dataclass
     class FileIndex:
+        """Class to ??.
+
+        Attributes:
+            index(int): ??
+        """
         index: int
 
     def iterate_line(self, file_index: Optional[FileIndex] = None, max_depth: Optional[int] = None,
