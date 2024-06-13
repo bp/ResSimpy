@@ -261,10 +261,10 @@ class NexusFile(File):
 
     @dataclass
     class FileIndex:
-        """Class to ??.
+        """Class to store the index when iterating over a list of strings with nested NexusFile objects in them.
 
         Attributes:
-            index(int): ??
+            index(int): The current index in the list of strings.
         """
         index: int
 
