@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
 
 class NetworkOperationsMixIn(ABC):
+    """A mixin for network collections that forces the implementation of the same methods across all classes."""
     def __init__(self, parent_network: Network) -> None:
         """Initialises the NetworkOperationsMixIn class.
 
