@@ -33,10 +33,7 @@ class NexusNodeConnection(NodeConnection):
     dp_add: Additional delta pressure (DPADD).
     """
 
-    hyd_method: Optional[str | int] = None
-    pvt_method: Optional[int] = None
     bat_method: Optional[int] = None
-    water_method: Optional[int] = None
     elevation_profile: Optional[str] = None
     measured_depth_in: Optional[float] = None
     measured_depth_out: Optional[float] = None
