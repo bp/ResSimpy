@@ -174,7 +174,8 @@ class NexusPVTMethod(DynamicProperty):
                 if key == 'IGS_CP':
                     printable_str += value.to_string(na_rep='', index=False, header=False) + '\n'
                 else:
-                    printable_str += value.to_string(na_rep='', index=False) + '\n'
+                    printable_str += value.to_string(na_rep='', index=False,
+                                                     float_format=lambda x: '%.9f' % x) + '\n'
                 if key in PVT_TABLES_WITH_ENDWORDS:
                     printable_str += 'END'+key+'\n'
                 printable_str += '\n'
@@ -183,7 +184,8 @@ class NexusPVTMethod(DynamicProperty):
                     printable_str += f"{key.replace('_',' ')} {subkey}\n"
                     df = value[subkey]
                     if isinstance(df, pd.DataFrame):
-                        printable_str += df.to_string(na_rep='', index=False) + '\n'
+                        printable_str += df.to_string(na_rep='', index=False,
+                                                      float_format=lambda x: '%.9f' % x) + '\n'
                     printable_str += '\n'
             elif isinstance(value, Enum):
                 if isinstance(value, UnitSystem) or isinstance(value, TemperatureUnits):
