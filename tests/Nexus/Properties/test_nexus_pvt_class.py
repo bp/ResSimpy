@@ -456,19 +456,19 @@ DESC and this is second line of description
 BLACKOIL API 30.0 SPECG 0.6
 ENGLISH
 SATURATED
-""" + pvt_obj.properties['SATURATED'].to_string(na_rep='', index=False) + '\n' + \
+""" + pvt_obj.properties['SATURATED'].to_string(na_rep='', index=False, float_format=lambda x: '%.9f' % x) + '\n' + \
 """
 UNSATOIL PSAT 2000.0
-""" + pvt_obj.properties['UNSATOIL_PSAT']['2000.0'].to_string(na_rep='', index=False) + '\n' + \
+""" + pvt_obj.properties['UNSATOIL_PSAT']['2000.0'].to_string(na_rep='', index=False, float_format=lambda x: '%.9f' % x) + '\n' + \
 """
 UNSATOIL PSAT 1900.0
-""" + pvt_obj.properties['UNSATOIL_PSAT']['1900.0'].to_string(na_rep='', index=False) + '\n' + \
+""" + pvt_obj.properties['UNSATOIL_PSAT']['1900.0'].to_string(na_rep='', index=False, float_format=lambda x: '%.9f' % x) + '\n' + \
 """
 UNSATGAS PRES 3515.0
-""" + pvt_obj.properties['UNSATGAS_PRES']['3515.0'].to_string(na_rep='', index=False) + '\n' + \
+""" + pvt_obj.properties['UNSATGAS_PRES']['3515.0'].to_string(na_rep='', index=False, float_format=lambda x: '%.9f' % x) + '\n' + \
 """
 UNSATGAS PRES 3415.0
-""" + pvt_obj.properties['UNSATGAS_PRES']['3415.0'].to_string(na_rep='', index=False) + '\n\n'
+""" + pvt_obj.properties['UNSATGAS_PRES']['3415.0'].to_string(na_rep='', index=False, float_format=lambda x: '%.9f' % x) + '\n\n'
 
     # Act
     result = pvt_obj.__repr__()
@@ -529,17 +529,17 @@ TEMP 160.0
 ENGLISH
 FAHR
 PROPS
-""" + pvt_obj.properties['PROPS'].to_string(na_rep='', index=False) + \
+""" + pvt_obj.properties['PROPS'].to_string(na_rep='', index=False, float_format=lambda x: '%.9f' % x) + \
 """
 ENDPROPS
 
 BINA
-""" + pvt_obj.properties['BINA'].to_string(na_rep='', index=False) + \
+""" + pvt_obj.properties['BINA'].to_string(na_rep='', index=False, float_format=lambda x: '%.9f' % x) + \
 """
 ENDBINA
 
 PEDTUNE
-""" + pvt_obj.properties['PEDTUNE'].to_string(na_rep='', index=False) + \
+""" + pvt_obj.properties['PEDTUNE'].to_string(na_rep='', index=False, float_format=lambda x: '%.9f' % x) + \
 """
 ENDPEDTUNE
 
@@ -626,17 +626,17 @@ TEMP 160.0
 ENGLISH
 FAHR
 PROPS
-""" + pvt_obj.properties['PROPS'].to_string(na_rep='', index=False) + \
+""" + pvt_obj.properties['PROPS'].to_string(na_rep='', index=False, float_format=lambda x: '%.9f' % x) + \
 """
 ENDPROPS
 
 BINA
-""" + pvt_obj.properties['BINA'].to_string(na_rep='', index=False) + \
+""" + pvt_obj.properties['BINA'].to_string(na_rep='', index=False, float_format=lambda x: '%.9f' % x) + \
 """
 ENDBINA
 
 PEDTUNE
-""" + pvt_obj.properties['PEDTUNE'].to_string(na_rep='', index=False) + \
+""" + pvt_obj.properties['PEDTUNE'].to_string(na_rep='', index=False, float_format=lambda x: '%.9f' % x) + \
 """
 ENDPEDTUNE
 
@@ -669,17 +669,17 @@ TEMP 160.0
 ENGLISH
 FAHR
 PROPS
-""" + pvt_obj.properties['PROPS'].to_string(na_rep='', index=False) + \
+""" + pvt_obj.properties['PROPS'].to_string(na_rep='', index=False, float_format=lambda x: '%.9f' % x) + \
 """
 ENDPROPS
 
 BINA
-""" + pvt_obj.properties['BINA'].to_string(na_rep='', index=False) + \
+""" + pvt_obj.properties['BINA'].to_string(na_rep='', index=False, float_format=lambda x: '%.9f' % x) + \
 """
 ENDBINA
 
 PEDTUNE
-""" + pvt_obj.properties['PEDTUNE'].to_string(na_rep='', index=False) + \
+""" + pvt_obj.properties['PEDTUNE'].to_string(na_rep='', index=False, float_format=lambda x: '%.9f' % x) + \
 """
 ENDPEDTUNE
 

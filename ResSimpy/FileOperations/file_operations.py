@@ -56,7 +56,8 @@ def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,
     return file_without_comments
 
 
-def load_file_as_list(file_path: str, strip_comments: bool = False, strip_str: bool = False) -> list[str]:
+def load_file_as_list(file_path: str, strip_comments: bool = False, strip_str: bool = False,
+                      comment_characters: Optional[list[str]] = None) -> list[str]:
     """Reads the text file into a variable.
 
     Args:
@@ -64,6 +65,7 @@ def load_file_as_list(file_path: str, strip_comments: bool = False, strip_str: b
         strip_comments (bool, optional): If set to True removes all inline/single line comments from \
             the passed in file. Defaults to False.
         strip_str (bool, optional): if True strips the lines of whitespace. Defaults to False.
+        comment_characters (list[str], optional): A list of characters that are considered comments.
 
     Returns:
         list[str]: list of strings with each line from the file a new entry in the list
@@ -76,7 +78,9 @@ def load_file_as_list(file_path: str, strip_comments: bool = False, strip_str: b
             file_content = list(f)
 
     if strip_comments:
-        file_content = strip_file_of_comments(file_content, strip_str=strip_str)
+        file_content = strip_file_of_comments(file_content, strip_str=strip_str,
+                                              comment_characters=comment_characters)
+        file_content = list(filter(None, file_content))
 
     return file_content
 
