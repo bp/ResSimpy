@@ -1,9 +1,11 @@
 """Functions for collecting tables from a Nexus file to populate Nexus objects."""
 from __future__ import annotations
 
+from datetime import timedelta, time
 from typing import Any, Optional
 
 from ResSimpy.File import File
+from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
@@ -60,9 +62,32 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
             raise TypeError(f"Value found for {unit_system=} of type {type(unit_system)} \
                                 not compatible, expected type UnitSystem Enum")
         if check_token('TIME', line):
-            current_date = get_expected_token_value(
+            time_value = get_expected_token_value(
                 token='TIME', token_line=line, file_list=file_as_list,
                 custom_message=f"Cannot find the date associated with the TIME card in {line=} at line number {index}")
+            if time_value.upper() != 'PLUS':
+                current_date = time_value
+            else:
+                plus_value = get_expected_token_value(token='PLUS', token_line=line, file_list=file_as_list,
+                                                      custom_message="Cannot find the date associated with the TIME "
+                                                                     f"PLUS card in {line=} at line number {index}")
+
+                if current_date is None:
+                    raise ValueError("Cannot calculate PLUS date without access to the initial date.")
+                else:
+                    new_datetime = ISODateTime.convert_to_iso(
+                        current_date, date_format, start_date) + timedelta(days=float(plus_value))
+
+                if date_format == DateFormat.DD_MM_YYYY:
+                    if new_datetime.time() == time(0, 0, 0, 0):
+                        current_date = new_datetime.strftime('%d/%m/%Y')
+                    else:
+                        current_date = new_datetime.strftime('%d/%m/%Y(%H:%M:%S)')
+                elif date_format == DateFormat.MM_DD_YYYY:
+                    if new_datetime.time() == time(0, 0, 0, 0):
+                        current_date = new_datetime.strftime('%m/%d/%Y')
+                    else:
+                        current_date = new_datetime.strftime('%m/%d/%Y(%H:%M:%S)')
             continue
         if table_start < 0:
             token_found = check_list_tokens(list(table_object_map.keys()), line)
