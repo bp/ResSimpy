@@ -234,7 +234,7 @@ def test_load_constraints(mocker, file_contents, expected_content):
     start_date = '01/01/2019'
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
 
-    surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
+    surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.replace('>\n', '').splitlines())
     expected_constraints = {}
 
     for constraint in expected_content:
