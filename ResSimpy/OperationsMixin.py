@@ -99,7 +99,7 @@ class NetworkOperationsMixIn(ABC):
 
     @staticmethod
     def resolve_same_named_objects(sorted_by_date: Sequence[DataObjectMixin]) -> Sequence[DataObjectMixin]:
-        resolved_objects = []
+        resolved_objects: list[DataObjectMixin] = []
         for unresolved_obj in sorted_by_date:
             # append the first
             if len(resolved_objects) == 0:

@@ -109,7 +109,9 @@ class NexusWellConnection(WellConnection):
             start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
             unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
         """
-        super().__init__(_date_format=date_format, _start_date=start_date, _unit_system=unit_system)
+        name = properties_dict.get('name', None)
+        name = name if isinstance(name, str) else None
+        super().__init__(_date_format=date_format, _start_date=start_date, _unit_system=unit_system, name=name)
 
         # Set the date related properties, then set the date, automatically setting the ISODate
         protected_attributes = ['date_format', 'start_date', 'unit_system']

@@ -22,14 +22,16 @@ class DataObjectMixin(ABC):
     __date: Optional[str] = None
     _start_date: Optional[str] = None
     _unit_system: Optional[UnitSystem] = None
+    __name: Optional[str] = None
 
     # TODO: Find a way to remove the dummy parameter below that doesn't break typing in nexus_add_new_object_to_file.
     def __init__(self, _: dict[str, str | float | int | None] = {}, date: Optional[str] = None,
-                 date_format: Optional[DateFormat] = None,
-                 start_date: Optional[str] = None, unit_system: Optional[UnitSystem] = None) -> None:
+                 date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
+                 unit_system: Optional[UnitSystem] = None, name: Optional[str] = None) -> None:
         """Initialises the DataObjectMixin Class. First '_' parameter is a dummy parameter for type compatibility.
 
         Args:
+            name (Optional[str]): The name of the object.
             date (Optional[str]): The date of the object.
             date_format (Optional[DateFormat]): The date format of the object.
             start_date (Optional[str]): The start date of the model (required if the date is in numerical format).
@@ -40,6 +42,7 @@ class DataObjectMixin(ABC):
         self._start_date = start_date
         self._unit_system = unit_system
         self.__date = date
+        self.__name = name
 
     def __repr__(self) -> str:
         return generic_repr(self)
@@ -78,6 +81,11 @@ class DataObjectMixin(ABC):
     def unit_system(self) -> Optional[UnitSystem]:
         """The unit system being used in the object."""
         return self._unit_system
+
+    @property
+    def name(self) -> Optional[str]:
+        """The name of the object in the simulator."""
+        return self.__name
 
     def set_iso_date(self) -> None:
         """Updates the ISO Date property."""
