@@ -1910,6 +1910,67 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
     spy.assert_called_once()
 
 
+
+def test_load_surface_file_activate_deactivate(mocker):
+    # Arrange
+    # Mock out the surface and fcs file
+    fcs_file_contents = 'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data/surface.inc'
+
+    surface_file_content = """
+        TIME 01/02/2024
+          WELLS
+         NAME   STREAM DATUM 
+         welcon_1 PRODUCER 1234 
+         welcon_2 PRODUCER 5678 
+         ENDWELLS
+         
+         
+        DEACTIVATE
+         CONNECTION
+         welcon_1
+        ENDDEACTIVATE
+        
+        TIME 09/07/2024
+        
+        ACTIVATE
+        CONNECTION
+        welcon_1
+        ENDACTIVATE
+    """
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            fcs_file_path: fcs_file_contents,
+            'nexus_data/surface.inc': surface_file_content,
+            'run_control.inc': 'START 01/01/2023',
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
+
+    fcs_file_path = 'fcs_file.fcs'
+    nexus_sim = NexusSimulator(fcs_file_path)
+    welcon_props_1 = {'name': 'welcon_1', 'stream': 'PRODUCER', 'datum_depth': 1234, 'date': '01/02/2024',
+                      'unit_system': UnitSystem.ENGLISH, 'is_active': False}
+    welcon_props_2 = {'name': 'welcon_2', 'stream': 'PRODUCER', 'datum_depth': 5678, 'date': '01/02/2024',
+                      'unit_system': UnitSystem.ENGLISH, 'is_active': True}
+    welcon_props_3 = {'name': 'welcon_1', 'stream': 'PRODUCER', 'datum_depth': 1234, 'date': '09/07/2024',
+                      'unit_system': UnitSystem.ENGLISH, 'is_active': True}
+
+    welcon_1 = NexusWellConnection(welcon_props_1, date_format=DateFormat.DD_MM_YYYY)
+    welcon_2 = NexusWellConnection(welcon_props_2, date_format=DateFormat.DD_MM_YYYY)
+    welcon_3 = NexusWellConnection(welcon_props_3, date_format=DateFormat.DD_MM_YYYY)
+
+    # Create the expected objects
+    expected_wellcons = [welcon_1, welcon_2, welcon_3]
+
+    # Act
+    result_wellcons = nexus_sim.network.well_connections.get_all()
+    # Assert
+    assert result_wellcons == expected_wellcons
+
+
 def test_nexus_simulator_repr(mocker):
     # Arrange
     fcs_content = '''DESC reservoir1
