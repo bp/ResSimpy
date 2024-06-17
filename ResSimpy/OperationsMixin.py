@@ -78,15 +78,22 @@ class NetworkOperationsMixIn(ABC):
 
     @staticmethod
     def resolve_carried_over_attributes(objects_to_resolve: Sequence[DataObjectMixin]) -> Sequence[DataObjectMixin]:
-        """Resolves carried over attributes from the parent network.
+        """Resolves carried over attributes from previous time steps to the future timesteps.
 
         Args:
             objects_to_resolve (Sequence[DataObjectMixin]): list of objects to resolve carried over attributes for.
+            Must be of homogenous type.
         """
         resolved_objects: list[DataObjectMixin] = []
 
-        # order by date:
-        sorted_by_date = sorted(objects_to_resolve, key=lambda x: x.iso_date)
+        if (len(objects_to_resolve) > 0 and
+                not all(isinstance(x, type(objects_to_resolve[0])) for x in objects_to_resolve)):
+            raise ValueError("Objects to resolve must be of the same type.")
+
+        # order by date and the order entered in the simulator.
+        current_ordering = list(enumerate(objects_to_resolve))
+        sorted_by_date_sim_ordering = sorted(current_ordering, key=lambda x: (x[1].iso_date, x[0]))
+        sorted_by_date = [x[1] for x in sorted_by_date_sim_ordering]
         # split by the name of the object
         unique_names = list({x.name for x in sorted_by_date})
 
@@ -99,6 +106,7 @@ class NetworkOperationsMixIn(ABC):
 
     @staticmethod
     def resolve_same_named_objects(sorted_by_date: Sequence[DataObjectMixin]) -> Sequence[DataObjectMixin]:
+        """Resolves a subset of objects by date."""
         resolved_objects: list[DataObjectMixin] = []
         for unresolved_obj in sorted_by_date:
             # append the first
