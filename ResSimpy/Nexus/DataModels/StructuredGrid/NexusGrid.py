@@ -407,11 +407,11 @@ class NexusGrid(Grid):
                     grid_array_def = None
                     if isinstance(token_property.property, dict):
                         for ireg_name, grid_array_def in token_property.property.items():
-                            if modifier == 'VALUE' and grid_array_def.value is not None:
+                            if grid_array_def.modifier == 'VALUE' and grid_array_def.value is not None:
                                 self.__add_absolute_path_to_grid_array_definition(grid_array_def, idx)
                     else:
                         grid_array_def = token_property.property
-                        if modifier == 'VALUE' and grid_array_def.value is not None:
+                        if grid_array_def.modifier == 'VALUE' and grid_array_def.value is not None:
                             self.__add_absolute_path_to_grid_array_definition(grid_array_def, idx)
 
             # Load in grid dimensions

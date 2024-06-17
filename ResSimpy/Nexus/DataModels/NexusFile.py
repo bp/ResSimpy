@@ -261,6 +261,11 @@ class NexusFile(File):
 
     @dataclass
     class FileIndex:
+        """Class to store the index when iterating over a list of strings with nested NexusFile objects in them.
+
+        Attributes:
+            index(int): The current index in the list of strings.
+        """
         index: int
 
     def iterate_line(self, file_index: Optional[FileIndex] = None, max_depth: Optional[int] = None,

@@ -11,16 +11,16 @@ from tests.utility_for_tests import mock_multiple_files
 @pytest.mark.parametrize("file_as_list, expected_filtered_file_as_list", [
 
     # basic test
-    (['1 2 \t 3 4 5', '6 7 8 9 10'], ['1 2 3 4 5', '6 7 8 9 10']),
+    (['1 2 \t 3 4 5\n', '6 7 8 9 10\n'], ['1 2 3 4 5\n', '6 7 8 9 10\n']),
 
     # with a comment
-    (['-- comment', '1 2 3 4 5'], ['1 2 3 4 5']),
+    (['-- comment\n', '1 2 3 4 5\n'], ['1 2 3 4 5\n']),
     # with a comment at the end
-    (['1 2 3 4 5 -- comment'], ['1 2 3 4 5']),
+    (['1 2 3 4 5 -- comment\n'], ['1 2 3 4 5\n']),
     # with keywords in the file
-    (['KEYWORD', '1 2 3 4 5'], ['', '1 2 3 4 5']),
+    (['KEYWORD\n', '1 2 3 4 5\n'], ['\n', '1 2 3 4 5\n']),
     # with keywords in the file at the end
-    (['1 2 3 4 5 keyword', 'KEYWORD'], ['1 2 3 4 5', '']),
+    (['1 2 3 4 5 keyword\n', 'KEYWORD\n'], ['1 2 3 4 5\n', '\n']),
 ],
     ids=['basic', 'comment', 'comment_end', 'keyword', 'keyword_end'])
 def test_grid_filter_file_as_list(file_as_list, expected_filtered_file_as_list):
@@ -49,7 +49,7 @@ def test_filter_grid_file(mocker):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    expected_filtered_file_as_list = ['', '1 2 3 4 5', '6 7 8 9 10', '', '11 12', '']
+    expected_filtered_file_as_list = ['\n', '1 2 3 4 5\n', '6 7 8 9 10\n', '\n', '11 12\n', '\n']
     expected_file = File(location='/my/grid/file_filtered.dat', file_loading_skipped=False,
                          file_content_as_list=expected_filtered_file_as_list, create_as_modified=True)
     grid_array_definition = GridArrayDefinition(modifier='VALUE', value=file_path, keyword_in_include_file=False)

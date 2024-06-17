@@ -33,7 +33,8 @@ class NexusRelPermMethod(DynamicProperty):
     # General parameters
     file: NexusFile
     properties: dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
-                     dict[str, Union[float, pd.DataFrame]]]] = field(default_factory=get_empty_dict_union)
+                     dict[str, Union[float, pd.DataFrame]]]] = \
+        field(default_factory=get_empty_dict_union)
     hysteresis_params: dict[str, Union[str, float, dict[str, Union[str, float, dict[str, Union[str, float]]]]]] \
         = field(default_factory=get_empty_hysteresis_dict)
     unit_system: UnitSystem

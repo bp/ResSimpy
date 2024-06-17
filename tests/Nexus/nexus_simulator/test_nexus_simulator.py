@@ -11,6 +11,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
 from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.DataModels.NexusOptions import NexusOptions
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusPVTMethod import NexusPVTMethod
 from ResSimpy.Nexus.DataModels.NexusSeparatorMethod import NexusSeparatorMethod
@@ -1712,6 +1713,40 @@ def test_get_gaslift(mocker: MockerFixture, fcs_file_contents: str):
 
     # Assert
     assert result == loaded_gaslift
+
+
+@pytest.mark.parametrize("fcs_file_contents", [
+    ("""
+     GRID_FILES
+       STRUCTURED_GRID my/grid/file.dat
+     OPTIONS my/options/file.dat
+    """)
+], ids=['basic case'])
+def test_get_options(mocker: MockerFixture, fcs_file_contents: str):
+    """Testing the functionality to retrieve options information from Nexus fcs file."""
+    # Arrange
+    mocker.patch.object(uuid, 'uuid4', return_value='uuid')
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            os.path.join('path', 'my/options/file.dat'): '',
+            'path/nexus_run.fcs': fcs_file_contents,
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    opts_file = NexusFile(location=f'my/options/file.dat', origin='path/nexus_run.fcs')
+
+    loaded_options = NexusOptions(file=opts_file, model_unit_system=UnitSystem.ENGLISH)
+
+    simulation = NexusSimulator(origin='path/nexus_run.fcs')
+
+    # Act
+    result = simulation.options
+
+    # Assert
+    assert result == loaded_options
 
 
 @pytest.mark.parametrize("fcs_file_contents, surface_file_content, node1_props, node2_props, \

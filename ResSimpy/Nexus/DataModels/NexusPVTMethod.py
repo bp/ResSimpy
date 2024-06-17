@@ -19,7 +19,8 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
 from ResSimpy.DynamicProperty import DynamicProperty
 from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import PVTUnits
 
-from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_list_str, get_empty_eosopt_dict_union
+from ResSimpy.Utils.factory_methods import get_empty_dict_union, get_empty_list_str
+from ResSimpy.Utils.factory_methods import get_empty_eosopt_dict_union
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
 
@@ -173,7 +174,8 @@ class NexusPVTMethod(DynamicProperty):
                 if key == 'IGS_CP':
                     printable_str += value.to_string(na_rep='', index=False, header=False) + '\n'
                 else:
-                    printable_str += value.to_string(na_rep='', index=False) + '\n'
+                    printable_str += value.to_string(na_rep='', index=False,
+                                                     float_format=lambda x: '%.9f' % x) + '\n'
                 if key in PVT_TABLES_WITH_ENDWORDS:
                     printable_str += 'END'+key+'\n'
                 printable_str += '\n'
@@ -182,7 +184,8 @@ class NexusPVTMethod(DynamicProperty):
                     printable_str += f"{key.replace('_',' ')} {subkey}\n"
                     df = value[subkey]
                     if isinstance(df, pd.DataFrame):
-                        printable_str += df.to_string(na_rep='', index=False) + '\n'
+                        printable_str += df.to_string(na_rep='', index=False,
+                                                      float_format=lambda x: '%.9f' % x) + '\n'
                     printable_str += '\n'
             elif isinstance(value, Enum):
                 if isinstance(value, UnitSystem) or isinstance(value, TemperatureUnits):

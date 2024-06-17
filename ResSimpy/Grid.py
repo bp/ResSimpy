@@ -202,7 +202,8 @@ class Grid(ABC):
             raise NotImplementedError('Nested includes for grid files currently not implemented')
         file_as_list = fo.strip_file_of_comments(file_as_list, comment_characters=comment_characters)
         # remove non float values
-        file_as_list = [' '.join([x for x in line.split() if check_if_string_is_float(x)]) for line in file_as_list]
+        file_as_list = [' '.join([x for x in line.split()
+                                  if check_if_string_is_float(x)])+'\n' for line in file_as_list]
         return file_as_list
 
     @staticmethod
