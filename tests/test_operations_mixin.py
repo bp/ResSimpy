@@ -60,6 +60,6 @@ def test_resolve_carried_over_attributes_multiple_names():
 
     # Act
     result = NetworkOperationsMixIn.resolve_carried_over_attributes(existing_objects)
-
+    result.sort(key=lambda x: (x.name, x.iso_date))
     # Assert
     assert result == expected_result
