@@ -227,7 +227,7 @@ ENDCONSTRAINTS
       {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
        'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH})),
 
-    # 'line continuation'
+    # 'line continuation with whitespace'
     (''' CONSTRAINTS
 well1	 QLIQSMAX 	3884.0 > \t
   QWSMAX 	0
