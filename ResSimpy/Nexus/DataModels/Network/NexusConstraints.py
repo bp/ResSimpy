@@ -101,7 +101,7 @@ class NexusConstraints(Constraints):
         # CONSTRAINTS keyword represents a list of semi structured constraints with a well_name and then constraints
         if surface_file.file_content_as_list is not None:
             contents_str = "\n".join(surface_file.file_content_as_list)
-            contents_str_line_continuation = contents_str.replace(">\n", "")
+            contents_str_line_continuation = re.sub(">\\s*\\n", "", contents_str)
             new_contents_list = contents_str_line_continuation.splitlines()
             surface_file.file_content_as_list = new_contents_list
         _, new_constraints = collect_all_tables_to_objects(surface_file,

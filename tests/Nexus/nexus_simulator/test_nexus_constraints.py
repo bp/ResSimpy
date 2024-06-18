@@ -241,7 +241,8 @@ ENDCONSTRAINTS
        'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH})),
     ], ids=['basic_test', 'Change in Time', 'more Keywords', 'constraint table', 'multiple constraints on same well',
     'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword', 'GORLIM_drawdowncards',
-    'MULT keyword with a number after it', 'loading in pressure', 'line continuation', 'line continuation with whitespace'])
+    'MULT keyword with a number after it', 'loading in pressure', 'line continuation',
+    'line continuation with whitespace'])
 def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'
