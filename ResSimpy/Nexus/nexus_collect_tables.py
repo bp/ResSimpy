@@ -61,7 +61,7 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
         if not isinstance(unit_system, UnitSystem):
             raise TypeError(f"Value found for {unit_system=} of type {type(unit_system)} \
                                 not compatible, expected type UnitSystem Enum")
-        if check_token('TIME', line):
+        if check_token('TIME', line) and table_start < 0:
             time_value = get_expected_token_value(
                 token='TIME', token_line=line, file_list=file_as_list,
                 custom_message=f"Cannot find the date associated with the TIME card in {line=} at line number {index}")

@@ -433,7 +433,7 @@ ENDCONSTRAINTS
     runcontrol_data = 'START 01/01/2020'
 
     extra_procs_data = '''
-	IF(TIME > 0.0) THEN
+	IF( TIME > 0.0) THEN
  DO something
  NODELIST, STATIC, WELLHEADS, BHNODES_INJ
  ENDDO
