@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Optional, cast
 from uuid import UUID
 
 import pandas as pd
+import re
 
 from ResSimpy.Constraint import Constraint
 from ResSimpy.Constraints import Constraints
@@ -98,6 +99,11 @@ class NexusConstraints(Constraints):
     def load(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
         # CONSTRAINT keyword represents a table with a header and columns.
         # CONSTRAINTS keyword represents a list of semi structured constraints with a well_name and then constraints
+        if surface_file.file_content_as_list is not None:
+            contents_str = "\n".join(surface_file.file_content_as_list)
+            contents_str_line_continuation = re.sub(">\\s*\\n", "", contents_str)
+            new_contents_list = contents_str_line_continuation.splitlines()
+            surface_file.file_content_as_list = new_contents_list
         _, new_constraints = collect_all_tables_to_objects(surface_file,
                                                            {
                                                                'CONSTRAINTS': NexusConstraint,
