@@ -2,6 +2,7 @@ import uuid
 from unittest.mock import Mock
 import pandas as pd
 import pytest
+from pytest_mock import MockerFixture
 
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
@@ -456,3 +457,69 @@ ENDPROCS'''
     # Assert
     assert constraint.date == '04/10/2019'
     assert len(procs) == 2
+
+def test_load_constraints_welllist(mocker: MockerFixture):
+    """Ensure that a constraint applied to a welllist has the properties applied to all wells within it. """
+    # Arrange
+    fcs_file_contents = '''
+         RUN_UNITS ENGLISH
+         DATEFORMAT DD/MM/YYYY
+         RECURRENT_FILES
+         RUNCONTROL /nexus_data/runcontrol.dat
+         SURFACE Network 1  /surface_file_01.dat
+         '''
+
+    runcontrol_contents = '''START 09/07/2024'''
+
+    surface_file_contents = """
+    WELLLIST some_wells
+    ADD
+    well_1
+    well_2
+    ENDWELLLIST
+    
+    
+    CONSTRAINTS
+    some_wells	 QLIQSMAX 	3884.0  QWSMAX 	0
+    ENDCONSTRAINTS
+    
+    TIME 23/08/2024
+    CONSTRAINT
+    NAME   QOSMAX
+    some_wells 123.4
+    ENDCONSTRAINT
+    
+    """
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            '/path/fcs_file.fcs': fcs_file_contents,
+            '/surface_file_01.dat': surface_file_contents,
+            '/nexus_data/runcontrol.dat': runcontrol_contents}
+                                        ).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+    nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
+
+    constraint_properties_1 = {'date': '09/07/2024', 'name': 'well_1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
+    'unit_system': UnitSystem.ENGLISH}
+    expected_constraint_1 = NexusConstraint(properties_dict=constraint_properties_1, date_format=DateFormat.DD_MM_YYYY)
+    constraint_properties_2 = {'date': '23/08/2024', 'name': 'well_1', 'max_surface_oil_rate': 123.4, 'unit_system': UnitSystem.ENGLISH}
+    expected_constraint_2 = NexusConstraint(properties_dict=constraint_properties_2, date_format=DateFormat.DD_MM_YYYY)
+
+    constraint_properties_3 = {'date': '09/07/2024', 'name': 'well_2', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
+    'unit_system': UnitSystem.ENGLISH}
+    expected_constraint_3 = NexusConstraint(properties_dict=constraint_properties_3, date_format=DateFormat.DD_MM_YYYY)
+
+    constraint_properties_4 = {'date': '23/08/2024', 'name': 'well_2', 'max_surface_oil_rate': 123.4, 'unit_system': UnitSystem.ENGLISH}
+    expected_constraint_4 = NexusConstraint(properties_dict=constraint_properties_4, date_format=DateFormat.DD_MM_YYYY)
+
+    # Act
+    result = nexus_sim.network.constraints.get_all()
+
+    # Assert
+    assert result['well_1'] == [expected_constraint_1, expected_constraint_2]
+    assert result['well_2'] == [expected_constraint_3, expected_constraint_4]
+    # assert result == expected_result
+
