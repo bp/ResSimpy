@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Optional, cast
 from uuid import UUID
 
 import pandas as pd
+import re
 
 from ResSimpy.Constraint import Constraint
 from ResSimpy.Constraints import Constraints
