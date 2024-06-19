@@ -16,15 +16,17 @@ from ResSimpy.WellLists import WellLists
 class NexusWellLists(WellLists):
     """Class for representing a set of WellList objects for the Nexus model."""
     _well_lists: list[NexusWellList] = field(default_factory=list)
+    __parent_network: NexusNetwork
 
     def __init__(self, parent_network: NexusNetwork) -> None:
         """Initialises the NexusWellLists class.
 
         Args:
             parent_network (NexusNetwork): The network that the well lists are a part of.
+            welllists (Optional[Sequence[NexusWellList]]):
         """
+        super().__init__()
         self.__parent_network: NexusNetwork = parent_network
-        self._well_lists: list[NexusWellList] = []
 
     def get_all(self) -> list[NexusWellList]:
         """Returns all WellList names."""

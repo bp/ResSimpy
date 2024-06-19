@@ -138,7 +138,7 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                 list_objects = load_well_lists(file_as_list=file_as_list[table_start - 1:table_end],
                                                current_date=current_date,
                                                previous_well_lists=nexus_object_results[token_found],
-                                               )
+                                               date_format=date_format)
 
             else:
                 list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
