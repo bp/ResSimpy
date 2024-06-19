@@ -475,19 +475,35 @@ def test_load_constraints_welllist(mocker: MockerFixture):
     WELLLIST some_wells
     ADD
     well_1
-    well_2
     ENDWELLLIST
-    
     
     CONSTRAINTS
     some_wells	 QLIQSMAX 	3884.0  QWSMAX 	0
     ENDCONSTRAINTS
     
     TIME 23/08/2024
+    
+    ! Redefine the welllist to check that the new constraints only get applied to newly added wells after this point.
+    WELLLIST some_wells
+    ADD
+    well_2
+    ENDWELLLIST
+    
     CONSTRAINT
     NAME   QOSMAX
     some_wells 123.4
     ENDCONSTRAINT
+    
+    TIME 15/10/2024
+    
+    WELLLIST some_wells
+    REMOVE
+    well_1
+    ENDWELLLIST
+    
+    CONSTRAINTS
+    some_wells	QLIQSMAX 4567
+    ENDCONSTRAINTS
     
     """
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
@@ -502,24 +518,21 @@ def test_load_constraints_welllist(mocker: MockerFixture):
     mocker.patch("builtins.open", mock_open_wrapper)
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
 
-    constraint_properties_1 = {'date': '09/07/2024', 'name': 'well_1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
+    well_1_constraint_properties_1 = {'date': '09/07/2024', 'name': 'well_1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
     'unit_system': UnitSystem.ENGLISH}
-    expected_constraint_1 = NexusConstraint(properties_dict=constraint_properties_1, date_format=DateFormat.DD_MM_YYYY)
-    constraint_properties_2 = {'date': '23/08/2024', 'name': 'well_1', 'max_surface_oil_rate': 123.4, 'unit_system': UnitSystem.ENGLISH}
-    expected_constraint_2 = NexusConstraint(properties_dict=constraint_properties_2, date_format=DateFormat.DD_MM_YYYY)
+    well_1_expected_constraint_1 = NexusConstraint(properties_dict=well_1_constraint_properties_1, date_format=DateFormat.DD_MM_YYYY)
+    well_1_constraint_properties_2 = {'date': '23/08/2024', 'name': 'well_1', 'max_surface_oil_rate': 123.4, 'unit_system': UnitSystem.ENGLISH}
+    well_1_expected_constraint_2 = NexusConstraint(properties_dict=well_1_constraint_properties_2, date_format=DateFormat.DD_MM_YYYY)
 
-    constraint_properties_3 = {'date': '09/07/2024', 'name': 'well_2', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
-    'unit_system': UnitSystem.ENGLISH}
-    expected_constraint_3 = NexusConstraint(properties_dict=constraint_properties_3, date_format=DateFormat.DD_MM_YYYY)
-
-    constraint_properties_4 = {'date': '23/08/2024', 'name': 'well_2', 'max_surface_oil_rate': 123.4, 'unit_system': UnitSystem.ENGLISH}
-    expected_constraint_4 = NexusConstraint(properties_dict=constraint_properties_4, date_format=DateFormat.DD_MM_YYYY)
+    well_2_constraint_properties_1 = {'date': '23/08/2024', 'name': 'well_2', 'max_surface_oil_rate': 123.4, 'unit_system': UnitSystem.ENGLISH}
+    well_2_expected_constraint_1 = NexusConstraint(properties_dict=well_2_constraint_properties_1, date_format=DateFormat.DD_MM_YYYY)
+    well_2_constraint_properties_2 = {'date': '15/10/2024', 'name': 'well_2', 'max_surface_liquid_rate': 4567, 'unit_system': UnitSystem.ENGLISH}
+    well_2_expected_constraint_2 = NexusConstraint(properties_dict=well_2_constraint_properties_2, date_format=DateFormat.DD_MM_YYYY)
 
     # Act
     result = nexus_sim.network.constraints.get_all()
 
     # Assert
-    assert result['well_1'] == [expected_constraint_1, expected_constraint_2]
-    assert result['well_2'] == [expected_constraint_3, expected_constraint_4]
-    # assert result == expected_result
+    assert result['well_1'] == [well_1_expected_constraint_1, well_1_expected_constraint_2]
+    assert result['well_2'] == [well_2_expected_constraint_1, well_2_expected_constraint_2]
 
