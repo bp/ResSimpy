@@ -3,9 +3,10 @@
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Enums.HowEnum import OperationEnum
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
 
-def load_well_lists(file_as_list: list[str], current_date: None | str,
+def load_well_lists(file_as_list: list[str], current_date: None | str, date_format: DateFormat,
                     previous_well_lists: None | list[NexusWellList] = None,
                     table_start_index: int = 0) -> list[tuple[NexusWellList, int]]:
     """Loads a well list from a surface network file.
@@ -13,6 +14,7 @@ def load_well_lists(file_as_list: list[str], current_date: None | str,
     Args:
         file_as_list (list[str]): The surface network file as a list of strings.
         current_date (None | str): The current date of the simulation.
+        date_format (Optional[DateFormat]): The date format of the objects being loaded.
         previous_well_lists (None | list[tuple[NexusWellList, int]]): ??
         The list of tuples of already loaded in NexusWellLists with their starting index. Defaults to None.
         table_start_index (int): The starting index of the table. Defaults to 0.
@@ -30,7 +32,8 @@ def load_well_lists(file_as_list: list[str], current_date: None | str,
     previous_well_list = get_previous_well_list(well_list_name=well_list_name, well_lists=previous_well_lists)
 
     new_well_list = load_well_list_from_table(well_list_as_list_str=file_as_list, current_date=current_date,
-                                              previous_well_list=previous_well_list, well_list_name=well_list_name)
+                                              previous_well_list=previous_well_list, well_list_name=well_list_name,
+                                              date_format=date_format)
 
     return [(new_well_list, table_start_index)]
 
@@ -45,14 +48,16 @@ def get_previous_well_list(well_list_name: str, well_lists: list[NexusWellList])
     Returns:
         NexusWellList | None: The previous well list if it exists, None otherwise.
     """
-    for well_list in well_lists:
-        if well_list.name == well_list_name:
-            return well_list
-    return None
+
+    # Find the latest matching welllist
+    matching_well_lists = [x for x in well_lists if x.name == well_list_name]
+    sorted_well_lists = sorted(matching_well_lists, key=lambda x: x.iso_date)
+    return None if len(sorted_well_lists) == 0 else sorted_well_lists[-1]
 
 
 def load_well_list_from_table(well_list_as_list_str: list[str], current_date: str, well_list_name: str,
-                              previous_well_list: NexusWellList | None = None) -> NexusWellList:
+                              date_format: DateFormat, previous_well_list: NexusWellList | None = None) \
+        -> NexusWellList:
     """Loads a well list from a table taken from a surface network file.
 
     Currently does not support Wildcards in welllists.
@@ -61,6 +66,7 @@ def load_well_list_from_table(well_list_as_list_str: list[str], current_date: st
         well_list_as_list_str (list[str]): The subsection of surface network file as a list of strings.
         current_date (str): The current date of the simulation.
         well_list_name (str): The name of the well list.
+        date_format (Optional[DateFormat]): The date format of the Welllist being loaded.
         previous_well_list (NexusWellList | None): The previous well list. Defaults to None.
 
     Returns:
@@ -99,4 +105,4 @@ def load_well_list_from_table(well_list_as_list_str: list[str], current_date: st
                 well_list.remove(well_name)
 
     # TODO may also need to store the line number for the loaded well list
-    return NexusWellList(name=well_list_name, wells=well_list, date=current_date)
+    return NexusWellList(name=well_list_name, wells=well_list, date=current_date, date_format=date_format)

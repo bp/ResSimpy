@@ -214,9 +214,36 @@ ENDQMULT ''',
       {'date': '01/01/2020', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_surface_liquid_rate': 20.5,
        'unit_system': UnitSystem.ENGLISH}
       )),
+
+    # 'line continuation'
+    (''' CONSTRAINTS
+well1	 QLIQSMAX 	3884.0 >
+  QWSMAX 	0
+well2	 QWSMAX 	0.0 >
+ QLIQSMAX- 10000.0 QLIQSMAX 15.5
+ENDCONSTRAINTS
+''',
+     ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
+       'unit_system': UnitSystem.ENGLISH},
+      {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
+       'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH})),
+
+    # 'line continuation with whitespace'
+    (''' CONSTRAINTS
+well1	 QLIQSMAX 	3884.0 > \t
+  QWSMAX 	0
+well2	 QWSMAX 	0.0 >
+ QLIQSMAX- 10000.0 QLIQSMAX 15.5
+ENDCONSTRAINTS
+''',
+     ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
+       'unit_system': UnitSystem.ENGLISH},
+      {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
+       'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH})),
     ], ids=['basic_test', 'Change in Time', 'more Keywords', 'constraint table', 'multiple constraints on same well',
     'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword', 'GORLIM_drawdowncards',
-    'MULT keyword with a number after it', 'loading in pressure'])
+    'MULT keyword with a number after it', 'loading in pressure', 'line continuation',
+    'line continuation with whitespace'])
 def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'
