@@ -23,7 +23,6 @@ class NexusWellLists(WellLists):
 
         Args:
             parent_network (NexusNetwork): The network that the well lists are a part of.
-            welllists (Optional[Sequence[NexusWellList]]):
         """
         super().__init__()
         self.__parent_network: NexusNetwork = parent_network
