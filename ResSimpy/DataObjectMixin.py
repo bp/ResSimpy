@@ -41,7 +41,7 @@ class DataObjectMixin(ABC):
         self._date_format = date_format
         self._start_date = start_date
         self._unit_system = unit_system
-        self.__date = date
+        self.date = date
         self.__name = name
 
     def __repr__(self) -> str:

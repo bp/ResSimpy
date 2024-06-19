@@ -1,14 +1,8 @@
-from dataclasses import dataclass
 from abc import ABC
+from dataclasses import dataclass
 from typing import Literal, Sequence
 
-
-@dataclass(kw_only=True)
-class WellList:
-    """Class for representing a single WellList or group for the model."""
-    name: str
-    wells: list[str]
-    date: str
+from ResSimpy.WellList import WellList
 
 
 @dataclass(kw_only=True)
@@ -16,13 +10,9 @@ class WellLists(ABC):
     """Class for representing a set of WellList objects for the model."""
     _well_lists: Sequence[WellList]
 
-    def __init__(self, welllists: Sequence[WellList]) -> None:
-        """Initialises the WellLists class.
-
-        Args:
-            welllists (Sequence[WellList]): List of WellList objects.
-        """
-        self._well_lists = welllists
+    def __init__(self) -> None:
+        """Initialises the WellLists class."""
+        self._well_lists = []
 
     @property
     def _network_element_name(self) -> Literal['welllists']:
@@ -36,7 +26,7 @@ class WellLists(ABC):
     @property
     def unique_names(self) -> list[str]:
         """Returns all WellList names."""
-        return list({x.name for x in self.welllists})
+        return list({x.name for x in self.welllists if x.name is not None})
 
     def get_all_by_name(self, well_list_name: str) -> Sequence[WellList]:
         """Returns a single WellList instance by name.
