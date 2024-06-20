@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 from abc import ABC, abstractmethod
-from typing import Any, Sequence, Optional, TYPE_CHECKING
+from typing import Any, Sequence, Optional, TYPE_CHECKING, TypeVar
 from uuid import UUID
 
 import pandas as pd
@@ -13,6 +13,8 @@ from ResSimpy.File import File
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import Network
+
+T = TypeVar('T', bound=DataObjectMixin)
 
 
 class NetworkOperationsMixIn(ABC):
@@ -78,7 +80,7 @@ class NetworkOperationsMixIn(ABC):
         raise NotImplementedError("Implement this in the derived class")
 
     @staticmethod
-    def resolve_carried_over_attributes(objects_to_resolve: Sequence[DataObjectMixin]) -> Sequence[DataObjectMixin]:
+    def resolve_carried_over_attributes(objects_to_resolve: Sequence[T]) -> Sequence[T]:
         """Resolves carried over attributes from previous time steps to the future timesteps.
 
         Args:
