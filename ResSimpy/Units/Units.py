@@ -80,6 +80,7 @@ class UnitDimension(ABC):
         """Converts the value from metbar to English."""
         return value
 
+
 class Area(UnitDimension):
     """Units for area."""
     english = 'ft2'
@@ -355,6 +356,7 @@ class SurfaceRatesLiquid(UnitDimension):
         """Converts the value from metbar to English."""
         return value * 6.28981077
 
+
 class SurfaceRatesGas(UnitDimension):
     """Units for surface rates gas."""
     english = 'mscf/day'
@@ -493,6 +495,14 @@ class Diameter(UnitDimension):
     metbar = 'cm'
     lab = 'cm'
     metric_atm = 'cm'
+
+    def english_to_metbar(self, value: float) -> float:
+        """Converts the value from English to metbar."""
+        return value * 2.54
+
+    def metbar_to_english(self, value: float) -> float:
+        """Converts the value from metbar to English."""
+        return value / 2.54
 
 
 class HeatTransfer(UnitDimension):

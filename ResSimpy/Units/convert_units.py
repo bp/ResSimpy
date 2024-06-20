@@ -1,7 +1,25 @@
-from typing import Callable, Optional
+from typing import Callable, Optional, Protocol, TypeVar
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Units.Units import UnitDimension
+
+
+# Set up typing and generics for the convert_units function
+class UnitConvertableObject(Protocol):
+    """Protocol for objects that can be converted between unit systems.
+    Implements _unit_system and units properties.
+    """
+    _unit_system: UnitSystem
+
+    @property
+    def units(self) -> BaseUnitMapping: ...
+
+    @property
+    def unit_system(self) -> UnitSystem: ...
+
+
+T = TypeVar('T', bound=UnitConvertableObject)
 
 
 def get_map(from_unit: UnitSystem, to_unit: UnitSystem, unit_dim: UnitDimension) -> Optional[Callable]:
@@ -24,12 +42,24 @@ def convert_units(from_unit: UnitSystem, to_unit: UnitSystem, unit_dim: UnitDime
     return unit_mapping_function(value)
 
 
-def convert_object(obj: object, to_unit: UnitSystem) -> object:
-    for attr in obj.__dict__:
+def convert_object_units(obj: T, to_unit: UnitSystem) -> T:
+    """Inplace conversion of all attributes on the provided object to the new unit system.
+
+    Args:
+        obj (UnitConvertableObject): The object to convert attributes of.
+        to_unit (UnitSystem): The unit system to convert to.
+    """
+    for attr, value in obj.__dict__.items():
         # TODO: use the typing in the dict rather than checking if it is a float
-        if isinstance(obj.__dict__[attr], float):
-            obj.__dict__[attr] = convert_units(obj.__dict__[attr].unit_system,
-                                               to_unit,
-                                               obj.__dict__[attr],
-                                               obj.__dict__[attr].value)
+        if isinstance(value, float):
+
+            attribute_unit_dims = obj.units.attribute_map.get(attr, None)
+            if attribute_unit_dims is None:
+                continue
+            converted_value = convert_units(obj.unit_system,
+                                            to_unit,
+                                            attribute_unit_dims,
+                                            value)
+            setattr(obj, attr, converted_value)
+    obj._unit_system = to_unit
     return obj
