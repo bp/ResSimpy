@@ -72,6 +72,13 @@ class UnitDimension(ABC):
             case _:
                 raise ValueError(f'Unit system {unit_system} not recognised.')
 
+    def english_to_metbar(self, value: float) -> float:
+        """Converts the value from English to metbar."""
+        return value
+
+    def metbar_to_english(self, value: float) -> float:
+        """Converts the value from metbar to English."""
+        return value
 
 class Area(UnitDimension):
     """Units for area."""
@@ -340,6 +347,13 @@ class SurfaceRatesLiquid(UnitDimension):
     lab = 'stcc/hour'
     metric_atm = 'stm3/day'
 
+    def english_to_metbar(self, value: float) -> float:
+        """Converts the value from English to metbar."""
+        return value / 6.28981077
+
+    def metbar_to_english(self, value: float) -> float:
+        """Converts the value from metbar to English."""
+        return value * 6.28981077
 
 class SurfaceRatesGas(UnitDimension):
     """Units for surface rates gas."""
