@@ -19,6 +19,7 @@ from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Utils.invert_nexus_map import attribute_name_to_nexus_keyword
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
@@ -426,3 +427,25 @@ class NexusConstraints(Constraints):
         combination_of_constraints.update(cleaned_new_constraint)
 
         self.add(combination_of_constraints, comments)
+
+
+    def write_out_constraints_for_date(self, date: str) -> str:
+        constraints_for_date = []
+        for name, constraints in self.constraints.items():
+            constraints_for_date.extend([x for x in constraints if x.date == date])
+
+        string_for_date = 'CONSTRAINTS\n'
+
+        # create headers for all constraints
+        headers = []
+        keyword_mapping = NexusConstraint.get_keyword_mapping()
+        for constraint in constraints_for_date:
+            for attr, value in constraint.to_dict(add_units=False, add_date=False, include_nones=False).items():
+                if value is not None and attr not in headers:
+                    headers.append(attribute_name_to_nexus_keyword(keyword_mapping, attr))
+
+        for constraint in constraints_for_date:
+            string_for_date += constraint.to_table_line(headers)
+        string_for_date += 'ENDCONSTRAINTS\n\n'
+
+        return string_for_date
