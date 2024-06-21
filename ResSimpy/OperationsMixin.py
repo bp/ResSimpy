@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 from abc import ABC, abstractmethod
-from typing import Any, Sequence, Optional, TYPE_CHECKING
+from typing import Any, Sequence, Optional, TYPE_CHECKING, TypeVar
 from uuid import UUID
 
 import pandas as pd
@@ -13,6 +13,8 @@ from ResSimpy.File import File
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import Network
+
+T = TypeVar('T', bound=DataObjectMixin)
 
 
 class NetworkOperationsMixIn(ABC):
@@ -78,14 +80,14 @@ class NetworkOperationsMixIn(ABC):
         raise NotImplementedError("Implement this in the derived class")
 
     @staticmethod
-    def resolve_carried_over_attributes(objects_to_resolve: Sequence[DataObjectMixin]) -> Sequence[DataObjectMixin]:
+    def resolve_carried_over_attributes(objects_to_resolve: Sequence[T]) -> Sequence[T]:
         """Resolves carried over attributes from previous time steps to the future timesteps.
 
         Args:
             objects_to_resolve (Sequence[DataObjectMixin]): list of objects to resolve carried over attributes for.
             Must be of homogenous type.
         """
-        resolved_objects: list[DataObjectMixin] = []
+        resolved_objects: list[T] = []
 
         if (len(objects_to_resolve) > 0 and
                 not all(isinstance(x, type(objects_to_resolve[0])) for x in objects_to_resolve)):
@@ -101,14 +103,15 @@ class NetworkOperationsMixIn(ABC):
         # resolve by name
         for name in unique_names:
             matching_names = [x for x in sorted_by_date if x.name == name]
-            resolved_objects.extend(NetworkOperationsMixIn.resolve_same_named_objects(matching_names))
+            resolving_by_name = NetworkOperationsMixIn.resolve_same_named_objects(matching_names)
+            resolved_objects.extend(resolving_by_name)
 
         return resolved_objects
 
     @staticmethod
-    def resolve_same_named_objects(sorted_by_date: Sequence[DataObjectMixin]) -> Sequence[DataObjectMixin]:
+    def resolve_same_named_objects(sorted_by_date: Sequence[T]) -> Sequence[T]:
         """Resolves a subset of objects by date."""
-        resolved_objects: list[DataObjectMixin] = []
+        resolved_objects: list[T] = []
         for unresolved_obj in sorted_by_date:
             # append the first
             if len(resolved_objects) == 0:
