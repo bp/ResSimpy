@@ -5,6 +5,7 @@ from typing import Optional, TYPE_CHECKING
 
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.nexus_file_operations import get_next_value, correct_datatypes
 from ResSimpy.Utils.invert_nexus_map import nexus_keyword_to_attribute_name
@@ -17,7 +18,7 @@ if TYPE_CHECKING:
 def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConstraint], current_date: Optional[str],
                             unit_system: UnitSystem, property_map: dict[str, tuple[str, type]],
                             existing_constraints: dict[str, list[NexusConstraint]], nexus_file: File,
-                            start_line_index: int, date_format: DateFormat,
+                            start_line_index: int, date_format: DateFormat, welllists: list[NexusWellList],
                             network_names: Optional[list[str]] = None) -> None:
     """Loads table of constraints with the wellname/node first and the constraints following inline
         uses previous set of constraints as still applied to the well.
@@ -34,14 +35,15 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
         nexus_file (File): The Nexus file containing the constraints.
         start_line_index (int): The index of the line in the file to start loading from.
         network_names (Optional[list[str]]): list of names for all nodes, wells and connections in a nexus network.
-            Used in deriving constraints from wildcards. Defaults to None
+            Used in deriving constraints from wildcards. Defaults to None.
         date_format (Optional[DateFormat]): The date format of the object.
+        welllists (list[WellList]): A list of all the WELLLISTs loaded in so far.
 
     Returns:
     -------
         dict[UUID, int]: dictionary of object locations derived from inline table.
     """
-
+    welllist_names = [x.name for x in welllists]
     for index, line in enumerate(file_as_list):
         properties_dict: dict[str, str | float | UnitSystem | None] = {'date': current_date, 'unit_system': unit_system}
         # first value in the line has to be the node/wellname
@@ -57,6 +59,11 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
             else:
                 # filter names that match the pattern
                 constraint_names_to_add = fnmatch.filter(network_names, name)
+        elif name in welllist_names:
+            # If the name refers to a welllist, apply the constraints to all of the wells in that.
+            welllist_for_constraining = next(x for x in welllists if x.name == name)
+            wellnames_in_welllist = welllist_for_constraining.wells
+            constraint_names_to_add.extend(wellnames_in_welllist)
         else:
             constraint_names_to_add.append(name)
 
@@ -100,8 +107,9 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
             trimmed_line = trimmed_line.replace(next_value, "", 1)
             next_value = get_next_value(0, [trimmed_line])
 
-        # first check if there are any existing constraints created for the well this timestep
+        # Loop through all objects that should have the constraints applied to them
         for name_of_node in constraint_names_to_add:
+            # first check if there are any existing constraints created for the well this timestep
             properties_dict['name'] = name_of_node
             well_constraints = existing_constraints.get(name_of_node, None)
             if well_constraints is not None:

@@ -12,7 +12,7 @@ class WellList(DataObjectMixin):
 
     def __init__(self, date: str, wells: list[str], name: str, date_format: Optional[DateFormat] = None,
                  start_date: Optional[str] = None) -> None:
-        """Initialises the OutputRequest class.
+        """Initialises the WellList class.
 
         Args:
             date (str): Date that the well list is created.
