@@ -16,6 +16,9 @@ class NodeConnection(DataObjectMixin, ABC):
     node_out: Optional[str] = None
     con_type: Optional[str] = None
     depth: Optional[float] = None
+    hyd_method: Optional[str | int] = None
+    pvt_method: Optional[int] = None
+    water_method: Optional[int] = None
 
     @property
     def units(self) -> NetworkUnits:

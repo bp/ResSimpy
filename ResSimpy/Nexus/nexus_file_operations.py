@@ -15,6 +15,7 @@ import pandas as pd
 from ResSimpy.Enums.UnitsEnum import UnitSystem, TemperatureUnits, SUnits
 from ResSimpy.FileOperations.file_operations import get_next_value, check_token, get_expected_token_value, \
     strip_file_of_comments, load_file_as_list
+from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusKeywords.nexus_keywords import VALID_NEXUS_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEYWORDS
@@ -410,8 +411,8 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
                           unit_system: Optional[UnitSystem] = None,
                           constraint_obj_dict: Optional[dict[str, list[Any]]] = None,
                           preserve_previous_object_attributes: bool = False,
-                          well_names: Optional[list[str]] = None
-                          ) -> list[tuple[Any, int]]:
+                          well_names: Optional[list[str]] = None,
+                          welllists: Optional[list[NexusWellList]] = None) -> list[tuple[Any, int]]:
     """Loads a table row by row to an object provided in the row_object.
 
     Args:
@@ -429,6 +430,7 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
             matching attributes. Must have a .update() method implemented and a name
         date_format (Optional[DateFormat]): The date format of the object.
         well_names (Optional[str]): A list of all the network object names.
+        welllists (Optional[list[WellList]]): A list of all the WELLLISTs loaded in so far.
 
     Returns:
         list[obj]: list of tuples containing instances of the class provided for the row_object,
@@ -441,6 +443,7 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
         constraint_obj_dict = {}
 
     return_objects = []
+    welllist_names = [] if welllists is None else [x.name for x in welllists]
     for index, line in enumerate(table_as_list, start=header_index + 1):
         keyword_store: dict[str, None | int | float | str] = {x: None for x in property_map.keys()}
         valid_line, keyword_store = table_line_reader(keyword_store, headers, line)
@@ -461,11 +464,18 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
         if not isinstance(keyword_store['name'], str):
             raise ValueError(f'Cannot find valid well name for object: {keyword_store}')
 
-        if keyword_store['name'].__contains__('*') and well_names is not None:
+        constraining_object_name = keyword_store['name']
+
+        if constraining_object_name.__contains__('*') and well_names is not None:
             # Wildcard found, apply these properties to all objects with a name that matches the name predicate.
-            object_well_names = [x for x in well_names if fnmatch.fnmatch(x, keyword_store['name'])]
+            object_well_names = [x for x in well_names if fnmatch.fnmatch(x, constraining_object_name)]
+        elif constraining_object_name in welllist_names and welllists is not None:
+            # If the name refers to a welllist, apply the constraints to all of the wells in that.
+            welllist_for_constraining = next(x for x in welllists if x.name == constraining_object_name)
+            wellnames_in_welllist = welllist_for_constraining.wells
+            object_well_names = wellnames_in_welllist
         else:
-            object_well_names = [keyword_store['name']]
+            object_well_names = [constraining_object_name]
 
         for name in object_well_names:
             keyword_store['name'] = name

@@ -2,6 +2,7 @@ import uuid
 from unittest.mock import Mock
 import pandas as pd
 import pytest
+from pytest_mock import MockerFixture
 
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
@@ -213,9 +214,36 @@ ENDQMULT ''',
       {'date': '01/01/2020', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_surface_liquid_rate': 20.5,
        'unit_system': UnitSystem.ENGLISH}
       )),
+
+    # 'line continuation'
+    (''' CONSTRAINTS
+well1	 QLIQSMAX 	3884.0 >
+  QWSMAX 	0
+well2	 QWSMAX 	0.0 >
+ QLIQSMAX- 10000.0 QLIQSMAX 15.5
+ENDCONSTRAINTS
+''',
+     ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
+       'unit_system': UnitSystem.ENGLISH},
+      {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
+       'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH})),
+
+    # 'line continuation with whitespace'
+    (''' CONSTRAINTS
+well1	 QLIQSMAX 	3884.0 > \t
+  QWSMAX 	0
+well2	 QWSMAX 	0.0 >
+ QLIQSMAX- 10000.0 QLIQSMAX 15.5
+ENDCONSTRAINTS
+''',
+     ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
+       'unit_system': UnitSystem.ENGLISH},
+      {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
+       'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH})),
     ], ids=['basic_test', 'Change in Time', 'more Keywords', 'constraint table', 'multiple constraints on same well',
     'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword', 'GORLIM_drawdowncards',
-    'MULT keyword with a number after it', 'loading in pressure'])
+    'MULT keyword with a number after it', 'loading in pressure', 'line continuation',
+    'line continuation with whitespace'])
 def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'
@@ -433,7 +461,7 @@ ENDCONSTRAINTS
     runcontrol_data = 'START 01/01/2020'
 
     extra_procs_data = '''
-	IF(TIME > 0.0) THEN
+	IF( TIME > 0.0) THEN
  DO something
  NODELIST, STATIC, WELLHEADS, BHNODES_INJ
  ENDDO
@@ -456,3 +484,82 @@ ENDPROCS'''
     # Assert
     assert constraint.date == '04/10/2019'
     assert len(procs) == 2
+
+def test_load_constraints_welllist(mocker: MockerFixture):
+    """Ensure that a constraint applied to a welllist has the properties applied to all wells within it. """
+    # Arrange
+    fcs_file_contents = '''
+         RUN_UNITS ENGLISH
+         DATEFORMAT DD/MM/YYYY
+         RECURRENT_FILES
+         RUNCONTROL /nexus_data/runcontrol.dat
+         SURFACE Network 1  /surface_file_01.dat
+         '''
+
+    runcontrol_contents = '''START 09/07/2024'''
+
+    surface_file_contents = """
+    WELLLIST some_wells
+    ADD
+    well_1
+    ENDWELLLIST
+    
+    CONSTRAINTS
+    some_wells	 QLIQSMAX 	3884.0  QWSMAX 	0
+    ENDCONSTRAINTS
+    
+    TIME 23/08/2024
+    
+    ! Redefine the welllist to check that the new constraints only get applied to newly added wells after this point.
+    WELLLIST some_wells
+    ADD
+    well_2
+    ENDWELLLIST
+    
+    CONSTRAINT
+    NAME   QOSMAX
+    some_wells 123.4
+    ENDCONSTRAINT
+    
+    TIME 15/10/2024
+    
+    WELLLIST some_wells
+    REMOVE
+    well_1
+    ENDWELLLIST
+    
+    CONSTRAINTS
+    some_wells	QLIQSMAX 4567
+    ENDCONSTRAINTS
+    
+    """
+    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            '/path/fcs_file.fcs': fcs_file_contents,
+            '/surface_file_01.dat': surface_file_contents,
+            '/nexus_data/runcontrol.dat': runcontrol_contents}
+                                        ).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+    nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
+
+    well_1_constraint_properties_1 = {'date': '09/07/2024', 'name': 'well_1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
+    'unit_system': UnitSystem.ENGLISH}
+    well_1_expected_constraint_1 = NexusConstraint(properties_dict=well_1_constraint_properties_1, date_format=DateFormat.DD_MM_YYYY)
+    well_1_constraint_properties_2 = {'date': '23/08/2024', 'name': 'well_1', 'max_surface_oil_rate': 123.4, 'unit_system': UnitSystem.ENGLISH}
+    well_1_expected_constraint_2 = NexusConstraint(properties_dict=well_1_constraint_properties_2, date_format=DateFormat.DD_MM_YYYY)
+
+    well_2_constraint_properties_1 = {'date': '23/08/2024', 'name': 'well_2', 'max_surface_oil_rate': 123.4, 'unit_system': UnitSystem.ENGLISH}
+    well_2_expected_constraint_1 = NexusConstraint(properties_dict=well_2_constraint_properties_1, date_format=DateFormat.DD_MM_YYYY)
+    well_2_constraint_properties_2 = {'date': '15/10/2024', 'name': 'well_2', 'max_surface_liquid_rate': 4567, 'unit_system': UnitSystem.ENGLISH}
+    well_2_expected_constraint_2 = NexusConstraint(properties_dict=well_2_constraint_properties_2, date_format=DateFormat.DD_MM_YYYY)
+
+    # Act
+    result = nexus_sim.network.constraints.get_all()
+
+    # Assert
+    assert result['well_1'] == [well_1_expected_constraint_1, well_1_expected_constraint_2]
+    assert result['well_2'] == [well_2_expected_constraint_1, well_2_expected_constraint_2]
+

@@ -99,11 +99,8 @@ class Completion(DataObjectMixin, ABC):
             start_date: Optional[str]: The start date of the simulation.
             unit_system: Optional[UnitSystem]: The unit system to use for the completion.
         """
-        super().__init__()
+        super().__init__(date=date, date_format=date_format, start_date=start_date)
         self.__well_radius = well_radius
-        self._date_format = date_format
-        self._start_date = start_date
-        self.date = date
         self.__i = i
         self.__j = j
         self.__k = k
