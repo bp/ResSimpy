@@ -26,7 +26,6 @@ class TestNexusWellMod:
                                             date_format=date_format, unit_system=unit_system, start_date=start_date)
     expected_completion_2 = NexusCompletion(date=start_date, i=6, j=7, k=8, well_radius=9.11,
                                             date_format=date_format, unit_system=unit_system, start_date=start_date)
-
     expected_completion_1._DataObjectMixin__id = 'uuid_1'
     expected_completion_2._DataObjectMixin__id = 'uuid_1'
 
@@ -120,21 +119,33 @@ class TestNexusWellMod:
         # Assert
         assert result_wells == expected_wells
 
-    def test_load_wellmod_var(self, mocker):
+    @pytest.mark.parametrize('skin_var, dkrw_var, skin_result, dkrw_result',[
+        # basic_test
+        ('1.2  55 10', '10 2\t3', [1.2, 55, 10], [10, 2, 3]),
+        # vector only
+        ('3*1.5', '3*3', [1.5, 1.5, 1.5], [3, 3, 3]),
+        # mix vector
+        ('1 2*1.5', '2*3 10.4', [1, 1.5, 1.5], [3, 3, 10.4]),
+], ids=['basic_test', 'vector_only', 'mix_vector'])
+    def test_load_wellmod_var(self, mocker, skin_var, dkrw_var, skin_result, dkrw_result):
         # Arrange
-        extra_well_file_content = "WELLMod test_well SKIN VAR 1.2  55  KHMULT    CON 1234.2  DKRW  VAr 10 2 "
+        extra_completion = '3 3 3 4.5\n'
+        extra_well_file_content = f"WELLMod test_well SKIN VAR {skin_var}  KHMULT    CON 1234.2  DKRW  VAr {dkrw_var} "
         expected_wellmod = NexusWellMod({'well_name': 'test_well', 'date': '01/01/2020',
-                                         'unit_system': self.unit_system, 'skin': [1.2, 55],
-                                         'perm_thickness_mult': 1234.2, 'delta_krw': [10, 2]})
+                                         'unit_system': self.unit_system, 'skin': skin_result,
+                                         'perm_thickness_mult': 1234.2, 'delta_krw': dkrw_result})
         dummy_model = get_fake_nexus_simulator(mocker)
         mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
         dummy_wells = NexusWells(model=dummy_model)
-
+        extra_completion_obj = NexusCompletion(date=self.start_date, i=3, j=3, k=3, well_radius=4.5,
+                                                  date_format=self.date_format, unit_system=self.unit_system,
+                                                  start_date=self.start_date)
         expected_wells = [NexusWell(well_name='test_well',
-                                    completions=[self.expected_completion_1, self.expected_completion_2],
+                                    completions=[self.expected_completion_1, self.expected_completion_2,
+                                                 extra_completion_obj],
                                     wellmods=[expected_wellmod],
                                     unit_system=self.unit_system, parent_wells_instance=dummy_wells)]
-        open_mock = mocker.mock_open(read_data=self.well_file_content + extra_well_file_content)
+        open_mock = mocker.mock_open(read_data=self.well_file_content + extra_completion + extra_well_file_content)
         mocker.patch("builtins.open", open_mock)
 
         wells_file = NexusFile.generate_file_include_structure('test_well_file.dat')

@@ -478,11 +478,19 @@ def __get_inline_well_mod(line: str, current_date: str, unit_system: UnitSystem 
                 number_completions = __get_number_completions(well_name=name_for_well_mod,
                                                               wells_loaded=wells_loaded, line=line,
                                                               current_iso_date=current_datetime_as_iso)
-                for i in range(number_completions):
+                completion_counter = 0
+                while completion_counter < number_completions:
                     next_value = fo.get_expected_next_value(0, [trimmed_line], trimmed_line)
-                    var_array.append(float(next_value))
-                    trimmed_line = trimmed_line.replace(next_value, "", 1)
-                value_found: list[float] | float = var_array
+                    if '*' in next_value:
+                        vect_length, vect_value = next_value.split('*', 1)
+                        var_array.extend([float(vect_value)] * int(vect_length))
+                        completion_counter += int(vect_length)
+                    else:
+                        var_array.append(float(next_value))
+                        completion_counter += 1
+                    if completion_counter != number_completions:
+                        trimmed_line = trimmed_line.replace(next_value, "", 1)
+                value_found: list[float] | float = var_array.copy()
                 if next_value is None:
                     raise ValueError(f"Cannot find value for {prop=} in {line=}")
             else:
