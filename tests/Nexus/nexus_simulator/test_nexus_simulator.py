@@ -1952,23 +1952,25 @@ def test_load_surface_file_activate_deactivate(mocker):
 
     fcs_file_path = 'fcs_file.fcs'
     nexus_sim = NexusSimulator(fcs_file_path)
-    welcon_props_1 = {'name': 'welcon_1', 'stream': 'PRODUCER', 'datum_depth': 1234, 'date': '01/02/2024',
-                      'unit_system': UnitSystem.ENGLISH, 'is_active': False}
-    welcon_props_2 = {'name': 'welcon_2', 'stream': 'PRODUCER', 'datum_depth': 5678, 'date': '01/02/2024',
-                      'unit_system': UnitSystem.ENGLISH, 'is_active': True}
-    welcon_props_3 = {'name': 'welcon_1', 'stream': 'PRODUCER', 'datum_depth': 1234, 'date': '09/07/2024',
-                      'unit_system': UnitSystem.ENGLISH, 'is_active': True}
+    welcon_props_1 = {'name': 'welcon_1', 'stream': 'PRODUCER', 'datum_depth': 1234.0, 'date': '01/02/2024',
+                      'unit_system': UnitSystem.ENGLISH}
+    welcon_props_2 = {'name': 'welcon_2', 'stream': 'PRODUCER', 'datum_depth': 5678.0, 'date': '01/02/2024',
+                      'unit_system': UnitSystem.ENGLISH}
+    welcon_props_3 = {'name': 'welcon_1', 'stream': 'PRODUCER', 'datum_depth': 1234.0, 'date': '09/07/2024',
+                      'unit_system': UnitSystem.ENGLISH}
 
-    welcon_1 = NexusWellConnection(welcon_props_1, date_format=DateFormat.DD_MM_YYYY)
-    welcon_2 = NexusWellConnection(welcon_props_2, date_format=DateFormat.DD_MM_YYYY)
-    welcon_3 = NexusWellConnection(welcon_props_3, date_format=DateFormat.DD_MM_YYYY)
+    welcon_1 = NexusWellConnection(welcon_props_1, date_format=DateFormat.DD_MM_YYYY, is_activated=False)
+    welcon_2 = NexusWellConnection(welcon_props_2, date_format=DateFormat.DD_MM_YYYY, is_activated=True)
+    welcon_3 = NexusWellConnection(welcon_props_3, date_format=DateFormat.DD_MM_YYYY, is_activated=True)
 
     # Create the expected objects
     expected_wellcons = [welcon_1, welcon_2, welcon_3]
 
     # Act
     result_wellcons = nexus_sim.network.well_connections.get_all()
+
     # Assert
+    assert result_wellcons[0] == welcon_1
     assert result_wellcons == expected_wellcons
 
 
