@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from datetime import timedelta, time
-from typing import Any, Optional, Tuple
+from typing import Any, Optional
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.File import File
@@ -68,15 +68,19 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
             raise TypeError(f"Value found for {unit_system=} of type {type(unit_system)} \
                                 not compatible, expected type UnitSystem Enum")
 
-        is_activate_block, is_deactivate_block, should_continue = __activate_deactivate_checks(line=line,
-                                                                                               table_start=table_start,
-                                                                                               table_end=table_end,
-                                                                                               is_activate_block=is_activate_block,
-                                                                                               is_deactivate_block=is_deactivate_block,
-                                                                                               current_date=current_date,
-                                                                                               start_date=start_date,
-                                                                                               date_format=date_format,
-                                                                                               nexus_object_results=nexus_object_results)
+        if current_date is None:
+            raise ValueError("Unable to determine date for object")
+
+        is_activate_block, is_deactivate_block, should_continue = \
+            __activate_deactivate_checks(line=line,
+                                         table_start=table_start,
+                                         table_end=table_end,
+                                         is_activate_block=is_activate_block,
+                                         is_deactivate_block=is_deactivate_block,
+                                         current_date=current_date,
+                                         start_date=start_date,
+                                         date_format=date_format,
+                                         nexus_object_results=nexus_object_results)
 
         if should_continue:
             continue
@@ -216,8 +220,9 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
 
 
 def __activate_deactivate_checks(line: str, table_start: int, table_end: int, is_activate_block: bool,
-                                 is_deactivate_block: bool, current_date: str, start_date: str, date_format: DateFormat,
-                                 nexus_object_results: dict[str, list[Any]]) -> Tuple[bool, bool, bool]:
+                                 is_deactivate_block: bool, current_date: str, start_date: str | None,
+                                 date_format: DateFormat, nexus_object_results: dict[str, list[Any]]) \
+        -> tuple[bool, bool, bool]:
     # Handle activation / deactivation of well connections
     if check_token('DEACTIVATE', line) and table_start <= table_end:
         is_deactivate_block = True

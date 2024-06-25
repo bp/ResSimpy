@@ -110,6 +110,7 @@ class NexusWellConnection(WellConnection):
             date_format (Optional[DateFormat]): The date format that the object uses.
             start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
             unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
+            is_activated: bool: Whether the Well Connection has been set as activated. Defaults to True.
         """
         name = properties_dict.get('name', None)
         name = name if isinstance(name, str) else None
