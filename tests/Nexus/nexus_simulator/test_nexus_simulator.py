@@ -1925,10 +1925,17 @@ def test_load_surface_file_activate_deactivate(mocker):
          welcon_2 PRODUCER 5678 
          ENDWELLS
          
+         GASWELLS
+        NAME 		D 		DPERF 
+        gaswelcon_1		1.123e-5	INVKH
+        gaswelcon_2		123.4	ABCD
+        ENDGASWELLS
+         
          
         DEACTIVATE
          CONNECTION
          welcon_1
+         gaswelcon_2
         ENDDEACTIVATE
         
         TIME 09/07/2024
@@ -1937,6 +1944,18 @@ def test_load_surface_file_activate_deactivate(mocker):
         CONNECTION
         welcon_1
         ENDACTIVATE
+        
+        TIME 23/08/2024
+        
+        ACTIVATE
+        CONNECTION
+        gaswelcon_2
+        ENDACTIVATE
+        
+        DEACTIVATE
+         CONNECTION
+         gaswelcon_1
+        ENDDEACTIVATE
     """
 
     def mock_open_wrapper(filename, mode):
@@ -1958,20 +1977,32 @@ def test_load_surface_file_activate_deactivate(mocker):
                       'unit_system': UnitSystem.ENGLISH}
     welcon_props_3 = {'name': 'welcon_1', 'stream': 'PRODUCER', 'datum_depth': 1234.0, 'date': '09/07/2024',
                       'unit_system': UnitSystem.ENGLISH}
+    gas_welcon_props_1 = {'name': 'gaswelcon_1', 'd_factor': 1.123e-5, 'non_darcy_flow_method': 'INVKH',
+                          'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH}
+    gas_welcon_props_2 = {'name': 'gaswelcon_2', 'd_factor': 123.4, 'non_darcy_flow_method': 'ABCD',
+                          'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH}
+    gas_welcon_props_3 = {'name': 'gaswelcon_2', 'd_factor': 123.4, 'non_darcy_flow_method': 'ABCD',
+                          'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
+    gas_welcon_props_4 = {'name': 'gaswelcon_1', 'd_factor': 1.123e-5, 'non_darcy_flow_method': 'INVKH',
+                          'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
 
     welcon_1 = NexusWellConnection(welcon_props_1, date_format=DateFormat.DD_MM_YYYY, is_activated=False)
     welcon_2 = NexusWellConnection(welcon_props_2, date_format=DateFormat.DD_MM_YYYY, is_activated=True)
     welcon_3 = NexusWellConnection(welcon_props_3, date_format=DateFormat.DD_MM_YYYY, is_activated=True)
+    gas_welcon_1 = NexusWellConnection(gas_welcon_props_1, date_format=DateFormat.DD_MM_YYYY, is_activated=True)
+    gas_welcon_2 = NexusWellConnection(gas_welcon_props_2, date_format=DateFormat.DD_MM_YYYY, is_activated=False)
+    gas_welcon_3 = NexusWellConnection(gas_welcon_props_3, date_format=DateFormat.DD_MM_YYYY, is_activated=True)
+    gas_welcon_4 = NexusWellConnection(gas_welcon_props_4, date_format=DateFormat.DD_MM_YYYY, is_activated=False)
 
     # Create the expected objects
-    expected_wellcons = [welcon_1, welcon_2, welcon_3]
+    expected_wellcons = [welcon_1, welcon_2, gas_welcon_1, gas_welcon_2, welcon_3, gas_welcon_3, gas_welcon_4]
 
     # Act
     result_wellcons = nexus_sim.network.well_connections.get_all()
 
     # Assert
     assert result_wellcons[0] == welcon_1
-    assert result_wellcons == expected_wellcons
+    assert sorted(result_wellcons, key=lambda x: x.iso_date) == expected_wellcons
 
 
 def test_nexus_simulator_repr(mocker):
