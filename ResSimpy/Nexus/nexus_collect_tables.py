@@ -248,31 +248,30 @@ def __activate_deactivate_checks(line: str, table_start: int, table_end: int, is
     current_iso_date = ISODateTime.convert_to_iso(date=current_date, date_format=date_format,
                                                   start_date=start_date)
 
-    ordered_well_connections = sorted(nexus_object_results['WELLS'], key=lambda x: x.iso_date, reverse=True)
+    matching_well_connections = [x for x in nexus_object_results['WELLS'] if x.name == well_connection_name and
+                                 x.iso_date <= current_iso_date]
+    matching_gas_well_connections = [x for x in nexus_object_results['GASWELLS'] if x.name == well_connection_name and
+                                     x.iso_date <= current_iso_date]
 
-    most_recent_matching_connection = next((x for x in ordered_well_connections if
-                                            x.name == well_connection_name and x.iso_date <= current_iso_date),
-                                           None)
-
-    if most_recent_matching_connection is None:
-        ordered_gas_well_connections = sorted(nexus_object_results['GASWELLS'], key=lambda x: x.iso_date, reverse=True)
-        most_recent_matching_connection = next((x for x in reversed(ordered_gas_well_connections) if
-                                                x.name == well_connection_name and x.iso_date <= current_iso_date),
-                                               None)
+    matching_well_connections.extend(matching_gas_well_connections)
+    ordered_matching_well_connections = sorted(matching_well_connections, key=lambda x: x.iso_date, reverse=True)
+    most_recent_matching_connection = ordered_matching_well_connections[0]
 
     if most_recent_matching_connection is None:
         raise ValueError(f"Unable to find well connection with name {well_connection_name}")
 
     if most_recent_matching_connection.iso_date == current_iso_date:
-        most_recent_matching_connection.is_activated = is_activate_block
+        # Set all matching connections for the same date to active / inactive
+        exact_matching_connections = [x for x in ordered_matching_well_connections if x.iso_date == current_iso_date]
+        for connection in exact_matching_connections:
+            connection.is_activated = is_activate_block
     else:
         # Create a new instance of the WellConnection object to reflect the change in activation status
-        new_well_connection = NexusWellConnection(properties_dict=most_recent_matching_connection.to_dict(
-            units_as_string=False),
-            is_activated=is_activate_block,
-            date=current_date,
-            date_format=most_recent_matching_connection.date_format,
-            unit_system=most_recent_matching_connection.unit_system)
+        new_well_connection = NexusWellConnection(properties_dict={'name': most_recent_matching_connection.name},
+                                                  is_activated=is_activate_block,
+                                                  date=current_date,
+                                                  date_format=most_recent_matching_connection.date_format,
+                                                  unit_system=most_recent_matching_connection.unit_system)
 
         nexus_object_results['WELLS'].append(new_well_connection)
 
