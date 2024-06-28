@@ -168,12 +168,16 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                 well_lists = [x[0] for x in list_objects]
 
             else:
+                if 'WELLS' in nexus_object_results:
+                    well_connections = nexus_object_results['WELLS']
+                else:
+                    well_connections = None
                 list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
                                                      row_object=table_object_map[token_found],
                                                      property_map=property_map,
                                                      current_date=current_date,
                                                      unit_system=unit_system, date_format=date_format,
-                                                     well_names=well_names)
+                                                     well_names=well_names, well_connections=well_connections)
 
             # store objects found into right dictionary
             list_of_token_obj = nexus_object_results[token_found]

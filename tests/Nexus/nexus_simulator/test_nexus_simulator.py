@@ -1947,6 +1947,13 @@ def test_load_surface_file_activate_deactivate(mocker):
         welcon_1
         ENDACTIVATE
         
+        TIME 14/07/2024
+        GASWELLS
+        NAME 		D 
+        gaswelcon_1		4321	
+        gaswelcon_2		9876	
+        ENDGASWELLS
+        
         TIME 23/08/2024
         
         ACTIVATE
@@ -1986,8 +1993,10 @@ def test_load_surface_file_activate_deactivate(mocker):
                           'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH}
     gas_welcon_props_2 = {'name': 'gaswelcon_2', 'd_factor': 123.4, 'non_darcy_flow_method': 'ABCD',
                           'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH}
-    gas_welcon_props_3 = {'name': 'gaswelcon_2', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
-    gas_welcon_props_4 = {'name': 'gaswelcon_1', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
+    gas_welcon_props_3 = {'name': 'gaswelcon_1', 'date': '14/07/2024', 'unit_system': UnitSystem.ENGLISH, 'd_factor': 4321}
+    gas_welcon_props_4 = {'name': 'gaswelcon_2', 'date': '14/07/2024', 'unit_system': UnitSystem.ENGLISH, 'd_factor': 9876,}
+    gas_welcon_props_5 = {'name': 'gaswelcon_2', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
+    gas_welcon_props_6 = {'name': 'gaswelcon_1', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
 
     welcon_1 = NexusWellConnection(welcon_props_1, date_format=DateFormat.DD_MM_YYYY, is_activated=False)
     welcon_2 = NexusWellConnection(welcon_props_2, date_format=DateFormat.DD_MM_YYYY, is_activated=True)
@@ -2000,11 +2009,13 @@ def test_load_surface_file_activate_deactivate(mocker):
     gas_welcon_2 = NexusWellConnection(gas_welcon_props_2, date_format=DateFormat.DD_MM_YYYY, is_activated=False)
     gas_welcon_3 = NexusWellConnection(gas_welcon_props_3, date_format=DateFormat.DD_MM_YYYY, is_activated=True)
     gas_welcon_4 = NexusWellConnection(gas_welcon_props_4, date_format=DateFormat.DD_MM_YYYY, is_activated=False)
+    gas_welcon_5 = NexusWellConnection(gas_welcon_props_5, date_format=DateFormat.DD_MM_YYYY, is_activated=True)
+    gas_welcon_6 = NexusWellConnection(gas_welcon_props_6, date_format=DateFormat.DD_MM_YYYY, is_activated=False)
 
 
     # Create the expected objects
     expected_wellcons = [welcon_1, welcon_2, original_gas_welcon_1, original_gas_welcon_2, gas_welcon_1, gas_welcon_2,
-                         welcon_3, gas_welcon_3, gas_welcon_4]
+                         welcon_3, gas_welcon_3, gas_welcon_4, gas_welcon_5, gas_welcon_6]
 
     # Act
     result_wellcons = nexus_sim.network.well_connections.get_all()

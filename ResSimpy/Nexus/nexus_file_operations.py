@@ -15,6 +15,7 @@ import pandas as pd
 from ResSimpy.Enums.UnitsEnum import UnitSystem, TemperatureUnits, SUnits
 from ResSimpy.FileOperations.file_operations import get_next_value, check_token, get_expected_token_value, \
     strip_file_of_comments, load_file_as_list
+from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusKeywords.nexus_keywords import VALID_NEXUS_KEYWORDS
@@ -412,7 +413,8 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
                           constraint_obj_dict: Optional[dict[str, list[Any]]] = None,
                           preserve_previous_object_attributes: bool = False,
                           well_names: Optional[list[str]] = None,
-                          welllists: Optional[list[NexusWellList]] = None) -> list[tuple[Any, int]]:
+                          welllists: Optional[list[NexusWellList]] = None,
+                          well_connections: Optional[list[NexusWellConnection]] = None) -> list[tuple[Any, int]]:
     """Loads a table row by row to an object provided in the row_object.
 
     Args:
@@ -431,6 +433,7 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
         date_format (Optional[DateFormat]): The date format of the object.
         well_names (Optional[str]): A list of all the network object names.
         welllists (Optional[list[WellList]]): A list of all the WELLLISTs loaded in so far.
+        well_connections (Optional[list[NexusWellConnection]]): A list of all the Well Connections loaded in so far.
 
     Returns:
         list[obj]: list of tuples containing instances of the class provided for the row_object,
@@ -479,7 +482,20 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
 
         for name in object_well_names:
             keyword_store['name'] = name
-            if preserve_previous_object_attributes:
+            if issubclass(row_object, NexusWellConnection):
+                # If we are creating a Well Connection, carry across the activated state of the previous one.
+                if well_connections is not None and len(well_connections) > 0:
+                    ordered_well_connections = sorted(well_connections, key=lambda x: x.iso_date, reverse=True)
+                    previous_well_connection = next(x for x in ordered_well_connections if x.name == name)
+                    is_activated = previous_well_connection.is_activated
+                else:
+                    is_activated = True
+
+                new_object = NexusWellConnection(properties_dict=keyword_store, date=current_date,
+                                                 unit_system=unit_system, date_format=date_format,
+                                                 is_activated=is_activated)
+
+            elif preserve_previous_object_attributes:
                 all_matching_existing_constraints = constraint_obj_dict.get(name, None)
                 if all_matching_existing_constraints is not None:
                     # use the previous object to update this
