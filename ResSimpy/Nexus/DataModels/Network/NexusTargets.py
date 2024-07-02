@@ -11,6 +11,7 @@ from typing import Sequence, Optional, TYPE_CHECKING
 import pandas as pd
 
 from ResSimpy.File import File
+from ResSimpy.Nexus.DataModels.NexusOptions import NexusOptions
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusTarget import NexusTarget
@@ -161,3 +162,14 @@ class NexusTargets(Targets):
 
         self.__modify_object_operations.modify_network_object(target_to_modify, new_properties,
                                                               self.__parent_network)
+
+    def _look_up_region_numbers_for_targets(self, options_file: NexusOptions) -> None:
+        """Looks up the region numbers for the targets based on the region names in the options file.
+
+        Args:
+            options_file (NexusOptions): options file object
+
+        """
+        for target in self._targets:
+            if target.region is not None:
+                target.region_number = options_file.look_up_region_number_by_name(target.region)

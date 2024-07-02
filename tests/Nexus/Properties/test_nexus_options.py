@@ -176,9 +176,7 @@ ENDGLOBAL_METHOD_OVERRIDES
     ('Reg2', 2),
     ('Reg3', -1),
     ('GrApE', 22),
-    
-]
-                         )
+])
 def test_look_up_region_number_by_name(region_name, expected_output):
     # Arrange
     opts_file = NexusFile(location='test/file/options.dat')
@@ -197,9 +195,8 @@ def test_look_up_region_number_by_name(region_name, expected_output):
                                                               'NAME': ['Apple', 'Grape', 'Orange', 'Reg1']
                                                               })}
                            }
-    expected_output = 2
     # Act
-    result = opts_obj.look_up_region_number_by_name('Reg2')
+    result = opts_obj.look_up_region_number_by_name(region_name)
     
     # Assert
     assert result == expected_output
