@@ -169,3 +169,37 @@ ENDGLOBAL_METHOD_OVERRIDES
 
     # Assert
     assert result == expected_output
+
+
+@pytest.mark.parametrize("region_name, expected_output",[
+    ('Reg1', 1),
+    ('Reg2', 2),
+    ('Reg3', -1),
+    ('GrApE', 22),
+    
+]
+                         )
+def test_look_up_region_number_by_name(region_name, expected_output):
+    # Arrange
+    opts_file = NexusFile(location='test/file/options.dat')
+    opts_obj = NexusOptions(file=opts_file, model_unit_system=UnitSystem.ENGLISH)
+    opts_obj.properties = {'DESC': ['Simulation Options'],
+                           'UNIT_SYSTEM': UnitSystem.ENGLISH,
+                           'PSTD': 14.7,
+                           'TSTD': 60.0,
+                           'RES_TEMP': 200.0,
+                           'REGDATA': {
+                               'Injection_regions': pd.DataFrame({'NAME': ['Reg1', 'Reg2'],
+                                                                  'NUMBER': [1, 2],
+                                                                  'IBAT': [2, 2]
+                                                                  }),
+                               'Fruit_regions': pd.DataFrame({'NUMBER': [10, 22, 33, 44],
+                                                              'NAME': ['Apple', 'Grape', 'Orange', 'Reg1']
+                                                              })}
+                           }
+    expected_output = 2
+    # Act
+    result = opts_obj.look_up_region_number_by_name('Reg2')
+    
+    # Assert
+    assert result == expected_output

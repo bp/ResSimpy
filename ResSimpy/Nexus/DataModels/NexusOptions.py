@@ -181,3 +181,22 @@ class NexusOptions(DynamicProperty):
             self.properties['REGDATA'] = reg_dfs
 
         self.__properties_loaded = True
+
+    def look_up_region_number_by_name(self, region_name: str) -> int:
+        """Look up the region number by the region name in the REGDATA.
+
+        Args:
+        region_name (str): Name of the region to look up.
+
+        Returns:
+        int: The region number if found, otherwise -1.
+        """
+        region_name = region_name.upper()
+        reg_data = self.properties.get('REGDATA', None)
+        if reg_data is None or not isinstance(reg_data, dict):
+            return -1
+        for table in reg_data.values():
+            table['NAME'] = table['NAME'].str.upper()
+            if table['NAME'].isin([region_name]).sum() > 0:
+                return table[table['NAME'] == region_name]['NUMBER'].to_numpy()[0]
+        return -1
