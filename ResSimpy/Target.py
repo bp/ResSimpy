@@ -28,6 +28,7 @@ class Target(DataObjectMixin, ABC):
     rank_dt: Optional[float] = None
     control_type: Optional[str] = None
     calculation_type: Optional[str] = None
+    region_number: Optional[int] = None
 
     @property
     def units(self) -> NetworkUnits:

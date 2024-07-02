@@ -256,6 +256,9 @@ class NexusNetwork(Network):
 
         self.__has_been_loaded = True
         self.__update_well_types()
+        if self.model.options is not None:
+            # assign the region numbers for the targets with a region name
+            self.targets._look_up_region_numbers_for_targets(self.model.options)
 
     def __update_well_types(self) -> None:
         """Updates the types of all of the wells using information found in the wells table."""
