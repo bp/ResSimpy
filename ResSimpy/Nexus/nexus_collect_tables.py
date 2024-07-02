@@ -83,6 +83,7 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                          nexus_object_results=nexus_object_results)
 
         if should_continue:
+            # If we have already read in the value for this line in the previous call, continue onto the next one.
             continue
 
         if check_token('TIME', line) and table_start < 0:
@@ -227,6 +228,13 @@ def __activate_deactivate_checks(line: str, table_start: int, table_end: int, is
                                  is_deactivate_block: bool, current_date: str, start_date: str | None,
                                  date_format: DateFormat, nexus_object_results: dict[str, list[Any]]) \
         -> tuple[bool, bool, bool]:
+    """Checks if the line being read is the start of an activate / deactivate block, and if it is, sets the property on
+    the related Wellconnection objects found.
+
+    Returns:
+    tuple[bool, bool, bool]: a tuple of three bools, stating whether the following text is an activate block, whether \
+        it is a deactivate block, and whether the loop calling this method should continue to the next line.
+    """
     # Handle activation / deactivation of well connections
     if check_token('DEACTIVATE', line) and table_start <= table_end:
         is_deactivate_block = True
