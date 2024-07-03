@@ -58,6 +58,7 @@ class NexusWellConnection(WellConnection):
     station (str): Station identifier (STATION)
     drill_queue (str): Drill queue identifier (ASSCDR)
     drill_order_benefit (float): Benefit of the drill order (BENEFIT)
+    is_activated (bool): Whether the Well Connection has been activated using ACTIVATED / DEACTIVATE. Defaults to True.
     """
 
     bh_node_name: Optional[str] = None
@@ -96,10 +97,11 @@ class NexusWellConnection(WellConnection):
     station: Optional[str] = None
     drill_queue: Optional[str] = None
     drill_order_benefit: Optional[float] = None
+    is_activated: bool = True
 
     def __init__(self, properties_dict: dict[str, None | int | str | float], date: Optional[str] = None,
                  date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
-                 unit_system: Optional[UnitSystem] = None) -> None:
+                 unit_system: Optional[UnitSystem] = None, is_activated: bool = True) -> None:
         """Initialises the NexusWellConnection class.
 
         Args:
@@ -108,13 +110,14 @@ class NexusWellConnection(WellConnection):
             date_format (Optional[DateFormat]): The date format that the object uses.
             start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
             unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
+            is_activated: bool: Whether the Well Connection has been set as activated. Defaults to True.
         """
         name = properties_dict.get('name', None)
         name = name if isinstance(name, str) else None
         super().__init__(_date_format=date_format, _start_date=start_date, _unit_system=unit_system, name=name)
+        self.is_activated = is_activated
 
-        # Set the date related properties, then set the date, automatically setting the ISODate
-        protected_attributes = ['date_format', 'start_date', 'unit_system']
+        protected_attributes = ['date_format', 'start_date', 'unit_system', 'is_activated']
 
         for attribute in protected_attributes:
             if attribute in properties_dict:
