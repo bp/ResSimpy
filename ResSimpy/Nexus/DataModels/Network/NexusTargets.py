@@ -84,6 +84,7 @@ class NexusTargets(Targets):
         Returns:
             DataFrame: of the properties of the targets through time with each row representing a target.
         """
+        self.__parent_network.get_load_status()
         df_store = obj_to_dataframe(self._targets)
         return df_store
 
