@@ -12,6 +12,8 @@ from typing import TYPE_CHECKING, Optional, Any, Literal
 
 from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.Network import Network
+from ResSimpy.Nexus.DataModels.Network.NexusConList import NexusConList
+from ResSimpy.Nexus.DataModels.Network.NexusConLists import NexusConLists
 from ResSimpy.Nexus.DataModels.Network.NexusProc import NexusProc
 from ResSimpy.Nexus.DataModels.Network.NexusProcs import NexusProcs
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
@@ -75,6 +77,7 @@ class NexusNetwork(Network):
         self.targets: NexusTargets = NexusTargets(self)
         self.welllists: NexusWellLists = NexusWellLists(self)
         self.procs: NexusProcs = NexusProcs(self)
+        self.conlists: NexusConLists = NexusConLists(self)
 
     def get_load_status(self) -> bool:
         """Checks load status and loads the network if it hasn't already been loaded."""
@@ -146,7 +149,6 @@ class NexusNetwork(Network):
 
                 # check for keyword ENDPROCS to signal end of the procedure
                 if fo.check_token('ENDPROCS', line=line):
-
                     # create the proc object
                     proc_obj = NexusProc(contents=proc_contents, date=time, name=name_, priority=priority_)
 
@@ -155,8 +157,8 @@ class NexusNetwork(Network):
 
                     # DO and IF statements are always combined with ENDIF and ENDDO, therefore dividing by 2 will take
                     # care of the over-counting
-                    proc_obj.contents_breakdown['IF'] = int(proc_obj.contents_breakdown['IF']/2)
-                    proc_obj.contents_breakdown['DO'] = int(proc_obj.contents_breakdown['DO']/2)
+                    proc_obj.contents_breakdown['IF'] = int(proc_obj.contents_breakdown['IF'] / 2)
+                    proc_obj.contents_breakdown['DO'] = int(proc_obj.contents_breakdown['DO'] / 2)
 
                     # append the fresh object to the list
                     loaded_procs.append(proc_obj)
@@ -220,23 +222,27 @@ class NexusNetwork(Network):
         if self.__model.model_files.surface_files is None:
             raise FileNotFoundError('Could not find any surface files associated with the fcs file provided.')
 
+        object_to_table_header_map = {'NODECON': NexusNodeConnection,
+                                      'NODES': NexusNode,
+                                      'WELLS': NexusWellConnection,
+                                      'GASWELLS': NexusWellConnection,
+                                      'WELLHEAD': NexusWellhead,
+                                      'WELLBORE': NexusWellbore,
+                                      'CONSTRAINTS': NexusConstraint,
+                                      'CONSTRAINT': NexusConstraint,
+                                      'QMULT': NexusConstraint,
+                                      'CONDEFAULTS': None,
+                                      'TARGET': NexusTarget,
+                                      'GUIDERATE': None,
+                                      'PROCS': None,
+                                      'WELLLIST': NexusWellList,
+                                      'CONLIST': NexusConList,
+                                      }
+
         for surface in self.__model.model_files.surface_files.values():
             nexus_obj_dict, constraints = collect_all_tables_to_objects(
-                surface, {'NODECON': NexusNodeConnection,
-                          'NODES': NexusNode,
-                          'WELLS': NexusWellConnection,
-                          'GASWELLS': NexusWellConnection,
-                          'WELLHEAD': NexusWellhead,
-                          'WELLBORE': NexusWellbore,
-                          'CONSTRAINTS': NexusConstraint,
-                          'CONSTRAINT': NexusConstraint,
-                          'QMULT': NexusConstraint,
-                          'CONDEFAULTS': None,
-                          'TARGET': NexusTarget,
-                          'GUIDERATE': None,
-                          'PROCS': None,
-                          'WELLLIST': NexusWellList,
-                          },
+                nexus_file=surface,
+                table_object_map=object_to_table_header_map,
                 start_date=self.__model.start_date,
                 default_units=self.__model.default_units,
                 date_format=self.__model.date_format
@@ -250,6 +256,7 @@ class NexusNetwork(Network):
             self.constraints._add_to_memory(type_check_dicts(constraints))
             self.targets._add_to_memory(type_check_lists(nexus_obj_dict.get('TARGET')))
             self.welllists._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLLIST')))
+            self.conlists._add_to_memory(type_check_lists(nexus_obj_dict.get('CONLIST')))
 
             add_procs_to_mem = self.__load_procs
             self.procs._add_to_memory(add_procs_to_mem)
