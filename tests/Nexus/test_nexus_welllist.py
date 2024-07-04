@@ -8,7 +8,6 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.nexus_load_well_list import load_well_list_from_table
-from ResSimpy.WellLists import WellLists, WellList
 from tests.utility_for_tests import get_fake_nexus_simulator
 
 
@@ -180,9 +179,8 @@ ENDWELLLIST'''
         # get a mock network
 
         mock_nexus_network = mocker.MagicMock()
-        well_lists = NexusWellLists(mock_nexus_network)
+        well_lists = NexusWellLists(mock_nexus_network, well_lists=[well_list, well_list2, well_list3, well_list4])
 
-        well_lists._well_lists = [well_list, well_list2, well_list3, well_list4]
         expected_result_1 = [well_list, well_list3]
         expected_result_2 = [well_list2, well_list4]
         # Act
@@ -205,9 +203,7 @@ ENDWELLLIST'''
             NexusWellList(name='well_list_name', wells=['wellname_2', 'wellname_3'], date='01/01/2023',
                           date_format=DateFormat.DD_MM_YYYY)]
 
-        welllist = NexusWellLists(parent_network=dummy_network)
-
-        welllist._well_lists = welllists
+        welllist = NexusWellLists(parent_network=dummy_network, well_lists=welllists)
 
         expected_result_1 = [
             NexusWellList(name='well_list_name', wells=['wellname_1', 'wellname_2', 'wellname_3'], date='01/01/2020',
@@ -220,7 +216,7 @@ ENDWELLLIST'''
 
         # Assert
         assert result == expected_result_1
-
+ 
     def test_add_then_remove_wells_from_welllist(self, mocker: MockerFixture):
         # Arrange
         mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')

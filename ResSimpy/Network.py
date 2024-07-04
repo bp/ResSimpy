@@ -5,11 +5,11 @@ from dataclasses import dataclass
 from typing import Optional
 
 from ResSimpy.Constraints import Constraints
+from ResSimpy.NetworkLists import NetworkLists
 from ResSimpy.NodeConnections import NodeConnections
 from ResSimpy.Nodes import Nodes
 from ResSimpy.Targets import Targets
 from ResSimpy.WellConnections import WellConnections
-from ResSimpy.WellLists import WellLists
 from ResSimpy.Wellbores import Wellbores
 from ResSimpy.Wellheads import Wellheads
 
@@ -24,7 +24,7 @@ class Network(ABC):
     well_connections: Optional[WellConnections] = None
     wellheads: Optional[Wellheads] = None
     wellbores: Optional[Wellbores] = None
-    welllists: Optional[WellLists] = None
+    welllists: Optional[NetworkLists] = None
     __has_been_loaded: bool = False
 
     @abstractmethod

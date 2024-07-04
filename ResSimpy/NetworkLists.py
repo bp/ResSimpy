@@ -1,22 +1,27 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Literal, Sequence
+from typing import Literal, Sequence, TYPE_CHECKING, Optional
 
+from ResSimpy.Network import Network
 from ResSimpy.NetworkList import NetworkList
+if TYPE_CHECKING:
+    pass
 
 
 @dataclass(kw_only=True)
 class NetworkLists(ABC):
     """Base class for representing different list types for the model."""
     _lists: Sequence[NetworkList]
+    __parent_network: Network
 
-    def __init__(self) -> None:
+    def __init__(self, parent_network: Network) -> None:
         """Initialises the ConLists class."""
-        self._lists = []
+        self.__parent_network: Network = parent_network
 
     @property
     @abstractmethod
-    def _network_element_name(self) -> Literal['conlists']:
+    def _network_element_name(self) -> Literal['conlists', 'welllists', 'node_lists']:
         raise NotImplementedError('This method must be implemented in the derived class.')
 
     @property
@@ -29,26 +34,33 @@ class NetworkLists(ABC):
         """Returns all ConList names."""
         return list({x.name for x in self.lists if x.name is not None})
 
-    def get_all_by_name(self, list_name: str) -> Sequence[NetworkList]:
-        """Returns a list of list objects that match by name.
-
-        Args:
-            list_name (str): The name of the NetworkList.
-
-        Returns:
-            list[NetworkList]: list of NetworkList that match by name.
-        """
-        return [x for x in self.lists if x.name == list_name]
-
-    @staticmethod
     @abstractmethod
-    def table_header() -> str:
+    @property
+    def table_header(self) -> str:
         """Start of the table."""
         raise NotImplementedError('This method must be implemented in the derived class.')
 
-    @staticmethod
     @abstractmethod
-    def table_footer() -> str:
+    @property
+    def table_footer(self) -> str:
         """End of the table."""
         raise NotImplementedError('This method must be implemented in the derived class.')
 
+    def get_all_by_name(self, list_name: str) -> Sequence[NetworkList]:
+        """Returns a list of NetworkLists which match the provided name loaded from the simulator.
+
+        Args:
+        ----
+            list_name (str): name of the requested ConList
+
+        Returns:
+        -------
+            list[NexusConList]: the requested list of filtered lists with the same name
+        """
+        self.__parent_network.get_load_status()
+        return [x for x in self._lists if x.name == list_name]
+
+    @abstractmethod
+    def _add_to_memory(self, additional_list: Optional[Sequence[NetworkList]]) -> None:
+        """Adds additional lists to the current list."""
+        raise NotImplementedError('This method must be implemented in the derived class.')
