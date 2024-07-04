@@ -196,7 +196,7 @@ class NexusOptions(DynamicProperty):
         if reg_data is None or not isinstance(reg_data, dict):
             return -1
         for table in reg_data.values():
-            table['NAME'] = table['NAME'].str.upper()
-            if table['NAME'].isin([region_name]).sum() > 0:
-                return table[table['NAME'] == region_name]['NUMBER'].to_numpy()[0]
+            upper_names = table['NAME'].str.upper()
+            if upper_names.isin([region_name]).sum() > 0:
+                return table[upper_names == region_name]['NUMBER'].to_numpy()[0]
         return -1
