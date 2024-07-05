@@ -1938,6 +1938,7 @@ def test_load_surface_file_activate_deactivate(mocker):
          CONNECTION
          welcon_1
          gaswelcon_2
+         !** test
         ENDDEACTIVATE
         
         TIME 09/07/2024
@@ -1966,6 +1967,7 @@ def test_load_surface_file_activate_deactivate(mocker):
          gaswelcon_1
         ENDDEACTIVATE
     """
+
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
