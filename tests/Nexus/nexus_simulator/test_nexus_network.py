@@ -734,7 +734,10 @@ def test_wells_table_expands_out_wildcards(mocker: MockerFixture):
     ENDNODECON
     
     TIME 09/07/2024
-    
+        WELLS
+        NAME      STREAM      DATUM
+        well_dd  PRODUCER    1234
+    ENDWELLS
     WELLS
       NAME    ONTIME
       wel*_a* 0.85
@@ -792,7 +795,7 @@ def test_wells_table_expands_out_wildcards(mocker: MockerFixture):
     assert connections_for_c_june[0].datum_depth == 9123
 
     connections_on_9th_july = [x for x in result if x.date == '09/07/2024']
-    assert len(connections_on_9th_july) == 2
+    assert len(connections_on_9th_july) == 3
 
     connections_for_aa_july = [x for x in connections_on_9th_july if x.name == 'well_aa']
     assert connections_for_aa_july[0].on_time == 0.85
@@ -801,7 +804,7 @@ def test_wells_table_expands_out_wildcards(mocker: MockerFixture):
     assert connections_for_ab_july[0].on_time == 0.85
 
     connections_on_14th_july = [x for x in result if x.date == '14/07/2024']
-    assert len(connections_on_14th_july) == 3
+    assert len(connections_on_14th_july) == 4
 
     connections_for_aa_14th_july = [x for x in connections_on_14th_july if x.name == 'well_aa']
     assert connections_for_aa_14th_july[0].datum_depth == 4321
