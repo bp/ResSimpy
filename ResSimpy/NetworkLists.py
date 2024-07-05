@@ -3,10 +3,9 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Literal, Sequence, TYPE_CHECKING, Optional
 
-from ResSimpy.Network import Network
 from ResSimpy.NetworkList import NetworkList
 if TYPE_CHECKING:
-    pass
+    from ResSimpy.Network import Network
 
 
 @dataclass(kw_only=True)
@@ -34,14 +33,14 @@ class NetworkLists(ABC):
         """Returns all ConList names."""
         return list({x.name for x in self.lists if x.name is not None})
 
-    @abstractmethod
     @property
+    @abstractmethod
     def table_header(self) -> str:
         """Start of the table."""
         raise NotImplementedError('This method must be implemented in the derived class.')
 
-    @abstractmethod
     @property
+    @abstractmethod
     def table_footer(self) -> str:
         """End of the table."""
         raise NotImplementedError('This method must be implemented in the derived class.')

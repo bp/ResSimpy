@@ -10,16 +10,16 @@ from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 class NexusWellList(NetworkList):
     """Class for representing a single WellList or group for the Nexus model."""
 
-    def __init__(self, name: str, wells: list[str], date: str, date_format: DateFormat) -> None:
+    def __init__(self, name: str, elements_in_the_list: list[str], date: str, date_format: DateFormat) -> None:
         """Initialises the NexusWellList class.
 
         Args:
             name (str): Name of the welllist.
-            wells (list[str]): List of well names in the welllist.
+            elements_in_the_list (list[str]): List of well names in the welllist.
             date (str): Date when the welllist is defined. Persists until the next date is defined.
             date_format (Optional[DateFormat]): The date format of the object.
         """
-        super().__init__(name=name, elements_in_the_list=wells, date=date, date_format=date_format)
+        super().__init__(name=name, elements_in_the_list=elements_in_the_list, date=date, date_format=date_format)
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:

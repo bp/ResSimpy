@@ -10,16 +10,16 @@ from ResSimpy.NetworkList import NetworkList
 class NexusConList(NetworkList):
     """Class for representing a single ConList or group for the Nexus model."""
 
-    def __init__(self, name: str, connections: list[str], date: str, date_format: DateFormat) -> None:
+    def __init__(self, name: str, elements_in_the_list: list[str], date: str, date_format: DateFormat) -> None:
         """Initialises the NexusConList class.
 
         Args:
             name (str): Name of the conlist.
-            connections (list[str]): List of connection names in the conlist.
+            elements_in_the_list (list[str]): List of connection names in the conlist.
             date (str): Date when the conlist is defined. Persists until the next date is defined.
             date_format (Optional[DateFormat]): The date format of the object.
         """
-        super().__init__(name=name, elements_in_the_list=connections, date=date, date_format=date_format)
+        super().__init__(name=name, elements_in_the_list=elements_in_the_list, date=date, date_format=date_format)
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:

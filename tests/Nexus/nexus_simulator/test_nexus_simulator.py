@@ -1852,8 +1852,8 @@ C          node1         NA        NA    80    100.5 200.8   1     station      
                                   'unit_system': UnitSystem.METBAR, 'active_node': True, 'min_pressure': 5.0,
                                   'convert_qmult_to_reservoir_barrels': True,
                                   'well_name': 'GUN_P'},
-                                 {'name': 'test_welllist', 'wells': ['well1', 'well2', 'well3'], 'date': '01/03/2025',
-                                  'date_format': DateFormat.DD_MM_YYYY}
+                                 {'name': 'test_welllist', 'elements_in_the_list': ['well1', 'well2', 'well3'],
+                                  'date': '01/03/2025', 'date_format': DateFormat.DD_MM_YYYY}
                          ),
                          ])
 def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node1_props, node2_props,

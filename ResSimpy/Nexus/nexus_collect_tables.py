@@ -15,7 +15,7 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.nexus_constraint_operations import load_inline_constraints
 from ResSimpy.Nexus.nexus_file_operations import check_property_in_line, check_token, get_expected_token_value, \
     check_list_tokens, load_table_to_objects
-from ResSimpy.Nexus.nexus_load_well_list import load_well_lists
+from ResSimpy.Nexus.nexus_load_list_table import load_table_to_lists
 
 
 # TODO refactor the collection of tables to an object with proper typing
@@ -161,12 +161,15 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                                      date_format=date_format,
                                                      welllists=well_lists)
 
-            elif token_found == 'WELLLIST':
-                list_objects = load_well_lists(file_as_list=file_as_list[table_start - 1:table_end],
-                                               current_date=current_date,
-                                               previous_well_lists=nexus_object_results[token_found],
-                                               date_format=date_format)
-                well_lists = [x[0] for x in list_objects]
+            elif token_found in ['WELLLIST', 'CONLIST']:
+                list_objects = load_table_to_lists(file_as_list=file_as_list[table_start - 1:table_end],
+                                                   row_object=table_object_map[token_found],
+                                                   table_header=token_found,
+                                                   current_date=current_date,
+                                                   previous_lists=nexus_object_results[token_found],
+                                                   date_format=date_format)
+                if token_found == 'WELLLIST':
+                    well_lists = [x[0] for x in list_objects]
 
             else:
                 if 'WELLS' in nexus_object_results:

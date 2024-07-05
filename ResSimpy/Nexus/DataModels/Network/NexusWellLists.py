@@ -48,12 +48,12 @@ class NexusWellLists(NetworkLists):
     @property
     def table_header(self) -> str:
         """Start of the Node definition table."""
-        return 'WELLLISTS'
+        return 'WELLLIST'
 
     @property
     def table_footer(self) -> str:
         """End of the Node definition table."""
-        return 'ENDWELLLISTS'
+        return 'ENDWELLLIST'
 
     def get_all_by_name(self, well_list_name: str) -> list[NexusWellList]:
         """Returns a list of WellLists which match the provided name loaded from the simulator.

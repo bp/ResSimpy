@@ -7,7 +7,7 @@ from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
-from ResSimpy.Nexus.nexus_load_well_list import load_well_list_from_table
+from ResSimpy.Nexus.nexus_load_list_table import load_list_from_table
 from tests.utility_for_tests import get_fake_nexus_simulator
 
 
@@ -24,26 +24,27 @@ ENDWELLLIST'''
 
     def test_nexus_welllist_add(self):
         # Arrange
-        existing_welllist = NexusWellList(name='well_list_name', wells=['test_well', 'test_well2'],
+        existing_welllist = NexusWellList(name='well_list_name', elements_in_the_list=['test_well', 'test_well2'],
                                           date='01/01/2019', date_format=DateFormat.DD_MM_YYYY)
-        expected_welllist = NexusWellList(name='well_list_name', wells=['test_well', 'test_well2',
+        expected_welllist = NexusWellList(name='well_list_name', elements_in_the_list=['test_well', 'test_well2',
                                                                         'wellname_1', 'wellname_2', 'wellname_n'],
                                           date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
         file_as_list = self.file_content.splitlines()
 
         # Act
-        welllist = load_well_list_from_table(well_list_as_list_str=file_as_list, current_date='01/01/2020',
-                                             well_list_name='well_list_name',
-                                             previous_well_list=existing_welllist, date_format=DateFormat.DD_MM_YYYY)
+        welllist = load_list_from_table(table_as_list_str=file_as_list, current_date='01/01/2020',
+                                        list_name='well_list_name',
+                                        previous_list_object=existing_welllist, date_format=DateFormat.DD_MM_YYYY,
+                                        table_header='WELLLIST', row_object=NexusWellList)
 
         # Assert
         assert welllist == expected_welllist
 
     def test_nexus_welllist_remove(self):
         # Arrange
-        existing_welllist = NexusWellList(name='well_list_name', wells=['test_well', 'test_well2'],
+        existing_welllist = NexusWellList(name='well_list_name', elements_in_the_list=['test_well', 'test_well2'],
                                           date='01/01/2019', date_format=DateFormat.DD_MM_YYYY)
-        expected_welllist = NexusWellList(name='well_list_name', wells=['test_well'],
+        expected_welllist = NexusWellList(name='well_list_name', elements_in_the_list=['test_well'],
                                           date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
         file_as_list = '''TIME 01/01/2020
         WELLLIST well_list_name
@@ -52,17 +53,18 @@ ENDWELLLIST'''
         ENDWELLLIST'''.splitlines()
 
         # Act
-        welllist = load_well_list_from_table(well_list_as_list_str=file_as_list, current_date='01/01/2020',
-                                             well_list_name='well_list_name',
-                                             previous_well_list=existing_welllist, date_format=DateFormat.DD_MM_YYYY)
+        welllist = load_list_from_table(table_as_list_str=file_as_list, current_date='01/01/2020',
+                                        list_name='well_list_name',
+                                        previous_list_object=existing_welllist, date_format=DateFormat.DD_MM_YYYY,
+                                        table_header='WELLLIST', row_object=NexusWellList)
 
         assert welllist == expected_welllist
 
     def test_nexus_welllist_clear(self):
         # Arrange
-        existing_welllist = NexusWellList(name='well_list_name', wells=['test_well', 'test_well2'],
+        existing_welllist = NexusWellList(name='well_list_name', elements_in_the_list=['test_well', 'test_well2'],
                                           date='01/01/2019', date_format=DateFormat.DD_MM_YYYY)
-        expected_welllist = NexusWellList(name='well_list_name', wells=['wellname_1', 'wellname_2', 'wellname_3'],
+        expected_welllist = NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'],
                                           date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
         file_as_list = '''TIME 01/01/2020
         WELLLIST well_list_name
@@ -75,15 +77,16 @@ ENDWELLLIST'''
         ENDWELLLIST'''.splitlines()
 
         # Act
-        welllist = load_well_list_from_table(well_list_as_list_str=file_as_list, current_date='01/01/2020',
-                                             well_list_name='well_list_name',
-                                             previous_well_list=existing_welllist, date_format=DateFormat.DD_MM_YYYY)
+        welllist = load_list_from_table(table_as_list_str=file_as_list, current_date='01/01/2020',
+                                        list_name='well_list_name',
+                                        previous_list_object=existing_welllist, date_format=DateFormat.DD_MM_YYYY,
+                                        table_header='WELLLIST', row_object=NexusWellList)
 
         assert welllist == expected_welllist
 
     def test_nexus_welllist_no_previous(self):
         # Arrange
-        expected_welllist = NexusWellList(name='well_list_name', wells=['wellname_1', 'wellname_2', 'wellname_3'],
+        expected_welllist = NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'],
                                           date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
         file_as_list = '''TIME 01/01/2020
         WELLLIST well_list_name
@@ -96,14 +99,15 @@ ENDWELLLIST'''
         ENDWELLLIST'''.splitlines()
 
         # Act
-        welllist = load_well_list_from_table(well_list_as_list_str=file_as_list, current_date='01/01/2020',
-                                             well_list_name='well_list_name', date_format=DateFormat.DD_MM_YYYY)
+        welllist = load_list_from_table(table_as_list_str=file_as_list, current_date='01/01/2020',
+                                        list_name='well_list_name', date_format=DateFormat.DD_MM_YYYY,
+                                        table_header='WELLLIST', row_object=NexusWellList)
 
         assert welllist == expected_welllist
 
     def test_nexus_wellllist_empty(self):
         # Arrange
-        expected_welllist = NexusWellList(name='well_list_name', wells=[],
+        expected_welllist = NexusWellList(name='well_list_name', elements_in_the_list=[],
                                           date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
         file_as_list = '''TIME 01/01/2020
         WELLLIST well_list_name
@@ -111,8 +115,9 @@ ENDWELLLIST'''
         ENDWELLLIST'''.splitlines()
 
         # Act
-        welllist = load_well_list_from_table(well_list_as_list_str=file_as_list, current_date='01/01/2020',
-                                             well_list_name='well_list_name', date_format=DateFormat.DD_MM_YYYY)
+        welllist = load_list_from_table(table_as_list_str=file_as_list, current_date='01/01/2020',
+                                        list_name='well_list_name', date_format=DateFormat.DD_MM_YYYY,
+                                        table_header='WELLLIST', row_object=NexusWellList)
 
         assert welllist == expected_welllist
 
@@ -120,11 +125,11 @@ ENDWELLLIST'''
         # Arrange
         mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
         expected_welllists = [
-            NexusWellList(name='well_list_name', wells=['wellname_1', 'wellname_2', 'wellname_3'],
+            NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'],
                           date='01/01/2020', date_format=DateFormat.MM_DD_YYYY),
-            NexusWellList(name='well_list_name_2', wells=['wellname_4', 'wellname_5', 'wellname_6'],
+            NexusWellList(name='well_list_name_2', elements_in_the_list=['wellname_4', 'wellname_5', 'wellname_6'],
                           date='01/01/2020', date_format=DateFormat.MM_DD_YYYY),
-            NexusWellList(name='well_list_name', wells=['wellname_2', 'wellname_3'],
+            NexusWellList(name='well_list_name', elements_in_the_list=['wellname_2', 'wellname_3'],
                           date='01/01/2023', date_format=DateFormat.MM_DD_YYYY),
         ]
 
@@ -165,16 +170,16 @@ ENDWELLLIST'''
 
     def test_get_by_name(self, mocker):
         # Arrange
-        well_list = NexusWellList(name='well_list_name', wells=['wellname_1', 'wellname_2', 'wellname_3'],
+        well_list = NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'],
                                   date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
         well_list2 = NexusWellList(name='well_list_name_2',
-                                   wells=['wellname_4', 'wellname_5', 'wellname_6'],
+                                   elements_in_the_list=['wellname_4', 'wellname_5', 'wellname_6'],
                                    date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
         well_list3 = NexusWellList(name='well_list_name',
-                                   wells=['wellname_2', 'wellname_3'],
+                                   elements_in_the_list=['wellname_2', 'wellname_3'],
                                    date='01/01/2023', date_format=DateFormat.DD_MM_YYYY)
         well_list4 = NexusWellList(name='well_list_name_2',
-                                   wells=['wellname_4', 'wellname_5', 'wellname_6'],
+                                   elements_in_the_list=['wellname_4', 'wellname_5', 'wellname_6'],
                                    date='01/02/2023', date_format=DateFormat.DD_MM_YYYY)
         # get a mock network
 
@@ -196,19 +201,19 @@ ENDWELLLIST'''
         dummy_network._NexusNetwork__has_been_loaded = True
 
         welllists = [
-            NexusWellList(name='well_list_name', wells=['wellname_1', 'wellname_2', 'wellname_3'], date='01/01/2020',
+            NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'], date='01/01/2020',
                           date_format=DateFormat.DD_MM_YYYY),
-            NexusWellList(name='well_list_name_2', wells=['wellname_4', 'wellname_5', 'wellname_6'], date='01/01/2020',
+            NexusWellList(name='well_list_name_2', elements_in_the_list=['wellname_4', 'wellname_5', 'wellname_6'], date='01/01/2020',
                           date_format=DateFormat.DD_MM_YYYY),
-            NexusWellList(name='well_list_name', wells=['wellname_2', 'wellname_3'], date='01/01/2023',
+            NexusWellList(name='well_list_name', elements_in_the_list=['wellname_2', 'wellname_3'], date='01/01/2023',
                           date_format=DateFormat.DD_MM_YYYY)]
 
         welllist = NexusWellLists(parent_network=dummy_network, well_lists=welllists)
 
         expected_result_1 = [
-            NexusWellList(name='well_list_name', wells=['wellname_1', 'wellname_2', 'wellname_3'], date='01/01/2020',
+            NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'], date='01/01/2020',
                           date_format=DateFormat.DD_MM_YYYY),
-            NexusWellList(name='well_list_name', wells=['wellname_2', 'wellname_3'], date='01/01/2023',
+            NexusWellList(name='well_list_name', elements_in_the_list=['wellname_2', 'wellname_3'], date='01/01/2023',
                           date_format=DateFormat.DD_MM_YYYY)]
 
         # Act
@@ -221,11 +226,11 @@ ENDWELLLIST'''
         # Arrange
         mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
         expected_welllists = [
-            NexusWellList(name='some_wells', wells=['well_1'],
+            NexusWellList(name='some_wells', elements_in_the_list=['well_1'],
                           date='09/07/2024', date_format=DateFormat.DD_MM_YYYY),
-            NexusWellList(name='some_wells', wells=['well_1', 'well_2'],
+            NexusWellList(name='some_wells', elements_in_the_list=['well_1', 'well_2'],
                           date='23/08/2024', date_format=DateFormat.DD_MM_YYYY),
-            NexusWellList(name='some_wells', wells=['well_2'],
+            NexusWellList(name='some_wells', elements_in_the_list=['well_2'],
                           date='15/10/2024', date_format=DateFormat.DD_MM_YYYY),
         ]
 
