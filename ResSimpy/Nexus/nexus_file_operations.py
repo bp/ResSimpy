@@ -486,8 +486,11 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
                 # If we are creating a Well Connection, carry across the activated state of the previous one.
                 if well_connections is not None and len(well_connections) > 0:
                     ordered_well_connections = sorted(well_connections, key=lambda x: x.iso_date, reverse=True)
-                    previous_well_connection = next(x for x in ordered_well_connections if x.name == name)
-                    is_activated = previous_well_connection.is_activated
+                    previous_well_connection = next((x for x in ordered_well_connections if x.name == name), None)
+                    if previous_well_connection is not None:
+                        is_activated = previous_well_connection.is_activated
+                    else:
+                        is_activated = True
                 else:
                     is_activated = True
 
