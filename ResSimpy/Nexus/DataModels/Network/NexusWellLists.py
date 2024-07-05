@@ -62,13 +62,13 @@ class NexusWellLists(NetworkLists):
         self.__parent_network.get_load_status()
         return self._lists
 
-    @property
-    def table_header(self) -> str:
+    @staticmethod
+    def table_header() -> Literal['WELLLIST']:
         """Start of the Node definition table."""
         return 'WELLLIST'
 
-    @property
-    def table_footer(self) -> str:
+    @staticmethod
+    def table_footer() -> Literal['ENDWELLLIST']:
         """End of the Node definition table."""
         return 'ENDWELLLIST'
 

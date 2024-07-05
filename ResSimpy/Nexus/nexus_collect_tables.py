@@ -8,8 +8,10 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.File import File
 from ResSimpy.FileOperations.file_operations import get_next_value
 from ResSimpy.ISODateTime import ISODateTime
+from ResSimpy.Nexus.DataModels.Network.NexusConLists import NexusConLists
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
+from ResSimpy.Nexus.DataModels.Network.NexusWellLists import NexusWellLists
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.nexus_constraint_operations import load_inline_constraints
@@ -161,14 +163,14 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                                      date_format=date_format,
                                                      welllists=well_lists)
 
-            elif token_found in ['WELLLIST', 'CONLIST']:
+            elif token_found in [NexusWellLists.table_header(), NexusConLists.table_header()]:
                 list_objects = load_table_to_lists(file_as_list=file_as_list[table_start - 1:table_end],
                                                    row_object=table_object_map[token_found],
                                                    table_header=token_found,
                                                    current_date=current_date,
                                                    previous_lists=nexus_object_results[token_found],
                                                    date_format=date_format)
-                if token_found == 'WELLLIST':
+                if token_found == NexusWellLists.table_header():
                     well_lists = [x[0] for x in list_objects]
 
             else:

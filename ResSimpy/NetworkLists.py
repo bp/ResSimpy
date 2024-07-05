@@ -33,15 +33,15 @@ class NetworkLists(ABC):
         """Returns all ConList names."""
         return list({x.name for x in self.lists if x.name is not None})
 
-    @property
+    @staticmethod
     @abstractmethod
-    def table_header(self) -> str:
+    def table_header() -> Literal['WELLLIST', 'CONLIST']:
         """Start of the table."""
         raise NotImplementedError('This method must be implemented in the derived class.')
 
-    @property
+    @staticmethod
     @abstractmethod
-    def table_footer(self) -> str:
+    def table_footer() -> Literal['ENDWELLLIST', 'ENDCONLIST']:
         """End of the table."""
         raise NotImplementedError('This method must be implemented in the derived class.')
 

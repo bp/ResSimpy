@@ -41,13 +41,13 @@ class NexusConLists(NetworkLists):
         self.__parent_network.get_load_status()
         return self._lists
 
-    @property
-    def table_header(self) -> str:
+    @staticmethod
+    def table_header() -> Literal['CONLIST']:
         """Start of the Node definition table."""
         return 'CONLIST'
 
-    @property
-    def table_footer(self) -> str:
+    @staticmethod
+    def table_footer() -> Literal['ENDCONLIST']:
         """End of the Node definition table."""
         return 'ENDCONLIST'
 
