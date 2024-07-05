@@ -257,6 +257,11 @@ def __activate_deactivate_checks(line: str, table_start: int, table_end: int, is
 
     # Find the most recent matching Well Connection, and apply 'deactivated' or 'activated' to it.
     well_connection_name = get_next_value(start_line_index=0, file_as_list=[line])
+
+    if well_connection_name is None:
+        # No valid name, continue to the next line
+        return is_activate_block, is_deactivate_block, True
+
     current_iso_date = ISODateTime.convert_to_iso(date=current_date, date_format=date_format,
                                                   start_date=start_date)
 
@@ -266,11 +271,12 @@ def __activate_deactivate_checks(line: str, table_start: int, table_end: int, is
                                      x.iso_date <= current_iso_date]
 
     matching_well_connections.extend(matching_gas_well_connections)
+
+    if len(matching_well_connections) == 0:
+        raise ValueError(f"Unable to find well connection with name {well_connection_name}")
+
     ordered_matching_well_connections = sorted(matching_well_connections, key=lambda x: x.iso_date, reverse=True)
     most_recent_matching_connection = ordered_matching_well_connections[0]
-
-    if most_recent_matching_connection is None:
-        raise ValueError(f"Unable to find well connection with name {well_connection_name}")
 
     if most_recent_matching_connection.iso_date == current_iso_date:
         # Set all matching connections for the same date to active / inactive
