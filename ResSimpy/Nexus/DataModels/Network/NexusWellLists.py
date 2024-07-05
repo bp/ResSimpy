@@ -11,6 +11,8 @@ from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 
+import pandas as pd
+
 
 @dataclass(kw_only=True)
 class NexusWellLists(NetworkLists):
@@ -38,6 +40,21 @@ class NexusWellLists(NetworkLists):
         """Returns all WellList names."""
         self.__parent_network.get_load_status()
         return self._lists
+
+    def get_df(self) -> pd.DataFrame:
+        """Creates a dataframe representing all processed node data in a surface file.
+
+        Returns:
+            DataFrame: of the properties of the nodes through time with each row representing a node.
+        """
+        self.__parent_network.get_load_status()
+        df_store = pd.DataFrame()
+        for welllist in self._lists:
+            data = {'name': [welllist.name] * len(welllist.elements_in_the_list),
+                    'well': welllist.elements_in_the_list,
+                    'date': [welllist.date] * len(welllist.elements_in_the_list)}
+            df_store = pd.concat([df_store, pd.DataFrame(data)], ignore_index=True)
+        return df_store
 
     @property
     def welllists(self) -> list[NexusWellList]:

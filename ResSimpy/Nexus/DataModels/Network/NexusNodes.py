@@ -84,6 +84,7 @@ class NexusNodes(Nodes):
         Returns:
             DataFrame: of the properties of the nodes through time with each row representing a node.
         """
+        self.__parent_network.get_load_status()
         df_store = obj_to_dataframe(self._nodes)
         return df_store
 

@@ -1,4 +1,5 @@
 from pytest_mock import MockerFixture
+import pandas as pd
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.Network.NexusWellLists import NexusWellLists
@@ -222,6 +223,33 @@ ENDWELLLIST'''
         # Assert
         assert result == expected_result_1
  
+
+    def test_welllist_get_df(self, mocker: MockerFixture):
+        dummy_model = get_fake_nexus_simulator(mocker, mock_open=True)
+        dummy_network = NexusNetwork(model=dummy_model)
+        dummy_network._NexusNetwork__has_been_loaded = True
+
+        welllists = [
+            NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'], date='01/01/2020',
+                          date_format=DateFormat.DD_MM_YYYY),
+            NexusWellList(name='well_list_name_2', elements_in_the_list=['wellname_4', 'wellname_5', 'wellname_6'], date='01/01/2020',
+                          date_format=DateFormat.DD_MM_YYYY),
+            NexusWellList(name='well_list_name', elements_in_the_list=['wellname_2', 'wellname_3'], date='01/01/2023',
+                          date_format=DateFormat.DD_MM_YYYY)]
+
+        welllist = NexusWellLists(parent_network=dummy_network, well_lists=welllists)
+
+        expected_result = pd.DataFrame({'name': ['well_list_name']*3 + ['well_list_name_2']*3 + ['well_list_name']*2,
+                                        'well': ['wellname_1', 'wellname_2', 'wellname_3',
+                                                 'wellname_4', 'wellname_5', 'wellname_6',
+                                                 'wellname_2', 'wellname_3'],
+                                        'date': ['01/01/2020']*6 + ['01/01/2023']*2})
+        # Act
+        result = welllist.get_df()
+
+        # Assert
+        pd.testing.assert_frame_equal(result, expected_result)
+
     def test_add_then_remove_wells_from_welllist(self, mocker: MockerFixture):
         # Arrange
         mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
