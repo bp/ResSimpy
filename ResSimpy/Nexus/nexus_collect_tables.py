@@ -270,7 +270,7 @@ def __activate_deactivate_checks(line: str, table_start: int, table_end: int, is
         all_gas_well_connections_names = [connection.name for connection in nexus_object_results['GASWELLS']]
         all_gas_well_connections_names.extend(all_gas_well_connections_names)
 
-        all_well_connections = frozenset(all_well_connection_names)
+        all_well_connections = list(dict.fromkeys(all_well_connection_names))
         all_affected_well_connections = [x for x in all_well_connections if
                                          fnmatch.fnmatch(x, affected_connection_name)]
     else:
