@@ -20,7 +20,8 @@ class NexusConLists(NetworkLists):
     __parent_network: NexusNetwork
 
     def __init__(self, parent_network: NexusNetwork, con_lists: None | list[NexusConList] = None) -> None:
-        """Initialises the NexusconLists class.
+        """Initialises the NexusConLists class. Supports ADD and REMOVE operations on the conlist.
+        Currently, this does not handle the keywords: NODEIN, NODEOUT, NODEPRODWH, NODEPRODBH, NODEINJWH or NODEINJBH.
 
         Args:
             parent_network (NexusNetwork): The network that the con lists are a part of.
