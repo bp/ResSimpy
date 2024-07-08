@@ -265,11 +265,12 @@ def __activate_deactivate_checks(line: str, table_start: int, table_end: int, is
 
     # If a wildcard is found, ensure that all connections that match the wildcard are dealt with.
     all_affected_well_connections = []
-    if affected_connection_name.__contains__('*'):
+    if '*' in affected_connection_name:
         all_well_connection_names = [connection.name for connection in nexus_object_results['WELLS']]
         all_gas_well_connections_names = [connection.name for connection in nexus_object_results['GASWELLS']]
         all_gas_well_connections_names.extend(all_gas_well_connections_names)
 
+        # Get a list of all the distinct well connection names that match the wildcard in the same order.
         all_well_connections = list(dict.fromkeys(all_well_connection_names))
         all_affected_well_connections = [x for x in all_well_connections if
                                          fnmatch.fnmatch(x, affected_connection_name)]
