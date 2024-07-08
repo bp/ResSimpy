@@ -1,22 +1,22 @@
-"""Holds a class for representing a single WellList or group for the Nexus model."""
+"""Holds a class for representing a single ConList or group for the Nexus model."""
 from dataclasses import dataclass
 
-from ResSimpy.NetworkList import NetworkList
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
+from ResSimpy.NetworkList import NetworkList
 
 
 @dataclass(kw_only=True, init=False)
-class NexusWellList(NetworkList):
-    """Class for representing a single WellList or group for the Nexus model."""
+class NexusConList(NetworkList):
+    """Class for representing a single ConList or group for the Nexus model."""
 
     def __init__(self, name: str, elements_in_the_list: list[str], date: str, date_format: DateFormat) -> None:
-        """Initialises the NexusWellList class.
+        """Initialises the NexusConList class.
 
         Args:
-            name (str): Name of the welllist.
-            elements_in_the_list (list[str]): List of well names in the welllist.
-            date (str): Date when the welllist is defined. Persists until the next date is defined.
+            name (str): Name of the conlist.
+            elements_in_the_list (list[str]): List of connection names in the conlist.
+            date (str): Date when the conlist is defined. Persists until the next date is defined.
             date_format (Optional[DateFormat]): The date format of the object.
         """
         super().__init__(name=name, elements_in_the_list=elements_in_the_list, date=date, date_format=date_format)
@@ -31,6 +31,6 @@ class NexusWellList(NetworkList):
         return BaseUnitMapping(None)
 
     @property
-    def wells(self) -> list[str]:
-        """Returns the list of wells in the welllist."""
+    def connections(self) -> list[str]:
+        """Returns the list of connections in the conlist."""
         return self.elements_in_the_list
