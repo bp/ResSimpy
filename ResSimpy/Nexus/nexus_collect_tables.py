@@ -1,6 +1,7 @@
 """Functions for collecting tables from a Nexus file to populate Nexus objects."""
 from __future__ import annotations
 
+import fnmatch
 from datetime import timedelta, time
 from typing import Any, Optional
 
@@ -267,41 +268,59 @@ def __activate_deactivate_checks(line: str, table_start: int, table_end: int, is
         return is_activate_block, is_deactivate_block, True
 
     # Find the most recent matching Well Connection, and apply 'deactivated' or 'activated' to it.
-    well_connection_name = get_next_value(start_line_index=0, file_as_list=[line])
+    affected_connection_name = get_next_value(start_line_index=0, file_as_list=[line])
 
-    if well_connection_name is None:
+    if affected_connection_name is None:
         # No valid name, continue to the next line
         return is_activate_block, is_deactivate_block, True
 
-    current_iso_date = ISODateTime.convert_to_iso(date=current_date, date_format=date_format,
-                                                  start_date=start_date)
+    # If a wildcard is found, ensure that all connections that match the wildcard are dealt with.
+    all_affected_well_connections = []
+    if '*' in affected_connection_name:
+        all_well_connection_names = [connection.name for connection in nexus_object_results['WELLS']]
+        all_gas_well_connections_names = [connection.name for connection in nexus_object_results['GASWELLS']]
+        all_gas_well_connections_names.extend(all_gas_well_connections_names)
 
-    matching_well_connections = [x for x in nexus_object_results['WELLS'] if x.name == well_connection_name and
-                                 x.iso_date <= current_iso_date]
-    matching_gas_well_connections = [x for x in nexus_object_results['GASWELLS'] if x.name == well_connection_name and
-                                     x.iso_date <= current_iso_date]
-
-    matching_well_connections.extend(matching_gas_well_connections)
-
-    if len(matching_well_connections) == 0:
-        raise ValueError(f"Unable to find well connection with name {well_connection_name}")
-
-    ordered_matching_well_connections = sorted(matching_well_connections, key=lambda x: x.iso_date, reverse=True)
-    most_recent_matching_connection = ordered_matching_well_connections[0]
-
-    if most_recent_matching_connection.iso_date == current_iso_date:
-        # Set all matching connections for the same date to active / inactive
-        exact_matching_connections = [x for x in ordered_matching_well_connections if x.iso_date == current_iso_date]
-        for connection in exact_matching_connections:
-            connection.is_activated = is_activate_block
+        # Get a list of all the distinct well connection names that match the wildcard in the same order.
+        all_well_connections = list(dict.fromkeys(all_well_connection_names))
+        all_affected_well_connections = [x for x in all_well_connections if
+                                         fnmatch.fnmatch(x, affected_connection_name)]
     else:
-        # Create a new instance of the WellConnection object to reflect the change in activation status
-        new_well_connection = NexusWellConnection(properties_dict={'name': most_recent_matching_connection.name},
-                                                  is_activated=is_activate_block,
-                                                  date=current_date,
-                                                  date_format=most_recent_matching_connection.date_format,
-                                                  unit_system=most_recent_matching_connection.unit_system)
+        all_affected_well_connections = [affected_connection_name]
 
-        nexus_object_results['WELLS'].append(new_well_connection)
+    # Loop through all affected well connections and apply the activated / deactivated state.
+    for well_connection_name in all_affected_well_connections:
+        current_iso_date = ISODateTime.convert_to_iso(date=current_date, date_format=date_format,
+                                                      start_date=start_date)
+
+        matching_well_connections = [x for x in nexus_object_results['WELLS'] if x.name == well_connection_name and
+                                     x.iso_date <= current_iso_date]
+        matching_gas_well_connections = [x for x in nexus_object_results['GASWELLS'] if
+                                         x.name == well_connection_name and
+                                         x.iso_date <= current_iso_date]
+
+        matching_well_connections.extend(matching_gas_well_connections)
+
+        if len(matching_well_connections) == 0:
+            raise ValueError(f"Unable to find well connection with name {well_connection_name}")
+
+        ordered_matching_well_connections = sorted(matching_well_connections, key=lambda x: x.iso_date, reverse=True)
+        most_recent_matching_connection = ordered_matching_well_connections[0]
+
+        if most_recent_matching_connection.iso_date == current_iso_date:
+            # Set all matching connections for the same date to active / inactive
+            exact_matching_connections = [x for x in ordered_matching_well_connections if
+                                          x.iso_date == current_iso_date]
+            for connection in exact_matching_connections:
+                connection.is_activated = is_activate_block
+        else:
+            # Create a new instance of the WellConnection object to reflect the change in activation status
+            new_well_connection = NexusWellConnection(properties_dict={'name': most_recent_matching_connection.name},
+                                                      is_activated=is_activate_block,
+                                                      date=current_date,
+                                                      date_format=most_recent_matching_connection.date_format,
+                                                      unit_system=most_recent_matching_connection.unit_system)
+
+            nexus_object_results['WELLS'].append(new_well_connection)
 
     return is_activate_block, is_deactivate_block, False
