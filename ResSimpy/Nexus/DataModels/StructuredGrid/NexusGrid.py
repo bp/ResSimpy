@@ -138,7 +138,7 @@ class NexusGrid(Grid):
         self.__irelpm: GridArrayDefinition = GridArrayDefinition()
         self.__irock: GridArrayDefinition = GridArrayDefinition()
         self.__itran: GridArrayDefinition = GridArrayDefinition()
-        self.__iregion: dict[str, GridArrayDefinition] = {}
+        self._iregion: dict[str, GridArrayDefinition] = {}
         self.__pvmult: GridArrayDefinition = GridArrayDefinition()
         self.__livecell: GridArrayDefinition = GridArrayDefinition()
         self.__worka1: GridArrayDefinition = GridArrayDefinition()
