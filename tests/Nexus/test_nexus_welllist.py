@@ -294,3 +294,53 @@ ENDWELLLIST'''
         )
         # Assert
         assert nexus_obj_dict['WELLLIST'] == expected_welllists
+
+    def test_multiple_changes_same_date(self, mocker: MockerFixture):
+        # Arrange
+        mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
+        expected_welllists = [
+            NexusWellList(name='some_wells', wells=['well_1'],
+                          date='09/07/2024', date_format=DateFormat.DD_MM_YYYY),
+            NexusWellList(name='some_wells', wells=['well_1', 'well_2'],
+                          date='23/08/2024', date_format=DateFormat.DD_MM_YYYY),
+            NexusWellList(name='some_wells', wells=['well_1', 'well_3'],
+                          date='26/12/2024', date_format=DateFormat.DD_MM_YYYY),
+        ]
+
+        file_as_list = '''
+    WELLLIST some_wells
+    ADD
+    well_1
+    ENDWELLLIST
+
+    TIME 23/08/2024
+
+    WELLLIST some_wells
+    ADD
+    well_2
+    ENDWELLLIST
+        
+    TIME 26/12/2024
+    ! Multiple changes on the same date.
+    WELLLIST some_wells
+    REMOVE
+    well_2
+    ENDWELLLIST
+    
+    WELLLIST some_wells
+    ADD
+    well_3
+    ENDWELLLIST
+        '''.splitlines()
+
+        nexus_file = NexusFile(location='', file_content_as_list=file_as_list)
+
+        # Act
+        nexus_obj_dict, _ = collect_all_tables_to_objects(
+            nexus_file=nexus_file, table_object_map={'WELLLIST': NexusWellList},
+            start_date='09/07/2024',
+            default_units=UnitSystem.ENGLISH,
+            date_format=DateFormat.DD_MM_YYYY
+        )
+        # Assert
+        assert nexus_obj_dict['WELLLIST'] == expected_welllists

@@ -166,6 +166,17 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                                current_date=current_date,
                                                previous_well_lists=nexus_object_results[token_found],
                                                date_format=date_format)
+
+                # If there is already a matching Welllist for this timestamp, update that with the additional changes,
+                # rather than adding another one.
+                existing_welllist = next(
+                    (x for x in nexus_object_results['WELLLIST'] if x.name == list_objects[0][0].name and
+                     x.date == list_objects[0][0].date), None)
+
+                if existing_welllist is not None:
+                    existing_welllist.wells = list_objects[0][0].wells
+                    list_objects = []
+
                 well_lists = [x[0] for x in list_objects]
 
             else:
