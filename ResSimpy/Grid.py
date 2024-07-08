@@ -63,6 +63,9 @@ class Grid(ABC):
     _kx: GridArrayDefinition
     _ky: GridArrayDefinition
     _kz: GridArrayDefinition
+
+    _iregion: dict[str, GridArrayDefinition]
+
     _grid_properties_loaded: bool = False
 
     def __init__(self, assume_loaded: bool = False) -> None:
@@ -82,6 +85,10 @@ class Grid(ABC):
         self._range_y: Optional[int] = None
         self._range_z: Optional[int] = None
         self._grid_properties_loaded = assume_loaded
+
+    @property
+    def iregion(self) -> dict[str, GridArrayDefinition]:
+        return self._iregion
 
     @property
     def range_x(self) -> int | None:
