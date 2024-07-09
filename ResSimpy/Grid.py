@@ -63,6 +63,7 @@ class Grid(ABC):
     _kx: GridArrayDefinition
     _ky: GridArrayDefinition
     _kz: GridArrayDefinition
+    _iregion: dict[str, GridArrayDefinition]
     _grid_properties_loaded: bool = False
 
     def __init__(self, assume_loaded: bool = False) -> None:
@@ -76,6 +77,7 @@ class Grid(ABC):
         self._kx = GridArrayDefinition()
         self._ky = GridArrayDefinition()
         self._kz = GridArrayDefinition()
+        self._iregion = {}
 
         # Grid dimensions
         self._range_x: Optional[int] = None
@@ -142,6 +144,11 @@ class Grid(ABC):
     def kz(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self._kz
+
+    @property
+    def iregion(self) -> dict[str, GridArrayDefinition]:
+        self.load_grid_properties_if_not_loaded()
+        return self._iregion
 
     @abstractmethod
     def load_structured_grid_file(self, structure_grid_file: File, lazy_loading: bool) -> Grid:

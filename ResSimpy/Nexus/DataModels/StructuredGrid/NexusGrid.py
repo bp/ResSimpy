@@ -99,7 +99,7 @@ class NexusGrid(Grid):
     __irelpm: GridArrayDefinition
     __irock: GridArrayDefinition
     __itran: GridArrayDefinition
-    __iregion: dict[str, GridArrayDefinition]
+    _iregion: dict[str, GridArrayDefinition]
     __pvmult: GridArrayDefinition
     __livecell: GridArrayDefinition
     __worka1: GridArrayDefinition
@@ -138,7 +138,7 @@ class NexusGrid(Grid):
         self.__irelpm: GridArrayDefinition = GridArrayDefinition()
         self.__irock: GridArrayDefinition = GridArrayDefinition()
         self.__itran: GridArrayDefinition = GridArrayDefinition()
-        self.__iregion: dict[str, GridArrayDefinition] = {}
+        self._iregion: dict[str, GridArrayDefinition] = {}
         self.__pvmult: GridArrayDefinition = GridArrayDefinition()
         self.__livecell: GridArrayDefinition = GridArrayDefinition()
         self.__worka1: GridArrayDefinition = GridArrayDefinition()
@@ -295,6 +295,7 @@ class NexusGrid(Grid):
             PropertyToLoad('KK', GRID_ARRAY_FORMAT_KEYWORDS, self._kz),
             PropertyToLoad('PERMZ', GRID_ARRAY_FORMAT_KEYWORDS, self._kz),
             PropertyToLoad('PERMK', GRID_ARRAY_FORMAT_KEYWORDS, self._kz),
+            PropertyToLoad('IREGION', GRID_ARRAY_FORMAT_KEYWORDS, self._iregion),
             PropertyToLoad('PVMULT', GRID_ARRAY_FORMAT_KEYWORDS, self.__pvmult),
             PropertyToLoad('CORP', ['VALUE'], self.__corp),
             PropertyToLoad('IEQUIL', GRID_ARRAY_FORMAT_KEYWORDS, self.__iequil),
@@ -303,7 +304,6 @@ class NexusGrid(Grid):
             PropertyToLoad('IRELPM', GRID_ARRAY_FORMAT_KEYWORDS, self.__irelpm),
             PropertyToLoad('IROCK', GRID_ARRAY_FORMAT_KEYWORDS, self.__irock),
             PropertyToLoad('ITRAN', GRID_ARRAY_FORMAT_KEYWORDS, self.__itran),
-            PropertyToLoad('IREGION', GRID_ARRAY_FORMAT_KEYWORDS, self.__iregion),
             PropertyToLoad('LIVECELL', GRID_ARRAY_FORMAT_KEYWORDS, self.__livecell),
             PropertyToLoad('WORKA1', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka1),
             PropertyToLoad('WORKA2', GRID_ARRAY_FORMAT_KEYWORDS, self.__worka2),
@@ -660,7 +660,7 @@ class NexusGrid(Grid):
     @property
     def iregion(self) -> dict[str, GridArrayDefinition]:
         self.load_grid_properties_if_not_loaded()
-        return self.__iregion
+        return self._iregion
 
     @property
     def livecell(self) -> GridArrayDefinition:
