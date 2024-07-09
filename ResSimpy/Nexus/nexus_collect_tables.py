@@ -9,14 +9,16 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.File import File
 from ResSimpy.FileOperations.file_operations import get_next_value
 from ResSimpy.ISODateTime import ISODateTime
+from ResSimpy.Nexus.DataModels.Network.NexusConLists import NexusConLists
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
+from ResSimpy.Nexus.DataModels.Network.NexusWellLists import NexusWellLists
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.nexus_constraint_operations import load_inline_constraints
 from ResSimpy.Nexus.nexus_file_operations import check_property_in_line, check_token, get_expected_token_value, \
     check_list_tokens, load_table_to_objects
-from ResSimpy.Nexus.nexus_load_well_list import load_well_lists
+from ResSimpy.Nexus.nexus_load_list_table import load_table_to_lists
 
 
 # TODO refactor the collection of tables to an object with proper typing
@@ -162,23 +164,26 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                                      date_format=date_format,
                                                      welllists=well_lists)
 
-            elif token_found == 'WELLLIST':
-                list_objects = load_well_lists(file_as_list=file_as_list[table_start - 1:table_end],
-                                               current_date=current_date,
-                                               previous_well_lists=nexus_object_results[token_found],
-                                               date_format=date_format)
+            elif token_found in [NexusWellLists.table_header(), NexusConLists.table_header()]:
+                list_objects = load_table_to_lists(file_as_list=file_as_list[table_start - 1:table_end],
+                                                   row_object=table_object_map[token_found],
+                                                   table_header=token_found,
+                                                   current_date=current_date,
+                                                   previous_lists=nexus_object_results[token_found],
+                                                   date_format=date_format)
 
                 # If there is already a matching Welllist for this timestamp, update that with the additional changes,
                 # rather than adding another one.
                 existing_welllist = next(
-                    (x for x in nexus_object_results['WELLLIST'] if x.name == list_objects[0][0].name and
+                    (x for x in nexus_object_results[NexusWellLists.table_header()] if
+                     x.name == list_objects[0][0].name and
                      x.date == list_objects[0][0].date), None)
 
                 if existing_welllist is not None:
-                    existing_welllist.wells = list_objects[0][0].wells
+                    existing_welllist.elements_in_the_list = list_objects[0][0].wells
                     list_objects = []
-
-                well_lists = [x[0] for x in list_objects]
+                if token_found == NexusWellLists.table_header():
+                    well_lists = [x[0] for x in list_objects]
 
             else:
                 if 'WELLS' in nexus_object_results:
