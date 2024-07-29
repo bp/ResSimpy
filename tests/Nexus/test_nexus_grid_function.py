@@ -86,6 +86,66 @@ KX OUTPUT KX
     assert result == expected_result
 
 
+def test_nexus_grid_function_tostring_repr_simple():
+    # Arrange
+    expected_result1 = '''FUNCTION IREGION
+1 2 3
+ANALYT POLYN 1.0 0.0
+KX OUTPUT KY
+'''
+    expected_result2 = '''FUNCTION
+BLOCKS 1 5 1 7 1 9
+ANALYT POLYN 3.0 2.0 1.0 0.0
+KX OUTPUT KY KZ
+'''
+    expected_result3 = '''FUNCTION
+GRID ROOT
+RANGE OUTPUT -1.0e+12 0.0
+ANALYT POLYN 0.0
+KX OUTPUT KX
+'''
+
+    expected_repr = """NexusGridArrayFunction(region_type=IREGION,region_number=[1, 2, 3],input_array=['KX'],output_array=['KY'],function_type=GridFunctionTypeEnum.POLYN,function_values=[1.0, 0.0])"""
+
+    input_grid_function = [
+     NexusGridArrayFunction(
+        region_type='IREGION',
+        region_number=[1, 2, 3],
+        function_type=GridFunctionTypeEnum.POLYN,
+        input_array=['KX'],
+        output_array=['KY'],
+        function_values=[1.0, 0.0]),
+     NexusGridArrayFunction(
+        blocks=[1, 5, 1, 7, 1, 9],
+        function_type=GridFunctionTypeEnum.POLYN,
+        input_array=['KX'],
+        output_array=['KY', 'KZ'],
+        function_values=[3.0, 2.0, 1.0, 0.0]),
+     NexusGridArrayFunction(
+        grid_name='ROOT',
+        function_type=GridFunctionTypeEnum.POLYN,
+        output_range=[(-1.0e+12, 0.)],
+        input_array=['KX'],
+        output_array=['KX'],
+        function_values=[0.0])
+    ]
+    grid = NexusGrid(assume_loaded=True)
+    grid._NexusGrid__grid_array_functions = input_grid_function
+
+    # Act
+    result_str1 = grid.array_functions[0].to_string()
+    result_str2 = grid.array_functions[1].to_string()
+    result_str3 = grid.array_functions[2].to_string()
+
+    result_repr = grid.array_functions[0].__repr__()
+    # Assert
+    assert result_str1 == expected_result1
+    assert result_str2 == expected_result2
+    assert result_str3 == expected_result3
+
+    assert result_repr == expected_repr
+
+
 @pytest.mark.parametrize("function_number, function_list, expected_grid_array_function_obj",
                          [(1, ['FUNCTION IREGION', '1 3', 'ANALYT POLYN 0.0 1212.59288582951', 'KX OUTPUT KX'],
                            NexusGridArrayFunction(
@@ -395,11 +455,3 @@ def test_tabular_array_function_block(input_file, expected_result):
     for i in range(len(expected_result)):
         if result is not None and len(result) > 0 and result[i] is not None:
             result_dict = result[i].__dict__
-        else:
-            raise AssertionError('result has the wrong format or is None.')
-        expected_result_dict = expected_result[i].__dict__
-        for key in expected_result_dict.keys():
-            if isinstance(expected_result_dict[key], pd.DataFrame):
-                pd.testing.assert_frame_equal(result_dict[key], expected_result_dict[key])
-            else:
-                assert result_dict[key] == expected_result_dict[key]
