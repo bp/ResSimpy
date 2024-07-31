@@ -460,3 +460,11 @@ def test_tabular_array_function_block(input_file, expected_result):
     for i in range(len(expected_result)):
         if result is not None and len(result) > 0 and result[i] is not None:
             result_dict = result[i].__dict__
+        else:
+            raise AssertionError('result has the wrong format or is None.')
+        expected_result_dict = expected_result[i].__dict__
+        for key in expected_result_dict.keys():
+            if isinstance(expected_result_dict[key], pd.DataFrame):
+                pd.testing.assert_frame_equal(result_dict[key], expected_result_dict[key])
+            else:
+                assert result_dict[key] == expected_result_dict[key]
