@@ -105,8 +105,9 @@ ANALYT POLYN 0.0
 KX OUTPUT KX
 '''
 
-    expected_repr = """NexusGridArrayFunction(region_type=IREGION,region_number=[1, 2, 3],input_array=['KX'],output_array=['KY'],function_type=GridFunctionTypeEnum.POLYN,function_values=[1.0, 0.0])"""
-
+    expected_repr1 = """NexusGridArrayFunction(region_type=IREGION,region_number=[1, 2, 3],input_array=['KX'],output_array=['KY'],function_type=GridFunctionTypeEnum.POLYN,function_values=[1.0, 0.0])"""
+    expected_repr2 = """NexusGridArrayFunction(input_array=['KX'],output_array=['KY', 'KZ'],function_type=GridFunctionTypeEnum.POLYN,function_values=[3.0, 2.0, 1.0, 0.0],blocks=[1, 5, 1, 7, 1, 9])"""
+    expected_repr3 = """NexusGridArrayFunction(input_array=['KX'],output_array=['KX'],function_type=GridFunctionTypeEnum.POLYN,function_values=[0.0],grid_name=ROOT,output_range=[(-1000000000000.0, 0.0)])"""
     input_grid_function = [
      NexusGridArrayFunction(
         region_type='IREGION',
@@ -137,13 +138,17 @@ KX OUTPUT KX
     result_str2 = grid.array_functions[1].to_string()
     result_str3 = grid.array_functions[2].to_string()
 
-    result_repr = grid.array_functions[0].__repr__()
+    result_repr1 = grid.array_functions[0].__repr__()
+    result_repr2 = grid.array_functions[1].__repr__()
+    result_repr3 = grid.array_functions[2].__repr__()
     # Assert
     assert result_str1 == expected_result1
     assert result_str2 == expected_result2
     assert result_str3 == expected_result3
 
-    assert result_repr == expected_repr
+    assert result_repr1 == expected_repr1
+    assert result_repr2 == expected_repr2
+    assert result_repr3 == expected_repr3
 
 
 @pytest.mark.parametrize("function_number, function_list, expected_grid_array_function_obj",
