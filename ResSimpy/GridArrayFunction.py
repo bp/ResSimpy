@@ -4,7 +4,7 @@ from ResSimpy.Enums.GridFunctionTypes import GridFunctionTypeEnum
 from typing import Optional
 
 
-@dataclass
+@dataclass(kw_only=True)
 class GridArrayFunction:
     """Class to represent grid array functions.
 
