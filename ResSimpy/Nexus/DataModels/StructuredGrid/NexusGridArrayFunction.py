@@ -67,6 +67,9 @@ BLOCKS""" + ' ' + block_num_str + '\n'
 
         return func_string + input_arr + ' OUTPUT ' + output_arr + '\n'
 
+    def __str__(self) -> str:
+        return self.to_string()
+
     def __repr__(self) -> str:
 
         beginning = 'NexusGridArrayFunction('

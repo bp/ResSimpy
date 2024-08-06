@@ -39,7 +39,13 @@ class DynamicProperty(ABC):
         raise NotImplementedError('Implement in the derived class.')
 
     def __repr__(self) -> str:
-        """Pretty printing dynamic property data."""
+        """Repr for dynamic property data."""
+        printable_str = f'\nFILE_PATH: {self.file.location}\n\n'
+        printable_str += self.to_string()
+        return printable_str
+
+    def __str__(self) -> str:
+        """Pretty printing dynamic property in human-readable format, e.g. output of print function."""
         printable_str = f'\nFILE_PATH: {self.file.location}\n\n'
         printable_str += self.to_string()
         return printable_str

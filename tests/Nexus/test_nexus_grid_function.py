@@ -134,9 +134,9 @@ KX OUTPUT KX
     grid._NexusGrid__grid_array_functions = input_grid_function
 
     # Act
-    result_str1 = grid.array_functions[0].to_string()
-    result_str2 = grid.array_functions[1].to_string()
-    result_str3 = grid.array_functions[2].to_string()
+    result_str1 = grid.array_functions[0].__str__()
+    result_str2 = grid.array_functions[1].__str__()
+    result_str3 = grid.array_functions[2].__str__()
 
     result_repr1 = grid.array_functions[0].__repr__()
     result_repr2 = grid.array_functions[1].__repr__()
