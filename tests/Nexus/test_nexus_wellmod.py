@@ -29,23 +29,25 @@ class TestNexusWellMod:
     expected_completion_1._DataObjectMixin__id = 'uuid_1'
     expected_completion_2._DataObjectMixin__id = 'uuid_1'
 
-    @pytest.mark.parametrize('wellfile_content, expected_wellmod_dict', [
+    @pytest.mark.parametrize('wellfile_content, expected_wellmod_dict, date', [
         # simple_wellmod
         ('''WELLMOD test_well PPERF	CON	0.25''',
-        {'well_name': 'test_well', 'date': '01/01/2020', 'unit_system': UnitSystem.ENGLISH, 'partial_perf': 0.25}),
+        {'well_name': 'test_well', 'date': '01/01/2020', 'unit_system': UnitSystem.ENGLISH, 'partial_perf': 0.25},
+         '01/01/2020'),
 
         # wellmod_with_different_date
         ("""TIME 01/01/2021
         TIME 01/01/2023
         WELLMOD test_well KHMULT CON 0.4 RADW CON 4.102""",
          {'well_name': 'test_well', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH, 'perm_thickness_mult': 0.4,
-          'well_radius': 4.102}),
+          'well_radius': 4.102}, '01/01/2023'),
     ], ids=['simple_wellmod', 'wellmod_with_different_date', ])
-    def test_load_nexus_wellmod(self, mocker, wellfile_content, expected_wellmod_dict):
+    def test_load_nexus_wellmod(self, mocker, wellfile_content, expected_wellmod_dict, date):
         # Arrange
         mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
         wellfile_content = self.well_file_content + wellfile_content
-        expected_wellmods = [NexusWellMod(expected_wellmod_dict)]
+        expected_wellmods = [NexusWellMod(expected_wellmod_dict, start_date=self.start_date, date=date,
+                                          date_format=DateFormat.DD_MM_YYYY)]
 
         dummy_model = get_fake_nexus_simulator(mocker)
         dummy_model.start_date = self.start_date
@@ -81,11 +83,17 @@ class TestNexusWellMod:
         mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
         well_file_content = self.well_file_content + extra_content
         expected_wellmod_1 = NexusWellMod({'well_name': 'test_well_2', 'date': '01/01/2020',
-                                                'unit_system': self.unit_system, 'skin': 0.25})
+                                                'unit_system': self.unit_system, 'skin': 0.25},
+                                                            start_date=self.start_date, date='01/01/2020',
+                                                            date_format=DateFormat.DD_MM_YYYY)
         expected_wellmod_2 = NexusWellMod({'well_name': 'TEST_well', 'date': '01/01/2020',
-                                             'unit_system': self.unit_system, 'perm_thickness_mult': 1234.2})
+                                             'unit_system': self.unit_system, 'perm_thickness_mult': 1234.2},
+                                                            start_date=self.start_date, date='01/01/2020',
+                                                            date_format=DateFormat.DD_MM_YYYY)
         expected_wellmod_3 = NexusWellMod({'well_name': 'test_well_2', 'date': '01/01/2021',
-                                                'unit_system': self.unit_system, 'partial_perf': 0.25})
+                                                'unit_system': self.unit_system, 'partial_perf': 0.25},
+                                                            start_date=self.start_date, date='01/01/2021',
+                                                            date_format=DateFormat.DD_MM_YYYY)
 
         expected_completion_test_well_2_1 = NexusCompletion(date=self.start_date, i=1, j=1, k=1, skin=None,
                                                             well_radius=4.5, date_format=self.date_format,
@@ -133,7 +141,9 @@ class TestNexusWellMod:
         extra_well_file_content = f"WELLMod test_well SKIN VAR {skin_var}  KHMULT    CON 1234.2  DKRW  VAr {dkrw_var} "
         expected_wellmod = NexusWellMod({'well_name': 'test_well', 'date': '01/01/2020',
                                          'unit_system': self.unit_system, 'skin': skin_result,
-                                         'perm_thickness_mult': 1234.2, 'delta_krw': dkrw_result})
+                                         'perm_thickness_mult': 1234.2, 'delta_krw': dkrw_result},
+                                                            start_date=self.start_date, date='01/01/2020',
+                                                            date_format=DateFormat.DD_MM_YYYY)
         dummy_model = get_fake_nexus_simulator(mocker)
         mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
         dummy_wells = NexusWells(model=dummy_model)
@@ -180,10 +190,14 @@ class TestNexusWellMod:
         mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
         expected_wellmod_1 = NexusWellMod({'well_name': 'test_well', 'date': '01/01/2022',
                                            'unit_system': self.unit_system, 'skin': [1.2, 55, 66],
-                                           'perm_thickness_mult': 1234.2, 'delta_krw': [10, 2, 3]})
+                                           'perm_thickness_mult': 1234.2, 'delta_krw': [10, 2, 3]},
+                                                            start_date=self.start_date, date='01/01/2022',
+                                                            date_format=DateFormat.DD_MM_YYYY)
         expected_wellmod_2 = NexusWellMod({'well_name': 'test_well', 'date': '01/01/2023',
                                              'unit_system': self.unit_system, 'skin': [0.5],
-                                             'perm_thickness_mult': 1234.2, 'delta_krw': [1.1]})
+                                             'perm_thickness_mult': 1234.2, 'delta_krw': [1.1]},
+                                                            start_date=self.start_date, date='01/01/2023',
+                                                            date_format=DateFormat.DD_MM_YYYY)
 
         extra_expected_completion_1 = NexusCompletion(date='01/01/2021', i=1, j=1, k=1, well_radius=4.5,
                                                       date_format=self.date_format, unit_system=self.unit_system,
@@ -213,7 +227,9 @@ class TestNexusWellMod:
                                                                  unit_system=self.unit_system,
                                                                  start_date=self.start_date)],
                                     wellmods=[NexusWellMod({'well_name': 'test_well2', 'date': '01/01/2023',
-                                                            'unit_system': self.unit_system, 'skin': 2})],
+                                                            'unit_system': self.unit_system, 'skin': 2},
+                                                            start_date=self.start_date, date='01/01/2023',
+                                                            date_format=DateFormat.DD_MM_YYYY)],
                                     unit_system=self.unit_system, parent_wells_instance=dummy_wells)]
         open_mock = mocker.mock_open(read_data=self.well_file_content + extra_well_file_content)
         mocker.patch("builtins.open", open_mock)
