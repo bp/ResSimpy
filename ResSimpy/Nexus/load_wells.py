@@ -506,7 +506,7 @@ def __get_inline_well_mod(line: str, current_date: str, unit_system: UnitSystem 
         next_value = nfo.get_next_value(0, [trimmed_line], trimmed_line)
         counter += 1
 
-    return NexusWellMod(well_mod_dict)
+    return NexusWellMod(wellmod_dict=well_mod_dict, date=current_date, date_format=date_format, start_date=start_date)
 
 
 def __get_number_completions(well_name: str | None, current_iso_date: ISODateTime, wells_loaded: list[NexusWell],
