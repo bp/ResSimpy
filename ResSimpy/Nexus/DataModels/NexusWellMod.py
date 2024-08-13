@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
+from ResSimpy.Units.AttributeMappings.CompletionUnitMapping import CompletionUnits
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Utils.to_dict_generic import to_dict
 
@@ -79,5 +79,5 @@ class NexusWellMod(DataObjectMixin):
         return keyword_mapping
 
     @property
-    def units(self) -> BaseUnitMapping:
-        raise NotImplementedError("Units not implemented for WellMods yet")  # TODO: Implement units for this class.
+    def units(self) -> CompletionUnits:
+        return CompletionUnits(self.unit_system)
