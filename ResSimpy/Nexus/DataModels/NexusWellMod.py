@@ -40,7 +40,14 @@ class NexusWellMod(DataObjectMixin):
             start_date: Optional[str]: The start date of the simulation.
             unit_system: Optional[UnitSystem]: The unit system to use for the Wellmod.
         """
-        for key, prop in wellmod_dict.items():
+        super().__init__(date_format=date_format, start_date=start_date, date=date)
+
+        protected_attributes = ['date_format', 'start_date', 'unit_system']
+
+        # Loop through the properties dict if one is provided and set those attributes
+        remaining_properties = [x for x in wellmod_dict.items() if x[0] not in protected_attributes]
+
+        for key, prop in remaining_properties:
             self.__setattr__(key, prop)
 
         super().__init__(date=date, date_format=date_format, start_date=start_date)
