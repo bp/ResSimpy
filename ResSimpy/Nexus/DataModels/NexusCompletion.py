@@ -286,14 +286,15 @@ class NexusCompletion(Completion):
         return self.__depth_to_bottom_str
 
     def to_dict(self, keys_in_keyword_style: bool = False, add_date: bool = True, add_units: bool = False,
+                add_iso_date: bool = False,
                 include_nones: bool = True, units_as_string: bool = True) -> \
             dict[str, None | str | int | float]:
 
-        attribute_dict = to_dict(self, keys_in_keyword_style, add_date=add_date,
+        attribute_dict = to_dict(self, keys_in_keyword_style, add_date=add_date, add_iso_date=add_iso_date,
                                  add_units=add_units, include_nones=include_nones)
         parent_attribute_dict = super().to_dict(keys_in_keyword_style=keys_in_keyword_style, add_date=add_date,
                                                 add_units=add_units, include_nones=include_nones,
-                                                units_as_string=units_as_string)
+                                                units_as_string=units_as_string, add_iso_date=add_iso_date)
 
         attribute_dict.update(parent_attribute_dict)
         if self.rel_perm_end_point is not None:
@@ -379,7 +380,7 @@ class NexusCompletion(Completion):
     def from_dict(cls: type[Self], input_dictionary: dict[str, None | float | int | str],
                   date_format: DateFormat) -> Self:
         """Generates a NexusCompletion from a dictionary."""
-        skip_mapping_keys = ['date', 'date_format', 'unit_system', 'start_date']
+        skip_mapping_keys = ['date', 'date_format', 'unit_system', 'start_date', 'iso_date']
         for input_attr in input_dictionary:
             if input_attr in skip_mapping_keys:
                 continue

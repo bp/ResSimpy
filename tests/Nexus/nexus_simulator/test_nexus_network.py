@@ -4,6 +4,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from ResSimpy.Enums.WellTypeEnum import WellType
+from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnections import NexusWellConnections
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
@@ -181,13 +182,16 @@ def test_get_node_df(mocker, file_contents, node1_props, node2_props):
     nexus_nodes = NexusNodes(mock_nexus_network)
     nexus_nodes.load(surface_file, start_date, default_units=UnitSystem.ENGLISH)
 
+    node1_props['iso_date'] = ISODateTime.convert_to_iso(date=node1_props['date'], date_format=DateFormat.DD_MM_YYYY)
+    node2_props['iso_date'] = ISODateTime.convert_to_iso(date=node2_props['date'], date_format=DateFormat.DD_MM_YYYY)
+
     expected_df = pd.DataFrame([node1_props, node2_props])
     expected_df = expected_df.fillna(value=np.nan).dropna(axis=1, how='all')
     # Act
     result = nexus_nodes.get_df()
 
     # Assert
-    pd.testing.assert_frame_equal(result, expected_df, )
+    pd.testing.assert_frame_equal(result, expected_df, check_like=True)
 
 
 @pytest.mark.parametrize('file_contents, connection1_props, connection2_props', [
@@ -257,6 +261,13 @@ def test_load_connections(mocker: MockerFixture, file_contents, connection1_prop
     con1 = NexusNodeConnection(connection1_props, date_format=DateFormat.DD_MM_YYYY)
     con2 = NexusNodeConnection(connection2_props, date_format=DateFormat.DD_MM_YYYY)
     expected_result = [con1, con2]
+
+    # add expected iso dates for the dataframe comparison
+    connection1_props['iso_date'] = ISODateTime.convert_to_iso(date=connection1_props['date'],
+                                                               date_format=DateFormat.DD_MM_YYYY)
+    connection2_props['iso_date'] = ISODateTime.convert_to_iso(date=connection2_props['date'],
+                                                               date_format=DateFormat.DD_MM_YYYY)
+
     # create the dataframe output
     expected_df = pd.DataFrame([connection1_props, connection2_props])
     expected_df = expected_df.fillna(value=np.nan).dropna(axis=1, how='all')
@@ -275,7 +286,7 @@ def test_load_connections(mocker: MockerFixture, file_contents, connection1_prop
     # check for correct float types
     if single_connection_result.depth is not None:
         assert single_connection_result.depth / 2 == 7002.67 / 2
-    pd.testing.assert_frame_equal(result_df, expected_df, )
+    pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
 
 
 @pytest.mark.parametrize('file_contents, well_connection_props1, well_connection_props2', [
@@ -308,6 +319,12 @@ def test_load_well_connections(mocker, file_contents, well_connection_props1, we
     mock_nexus_network.model.date_format = DateFormat.DD_MM_YYYY
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
     nexus_well_cons = NexusWellConnections(mock_nexus_network)
+
+    well_connection_props1['iso_date'] = ISODateTime.convert_to_iso(date=well_connection_props1['date'],
+                                                                    date_format=DateFormat.DD_MM_YYYY)
+    well_connection_props2['iso_date'] = ISODateTime.convert_to_iso(date=well_connection_props2['date'],
+                                                                    date_format=DateFormat.DD_MM_YYYY)
+
     expected_df = pd.DataFrame([well_connection_props1, well_connection_props2])
     expected_df = expected_df.fillna(value=np.nan).dropna(axis=1, how='all')
 
@@ -525,6 +542,13 @@ def test_load_wellhead(mocker, file_contents, wellhead_props_1, wellhead_props_2
     mock_nexus_network.model.date_format = DateFormat.DD_MM_YYYY
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
     nexus_wellheads = NexusWellheads(mock_nexus_network)
+    
+    # add expected iso dates for the dataframe comparison
+    wellhead_props_1['iso_date'] = ISODateTime.convert_to_iso(date=wellhead_props_1['date'],
+                                                                date_format=DateFormat.DD_MM_YYYY)
+    wellhead_props_2['iso_date'] = ISODateTime.convert_to_iso(date=wellhead_props_2['date'],
+                                                                date_format=DateFormat.DD_MM_YYYY)
+    
     expected_df = pd.DataFrame([wellhead_props_1, wellhead_props_2])
     expected_df = expected_df.fillna(value=np.nan).dropna(axis=1, how='all')
 
@@ -569,6 +593,13 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
     mock_nexus_network.model.date_format = DateFormat.DD_MM_YYYY
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
     nexuswellbore = NexusWellbores(mock_nexus_network)
+    
+    # add expected iso dates for the dataframe comparison
+    wellboreprops1['iso_date'] = ISODateTime.convert_to_iso(date=wellboreprops1['date'],
+                                                            date_format=DateFormat.DD_MM_YYYY)
+    wellboreprops2['iso_date'] = ISODateTime.convert_to_iso(date=wellboreprops2['date'],
+                                                            date_format=DateFormat.DD_MM_YYYY)
+    
     expected_df = pd.DataFrame([wellboreprops1, wellboreprops2])
     expected_df = expected_df.fillna(value=np.nan).dropna(axis=1, how='all')
 
@@ -582,6 +613,7 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
     assert result == expected_result
     assert single_wellbore == wellbore1
     pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
+
 
 @pytest.mark.parametrize('file_contents, wellboreprops1, wellboreprops2', [
     (''' TIME 01/03/2019
@@ -628,6 +660,13 @@ def test_load_wellbore_time_plus(mocker, file_contents, wellboreprops1, wellbore
     mock_nexus_network.model.date_format = DateFormat.DD_MM_YYYY
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
     nexuswellbore = NexusWellbores(mock_nexus_network)
+    
+    # add expected iso dates for the dataframe comparison
+    wellboreprops1['iso_date'] = ISODateTime.convert_to_iso(date=wellboreprops1['date'],
+                                                            date_format=DateFormat.DD_MM_YYYY)
+    wellboreprops2['iso_date'] = ISODateTime.convert_to_iso(date=wellboreprops2['date'],
+                                                            date_format=DateFormat.DD_MM_YYYY)
+    
     expected_df = pd.DataFrame([wellboreprops1, wellboreprops2])
     expected_df = expected_df.fillna(value=np.nan).dropna(axis=1, how='all')
 
@@ -641,6 +680,7 @@ def test_load_wellbore_time_plus(mocker, file_contents, wellboreprops1, wellbore
     assert result == expected_result
     assert single_wellbore == wellbore1
     pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
+
 
 @pytest.mark.parametrize('file_contents, wellboreprops1, wellboreprops2', [
     (''' TIME 12/28/2019
@@ -687,6 +727,13 @@ def test_load_wellbore_time_plus_mmddyy(mocker, file_contents, wellboreprops1, w
     mock_nexus_network.model.date_format = DateFormat.MM_DD_YYYY
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
     nexuswellbore = NexusWellbores(mock_nexus_network)
+    
+    # add expected iso dates for the dataframe comparison
+    wellboreprops1['iso_date'] = ISODateTime.convert_to_iso(date=wellboreprops1['date'],
+                                                            date_format=DateFormat.MM_DD_YYYY)
+    wellboreprops2['iso_date'] = ISODateTime.convert_to_iso(date=wellboreprops2['date'],
+                                                            date_format=DateFormat.MM_DD_YYYY)
+    
     expected_df = pd.DataFrame([wellboreprops1, wellboreprops2])
     expected_df = expected_df.fillna(value=np.nan).dropna(axis=1, how='all')
 
@@ -700,6 +747,7 @@ def test_load_wellbore_time_plus_mmddyy(mocker, file_contents, wellboreprops1, w
     assert result == expected_result
     assert single_wellbore == wellbore1
     pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
+
 
 def test_wells_table_expands_out_wildcards(mocker: MockerFixture):
     """Checks that wildcard names in a WELLS table apply the property to all names that match the wildcard."""

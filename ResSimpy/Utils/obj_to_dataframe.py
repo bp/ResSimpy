@@ -9,7 +9,7 @@ def obj_to_dataframe(list_objs: list[Any]) -> pd.DataFrame:
 
     Requires a "to_dict" method for each object.
     """
-    df_store = pd.DataFrame([x.to_dict() for x in list_objs])
+    df_store = pd.DataFrame([x.to_dict(add_iso_date=True) for x in list_objs])
     df_store = df_store.fillna(value=np.nan)
     df_store = df_store.dropna(axis=1, how='all')
     return df_store

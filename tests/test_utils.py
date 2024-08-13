@@ -6,6 +6,8 @@ import pandas as pd
 import pytest
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.ISODateTime import ISODateTime
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Utils import to_dict_generic
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Utils.invert_nexus_map import invert_nexus_map, attribute_name_to_nexus_keyword, \
@@ -35,8 +37,9 @@ class GenericTest:
             }
         return mapping_dict
 
-    def to_dict(self, include_nones=True):
-        return to_dict_generic.to_dict(self, add_date=True, add_units=True, include_nones=include_nones)
+    def to_dict(self, include_nones=True, add_iso_date=True):
+        return to_dict_generic.to_dict(self, add_date=True, add_units=True, include_nones=include_nones, 
+                                       add_iso_date=add_iso_date)
 
     def __repr__(self):
         return generic_repr(self)
@@ -75,7 +78,8 @@ def test_to_dict():
 def test_obj_to_dataframe():
     # Arrange
     class_inst_1 = GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=UnitSystem.METRIC,
-                               date='01/01/2030')
+                               date='01/01/2030', 
+                               )
     class_inst_2 = GenericTest(attr_1='world', attr_2=2, attr_3=2.2, unit_system=UnitSystem.ENGLISH,
                                date='01/01/2033')
     list_class = [class_inst_1, class_inst_2]
