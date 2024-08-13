@@ -237,7 +237,9 @@ WELLMOD	DEV2	DKH	CON	0
                                 completions=[expected_well_2_completion_1, expected_well_2_completion_2,
                                              expected_well_2_completion_3], unit_system=UnitSystem.ENGLISH,
                                 wellmods=[NexusWellMod(dict(well_name='DEV2', delta_perm_thickness_ovr=0,
-                                                            date=start_date, unit_system=UnitSystem.ENGLISH))],
+                                                            unit_system=UnitSystem.ENGLISH),
+                                                            start_date=start_date, date=start_date,
+                                                            date_format=date_format)],
                                 parent_wells_instance=dummy_wells)
     expected_well_3 = NexusWell(well_name='WEL1234',
                                 completions=[expected_well_3_completion_1, expected_well_3_completion_2],

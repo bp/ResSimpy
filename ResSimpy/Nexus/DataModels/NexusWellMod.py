@@ -1,15 +1,17 @@
 """Data structure for holding wellmod data for the NexusWell class."""
 from dataclasses import dataclass
 
+from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
+from ResSimpy.Units.AttributeMappings.CompletionUnitMapping import CompletionUnits
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Utils.to_dict_generic import to_dict
 
 
 @dataclass(kw_only=True)
-class NexusWellMod:
+class NexusWellMod(DataObjectMixin):
     """Data structure for holding wellmod data for the NexusWell class."""
-    date: str
     well_name: str
     unit_system: UnitSystem | None = None
     partial_perf: float | list[float] | None = None
@@ -27,14 +29,21 @@ class NexusWellMod:
     delta_krg: float | list[float] | None = None
     perm_thickness_mult: float | list[float] | None = None
 
-    def __init__(self, wellmod_dict: dict[str, None | str | float | int | list[float]]) -> None:
+    def __init__(self, wellmod_dict: dict[str, None | str | float | int | list[float]],  date: str,
+                 start_date: str, date_format: DateFormat) -> None:
         """Initialises the NexusWellMod class.
 
         Args:
             wellmod_dict (dict[str, None | str | float | int | list[float]]): Dictionary of wellmod properties.
+            date: str representing the date of the Wellmod
+            date_format: Optional[DateFormatEnum.DateFormat]: The date format to use for the date as an enum.
+            start_date: Optional[str]: The start date of the simulation.
+            unit_system: Optional[UnitSystem]: The unit system to use for the Wellmod.
         """
         for key, prop in wellmod_dict.items():
             self.__setattr__(key, prop)
+
+        super().__init__(date=date, date_format=date_format, start_date=start_date)
 
     def __repr__(self) -> str:
         return generic_repr(self)
@@ -43,10 +52,10 @@ class NexusWellMod:
         return generic_str(self)
 
     def to_dict(self, keys_in_nexus_style: bool = False, add_date: bool = True, add_units: bool = True,
-                include_nones: bool = True) -> dict[str, str | float | int | None]:
+                include_nones: bool = True, units_as_string: bool = True) -> dict[str, str | float | int | None]:
         """Returns a dictionary representation of the wellmod."""
         return to_dict(nexus_object=self, keys_in_nexus_style=keys_in_nexus_style, add_date=add_date,
-                       add_units=add_units, include_nones=include_nones)
+                       add_units=add_units, include_nones=include_nones, units_as_string=units_as_string)
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
@@ -68,3 +77,7 @@ class NexusWellMod:
             'KHMULT': ('perm_thickness_mult', float),
         }
         return keyword_mapping
+
+    @property
+    def units(self) -> CompletionUnits:
+        return CompletionUnits(self.unit_system)
