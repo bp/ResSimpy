@@ -41,7 +41,14 @@ class TestNexusWellMod:
         WELLMOD test_well KHMULT CON 0.4 RADW CON 4.102""",
          {'well_name': 'test_well', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH, 'perm_thickness_mult': 0.4,
           'well_radius': 4.102}, '01/01/2023'),
-    ], ids=['simple_wellmod', 'wellmod_with_different_date', ])
+
+        # Checking date format
+        ("""TIME 01/01/2021
+    TIME 14/01/2023
+    WELLMOD test_well KHMULT CON 0.4 RADW CON 4.102""",
+         {'well_name': 'test_well', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH, 'perm_thickness_mult': 0.4,
+          'well_radius': 4.102}, '14/01/2023'),
+    ], ids=['simple_wellmod', 'wellmod_with_different_date', 'checking date format'])
     def test_load_nexus_wellmod(self, mocker, wellfile_content, expected_wellmod_dict, date):
         # Arrange
         mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
