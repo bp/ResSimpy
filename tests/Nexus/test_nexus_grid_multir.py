@@ -16,8 +16,7 @@ from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
     1	4	0	XYZ	ALL
     
     1	5	0	XYZ	ALL
-    1	6	0	XYZ	ALL
-    """, pd.DataFrame({'REGION_1': [1, 1, 1, 1, 1],
+    1	6	0	XYZ	ALL""", pd.DataFrame({'REGION_1': [1, 1, 1, 1, 1],
                        'REGION_2': [2, 3, 4, 5, 6],
                        'TMULT': [0.1, 0, 0, 0, 0],
                        'DIRECTIONS': ['XYZ', 'XYZ', 'XYZ', 'XYZ', 'XYZ'],

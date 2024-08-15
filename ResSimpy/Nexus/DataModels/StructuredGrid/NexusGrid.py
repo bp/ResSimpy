@@ -608,10 +608,12 @@ class NexusGrid(Grid):
         collect_multir_tables = pd.DataFrame(columns=multir_columns).astype(multir_dtypes)
 
         for idx, line in enumerate(file_content_as_list):
-            if nfo.nexus_token_found(line, valid_end_tokens) or idx == len(file_content_as_list) - 1:
+            if nfo.nexus_token_found(line, valid_end_tokens):
                 end_idx = idx
+            if idx == len(file_content_as_list) - 1:
+                end_idx = idx + 1
 
-            if 0 < start_idx < end_idx:
+            if 0 < start_idx < end_idx - 1:
                 multir_table = nfo.read_table_to_df(file_content_as_list[start_idx:end_idx], noheader=True)
                 multir_table.columns = multir_columns
                 collect_multir_tables = collect_multir_tables.append(multir_table, ignore_index=True)
