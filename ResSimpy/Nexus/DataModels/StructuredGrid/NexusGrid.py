@@ -13,6 +13,7 @@ from ResSimpy.File import File
 from ResSimpy.Grid import Grid, GridArrayDefinition
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGridArrayFunction import NexusGridArrayFunction
+from ResSimpy.Nexus.NexusKeywords.nexus_keywords import VALID_NEXUS_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_FORMAT_KEYWORDS
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -111,6 +112,7 @@ class NexusGrid(Grid):
     __worka7: GridArrayDefinition
     __worka8: GridArrayDefinition
     __worka9: GridArrayDefinition
+    __grid_multir_loaded: bool = False
 
     def __init__(self, grid_nexus_file: Optional[NexusFile] = None, assume_loaded: bool = False) -> None:
         """Initialises the NexusGrid class.
@@ -581,6 +583,53 @@ class NexusGrid(Grid):
             self.load_faults()
         return self.__faults_df
 
+    def load_multir(self) -> None:
+        """Function to read MULTIR in Nexus grid file."""
+        file_content_as_list = self.__grid_file_contents
+        if file_content_as_list is None:
+            raise ValueError('Grid file contents have not been loaded')
+        multir_df = self.load_nexus_multir_table_from_list(file_content_as_list)
+        self.__multir_df = multir_df
+        self.__grid_multir_loaded = True
+
+    @staticmethod
+    def load_nexus_multir_table_from_list(file_content_as_list: list[str]) -> pd.DataFrame:
+        """Function to read MULTIR from a file represented as a list."""
+        start_idx = -1
+        end_idx = -1
+
+        valid_end_tokens = VALID_NEXUS_KEYWORDS
+        skip_tokens = ['X', 'Y', 'Z', 'XYZ', 'ALL']
+        valid_end_tokens = [x for x in valid_end_tokens if x not in skip_tokens]
+
+        multir_columns = ['REGION_1', 'REGION_2', 'TMULT', 'DIRECTIONS', 'CONNECTIONS']
+        multir_dtypes = dict(zip(multir_columns, [int, int, float, str, str]))
+        collect_multir_tables = pd.DataFrame(columns=multir_columns).astype(multir_dtypes)
+
+        for idx, line in enumerate(file_content_as_list):
+            if nfo.nexus_token_found(line, valid_end_tokens) or idx == len(file_content_as_list) - 1:
+                end_idx = idx
+
+            if 0 < start_idx < end_idx:
+                multir_table = nfo.read_table_to_df(file_content_as_list[start_idx:end_idx], noheader=True)
+                multir_table.columns = multir_columns
+                collect_multir_tables = collect_multir_tables.append(multir_table, ignore_index=True)
+                start_idx = -1
+                end_idx = -1
+
+            if nfo.check_token('MULTIR', line):
+                start_idx = idx + 1
+                continue
+        # if no MULTIR table is found, return an empty dataframe
+        return collect_multir_tables
+
+    def get_multir_df(self) -> Optional[pd.DataFrame]:
+        """Returns the MULTIR information as a dataframe."""
+        self.load_grid_properties_if_not_loaded()
+        if not self.__grid_multir_loaded:
+            self.load_multir()
+        return self.__multir_df
+
     @staticmethod
     def __keyword_in_include_file_warning(var_entry_obj: GridArrayDefinition) -> None:
 
@@ -971,3 +1020,7 @@ class NexusGrid(Grid):
     def pv(self) -> GridArrayDefinition:
         self.load_grid_properties_if_not_loaded()
         return self.__pv
+
+    @property
+    def multir(self) -> pd.DataFrame:
+        return self.get_multir_df()
