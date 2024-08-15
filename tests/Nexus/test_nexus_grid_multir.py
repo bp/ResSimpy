@@ -29,7 +29,7 @@ from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
      pd.DataFrame(columns=['REGION_1', 'REGION_2', 'TMULT', 'DIRECTIONS', 'CONNECTIONS']).astype({'REGION_1': 'int',
                                                 'REGION_2': 'int',
                                                 'TMULT': 'float64'})),
-    
+
     # Test with a keyword after MULTIR
     ("""KX CON 
      5.1

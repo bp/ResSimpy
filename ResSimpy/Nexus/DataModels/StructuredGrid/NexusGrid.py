@@ -113,6 +113,7 @@ class NexusGrid(Grid):
     __worka8: GridArrayDefinition
     __worka9: GridArrayDefinition
     __grid_multir_loaded: bool = False
+    __multir_df: Optional[pd.DataFrame] = None
 
     def __init__(self, grid_nexus_file: Optional[NexusFile] = None, assume_loaded: bool = False) -> None:
         """Initialises the NexusGrid class.
