@@ -101,7 +101,7 @@ class AddObjectOperations:
         header_index += index
         headers_original = copy.copy(headers)
 
-        keys_to_skip = ['date', 'unit_system', 'date_format', 'start_date']
+        keys_to_skip = ['date', 'unit_system', 'date_format', 'start_date', 'iso_date']
 
         for key in object_properties:
             if key in keys_to_skip:

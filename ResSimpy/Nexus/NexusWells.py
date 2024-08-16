@@ -312,7 +312,7 @@ class NexusWells(Wells):
                 prev_completion_properties = {k: v for k, v in previous_completion_list[0].to_dict().items() if
                                               v is not None}
                 for key in prev_completion_properties:
-                    if key == 'date':
+                    if key == 'date' or key == 'iso_date':
                         continue
                     header_key = attribute_name_to_nexus_keyword(nexus_mapping, key)
                     if header_key not in headers:
