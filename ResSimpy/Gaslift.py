@@ -15,4 +15,5 @@ class Gaslift(ABC):
 
     @property
     def inputs(self) -> Mapping[int, DynamicProperty]:
+        """Returns mapping of gaslift property inputs."""
         raise NotImplementedError("Implement this in the derived class")

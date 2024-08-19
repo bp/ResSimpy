@@ -23,6 +23,11 @@ class ISODateTime(datetime):
 
     @staticmethod
     def isfloat(no_of_days: str) -> bool:
+        """Checks if provided string can be turned into a float.
+
+        Args:
+            no_of_days(str): Number of days.
+        """
         if no_of_days is not None:
             try:
                 float(no_of_days)

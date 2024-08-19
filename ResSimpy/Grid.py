@@ -87,83 +87,137 @@ class Grid(ABC):
 
     @property
     def range_x(self) -> int | None:
+        """Returns an instance of grid dimensions.
+        Loads grid properties if not loaded.
+        """
         self.load_grid_properties_if_not_loaded()
         return self._range_x
 
     @property
     def range_y(self) -> int | None:
+        """Returns an instance of grid dimensions.
+        Loads grid properties if not loaded.
+        """
         self.load_grid_properties_if_not_loaded()
         return self._range_y
 
     @property
     def range_z(self) -> int | None:
+        """Returns range_z.
+        Loads grid properties if not loaded.
+        """
         self.load_grid_properties_if_not_loaded()
         return self._range_z
 
     @property
     def netgrs(self) -> GridArrayDefinition:
+        """Returns grid netgrs.
+        Loads grid properties if not loaded.
+        """
         self.load_grid_properties_if_not_loaded()
         return self._netgrs
 
     @property
     def porosity(self) -> GridArrayDefinition:
+        """Returns grid porosity.
+        Loads grid properties if not loaded.
+        """
         self.load_grid_properties_if_not_loaded()
         return self._porosity
 
     @property
     def sw(self) -> GridArrayDefinition:
+        """Returns grid sg.
+        Loads grid properties if not loaded.
+        """
         self.load_grid_properties_if_not_loaded()
         return self._sw
 
     @property
     def sg(self) -> GridArrayDefinition:
+        """Returns grid sg.
+        Loads grid properties if not loaded.
+        """
         self.load_grid_properties_if_not_loaded()
         return self._sg
 
     @property
     def pressure(self) -> GridArrayDefinition:
+        """Returns grid pressure.
+        Loads grid properties if not loaded.
+        """
         self.load_grid_properties_if_not_loaded()
         return self._pressure
 
     @property
     def temperature(self) -> GridArrayDefinition:
+        """Returns grid temperature.
+        Loads grid properties if not loaded.
+        """
         self.load_grid_properties_if_not_loaded()
         return self._temperature
 
     @property
     def kx(self) -> GridArrayDefinition:
+        """Returns grid kx.
+        Loads grid properties if not loaded.
+        """
         self.load_grid_properties_if_not_loaded()
         return self._kx
 
     @property
     def ky(self) -> GridArrayDefinition:
+        """Returns grid ky.
+        Loads grid properties if not loaded.
+        """
         self.load_grid_properties_if_not_loaded()
         return self._ky
 
     @property
     def kz(self) -> GridArrayDefinition:
+        """Returns grid kz.
+        loads grid properties if not loaded.
+        """
         self.load_grid_properties_if_not_loaded()
         return self._kz
 
     @property
     def iregion(self) -> dict[str, GridArrayDefinition]:
+        """Returns grid regions as dictionary.
+        loads grid properties if not loaded.
+        """
         self.load_grid_properties_if_not_loaded()
         return self._iregion
 
     @abstractmethod
     def load_structured_grid_file(self, structure_grid_file: File, lazy_loading: bool) -> Grid:
+        """Loads in a structured grid file with all grid properties, and the array functions defined with 'FUNCTION'.
+
+        Args:
+            structure_grid_file(File, lazy_loading: bool):he NexusFile representation of a structured grid file for
+            converting into a structured grid file class.
+            lazy_loading(bool): If set to True, parts of the grid will only be loaded in
+             when requested via properties on the object.
+        """
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
     def load_grid_properties_if_not_loaded(self) -> None:
+        """Loads grid properties if not loaded."""
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
     def to_dict(self) -> dict[str, Optional[int] | GridArrayDefinition]:
+        """Converts object to a dictionary."""
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
     def update_properties_from_dict(self, data: dict[str, int | GridArrayDefinition]) -> None:
+        """Allows you to update properties on the class using the provided dict of values.
+
+        Args:
+            data(dict[str, int | GridArrayDefinition]): Dictionary of values to update on the class.
+        """
         raise NotImplementedError("Implement this in the derived class")
 
     @property

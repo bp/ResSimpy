@@ -64,15 +64,22 @@ class NexusSeparatorMethods(Separator):
 
     @property
     def inputs(self) -> MutableMapping[int, NexusSeparatorMethod]:
+        """Returns mapping of Nexus separator methods."""
         if not self.__properties_loaded:
             self.load_separator_methods()
         return self.__inputs
 
     @property
     def files(self) -> dict[int, NexusFile]:
+        """Returns dictionary of nexus files.
+
+        Args:
+            NexusFile(int): Nexus files where keys are of type int.
+        """
         return self.__files
 
     def load_separator_methods(self) -> None:
+        """Loads and processes the seperator method files."""
         # Read in separator properties from Nexus separator method files
         if self.__files is not None and len(self.__files) > 0:  # Check if separator files exist
             for table_num in self.__files.keys():  # For each separator property method

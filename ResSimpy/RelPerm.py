@@ -15,4 +15,5 @@ class RelPerm(ABC):
 
     @property
     def inputs(self) -> Mapping[int, DynamicProperty]:
+        """Returns mapping of dynamic property instance as an int."""
         raise NotImplementedError("Implement this in the derived class")

@@ -70,10 +70,12 @@ class OpenGoSimSimulator(Simulator):
 
     @property
     def simulation_type(self) -> SimulationType:
+        """Returns an instance of OpenGo simulation type."""
         return self.__simulation_type
 
     @property
     def final_date(self) -> Optional[str]:
+        """Returns"""
         return self.__final_date
 
     def __repr__(self) -> str:
@@ -215,10 +217,21 @@ WELLS
         self._wells._wells_loaded = True
 
     @staticmethod
+    @staticmethod
     def get_fluid_type(surface_file_content: list[str]) -> str:
+        """Returns fluid type for single model from surface file.
+
+        Args:
+            surface_file_content(list[str]): List of strings with a new line per entry from surface file.
+        """
         raise NotImplementedError("Not implemented for OGS yet")
 
     def set_output_path(self, path: str) -> None:
+        """Initialises the output to the declares output location (path).
+
+        Args:
+            path(str): File location.
+        """
         raise NotImplementedError("Not implemented for OGS yet")
 
     def get_date_format(self) -> str:
@@ -229,7 +242,7 @@ WELLS
         """Writes out a new version of the model to the location supplied.
 
         Args:
-        new_location (str): Path to write the contents of the model to.
-        new_model_name (str): The name for the model that will be created.
+            new_location (str): Path to write the contents of the model to.
+            new_model_name (str): The name for the model that will be created.
         """
         raise NotImplementedError("Not implemented for OGS yet")

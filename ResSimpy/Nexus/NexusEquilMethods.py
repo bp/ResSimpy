@@ -60,15 +60,23 @@ class NexusEquilMethods(Equilibration):
 
     @property
     def inputs(self) -> MutableMapping[int, NexusEquilMethod]:
+        """Returns mapping of 'NexusEquilMethod' where keys are of type int.
+        If properties are not loaded, it will load them.
+        """
         if not self.__properties_loaded:
             self.load_equil_methods()
         return self.__inputs
 
     @property
     def files(self) -> dict[int, NexusFile]:
+        """Returns dictionary of Nexus files where keys are of type int."""
         return self.__files
 
     def load_equil_methods(self) -> None:
+        """Loads a collection of equilibration method files.
+        This method checks if equil files are available and reads their properties into
+        'NexusEquilmethod' objects.
+        """
         # Read in equil properties from Nexus equil method files
         if self.__files is not None and len(self.__files) > 0:  # Check if equil files exist
             for table_num in self.__files.keys():  # For each equil property method

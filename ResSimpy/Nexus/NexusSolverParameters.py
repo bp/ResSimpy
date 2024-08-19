@@ -34,6 +34,11 @@ class NexusSolverParameters(SolverParameters):
 
     @property
     def solver_parameters(self) -> Sequence[SolverParameter]:
+        """Returns a list of solver parameters (usually of type list).
+
+        If solver parameters are not loaded 'self.load' will attempt to load them.
+        If loading fails it will return a value error.
+        """
         if self.__solver_parameters is None:
             self.load()
         if self.__solver_parameters is None:
@@ -42,9 +47,15 @@ class NexusSolverParameters(SolverParameters):
 
     @solver_parameters.setter
     def solver_parameters(self, value: list[NexusSolverParameter]) -> None:
+        """Sets solver parameters for this instance and returns none.
+
+        Args:
+            value(list[NexusSolverParameter]): list of solver parameters.
+        """
         self.__solver_parameters = value
 
     def load(self) -> None:
+        """Loads data from run control file and sets start date from the model."""
         if self.__model.model_files.runcontrol_file is None:
             raise ValueError('No runcontrol file found when trying to load solver parameters.')
         self.file_content = self.__model.model_files.runcontrol_file.get_flat_list_str_file

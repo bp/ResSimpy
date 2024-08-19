@@ -61,15 +61,22 @@ class NexusRelPermMethods(RelPerm):
 
     @property
     def inputs(self) -> MutableMapping[int, NexusRelPermMethod]:
+        """Returns collection of Nexus relperm property inputs as dictionary.
+
+        Args:
+            NexusRelPermMethod(int): Nexus relative permeability and capillary pressure properties.
+        """
         if not self.__properties_loaded:
             self.load_relperm_methods()
         return self.__inputs
 
     @property
     def files(self) -> dict[int, NexusFile]:
+        """Returns dictionary of Nexus Files."""
         return self.__files
 
     def load_relperm_methods(self) -> None:
+        """Loads a collection of relperm Nexus files."""
         # Read in relperm properties from Nexus relperm method files
         if self.__files is not None and len(self.__files) > 0:  # Check if relperm files exist
             for table_num in self.__files.keys():  # For each relperm property method

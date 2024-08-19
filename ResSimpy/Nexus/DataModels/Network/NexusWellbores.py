@@ -68,12 +68,21 @@ class NexusWellbores(Wellbores):
         return next(to_return, None)
 
     def get_df(self) -> pd.DataFrame:
+        """Returns wellbores data as a dataframe."""
         return obj_to_dataframe(self._wellbores)
 
     def get_overview(self) -> str:
+        """Returns overview of the wellbores."""
         raise NotImplementedError('To be implemented')
 
     def load(self, surface_file: File, start_date: str, default_units: UnitSystem) -> None:
+        """Loads wellbores data from surface file.
+
+        Args:
+            surface_file(): Nexus representation of the surface file.
+            start_date(): start date of the run.
+            default_units(): default untis used if no units are found.
+        """
         new_wellbores, _ = collect_all_tables_to_objects(surface_file, {'WELLBORE': NexusWellbore},
                                                          start_date=start_date,
                                                          default_units=default_units,
@@ -132,8 +141,10 @@ class NexusWellbores(Wellbores):
 
     @property
     def table_header(self) -> str:
+        """Returns start of the table in the wellbores file."""
         return 'WELLBORE'
 
     @property
     def table_footer(self) -> str:
+        """Returns end of the table in the wellbores file."""
         return 'END' + self.table_header

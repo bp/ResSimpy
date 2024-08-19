@@ -29,6 +29,7 @@ class Network(ABC):
 
     @abstractmethod
     def load(self) -> None:
+        """Loads Network data."""
         raise NotImplementedError("Implement this in the derived class")
 
     def get_load_status(self) -> bool:

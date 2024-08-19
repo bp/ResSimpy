@@ -246,20 +246,31 @@ class NexusSimulator(Simulator):
         self.model_files.surface_files[1].location = self.model_files.surface_files[1].location.replace('temp/', '', 1)
 
     def get_simulation_status(self, from_startup: bool = False) -> Optional[str]:
+        """Returns run status from the latest simulation run.
+
+        Args:
+            from_startup(bool = False): Searches the same directory as the original_fcs_file_path if true.
+            Otherwise searches the destination folder path, failing this then searches the original_fcs_file_path
+            if false. Defaults to false.
+        """
         return self.logging.get_simulation_status(from_startup)
 
     def get_simulation_progress(self) -> float:
+        """Returns simulation progress from log files."""
         return self.logging.get_simulation_progress()
 
     def get_users_linked_with_files(self) -> Optional[list[tuple[Optional[str], Optional[str], Optional[datetime]]]]:
+        """Returns list of users linked with each model file."""
         return self.model_files.files_info
 
     @property
     def model_files(self) -> FcsNexusFile:
+        """Returns model files associated with instance of 'FcsNexusfile'."""
         return self._model_files
 
     @property
     def network(self) -> NexusNetwork:
+        """Returns an instance of Nexus network class."""
         return self._network
 
     @property
@@ -284,14 +295,17 @@ class NexusSimulator(Simulator):
 
     @property
     def write_times(self) -> bool:
+        """Sets whether the runcontrol file will expand the include files with time cards in. Defaults to True."""
         return self.__write_times
 
     @property
     def original_fcs_file_path(self) -> str:
+        """Returns path to the original fcs file path supplied."""
         return self.__original_fcs_file_path
 
     @property
     def root_name(self) -> Optional[str]:
+        """Returns root file name of the fcs."""
         return self.__root_name
 
     @root_name.setter
@@ -485,6 +499,7 @@ class NexusSimulator(Simulator):
 
     @property
     def destination(self) -> Optional[str]:
+        """Returns the destination to move the model to (either as a string or none)."""
         return self.__destination
 
     def set_output_path(self, path: str) -> None:
@@ -824,8 +839,10 @@ class NexusSimulator(Simulator):
 
     @property
     def sim_controls(self) -> SimControls:
+        """Returns an instance of Sim controls class."""
         return self._sim_controls
 
     @property
     def options(self) -> NexusOptions | None:
+        """Returns an instance of Nexus options class."""
         return self._options

@@ -59,10 +59,12 @@ class NexusWells(Wells):
 
     @property
     def start_date(self) -> str:
+        """Returns start date of the model."""
         return self.__model.start_date
 
     @property
     def date_format(self) -> DateFormat:
+        """Returns date format of the loads wells."""
         # If we haven't loaded in the wells file, load it in case date format is specified there.
         if not self._wells_loaded:
             self._load()
@@ -70,13 +72,16 @@ class NexusWells(Wells):
 
     @property
     def table_header(self) -> str:
+        """Returns string representing the start of the table in the wellspec file."""
         return 'WELLSPEC'
 
     @property
     def table_footer(self) -> str:
+        """Returns string representing the end of the table in the file."""
         return ''
 
     def get_all(self) -> Sequence[NexusWell]:
+        """Returns list of all loaded wells in the Nexus file."""
         if not self._wells_loaded:
             self._load()
         return self._wells
@@ -91,6 +96,7 @@ class NexusWells(Wells):
         return next(wells_to_return, None)
 
     def get_df(self) -> pd.DataFrame:
+        """Returns data frame representing all processed completions data in the Nexus file."""
         # loop through wells and completions to output a table
         if not self._wells_loaded:
             self._load()
@@ -331,6 +337,13 @@ class NexusWells(Wells):
     def remove_completion(self, well_name: str,
                           completion_properties: Optional[dict[str, None | float | int | str]] = None,
                           completion_id: Optional[UUID] = None) -> None:
+        """Removes well completion from wellspec file.
+
+        Args:
+            well_name(str): Name of the well
+            completion_properties(Optional[dict[str, None | float | int | str]]): The completion properties.
+            completion_id(Optional[UUID) = None): Completion unique identifier or ID.
+        """
 
         well = self.get(well_name)
         if well is None:

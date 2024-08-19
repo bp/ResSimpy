@@ -60,12 +60,21 @@ class NexusWellheads(Wellheads):
         return next(to_return, None)
 
     def get_df(self) -> pd.DataFrame:
+        """Returns wellhead data as a dataframe."""
         return obj_to_dataframe(self._wellheads)
 
     def get_overview(self) -> str:
+        """Returns overview of the wellhead."""
         raise NotImplementedError('To be implemented')
 
     def load(self, surface_file: File, start_date: str, default_units: UnitSystem) -> None:
+        """Loads wellhead data from surface file.
+
+        Args:
+            surface_file(file): Nexus file representation of the surface file.
+            start_date(str): start date of the run.
+            default_units(UnitSystem): default units used if no units are found.
+        """
         new_wellheads, _ = collect_all_tables_to_objects(surface_file, {'WELLHEAD': NexusWellhead},
                                                          start_date=start_date,
                                                          default_units=default_units,

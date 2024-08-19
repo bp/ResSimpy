@@ -71,6 +71,7 @@ class SimControls:
 
     @property
     def date_format_string(self) -> str:
+        """Returns how dates should be formatted in the run control file as a string."""
         return self.__date_format_string
 
     @date_format_string.setter
@@ -79,6 +80,7 @@ class SimControls:
 
     @property
     def times(self) -> list[str]:
+        """Returns list of times, if value is not provided it will return none."""
         return self.__times if self.__times is not None else []
 
     @staticmethod

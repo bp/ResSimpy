@@ -225,6 +225,9 @@ class NexusGrid(Grid):
         self._grid_properties_loaded = True
 
     def to_dict(self) -> dict[str, Optional[int] | GridArrayDefinition]:
+        """Returns a dictionary representation of grid array.
+        Checks if grid properties are not loaded and loads them.
+        """
         self.load_grid_properties_if_not_loaded()
 
         original_dict = self.__dict__
@@ -240,6 +243,7 @@ class NexusGrid(Grid):
         return new_dict
 
     def load_grid_properties_if_not_loaded(self) -> None:
+        """Checks if grid properties are not loaded and loads them."""
         def move_next_value(next_line: str) -> tuple[str, str]:
             """Finds the next value and then strips out the value from the line.
 
@@ -521,6 +525,7 @@ class NexusGrid(Grid):
             text_file.write(new_file_str)
 
     def load_array_functions(self) -> None:
+        """Loads collection of array function defined in the nexus grid file."""
         # for function arrays we need the expanded file contents without includes
         if self.__grid_nexus_file is None or self.__grid_nexus_file.get_flat_list_str_file is None:
             raise ValueError("Cannot load array functions as grid file cannot not found")
@@ -622,6 +627,9 @@ class NexusGrid(Grid):
 
     @property
     def corp(self) -> GridArrayDefinition:
+        """Returns corp grid property.
+        Ensures grid properties are loaded and returns value of 'corp'.
+        """
         self.load_grid_properties_if_not_loaded()
         NexusGrid.__keyword_in_include_file_warning(self.__corp)
 
@@ -629,345 +637,553 @@ class NexusGrid(Grid):
 
     @property
     def iequil(self) -> GridArrayDefinition:
+        """Returns iequil grid property.
+        Ensures grid properties are loaded and returns value of 'iequil'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__iequil
 
     @property
     def ipvt(self) -> GridArrayDefinition:
+        """Returns ipvt grid property.
+        Ensures grid properties are loaded and returns value of 'ipvt'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__ipvt
 
     @property
     def iwater(self) -> GridArrayDefinition:
+        """Returns iwater grid property.
+        Ensures grid properties are loaded and returns value of 'iwater'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__iwater
 
     @property
     def irelpm(self) -> GridArrayDefinition:
+        """Returns irelpm grid property.
+        Ensures grid properties are loaded and returns value of 'irelpm'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__irelpm
 
     @property
     def irock(self) -> GridArrayDefinition:
+        """Returns irock grid property.
+        Ensures grid properties are loaded and returns value of 'irock'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__irock
 
     @property
     def itran(self) -> GridArrayDefinition:
+        """Returns itran grid property.
+        Ensures grid properties are loaded and returns value of 'itran'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__itran
 
     @property
     def iregion(self) -> dict[str, GridArrayDefinition]:
+        """Returns iregion grid property.
+        Ensures grid properties are loaded and returns value of 'iregion'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self._iregion
 
     @property
     def livecell(self) -> GridArrayDefinition:
+        """Returns livecell grid property.
+        Ensures grid properties are loaded and returns value of 'livecell'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__livecell
 
     @property
     def pvmult(self) -> GridArrayDefinition:
+        """Returns pvmult grid property.
+        Ensures grid properties are loaded and returns value of 'pv_mult'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__pvmult
 
     @property
     def worka1(self) -> GridArrayDefinition:
+        """Returns worka1 grid property.
+        Ensures grid properties are loaded and returns value of 'worka1'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__worka1
 
     @property
     def worka2(self) -> GridArrayDefinition:
+        """Returns worka2 grid property.
+        Ensures grid properties are loaded and returns value of 'worka2'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__worka2
 
     @property
     def worka3(self) -> GridArrayDefinition:
+        """Returns worka3 grid property.
+        Ensures grid properties are loaded and returns value of 'worka3'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__worka3
 
     @property
     def worka4(self) -> GridArrayDefinition:
+        """Returns worka4 grid property.
+        Ensures grid properties are loaded and returns value of 'worka4'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__worka4
 
     @property
     def worka5(self) -> GridArrayDefinition:
+        """Returns worka5 grid property.
+        Ensures grid properties are loaded and returns value of 'worka5'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__worka5
 
     @property
     def worka6(self) -> GridArrayDefinition:
+        """Returns worka6 grid property.
+        Ensures grid properties are loaded and returns value of 'worka6'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__worka6
 
     @property
     def worka7(self) -> GridArrayDefinition:
+        """Returns worka7 grid property.
+        Ensures grid properties are loaded and returns value of 'worka7'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__worka7
 
     @property
     def worka8(self) -> GridArrayDefinition:
+        """Returns worka8 grid property.
+        Ensures grid properties are loaded and returns value of 'worka8'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__worka8
 
     @property
     def worka9(self) -> GridArrayDefinition:
+        """Returns worka9 grid property.
+        Ensures grid properties are loaded and returns value of 'worka9'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__worka9
 
     @property
     def dx(self) -> GridArrayDefinition:
+        """Returns dx grid property.
+        Ensures grid properties are loaded and returns value of 'dx'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__dx
 
     @property
     def dy(self) -> GridArrayDefinition:
+        """Returns dy grid property.
+        Ensures grid properties are loaded and returns value of 'dy'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__dy
 
     @property
     def dz(self) -> GridArrayDefinition:
+        """Returns dz grid property.
+        Ensures grid properties are loaded and returns value of 'dz'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__dz
 
     @property
     def depth(self) -> GridArrayDefinition:
+        """Returns depth grid property.
+        Ensures grid properties are loaded and returns value of 'depth'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__depth
 
     @property
     def mdepth(self) -> GridArrayDefinition:
+        """Returns mdepth grid property.
+        Ensures grid properties are loaded and returns value of 'mdepth'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__mdepth
 
     @property
     def dznet(self) -> GridArrayDefinition:
+        """Returns dznet grid property.
+        Ensures grid properties are loaded and returns value of 'dznet'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__dznet
 
     @property
     def compr(self) -> GridArrayDefinition:
+        """Returns compr grid property.
+        Ensures grid properties are loaded and returns value of 'compr'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__compr
 
     @property
     def icoars(self) -> GridArrayDefinition:
+        """Returns icoars grid property.
+        Ensures grid properties are loaded and returns value of 'icoars'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__icoars
 
     @property
     def ialphaf(self) -> GridArrayDefinition:
+        """Returns ialphaf grid property.
+        Ensures grid properties are loaded and returns value of 'ialphaf'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__ialphaf
 
     @property
     def ipolymer(self) -> GridArrayDefinition:
+        """Returns ipolymer grid property.
+        Ensures grid properties are loaded and returns value of 'ipolymer'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__ipolymer
 
     @property
     def iadsorption(self) -> GridArrayDefinition:
+        """Returns iadsorption grid property.
+        Ensures grid properties are loaded and returns value of 'iadsorption'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__iadsorption
 
     @property
     def itracer(self) -> GridArrayDefinition:
+        """Returns itracer grid property.
+        Ensures grid properties are loaded and returns value of 'itracer'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__itracer
 
     @property
     def igrid(self) -> GridArrayDefinition:
+        """Returns igrid grid property.
+        Ensures grid properties are loaded and returns value of 'igrid'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__igrid
 
     @property
     def isector(self) -> GridArrayDefinition:
+        """Returns isector grid property.
+        Ensures grid properties are loaded and returns value of 'isector'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__isector
 
     @property
     def swl(self) -> GridArrayDefinition:
+        """Returns swl grid property.
+        Ensures grid properties are loaded and returns value of 'swl'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__swl
 
     @property
     def swr(self) -> GridArrayDefinition:
+        """Returns swr grid property.
+        Ensures grid properties are loaded and returns value of 'swr'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__swr
 
+
     @property
     def swu(self) -> GridArrayDefinition:
+        """Returns swu grid property.
+        Ensures grid properties are loaded and returns value of 'swu'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__swu
 
     @property
     def sgl(self) -> GridArrayDefinition:
+        """Returns sgl grid property.
+        Ensures grid properties are loaded and returns value of 'sgl'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__sgl
 
     @property
     def sgr(self) -> GridArrayDefinition:
+        """Returns sgr grid property.
+        Ensures grid properties are loaded and returns value of 'sgr'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__sgr
 
     @property
     def sgu(self) -> GridArrayDefinition:
+        """Returns sgu grid property.
+        Ensures grid properties are loaded and returns value of 'sgu'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__sgu
 
     @property
     def swro(self) -> GridArrayDefinition:
+        """Returns swro grid property.
+        Ensures grid properties are loaded and returns value of 'swro'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__swro
 
     @property
     def swro_ls(self) -> GridArrayDefinition:
+        """Returns swro_ls grid property.
+        Ensures grid properties are loaded and returns value of 'swro_ls'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__swro_ls
 
     @property
     def sgro(self) -> GridArrayDefinition:
+        """Returns sgro grid property.
+        Ensures grid properties are loaded and returns value of 'sgro'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__sgro
 
     @property
     def sgrw(self) -> GridArrayDefinition:
+        """Returns sgrw grid property.
+        Ensures grid properties are loaded and returns value of 'sgrw'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__sgrw
 
     @property
     def krw_swro(self) -> GridArrayDefinition:
+        """Returns krw_swro grid property.
+        Ensures grid properties are loaded and returns value of 'krw_swro'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__krw_swro
 
     @property
     def krws_ls(self) -> GridArrayDefinition:
+        """Returns krws_ls grid property.
+        Ensures grid properties are loaded and returns value of 'krws_ls'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__krws_ls
 
     @property
     def krw_swu(self) -> GridArrayDefinition:
+        """Returns krw_swu grid property.
+        Ensures grid properties are loaded and returns value of 'krw_swu'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__krw_swu
 
     @property
     def krg_sgro(self) -> GridArrayDefinition:
+        """Returns kro_sgro grid property.
+        Ensures grid properties are loaded and returns value of 'krg_sgro'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__krg_sgro
 
     @property
     def krg_sgu(self) -> GridArrayDefinition:
+        """Returns krg_sgu grid property.
+        Ensures grid properties are loaded and returns value of 'krg_sgu'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__krg_sgu
 
     @property
     def krg_sgrw(self) -> GridArrayDefinition:
+        """Returns kro_sgrw grid property.
+        Ensures grid properties are loaded and returns value of 'krg_sgrw'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__krg_sgrw
 
     @property
     def kro_swl(self) -> GridArrayDefinition:
+        """Returns kro_swl grid property.
+        Ensures grid properties are loaded and returns value of 'kro_swl'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__kro_swl
 
     @property
     def kro_swr(self) -> GridArrayDefinition:
+        """Returns kro_swr grid property.
+        Ensures grid properties are loaded and returns value of 'kro_swr'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__kro_swr
 
     @property
     def kro_sgl(self) -> GridArrayDefinition:
+        """Returns kro_sgl grid property.
+        Ensures grid properties are loaded and returns value of 'kro_sgl'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__kro_sgl
 
     @property
     def kro_sgr(self) -> GridArrayDefinition:
+        """Returns kro_sgr grid property.
+        Ensures grid properties are loaded and returns value of 'kro_sgr'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__kro_sgr
 
     @property
     def krw_sgl(self) -> GridArrayDefinition:
+        """Returns krw_sgl grid property.
+        Ensures grid properties are loaded and returns value of 'krw_sgl'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__krw_sgl
 
     @property
     def krw_sgr(self) -> GridArrayDefinition:
+        """Returns krw_sgr grid property.
+        Ensures grid properties are loaded and returns value of 'krw_sgr'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__krw_sgr
 
     @property
     def sgtr(self) -> GridArrayDefinition:
+        """"Returns sgtr grid property.
+        Ensures gir properties are loaded and returns value of 'sgtr'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__sgtr
 
     @property
     def sotr(self) -> GridArrayDefinition:
+        """"Returns sotr grid property.
+        Ensures grid properties are loaded and returns value of 'sotr'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__sotr
 
     @property
     def swlpc(self) -> GridArrayDefinition:
+        """Returns swlpc grid property.
+        Ensures grid properties are loaded and returns value of 'swlpc'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__swlpc
 
     @property
     def sglpc(self) -> GridArrayDefinition:
+        """Returns sglpc property.
+        Ensures grid properties are loaded and returns value of 'sglpc'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__sglpc
 
     @property
     def pcw_swl(self) -> GridArrayDefinition:
+        """Returns pcw_swl property.
+        Ensures grid properties are loaded and returns value of 'pcw_swl'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__pcw_swl
 
     @property
     def pcg_sgu(self) -> GridArrayDefinition:
+        """Returns pcg_sgu grid proprety.
+        Ensures grid properties are loaded and returns value of 'pcg_sgu'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__pcg_sgu
 
     @property
     def chloride(self) -> GridArrayDefinition:
+        """Returns chloride grid property.
+        Ensures grid properties are loaded and returns value of 'chloride'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__chloride
 
     @property
     def calcium(self) -> GridArrayDefinition:
+        """Returns calcium grid property.
+        Ensures grid properties are loaded and returns value of 'calcium'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__calcium
 
     @property
     def salinity(self) -> GridArrayDefinition:
+        """Returns grid salinity.
+        Ensures grid properties are loaded and returns the value 'salinity'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__salinity
 
     @property
     def api(self) -> GridArrayDefinition:
+        """Returns grid api.
+        Ensures grid properties are loaded and returns value of 'api'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__api
 
     @property
     def tmx(self) -> GridArrayDefinition:
+        """Returns gird tmx.
+        Ensures grid properties are loaded and returns value of 'tmx'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__tmx
 
     @property
     def tmy(self) -> GridArrayDefinition:
+        """Returns grid tmy.
+        Ensures grid properties are loaded and returns value of 'tmy'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__tmy
 
     @property
     def tmz(self) -> GridArrayDefinition:
+        """Returns grid tmz.
+        Ensures gird properties are loaded and returns value if 'tmz'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__tmz
 
     @property
     def multbv(self) -> GridArrayDefinition:
+        """Returns gird multvb.
+        Ensures grid properties are loaded and returns value of 'multvb'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__multbv
 
     @property
     def pv(self) -> GridArrayDefinition:
+        """Returns grid pv.
+        Ensures grid properties are loaded and returns value of 'pv'.
+        """
         self.load_grid_properties_if_not_loaded()
         return self.__pv

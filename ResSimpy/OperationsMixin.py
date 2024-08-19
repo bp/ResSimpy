@@ -29,49 +29,89 @@ class NetworkOperationsMixIn(ABC):
 
     @abstractmethod
     def get_all(self) -> Sequence[Any]:
+        """Returns list of network operations."""
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
     def get_by_name(self, name: str) -> Optional[Any]:
+        """Returns network operation with provided name.
+
+        Args:
+            name(str): Name of network operation.
+        """
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
     def get_df(self) -> pd.DataFrame:
+        """Creates dataframe representing network operations in a file."""
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
     def get_overview(self) -> str:
+        """Returns an overview of the network operations."""
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
     def load(self, file: File, start_date: str, default_units: UnitSystem) -> None:
+        """Loads file path using the default units.
+
+        Args:
+            file(File): Loads file path
+            start_date(str): Starting date of the run.
+            default_units(UnitSystem): Units used if not specified by the file.
+        """
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
     def _add_to_memory(self, additional_objs: Optional[list[Any]]) -> None:
+        """Adds an instance of objects to the current list.
+
+        Args:
+            additional_objs(Optional[list[Any]]): New objects to be added.
+        """
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
     def remove(self, obj_to_remove: UUID | dict[str, None | str | float | int]) -> None:
+        """Removes the UUID from the network.
+
+        Args:
+            obj_to_remove(UUID | dict[str, None | str | float | int]): UUID of the network to be removed
+            from the dictionary.
+        """
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
     def add(self, obj_to_add: dict[str, None | str | float | int]) -> None:
+        """Adding a connection to a network taking a dictionary with properties for the new connection.
+
+        Args:
+            obj_to_add(dict[str, None | str | float | int]): dictionary taking all the new properties for the network.
+        """
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
     def modify(self, obj_to_modify: dict[str, None | str | float | int],
                new_properties: dict[str, None | str | float | int]) -> None:
+        """Modify existing object based on a matching dictionary of properties.
+
+        Args:
+            obj_to_modify(dict[str, None | str | float | int]): dictionary containing attributes to match
+            in the existing object.
+            new_properties(dict[str, None | str | float | int]): properties to switch to in the new object.
+        """
         raise NotImplementedError("Implement this in the derived class")
 
     @property
     @abstractmethod
     def table_header(self) -> str:
+        """Returns"""
         raise NotImplementedError("Implement this in the derived class")
 
     @property
     @abstractmethod
     def table_footer(self) -> str:
+        """Returns table footer as a string."""
         raise NotImplementedError("Implement this in the derived class")
 
     @property

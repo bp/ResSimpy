@@ -60,15 +60,23 @@ class NexusAquiferMethods(Aquifer):
 
     @property
     def inputs(self) -> MutableMapping[int, NexusAquiferMethod]:
+        """Returns mapping of aquifer where keys are of type int.
+        If properties are not loaded, it will load them.
+        """
         if not self.__properties_loaded:
             self.load_aquifer_methods()
         return self.__inputs
 
     @property
     def files(self) -> dict[int, NexusFile]:
+        """Returns dictionary of Nexus files where keys are of type int."""
         return self.__files
 
     def load_aquifer_methods(self) -> None:
+        """Loads a collection of aquifer method files.
+        This method checks if aquifer files are available and read their properties into
+        the 'NexusAquifer' object.
+        """
         # Read in aquifer properties from Nexus aquifer method files
         if self.__files is not None and len(self.__files) > 0:  # Check if aquifer files exist
             for table_num in self.__files.keys():  # For each aquifer property method
