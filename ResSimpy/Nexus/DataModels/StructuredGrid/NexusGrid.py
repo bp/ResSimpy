@@ -244,6 +244,7 @@ class NexusGrid(Grid):
 
     def load_grid_properties_if_not_loaded(self) -> None:
         """Checks if grid properties are not loaded and loads them."""
+
         def move_next_value(next_line: str) -> tuple[str, str]:
             """Finds the next value and then strips out the value from the line.
 
@@ -906,7 +907,6 @@ class NexusGrid(Grid):
         """
         self.load_grid_properties_if_not_loaded()
         return self.__swr
-
 
     @property
     def swu(self) -> GridArrayDefinition:
