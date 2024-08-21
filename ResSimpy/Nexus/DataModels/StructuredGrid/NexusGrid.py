@@ -603,7 +603,7 @@ class NexusGrid(Grid):
         skip_tokens = ['X', 'Y', 'Z', 'XYZ', 'ALL']
         valid_end_tokens = [x for x in valid_end_tokens if x not in skip_tokens]
 
-        multir_columns = ['REGION_1', 'REGION_2', 'TMULT', 'DIRECTIONS', 'CONNECTIONS']
+        multir_columns = ['region_1', 'region_2', 'tmult', 'directions', 'connections']
         multir_dtypes = dict(zip(multir_columns, [int, int, float, str, str]))
         collect_multir_tables = pd.DataFrame(columns=multir_columns).astype(multir_dtypes)
 
