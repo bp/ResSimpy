@@ -414,7 +414,8 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
                           preserve_previous_object_attributes: bool = False,
                           well_names: Optional[list[str]] = None,
                           welllists: Optional[list[NexusWellList]] = None,
-                          well_connections: Optional[list[NexusWellConnection]] = None) -> list[tuple[Any, int]]:
+                          well_connections: Optional[list[NexusWellConnection]] = None,
+                          start_date: Optional[str] = None) -> list[tuple[Any, int]]:
     """Loads a table row by row to an object provided in the row_object.
 
     Args:
@@ -434,6 +435,7 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
         well_names (Optional[str]): A list of all the network object names.
         welllists (Optional[list[WellList]]): A list of all the WELLLISTs loaded in so far.
         well_connections (Optional[list[NexusWellConnection]]): A list of all the Well Connections loaded in so far.
+        start_date (Optional[str]): The start date of the simulation.
 
     Returns:
         list[obj]: list of tuples containing instances of the class provided for the row_object,
@@ -496,7 +498,7 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
 
                 new_object = NexusWellConnection(properties_dict=keyword_store, date=current_date,
                                                  unit_system=unit_system, date_format=date_format,
-                                                 is_activated=is_activated)
+                                                 is_activated=is_activated, start_date=start_date)
 
             elif preserve_previous_object_attributes:
                 all_matching_existing_constraints = constraint_obj_dict.get(name, None)
@@ -512,13 +514,14 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
                         continue
                     else:
                         new_object = row_object(properties_dict=keyword_store, date=current_date,
-                                                unit_system=unit_system, date_format=date_format)
+                                                unit_system=unit_system, date_format=date_format,
+                                                start_date=start_date)
                 else:
                     new_object = row_object(properties_dict=keyword_store, date=current_date, unit_system=unit_system,
-                                            date_format=date_format)
+                                            date_format=date_format, start_date=start_date)
             else:
                 new_object = row_object(properties_dict=keyword_store, date=current_date, unit_system=unit_system,
-                                        date_format=date_format)
+                                        date_format=date_format, start_date=start_date)
 
             return_objects.append((new_object, index))
     return return_objects

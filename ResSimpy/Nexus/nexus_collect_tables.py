@@ -162,7 +162,8 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                                      constraint_obj_dict=nexus_constraints,
                                                      preserve_previous_object_attributes=True,
                                                      date_format=date_format,
-                                                     welllists=well_lists)
+                                                     welllists=well_lists,
+                                                     start_date=start_date)
 
             elif token_found in [NexusWellLists.table_header(), NexusConLists.table_header()]:
                 list_objects = load_table_to_lists(file_as_list=file_as_list[table_start - 1:table_end],
@@ -195,7 +196,8 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                                      property_map=property_map,
                                                      current_date=current_date,
                                                      unit_system=unit_system, date_format=date_format,
-                                                     well_names=well_names, well_connections=well_connections)
+                                                     well_names=well_names, well_connections=well_connections,
+                                                     start_date=start_date)
 
             # store objects found into right dictionary
             list_of_token_obj = nexus_object_results[token_found]

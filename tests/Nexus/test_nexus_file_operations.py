@@ -166,6 +166,7 @@ value 3
     # Assert
     assert result == expected_result
 
+
 def mock_includes(mocker, filename, include_contents0, include_contents1):
     # yes this should just index a tuple
     if "0" in filename:
@@ -413,6 +414,7 @@ def test_get_next_value_multiple_lines(file, expected_result):
     # Assert
     assert result == expected_result
 
+
 @pytest.mark.parametrize("file, expected_result", [
     (['\t #comment', '1'], '1'),
     (['#comment', '1'], '1'),
@@ -425,6 +427,7 @@ def test_get_next_value_different_comment_char(file, expected_result):
     # Assert
     assert result == expected_result
 
+
 @pytest.mark.parametrize("file, single_c_acts_as_comment, expected_result", [
     (['C Comment line ', '1'], True, '1'),
     (['C Comment line ', '1'], False, 'C'),
@@ -436,6 +439,7 @@ def test_get_next_value_single_c_acts_as_comment(file, single_c_acts_as_comment,
     result = nfo.get_next_value(0, file, single_c_acts_as_comment=single_c_acts_as_comment)
     # Assert
     assert result == expected_result
+
 
 @pytest.mark.parametrize("line, ignore, expected_result", [
     ('test 1', [], 'test'),
@@ -450,7 +454,7 @@ def test_get_next_value_single_c_acts_as_comment(file, single_c_acts_as_comment,
     ('KX include includes/folder/file.dat another', ['kx', 'include'], 'includes/folder/file.dat'),
     ('exclude excludepartoflongertext 1', ['exclude'], 'excludepartoflongertext'),
 ])
-def test_get_next_value_ignore(line:str,  ignore:list[str], expected_result: str):
+def test_get_next_value_ignore(line: str, ignore: list[str], expected_result: str):
     # Act
     result = nfo.get_next_value(0, [line], ignore_values=ignore)
     # Assert
@@ -500,7 +504,7 @@ def test_get_previous_value_single_line_specify_search_before(line, search_befor
      '12_3'),
     (['1', '2 ', ' 3', '!4', ' START_TEXT 5'], 'START_TEXT', '3'),
     (['1', '2 ', ' 3', '!4', '1 START_TEXT 5'], 'START_TEXT', '1'),
-    ([' Token INCLUDE /path VALUE HIJK',  '\n' 'INCLUDE /file_name'], 'INCLUDE', 'HIJK'),
+    ([' Token INCLUDE /path VALUE HIJK', '\n' 'INCLUDE /file_name'], 'INCLUDE', 'HIJK'),
 ])
 def test_get_previous_value_multiple_lines_specify_search_before(file, search_before, expected_result):
     # Act
@@ -751,7 +755,21 @@ ENDWELLS
      {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'x_pos': None, 'y_pos': None, 'number': 2,
       'station': 'station2', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
      ),
-], ids=['basic', 'all columns', 'times', 'units', 'two tables'])
+    ("""  NODES
+    NAME TYPE DEPTH TEMP
+  node_1 WELLHEAD 1167.3 # 
+  ENDNODES
+  TIME 1.5
+  NODES
+  NAME TYPE DEPTH TEMP
+  node_2 WELLHEAD 1005.3 10.5
+  ENDNODES """,
+     {'name': 'node_1', 'type': 'WELLHEAD', 'depth': 1167.3, 'temp': None, 'date': '01/01/2023',
+      'unit_system': UnitSystem.ENGLISH},
+     {'name': 'node_2', 'type': 'WELLHEAD', 'depth': 1005.3, 'temp': 10.5,
+      'date': '1.5', 'unit_system': UnitSystem.ENGLISH}
+     )
+], ids=['basic', 'all columns', 'times', 'units', 'two tables', 'decimal date'])
 def test_collect_all_tables_to_objects(mocker, file_contents, node1_props, node2_props):
     # Arrange
     # mock out a surface file:
@@ -759,19 +777,21 @@ def test_collect_all_tables_to_objects(mocker, file_contents, node1_props, node2
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
 
-    node_1 = NexusNode(node1_props, date_format=DateFormat.MM_DD_YYYY)
-    node_2 = NexusNode(node2_props, date_format=DateFormat.MM_DD_YYYY)
+    node_1 = NexusNode(node1_props, date_format=DateFormat.MM_DD_YYYY, start_date=start_date)
+    node_2 = NexusNode(node2_props, date_format=DateFormat.MM_DD_YYYY, start_date=start_date)
 
     # line locs for this part of the code refers to line loc relative to the table
     expected_result = [node_1, node_2]
 
     # Act
 
-    result_dict, _ = ResSimpy.Nexus.nexus_collect_tables.collect_all_tables_to_objects(surface_file,
-                                                                                    {'NODES': NexusNode,
-                                                                                     'WELLS': NexusNode}, start_date,
-                                                                                    default_units=UnitSystem.ENGLISH,
-                                                                                    date_format=DateFormat.MM_DD_YYYY)
+    result_dict, _ = ResSimpy.Nexus.nexus_collect_tables.collect_all_tables_to_objects(
+        nexus_file=surface_file,
+        table_object_map={'NODES': NexusNode,
+         'WELLS': NexusNode}, start_date=start_date,
+        default_units=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+        )
     result = result_dict.get('NODES')
     if result_dict.get('WELLS') is not None:
         result.extend(result_dict.get('WELLS'))
