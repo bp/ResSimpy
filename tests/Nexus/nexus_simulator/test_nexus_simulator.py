@@ -2320,3 +2320,27 @@ def test_wells_and_network_equal_empty(mocker):
     # Act
     with pytest.raises(ValueError):
         fake_simulator1.wells_and_network_equal(fake_simulator2)
+
+def test_model_summary(mocker):
+    # Arrange
+    fcs_contents = "RUNCONTROL /path/to/run/control\n  DATE_FORMAT DD/MM/YYYY"
+    open_mock = mocker.mock_open(read_data=fcs_contents)
+    mocker.patch("builtins.open", open_mock)
+
+    model = NexusSimulator(origin='test.fcs')
+    model._start_date = '15/01/2020'
+    grid = NexusGrid(assume_loaded=True)
+    grid._range_x = 1
+    grid._range_y = 2
+    grid._range_z = 3
+    model._grid = grid
+
+    expected_summary = """Start Date: 15/01/2020
+Grid Dimensions (x y z) : 1 x 2 x 3
+"""
+
+    # Act
+    result = model.summary()
+
+    # Assert
+    assert result == expected_summary
