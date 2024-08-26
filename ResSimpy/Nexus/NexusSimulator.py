@@ -837,14 +837,6 @@ class NexusSimulator(Simulator):
         """Not implemented for Nexus yet."""
         raise NotImplementedError("Not Implemented Yet")
 
-    def summary(self):
-        """Returns a string summary of the model contents."""
-
-        model_summary = f"""Start Date: {self.start_date}
-Grid Dimensions (x y z) : {self.grid.range_x} x {self.grid.range_y} x {self.grid.range_z}
-"""
-        return model_summary
-
     @property
     def sim_controls(self) -> SimControls:
         """Returns an instance of Sim controls class."""
