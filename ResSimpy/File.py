@@ -79,7 +79,7 @@ class File(FileBase):
         """update_include_location_in_file_as_list.
 
         Args:
-            new_path(st): Updates the path in the file as list to point towards the new include location.
+            new_path(str): Updates the path in the file as list to point towards the new include location.
             include_file(file): include object whose path is being modified.
         """
         raise NotImplementedError("Implement this in the derived class.")
@@ -190,7 +190,7 @@ class File(FileBase):
         raise NotImplementedError("Implement this in the derived class")
 
     def get_object_locations_for_id(self, obj_id: UUID) -> list[int]:
-        """Gets the number of object locations for a specified id.
+        """Returns the list of line numbers associated with the object ID.
 
         Args:
             obj_id(UUID): Unique identifier for each node object.

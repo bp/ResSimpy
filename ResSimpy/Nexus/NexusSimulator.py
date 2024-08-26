@@ -149,7 +149,7 @@ class NexusSimulator(Simulator):
         return printable_str
 
     @staticmethod
-    def _attr_info_to_tuple(sim_attr: Union[dict, Sequence])\
+    def _attr_info_to_tuple(sim_attr: Union[dict, Sequence]) \
             -> tuple[tuple[tuple[str, Union[str, bool, float]], ...], ...]:
         """Convert the network constraints/wells completions attribute to a tuple of tuples so that it is hashable.
 
@@ -295,7 +295,7 @@ class NexusSimulator(Simulator):
 
     @property
     def write_times(self) -> bool:
-        """Sets whether the runcontrol file will expand the include files with time cards in. Defaults to True."""
+        """Sets whether the runcontrol file will expand the include files with time cards in."""
         return self.__write_times
 
     @property
@@ -836,6 +836,14 @@ class NexusSimulator(Simulator):
     def write_out_new_model(self, new_location: str, new_model_name: str) -> None:
         """Not implemented for Nexus yet."""
         raise NotImplementedError("Not Implemented Yet")
+
+    def summary(self):
+        """Returns a string summary of the model contents."""
+
+        model_summary = f"""Start Date: {self.start_date}
+Grid Dimensions (x y z) : {self.grid.range_x} x {self.grid.range_y} x {self.grid.range_z}
+"""
+        return model_summary
 
     @property
     def sim_controls(self) -> SimControls:

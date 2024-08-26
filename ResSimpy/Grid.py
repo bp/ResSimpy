@@ -111,7 +111,7 @@ class Grid(ABC):
 
     @property
     def netgrs(self) -> GridArrayDefinition:
-        """Returns grid netgrs.
+        """Returns grid array definition for netgrs.
         Loads grid properties if not loaded.
         """
         self.load_grid_properties_if_not_loaded()
@@ -127,7 +127,7 @@ class Grid(ABC):
 
     @property
     def sw(self) -> GridArrayDefinition:
-        """Returns grid sg.
+        """Returns water saturation grid.
         Loads grid properties if not loaded.
         """
         self.load_grid_properties_if_not_loaded()
@@ -135,7 +135,7 @@ class Grid(ABC):
 
     @property
     def sg(self) -> GridArrayDefinition:
-        """Returns grid sg.
+        """Returns gas saturation grid.
         Loads grid properties if not loaded.
         """
         self.load_grid_properties_if_not_loaded()
@@ -183,7 +183,7 @@ class Grid(ABC):
 
     @property
     def iregion(self) -> dict[str, GridArrayDefinition]:
-        """Returns grid regions as dictionary.
+        """Returns integer regions as dictionary keyed by the name of the array.
         loads grid properties if not loaded.
         """
         self.load_grid_properties_if_not_loaded()
@@ -194,7 +194,7 @@ class Grid(ABC):
         """Loads in a structured grid file with all grid properties, and the array functions defined with 'FUNCTION'.
 
         Args:
-            structure_grid_file(File, lazy_loading: bool):he NexusFile representation of a structured grid file for
+            structure_grid_file(File, lazy_loading: bool):The NexusFile representation of a structured grid file for
             converting into a structured grid file class.
             lazy_loading(bool): If set to True, parts of the grid will only be loaded in
              when requested via properties on the object.

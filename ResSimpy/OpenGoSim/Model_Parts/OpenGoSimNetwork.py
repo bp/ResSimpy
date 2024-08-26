@@ -23,5 +23,5 @@ class OpenGoSimNetwork(Network):
         return "Not implemented yet"
 
     def load(self) -> None:
-        """Returns."""
+        """Loads the OpenGoSimNetwork.Not implemented yet."""
         raise NotImplementedError("Not implemented for OGS yet")

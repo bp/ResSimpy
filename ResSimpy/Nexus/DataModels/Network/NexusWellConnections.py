@@ -142,12 +142,12 @@ class NexusWellConnections(WellConnections):
 
     @property
     def table_header(self) -> str:
-        """Returns the start of the table in wellconnections file."""
+        """Returns the header for the wellconnections table in surface file."""
         return 'WELLS'
 
     @property
     def table_footer(self) -> str:
-        """Returns the end of the table in wellconnections file."""
+        """Returns the footer of the wellconnections table in surface file."""
         return 'END' + self.table_header
 
     @property

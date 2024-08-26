@@ -61,7 +61,7 @@ class NexusWaterMethods(Water):
 
     @property
     def inputs(self) -> MutableMapping[int, NexusWaterMethod]:
-        """Returns mapping of water property methods as a dictionary where keys are of type int."""
+        """Returns mapping of water property methods as a dictionary where keys are the method number of type int."""
         if not self.__properties_loaded:
             self.load_water_methods()
         return self.__inputs

@@ -26,6 +26,7 @@ from ResSimpy.Nexus.DataModels.NexusGasliftMethod import NexusGasliftMethod
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
@@ -1887,7 +1888,8 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
                           NexusWellhead(wellheadprops2, date_format=DateFormat.DD_MM_YYYY)]
     expected_wellbores = [NexusWellbore(wellboreprops1, date_format=DateFormat.DD_MM_YYYY),
                           NexusWellbore(wellboreprops2, date_format=DateFormat.DD_MM_YYYY)]
-    expected_constraints = {constraint_props1['name']: [NexusConstraint(constraint_props2, date_format=DateFormat.DD_MM_YYYY)]}
+    expected_constraints = {
+        constraint_props1['name']: [NexusConstraint(constraint_props2, date_format=DateFormat.DD_MM_YYYY)]}
     expected_welllist = [NexusWellList(**welllist1)]
     # create a mocker spy to check the network loader gets called once
     spy = mocker.spy(nexus_sim._network, 'load')
@@ -1909,7 +1911,6 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
     assert result_constraints == expected_constraints
     assert result_welllist == expected_welllist
     spy.assert_called_once()
-
 
 
 def test_load_surface_file_activate_deactivate(mocker):
@@ -1969,7 +1970,6 @@ def test_load_surface_file_activate_deactivate(mocker):
         ENDDEACTIVATE
     """
 
-
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             fcs_file_path: fcs_file_contents,
@@ -1988,19 +1988,23 @@ def test_load_surface_file_activate_deactivate(mocker):
     welcon_props_2 = {'name': 'welcon_2', 'stream': 'PRODUCER', 'datum_depth': 5678.0, 'date': '01/02/2024',
                       'unit_system': UnitSystem.ENGLISH}
     welcon_props_1_2_1 = {'name': 'welcon_1_2', 'stream': 'PRODUCER', 'datum_depth': 9.87, 'date': '01/02/2024',
-                      'unit_system': UnitSystem.ENGLISH}
+                          'unit_system': UnitSystem.ENGLISH}
     welcon_props_1_2_2 = {'name': 'welcon_1_2', 'date': '09/07/2024', 'unit_system': UnitSystem.ENGLISH}
-    original_gas_welcon_props_1 = {'name': 'gaswelcon_1', 'stream': 'PRODUCER', 'datum_depth': 1.234, 'date': '01/02/2024',
-                      'unit_system': UnitSystem.ENGLISH}
-    original_gas_welcon_props_2 = {'name': 'gaswelcon_2', 'stream': 'PRODUCER', 'datum_depth': 5.678, 'date': '01/02/2024',
-                      'unit_system': UnitSystem.ENGLISH}
-    welcon_props_3 = {'name': 'welcon_1','date': '09/07/2024', 'unit_system': UnitSystem.ENGLISH}
+    original_gas_welcon_props_1 = {'name': 'gaswelcon_1', 'stream': 'PRODUCER', 'datum_depth': 1.234,
+                                   'date': '01/02/2024',
+                                   'unit_system': UnitSystem.ENGLISH}
+    original_gas_welcon_props_2 = {'name': 'gaswelcon_2', 'stream': 'PRODUCER', 'datum_depth': 5.678,
+                                   'date': '01/02/2024',
+                                   'unit_system': UnitSystem.ENGLISH}
+    welcon_props_3 = {'name': 'welcon_1', 'date': '09/07/2024', 'unit_system': UnitSystem.ENGLISH}
     gas_welcon_props_1 = {'name': 'gaswelcon_1', 'd_factor': 1.123e-5, 'non_darcy_flow_method': 'INVKH',
                           'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH}
     gas_welcon_props_2 = {'name': 'gaswelcon_2', 'd_factor': 123.4, 'non_darcy_flow_method': 'ABCD',
                           'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH}
-    gas_welcon_props_3 = {'name': 'gaswelcon_1', 'date': '14/07/2024', 'unit_system': UnitSystem.ENGLISH, 'd_factor': 4321}
-    gas_welcon_props_4 = {'name': 'gaswelcon_2', 'date': '14/07/2024', 'unit_system': UnitSystem.ENGLISH, 'd_factor': 9876,}
+    gas_welcon_props_3 = {'name': 'gaswelcon_1', 'date': '14/07/2024', 'unit_system': UnitSystem.ENGLISH,
+                          'd_factor': 4321}
+    gas_welcon_props_4 = {'name': 'gaswelcon_2', 'date': '14/07/2024', 'unit_system': UnitSystem.ENGLISH,
+                          'd_factor': 9876, }
     gas_welcon_props_5 = {'name': 'gaswelcon_2', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
     gas_welcon_props_6 = {'name': 'gaswelcon_1', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
 
@@ -2019,7 +2023,6 @@ def test_load_surface_file_activate_deactivate(mocker):
     gas_welcon_4 = NexusWellConnection(gas_welcon_props_4, date_format=DateFormat.DD_MM_YYYY, is_activated=False)
     gas_welcon_5 = NexusWellConnection(gas_welcon_props_5, date_format=DateFormat.DD_MM_YYYY, is_activated=True)
     gas_welcon_6 = NexusWellConnection(gas_welcon_props_6, date_format=DateFormat.DD_MM_YYYY, is_activated=False)
-
 
     # Create the expected objects
     expected_wellcons = [welcon_1, welcon_2, welcon_1_2, original_gas_welcon_1, original_gas_welcon_2, gas_welcon_1,
@@ -2320,3 +2323,28 @@ def test_wells_and_network_equal_empty(mocker):
     # Act
     with pytest.raises(ValueError):
         fake_simulator1.wells_and_network_equal(fake_simulator2)
+
+
+def test_model_summary(mocker):
+    # Arrange
+    fcs_contents = "RUNCONTROL /path/to/run/control\n  DATE_FORMAT DD/MM/YYYY"
+    open_mock = mocker.mock_open(read_data=fcs_contents)
+    mocker.patch("builtins.open", open_mock)
+
+    model = NexusSimulator(origin='test.fcs')
+    model._start_date = '15/01/2020'
+    grid = NexusGrid(assume_loaded=True)
+    grid._range_x = 1
+    grid._range_y = 2
+    grid._range_z = 3
+    model._grid = grid
+
+    expected_summary = """Start Date: 15/01/2020
+Grid Dimensions (x y z) : 1 x 2 x 3
+"""
+
+    # Act
+    result = model.summary()
+
+    # Assert
+    assert result == expected_summary

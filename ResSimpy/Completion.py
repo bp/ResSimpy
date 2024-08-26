@@ -152,17 +152,17 @@ class Completion(DataObjectMixin, ABC):
 
     @property
     def x(self) -> float | None:
-        """Returns the location of the well as a float."""
+        """Returns the location of the completion in the x direction."""
         return self.__x
 
     @property
     def y(self) -> float | None:
-        """Returns the location of the well as a float."""
+        """Returns the location of the completion in the y direction."""
         return self.__y
 
     @property
     def angle_a(self) -> float | None:
-        """Returns the angle relative to the local axis I axis."""
+        """Returns the angle relative to the local I axis."""
         return self.__angle_a
 
     @property
@@ -172,7 +172,7 @@ class Completion(DataObjectMixin, ABC):
 
     @property
     def grid(self) -> str | None:
-        """Returns grid name associated with the completion data as a string."""
+        """Returns the grid name to which the completion data applies."""
         return self.__grid
 
     @property
@@ -207,7 +207,7 @@ class Completion(DataObjectMixin, ABC):
 
     @property
     def peaceman_well_block_radius(self) -> Optional[float]:
-        """Writes the pressure equivalent radius of the grid block as a float."""
+        """Writes the pressure equivalent radius of the grid block."""
         return self.__peaceman_well_block_radius
 
     @property
@@ -227,7 +227,7 @@ class Completion(DataObjectMixin, ABC):
 
     @property
     def completion_is_shutin(self) -> bool:
-        """Returns a boolean indicating whether the provided completion is categorized as a shut-in."""
+        """Returns a boolean indicating whether the provided completion is categorized as a shut-in or not."""
         return not self.completion_is_perforation
 
     @property

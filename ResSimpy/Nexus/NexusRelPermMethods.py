@@ -63,8 +63,8 @@ class NexusRelPermMethods(RelPerm):
     def inputs(self) -> MutableMapping[int, NexusRelPermMethod]:
         """Returns collection of Nexus relperm property inputs as dictionary.
 
-        Args:
-            NexusRelPermMethod(int): Nexus relative permeability and capillary pressure properties.
+        Returns:
+            NexusRelPermMethod(MutableMapping): Keyed by method number with values being the NexusRelPermMethod.
         """
         if not self.__properties_loaded:
             self.load_relperm_methods()

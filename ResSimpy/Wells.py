@@ -44,7 +44,7 @@ class Wells(ABC):
         raise NotImplementedError("Implement this in the derived class")
 
     def get(self, well_name: str) -> Optional[Well]:
-        """?
+        """Gets a well by name.
 
         Args:
             well_name (str): The well name.
@@ -52,17 +52,19 @@ class Wells(ABC):
         raise NotImplementedError("Implement this in the derived class")
 
     def get_df(self) -> pd.DataFrame:
-        """Returns a pandas data frame."""
+        """Returns wells as pandas data frame."""
         raise NotImplementedError("Implement this in the derived class")
 
     def modify(self, well_name: str, completion_properties_list: list[dict[str, None | float | int | str]],
                how: OperationEnum = OperationEnum.ADD) -> None:
-        """?
+        """Modifies a completion in a named well using a list of properties. How enum determines if the completions are
+        added, removed or modified.
 
         Args:
-            well_name (str) : The well name
-            completion_properties_list (list[dict[str, None | float | int | str]]) : ?
-            how (OperationEnum) : ?
+            well_name (str) : The well name.
+            completion_properties_list (list[dict[str, None | float | int | str]]) : List of completions property
+            dictionaries to pass through to each of the ADD/REMOVE/MODIFY operations.
+            how (OperationEnum) : Check the OperationEnum for valid options.
 
         Returns:
             None
@@ -71,12 +73,13 @@ class Wells(ABC):
 
     def add_completion(self, well_name: str, completion_properties: dict[str, None | float | int | str],
                        preserve_previous_completions: bool = True, comments: Optional[str] = None) -> None:
-        """Add the new completion.
+        """Adds completion to an existing wellspecfile.
 
         Args:
             well_name(str): The well name.
             completion_properties(dict[str, None | float | int | str]): Properties of the added completion.
-            preserve_previous_completions():? .
+            preserve_previous_completions(bool): If true, a new perforation on a TIME card will keep previous
+            completions from the nearest TIME card along with the new completion.
             comments(Optional[str]): Comments about the added completion.
 
         Returns:
@@ -87,7 +90,7 @@ class Wells(ABC):
     def remove_completion(self, well_name: str,
                           completion_properties: Optional[dict[str, None | float | int | str]] = None,
                           completion_id: Optional[UUID] = None) -> None:
-        """Removes completion.
+        """Well name to remove the completion from.
 
         Args:
             well_name(str): Well name.
@@ -103,7 +106,7 @@ class Wells(ABC):
                           completion_to_change: Optional[dict[str, None | float | int | str]] = None,
                           completion_id: Optional[UUID] = None,
                           comments: Optional[str] = None) -> None:
-        """Modifies the completion properties with the new values.
+        """Well name to modify completion from.
 
         Args:
             well_name (str): Well name.

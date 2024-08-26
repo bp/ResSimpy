@@ -66,7 +66,7 @@ class Constraints(ABC):
                new_constraint_props: dict[str, None | float | int | str | UnitSystem] | Constraint,
                comments: Optional[str] = None) \
             -> None:
-        """Modify an existing constraint.
+        """Adds optional post line comments in the modified constraint.
 
         Args:
             name(str): The well name.

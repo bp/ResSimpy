@@ -79,9 +79,9 @@ class NexusWellbores(Wellbores):
         """Loads wellbores data from surface file.
 
         Args:
-            surface_file(): Nexus representation of the surface file.
-            start_date(): start date of the run.
-            default_units(): default untis used if no units are found.
+            surface_file(File): Nexus representation of the surface file.
+            start_date(str): start date of the run.
+            default_units(UnitSystem): default units used if no units are found.
         """
         new_wellbores, _ = collect_all_tables_to_objects(surface_file, {'WELLBORE': NexusWellbore},
                                                          start_date=start_date,
@@ -141,10 +141,10 @@ class NexusWellbores(Wellbores):
 
     @property
     def table_header(self) -> str:
-        """Returns start of the table in the wellbores file."""
+        """Returns the header for the wellbore table in surface file."""
         return 'WELLBORE'
 
     @property
     def table_footer(self) -> str:
-        """Returns end of the table in the wellbores file."""
+        """Returns the footer for the wellbore table in surface file."""
         return 'END' + self.table_header

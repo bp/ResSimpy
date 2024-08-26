@@ -70,12 +70,12 @@ class OpenGoSimSimulator(Simulator):
 
     @property
     def simulation_type(self) -> SimulationType:
-        """Returns an instance of OpenGo simulation type."""
+        """Returns an instance of OpenGoSim simulation type."""
         return self.__simulation_type
 
     @property
     def final_date(self) -> Optional[str]:
-        """Returns"""
+        """Returns final date in the simulator."""
         return self.__final_date
 
     def __repr__(self) -> str:
@@ -216,7 +216,6 @@ WELLS
         self._wells._wells.append(loaded_well)
         self._wells._wells_loaded = True
 
-    @staticmethod
     @staticmethod
     def get_fluid_type(surface_file_content: list[str]) -> str:
         """Returns fluid type for single model from surface file.

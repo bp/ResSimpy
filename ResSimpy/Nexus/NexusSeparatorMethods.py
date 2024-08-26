@@ -73,8 +73,8 @@ class NexusSeparatorMethods(Separator):
     def files(self) -> dict[int, NexusFile]:
         """Returns dictionary of nexus files.
 
-        Args:
-            NexusFile(int): Nexus files where keys are of type int.
+        Returns:
+            NexusFile(dict): Nexus files where keys are of type int.
         """
         return self.__files
 

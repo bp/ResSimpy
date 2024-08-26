@@ -105,7 +105,7 @@ class NetworkOperationsMixIn(ABC):
     @property
     @abstractmethod
     def table_header(self) -> str:
-        """Returns"""
+        """Returns table header as a string."""
         raise NotImplementedError("Implement this in the derived class")
 
     @property
