@@ -90,6 +90,7 @@ class NexusTargets(Targets):
         return df_store
 
     def get_overview(self) -> str:
+        """Returns overview of the Targets."""
         raise NotImplementedError('To be implemented')
 
     def load(self, surface_file: File, start_date: str, default_units: UnitSystem) -> None:

@@ -61,15 +61,18 @@ class NexusValveMethods(Valve):
 
     @property
     def inputs(self) -> MutableMapping[int, NexusValveMethod]:
+        """Returns mapping of valve properties as a dictionary where keys are of type int."""
         if not self.__properties_loaded:
             self.load_valve_methods()
         return self.__inputs
 
     @property
     def valve_files(self) -> dict[int, NexusFile]:
+        """Returns dictionary of valve files."""
         return self.__files
 
     def load_valve_methods(self) -> None:
+        """Loads valve methods from files and initialises 'NexusValveMethod' object."""
         # Read in valve properties from Nexus valve method files
         if self.__files is not None and len(self.__files) > 0:  # Check if valve files exist
             for table_num in self.__files.keys():  # For each valve property method

@@ -76,6 +76,12 @@ class File(FileBase):
         return self._location_in_including_file
 
     def update_include_location_in_file_as_list(self, new_path: str, include_file: File) -> None:
+        """update_include_location_in_file_as_list.
+
+        Args:
+            new_path(str): Updates the path in the file as list to point towards the new include location.
+            include_file(file): include object whose path is being modified.
+        """
         raise NotImplementedError("Implement this in the derived class.")
 
     def write_to_file(self, new_file_path: None | str = None, write_includes: bool = False,
@@ -151,35 +157,90 @@ class File(FileBase):
         self._file_modified_set(False)
 
     def _file_modified_set(self, value: bool) -> None:
+        """Set the modified file status.
+
+        Args:
+            value(bool): True if the file is modified, False otherwise.
+        """
         self.__file_modified = value
 
     @property
     def get_flat_list_str_file(self) -> list[str]:
+        """Returns flat list of strings from file."""
         raise NotImplementedError("Implement this in the derived class")
 
     def add_object_locations(self, obj_uuid: UUID, line_indices: list[int]) -> None:
+        """Adds a uuid to the object_locations dictionary.
+
+        Args:
+            obj_uuid(UUID): Unique identifier of the object being created/stored.
+            line_indices(list[int]): line number in the flattened file_content_as_list
+            (i.e. from the get_flat_list_str_file method).
+        """
         raise NotImplementedError("Implement this in the derived class")
 
     @staticmethod
     def insert_comments(additional_content: list[str], comments: str) -> list[str]:
+        """Adds comments alongside additional content.
+
+        Args:
+            additional_content(list[str]): additional lines of the file to be added with a new entry per line.
+            comments(str): comments to be added to all lines list of strings within the content.
+        """
         raise NotImplementedError("Implement this in the derived class")
 
     def get_object_locations_for_id(self, obj_id: UUID) -> list[int]:
+        """Returns the list of line numbers associated with the object ID.
+
+        Args:
+            obj_id(UUID): Unique identifier for each node object.
+        """
         raise NotImplementedError("Implement this in the derived class")
 
     def remove_object_from_file_as_list(self, objects_to_remove: list[UUID]) -> None:
+        """Removes all associated lines in the file as well as the object locations relating to a list of objects.
+
+        Args:
+            objects_to_remove(list[UUID]):  list of object ids to remove from the object locations. Defaults to None
+        """
         raise NotImplementedError("Implement this in the derived class")
 
     def add_to_file_as_list(self, additional_content: list[str], index: int,
                             additional_objects: Optional[dict[UUID, list[int]]] = None,
                             comments: Optional[str] = None) -> None:
+        """To add content to the file as list, also updates object numbers
+        and optionally allows user to add several additional new objects.
+
+        Args:
+            additional_content(list[str]):  Additional lines as a list of strings to be added.
+            index(int): index to insert the new lines at in the calling flat_file_as_list
+            additional_objects(Optional[dict[UUID, list[int]]]): defaults to None. Otherwise,
+            a dictionary keyed with the UUID of the new objects to add as well as
+            the corresponding index of the object in the original calling NexusFile.
+            comments(Optional[str]): defaults to None. Comments to add in-line to the file.
+        """
         raise NotImplementedError("Implement this in the derived class")
 
     def remove_from_file_as_list(self, index: int, objects_to_remove: Optional[list[UUID]] = None,
                                  string_to_remove: Optional[str] = None) -> None:
+        """Remove an entry from the file as list.
+
+        Args:
+            index(int): index n the calling flat_file_as_list to remove the entry from.
+            objects_to_remove(Optional[list[UUID]): list of object ids to
+            remove from the object locations. Defaults to None.
+            string_to_remove(Optional[str]):if specified will only remove the listed string from the entry at the index.
+             Defaults to None, which removes the entire entry.
+        """
         raise NotImplementedError("Implement this in the derived class")
 
     def find_which_include_file(self, flattened_index: int) -> tuple[File, int]:
+        """Given a line index that relates to a position within the flattened
+        file_as_list from the method get_flat_file_as_list.
+
+        Args:
+            flattened_index(int): index in the flattened file as list structure.
+        """
         raise NotImplementedError("Implement this in the derived class")
 
     def __repr__(self) -> str:

@@ -55,6 +55,11 @@ class OutputRequest(DataObjectMixin, ABC):
 
     @property
     def units(self) -> BaseUnitMapping:
+        """Writes unit type for the given unit system.
+
+        Returns:
+            An instance of the BaseUnitMapping class.
+        """
         return BaseUnitMapping(unit_system=None)
 
 

@@ -19,4 +19,5 @@ class Rock(ABC):
         raise NotImplementedError("Implement this in the derived class")
 
     def to_string(self) -> str:
+        """Writes dynamic property data to string."""
         raise NotImplementedError('Implement this in the derived class.')

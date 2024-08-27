@@ -101,6 +101,7 @@ class RelPermEndPoint(ABC):
         self.__sotr = sotr
 
     def to_dict(self) -> dict[str, Optional[float]]:
+        """Returns a dictionary mapping keys to types (usually of type list)."""
         attribute_dict: dict[str, Optional[float]] = {
             'swl': self.__swl,
             'swr': self.__swr,
