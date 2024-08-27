@@ -80,9 +80,17 @@ class NexusWellConnections(WellConnections):
         return obj_to_dataframe(self._well_connections)
 
     def get_overview(self) -> str:
+        """Returns overview of the well connections."""
         raise NotImplementedError('To be implemented')
 
     def load(self, surface_file: File, start_date: str, default_units: UnitSystem) -> None:
+        """Loads well connections surface file as Nexus.
+
+        Args:
+            surface_file(file): path to the surface file.
+            start_date(str): start date of the run.
+            default_units(UnitSystem): default units to use if no units are found.
+        """
         new_well_connections, _ = collect_all_tables_to_objects(surface_file, {'WELLS': NexusWellConnection,
                                                                                'GASWELLS': NexusWellConnection},
                                                                 start_date=start_date,
@@ -134,13 +142,16 @@ class NexusWellConnections(WellConnections):
 
     @property
     def table_header(self) -> str:
+        """Returns the header for the wellconnections table in surface file."""
         return 'WELLS'
 
     @property
     def table_footer(self) -> str:
+        """Returns the footer of the wellconnections table in surface file."""
         return 'END' + self.table_header
 
     @property
     def well_connections(self) -> Sequence[NexusWellConnection]:
+        """Returns a list of all well connections loaded."""
         self.__parent_network.get_load_status()
         return self._well_connections

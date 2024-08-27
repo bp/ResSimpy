@@ -60,15 +60,20 @@ class NexusHydraulicsMethods(Hydraulics):
 
     @property
     def inputs(self) -> MutableMapping[int, NexusHydraulicsMethod]:
+        """Returns mapping of hydraulics method where keys are of type int.
+        If properties are not loaded, it will load them first.
+        """
         if not self.__properties_loaded:
             self.load_hydraulics_methods()
         return self.__inputs
 
     @property
     def files(self) -> dict[int, NexusFile]:
+        """Returns a dictionary of Nexus files where keys are of type int."""
         return self.__files
 
     def load_hydraulics_methods(self) -> None:
+        """Loads a collection of hydraulic method files defined by the Nexus fcs files."""
         # Read in hydraulics properties from Nexus hydraulics method files
         if self.__files is not None and len(self.__files) > 0:  # Check if hydraulics files exist
             for table_num in self.__files.keys():  # For each hydraulics property method

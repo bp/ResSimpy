@@ -183,112 +183,152 @@ class NexusCompletion(Completion):
 
     @property
     def measured_depth(self) -> float | None:
+        """Returns the measured depth of a completion."""
         return self.__measured_depth
 
     @property
     def well_indices(self) -> float | None:
+        """Returns the well index used to calculate performance of the completion."""
         return self.__well_indices
 
     @property
     def partial_perf(self) -> float | None:
+        """Returns the partial penetration factor.
+        'PPERF' in Nexus.
+        """
         return self.__partial_perf
 
     @property
     def cell_number(self) -> int | None:
+        """Returns the cell number for the completion in unstructured grids."""
         return self.__cell_number
 
     @property
     def portype(self) -> str | None:
+        """Returns the pore type for the completion fracture or MATRIX."""
         return self.__portype
 
     @property
     def fracture_mult(self) -> float | None:
+        """Returns the multiplier for the fracture."""
         return self.__fracture_mult
 
     @property
     def sector(self) -> None | str | int:
+        """Returns the section of the wellbore to which this completion flows."""
         return self.__sector
 
     @property
     def well_group(self) -> str | None:
+        """Returns the group of the well."""
         return self.__well_group
 
     @property
     def zone(self) -> int | None:
+        """Returns the zone of the well."""
         return self.__zone
 
     @property
     def angle_open_flow(self) -> float | None:
+        """Returns the angle of the openflow."""
         return self.__angle_open_flow
 
     @property
     def temperature(self) -> float | None:
+        """Returns the temperature of the completion."""
         return self.__temperature
 
     @property
     def flowsector(self) -> int | None:
+        """Returns the flow sector of the completion."""
         return self.__flowsector
 
     @property
     def parent_node(self) -> str | None:
+        """Returns the parent node of the completion."""
         return self.__parent_node
 
     @property
     def mdcon(self) -> float | None:
+        """Returns the mdcon of the completion."""
         return self.__mdcon
 
     @property
     def pressure_avg_pattern(self) -> int | None:
+        """Returns the block pattern to take the pressure for the completion inflow."""
         return self.__pressure_avg_pattern
 
     @property
     def length(self) -> float | None:
+        """Return the length of the completion."""
         return self.__length
 
     @property
     def permeability(self) -> float | None:
+        """Returns permeability of the completion."""
         return self.__permeability
 
     @property
     def non_darcy_model(self) -> str | None:
+        """Returns non-darcy model to use for the completion."""
         return self.__non_darcy_model
 
     @property
     def comp_dz(self) -> float | None:
+        """Returns dz of the completion."""
         return self.__comp_dz
 
     @property
     def layer_assignment(self) -> int | None:
+        """Returns layer assignment of the completion."""
         return self.__layer_assignment
 
     @property
     def polymer_block_radius(self) -> float | None:
+        """Returns polymer block radius of the completion."""
         return self.__polymer_block_radius
 
     @property
     def polymer_well_radius(self) -> float | None:
+        """Returns effective polymer well radius of the completion."""
         return self.__polymer_well_radius
 
     @property
     def rel_perm_end_point(self) -> NexusRelPermEndPoint | None:
+        """Returns instance of the NexusRelPermEndPoint class
+        that holds relative permeability endpoints data storage.
+        """
         return self.__rel_perm_end_point
 
     @property
     def kh_mult(self) -> float | None:
+        """Returns multiplier that is applied to the permeability-thickness. 'KHMULT' in Nexus."""
         return self.__kh_mult
 
     @property
     def depth_to_top_str(self) -> str | None:
+        """Returns depth to the top of the completion interval."""
         return self.__depth_to_top_str
 
     @property
     def depth_to_bottom_str(self) -> str | None:
+        """Returns depth to the bottom of the completion interval."""
         return self.__depth_to_bottom_str
 
     def to_dict(self, keys_in_keyword_style: bool = False, add_date: bool = True, add_units: bool = False,
                 add_iso_date: bool = False,
                 include_nones: bool = True, units_as_string: bool = True) -> \
             dict[str, None | str | int | float]:
+        """Returns dictionary of the completion attributes.
+
+        Args:
+            keys_in_keyword_style(bool = False): if true returns the key values as simulator keywords,
+            otherwise returns the attribute name as stored by ressimpy.
+            add_date(bool = True): if True adds the date to the dictionary.
+            add_units(bool = False): if True adds the units to the dictionary.
+            include_nones(bool = True): if True adds the includes Nones values from object in the dictionary.
+            units_as_string(bool = True): if True, converts the object's units to a string value rather than an enum.
+        """
 
         attribute_dict = to_dict(self, keys_in_keyword_style, add_date=add_date, add_iso_date=add_iso_date,
                                  add_units=add_units, include_nones=include_nones)

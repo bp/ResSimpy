@@ -288,6 +288,7 @@ class FcsNexusFile(NexusFile):
 
     @staticmethod
     def fcs_keyword_map_single() -> dict[str, str]:
+        """Returns mapping of fcs keywords to single file categories."""
         keyword_map = {
             'STRUCTURED_GRID': 'structured_grid_file',
             'OPTIONS': 'options_file',
@@ -299,6 +300,7 @@ class FcsNexusFile(NexusFile):
 
     @staticmethod
     def fcs_keyword_map_multi() -> dict[str, str]:
+        """Returns mapping of fcs keywords to file multiple file categories."""
         keyword_map = {
             'EQUIL': 'equil_files',
             'ROCK': 'rock_files',
@@ -327,6 +329,7 @@ class FcsNexusFile(NexusFile):
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """Returns mapping of keywords to attribute definitions."""
         single_keywords = {k: (v, type(NexusFile)) for k, v in FcsNexusFile.fcs_keyword_map_single().items()}
         multi_keywords = {k: (v, type(dict)) for k, v in FcsNexusFile.fcs_keyword_map_multi().items()}
         return_dict = dict(single_keywords, **multi_keywords)

@@ -16,7 +16,9 @@ class Equilibration(ABC):
 
     @property
     def inputs(self) -> Mapping[int, DynamicProperty]:
+        """Returns a mapping of equilibration inputs."""
         raise NotImplementedError("Implement this in the derived class")
 
     def to_string(self) -> str:
+        """Create string with equilibration data in Nexus file format."""
         raise NotImplementedError('Implement this in the derived class.')

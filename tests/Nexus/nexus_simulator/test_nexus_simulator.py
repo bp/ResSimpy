@@ -26,6 +26,7 @@ from ResSimpy.Nexus.DataModels.NexusGasliftMethod import NexusGasliftMethod
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
