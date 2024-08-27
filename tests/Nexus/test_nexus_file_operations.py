@@ -600,7 +600,7 @@ def test_load_table_to_objects_basic():
         k: float
 
         def __init__(self, properties_dict, date: str | None = None, date_format: DateFormat | None = None,
-                     unit_system: UnitSystem | None = None):
+                     unit_system: UnitSystem | None = None, start_date: str | None = None):
             for key, prop in properties_dict.items():
                 self.__setattr__(key, prop)
 
@@ -633,7 +633,7 @@ def test_load_table_to_objects_date_units():
         k: float
 
         def __init__(self, properties_dict, date: str | None = None, date_format: DateFormat | None = None,
-                     unit_system: UnitSystem | None = None):
+                     unit_system: UnitSystem | None = None, start_date: str | None = None):
             for key, prop in properties_dict.items():
                 self.__setattr__(key, prop)
 
@@ -645,7 +645,7 @@ def test_load_table_to_objects_date_units():
         k: float
 
         def __init__(self, properties_dict, date: str | None = None, date_format: DateFormat | None = None,
-                     unit_system: UnitSystem | None = None):
+                     unit_system: UnitSystem | None = None, start_date: str | None = None):
             for key, prop in properties_dict.items():
                 self.__setattr__(key, prop)
 

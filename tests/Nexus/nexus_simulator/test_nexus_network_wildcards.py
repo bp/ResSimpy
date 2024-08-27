@@ -124,6 +124,7 @@ def test_read_wildcard(mocker, file_contents, expected_constraints):
         RUNCONTROL /nexus_data/runcontrol.dat
         SURFACE Network 1  /surface_file_01.dat
         '''
+    start_date = '01/01/2019'
     runcontrol_contents = '''START 01/01/2019'''
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
 
@@ -132,9 +133,11 @@ def test_read_wildcard(mocker, file_contents, expected_constraints):
     for constraint in expected_constraints:
         well_name = constraint['name']
         if expected_result.get(well_name, None) is not None:
-            expected_result[well_name].append(NexusConstraint(constraint, date_format=DateFormat.DD_MM_YYYY))
+            expected_result[well_name].append(NexusConstraint(constraint, date_format=DateFormat.DD_MM_YYYY,
+                                                              start_date=start_date))
         else:
-            expected_result[well_name] = [NexusConstraint(constraint, date_format=DateFormat.DD_MM_YYYY)]
+            expected_result[well_name] = [NexusConstraint(constraint, date_format=DateFormat.DD_MM_YYYY,
+                                                          start_date=start_date)]
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
