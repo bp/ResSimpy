@@ -310,7 +310,7 @@ def __activate_deactivate_checks(line: str, table_start: int, table_end: int, is
                                          x.name == well_connection_name and
                                          x.iso_date <= current_iso_date]
         matching_node_connections = [x for x in nexus_object_results['NODECON'] if x.name == well_connection_name and
-                                        x.iso_date <= current_iso_date]
+                                     x.iso_date <= current_iso_date]
         matching_well_connections.extend(matching_gas_well_connections)
         matching_well_connections.extend(matching_node_connections)
 
