@@ -1937,12 +1937,17 @@ def test_load_surface_file_activate_deactivate(mocker):
         gaswelcon_2		123.4	ABCD
         ENDGASWELLS
          
+         NODECON
+         NAME      NODEIN    NODEOUT    TYPE
+         N1_N2     N1        N2         PIPE
+         ENDNODECON
          
         DEACTIVATE
          CONNECTION
          welcon_1*
          gaswelcon_2
          !** test
+         N1_N2
         ENDDEACTIVATE
         
         TIME 09/07/2024
@@ -1964,6 +1969,7 @@ def test_load_surface_file_activate_deactivate(mocker):
         ACTIVATE
         CONNECTION
         gaswelcon_2
+        N1_N2
         ENDACTIVATE
         
         DEACTIVATE
@@ -2010,6 +2016,10 @@ def test_load_surface_file_activate_deactivate(mocker):
                           'd_factor': 9876, }
     gas_welcon_props_5 = {'name': 'gaswelcon_2', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
     gas_welcon_props_6 = {'name': 'gaswelcon_1', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
+    
+    node_con_prop_n1_n2 = {'name': 'N1_N2', 'node_in': 'N1', 'node_out': 'N2', 'con_type': 'PIPE', 
+                           'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH}
+    node_con_prop_n1_n2_later = {'name': 'N1_N2', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
 
     welcon_1 = NexusWellConnection(welcon_props_1, date_format=DateFormat.DD_MM_YYYY, is_activated=False,
                                    start_date=start_date)
@@ -2038,17 +2048,24 @@ def test_load_surface_file_activate_deactivate(mocker):
                                        start_date=start_date)
     gas_welcon_6 = NexusWellConnection(gas_welcon_props_6, date_format=DateFormat.DD_MM_YYYY, is_activated=False,
                                        start_date=start_date)
+    node_n1_n2 = NexusNodeConnection(node_con_prop_n1_n2, date_format=DateFormat.DD_MM_YYYY, is_activated=False,
+                                     start_date=start_date)
+    node_n1_n2_later = NexusNodeConnection(node_con_prop_n1_n2_later, date_format=DateFormat.DD_MM_YYYY,
+                                           is_activated=True, start_date=start_date)
 
     # Create the expected objects
     expected_wellcons = [welcon_1, welcon_2, welcon_1_2, original_gas_welcon_1, original_gas_welcon_2, gas_welcon_1,
                          gas_welcon_2, welcon_3, welcon_1_2_2, gas_welcon_3, gas_welcon_4, gas_welcon_5, gas_welcon_6]
-
+    expected_node_cons = [node_n1_n2, node_n1_n2_later]
+    
     # Act
     result_wellcons = nexus_sim.network.well_connections.get_all()
+    result_nodecons = nexus_sim.network.connections.get_all()
 
     # Assert
     assert result_wellcons[0] == welcon_1
     assert sorted(result_wellcons, key=lambda x: (x.iso_date)) == expected_wellcons
+    assert sorted(result_nodecons, key=lambda x: (x.iso_date)) == expected_node_cons
 
 
 def test_nexus_simulator_repr(mocker):
