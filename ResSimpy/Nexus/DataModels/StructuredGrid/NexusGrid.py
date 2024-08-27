@@ -1242,4 +1242,5 @@ class NexusGrid(Grid):
 
     @property
     def multir(self) -> pd.DataFrame:
+        """Returns the MULTIR table as a dataframe."""
         return self.get_multir_df()

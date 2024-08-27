@@ -89,4 +89,5 @@ class NexusWellMod(DataObjectMixin):
 
     @property
     def units(self) -> CompletionUnits:
+        """Returns the completion units for the wellmod."""
         return CompletionUnits(self.unit_system)

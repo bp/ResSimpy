@@ -326,6 +326,7 @@ class NexusCompletion(Completion):
             otherwise returns the attribute name as stored by ressimpy.
             add_date(bool = True): if True adds the date to the dictionary.
             add_units(bool = False): if True adds the units to the dictionary.
+            add_iso_date(bool = False): if True adds the iso date to the dictionary.
             include_nones(bool = True): if True adds the includes Nones values from object in the dictionary.
             units_as_string(bool = True): if True, converts the object's units to a string value rather than an enum.
         """
