@@ -112,15 +112,15 @@ class NexusWellConnections(WellConnections):
         self.__remove_object_operations.remove_object_from_network_main(
             obj_to_remove, self._network_element_name, self._well_connections)
 
-    def add(self, obj_to_remove: dict[str, None | str | float | int]) -> None:
+    def add(self, obj_to_add: dict[str, None | str | float | int]) -> None:
         """Adds a well connection to a network, taking a dictionary with properties for the new well connection.
 
         Args:
-            obj_to_remove (dict[str, None | str | float | int]): dictionary taking all the properties for the new
+            obj_to_add (dict[str, None | str | float | int]): dictionary taking all the properties for the new
             well connection.
             Requires date and a name.
         """
-        new_object = self.__add_object_operations.add_network_obj(obj_to_remove, NexusWellConnection,
+        new_object = self.__add_object_operations.add_network_obj(obj_to_add, NexusWellConnection,
                                                                   self.__parent_network)
         self._add_to_memory([new_object])
 

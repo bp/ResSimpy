@@ -257,10 +257,10 @@ def test_load_constraints(mocker, file_contents, expected_content):
         well_name = constraint['name']
         if expected_constraints.get(well_name, None) is not None:
             expected_constraints[well_name].append(NexusConstraint(constraint, date_format=DateFormat.MM_DD_YYYY,
-                                                                   ))
+                                                                   start_date=start_date))
         else:
             expected_constraints[well_name] = [NexusConstraint(constraint, date_format=DateFormat.MM_DD_YYYY,
-                                                               )]
+                                                               start_date=start_date)]
 
     expected_date_filtered_constraints = {}
     for constraint in expected_content:
@@ -269,11 +269,11 @@ def test_load_constraints(mocker, file_contents, expected_content):
             if expected_date_filtered_constraints.get(well_name, None) is not None:
                 expected_date_filtered_constraints[well_name].append(NexusConstraint(constraint,
                                                                                      date_format=DateFormat.MM_DD_YYYY,
-                                                                                     ))
+                                                                                     start_date=start_date))
             else:
                 expected_date_filtered_constraints[well_name] = [NexusConstraint(constraint,
                                                                                  date_format=DateFormat.MM_DD_YYYY,
-                                                                                 )]
+                                                                                 start_date=start_date)]
         # set the expected iso_date in the constraints for adding to the expected dataframe
         constraint['iso_date'] = ISODateTime.convert_to_iso(date=constraint['date'], date_format=DateFormat.MM_DD_YYYY,
                                                             start_date=start_date)
@@ -506,7 +506,7 @@ def test_load_constraints_welllist(mocker: MockerFixture):
          RUNCONTROL /nexus_data/runcontrol.dat
          SURFACE Network 1  /surface_file_01.dat
          '''
-
+    start_date = '09/07/2024'
     runcontrol_contents = '''START 09/07/2024'''
 
     surface_file_contents = """
@@ -558,14 +558,18 @@ def test_load_constraints_welllist(mocker: MockerFixture):
 
     well_1_constraint_properties_1 = {'date': '09/07/2024', 'name': 'well_1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
     'unit_system': UnitSystem.ENGLISH}
-    well_1_expected_constraint_1 = NexusConstraint(properties_dict=well_1_constraint_properties_1, date_format=DateFormat.DD_MM_YYYY)
+    well_1_expected_constraint_1 = NexusConstraint(properties_dict=well_1_constraint_properties_1, date_format=DateFormat.DD_MM_YYYY,
+                                                   start_date=start_date)
     well_1_constraint_properties_2 = {'date': '23/08/2024', 'name': 'well_1', 'max_surface_oil_rate': 123.4, 'unit_system': UnitSystem.ENGLISH}
-    well_1_expected_constraint_2 = NexusConstraint(properties_dict=well_1_constraint_properties_2, date_format=DateFormat.DD_MM_YYYY)
+    well_1_expected_constraint_2 = NexusConstraint(properties_dict=well_1_constraint_properties_2, date_format=DateFormat.DD_MM_YYYY,
+                                                   start_date=start_date)
 
     well_2_constraint_properties_1 = {'date': '23/08/2024', 'name': 'well_2', 'max_surface_oil_rate': 123.4, 'unit_system': UnitSystem.ENGLISH}
-    well_2_expected_constraint_1 = NexusConstraint(properties_dict=well_2_constraint_properties_1, date_format=DateFormat.DD_MM_YYYY)
+    well_2_expected_constraint_1 = NexusConstraint(properties_dict=well_2_constraint_properties_1, date_format=DateFormat.DD_MM_YYYY,
+                                                   start_date=start_date)
     well_2_constraint_properties_2 = {'date': '15/10/2024', 'name': 'well_2', 'max_surface_liquid_rate': 4567, 'unit_system': UnitSystem.ENGLISH}
-    well_2_expected_constraint_2 = NexusConstraint(properties_dict=well_2_constraint_properties_2, date_format=DateFormat.DD_MM_YYYY)
+    well_2_expected_constraint_2 = NexusConstraint(properties_dict=well_2_constraint_properties_2, date_format=DateFormat.DD_MM_YYYY,
+                                                   start_date=start_date)
 
     # Act
     result = nexus_sim.network.constraints.get_all()

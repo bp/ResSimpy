@@ -151,7 +151,8 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                         start_line_index=table_start,
                                         network_names=network_names,
                                         date_format=date_format,
-                                        welllists=well_lists)
+                                        welllists=well_lists,
+                                        start_date=start_date)
 
             elif token_found == 'QMULT' or token_found == 'CONSTRAINT':
                 list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
@@ -162,7 +163,8 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                                      constraint_obj_dict=nexus_constraints,
                                                      preserve_previous_object_attributes=True,
                                                      date_format=date_format,
-                                                     welllists=well_lists)
+                                                     welllists=well_lists,
+                                                     start_date=start_date)
 
             elif token_found in [NexusWellLists.table_header(), NexusConLists.table_header()]:
                 list_objects = load_table_to_lists(file_as_list=file_as_list[table_start - 1:table_end],
@@ -195,7 +197,8 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                                      property_map=property_map,
                                                      current_date=current_date,
                                                      unit_system=unit_system, date_format=date_format,
-                                                     well_names=well_names, well_connections=well_connections)
+                                                     well_names=well_names, well_connections=well_connections,
+                                                     start_date=start_date)
 
             # store objects found into right dictionary
             list_of_token_obj = nexus_object_results[token_found]
@@ -324,7 +327,8 @@ def __activate_deactivate_checks(line: str, table_start: int, table_end: int, is
                                                       is_activated=is_activate_block,
                                                       date=current_date,
                                                       date_format=most_recent_matching_connection.date_format,
-                                                      unit_system=most_recent_matching_connection.unit_system)
+                                                      unit_system=most_recent_matching_connection.unit_system,
+                                                      start_date=start_date)
 
             nexus_object_results['WELLS'].append(new_well_connection)
 

@@ -61,7 +61,7 @@ class ISODateTime(datetime):
             date_format = DateFormat.MM_DD_YYYY
 
         if ISODateTime.isfloat(date) and start_date is None:
-            raise ValueError('Please provide start date when date is numeric')
+            raise ValueError(f'Found date: "{date}". Please provide start date when date is numeric')
         elif ISODateTime.isfloat(date) and start_date is not None:
             if date_format == DateFormat.DD_MM_YYYY:
                 converted_date = ISODateTime.strptime(start_date, '%d/%m/%Y') + timedelta(days=float(date))

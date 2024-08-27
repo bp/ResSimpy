@@ -40,6 +40,9 @@ class ModifyObjectOperations:
         network_element = network.find_network_element_with_dict(name, object_to_modify,
                                                                  network_attribute_name)
         existing_properties = network_element.to_dict(include_nones=False, units_as_string=False)
+        # pass through the start date
+        if getattr(network_element, 'start_date', None) is not None:
+            existing_properties['start_date'] = getattr(network_element, 'start_date')
         # do the union of the two dicts
         existing_properties.update(new_properties)
 
