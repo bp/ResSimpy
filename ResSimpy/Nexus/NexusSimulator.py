@@ -823,11 +823,14 @@ class NexusSimulator(Simulator):
         raise NotImplementedError("Not Implemented Yet")
 
     def summary(self):
-        """Returns a string summary of the model contents."""
+        """Returns a summary of the model contents."""
 
+        model_reporting_date = self.sim_controls.times[-1]
         model_summary = f"""Start Date: {self.start_date}
-        Grid Dimensions (x y z) : {self.grid.range_x} x {self.grid.range_y} x {self.grid.range_z}
+    Last reporting date: {model_reporting_date}
+    Grid Dimensions (x y z) : {self.grid.range_x} x {self.grid.range_y} x {self.grid.range_z}
     """
+
         return model_summary
 
     @property
