@@ -1924,7 +1924,7 @@ def test_load_surface_file_activate_deactivate(mocker):
         TIME 01/02/2024
           WELLS
          NAME   STREAM DATUM 
-         welcon_1 PRODUCER 1234 
+         WELCON_1 PRODUCER 1234 
          welcon_2 PRODUCER 5678 
          welcon_1_2 PRODUCER 9.87
          gaswelcon_1 PRODUCER 1.234
@@ -1939,7 +1939,7 @@ def test_load_surface_file_activate_deactivate(mocker):
          
          NODECON
          NAME      NODEIN    NODEOUT    TYPE
-         N1_N2     N1        N2         PIPE
+         N1_n2     N1        N2         PIPE
          ENDNODECON
          
         DEACTIVATE
@@ -1992,7 +1992,7 @@ def test_load_surface_file_activate_deactivate(mocker):
 
     fcs_file_path = 'fcs_file.fcs'
     nexus_sim = NexusSimulator(fcs_file_path)
-    welcon_props_1 = {'name': 'welcon_1', 'stream': 'PRODUCER', 'datum_depth': 1234.0, 'date': '01/02/2024',
+    welcon_props_1 = {'name': 'WELCON_1', 'stream': 'PRODUCER', 'datum_depth': 1234.0, 'date': '01/02/2024',
                       'unit_system': UnitSystem.ENGLISH}
     welcon_props_2 = {'name': 'welcon_2', 'stream': 'PRODUCER', 'datum_depth': 5678.0, 'date': '01/02/2024',
                       'unit_system': UnitSystem.ENGLISH}
@@ -2005,7 +2005,7 @@ def test_load_surface_file_activate_deactivate(mocker):
     original_gas_welcon_props_2 = {'name': 'gaswelcon_2', 'stream': 'PRODUCER', 'datum_depth': 5.678,
                                    'date': '01/02/2024',
                                    'unit_system': UnitSystem.ENGLISH}
-    welcon_props_3 = {'name': 'welcon_1', 'date': '09/07/2024', 'unit_system': UnitSystem.ENGLISH}
+    welcon_props_3 = {'name': 'WELCON_1', 'date': '09/07/2024', 'unit_system': UnitSystem.ENGLISH}
     gas_welcon_props_1 = {'name': 'gaswelcon_1', 'd_factor': 1.123e-5, 'non_darcy_flow_method': 'INVKH',
                           'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH}
     gas_welcon_props_2 = {'name': 'gaswelcon_2', 'd_factor': 123.4, 'non_darcy_flow_method': 'ABCD',
@@ -2017,9 +2017,9 @@ def test_load_surface_file_activate_deactivate(mocker):
     gas_welcon_props_5 = {'name': 'gaswelcon_2', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
     gas_welcon_props_6 = {'name': 'gaswelcon_1', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
     
-    node_con_prop_n1_n2 = {'name': 'N1_N2', 'node_in': 'N1', 'node_out': 'N2', 'con_type': 'PIPE', 
+    node_con_prop_n1_n2 = {'name': 'N1_n2', 'node_in': 'N1', 'node_out': 'N2', 'con_type': 'PIPE', 
                            'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH}
-    node_con_prop_n1_n2_later = {'name': 'N1_N2', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
+    node_con_prop_n1_n2_later = {'name': 'N1_n2', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
 
     welcon_1 = NexusWellConnection(welcon_props_1, date_format=DateFormat.DD_MM_YYYY, is_activated=False,
                                    start_date=start_date)

@@ -285,13 +285,13 @@ def __activate_deactivate_checks(line: str, table_start: int, table_end: int, is
 
     # If a wildcard is found, ensure that all connections that match the wildcard are dealt with.
     all_affected_well_connections = []
+    # case-insensitive matching
+    affected_connection_name = affected_connection_name.upper()
     if '*' in affected_connection_name:
-        all_well_connection_names = [connection.name for connection in nexus_object_results['WELLS']]
-        all_gas_well_connections_names = [connection.name for connection in nexus_object_results['GASWELLS']]
-        all_node_connection_names = [connection.name for connection in nexus_object_results['NODECON']]
-        all_well_connection_names.extend(all_gas_well_connections_names)
-        all_well_connection_names.extend(all_node_connection_names)
-
+        all_well_connection_names = []
+        for connection_type in ['WELLS', 'GASWELLS', 'NODECON']:
+            all_well_connection_names.extend([connection.name.upper() for
+                                              connection in nexus_object_results[connection_type]])
         # Get a list of all the distinct well connection names that match the wildcard in the same order.
         all_well_connections = list(dict.fromkeys(all_well_connection_names))
         all_affected_well_connections = [x for x in all_well_connections if
@@ -303,16 +303,12 @@ def __activate_deactivate_checks(line: str, table_start: int, table_end: int, is
     for well_connection_name in all_affected_well_connections:
         current_iso_date = ISODateTime.convert_to_iso(date=current_date, date_format=date_format,
                                                       start_date=start_date)
-
-        matching_well_connections = [x for x in nexus_object_results['WELLS'] if x.name == well_connection_name and
-                                     x.iso_date <= current_iso_date]
-        matching_gas_well_connections = [x for x in nexus_object_results['GASWELLS'] if
-                                         x.name == well_connection_name and
-                                         x.iso_date <= current_iso_date]
-        matching_node_connections = [x for x in nexus_object_results['NODECON'] if x.name == well_connection_name and
-                                     x.iso_date <= current_iso_date]
-        matching_well_connections.extend(matching_gas_well_connections)
-        matching_well_connections.extend(matching_node_connections)
+        matching_well_connections = []
+        for connection_type in ['WELLS', 'GASWELLS', 'NODECON']:
+            matching_connections = [x for x in nexus_object_results[connection_type] if
+                                    x.name.upper() == well_connection_name and
+                                    x.iso_date <= current_iso_date]
+            matching_well_connections.extend(matching_connections)
 
         if len(matching_well_connections) == 0:
             raise ValueError(f"Unable to find well connection with name {well_connection_name}")
