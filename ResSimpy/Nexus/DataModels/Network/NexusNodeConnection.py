@@ -59,10 +59,11 @@ class NexusNodeConnection(NodeConnection):
     gravity_pressure_gradient_mult: Optional[float] = None
     friction_pressure_gradient_mult: Optional[float] = None
     acceleration_pressure_gradient_mult: Optional[float] = None
+    is_activated: bool = True
 
     def __init__(self, properties_dict: dict[str, None | int | str | float], date: Optional[str] = None,
                  date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
-                 unit_system: Optional[UnitSystem] = None) -> None:
+                 unit_system: Optional[UnitSystem] = None, is_activated: bool = True) -> None:
         """Initialises the NexusNodeConnection class.
 
         Args:
@@ -71,11 +72,12 @@ class NexusNodeConnection(NodeConnection):
             date_format (Optional[DateFormat]): The date format that the object uses.
             start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
             unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
+            is_activated: bool: Whether the Connection has been set as activated. Defaults to True.
         """
         name = properties_dict.get('name', None)
         name = name if isinstance(name, str) else None
         super().__init__(_date_format=date_format, _start_date=start_date, _unit_system=unit_system, name=name)
-
+        self.is_activated = is_activated
         # Set the date related properties, then set the date, automatically setting the ISODate
         protected_attributes = ['date_format', 'start_date', 'unit_system']
 

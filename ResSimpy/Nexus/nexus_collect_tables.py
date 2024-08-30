@@ -11,6 +11,7 @@ from ResSimpy.FileOperations.file_operations import get_next_value
 from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.Network.NexusConLists import NexusConLists
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
+from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellLists import NexusWellLists
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
@@ -284,11 +285,13 @@ def __activate_deactivate_checks(line: str, table_start: int, table_end: int, is
 
     # If a wildcard is found, ensure that all connections that match the wildcard are dealt with.
     all_affected_well_connections = []
+    # case-insensitive matching
+    affected_connection_name = affected_connection_name.upper()
     if '*' in affected_connection_name:
-        all_well_connection_names = [connection.name for connection in nexus_object_results['WELLS']]
-        all_gas_well_connections_names = [connection.name for connection in nexus_object_results['GASWELLS']]
-        all_gas_well_connections_names.extend(all_gas_well_connections_names)
-
+        all_well_connection_names = []
+        for connection_type in ['WELLS', 'GASWELLS', 'NODECON']:
+            all_well_connection_names.extend([connection.name.upper() for
+                                              connection in nexus_object_results[connection_type]])
         # Get a list of all the distinct well connection names that match the wildcard in the same order.
         all_well_connections = list(dict.fromkeys(all_well_connection_names))
         all_affected_well_connections = [x for x in all_well_connections if
@@ -300,14 +303,12 @@ def __activate_deactivate_checks(line: str, table_start: int, table_end: int, is
     for well_connection_name in all_affected_well_connections:
         current_iso_date = ISODateTime.convert_to_iso(date=current_date, date_format=date_format,
                                                       start_date=start_date)
-
-        matching_well_connections = [x for x in nexus_object_results['WELLS'] if x.name == well_connection_name and
-                                     x.iso_date <= current_iso_date]
-        matching_gas_well_connections = [x for x in nexus_object_results['GASWELLS'] if
-                                         x.name == well_connection_name and
-                                         x.iso_date <= current_iso_date]
-
-        matching_well_connections.extend(matching_gas_well_connections)
+        matching_well_connections = []
+        for connection_type in ['WELLS', 'GASWELLS', 'NODECON']:
+            matching_connections = [x for x in nexus_object_results[connection_type] if
+                                    x.name.upper() == well_connection_name and
+                                    x.iso_date <= current_iso_date]
+            matching_well_connections.extend(matching_connections)
 
         if len(matching_well_connections) == 0:
             raise ValueError(f"Unable to find well connection with name {well_connection_name}")
@@ -321,6 +322,16 @@ def __activate_deactivate_checks(line: str, table_start: int, table_end: int, is
                                           x.iso_date == current_iso_date]
             for connection in exact_matching_connections:
                 connection.is_activated = is_activate_block
+        elif isinstance(most_recent_matching_connection, NexusNodeConnection):
+            # Create a new instance of the NodeConnection object to reflect the change in activation status
+            new_node_connection = NexusNodeConnection(properties_dict={'name': most_recent_matching_connection.name},
+                                                      is_activated=is_activate_block,
+                                                      date=current_date,
+                                                      date_format=most_recent_matching_connection.date_format,
+                                                      unit_system=most_recent_matching_connection.unit_system,
+                                                      start_date=start_date)
+
+            nexus_object_results['NODECON'].append(new_node_connection)
         else:
             # Create a new instance of the WellConnection object to reflect the change in activation status
             new_well_connection = NexusWellConnection(properties_dict={'name': most_recent_matching_connection.name},
