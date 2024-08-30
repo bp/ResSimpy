@@ -33,6 +33,7 @@ class WellConnection(DataObjectMixin, ABC):
     drainage_radius: Optional[float] = None
     pvt_method: Optional[int] = None
     d_factor: Optional[float] = None
+    on_time: Optional[float] = None
 
     @property
     def units(self) -> NetworkUnits:
