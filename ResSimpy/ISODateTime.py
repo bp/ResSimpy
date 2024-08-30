@@ -121,6 +121,16 @@ class ISODateTime(datetime):
                     new_date_str = datetime.strftime(self, '%d %b %Y %H:%M:%S').lstrip('0').upper()
                 else:
                     new_date_str = datetime.strftime(self, '%d %b %Y').lstrip('0').upper()
+            case DateFormat.DD_MM_YYYY:
+                if time_included:
+                    new_date_str = datetime.strftime(self, '%d/%m/%Y(%H:%M:%S)')
+                else:
+                    new_date_str = datetime.strftime(self, '%d/%m/%Y')
+            case DateFormat.MM_DD_YYYY:
+                if time_included:
+                    new_date_str = datetime.strftime(self, '%m/%d/%Y(%H:%M:%S)')
+                else:
+                    new_date_str = datetime.strftime(self, '%m/%d/%Y')
             case _:
                 raise NotImplementedError("Requested conversion not implemented yet.")
 
