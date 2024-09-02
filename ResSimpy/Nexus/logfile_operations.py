@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import warnings
 from datetime import datetime
 from typing import Optional, TYPE_CHECKING
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -154,7 +155,11 @@ class Logging:
         """
         folder_path = os.path.dirname(
             self.__model.original_fcs_file_path) if from_startup else os.path.dirname(self.__model.origin)
-        files = os.listdir(folder_path)
+        try:
+            files = os.listdir(folder_path)
+        except FileNotFoundError:
+            warnings.warn(f"Folder not found for logging details: {folder_path}")
+            return None
         original_fcs_file_location = os.path.basename(self.__model.original_fcs_file_path)
         log_file_name = os.path.splitext(original_fcs_file_location)[0] + ".log" if from_startup \
             or self.__model.root_name is None else self.__model.root_name + ".log"
