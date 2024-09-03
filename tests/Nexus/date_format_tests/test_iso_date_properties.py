@@ -188,3 +188,21 @@ def test_datetime_to_iso():
 
     # Assert
     assert result == expected_iso_date
+
+
+@pytest.mark.maintain_datetime_behaviour
+@pytest.mark.parametrize('iso_date, expected_str, dateformat', [
+    (ISODateTime(2022, 1, 19), '19 JAN 2022', DateFormat.DD_MMM_YYYY),
+    (ISODateTime(2022, 1, 19, 12, 0, 0), '19 JAN 2022 12:00:00', DateFormat.DD_MMM_YYYY),
+    (ISODateTime(2022, 1, 19), '19/01/2022', DateFormat.DD_MM_YYYY),
+    (ISODateTime(2022, 1, 19, 12, 0, 0), '19/01/2022(12:00:00)', DateFormat.DD_MM_YYYY),
+    (ISODateTime(2022, 1, 19), '01/19/2022', DateFormat.MM_DD_YYYY),
+    (ISODateTime(2022, 1, 19, 12, 0, 0), '01/19/2022(12:00:00)', DateFormat.MM_DD_YYYY),
+])
+def test_datetime_to_iso(iso_date, expected_str, dateformat):
+    # Arrange
+    # Act
+    result = iso_date.strftime_dateformat(dateformat)
+
+    # Assert
+    assert result == expected_str
