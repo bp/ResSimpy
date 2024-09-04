@@ -27,6 +27,7 @@ class GridArrayDefinition:
     mods: Optional[dict[str, pd.DataFrame]] = None
     keyword_in_include_file: bool = False
     absolute_path: Optional[str] = None
+    array: Optional[np.ndarray] = None
 
     def load_grid_array_definition_to_file_as_list(self) -> list[str]:
         """Loads the grid array definition to a file as a list of strings."""
@@ -40,8 +41,11 @@ class GridArrayDefinition:
     def get_array_from_file(self, x_range: None | int = None, y_range: None | int = None,
                             z_range: None | int = None) -> np.ndarray:
         """Returns a 1D numpy array from the grid array definition."""
+        if self.array is not None:
+            return self.array
         file_as_list = self.load_grid_array_definition_to_file_as_list()
-        return self.grid_file_as_list_to_numpy_array(file_as_list, x_range, y_range, z_range)
+        self.array = self.grid_file_as_list_to_numpy_array(file_as_list, x_range, y_range, z_range)
+        return self.array
 
     def filtered_grid_array_def_as_file(self) -> File:
         """Filters the grid array definition."""
@@ -88,3 +92,7 @@ class GridArrayDefinition:
             return array_or_value
         else:
             return array_or_value.max()
+
+    def get_array(self) -> np.ndarray:
+        """Returns the array from the grid array definition."""
+        return self.get_array_from_file()
