@@ -10,7 +10,8 @@ from typing import Optional, TYPE_CHECKING, Any
 import warnings
 
 from ResSimpy.File import File
-from ResSimpy.Grid import Grid, GridArrayDefinition
+from ResSimpy.Grid import Grid
+from ResSimpy.GridArrayDefinition import GridArrayDefinition
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGridArrayFunction import NexusGridArrayFunction
 from ResSimpy.Nexus.NexusKeywords.nexus_keywords import VALID_NEXUS_KEYWORDS

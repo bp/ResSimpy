@@ -2,8 +2,9 @@
 import numpy as np
 import pytest
 from ResSimpy.File import File
-from ResSimpy.Grid import GridArrayDefinition, Grid
+from ResSimpy.GridArrayDefinition import GridArrayDefinition
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
+from ResSimpy.grid_filtering_functions import grid_filter_file_as_list, filter_grid_array_definition
 
 from tests.utility_for_tests import mock_multiple_files
 
@@ -26,7 +27,7 @@ from tests.utility_for_tests import mock_multiple_files
 def test_grid_filter_file_as_list(file_as_list, expected_filtered_file_as_list):
     # Arrange
     # Act
-    result = Grid.grid_filter_file_as_list(file_as_list)
+    result = grid_filter_file_as_list(file_as_list)
     # Assert
     assert result == expected_filtered_file_as_list
 
@@ -55,9 +56,11 @@ def test_filter_grid_file(mocker):
     grid_array_definition = GridArrayDefinition(modifier='VALUE', value=file_path, keyword_in_include_file=False)
 
     # Act
-    result = Grid.filter_grid_array_definition(grid_array_definition)
+    result = filter_grid_array_definition(grid_array_definition)
+    result_from_array_def = grid_array_definition.filtered_grid_array_def_as_file()
     # Assert
     assert result == expected_file
+    assert result_from_array_def == expected_file
 
 
 def test_grid_to_numpy_array(mocker):
@@ -85,7 +88,7 @@ def test_grid_to_numpy_array(mocker):
     grid._range_z = 2
     # Act
     result = grid.grid_array_definition_to_numpy_array(grid_array_definition=grid.porosity)
-    result_from_grid_array = grid.porosity.get_array()
+    result_from_grid_array = grid.porosity.get_array_from_file()
     # Assert
     assert np.array_equal(expected_array, result)
     assert np.array_equal(expected_array, result_from_grid_array)
