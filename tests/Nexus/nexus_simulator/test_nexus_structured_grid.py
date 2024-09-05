@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import pytest
-from ResSimpy.Grid import GridArrayDefinition
+from ResSimpy.GridArrayDefinition import GridArrayDefinition
 from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
