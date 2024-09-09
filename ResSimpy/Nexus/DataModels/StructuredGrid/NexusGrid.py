@@ -113,6 +113,9 @@ class NexusGrid(Grid):
     __worka7: GridArrayDefinition
     __worka8: GridArrayDefinition
     __worka9: GridArrayDefinition
+    __kxeff: GridArrayDefinition
+    __kyeff: GridArrayDefinition
+    __kzeff: GridArrayDefinition
     __grid_multir_loaded: bool = False
     __multir_df: Optional[pd.DataFrame] = None
 
@@ -205,6 +208,9 @@ class NexusGrid(Grid):
         self.__tmz: GridArrayDefinition = GridArrayDefinition()
         self.__multbv: GridArrayDefinition = GridArrayDefinition()
         self.__pv: GridArrayDefinition = GridArrayDefinition()
+        self.__kxeff: GridArrayDefinition = GridArrayDefinition()
+        self.__kyeff: GridArrayDefinition = GridArrayDefinition()
+        self.__kzeff: GridArrayDefinition = GridArrayDefinition()
 
     def __wrap(self, value: Any) -> Any:
         if isinstance(value, tuple | list | set | frozenset):
@@ -297,6 +303,9 @@ class NexusGrid(Grid):
             PropertyToLoad('PERMX', GRID_ARRAY_FORMAT_KEYWORDS, self._kx),
             PropertyToLoad('PERMI', GRID_ARRAY_FORMAT_KEYWORDS, self._kx),
             PropertyToLoad('KY', GRID_ARRAY_FORMAT_KEYWORDS, self._ky),
+            PropertyToLoad('KXEFF', GRID_ARRAY_FORMAT_KEYWORDS, self.__kxeff),
+            PropertyToLoad('KYEFF', GRID_ARRAY_FORMAT_KEYWORDS, self.__kyeff),
+            PropertyToLoad('KZEFF', GRID_ARRAY_FORMAT_KEYWORDS, self.__kzeff),
             PropertyToLoad('KJ', GRID_ARRAY_FORMAT_KEYWORDS, self._ky),
             PropertyToLoad('PERMY', GRID_ARRAY_FORMAT_KEYWORDS, self._ky),
             PropertyToLoad('PERMJ', GRID_ARRAY_FORMAT_KEYWORDS, self._ky),
@@ -1227,7 +1236,7 @@ class NexusGrid(Grid):
 
     @property
     def multbv(self) -> GridArrayDefinition:
-        """Returns gird multvb.
+        """Returns grid multvb.
         Ensures grid properties are loaded and returns value of 'multvb'.
         """
         self.load_grid_properties_if_not_loaded()
@@ -1240,6 +1249,30 @@ class NexusGrid(Grid):
         """
         self.load_grid_properties_if_not_loaded()
         return self.__pv
+
+    @property
+    def kxeff(self) -> GridArrayDefinition:
+        """Returns the kxeff grid property.
+        Ensures grid properties are loaded and returns value of 'kxeff'.
+        """
+        self.load_grid_properties_if_not_loaded()
+        return self.__kxeff
+
+    @property
+    def kyeff(self) -> GridArrayDefinition:
+        """Returns the kyeff grid property.
+        Ensures grid properties are loaded and returns value of 'kyeff'.
+        """
+        self.load_grid_properties_if_not_loaded()
+        return self.__kyeff
+
+    @property
+    def kzeff(self) -> GridArrayDefinition:
+        """Returns the kzeff grid property.
+        Ensures grid properties are loaded and returns value of 'kzeff'.
+        """
+        self.load_grid_properties_if_not_loaded()
+        return self.__kzeff
 
     @property
     def multir(self) -> pd.DataFrame:
