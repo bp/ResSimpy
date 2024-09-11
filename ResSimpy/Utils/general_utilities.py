@@ -31,7 +31,10 @@ def convert_to_number(x: str) -> int | float:
         return int(x)
     except ValueError:
         # If it fails, try to convert the string to a float
-        return float(x)
+        try:
+            return float(x)
+        except ValueError:
+            raise ValueError(f'Provided string {x} is erroneous and needs to be either an integer or a float.')
 
 
 def expand_string_list_of_numbers(s: str) -> str:
