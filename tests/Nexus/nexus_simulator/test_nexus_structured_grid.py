@@ -808,6 +808,49 @@ def test_load_structured_grid_file_k_values(mocker, structured_grid_file_content
     assert result.kz.modifier == expected_kz_modifier
     assert result.kz.value == expected_kz_value
 
+def test_load_structured_grid_file_keff_values(mocker):
+    # Arrange
+    fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    base_structured_grid_file = "! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text " \
+                                "\nother text\n\n,NETGRS VALUE\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\n POROSITY " \
+                                "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc \n"
+
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file = (base_structured_grid_file + 
+                            "KXEFF VALUE\n INCLUDE /path/to/kxeff.inc\n KYEFF CON \n2 \n KZEFF VALUE \nINCLUDE\n kzeff.inc")
+
+    expected_value_kxeff = "/path/to/kxeff.inc"
+    expected_value_kyeff = "2"
+    expected_value_kzeff = "kzeff.inc"
+    expected_modifier_kxeff = "VALUE"
+    expected_modifier_kyeff = "CON"
+    expected_modifier_kzeff = "VALUE"
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+        {'testpath1/nexus_run.fcs': fcs_file,
+         '/run_control/path': '',
+         structured_grid_name: structured_grid_file,
+         '/path_to_netgrs_file/include_net_to_gross.inc': '',
+         'path/to/porosity.inc': '',
+         "/path/to/kz.inc": '',
+         '/path/to/kxeff.inc': '',
+         }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
+    result = simulation.grid
+    
+    # Assert
+    assert result.kxeff.value == expected_value_kxeff
+    assert result.kxeff.modifier == expected_modifier_kxeff
+    assert result.kyeff.value == expected_value_kyeff
+    assert result.kyeff.modifier == expected_modifier_kyeff
+    assert result.kzeff.value == expected_value_kzeff
+    assert result.kzeff.modifier == expected_modifier_kzeff  
+
 
 @pytest.mark.parametrize("new_porosity, new_sw, new_netgrs, new_kx, new_ky, new_kz",
                          [
