@@ -9,6 +9,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Utils import to_dict_generic
+from ResSimpy.Utils.general_utilities import expand_string_list_of_numbers, convert_to_number
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Utils.invert_nexus_map import invert_nexus_map, attribute_name_to_nexus_keyword, \
     nexus_keyword_to_attribute_name
@@ -46,6 +47,7 @@ class GenericTest:
 
     def __str__(self):
         return generic_str(self)
+
 
 def test_to_dict():
     # Arrange
@@ -204,3 +206,34 @@ def test_to_string_generic(mocker, headers, expected_result):
 
     # Assert
     assert result_string == expected_result
+
+
+@pytest.mark.parametrize('input_string, expected_result', [
+    # string with repeats
+    ("1 2 3 4*20 3*12.5 4 5 2*6.4e-5 1*7.2E+3 8",
+     "1 2 3 20 20 20 20 12.5 12.5 12.5 4 5 6.4e-05 6.4e-05 7200.0 8"),
+    # no repeats
+    ('1 2 3 4 5',
+     '1 2 3 4 5')
+    ], ids=['string_with_repeats', 'no_repeats'])
+def test_expand_string_list_of_numbers(input_string, expected_result):
+    # Arrange
+
+    # Act
+    result = expand_string_list_of_numbers(input_string)
+
+    # Assert
+    assert result == expected_result
+
+
+def test_convert_to_number_error():
+    # Arrange
+    err_input = '3abc'
+    expected_error_msg = f'Provided string {err_input} is erroneous and needs to be either an integer or a float.'
+
+    # Act
+    with pytest.raises(ValueError) as error:
+        convert_to_number(err_input)
+
+    # Assert
+    assert str(error.value) == expected_error_msg
