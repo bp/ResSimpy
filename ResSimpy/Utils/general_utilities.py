@@ -1,3 +1,6 @@
+import re
+
+
 def check_if_string_is_float(x: str) -> bool:
     """Function to check if a string can be successfully cast to a float.
 
@@ -12,3 +15,43 @@ def check_if_string_is_float(x: str) -> bool:
         return True
     except ValueError:
         return False
+
+
+def convert_to_number(x: str) -> int | float:
+    """Function that takes a numerical string and casts it to an int or float, as appropriate.
+
+    Args:
+        x (str): Numerical string
+
+    Returns:
+        int | float: integer or float value from input numerical string
+    """
+    try:
+        # Try to convert the string to an integer
+        return int(x)
+    except ValueError:
+        # If it fails, try to convert the string to a float
+        return float(x)
+
+
+def expand_string_list_of_numbers(s: str) -> str:
+    """Function thats a string of numbers with repeats such as 1 2 3*4 5 and expands it appropriately into 1 2 4 4 4 5.
+
+    Args:
+        s (str): Input string of numbers with repeats, e.g., 1 2 3*4 5
+
+    Returns:
+        str: Expanded string of numbers, e.g., 1 2 4 4 4 5
+    """
+    # Find all occurrences of the pattern 'count*number' where number can be an integer or a float
+    pattern = re.compile(r'(\d+)\*(\d+\.?\d*)')
+    matches = pattern.findall(s)
+
+    # Replace each match with the expanded string
+    for match in matches:
+        count = int(match[0])
+        value = convert_to_number(match[1])
+        expanded = ' '.join([str(value)] * count)
+        s = s.replace(f'{count}*{value}', expanded)
+
+    return s

@@ -9,6 +9,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.ISODateTime import ISODateTime
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Utils import to_dict_generic
+from ResSimpy.Utils.general_utilities import expand_string_list_of_numbers
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Utils.invert_nexus_map import invert_nexus_map, attribute_name_to_nexus_keyword, \
     nexus_keyword_to_attribute_name
@@ -46,6 +47,7 @@ class GenericTest:
 
     def __str__(self):
         return generic_str(self)
+
 
 def test_to_dict():
     # Arrange
@@ -204,3 +206,15 @@ def test_to_string_generic(mocker, headers, expected_result):
 
     # Assert
     assert result_string == expected_result
+
+
+def test_expand_string_list_of_numbers():
+    # Arrange
+    input_string = "1 2 3 4*20 3*12.5 4 5"
+    expected_result = "1 2 3 20 20 20 20 12.5 12.5 12.5 4 5"
+
+    # Act
+    result = expand_string_list_of_numbers(input_string)
+
+    # Assert
+    assert result == expected_result
