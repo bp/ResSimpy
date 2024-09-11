@@ -148,8 +148,7 @@ C
 C
 C
 IREGION VALUE"""
-                              )
-
+                              ),
                          ])
 def test_grid_arr_in_include_file_ireg(mocker, structured_grid_file_contents, include_file_contents):
     # Arrange
@@ -520,6 +519,7 @@ LIST"""  # ends structured_grid_file_contents
     assert result.iregion['IREG1'].modifier == 'VALUE'
     assert result.iregion['inj_02'].modifier == 'CON'
     assert result.iregion['IREG1'].value == '/path/to/file.inc'
+    assert result.iregion['IREG1'].absolute_path == '/path/to/file.inc'
     assert result.iregion['inj_02'].value == '3'
     assert result.iregion['inj_03'].value == '4'
     assert result.iregion['inj_03'].modifier == 'CON'
@@ -1557,20 +1557,26 @@ def test_nested_includes_with_grid_array_keywords(mocker):
     assert result_kx == expected_kx_result
     assert result_ky == expected_ky_result
 
-
-def test_grid_array_definitions_abs_path(mocker):
+@pytest.mark.parametrize('structured_grid_file_contents, modifier, full_file_path', [
+    ('''! Array data
+    KX VALUE
+    INCLUDE inc_file_kx.inc''', 'VALUE', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc')),
+     ('''! Array data
+     KX ZVAR
+     INCLUDE inc_file_kx.inc''', 'ZVAR', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc')),
+    ('''! Array data
+    KX YVAR
+    INCLUDE inc_file_kx.inc''', 'YVAR', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc')),
+])
+def test_grid_array_definitions_abs_path(mocker, structured_grid_file_contents, modifier,
+                                         full_file_path):
     # Arrange
     fcs_path = '/root/nexus_run.fcs'
     structured_grid_path = 'nexus_files/grid/test_structured_grid.dat'
     fcs_file_contents = (f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID "
                          f"{structured_grid_path}")
-    structured_grid_file_contents = '''! Array data
-    KX VALUE
-    INCLUDE inc_file_kx.inc'''
 
     full_structured_grid_path = os.path.join('/root', structured_grid_path)
-    include_file_location_kx = 'inc_file_kx.inc'
-    full_file_path = os.path.join('/root', 'nexus_files/grid', include_file_location_kx)
     include_file_contents_kx = 'some content that should be skipped'
 
     def mock_open_wrapper(filename, mode):
@@ -1586,7 +1592,7 @@ def test_grid_array_definitions_abs_path(mocker):
 
     sim_obj = NexusSimulator(origin=fcs_path)
 
-    expected_kx_result = GridArrayDefinition(modifier='VALUE', value='inc_file_kx.inc', mods=None,
+    expected_kx_result = GridArrayDefinition(modifier=modifier, value='inc_file_kx.inc', mods=None,
                                              absolute_path=full_file_path)
 
     # Act
