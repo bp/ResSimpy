@@ -47,14 +47,15 @@ def expand_string_list_of_numbers(s: str) -> str:
         str: Expanded string of numbers, e.g., 1 2 4 4 4 5
     """
     # Find all occurrences of the pattern 'count*number' where number can be an integer or a float
-    pattern = re.compile(r'(\d+)\*(\d+\.?\d*)')
+    pattern = re.compile(r'(\d+)\*(\d+\.?\d*[eE]?[-+]?\d+)')
     matches = pattern.findall(s)
 
     # Replace each match with the expanded string
     for match in matches:
         count = int(match[0])
-        value = convert_to_number(match[1])
+        str_value = match[1]
+        value = convert_to_number(str_value)
         expanded = ' '.join([str(value)] * count)
-        s = s.replace(f'{count}*{value}', expanded)
+        s = s.replace(f'{count}*{str_value}', expanded)
 
     return s

@@ -210,8 +210,8 @@ def test_to_string_generic(mocker, headers, expected_result):
 
 @pytest.mark.parametrize('input_string, expected_result', [
     # string with repeats
-    ("1 2 3 4*20 3*12.5 4 5",
-     "1 2 3 20 20 20 20 12.5 12.5 12.5 4 5"),
+    ("1 2 3 4*20 3*12.5 4 5 2*6.4e-5 1*7.2E+3 8",
+     "1 2 3 20 20 20 20 12.5 12.5 12.5 4 5 6.4e-05 6.4e-05 7200.0 8"),
     # no repeats
     ('1 2 3 4 5',
      '1 2 3 4 5')
