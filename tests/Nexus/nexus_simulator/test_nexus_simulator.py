@@ -1,9 +1,13 @@
 import os
 import uuid
+from unittest import mock
+
 import pytest
 import pandas as pd
 from datetime import datetime, timezone
 
+from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
+from ResSimpy.Well import Well
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
@@ -34,6 +38,10 @@ from pytest_mock import MockerFixture
 from unittest.mock import Mock
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusWells import NexusWells
+from ResSimpy.Nexus.NexusRelPermMethods import NexusRelPermMethods
+from ResSimpy.Nexus.NexusPVTMethods import NexusPVTMethods
+from ResSimpy.Nexus.NexusHydraulicsMethods import NexusHydraulicsMethods
+from ResSimpy.Nexus.NexusEquilMethods import NexusEquilMethods
 from ResSimpy.Nexus.runcontrol_operations import SimControls
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator
@@ -339,7 +347,7 @@ def test_output_destination_missing(mocker, run_control_path, expected_run_contr
                          ])
 def test_origin_missing(mocker, run_control_path, expected_run_control_path, date_format,
                         expected_use_american_date_format):
-    """Check that an exception is raised if the user attempts to initialise the class without an fcs file declared"""
+    """Check that an exception is raised if the user attempts to initialise the class without a fcs file declared"""
     # Arrange
     fcs_file = f"RUNCONTROL {run_control_path}\nDATEFORMAT {date_format}"
     open_mock = mocker.mock_open(read_data=fcs_file)
@@ -2325,12 +2333,11 @@ def test_wells_and_network_equal_empty(mocker):
     with pytest.raises(ValueError):
         fake_simulator1.wells_and_network_equal(fake_simulator2)
 
-
-def test_model_summary(mocker, completion_1=None, sim_controls=None):
-    #Arrange
-    #fcs_contents = "RUNCONTROL /path/to/run/control\n  DATE_FORMAT DD/MM/YYYY"
-    #open_mock = mocker.mock_open(read_data=fcs_contents)
-    #mocker.patch("builtins.open", open_mock)
+def test_model_summary(mocker):
+    # Arrange
+    # fcs_contents = "RUNCONTROL /path/to/run/control\n  DATE_FORMAT DD/MM/YYYY"
+    # open_mock = mocker.mock_open(read_data=fcs_contents)
+    # mocker.patch("builtins.open", open_mock)
 
     model = NexusSimulator(origin='test.fcs')
     model._start_date = '15/01/2020'
@@ -2346,17 +2353,94 @@ def test_model_summary(mocker, completion_1=None, sim_controls=None):
 
     wells = NexusWells(model=model)
     unit_system = UnitSystem.ENGLISH
-    completion_1 = NexusCompletion(date_format=DateFormat.DD_MM_YYYY, i=1, j=2, k=3, well_radius=4.5, date='16/01/2020')
-    completion_2 = NexusCompletion(date_format=DateFormat.DD_MM_YYYY, i=1, j=2, k=4, well_radius=5, date='16/01/2020')
-    completion_3 = NexusCompletion(date_format=DateFormat.DD_MM_YYYY, i=1, j=2, k=5, well_radius=5.5, date='16/01/2020')
-    completion_4 = NexusCompletion(date_format=DateFormat.DD_MM_YYYY, i=1, j=2, k=5, well_radius=6, date='16/01/2020')
+    completion_1 = NexusCompletion(date_format=DateFormat.DD_MM_YYYY, i=1, j=2, k=3, well_radius=4.5,
+                                   date='16/01/2020')
+    completion_2 = NexusCompletion(date_format=DateFormat.DD_MM_YYYY, i=1, j=2, k=4, well_radius=5,
+                                   date='16/01/2020')
+    completion_3 = NexusCompletion(date_format=DateFormat.DD_MM_YYYY, i=1, j=2, k=5, well_radius=5.5,
+                                   date='16/01/2020')
+    completion_4 = NexusCompletion(date_format=DateFormat.DD_MM_YYYY, i=1, j=2, k=5, well_radius=6,
+                                   date='16/01/2020')
     wells._wells = [NexusWell(parent_wells_instance=wells, unit_system=unit_system, well_name="test well",
                               completions=[completion_1, completion_2, completion_3, completion_4])]
     model._wells = wells
 
-    expected_summary = """Start Date: 15/01/2020
+    # data for get_fluid_type
+    fake_model_files = FcsNexusFile(location='test_location')
+    fake_surface_file = NexusFile(location='test_surface_location', file_content_as_list=[f'BLACKOIL'])
+    fake_surface_files = {0: fake_surface_file}
+    fake_model_files.surface_files = fake_surface_files
+    model._model_files = fake_model_files
+
+    # Relperm
+    relpm_files = []
+    for i in range(3):
+        relpm_file = NexusFile(location=f'my/relpm/file{i + 1}.dat', origin='path/nexus_run.fcs')
+        relpm_file.line_locations = [(0, uuid.uuid4())]
+        relpm_files.append(relpm_file)
+
+    loaded_relperms = {
+        1: NexusRelPermMethod(file=relpm_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+        2: NexusRelPermMethod(file=relpm_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+        3: NexusRelPermMethod(file=relpm_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH),
+    }
+    fake_relperm = NexusRelPermMethods(inputs=loaded_relperms, model_unit_system=UnitSystem.ENGLISH)
+    model._relperm = fake_relperm
+
+    # PVT
+    pvt_files = []
+    for i in range(3):
+        pvt_file = NexusFile(location=f'my/pvt/file{i + 1}.dat', origin='path/nexus_run.fcs')
+        pvt_file.line_locations = [(0, uuid.uuid4())]
+        pvt_files.append(pvt_file)
+
+    loaded_pvt = {1: NexusPVTMethod(file=pvt_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                  2: NexusPVTMethod(file=pvt_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                  3: NexusPVTMethod(file=pvt_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH),
+                  }
+    fake_pvt = NexusPVTMethods(inputs=loaded_pvt, model_unit_system=UnitSystem.ENGLISH)
+    model._pvt = fake_pvt
+
+    #Hydraulics
+    hyd_files = []
+    for i in range(3):
+        hyd_file = NexusFile(location=f'my/hyd/file{i + 1}.dat', origin='path/nexus_run.fcs')
+        hyd_file.line_locations = [(0, uuid.uuid4())]
+        hyd_files.append(hyd_file)
+
+    loaded_hyd = {1: NexusHydraulicsMethod(file=hyd_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                  2: NexusHydraulicsMethod(file=hyd_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                  3: NexusHydraulicsMethod(file=hyd_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH),
+                  }
+    fake_hyd = NexusHydraulicsMethods(inputs=loaded_hyd, model_unit_system=UnitSystem.ENGLISH)
+    model._hydraulics = fake_hyd
+
+    #Equil
+    eq_files = []
+    for i in range(3):
+        eq_file = NexusFile(location=f'my/equil/file{i + 1}.dat', origin='path/nexus_run.fcs')
+        eq_file.line_locations = [(0, uuid.uuid4())]
+        eq_files.append(eq_file)
+
+    loaded_equil = {1: NexusEquilMethod(file=eq_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                    2: NexusEquilMethod(file=eq_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                    3: NexusEquilMethod(file=eq_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH)
+                    }
+
+    fake_equil = NexusEquilMethods(inputs=loaded_equil, model_unit_system=unit_system.ENGLISH)
+    model._equil = fake_equil
+
+    simulation = NexusSimulator(origin='path/nexus_run.fcs')
+
+    expected_summary = f"""Start Date: 15/01/2020
     Last reporting date: 01/12/2021
     Grid Dimensions (x y z) : 1 x 2 x 3
+    Well summary: Well names: ['test well has: 4 completions']
+    Fluid type: BLACKOIL
+    Relperm: 1: {os.path.join('path', 'my/relpm/file1.dat')} 2: {os.path.join('path', 'my/relpm/file2.dat')} 3: {os.path.join('path', 'my/relpm/file3.dat ')}
+    PVT: 1: {os.path.join('path', 'my/pvt/file1.dat')} 2: {os.path.join('path', 'my/pvt/file2.dat')} 3: {os.path.join('path', 'my/pvt/file3.dat ')}
+    Hydraulics: 1: {os.path.join('path', 'my/hyd/file1.dat')} 2: {os.path.join('path', 'my/hyd/file2.dat')} 3: {os.path.join('path', 'my/hyd/file3.dat ')}
+    Equil: 1: {os.path.join('path', 'my/equil/file1.dat')} 2: {os.path.join('path', 'my/equil/file2.dat')} 3: {os.path.join('path', 'my/equil/file3.dat ')}
     """
 
     # Act

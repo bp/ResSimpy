@@ -235,8 +235,8 @@ def clean_up_string(value: str) -> str:
 def check_for_and_populate_common_input_data(
         file_as_list: list[str],
         property_dict: dict[str,
-                            Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
-                                  dict[str, Union[float, pd.DataFrame]]]]
+        Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
+        dict[str, Union[float, pd.DataFrame]]]]
 ) -> None:
     """Loop through lines of Nexus input file content looking for common input data.
 
@@ -258,8 +258,8 @@ def check_for_and_populate_common_input_data(
 def check_property_in_line(
         line: str,
         property_dict: dict[str,
-                            Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
-                                  dict[str, Union[float, pd.DataFrame]]]], file_as_list: list[str]) -> None:
+        Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
+        dict[str, Union[float, pd.DataFrame]]]], file_as_list: list[str]) -> None:
     """Given a line of Nexus input file content looking for common input data.
 
     e.g., units such as ENGLISH or METRIC, temperature units such as FAHR or CELSIUS, DATEFORMAT, etc.,

@@ -1,4 +1,4 @@
-""""Class for collection of Nexus relative permeability and capillary pressure property inputs."""
+"""Class for collection of Nexus relative permeability and capillary pressure property inputs."""
 from __future__ import annotations
 from dataclasses import dataclass
 import os
@@ -88,3 +88,12 @@ class NexusRelPermMethods(RelPerm):
     def model_unit_system(self) -> UnitSystem:
         """Return the model unit system."""
         return self.__model_unit_system
+
+    @property
+    def summary(self) -> str:
+        relperm_summary = ''
+        for key, value in self.inputs.items():
+            relperm_summary += f'{key}: {value.file.location} '
+
+        return relperm_summary
+

@@ -81,7 +81,7 @@ class NexusSimulator(Simulator):
             ValueError: If the FCS file path is not given
 
         Examples:
-            Example of calling a NexusSimulator with a file path to an fcs file:
+            Example of calling a NexusSimulator with a file path to a fcs file:
 
             >>> from ResSimpy.Nexus.NexusSimulator import NexusSimulator
             >>> model = NexusSimulator(origin="/path/to/fcs_file.fcs")
@@ -149,7 +149,7 @@ class NexusSimulator(Simulator):
         return printable_str
 
     @staticmethod
-    def _attr_info_to_tuple(sim_attr: Union[dict, Sequence])\
+    def _attr_info_to_tuple(sim_attr: Union[dict, Sequence]) \
             -> tuple[tuple[tuple[str, Union[str, bool, float]], ...], ...]:
         """Convert the network constraints/wells completions attribute to a tuple of tuples so that it is hashable.
 
@@ -508,7 +508,7 @@ class NexusSimulator(Simulator):
         # fcs_content_with_includes is used to scan only the fcs file and files specifically called with the INCLUDE
         # token in front of it to prevent it from reading through all the other files. We need this here to extract the
         # fcs properties only. The FcsFile structure is then generated and stored in the object (with all the nesting of
-        # the NexusFiles as self.model_files (e.g. STRUCTURED_GRID, RUNCONTROL etc)
+        # the NexusFiles as self.model_files (e.g. STRUCTURED_GRID, RUNCONTROL etc.)
         fcs_content_with_includes = NexusFile.generate_file_include_structure(
             self.__new_fcs_file_path).get_flat_list_str_file
         self._model_files = FcsNexusFile.generate_fcs_structure(self.__new_fcs_file_path)
@@ -824,12 +824,27 @@ class NexusSimulator(Simulator):
 
     def summary(self):
         """Returns a summary of the model contents."""
-
+        relperm_files = self.relperm.summary
+        pvt_files = self.pvt.summary
+        hyd_files = self.hydraulics.summary
+        equil_files = self.equil.summary
+        fluid_type = self.get_fluid_type(surface_file_content=self.model_files.surface_files[0].file_content_as_list)
+        list_of_wells = self.wells.get_all()
+        list_of_well_name = [well.well_name for well in list_of_wells]
+        completions = [len(well.completions) for well in list_of_wells]
+        well_summary = [f'{y} has: {z} completions' for y, z in zip(list_of_well_name, completions)]
         model_reporting_date = self.sim_controls.times[-1]
         model_summary = f"""Start Date: {self.start_date}
     Last reporting date: {model_reporting_date}
     Grid Dimensions (x y z) : {self.grid.range_x} x {self.grid.range_y} x {self.grid.range_z}
+    Well summary: Well names: {well_summary}
+    Fluid type: {fluid_type}
+    Relperm: {relperm_files}
+    PVT: {pvt_files}
+    Hydraulics: {hyd_files}
+    Equil: {equil_files}
     """
+
 
         return model_summary
 
