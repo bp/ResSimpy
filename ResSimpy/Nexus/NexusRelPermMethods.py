@@ -98,6 +98,7 @@ class NexusRelPermMethods(RelPerm):
 
     @property
     def summary(self) -> str:
+        """Returns a string summary of 'NexusRelPermMethods' inputs in a dictionary."""
         relperm_summary = ''
         for key, value in self.inputs.items():
             relperm_summary += f'{key}: {value.file.location} '

@@ -95,6 +95,7 @@ class NexusPVTMethods(PVT):
 
     @property
     def summary(self) -> str:
+        """Returns a string summary of 'NexusPVTMethods' inputs in a dictionary."""
         pvt_summary = ''
         for key, value in self.inputs.items():
             pvt_summary = pvt_summary + f'{key}: {value.file.location} '

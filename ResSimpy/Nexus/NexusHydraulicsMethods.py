@@ -94,6 +94,7 @@ class NexusHydraulicsMethods(Hydraulics):
 
     @property
     def summary(self) -> str:
+        """Returns a string summary of 'NexusHydraulicsMethods' inputs in a dictionary."""
         hydraulics_summary = ''
         for key, value in self.inputs.items():
             hydraulics_summary += f'{key}: {value.file.location} '

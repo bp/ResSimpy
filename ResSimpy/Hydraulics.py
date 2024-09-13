@@ -5,7 +5,6 @@ from typing import Mapping
 from ResSimpy.DynamicProperty import DynamicProperty
 
 
-
 @dataclass(kw_only=True)
 class Hydraulics(ABC):
     """The abstract base class for a collection of hydraulics inputs.

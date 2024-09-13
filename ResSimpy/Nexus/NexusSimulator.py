@@ -837,7 +837,7 @@ class NexusSimulator(Simulator):
         """Not implemented for Nexus yet."""
         raise NotImplementedError("Not Implemented Yet")
 
-    def summary(self):
+    def summary(self) -> str:
         """Returns a summary of the model contents."""
         relperm_files = self.relperm.summary
         pvt_files = self.pvt.summary
@@ -859,8 +859,6 @@ class NexusSimulator(Simulator):
     Hydraulics: {hyd_files}
     Equil: {equil_files}
     """
-
-
         return model_summary
 
     @property
