@@ -129,7 +129,7 @@ class NexusWells(Wells):
             self.__date_format = date_format
         self._wells_loaded = True
 
-    def Modify (self, well_name: str, completion_properties_list: list[dict[str, None | float | int | str]],
+    def modify(self, well_name: str, completion_properties_list: list[dict[str, None | float | int | str]],
                how: OperationEnum = OperationEnum.ADD) -> None:
         """Modify the existing wells in memory using a dictionary of properties.
 
@@ -139,7 +139,7 @@ class NexusWells(Wells):
             completion_properties_list (list[InputDict]): a dictionary containing the properties to modify with the \
                 attribute as keys and the values as the updated property value. If remove will remove perforation that \
                 matches the values in the dictionary.
-            how (OperationEnum): operation enum taking the values OperationEnum. ADD, OperationEnum.REMOVE. \
+            how (OperationEnum): operation enum taking the values OperationEnum.ADD, OperationEnum.REMOVE. \
                 Specifies how to modify the existing wells perforations.
             remove_all_that_match (bool): If True will remove all wells that partially match the completion_properties\
                 provided. If False will remove perforation if only one matches, if several match throws a warning and \
