@@ -80,9 +80,17 @@ class NexusWellConnections(WellConnections):
         return obj_to_dataframe(self._well_connections)
 
     def get_overview(self) -> str:
+        """Returns overview of the well connections."""
         raise NotImplementedError('To be implemented')
 
     def load(self, surface_file: File, start_date: str, default_units: UnitSystem) -> None:
+        """Loads well connections surface file as Nexus.
+
+        Args:
+            surface_file(file): path to the surface file.
+            start_date(str): start date of the run.
+            default_units(UnitSystem): default units to use if no units are found.
+        """
         new_well_connections, _ = collect_all_tables_to_objects(surface_file, {'WELLS': NexusWellConnection,
                                                                                'GASWELLS': NexusWellConnection},
                                                                 start_date=start_date,
@@ -104,15 +112,15 @@ class NexusWellConnections(WellConnections):
         self.__remove_object_operations.remove_object_from_network_main(
             obj_to_remove, self._network_element_name, self._well_connections)
 
-    def add(self, obj_to_remove: dict[str, None | str | float | int]) -> None:
+    def add(self, obj_to_add: dict[str, None | str | float | int]) -> None:
         """Adds a well connection to a network, taking a dictionary with properties for the new well connection.
 
         Args:
-            obj_to_remove (dict[str, None | str | float | int]): dictionary taking all the properties for the new
+            obj_to_add (dict[str, None | str | float | int]): dictionary taking all the properties for the new
             well connection.
             Requires date and a name.
         """
-        new_object = self.__add_object_operations.add_network_obj(obj_to_remove, NexusWellConnection,
+        new_object = self.__add_object_operations.add_network_obj(obj_to_add, NexusWellConnection,
                                                                   self.__parent_network)
         self._add_to_memory([new_object])
 
@@ -134,13 +142,16 @@ class NexusWellConnections(WellConnections):
 
     @property
     def table_header(self) -> str:
+        """Returns the header for the wellconnections table in surface file."""
         return 'WELLS'
 
     @property
     def table_footer(self) -> str:
+        """Returns the footer of the wellconnections table in surface file."""
         return 'END' + self.table_header
 
     @property
     def well_connections(self) -> Sequence[NexusWellConnection]:
+        """Returns a list of all well connections loaded."""
         self.__parent_network.get_load_status()
         return self._well_connections

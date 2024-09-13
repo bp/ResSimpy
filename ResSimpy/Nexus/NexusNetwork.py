@@ -87,6 +87,7 @@ class NexusNetwork(Network):
 
     @property
     def model(self) -> NexusSimulator:
+        """Returns Nexus simulator model."""
         return self.__model
 
     def get_network_file(self, method_number: int = 1) -> NexusFile:

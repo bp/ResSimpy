@@ -29,6 +29,8 @@ class Constraint(DataObjectMixin, ABC):
     bottom_hole_pressure: Optional[float] = None
     tubing_head_pressure: Optional[float] = None
     max_reservoir_total_fluids_rate: Optional[float] = None
+    max_avg_comp_dp: Optional[float] = None
+    max_comp_dp: Optional[float] = None
 
     @property
     def units(self) -> ConstraintUnits:

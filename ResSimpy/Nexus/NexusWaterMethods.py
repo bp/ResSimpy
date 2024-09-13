@@ -61,15 +61,18 @@ class NexusWaterMethods(Water):
 
     @property
     def inputs(self) -> MutableMapping[int, NexusWaterMethod]:
+        """Returns mapping of water property methods as a dictionary where keys are the method number of type int."""
         if not self.__properties_loaded:
             self.load_water_methods()
         return self.__inputs
 
     @property
     def files(self) -> dict[int, NexusFile]:
+        """Returns dictionary of 'NexusFile' objects where keys are of type int."""
         return self.__files
 
     def load_water_methods(self) -> None:
+        """Loads water properties from files and initialises NexusWaterMethod object."""
         # Read in water properties from Nexus water method files
         if self.__files is not None and len(self.__files) > 0:  # Check if water files exist
             for table_num in self.__files.keys():  # For each water property method

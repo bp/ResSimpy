@@ -19,7 +19,7 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
                             unit_system: UnitSystem, property_map: dict[str, tuple[str, type]],
                             existing_constraints: dict[str, list[NexusConstraint]], nexus_file: File,
                             start_line_index: int, date_format: DateFormat, welllists: list[NexusWellList],
-                            network_names: Optional[list[str]] = None) -> None:
+                            network_names: Optional[list[str]] = None, start_date: str | None = None) -> None:
     """Loads table of constraints with the wellname/node first and the constraints following inline
         uses previous set of constraints as still applied to the well.
 
@@ -38,6 +38,7 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
             Used in deriving constraints from wildcards. Defaults to None.
         date_format (Optional[DateFormat]): The date format of the object.
         welllists (list[WellList]): A list of all the WELLLISTs loaded in so far.
+        start_date (str | None): The start date of the model. Defaults to None.
 
     Returns:
     -------
@@ -119,11 +120,11 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
                     nexus_file.add_object_locations(latest_constraint.id, [index + start_line_index])
                 else:
                     # otherwise take a copy of the previous constraint and add the additional properties
-                    new_constraint = constraint(properties_dict, date_format=date_format)
+                    new_constraint = constraint(properties_dict, date_format=date_format, start_date=start_date)
                     well_constraints.append(new_constraint)
                     nexus_file.add_object_locations(new_constraint.id, [index + start_line_index])
             else:
-                new_constraint = constraint(properties_dict, date_format=date_format)
+                new_constraint = constraint(properties_dict, date_format=date_format, start_date=start_date)
                 existing_constraints[name_of_node] = [new_constraint]
                 nexus_file.add_object_locations(new_constraint.id, [index + start_line_index])
 

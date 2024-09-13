@@ -59,10 +59,12 @@ class NexusWellMod(DataObjectMixin):
         return generic_str(self)
 
     def to_dict(self, keys_in_nexus_style: bool = False, add_date: bool = True, add_units: bool = True,
-                include_nones: bool = True, units_as_string: bool = True) -> dict[str, str | float | int | None]:
+                add_iso_date: bool = False, include_nones: bool = True,
+                units_as_string: bool = True) -> dict[str, str | float | int | None]:
         """Returns a dictionary representation of the wellmod."""
         return to_dict(nexus_object=self, keys_in_nexus_style=keys_in_nexus_style, add_date=add_date,
-                       add_units=add_units, include_nones=include_nones, units_as_string=units_as_string)
+                       add_units=add_units, include_nones=include_nones, units_as_string=units_as_string,
+                       add_iso_date=add_iso_date)
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
@@ -87,4 +89,5 @@ class NexusWellMod(DataObjectMixin):
 
     @property
     def units(self) -> CompletionUnits:
+        """Returns the completion units for the wellmod."""
         return CompletionUnits(self.unit_system)

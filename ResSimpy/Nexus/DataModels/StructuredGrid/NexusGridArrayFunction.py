@@ -21,6 +21,7 @@ class NexusGridArrayFunction(GridArrayFunction):
     function_table_p_list: Optional[list[float]] = None
 
     def to_string(self) -> str:
+        """Creates a string representation of the object."""
 
         # keep a running string
         func_string = """"""

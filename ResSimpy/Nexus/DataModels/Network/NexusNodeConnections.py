@@ -61,10 +61,16 @@ class NexusNodeConnections(NodeConnections):
         return 'END' + self.table_header
 
     def get_all(self) -> Sequence[NexusNodeConnection]:
+        """Returns a collection of Nexus node connections."""
         self.__parent_network.get_load_status()
         return self._connections
 
     def get_by_name(self, connection_name: str) -> Optional[NodeConnection]:
+        """Returns the node connection name.
+
+        Args:
+            connection_name(str): Node connection name
+        """
         self.__parent_network.get_load_status()
         connections_to_return = filter(lambda x: False if x.name is None else x.name.upper() == connection_name.upper(),
                                        self._connections)
@@ -80,6 +86,7 @@ class NexusNodeConnections(NodeConnections):
         return obj_to_dataframe(self._connections)
 
     def get_overview(self) -> str:
+        """Returns overview of Node connections."""
         raise NotImplementedError('To be implemented')
 
     def load(self, surface_file: File, start_date: str, default_units: UnitSystem) -> None:
@@ -113,15 +120,15 @@ class NexusNodeConnections(NodeConnections):
         self.__remove_object_operations.remove_object_from_network_main(
             obj_to_remove, self._network_element_name, self._connections)
 
-    def add(self, obj_to_remove: dict[str, None | str | float | int]) -> None:
+    def add(self, obj_to_add: dict[str, None | str | float | int]) -> None:
         """Adds a connection to a network, taking a dictionary with properties for the new connection.
 
         Args:
-            obj_to_remove (dict[str, None | str | float | int]): dictionary taking all the properties for the new
+            obj_to_add (dict[str, None | str | float | int]): dictionary taking all the properties for the new
             connection.
             Requires date and a name.
         """
-        new_object = self.__add_object_operations.add_network_obj(obj_to_remove, NexusNodeConnection,
+        new_object = self.__add_object_operations.add_network_obj(obj_to_add, NexusNodeConnection,
                                                                   self.__parent_network)
         self._add_to_memory([new_object])
 

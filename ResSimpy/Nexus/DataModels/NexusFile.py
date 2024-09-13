@@ -360,6 +360,9 @@ class NexusFile(File):
 
     @property
     def get_flat_list_str_file(self) -> list[str]:
+        """Returns flat list of strings from file content.
+        This method does not include the referenced includes in the final list.
+        """
         if self.file_content_as_list is None:
             raise ValueError(f'No file content found for {self.location}')
         flat_list = list(self.iterate_line(file_index=None, keep_include_references=False))
@@ -367,6 +370,9 @@ class NexusFile(File):
 
     @property
     def get_flat_list_str_file_including_includes(self) -> list[str]:
+        """Returns flat list of strings from file content including the referenced.
+        includes in the final list.
+        """
         if self.file_content_as_list is None:
             raise ValueError(f'No file content found for {self.location}')
         flat_list = list(self.iterate_line(file_index=None, keep_include_references=True))

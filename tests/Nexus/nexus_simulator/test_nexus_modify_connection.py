@@ -23,7 +23,7 @@ tests_name_2 test_node test_node_out PIPE NA NA 100
 ENDNODECON
 ''',
 {'name': 'tests_name_2', 'node_in': 'test_node', 'node_out': 'test_node_out', 'con_type': 'PIPE', 'date': '01/01/2023',
-'unit_system': UnitSystem.ENGLISH, 'dp_add': 100},
+'unit_system': UnitSystem.ENGLISH, 'dp_add': 100, 'start_date': '01/01/2019'},
 [
     {'name': 'test_name_1', 'node_in': 'test_node', 'node_out': 'test_node_out', 'con_type': 'PIPE', 'roughness': 3.2,
     'date': '01/01/2023', 'temperature_profile': 'tempprof', 'unit_system': UnitSystem.ENGLISH},
@@ -42,7 +42,8 @@ def test_add_connection(mocker, file_contents, expected_file_contents, connectio
         RUNCONTROL /nexus_data/runcontrol.dat
         SURFACE Network 1  /surface_file_01.dat
         '''
-    runcontrol_contents = '''START 01/01/2019'''
+    start_date = '01/01/2019'
+    runcontrol_contents = f'''START {start_date}'''
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -58,7 +59,8 @@ def test_add_connection(mocker, file_contents, expected_file_contents, connectio
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
 
-    expected_cons = [NexusNodeConnection(node, date_format=DateFormat.DD_MM_YYYY) for node in expected_connections]
+    expected_cons = [NexusNodeConnection(node, date_format=DateFormat.DD_MM_YYYY, 
+                                         start_date=start_date) for node in expected_connections]
     expected_cons.sort(key=lambda x: x.name)
 
     expected_cons[0]._DataObjectMixin__id = 'uuid_1'
@@ -109,6 +111,7 @@ def test_remove_connection(mocker, file_contents, expected_file_contents, connec
             RUNCONTROL /nexus_data/runcontrol.dat
             SURFACE Network 1  /surface_file_01.dat
             '''
+        start_date = '01/01/2019'
         runcontrol_contents = '''START 01/01/2019'''
 
         mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
@@ -127,7 +130,8 @@ def test_remove_connection(mocker, file_contents, expected_file_contents, connec
         writing_mock_open = mocker.mock_open()
         mocker.patch("builtins.open", writing_mock_open)
 
-        expected_connection = [NexusNodeConnection(node, date_format=DateFormat.DD_MM_YYYY) for node in expected_connection]
+        expected_connection = [NexusNodeConnection(node, date_format=DateFormat.DD_MM_YYYY,
+                                                   start_date=start_date) for node in expected_connection]
         expected_connection[0]._DataObjectMixin__id = 'uuid_3'
 
         # Act
@@ -162,9 +166,9 @@ TIME 01/01/2024
 {'name': 'test_name_2', 'roughness': 376,},
 [
     {'name': 'test_name_1', 'node_in': 'test_node', 'node_out': 'test_node_out', 'con_type': 'PIPE', 'roughness': 3.2,
-    'date': '01/01/2023', 'temperature_profile': 'tempprof', 'unit_system': UnitSystem.ENGLISH},
+    'date': '01/01/2023', 'temperature_profile': 'tempprof', 'unit_system': UnitSystem.ENGLISH, 'start_date': '01/01/2019'},
     {'name': 'test_name_2', 'node_in': 'test_node', 'node_out': 'test_node_out', 'roughness': 376,
-    'con_type': 'PIPE', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+    'con_type': 'PIPE', 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH, 'start_date': '01/01/2019'},
     ],
 2  # no. writes
 ),
@@ -181,6 +185,7 @@ def test_modify_connections(mocker, file_contents, expected_file_contents, obj_t
         RUNCONTROL /nexus_data/runcontrol.dat
         SURFACE Network 1  /surface_file_01.dat
         '''
+    start_date = '01/01/2019'
     runcontrol_contents = '''START 01/01/2019'''
 
     def mock_open_wrapper(filename, mode):
@@ -198,10 +203,9 @@ def test_modify_connections(mocker, file_contents, expected_file_contents, obj_t
 
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_3'])
 
-    expected_objs = [NexusNodeConnection(node, date_format=DateFormat.DD_MM_YYYY) for node in expected_objs]
+    expected_objs = [NexusNodeConnection(node, date_format=DateFormat.DD_MM_YYYY,
+                                         start_date=start_date) for node in expected_objs]
     expected_objs.sort(key=lambda x: x.name)
-
-    # mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
 
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
                                                                 'uuid_6', 'uuid_7'])

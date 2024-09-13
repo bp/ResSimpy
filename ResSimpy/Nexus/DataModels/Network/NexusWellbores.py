@@ -68,12 +68,21 @@ class NexusWellbores(Wellbores):
         return next(to_return, None)
 
     def get_df(self) -> pd.DataFrame:
+        """Returns wellbores data as a dataframe."""
         return obj_to_dataframe(self._wellbores)
 
     def get_overview(self) -> str:
+        """Returns overview of the wellbores."""
         raise NotImplementedError('To be implemented')
 
     def load(self, surface_file: File, start_date: str, default_units: UnitSystem) -> None:
+        """Loads wellbores data from surface file.
+
+        Args:
+            surface_file(File): Nexus representation of the surface file.
+            start_date(str): start date of the run.
+            default_units(UnitSystem): default units used if no units are found.
+        """
         new_wellbores, _ = collect_all_tables_to_objects(surface_file, {'WELLBORE': NexusWellbore},
                                                          start_date=start_date,
                                                          default_units=default_units,
@@ -103,15 +112,15 @@ class NexusWellbores(Wellbores):
         self.__remove_object_operations.remove_object_from_network_main(
             obj_to_remove, self._network_element_name, self._wellbores)
 
-    def add(self, obj_to_remove: dict[str, None | str | float | int]) -> None:
+    def add(self, obj_to_add: dict[str, None | str | float | int]) -> None:
         """Adds a wellbore to a network, taking a dictionary with properties for the new wellbore.
 
         Args:
-            obj_to_remove (dict[str, None | str | float | int]): dictionary taking all the properties for the new
+            obj_to_add (dict[str, None | str | float | int]): dictionary taking all the properties for the new
             wellbore.
             Requires date and a name.
         """
-        new_object = self.__add_object_operations.add_network_obj(obj_to_remove, NexusWellbore, self.__parent_network)
+        new_object = self.__add_object_operations.add_network_obj(obj_to_add, NexusWellbore, self.__parent_network)
         self._add_to_memory([new_object])
 
     def modify(self, obj_to_modify: dict[str, None | str | float | int],
@@ -132,8 +141,10 @@ class NexusWellbores(Wellbores):
 
     @property
     def table_header(self) -> str:
+        """Returns the header for the wellbore table in surface file."""
         return 'WELLBORE'
 
     @property
     def table_footer(self) -> str:
+        """Returns the footer for the wellbore table in surface file."""
         return 'END' + self.table_header

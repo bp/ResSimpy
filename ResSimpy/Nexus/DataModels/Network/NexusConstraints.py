@@ -94,9 +94,17 @@ class NexusConstraints(Constraints):
         return obj_to_dataframe(list_constraints)
 
     def get_overview(self) -> str:
+        """Returns overview of Constraints."""
         raise NotImplementedError('To be implemented')
 
     def load(self, surface_file: NexusFile, start_date: str, default_units: UnitSystem) -> None:
+        """Loads nexus surface file.
+
+        Args:
+            surface_file(NexusFile): File path of the Nexus surface file.
+            start_date(str): Start date of the run.
+            default_units(UnitSystem): default units used if not units are found.
+        """
         # CONSTRAINT keyword represents a table with a header and columns.
         # CONSTRAINTS keyword represents a list of semi structured constraints with a well_name and then constraints
         if surface_file.file_content_as_list is not None:

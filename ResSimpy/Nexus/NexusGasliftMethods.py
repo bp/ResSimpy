@@ -60,15 +60,23 @@ class NexusGasliftMethods(Gaslift):
 
     @property
     def inputs(self) -> MutableMapping[int, NexusGasliftMethod]:
+        """Returns mapping of gaslift where keys are of type int.
+        If gaslift properties are not loaded, it will load them.
+        """
         if not self.__properties_loaded:
             self.load_gaslift_methods()
         return self.__inputs
 
     @property
     def files(self) -> dict[int, NexusFile]:
+        """Returns dictionary of Nexus files where keys are of type int."""
         return self.__files
 
     def load_gaslift_methods(self) -> None:
+        """Loads a collection of gaslift method properties from files.
+        This method checks if gaslift files are available and reads their properties into the
+        'NexusGasliftMethod' objects.
+        """
         # Read in gaslift properties from Nexus gaslift method files
         if self.__files is not None and len(self.__files) > 0:  # Check if gaslift files exist
             for table_num in self.__files.keys():  # For each gaslift property method

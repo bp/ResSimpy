@@ -19,4 +19,5 @@ class SolverParameters(ABC):
     @property
     @abstractmethod
     def solver_parameters(self) -> Sequence[SolverParameter]:
+        """Returns an instance of Solver Parameter in a sequence (usually of type list)."""
         return self.__solver_parameters

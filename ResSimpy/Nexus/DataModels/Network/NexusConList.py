@@ -23,6 +23,7 @@ class NexusConList(NetworkList):
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """Returns mapping of keywords."""
         return {}
 
     @property

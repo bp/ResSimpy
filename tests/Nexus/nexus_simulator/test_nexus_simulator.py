@@ -1880,6 +1880,7 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
         }).return_value
         return mock_open
 
+    start_date = '01/01/2023'
     mocker.patch("builtins.open", mock_open_wrapper)
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
 
@@ -1887,18 +1888,19 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
     nexus_sim = NexusSimulator(fcs_file_path)
 
     # Create the expected objects
-    expected_nodes = [NexusNode(node1_props, date_format=DateFormat.DD_MM_YYYY),
-                      NexusNode(node2_props, date_format=DateFormat.DD_MM_YYYY)]
-    expected_cons = [NexusNodeConnection(connection1_props, date_format=DateFormat.DD_MM_YYYY),
-                     NexusNodeConnection(connection2_props, date_format=DateFormat.DD_MM_YYYY)]
-    expected_wellcons = [NexusWellConnection(wellconprops1, date_format=DateFormat.DD_MM_YYYY),
-                         NexusWellConnection(wellconprops2, date_format=DateFormat.DD_MM_YYYY)]
-    expected_wellheads = [NexusWellhead(wellheadprops1, date_format=DateFormat.DD_MM_YYYY),
-                          NexusWellhead(wellheadprops2, date_format=DateFormat.DD_MM_YYYY)]
-    expected_wellbores = [NexusWellbore(wellboreprops1, date_format=DateFormat.DD_MM_YYYY),
-                          NexusWellbore(wellboreprops2, date_format=DateFormat.DD_MM_YYYY)]
-    expected_constraints = {
-        constraint_props1['name']: [NexusConstraint(constraint_props2, date_format=DateFormat.DD_MM_YYYY)]}
+    expected_nodes = [NexusNode(node1_props, date_format=DateFormat.DD_MM_YYYY, start_date=start_date),
+                      NexusNode(node2_props, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)]
+    expected_cons = [NexusNodeConnection(connection1_props, date_format=DateFormat.DD_MM_YYYY, start_date=start_date),
+                     NexusNodeConnection(connection2_props, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)]
+    expected_wellcons = [NexusWellConnection(wellconprops1, date_format=DateFormat.DD_MM_YYYY, start_date=start_date),
+                         NexusWellConnection(wellconprops2, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)]
+    expected_wellheads = [NexusWellhead(wellheadprops1, date_format=DateFormat.DD_MM_YYYY, start_date=start_date),
+                          NexusWellhead(wellheadprops2, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)]
+    expected_wellbores = [NexusWellbore(wellboreprops1, date_format=DateFormat.DD_MM_YYYY, start_date=start_date),
+                          NexusWellbore(wellboreprops2, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)]
+    expected_constraints = {constraint_props1['name']: [NexusConstraint(constraint_props2,
+                                                                        date_format=DateFormat.DD_MM_YYYY,
+                                                                        start_date=start_date)]}
     expected_welllist = [NexusWellList(**welllist1)]
     # create a mocker spy to check the network loader gets called once
     spy = mocker.spy(nexus_sim._network, 'load')
@@ -1931,7 +1933,7 @@ def test_load_surface_file_activate_deactivate(mocker):
         TIME 01/02/2024
           WELLS
          NAME   STREAM DATUM 
-         welcon_1 PRODUCER 1234 
+         WELCON_1 PRODUCER 1234 
          welcon_2 PRODUCER 5678 
          welcon_1_2 PRODUCER 9.87
          gaswelcon_1 PRODUCER 1.234
@@ -1944,12 +1946,17 @@ def test_load_surface_file_activate_deactivate(mocker):
         gaswelcon_2		123.4	ABCD
         ENDGASWELLS
          
+         NODECON
+         NAME      NODEIN    NODEOUT    TYPE
+         N1_n2     N1        N2         PIPE
+         ENDNODECON
          
         DEACTIVATE
          CONNECTION
          welcon_1*
          gaswelcon_2
          !** test
+         N1_N2
         ENDDEACTIVATE
         
         TIME 09/07/2024
@@ -1971,6 +1978,7 @@ def test_load_surface_file_activate_deactivate(mocker):
         ACTIVATE
         CONNECTION
         gaswelcon_2
+        N1_N2
         ENDACTIVATE
         
         DEACTIVATE
@@ -1987,12 +1995,13 @@ def test_load_surface_file_activate_deactivate(mocker):
         }).return_value
         return mock_open
 
+    start_date = '01/01/2023'
     mocker.patch("builtins.open", mock_open_wrapper)
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
 
     fcs_file_path = 'fcs_file.fcs'
     nexus_sim = NexusSimulator(fcs_file_path)
-    welcon_props_1 = {'name': 'welcon_1', 'stream': 'PRODUCER', 'datum_depth': 1234.0, 'date': '01/02/2024',
+    welcon_props_1 = {'name': 'WELCON_1', 'stream': 'PRODUCER', 'datum_depth': 1234.0, 'date': '01/02/2024',
                       'unit_system': UnitSystem.ENGLISH}
     welcon_props_2 = {'name': 'welcon_2', 'stream': 'PRODUCER', 'datum_depth': 5678.0, 'date': '01/02/2024',
                       'unit_system': UnitSystem.ENGLISH}
@@ -2005,7 +2014,7 @@ def test_load_surface_file_activate_deactivate(mocker):
     original_gas_welcon_props_2 = {'name': 'gaswelcon_2', 'stream': 'PRODUCER', 'datum_depth': 5.678,
                                    'date': '01/02/2024',
                                    'unit_system': UnitSystem.ENGLISH}
-    welcon_props_3 = {'name': 'welcon_1', 'date': '09/07/2024', 'unit_system': UnitSystem.ENGLISH}
+    welcon_props_3 = {'name': 'WELCON_1', 'date': '09/07/2024', 'unit_system': UnitSystem.ENGLISH}
     gas_welcon_props_1 = {'name': 'gaswelcon_1', 'd_factor': 1.123e-5, 'non_darcy_flow_method': 'INVKH',
                           'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH}
     gas_welcon_props_2 = {'name': 'gaswelcon_2', 'd_factor': 123.4, 'non_darcy_flow_method': 'ABCD',
@@ -2016,33 +2025,55 @@ def test_load_surface_file_activate_deactivate(mocker):
                           'd_factor': 9876, }
     gas_welcon_props_5 = {'name': 'gaswelcon_2', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
     gas_welcon_props_6 = {'name': 'gaswelcon_1', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
+    
+    node_con_prop_n1_n2 = {'name': 'N1_n2', 'node_in': 'N1', 'node_out': 'N2', 'con_type': 'PIPE', 
+                           'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH}
+    node_con_prop_n1_n2_later = {'name': 'N1_n2', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
 
-    welcon_1 = NexusWellConnection(welcon_props_1, date_format=DateFormat.DD_MM_YYYY, is_activated=False)
-    welcon_2 = NexusWellConnection(welcon_props_2, date_format=DateFormat.DD_MM_YYYY, is_activated=True)
-    welcon_1_2 = NexusWellConnection(welcon_props_1_2_1, date_format=DateFormat.DD_MM_YYYY, is_activated=False)
-    welcon_3 = NexusWellConnection(welcon_props_3, date_format=DateFormat.DD_MM_YYYY, is_activated=True)
-    welcon_1_2_2 = NexusWellConnection(welcon_props_1_2_2, date_format=DateFormat.DD_MM_YYYY, is_activated=True)
+    welcon_1 = NexusWellConnection(welcon_props_1, date_format=DateFormat.DD_MM_YYYY, is_activated=False,
+                                   start_date=start_date)
+    welcon_2 = NexusWellConnection(welcon_props_2, date_format=DateFormat.DD_MM_YYYY, is_activated=True,
+                                   start_date=start_date)
+    welcon_1_2 = NexusWellConnection(welcon_props_1_2_1, date_format=DateFormat.DD_MM_YYYY, is_activated=False,
+                                     start_date=start_date)
+    welcon_3 = NexusWellConnection(welcon_props_3, date_format=DateFormat.DD_MM_YYYY, is_activated=True,
+                                   start_date=start_date)
+    welcon_1_2_2 = NexusWellConnection(welcon_props_1_2_2, date_format=DateFormat.DD_MM_YYYY, is_activated=True,
+                                       start_date=start_date)
+
     original_gas_welcon_1 = NexusWellConnection(original_gas_welcon_props_1, date_format=DateFormat.DD_MM_YYYY,
-                                                is_activated=True)
+                                                is_activated=True, start_date=start_date)
     original_gas_welcon_2 = NexusWellConnection(original_gas_welcon_props_2, date_format=DateFormat.DD_MM_YYYY,
-                                                is_activated=False)
-    gas_welcon_1 = NexusWellConnection(gas_welcon_props_1, date_format=DateFormat.DD_MM_YYYY, is_activated=True)
-    gas_welcon_2 = NexusWellConnection(gas_welcon_props_2, date_format=DateFormat.DD_MM_YYYY, is_activated=False)
-    gas_welcon_3 = NexusWellConnection(gas_welcon_props_3, date_format=DateFormat.DD_MM_YYYY, is_activated=True)
-    gas_welcon_4 = NexusWellConnection(gas_welcon_props_4, date_format=DateFormat.DD_MM_YYYY, is_activated=False)
-    gas_welcon_5 = NexusWellConnection(gas_welcon_props_5, date_format=DateFormat.DD_MM_YYYY, is_activated=True)
-    gas_welcon_6 = NexusWellConnection(gas_welcon_props_6, date_format=DateFormat.DD_MM_YYYY, is_activated=False)
-
+                                                is_activated=False, start_date=start_date)
+    gas_welcon_1 = NexusWellConnection(gas_welcon_props_1, date_format=DateFormat.DD_MM_YYYY, is_activated=True,
+                                       start_date=start_date)
+    gas_welcon_2 = NexusWellConnection(gas_welcon_props_2, date_format=DateFormat.DD_MM_YYYY, is_activated=False,
+                                       start_date=start_date)
+    gas_welcon_3 = NexusWellConnection(gas_welcon_props_3, date_format=DateFormat.DD_MM_YYYY, is_activated=True,
+                                       start_date=start_date)
+    gas_welcon_4 = NexusWellConnection(gas_welcon_props_4, date_format=DateFormat.DD_MM_YYYY, is_activated=False,
+                                       start_date=start_date)
+    gas_welcon_5 = NexusWellConnection(gas_welcon_props_5, date_format=DateFormat.DD_MM_YYYY, is_activated=True,
+                                       start_date=start_date)
+    gas_welcon_6 = NexusWellConnection(gas_welcon_props_6, date_format=DateFormat.DD_MM_YYYY, is_activated=False,
+                                       start_date=start_date)
+    node_n1_n2 = NexusNodeConnection(node_con_prop_n1_n2, date_format=DateFormat.DD_MM_YYYY, is_activated=False,
+                                     start_date=start_date)
+    node_n1_n2_later = NexusNodeConnection(node_con_prop_n1_n2_later, date_format=DateFormat.DD_MM_YYYY,
+                                           is_activated=True, start_date=start_date)
     # Create the expected objects
     expected_wellcons = [welcon_1, welcon_2, welcon_1_2, original_gas_welcon_1, original_gas_welcon_2, gas_welcon_1,
                          gas_welcon_2, welcon_3, welcon_1_2_2, gas_welcon_3, gas_welcon_4, gas_welcon_5, gas_welcon_6]
-
+    expected_node_cons = [node_n1_n2, node_n1_n2_later]
+    
     # Act
     result_wellcons = nexus_sim.network.well_connections.get_all()
+    result_nodecons = nexus_sim.network.connections.get_all()
 
     # Assert
     assert result_wellcons[0] == welcon_1
     assert sorted(result_wellcons, key=lambda x: (x.iso_date)) == expected_wellcons
+    assert sorted(result_nodecons, key=lambda x: (x.iso_date)) == expected_node_cons
 
 
 def test_nexus_simulator_repr(mocker):

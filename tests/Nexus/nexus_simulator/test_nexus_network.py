@@ -133,8 +133,8 @@ def test_load_nexus_nodes(mocker: MockerFixture, file_contents, node1_props, nod
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
 
-    node_1 = NexusNode(properties_dict=node1_props, date_format=DateFormat.MM_DD_YYYY)
-    node_2 = NexusNode(properties_dict=node2_props, date_format=DateFormat.MM_DD_YYYY)
+    node_1 = NexusNode(properties_dict=node1_props, date_format=DateFormat.MM_DD_YYYY, start_date=start_date)
+    node_2 = NexusNode(properties_dict=node2_props, date_format=DateFormat.MM_DD_YYYY, start_date=start_date)
 
     mock_nexus_network = mocker.MagicMock()
     mock_nexus_network.model.date_format = DateFormat.MM_DD_YYYY
@@ -258,8 +258,8 @@ def test_load_connections(mocker: MockerFixture, file_contents, connection1_prop
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
 
     # set up objects from the dictionaries
-    con1 = NexusNodeConnection(connection1_props, date_format=DateFormat.DD_MM_YYYY)
-    con2 = NexusNodeConnection(connection2_props, date_format=DateFormat.DD_MM_YYYY)
+    con1 = NexusNodeConnection(connection1_props, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    con2 = NexusNodeConnection(connection2_props, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
     expected_result = [con1, con2]
 
     # add expected iso dates for the dataframe comparison
@@ -312,8 +312,8 @@ def test_load_well_connections(mocker, file_contents, well_connection_props1, we
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
 
-    wellcon1 = NexusWellConnection(well_connection_props1, date_format=DateFormat.DD_MM_YYYY)
-    wellcon2 = NexusWellConnection(well_connection_props2, date_format=DateFormat.DD_MM_YYYY)
+    wellcon1 = NexusWellConnection(well_connection_props1, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    wellcon2 = NexusWellConnection(well_connection_props2, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
     expected_result = [wellcon1, wellcon2]
     mock_nexus_network = mocker.MagicMock()
     mock_nexus_network.model.date_format = DateFormat.DD_MM_YYYY
@@ -321,9 +321,11 @@ def test_load_well_connections(mocker, file_contents, well_connection_props1, we
     nexus_well_cons = NexusWellConnections(mock_nexus_network)
 
     well_connection_props1['iso_date'] = ISODateTime.convert_to_iso(date=well_connection_props1['date'],
-                                                                    date_format=DateFormat.DD_MM_YYYY)
+                                                                    date_format=DateFormat.DD_MM_YYYY,
+                                                                    start_date=start_date)
     well_connection_props2['iso_date'] = ISODateTime.convert_to_iso(date=well_connection_props2['date'],
-                                                                    date_format=DateFormat.DD_MM_YYYY)
+                                                                    date_format=DateFormat.DD_MM_YYYY,
+                                                                    start_date=start_date)
 
     expected_df = pd.DataFrame([well_connection_props1, well_connection_props2])
     expected_df = expected_df.fillna(value=np.nan).dropna(axis=1, how='all')
@@ -384,11 +386,11 @@ ENDGASWELLS
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
 
-    wellcon1 = NexusWellConnection(well_connection_props1, date_format=DateFormat.DD_MM_YYYY)
-    wellcon2 = NexusWellConnection(well_connection_props2, date_format=DateFormat.DD_MM_YYYY)
-    wellcon3 = NexusWellConnection(well_connection_props3, date_format=DateFormat.DD_MM_YYYY)
-    wellcon4 = NexusWellConnection(well_connection_props4, date_format=DateFormat.DD_MM_YYYY)
-    wellcon5 = NexusWellConnection(well_connection_props5, date_format=DateFormat.DD_MM_YYYY)
+    wellcon1 = NexusWellConnection(well_connection_props1, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    wellcon2 = NexusWellConnection(well_connection_props2, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    wellcon3 = NexusWellConnection(well_connection_props3, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    wellcon4 = NexusWellConnection(well_connection_props4, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    wellcon5 = NexusWellConnection(well_connection_props5, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
     expected_result = [wellcon1, wellcon2, wellcon3, wellcon4, wellcon5]
     mock_nexus_network = mocker.MagicMock()
     mock_nexus_network.model.date_format = DateFormat.DD_MM_YYYY
@@ -535,8 +537,8 @@ def test_load_wellhead(mocker, file_contents, wellhead_props_1, wellhead_props_2
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
 
-    wellhead1 = NexusWellhead(wellhead_props_1, date_format=DateFormat.DD_MM_YYYY)
-    wellhead2 = NexusWellhead(wellhead_props_2, date_format=DateFormat.DD_MM_YYYY)
+    wellhead1 = NexusWellhead(wellhead_props_1, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    wellhead2 = NexusWellhead(wellhead_props_2, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
     expected_result = [wellhead1, wellhead2]
     mock_nexus_network = mocker.MagicMock()
     mock_nexus_network.model.date_format = DateFormat.DD_MM_YYYY
@@ -586,8 +588,8 @@ def test_load_wellbore(mocker, file_contents, wellboreprops1, wellboreprops2):
     start_date = '01/01/2018'
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
 
-    wellbore1 = NexusWellbore(wellboreprops1, date_format=DateFormat.DD_MM_YYYY)
-    wellbore2 = NexusWellbore(wellboreprops2, date_format=DateFormat.DD_MM_YYYY)
+    wellbore1 = NexusWellbore(wellboreprops1, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    wellbore2 = NexusWellbore(wellboreprops2, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
     expected_result = [wellbore1, wellbore2]
     mock_nexus_network = mocker.MagicMock()
     mock_nexus_network.model.date_format = DateFormat.DD_MM_YYYY
@@ -653,8 +655,8 @@ def test_load_wellbore_time_plus(mocker, file_contents, wellboreprops1, wellbore
     start_date = '01/01/2018'
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
 
-    wellbore1 = NexusWellbore(wellboreprops1, date_format=DateFormat.DD_MM_YYYY)
-    wellbore2 = NexusWellbore(wellboreprops2, date_format=DateFormat.DD_MM_YYYY)
+    wellbore1 = NexusWellbore(wellboreprops1, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    wellbore2 = NexusWellbore(wellboreprops2, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
     expected_result = [wellbore1, wellbore2]
     mock_nexus_network = mocker.MagicMock()
     mock_nexus_network.model.date_format = DateFormat.DD_MM_YYYY
@@ -720,8 +722,8 @@ def test_load_wellbore_time_plus_mmddyy(mocker, file_contents, wellboreprops1, w
     start_date = '01/01/2018'
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
 
-    wellbore1 = NexusWellbore(wellboreprops1, date_format=DateFormat.MM_DD_YYYY)
-    wellbore2 = NexusWellbore(wellboreprops2, date_format=DateFormat.MM_DD_YYYY)
+    wellbore1 = NexusWellbore(wellboreprops1, date_format=DateFormat.MM_DD_YYYY, start_date=start_date)
+    wellbore2 = NexusWellbore(wellboreprops2, date_format=DateFormat.MM_DD_YYYY, start_date=start_date)
     expected_result = [wellbore1, wellbore2]
     mock_nexus_network = mocker.MagicMock()
     mock_nexus_network.model.date_format = DateFormat.MM_DD_YYYY

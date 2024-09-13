@@ -1,8 +1,11 @@
 from __future__ import annotations
+
+import os
 from typing import Optional, TYPE_CHECKING
 
 import pandas as pd
-from ResSimpy.Grid import GridArrayDefinition
+from ResSimpy.GridArrayDefinition import GridArrayDefinition
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEYWORDS, STRUCTURED_GRID_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_FORMAT_KEYWORDS
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -26,6 +29,7 @@ class StructuredGridOperations:
     def load_token_value_if_present(token: str, modifier: str,
                                     token_property: GridArrayDefinition | dict[str, GridArrayDefinition],
                                     line: str, file_as_list: list[str], line_indx: int,
+                                    grid_nexus_file: NexusFile,
                                     ignore_values: Optional[list[str]] = None) -> None:
         """Gets a token's value if there is one and loads it into the token_property.
 
@@ -38,6 +42,7 @@ class StructuredGridOperations:
             line (str): line to search for the token in
             line_indx (int): index of line in file_as_list
             file_as_list (list[str]): a list of strings containing each line of the file as a new entry
+            grid_nexus_file (NexusFile): the NexusFile object containing the grid file.
             ignore_values (Optional[list[str]]): values to be ignored. Defaults to None.
 
         Raises:
@@ -78,7 +83,7 @@ class StructuredGridOperations:
             # piece two: find out if we have any MOD cards to deal with
             # piece three: make the mod table and add it to the grid array
             StructuredGridOperations.__make_grid_def(file_as_list, ignore_values, line, line_indx, modifier,
-                                                     region_name, token_modifier, token_property)
+                                                     region_name, token_modifier, token_property, grid_nexus_file)
 
             mod_start_end = StructuredGridOperations.__extract_mod_positions(line_indx, file_as_list)
             StructuredGridOperations.__make_mod_table(mod_start_end, file_as_list,
@@ -87,7 +92,8 @@ class StructuredGridOperations:
     @staticmethod
     def __make_grid_def(file_as_list: list[str], ignore_values: list[str], line: str, line_indx: int, modifier: str,
                         region_name: str, token_modifier: str,
-                        token_property: GridArrayDefinition | dict[str, GridArrayDefinition]) -> None:
+                        token_property: GridArrayDefinition | dict[str, GridArrayDefinition],
+                        grid_file: NexusFile) -> None:
         """A function that begins the process of populating the grid away."""
 
         if modifier == 'MULT':
@@ -127,10 +133,16 @@ class StructuredGridOperations:
                     if not isinstance(token_property, dict):
                         token_property.value = value
                         token_property.modifier = modifier
+                        StructuredGridOperations.__add_absolute_path_to_grid_array_definition(
+                            grid_array_definition=token_property, line_index_of_include_file=line_indx,
+                            grid_nexus_file=grid_file)
                     elif region_name != '':  # IREGION
                         token_property[region_name] = GridArrayDefinition()
                         token_property[region_name].modifier = modifier
                         token_property[region_name].value = value
+                        StructuredGridOperations.__add_absolute_path_to_grid_array_definition(
+                            grid_array_definition=token_property[region_name], line_index_of_include_file=line_indx,
+                            grid_nexus_file=grid_file)
                 elif check_if_string_is_float(value[0]) or value[0] == '.':
                     start_indx = line_indx + 1
                     end_indx = len(file_as_list)
@@ -158,11 +170,19 @@ class StructuredGridOperations:
                             token_property.modifier = modifier
                             token_property.value = file_as_list[line_indx - 1].split('INCLUDE')[1].strip()
                             token_property.keyword_in_include_file = True
+                            StructuredGridOperations.__add_absolute_path_to_grid_array_definition(
+                                grid_array_definition=token_property, line_index_of_include_file=line_indx,
+                                grid_nexus_file=grid_file
+                            )
                         elif region_name != '':  # IREGION
                             token_property[region_name] = GridArrayDefinition()
                             token_property[region_name].modifier = modifier
                             token_property[region_name].value \
                                 = file_as_list[line_indx - 1].split('INCLUDE')[1].strip()
+                            StructuredGridOperations.__add_absolute_path_to_grid_array_definition(
+                                grid_array_definition=token_property[region_name], line_index_of_include_file=line_indx,
+                                grid_nexus_file=grid_file
+                            )
                             token_property[region_name].keyword_in_include_file = True
                     else:
                         raise ValueError(
@@ -379,3 +399,35 @@ class StructuredGridOperations:
                                         pd.concat([orig_mod_tab, mod_table]).reset_index(drop=True)
                         else:
                             token_property[region_name].mods = {key: mod_table}
+
+    @staticmethod
+    def __add_absolute_path_to_grid_array_definition(grid_array_definition: GridArrayDefinition,
+                                                     line_index_of_include_file: int,
+                                                     grid_nexus_file: NexusFile) -> None:
+        """Adds the absolute path to the grid array definition.
+
+        Args:
+        grid_array_definition (GridArrayDefinition): the grid array definition to add the absolute path to.
+        line_index_of_include_file (int): the index of the line in the file containing the include file.
+        grid_nexus_file (NexusFile): the NexusFile object representing the top level grid file.
+        """
+        # cover the trivial case where the path is already absolute
+        if grid_array_definition.value is None:
+            return
+        if os.path.isabs(grid_array_definition.value):
+            grid_array_definition.absolute_path = grid_array_definition.value
+            return
+        if grid_nexus_file is None:
+            return
+        file_containing_include_line, _ = grid_nexus_file.find_which_include_file(line_index_of_include_file)
+        # find the include path from within this include file
+        if file_containing_include_line.include_objects is None:
+            return
+        matching_includes = [x for x in file_containing_include_line.include_objects if
+                             grid_array_definition.value in x.location]
+        if len(matching_includes) == 0:
+            return
+        include_file = matching_includes[0]
+
+        absolute_file_path = include_file.location
+        grid_array_definition.absolute_path = absolute_file_path

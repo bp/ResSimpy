@@ -61,15 +61,20 @@ class NexusPVTMethods(PVT):
 
     @property
     def inputs(self) -> MutableMapping[int, NexusPVTMethod]:
+        """Returns mapping of Nexus PVT property methods.
+        If properties are not loaded, it will load them first.
+        """
         if not self.__properties_loaded:
             self.load_pvt_methods()
         return self.__inputs
 
     @property
     def files(self) -> dict[int, NexusFile]:
+        """Returns dictionary of Nexus files."""
         return self.__files
 
     def load_pvt_methods(self) -> None:
+        """Loads a collection of pvt properties from Nexus pvt method files."""
         # Read in pvt properties from Nexus pvt method files
         if self.__files is not None and len(self.__files) > 0:  # Check if pvt files exist
             for table_num in self.__files.keys():  # For each pvt property method

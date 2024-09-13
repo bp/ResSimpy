@@ -23,6 +23,7 @@ class NexusWellList(NetworkList):
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """Returns keyword mapping from well list of the Nexus model."""
         return {}
 
     @property

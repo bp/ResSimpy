@@ -122,97 +122,117 @@ class Completion(DataObjectMixin, ABC):
 
     @property
     def well_radius(self) -> float | None:
+        """Returns well radius as float."""
         return self.__well_radius
 
     @property
     def i(self) -> int | None:
+        """Returns grid cell location in the x direction as an int."""
         return self.__i
 
     @property
     def j(self) -> int | None:
+        """Returns grid cell location in the y direction as an int."""
         return self.__j
 
     @property
     def k(self) -> int | None:
+        """Returns grid cell location in the z direction as an int."""
         return self.__k
 
     @property
     def skin(self) -> float | None:
+        """Returns skin value of the completion as a float."""
         return self.__skin
 
     @property
     def depth(self) -> float | None:
+        """Returns the depth of the completion as a float."""
         return self.__depth
 
     @property
     def x(self) -> float | None:
+        """Returns the location of the completion in the x direction."""
         return self.__x
 
     @property
     def y(self) -> float | None:
+        """Returns the location of the completion in the y direction."""
         return self.__y
 
     @property
     def angle_a(self) -> float | None:
+        """Returns the angle relative to the local I axis."""
         return self.__angle_a
 
     @property
     def angle_v(self) -> float | None:
+        """Returns the angle relative to the true vertical axis (global Z axis)."""
         return self.__angle_v
 
     @property
     def grid(self) -> str | None:
+        """Returns the grid name to which the completion data applies."""
         return self.__grid
 
     @property
     def depth_to_top(self) -> float | None:
+        """Returns the depth to the top of the completion interval as a float."""
         return self.__depth_to_top
 
     @property
     def depth_to_bottom(self) -> float | None:
+        """Returns the depth to the bottom as a float."""
         return self.__depth_to_bottom
 
     @property
     def perm_thickness_ovr(self) -> float | None:
+        """Returns premeability thickness override value as a float to use for the completion interval."""
         return self.__perm_thickness_ovr
 
     @property
     def dfactor(self) -> float | None:
+        """Returns the non-darcy factor to use for rate dependent skin calculations as a float."""
         return self.__dfactor
 
     @property
     def rel_perm_method(self) -> int | None:
+        """Writes the relative permeability used for completion as an int."""
         return self.__rel_perm_method
 
     @property
     def status(self) -> str | None:
+        """Returns the status of the layer as a string whether it is 'ON' or 'OF'."""
         return self.__status
 
     @property
     def peaceman_well_block_radius(self) -> Optional[float]:
-        """The Peaceman Well Block Radius for the completion."""
+        """Writes the pressure equivalent radius of the grid block."""
         return self.__peaceman_well_block_radius
 
     @property
     def date_format(self) -> Optional[DateFormat]:
+        """Returns date format."""
         return self._date_format
 
     @property
     def unit_system(self) -> UnitSystem | None:
+        """Returns unit system for the completion."""
         return self.__unit_system
 
     @property
     def units(self) -> CompletionUnits:
+        """Writes an instance of the Completion Units class initialized in unit system of the object."""
         return CompletionUnits(self.unit_system)
 
     @property
     def completion_is_shutin(self) -> bool:
-        """Determines if the supplied completion is a shut-in or not."""
+        """Returns a boolean indicating whether the provided completion is categorized as a shut-in or not."""
         return not self.completion_is_perforation
 
     @property
     def perforations(self) -> Sequence[Completion]:
-        """Returns a list of all of the perforations for the well."""
+        """Returns a list of all the perforations for the well."""
         raise NotImplementedError("This method has not been implemented for this simulator yet")
 
     @property
@@ -222,7 +242,7 @@ class Completion(DataObjectMixin, ABC):
 
     @property
     def shutins(self) -> Sequence[Completion]:
-        """Returns a list of all of the perforations for the well."""
+        """Returns a list of all the perforations for the well."""
         raise NotImplementedError("This method has not been implemented for this simulator yet")
 
     @property

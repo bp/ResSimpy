@@ -215,7 +215,8 @@ def test_remove_node(mocker, file_contents, expected_file_contents, node_to_remo
         RUNCONTROL /nexus_data/runcontrol.dat
         SURFACE Network 1  /surface_file_01.dat
         '''
-    runcontrol_contents = '''START 01/01/2019'''
+    start_date = '01/01/2019'
+    runcontrol_contents = f'''START {start_date}'''
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -232,7 +233,7 @@ def test_remove_node(mocker, file_contents, expected_file_contents, node_to_remo
 
     # Set the expected Ids correctly, then have the test mock out Ids for the actual load method
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=expected_ids)
-    expected_nodes = [NexusNode(node, date_format=DateFormat.DD_MM_YYYY) for node in expected_nodes]
+    expected_nodes = [NexusNode(node, date_format=DateFormat.DD_MM_YYYY, start_date=start_date) for node in expected_nodes]
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
                                                                 'uuid_6', 'uuid_7'])
 
@@ -458,6 +459,7 @@ def test_add_node(mocker, file_contents, expected_file_contents, node_to_add, ex
         RUNCONTROL /nexus_data/runcontrol.dat
         SURFACE Network 1  /surface_file_01.dat
         '''
+    start_date = '01/01/2019'
     runcontrol_contents = '''START 01/01/2019'''
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
 
@@ -474,10 +476,14 @@ def test_add_node(mocker, file_contents, expected_file_contents, node_to_add, ex
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
 
-    expected_nodes = [NexusNode(node, date_format=DateFormat.DD_MM_YYYY) for node in expected_nodes]
+    expected_nodes = [NexusNode(node, date_format=DateFormat.DD_MM_YYYY, 
+                                start_date=start_date) for node in expected_nodes]
     expected_nodes.sort(key=lambda x: x.name)
 
     mocker.patch.object(uuid, 'uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
+
+    node_to_add['start_date'] = start_date
+
     # Act
     nexus_sim.network.nodes.add(node_to_add)
     # compare sets as order doesn't matter
@@ -587,6 +593,7 @@ def test_modify_node(mocker, file_contents, expected_file_contents, node_to_modi
         RUNCONTROL /nexus_data/runcontrol.dat
         SURFACE Network 1  /surface_file_01.dat
         '''
+    start_date = '01/01/2019'
     runcontrol_contents = '''START 01/01/2019'''
 
     def mock_open_wrapper(filename, mode):
@@ -602,7 +609,8 @@ def test_modify_node(mocker, file_contents, expected_file_contents, node_to_modi
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
 
-    expected_nodes = [NexusNode(node, date_format=DateFormat.DD_MM_YYYY) for node in expected_nodes]
+    expected_nodes = [NexusNode(node, date_format=DateFormat.DD_MM_YYYY,
+                                start_date=start_date) for node in expected_nodes]
     expected_nodes.sort(key=lambda x: x.name)
     mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6'])
 

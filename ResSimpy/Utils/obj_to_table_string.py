@@ -7,11 +7,17 @@ class SupportsKeywordMapping(Protocol):
     @staticmethod
     @abstractmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
-        pass
+        """Returns a mapping of keywords.
+
+        The values in dict can be of the following types:[str, tuple[str, type]].
+
+        """
+        raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
     def to_dict(self) -> dict[str, None | str | int | float]:
-        pass
+        """Writes a dictionary with the following types:[str, None | str | int | float]."""
+        raise NotImplementedError("Implement this in the derived class")
 
 
 def to_table_line(obj: SupportsKeywordMapping, headers: list[str]) -> str:

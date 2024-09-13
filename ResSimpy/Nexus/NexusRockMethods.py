@@ -61,15 +61,20 @@ class NexusRockMethods(Rock):
 
     @property
     def inputs(self) -> MutableMapping[int, NexusRockMethod]:
+        """Returns mapping of Nexus rock properties.
+        If properties have not been loaded, it loads them first.
+        """
         if not self.__properties_loaded:
             self.load_rock_methods()
         return self.__inputs
 
     @property
     def files(self) -> dict[int, NexusFile]:
+        """Returns dictionary of NexusFile where keys are of type int."""
         return self.__files
 
     def load_rock_methods(self) -> None:
+        """Loads rock property files from Nexus fcs file."""
         # Read in rock properties from Nexus rock method files
         if self.__files is not None and len(self.__files) > 0:  # Check if rock files exist
             for table_num in self.__files.keys():  # For each rock property method

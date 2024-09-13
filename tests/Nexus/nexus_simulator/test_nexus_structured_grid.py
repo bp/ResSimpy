@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import pytest
-from ResSimpy.Grid import GridArrayDefinition
+from ResSimpy.GridArrayDefinition import GridArrayDefinition
 from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
@@ -148,8 +148,7 @@ C
 C
 C
 IREGION VALUE"""
-                              )
-
+                              ),
                          ])
 def test_grid_arr_in_include_file_ireg(mocker, structured_grid_file_contents, include_file_contents):
     # Arrange
@@ -520,6 +519,7 @@ LIST"""  # ends structured_grid_file_contents
     assert result.iregion['IREG1'].modifier == 'VALUE'
     assert result.iregion['inj_02'].modifier == 'CON'
     assert result.iregion['IREG1'].value == '/path/to/file.inc'
+    assert result.iregion['IREG1'].absolute_path == '/path/to/file.inc'
     assert result.iregion['inj_02'].value == '3'
     assert result.iregion['inj_03'].value == '4'
     assert result.iregion['inj_03'].modifier == 'CON'
@@ -807,6 +807,49 @@ def test_load_structured_grid_file_k_values(mocker, structured_grid_file_content
     assert result.ky.value == expected_ky_value
     assert result.kz.modifier == expected_kz_modifier
     assert result.kz.value == expected_kz_value
+
+def test_load_structured_grid_file_keff_values(mocker):
+    # Arrange
+    fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    base_structured_grid_file = "! Grid dimensions\nNX NY NZ\n1 2 3\ntest string\nDUMMY VALUE\n!ioeheih\ndummy text " \
+                                "\nother text\n\n,NETGRS VALUE\n INCLUDE  /path_to_netgrs_file/net_to_gross.inc\n POROSITY " \
+                                "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc \n"
+
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file = (base_structured_grid_file + 
+                            "KXEFF VALUE\n INCLUDE /path/to/kxeff.inc\n KYEFF CON \n2 \n KZEFF VALUE \nINCLUDE\n kzeff.inc")
+
+    expected_value_kxeff = "/path/to/kxeff.inc"
+    expected_value_kyeff = "2"
+    expected_value_kzeff = "kzeff.inc"
+    expected_modifier_kxeff = "VALUE"
+    expected_modifier_kyeff = "CON"
+    expected_modifier_kzeff = "VALUE"
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+        {'testpath1/nexus_run.fcs': fcs_file,
+         '/run_control/path': '',
+         structured_grid_name: structured_grid_file,
+         '/path_to_netgrs_file/include_net_to_gross.inc': '',
+         'path/to/porosity.inc': '',
+         "/path/to/kz.inc": '',
+         '/path/to/kxeff.inc': '',
+         }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
+    result = simulation.grid
+    
+    # Assert
+    assert result.kxeff.value == expected_value_kxeff
+    assert result.kxeff.modifier == expected_modifier_kxeff
+    assert result.kyeff.value == expected_value_kyeff
+    assert result.kyeff.modifier == expected_modifier_kyeff
+    assert result.kzeff.value == expected_value_kzeff
+    assert result.kzeff.modifier == expected_modifier_kzeff  
 
 
 @pytest.mark.parametrize("new_porosity, new_sw, new_netgrs, new_kx, new_ky, new_kz",
@@ -1514,20 +1557,26 @@ def test_nested_includes_with_grid_array_keywords(mocker):
     assert result_kx == expected_kx_result
     assert result_ky == expected_ky_result
 
-
-def test_grid_array_definitions_abs_path(mocker):
+@pytest.mark.parametrize('structured_grid_file_contents, modifier, full_file_path', [
+    ('''! Array data
+    KX VALUE
+    INCLUDE inc_file_kx.inc''', 'VALUE', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc')),
+     ('''! Array data
+     KX ZVAR
+     INCLUDE inc_file_kx.inc''', 'ZVAR', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc')),
+    ('''! Array data
+    KX YVAR
+    INCLUDE inc_file_kx.inc''', 'YVAR', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc')),
+])
+def test_grid_array_definitions_abs_path(mocker, structured_grid_file_contents, modifier,
+                                         full_file_path):
     # Arrange
     fcs_path = '/root/nexus_run.fcs'
     structured_grid_path = 'nexus_files/grid/test_structured_grid.dat'
     fcs_file_contents = (f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID "
                          f"{structured_grid_path}")
-    structured_grid_file_contents = '''! Array data
-    KX VALUE
-    INCLUDE inc_file_kx.inc'''
 
     full_structured_grid_path = os.path.join('/root', structured_grid_path)
-    include_file_location_kx = 'inc_file_kx.inc'
-    full_file_path = os.path.join('/root', 'nexus_files/grid', include_file_location_kx)
     include_file_contents_kx = 'some content that should be skipped'
 
     def mock_open_wrapper(filename, mode):
@@ -1543,7 +1592,7 @@ def test_grid_array_definitions_abs_path(mocker):
 
     sim_obj = NexusSimulator(origin=fcs_path)
 
-    expected_kx_result = GridArrayDefinition(modifier='VALUE', value='inc_file_kx.inc', mods=None,
+    expected_kx_result = GridArrayDefinition(modifier=modifier, value='inc_file_kx.inc', mods=None,
                                              absolute_path=full_file_path)
 
     # Act

@@ -170,7 +170,7 @@ class AddObjectOperations:
             new_obj (Any): The object getting added that requires the new table to represent it.
 
         Returns:
-            list[str], int: first return arg is a new table containing the requested object and \
+            list[str], int: first return arg in a new table containing the requested object and \
             the second representing the line location of the new object within the table.
         """
         nexus_mapping = new_obj.get_keyword_mapping()
@@ -299,6 +299,13 @@ class AddObjectOperations:
 
     def add_network_obj(self, node_to_add: dict[str, None | str | float | int], obj_type: type[T],
                         network: NexusNetwork) -> T:
+        """Add new node to the nexus network file.
+
+        Args:
+            node_to_add(dict[str, None | str | float | int]): dictionary taking all the properties for the new node.
+            obj_type(type [T]): type of object to add to the file.
+            network(NexusNetwork): network that the new nodes are part of.
+        """
         network.get_load_status()
         file_to_add_to = network.get_network_file()
         if self.obj_type is not None:
