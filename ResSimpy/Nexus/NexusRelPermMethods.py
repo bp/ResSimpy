@@ -104,4 +104,3 @@ class NexusRelPermMethods(RelPerm):
             relperm_summary += f'{key}: {value.file.location} '
 
         return relperm_summary
-
