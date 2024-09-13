@@ -2475,7 +2475,7 @@ def test_model_summary(mocker):
     """
 
     # Act
-    result = model.summary()
+    result = model.summary
 
     # Assert
     assert result == expected_summary

@@ -837,6 +837,7 @@ class NexusSimulator(Simulator):
         """Not implemented for Nexus yet."""
         raise NotImplementedError("Not Implemented Yet")
 
+    @property
     def summary(self) -> str:
         """Returns a summary of the model contents."""
         relperm_files = self.relperm.summary
