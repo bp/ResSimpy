@@ -13,8 +13,6 @@ class PVT(ABC):
         inputs (dict[int, DynamicProperty]): Collection of PVT inputs, as a dictionary.
     """
 
-    def __init__(self):
-        self.summary = None
 
     @property
     def inputs(self) -> Mapping[int, DynamicProperty]:

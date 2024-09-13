@@ -13,9 +13,6 @@ class Hydraulics(ABC):
         inputs (dict[int, DynamicProperty]): Collection of hydraulics inputs, as a dictionary.
     """
 
-    def __init__(self):
-        self.summary = None
-
     @property
     def inputs(self) -> Mapping[int, DynamicProperty]:
         """A Collection of hydraulics inputs, as a dictionary."""
