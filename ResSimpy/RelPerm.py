@@ -13,6 +13,9 @@ class RelPerm(ABC):
         inputs (dict[int, DynamicProperty]): Dictionary collection of relperm and capillary pressure property inputs.
     """
 
+    def __init__(self):
+        self.summary = None
+
     @property
     def inputs(self) -> Mapping[int, DynamicProperty]:
         """Returns mapping of dynamic property instance as an int."""
