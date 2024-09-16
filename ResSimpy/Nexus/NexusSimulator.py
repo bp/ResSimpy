@@ -840,19 +840,31 @@ class NexusSimulator(Simulator):
     @property
     def summary(self) -> str:
         """Returns a summary of the model contents."""
+
         relperm_files = self.relperm.summary
         pvt_files = self.pvt.summary
         hyd_files = self.hydraulics.summary
         equil_files = self.equil.summary
-        fluid_type = self.get_fluid_type(surface_file_content=self.model_files.surface_files[0].file_content_as_list)
+        fluid_type = ''
+        if isinstance(self.model_files.surface_files, dict):
+            if self.model_files.surface_files[0].file_content_as_list is not None:
+                fluid_type = self.get_fluid_type(surface_file_content=
+                                                 self.model_files.surface_files[0].file_content_as_list)
         list_of_wells = self.wells.get_all()
         list_of_well_name = [well.well_name for well in list_of_wells]
         completions = [len(well.completions) for well in list_of_wells]
         well_summary = [f'{y} has: {z} completions' for y, z in zip(list_of_well_name, completions)]
         model_reporting_date = self.sim_controls.times[-1]
+        range_x = None
+        range_y = None
+        range_z = None
+        if self.grid is not None:
+            range_x = self.grid.range_x
+            range_y = self.grid.range_y
+            range_z = self.grid.range_z
         model_summary = f"""Start Date: {self.start_date}
     Last reporting date: {model_reporting_date}
-    Grid Dimensions (x y z) : {self.grid.range_x} x {self.grid.range_y} x {self.grid.range_z}
+    Grid Dimensions (x y z) : {range_x} x {range_y} x {range_z}
     Well summary: Well names: {well_summary}
     Fluid type: {fluid_type}
     Relperm: {relperm_files}

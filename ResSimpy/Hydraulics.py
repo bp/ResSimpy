@@ -14,6 +14,11 @@ class Hydraulics(ABC):
     """
 
     @property
+    def summary(self) -> str:
+        """Returns string summary of Hydraulics properties."""
+        raise NotImplementedError("Implement this in a derived class")
+
+    @property
     def inputs(self) -> Mapping[int, DynamicProperty]:
         """A Collection of hydraulics inputs, as a dictionary."""
         raise NotImplementedError("Implement this in the derived class")

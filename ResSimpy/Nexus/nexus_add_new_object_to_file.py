@@ -309,7 +309,7 @@ class AddObjectOperations:
         network.get_load_status()
         file_to_add_to = network.get_network_file()
         if self.obj_type is not None:
-            obj_type = self.obj_type
+            obj_type = obj_type
         name, date = self.check_name_date(node_to_add)
         date_format = network.model.date_format
         new_object = obj_type(node_to_add, date_format=date_format)
