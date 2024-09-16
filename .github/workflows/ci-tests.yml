@@ -37,7 +37,7 @@ jobs:
           mypy_args: ResSimpy --config-file ./.config/mypy
 
       - name: Ruff checks
-        uses: jpetrucciani/ruff-check@0.3.7
+        uses: jpetrucciani/ruff-check@0.6.5
         with:
           path: 'ResSimpy'
 
