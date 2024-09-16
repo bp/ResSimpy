@@ -848,8 +848,9 @@ class NexusSimulator(Simulator):
         fluid_type = ''
         if isinstance(self.model_files.surface_files, dict):
             if self.model_files.surface_files[0].file_content_as_list is not None:
-                fluid_type = self.get_fluid_type(surface_file_content=
-                                                 self.model_files.surface_files[0].file_content_as_list)
+                fluid_type = self.get_fluid_type(
+                    surface_file_content=self.model_files.surface_files[0].file_content_as_list
+                )
         list_of_wells = self.wells.get_all()
         list_of_well_name = [well.well_name for well in list_of_wells]
         completions = [len(well.completions) for well in list_of_wells]
