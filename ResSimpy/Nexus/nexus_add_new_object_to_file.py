@@ -254,7 +254,7 @@ class AddObjectOperations:
                 else:
                     header_index, headers, headers_original = self.get_and_write_new_header(
                         additional_headers, object_properties, file_as_list, index, nexus_mapping, file_to_add_to
-                        )
+                    )
                     continue
 
             if header_index != -1 and index > header_index:
@@ -293,7 +293,7 @@ class AddObjectOperations:
         # write out to the file_content_as_list
         new_object_ids = {
             new_object.id: id_line_locs
-            }
+        }
         file_to_add_to.add_to_file_as_list(additional_content=additional_content, index=insert_line_index,
                                            additional_objects=new_object_ids)
 
@@ -309,7 +309,10 @@ class AddObjectOperations:
         network.get_load_status()
         file_to_add_to = network.get_network_file()
         if self.obj_type is not None:
-            obj_type = obj_type
+            if issubclass(self.obj_type, obj_type):
+                obj_type = self.obj_type
+            else:
+                raise TypeError(" Type mismatch: self.obj_type is not a subclass of obj_type")
         name, date = self.check_name_date(node_to_add)
         date_format = network.model.date_format
         new_object = obj_type(node_to_add, date_format=date_format)
