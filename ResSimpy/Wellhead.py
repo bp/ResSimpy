@@ -3,12 +3,12 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
 
-from ResSimpy.DataObjectMixin import DataObjectMixin
+from ResSimpy.NetworkObject import NetworkObject
 from ResSimpy.Units.AttributeMappings.NetworkUnitMapping import NetworkUnits
 
 
 @dataclass(repr=False)
-class Wellhead(DataObjectMixin, ABC):
+class Wellhead(NetworkObject, ABC):
     well: Optional[str] = None
     name: Optional[str] = None
     wellhead_type: Optional[str] = None

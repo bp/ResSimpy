@@ -5,15 +5,15 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional, Sequence
 
-from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.NetworkObject import NetworkObject
 from ResSimpy.Nexus.NexusEnums import DateFormatEnum
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Units.AttributeMappings.CompletionUnitMapping import CompletionUnits
 
 
 @dataclass(kw_only=True, repr=False)
-class Completion(DataObjectMixin, ABC):
+class Completion(NetworkObject, ABC):
     """A class representing well completions.
 
     IMPORTANT: if modifying this class, make sure to update the relevant tests in test_load_wells, as well as updating

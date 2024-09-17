@@ -24,10 +24,9 @@ class DataObjectMixin(ABC):
     _unit_system: Optional[UnitSystem] = None
     __name: Optional[str] = None
 
-    # TODO: Find a way to remove the dummy parameter below that doesn't break typing in nexus_add_new_object_to_file.
-    def __init__(self, _: dict[str, str | float | int | None] = {}, date: Optional[str] = None,
-                 date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
-                 unit_system: Optional[UnitSystem] = None, name: Optional[str] = None) -> None:
+    def __init__(self, date: Optional[str] = None, date_format: Optional[DateFormat] = None,
+                 start_date: Optional[str] = None, unit_system: Optional[UnitSystem] = None,
+                 name: Optional[str] = None) -> None:
         """Initialises the DataObjectMixin Class. First '_' parameter is a dummy parameter for type compatibility.
 
         Args:

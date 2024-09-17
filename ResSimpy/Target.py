@@ -2,12 +2,12 @@ from __future__ import annotations
 from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
-from ResSimpy.DataObjectMixin import DataObjectMixin
+from ResSimpy.NetworkObject import NetworkObject
 from ResSimpy.Units.AttributeMappings.NetworkUnitMapping import NetworkUnits
 
 
 @dataclass(repr=False)
-class Target(DataObjectMixin, ABC):
+class Target(NetworkObject, ABC):
     name: Optional[str] = None
 
     control_quantity: Optional[str] = None

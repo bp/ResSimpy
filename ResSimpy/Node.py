@@ -4,15 +4,31 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
 
-from ResSimpy.DataObjectMixin import DataObjectMixin
+from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.NetworkObject import NetworkObject
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Units.AttributeMappings.NetworkUnitMapping import NetworkUnits
 
 
 @dataclass(repr=False)
-class Node(DataObjectMixin, ABC):
-    name: Optional[str] = None
+class Node(NetworkObject, ABC):
     type: Optional[str] = None
     depth: Optional[float] = None
+
+    def __init__(self, properties_dict: dict[str, None | int | str | float], date: Optional[str] = None,
+                 date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
+                 unit_system: Optional[UnitSystem] = None) -> None:
+        """Initialises the NexusNode class.
+
+        Args:
+            properties_dict (dict): dict of the properties to set on the object.
+            date (Optional[str]): The date of the object.
+            date_format (Optional[DateFormat]): The date format that the object uses.
+            start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
+            unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
+        """
+        super().__init__(properties_dict=properties_dict, date=date, date_format=date_format, start_date=start_date,
+                         unit_system=unit_system)
 
     @property
     def units(self) -> NetworkUnits:

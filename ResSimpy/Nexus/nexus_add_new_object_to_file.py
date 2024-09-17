@@ -5,16 +5,16 @@ from typing import TYPE_CHECKING, Any, TypeVar, Optional
 from uuid import UUID
 
 from ResSimpy.File import File
+from ResSimpy.NetworkObject import NetworkObject
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 import ResSimpy.Nexus.nexus_file_operations as nfo
-from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Utils.invert_nexus_map import invert_nexus_map
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 
-T = TypeVar('T', bound=DataObjectMixin)
+T = TypeVar('T', bound=NetworkObject)
 
 
 class AddObjectOperations:
@@ -308,11 +308,10 @@ class AddObjectOperations:
         """
         network.get_load_status()
         file_to_add_to = network.get_network_file()
-        if self.obj_type is not None:
-            obj_type = self.obj_type
         name, date = self.check_name_date(node_to_add)
         date_format = network.model.date_format
-        new_object = obj_type(node_to_add, date_format=date_format)
+        new_obj_type = obj_type
+        new_object = new_obj_type(node_to_add, date_format=date_format)
         file_as_list = file_to_add_to.get_flat_list_str_file
         if file_as_list is None:
             raise ValueError(f'No file content found in the surface file specified at {file_to_add_to.location}')
