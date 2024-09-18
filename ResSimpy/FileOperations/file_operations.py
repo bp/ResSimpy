@@ -536,9 +536,10 @@ def split_lines_for_long_string(long_string: str, max_length: int) -> str:
     for i in range(len(whitespace_indices) - 1):
         if whitespace_indices[i + 1] > max_length:
             compiled_string += long_string[:whitespace_indices[i]] + '\n'
+            length_of_short_line = len(long_string[:whitespace_indices[i]+1])
             long_string = long_string[whitespace_indices[i]+1:]
             # adjust the indices for the newly created line and check the line length again
-            whitespace_indices = [x - i for x in whitespace_indices]
+            whitespace_indices = [x - length_of_short_line for x in whitespace_indices]
     compiled_string += long_string
     return compiled_string
 
