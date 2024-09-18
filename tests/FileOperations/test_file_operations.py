@@ -137,3 +137,17 @@ def test_split_lines_for_long_string(long_string, expected_result, max_length):
     # Assert
     assert result == expected_result
 
+def test_split_list_of_strings_by_length():
+    # Arrange
+    list_of_strings = ['This is a long string that\n', 'needs to be split into multiple lines\n']
+    expected_result = [
+        'This is a long\nstring that\n',
+        'needs to be split\ninto multiple lines\n'
+    ]
+    max_length = 20
+
+    # Act
+    result = fo.split_list_of_strings_by_length(list_of_strings, max_length)
+
+    # Assert
+    assert result == expected_result
