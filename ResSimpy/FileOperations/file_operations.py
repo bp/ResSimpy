@@ -515,3 +515,43 @@ def get_nth_value(list_of_strings: list[str], value_number: int, ignore_values: 
             return None
 
     return found_value
+
+
+def split_lines_for_long_string(long_string: str, max_length: int) -> str:
+    """Splits a long string into a list of strings with a maximum length.
+
+    Args:
+        long_string (str): The long string to be split.
+        max_length (int): The maximum length of each string in the list.
+
+    Returns:
+        list[str]: A list of strings split from the long string.
+    """
+    # split only on whitespace
+    from string import whitespace
+    # find the indices of whitespace characters
+
+    whitespace_indices = [i for i, char in enumerate(long_string) if char in whitespace]
+    compiled_string = ''
+    for i in range(len(whitespace_indices) - 1):
+        if whitespace_indices[i + 1] > max_length:
+            compiled_string += long_string[:whitespace_indices[i]] + '\n'
+            long_string = long_string[whitespace_indices[i]+1:]
+            # adjust the indices for the newly created line and check the line length again
+            whitespace_indices = [x - i for x in whitespace_indices]
+    compiled_string += long_string
+    return compiled_string
+
+
+def split_list_of_strings_by_length(list_of_strings: list[str], max_length: int) -> list[str]:
+    """Splits a list of strings into a new list of strings with a maximum length.
+
+    Args:
+        list_of_strings (list[str]): The list of strings to be split.
+        max_length (int): The maximum length of each string in the new list.
+
+    Returns:
+        list[str]: A new list of strings split from the original list.
+    """
+    return [split_lines_for_long_string(string, max_length) for string in list_of_strings]
+
