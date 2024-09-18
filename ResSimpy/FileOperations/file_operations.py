@@ -1,6 +1,7 @@
 from functools import partial
 from typing import Optional, Union
 import re
+from string import whitespace
 
 from ResSimpy.GridArrayDefinition import GridArrayDefinition
 
@@ -527,8 +528,6 @@ def split_lines_for_long_string(long_string: str, max_length: int) -> str:
     Returns:
         list[str]: A list of strings split from the long string.
     """
-    # split only on whitespace
-    from string import whitespace
     # find the indices of whitespace characters
 
     whitespace_indices = [i for i, char in enumerate(long_string) if char in whitespace]
