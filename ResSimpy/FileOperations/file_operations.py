@@ -555,4 +555,3 @@ def split_list_of_strings_by_length(list_of_strings: list[str], max_length: int)
         list[str]: A new list of strings split from the original list.
     """
     return [split_lines_for_long_string(string, max_length) for string in list_of_strings]
-
