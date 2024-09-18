@@ -2025,8 +2025,8 @@ def test_load_surface_file_activate_deactivate(mocker):
                           'd_factor': 9876, }
     gas_welcon_props_5 = {'name': 'gaswelcon_2', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
     gas_welcon_props_6 = {'name': 'gaswelcon_1', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
-    
-    node_con_prop_n1_n2 = {'name': 'N1_n2', 'node_in': 'N1', 'node_out': 'N2', 'con_type': 'PIPE', 
+
+    node_con_prop_n1_n2 = {'name': 'N1_n2', 'node_in': 'N1', 'node_out': 'N2', 'con_type': 'PIPE',
                            'date': '01/02/2024', 'unit_system': UnitSystem.ENGLISH}
     node_con_prop_n1_n2_later = {'name': 'N1_n2', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
 
@@ -2065,7 +2065,7 @@ def test_load_surface_file_activate_deactivate(mocker):
     expected_wellcons = [welcon_1, welcon_2, welcon_1_2, original_gas_welcon_1, original_gas_welcon_2, gas_welcon_1,
                          gas_welcon_2, welcon_3, welcon_1_2_2, gas_welcon_3, gas_welcon_4, gas_welcon_5, gas_welcon_6]
     expected_node_cons = [node_n1_n2, node_n1_n2_later]
-    
+
     # Act
     result_wellcons = nexus_sim.network.well_connections.get_all()
     result_nodecons = nexus_sim.network.connections.get_all()
@@ -2364,12 +2364,17 @@ def test_wells_and_network_equal_empty(mocker):
     with pytest.raises(ValueError):
         fake_simulator1.wells_and_network_equal(fake_simulator2)
 
-def test_model_summary(mocker):
-    # Arrange
-    # fcs_contents = "RUNCONTROL /path/to/run/control\n  DATE_FORMAT DD/MM/YYYY"
-    # open_mock = mocker.mock_open(read_data=fcs_contents)
-    # mocker.patch("builtins.open", open_mock)
 
+@pytest.mark.parametrize('fluid_type, expected_fluid_type',
+                         [('WATEROIL', 'WATEROIL'),
+                          ('', 'BLACKOIL'),
+                          ('BLACKOIL', 'BLACKOIL'),
+                          ('GASWATER', 'GASWATER'),
+                          ('EOS', 'EOS'),
+                          ('API', 'API')
+                          ],
+                         ids=['WATEROIL', 'default fluid type', 'BLACKOIL', 'GASWATER', 'EOS', 'API'])
+def test_model_summary(mocker, fluid_type, expected_fluid_type):
     model = NexusSimulator(origin='test.fcs')
     model._start_date = '15/01/2020'
     grid = NexusGrid(assume_loaded=True)
@@ -2463,15 +2468,27 @@ def test_model_summary(mocker):
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
 
-    expected_summary = f"""Start Date: 15/01/2020
+    expected_summary = f"""    Start Date: 15/01/2020
     Last reporting date: 01/12/2021
     Grid Dimensions (x y z) : 1 x 2 x 3
     Well summary: Well names: ['test well has: 4 completions']
     Fluid type: BLACKOIL
-    Relperm: 1: {os.path.join('path', 'my/relpm/file1.dat')} 2: {os.path.join('path', 'my/relpm/file2.dat')} 3: {os.path.join('path', 'my/relpm/file3.dat ')}
-    PVT: 1: {os.path.join('path', 'my/pvt/file1.dat')} 2: {os.path.join('path', 'my/pvt/file2.dat')} 3: {os.path.join('path', 'my/pvt/file3.dat ')}
-    Hydraulics: 1: {os.path.join('path', 'my/hyd/file1.dat')} 2: {os.path.join('path', 'my/hyd/file2.dat')} 3: {os.path.join('path', 'my/hyd/file3.dat ')}
-    Equil: 1: {os.path.join('path', 'my/equil/file1.dat')} 2: {os.path.join('path', 'my/equil/file2.dat')} 3: {os.path.join('path', 'my/equil/file3.dat ')}
+    Relperm:
+        1: {os.path.join('path', 'my/relpm/file1.dat')}
+        2: {os.path.join('path', 'my/relpm/file2.dat')}
+        3: {os.path.join('path', 'my/relpm/file3.dat')}
+    PVT:
+        1: {os.path.join('path', 'my/pvt/file1.dat')}
+        2: {os.path.join('path', 'my/pvt/file2.dat')}
+        3: {os.path.join('path', 'my/pvt/file3.dat')}
+    Hydraulics:
+        1: {os.path.join('path', 'my/hyd/file1.dat')}
+        2: {os.path.join('path', 'my/hyd/file2.dat')}
+        3: {os.path.join('path', 'my/hyd/file3.dat')}
+    Equil:
+        1: {os.path.join('path', 'my/equil/file1.dat')}
+        2: {os.path.join('path', 'my/equil/file2.dat')}
+        3: {os.path.join('path', 'my/equil/file3.dat')}
     """
 
     # Act

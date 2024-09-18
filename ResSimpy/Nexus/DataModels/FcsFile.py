@@ -157,7 +157,6 @@ class FcsNexusFile(NexusFile):
         self.override_file = override_file
         self.eos_default_file = eos_default_file
         self.surface_files = surface_files
-        self.surface_files = surface_files
         self.well_files = well_files if well_files is not None else get_empty_dict_int_nexus_file()
         self.rock_files = rock_files if rock_files is not None else get_empty_dict_int_nexus_file()
         self.relperm_files = relperm_files if relperm_files is not None else get_empty_dict_int_nexus_file()

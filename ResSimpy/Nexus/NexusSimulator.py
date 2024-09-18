@@ -81,7 +81,7 @@ class NexusSimulator(Simulator):
             ValueError: If the FCS file path is not given
 
         Examples:
-            Example of calling a NexusSimulator with a file path to a fcs file:
+            Example of calling a NexusSimulator with a file path to an fcs file:
 
             >>> from ResSimpy.Nexus.NexusSimulator import NexusSimulator
             >>> model = NexusSimulator(origin="/path/to/fcs_file.fcs")
@@ -841,20 +841,22 @@ class NexusSimulator(Simulator):
     def summary(self) -> str:
         """Returns a summary of the model contents."""
 
-        relperm_files = self.relperm.summary
-        pvt_files = self.pvt.summary
-        hyd_files = self.hydraulics.summary
-        equil_files = self.equil.summary
+        # Initialize 'fluid_type' to an empty string.
         fluid_type = ''
-        if isinstance(self.model_files.surface_files, dict):
-            if self.model_files.surface_files[0].file_content_as_list is not None:
-                fluid_type = self.get_fluid_type(
-                    surface_file_content=self.model_files.surface_files[0].file_content_as_list
-                )
+
+        # Verify if 'surface_file' is a dictionary.
+        if (isinstance(self.model_files.surface_files, dict) and
+                # Checks if the first item in 'surface_files'(at index 0) has a valid value and is not none.
+                self.model_files.surface_files[0].file_content_as_list is not None):
+
+            # If conditions in lines 857 and 859 are met, get_fluid_type is called to retrieve the fluid type.
+            fluid_type = self.get_fluid_type(
+                surface_file_content=self.model_files.surface_files[0].file_content_as_list
+            )
         list_of_wells = self.wells.get_all()
-        list_of_well_name = [well.well_name for well in list_of_wells]
+        list_of_well_names = [well.well_name for well in list_of_wells]
         completions = [len(well.completions) for well in list_of_wells]
-        well_summary = [f'{y} has: {z} completions' for y, z in zip(list_of_well_name, completions)]
+        well_summary = [f'{y} has: {z} completions' for y, z in zip(list_of_well_names, completions)]
         model_reporting_date = self.sim_controls.times[-1]
         range_x = None
         range_y = None
@@ -863,15 +865,24 @@ class NexusSimulator(Simulator):
             range_x = self.grid.range_x
             range_y = self.grid.range_y
             range_z = self.grid.range_z
-        model_summary = f"""Start Date: {self.start_date}
+
+        relperm_summary = self.relperm.summary
+        pvt_summary = self.pvt.summary
+        equil_summary = self.equil.summary
+        hyd_summary = self.hydraulics.summary
+        model_summary = f"""    Start Date: {self.start_date}
     Last reporting date: {model_reporting_date}
     Grid Dimensions (x y z) : {range_x} x {range_y} x {range_z}
     Well summary: Well names: {well_summary}
     Fluid type: {fluid_type}
-    Relperm: {relperm_files}
-    PVT: {pvt_files}
-    Hydraulics: {hyd_files}
-    Equil: {equil_files}
+    Relperm:
+        {relperm_summary.strip()}
+    PVT:
+        {pvt_summary.strip()}
+    Hydraulics:
+        {hyd_summary.strip()}
+    Equil:
+        {equil_summary.strip()}
     """
         return model_summary
 

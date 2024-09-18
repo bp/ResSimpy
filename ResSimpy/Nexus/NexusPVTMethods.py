@@ -98,5 +98,5 @@ class NexusPVTMethods(PVT):
         """Returns a string summary of 'NexusPVTMethods' inputs in a dictionary."""
         pvt_summary = ''
         for key, value in self.inputs.items():
-            pvt_summary = pvt_summary + f'{key}: {value.file.location} '
+            pvt_summary += f'        {key}: {value.file.location}\n'
         return pvt_summary

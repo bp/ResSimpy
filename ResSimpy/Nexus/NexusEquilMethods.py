@@ -100,6 +100,6 @@ class NexusEquilMethods(Equilibration):
         """Returns a string summary of 'NexusEquilMethods' inputs in a dictionary."""
         equil_summary = ''
         for key, value in self.inputs.items():
-            equil_summary += f'{key}: {value.file.location} '
+            equil_summary += f'        {key}: {value.file.location}\n'
 
         return equil_summary
