@@ -197,9 +197,9 @@ class NexusConstraint(Constraint):
     clear_alq: Optional[bool] = None
     clear_p: Optional[bool] = None
 
-    def __init__(self, properties_dict: dict[str, None | int | str | float | UnitSystem], date: Optional[str] = None,
-                 date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
-                 unit_system: Optional[UnitSystem] = None) -> None:
+    def __init__(self, properties_dict: Optional[dict[str, None | int | str | float | UnitSystem]] = None,
+                 date: Optional[str] = None, date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
+                 unit_system: Optional[UnitSystem] = None, name: Optional[str] = None) -> None:
         """Initialises the NexusConstraint class.
 
         Args:
@@ -208,10 +208,12 @@ class NexusConstraint(Constraint):
             date_format (Optional[DateFormat]): The date format that the object uses.
             start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
             unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
+            name (Optional[str]): The name of the object.
         """
-        name = properties_dict.get('name', None)
-        name = name if isinstance(name, str) else None
         super().__init__(_date_format=date_format, _start_date=start_date, _unit_system=unit_system, name=name)
+
+        if properties_dict is None:
+            return
 
         # Set the date related properties, then set the date, automatically setting the ISODate
         protected_attributes = ['date_format', 'start_date', 'unit_system']
@@ -250,7 +252,7 @@ class NexusConstraint(Constraint):
             'CLEARP': ('clear_p', bool),
             'CLEARLIMIT': ('clear_limit', bool),
             'CLEARALQ': ('clear_alq', bool),
-            }
+        }
         nexus_mapping.update(NexusConstraint.get_limit_constraints_map())
         nexus_mapping.update(NexusConstraint.get_pressure_constraints_map())
         nexus_mapping.update(NexusConstraint.get_rate_constraints_map())
@@ -311,7 +313,7 @@ class NexusConstraint(Constraint):
             'QGAS': ('qmult_gas_rate', float),
             'DPBHAVG': ('max_avg_comp_dp', float),
             'DPBHMX': ('max_comp_dp', float),
-            }
+        }
         return nexus_mapping
 
     @staticmethod
@@ -324,7 +326,7 @@ class NexusConstraint(Constraint):
             'PGMAX': ('max_wag_gas_pressure', float),
             'BHP': ('bottom_hole_pressure', float),
             'THP': ('tubing_head_pressure', float),
-            }
+        }
         return nexus_mapping
 
     @staticmethod
@@ -357,7 +359,7 @@ class NexusConstraint(Constraint):
             'CGLIM': ('max_cum_gas_prod', float),
             'CWLIM': ('max_cum_water_prod', float),
             'COLIM': ('max_cum_oil_prod', float),
-            }
+        }
         return nexus_mapping
 
     @staticmethod
@@ -373,7 +375,7 @@ class NexusConstraint(Constraint):
             'SPEED': ('pump_speed', float),
             'CHOKELIMIT': ('choke_limit', str),
             'POSITION': ('manifold_position', int),
-            }
+        }
         return nexus_mapping
 
     def update(self, new_data: dict[str, None | int | str | float | UnitSystem], nones_overwrite: bool = False) -> None:

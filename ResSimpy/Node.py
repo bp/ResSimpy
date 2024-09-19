@@ -15,13 +15,13 @@ class Node(NetworkObject, ABC):
     type: Optional[str] = None
     depth: Optional[float] = None
 
-    def __init__(self, properties_dict: dict[str, None | int | str | float], date: Optional[str] = None,
-                 date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
+    def __init__(self, properties_dict: Optional[dict[str, None | int | str | float]] = None,
+                 date: Optional[str] = None, date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None) -> None:
         """Initialises the NexusNode class.
 
         Args:
-            properties_dict (dict): dict of the properties to set on the object.
+            properties_dict (Optional[dict]): dict of the properties to set on the object.
             date (Optional[str]): The date of the object.
             date_format (Optional[DateFormat]): The date format that the object uses.
             start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.

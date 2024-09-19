@@ -97,8 +97,6 @@ def test_get_unit_error():
     (NexusNode, 'depth', 'ft', False),
     (NexusNodeConnection, 'diameter', 'in', False),
     (NexusWellbore, 'measured_depth_in', 'ft', False),
-    (NexusCompletion, 'angle_a', 'degrees', False),
-    (NexusCompletion, 'angle_a', 'DEGREES', True),
     (NexusTarget, 'calculation_method', '', True),
     (NexusWellhead, 'dp_add', 'psi', False),
     (NexusWellConnection, 'dt_add', 'DEGREES F', True),
@@ -108,12 +106,26 @@ def test_get_unit_for_attribute(mocker, data_object, attribute, expected_result,
     # Arrange
     # patch out convert_to_iso from the ISODateTime module as it is not needed for this test
     mocker.patch.object(ISODateTime, 'convert_to_iso', return_value=ISODateTime(2021, 1, 1))
-    dataobj = data_object({'date': '01/01/2020'})
+    dataobj = data_object(date='14/01/2020', date_format=DateFormat.DD_MM_YYYY, properties_dict={})
     # Act
     result = dataobj.get_unit_for_attribute(attribute_name=attribute, unit_system=UnitSystem.ENGLISH, uppercase=upper)
     # Assert
     assert result == expected_result
 
+@pytest.mark.parametrize('attribute, expected_result, upper', [
+    ('angle_a', 'degrees', False),
+    ('angle_a', 'DEGREES', True)
+])
+def test_get_unit_for_attribute_completion(mocker, attribute, expected_result, upper):
+    """Write a test to check that the DataObjectMixin.get_unit_for_attribute method works as expected."""
+    # Arrange
+    # patch out convert_to_iso from the ISODateTime module as it is not needed for this test
+    mocker.patch.object(ISODateTime, 'convert_to_iso', return_value=ISODateTime(2021, 1, 1))
+    dataobj = NexusCompletion(date='14/01/2020', date_format=DateFormat.DD_MM_YYYY)
+    # Act
+    result = dataobj.get_unit_for_attribute(attribute_name=attribute, unit_system=UnitSystem.ENGLISH, uppercase=upper)
+    # Assert
+    assert result == expected_result
 
 @pytest.mark.parametrize('attribute, expected_unit', [
     ('depth', 'ft'),
@@ -189,7 +201,8 @@ def test_get_unit_for_attribute(mocker, data_object, attribute, expected_result,
 ])
 def test_network_unit_properties(attribute, expected_unit):
     # Arrange
-    test_object = NexusNode(properties_dict=dict(date='01/01/2001', unit_system=UnitSystem.ENGLISH))
+    test_object = NexusNode(properties_dict=dict(date='01/01/2001', unit_system=UnitSystem.ENGLISH,
+                                                 date_format=DateFormat.DD_MM_YYYY))
     # Act
     result = getattr(test_object.units, attribute)
     # Assert

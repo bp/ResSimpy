@@ -39,17 +39,17 @@ class NetworkObject(DataObjectMixin, ABC):
                 obj_start_date = properties_dict['start_date']
                 start_date = obj_start_date if isinstance(obj_start_date, str) else None
 
+        if date_format is None:
+            if 'date_format' in properties_dict and isinstance(properties_dict['date_format'], DateFormat):
+                date_format = properties_dict['date_format']
+            else:
+                raise ValueError("No date format supplied for object.")
+
         super().__init__(date_format=date_format, start_date=start_date, unit_system=unit_system, name=obj_name,
                          date=date)
 
-        # Don't set the attributes set in the class constructor above
+        # Set attributes in the provided dict, excluding the ones already set.
         protected_attributes = ['date_format', 'start_date', 'unit_system', 'name']
-
-        for attribute in protected_attributes:
-            if attribute in properties_dict:
-                self.__setattr__(f"_{attribute}", properties_dict[attribute])
-
-        # Loop through the properties dict if one is provided and set those attributes
         remaining_properties = [x for x in properties_dict.keys() if x not in protected_attributes]
         for key in remaining_properties:
             self.__setattr__(key, properties_dict[key])

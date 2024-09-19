@@ -37,13 +37,13 @@ class NexusOutputRequest(OutputRequest):
             date_format (Optional[DateFormat]): The date format of the object.
             start_date (Optional[str]): The start date of the model (required if the date is in numerical format).
         """
+        # TODO: Remove the following two lines once the OutputRequest code sets date format properly.
+        if date_format is None:
+            date_format = DateFormat.MM_DD_YYYY
+
         super().__init__(output=output, output_type=output_type, output_frequency=output_frequency,
                          output_frequency_number=output_frequency_number, date=date, date_format=date_format,
                          start_date=start_date)
-
-        self._date_format = date_format
-        self._start_date = start_date
-        self.date = date
 
     def to_table_line(self, headers: list[str]) -> str:
         """String representation of the single line within an Output request table."""
