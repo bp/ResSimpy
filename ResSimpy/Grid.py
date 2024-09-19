@@ -11,6 +11,7 @@ import numpy as np
 from ResSimpy.GridArrayDefinition import GridArrayDefinition
 from ResSimpy.GridArrayFunction import GridArrayFunction
 from ResSimpy.File import File
+from ResSimpy.LGRs import LGRs
 
 
 @dataclass(kw_only=True)
@@ -32,6 +33,7 @@ class Grid(ABC):
     _kz: GridArrayDefinition
     _iregion: dict[str, GridArrayDefinition]
     _grid_properties_loaded: bool = False
+    _lgrs: LGRs
 
     def __init__(self, assume_loaded: bool = False) -> None:
         """Initialises the Grid class."""
@@ -51,6 +53,9 @@ class Grid(ABC):
         self._range_y: Optional[int] = None
         self._range_z: Optional[int] = None
         self._grid_properties_loaded = assume_loaded
+
+        # LGRs
+        self._lgrs: LGRs = LGRs()
 
     @property
     def range_x(self) -> int | None:
@@ -155,6 +160,11 @@ class Grid(ABC):
         """
         self.load_grid_properties_if_not_loaded()
         return self._iregion
+
+    @property
+    def lgrs(self) -> LGRs:
+        """Returns the LGR module object associated with the grid."""
+        return self._lgrs
 
     @abstractmethod
     def load_structured_grid_file(self, structure_grid_file: File, lazy_loading: bool) -> Grid:

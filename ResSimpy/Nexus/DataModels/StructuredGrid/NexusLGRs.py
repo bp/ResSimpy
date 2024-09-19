@@ -23,6 +23,7 @@ class NexusLGRs(LGRs):
 
     def load_lgrs(self) -> None:
         """Loads LGRs from a list of strings."""
+
         # Implementation to load LGRs from the provided list
         start_cartref_index = -1
         end_cartref_index = -1
@@ -85,6 +86,7 @@ class NexusLGRs(LGRs):
                         nx=nx, ny=ny, nz=nz)
 
     def __expand_refinement_lines(self, refinement_line: list[str]) -> list[int]:
+        """Expands the refinement lines into a list of integers."""
         store_final_values: list[int] = []
         for value in refinement_line:
             if '*' in value:
@@ -101,3 +103,18 @@ class NexusLGRs(LGRs):
         if not self.__has_been_loaded:
             self.load_lgrs()
         return self._lgrs
+
+    def get_all(self) -> list[NexusLGR]:
+        """Returns the collection of LGRs in the NexusGrid."""
+        return self.lgrs
+
+    def get(self, name: str) -> NexusLGR:
+        """Returns the LGR with the specified name.
+
+        Args:
+            name (str): the name of the LGR to get from the grid.
+        """
+        lgr = next((x for x in self.lgrs if x.name == name), None)
+        if lgr is None:
+            raise ValueError(f'No LGR with name {name} found in the NexusGrid.')
+        return lgr

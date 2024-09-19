@@ -19,7 +19,7 @@ from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_FOR
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.Nexus.array_function_operations as afo
-
+from ResSimpy.FileOperations import file_operations as fo
 from resqpy.olio.read_nexus_fault import load_nexus_fault_mult_table_from_list
 
 if TYPE_CHECKING:
@@ -255,6 +255,108 @@ class NexusGrid(Grid):
 
         return new_dict
 
+    @staticmethod
+    def keyword_mapping() -> dict[str, tuple[str, type]]:
+        """Returns the keyword mapping for the NexusGrid class."""
+        keyword_map = {
+            'NETGRS': ('netgrs', GridArrayDefinition),
+            'POROSITY': ('porosity', GridArrayDefinition),
+            'POR': ('porosity', GridArrayDefinition),
+            'SW': ('sw', GridArrayDefinition),
+            'SG': ('sg', GridArrayDefinition),
+            'PRESSURE': ('pressure', GridArrayDefinition),
+            'P': ('pressure', GridArrayDefinition),
+            'TEMPERATURE': ('temperature', GridArrayDefinition),
+            'TEMP': ('temperature', GridArrayDefinition),
+            'KX': ('kx', GridArrayDefinition),
+            'KI': ('kx', GridArrayDefinition),
+            'PERMX': ('kx', GridArrayDefinition),
+            'PERMI': ('kx', GridArrayDefinition),
+            'KY': ('ky', GridArrayDefinition),
+            'KXEFF': ('kxeff', GridArrayDefinition),
+            'KYEFF': ('kyeff', GridArrayDefinition),
+            'KZEFF': ('kzeff', GridArrayDefinition),
+            'KJ': ('ky', GridArrayDefinition),
+            'PERMY': ('ky', GridArrayDefinition),
+            'PERMJ': ('ky', GridArrayDefinition),
+            'KZ': ('kz', GridArrayDefinition),
+            'KK': ('kz', GridArrayDefinition),
+            'PERMZ': ('kz', GridArrayDefinition),
+            'PERMK': ('kz', GridArrayDefinition),
+            'IREGION': ('iregion', dict),
+            'PVMULT': ('pvmult', GridArrayDefinition),
+            'CORP': ('corp', GridArrayDefinition),
+            'IEQUIL': ('iequil', GridArrayDefinition),
+            'IPVT': ('ipvt', GridArrayDefinition),
+            'IWATER': ('iwater', GridArrayDefinition),
+            'IRELPM': ('irelpm', GridArrayDefinition),
+            'IROCK': ('irock', GridArrayDefinition),
+            'ITRAN': ('itran', GridArrayDefinition),
+            'LIVECELL': ('livecell', GridArrayDefinition),
+            'WORKA1': ('worka1', GridArrayDefinition),
+            'WORKA2': ('worka2', GridArrayDefinition),
+            'WORKA3': ('worka3', GridArrayDefinition),
+            'WORKA4': ('worka4', GridArrayDefinition),
+            'WORKA5': ('worka5', GridArrayDefinition),
+            'WORKA6': ('worka6', GridArrayDefinition),
+            'WORKA7': ('worka7', GridArrayDefinition),
+            'WORKA8': ('worka8', GridArrayDefinition),
+            'WORKA9': ('worka9', GridArrayDefinition),
+            'DX': ('dx', GridArrayDefinition),
+            'DY': ('dy', GridArrayDefinition),
+            'DZ': ('dz', GridArrayDefinition),
+            'DEPTH': ('depth', GridArrayDefinition),
+            'MDEPTH': ('mdepth', GridArrayDefinition),
+            'DZNET': ('dznet', GridArrayDefinition),
+            'COMPR': ('compr', GridArrayDefinition),
+            'ICOARS': ('icoars', GridArrayDefinition),
+            'IALPHAF': ('ialphaf', GridArrayDefinition),
+            'IPOLYMER': ('ipolymer', GridArrayDefinition),
+            'IADSORPTION': ('iadsorption', GridArrayDefinition),
+            'ITRACER': ('itracer', GridArrayDefinition),
+            'IGRID': ('igrid', GridArrayDefinition),
+            'ISECTOR': ('isector', GridArrayDefinition),
+            'SWL': ('swl', GridArrayDefinition),
+            'SWR': ('swr', GridArrayDefinition),
+            'SWU': ('swu', GridArrayDefinition),
+            'SGL': ('sgl', GridArrayDefinition),
+            'SGR': ('sgr', GridArrayDefinition),
+            'SGU': ('sgu', GridArrayDefinition),
+            'SWRO': ('swro', GridArrayDefinition),
+            'SWRO_LS': ('swro_ls', GridArrayDefinition),
+            'SGRO': ('sgro', GridArrayDefinition),
+            'SGRW': ('sgrw', GridArrayDefinition),
+            'KRW_SWRO': ('krw_swro', GridArrayDefinition),
+            'KRWS_LS': ('krws_ls', GridArrayDefinition),
+            'KRW_SWU': ('krw_swu', GridArrayDefinition),
+            'KRG_SGRO': ('krg_sgro', GridArrayDefinition),
+            'KRG_SGU': ('krg_sgu', GridArrayDefinition),
+            'KRG_SGRW': ('krg_sgrw', GridArrayDefinition),
+            'KRO_SWL': ('kro_swl', GridArrayDefinition),
+            'KRO_SWR': ('kro_swr', GridArrayDefinition),
+            'KRO_SGL': ('kro_sgl', GridArrayDefinition),
+            'KRO_SGR': ('kro_sgr', GridArrayDefinition),
+            'KRW_SGL': ('krw_sgl', GridArrayDefinition),
+            'KRW_SGR': ('krw_sgr', GridArrayDefinition),
+            'SGTR': ('sgtr', GridArrayDefinition),
+            'SOTR': ('sotr', GridArrayDefinition),
+            'SWLPC': ('swlpc', GridArrayDefinition),
+            'SGLPC': ('sglpc', GridArrayDefinition),
+            'PCW_SWL': ('pcw_swl', GridArrayDefinition),
+            'PCG_SGU': ('pcg_sgu', GridArrayDefinition),
+            'CHLORIDE': ('chloride', GridArrayDefinition),
+            'CALCIUM': ('calcium', GridArrayDefinition),
+            'SALINITY': ('salinity', GridArrayDefinition),
+            'API': ('api', GridArrayDefinition),
+            'TMX': ('tmx', GridArrayDefinition),
+            'TMY': ('tmy', GridArrayDefinition),
+            'TMZ': ('tmz', GridArrayDefinition),
+            'MULTBV': ('multbv', GridArrayDefinition),
+            'PV': ('pv', GridArrayDefinition),
+
+        }
+        return keyword_map
+
     def load_grid_properties_if_not_loaded(self) -> None:
         """Checks if grid properties are not loaded and loads them."""
 
@@ -397,6 +499,7 @@ class NexusGrid(Grid):
         possible_properties = [prop.token for prop in properties_to_load]
 
         ignore_line = False
+        array_name = 'ROOT'
 
         for idx, line in enumerate(file_as_list):
 
@@ -416,13 +519,27 @@ class NexusGrid(Grid):
             if ignore_line:
                 continue
 
+            if nfo.check_token('ARRAYS', line):
+                array_name = fo.get_token_value('ARRAYS', line, [line])
+                if array_name is None:
+                    array_name = 'ROOT'
+
             if line_start_token is not None and line_start_token.upper() in possible_properties:
                 token_property = properties_to_load[possible_properties.index(line_start_token)]
                 for modifier in token_property.modifiers:
                     # execute the load
-                    StructuredGridOperations.load_token_value_if_present(
-                        token_property.token, modifier, token_property.property, line, file_as_list, idx,
-                        grid_nexus_file=self.__grid_nexus_file, ignore_values=['INCLUDE', 'NOLIST'])
+                    if array_name == 'ROOT':
+                        StructuredGridOperations.load_token_value_if_present(
+                            token_property.token, modifier, token_property.property, line, file_as_list, idx,
+                            grid_nexus_file=self.__grid_nexus_file, ignore_values=['INCLUDE', 'NOLIST'])
+                    else:
+                        # get the LGR object to add the grid array to:
+                        lgr = self.lgrs.get(array_name)
+                        attribute_name = self.keyword_mapping()[token_property.token][0]
+                        grid_array_def_to_modify = getattr(lgr, attribute_name)
+                        StructuredGridOperations.load_token_value_if_present(
+                            token_property.token, modifier, grid_array_def_to_modify, line, file_as_list, idx,
+                            grid_nexus_file=self.__grid_nexus_file, ignore_values=['INCLUDE', 'NOLIST'])
 
             # Load in grid dimensions
             if nfo.check_token('NX', line):
