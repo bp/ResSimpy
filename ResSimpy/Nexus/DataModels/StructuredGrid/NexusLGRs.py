@@ -24,14 +24,10 @@ class NexusLGRs(LGRs):
     def load_lgrs(self) -> None:
         """Loads LGRs from a list of strings."""
         # Implementation to load LGRs from the provided list
-        in_lgr_section = False
         start_cartref_index = -1
         end_cartref_index = -1
         lgr_name = ''
         for line_num, line in enumerate(self._grid_file_as_list):
-            if fo.check_token('LGR', line):
-                in_lgr_section = True
-
             if fo.check_token('CARTREF', line):
                 lgr_name = fo.get_expected_token_value('CARTREF',
                                                        token_line=line,
@@ -58,11 +54,11 @@ class NexusLGRs(LGRs):
 
         filter_list = file_subsection.copy()
         for x in range(6):
-            next_value = fo.get_next_value(0, filter_list, filter_list[0], replace_with='')
-            range_of_lgr.append(next_value)
+            range_values = fo.get_expected_next_value(0, filter_list, filter_list[0], replace_with='')
+            range_of_lgr.append(range_values)
         i1, i2, j1, j2, k1, k2 = (int(x) for x in range_of_lgr)
 
-        refinement_lines = []
+        refinement_lines: list[list[str]] = []
         for line in filter_list:
             if len(refinement_lines) == 3:
                 # we expect 3 lines worth of refinement one for each

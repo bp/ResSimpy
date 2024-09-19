@@ -215,7 +215,6 @@ class NexusGrid(Grid):
 
         self.__lgrs: NexusLGRs = NexusLGRs(self.__grid_file_contents)
 
-
     def __wrap(self, value: Any) -> Any:
         if isinstance(value, tuple | list | set | frozenset):
             return type(value)([self.__wrap(v) for v in value])
@@ -1251,4 +1250,5 @@ class NexusGrid(Grid):
 
     @property
     def lgrs(self) -> NexusLGRs:
+        """Returns the LGR object which contains a list of the LGRs in the nexus grid."""
         return self.__lgrs
