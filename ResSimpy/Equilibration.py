@@ -15,6 +15,11 @@ class Equilibration(ABC):
     """
 
     @property
+    def summary(self) -> str:
+        """Returns string summary of Equilibration properties."""
+        raise NotImplementedError("Implement this in derived class")
+
+    @property
     def inputs(self) -> Mapping[int, DynamicProperty]:
         """Returns a mapping of equilibration inputs."""
         raise NotImplementedError("Implement this in the derived class")

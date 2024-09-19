@@ -91,3 +91,12 @@ class NexusHydraulicsMethods(Hydraulics):
     def model_unit_system(self) -> UnitSystem:
         """Return the model unit system."""
         return self.__model_unit_system
+
+    @property
+    def summary(self) -> str:
+        """Returns a string summary of 'NexusHydraulicsMethods' inputs in a dictionary."""
+        hydraulics_summary = ''
+        for key, value in self.inputs.items():
+            hydraulics_summary += f'        {key}: {value.file.location}\n'
+
+        return hydraulics_summary

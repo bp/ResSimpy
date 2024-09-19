@@ -22,7 +22,7 @@ class Well(ABC):
 
         Args:
             well_name (str): The name of the well.
-            completions (list[Completion]): A list of all of the completions on the well.
+            completions (list[Completion]): A list of all the completions on the well.
             unit_system (None | UnitSystem): The unit system associated with the properties on this well.
             well_type (Optional[WellType]): The type of the well represented by a WellType Enum.
         """
@@ -33,7 +33,7 @@ class Well(ABC):
 
     @property
     def completions(self) -> list[Completion]:
-        """A list of all of the completions on the well."""
+        """A list of all the completions on the well."""
         return self._completions
 
     @property
@@ -87,7 +87,7 @@ class Well(ABC):
 
     @property
     def shutins(self) -> Sequence[Completion]:
-        """Returns a list of all of the shut-ins for the well."""
+        """Returns a list of all the shut-ins for the well."""
 
         shutins = filter(lambda x: x.completion_is_shutin, self._completions)
         return list(shutins)

@@ -523,7 +523,7 @@ class NexusSimulator(Simulator):
         # fcs_content_with_includes is used to scan only the fcs file and files specifically called with the INCLUDE
         # token in front of it to prevent it from reading through all the other files. We need this here to extract the
         # fcs properties only. The FcsFile structure is then generated and stored in the object (with all the nesting of
-        # the NexusFiles as self.model_files (e.g. STRUCTURED_GRID, RUNCONTROL etc)
+        # the NexusFiles as self.model_files (e.g. STRUCTURED_GRID, RUNCONTROL etc.)
         fcs_content_with_includes = NexusFile.generate_file_include_structure(
             self.__new_fcs_file_path).get_flat_list_str_file
         self._model_files = FcsNexusFile.generate_fcs_structure(self.__new_fcs_file_path)
@@ -836,6 +836,55 @@ class NexusSimulator(Simulator):
     def write_out_new_model(self, new_location: str, new_model_name: str) -> None:
         """Not implemented for Nexus yet."""
         raise NotImplementedError("Not Implemented Yet")
+
+    @property
+    def summary(self) -> str:
+        """Returns a summary of the model contents."""
+
+        # Initialize 'fluid_type' to an empty string.
+        fluid_type = ''
+
+        # Verify if 'surface_file' is a dictionary.
+        if (isinstance(self.model_files.surface_files, dict) and
+                # Checks if the first item in 'surface_files'(at index 0) has a valid value and is not none.
+                self.model_files.surface_files[0].file_content_as_list is not None):
+
+            # If conditions in lines 857 and 859 are met, get_fluid_type is called to retrieve the fluid type.
+            fluid_type = self.get_fluid_type(
+                surface_file_content=self.model_files.surface_files[0].file_content_as_list
+            )
+        list_of_wells = self.wells.get_all()
+        list_of_well_names = [well.well_name for well in list_of_wells]
+        completions = [len(well.completions) for well in list_of_wells]
+        well_summary = [f'{y} has: {z} completions' for y, z in zip(list_of_well_names, completions)]
+        model_reporting_date = self.sim_controls.times[-1]
+        range_x = None
+        range_y = None
+        range_z = None
+        if self.grid is not None:
+            range_x = self.grid.range_x
+            range_y = self.grid.range_y
+            range_z = self.grid.range_z
+
+        relperm_summary = self.relperm.summary
+        pvt_summary = self.pvt.summary
+        equil_summary = self.equil.summary
+        hyd_summary = self.hydraulics.summary
+        model_summary = f"""    Start Date: {self.start_date}
+    Last reporting date: {model_reporting_date}
+    Grid Dimensions (x y z) : {range_x} x {range_y} x {range_z}
+    Well summary: Well names: {well_summary}
+    Fluid type: {fluid_type}
+    Relperm:
+        {relperm_summary.strip()}
+    PVT:
+        {pvt_summary.strip()}
+    Hydraulics:
+        {hyd_summary.strip()}
+    Equil:
+        {equil_summary.strip()}
+    """
+        return model_summary
 
     @property
     def sim_controls(self) -> SimControls:
