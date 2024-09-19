@@ -273,13 +273,13 @@ TIME 01/01/2024
     def test_modify_network_component(self, mocker, object_type, network_component,
                                       expected_file_contents, obj_to_modify,
                                       modified_properties, expected_objs, expected_ids):
-        # Arrange
 
+        # Arrange
         nexus_sim, writing_mock_open = self.patch_simulator(mocker)
         mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=expected_ids)
 
-        expected_objs = [object_type(obj, start_date=self.start_date) for obj in expected_objs]
-        expected_objs.sort(key=lambda x: x.name)
+        expected_objects = [object_type(properties_dict=obj, start_date=self.start_date) for obj in expected_objs]
+        expected_objects.sort(key=lambda x: x.name)
 
         # Reset the ID allocation
         mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
@@ -293,6 +293,6 @@ TIME 01/01/2024
         result_nodes.sort(key=lambda x: x.name)
 
         # Assert
-        assert result_nodes == expected_objs
+        assert result_nodes == expected_objects
         assert nexus_sim.model_files.surface_files[1].file_content_as_list == \
                expected_file_contents.splitlines(keepends=True)
