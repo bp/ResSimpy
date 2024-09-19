@@ -142,10 +142,73 @@ def test_add_region_numbers_to_targets(mocker):
                                                               })}
                            }
     nexus_sim._options = opts_obj
-    
+
     # Act
     nexus_sim.network.load()
-    
+
     # Assert
     assert nexus_sim.network.targets.get_by_name('target1').region_number == 1
     assert nexus_sim.network.targets.get_by_name('target2').region_number == 22
+
+
+def test_add_region_numbers_to_targets_tort(mocker):
+    # Arrange
+    fcs_file_contents = '''
+        RUN_UNITS ENGLISH
+        DATEFORMAT DD/MM/YYYY
+        RECURRENT_FILES
+        RUNCONTROL /nexus_data/runcontrol.dat
+        SURFACE Network 1  /surface_file_01.dat
+        OPTIONS /nexus_data/options_file.dat
+        '''
+    runcontrol_contents = '''START 01/01/2019'''
+    file_contents = '''TIME 01/01/2019
+        TARGET
+        NAME    CTRL   CTRLCOND   CTRLCONS   CTRLMETHOD   CALCMETHOD   CALCCOND   CALCCONS   VALUE  REGION   PRIORITY   
+        targ1   ctrl1   ctrlcnd1  ctrlcons1  ctrlmthd1    calcmthd1    calccond1  calccons1   2000  tort_targ       2
+        targ2   ctrl2   ctrlcnd2  ctrlcons2  ctrlmthd2    calcmthd2    calccond2  calccons2   5000  tort_targ2      4
+        ENDTARGET'''
+
+    options_file = """
+PSTD 14.7 	! PSIA
+TSTD 60 	! F
+
+! IREG1: Hierarchy also IPVT
+! ------------------------------------
+REGDATA Hierarchy
+NUMBER  NAME
+1	A1
+2	A2
+3	tort_targ
+4	A3
+5	A4
+6	tort_targ2  
+ENDREGDATA
+
+! IREG2: Geomask 
+! ------------------------------------
+REGDATA Geomask
+NUMBER  NAME
+1	GEO1
+2	GEO2
+ENDREGDATA
+"""
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            '/path/fcs_file.fcs': fcs_file_contents,
+            '/surface_file_01.dat': file_contents,
+            '/nexus_data/runcontrol.dat': runcontrol_contents,
+            '/nexus_data/options_file.dat': options_file}
+                                        ).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+    nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
+
+    # Act
+    nexus_sim.network.load()
+
+    # Assert
+    assert nexus_sim.network.targets.get_by_name('targ1').region_number == 3
+    assert nexus_sim.network.targets.get_by_name('targ2').region_number == 6

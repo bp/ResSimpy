@@ -20,14 +20,14 @@ class NexusOptions(DynamicProperty):
     """Class to hold Nexus options data."""
     file: NexusFile
     properties: dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
-                     dict[str, Union[float, pd.DataFrame]]]] = \
+                                dict[str, Union[float, pd.DataFrame]]]] = \
         field(default_factory=get_empty_dict_union)
     unit_system: UnitSystem
     __properties_loaded: bool = False  # Used in lazy loading
 
     def __init__(self, file: NexusFile, model_unit_system: UnitSystem, input_number: int = 1,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
-                                      dict[str, Union[float, pd.DataFrame]]]]] = None
+                                                      dict[str, Union[float, pd.DataFrame]]]]] = None
                  ) -> None:
         """Initialises the NexusOptions class.
 
@@ -51,7 +51,7 @@ class NexusOptions(DynamicProperty):
             'PSTD': ('standard_pressure', float),
             'TSTD': ('standard_temperature', float),
             'RES_TEMP': ('reservoir_temperature', float)
-            }
+        }
         return keywords
 
     @property
@@ -151,7 +151,7 @@ class NexusOptions(DynamicProperty):
             if potential_keyword is not None:
                 line_elems = line.split('!')[0].split()
                 keyword_index = line_elems.index(potential_keyword)
-                self.properties[potential_keyword] = np.fromstring(' '.join(line_elems[keyword_index+1:]), sep=' ')
+                self.properties[potential_keyword] = np.fromstring(' '.join(line_elems[keyword_index + 1:]), sep=' ')
 
             # Find global method overrides keywords
             potential_keyword = nfo.check_list_tokens(OPT_GLOBAL_METHOD_OVERRIDES_KEYWORDS, line)
@@ -165,7 +165,7 @@ class NexusOptions(DynamicProperty):
             # Find starting and ending indices for regdata table
             if nfo.check_token('REGDATA', line):
                 region_group_name = nfo.get_expected_token_value('REGDATA', line, file_as_list)
-                regdata_indices[region_group_name] = [line_indx+1, len(file_as_list)]
+                regdata_indices[region_group_name] = [line_indx + 1, len(file_as_list)]
                 start_reading_table = True
             if start_reading_table and nfo.check_token('ENDREGDATA', line):
                 regdata_indices[region_group_name][1] = line_indx

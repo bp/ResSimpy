@@ -264,7 +264,12 @@ class NexusNetwork(Network):
 
         self.__has_been_loaded = True
         self.__update_well_types()
+
         if self.model.options is not None:
+
+            # load the options file
+            self.model.options.load_nexus_options()
+
             # assign the region numbers for the targets with a region name
             self.targets._look_up_region_numbers_for_targets(self.model.options)
 
