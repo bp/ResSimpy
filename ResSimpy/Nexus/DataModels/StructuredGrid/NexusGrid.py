@@ -13,6 +13,7 @@ from ResSimpy.Grid import Grid
 from ResSimpy.GridArrayDefinition import GridArrayDefinition
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGridArrayFunction import NexusGridArrayFunction
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusLGRs import NexusLGRs
 from ResSimpy.Nexus.NexusKeywords.nexus_keywords import VALID_NEXUS_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_FORMAT_KEYWORDS
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
@@ -117,6 +118,7 @@ class NexusGrid(Grid):
     __kzeff: GridArrayDefinition
     __grid_multir_loaded: bool = False
     __multir_df: Optional[pd.DataFrame] = None
+    __lgrs: NexusLGRs
 
     def __init__(self, grid_nexus_file: Optional[NexusFile] = None, assume_loaded: bool = False) -> None:
         """Initialises the NexusGrid class.
@@ -210,6 +212,9 @@ class NexusGrid(Grid):
         self.__kxeff: GridArrayDefinition = GridArrayDefinition()
         self.__kyeff: GridArrayDefinition = GridArrayDefinition()
         self.__kzeff: GridArrayDefinition = GridArrayDefinition()
+
+        self.__lgrs: NexusLGRs = NexusLGRs(self.__grid_file_contents)
+
 
     def __wrap(self, value: Any) -> Any:
         if isinstance(value, tuple | list | set | frozenset):
@@ -1243,3 +1248,7 @@ class NexusGrid(Grid):
     def multir(self) -> pd.DataFrame:
         """Returns the MULTIR table as a dataframe."""
         return self.get_multir_df()
+
+    @property
+    def lgrs(self) -> NexusLGRs:
+        return self.__lgrs
