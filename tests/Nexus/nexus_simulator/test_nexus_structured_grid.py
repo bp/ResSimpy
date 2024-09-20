@@ -1711,7 +1711,7 @@ KY CON
     # Act
     result = model.grid
     result_lgr = result.lgrs.lgrs[0]
-    
+
     # assert
     assert result.kx == expected_root_kx
     assert result.ky == expected_root_ky

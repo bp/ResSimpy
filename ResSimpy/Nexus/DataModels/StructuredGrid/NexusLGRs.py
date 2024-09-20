@@ -85,7 +85,8 @@ class NexusLGRs(LGRs):
         return NexusLGR(parent_grid='ROOT', name=lgr_name, i1=i1, i2=i2, j1=j1, j2=j2, k1=k1, k2=k2,
                         nx=nx, ny=ny, nz=nz)
 
-    def __expand_refinement_lines(self, refinement_line: list[str]) -> list[int]:
+    @staticmethod
+    def __expand_refinement_lines(refinement_line: list[str]) -> list[int]:
         """Expands the refinement lines into a list of integers."""
         store_final_values: list[int] = []
         for value in refinement_line:
