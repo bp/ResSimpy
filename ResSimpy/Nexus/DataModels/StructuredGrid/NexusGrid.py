@@ -523,6 +523,8 @@ class NexusGrid(Grid):
                 temp_array_name = fo.get_token_value('ARRAYS', line, [line])
                 if temp_array_name is None:
                     array_name = 'ROOT'
+                else:
+                    array_name = temp_array_name
 
             if line_start_token is not None and line_start_token.upper() in possible_properties:
                 token_property = properties_to_load[possible_properties.index(line_start_token)]
