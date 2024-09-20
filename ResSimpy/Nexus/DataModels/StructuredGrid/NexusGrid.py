@@ -520,8 +520,8 @@ class NexusGrid(Grid):
                 continue
 
             if nfo.check_token('ARRAYS', line):
-                array_name = fo.get_token_value('ARRAYS', line, [line])
-                if array_name is None:
+                temp_array_name = fo.get_token_value('ARRAYS', line, [line])
+                if temp_array_name is None:
                     array_name = 'ROOT'
 
             if line_start_token is not None and line_start_token.upper() in possible_properties:
