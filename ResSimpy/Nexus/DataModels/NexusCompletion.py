@@ -442,8 +442,11 @@ class NexusCompletion(Completion):
         if 'start_date' not in input_dictionary or not isinstance(input_dictionary['start_date'], str):
             raise ValueError(f"Invalid start date found: {input_dictionary}")
 
+        if 'unit_system' not in input_dictionary or not isinstance(input_dictionary['unit_system'], UnitSystem):
+            raise ValueError(f"Invalid unit system found: {input_dictionary}")
+
         constructed_class = cls(date=date, date_format=completion_date_format,
-                                start_date=input_dictionary['start_date'])
+                                unit_system=input_dictionary['unit_system'], start_date=input_dictionary['start_date'])
         constructed_class.update(input_dictionary)
         return constructed_class
 

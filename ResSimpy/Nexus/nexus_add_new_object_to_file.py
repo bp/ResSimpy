@@ -4,6 +4,7 @@ import copy
 from typing import TYPE_CHECKING, Any, TypeVar, Optional
 from uuid import UUID
 
+from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.File import File
 from ResSimpy.NetworkObject import NetworkObject
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -14,7 +15,8 @@ if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 
-T = TypeVar('T', bound=NetworkObject)
+T = TypeVar('T', bound=DataObjectMixin)
+U = TypeVar('U', bound=NetworkObject)
 
 
 class AddObjectOperations:
@@ -297,8 +299,8 @@ class AddObjectOperations:
         file_to_add_to.add_to_file_as_list(additional_content=additional_content, index=insert_line_index,
                                            additional_objects=new_object_ids)
 
-    def add_network_obj(self, node_to_add: dict[str, None | str | float | int], obj_type: type[T],
-                        network: NexusNetwork) -> T:
+    def add_network_obj(self, node_to_add: dict[str, None | str | float | int], obj_type: type[U],
+                        network: NexusNetwork) -> U:
         """Add new node to the nexus network file.
 
         Args:

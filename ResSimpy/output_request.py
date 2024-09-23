@@ -1,16 +1,16 @@
-from dataclasses import dataclass
 from abc import ABC
+from dataclasses import dataclass
 from typing import Optional
 
+from ResSimpy.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.FrequencyEnum import FrequencyEnum
 from ResSimpy.Enums.OutputType import OutputType
-from ResSimpy.NetworkObject import NetworkObject
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 
 
 @dataclass(kw_only=True)
-class OutputRequest(NetworkObject, ABC):
+class OutputRequest(DataObjectMixin, ABC):
     """Class to hold data input for an Output Request.
 
     Attributes:

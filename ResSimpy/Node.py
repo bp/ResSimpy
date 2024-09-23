@@ -29,7 +29,7 @@ class Node(NetworkObject, ABC):
             name (Optional[str]): The name of the object.
         """
         super().__init__(properties_dict=properties_dict, date=date, date_format=date_format, start_date=start_date,
-                         unit_system=unit_system)
+                         unit_system=unit_system, name=name)
 
     @property
     def units(self) -> NetworkUnits:

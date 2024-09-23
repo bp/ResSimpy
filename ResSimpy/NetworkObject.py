@@ -1,4 +1,5 @@
 """Abstract base class for network objects."""
+import warnings
 from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
@@ -44,6 +45,14 @@ class NetworkObject(DataObjectMixin, ABC):
                 date_format = properties_dict['date_format']
             else:
                 raise ValueError("No date format supplied for object.")
+
+        if unit_system is None:
+            if 'unit_system' in properties_dict and isinstance(properties_dict['unit_system'], UnitSystem):
+                unit_system = properties_dict['unit_system']
+            else:
+                # TODO: Update our unit tests with unit systems and upgrade the below to an error
+                warnings.warn(f"No unit system supplied for object: {self.name}, assuming ENGLISH")
+                unit_system = UnitSystem.ENGLISH
 
         super().__init__(date_format=date_format, start_date=start_date, unit_system=unit_system, name=obj_name,
                          date=date)
