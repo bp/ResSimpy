@@ -92,3 +92,11 @@ class NexusPVTMethods(PVT):
     def model_unit_system(self) -> UnitSystem:
         """Return the model unit system."""
         return self.__model_unit_system
+
+    @property
+    def summary(self) -> str:
+        """Returns a string summary of 'NexusPVTMethods' inputs in a dictionary."""
+        pvt_summary = ''
+        for key, value in self.inputs.items():
+            pvt_summary += f'        {key}: {value.file.location}\n'
+        return pvt_summary
