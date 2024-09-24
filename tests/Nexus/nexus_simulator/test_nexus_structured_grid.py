@@ -1718,3 +1718,4 @@ KY CON
     assert result_lgr == expected_lgr
     assert result_lgr.kx == expected_lgr._kx
     assert result_lgr.ky == expected_lgr._ky
+    assert len(result.lgrs.lgrs) == 1

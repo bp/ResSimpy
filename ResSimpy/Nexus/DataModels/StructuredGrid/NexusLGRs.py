@@ -16,7 +16,14 @@ class NexusLGRs(LGRs):
 
     def __init__(self, grid_file_as_list: None | list[str], lgrs: None | list[NexusLGR] = None,
                  assume_loaded: bool = False) -> None:
-        """Initializes the NexusLGRs class."""
+        """Initializes the NexusLGRs class.
+
+        Args:
+            grid_file_as_list (None | list[str]): List of strings representing the file to load the LGRs from.
+            lgrs (None | list[NexusLGR]): List of LGRs to initialize the class with. Defaults to None for loading
+            purposes.
+            assume_loaded (bool): Whether the LGRs have already been loaded. Defaults to False.
+        """
         super().__init__(lgrs=lgrs)
         self._grid_file_as_list = grid_file_as_list if grid_file_as_list is not None else []
         self.__has_been_loaded = assume_loaded
