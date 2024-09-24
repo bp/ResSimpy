@@ -31,6 +31,26 @@ class Constraint(DataObjectMixin, ABC):
     max_reservoir_total_fluids_rate: Optional[float] = None
     max_avg_comp_dp: Optional[float] = None
     max_comp_dp: Optional[float] = None
+    max_watercut: Optional[float] = None
+    max_watercut_plug: Optional[float] = None
+    max_watercut_plugplus: Optional[float] = None
+    max_watercut_perf: Optional[float] = None
+    max_watercut_perfplus: Optional[float] = None
+    max_wor: Optional[float] = None
+    max_wor_plug: Optional[float] = None
+    max_wor_plug_plus: Optional[float] = None
+    max_wor_perf: Optional[float] = None
+    max_wor_perfplus: Optional[float] = None
+    max_gor: Optional[float] = None
+    max_gor_plug: Optional[float] = None
+    max_gor_plug_plus: Optional[float] = None
+    max_gor_perf: Optional[float] = None
+    max_gor_perfplus: Optional[float] = None
+    max_lgr: Optional[float] = None
+    max_lgr_plug: Optional[float] = None
+    max_lgr_plug_plus: Optional[float] = None
+    max_lgr_perf: Optional[float] = None
+    max_lgr_perfplus: Optional[float] = None
 
     @property
     def units(self) -> ConstraintUnits:
