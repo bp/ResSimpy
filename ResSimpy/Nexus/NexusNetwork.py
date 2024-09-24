@@ -268,7 +268,7 @@ class NexusNetwork(Network):
         if self.model.options is not None:
 
             # load the options file
-            self.model.options.load_nexus_options()
+            self.model.options.load_nexus_options_if_not_loaded()
 
             # assign the region numbers for the targets with a region name
             self.targets._look_up_region_numbers_for_targets(self.model.options)

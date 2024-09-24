@@ -20,14 +20,14 @@ class NexusOptions(DynamicProperty):
     """Class to hold Nexus options data."""
     file: NexusFile
     properties: dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
-                                dict[str, Union[float, pd.DataFrame]]]] = \
+    dict[str, Union[float, pd.DataFrame]]]] = \
         field(default_factory=get_empty_dict_union)
     unit_system: UnitSystem
     __properties_loaded: bool = False  # Used in lazy loading
 
     def __init__(self, file: NexusFile, model_unit_system: UnitSystem, input_number: int = 1,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
-                                                      dict[str, Union[float, pd.DataFrame]]]]] = None
+                 dict[str, Union[float, pd.DataFrame]]]]] = None
                  ) -> None:
         """Initialises the NexusOptions class.
 
@@ -181,6 +181,12 @@ class NexusOptions(DynamicProperty):
             self.properties['REGDATA'] = reg_dfs
 
         self.__properties_loaded = True
+
+    def load_nexus_options_if_not_loaded(self) -> None:
+
+        if not self.__properties_loaded:
+            self.load_nexus_options()
+            self.__properties_loaded = True
 
     def look_up_region_number_by_name(self, region_name: str) -> int:
         """Look up the region number by the region name in the REGDATA.

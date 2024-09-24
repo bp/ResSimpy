@@ -144,33 +144,12 @@ class NexusConstraint(Constraint):
     min_reverse_reservoir_liquid_rate: Optional[float] = None
     min_reverse_reservoir_total_fluids_rate: Optional[float] = None
     min_reverse_reservoir_hc_rate: Optional[float] = None
-    max_watercut: Optional[float] = None
-    max_watercut_plug: Optional[float] = None
-    max_watercut_plugplus: Optional[float] = None
-    max_watercut_perf: Optional[float] = None
-    max_watercut_perfplus: Optional[float] = None
-    max_wor: Optional[float] = None
-    max_wor_plug: Optional[float] = None
-    max_wor_plug_plus: Optional[float] = None
-    max_wor_perf: Optional[float] = None
-    max_wor_perfplus: Optional[float] = None
-    max_gor: Optional[float] = None
-    max_gor_plug: Optional[float] = None
-    max_gor_plug_plus: Optional[float] = None
-    max_gor_perf: Optional[float] = None
-    max_gor_perfplus: Optional[float] = None
     gor_limit: Optional[float] = None
     gor_limit_exponent: Optional[float] = None
     gor_limit_frequency: Optional[float] = None
-    max_lgr: Optional[float] = None
-    max_lgr_plug: Optional[float] = None
-    max_lgr_plug_plus: Optional[float] = None
-    max_lgr_perf: Optional[float] = None
-    max_lgr_perfplus: Optional[float] = None
     max_cum_gas_prod: Optional[float] = None
     max_cum_water_prod: Optional[float] = None
     max_cum_oil_prod: Optional[float] = None
-
     max_qmult_total_reservoir_rate: Optional[float] = None
     convert_qmult_to_reservoir_barrels: Optional[bool] = None
     qmult_oil_rate: Optional[float] = None
@@ -180,7 +159,6 @@ class NexusConstraint(Constraint):
     use_qmult_qwater_surface_rate: Optional[bool] = None
     use_qmult_qgas_surface_rate: Optional[bool] = None
     use_qmult_qoilqwat_surface_rate: Optional[bool] = None
-
     artificial_lift_number: Optional[int] = None
     max_choke_setting: Optional[float] = None
     min_gas_lift_efficiency: Optional[float] = None
