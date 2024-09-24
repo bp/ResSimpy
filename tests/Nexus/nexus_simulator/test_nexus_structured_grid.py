@@ -3,6 +3,7 @@ import pandas as pd
 import pytest
 from ResSimpy.GridArrayDefinition import GridArrayDefinition
 from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusLGR import NexusLGR
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
 from tests.multifile_mocker import mock_multiple_files
@@ -1651,3 +1652,70 @@ DZNET CON
     assert result.dx.value is None
     assert result.dy.value is None
     assert result.dz.value is None
+
+def test_load_arrays_with_different_grid_names_to_lgr_class(mocker):
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents ="""NX  NY  NZ
+ 80  86  84
+
+CARTREF lgr_01                         
+  14  20   29  29  1  10  ! comment
+  
+  6*5  1*7 6*5
+  9   ! comment
+  
+  10*1
+ENDREF 
+ENDLGR
+
+
+ARRAYS
+
+KX CON
+100
+
+KY CON
+10
+
+ARRAYS lgr_01
+
+KX  ZVAR 
+INCLUDE  KX_file.dat
+
+KY CON
+1
+"""
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+        {'testpath1/nexus_run.fcs': fcs_file_contents,
+         '/run_control/path': '',
+         structured_grid_name: structured_grid_file_contents,
+         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+    
+    expected_lgr = NexusLGR(parent_grid='ROOT', name='lgr_01', i1=14, i2=20, j1=29, j2=29, k1=1, k2=10,
+                            nx=[5, 5, 5, 5, 5, 5, 7, 5, 5, 5, 5, 5, 5],
+                            ny=[9],
+                            nz=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+                            )
+    expected_lgr._kx = GridArrayDefinition(modifier='ZVAR', value='KX_file.dat', 
+                                           absolute_path=os.path.join('testpath1','KX_file.dat'))
+    expected_lgr._ky = GridArrayDefinition(modifier='CON', value='1')
+    expected_root_kx = GridArrayDefinition(modifier='CON', value='100')
+    expected_root_ky = GridArrayDefinition(modifier='CON', value='10')
+
+    model = NexusSimulator('testpath1/nexus_run.fcs')
+    # Act
+    result = model.grid
+    result_lgr = result.lgrs.lgrs[0]
+
+    # assert
+    assert result.kx == expected_root_kx
+    assert result.ky == expected_root_ky
+    assert result_lgr == expected_lgr
+    assert result_lgr.kx == expected_lgr._kx
+    assert result_lgr.ky == expected_lgr._ky
+    assert len(result.lgrs.lgrs) == 1
