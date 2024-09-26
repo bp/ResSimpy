@@ -76,15 +76,6 @@ class NexusNodeConnection(NodeConnection):
             is_activated: bool: Whether the Connection has been set as activated. Defaults to True.
             name (Optional[str]): The name of the object.
         """
-        if unit_system is None:
-            if properties_dict is not None and 'unit_system' in properties_dict:
-                if not isinstance(properties_dict['unit_system'], UnitSystem):
-                    raise ValueError(f"Invalid unit system: {unit_system}")
-
-                unit_system = properties_dict['unit_system']
-            else:
-                unit_system = UnitSystem.ENGLISH  # Nexus Default
-
         super().__init__(date_format=date_format, start_date=start_date, unit_system=unit_system, name=name, date=date,
                          properties_dict=properties_dict)
         self.is_activated = is_activated

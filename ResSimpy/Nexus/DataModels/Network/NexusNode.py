@@ -29,14 +29,6 @@ class NexusNode(Node):
             start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
             unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
         """
-        if unit_system is None:
-            if properties_dict is not None and 'unit_system' in properties_dict:
-                if not isinstance(properties_dict['unit_system'], UnitSystem):
-                    raise ValueError(f"Invalid unit system: {unit_system}")
-                unit_system = properties_dict['unit_system']
-            else:
-                unit_system = UnitSystem.ENGLISH  # Nexus Default
-
         super().__init__(properties_dict=properties_dict, date=date, date_format=date_format, start_date=start_date,
                          unit_system=unit_system)
 

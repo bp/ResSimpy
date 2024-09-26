@@ -1,4 +1,6 @@
 """Abstract base class for network objects."""
+from __future__ import annotations
+
 import warnings
 from abc import ABC
 from dataclasses import dataclass
@@ -51,8 +53,10 @@ class NetworkObject(DataObjectMixin, ABC):
                 unit_system = properties_dict['unit_system']
             else:
                 # TODO: Update our unit tests with unit systems and upgrade the below to an error
-                warnings.warn(f"No unit system supplied for object: {self.name}, assuming ENGLISH")
-                unit_system = UnitSystem.ENGLISH
+                if 'Nexus' in self.__class__.__name__:
+                    unit_system = UnitSystem.ENGLISH
+                warnings.warn(f"No unit system supplied for object: {self.name}, assuming Simulator default of "
+                              f"{unit_system}.")
 
         super().__init__(date_format=date_format, start_date=start_date, unit_system=unit_system, name=obj_name,
                          date=date)

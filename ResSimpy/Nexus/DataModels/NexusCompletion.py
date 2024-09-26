@@ -175,6 +175,9 @@ class NexusCompletion(Completion):
         self.__rel_perm_end_point = rel_perm_end_point
         self.__kh_mult = kh_mult
 
+        if unit_system is None:
+            unit_system = UnitSystem.ENGLISH
+
         super().__init__(date=date, i=i, j=j, k=k, skin=skin, depth=depth, well_radius=well_radius, x=x, y=y,
                          angle_a=angle_a, angle_v=angle_v, grid=grid, depth_to_top=depth_to_top,
                          depth_to_bottom=depth_to_bottom, perm_thickness_ovr=perm_thickness_ovr, dfactor=dfactor,
