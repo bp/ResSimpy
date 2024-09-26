@@ -157,6 +157,10 @@ class DataObjectMixin(ABC):
         unit_dimension = self.units.attribute_map.get(attribute_name, None)
         if unit_dimension is None:
             raise AttributeError(f'Attribute {attribute_name} not recognised and does not have a unit definition')
+
+        if self.unit_system is None:
+            raise AttributeError("Cannot find unit without a unit system.")
+
         unit = unit_dimension.unit_system_enum_to_variable(unit_system=self.unit_system)
         if uppercase:
             unit = unit.upper()
