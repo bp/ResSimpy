@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 from abc import ABC
+from dataclasses import dataclass
 from typing import Optional
 
 from ResSimpy.DataObjectMixin import DataObjectMixin

@@ -99,41 +99,24 @@ class NexusWellConnection(WellConnection):
     drill_order_benefit: Optional[float] = None
     is_activated: bool = True
 
-    def __init__(self, properties_dict: dict[str, None | int | str | float], date: Optional[str] = None,
-                 date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
-                 unit_system: Optional[UnitSystem] = None, is_activated: bool = True) -> None:
+    def __init__(self, properties_dict: Optional[dict[str, None | int | str | float]] = None,
+                 date: Optional[str] = None, date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
+                 unit_system: Optional[UnitSystem] = None, is_activated: bool = True,
+                 name: Optional[str] = None) -> None:
         """Initialises the NexusWellConnection class.
 
         Args:
-            properties_dict (dict): dict of the properties to set on the object.
+            properties_dict (Optional[dict]): dict of the properties to set on the object.
             date (Optional[str]): The date of the object.
             date_format (Optional[DateFormat]): The date format that the object uses.
             start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
             unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
             is_activated: bool: Whether the Well Connection has been set as activated. Defaults to True.
+            name (Optional[str]): The name of the object.
         """
-        name = properties_dict.get('name', None)
-        name = name if isinstance(name, str) else None
-        super().__init__(_date_format=date_format, _start_date=start_date, _unit_system=unit_system, name=name)
+        super().__init__(date_format=date_format, start_date=start_date, unit_system=unit_system, name=name, date=date,
+                         properties_dict=properties_dict)
         self.is_activated = is_activated
-
-        protected_attributes = ['date_format', 'start_date', 'unit_system', 'is_activated']
-
-        for attribute in protected_attributes:
-            if attribute in properties_dict:
-                self.__setattr__(f"_{attribute}", properties_dict[attribute])
-
-        # Loop through the properties dict if one is provided and set those attributes
-        remaining_properties = [x for x in properties_dict.keys() if x not in protected_attributes]
-        for key in remaining_properties:
-            self.__setattr__(key, properties_dict[key])
-
-        if date is None:
-            if 'date' not in properties_dict or not isinstance(properties_dict['date'], str):
-                raise ValueError(f"No valid Date found for object with properties: {properties_dict}")
-            self.date = properties_dict['date']
-        else:
-            self.date = date
 
         if self.name is not None:
             self.bh_node_name = self.name + '%bh'

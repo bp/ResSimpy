@@ -24,10 +24,9 @@ class DataObjectMixin(ABC):
     _unit_system: Optional[UnitSystem] = None
     __name: Optional[str] = None
 
-    # TODO: Find a way to remove the dummy parameter below that doesn't break typing in nexus_add_new_object_to_file.
-    def __init__(self, _: dict[str, str | float | int | None] = {}, date: Optional[str] = None,
-                 date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
-                 unit_system: Optional[UnitSystem] = None, name: Optional[str] = None) -> None:
+    def __init__(self, date: Optional[str] = None, date_format: Optional[DateFormat] = None,
+                 start_date: Optional[str] = None, unit_system: Optional[UnitSystem] = None,
+                 name: Optional[str] = None) -> None:
         """Initialises the DataObjectMixin Class. First '_' parameter is a dummy parameter for type compatibility.
 
         Args:
@@ -147,7 +146,7 @@ class DataObjectMixin(ABC):
         """Returns the attribute to unit map for the data object."""
         raise NotImplementedError("Implement this in the derived class")
 
-    def get_unit_for_attribute(self, attribute_name: str, unit_system: UnitSystem, uppercase: bool = False) -> str:
+    def get_unit_for_attribute(self, attribute_name: str, uppercase: bool = False) -> str:
         """Returns the unit variable for the given unit system.
 
         Args:
@@ -158,7 +157,11 @@ class DataObjectMixin(ABC):
         unit_dimension = self.units.attribute_map.get(attribute_name, None)
         if unit_dimension is None:
             raise AttributeError(f'Attribute {attribute_name} not recognised and does not have a unit definition')
-        unit = unit_dimension.unit_system_enum_to_variable(unit_system=unit_system)
+
+        if self.unit_system is None:
+            raise AttributeError("Cannot find unit without a unit system.")
+
+        unit = unit_dimension.unit_system_enum_to_variable(unit_system=self.unit_system)
         if uppercase:
             unit = unit.upper()
         return unit

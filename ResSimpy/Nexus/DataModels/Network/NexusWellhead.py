@@ -62,7 +62,7 @@ class NexusWellhead(Wellhead):
 
     def __init__(self, properties_dict: dict[str, None | int | str | float], date: Optional[str] = None,
                  date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
-                 unit_system: Optional[UnitSystem] = None) -> None:
+                 unit_system: Optional[UnitSystem] = None, name: Optional[str] = None) -> None:
         """Initialises the NexusWellhead class.
 
         Args:
@@ -71,29 +71,10 @@ class NexusWellhead(Wellhead):
             date_format (Optional[DateFormat]): The date format that the object uses.
             start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
             unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
+            name (Optional[str]): The name of the object.
         """
-        name = properties_dict.get('name', None)
-        name = name if isinstance(name, str) else None
-        super().__init__(_date_format=date_format, _start_date=start_date, _unit_system=unit_system, name=name)
-
-        # Set the date related properties, then set the date, automatically setting the ISODate
-        protected_attributes = ['date_format', 'start_date', 'unit_system']
-
-        for attribute in protected_attributes:
-            if attribute in properties_dict:
-                self.__setattr__(f"_{attribute}", properties_dict[attribute])
-
-        # Loop through the properties dict if one is provided and set those attributes
-        remaining_properties = [x for x in properties_dict.keys() if x not in protected_attributes]
-        for key in remaining_properties:
-            self.__setattr__(key, properties_dict[key])
-
-        if date is None:
-            if 'date' not in properties_dict or not isinstance(properties_dict['date'], str):
-                raise ValueError(f"No valid Date found for object with properties: {properties_dict}")
-            self.date = properties_dict['date']
-        else:
-            self.date = date
+        super().__init__(date_format=date_format, start_date=start_date, unit_system=unit_system, name=name, date=date,
+                         properties_dict=properties_dict)
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
