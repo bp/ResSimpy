@@ -97,11 +97,12 @@ class StructuredGridOperations:
         """A function that begins the process of populating the grid away."""
 
         if modifier == 'MULT':
-            numerical_value = nfo.get_expected_token_value(modifier, line, file_as_list, ignore_values=ignore_values)
+            numerical_value = nfo.get_expected_token_value(modifier, line, file_as_list[line_indx:],
+                                                           ignore_values=ignore_values)
             if numerical_value is None:
                 raise ValueError(
                     f'No numerical value found after {token_modifier} keyword in line: {line}')
-            value_to_multiply = fo.get_token_value(modifier, line, file_as_list,
+            value_to_multiply = fo.get_token_value(modifier, line, file_as_list[line_indx:],
                                                    ignore_values=[numerical_value, *ignore_values])
             if numerical_value is not None and value_to_multiply is not None:
                 if not isinstance(token_property, dict):
@@ -112,7 +113,7 @@ class StructuredGridOperations:
                     token_property[region_name].modifier = 'MULT'
                     token_property[region_name].value = f"{numerical_value} {value_to_multiply}"
         else:
-            value = fo.get_token_value(modifier, line, file_as_list, ignore_values=ignore_values)
+            value = fo.get_token_value(modifier, line, file_as_list[line_indx:], ignore_values=ignore_values)
             if value is None:
                 # Could be 'cut short' by us excluding the rest of a file.
                 if not isinstance(token_property, dict):
