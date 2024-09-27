@@ -7,16 +7,6 @@ from ResSimpy.LGR import LGR
 @dataclass
 class NexusLGR(LGR):
     """Class for handling a Local Grid Refinement (LGR) in the NexusGrid."""
-    _netgrs: GridArrayDefinition
-    _porosity: GridArrayDefinition
-    _sw: GridArrayDefinition
-    _sg: GridArrayDefinition
-    _pressure: GridArrayDefinition
-    _temperature: GridArrayDefinition
-    _kx: GridArrayDefinition
-    _ky: GridArrayDefinition
-    _kz: GridArrayDefinition
-
     _dx: GridArrayDefinition
     _dy: GridArrayDefinition
     _dz: GridArrayDefinition
@@ -68,13 +58,6 @@ class NexusLGR(LGR):
     _tmz: GridArrayDefinition
     _multbv: GridArrayDefinition
     _pv: GridArrayDefinition
-    _iequil: GridArrayDefinition
-    _ipvt: GridArrayDefinition
-    _iwater: GridArrayDefinition
-    _irelpm: GridArrayDefinition
-    _irock: GridArrayDefinition
-    _itran: GridArrayDefinition
-    _iregion: dict[str, GridArrayDefinition]
     _pvmult: GridArrayDefinition
     _livecell: GridArrayDefinition
     _worka1: GridArrayDefinition
@@ -94,24 +77,6 @@ class NexusLGR(LGR):
                  nx: list[int], ny: list[int], nz: list[int]) -> None:
         """Initializes the NexusLGR class."""
         super().__init__(parent_grid, name, i1, i2, j1, j2, k1, k2, nx, ny, nz)
-        self._netgrs = GridArrayDefinition()
-        self._porosity = GridArrayDefinition()
-        self._sw = GridArrayDefinition()
-        self._sg = GridArrayDefinition()
-        self._pressure = GridArrayDefinition()
-        self._temperature = GridArrayDefinition()
-        self._kx = GridArrayDefinition()
-        self._ky = GridArrayDefinition()
-        self._kz = GridArrayDefinition()
-        self._iregion = {}
-
-        self._iequil: GridArrayDefinition = GridArrayDefinition()
-        self._ipvt: GridArrayDefinition = GridArrayDefinition()
-        self._iwater: GridArrayDefinition = GridArrayDefinition()
-        self._irelpm: GridArrayDefinition = GridArrayDefinition()
-        self._irock: GridArrayDefinition = GridArrayDefinition()
-        self._itran: GridArrayDefinition = GridArrayDefinition()
-        self._iregion: dict[str, GridArrayDefinition] = {}
         self._pvmult: GridArrayDefinition = GridArrayDefinition()
         self._livecell: GridArrayDefinition = GridArrayDefinition()
         self._worka1: GridArrayDefinition = GridArrayDefinition()
