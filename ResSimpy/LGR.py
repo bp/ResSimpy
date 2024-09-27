@@ -194,20 +194,20 @@ class LGR(ABC):
     def grid_array_defs(self) -> dict[str, GridArrayDefinition]:
         """Returns the grid array definitions as a dictionary keyed by ."""
         grid_array_defs = {'netgrs': self._netgrs,
-                            'porosity': self._porosity,
-                            'sw': self._sw,
-                            'sg': self._sg,
-                            'pressure': self._pressure,
-                            'temperature': self._temperature,
-                            'kx': self._kx,
-                            'ky': self._ky,
-                            'kz': self._kz,
-                            'iequil': self._iequil,
-                            'ipvt': self._ipvt,
-                            'iwater': self._iwater,
-                            'irelpm': self._irelpm,
-                            'irock': self._irock,
-                            'itran': self._itran}
+                           'porosity': self._porosity,
+                           'sw': self._sw,
+                           'sg': self._sg,
+                           'pressure': self._pressure,
+                           'temperature': self._temperature,
+                           'kx': self._kx,
+                           'ky': self._ky,
+                           'kz': self._kz,
+                           'iequil': self._iequil,
+                           'ipvt': self._ipvt,
+                           'iwater': self._iwater,
+                           'irelpm': self._irelpm,
+                           'irock': self._irock,
+                           'itran': self._itran}
         # filter to only include grid array definitions with a modifier
         grid_array_defs = {key: value for key, value in grid_array_defs.items() if value.modifier is not None}
         return grid_array_defs
