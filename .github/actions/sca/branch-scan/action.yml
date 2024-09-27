@@ -134,7 +134,7 @@ runs:
       run: |
         wget -O cxflow.jar https://github.com/checkmarx-ltd/cx-flow/releases/download/1.6.38/cx-flow-1.6.38-java11.jar
     - name: create spring_config.yml
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
           const fs = require('fs');

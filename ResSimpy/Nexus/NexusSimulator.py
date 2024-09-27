@@ -283,6 +283,11 @@ class NexusSimulator(Simulator):
         """Returns the default units."""
         return self._default_units
 
+    @staticmethod
+    def sim_default_unit_system() -> UnitSystem:
+        """Returns the default unit system used by the Simulator."""
+        return UnitSystem.ENGLISH
+
     @property
     def run_units(self) -> UnitSystem:
         """Returns the run units."""

@@ -175,6 +175,9 @@ class NexusCompletion(Completion):
         self.__rel_perm_end_point = rel_perm_end_point
         self.__kh_mult = kh_mult
 
+        if unit_system is None:
+            unit_system = UnitSystem.ENGLISH
+
         super().__init__(date=date, i=i, j=j, k=k, skin=skin, depth=depth, well_radius=well_radius, x=x, y=y,
                          angle_a=angle_a, angle_v=angle_v, grid=grid, depth_to_top=depth_to_top,
                          depth_to_bottom=depth_to_bottom, perm_thickness_ovr=perm_thickness_ovr, dfactor=dfactor,
@@ -442,8 +445,11 @@ class NexusCompletion(Completion):
         if 'start_date' not in input_dictionary or not isinstance(input_dictionary['start_date'], str):
             raise ValueError(f"Invalid start date found: {input_dictionary}")
 
+        if 'unit_system' not in input_dictionary or not isinstance(input_dictionary['unit_system'], UnitSystem):
+            raise ValueError(f"Invalid unit system found: {input_dictionary}")
+
         constructed_class = cls(date=date, date_format=completion_date_format,
-                                start_date=input_dictionary['start_date'])
+                                unit_system=input_dictionary['unit_system'], start_date=input_dictionary['start_date'])
         constructed_class.update(input_dictionary)
         return constructed_class
 

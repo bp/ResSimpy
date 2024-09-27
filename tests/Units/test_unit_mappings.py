@@ -97,20 +97,57 @@ def test_get_unit_error():
     (NexusNode, 'depth', 'ft', False),
     (NexusNodeConnection, 'diameter', 'in', False),
     (NexusWellbore, 'measured_depth_in', 'ft', False),
-    (NexusCompletion, 'angle_a', 'degrees', False),
-    (NexusCompletion, 'angle_a', 'DEGREES', True),
     (NexusTarget, 'calculation_method', '', True),
     (NexusWellhead, 'dp_add', 'psi', False),
     (NexusWellConnection, 'dt_add', 'DEGREES F', True),
 ])
-def test_get_unit_for_attribute(mocker, data_object, attribute, expected_result, upper):
+def test_get_unit_for_attribute_imperial(mocker, data_object, attribute, expected_result, upper):
     """Write a test to check that the DataObjectMixin.get_unit_for_attribute method works as expected."""
     # Arrange
     # patch out convert_to_iso from the ISODateTime module as it is not needed for this test
     mocker.patch.object(ISODateTime, 'convert_to_iso', return_value=ISODateTime(2021, 1, 1))
-    dataobj = data_object({'date': '01/01/2020'})
+    dataobj = data_object(date='14/01/2020', date_format=DateFormat.DD_MM_YYYY, properties_dict={},
+                          unit_system=UnitSystem.ENGLISH)
     # Act
-    result = dataobj.get_unit_for_attribute(attribute_name=attribute, unit_system=UnitSystem.ENGLISH, uppercase=upper)
+    result = dataobj.get_unit_for_attribute(attribute_name=attribute, uppercase=upper)
+    # Assert
+    assert result == expected_result
+
+
+@pytest.mark.parametrize('data_object, attribute, expected_result, upper', [
+    (NexusConstraint, 'max_surface_water_rate', 'stm3/day', False),
+    (NexusNode, 'depth', 'm', False),
+    (NexusNodeConnection, 'diameter', 'cm', False),
+    (NexusWellbore, 'measured_depth_in', 'm', False),
+    (NexusTarget, 'calculation_method', '', True),
+    (NexusWellhead, 'dp_add', 'kPa', False),
+    (NexusWellConnection, 'dt_add', 'DEGREES C', True),
+])
+def test_get_unit_for_attribute_metric(mocker, data_object, attribute, expected_result, upper):
+    """Write a test to check that the DataObjectMixin.get_unit_for_attribute method works as expected."""
+    # Arrange
+    # patch out convert_to_iso from the ISODateTime module as it is not needed for this test
+    mocker.patch.object(ISODateTime, 'convert_to_iso', return_value=ISODateTime(2021, 1, 1))
+    dataobj = data_object(date='14/01/2020', date_format=DateFormat.DD_MM_YYYY, properties_dict={},
+                          unit_system=UnitSystem.METRIC)
+    # Act
+    result = dataobj.get_unit_for_attribute(attribute_name=attribute, uppercase=upper)
+    # Assert
+    assert result == expected_result
+
+
+@pytest.mark.parametrize('attribute, expected_result, upper', [
+    ('angle_a', 'degrees', False),
+    ('angle_a', 'DEGREES', True)
+])
+def test_get_unit_for_attribute_completion(mocker, attribute, expected_result, upper):
+    """Write a test to check that the DataObjectMixin.get_unit_for_attribute method works as expected."""
+    # Arrange
+    # patch out convert_to_iso from the ISODateTime module as it is not needed for this test
+    mocker.patch.object(ISODateTime, 'convert_to_iso', return_value=ISODateTime(2021, 1, 1))
+    dataobj = NexusCompletion(date='14/01/2020', date_format=DateFormat.DD_MM_YYYY)
+    # Act
+    result = dataobj.get_unit_for_attribute(attribute_name=attribute, uppercase=upper)
     # Assert
     assert result == expected_result
 
@@ -189,7 +226,8 @@ def test_get_unit_for_attribute(mocker, data_object, attribute, expected_result,
 ])
 def test_network_unit_properties(attribute, expected_unit):
     # Arrange
-    test_object = NexusNode(properties_dict=dict(date='01/01/2001', unit_system=UnitSystem.ENGLISH))
+    test_object = NexusNode(properties_dict=dict(date='01/01/2001', unit_system=UnitSystem.ENGLISH,
+                                                 date_format=DateFormat.DD_MM_YYYY))
     # Act
     result = getattr(test_object.units, attribute)
     # Assert
@@ -332,7 +370,7 @@ def test_object_attribute_property_constraint(attribute, expected_unit):
 
 def test_object_no_unit_system():
     # Arrange
-    test_object = NexusConstraint(dict(date='01/01/2001'))
+    test_object = NexusConstraint(properties_dict=dict(date='01/01/2001'))
     # Act and Assert
     with pytest.raises(AttributeError) as ae:
         _ = test_object.units.max_surface_oil_rate

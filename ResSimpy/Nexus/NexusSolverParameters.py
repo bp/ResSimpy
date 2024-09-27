@@ -219,7 +219,7 @@ class NexusSolverParameters(SolverParameters):
         else:
             attribute_value, type_assignment = keyword_mapping[solver_token_value]
             value = fo.get_expected_token_value(solver_token_value, line, file_list=self.file_content)
-        if type_assignment == bool:
+        if type_assignment is bool:
             # set to True if the value is 'ON' and False if the value is 'OFF' (the bool conversion happens
             # by type_assignment)
             value = '' if value.upper() == 'OFF' else value

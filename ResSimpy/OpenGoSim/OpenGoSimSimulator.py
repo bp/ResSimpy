@@ -78,6 +78,11 @@ class OpenGoSimSimulator(Simulator):
         """Returns final date in the simulator."""
         return self.__final_date
 
+    @staticmethod
+    def sim_default_unit_system() -> UnitSystem:
+        """Returns the default unit system used by the Simulator."""
+        return UnitSystem.METRIC
+
     def __repr__(self) -> str:
         full_string = f"""Simulation Type {self.simulation_type.value}
 Start Date: {self.start_date}

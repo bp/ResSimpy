@@ -144,33 +144,12 @@ class NexusConstraint(Constraint):
     min_reverse_reservoir_liquid_rate: Optional[float] = None
     min_reverse_reservoir_total_fluids_rate: Optional[float] = None
     min_reverse_reservoir_hc_rate: Optional[float] = None
-    max_watercut: Optional[float] = None
-    max_watercut_plug: Optional[float] = None
-    max_watercut_plugplus: Optional[float] = None
-    max_watercut_perf: Optional[float] = None
-    max_watercut_perfplus: Optional[float] = None
-    max_wor: Optional[float] = None
-    max_wor_plug: Optional[float] = None
-    max_wor_plug_plus: Optional[float] = None
-    max_wor_perf: Optional[float] = None
-    max_wor_perfplus: Optional[float] = None
-    max_gor: Optional[float] = None
-    max_gor_plug: Optional[float] = None
-    max_gor_plug_plus: Optional[float] = None
-    max_gor_perf: Optional[float] = None
-    max_gor_perfplus: Optional[float] = None
     gor_limit: Optional[float] = None
     gor_limit_exponent: Optional[float] = None
     gor_limit_frequency: Optional[float] = None
-    max_lgr: Optional[float] = None
-    max_lgr_plug: Optional[float] = None
-    max_lgr_plug_plus: Optional[float] = None
-    max_lgr_perf: Optional[float] = None
-    max_lgr_perfplus: Optional[float] = None
     max_cum_gas_prod: Optional[float] = None
     max_cum_water_prod: Optional[float] = None
     max_cum_oil_prod: Optional[float] = None
-
     max_qmult_total_reservoir_rate: Optional[float] = None
     convert_qmult_to_reservoir_barrels: Optional[bool] = None
     qmult_oil_rate: Optional[float] = None
@@ -180,7 +159,6 @@ class NexusConstraint(Constraint):
     use_qmult_qwater_surface_rate: Optional[bool] = None
     use_qmult_qgas_surface_rate: Optional[bool] = None
     use_qmult_qoilqwat_surface_rate: Optional[bool] = None
-
     artificial_lift_number: Optional[int] = None
     max_choke_setting: Optional[float] = None
     min_gas_lift_efficiency: Optional[float] = None
@@ -197,9 +175,9 @@ class NexusConstraint(Constraint):
     clear_alq: Optional[bool] = None
     clear_p: Optional[bool] = None
 
-    def __init__(self, properties_dict: dict[str, None | int | str | float | UnitSystem], date: Optional[str] = None,
-                 date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
-                 unit_system: Optional[UnitSystem] = None) -> None:
+    def __init__(self, properties_dict: Optional[dict[str, None | int | str | float | UnitSystem]] = None,
+                 date: Optional[str] = None, date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
+                 unit_system: Optional[UnitSystem] = None, name: Optional[str] = None) -> None:
         """Initialises the NexusConstraint class.
 
         Args:
@@ -208,10 +186,12 @@ class NexusConstraint(Constraint):
             date_format (Optional[DateFormat]): The date format that the object uses.
             start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
             unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
+            name (Optional[str]): The name of the object.
         """
-        name = properties_dict.get('name', None)
-        name = name if isinstance(name, str) else None
         super().__init__(_date_format=date_format, _start_date=start_date, _unit_system=unit_system, name=name)
+
+        if properties_dict is None:
+            return
 
         # Set the date related properties, then set the date, automatically setting the ISODate
         protected_attributes = ['date_format', 'start_date', 'unit_system']
@@ -250,7 +230,7 @@ class NexusConstraint(Constraint):
             'CLEARP': ('clear_p', bool),
             'CLEARLIMIT': ('clear_limit', bool),
             'CLEARALQ': ('clear_alq', bool),
-            }
+        }
         nexus_mapping.update(NexusConstraint.get_limit_constraints_map())
         nexus_mapping.update(NexusConstraint.get_pressure_constraints_map())
         nexus_mapping.update(NexusConstraint.get_rate_constraints_map())
@@ -311,7 +291,7 @@ class NexusConstraint(Constraint):
             'QGAS': ('qmult_gas_rate', float),
             'DPBHAVG': ('max_avg_comp_dp', float),
             'DPBHMX': ('max_comp_dp', float),
-            }
+        }
         return nexus_mapping
 
     @staticmethod
@@ -324,7 +304,7 @@ class NexusConstraint(Constraint):
             'PGMAX': ('max_wag_gas_pressure', float),
             'BHP': ('bottom_hole_pressure', float),
             'THP': ('tubing_head_pressure', float),
-            }
+        }
         return nexus_mapping
 
     @staticmethod
@@ -357,7 +337,7 @@ class NexusConstraint(Constraint):
             'CGLIM': ('max_cum_gas_prod', float),
             'CWLIM': ('max_cum_water_prod', float),
             'COLIM': ('max_cum_oil_prod', float),
-            }
+        }
         return nexus_mapping
 
     @staticmethod
@@ -373,7 +353,7 @@ class NexusConstraint(Constraint):
             'SPEED': ('pump_speed', float),
             'CHOKELIMIT': ('choke_limit', str),
             'POSITION': ('manifold_position', int),
-            }
+        }
         return nexus_mapping
 
     def update(self, new_data: dict[str, None | int | str | float | UnitSystem], nones_overwrite: bool = False) -> None:

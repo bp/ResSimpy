@@ -128,6 +128,12 @@ class Simulator(ABC):
         """Returns the default units to use if no units are found."""
         return self._default_units
 
+    @staticmethod
+    @abstractmethod
+    def sim_default_unit_system() -> UnitSystem:
+        """Returns the default unit system used by the Simulator."""
+        raise NotImplementedError("This method has not been implemented for this simulator yet")
+
     @property
     def grid(self) -> None | Grid:
         """Pass the grid information to the front end."""
