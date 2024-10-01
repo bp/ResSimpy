@@ -123,7 +123,6 @@ class NexusConstraint(Constraint):
     max_reverse_reservoir_hc_rate: Optional[float] = None
     max_avg_comp_dp: Optional[float] = None
     max_comp_dp: Optional[float] = None
-
     min_pressure: Optional[float] = None
     max_pressure: Optional[float] = None
     max_wag_water_pressure: Optional[float] = None
@@ -168,7 +167,6 @@ class NexusConstraint(Constraint):
     pump_speed: Optional[float] = None
     choke_limit: Optional[str] = None
     manifold_position: Optional[int] = None
-
     clear_all: Optional[bool] = None
     clear_q: Optional[bool] = None
     clear_limit: Optional[bool] = None

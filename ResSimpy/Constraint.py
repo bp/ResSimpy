@@ -31,6 +31,9 @@ class Constraint(DataObjectMixin, ABC):
     max_reservoir_total_fluids_rate: Optional[float] = None
     max_avg_comp_dp: Optional[float] = None
     max_comp_dp: Optional[float] = None
+
+    # attributes below here are also used on eclipse end
+    # to determine proper workover strategy in WECON
     max_watercut: Optional[float] = None
     max_watercut_plug: Optional[float] = None
     max_watercut_plugplus: Optional[float] = None
