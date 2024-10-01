@@ -1719,3 +1719,75 @@ KY CON
     assert result_lgr.kx == expected_lgr._kx
     assert result_lgr.ky == expected_lgr._ky
     assert len(result.lgrs.lgrs) == 1
+
+
+def test_load_lgrs(mocker):
+    input_run_control = "START 01/07/2023"
+    input_nexus_fcs_file = """DATEFORMAT DD/MM/YYYY
+        GRID_FILES
+            STRUCTURED_GRID    /path/to/grid/file.dat
+
+        RECURRENT_FILES
+            RUNCONTROL /path/to/run_control.dat
+
+        SURFACE Network 1  /surface_file_01.dat
+
+        """
+    input_grid_file = """
+
+    NX NY NZ
+    69 30  1
+
+    KX VALUE
+    INCLUDE BLAH/BLAH
+
+    KY CON
+    200.50
+
+    LGR
+    CARTREF lgr_01                         
+      14  20   29  29  1  1
+      6*5  1*7 6*5
+      9
+      10*1
+    ENDREF 
+    ENDLGR
+
+    ARRAYS lgr_01
+    KX VALUE
+    INCLUDE permx_array.dat
+
+    """
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            '/path/to/nexus/fcsfile.dat': input_nexus_fcs_file,
+            '/path/to/run_control.dat': input_run_control,
+            '/path/to/grid/file.dat': input_grid_file,
+            '/surface_file_01.dat': ''
+        }
+                                        ).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    listdir_mock = mocker.Mock(return_value=[])
+    mocker.patch("os.listdir", listdir_mock)
+
+    def mock_isfile(filename):
+        if '_filtered' in filename:
+            return False
+        return True
+
+    mocker.patch("os.path.isfile", mock_isfile)
+    mocker.patch("os.path.exists", mock_isfile)
+    expected_output_file_name = os.path.join('/path/to/new/test/location', 'MY_NEW_MODEL.DATA')
+    # Act
+    nexus_model = NexusSimulator(origin='/path/to/nexus/fcsfile.dat')
+    kx_array = nexus_model.grid.kx
+    lgr_kx_array = nexus_model.grid.lgrs.lgrs[0].kx
+    
+    # Assert
+    assert kx_array.modifier == 'VALUE'
+    assert kx_array.value == 'BLAH/BLAH'
+    assert lgr_kx_array.modifier == 'VALUE'
+    assert lgr_kx_array.value == 'permx_array.dat'
