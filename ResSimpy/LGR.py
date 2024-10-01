@@ -97,22 +97,22 @@ class LGR(ABC):
 
     @property
     def nx(self) -> list[int]:
-        """Returns the nx values."""
+        """Returns the x-direction refinement values."""
         return self._nx
 
     @property
     def ny(self) -> list[int]:
-        """Returns the ny values."""
+        """Returns the y-direction refinement values."""
         return self._ny
 
     @property
     def nz(self) -> list[int]:
-        """Returns the nz values."""
+        """Returns the z-direction refinement values."""
         return self._nz
 
     @property
     def netgrs(self) -> GridArrayDefinition:
-        """Returns the netgrs grid array definition."""
+        """Returns the net-to-gross grid array definition."""
         return self._netgrs
 
     @property
@@ -122,12 +122,12 @@ class LGR(ABC):
 
     @property
     def sw(self) -> GridArrayDefinition:
-        """Returns the sw grid array definition."""
+        """Returns the water saturation grid array definition."""
         return self._sw
 
     @property
     def sg(self) -> GridArrayDefinition:
-        """Returns the sg grid array definition."""
+        """Returns the gas saturation grid array definition."""
         return self._sg
 
     @property
@@ -192,7 +192,9 @@ class LGR(ABC):
 
     @property
     def grid_array_defs(self) -> dict[str, GridArrayDefinition]:
-        """Returns the grid array definitions as a dictionary keyed by ."""
+        """Returns the grid array definitions in a dictionary keyed by the ResSimpy keyword associated with the
+        grid array definition.
+        """
         grid_array_defs = {'netgrs': self._netgrs,
                            'porosity': self._porosity,
                            'sw': self._sw,
