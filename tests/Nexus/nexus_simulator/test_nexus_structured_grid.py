@@ -935,7 +935,7 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
     mocker.patch("builtins.open", structured_grid_mock)
 
     # Act
-    NexusGrid.NexusGrid.update_structured_grid_file(new_structured_grid_dictionary, simulation)
+    NexusGrid.update_structured_grid_file(new_structured_grid_dictionary, simulation)
     result = simulation.grid
 
     # Assert
