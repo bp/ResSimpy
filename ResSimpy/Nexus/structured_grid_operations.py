@@ -45,6 +45,8 @@ class StructuredGridOperations:
             line_indx (int): index of line in file_as_list
             file_as_list (list[str]): a list of strings containing each line of the file as a new entry
             grid_nexus_file (NexusFile): the NexusFile object containing the grid file.
+            original_line_location (int): the line location relative to the expanded file as list with the include
+            file paths.
             ignore_values (Optional[list[str]]): values to be ignored. Defaults to None.
 
         Raises:
@@ -435,18 +437,18 @@ class StructuredGridOperations:
         default_root = os.path.dirname(grid_nexus_file.location)
         absolute_file_path = os.path.join(default_root, grid_array_definition.value)
 
-        file_containing_include_line, _ = grid_nexus_file.find_which_include_file(line_index_of_include_file,
-                                                                                  with_include_lines=True)
+        line_with_file_uuid = grid_nexus_file.get_flat_list_str_with_file_ids_with_includes
+        line, uuid = line_with_file_uuid[line_index_of_include_file]
+
         # find the include path from within this include file
-        if file_containing_include_line.include_objects is None:
+        if grid_nexus_file.include_objects is None:
             grid_array_definition.absolute_path = absolute_file_path
             return
-        matching_includes = [x for x in file_containing_include_line.include_objects if
-                             grid_array_definition.value in x.location]
+        matching_includes = [x for x in grid_nexus_file.include_objects if uuid == x.id]
         if len(matching_includes) == 0:
             grid_array_definition.absolute_path = absolute_file_path
             return
         include_file = matching_includes[0]
 
-        absolute_file_path = include_file.location
+        absolute_file_path = os.path.join(os.path.dirname(include_file.location), grid_array_definition.value)
         grid_array_definition.absolute_path = absolute_file_path

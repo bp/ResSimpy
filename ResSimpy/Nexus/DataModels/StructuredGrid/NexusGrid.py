@@ -389,12 +389,15 @@ class NexusGrid(Grid):
             raise ValueError("Grid file not found, cannot load grid properties")
 
         # Strip file of comments
-        file_as_list = nfo.strip_file_of_comments(self.__grid_file_contents, comment_characters=['!', 'C'])
-        # Ignore blank lines
-        file_as_list_with_original_line_numbers = [(i, line) for i, line in enumerate(file_as_list)
-                                                   if line.strip() != '']
-        file_as_list = [line for _, line in file_as_list_with_original_line_numbers]
+        file_as_list_with_original_line_numbers = []
+        for i, line in enumerate(self.__grid_file_contents):
+            cleaned_line = nfo.strip_file_of_comments([line], comment_characters=['!', 'C'])
+            if len(cleaned_line) == 0 or cleaned_line[0].strip() == '':
+                pass
+            else:
+                file_as_list_with_original_line_numbers.append((i, cleaned_line[0]))
 
+        file_as_list = [line for _, line in file_as_list_with_original_line_numbers]
 
         properties_to_load = [
             PropertyToLoad('NETGRS', GRID_ARRAY_FORMAT_KEYWORDS, self._netgrs),
