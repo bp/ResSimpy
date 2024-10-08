@@ -12,7 +12,7 @@ from ResSimpy.Nexus.NexusWells import NexusWells
 from ResSimpy.Nexus.load_wells import load_wells
 
 from tests.multifile_mocker import mock_multiple_files
-from tests.utility_for_tests import get_fake_nexus_simulator
+from tests.utility_for_tests import get_fake_nexus_simulator, uuid_side_effect
 
 
 def mock_different_includes(mocker, filename, test_file_contents, inc_file_content1, inc_file_content2='',
@@ -1150,3 +1150,38 @@ def test_get_full_network_nexus_file(mocker):
 
     assert shallow_from_list == expected_shallow_from_list
     assert shallow_to_list == expected_shallow_to_list
+
+def test_iterate_line_with_file_origins(mocker):
+    # Arrange
+    # mock out the uuids
+    mocker.patch.object(uuid, 'uuid4', side_effect=uuid_side_effect())
+    file_path = 'test_file_path.dat'
+    test_file_contents = (
+        '''basic_file INCLUDE inc_file1.inc
+line 1 parent
+line 2 parent
+'''
+    )
+    include_file_contents = 'first inc file contents\nsecond line in incfile'
+        
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'test_file_path.dat': test_file_contents,
+            'inc_file1.inc': include_file_contents,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+        
+    expected_result = [('basic_file INCLUDE inc_file1.inc\n', 'uuid1'),
+                       ('basic_file ', 'uuid0'),
+                       ('first inc file contents\n', 'uuid0'),
+                       ('second line in incfile', 'uuid0'),
+                       ('line 1 parent\n', 'uuid1'),
+                       ('line 2 parent\n', 'uuid1'),
+                       ]
+    nexus_file = NexusFile.generate_file_include_structure(file_path=file_path)
+    # Act
+    result = nexus_file.get_flat_list_str_with_file_ids_with_includes
+    
+    # Assert
+    assert result == expected_result
