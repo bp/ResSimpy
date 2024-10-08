@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 import pytest
 
@@ -14,7 +14,7 @@ def test_mmddyyyy_date_format(mocker):
     completion = NexusCompletion(date='01/14/2022', date_format=DateFormat.MM_DD_YYYY)
 
     # expected_iso_date_str = 2022-01-14T00:00:00
-    expected_iso_date = datetime.datetime(2022, 1, 14, 0, 0, 0)
+    expected_iso_date = datetime(2022, 1, 14, 0, 0, 0)
 
     # Act
     result_date = completion.iso_date
@@ -29,7 +29,7 @@ def test_mmddyyyy_date_no_of_days():
     completion = NexusCompletion(date='5', date_format=DateFormat.MM_DD_YYYY, start_date='01/14/2022')
 
     # expected_iso_date_str = 2022-01-14T00:00:00
-    expected_iso_date = datetime.datetime(2022, 1, 19, 0, 0, 0)
+    expected_iso_date = datetime(2022, 1, 19, 0, 0, 0)
 
     # Act
     result_date = completion.iso_date
@@ -52,7 +52,7 @@ def test_ddmmyyyy_date_format():
     completion = NexusCompletion(date='14/01/2022', date_format=DateFormat.DD_MM_YYYY)
 
     # expected_iso_date_str = 2022-01-14T00:00:00
-    expected_iso_date = datetime.datetime(2022, 1, 14, 0, 0, 0)
+    expected_iso_date = datetime(2022, 1, 14, 0, 0, 0)
 
     # Act
     result_date = completion.iso_date
@@ -67,7 +67,7 @@ def test_ddmmyyyy_date_no_of_days():
     completion = NexusCompletion(date='5', date_format=DateFormat.DD_MM_YYYY, start_date='14/01/2022')
 
     # expected_iso_date_str = 2022-01-14T00:00:00
-    expected_iso_date = datetime.datetime(2022, 1, 19, 0, 0, 0)
+    expected_iso_date = datetime(2022, 1, 19, 0, 0, 0)
 
     # Act
     result_date = completion.iso_date
@@ -88,7 +88,7 @@ def test_ddmmyyyy_date_no_of_days_blankStartDate():
 def test_start_date_decimal_mmddyyyyFormat():
     # Arrange
     completion = NexusCompletion(date='5.5', date_format=DateFormat.MM_DD_YYYY, start_date='01/14/2022')
-    expected_iso_date = datetime.datetime(2022, 1, 19, 12, 0, 0)
+    expected_iso_date = datetime(2022, 1, 19, 12, 0, 0)
 
     # Act
     result_date = completion.iso_date
@@ -101,7 +101,7 @@ def test_start_date_decimal_mmddyyyyFormat():
 def test_date_decimal_ddmmyyyyFormat_Completion():
     # Arrange
     completion = NexusCompletion(date='5.5', date_format=DateFormat.DD_MM_YYYY, start_date='14/01/2022')
-    expected_iso_date = datetime.datetime(2022, 1, 19, 12, 0, 0)
+    expected_iso_date = datetime(2022, 1, 19, 12, 0, 0)
 
     # Act
     result_date = completion.iso_date
@@ -114,7 +114,7 @@ def test_date_decimal_ddmmyyyyFormat_Completion():
 def test_date_decimal_ddmmyyyyFormat_Node():
     # Arrange
     completion = NexusNode(date='5.5', date_format=DateFormat.DD_MM_YYYY, start_date='14/01/2022', properties_dict={})
-    expected_iso_date = datetime.datetime(2022, 1, 19, 12, 0, 0)
+    expected_iso_date = datetime(2022, 1, 19, 12, 0, 0)
 
     # Act
     result_date = completion.iso_date
@@ -126,8 +126,9 @@ def test_date_decimal_ddmmyyyyFormat_Node():
 @pytest.mark.maintain_datetime_behaviour
 def test_date_decimal_ddmmyyyyFormat_Node_all_in_properties():
     # Arrange
-    completion = NexusNode(properties_dict={'date':'5.5', 'date_format':DateFormat.DD_MM_YYYY, 'start_date':'12/01/2022'})
-    expected_iso_date = datetime.datetime(2022, 1, 17, 12, 0, 0)
+    completion = NexusNode(
+        properties_dict={'date': '5.5', 'date_format': DateFormat.DD_MM_YYYY, 'start_date': '12/01/2022'})
+    expected_iso_date = datetime(2022, 1, 17, 12, 0, 0)
 
     # Act
     result_date = completion.iso_date
@@ -140,7 +141,7 @@ def test_date_decimal_ddmmyyyyFormat_Node_all_in_properties():
 def test_date_decimal_ddmmyyyyFormat_more_classes():
     # Arrange
     completion = NexusNode(date='5.5', date_format=DateFormat.DD_MM_YYYY, start_date='14/01/2022', properties_dict={})
-    expected_iso_date = datetime.datetime(2022, 1, 19, 12, 0, 0)
+    expected_iso_date = datetime(2022, 1, 19, 12, 0, 0)
 
     # Act
     result_date = completion.iso_date
@@ -155,7 +156,7 @@ def test_dd_MMM_yyyy_date_format():
     completion = NexusCompletion(date='14 JAN 2022', date_format=DateFormat.DD_MMM_YYYY)
 
     expected_iso_date_str = '2022-01-14T00:00:00'
-    expected_iso_date = datetime.datetime(2022, 1, 14, 0, 0, 0)
+    expected_iso_date = datetime(2022, 1, 14, 0, 0, 0)
 
     # Act
     result_date = completion.iso_date
@@ -180,7 +181,7 @@ def test_invalid_date_format_raises_error():
 @pytest.mark.maintain_datetime_behaviour
 def test_datetime_to_iso():
     # Arrange
-    date_to_convert = datetime.datetime(2022, 1, 19)
+    date_to_convert = datetime(2022, 1, 19)
     expected_iso_date = ISODateTime(2022, 1, 19)
 
     # Act
@@ -206,3 +207,26 @@ def test_datetime_to_iso(iso_date, expected_str, dateformat):
 
     # Assert
     assert result == expected_str
+
+
+@pytest.mark.maintain_datetime_behaviour
+@pytest.mark.parametrize('initial_date_str, date_format, expected_date_object, datetime_format', [
+    ('14/01/2025', DateFormat.DD_MM_YYYY, datetime(2025, 1, 14), '%Y-%m-%d %H:%M:%S'),
+    ('01/14/2025', DateFormat.MM_DD_YYYY, datetime(2025, 1, 14), '%Y-%m-%d %H:%M:%S'),
+    ('14/01/2025(23:11:01)', DateFormat.DD_MM_YYYY, datetime(2025, 1, 14, 23, 11, 1), '%Y-%m-%d %H:%M:%S'),
+    ('01/14/2025(23:11:01)', DateFormat.MM_DD_YYYY, datetime(2025, 1, 14, 23, 11, 1), '%Y-%m-%d %H:%M:%S'),
+    ('14 JAN 2025', DateFormat.DD_MMM_YYYY, datetime(2025, 1, 14), '%Y-%m-%d %H:%M:%S'),
+    ('14 JAN 2025 23:11:01', DateFormat.DD_MMM_YYYY, datetime(2025, 1, 14, 23, 11, 1), '%Y-%m-%d %H:%M:%S'),
+    ('14 JAN 2025 23:11:01.1234', DateFormat.DD_MMM_YYYY, datetime(2025, 1, 14, 23, 11, 1, 123400), '%Y-%m-%d %H:%M:%S.%f'),
+], ids=['dd/mm/yyyy', 'mm/dd/yyyy', 'dd/mm/yyyy(time)', 'mm/dd/yyyy(time)', '3 letter month',
+        '3 letter month with time', '3 letter month with time + decimal seconds'])
+def test_convert_to_iso(initial_date_str, date_format, expected_date_object, datetime_format):
+    # Arrange
+    expected_iso_date_object = ISODateTime.datetime_to_iso(date=expected_date_object,
+                                                           datetime_format=datetime_format)
+
+    # Act
+    result = ISODateTime.convert_to_iso(date=initial_date_str, date_format=date_format)
+
+    # Assert
+    assert result == expected_iso_date_object
