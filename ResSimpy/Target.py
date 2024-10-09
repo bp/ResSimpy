@@ -52,7 +52,31 @@ class Target(NetworkObject, ABC):
             start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
             unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
             name (Optional[str]): The name of the object.
-            control_quantity(Optional[str]):
+            control_quantity(Optional[str]): Specifies control type for connections.
+            control_conditions(Optional[str]): Column heading keyword indicating the conditions used for control.
+            control_connections(Optional[str]): Specifies connections controlled to meet targets, using lists or single
+            connections; constraints ensure targets are satisfied.
+            control_method(Optional[str]): Indicates the method used to allocate the target constraint to controlling
+            connections.
+            calculation_method (Optional[str]): Specifies how the target rate is determined.
+            calculation_conditions (Optional[str]): Indicates the conditions used to calculate the target rate.
+            calculation_connections (Optional[str]): Indicates which connections contribute to the target calculation.
+            Value (Optional[float]): Indicates the value for the target rate.
+            add_value (Optional[float]): Specifies an amount to be added to the target rate calculated by CALCMETHOD.
+            region (Optional[str]): Specified a region name from REGDATA table.
+            priority (Optional[int]): Column heading for target priority; lower integers indicate higher priority.
+            minimum_rate (Optional[str]): Indicates the minimum rate for each connection. Applies to all CTRL
+            unless an individual qmin is specified for a connections in a subsequent TGTCON table.
+            minimum_rate_no_shut (Optional[float]): Indicates the minimum rate for each connection. Applies to all CTRL
+            unless an individual qmin_noshut is specified for a connections in a subsequent TGTCON table.
+            guide_rate (Optional[str]): Specifies the guide rate for each connection.
+            max_change_pressure (Optional[float]): Specifies the maximum rate of change of region pressure versus time.
+            rank_dt: Optional[float]: Specifies the minimum time change between reranking the connections.
+            control_type Optional[str]: Specifies which connections (or wells) should be included from CTRLCONS
+            connections.
+            calculation_type Optional[str]: Specifies which connections (or wells) should be included from CALCONS
+            connections.
+            region_number Optional[int]: Region numbers, to which function input options are to be applied.
         """
         self.control_quantity = None
         self.control_conditions = None
