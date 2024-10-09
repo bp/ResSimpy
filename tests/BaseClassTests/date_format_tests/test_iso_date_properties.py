@@ -218,8 +218,9 @@ def test_datetime_to_iso(iso_date, expected_str, dateformat):
     ('14 JAN 2025', DateFormat.DD_MMM_YYYY, datetime(2025, 1, 14), '%Y-%m-%d %H:%M:%S'),
     ('14 JAN 2025 23:11:01', DateFormat.DD_MMM_YYYY, datetime(2025, 1, 14, 23, 11, 1), '%Y-%m-%d %H:%M:%S'),
     ('14 JAN 2025 23:11:01.1234', DateFormat.DD_MMM_YYYY, datetime(2025, 1, 14, 23, 11, 1, 123400), '%Y-%m-%d %H:%M:%S.%f'),
+    ('1 NOV 2024 23:11:01', DateFormat.DD_MMM_YYYY, datetime(2024, 11, 1, 23, 11, 1), '%Y-%m-%d %H:%M:%S'),
 ], ids=['dd/mm/yyyy', 'mm/dd/yyyy', 'dd/mm/yyyy(time)', 'mm/dd/yyyy(time)', '3 letter month',
-        '3 letter month with time', '3 letter month with time + decimal seconds'])
+        '3 letter month with time', '3 letter month with time + decimal seconds', 'single digit day'])
 def test_convert_to_iso(initial_date_str, date_format, expected_date_object, datetime_format):
     # Arrange
     expected_iso_date_object = ISODateTime.datetime_to_iso(date=expected_date_object,

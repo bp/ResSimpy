@@ -84,7 +84,7 @@ class ISODateTime(datetime):
             try:
                 converted_date = ISODateTime.strptime(date, '%d %b %Y')
             except ValueError:  # Handling the case where a time has been added
-                if len(date) == 20:
+                if len(date) < 21:
                     converted_date = ISODateTime.strptime(date, '%d %b %Y %H:%M:%S')
                 else:
                     converted_date = ISODateTime.strptime(date, '%d %b %Y %H:%M:%S.%f')
