@@ -270,12 +270,21 @@ class NexusFile(File):
 
     def iterate_line(self, file_index: Optional[FileIndex] = None, max_depth: Optional[int] = None,
                      parent: Optional[NexusFile] = None, prefix_line: Optional[str] = None,
-                     keep_include_references: bool = False) -> \
-            Generator[str, None, None]:
+                     keep_include_references: bool = False, with_file_uuid: bool = False) -> \
+            Generator[str | tuple[str, UUID], None, None]:
         """Generator object for iterating over a list of strings with nested NexusFile objects in them.
 
+        Args:
+            file_index (FileIndex, optional): The current index which represents depth of the investigation for
+            recursion. Defaults to None.
+            max_depth (Optional[int], optional): The maximum depth of the iteration. Defaults to None.
+            parent (Optional[NexusFile], optional): The parent NexusFile object. Defaults to None.
+            prefix_line (Optional[str], optional): The prefix line to add to the start of the line. Defaults to None.
+            keep_include_references (bool): If set to True, the INCLUDE references are kept in the output.
+            with_file_uuid (bool): If set to True, the file UUID is included in the output as a tuple of str, UUID
+
         Yields:
-            str: sequential line from the file.
+            str | tuple[str, UUID]: sequential line from the file. Or a tuple of the line and the file UUID.
         """
 
         if file_index is None:
@@ -287,7 +296,10 @@ class NexusFile(File):
             parent.line_locations = []
         if prefix_line is not None and prefix_line != ' ':
             file_index.index += 1
-            yield prefix_line
+            if with_file_uuid:
+                yield prefix_line, self.id
+            else:
+                yield prefix_line
 
         new_entry = (file_index.index, self.id)
         if new_entry not in parent.line_locations:
@@ -338,11 +350,15 @@ class NexusFile(File):
                     level_down_max_depth = None if max_depth is None else depth - 1
 
                     if keep_include_references:
-                        yield row
+                        if with_file_uuid:
+                            yield row, self.id
+                        else:
+                            yield row
 
                     yield from include_file.iterate_line(file_index=file_index, max_depth=level_down_max_depth,
                                                          parent=parent, prefix_line=prefix_line,
-                                                         keep_include_references=keep_include_references)
+                                                         keep_include_references=keep_include_references,
+                                                         with_file_uuid=with_file_uuid)
 
                     new_entry = (file_index.index, self.id)
                     if new_entry not in parent.line_locations:
@@ -351,12 +367,18 @@ class NexusFile(File):
                         file_index.index += 1
                         # Add in space between include location and the rest of the line
                         suffix_line = ' ' + suffix_line
-                        yield suffix_line
+                        if with_file_uuid:
+                            yield suffix_line, self.id
+                        else:
+                            yield suffix_line
                 else:
                     continue
             else:
                 file_index.index += 1
-                yield row
+                if with_file_uuid:
+                    yield row, self.id
+                else:
+                    yield row
 
     @property
     def get_flat_list_str_file(self) -> list[str]:
@@ -366,7 +388,8 @@ class NexusFile(File):
         if self.file_content_as_list is None:
             raise ValueError(f'No file content found for {self.location}')
         flat_list = list(self.iterate_line(file_index=None, keep_include_references=False))
-        return flat_list
+        string_lists: list[str] = [x for x in flat_list if isinstance(x, str)]
+        return string_lists
 
     @property
     def get_flat_list_str_file_including_includes(self) -> list[str]:
@@ -376,7 +399,8 @@ class NexusFile(File):
         if self.file_content_as_list is None:
             raise ValueError(f'No file content found for {self.location}')
         flat_list = list(self.iterate_line(file_index=None, keep_include_references=True))
-        return flat_list
+        string_lists: list[str] = [x for x in flat_list if isinstance(x, str)]
+        return string_lists
 
     # TODO write an output function using the iterate_line method
     def get_full_network(self, max_depth: Optional[int] = None) -> tuple[list[str | None], list[str]]:
@@ -689,98 +713,6 @@ class NexusFile(File):
         # update the new path
         include_file._location_in_including_file = new_path
 
-    def iterate_line_with_file_origins(self, file_index: Optional[FileIndex] = None, max_depth: Optional[int] = None,
-                                       parent: Optional[NexusFile] = None, prefix_line: Optional[str] = None,
-                                       keep_include_references: bool = False) -> \
-            Generator[tuple[str, UUID], None, None]:
-        """Generator object for iterating over a list of strings with nested NexusFile objects in them.
-
-        Yields:
-            str: sequential line from the file.
-        """
-
-        if file_index is None:
-            file_index = NexusFile.FileIndex(index=0)
-        if parent is None:
-            parent = self
-            parent.line_locations = []
-        if parent.line_locations is None:
-            parent.line_locations = []
-        if prefix_line is not None and prefix_line != ' ':
-            file_index.index += 1
-            yield prefix_line, self.id
-
-        new_entry = (file_index.index, self.id)
-        if new_entry not in parent.line_locations:
-            parent.line_locations.append(new_entry)
-        depth: int = 0
-        if max_depth is not None:
-            depth = max_depth
-        if self.file_content_as_list is None:
-            warnings.warn(f'No file content found for file: {self.location}')
-            return
-        for row in self.file_content_as_list:
-            if nfo.check_token('INCLUDE', row):
-                incfile_location = fo.get_token_value('INCLUDE', row, self.file_content_as_list)
-                if incfile_location is None:
-                    continue
-                split_line = re.split(incfile_location, row, maxsplit=1, flags=re.IGNORECASE)
-                if len(split_line) == 2:
-                    prefix_line, suffix_line = split_line
-                    prefix_line = re.sub('INCLUDE', '', prefix_line, flags=re.IGNORECASE)
-                    prefix_line = prefix_line.rstrip() + ' '
-                    suffix_line = suffix_line.lstrip()
-                else:
-                    prefix_line = row.replace(incfile_location, '')
-                    suffix_line = None
-
-                include_file: Optional[NexusFile] = None
-                if self.include_objects is None:
-                    raise ValueError(f'No include objects found in the nexusfile to expand over for file: '
-                                     f'{self.location}')
-                for obj in self.include_objects:
-                    # TODO: Remove this code once these methods have been moved to the File base class
-                    if not isinstance(obj, NexusFile):
-                        raise TypeError("File is of incorrect type")
-
-                    if obj.location == incfile_location:
-                        include_file = obj
-                        break
-                    if self.origin is not None and \
-                            obj.location == nfo.get_full_file_path(incfile_location, self.origin):
-                        include_file = obj
-                        break
-                    if obj.location is not None and \
-                            os.path.basename(obj.location) == os.path.basename(incfile_location):
-                        include_file = obj
-                        break
-
-                if (max_depth is None or depth > 0) and include_file is not None:
-                    level_down_max_depth = None if max_depth is None else depth - 1
-
-                    if keep_include_references:
-                        yield row, self.id
-
-                    yield from include_file.iterate_line_with_file_origins(
-                        file_index=file_index,
-                        max_depth=level_down_max_depth,
-                        parent=parent, prefix_line=prefix_line,
-                        keep_include_references=keep_include_references)
-
-                    new_entry = (file_index.index, self.id)
-                    if new_entry not in parent.line_locations:
-                        parent.line_locations.append(new_entry)
-                    if suffix_line:
-                        file_index.index += 1
-                        # Add in space between include location and the rest of the line
-                        suffix_line = ' ' + suffix_line
-                        yield suffix_line, self.id
-                else:
-                    continue
-            else:
-                file_index.index += 1
-                yield row, self.id
-
     @property
     def get_flat_list_str_with_file_ids(self) -> list[tuple[str, UUID]]:
         """Returns flat list of strings from file content.
@@ -788,8 +720,9 @@ class NexusFile(File):
         """
         if self.file_content_as_list is None:
             raise ValueError(f'No file content found for {self.location}')
-        flat_list = list(self.iterate_line_with_file_origins(file_index=None, keep_include_references=False))
-        return flat_list
+        flat_list = list(self.iterate_line(file_index=None, keep_include_references=False, with_file_uuid=True))
+        string_with_uuid: list[tuple[str, UUID]] = [x for x in flat_list if isinstance(x, tuple)]
+        return string_with_uuid
 
     @property
     def get_flat_list_str_with_file_ids_with_includes(self) -> list[tuple[str, UUID]]:
@@ -798,5 +731,7 @@ class NexusFile(File):
         """
         if self.file_content_as_list is None:
             raise ValueError(f'No file content found for {self.location}')
-        flat_list = list(self.iterate_line_with_file_origins(file_index=None, keep_include_references=True))
-        return flat_list
+        flat_list = list(self.iterate_line(file_index=None, keep_include_references=True,
+                                           with_file_uuid=True))
+        string_with_uuid: list[tuple[str, UUID]] = [x for x in flat_list if isinstance(x, tuple)]
+        return string_with_uuid
