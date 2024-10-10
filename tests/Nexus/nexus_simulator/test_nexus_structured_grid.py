@@ -2,7 +2,8 @@ import os
 import pandas as pd
 import pytest
 from ResSimpy.GridArrayDefinition import GridArrayDefinition
-from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusLGR import NexusLGR
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
@@ -934,7 +935,7 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
     mocker.patch("builtins.open", structured_grid_mock)
 
     # Act
-    NexusGrid.NexusGrid.update_structured_grid_file(new_structured_grid_dictionary, simulation)
+    NexusGrid.update_structured_grid_file(new_structured_grid_dictionary, simulation)
     result = simulation.grid
 
     # Assert
@@ -1791,3 +1792,106 @@ def test_load_lgrs(mocker):
     assert kx_array.value == 'BLAH/BLAH'
     assert lgr_kx_array.modifier == 'VALUE'
     assert lgr_kx_array.value == 'permx_array.dat'
+
+
+def test_load_grid_new_bug(mocker):
+    # Arrange
+    input_run_control = "START 01/07/2023"
+    input_nexus_fcs_file = """DATEFORMAT DD/MM/YYYY
+            GRID_FILES
+                STRUCTURED_GRID    /path/to/grid/file.dat
+
+            RECURRENT_FILES
+                RUNCONTROL /path/to/run_control.dat
+
+            SURFACE Network 1  /surface_file_01.dat
+
+            """
+    input_grid_file = """
+! GRID DEFINITION   
+MAPOUT ALL
+
+NX NY NZ
+ 57  57  82
+
+LGR
+CARTREF lgr1                         
+  14  44   29  29  1  82
+  15*5  1*5 15*5
+  9
+  82*1
+ENDREF 
+ENDLGR
+
+
+DECOMP
+ROOT      4   4  3
+lgr1    16  1  3
+ENDDEC
+
+ARRAYS 
+
+DX  CON                          
+116.0                                                                                                                                                             
+DY  CON                                                                                                                                                            
+116.0
+
+POROSITY ZVAR
+INCLUDE PORO.dat
+
+KX  ZVAR 
+INCLUDE  KX.dat
+MOD
+      1   57    1    57    1   82 *  1.10  
+
+KY  ZVAR
+INCLUDE  KX.dat
+MOD
+      1   57    1    57    1   82 *  1.10 
+	  
+KZ  ZVAR  
+INCLUDE  KX.dat
+MOD
+      1   57    1    57    1   82 *  1.10 
+	  
+NETGRS  CON                                                                                                                                                            
+1.0
+
+SW  ZVAR  
+INCLUDE  SW.dat
+
+"""
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            '/path/to/nexus/fcsfile.dat': input_nexus_fcs_file,
+            '/path/to/run_control.dat': input_run_control,
+            '/path/to/grid/file.dat': input_grid_file,
+            '/surface_file_01.dat': ''
+        }
+                                        ).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    listdir_mock = mocker.Mock(return_value=[])
+    mocker.patch("os.listdir", listdir_mock)
+
+    def mock_isfile(filename):
+        if '_filtered' in filename:
+            return False
+        return True
+
+    mocker.patch("os.path.isfile", mock_isfile)
+    mocker.patch("os.path.exists", mock_isfile)
+
+    expected_sw = GridArrayDefinition(modifier='ZVAR', value='SW.dat', 
+                                      absolute_path=os.path.join('/path/to/grid', 'SW.dat'))
+    nexus_model = NexusSimulator(origin='/path/to/nexus/fcsfile.dat')
+
+    # Act
+    result_sw = nexus_model.grid.sw
+    
+    # Assert
+    assert nexus_model.grid.ky.absolute_path is not None
+    assert result_sw == expected_sw
