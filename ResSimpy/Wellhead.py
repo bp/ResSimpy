@@ -19,7 +19,9 @@ class Wellhead(NetworkObject, ABC):
 
     def __init__(self, properties_dict: Optional[dict[str, None | int | str | float]] = None,
                  date: Optional[str] = None, date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
-                 unit_system: Optional[UnitSystem] = None, name: Optional[str] = None) -> None:
+                 unit_system: Optional[UnitSystem] = None, name: Optional[str] = None, well: Optional[str] = None,
+                 wellhead_type: Optional[str] = None, depth: Optional[float] = None, x_pos: Optional[float] = None,
+                 y_pos: Optional[float] = None) -> None:
         """Initialises the Wellhead class.
 
         Args:
@@ -29,7 +31,19 @@ class Wellhead(NetworkObject, ABC):
             start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
             unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
             name (Optional[str]): The name of the object.
+            well (Optional[str]): Associates the wellhead to the well.
+            wellhead_type (Optional[str]): The type of well.
+            depth (Optional[float]): The depth of the wellhead
+            x_pos (Optional[float]): The x-coordinate of the wellhead (x).
+            y_pos (Optional[float]): The y-coordinate of the wellhead (y)
         """
+
+        self.well = None
+        self.wellhead_type = None
+        self.depth = None
+        self.x_pos = None
+        self.y_pos = None
+
         super().__init__(properties_dict=properties_dict, date=date, date_format=date_format, start_date=start_date,
                          unit_system=unit_system, name=name)
 
