@@ -4,7 +4,7 @@ from __future__ import annotations
 import fnmatch
 from datetime import timedelta, time
 from typing import Any, Optional
-
+import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.File import File
 from ResSimpy.FileOperations.file_operations import get_next_value
@@ -64,6 +64,7 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
     well_lists: list[NexusWellList] = []
     is_deactivate_block = False
     is_activate_block = False
+    is_actions_block = False
     for index, line in enumerate(file_as_list):
         # check for changes in unit system
         check_property_in_line(line, property_dict, file_as_list)
@@ -75,20 +76,27 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
         if current_date is None:
             raise ValueError("Unable to determine date for object")
 
-        is_activate_block, is_deactivate_block, should_continue = \
-            __activate_deactivate_checks(line=line,
-                                         table_start=table_start,
-                                         table_end=table_end,
-                                         is_activate_block=is_activate_block,
-                                         is_deactivate_block=is_deactivate_block,
-                                         current_date=current_date,
-                                         start_date=start_date,
-                                         date_format=date_format,
-                                         nexus_object_results=nexus_object_results)
+        if fo.check_token('ACTIONS', line=line):
+            is_actions_block = True
+        # Important!: DEACTIVATE can also appear in the ACTIONS table in the surface network
+        # If we are already in the actions block, we don;=
+        if fo.check_token('ENDACTIONS', line=line):
+            is_actions_block = False
+        if not is_actions_block:
+            is_activate_block, is_deactivate_block, should_continue = \
+                __activate_deactivate_checks(line=line,
+                                             table_start=table_start,
+                                             table_end=table_end,
+                                             is_activate_block=is_activate_block,
+                                             is_deactivate_block=is_deactivate_block,
+                                             current_date=current_date,
+                                             start_date=start_date,
+                                             date_format=date_format,
+                                             nexus_object_results=nexus_object_results)
 
-        if should_continue:
-            # If we have already read in the value for this line in the previous call, continue onto the next one.
-            continue
+            if should_continue:
+                # If we have already read in the value for this line in the previous call, continue onto the next one.
+                continue
 
         if check_token('TIME', line) and table_start < 0:
             time_value = get_expected_token_value(
