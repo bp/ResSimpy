@@ -1151,7 +1151,25 @@ def test_get_full_network_nexus_file(mocker):
     assert shallow_from_list == expected_shallow_from_list
     assert shallow_to_list == expected_shallow_to_list
 
-def test_iterate_line_with_file_origins(mocker):
+
+@pytest.mark.parametrize('callable, expected_result', [
+    ('get_flat_list_str_with_file_ids', [('basic_file ', 'uuid0'),
+                       ('first inc file contents\n', 'uuid0'),
+                       ('second line in incfile', 'uuid0'),
+                       ('line 1 parent\n', 'uuid1'),
+                       ('line 2 parent\n', 'uuid1'),
+                       ]),
+    ('get_flat_list_str_with_file_ids_with_includes', [('basic_file INCLUDE inc_file1.inc\n', 'uuid1'),
+                       ('basic_file ', 'uuid0'),
+                       ('first inc file contents\n', 'uuid0'),
+                       ('second line in incfile', 'uuid0'),
+                       ('line 1 parent\n', 'uuid1'),
+                       ('line 2 parent\n', 'uuid1'),
+                       ]),
+    ('get_flat_list_str_file', ['basic_file ', 'first inc file contents\n', 'second line in incfile',
+                            'line 1 parent\n', 'line 2 parent\n']),
+                         ],ids=['file_ids', 'file_ids_with_includes', 'no_file_ids'])
+def test_iterate_line_with_file_origins(mocker, callable, expected_result):
     # Arrange
     # mock out the uuids
     mocker.patch.object(uuid, 'uuid4', side_effect=uuid_side_effect())
@@ -1172,16 +1190,9 @@ line 2 parent
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
         
-    expected_result = [('basic_file INCLUDE inc_file1.inc\n', 'uuid1'),
-                       ('basic_file ', 'uuid0'),
-                       ('first inc file contents\n', 'uuid0'),
-                       ('second line in incfile', 'uuid0'),
-                       ('line 1 parent\n', 'uuid1'),
-                       ('line 2 parent\n', 'uuid1'),
-                       ]
     nexus_file = NexusFile.generate_file_include_structure(file_path=file_path)
     # Act
-    result = nexus_file.get_flat_list_str_with_file_ids_with_includes
+    result = getattr(nexus_file, callable)
     
     # Assert
     assert result == expected_result
