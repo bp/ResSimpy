@@ -129,24 +129,18 @@ class NexusNetwork(Network):
 
             grab_line: bool = False
 
-            # necessary to see if we need to skip the header
-            skip_flag: bool = False
-
             for line in file_contents:
 
-                if skip_flag:
-                    skip_flag = False
+                # skips single line comments
+                if line.startswith('!'):
                     continue
 
-                if fo.check_token('ACTIONS', line=line):
-
+                # we should not only check for the ACTION keyword but also for the header
+                if fo.check_token('ACTIONS', line=line) or fo.check_token('ACTIONTIME', line=line):
                     # set grab line to true to start reading data
                     grab_line = True
 
                     # there is nothing more to do on this iteration, so we continue
-                    # but before we do, we know that the next iteration will contain the header
-                    # set skip_flag to true to skip the header with the preceding if statement
-                    skip_flag = True
                     continue
 
                 if grab_line:
@@ -155,9 +149,18 @@ class NexusNetwork(Network):
                         break
 
                     data_as_list = line.split()
-                    action_obj = NexusAction(action_time=int(data_as_list[0]), action=data_as_list[1],
+
+                    if not data_as_list:  # line.split() returns a list. this checks if it is empty
+                        # if the line is empty, go to the next iteration
+                        continue
+
+                    action_obj = NexusAction(action_time=data_as_list[0], action=data_as_list[1],
                                              connection=data_as_list[2])
                     nexus_action_obj_list.append(action_obj)
+
+        if not nexus_action_obj_list:
+            warnings.warn(
+                UserWarning('ACTIONS/ENDACTIONS keywords specified, but no ACTION table exists.'))
 
         return nexus_action_obj_list
 
@@ -290,6 +293,7 @@ class NexusNetwork(Network):
                                       'PROCS': None,
                                       'WELLLIST': NexusWellList,
                                       'CONLIST': NexusConList,
+                                      'ACTIONS': None
                                       }
 
         for surface in self.__model.model_files.surface_files.values():
