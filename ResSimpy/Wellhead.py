@@ -38,11 +38,11 @@ class Wellhead(NetworkObject, ABC):
             y_pos (Optional[float]): The y-coordinate of the wellhead (y)
         """
 
-        self.well = None
-        self.wellhead_type = None
-        self.depth = None
-        self.x_pos = None
-        self.y_pos = None
+        self.well = well
+        self.wellhead_type = wellhead_type
+        self.depth = depth
+        self.x_pos = x_pos
+        self.y_pos = y_pos
 
         super().__init__(properties_dict=properties_dict, date=date, date_format=date_format, start_date=start_date,
                          unit_system=unit_system, name=name)

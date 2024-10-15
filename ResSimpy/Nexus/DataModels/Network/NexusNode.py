@@ -19,7 +19,7 @@ class NexusNode(Node):
 
     def __init__(self, properties_dict: Optional[dict[str, None | int | str | float]] = None,
                  date: Optional[str] = None, date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
-                 unit_system: Optional[UnitSystem] = None, x_pos: Optional[float] = None,
+                 unit_system: Optional[UnitSystem] = None, x_pos: Optional[float] = x_pos,
                  y_pos: Optional[float] = None, number: Optional[int] = None, temp: Optional[float] = None,
                  station: Optional[str] = None) -> None:
         """Initialises the NexusNode class.
@@ -39,11 +39,11 @@ class NexusNode(Node):
             unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
 
         """
-        self.x_pos = None
-        self.y_pos = None
-        self.number = None
-        self.temp = None
-        self.station = None
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+        self.number = number
+        self.temp = temp
+        self.station = station
 
         super().__init__(properties_dict=properties_dict, date=date, date_format=date_format, start_date=start_date,
                          unit_system=unit_system)

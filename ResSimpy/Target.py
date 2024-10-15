@@ -71,32 +71,32 @@ class Target(NetworkObject, ABC):
             unless an individual qmin_noshut is specified for a connections in a subsequent TGTCON table.
             guide_rate (Optional[str]): Specifies the guide rate for each connection.
             max_change_pressure (Optional[float]): Specifies the maximum rate of change of region pressure versus time.
-            rank_dt: Optional[float]: Specifies the minimum time change between reranking the connections.
-            control_type Optional[str]: Specifies which connections (or wells) should be included from CTRLCONS
+            rank_dt (Optional[float]): Specifies the minimum time change between reranking the connections.
+            control_type (Optional[str]): Specifies which connections (or wells) should be included from CTRLCONS
             connections.
-            calculation_type Optional[str]: Specifies which connections (or wells) should be included from CALCONS
+            calculation_type (Optional[str]): Specifies which connections (or wells) should be included from CALCONS
             connections.
-            region_number Optional[int]: Region numbers, to which function input options are to be applied.
+            region_number (Optional[int]): Region numbers, to which function input options are to be applied.
         """
-        self.control_quantity = None
-        self.control_conditions = None
-        self.control_connections = None
-        self.control_method = None
-        self.calculation_method = None
-        self.calculation_conditions = None
-        self.calculation_connections = None
-        self.value = None
-        self.add_value = None
-        self.region = None
-        self.priority = None
-        self.minimum_rate = None
-        self.minimum_rate_no_shut = None
-        self.guide_rate = None
-        self.max_change_pressure = None
-        self.rank_dt = None
-        self.control_type = None
-        self.calculation_type = None
-        self.region_number = None
+        self.control_quantity = control_quantity
+        self.control_conditions = control_conditions
+        self.control_connections = control_connections
+        self.control_method = control_method
+        self.calculation_method = calculation_method
+        self.calculation_conditions = calculation_conditions
+        self.calculation_connections = calculation_connections
+        self.value = value
+        self.add_value = add_value
+        self.region = region
+        self.priority = priority
+        self.minimum_rate = minimum_rate
+        self.minimum_rate_no_shut = minimum_rate_no_shut
+        self.guide_rate = guide_rate
+        self.max_change_pressure = max_change_pressure
+        self.rank_dt = rank_dt
+        self.control_type = control_type
+        self.calculation_type = calculation_type
+        self.region_number = region_number
 
         super().__init__(properties_dict=properties_dict, date=date, date_format=date_format, start_date=start_date,
                          unit_system=unit_system, name=name)
