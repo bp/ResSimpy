@@ -8,7 +8,7 @@ import pandas as pd
 
 from ResSimpy.File import File
 from ResSimpy.FileOperations import file_operations as fo
-from ResSimpy.grid_filtering_functions import grid_filter_file_as_list, filter_grid_array_definition
+from ResSimpy.Utils.grid_filtering_functions import grid_filter_file_as_list, filter_grid_array_definition
 
 
 @dataclass

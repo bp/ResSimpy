@@ -248,7 +248,7 @@ ENDCONSTRAINTS
 def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
 
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
     expected_constraints = {}
@@ -412,7 +412,7 @@ def test_constraint_ids(mocker, file_contents, object_locations):
 
     model = NexusSimulator('fcs_file.dat')
 
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6',
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6',
                                                                 'uuid7'])
 
     # Act
@@ -425,7 +425,7 @@ def test_constraint_ids(mocker, file_contents, object_locations):
 def test_nexus_constraint_repr(mocker):
     # Arrange
     # patch the uuid
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
     constraint = NexusConstraint({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0,
                                   'max_surface_water_rate': 0})
     expected_repr = ("NexusConstraint(ID='uuid1', Date='01/01/2019', name='well1', "
@@ -544,7 +544,7 @@ def test_load_constraints_welllist(mocker: MockerFixture):
     ENDCONSTRAINTS
     
     """
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             '/path/fcs_file.fcs': fcs_file_contents,

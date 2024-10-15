@@ -11,7 +11,7 @@ import numpy as np
 from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
 from ResSimpy.DataModelBaseClasses.GridArrayFunction import GridArrayFunction
 from ResSimpy.File import File
-from ResSimpy.LGRs import LGRs
+from ResSimpy.GenericContainerClasses.LGRs import LGRs
 
 
 @dataclass(kw_only=True)

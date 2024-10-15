@@ -4,14 +4,14 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional
 
-from ResSimpy.Constraints import Constraints
-from ResSimpy.NetworkLists import NetworkLists
-from ResSimpy.NodeConnections import NodeConnections
-from ResSimpy.Nodes import Nodes
-from ResSimpy.Targets import Targets
-from ResSimpy.WellConnections import WellConnections
-from ResSimpy.Wellbores import Wellbores
-from ResSimpy.Wellheads import Wellheads
+from ResSimpy.GenericContainerClasses.Constraints import Constraints
+from ResSimpy.GenericContainerClasses.NetworkLists import NetworkLists
+from ResSimpy.GenericContainerClasses.NodeConnections import NodeConnections
+from ResSimpy.GenericContainerClasses.Nodes import Nodes
+from ResSimpy.GenericContainerClasses.Targets import Targets
+from ResSimpy.GenericContainerClasses.WellConnections import WellConnections
+from ResSimpy.GenericContainerClasses.Wellbores import Wellbores
+from ResSimpy.GenericContainerClasses.Wellheads import Wellheads
 
 
 @dataclass(kw_only=True, init=False)

@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional, Sequence
 
-from ResSimpy.DataObjectMixin import DataObjectMixin
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums import DateFormatEnum
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat

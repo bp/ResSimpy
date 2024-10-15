@@ -19,7 +19,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.nexus_modify_object_in_file import ModifyObjectOperations
 from ResSimpy.Nexus.nexus_remove_object_from_file import RemoveObjectOperations
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
-from ResSimpy.Wellbores import Wellbores
+from ResSimpy.GenericContainerClasses.Wellbores import Wellbores
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork

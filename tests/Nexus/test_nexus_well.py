@@ -260,7 +260,7 @@ def test_get_first_perforation(mocker, completions, expected_perforation):
 ], ids=['basic case', 'mixture of perf and not perf', 'no shutins', 'no perf info', 'empty list'])
 def test_get_shutins(mocker, completions, expected_shutins):
     # Arrange
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
                                                                 'uuid_6', 'uuid_7'])
 
     dummy_model = get_fake_nexus_simulator(mocker)
@@ -341,7 +341,7 @@ def test_get_shutins(mocker, completions, expected_shutins):
 ], ids=['basic case', 'mixture of perf and not perf', 'only shutins', 'no shutins', 'no perf info', 'empty list'])
 def test_get_last_shutin(mocker, completions, expected_shutin):
     # Arrange
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
                                                                 'uuid_6', 'uuid_7'])
 
     dummy_model = get_fake_nexus_simulator(mocker)
@@ -611,7 +611,7 @@ def test_add_completion(mocker):
     well = NexusWell(well_name='test well', completions=existing_completions,
                      unit_system=UnitSystem.METKGCM2, parent_wells_instance=dummy_wells)
 
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='new_uuid')
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='new_uuid')
 
     # Act
     well._add_completion_to_memory(date=new_date, completion_properties=new_completion_props,
@@ -623,7 +623,7 @@ def test_add_completion(mocker):
 def test_remove_completion_from_memory(mocker):
     # Arrange
 
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
                                                                 'uuid_6', 'uuid_7'])
 
     existing_completions = [
@@ -667,7 +667,7 @@ def test_remove_completion_from_memory(mocker):
 
 def test_modify_completion(mocker):
     # Arrange
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
                                                                 'uuid_6', 'uuid_7'])
 
     existing_completions = [
@@ -788,7 +788,7 @@ def test_wells_modify(mocker):
 
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
 
     nexus_sim = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='fcs_file.fcs', mock_open=False)
 
@@ -1387,7 +1387,7 @@ def test_object_locations_updating(mocker, well_file_data, expected_uuid):
     WELLS Set 1 wells.dat'''
     runcontrol_data = 'START 01/01/2020'
 
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5',
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5',
                                                     'uuid6', 'uuid7']) # Mocking the object IDs
 
     mocker.patch.object(uuid, 'uuid4', side_effect=['file_uuid', 'runcontrol_uuid', 'wells_file_uuid',

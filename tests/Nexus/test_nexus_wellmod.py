@@ -51,7 +51,7 @@ class TestNexusWellMod:
     ], ids=['simple_wellmod', 'wellmod_with_different_date', 'checking date format'])
     def test_load_nexus_wellmod(self, mocker, wellfile_content, expected_wellmod_dict, date):
         # Arrange
-        mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
+        mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
         wellfile_content = self.well_file_content + wellfile_content
         expected_wellmods = [NexusWellMod(expected_wellmod_dict, start_date=self.start_date, date=date,
                                           date_format=DateFormat.DD_MM_YYYY)]
@@ -87,7 +87,7 @@ class TestNexusWellMod:
         TIME 01/01/2021
         WELLMOD test_well_2 PPERF	CON	0.25
         """
-        mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
+        mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
         well_file_content = self.well_file_content + extra_content
         expected_wellmod_1 = NexusWellMod({'well_name': 'test_well_2', 'date': '01/01/2020',
                                                 'unit_system': self.unit_system, 'skin': 0.25},
@@ -152,7 +152,7 @@ class TestNexusWellMod:
                                                             start_date=self.start_date, date='01/01/2020',
                                                             date_format=DateFormat.DD_MM_YYYY)
         dummy_model = get_fake_nexus_simulator(mocker)
-        mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
+        mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
         dummy_wells = NexusWells(model=dummy_model)
         extra_completion_obj = NexusCompletion(date=self.start_date, i=3, j=3, k=3, well_radius=4.5,
                                                   date_format=self.date_format, unit_system=self.unit_system,
@@ -194,7 +194,7 @@ class TestNexusWellMod:
         WELLMOD test_well SKIN VAR 0.5 KHMULT    CON 1234.2  DKRW  VAr 1.1
         WELLMOD test_well2 SKIN CON 2
         """
-        mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
+        mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
         expected_wellmod_1 = NexusWellMod({'well_name': 'test_well', 'date': '01/01/2022',
                                            'unit_system': self.unit_system, 'skin': [1.2, 55, 66],
                                            'perm_thickness_mult': 1234.2, 'delta_krw': [10, 2, 3]},

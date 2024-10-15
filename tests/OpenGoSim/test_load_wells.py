@@ -31,7 +31,7 @@ WELL_DATA well_1
 END    
 """
 
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
 
     open_mock = mocker.mock_open(read_data=in_file_contents)
     mocker.patch("builtins.open", open_mock)
@@ -89,7 +89,7 @@ WELL_DATA well_1
 END    
 """
 
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
 
     open_mock = mocker.mock_open(read_data=in_file_contents)
     mocker.patch("builtins.open", open_mock)
@@ -156,7 +156,7 @@ WELL_DATA well_1
 END    
 """
 
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
 
     open_mock = mocker.mock_open(read_data=in_file_contents)
     mocker.patch("builtins.open", open_mock)
@@ -224,7 +224,7 @@ WELL_DATA well_1
 END    
 """
 
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
 
     open_mock = mocker.mock_open(read_data=in_file_contents)
     mocker.patch("builtins.open", open_mock)

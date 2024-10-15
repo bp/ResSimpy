@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, TYPE_CHECKING, Literal, TypeVar, Optional
 from uuid import UUID
 
-from ResSimpy.DataObjectMixin import DataObjectMixin
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 T = TypeVar('T', bound=DataObjectMixin)
 

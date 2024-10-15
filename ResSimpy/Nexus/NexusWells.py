@@ -17,7 +17,7 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
-from ResSimpy.Wells import Wells
+from ResSimpy.GenericContainerClasses.Wells import Wells
 from ResSimpy.Nexus.load_wells import load_wells
 import ResSimpy.FileOperations.file_operations as fo
 import ResSimpy.Nexus.nexus_file_operations as nfo

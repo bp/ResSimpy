@@ -3,7 +3,7 @@ from abc import ABC
 from typing import Literal, Sequence
 
 from ResSimpy.DataModelBaseClasses.Node import Node
-from ResSimpy.OperationsMixin import NetworkOperationsMixIn
+from ResSimpy.GenericContainerClasses.OperationsMixin import NetworkOperationsMixIn
 
 
 @dataclass(kw_only=True)

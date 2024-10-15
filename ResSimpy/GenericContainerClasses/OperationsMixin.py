@@ -7,7 +7,7 @@ from uuid import UUID
 
 import pandas as pd
 
-from ResSimpy.DataObjectMixin import DataObjectMixin
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.File import File
 

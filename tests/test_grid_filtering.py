@@ -4,7 +4,7 @@ import pytest
 from ResSimpy.File import File
 from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
-from ResSimpy.grid_filtering_functions import grid_filter_file_as_list, filter_grid_array_definition
+from ResSimpy.Utils.grid_filtering_functions import grid_filter_file_as_list, filter_grid_array_definition
 
 from tests.utility_for_tests import mock_multiple_files
 

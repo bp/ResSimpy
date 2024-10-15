@@ -2,7 +2,7 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
 
-from ResSimpy.DataObjectMixin import DataObjectMixin
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.FrequencyEnum import FrequencyEnum
 from ResSimpy.Enums.OutputType import OutputType
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat

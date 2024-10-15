@@ -10,7 +10,7 @@ from ResSimpy.DataModelBaseClasses.Equilibration import Equilibration
 from ResSimpy.File import File
 from ResSimpy.DataModelBaseClasses.Gaslift import Gaslift
 from ResSimpy.DataModelBaseClasses.Grid import Grid
-from ResSimpy.Hydraulics import Hydraulics
+from ResSimpy.GenericContainerClasses.Hydraulics import Hydraulics
 from ResSimpy.DataModelBaseClasses.Network import Network
 from ResSimpy.DataModelBaseClasses.PVT import PVT
 from ResSimpy.DataModelBaseClasses.RelPerm import RelPerm
@@ -19,7 +19,7 @@ from ResSimpy.DataModelBaseClasses.Rock import Rock
 from ResSimpy.DataModelBaseClasses.Separator import Separator
 from ResSimpy.DataModelBaseClasses.Valve import Valve
 from ResSimpy.DataModelBaseClasses.Water import Water
-from ResSimpy.Wells import Wells
+from ResSimpy.GenericContainerClasses.Wells import Wells
 
 
 @dataclass(kw_only=True, init=False)

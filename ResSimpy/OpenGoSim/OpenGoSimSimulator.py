@@ -9,7 +9,7 @@ from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.DataModelBaseClasses.Equilibration import Equilibration
 from ResSimpy.File import File
 from ResSimpy.DataModelBaseClasses.Gaslift import Gaslift
-from ResSimpy.Hydraulics import Hydraulics
+from ResSimpy.GenericContainerClasses.Hydraulics import Hydraulics
 from ResSimpy.OpenGoSim.DataModels.OpenGoSimCompletion import OpenGoSimCompletion
 from ResSimpy.OpenGoSim.DataModels.OpenGoSimWell import OpenGoSimWell
 from ResSimpy.OpenGoSim.Enums.SimulationTypeEnum import SimulationType

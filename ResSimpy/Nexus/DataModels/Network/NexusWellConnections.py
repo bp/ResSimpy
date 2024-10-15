@@ -19,7 +19,7 @@ from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
-from ResSimpy.WellConnections import WellConnections
+from ResSimpy.GenericContainerClasses.WellConnections import WellConnections
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork

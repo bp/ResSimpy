@@ -1880,7 +1880,7 @@ def test_load_surface_file(mocker, fcs_file_contents, surface_file_content, node
 
     start_date = '01/01/2023'
     mocker.patch("builtins.open", mock_open_wrapper)
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
 
     fcs_file_path = 'fcs_file.fcs'
     nexus_sim = NexusSimulator(fcs_file_path)
@@ -1995,7 +1995,7 @@ def test_load_surface_file_activate_deactivate(mocker):
 
     start_date = '01/01/2023'
     mocker.patch("builtins.open", mock_open_wrapper)
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
 
     fcs_file_path = 'fcs_file.fcs'
     nexus_sim = NexusSimulator(fcs_file_path)

@@ -126,7 +126,7 @@ def test_read_wildcard(mocker, file_contents, expected_constraints):
         '''
     start_date = '01/01/2019'
     runcontrol_contents = '''START 01/01/2019'''
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
 
     # set up expected constraint dict
     expected_result = {}
