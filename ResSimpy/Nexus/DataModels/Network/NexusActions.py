@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 @dataclass(kw_only=True)
 class NexusActions:
-    """A class representing a list of nexus action objects"""
+    """A class representing a list of nexus action objects."""
     __actions: list[NexusAction] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork) -> None:
@@ -31,5 +31,3 @@ class NexusActions:
     def _add_to_memory(self, actions_to_add: list[NexusAction]) -> None:
         """Adds the list of Nexus Action objects to memory."""
         self.__actions.extend(actions_to_add)
-
-
