@@ -6,7 +6,7 @@ from typing import Optional
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from ResSimpy.WellConnection import WellConnection
+from ResSimpy.DataModelBaseClasses.WellConnection import WellConnection
 
 
 @dataclass(kw_only=True)

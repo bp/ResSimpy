@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Literal, Sequence, TYPE_CHECKING, Optional
 
-from ResSimpy.NetworkList import NetworkList
+from ResSimpy.DataModelBaseClasses.NetworkList import NetworkList
 if TYPE_CHECKING:
     from ResSimpy.DataModelBaseClasses.Network import Network
 

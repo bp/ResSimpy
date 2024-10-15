@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Sequence
 
-from ResSimpy.SolverParameter import SolverParameter
+from ResSimpy.DataModelBaseClasses.SolverParameter import SolverParameter
 
 
 @dataclass

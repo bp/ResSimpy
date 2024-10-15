@@ -18,12 +18,12 @@ from ResSimpy.OpenGoSim.OpenGoSimKeywords.OpenGoSimKeywords import OPENGOSIM_KEY
 from ResSimpy.OpenGoSim.OpenGoSimWells import OpenGoSimWells
 from ResSimpy.DataModelBaseClasses.PVT import PVT
 from ResSimpy.DataModelBaseClasses.RelPerm import RelPerm
-from ResSimpy.Reporting import Reporting
+from ResSimpy.DataModelBaseClasses.Reporting import Reporting
 from ResSimpy.DataModelBaseClasses.Rock import Rock
 from ResSimpy.DataModelBaseClasses.Separator import Separator
 from ResSimpy.DataModelBaseClasses.Simulator import Simulator
-from ResSimpy.Valve import Valve
-from ResSimpy.Water import Water
+from ResSimpy.DataModelBaseClasses.Valve import Valve
+from ResSimpy.DataModelBaseClasses.Water import Water
 
 
 def line_contains_block_ending(line: str) -> bool:

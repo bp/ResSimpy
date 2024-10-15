@@ -1,7 +1,7 @@
 """Holds a class for representing a single WellList or group for the Nexus model."""
 from dataclasses import dataclass
 
-from ResSimpy.NetworkList import NetworkList
+from ResSimpy.DataModelBaseClasses.NetworkList import NetworkList
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 

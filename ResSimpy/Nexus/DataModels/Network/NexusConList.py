@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
-from ResSimpy.NetworkList import NetworkList
+from ResSimpy.DataModelBaseClasses.NetworkList import NetworkList
 
 
 @dataclass(kw_only=True, init=False)

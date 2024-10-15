@@ -1,13 +1,11 @@
 import os
 import uuid
-from unittest import mock
 
 import pytest
 import pandas as pd
 from datetime import datetime, timezone
 
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
-from ResSimpy.Well import Well
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection

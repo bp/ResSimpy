@@ -1,7 +1,7 @@
 """Functions for loading a well list from a surface network file."""
 from typing import TypeVar, Type
 
-from ResSimpy.NetworkList import NetworkList
+from ResSimpy.DataModelBaseClasses.NetworkList import NetworkList
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Enums.HowEnum import OperationEnum
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat

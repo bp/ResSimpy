@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from typing import Literal, Optional, TYPE_CHECKING, Sequence
 
 from ResSimpy.OperationsMixin import NetworkOperationsMixIn
-from ResSimpy.WellConnection import WellConnection
+from ResSimpy.DataModelBaseClasses.WellConnection import WellConnection
 if TYPE_CHECKING:
     from ResSimpy.DataModelBaseClasses.Network import Network
 

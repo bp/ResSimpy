@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from typing import Literal, Sequence
 
 from ResSimpy.OperationsMixin import NetworkOperationsMixIn
-from ResSimpy.Wellhead import Wellhead
+from ResSimpy.DataModelBaseClasses.Wellhead import Wellhead
 
 
 @dataclass(kw_only=True)

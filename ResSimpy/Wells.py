@@ -6,7 +6,7 @@ from uuid import UUID
 import pandas as pd
 from ResSimpy.Enums.HowEnum import OperationEnum
 
-from ResSimpy.Well import Well
+from ResSimpy.DataModelBaseClasses.Well import Well
 from typing import Sequence, Optional
 
 

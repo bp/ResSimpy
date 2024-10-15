@@ -14,11 +14,11 @@ from ResSimpy.Hydraulics import Hydraulics
 from ResSimpy.DataModelBaseClasses.Network import Network
 from ResSimpy.DataModelBaseClasses.PVT import PVT
 from ResSimpy.DataModelBaseClasses.RelPerm import RelPerm
-from ResSimpy.Reporting import Reporting
+from ResSimpy.DataModelBaseClasses.Reporting import Reporting
 from ResSimpy.DataModelBaseClasses.Rock import Rock
 from ResSimpy.DataModelBaseClasses.Separator import Separator
-from ResSimpy.Valve import Valve
-from ResSimpy.Water import Water
+from ResSimpy.DataModelBaseClasses.Valve import Valve
+from ResSimpy.DataModelBaseClasses.Water import Water
 from ResSimpy.Wells import Wells
 
 
