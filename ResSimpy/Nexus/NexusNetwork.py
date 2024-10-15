@@ -12,6 +12,8 @@ from typing import TYPE_CHECKING, Optional, Any, Literal
 
 from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.Network import Network
+from ResSimpy.Nexus.DataModels.Network.NexusAction import NexusAction
+from ResSimpy.Nexus.DataModels.Network.NexusActions import NexusActions
 from ResSimpy.Nexus.DataModels.Network.NexusConList import NexusConList
 from ResSimpy.Nexus.DataModels.Network.NexusConLists import NexusConLists
 from ResSimpy.Nexus.DataModels.Network.NexusProc import NexusProc
@@ -56,6 +58,7 @@ class NexusNetwork(Network):
     wellbores: NexusWellbores
     constraints: NexusConstraints
     procs: NexusProcs
+    actions: NexusActions
     targets: NexusTargets
     welllists: NexusWellLists
     __has_been_loaded: bool = False
@@ -77,6 +80,7 @@ class NexusNetwork(Network):
         self.targets: NexusTargets = NexusTargets(self)
         self.welllists: NexusWellLists = NexusWellLists(self)
         self.procs: NexusProcs = NexusProcs(self)
+        self.actions: NexusActions = NexusActions(self)
         self.conlists: NexusConLists = NexusConLists(self)
 
     def get_load_status(self) -> bool:
@@ -108,6 +112,57 @@ class NexusNetwork(Network):
         if network_file is None:
             raise ValueError(f'No file found for {method_number=}, instead found {network_file=}')
         return network_file
+
+    def __load_actions(self) -> list[NexusAction]:
+
+        nexus_action_obj_list: list[NexusAction] = []
+        files_dict = self.__model.model_files.surface_files
+
+        if files_dict is None:
+            raise ValueError('Surface files not found for this model.')
+
+        for file in files_dict.values():
+            file_contents = file.get_flat_list_str_file
+
+            if file_contents is None:
+                raise ValueError(f'No file contents found for surface file {file.location}.')
+
+            grab_line: bool = False
+
+            for line in file_contents:
+
+                # skips single line comments
+                if line.startswith('!'):
+                    continue
+
+                # we should not only check for the ACTION keyword but also for the header
+                if fo.check_token('ACTIONS', line=line) or fo.check_token('ACTIONTIME', line=line):
+                    # set grab line to true to start reading data
+                    grab_line = True
+
+                    # there is nothing more to do on this iteration, so we continue
+                    continue
+
+                if grab_line:
+
+                    if fo.check_token('ENDACTIONS', line=line):
+                        break
+
+                    data_as_list = line.split()
+
+                    if not data_as_list:  # line.split() returns a list. this checks if it is empty
+                        # if the line is empty, go to the next iteration
+                        continue
+
+                    action_obj = NexusAction(action_time=data_as_list[0], action=data_as_list[1],
+                                             connection=data_as_list[2])
+                    nexus_action_obj_list.append(action_obj)
+
+        if not nexus_action_obj_list:
+            warnings.warn(
+                UserWarning('ACTIONS/ENDACTIONS keywords specified, but no ACTION table exists.'))
+
+        return nexus_action_obj_list
 
     @property
     def __load_procs(self) -> list[NexusProc]:
@@ -238,6 +293,7 @@ class NexusNetwork(Network):
                                       'PROCS': None,
                                       'WELLLIST': NexusWellList,
                                       'CONLIST': NexusConList,
+                                      'ACTIONS': None
                                       }
 
         for surface in self.__model.model_files.surface_files.values():
@@ -261,12 +317,12 @@ class NexusNetwork(Network):
 
             add_procs_to_mem = self.__load_procs
             self.procs._add_to_memory(add_procs_to_mem)
+            self.actions._add_to_memory(self.__load_actions())
 
         self.__has_been_loaded = True
         self.__update_well_types()
 
         if self.model.options is not None:
-
             # load the options file
             self.model.options.load_nexus_options_if_not_loaded()
 
