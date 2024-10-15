@@ -4,7 +4,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from ResSimpy.Enums.WellTypeEnum import WellType
-from ResSimpy.ISODateTime import ISODateTime
+from ResSimpy.Time.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnections import NexusWellConnections
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore

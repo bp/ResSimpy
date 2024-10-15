@@ -24,7 +24,7 @@ from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterMethod
 from ResSimpy.Nexus.DataModels.NexusOptions import NexusOptions
 from ResSimpy.Units.Units import Area
 from ResSimpy.Units.AttributeMappings.ConstraintUnitMapping import ConstraintUnits
-from ResSimpy.ISODateTime import ISODateTime
+from ResSimpy.Time.ISODateTime import ISODateTime
 
 
 @pytest.mark.parametrize('unit_system, expected_result', [

@@ -9,7 +9,7 @@ import pandas as pd
 if TYPE_CHECKING:  # pragma: no cover
     from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
     from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterParams
-    from ResSimpy.File import File
+    from ResSimpy.FileOperations.File import File
 
 
 # Factory methods for generating empty lists with typing

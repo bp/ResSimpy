@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.ISODateTime import ISODateTime
+from ResSimpy.Time.ISODateTime import ISODateTime
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Utils import to_dict_generic

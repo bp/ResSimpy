@@ -4,7 +4,7 @@ from abc import ABC
 from dataclasses import dataclass, field
 from typing import Literal, Optional, TYPE_CHECKING, Sequence
 
-from ResSimpy.GenericContainerClasses.OperationsMixin import NetworkOperationsMixIn
+from ResSimpy.DataModelBaseClasses.OperationsMixin import NetworkOperationsMixIn
 from ResSimpy.DataModelBaseClasses.WellConnection import WellConnection
 if TYPE_CHECKING:
     from ResSimpy.DataModelBaseClasses.Network import Network

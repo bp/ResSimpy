@@ -7,7 +7,7 @@ from ResSimpy.Enums.PenetrationDirectionEnum import PenetrationDirectionEnum
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.DataModelBaseClasses.Equilibration import Equilibration
-from ResSimpy.File import File
+from ResSimpy.FileOperations.File import File
 from ResSimpy.DataModelBaseClasses.Gaslift import Gaslift
 from ResSimpy.GenericContainerClasses.Hydraulics import Hydraulics
 from ResSimpy.OpenGoSim.DataModels.OpenGoSimCompletion import OpenGoSimCompletion

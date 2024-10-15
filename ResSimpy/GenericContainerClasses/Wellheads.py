@@ -2,7 +2,7 @@ from abc import ABC
 from dataclasses import dataclass, field
 from typing import Literal, Sequence
 
-from ResSimpy.GenericContainerClasses.OperationsMixin import NetworkOperationsMixIn
+from ResSimpy.DataModelBaseClasses.OperationsMixin import NetworkOperationsMixIn
 from ResSimpy.DataModelBaseClasses.Wellhead import Wellhead
 
 

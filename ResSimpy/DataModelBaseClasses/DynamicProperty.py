@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 from typing import Optional
-from ResSimpy.File import File
+from ResSimpy.FileOperations.File import File
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 
 

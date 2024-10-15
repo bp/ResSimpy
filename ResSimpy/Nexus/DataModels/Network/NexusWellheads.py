@@ -10,7 +10,7 @@ from uuid import UUID
 
 import pandas as pd
 
-from ResSimpy.File import File
+from ResSimpy.FileOperations.File import File
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead

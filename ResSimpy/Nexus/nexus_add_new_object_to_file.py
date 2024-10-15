@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, TypeVar, Optional
 from uuid import UUID
 
 from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
-from ResSimpy.File import File
+from ResSimpy.FileOperations.File import File
 from ResSimpy.DataModelBaseClasses.NetworkObject import NetworkObject
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 import ResSimpy.Nexus.nexus_file_operations as nfo

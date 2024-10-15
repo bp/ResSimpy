@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from ResSimpy.DataModelBaseClasses.Aquifer import Aquifer
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.DataModelBaseClasses.Equilibration import Equilibration
-from ResSimpy.File import File
+from ResSimpy.FileOperations.File import File
 from ResSimpy.DataModelBaseClasses.Gaslift import Gaslift
 from ResSimpy.DataModelBaseClasses.Grid import Grid
 from ResSimpy.GenericContainerClasses.Hydraulics import Hydraulics

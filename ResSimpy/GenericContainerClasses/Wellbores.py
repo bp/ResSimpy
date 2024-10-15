@@ -1,7 +1,7 @@
 from abc import ABC
 from dataclasses import dataclass, field
 from typing import Literal
-from ResSimpy.GenericContainerClasses.OperationsMixin import NetworkOperationsMixIn
+from ResSimpy.DataModelBaseClasses.OperationsMixin import NetworkOperationsMixIn
 from ResSimpy.DataModelBaseClasses.Wellbore import Wellbore
 
 

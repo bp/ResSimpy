@@ -1,7 +1,7 @@
 # tests for filtering the grid file to ensure it is only numeric values
 import numpy as np
 import pytest
-from ResSimpy.File import File
+from ResSimpy.FileOperations.File import File
 from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from ResSimpy.Utils.grid_filtering_functions import grid_filter_file_as_list, filter_grid_array_definition

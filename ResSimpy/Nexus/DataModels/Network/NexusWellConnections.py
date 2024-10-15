@@ -11,7 +11,7 @@ from uuid import UUID
 
 import pandas as pd
 
-from ResSimpy.File import File
+from ResSimpy.FileOperations.File import File
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Nexus.nexus_modify_object_in_file import ModifyObjectOperations
 from ResSimpy.Nexus.nexus_remove_object_from_file import RemoveObjectOperations

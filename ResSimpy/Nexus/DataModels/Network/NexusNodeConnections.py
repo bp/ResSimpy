@@ -11,7 +11,7 @@ from uuid import UUID
 import pandas as pd
 from typing import Sequence, Optional, TYPE_CHECKING
 
-from ResSimpy.File import File
+from ResSimpy.FileOperations.File import File
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 

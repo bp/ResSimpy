@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from typing import Optional, TYPE_CHECKING, Any
 import warnings
 
-from ResSimpy.File import File
+from ResSimpy.FileOperations.File import File
 from ResSimpy.DataModelBaseClasses.Grid import Grid
 from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile

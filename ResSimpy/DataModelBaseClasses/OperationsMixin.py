@@ -9,7 +9,7 @@ import pandas as pd
 
 from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.File import File
+from ResSimpy.FileOperations.File import File
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import Network

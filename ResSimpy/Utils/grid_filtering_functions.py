@@ -1,7 +1,7 @@
 from __future__ import annotations
 import os
 
-from ResSimpy.File import File
+from ResSimpy.FileOperations.File import File
 from ResSimpy.FileOperations import file_operations as fo
 from ResSimpy.Utils.general_utilities import check_if_string_is_float
 from typing import TYPE_CHECKING

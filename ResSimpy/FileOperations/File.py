@@ -5,7 +5,7 @@ from uuid import uuid4, UUID
 from dataclasses import dataclass, field
 from typing import Optional, Sequence
 import warnings
-from ResSimpy.FileBase import FileBase
+from ResSimpy.FileOperations.FileBase import FileBase
 import ResSimpy.FileOperations.file_operations as fo
 import uuid
 
