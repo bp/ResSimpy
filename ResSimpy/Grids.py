@@ -2,7 +2,7 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Sequence
 
-from ResSimpy.Grid import Grid
+from ResSimpy.DataModelBaseClasses.Grid import Grid
 
 
 @dataclass(kw_only=True)

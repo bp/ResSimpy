@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from ResSimpy.Completion import Completion
+from ResSimpy.DataModelBaseClasses.Completion import Completion
 from ResSimpy.Enums.PenetrationDirectionEnum import PenetrationDirectionEnum
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Units.AttributeMappings.CompletionUnitMapping import CompletionUnits

@@ -4,9 +4,9 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Sequence, TYPE_CHECKING
 
-from ResSimpy.output_request import OutputRequest, OutputContents
+from ResSimpy.DataModelBaseClasses.output_request import OutputRequest, OutputContents
 if TYPE_CHECKING:
-    from ResSimpy.Simulator import Simulator
+    from ResSimpy.DataModelBaseClasses.Simulator import Simulator
 
 
 @dataclass(kw_only=True)

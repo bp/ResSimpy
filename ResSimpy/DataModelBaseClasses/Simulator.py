@@ -4,19 +4,19 @@ import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from ResSimpy.Aquifer import Aquifer
+from ResSimpy.DataModelBaseClasses.Aquifer import Aquifer
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.Equilibration import Equilibration
+from ResSimpy.DataModelBaseClasses.Equilibration import Equilibration
 from ResSimpy.File import File
-from ResSimpy.Gaslift import Gaslift
-from ResSimpy.Grid import Grid
+from ResSimpy.DataModelBaseClasses.Gaslift import Gaslift
+from ResSimpy.DataModelBaseClasses.Grid import Grid
 from ResSimpy.Hydraulics import Hydraulics
-from ResSimpy.Network import Network
-from ResSimpy.PVT import PVT
-from ResSimpy.RelPerm import RelPerm
+from ResSimpy.DataModelBaseClasses.Network import Network
+from ResSimpy.DataModelBaseClasses.PVT import PVT
+from ResSimpy.DataModelBaseClasses.RelPerm import RelPerm
 from ResSimpy.Reporting import Reporting
-from ResSimpy.Rock import Rock
-from ResSimpy.Separator import Separator
+from ResSimpy.DataModelBaseClasses.Rock import Rock
+from ResSimpy.DataModelBaseClasses.Separator import Separator
 from ResSimpy.Valve import Valve
 from ResSimpy.Water import Water
 from ResSimpy.Wells import Wells

@@ -13,7 +13,7 @@ from uuid import UUID
 import pandas as pd
 import re
 
-from ResSimpy.Constraint import Constraint
+from ResSimpy.DataModelBaseClasses.Constraint import Constraint
 from ResSimpy.Constraints import Constraints
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint

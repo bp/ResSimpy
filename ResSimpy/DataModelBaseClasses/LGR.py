@@ -1,7 +1,7 @@
 from abc import ABC
 from dataclasses import dataclass
 
-from ResSimpy.GridArrayDefinition import GridArrayDefinition
+from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
 
 
 @dataclass

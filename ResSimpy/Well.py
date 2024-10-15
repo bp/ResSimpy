@@ -4,7 +4,7 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Optional, Sequence
 
-from ResSimpy.Completion import Completion
+from ResSimpy.DataModelBaseClasses.Completion import Completion
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Enums.WellTypeEnum import WellType
 

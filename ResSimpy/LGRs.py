@@ -2,7 +2,7 @@ from abc import ABC
 from dataclasses import dataclass, field
 from typing import Sequence
 
-from ResSimpy.LGR import LGR
+from ResSimpy.DataModelBaseClasses.LGR import LGR
 
 
 @dataclass

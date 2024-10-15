@@ -8,8 +8,8 @@ from typing import Optional, Sequence
 
 import numpy as np
 
-from ResSimpy.GridArrayDefinition import GridArrayDefinition
-from ResSimpy.GridArrayFunction import GridArrayFunction
+from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
+from ResSimpy.DataModelBaseClasses.GridArrayFunction import GridArrayFunction
 from ResSimpy.File import File
 from ResSimpy.LGRs import LGRs
 

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from ResSimpy.GridArrayDefinition import GridArrayDefinition
-from ResSimpy.LGR import LGR
+from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
+from ResSimpy.DataModelBaseClasses.LGR import LGR
 
 
 @dataclass

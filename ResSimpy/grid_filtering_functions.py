@@ -7,7 +7,7 @@ from ResSimpy.Utils.general_utilities import check_if_string_is_float
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ResSimpy.GridArrayDefinition import GridArrayDefinition
+    from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
 
 
 def filter_grid_array_definition(grid_array_definition: GridArrayDefinition) -> File:

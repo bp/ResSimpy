@@ -7,7 +7,7 @@ from typing import Optional, MutableMapping
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusPVTMethod import NexusPVTMethod
-from ResSimpy.PVT import PVT
+from ResSimpy.DataModelBaseClasses.PVT import PVT
 
 
 @dataclass(kw_only=True)

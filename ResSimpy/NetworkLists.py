@@ -5,7 +5,7 @@ from typing import Literal, Sequence, TYPE_CHECKING, Optional
 
 from ResSimpy.NetworkList import NetworkList
 if TYPE_CHECKING:
-    from ResSimpy.Network import Network
+    from ResSimpy.DataModelBaseClasses.Network import Network
 
 
 @dataclass(kw_only=True)

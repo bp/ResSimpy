@@ -7,7 +7,7 @@ from typing import Literal, Optional, TYPE_CHECKING, Sequence
 from ResSimpy.OperationsMixin import NetworkOperationsMixIn
 from ResSimpy.WellConnection import WellConnection
 if TYPE_CHECKING:
-    from ResSimpy.Network import Network
+    from ResSimpy.DataModelBaseClasses.Network import Network
 
 
 @dataclass(kw_only=True)

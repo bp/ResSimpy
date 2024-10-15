@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from abc import ABC
 from typing import Mapping
 
-from ResSimpy.DynamicProperty import DynamicProperty
+from ResSimpy.DataModelBaseClasses.DynamicProperty import DynamicProperty
 
 
 @dataclass(kw_only=True)

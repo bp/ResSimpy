@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Optional
 import pandas as pd
 
-from ResSimpy.GridArrayFunction import GridArrayFunction
+from ResSimpy.DataModelBaseClasses.GridArrayFunction import GridArrayFunction
 
 
 @dataclass

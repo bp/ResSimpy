@@ -5,7 +5,7 @@ from typing import Optional, MutableMapping
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusGasliftMethod import NexusGasliftMethod
-from ResSimpy.Gaslift import Gaslift
+from ResSimpy.DataModelBaseClasses.Gaslift import Gaslift
 
 
 @dataclass(kw_only=True)

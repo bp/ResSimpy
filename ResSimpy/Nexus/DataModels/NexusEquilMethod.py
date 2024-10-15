@@ -11,7 +11,7 @@ from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_INTSAT_KEYWORDS, E
 from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_TABLE_KEYWORDS, EQUIL_SINGLE_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_COMPOSITION_OPTIONS
 from ResSimpy.Nexus.NexusKeywords.equil_keywords import EQUIL_KEYWORDS
-from ResSimpy.DynamicProperty import DynamicProperty
+from ResSimpy.DataModelBaseClasses.DynamicProperty import DynamicProperty
 from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import EquilUnits
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union

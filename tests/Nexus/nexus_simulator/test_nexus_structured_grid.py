@@ -1,8 +1,7 @@
 import os
 import pandas as pd
 import pytest
-from ResSimpy.GridArrayDefinition import GridArrayDefinition
-from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusLGR import NexusLGR
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
