@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 
 from ResSimpy.Enums.TimeSteppingMethodEnum import TimeSteppingMethod
-from ResSimpy.SolverParameter import SolverParameter
+from ResSimpy.DataModelBaseClasses.SolverParameter import SolverParameter
 
 
 @dataclass(kw_only=True)

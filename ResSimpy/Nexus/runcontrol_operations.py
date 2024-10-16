@@ -14,7 +14,7 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
 from ResSimpy.Nexus.NexusSolverParameters import NexusSolverParameters
 from ResSimpy.Nexus.constants import DATE_WITH_TIME_LENGTH
-from ResSimpy.SolverParameter import SolverParameter
+from ResSimpy.DataModelBaseClasses.SolverParameter import SolverParameter
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 

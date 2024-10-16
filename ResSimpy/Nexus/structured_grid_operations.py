@@ -4,7 +4,7 @@ import os
 from typing import Optional, TYPE_CHECKING
 
 import pandas as pd
-from ResSimpy.GridArrayDefinition import GridArrayDefinition
+from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEYWORDS, STRUCTURED_GRID_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_FORMAT_KEYWORDS

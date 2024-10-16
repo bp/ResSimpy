@@ -2,28 +2,28 @@ from dataclasses import dataclass
 from typing import Optional
 
 import ResSimpy.FileOperations.file_operations as fo
-from ResSimpy.Aquifer import Aquifer
+from ResSimpy.DataModelBaseClasses.Aquifer import Aquifer
 from ResSimpy.Enums.PenetrationDirectionEnum import PenetrationDirectionEnum
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Enums.WellTypeEnum import WellType
-from ResSimpy.Equilibration import Equilibration
-from ResSimpy.File import File
-from ResSimpy.Gaslift import Gaslift
-from ResSimpy.Hydraulics import Hydraulics
+from ResSimpy.DataModelBaseClasses.Equilibration import Equilibration
+from ResSimpy.FileOperations.File import File
+from ResSimpy.DataModelBaseClasses.Gaslift import Gaslift
+from ResSimpy.GenericContainerClasses.Hydraulics import Hydraulics
 from ResSimpy.OpenGoSim.DataModels.OpenGoSimCompletion import OpenGoSimCompletion
 from ResSimpy.OpenGoSim.DataModels.OpenGoSimWell import OpenGoSimWell
 from ResSimpy.OpenGoSim.Enums.SimulationTypeEnum import SimulationType
 from ResSimpy.OpenGoSim.Model_Parts.OpenGoSimNetwork import OpenGoSimNetwork
 from ResSimpy.OpenGoSim.OpenGoSimKeywords.OpenGoSimKeywords import OPENGOSIM_KEYWORDS
 from ResSimpy.OpenGoSim.OpenGoSimWells import OpenGoSimWells
-from ResSimpy.PVT import PVT
-from ResSimpy.RelPerm import RelPerm
-from ResSimpy.Reporting import Reporting
-from ResSimpy.Rock import Rock
-from ResSimpy.Separator import Separator
-from ResSimpy.Simulator import Simulator
-from ResSimpy.Valve import Valve
-from ResSimpy.Water import Water
+from ResSimpy.DataModelBaseClasses.PVT import PVT
+from ResSimpy.DataModelBaseClasses.RelPerm import RelPerm
+from ResSimpy.DataModelBaseClasses.Reporting import Reporting
+from ResSimpy.DataModelBaseClasses.Rock import Rock
+from ResSimpy.DataModelBaseClasses.Separator import Separator
+from ResSimpy.DataModelBaseClasses.Simulator import Simulator
+from ResSimpy.DataModelBaseClasses.Valve import Valve
+from ResSimpy.DataModelBaseClasses.Water import Water
 
 
 def line_contains_block_ending(line: str) -> bool:

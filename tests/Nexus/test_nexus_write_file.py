@@ -6,7 +6,6 @@ from pytest_mock import MockerFixture
 
 from ResSimpy.Enums.UnitsEnum import SUnits, TemperatureUnits, UnitSystem
 from ResSimpy.Enums.FluidTypeEnums import PvtType, SeparatorType
-from ResSimpy.File import File
 
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusPVTMethod import NexusPVTMethod

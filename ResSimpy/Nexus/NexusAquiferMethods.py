@@ -6,7 +6,7 @@ from typing import Optional, MutableMapping
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusAquiferMethod import NexusAquiferMethod
-from ResSimpy.Aquifer import Aquifer
+from ResSimpy.DataModelBaseClasses.Aquifer import Aquifer
 
 
 @dataclass(kw_only=True)

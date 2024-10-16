@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional, Any, Literal
 
 from ResSimpy.Enums.WellTypeEnum import WellType
-from ResSimpy.Network import Network
+from ResSimpy.DataModelBaseClasses.Network import Network
 from ResSimpy.Nexus.DataModels.Network.NexusConList import NexusConList
 from ResSimpy.Nexus.DataModels.Network.NexusConLists import NexusConLists
 from ResSimpy.Nexus.DataModels.Network.NexusProc import NexusProc

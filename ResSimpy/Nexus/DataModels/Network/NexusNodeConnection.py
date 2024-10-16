@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Optional
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from ResSimpy.NodeConnection import NodeConnection
+from ResSimpy.DataModelBaseClasses.NodeConnection import NodeConnection
 
 
 @dataclass(repr=False)

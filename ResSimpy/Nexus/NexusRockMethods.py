@@ -6,7 +6,7 @@ from typing import Optional, MutableMapping
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusRockMethod import NexusRockMethod
-from ResSimpy.Rock import Rock
+from ResSimpy.DataModelBaseClasses.Rock import Rock
 
 
 @dataclass(kw_only=True)

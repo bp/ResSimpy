@@ -12,7 +12,7 @@ from ResSimpy.Utils.invert_nexus_map import nexus_keyword_to_attribute_name
 import fnmatch
 
 if TYPE_CHECKING:
-    from ResSimpy.File import File
+    from ResSimpy.FileOperations.File import File
 
 
 def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConstraint], current_date: Optional[str],

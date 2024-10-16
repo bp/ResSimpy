@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from ResSimpy.ISODateTime import ISODateTime
+from ResSimpy.Time.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
