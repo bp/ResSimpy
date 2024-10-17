@@ -61,7 +61,7 @@ class Target(NetworkObject, ABC):
             calculation_method (Optional[str]): Specifies how the target rate is determined.
             calculation_conditions (Optional[str]): Indicates the conditions used to calculate the target rate.
             calculation_connections (Optional[str]): Indicates which connections contribute to the target calculation.
-            Value (Optional[float]): Indicates the value for the target rate.
+            value (Optional[float]): Indicates the value for the target rate.
             add_value (Optional[float]): Specifies an amount to be added to the target rate calculated by CALCMETHOD.
             region (Optional[str]): Specified a region name from REGDATA table.
             priority (Optional[int]): Column heading for target priority; lower integers indicate higher priority.

@@ -44,7 +44,7 @@ class NexusWellbore(Wellbore):
                  date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None, name: Optional[str] = None, flowsect: Optional[int] = None,
                  bore_type: Optional[str] = None, hyd_method: Optional[str] = None, temperature: Optional[float] = None,
-                 elevation_profile: Optional[str] = None, temperature_profile: [float] = None,
+                 elevation_profile: Optional[str] = None, temperature_profile: Optional[str] = None,
                  heat_tansfer_coeff: Optional[float] = None, pvt_method: Optional[int] = None,
                  water_method: Optional[int] = None) -> None:
         """Initialises the NexusWellbore class.
