@@ -101,8 +101,22 @@ class NexusWellConnection(WellConnection):
 
     def __init__(self, properties_dict: Optional[dict[str, None | int | str | float]] = None,
                  date: Optional[str] = None, date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
-                 unit_system: Optional[UnitSystem] = None, is_activated: bool = True,
-                 name: Optional[str] = None) -> None:
+                 unit_system: Optional[UnitSystem] = None, name: Optional[str] = None,
+                 bh_node_name: Optional[str] = None, wh_node_name: Optional[str] = None,
+                 stream: Optional[str] = None, number: Optional[int] = None, scale: Optional[float] = None,
+                 gradient_cal: Optional[str] = None, bottomhole_measured_depth: Optional[float] = None,
+                 add_tubing: Optional[int] = None, tracer: Optional[str] = None, con_type: Optional[str] = None,
+                 pvt_method: Optional[int] = None, water_method: Optional[int] = None, bat_method: Optional[int] = None,
+                 elevation_profile: Optional[str] = None, temperature_profile: Optional[str] = None,
+                 inj_mobility: Optional[str] = None, crosshut: Optional[str] = None, crossflow: Optional[str] = None,
+                 on_time: Optional[float] = None, heat_transfer_coeff: Optional[float] = None,
+                 well_index_mult: Optional[float] = None, vip_productivity_index: Optional[float] = None,
+                 productivity_index_phase: Optional[str] = None, d_factor: Optional[float] = None,
+                 non_darcy_flow_model: Optional[str] = None, non_darcy_flow_method: Optional[str] = None,
+                 gas_mobility: Optional[float] = None, capillary_number_model: Optional[str] = None,
+                 dp_add: Optional[float] = None, dt_add: Optional[float] = None, rate_mult: Optional[float] = None,
+                 polymer: Optional[str] = None, station: Optional[str] = None, drill_queue: Optional[str] = None,
+                 drill_order_benefit: Optional[float] = None, is_activated: bool = True) -> None:
         """Initialises the NexusWellConnection class.
 
         Args:
@@ -113,7 +127,84 @@ class NexusWellConnection(WellConnection):
             unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
             is_activated: bool: Whether the Well Connection has been set as activated. Defaults to True.
             name (Optional[str]): The name of the object.
+            bh_node_name (Optional[str]): Bottom hole node name.
+            wh_node_name (Optional[str]): Wellhead node name.
+            stream (Optional[str]): Stream identifier (STREAM).
+            number (Optional[int]): Identificaiton number (Number).
+            scale (Optional[float]): Scaling factor (SCALE).
+            gradient_cal (Optional[str]): Gradient calculation method (DATGRAD).
+            bottomhole_measured_depth (Optional[float]): Measured depth of the bottom hole (BHMD).
+            add_tubing (Optional[int]): Additional tubing indicator (ADDTUBING).
+            tracer (Optional[str]): Tracer substance identifier (TRACERS).
+            con_type (Optional[str]): Connection type (TYPE).
+            pvt_method (Optional[int]): PVT method (IPVT).
+            water_method (Optional[int]): Water method (IWAT).
+            bat_method (Optional[int]): Bat method (IBAT).
+            elevation_profile (Optional[str]): Elevation profile identifier (ELEVPR).
+            temperature_profile (Optional[str]): Temperature profile identifier (TEMPPR).
+            inj_mobility (Optional[str]): Injection mobility identifier (INJMOB).
+            crosshut (Optional[str]): Cross-shut identifier (CROSS_SHUT).
+            crossflow (Optional[str]): Crossflow identifier (CROSSFLOW).
+            on_time (Optional[float]): On-time duration (ONTIME).
+            heat_transfer_coeff (Optional[float]): Heat transfer coefficient (HTC).
+            well_index_mult (Optional[float]): Well index multiplier (WIMULT).
+            vip_productivity_index (Optional[float]): VIP productivity index identifier (VIPPI).
+            productivity_index_phase (Optional[str]): Productivity index phase identifier (PIPHASE).
+            d_factor (Optional[float]): Non-Darcy D-factor (D).
+            non_darcy_flow_model (Optional[str]): Non-Darcy flow model identifier (ND).
+            non_darcy_flow_method (Optional[str]): Non-Darcy flow method identifier (DPERF)
+            gas_mobility (Optional[float]): Gas mobility value (GASMOB).
+            capillary_number_model (Optional[str]): Capillary number model identifier (CN).
+            dp_add (Optional[float]): Additional pressure drop (DPADD).
+            dt_add (Optional[float]): Additional temperature change (DTADD).
+            rate_mult (Optional[float]): Rate multiplier (RATEMULT).
+            polymer (Optional[str]): Polymer identifier (POLYMER).
+            station (Optional[str]): Station identifier (STATION).
+            drill_queue (Optional[str]): Drill queue identifier (ASSCDR).
+            drill_order_benefit (Optional[float]): Benefit of the drill order (BENEFIT).
+            is_activated (bool): Whether the Well Connection has been activated using ACTIVATED / DEACTIVATE
+            Defaults to True.
+
+
         """
+
+        self.bh_node_name = bh_node_name
+        self.wh_node_name = wh_node_name
+        self.stream = stream
+        self.number = number
+        self.scale = scale
+        self.scale = stream
+        self.gradient_calc = gradient_cal
+        self.bottomhole_measured_depth = bottomhole_measured_depth
+        self.add_tubing = add_tubing
+        self.tracer = tracer
+        self.con_type = con_type
+        self.pvt_method = pvt_method
+        self.water_method = water_method
+        self.bat_method = bat_method
+        self.elevation_profile = elevation_profile
+        self.temperature = temperature_profile
+        self.inj_mobility = inj_mobility
+        self.crossshut = crosshut
+        self.crossflow = crossflow
+        self.on_time = on_time
+        self.heat_transfer_coeff = heat_transfer_coeff
+        self.well_index_mult = well_index_mult
+        self.vip_productivity_index = vip_productivity_index
+        self.productivity_index = productivity_index_phase
+        self.d_factor = d_factor
+        self.non_darcy_flow_model = non_darcy_flow_model
+        self.non_darcy_flow_method = non_darcy_flow_method
+        self.gas_mobility = gas_mobility
+        self.capillary_number_model = capillary_number_model
+        self.dp_add = dp_add
+        self.dt_add = dt_add
+        self.rate_mult = rate_mult
+        self.polymer = polymer
+        self.station = station
+        self.drill_queue = drill_queue
+        self.drill_order_benefit = drill_order_benefit
+        self.is_activated = is_activated
         super().__init__(date_format=date_format, start_date=start_date, unit_system=unit_system, name=name, date=date,
                          properties_dict=properties_dict)
         self.is_activated = is_activated
