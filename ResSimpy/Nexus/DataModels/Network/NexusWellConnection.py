@@ -173,7 +173,6 @@ class NexusWellConnection(WellConnection):
         self.stream = stream
         self.number = number
         self.scale = scale
-        self.scale = stream
         self.gradient_calc = gradient_cal
         self.bottomhole_measured_depth = bottomhole_measured_depth
         self.add_tubing = add_tubing
@@ -183,7 +182,7 @@ class NexusWellConnection(WellConnection):
         self.water_method = water_method
         self.bat_method = bat_method
         self.elevation_profile = elevation_profile
-        self.temperature = temperature_profile
+        self.temperature_profile = temperature_profile
         self.inj_mobility = inj_mobility
         self.crossshut = crosshut
         self.crossflow = crossflow
@@ -191,7 +190,7 @@ class NexusWellConnection(WellConnection):
         self.heat_transfer_coeff = heat_transfer_coeff
         self.well_index_mult = well_index_mult
         self.vip_productivity_index = vip_productivity_index
-        self.productivity_index = productivity_index_phase
+        self.productivity_index_phase = productivity_index_phase
         self.d_factor = d_factor
         self.non_darcy_flow_model = non_darcy_flow_model
         self.non_darcy_flow_method = non_darcy_flow_method
