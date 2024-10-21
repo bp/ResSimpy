@@ -164,8 +164,6 @@ class NexusWellConnection(WellConnection):
             drill_order_benefit (Optional[float]): Benefit of the drill order (BENEFIT).
             is_activated (bool): Whether the Well Connection has been activated using ACTIVATED / DEACTIVATE
             Defaults to True.
-
-
         """
 
         self.bh_node_name = bh_node_name
