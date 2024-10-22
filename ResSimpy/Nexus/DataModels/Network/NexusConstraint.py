@@ -97,7 +97,6 @@ class NexusConstraint(Constraint):
     pump_speed (float): maximum speed of the pump/esp/compressor (SPEED)
     choke_limit (str): ON/OFF for whether the esp should exceed the choke limit (CHOKELIMIT)
     manifold_position (int): position in the manifold for the well (POSITION)
-
     """
 
     well_name: Optional[str] = None
