@@ -11,7 +11,7 @@ from ResSimpy.Enums.FrequencyEnum import FrequencyEnum
 from ResSimpy.Enums.OutputType import OutputType
 from ResSimpy.Nexus.DataModels.NexusReportingRequests import NexusOutputRequest, NexusOutputContents
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
-from ResSimpy.Reporting import Reporting
+from ResSimpy.DataModelBaseClasses.Reporting import Reporting
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator

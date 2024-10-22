@@ -4,7 +4,7 @@ import warnings
 from typing import Optional, Sequence, TYPE_CHECKING
 from datetime import time, timedelta
 
-from ResSimpy.ISODateTime import ISODateTime
+from ResSimpy.Time.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.NexusWellMod import NexusWellMod
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 import ResSimpy.Nexus.nexus_file_operations as nfo

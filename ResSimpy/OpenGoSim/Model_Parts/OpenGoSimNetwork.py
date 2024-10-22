@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from ResSimpy.Network import Network
+from ResSimpy.DataModelBaseClasses.Network import Network
 
 
 @dataclass(kw_only=True, init=False)

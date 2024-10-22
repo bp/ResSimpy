@@ -5,7 +5,7 @@ from typing import Optional, MutableMapping
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusHydraulicsMethod import NexusHydraulicsMethod
-from ResSimpy.Hydraulics import Hydraulics
+from ResSimpy.GenericContainerClasses.Hydraulics import Hydraulics
 
 
 @dataclass(kw_only=True)

@@ -6,7 +6,7 @@ from typing import Optional, MutableMapping
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusWaterMethod import NexusWaterMethod
-from ResSimpy.Water import Water
+from ResSimpy.DataModelBaseClasses.Water import Water
 
 
 @dataclass(kw_only=True)

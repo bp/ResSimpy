@@ -5,7 +5,7 @@ from typing import Optional
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from ResSimpy.Wellhead import Wellhead
+from ResSimpy.DataModelBaseClasses.Wellhead import Wellhead
 
 
 @dataclass(kw_only=True)

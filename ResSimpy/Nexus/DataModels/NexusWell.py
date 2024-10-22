@@ -10,7 +10,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusWellMod import NexusWellMod
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from ResSimpy.Well import Well
+from ResSimpy.DataModelBaseClasses.Well import Well
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusWells import NexusWells

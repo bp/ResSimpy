@@ -11,8 +11,8 @@ from ResSimpy.Nexus.NexusKeywords.runcontrol_keywords import (DT_KEYWORDS, SOLVE
                                                               SOLVER_SCOPED_KEYWORDS, SOLVER_KEYWORDS,
                                                               IMPSTAB_KEYWORDS, GRIDSOLVER_KEYWORDS, SOLO_KEYWORDS,
                                                               TOLS_KEYWORDS, DCMAX_KEYWORDS, MAX_CHANGE_KEYWORDS)
-from ResSimpy.SolverParameter import SolverParameter
-from ResSimpy.SolverParameters import SolverParameters
+from ResSimpy.DataModelBaseClasses.SolverParameter import SolverParameter
+from ResSimpy.GenericContainerClasses.SolverParameters import SolverParameters
 from ResSimpy.FileOperations import file_operations as fo
 
 if TYPE_CHECKING:

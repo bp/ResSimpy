@@ -3,7 +3,7 @@ import pytest
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from ResSimpy.OperationsMixin import NetworkOperationsMixIn
+from ResSimpy.DataModelBaseClasses.OperationsMixin import NetworkOperationsMixIn
 
 
 def test_resolve_carried_over_attributes():

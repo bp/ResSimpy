@@ -5,7 +5,7 @@ from typing import Optional
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from ResSimpy.Target import Target
+from ResSimpy.DataModelBaseClasses.Target import Target
 
 
 @dataclass(kw_only=True, repr=False)

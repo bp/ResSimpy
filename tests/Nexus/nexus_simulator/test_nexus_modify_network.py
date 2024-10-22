@@ -276,13 +276,13 @@ TIME 01/01/2024
 
         # Arrange
         nexus_sim, writing_mock_open = self.patch_simulator(mocker)
-        mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=expected_ids)
+        mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=expected_ids)
 
         expected_objects = [object_type(properties_dict=obj, start_date=self.start_date) for obj in expected_objs]
         expected_objects.sort(key=lambda x: x.name)
 
         # Reset the ID allocation
-        mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+        mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
                                                                     'uuid_6', 'uuid_7', 'uuid_8', 'uuid_9'])
 
         # Act
