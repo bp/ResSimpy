@@ -35,7 +35,7 @@ class Wellhead(NetworkObject, ABC):
             wellhead_type (Optional[str]): The type of well.
             depth (Optional[float]): The depth of the wellhead
             x_pos (Optional[float]): The x-coordinate of the wellhead (x).
-            y_pos (Optional[float]): The y-coordinate of the wellhead (y)
+            y_pos (Optional[float]): The y-coordinate of the wellhead (y).
         """
 
         self.well = well
