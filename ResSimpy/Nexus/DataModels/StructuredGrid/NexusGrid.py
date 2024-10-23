@@ -14,6 +14,7 @@ from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinitio
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGridArrayFunction import NexusGridArrayFunction
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusLGRs import NexusLGRs
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusMultir import NexusMultir
 from ResSimpy.Nexus.NexusKeywords.nexus_keywords import VALID_NEXUS_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_FORMAT_KEYWORDS
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
@@ -117,7 +118,7 @@ class NexusGrid(Grid):
     __kyeff: GridArrayDefinition
     __kzeff: GridArrayDefinition
     __grid_multir_loaded: bool = False
-    __multir_df: Optional[pd.DataFrame] = None
+    __multir: Optional[list[NexusMultir]] = None
     __lgrs: NexusLGRs
 
     def __init__(self, grid_nexus_file: Optional[NexusFile] = None, assume_loaded: bool = False) -> None:
@@ -724,23 +725,20 @@ class NexusGrid(Grid):
         file_content_as_list = self.__grid_file_contents
         if file_content_as_list is None:
             raise ValueError('Grid file contents have not been loaded')
-        multir_df = self.load_nexus_multir_table_from_list(file_content_as_list)
-        self.__multir_df = multir_df
+        multir_list = self.load_nexus_multir_table_from_list(file_content_as_list)
+        self.__multir = multir_list
         self.__grid_multir_loaded = True
 
     @staticmethod
-    def load_nexus_multir_table_from_list(file_content_as_list: list[str]) -> pd.DataFrame:
+    def load_nexus_multir_table_from_list(file_content_as_list: list[str]) -> list[NexusMultir]:
         """Function to read MULTIR from a file represented as a list."""
         start_idx = -1
         end_idx = -1
 
         valid_end_tokens = VALID_NEXUS_KEYWORDS
-        skip_tokens = ['X', 'Y', 'Z', 'XYZ', 'ALL']
+        skip_tokens = ['X', 'Y', 'Z', 'XYZ', 'ALL', 'STD', 'NONSTD']
         valid_end_tokens = [x for x in valid_end_tokens if x not in skip_tokens]
-
-        multir_columns = ['region_1', 'region_2', 'tmult', 'directions', 'connections']
-        multir_dtypes = dict(zip(multir_columns, [int, int, float, str, str]))
-        collect_multir_tables = pd.DataFrame(columns=multir_columns).astype(multir_dtypes)
+        multir_lists: list[NexusMultir] = []
 
         for idx, line in enumerate(file_content_as_list):
             if nfo.nexus_token_found(line, valid_end_tokens):
@@ -749,24 +747,66 @@ class NexusGrid(Grid):
                 end_idx = idx + 1
 
             if 0 < start_idx < end_idx - 1:
-                multir_table = nfo.read_table_to_df(file_content_as_list[start_idx:end_idx], noheader=True)
-                multir_table.columns = multir_columns
-                collect_multir_tables = collect_multir_tables.append(multir_table, ignore_index=True)
+                for multir_line in file_content_as_list[start_idx:end_idx]:
+                    new_multir = NexusGrid.__extract_multir_tableline(multir_line)
+                    if new_multir is not None:
+                        multir_lists.append(new_multir)
                 start_idx = -1
                 end_idx = -1
 
             if nfo.check_token('MULTIR', line):
                 start_idx = idx + 1
                 continue
-        # if no MULTIR table is found, return an empty dataframe
-        return collect_multir_tables
+        # if no MULTIR table is found, return an empty list
+        return multir_lists
 
-    def get_multir_df(self) -> Optional[pd.DataFrame]:
-        """Returns the MULTIR information as a dataframe."""
+    @staticmethod
+    def __extract_multir_tableline(line: str) -> None | NexusMultir:
+        """Takes a single line in a file and extracts a Multir object from it."""
+        value = nfo.get_next_value(0, [line])
+        if value is None:
+            return None
+        stored_values = []
+        trimmed_line = line
+        while value is not None:
+            stored_values.append(value.upper())
+            trimmed_line = trimmed_line.replace(value, "", 1)
+            value = nfo.get_next_value(0, [trimmed_line])
+
+        region_1_str, region_2_str, tmult_str = stored_values[0:3]
+        region_1 = int(region_1_str)
+        region_2 = int(region_2_str)
+        tmult = float(tmult_str)
+
+        direction = ''
+        for ele in stored_values:
+            if 'X' in ele:
+                direction += 'X'
+            if 'Y' in ele:
+                direction += 'Y'
+            if 'Z' in ele:
+                direction += 'Z'
+
+        standard_connections = True
+        non_standard_connections = True
+        if 'STD' in stored_values and 'NONSTD' not in stored_values:
+            standard_connections = True
+            non_standard_connections = False
+        if 'NONSTD' in stored_values and 'STD' not in stored_values:
+            standard_connections = False
+            non_standard_connections = True
+        if 'ALL' in stored_values or ('STD' not in stored_values and 'NONSTD' not in stored_values):
+            standard_connections = True
+            non_standard_connections = True
+        return NexusMultir(region_1=region_1, region_2=region_2, tmult=tmult, directions=direction,
+                           std_connections=standard_connections, non_std_connections=non_standard_connections)
+
+    def get_multir(self) -> list[NexusMultir]:
+        """Returns the MULTIR information as a list of multir objects."""
         self.load_grid_properties_if_not_loaded()
         if not self.__grid_multir_loaded:
             self.load_multir()
-        return self.__multir_df
+        return self.__multir if self.__multir is not None else []
 
     @staticmethod
     def __keyword_in_include_file_warning(var_entry_obj: GridArrayDefinition) -> None:
@@ -1371,9 +1411,9 @@ class NexusGrid(Grid):
         return self.__kzeff
 
     @property
-    def multir(self) -> pd.DataFrame:
-        """Returns the MULTIR table as a dataframe."""
-        return self.get_multir_df()
+    def multir(self) -> list[NexusMultir]:
+        """Returns the MULTIR table as a list of multir objects."""
+        return self.get_multir()
 
     @property
     def lgrs(self) -> NexusLGRs:
