@@ -113,57 +113,6 @@ class NexusNetwork(Network):
             raise ValueError(f'No file found for {method_number=}, instead found {network_file=}')
         return network_file
 
-    def __load_actions(self) -> list[NexusAction]:
-
-        nexus_action_obj_list: list[NexusAction] = []
-        files_dict = self.__model.model_files.surface_files
-
-        if files_dict is None:
-            raise ValueError('Surface files not found for this model.')
-
-        for file in files_dict.values():
-            file_contents = file.get_flat_list_str_file
-
-            if file_contents is None:
-                raise ValueError(f'No file contents found for surface file {file.location}.')
-
-            grab_line: bool = False
-
-            for line in file_contents:
-
-                # skips single line comments
-                if line.startswith('!'):
-                    continue
-
-                # we should not only check for the ACTION keyword but also for the header
-                if fo.check_token('ACTIONS', line=line) or fo.check_token('ACTIONTIME', line=line):
-                    # set grab line to true to start reading data
-                    grab_line = True
-
-                    # there is nothing more to do on this iteration, so we continue
-                    continue
-
-                if grab_line:
-
-                    if fo.check_token('ENDACTIONS', line=line):
-                        break
-
-                    data_as_list = line.split()
-
-                    if not data_as_list:  # line.split() returns a list. this checks if it is empty
-                        # if the line is empty, go to the next iteration
-                        continue
-
-                    action_obj = NexusAction(action_time=data_as_list[0], action=data_as_list[1],
-                                             connection=data_as_list[2])
-                    nexus_action_obj_list.append(action_obj)
-
-        if not nexus_action_obj_list:
-            warnings.warn(
-                UserWarning('ACTIONS/ENDACTIONS keywords specified, but no ACTION table exists.'))
-
-        return nexus_action_obj_list
-
     @property
     def __load_procs(self) -> list[NexusProc]:
         """This private function searches the surface file for Nexus procedures, stores data related procedures, and \
@@ -293,7 +242,7 @@ class NexusNetwork(Network):
                                       'PROCS': None,
                                       'WELLLIST': NexusWellList,
                                       'CONLIST': NexusConList,
-                                      'ACTIONS': None
+                                      'ACTIONS': NexusAction,
                                       }
 
         for surface in self.__model.model_files.surface_files.values():
@@ -315,9 +264,12 @@ class NexusNetwork(Network):
             self.welllists._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLLIST')))
             self.conlists._add_to_memory(type_check_lists(nexus_obj_dict.get('CONLIST')))
 
+            actions_check = type_check_lists(nexus_obj_dict.get('ACTIONS'))
+            if actions_check is not None:
+                self.actions._add_to_memory(actions_check)
+
             add_procs_to_mem = self.__load_procs
             self.procs._add_to_memory(add_procs_to_mem)
-            self.actions._add_to_memory(self.__load_actions())
 
         self.__has_been_loaded = True
         self.__update_well_types()
