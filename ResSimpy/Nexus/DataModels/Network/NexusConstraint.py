@@ -391,7 +391,6 @@ class NexusConstraint(Constraint):
         self.clear_alq = clear_alq
         self.clear_p = clear_p
 
-
         super().__init__(_date_format=date_format, _start_date=start_date, _unit_system=unit_system, name=name)
 
         if properties_dict is None:
