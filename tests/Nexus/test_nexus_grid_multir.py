@@ -18,12 +18,12 @@ from ResSimpy.Nexus.DataModels.StructuredGrid.NexusMultir import NexusMultir
     1	4	0	XYZ	STD
     
     1	5	0.24	XYZ	NONSTD
-    1	6	0	XYZ	ALL""",
+    1	6	0	X	ALL""",
      [NexusMultir(region_1=1, region_2=2, tmult=0.1, directions='XYZ', std_connections=True, non_std_connections=True),
       NexusMultir(region_1=1, region_2=3, tmult=0.0, directions='YZ', std_connections=True, non_std_connections=True),
       NexusMultir(region_1=1, region_2=4, tmult=0.0, directions='XYZ', std_connections=True, non_std_connections=False),
       NexusMultir(region_1=1, region_2=5, tmult=0.24, directions='XYZ', std_connections=False, non_std_connections=True),
-      NexusMultir(region_1=1, region_2=6, tmult=0.0, directions='XYZ', std_connections=True, non_std_connections=True)]),
+      NexusMultir(region_1=1, region_2=6, tmult=0.0, directions='X', std_connections=True, non_std_connections=True)]),
     # Empty MULTIR table
     ("""
     MULTIR
@@ -98,3 +98,17 @@ def test_load_multir():
 
     # Assert
     assert result == expected_result
+    
+def test_NexusMultir_to_string():
+    # Arrange
+    multir = NexusMultir(region_1=1, region_2=2, tmult=0.1, directions='XYZ', std_connections=True, non_std_connections=True)
+    
+    expected_result = '1\t2\t0.1\tXYZ\tSTD\tNONSTD\n'
+    
+    # Act
+    result = multir.to_string()
+    
+    # Assert
+    assert result == expected_result
+    
+    

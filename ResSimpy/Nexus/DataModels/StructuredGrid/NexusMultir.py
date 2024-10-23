@@ -31,5 +31,5 @@ class NexusMultir(Multir):
         std_connections_str = 'STD' if self.std_connections else ''
         non_std_connections_str = 'NONSTD' if self.non_std_connections else ''
 
-        return f"""{self.region_1}\t{self.region_2}\t{self.tmult}\t{self.directions}\t
-{std_connections_str}\t{non_std_connections_str}"""
+        return (f"{self.region_1}\t{self.region_2}\t{self.tmult}\t{self.directions}\t"
+                f"{std_connections_str}\t{non_std_connections_str}\n")
