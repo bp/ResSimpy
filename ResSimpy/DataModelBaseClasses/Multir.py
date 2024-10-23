@@ -11,4 +11,3 @@ class Multir(ABC):
     directions: None | str = None
     std_connections: bool = True
     non_std_connections: bool = True
-

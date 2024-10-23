@@ -773,10 +773,10 @@ class NexusGrid(Grid):
             trimmed_line = trimmed_line.replace(value, "", 1)
             value = nfo.get_next_value(0, [trimmed_line])
 
-        region_1, region_2, tmult = stored_values[0:3]
-        tmult = float(tmult)
-        region_1 = int(region_1)
-        region_2 = int(region_2)
+        region_1_str, region_2_str, tmult_str = stored_values[0:3]
+        region_1 = int(region_1_str)
+        region_2 = int(region_2_str)
+        tmult = float(tmult_str)
 
         direction = ''
         for ele in stored_values:
@@ -801,13 +801,12 @@ class NexusGrid(Grid):
         return NexusMultir(region_1=region_1, region_2=region_2, tmult=tmult, directions=direction,
                            std_connections=standard_connections, non_std_connections=non_standard_connections)
 
-
     def get_multir(self) -> list[NexusMultir]:
         """Returns the MULTIR information as a list of multir objects."""
         self.load_grid_properties_if_not_loaded()
         if not self.__grid_multir_loaded:
             self.load_multir()
-        return self.__multir
+        return self.__multir if self.__multir is not None else []
 
     @staticmethod
     def __keyword_in_include_file_warning(var_entry_obj: GridArrayDefinition) -> None:
