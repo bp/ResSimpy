@@ -467,6 +467,10 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
             row_name = keyword_store.get('well_name', None)
             keyword_store['name'] = row_name
 
+        if row_name is None:
+            row_name = keyword_store.get('connection', None)
+            keyword_store['name'] = row_name
+
         if not isinstance(keyword_store['name'], str):
             raise ValueError(f'Cannot find valid well name for object: {keyword_store}')
 
