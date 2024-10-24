@@ -36,7 +36,7 @@ from ResSimpy.Nexus.DataModels.StructuredGrid.NexusMultir import NexusMultir
      
      MULTIR
      2 2 3.1 X StD  ! comment after
-     2 4 5 XYZ ALL
+     2 4 5 ALL
      KZ CON
      5.1
      """,
@@ -92,7 +92,6 @@ def test_load_multir():
                        NexusMultir(region_1=1, region_2=5, tmult=0, directions='XYZ', std_connections=True, non_std_connections=True),
                        NexusMultir(region_1=1, region_2=6, tmult=0, directions='XYZ', std_connections=True, non_std_connections=True)]
 
-    
     # Act
     result = grid.multir
 
