@@ -788,7 +788,7 @@ class NexusGrid(Grid):
                 direction += 'Z'
 
         if direction == '':
-            #default to all directions
+            # default to all directions
             direction = 'XYZ'
 
         standard_connections = True
