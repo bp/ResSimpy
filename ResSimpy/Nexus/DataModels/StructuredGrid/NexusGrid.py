@@ -787,6 +787,10 @@ class NexusGrid(Grid):
             if 'Z' in ele:
                 direction += 'Z'
 
+        if direction == '':
+            #default to all directions
+            direction = 'XYZ'
+
         standard_connections = True
         non_standard_connections = True
         if 'STD' in stored_values and 'NONSTD' not in stored_values:
