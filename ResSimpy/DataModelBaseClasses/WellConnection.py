@@ -42,7 +42,11 @@ class WellConnection(NetworkObject, ABC):
                  inj_mobility: Optional[str] = None, polymer: Optional[str] = None, stream: Optional[str] = None,
                  group: Optional[str] = None, i: Optional[int] = None, j: Optional[int] = None,
                  drainage_radius: Optional[float] = None, pvt_method: Optional[int] = None,
-                 d_factor: Optional[float] = None, on_time: Optional[float] = None) -> None:
+                 d_factor: Optional[float] = None, on_time: Optional[float] = None, bhdepth: Optional[float] = None,
+                 x_pos: Optional[float] = None, y_pos: Optional[float] = None, length: Optional[float] = None,
+                 temperature: Optional[float] = None, diameter: Optional[float] = None,
+                 inner_diameter: Optional[float] = None, roughness: Optional[float] = None,
+                 productivity_index: Optional[float] = None, hyd_method: Optional[str] = None) -> None:
         """Initialises the WellConnection class.
 
         Args:
@@ -65,7 +69,29 @@ class WellConnection(NetworkObject, ABC):
             polymer (Optional[str]): Polymer identifier.
             pvt_method (Optional[int]): PVT method.
             stream (Optional[str]): Stream identifier.
+            bhdepth (Optional[float]): Bottomhole depth (BHDEPTH).
+            x_pos(Optional[float]): X-coordinate position (X).
+            y_pos (Optional[float]): Y-coordinate position (Y).
+            length (Optional[float]): Length of the well connection (LENGTH).
+            temperature (Optional[float]): Temperature (TEMP).
+            diameter (Optional[float]):  Diameter of the well connection (DIAM).
+            inner_diameter (Optional[float]): Inner diameter of the well connection (INNERDIAM).
+            roughness (Optional[float]): Pipe roughness (ROUGHNESS).
+            productivity_index (Optional[float]): Productivity index (PI).
+            hyd_method (Optional[str]): Hydraulic method (METHOD).
         """
+
+        self.bhdepth = bhdepth
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+        self.length = length
+        self.temperature = temperature
+        self.diameter = diameter
+        self.inner_diameter = inner_diameter
+        self.roughness = roughness
+        self.productivity_index = productivity_index
+        self.hyd_method = hyd_method
+
         super().__init__(properties_dict=properties_dict, date=date, date_format=date_format, start_date=start_date,
                          unit_system=unit_system, name=name)
 

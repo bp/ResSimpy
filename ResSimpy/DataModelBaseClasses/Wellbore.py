@@ -18,7 +18,8 @@ class Wellbore(NetworkObject, ABC):
 
     def __init__(self, properties_dict: Optional[dict[str, None | int | str | float]] = None,
                  date: Optional[str] = None, date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
-                 unit_system: Optional[UnitSystem] = None, name: Optional[str] = None) -> None:
+                 unit_system: Optional[UnitSystem] = None, name: Optional[str] = None, diameter: Optional[float] = None,
+                 inner_diameter: Optional[float] = None, roughness: Optional[float] = None) -> None:
         """Initialises the Wellbore class.
 
         Args:
@@ -28,7 +29,15 @@ class Wellbore(NetworkObject, ABC):
             start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
             unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
             name (Optional[str]): The name of the object.
+            diameter (Optional[float]): Diameter of the well.(DIAM)
+            inner_diameter (Optional[float]): Inner diameter of the well. (INNERDIAM)
+            roughness (Optional[float]): Roughness of the well. (ROUGHNESS)
         """
+
+        self.diameter = diameter
+        self.inner_diameter = inner_diameter
+        self.roughness = roughness
+
         super().__init__(properties_dict=properties_dict, date=date, date_format=date_format, start_date=start_date,
                          unit_system=unit_system, name=name)
 

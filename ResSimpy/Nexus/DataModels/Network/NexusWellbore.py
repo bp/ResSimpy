@@ -42,7 +42,11 @@ class NexusWellbore(Wellbore):
 
     def __init__(self, properties_dict: dict[str, None | int | str | float], date: Optional[str] = None,
                  date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
-                 unit_system: Optional[UnitSystem] = None, name: Optional[str] = None) -> None:
+                 unit_system: Optional[UnitSystem] = None, name: Optional[str] = None, flowsect: Optional[int] = None,
+                 bore_type: Optional[str] = None, hyd_method: Optional[str] = None, temperature: Optional[float] = None,
+                 elevation_profile: Optional[str] = None, temperature_profile: Optional[str] = None,
+                 heat_tansfer_coeff: Optional[float] = None, pvt_method: Optional[int] = None,
+                 water_method: Optional[int] = None) -> None:
         """Initialises the NexusWellbore class.
 
         Args:
@@ -52,7 +56,26 @@ class NexusWellbore(Wellbore):
             start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
             unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
             name (Optional[str]): The name of the object.
+            flowsect (Optional[int]): Number of the flow section.
+            bore_type (Optional[str]): Type of well.
+            hyd_method (Optional[str]): Hydraulic method.
+            temperature (Optional[float]): Temperature of the well.
+            elevation_profile (Optional[str]): Elevation profile of the well.
+            temperature_profile (Optional[str]): Temperature profile of the well.
+            heat_tansfer_coeff (Optional[float]): Heat transfer coefficient of the well.
+            pvt_method (Optional[int]): Method number used for PVT.
+            water_method (Optional[int]): Method number used for water.
         """
+        self.flowsect = flowsect
+        self.bore_type = bore_type
+        self.hyd_method = hyd_method
+        self.temperature = temperature
+        self.elevation_profile = elevation_profile
+        self.temperature_profile = temperature_profile
+        self.heat_transfer_coeff = heat_tansfer_coeff
+        self.pvt_method = pvt_method
+        self.water_method = water_method
+
         super().__init__(date_format=date_format, start_date=start_date, unit_system=unit_system, name=name, date=date,
                          properties_dict=properties_dict)
 

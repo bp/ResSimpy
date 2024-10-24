@@ -62,9 +62,22 @@ class NexusNodeConnection(NodeConnection):
     is_activated: bool = True
 
     def __init__(self, properties_dict: dict[str, None | int | str | float], date: Optional[str] = None,
-                 date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
-                 unit_system: Optional[UnitSystem] = None, is_activated: bool = True,
-                 name: Optional[str] = None) -> None:
+                 date_format: Optional[DateFormat] = None, start_date: Optional[str] = None, name: Optional[str] = None,
+                 unit_system: Optional[UnitSystem] = None, bat_method: Optional[int] = None,
+                 elevation_profile: Optional[str] = None, measured_depth_in: Optional[float] = None,
+                 measured_depth_out: Optional[float] = None, diameter: Optional[float] = None,
+                 inner_diameter: Optional[float] = None, roughness: Optional[float] = None,
+                 heat_transfer_coeff: Optional[float] = None, temperature_profile: Optional[float] = None,
+                 length: Optional[float] = None, delta_depth: Optional[float] = None,
+                 connection_number: Optional[int] = None, seawater_profile: Optional[str] = None,
+                 rate_mult: Optional[float] = None, polymer: Optional[str] = None, dp_add: Optional[float] = None,
+                 dt_add: Optional[float] = None, temperature_in: Optional[float] = None,
+                 temperature_out: Optional[float] = None, tracer: Optional[str] = None,
+                 heat_conductivity: Optional[float] = None, insulation_thickness: Optional[float] = None,
+                 insulation_conductivity: Optional[float] = None,
+                 gravity_pressure_gradient_mult: Optional[float] = None,
+                 friction_pressure_gradient_mult: Optional[float] = None,
+                 acceleration_pressure_gradient_mult: Optional[float] = None, is_activated: bool = True) -> None:
         """Initialises the NexusNodeConnection class.
 
         Args:
@@ -73,12 +86,69 @@ class NexusNodeConnection(NodeConnection):
             date_format (Optional[DateFormat]): The date format that the object uses.
             start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
             unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
-            is_activated: bool: Whether the Connection has been set as activated. Defaults to True.
             name (Optional[str]): The name of the object.
+            bat_method (Optional[float]): Bat method (IBAT).
+            elevation_profile (Optional[str]): Elevation profile identifier (ELEVPR).
+            measured_depth_in (Optional[float]): Measured depth of the input node (MDIN)
+            measured_depth_out (Optional[float]): Measured depth of the output node (MDOUT).
+            diameter (Optional[float]): diameter of the connecting pipe (DIAMETER).
+            inner_diameter (Optional[float]): Outer diameter of the pipe (INNERDIAM).
+            roughness (Optional[float]): Roughness of the pipe (ROUGHNESS)
+            heat_transfer_coeff (Optional[float]): The heat transfer coefficient of the pipe (HTC).
+            temperature_profile (Optional[float]): Temperature profile used for the connection (TEMPPR).
+            length (Optional[float]): Length of the connection (LENGTH).
+            delta_depth (Optional[float]): Change in depth between node_in and node_out (DDEPTH).
+            connection_number (Optional[int]): Used in place of name as a numbered connection (NUMBER).
+            seawater_profile (Optional[str]): Seawater profile used (SEAWPR).
+            rate_mult (Optional[float]): Multiplier to the rate (RATEMULT).
+            polymer (Optional[str]): Whether polymer is a stream here (POLYMER).
+            dp_add (Optional[float]): Additional delta pressure (DPADD).
+            dt_add (Optional[float]):  Additional temperature change (DTADD).
+            temperature_in (Optional[float]): Temperature at nodein.
+            temperature_out (Optional[float]): Temperature at node-out.
+            tracer (Optional[str]): Specifies tracer concentrations.
+            heat_conductivity (Optional[float]): Defines heat conductivity (HCOND).
+            insulation_thickness (Optional[float]): Defines insulation thickness (INSTHN).
+            insulation_conductivity (Optional[float]): Defines insulation conductivity (INSK).
+            gravity_pressure_gradient_mult (Optional[float]): Correction Factor for the gravity pressure gradient for
+            pressure drop correlations (GRPGCR).
+            friction_pressure_gradient_mult (Optional[float]):  Correction Factor for the friction pressure gradient for
+            pressure drop correlations (FRPGCR).
+            acceleration_pressure_gradient_mult (Optional[float]): Correction Factor for the acceleration pressure
+            gradient for pressure drop correlations (ACPGCR).
+            is_activated: bool: Whether the Connection has been set as activated. Defaults to True.
         """
+
+        self.bat_method = bat_method
+        self.elevation_profile = elevation_profile
+        self.measured_depth_in = measured_depth_in
+        self.measured_depth_out = measured_depth_out
+        self.diameter = diameter
+        self.inner_diameter = inner_diameter
+        self.roughness = roughness
+        self.heat_transfer_coeff = heat_transfer_coeff
+        self.temperature_profile = temperature_profile
+        self.length = length
+        self.delta_depth = delta_depth
+        self.connection_number = connection_number
+        self.seawater_profile = seawater_profile
+        self.rate_mult = rate_mult
+        self.polymer = polymer
+        self.dp_add = dp_add
+        self.dt_add = dt_add
+        self.temperature_in = temperature_in
+        self.temperature_out = temperature_out
+        self.tracer = tracer
+        self.heat_conductivity = heat_conductivity
+        self.insulation_thickness = insulation_thickness
+        self.insulation_conductivity = insulation_conductivity
+        self.gravity_pressure_gradient_mult = gravity_pressure_gradient_mult
+        self.friction_pressure_gradient_mult = friction_pressure_gradient_mult
+        self.acceleration_pressure_gradient_mult = acceleration_pressure_gradient_mult
+        self.is_activated = is_activated
+
         super().__init__(date_format=date_format, start_date=start_date, unit_system=unit_system, name=name, date=date,
                          properties_dict=properties_dict)
-        self.is_activated = is_activated
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:

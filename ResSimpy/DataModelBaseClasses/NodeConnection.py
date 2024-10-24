@@ -23,7 +23,10 @@ class NodeConnection(NetworkObject, ABC):
 
     def __init__(self, properties_dict: Optional[dict[str, None | int | str | float]] = None,
                  date: Optional[str] = None, date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
-                 unit_system: Optional[UnitSystem] = None, name: Optional[str] = None) -> None:
+                 unit_system: Optional[UnitSystem] = None, name: Optional[str] = None, node_in: Optional[str] = None,
+                 node_out: Optional[str] = None, con_type: Optional[str] = None, depth: Optional[float] = None,
+                 hyd_method: Optional[str | int] = None, pvt_method: Optional[int] = None,
+                 water_method: Optional[int] = None) -> None:
         """Initialises the NodeConnection class.
 
         Args:
@@ -33,7 +36,23 @@ class NodeConnection(NetworkObject, ABC):
             start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
             unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
             name (Optional[str]): The name of the object.
+            node_in (Optional[str]): Inflow node name.
+            node_out (Optional[str]): Outflow node name.
+            con_type (Optional[str]): Connection type.
+            depth (Optional[float]): The depth of the wellhead.
+            hyd_method (optional[str | int]): Hydraulic method (METHOD)
+            pvt_method (Optional[int]): PVT method (IPVT)
+            water_method (Optional[int]): Water method (IWAT)
         """
+
+        self.node_in = node_in
+        self.node_out = node_out
+        self.con_type = con_type
+        self.depth = depth
+        self.hyd_method = hyd_method
+        self.pvt_method = pvt_method
+        self.water_method = water_method
+
         super().__init__(properties_dict=properties_dict, date=date, date_format=date_format, start_date=start_date,
                          unit_system=unit_system, name=name)
 
