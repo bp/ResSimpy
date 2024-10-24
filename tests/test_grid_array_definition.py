@@ -1,6 +1,6 @@
 import pytest
 
-from ResSimpy.GridArrayDefinition import GridArrayDefinition
+from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
 from tests.multifile_mocker import mock_multiple_files
 
 

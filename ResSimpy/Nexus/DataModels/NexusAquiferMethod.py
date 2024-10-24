@@ -10,7 +10,7 @@ from ResSimpy.Nexus.NexusKeywords.aquifer_keywords import AQUIFER_SINGLE_KEYWORD
 from ResSimpy.Nexus.NexusKeywords.aquifer_keywords import AQUIFER_KEYWORDS_VALUE_FLOAT, AQUIFER_KEYWORDS_VALUE_INT
 from ResSimpy.Nexus.NexusKeywords.aquifer_keywords import AQUIFER_KEYWORDS, AQUIFER_TYPE_KEYWORDS
 from ResSimpy.Enums.UnitsEnum import UnitSystem, SUnits, TemperatureUnits
-from ResSimpy.DynamicProperty import DynamicProperty
+from ResSimpy.DataModelBaseClasses.DynamicProperty import DynamicProperty
 from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import AquiferUnits
 
 from ResSimpy.Utils.factory_methods import get_empty_dict_union

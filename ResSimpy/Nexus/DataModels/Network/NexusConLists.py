@@ -4,8 +4,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal, Sequence
 
-from ResSimpy.NetworkList import NetworkList
-from ResSimpy.NetworkLists import NetworkLists
+from ResSimpy.DataModelBaseClasses.NetworkList import NetworkList
+from ResSimpy.GenericContainerClasses.NetworkLists import NetworkLists
 from ResSimpy.Nexus.DataModels.Network.NexusConList import NexusConList
 
 if TYPE_CHECKING:

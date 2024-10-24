@@ -1,7 +1,7 @@
 """Class for handling the set of Local Grid Refinements (LGR) in the NexusGrid."""
 from dataclasses import dataclass, field
 
-from ResSimpy.LGRs import LGRs
+from ResSimpy.GenericContainerClasses.LGRs import LGRs
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusLGR import NexusLGR
 from ResSimpy.FileOperations import file_operations as fo
 

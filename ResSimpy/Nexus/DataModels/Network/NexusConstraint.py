@@ -5,7 +5,7 @@ import warnings
 from dataclasses import dataclass
 from typing import Optional
 
-from ResSimpy.Constraint import Constraint
+from ResSimpy.DataModelBaseClasses.Constraint import Constraint
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 

@@ -6,9 +6,9 @@ from datetime import timedelta, time
 from typing import Any, Optional
 import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.File import File
+from ResSimpy.FileOperations.File import File
 from ResSimpy.FileOperations.file_operations import get_next_value
-from ResSimpy.ISODateTime import ISODateTime
+from ResSimpy.Time.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.Network.NexusConLists import NexusConLists
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection

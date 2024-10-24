@@ -31,7 +31,7 @@ from ResSimpy.Nexus.NexusWells import NexusWells
 from ResSimpy.Nexus.runcontrol_operations import SimControls
 from ResSimpy.Nexus.logfile_operations import Logging
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
-from ResSimpy.Simulator import Simulator
+from ResSimpy.DataModelBaseClasses.Simulator import Simulator
 
 
 class NexusSimulator(Simulator):
