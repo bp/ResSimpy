@@ -458,7 +458,12 @@ def object_from_array_function_block(array_function: list[str], function_number:
             function_type_enum = GridFunctionTypeEnum.FUNCTION_TABLE
 
         if nfo.check_token('ANALYT', modified_line):
-            function_type_enum = GridFunctionTypeEnum[words[1]]
+            if words[1] == 'POLY':
+                # POLY should just map to POLYN in the enum
+                # This is an undocumented feature in the Nexus manual.
+                function_type_enum = GridFunctionTypeEnum.POLYN
+            else:
+                function_type_enum = GridFunctionTypeEnum[words[1]]
             if len(words) > 2:
                 # remove the first 2 words in line, and set the rest to coefficients
                 function_coefficients0 = words[2:]
