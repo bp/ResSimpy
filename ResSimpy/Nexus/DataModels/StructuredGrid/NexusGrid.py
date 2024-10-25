@@ -1481,7 +1481,8 @@ class NexusGrid(Grid):
 
         return overs_list
 
-    def get_overs(self) -> list[NexusOver]:
+    @property
+    def overs(self) -> list[NexusOver]:
         """Returns the OVER table as a list of NexusOver objects."""
         if not self._grid_properties_loaded:
             self.load_grid_properties_if_not_loaded()

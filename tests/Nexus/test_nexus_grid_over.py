@@ -128,7 +128,7 @@ def test_read_nexus_over_from_grid():
     grid = NexusGrid(grid_nexus_file=NexusFile(location='loc.dat', 
                                                file_content_as_list=grid_file_content.splitlines(keepends=True)))
     # Act
-    result = grid.get_overs()
+    result = grid.overs
 
     # Assert
     assert result == expected_result
