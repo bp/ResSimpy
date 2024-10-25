@@ -819,3 +819,29 @@ def test_load_file_as_list_unicode_error(mocker, ):
     result = nfo.load_file_as_list(file_path)
     # Assert
     assert result == expected_file_as_list
+
+
+@pytest.mark.parametrize('line, expected_result',[
+    ('some kind of token line', ['some', 'kind', 'of', 'token', 'line']),
+    ('some !comment finshes the line', ['some']),
+        ('!only comment', []),
+        ('', [])
+])
+def test_split_line(line, expected_result):
+    # Act
+    result = nfo.split_line(line, upper=False)
+    # Assert
+    assert result == expected_result
+
+
+@pytest.mark.parametrize('line, expected_result',[
+    ('some kind of token line', ['SOME', 'KIND', 'OF', 'TOKEN', 'LINE']),
+    ('some !comment finshes the line', ['SOME']),
+        ('!only comment', []),
+        ('', [])
+])
+def test_split_line(line, expected_result):
+    # Act
+    result = nfo.split_line(line, upper=True)
+    # Assert
+    assert result == expected_result
