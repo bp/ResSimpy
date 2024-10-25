@@ -588,7 +588,7 @@ def split_line(line: str, upper: bool = True) -> list[str]:
     """Splits a line into a list of strings through sequential application of get_next_value.
     Does not include comments. A line with no valid tokens will return an empty list.
     """
-    stored_values = []
+    stored_values: list[str] = []
     value = get_next_value(0, [line])
     if value is None:
         return stored_values

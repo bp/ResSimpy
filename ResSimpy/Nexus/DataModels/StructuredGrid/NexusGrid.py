@@ -4,7 +4,7 @@ from __future__ import annotations
 import copy
 
 import pandas as pd
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, TYPE_CHECKING, Any, Final
 import warnings
 
@@ -121,6 +121,7 @@ class NexusGrid(Grid):
     __grid_multir_loaded: bool = False
     __multir: Optional[list[NexusMultir]] = None
     __lgrs: NexusLGRs
+    __overs: list[NexusOver] = field(default_factory=list)
 
     def __init__(self, grid_nexus_file: Optional[NexusFile] = None, assume_loaded: bool = False) -> None:
         """Initialises the NexusGrid class.
@@ -216,6 +217,7 @@ class NexusGrid(Grid):
         self.__kzeff: GridArrayDefinition = GridArrayDefinition()
 
         self.__lgrs: NexusLGRs = NexusLGRs(grid_file_as_list=self.__grid_file_contents)
+        self.__overs: list[NexusOver] = []
 
     def __wrap(self, value: Any) -> Any:
         if isinstance(value, tuple | list | set | frozenset):
@@ -575,6 +577,10 @@ class NexusGrid(Grid):
                 self._range_x = int(first_value)
                 self._range_y = int(second_value)
                 self._range_z = int(third_value)
+
+            # load the overs:
+            if fo.value_in_file('OVER', file_as_list):
+                self.__overs = NexusGrid.load_nexus_overs(file_as_list)
 
         self._grid_properties_loaded = True
 
@@ -1419,15 +1425,23 @@ class NexusGrid(Grid):
         return self.__lgrs
 
     @staticmethod
-    def read_nexus_overs(file_content_as_list: list[str]) -> list[NexusOver]:
+    def load_nexus_overs(file_content_as_list: list[str]) -> list[NexusOver]:
+        """Function to read in OVER tables from a file.
+
+        Args:
+            file_content_as_list (list[str]): list of strings representing the file contents.
+
+        Returns:
+            list[NexusOver]: list of NexusOver objects representing the OVER table.
+        """
         ignore_list = ['OVER', 'TX', 'TY', 'TZ', 'PV', 'PVF', 'TXF', 'TYF', 'TZF', 'GRID', 'FNAME', 'GE', 'LE']
         valid_end_tokens = [x for x in VALID_NEXUS_KEYWORDS if x not in ignore_list]
         overs_list: list[NexusOver] = []
         reading_over = False
         grid = 'ROOT'
         fname = None
-        arrays = []
-        POTENTIAL_OPERATORS: Final = ['+', '-', '*', '/', '=']
+        arrays: list[str] = []
+        potential_operators: Final = ['+', '-', '*', '/', '=']
         threshold_value = None
         for line in file_content_as_list:
             if nfo.nexus_token_found(line, valid_end_tokens):
@@ -1445,7 +1459,7 @@ class NexusGrid(Grid):
                 if len(split_line) > 6:
                     i1, i2, j1, j2, k1, k2 = (int(x) for x in split_line[0:6])
                     operator_value = split_line[6]
-                    operator_matches = [x for x in POTENTIAL_OPERATORS if x == operator_value[0]]
+                    operator_matches = [x for x in potential_operators if x == operator_value[0]]
                     if not operator_matches:
                         # if the operator is not found then it is GE or LE
                         threshold_value = float(split_line[6])
@@ -1466,3 +1480,9 @@ class NexusGrid(Grid):
                 arrays = over_split_line[over_split_line.index('OVER')+1:]
 
         return overs_list
+
+    def get_overs(self) -> list[NexusOver]:
+        """Returns the OVER table as a list of NexusOver objects."""
+        if not self._grid_properties_loaded:
+            self.load_grid_properties_if_not_loaded()
+        return self.__overs

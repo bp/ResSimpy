@@ -1,3 +1,4 @@
+from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusOver import NexusOver
 
@@ -26,7 +27,7 @@ def test_read_nexus_over():
                                  arrays=['TX'], grid='ROOT')]
 
     # Act
-    result = NexusGrid.read_nexus_overs(file_content.splitlines(keepends=True))
+    result = NexusGrid.load_nexus_overs(file_content.splitlines(keepends=True))
 
     # Assert
     assert result == expected_result
@@ -44,7 +45,7 @@ def test_read_nexus_over_grids():
                                  arrays=['PVF'], grid='LGR_01')]
 
     # Act
-    result = NexusGrid.read_nexus_overs(file_content.splitlines(keepends=True))
+    result = NexusGrid.load_nexus_overs(file_content.splitlines(keepends=True))
 
     # Assert
     assert result == expected_result
@@ -81,7 +82,7 @@ def test_read_nexus_over_faultnames():
                                  arrays=['PVF'], fault_name='fault_name_2', grid='ROOT')]
 
     # Act
-    result = NexusGrid.read_nexus_overs(file_content.splitlines(keepends=True))
+    result = NexusGrid.load_nexus_overs(file_content.splitlines(keepends=True))
 
     # Assert
     assert result == expected_result
@@ -103,7 +104,31 @@ def test_read_nexus_over_with_GE():
                                    arrays=['TY'], threshold=2.5, grid='ROOT')]
 
     # Act
-    result = NexusGrid.read_nexus_overs(file_content.splitlines(keepends=True))
+    result = NexusGrid.load_nexus_overs(file_content.splitlines(keepends=True))
+
+    # Assert
+    assert result == expected_result
+
+
+def test_read_nexus_over_from_grid():
+    # Arrange
+    grid_file_content = """
+    NX NY NZ
+    20 50 100
+    ARRAYS
+    KX CON
+    1
+    ! comment
+    OVER TX
+    1 12  1 46 10 11 *0.0		! North 
+    """
+
+    expected_result = [NexusOver(i1=1, i2=12, j1=1, j2=46, k1=10, k2=11, operator='*', value=0.0,
+                                 arrays=['TX'], grid='ROOT')]
+    grid = NexusGrid(grid_nexus_file=NexusFile(location='loc.dat', 
+                                               file_content_as_list=grid_file_content.splitlines(keepends=True)))
+    # Act
+    result = grid.get_overs()
 
     # Assert
     assert result == expected_result
