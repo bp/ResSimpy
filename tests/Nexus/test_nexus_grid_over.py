@@ -55,9 +55,9 @@ def test_read_nexus_over_faultnames():
     # Arrange
     file_content = """! comment
     OVER TXF TYF TZF
-    FNAME fault_name_1
-    1 12  1 46 10 11 +0.5
-    2 13  2 45 11 12 -0.5
+    FNAME  fault_name_1
+    1    12  1    46 10 11 +0.5
+    2    13  2    45 11 12 -0.5
     
     POR CON
     1
@@ -130,5 +130,17 @@ def test_read_nexus_over_from_grid():
     # Act
     result = grid.overs
 
+    # Assert
+    assert result == expected_result
+    
+def test_over_to_string():
+    # Arrange
+    over = NexusOver(i1=1, i2=12, j1=1, j2=46, k1=10, k2=11, operator='*', value=0.0,
+                      arrays=['TX'], grid='ROOT')
+    expected_result = """OVER TX
+1 12 1 46 10 11 *0.0
+"""
+    # Act
+    result = over.to_string()
     # Assert
     assert result == expected_result

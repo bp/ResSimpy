@@ -35,10 +35,11 @@ class NexusOver:
         """Converts the over to a string for writing to a Nexus file."""
         return_str = 'OVER'
         for array in self.arrays:
-            return_str += f" {self.arrays}"
+            return_str += f" {array}"
         return_str += '\n'
-        if self.grid:
+        if self.grid != 'ROOT':
             return_str += f"GRID {self.grid}\n"
         if self.fault_name:
             return_str += f"FNAME {self.fault_name}\n"
-        return f"{self.i1}\t{self.i2}\t{self.j1}\t{self.j2}\t{self.k1}\t{self.k2}\t{self.operator}{self.value}\n"
+        return_str += f"{self.i1} {self.i2} {self.j1} {self.j2} {self.k1} {self.k2} {self.operator}{self.value}\n"
+        return return_str
