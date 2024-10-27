@@ -14,6 +14,14 @@ class Constraint(DataObjectMixin, ABC):
     """Base class object for storing data related to well and node constraints."""
     # TODO: Add docstrings for this class
     name: Optional[str] = None
+    max_surface_oil_rate: Optional[float] = None
+    max_surface_gas_rate: Optional[float] = None
+    max_surface_water_rate: Optional[float] = None
+    max_surface_liquid_rate: Optional[float] = None
+    max_reservoir_oil_rate: Optional[float] = None
+    max_reservoir_gas_rate: Optional[float] = None
+    max_reservoir_water_rate: Optional[float] = None
+    max_reservoir_liquid_rate: Optional[float] = None
     min_surface_oil_rate: Optional[float] = None
     min_surface_gas_rate: Optional[float] = None
     min_surface_water_rate: Optional[float] = None
@@ -21,6 +29,8 @@ class Constraint(DataObjectMixin, ABC):
     bottom_hole_pressure: Optional[float] = None
     tubing_head_pressure: Optional[float] = None
     max_reservoir_total_fluids_rate: Optional[float] = None
+    max_avg_comp_dp: Optional[float] = None
+    max_comp_dp: Optional[float] = None
 
     # attributes below here are also used on eclipse end
     # to determine proper workover strategy in WECON

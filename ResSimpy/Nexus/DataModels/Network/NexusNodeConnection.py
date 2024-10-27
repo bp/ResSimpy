@@ -77,7 +77,10 @@ class NexusNodeConnection(NodeConnection):
                  insulation_conductivity: Optional[float] = None,
                  gravity_pressure_gradient_mult: Optional[float] = None,
                  friction_pressure_gradient_mult: Optional[float] = None,
-                 acceleration_pressure_gradient_mult: Optional[float] = None, is_activated: bool = True) -> None:
+                 acceleration_pressure_gradient_mult: Optional[float] = None, is_activated: bool = True,
+                 node_in: Optional[str] = None, node_out: Optional[str] = None, con_type: Optional[str] = None,
+                 hyd_method: Optional[str | int] = None, pvt_method: Optional[int] = None,
+                 water_method: Optional[int] = None) -> None:
         """Initialises the NexusNodeConnection class.
 
         Args:
@@ -117,6 +120,12 @@ class NexusNodeConnection(NodeConnection):
             acceleration_pressure_gradient_mult (Optional[float]): Correction Factor for the acceleration pressure
             gradient for pressure drop correlations (ACPGCR).
             is_activated: bool: Whether the Connection has been set as activated. Defaults to True.
+            con_type (Optional[str]): Connection type.
+            hyd_method (optional[str | int]): Hydraulic method (METHOD)
+            node_in (Optional[str]): Inflow node name.
+            node_out (Optional[str]): Outflow node name.
+            pvt_method (Optional[int]): PVT method (IPVT)
+            water_method (Optional[int]): Water method (IWAT)
         """
 
         self.bat_method = bat_method
@@ -148,7 +157,8 @@ class NexusNodeConnection(NodeConnection):
         self.is_activated = is_activated
 
         super().__init__(date_format=date_format, start_date=start_date, unit_system=unit_system, name=name, date=date,
-                         properties_dict=properties_dict)
+                         properties_dict=properties_dict, node_in=node_in, node_out=node_out, con_type=con_type,
+                         hyd_method=hyd_method, pvt_method=pvt_method, water_method=water_method)
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
