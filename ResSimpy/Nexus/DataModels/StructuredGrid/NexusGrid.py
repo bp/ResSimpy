@@ -4,8 +4,8 @@ from __future__ import annotations
 import copy
 
 import pandas as pd
-from dataclasses import dataclass
-from typing import Optional, TYPE_CHECKING, Any
+from dataclasses import dataclass, field
+from typing import Optional, TYPE_CHECKING, Any, Final
 import warnings
 
 from ResSimpy.FileOperations.File import File
@@ -15,6 +15,7 @@ from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGridArrayFunction import NexusGridArrayFunction
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusLGRs import NexusLGRs
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusMultir import NexusMultir
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusOver import NexusOver
 from ResSimpy.Nexus.NexusKeywords.nexus_keywords import VALID_NEXUS_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_FORMAT_KEYWORDS
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
@@ -120,6 +121,7 @@ class NexusGrid(Grid):
     __grid_multir_loaded: bool = False
     __multir: Optional[list[NexusMultir]] = None
     __lgrs: NexusLGRs
+    __overs: list[NexusOver] = field(default_factory=list)
 
     def __init__(self, grid_nexus_file: Optional[NexusFile] = None, assume_loaded: bool = False) -> None:
         """Initialises the NexusGrid class.
@@ -215,6 +217,7 @@ class NexusGrid(Grid):
         self.__kzeff: GridArrayDefinition = GridArrayDefinition()
 
         self.__lgrs: NexusLGRs = NexusLGRs(grid_file_as_list=self.__grid_file_contents)
+        self.__overs: list[NexusOver] = []
 
     def __wrap(self, value: Any) -> Any:
         if isinstance(value, tuple | list | set | frozenset):
@@ -575,6 +578,10 @@ class NexusGrid(Grid):
                 self._range_y = int(second_value)
                 self._range_z = int(third_value)
 
+            # load the overs:
+            if fo.value_in_file('OVER', file_as_list):
+                self.__overs = NexusGrid.load_nexus_overs(file_as_list)
+
         self._grid_properties_loaded = True
 
     @classmethod
@@ -763,16 +770,9 @@ class NexusGrid(Grid):
     @staticmethod
     def __extract_multir_tableline(line: str) -> None | NexusMultir:
         """Takes a single line in a file and extracts a Multir object from it."""
-        value = nfo.get_next_value(0, [line])
-        if value is None:
+        stored_values = nfo.split_line(line)
+        if not stored_values:
             return None
-        stored_values = []
-        trimmed_line = line
-        while value is not None:
-            stored_values.append(value.upper())
-            trimmed_line = trimmed_line.replace(value, "", 1)
-            value = nfo.get_next_value(0, [trimmed_line])
-
         region_1_str, region_2_str, tmult_str = stored_values[0:3]
         region_1 = int(region_1_str)
         region_2 = int(region_2_str)
@@ -1423,3 +1423,67 @@ class NexusGrid(Grid):
     def lgrs(self) -> NexusLGRs:
         """Returns the LGR object which contains a list of the LGRs in the nexus grid."""
         return self.__lgrs
+
+    @staticmethod
+    def load_nexus_overs(file_content_as_list: list[str]) -> list[NexusOver]:
+        """Function to read in OVER tables from a file.
+
+        Args:
+            file_content_as_list (list[str]): list of strings representing the file contents.
+
+        Returns:
+            list[NexusOver]: list of NexusOver objects representing the OVER table.
+        """
+        ignore_list = ['OVER', 'TX', 'TY', 'TZ', 'PV', 'PVF', 'TXF', 'TYF', 'TZF', 'GRID', 'FNAME', 'GE', 'LE']
+        valid_end_tokens = [x for x in VALID_NEXUS_KEYWORDS if x not in ignore_list]
+        overs_list: list[NexusOver] = []
+        reading_over = False
+        grid = 'ROOT'
+        fname = None
+        arrays: list[str] = []
+        potential_operators: Final = ['+', '-', '*', '/', '=']
+        threshold_value = None
+        for line in file_content_as_list:
+            if nfo.nexus_token_found(line, valid_end_tokens):
+                reading_over = False
+                grid = 'ROOT'
+                fname = None
+                arrays = []
+                continue
+            if reading_over:
+                split_line = nfo.split_line(line)
+                if nfo.check_token('GRID', line):
+                    grid = nfo.get_expected_token_value('GRID', line, file_content_as_list)
+                if nfo.check_token('FNAME', line):
+                    fname = nfo.get_expected_token_value('FNAME', line, file_content_as_list)
+                if len(split_line) > 6:
+                    i1, i2, j1, j2, k1, k2 = (int(x) for x in split_line[0:6])
+                    operator_value = split_line[6]
+                    operator_matches = [x for x in potential_operators if x == operator_value[0]]
+                    if not operator_matches:
+                        # if the operator is not found then it is GE or LE
+                        threshold_value = float(split_line[6])
+                        operator = split_line[7]
+                        value = float(split_line[8])
+                    else:
+                        operator = operator_matches[0]
+                        # remove the operator and the remaining string is the value
+                        value = float(split_line[6][1:])
+                    overs_list.append(NexusOver(arrays=arrays, grid=grid, fault_name=fname,
+                                                i1=i1, i2=i2, j1=j1, j2=j2, k1=k1, k2=k2, operator=operator,
+                                                value=value, threshold=threshold_value))
+                    threshold_value = None
+
+            if nfo.check_token('OVER', line):
+                reading_over = True
+                over_split_line = nfo.split_line(line)
+                arrays = over_split_line[over_split_line.index('OVER')+1:]
+
+        return overs_list
+
+    @property
+    def overs(self) -> list[NexusOver]:
+        """Returns the OVER table as a list of NexusOver objects."""
+        if not self._grid_properties_loaded:
+            self.load_grid_properties_if_not_loaded()
+        return self.__overs
