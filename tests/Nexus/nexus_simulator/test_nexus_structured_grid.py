@@ -1,4 +1,6 @@
 import os
+
+import numpy as np
 import pandas as pd
 import pytest
 from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
@@ -1894,3 +1896,69 @@ INCLUDE  SW.dat
     # Assert
     assert nexus_model.grid.ky.absolute_path is not None
     assert result_sw == expected_sw
+
+
+def test_load_arrays_with_different_grid_names_to_lgr_class_none_keyword(mocker):
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents = """NX  NY  NZ
+ 80  86  84
+
+CARTREF LGR_01                         
+  14  44   29  29  1  82
+  15*5  1*5 15*5
+  9
+  82*1
+ENDREF 
+ENDLGR
+
+ARRAYS LGR_01
+
+KX  NONE
+MOD 
+    1   155    5    5      1   82 =1000.00  
+"""
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+        {'testpath1/nexus_run.fcs': fcs_file_contents,
+         '/run_control/path': '',
+         structured_grid_name: structured_grid_file_contents,
+         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    expected_lgr = NexusLGR(parent_grid='ROOT', name='LGR_01', i1=14, i2=44, j1=29, j2=29, k1=1, k2=82,
+
+nx=[5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+
+ny=[9],
+
+nz=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+
+    # set up dataframe
+    i1 = [1]
+    i2 = [155]
+    j1 = [5]
+    j2 = [5]
+    k1 = [1]
+    k2 = [82]
+    v = ['=1000']
+    expected_df = pd.DataFrame({'i1': i1, 'i2': i2, 'j1': j1, 'j2': j2, 'k1': k1, 'k2': k2, '#v': v})
+
+    expected_lgr._kx = GridArrayDefinition(modifier=None, value=None, mods={'MOD': expected_df},
+                                           keyword_in_include_file=False, absolute_path=None, array=None)
+
+    model = NexusSimulator('testpath1/nexus_run.fcs')
+    # Act
+    result = model.grid
+    result_lgr = result.lgrs.lgrs[0]
+
+    # Assert
+    # assert result.kx == expected_root_kx
+    # assert result.ky == expected_root_ky
+    pd.testing.assert_frame_equal(result_lgr.kx.mods['MOD'], expected_lgr.kx.mods['MOD'])
+    # assert result_lgr.kx == expected_lgr._kx
+    # assert result_lgr.ky == expected_lgr._ky
+    assert len(result.lgrs.lgrs) == 1

@@ -214,7 +214,7 @@ class NexusGrid(Grid):
         self.__kyeff: GridArrayDefinition = GridArrayDefinition()
         self.__kzeff: GridArrayDefinition = GridArrayDefinition()
 
-        self.__lgrs: NexusLGRs = NexusLGRs(grid_file_as_list=self.__grid_file_contents)
+        self.__lgrs: NexusLGRs = NexusLGRs(grid_file_as_list=self.__grid_file_contents, parent_grid=self)
 
     def __wrap(self, value: Any) -> Any:
         if isinstance(value, tuple | list | set | frozenset):
