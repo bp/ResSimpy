@@ -744,20 +744,20 @@ def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
                               "/path/to/kx.inc",
                               "VALUE", "12 KX", "MULT", "kz.inc", "VALUE"),
                              (
-                             "KX VALUE\n INCLUDE /path/to/kx.inc\nKY VALUE\n\tINCLUDE /path/to/kx.inc\n KZ MULT\n\n\n\t0.1 KX",
-                             "/path/to/kx.inc",
-                             "VALUE", "/path/to/kx.inc", "VALUE", "0.1 KX", "MULT"),
+                                     "KX VALUE\n INCLUDE /path/to/kx.inc\nKY VALUE\n\tINCLUDE /path/to/kx.inc\n KZ MULT\n\n\n\t0.1 KX",
+                                     "/path/to/kx.inc",
+                                     "VALUE", "/path/to/kx.inc", "VALUE", "0.1 KX", "MULT"),
                              ("KX VALUE\n!Comment \n INCLUDE kx.inc\nKY MULT\n\t1 KX\n KZ MULT\n\n!3 KX\n 1 KX",
                               "kx.inc", "VALUE", "1 KX", "MULT", "1 KX", "MULT"),
                              (
-                             "KX MULT\n0.000001 KY\nKY VALUE\n\tINCLUDE ky.inc\n KZ VALUE\n!COMMENT test\n\n INCLUDE /path/to/kz.inc",
-                             "0.000001 KY", "MULT", "ky.inc", "VALUE", "/path/to/kz.inc", "VALUE"),
+                                     "KX MULT\n0.000001 KY\nKY VALUE\n\tINCLUDE ky.inc\n KZ VALUE\n!COMMENT test\n\n INCLUDE /path/to/kz.inc",
+                                     "0.000001 KY", "MULT", "ky.inc", "VALUE", "/path/to/kz.inc", "VALUE"),
                              (
-                             "KX MULT\n 0.1 KY\nKY VALUE\n\t INCLUDE ky.inc\n KZ VALUE\n!COMMENT test\n\n INCLUDE /path/to/kz.inc",
-                             "0.1 KY", "MULT", "ky.inc", "VALUE", "/path/to/kz.inc", "VALUE"),
+                                     "KX MULT\n 0.1 KY\nKY VALUE\n\t INCLUDE ky.inc\n KZ VALUE\n!COMMENT test\n\n INCLUDE /path/to/kz.inc",
+                                     "0.1 KY", "MULT", "ky.inc", "VALUE", "/path/to/kz.inc", "VALUE"),
                              (
-                             "KX VALUE\n INCLUDE /path/to/kx.inc\nKY VALUE\n\tINCLUDE /path/to/kx.inc\n KZ MULT\n\n\n\t\n\t 0.1\tKX",
-                             "/path/to/kx.inc", "VALUE", "/path/to/kx.inc", "VALUE", "0.1 KX", "MULT"),
+                                     "KX VALUE\n INCLUDE /path/to/kx.inc\nKY VALUE\n\tINCLUDE /path/to/kx.inc\n KZ MULT\n\n\n\t\n\t 0.1\tKX",
+                                     "/path/to/kx.inc", "VALUE", "/path/to/kx.inc", "VALUE", "0.1 KX", "MULT"),
                              ("KX VALUE\n INCLUDE kx.inc\nKY MULT\n1 KX\n KZ MULT\n12 Ky",
                               "kx.inc", "VALUE", "1 KX", "MULT", "12 Ky", "MULT"),
                              ("KX CON\n 0.11333\nKY MULT\n1 KX\n KZ MULT\n12 Ky",
@@ -769,9 +769,9 @@ def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
                              ("KI CON\n 0.11333\nKJ MULT\n1 KI\n KK MULT\n12 KI",
                               "0.11333", "CON", "1 KI", "MULT", "12 KI", "MULT"),
                              (
-                             "!KX VALUE\nKX VALUE\n INCLUDE /path/to/kx.inc\nKY MULT\n12 KX\n KZ VALUE\n\n\n INCLUDE kz.inc",
-                             "/path/to/kx.inc",
-                             "VALUE", "12 KX", "MULT", "kz.inc", "VALUE"),
+                                     "!KX VALUE\nKX VALUE\n INCLUDE /path/to/kx.inc\nKY MULT\n12 KX\n KZ VALUE\n\n\n INCLUDE kz.inc",
+                                     "/path/to/kx.inc",
+                                     "VALUE", "12 KX", "MULT", "kz.inc", "VALUE"),
                          ])
 def test_load_structured_grid_file_k_values(mocker, structured_grid_file_contents, expected_kx_value,
                                             expected_kx_modifier, expected_ky_value, expected_ky_modifier,
@@ -811,6 +811,7 @@ def test_load_structured_grid_file_k_values(mocker, structured_grid_file_content
     assert result.kz.modifier == expected_kz_modifier
     assert result.kz.value == expected_kz_value
 
+
 def test_load_structured_grid_file_keff_values(mocker):
     # Arrange
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
@@ -819,7 +820,7 @@ def test_load_structured_grid_file_keff_values(mocker):
                                 "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc \n"
 
     structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
-    structured_grid_file = (base_structured_grid_file + 
+    structured_grid_file = (base_structured_grid_file +
                             "KXEFF VALUE\n INCLUDE /path/to/kxeff.inc\n KYEFF CON \n2 \n KZEFF VALUE \nINCLUDE\n kzeff.inc")
 
     expected_value_kxeff = "/path/to/kxeff.inc"
@@ -840,19 +841,20 @@ def test_load_structured_grid_file_keff_values(mocker):
          '/path/to/kxeff.inc': '',
          }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
     simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
     result = simulation.grid
-    
+
     # Assert
     assert result.kxeff.value == expected_value_kxeff
     assert result.kxeff.modifier == expected_modifier_kxeff
     assert result.kyeff.value == expected_value_kyeff
     assert result.kyeff.modifier == expected_modifier_kyeff
     assert result.kzeff.value == expected_value_kzeff
-    assert result.kzeff.modifier == expected_modifier_kzeff  
+    assert result.kzeff.modifier == expected_modifier_kzeff
 
 
 @pytest.mark.parametrize("new_porosity, new_sw, new_netgrs, new_kx, new_ky, new_kz",
@@ -1560,11 +1562,12 @@ def test_nested_includes_with_grid_array_keywords(mocker):
     assert result_kx == expected_kx_result
     assert result_ky == expected_ky_result
 
+
 @pytest.mark.parametrize('structured_grid_file_contents, modifier, full_file_path', [
     ('''! Array data
     KX VALUE
     INCLUDE inc_file_kx.inc''', 'VALUE', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc')),
-     ('''! Array data
+    ('''! Array data
      KX ZVAR
      INCLUDE inc_file_kx.inc''', 'ZVAR', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc')),
     ('''! Array data
@@ -1655,10 +1658,11 @@ DZNET CON
     assert result.dy.value is None
     assert result.dz.value is None
 
+
 def test_load_arrays_with_different_grid_names_to_lgr_class(mocker):
     fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
     structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
-    structured_grid_file_contents ="""NX  NY  NZ
+    structured_grid_file_contents = """NX  NY  NZ
  80  86  84
 
 CARTREF lgr_01                         
@@ -1688,6 +1692,7 @@ INCLUDE  KX_file.dat
 KY CON
 1
 """
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
         {'testpath1/nexus_run.fcs': fcs_file_contents,
@@ -1697,14 +1702,14 @@ KY CON
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-    
+
     expected_lgr = NexusLGR(parent_grid='ROOT', name='lgr_01', i1=14, i2=20, j1=29, j2=29, k1=1, k2=10,
                             nx=[5, 5, 5, 5, 5, 5, 7, 5, 5, 5, 5, 5, 5],
                             ny=[9],
                             nz=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
                             )
-    expected_lgr._kx = GridArrayDefinition(modifier='ZVAR', value='KX_file.dat', 
-                                           absolute_path=os.path.join('testpath1','KX_file.dat'))
+    expected_lgr._kx = GridArrayDefinition(modifier='ZVAR', value='KX_file.dat',
+                                           absolute_path=os.path.join('testpath1', 'KX_file.dat'))
     expected_lgr._ky = GridArrayDefinition(modifier='CON', value='1')
     expected_root_kx = GridArrayDefinition(modifier='CON', value='100')
     expected_root_ky = GridArrayDefinition(modifier='CON', value='10')
@@ -1760,6 +1765,7 @@ def test_load_lgrs(mocker):
     INCLUDE permx_array.dat
 
     """
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             '/path/to/nexus/fcsfile.dat': input_nexus_fcs_file,
@@ -1787,7 +1793,7 @@ def test_load_lgrs(mocker):
     nexus_model = NexusSimulator(origin='/path/to/nexus/fcsfile.dat')
     kx_array = nexus_model.grid.kx
     lgr_kx_array = nexus_model.grid.lgrs.lgrs[0].kx
-    
+
     # Assert
     assert kx_array.modifier == 'VALUE'
     assert kx_array.value == 'BLAH/BLAH'
@@ -1886,13 +1892,13 @@ INCLUDE  SW.dat
     mocker.patch("os.path.isfile", mock_isfile)
     mocker.patch("os.path.exists", mock_isfile)
 
-    expected_sw = GridArrayDefinition(modifier='ZVAR', value='SW.dat', 
+    expected_sw = GridArrayDefinition(modifier='ZVAR', value='SW.dat',
                                       absolute_path=os.path.join('/path/to/grid', 'SW.dat'))
     nexus_model = NexusSimulator(origin='/path/to/nexus/fcsfile.dat')
 
     # Act
     result_sw = nexus_model.grid.sw
-    
+
     # Assert
     assert nexus_model.grid.ky.absolute_path is not None
     assert result_sw == expected_sw
@@ -1930,12 +1936,12 @@ MOD
     mocker.patch("builtins.open", mock_open_wrapper)
 
     expected_lgr = NexusLGR(parent_grid='ROOT', name='LGR_01', i1=14, i2=44, j1=29, j2=29, k1=1, k2=82,
-
-nx=[5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
-
-ny=[9],
-
-nz=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+                            nx=[5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+                                5, 5],
+                            ny=[9],
+                            nz=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
 
     # set up dataframe
     i1 = [1]
@@ -1944,7 +1950,7 @@ nz=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
     j2 = [5]
     k1 = [1]
     k2 = [82]
-    v = ['=1000']
+    v = ['=1000.00']
     expected_df = pd.DataFrame({'i1': i1, 'i2': i2, 'j1': j1, 'j2': j2, 'k1': k1, 'k2': k2, '#v': v})
 
     expected_lgr._kx = GridArrayDefinition(modifier=None, value=None, mods={'MOD': expected_df},
