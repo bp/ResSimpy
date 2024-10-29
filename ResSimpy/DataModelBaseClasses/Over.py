@@ -17,7 +17,9 @@ class Over(ABC):
         k2 (int): The end of the k range.
         operator (str): The operator to be assigned to the range.
         value (float): The value to be assigned to the range.
-        threshold (float): The value for which GE or LE is used.
+        threshold (Optional[float]): The value for which GE or LE is used.
+        grid (Optional[str]): The grid that the Over function relates to.
+        fault_name (Optional[str]): The named fault that the Over function relates to.
     """
     arrays: list[str]
     i1: int
