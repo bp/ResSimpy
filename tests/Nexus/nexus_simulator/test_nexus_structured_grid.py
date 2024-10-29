@@ -1962,9 +1962,7 @@ MOD
     result_lgr = result.lgrs.lgrs[0]
 
     # Assert
-    # assert result.kx == expected_root_kx
-    # assert result.ky == expected_root_ky
     pd.testing.assert_frame_equal(result_lgr.kx.mods['MOD'], expected_lgr.kx.mods['MOD'])
-    # assert result_lgr.kx == expected_lgr._kx
-    # assert result_lgr.ky == expected_lgr._ky
+    assert result_lgr.kx.value == expected_lgr.kx.value
+    assert result_lgr.kx.modifier == expected_lgr.kx.modifier
     assert len(result.lgrs.lgrs) == 1
