@@ -12,6 +12,8 @@ from typing import TYPE_CHECKING, Optional, Any, Literal
 
 from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.DataModelBaseClasses.Network import Network
+from ResSimpy.Nexus.DataModels.Network.NexusAction import NexusAction
+from ResSimpy.Nexus.DataModels.Network.NexusActions import NexusActions
 from ResSimpy.Nexus.DataModels.Network.NexusConList import NexusConList
 from ResSimpy.Nexus.DataModels.Network.NexusConLists import NexusConLists
 from ResSimpy.Nexus.DataModels.Network.NexusProc import NexusProc
@@ -56,6 +58,7 @@ class NexusNetwork(Network):
     wellbores: NexusWellbores
     constraints: NexusConstraints
     procs: NexusProcs
+    actions: NexusActions
     targets: NexusTargets
     welllists: NexusWellLists
     __has_been_loaded: bool = False
@@ -77,6 +80,7 @@ class NexusNetwork(Network):
         self.targets: NexusTargets = NexusTargets(self)
         self.welllists: NexusWellLists = NexusWellLists(self)
         self.procs: NexusProcs = NexusProcs(self)
+        self.actions: NexusActions = NexusActions(self)
         self.conlists: NexusConLists = NexusConLists(self)
 
     def get_load_status(self) -> bool:
@@ -238,6 +242,7 @@ class NexusNetwork(Network):
                                       'PROCS': None,
                                       'WELLLIST': NexusWellList,
                                       'CONLIST': NexusConList,
+                                      'ACTIONS': NexusAction,
                                       }
 
         for surface in self.__model.model_files.surface_files.values():
@@ -259,6 +264,10 @@ class NexusNetwork(Network):
             self.welllists._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLLIST')))
             self.conlists._add_to_memory(type_check_lists(nexus_obj_dict.get('CONLIST')))
 
+            actions_check = type_check_lists(nexus_obj_dict.get('ACTIONS'))
+            if actions_check is not None:
+                self.actions._add_to_memory(actions_check)
+
             add_procs_to_mem = self.__load_procs
             self.procs._add_to_memory(add_procs_to_mem)
 
@@ -266,7 +275,6 @@ class NexusNetwork(Network):
         self.__update_well_types()
 
         if self.model.options is not None:
-
             # load the options file
             self.model.options.load_nexus_options_if_not_loaded()
 

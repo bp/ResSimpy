@@ -467,6 +467,10 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
             row_name = keyword_store.get('well_name', None)
             keyword_store['name'] = row_name
 
+        if row_name is None:
+            row_name = keyword_store.get('connection', None)
+            keyword_store['name'] = row_name
+
         if not isinstance(keyword_store['name'], str):
             raise ValueError(f'Cannot find valid well name for object: {keyword_store}')
 
@@ -582,3 +586,23 @@ def correct_datatypes(value: None | float | str, dtype: type,
                 return None
         case _:
             return dtype(value)
+
+
+def split_line(line: str, upper: bool = True) -> list[str]:
+    """Splits a line into a list of strings through sequential application of get_next_value.
+    Does not include comments. A line with no valid tokens will return an empty list.
+    """
+    stored_values: list[str] = []
+    value = get_next_value(0, [line])
+    if value is None:
+        return stored_values
+    trimmed_line = line
+    while value is not None:
+        if upper:
+            stored_values.append(value.upper())
+        else:
+            stored_values.append(value)
+        trimmed_line = trimmed_line.replace(value, "", 1)
+        value = get_next_value(0, [trimmed_line])
+
+    return stored_values
