@@ -373,8 +373,9 @@ class NexusConstraint(Constraint):
         self.clear_alq = clear_alq
         self.clear_p = clear_p
 
-        super().__init__(_date_format=date_format, _start_date=start_date, _unit_system=unit_system,name=name,
-                         max_surface_oil_rate=max_surface_oil_rate, max_surface_gas_rate=max_surface_gas_rate,
+        super().__init__(_date_format=date_format, _start_date=start_date, _unit_system=unit_system, name=name,
+                         max_surface_oil_rate=max_surface_oil_rate,
+                         max_surface_gas_rate=max_surface_gas_rate,
                          max_surface_water_rate=max_surface_water_rate, max_surface_liquid_rate=max_surface_liquid_rate,
                          max_reservoir_oil_rate=max_reservoir_oil_rate, max_reservoir_gas_rate=max_reservoir_gas_rate,
                          max_reservoir_water_rate=max_reservoir_water_rate,
