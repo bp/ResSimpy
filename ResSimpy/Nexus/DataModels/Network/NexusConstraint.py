@@ -357,7 +357,7 @@ class NexusConstraint(Constraint):
         self.use_qmult_qoil_surface_rate = use_qmult_qoil_surface_rate
         self.use_qmult_qwater_surface_rate = use_qmult_qwater_surface_rate
         self.use_qmult_qgas_surface_rate = use_qmult_qgas_surface_rate
-        self. use_qmult_qoilqwat_surface_rate = use_qmult_qoilqwat_surface_rate
+        self.use_qmult_qoilqwat_surface_rate = use_qmult_qoilqwat_surface_rate
         self.artificial_lift_number = artificial_lift_number
         self.max_choke_setting = max_choke_setting
         self.min_gas_lift_efficiency = min_gas_lift_efficiency
@@ -376,11 +376,19 @@ class NexusConstraint(Constraint):
         super().__init__(_date_format=date_format, _start_date=start_date, _unit_system=unit_system, name=name,
                          max_surface_oil_rate=max_surface_oil_rate,
                          max_surface_gas_rate=max_surface_gas_rate,
+                         max_surface_oil_rate=max_surface_oil_rate, max_surface_gas_rate=max_surface_gas_rate,
                          max_surface_water_rate=max_surface_water_rate, max_surface_liquid_rate=max_surface_liquid_rate,
                          max_reservoir_oil_rate=max_reservoir_oil_rate, max_reservoir_gas_rate=max_reservoir_gas_rate,
                          max_reservoir_water_rate=max_reservoir_water_rate,
                          max_reservoir_liquid_rate=max_reservoir_liquid_rate, max_avg_comp_dp=max_avg_comp_dp,
                          max_comp_dp=max_comp_dp)
+
+        if date is None and properties_dict is not None:
+            if 'date' not in properties_dict or not isinstance(properties_dict['date'], str):
+                raise ValueError(f"No valid Date found for object with properties: {properties_dict}")
+            self.date = properties_dict['date']
+        else:
+            self.date = date
 
         if properties_dict is None:
             return
@@ -396,13 +404,6 @@ class NexusConstraint(Constraint):
         remaining_properties = [x for x in properties_dict.keys() if x not in protected_attributes]
         for key in remaining_properties:
             self.__setattr__(key, properties_dict[key])
-
-        if date is None:
-            if 'date' not in properties_dict or not isinstance(properties_dict['date'], str):
-                raise ValueError(f"No valid Date found for object with properties: {properties_dict}")
-            self.date = properties_dict['date']
-        else:
-            self.date = date
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
