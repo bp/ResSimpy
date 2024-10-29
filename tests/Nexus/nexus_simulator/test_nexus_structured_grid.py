@@ -1943,6 +1943,12 @@ ARRAYS LGR_01
 KX  NONE
 MOD 
     1   155    5    5      1   82 =1000.00  
+
+IREGION NONE
+MOD
+1 10  1  10 1  1  =1
+11 20  1  10 2  2  =2
+
 """
 
     def mock_open_wrapper(filename, mode):
@@ -1975,14 +1981,21 @@ MOD
 
     expected_lgr._kx = GridArrayDefinition(modifier=None, value=None, mods={'MOD': expected_df},
                                            keyword_in_include_file=False, absolute_path=None, array=None)
-
+    expected_lgr._iregion = {'IREG1': GridArrayDefinition(modifier=None, value=None, mods={'MOD': pd.DataFrame(
+        {'i1': [1, 11], 'i2': [10, 20], 'j1': [1, 1], 'j2': [10, 10], 'k1': [1, 2], 'k2': [1, 2], '#v': ['=1', '=2']})},
+                                                keyword_in_include_file=False, absolute_path=None, array=None)}
+    
     model = NexusSimulator('testpath1/nexus_run.fcs')
     # Act
     result = model.grid
     result_lgr = result.lgrs.lgrs[0]
+    result_iregion = result_lgr.iregion['IREG1']
 
     # Assert
     pd.testing.assert_frame_equal(result_lgr.kx.mods['MOD'], expected_lgr.kx.mods['MOD'])
     assert result_lgr.kx.value == expected_lgr.kx.value
     assert result_lgr.kx.modifier == expected_lgr.kx.modifier
     assert len(result.lgrs.lgrs) == 1
+    assert result_iregion.value == expected_lgr._iregion['IREG1'].value
+    assert result_iregion.modifier == expected_lgr._iregion['IREG1'].modifier
+    pd.testing.assert_frame_equal(result_iregion.mods['MOD'], expected_lgr._iregion['IREG1'].mods['MOD'])
