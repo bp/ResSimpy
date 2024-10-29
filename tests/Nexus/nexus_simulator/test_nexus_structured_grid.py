@@ -1849,17 +1849,17 @@ INCLUDE PORO.dat
 KX  ZVAR 
 INCLUDE  KX.dat
 MOD
-      1   57    1    57    1   82 *  1.10  
+      1   57    1    57    1   82 *1.10  
 
 KY  ZVAR
 INCLUDE  KX.dat
 MOD
-      1   57    1    57    1   82 *  1.10 
+      1   57    1    57    1   82 *1.10 
 	  
 KZ  ZVAR  
 INCLUDE  KX.dat
 MOD
-      1   57    1    57    1   82 *  1.10 
+      1   57    1    57    1   82 *1.10 
 	  
 NETGRS  CON                                                                                                                                                            
 1.0
@@ -1894,15 +1894,35 @@ INCLUDE  SW.dat
 
     expected_sw = GridArrayDefinition(modifier='ZVAR', value='SW.dat',
                                       absolute_path=os.path.join('/path/to/grid', 'SW.dat'))
+    expected_kz = GridArrayDefinition(modifier='ZVAR', value='KX.dat',
+                                      absolute_path=os.path.join('/path/to/grid', 'KX.dat'),
+                                      mods={'MOD': pd.DataFrame({'i1': [1], 'i2': [57], 'j1': [1], 'j2': [57],
+                                                                 'k1': [1], 'k2': [82], '#v': ['*1.10']})})
+    expected_kx = GridArrayDefinition(modifier='ZVAR', value='KX.dat',
+                                        absolute_path=os.path.join('/path/to/grid', 'KX.dat'),
+                                        mods={'MOD': pd.DataFrame({'i1': [1], 'i2': [57], 'j1': [1], 'j2': [57],
+                                                                     'k1': [1], 'k2': [82], '#v': ['*1.10']})})
+
     nexus_model = NexusSimulator(origin='/path/to/nexus/fcsfile.dat')
 
     # Act
     result_sw = nexus_model.grid.sw
+    result_kz = nexus_model.grid.kz
+    result_kx = nexus_model.grid.kx
 
     # Assert
     assert nexus_model.grid.ky.absolute_path is not None
     assert result_sw == expected_sw
-
+    
+    assert result_kz.value == expected_kz.value
+    assert result_kz.modifier == expected_kz.modifier
+    assert result_kz.absolute_path == expected_kz.absolute_path
+    pd.testing.assert_frame_equal(result_kz.mods['MOD'], expected_kz.mods['MOD'])
+    
+    assert result_kx.value == expected_kx.value
+    assert result_kx.modifier == expected_kx.modifier
+    assert result_kx.absolute_path == expected_kx.absolute_path    
+    pd.testing.assert_frame_equal(nexus_model.grid.kx.mods['MOD'], expected_kx.mods['MOD'])
 
 def test_load_arrays_with_different_grid_names_to_lgr_class_none_keyword(mocker):
     fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
