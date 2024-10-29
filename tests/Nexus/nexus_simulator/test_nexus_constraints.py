@@ -433,10 +433,11 @@ def test_nexus_constraint_repr(mocker):
     mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
     constraint = NexusConstraint({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0,
                                   'max_surface_water_rate': 0})
-    expected_repr = ('NexusConstraint(max_surface_water_rate=0, max_surface_liquid_rate=3884.0, '
-                     "ID='uuid1', Date='01/01/2019', name='well1', ISO_Date='2019-01-01T00:00:00')")
-    expected_str = ('NexusConstraint(max_surface_water_rate=0, max_surface_liquid_rate=3884.0, '
-                    "_DataObjectMixin__date='01/01/2019', name='well1', "
+    expected_repr = ("NexusConstraint(ID='uuid1', Date='01/01/2019', name='well1', "
+                     'max_surface_water_rate=0, max_surface_liquid_rate=3884.0, '
+                     "ISO_Date='2019-01-01T00:00:00')")
+    expected_str = ("NexusConstraint(_DataObjectMixin__date='01/01/2019', name='well1', "
+                    'max_surface_water_rate=0, max_surface_liquid_rate=3884.0, '
                     '_DataObjectMixin__iso_date=ISODateTime(2019,T1,T1,T0,T0))')
     # Act
     repr_result = constraint.__repr__()
@@ -565,27 +566,21 @@ def test_load_constraints_welllist(mocker: MockerFixture):
     mocker.patch("builtins.open", mock_open_wrapper)
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
 
-    well_1_constraint_properties_1 = {'date': '09/07/2024', 'name': 'well_1', 'max_surface_liquid_rate': 3884.0,
-                                      'max_surface_water_rate': 0,
-                                      'unit_system': UnitSystem.ENGLISH}
-    well_1_expected_constraint_1 = NexusConstraint(properties_dict=well_1_constraint_properties_1,
-                                                   date_format=DateFormat.DD_MM_YYYY,
-                                                   start_date=start_date)
-    well_1_constraint_properties_2 = {'date': '23/08/2024', 'name': 'well_1', 'max_surface_oil_rate': 123.4,
-                                      'unit_system': UnitSystem.ENGLISH}
-    well_1_expected_constraint_2 = NexusConstraint(properties_dict=well_1_constraint_properties_2,
+    well_1_expected_constraint_1 = NexusConstraint(date='09/07/2024', name='well_1', max_surface_liquid_rate=3884.0,
+                                                   max_surface_water_rate=0, unit_system=UnitSystem.ENGLISH,
                                                    date_format=DateFormat.DD_MM_YYYY,
                                                    start_date=start_date)
 
-    well_2_constraint_properties_1 = {'date': '23/08/2024', 'name': 'well_2', 'max_surface_oil_rate': 123.4,
-                                      'unit_system': UnitSystem.ENGLISH}
-    well_2_expected_constraint_1 = NexusConstraint(properties_dict=well_2_constraint_properties_1,
-                                                   date_format=DateFormat.DD_MM_YYYY,
+    well_1_expected_constraint_2 = NexusConstraint(date='23/08/2024', name='well_1', max_surface_oil_rate=123.4,
+                                                   unit_system=UnitSystem.ENGLISH, date_format=DateFormat.DD_MM_YYYY,
                                                    start_date=start_date)
-    well_2_constraint_properties_2 = {'date': '15/10/2024', 'name': 'well_2', 'max_surface_liquid_rate': 4567,
-                                      'unit_system': UnitSystem.ENGLISH}
-    well_2_expected_constraint_2 = NexusConstraint(properties_dict=well_2_constraint_properties_2,
-                                                   date_format=DateFormat.DD_MM_YYYY,
+
+    well_2_expected_constraint_1 = NexusConstraint(date='23/08/2024', name='well_2', max_surface_oil_rate=123.4,
+                                                   unit_system=UnitSystem.ENGLISH, date_format=DateFormat.DD_MM_YYYY,
+                                                   start_date=start_date)
+
+    well_2_expected_constraint_2 = NexusConstraint(date='15/10/2024', name='well_2', max_surface_liquid_rate=4567,
+                                                   date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH,
                                                    start_date=start_date)
 
     # Act

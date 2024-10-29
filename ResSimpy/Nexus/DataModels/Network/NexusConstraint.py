@@ -311,19 +311,11 @@ class NexusConstraint(Constraint):
         """
 
         self.well_name = well_name
-        self.max_surface_oil_rate = max_surface_oil_rate
-        self.max_surface_gas_rate = max_surface_gas_rate
-        self.max_surface_water_rate = max_surface_water_rate
-        self.max_surface_liquid_rate = max_surface_liquid_rate
         self.max_hc_molar_rate = max_hc_molar_rate
         self.max_reverse_surface_oil_rate = max_reverse_surface_oil_rate
         self.max_reverse_surface_gas_rate = max_reverse_surface_gas_rate
         self.max_reverse_surface_water_rate = max_reverse_surface_water_rate
         self.max_reverse_surface_liquid_rate = max_reverse_surface_liquid_rate
-        self.max_reservoir_oil_rate = max_reservoir_oil_rate
-        self.max_reservoir_gas_rate = max_reservoir_gas_rate
-        self.max_reservoir_water_rate = max_reservoir_water_rate
-        self.max_reservoir_liquid_rate = max_reservoir_liquid_rate
         self.max_reservoir_hc_rate = max_reservoir_hc_rate
         self.max_reverse_reservoir_oil_rate = max_reverse_reservoir_oil_rate
         self.max_reverse_reservoir_gas_rate = max_reverse_reservoir_gas_rate
@@ -331,8 +323,6 @@ class NexusConstraint(Constraint):
         self.max_reverse_reservoir_liquid_rate = max_reverse_reservoir_liquid_rate
         self.max_reverse_reservoir_total_fluids_rate = max_reverse_reservoir_total_fluids_rate
         self.max_reverse_reservoir_hc_rate = max_reverse_reservoir_hc_rate
-        self.max_avg_comp_dp = max_avg_comp_dp
-        self.max_comp_dp = max_comp_dp
         self.min_pressure = min_pressure
         self.max_pressure = max_pressure
         self.max_wag_water_pressure = max_wag_water_pressure
@@ -376,14 +366,20 @@ class NexusConstraint(Constraint):
         self.pump_power = pump_power
         self.pump_speed = pump_speed
         self.choke_limit = choke_limit
-        self.mainfold_postion = mainfold_position
+        self.mainfold_position = mainfold_position
         self.clear_all = clear_all
         self.clear_q = clear_q
         self.clear_limit = clear_limit
         self.clear_alq = clear_alq
         self.clear_p = clear_p
 
-        super().__init__(_date_format=date_format, _start_date=start_date, _unit_system=unit_system, name=name)
+        super().__init__(_date_format=date_format, _start_date=start_date, _unit_system=unit_system,name=name,
+                         max_surface_oil_rate=max_surface_oil_rate, max_surface_gas_rate=max_surface_gas_rate,
+                         max_surface_water_rate=max_surface_water_rate, max_surface_liquid_rate=max_surface_liquid_rate,
+                         max_reservoir_oil_rate=max_reservoir_oil_rate, max_reservoir_gas_rate=max_reservoir_gas_rate,
+                         max_reservoir_water_rate=max_reservoir_water_rate,
+                         max_reservoir_liquid_rate=max_reservoir_liquid_rate, max_avg_comp_dp=max_avg_comp_dp,
+                         max_comp_dp=max_comp_dp)
 
         if properties_dict is None:
             return
