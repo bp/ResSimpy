@@ -11,6 +11,7 @@ from ResSimpy.FileOperations import file_operations as fo
 if TYPE_CHECKING:
     from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 
+
 @dataclass(kw_only=True)
 class NexusLGRs(LGRs):
     """Class for handling the set of Local Grid Refinements (LGR) in the NexusGrid."""
@@ -25,6 +26,7 @@ class NexusLGRs(LGRs):
         """Initializes the NexusLGRs class.
 
         Args:
+            parent_grid (NexusGrid): The NexusGrid object that the LGRs belong to.
             grid_file_as_list (None | list[str]): List of strings representing the file to load the LGRs from.
             lgrs (None | list[NexusLGR]): List of LGRs to initialize the class with. Defaults to None for loading
             purposes.

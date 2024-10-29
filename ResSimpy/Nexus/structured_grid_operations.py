@@ -119,8 +119,13 @@ class StructuredGridOperations:
                     token_property[region_name].modifier = 'MULT'
                     token_property[region_name].value = f"{numerical_value} {value_to_multiply}"
         elif modifier == 'NONE':
-            token_property.modifier = None
-            token_property.value = None
+            if not isinstance(token_property, dict):
+                token_property.modifier = None
+                token_property.value = None
+            elif region_name != '':
+                token_property[region_name] = GridArrayDefinition()
+                token_property[region_name].modifier = None
+                token_property[region_name].value = None
 
         else:
             value = fo.get_token_value(modifier, line, file_as_list[line_indx:], ignore_values=ignore_values)
