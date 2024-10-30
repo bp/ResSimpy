@@ -10,6 +10,7 @@ import numpy as np
 
 from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
 from ResSimpy.DataModelBaseClasses.GridArrayFunction import GridArrayFunction
+from ResSimpy.DataModelBaseClasses.Over import Over
 from ResSimpy.FileOperations.File import File
 from ResSimpy.GenericContainerClasses.LGRs import LGRs
 
@@ -34,6 +35,7 @@ class Grid(ABC):
     _iregion: dict[str, GridArrayDefinition]
     _grid_properties_loaded: bool = False
     _lgrs: LGRs
+    _overs: Sequence[Over]
 
     def __init__(self, assume_loaded: bool = False) -> None:
         """Initialises the Grid class."""
@@ -205,3 +207,8 @@ class Grid(ABC):
     def grid_array_definition_to_numpy_array(self, grid_array_definition: GridArrayDefinition) -> np.ndarray:
         """Converts a grid array to a numpy array."""
         return grid_array_definition.get_array_from_file(self.range_x, self.range_y, self.range_z)
+
+    @property
+    def overs(self) -> Sequence[Over]:
+        """Returns the overs associated with the grid."""
+        return self._overs

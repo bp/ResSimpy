@@ -1,9 +1,10 @@
 from dataclasses import dataclass
-from typing import Optional
+
+from ResSimpy.DataModelBaseClasses.Over import Over
 
 
 @dataclass
-class NexusOver:
+class NexusOver(Over):
     """Used to represent a line from an OVER table in a Nexus file.
 
     Attributes:
@@ -18,18 +19,6 @@ class NexusOver:
         value (float): The value to be assigned to the range.
         threshold (float): The value for which GE or LE is used.
     """
-    arrays: list[str]
-    i1: int
-    i2: int
-    j1: int
-    j2: int
-    k1: int
-    k2: int
-    operator: str
-    value: float
-    threshold: Optional[float] = None
-    grid: Optional[str] = None
-    fault_name: Optional[str] = None
 
     def to_string(self) -> str:
         """Converts the over to a string for writing to a Nexus file."""
