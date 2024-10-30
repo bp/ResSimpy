@@ -116,7 +116,13 @@ class NexusWellConnection(WellConnection):
                  gas_mobility: Optional[float] = None, capillary_number_model: Optional[str] = None,
                  dp_add: Optional[float] = None, dt_add: Optional[float] = None, rate_mult: Optional[float] = None,
                  polymer: Optional[str] = None, station: Optional[str] = None, drill_queue: Optional[str] = None,
-                 drill_order_benefit: Optional[float] = None, is_activated: bool = True) -> None:
+                 drill_order_benefit: Optional[float] = None, is_activated: bool = True,
+                 bhdepth: Optional[float] = None, datum_depth: Optional[float] = None, x_pos: Optional[float] = None,
+                 y_pos: Optional[float] = None, length: Optional[float] = None, temperature: Optional[float] = None,
+                 diameter: Optional[float] = None, roughness: Optional[float] = None,
+                 inner_diameter: Optional[float] = None, productivity_index: Optional[float] = None,
+                 hyd_method: Optional[str] = None, group: Optional[str] = None, i: Optional[int] = None,
+                 j: Optional[int] = None, drainage_radius: Optional[float] = None) -> None:
         """Initialises the NexusWellConnection class.
 
         Args:
@@ -164,6 +170,22 @@ class NexusWellConnection(WellConnection):
             drill_order_benefit (Optional[float]): Benefit of the drill order (BENEFIT).
             is_activated (bool): Whether the Well Connection has been activated using ACTIVATED / DEACTIVATE
             Defaults to True.
+            bhdepth (float): Bottomhole depth (BHDEPTH)
+            datum_depth (float): Depth relative to a datum (DATUM)
+            x_pos (float): X-coordinate position (X)
+            y_pos (float): Y-coordinate position (Y)
+            length (float): Length of the well connection (LENGTH)
+            temperature (float): Temperature (TEMP)
+            diameter (float): Diameter of the well connection (DIAM)
+            roughness (float): Pipe roughness (ROUGHNESS)
+            inner_diameter (float): Inner diameter of the well connection (INNERDIAM)
+            productivity_index_phase (str): Productivity index phase identifier (PIPHASE)
+            hyd_method (str): Hydraulic method (METHOD)
+            group (Optional[str]): The group that the Well Connection belongs to.
+            drainage_radius (Optional[float]): The drainage radius.
+            i (Optional[int]): The location of the Well Connection in the i direction.
+            j (Optional[int]): The location of the Well Connection in the j direction.
+            productivity_index (Optional[float]): Productivity index (PI).
         """
 
         self.bh_node_name = bh_node_name
@@ -203,7 +225,11 @@ class NexusWellConnection(WellConnection):
         self.drill_order_benefit = drill_order_benefit
         self.is_activated = is_activated
         super().__init__(date_format=date_format, start_date=start_date, unit_system=unit_system, name=name, date=date,
-                         properties_dict=properties_dict)
+                         properties_dict=properties_dict, bhdepth=bhdepth, datum_depth=datum_depth, x_pos=x_pos,
+                         y_pos=y_pos, length=length, temperature=temperature, diameter=diameter, roughness=roughness,
+                         inner_diameter=inner_diameter, productivity_index=productivity_index, hyd_method=hyd_method,
+                         group=group, i=i, j=j, drainage_radius=drainage_radius)
+
         self.is_activated = is_activated
 
         if self.name is not None:

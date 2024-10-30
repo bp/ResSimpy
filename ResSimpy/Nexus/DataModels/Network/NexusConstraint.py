@@ -210,7 +210,21 @@ class NexusConstraint(Constraint):
                  pump_power: Optional[float] = None, pump_speed: Optional[float] = None,
                  choke_limit: Optional[str] = None, mainfold_position: Optional[int] = None,
                  clear_all: Optional[bool] = None, clear_q: Optional[bool] = None, clear_limit: Optional[bool] = None,
-                 clear_alq: Optional[bool] = None, clear_p: Optional[bool] = None) -> None:
+                 clear_alq: Optional[bool] = None, clear_p: Optional[bool] = None,
+                 min_surface_oil_rate: Optional[float] = None, min_surface_gas_rate: Optional[float] = None,
+                 min_surface_water_rate: Optional[float] = None, min_surface_liquid_rate: Optional[float] = None,
+                 bottom_hole_pressure: Optional[float] = None, tubing_head_pressure: Optional[float] = None,
+                 max_reservoir_total_fluids_rate: Optional[float] = None, max_watercut: Optional[float] = None,
+                 max_watercut_plug: Optional[float] = None, max_watercut_plugplus: Optional[float] = None,
+                 max_watercut_perf: Optional[float] = None, max_watercut_perfplus: Optional[float] = None,
+                 max_wor: Optional[float] = None, max_wor_plug: Optional[float] = None,
+                 max_wor_plug_plus: Optional[float] = None, max_wor_perf: Optional[float] = None,
+                 max_wor_perfplus: Optional[float] = None, max_gor: Optional[float] = None,
+                 max_gor_plug: Optional[float] = None, max_gor_plug_plus: Optional[float] = None,
+                 max_gor_perf: Optional[float] = None, max_gor_perfplus: Optional[float] = None,
+                 max_lgr: Optional[float] = None, max_lgr_plug: Optional[float] = None,
+                 max_lgr_plug_plus: Optional[float] = None, max_lgr_perf: Optional[float] = None,
+                 max_lgr_perfplus: Optional[float] = None) -> None:
         r"""Initialises the NexusConstraint class.
 
         Args:
@@ -308,6 +322,33 @@ class NexusConstraint(Constraint):
             clear_alq (Optional[bool]): Specifies that the artificial lift quantity will be set
             to its default (CLEARALQ).
             clear_p (Optional[bool]): Remove all pressure constraints for the well (CLEARP).
+            bottom_hole_pressure (float): bottom hole pressure (BHP).
+            max_gor (float): max gor (GORMAX).
+            max_gor_perf (float): max gor perf (GORPERF).
+            max_gor_plug (float): max gor plug (GORPLUG).
+            max_gor_plug_plus (float): max gor plug plus (GORPLUGPLUS).
+            max_gor_perfplus (float): max gor perfplus (GORPERFPLUS).
+            max_lgr (float): max lgr (LGRMAX).
+            max_lgr_plug (float): max lgr plug (LGRPLUG).
+            max_lgr_plug_plus (float): max lgr plug plus (LGRPLUGPLUS).
+            max_lgr_perf (float): max lgr perf (LGRPERF).
+            max_lgr_perfplus (float): max lgr perfplus (LGRPERFPLUS).
+            max_watercut (float): max watercut (WCUTMAX).
+            max_watercut_plug (float): max watercut plug (WCUTPLUG).
+            max_watercut_plugplus (float): max watercut plugplus (WCUTPLUGPLUS).
+            max_watercut_perf (float): max watercut perf (WCUTPERF).
+            max_watercut_perfplus (float): max watercut perfplus (WCUTPERFPLUS).
+            max_wor (float): max wor (WORMAX).
+            max_wor_plug (float): max wor plug (WORPLUG).
+            max_wor_plug_plus (float): max wor plug plus (WORPLUGPLUS).
+            max_wor_perf (float): max wor perf (WORPERF).
+            max_wor_perfplus (float): max wor perfplus (WORPERFPLUS).
+            min_surface_oil_rate (float): min surface oil rate (QOSMIN).
+            min_surface_gas_rate (float): min surface gas rate (QGSMIN).
+            min_surface_water_rate (float): min surface water rate (QWSMIN).
+            min_surface_liquid_rate (float): min surface liquid rate (QLIQSMIN).
+            tubing_head_pressure (float): tubing head pressure (THP).
+            max_reservoir_total_fluids_rate (float): max reservoir total fluids rate (QALLMAX).
         """
 
         self.well_name = well_name
@@ -376,12 +417,23 @@ class NexusConstraint(Constraint):
         super().__init__(_date_format=date_format, _start_date=start_date, _unit_system=unit_system, name=name,
                          max_surface_oil_rate=max_surface_oil_rate,
                          max_surface_gas_rate=max_surface_gas_rate,
-                         max_surface_oil_rate=max_surface_oil_rate, max_surface_gas_rate=max_surface_gas_rate,
                          max_surface_water_rate=max_surface_water_rate, max_surface_liquid_rate=max_surface_liquid_rate,
                          max_reservoir_oil_rate=max_reservoir_oil_rate, max_reservoir_gas_rate=max_reservoir_gas_rate,
                          max_reservoir_water_rate=max_reservoir_water_rate,
                          max_reservoir_liquid_rate=max_reservoir_liquid_rate, max_avg_comp_dp=max_avg_comp_dp,
-                         max_comp_dp=max_comp_dp)
+                         max_comp_dp=max_comp_dp, min_surface_oil_rate=min_surface_oil_rate,
+                         min_surface_gas_rate=min_surface_gas_rate, min_surface_water_rate=min_surface_water_rate,
+                         min_surface_liquid_rate=min_surface_liquid_rate, bottom_hole_pressure=bottom_hole_pressure,
+                         tubing_head_pressure=tubing_head_pressure,
+                         max_reservoir_total_fluids_rate=max_reservoir_total_fluids_rate, max_watercut=max_watercut,
+                         max_watercut_plug=max_watercut_plug, max_watercut_plugplus=max_watercut_plugplus,
+                         max_watercut_perf=max_watercut_perf, max_watercut_perfplus=max_watercut_perfplus,
+                         max_wor=max_wor, max_wor_plug=max_wor_plug, max_wor_plug_plus=max_wor_plug_plus,
+                         max_wor_perf=max_wor_perf, max_wor_perfplus=max_wor_perfplus, max_gor=max_gor,
+                         max_gor_plug=max_gor_plug, max_gor_plug_plus=max_gor_plug_plus, max_gor_perf=max_gor_perf,
+                         max_gor_perfplus=max_gor_perfplus, max_lgr=max_lgr, max_lgr_plug=max_lgr_plug,
+                         max_lgr_plug_plus=max_lgr_plug_plus, max_lgr_perf=max_lgr_perf,
+                         max_lgr_perfplus=max_lgr_perfplus)
 
         if date is None and properties_dict is not None:
             if 'date' not in properties_dict or not isinstance(properties_dict['date'], str):
