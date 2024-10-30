@@ -1999,3 +1999,95 @@ MOD
     assert result_iregion.value == expected_lgr._iregion['IREG1'].value
     assert result_iregion.modifier == expected_lgr._iregion['IREG1'].modifier
     pd.testing.assert_frame_equal(result_iregion.mods['MOD'], expected_lgr._iregion['IREG1'].mods['MOD'])
+
+
+def test_load_arrays_with_mods_in_include_files(mocker):
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents = """NX  NY  NZ
+ 80  86  84
+
+CARTREF LGR_01                         
+  14  44   29  29  1  82
+  15*5  1*5 15*5
+  9
+  82*1
+ENDREF 
+ENDLGR
+
+ARRAYS LGR_01
+
+KX  NONE
+MOD 
+!20 2 02 50 2 02 =1000.00
+INCLUDE kx_mod.mod
+
+IREGION NONE
+MOD
+! 1 1 1 2 2 2 *10
+INCLUDE iregion_mod.mod
+
+"""
+    kx_mod_path = os.path.join('testpath1', 'kx_mod.mod')
+    kx_mod_content = '''79          79           5           5           8           8 =   1.89576540E-02
+           77          77           5           5           8           8 =   1.89576540E-02
+           78          78           5           5           8           8 =  0.240092114    
+           79          79           5           5           9           9 =   977.063721  
+           77          77           5           5           9           9 =   977.063721
+           80          80           5           5           9           9 =   915.068970
+'''
+    iregion_mod_path = os.path.join('testpath1', 'iregion_mod.mod')
+    iregion_mod_content = '''1           10           1           10           1           1 =  1.00000000
+              11           20           1           10           2           2 =  2.00000000
+              '''
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+        {'testpath1/nexus_run.fcs': fcs_file_contents,
+         '/run_control/path': '',
+         structured_grid_name: structured_grid_file_contents,
+         kx_mod_path: kx_mod_content,
+         iregion_mod_path: iregion_mod_content,
+         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    expected_lgr = NexusLGR(parent_grid='ROOT', name='LGR_01', i1=14, i2=44, j1=29, j2=29, k1=1, k2=82,
+                            nx=[5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+                                5, 5],
+                            ny=[9],
+                            nz=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+
+    # set up dataframe
+    i1 = [79, 77, 78, 79, 77, 80]
+    i2 = [79, 77, 78, 79, 77, 80]
+    j1 = [5, 5, 5, 5, 5, 5]
+    j2 = [5, 5, 5, 5, 5, 5]
+    k1 = [8, 8, 8, 9, 9, 9]
+    k2 = [8, 8, 8, 9, 9, 9]
+    v = ['=0.018957654', '=0.018957654', '=0.240092114', '=977.063721', '=977.063721', '=915.06897']
+    expected_df = pd.DataFrame({'i1': i1, 'i2': i2, 'j1': j1, 'j2': j2, 'k1': k1, 'k2': k2, '#v': v})
+    expected_lgr._kx = GridArrayDefinition(modifier=None, value=None, mods={'MOD': expected_df},
+                                           keyword_in_include_file=False, absolute_path=None, array=None)
+    # set up iregion dataframe
+    expected_lgr._iregion = {'IREG1': GridArrayDefinition(modifier=None, value=None, mods={'MOD': pd.DataFrame(
+        {'i1': [1, 11], 'i2': [10, 20], 'j1': [1, 1], 'j2': [10, 10], 'k1': [1, 2], 'k2': [1, 2], '#v': ['=1.0', '=2.0']})},
+                                                keyword_in_include_file=False, absolute_path=None, array=None)}
+
+    model = NexusSimulator('testpath1/nexus_run.fcs')
+    # Act
+    result = model.grid
+    result_lgr = result.lgrs.lgrs[0]
+    result_iregion = result_lgr.iregion['IREG1']
+
+    # Assert
+    pd.testing.assert_frame_equal(result_lgr.kx.mods['MOD'], expected_lgr.kx.mods['MOD'])
+    assert result_lgr.kx.value == expected_lgr.kx.value
+    assert result_lgr.kx.modifier == expected_lgr.kx.modifier
+    assert len(result.lgrs.lgrs) == 1
+    assert result_iregion.value == expected_lgr._iregion['IREG1'].value
+    assert result_iregion.modifier == expected_lgr._iregion['IREG1'].modifier
+    pd.testing.assert_frame_equal(result_iregion.mods['MOD'], expected_lgr._iregion['IREG1'].mods['MOD'])

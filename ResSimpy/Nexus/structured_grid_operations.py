@@ -364,7 +364,8 @@ class StructuredGridOperations:
                     mod_start_end['MOD'] = [[i + 1, len(file_as_list)]]
                 found_end_of_mod_table = False
                 for j in range(i + 1, len(file_as_list)):
-                    for keyword in STRUCTURED_GRID_KEYWORDS + GRID_ARRAY_KEYWORDS:
+                    keywords_to_stop_on = [x for x in (STRUCTURED_GRID_KEYWORDS + GRID_ARRAY_KEYWORDS) if x != 'INCLUDE']
+                    for keyword in keywords_to_stop_on:
                         if nfo.check_token(keyword, file_as_list[j]):
                             mod_start_end['MOD'][-1][1] = j
                             found_end_of_mod_table = True
@@ -389,8 +390,10 @@ class StructuredGridOperations:
         for key in mod_start_end.keys():
             for i in range(len(mod_start_end[key])):
                 if mod_start_end[key][i][1] > mod_start_end[key][i][0]:
-                    mod_table = nfo.read_table_to_df(
-                        file_as_list[mod_start_end[key][i][0]:mod_start_end[key][i][1]], noheader=True)
+                    file_slice = file_as_list[mod_start_end[key][i][0]:mod_start_end[key][i][1]]
+                    # exclude lines with INCLUDE keyword
+                    file_slice = [x for x in file_slice if not nfo.check_token('INCLUDE', x)]
+                    mod_table = nfo.read_table_to_df(file_slice, noheader=True)
                     if len(mod_table.columns) == 7:
                         mod_table.columns = ['i1', 'i2', 'j1', 'j2', 'k1', 'k2', '#v']
                     elif len(mod_table.columns) == 8:
