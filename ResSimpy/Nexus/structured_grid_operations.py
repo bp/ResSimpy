@@ -364,7 +364,8 @@ class StructuredGridOperations:
                     mod_start_end['MOD'] = [[i + 1, len(file_as_list)]]
                 found_end_of_mod_table = False
                 for j in range(i + 1, len(file_as_list)):
-                    keywords_to_stop_on = [x for x in (STRUCTURED_GRID_KEYWORDS + GRID_ARRAY_KEYWORDS) if x != 'INCLUDE']
+                    keywords_to_stop_on = [x for x in (STRUCTURED_GRID_KEYWORDS + GRID_ARRAY_KEYWORDS)
+                                           if x != 'INCLUDE']
                     for keyword in keywords_to_stop_on:
                         if nfo.check_token(keyword, file_as_list[j]):
                             mod_start_end['MOD'][-1][1] = j
