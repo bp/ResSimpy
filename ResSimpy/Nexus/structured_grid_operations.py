@@ -350,6 +350,8 @@ class StructuredGridOperations:
 
         mod_start_end: dict[str, list[list[int]]] = {}
         break_flag = False
+        keywords_to_stop_on = STRUCTURED_GRID_KEYWORDS + GRID_ARRAY_KEYWORDS
+        keywords_to_stop_on.remove('INCLUDE')
         for i in range(line_indx + 1, len(file_as_list)):
             if nfo.check_token('MODX', file_as_list[i]):
                 mod_start_end['MODX'] = [[i + 1, i + 2]]
@@ -364,8 +366,6 @@ class StructuredGridOperations:
                     mod_start_end['MOD'] = [[i + 1, len(file_as_list)]]
                 found_end_of_mod_table = False
                 for j in range(i + 1, len(file_as_list)):
-                    keywords_to_stop_on = [x for x in (STRUCTURED_GRID_KEYWORDS + GRID_ARRAY_KEYWORDS)
-                                           if x != 'INCLUDE']
                     for keyword in keywords_to_stop_on:
                         if nfo.check_token(keyword, file_as_list[j]):
                             mod_start_end['MOD'][-1][1] = j
