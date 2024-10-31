@@ -16,15 +16,15 @@ def test_read_nexus_over():
     """
 
     expected_result = [NexusOver(i1=1, i2=12, j1=1, j2=46, k1=10, k2=11, operator='*', value=0.0,
-                                 arrays=['TX'], grid='ROOT'),
+                                 array='TX', grid='ROOT'),
                        NexusOver(i1=1, i2=13, j1=1, j2=45, k1=11, k2=12, operator='+', value=1.5,
-                                 arrays=['TX'], grid='ROOT'),
+                                 array='TX', grid='ROOT'),
                        NexusOver(i1=1, i2=14, j1=1, j2=44, k1=12, k2=13, operator='-', value=1.5,
-                                 arrays=['TX'], grid='ROOT'),
+                                 array='TX', grid='ROOT'),
                        NexusOver(i1=1, i2=15, j1=1, j2=43, k1=13, k2=14, operator='/', value=2.0,
-                                 arrays=['TX'], grid='ROOT'),
+                                 array='TX', grid='ROOT'),
                        NexusOver(i1=1, i2=16, j1=1, j2=42, k1=14, k2=15, operator='=', value=2.0,
-                                 arrays=['TX'], grid='ROOT')]
+                                 array='TX', grid='ROOT')]
 
     # Act
     result = NexusGrid.load_nexus_overs(file_content.splitlines(keepends=True))
@@ -42,7 +42,7 @@ def test_read_nexus_over_grids():
     """
 
     expected_result = [NexusOver(i1=1, i2=12, j1=1, j2=46, k1=10, k2=11, operator='*', value=0.0,
-                                 arrays=['PVF'], grid='LGR_01')]
+                                 array='PVF', grid='LGR_01')]
 
     # Act
     result = NexusGrid.load_nexus_overs(file_content.splitlines(keepends=True))
@@ -56,8 +56,8 @@ def test_read_nexus_over_faultnames():
     file_content = """! comment
     OVER TXF TYF TZF
     FNAME  fault_name_1
-    1    12  1    46 10 11 +0.5
-    2    13  2    45 11 12 -0.5
+    1    12  1    46 10 11 +0.5 0.2 GE 1 *0.1
+    2    13  2    45 11 12 -0.5 0.2 LE 1 *0.1
     
     POR CON
     1
@@ -75,11 +75,19 @@ def test_read_nexus_over_faultnames():
     """
 
     expected_result = [NexusOver(i1=1, i2=12, j1=1, j2=46, k1=10, k2=11, operator='+', value=0.5,
-                                 arrays=['TXF', 'TYF', 'TZF'], fault_name='fault_name_1', grid='ROOT'),
+                                 array='TXF', fault_name='fault_name_1', grid='ROOT'),
+                       NexusOver(i1=1, i2=12, j1=1, j2=46, k1=10, k2=11, operator='GE', value=0.2,
+                                 array='TYF', fault_name='fault_name_1', grid='ROOT', threshold=1),
+                       NexusOver(i1=1, i2=12, j1=1, j2=46, k1=10, k2=11, operator='*', value=0.1,
+                                 array='TZF', fault_name='fault_name_1', grid='ROOT'),
                        NexusOver(i1=2, i2=13, j1=2, j2=45, k1=11, k2=12, operator='-', value=0.5,
-                                 arrays=['TXF', 'TYF', 'TZF'], fault_name='fault_name_1', grid='ROOT'),
+                                 array='TXF', fault_name='fault_name_1', grid='ROOT'),
+                       NexusOver(i1=2, i2=13, j1=2, j2=45, k1=11, k2=12, operator='LE', value=0.2,
+                                 array='TYF', fault_name='fault_name_1', grid='ROOT', threshold=1),
+                       NexusOver(i1=2, i2=13, j1=2, j2=45, k1=11, k2=12, operator='*', value=0.1,
+                                 array='TZF', fault_name='fault_name_1', grid='ROOT'),
                        NexusOver(i1=1, i2=12, j1=1, j2=46, k1=10, k2=11, operator='*', value=1.1,
-                                 arrays=['PVF'], fault_name='fault_name_2', grid='ROOT')]
+                                 array='PVF', fault_name='fault_name_2', grid='ROOT')]
 
     # Act
     result = NexusGrid.load_nexus_overs(file_content.splitlines(keepends=True))
@@ -98,10 +106,10 @@ def test_read_nexus_over_with_GE():
     1 14 1 44 12 13  2.5 LE 0.5		! South
     """
 
-    expected_result = [NexusOver(i1=1, i2=12, j1=1, j2=46, k1=10, k2=11, operator='GE', value=0.5,
-                                 arrays=['TX'], threshold=2.5, grid='ROOT')
-                       , NexusOver(i1=1, i2=14, j1=1, j2=44, k1=12, k2=13, operator='LE', value=0.5,
-                                   arrays=['TY'], threshold=2.5, grid='ROOT')]
+    expected_result = [NexusOver(i1=1, i2=12, j1=1, j2=46, k1=10, k2=11, operator='GE', value=2.5,
+                                 array='TX', threshold=0.5, grid='ROOT'), 
+                       NexusOver(i1=1, i2=14, j1=1, j2=44, k1=12, k2=13, operator='LE', value=2.5,
+                                 array='TY', threshold=0.5, grid='ROOT')]
 
     # Act
     result = NexusGrid.load_nexus_overs(file_content.splitlines(keepends=True))
@@ -124,19 +132,38 @@ def test_read_nexus_over_from_grid():
     """
 
     expected_result = [NexusOver(i1=1, i2=12, j1=1, j2=46, k1=10, k2=11, operator='*', value=0.0,
-                                 arrays=['TX'], grid='ROOT')]
-    grid = NexusGrid(grid_nexus_file=NexusFile(location='loc.dat', 
+                                 array='TX', grid='ROOT')]
+    grid = NexusGrid(grid_nexus_file=NexusFile(location='loc.dat',
                                                file_content_as_list=grid_file_content.splitlines(keepends=True)))
     # Act
     result = grid.overs
 
     # Assert
     assert result == expected_result
+
+
+def test_over_multiple_values_arrays():
+    # Arrange
+    expected_result = [NexusOver(i1=227, i2=240, j1=91, j2=91, k1=29, k2=40, operator='*', value=0.0,
+                                 array='TY', grid='ROOT'),
+                       NexusOver(i1=227, i2=240, j1=91, j2=91, k1=29, k2=40, operator='*', value=0.0,
+                                 array='TYF', grid='ROOT')]
     
+    file_content = """OVER	TY TYF							
+GRID	ROOT							
+227 	240 	91 	91 	29 	40	*0.0	*0.0
+"""
+    # Act
+    result = NexusGrid.load_nexus_overs(file_content.splitlines(keepends=True))
+
+    # Assert
+    assert result == expected_result
+
+
 def test_over_to_string():
     # Arrange
     over = NexusOver(i1=1, i2=12, j1=1, j2=46, k1=10, k2=11, operator='*', value=0.0,
-                      arrays=['TX'], grid='ROOT')
+                     array='TX', grid='ROOT')
     expected_result = """OVER TX
 1 12 1 46 10 11 *0.0
 """

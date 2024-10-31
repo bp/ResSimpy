@@ -8,7 +8,7 @@ class Over(ABC):
     """Used to represent an abstract base of Overrides for transmissibility and pore volumes.
 
     Attributes:
-        arrays (list[str]): The arrays to be modified by the over.
+        array (str): The array to be modified by the over.
         i1 (int): The start of the i range.
         i2 (int): The end of the i range.
         j1 (int): The start of the j range.
@@ -21,7 +21,7 @@ class Over(ABC):
         grid (Optional[str]): The grid that the Over function relates to.
         fault_name (Optional[str]): The named fault that the Over function relates to.
     """
-    arrays: list[str]
+    array: str
     i1: int
     i2: int
     j1: int

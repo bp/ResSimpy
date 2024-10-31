@@ -1434,7 +1434,7 @@ class NexusGrid(Grid):
         Returns:
             list[NexusOver]: list of NexusOver objects representing the OVER table.
         """
-        ignore_list = ['OVER', 'TX', 'TY', 'TZ', 'PV', 'PVF', 'TXF', 'TYF', 'TZF', 'GRID', 'FNAME', 'GE', 'LE']
+        ignore_list = ['OVER', 'TX', 'TY', 'TZ', 'PV', 'PVF', 'TXF', 'TYF', 'TZF', 'GRID', 'FNAME', 'GE', 'LE', 'ROOT']
         valid_end_tokens = [x for x in VALID_NEXUS_KEYWORDS if x not in ignore_list]
         overs_list: list[NexusOver] = []
         reading_over = False
@@ -1458,21 +1458,27 @@ class NexusGrid(Grid):
                     fname = nfo.get_expected_token_value('FNAME', line, file_content_as_list)
                 if len(split_line) > 6:
                     i1, i2, j1, j2, k1, k2 = (int(x) for x in split_line[0:6])
-                    operator_value = split_line[6]
-                    operator_matches = [x for x in potential_operators if x == operator_value[0]]
-                    if not operator_matches:
-                        # if the operator is not found then it is GE or LE
-                        threshold_value = float(split_line[6])
-                        operator = split_line[7]
-                        value = float(split_line[8])
-                    else:
-                        operator = operator_matches[0]
-                        # remove the operator and the remaining string is the value
-                        value = float(split_line[6][1:])
-                    overs_list.append(NexusOver(arrays=arrays, grid=grid, fault_name=fname,
-                                                i1=i1, i2=i2, j1=j1, j2=j2, k1=k1, k2=k2, operator=operator,
-                                                value=value, threshold=threshold_value))
-                    threshold_value = None
+                    # cut out the ranges
+                    split_line = split_line[6:]
+                    for array in arrays:
+                        operator_value = split_line[0]
+                        operator_matches = [x for x in potential_operators if x == operator_value[0]]
+                        if not operator_matches:
+                            # if the operator is not found then it is GE or LE
+                            value = float(split_line[0])
+                            operator = split_line[1]
+                            threshold_value = float(split_line[2])
+                            split_line_position = 3
+                        else:
+                            operator = operator_matches[0]
+                            # remove the operator and the remaining string is the value
+                            value = float(split_line[0][1:])
+                            split_line_position = 1
+                        overs_list.append(NexusOver(array=array, grid=grid, fault_name=fname,
+                                                    i1=i1, i2=i2, j1=j1, j2=j2, k1=k1, k2=k2, operator=operator,
+                                                    value=value, threshold=threshold_value))
+                        split_line = split_line[split_line_position:]
+                        threshold_value = None
 
             if nfo.check_token('OVER', line):
                 reading_over = True
