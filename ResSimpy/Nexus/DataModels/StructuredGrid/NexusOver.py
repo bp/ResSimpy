@@ -8,7 +8,7 @@ class NexusOver(Over):
     """Used to represent a line from an OVER table in a Nexus file.
 
     Attributes:
-        arrays (list[str]): The arrays to be modified by the over.
+        array (str): The arrays to be modified by the over.
         i1 (int): The start of the i range.
         i2 (int): The end of the i range.
         j1 (int): The start of the j range.
@@ -23,8 +23,7 @@ class NexusOver(Over):
     def to_string(self) -> str:
         """Converts the over to a string for writing to a Nexus file."""
         return_str = 'OVER'
-        for array in self.arrays:
-            return_str += f" {array}"
+        return_str += f" {self.array}"
         return_str += '\n'
         if self.grid != 'ROOT':
             return_str += f"GRID {self.grid}\n"
