@@ -249,8 +249,19 @@ def test_get_node_df(mocker, file_contents, node1_props, node2_props):
       'elevation_profile': 'R0308E03', 'diameter': 9.130, 'roughness': 0.0018, 'heat_transfer_coeff': 8.000,
       'temperature_profile': 'prtempr', 'temperature_in': 100, 'temperature_out': 10.3, 'date': '01/01/2023',
       'unit_system': UnitSystem.ENGLISH},),
+    ('''NODECON
+        NAME             NODEIN    NODEOUT       TYPE        METHOD    DDEPTH
+        CP01             CP01      wh_cp01       PIPEGRAD        2          7002.67
+        another_pipegrad  X         CP01         PIPEGRAD      0.0        NA
+        ENDNODECON
+        ''',
+     {'name': 'CP01', 'node_in': 'CP01', 'node_out': 'wh_cp01', 'con_type': 'PIPEGRAD', 'hyd_method': None,
+      'delta_depth': 7002.67, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH},
+     {'name': 'another_pipegrad', 'node_in': 'X', 'node_out': 'CP01', 'con_type': 'PIPEGRAD', 'hyd_method': None,
+      'delta_depth': None, 'date': '01/01/2023', 'unit_system': UnitSystem.ENGLISH}
+     )
 
-], ids=['basic', 'other_tables', 'time changes two tables', 'More Columns'])
+], ids=['basic', 'other_tables', 'time changes two tables', 'More Columns', 'pipegrad'])
 def test_load_connections(mocker: MockerFixture, file_contents, connection1_props, connection2_props):
     # Arrange
     start_date = '01/01/2023'
@@ -304,8 +315,24 @@ WELLS
       'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
      {'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 4039.3, 'crossflow': 'OFF', 'crossshut': 'CALC',
       'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
+     ),
+
+    (''' TIME 02/10/2032
+METRIC
+WELLS
+  NAME    STREAM   NUMBER   DATUM   CROSSFLOW   CROSS_SHUT  METHOD   TYPE
+  prod   PRODUCER   94     4039.3     ON        CELLGRAD     1       PIPE
+  inj   WATER      95     4039.3     OFF        CALC         0.0     PIPEGRAD
+  bad_data
+    ENDWELLS
+''',
+     {'name': 'prod', 'stream': 'PRODUCER', 'number': 94, 'datum_depth': 4039.3, 'crossflow': 'ON',
+      'crossshut': 'CELLGRAD',
+      'date': '02/10/2032', 'unit_system': UnitSystem.METRIC, 'hyd_method': '1', 'con_type': 'PIPE'},
+     {'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 4039.3, 'crossflow': 'OFF', 'crossshut': 'CALC',
+      'date': '02/10/2032', 'unit_system': UnitSystem.METRIC, 'hyd_method': None, 'con_type': 'PIPEGRAD' },
      )
-])
+], ids=['Normal', 'Pipegrad'])
 def test_load_well_connections(mocker, file_contents, well_connection_props1, well_connection_props2, ):
     # Arrange
     start_date = '01/01/2023'
@@ -337,6 +364,9 @@ def test_load_well_connections(mocker, file_contents, well_connection_props1, we
     result_df = nexus_well_cons.get_df()
 
     # Assert
+    assert len(result) == 2
+    assert result[0] == wellcon1
+    assert result[1] == wellcon2
     assert result == expected_result
     assert single_connection_result == wellcon1
     pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
