@@ -578,9 +578,9 @@ class NexusGrid(Grid):
                 self._range_y = int(second_value)
                 self._range_z = int(third_value)
 
-            # load the overs:
-            if fo.value_in_file('OVER', file_as_list):
-                self.__overs = NexusGrid.load_nexus_overs(file_as_list)
+        # load the overs:
+        if fo.value_in_file('OVER', file_as_list):
+            self.__overs = NexusGrid.load_nexus_overs(file_as_list)
 
         self._grid_properties_loaded = True
 
