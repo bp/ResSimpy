@@ -51,7 +51,7 @@ ENDLGR
     def test_load_lgrs(self):
         # Arrange
 
-        lgrs = NexusLGRs(grid_file_as_list=self.grid_file_contents.splitlines(keepends=True))
+        lgrs = NexusLGRs(grid_file_as_list=self.grid_file_contents.splitlines(keepends=True), parent_grid=None)
 
         # Act
         lgrs.load_lgrs()
@@ -75,7 +75,7 @@ ENDLGR
         assert lgrs_list[1] == self.expected_lgr_2
 
     def test_get_by_name(self):
-        lgrs = NexusLGRs(grid_file_as_list=self.grid_file_contents.splitlines(keepends=True))
+        lgrs = NexusLGRs(grid_file_as_list=self.grid_file_contents.splitlines(keepends=True), parent_grid=None)
         lgrs.load_lgrs()
 
         # Act

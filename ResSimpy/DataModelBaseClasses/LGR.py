@@ -211,5 +211,6 @@ class LGR(ABC):
                            'irock': self._irock,
                            'itran': self._itran}
         # filter to only include grid array definitions with a modifier
-        grid_array_defs = {key: value for key, value in grid_array_defs.items() if value.modifier is not None}
+        grid_array_defs = {key: value for key, value in grid_array_defs.items() if value.modifier is not None or
+                           value.value is not None or value.mods is not None}
         return grid_array_defs
