@@ -15,6 +15,7 @@ import pandas as pd
 from ResSimpy.Enums.UnitsEnum import UnitSystem, TemperatureUnits, SUnits
 from ResSimpy.FileOperations.file_operations import get_next_value, check_token, get_expected_token_value, \
     strip_file_of_comments, load_file_as_list
+from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
@@ -527,6 +528,12 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
             else:
                 new_object = row_object(properties_dict=keyword_store, date=current_date, unit_system=unit_system,
                                         date_format=date_format, start_date=start_date)
+
+            # If we are creating a PIPEGRAD connection of some kind, set hyd_method to None for now, as this column has
+            # a different meaning in the Nexus format for such connections.
+            if isinstance(new_object, NexusWellConnection) or isinstance(new_object, NexusNodeConnection):
+                if new_object.con_type == 'PIPEGRAD':
+                    new_object.hyd_method = None
 
             return_objects.append((new_object, index))
     return return_objects
