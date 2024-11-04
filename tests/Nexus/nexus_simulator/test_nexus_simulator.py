@@ -2502,9 +2502,9 @@ def test_load_fcs_file_multires_throws_error(mocker):
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    with pytest.raises(ValueError) as ve:
+    with pytest.raises(NotImplementedError) as nie:
         _ = NexusSimulator(origin='testpath1/Path.fcs')
 
     # Assert
-    assert str(ve.value) == 'Multiple reservoir models are not currently supported by ResSimpy.'
+    assert str(nie.value) == 'Multiple reservoir models are not currently supported by ResSimpy.'
 

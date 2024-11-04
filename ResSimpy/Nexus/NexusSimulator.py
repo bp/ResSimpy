@@ -552,7 +552,7 @@ class NexusSimulator(Simulator):
                 if value is not None:
                     self._default_units = UnitSystem(value.upper())
             elif nfo.check_token(token='RESERVOIR', line=line):
-                raise ValueError('Multiple reservoir models are not currently supported by ResSimpy.')
+                raise NotImplementedError('Multiple reservoir models are not currently supported by ResSimpy.')
 
         # Load in the Nexus options information
         if self.model_files.options_file is not None:
