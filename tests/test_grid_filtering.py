@@ -68,7 +68,7 @@ def test_grid_to_numpy_array(mocker):
     file_contents = '''! Comment 345 52
     1 2 3 4 5
     6 7 8 9 10 ! comment
-    -- comment?
+    !-- comment?
     11 12'''
     expected_array = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
 
@@ -83,6 +83,38 @@ def test_grid_to_numpy_array(mocker):
     grid = NexusGrid(assume_loaded=True)
     grid._porosity = GridArrayDefinition(modifier='VALUE', value=file_path, keyword_in_include_file=False,
                                          absolute_path=file_path)
+    grid._range_x = 2
+    grid._range_y = 3
+    grid._range_z = 2
+    # Act
+    result = grid.grid_array_definition_to_numpy_array(grid_array_definition=grid.porosity)
+    result_from_grid_array = grid.porosity.get_array_from_file()
+    # Assert
+    assert np.array_equal(expected_array, result)
+    assert np.array_equal(expected_array, result_from_grid_array)
+
+
+def test_grid_to_numpy_array_values_in_file(mocker):
+    # Arrange
+    file_contents = '''! Comment 345 52
+    1 2 3 4 5
+    6 7 8 9 10 ! comment
+    !-- comment?
+    11 12'''
+    expected_array = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+
+    file_path = '/my/grid/file.dat'
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            file_path: file_contents,
+        }).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    grid = NexusGrid(assume_loaded=True)
+    grid._porosity = GridArrayDefinition(modifier='VALUE', value=file_contents, keyword_in_include_file=False,
+                                         absolute_path=None)
     grid._range_x = 2
     grid._range_y = 3
     grid._range_z = 2
