@@ -38,6 +38,10 @@ class LGR(ABC):
     _itran: GridArrayDefinition
     _iregion: dict[str, GridArrayDefinition]
 
+    _dx: GridArrayDefinition
+    _dy: GridArrayDefinition
+    _dz: GridArrayDefinition
+
     def __init__(self, parent_grid: str, name: str, i1: int, i2: int, j1: int, j2: int, k1: int, k2: int,  # noqa: D417
                  nx: list[int], ny: list[int], nz: list[int]) -> None:
         """Initializes the LGR class.
@@ -79,6 +83,11 @@ class LGR(ABC):
         self._irock: GridArrayDefinition = GridArrayDefinition()
         self._itran: GridArrayDefinition = GridArrayDefinition()
         self._iregion: dict[str, GridArrayDefinition] = {}
+
+        self._dx: GridArrayDefinition = GridArrayDefinition()
+        self._dy: GridArrayDefinition = GridArrayDefinition()
+        self._dz: GridArrayDefinition = GridArrayDefinition()
+
 
     @property
     def range(self) -> tuple[int, int, int, int, int, int]:
@@ -209,7 +218,11 @@ class LGR(ABC):
                            'iwater': self._iwater,
                            'irelpm': self._irelpm,
                            'irock': self._irock,
-                           'itran': self._itran}
+                           'itran': self._itran,
+                           'dx': self._dx,
+                           'dy': self._dy,
+                           'dz': self._dz,
+                           }
         # filter to only include grid array definitions with a modifier
         grid_array_defs = {key: value for key, value in grid_array_defs.items() if value.modifier is not None or
                            value.value is not None or value.mods is not None}
