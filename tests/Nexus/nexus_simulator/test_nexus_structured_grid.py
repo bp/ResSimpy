@@ -1563,19 +1563,23 @@ def test_nested_includes_with_grid_array_keywords(mocker):
     assert result_ky == expected_ky_result
 
 
-@pytest.mark.parametrize('structured_grid_file_contents, modifier, full_file_path', [
+@pytest.mark.parametrize('structured_grid_file_contents, modifier, full_file_path, expected_value', [
     ('''! Array data
     KX VALUE
-    INCLUDE inc_file_kx.inc''', 'VALUE', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc')),
+    INCLUDE inc_file_kx.inc''', 'VALUE', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc'), 'inc_file_kx.inc'),
     ('''! Array data
      KX ZVAR
-     INCLUDE inc_file_kx.inc''', 'ZVAR', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc')),
+     INCLUDE inc_file_kx.inc''', 'ZVAR', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc'), 'inc_file_kx.inc'),
     ('''! Array data
     KX YVAR
-    INCLUDE inc_file_kx.inc''', 'YVAR', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc')),
+    INCLUDE inc_file_kx.inc''', 'YVAR', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc'), 'inc_file_kx.inc'),
+    # Value directly in grid file
+    ('''! Array data
+    KX VALUE
+    1 2 3 4''', 'VALUE', None, '1 2 3 4'),
 ])
 def test_grid_array_definitions_abs_path(mocker, structured_grid_file_contents, modifier,
-                                         full_file_path):
+                                         full_file_path, expected_value):
     # Arrange
     fcs_path = '/root/nexus_run.fcs'
     structured_grid_path = 'nexus_files/grid/test_structured_grid.dat'
@@ -1598,7 +1602,7 @@ def test_grid_array_definitions_abs_path(mocker, structured_grid_file_contents, 
 
     sim_obj = NexusSimulator(origin=fcs_path)
 
-    expected_kx_result = GridArrayDefinition(modifier=modifier, value='inc_file_kx.inc', mods=None,
+    expected_kx_result = GridArrayDefinition(modifier=modifier, value=expected_value, mods=None,
                                              absolute_path=full_file_path)
 
     # Act
