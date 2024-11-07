@@ -2091,3 +2091,81 @@ INCLUDE iregion_mod.mod
     assert result_iregion.value == expected_lgr._iregion['IREG1'].value
     assert result_iregion.modifier == expected_lgr._iregion['IREG1'].modifier
     pd.testing.assert_frame_equal(result_iregion.mods['MOD'], expected_lgr._iregion['IREG1'].mods['MOD'])
+
+
+def test_read_mods(mocker):
+    # Arrange
+    input_run_control = "START 01/07/2023"
+    input_nexus_fcs_file = """DATEFORMAT DD/MM/YYYY
+        GRID_FILES
+            STRUCTURED_GRID    /path/to/grid/file.dat
+
+        RECURRENT_FILES
+            RUNCONTROL /path/to/run_control.dat
+
+        SURFACE Network 1  /surface_file_01.dat
+
+        """
+    input_grid_file = """
+
+NX NY NZ
+69 30  1
+
+KX VALUE
+INCLUDE BLAH/BLAH
+
+KY CON
+200.50
+
+LGR
+CARTREF lgr_01                         
+  14  20   29  29  1  10
+  6*5  1*7
+  9
+  10*1
+ENDREF 
+ENDLGR
+
+ARRAYS lgr_01
+KX VALUE
+INCLUDE permx_array.dat
+
+IPVT CON
+1
+MOD 
+1 5 1 2 1 1 =2
+1 5 3 4 1 1 =3
+
+SG ZVAR
+5*0.8
+5*0.2
+"""
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            '/path/to/nexus/fcsfile.dat': input_nexus_fcs_file,
+            '/path/to/run_control.dat': input_run_control,
+            '/path/to/grid/file.dat': input_grid_file,
+            '/surface_file_01.dat': ''
+        }
+                                        ).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    listdir_mock = mocker.Mock(return_value=[])
+    mocker.patch("os.listdir", listdir_mock)
+
+    def mock_isfile(filename):
+        if '_filtered' in filename:
+            return False
+        return True
+
+    mocker.patch("os.path.isfile", mock_isfile)
+    mocker.patch("os.path.exists", mock_isfile)
+    expected_output_file_name = os.path.join('/path/to/new/test/location', 'MY_NEW_MODEL.DATA')
+    # Act
+    nexus_model = NexusSimulator(origin='/path/to/nexus/fcsfile.dat')
+    
+    # Assert
+    x = nexus_model.grid.kx
+    # assert len(nexus_model.grid.lgrs.lgrs[0].ipvt.mods['MOD']) == 2
+    assert len(nexus_model.grid.lgrs.lgrs[0].ipvt.mods['MOD']) == 2

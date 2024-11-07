@@ -389,6 +389,8 @@ class NexusGrid(Grid):
         if self._grid_properties_loaded:
             return
 
+        self.lgrs.load_lgrs()
+
         if self.__grid_nexus_file is None or self.__grid_file_contents is None or self.__grid_file_nested is None:
             raise ValueError("Grid file not found, cannot load grid properties")
 
