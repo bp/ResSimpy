@@ -72,7 +72,7 @@ def test_grid_to_numpy_array(mocker):
     11 12'''
     expected_array = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
 
-    file_path = '/my/grid/file.dat'
+    file_path = '/my/grid/file_2.dat'
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             file_path: file_contents,
@@ -103,7 +103,7 @@ def test_grid_to_numpy_array_values_in_file(mocker):
     11 12'''
     expected_array = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
 
-    file_path = '/my/grid/file.dat'
+    file_path = '/my/grid/file_2.dat'
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={

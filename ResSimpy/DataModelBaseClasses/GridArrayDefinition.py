@@ -35,7 +35,7 @@ class GridArrayDefinition:
         if path is None and self.value is not None:
             sanitised_value = "".join(fo.strip_file_of_comments(self.value.splitlines()))
             # If the value is a path, load that file in. Otherwise, assume it is a grid array value.
-            if sanitised_value.upper().isupper():
+            if sanitised_value.upper().isupper():  # Fastest way to check if there are any letters in a string
                 path = self.value
             else:
                 return sanitised_value.splitlines()
