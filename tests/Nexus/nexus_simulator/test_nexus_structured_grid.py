@@ -2033,7 +2033,7 @@ INCLUDE iregion_mod.mod
 
 """
     kx_mod_path = os.path.join('testpath1', 'kx_mod.mod')
-    kx_mod_content = '''79          79           5           5           8           8 =   1.89576540E-02
+    kx_mod_content = '''79          79           5           5           8           8 =   1.89576540E-02 ! A comment
            77          77           5           5           8           8 =   1.89576540E-02
            78          78           5           5           8           8 =  0.240092114    
            79          79           5           5           9           9 =   977.063721  
@@ -2137,8 +2137,8 @@ INCLUDE permx_array.dat
 IPVT CON
 1
 MOD 
-1 5 1 2 1 1 =2
-1 5 3 4 1 1 =3
+1 5 1 2 1 1 = 2\t! A comment
+1 5 3 4 1 1 =3 ! A comment
 
 SG ZVAR
 5*0.8
@@ -2165,11 +2165,15 @@ SG ZVAR
 
     mocker.patch("os.path.isfile", mock_isfile)
     mocker.patch("os.path.exists", mock_isfile)
-    expected_output_file_name = os.path.join('/path/to/new/test/location', 'MY_NEW_MODEL.DATA')
+    
+    expected_ipvt_mod = pd.DataFrame({'i1': [1, 1], 'i2': [5, 5], 'j1': [1, 3], 'j2': [2, 4], 
+                                      'k1': [1, 1], 'k2': [1, 1], '#v': ['=2', '=3']})
+
     # Act
     nexus_model = NexusSimulator(origin='/path/to/nexus/fcsfile.dat')
     
     # Assert
     x = nexus_model.grid.kx
-    # assert len(nexus_model.grid.lgrs.lgrs[0].ipvt.mods['MOD']) == 2
-    assert len(nexus_model.grid.lgrs.lgrs[0].ipvt.mods['MOD']) == 2
+    ipvt_mods = nexus_model.grid.lgrs.lgrs[0].ipvt.mods['MOD']
+    assert len(ipvt_mods) == 2
+    pd.testing.assert_frame_equal(ipvt_mods, expected_ipvt_mod)
