@@ -10,6 +10,7 @@ import pandas as pd
 from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.FileOperations.File import File
+from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import Network
@@ -164,5 +165,48 @@ class NetworkOperationsMixIn(ABC):
             for attr, value in last_resolved_object.__dict__.items():
                 if value is not None and getattr(unresolved_obj, attr, None) is None:
                     setattr(new_resolved_object, attr, value)
+            resolved_objects.append(new_resolved_object)
+        return resolved_objects
+
+    @staticmethod
+    def resolve_same_named_objects_constraints(sorted_by_data: Sequence[NexusConstraint]) -> Sequence[NexusConstraint]:
+        """Resolves a subset of objects by date and applies clears in the constraints."""
+        resolved_objects: list[NexusConstraint] = []
+        for unresolved_obj in sorted_by_data:
+            # append the first
+            if len(resolved_objects) == 0:
+                resolved_objects.append(unresolved_obj)
+                continue
+            last_resolved_object = resolved_objects[-1]
+
+            new_resolved_object = copy.deepcopy(unresolved_obj)
+
+            skip_attributes = ['id', 'date', 'name', 'iso_date', 'clear_q', 'clear_p', 'clear_limit', 'clear_alq',
+                               'clear_all']
+
+            for attr, value in last_resolved_object.__dict__.items():
+                if value is None or attr in skip_attributes:
+                    continue
+                if getattr(unresolved_obj, attr, None) is None:
+                    setattr(new_resolved_object, attr, value)
+
+            # collect which attributes to clear:
+            clear_constraints_dict = {}
+            if unresolved_obj.clear_q:
+                clear_constraints_dict.update(unresolved_obj.get_rate_constraints_map())
+            if unresolved_obj.clear_p:
+                clear_constraints_dict.update(unresolved_obj.get_pressure_constraints_map())
+            if unresolved_obj.clear_limit:
+                clear_constraints_dict.update(unresolved_obj.get_limit_constraints_map())
+            if unresolved_obj.clear_alq:
+                clear_constraints_dict.update(unresolved_obj.get_alq_constraints_map())
+            if unresolved_obj.clear_all:
+                clear_constraints_dict.update(unresolved_obj.get_rate_constraints_map())
+                clear_constraints_dict.update(unresolved_obj.get_pressure_constraints_map())
+                clear_constraints_dict.update(unresolved_obj.get_limit_constraints_map())
+                clear_constraints_dict.update(unresolved_obj.get_alq_constraints_map())
+            # Clear them by setting to None.
+            for (clear_attr, _) in clear_constraints_dict.values():
+                setattr(new_resolved_object, clear_attr, None)
             resolved_objects.append(new_resolved_object)
         return resolved_objects

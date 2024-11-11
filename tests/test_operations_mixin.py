@@ -1,5 +1,6 @@
 import pytest
 
+from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
@@ -106,6 +107,55 @@ def test_resolve_carried_over_attributes_same_date():
 
     # Act
     result = NetworkOperationsMixIn.resolve_carried_over_attributes(existing_objects)
+
+    # Assert
+    assert result == expected_result
+
+
+def test_apply_clears():
+    # Arrange
+    constraints_for_well = [
+        NexusConstraint(max_surface_gas_rate=12.3, max_surface_liquid_rate=123.4, name='well1', max_pressure=100,
+                        date='01/01/2020', date_format=DateFormat.DD_MM_YYYY),
+        NexusConstraint(clear_q=True, name='well1', date='01/02/2020', date_format=DateFormat.DD_MM_YYYY),
+        NexusConstraint(max_reservoir_oil_rate=120, name='well1', date='01/03/2020', date_format=DateFormat.DD_MM_YYYY),
+    ]
+    
+    expected_result = [
+        NexusConstraint(max_surface_gas_rate=12.3, max_surface_liquid_rate=123.4, name='well1', max_pressure=100,
+                        date='01/01/2020', date_format=DateFormat.DD_MM_YYYY),
+        NexusConstraint(clear_q=True, name='well1', date='01/02/2020', date_format=DateFormat.DD_MM_YYYY,
+                        max_pressure=100),
+        NexusConstraint(max_reservoir_oil_rate=120, name='well1', date='01/03/2020', date_format=DateFormat.DD_MM_YYYY,
+                        max_pressure=100),
+    ]
+    
+    # Act
+    result = NetworkOperationsMixIn.resolve_same_named_objects_constraints(constraints_for_well)
+    
+    # Assert
+    assert result == expected_result
+
+
+def test_apply_clear_all():
+    # Arrange
+    constraints_for_well = [
+        NexusConstraint(max_surface_gas_rate=12.3, max_surface_liquid_rate=123.4, name='well1', max_pressure=100,
+                        date='01/01/2020', date_format=DateFormat.DD_MM_YYYY),
+        NexusConstraint(clear_all=True, name='well1', date='01/02/2020', date_format=DateFormat.DD_MM_YYYY),
+        NexusConstraint(max_reservoir_oil_rate=120, name='well1', date='01/03/2020', date_format=DateFormat.DD_MM_YYYY),
+    ]
+
+    expected_result = [
+        NexusConstraint(max_surface_gas_rate=12.3, max_surface_liquid_rate=123.4, name='well1', max_pressure=100,
+                        date='01/01/2020', date_format=DateFormat.DD_MM_YYYY),
+        NexusConstraint(clear_all=True, name='well1', date='01/02/2020', date_format=DateFormat.DD_MM_YYYY),
+        NexusConstraint(max_reservoir_oil_rate=120, name='well1', date='01/03/2020', date_format=DateFormat.DD_MM_YYYY,
+                        ),
+    ]
+
+    # Act
+    result = NetworkOperationsMixIn.resolve_same_named_objects_constraints(constraints_for_well)
 
     # Assert
     assert result == expected_result
