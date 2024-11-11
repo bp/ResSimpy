@@ -2041,8 +2041,8 @@ INCLUDE iregion_mod.mod
            80          80           5           5           9           9 =   915.068970
 '''
     iregion_mod_path = os.path.join('testpath1', 'iregion_mod.mod')
-    iregion_mod_content = '''1           10           1           10           1           1 =  1.00000000
-              11           20           1           10           2           2 =  2.00000000
+    iregion_mod_content = '''1           10           1           10           1           1 =  1
+              11           20           1           10           2           2 =  2
               '''
 
     def mock_open_wrapper(filename, mode):
@@ -2078,7 +2078,7 @@ INCLUDE iregion_mod.mod
                                            keyword_in_include_file=False, absolute_path=None, array=None)
     # set up iregion dataframe
     expected_lgr._iregion = {'IREG1': GridArrayDefinition(modifier=None, value=None, mods={'MOD': pd.DataFrame(
-        {'i1': [1, 11], 'i2': [10, 20], 'j1': [1, 1], 'j2': [10, 10], 'k1': [1, 2], 'k2': [1, 2], '#v': ['=1.0', '=2.0']})},
+        {'i1': [1, 11], 'i2': [10, 20], 'j1': [1, 1], 'j2': [10, 10], 'k1': [1, 2], 'k2': [1, 2], '#v': ['=1', '=2']})},
                                                 keyword_in_include_file=False, absolute_path=None, array=None)}
 
     model = NexusSimulator('testpath1/nexus_run.fcs')

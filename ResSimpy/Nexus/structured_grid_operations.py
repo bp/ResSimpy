@@ -390,40 +390,47 @@ class StructuredGridOperations:
 
         for key in mod_start_end.keys():
             for i in range(len(mod_start_end[key])):
-                if mod_start_end[key][i][1] > mod_start_end[key][i][0]:
-                    file_slice = file_as_list[mod_start_end[key][i][0]:mod_start_end[key][i][1]]
-                    # exclude lines with INCLUDE keyword
-                    file_slice = [x for x in file_slice if not nfo.check_token('INCLUDE', x)]
-                    mod_table = nfo.read_table_to_df(file_slice, noheader=True)
-                    if len(mod_table.columns) == 7:
-                        mod_table.columns = ['i1', 'i2', 'j1', 'j2', 'k1', 'k2', '#v']
-                    elif len(mod_table.columns) == 8:
-                        mod_table[8] = mod_table[6].astype(str) + mod_table[7].astype(str)
-                        mod_table = mod_table.drop([6, 7], axis=1)
-                        mod_table.columns = ['i1', 'i2', 'j1', 'j2', 'k1', 'k2', '#v']
+                if mod_start_end[key][i][1] <= mod_start_end[key][i][0]:
+                    continue
+                file_slice = file_as_list[mod_start_end[key][i][0]:mod_start_end[key][i][1]]
+                # exclude lines with INCLUDE keyword
+                file_slice = [x for x in file_slice if not nfo.check_token('INCLUDE', x)]
+                mod_table = nfo.read_table_to_df(file_slice, noheader=True)
+                if len(mod_table.columns) == 7:
+                    mod_table.columns = ['i1', 'i2', 'j1', 'j2', 'k1', 'k2', '#v']
+                elif len(mod_table.columns) == 8:
+                    # clean nan's when there is a mix of 7 length and 8 length columns
+                    mod_table[7] = mod_table[7].convert_dtypes().astype(str)
+                    mod_table[7] = mod_table[7].replace('nan', '')
+                    mod_table[7] = mod_table[7].replace('<NA>', '')
+
+                    mod_table[8] = mod_table[6].astype(str) + mod_table[7].astype(str)
+
+                    mod_table = mod_table.drop([6, 7], axis=1)
+                    mod_table.columns = ['i1', 'i2', 'j1', 'j2', 'k1', 'k2', '#v']
+                else:
+                    raise ValueError(
+                        f'Unsuitable mod card for {token_modifier} keyword in line: {line}')
+                if not isinstance(token_property, dict):
+                    if token_property.mods is not None:
+                        if key in token_property.mods.keys():
+                            orig_mod_tab = token_property.mods[key].copy()
+                            token_property.mods[key] = \
+                                pd.concat([orig_mod_tab, mod_table]).reset_index(drop=True)
+                        else:
+                            token_property.mods[key] = mod_table
                     else:
-                        raise ValueError(
-                            f'Unsuitable mod card for {token_modifier} keyword in line: {line}')
-                    if not isinstance(token_property, dict):
-                        if token_property.mods is not None:
-                            if key in token_property.mods.keys():
-                                orig_mod_tab = token_property.mods[key].copy()
-                                token_property.mods[key] = \
+                        token_property.mods = {key: mod_table}
+                else:  # IREGION
+                    if token_property[region_name].mods is not None:
+                        tmp_dict = token_property[region_name].mods
+                        if isinstance(tmp_dict, dict):
+                            if key in tmp_dict.keys():
+                                orig_mod_tab = tmp_dict[key].copy()
+                                tmp_dict[key] = \
                                     pd.concat([orig_mod_tab, mod_table]).reset_index(drop=True)
-                            else:
-                                token_property.mods[key] = mod_table
-                        else:
-                            token_property.mods = {key: mod_table}
-                    else:  # IREGION
-                        if token_property[region_name].mods is not None:
-                            tmp_dict = token_property[region_name].mods
-                            if isinstance(tmp_dict, dict):
-                                if key in tmp_dict.keys():
-                                    orig_mod_tab = tmp_dict[key].copy()
-                                    tmp_dict[key] = \
-                                        pd.concat([orig_mod_tab, mod_table]).reset_index(drop=True)
-                        else:
-                            token_property[region_name].mods = {key: mod_table}
+                    else:
+                        token_property[region_name].mods = {key: mod_table}
 
     @staticmethod
     def __add_absolute_path_to_grid_array_definition(grid_array_definition: GridArrayDefinition,
