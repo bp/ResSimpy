@@ -403,15 +403,16 @@ class StructuredGridOperations:
                     mod_table[7] = mod_table[7].convert_dtypes().astype(str)
                     mod_table[7] = mod_table[7].replace('nan', '')
                     mod_table[7] = mod_table[7].replace('<NA>', '')
-
+                    # Put the last two columns together and drop them to make the #v column
                     mod_table[8] = mod_table[6].astype(str) + mod_table[7].astype(str)
-
                     mod_table = mod_table.drop([6, 7], axis=1)
+
                     mod_table.columns = ['i1', 'i2', 'j1', 'j2', 'k1', 'k2', '#v']
                 else:
                     raise ValueError(
                         f'Unsuitable mod card for {token_modifier} keyword in line: {line}')
                 if not isinstance(token_property, dict):
+                    # If we are dealing with a single grid array definition
                     if token_property.mods is not None:
                         if key in token_property.mods.keys():
                             orig_mod_tab = token_property.mods[key].copy()
@@ -422,6 +423,7 @@ class StructuredGridOperations:
                     else:
                         token_property.mods = {key: mod_table}
                 else:  # IREGION
+                    # If we are dealing with a dictionary of grid array definitions representing an iregion dict
                     if token_property[region_name].mods is not None:
                         tmp_dict = token_property[region_name].mods
                         if isinstance(tmp_dict, dict):
