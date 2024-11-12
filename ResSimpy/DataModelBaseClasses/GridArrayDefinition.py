@@ -33,7 +33,12 @@ class GridArrayDefinition:
         """Loads the grid array definition to a file as a list of strings."""
         path = self.absolute_path
         if path is None and self.value is not None:
-            path = self.value
+            sanitised_value = "".join(fo.strip_file_of_comments(self.value.splitlines()))
+            # If the value is a path, load that file in. Otherwise, assume it is a grid array value.
+            if sanitised_value.upper().isupper():  # Fastest way to check if there are any letters in a string
+                path = self.value
+            else:
+                return sanitised_value.splitlines()
         elif path is None:
             raise FileNotFoundError('No file path found in the grid array definition')
         return fo.load_file_as_list(path)

@@ -39,7 +39,8 @@ class NexusLGRs(LGRs):
 
     def load_lgrs(self) -> None:
         """Loads LGRs from a list of strings."""
-
+        if self.__has_been_loaded:
+            return
         # Implementation to load LGRs from the provided list
         start_cartref_index = -1
         end_cartref_index = -1
