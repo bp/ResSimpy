@@ -1001,11 +1001,6 @@ def test_load_surface_file_activate_deactivate(mocker):
                           'd_factor': 4321}
     gas_welcon_props_4 = {'name': 'gaswelcon_2', 'date': '14/07/2024', 'unit_system': UnitSystem.ENGLISH,
                           'd_factor': 9876, }
-    # gas_welcon_props_5 = {'name': 'gaswelcon_2', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
-    # gas_welcon_props_6 = {'name': 'gaswelcon_1', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
-
-
-    # node_con_prop_n1_n2_later = {'name': 'N1_n2', 'date': '23/08/2024', 'unit_system': UnitSystem.ENGLISH}
 
     welcon_1 = NexusWellConnection(welcon_props_1, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
     welcon_2 = NexusWellConnection(welcon_props_2, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
@@ -1019,11 +1014,7 @@ def test_load_surface_file_activate_deactivate(mocker):
     gas_welcon_2 = NexusWellConnection(gas_welcon_props_2, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
     gas_welcon_3 = NexusWellConnection(gas_welcon_props_3, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
     gas_welcon_4 = NexusWellConnection(gas_welcon_props_4, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
-    # gas_welcon_5 = NexusWellConnection(gas_welcon_props_5, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
-    # gas_welcon_6 = NexusWellConnection(gas_welcon_props_6, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
     node_n1_n2 = NexusNodeConnection(node_con_prop_n1_n2, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
-    # node_n1_n2_later = NexusNodeConnection(node_con_prop_n1_n2_later, date_format=DateFormat.DD_MM_YYYY,
-    #                                        start_date=start_date)
 
     activation_change_1 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, date_format=DateFormat.DD_MM_YYYY,
                                                 date='01/02/2024', name='WELCON_1', start_date = '01/01/2023')

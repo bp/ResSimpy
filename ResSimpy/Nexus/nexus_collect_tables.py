@@ -302,7 +302,7 @@ def __activate_deactivate_checks(line: str, is_activate_block: bool,
         # If a wildcard is found, ensure that all connections that match the wildcard are dealt with.
         if '*' in affected_connection_name:
             all_affected_well_connections = [x for x in all_well_connections if
-                                             fnmatch.fnmatch(x, affected_connection_name)]
+                                             fnmatch.fnmatch(x.casefold(), affected_connection_name.casefold())]
 
             # Create an object for each affected connection
             for connection in all_affected_well_connections:
