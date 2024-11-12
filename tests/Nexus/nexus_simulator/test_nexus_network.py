@@ -1130,3 +1130,75 @@ ENDACTIVATE
     # Assert
     assert result_wellcons == expected_wellcons
     assert result_activation_changes == expected_activation_changes
+
+
+def test_load_surface_file_activate_deactivate_multiple_on_same_line(mocker):
+    # Arrange
+    # Mock out the surface and fcs file
+    fcs_file_contents = 'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data/surface.inc'
+
+    surface_file_content = """
+        WELLS
+ NAME     	STREAM    NUMBER  DATUM 	CROSSFLOW CROSS_SHUT  
+ well1	  	PRODUCER    1       123.4    OFF        OFF
+  Well2	  	PRODUCER    1       123.4    OFF        OFF
+ENDWELLS
+
+TIME 09/07/2024
+CONSTRAINTS
+    well1	 QOSMAX 	5432
+ENDCONSTRAINTS
+
+TIME 23/08/2024
+DEACTIVATE
+    CONNECTION
+    well1 Well2
+ENDDEACTIVATE
+
+TIME 10/09/2024
+ACTIVATE
+    CONNECTION
+    well1
+ENDACTIVATE
+    """
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            fcs_file_path: fcs_file_contents,
+            'nexus_data/surface.inc': surface_file_content,
+            'run_control.inc': 'START 01/01/2023',
+        }).return_value
+        return mock_open
+
+    start_date = '01/01/2023'
+    mocker.patch("builtins.open", mock_open_wrapper)
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
+
+    fcs_file_path = 'fcs_file.fcs'
+    nexus_sim = NexusSimulator(fcs_file_path)
+
+    # Create the expected objects
+    welcon_0 = NexusWellConnection(date_format=DateFormat.DD_MM_YYYY,
+                                   start_date=start_date, date='01/01/2023', name='well1', datum_depth=123.4,
+                                   crossflow='OFF', crossshut='OFF', number=1, stream='PRODUCER')
+    welcon_1 = NexusWellConnection(date_format=DateFormat.DD_MM_YYYY,
+                                   start_date=start_date, date='01/01/2023', name='Well2', datum_depth=123.4,
+                                   crossflow='OFF', crossshut='OFF', number=1, stream='PRODUCER')
+
+    expected_wellcons = [welcon_0, welcon_1]
+
+    activation_change_1 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, name='well1', date='23/08/2024',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    activation_change_2 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, name='Well2', date='23/08/2024',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    activation_change_3 = NexusActivationChange(change=ActivationChangeEnum.ACTIVATE, name='well1', date='10/09/2024',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    expected_activation_changes = [activation_change_1, activation_change_2, activation_change_3]
+
+    # Act
+    result_wellcons = nexus_sim.network.well_connections.get_all()
+    result_activation_changes = nexus_sim.network.activation_changes.get_all()
+
+    # Assert
+    assert result_wellcons == expected_wellcons
+    assert result_activation_changes == expected_activation_changes

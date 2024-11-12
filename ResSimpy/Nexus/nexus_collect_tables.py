@@ -4,24 +4,23 @@ from __future__ import annotations
 import fnmatch
 from datetime import timedelta, time
 from typing import Any, Optional
+
 import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.FileOperations.File import File
 from ResSimpy.FileOperations.file_operations import get_next_value
 from ResSimpy.Nexus.DataModels.Network.NexusActivationChange import NexusActivationChange
-from ResSimpy.Nexus.NexusEnums.ActivationChangeEnum import ActivationChangeEnum
-from ResSimpy.Time.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.Network.NexusConLists import NexusConLists
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
-from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
-from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellLists import NexusWellLists
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
+from ResSimpy.Nexus.NexusEnums.ActivationChangeEnum import ActivationChangeEnum
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.nexus_constraint_operations import load_inline_constraints
 from ResSimpy.Nexus.nexus_file_operations import check_property_in_line, check_token, get_expected_token_value, \
     check_list_tokens, load_table_to_objects
 from ResSimpy.Nexus.nexus_load_list_table import load_table_to_lists
+from ResSimpy.Time.ISODateTime import ISODateTime
 
 
 # TODO refactor the collection of tables to an object with proper typing
@@ -204,19 +203,12 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                     well_lists = [x[0] for x in list_objects]
 
             else:
-                if 'WELLS' in nexus_object_results:
-                    well_connections = nexus_object_results['WELLS']
-                else:
-                    well_connections = None
                 list_objects = load_table_to_objects(file_as_list=file_as_list[table_start:table_end],
                                                      row_object=table_object_map[token_found],
                                                      property_map=property_map,
                                                      current_date=current_date,
                                                      unit_system=unit_system, date_format=date_format,
-                                                     well_names=well_names, well_connections=well_connections,
-                                                     start_date=start_date)
-
-                # if token_found == 'ACTIVATE' or token_found == 'DEACTIVATE':
+                                                     well_names=well_names, start_date=start_date)
 
             # store objects found into right dictionary
             list_of_token_obj = nexus_object_results[token_found]
@@ -320,8 +312,9 @@ def __activate_deactivate_checks(line: str, is_activate_block: bool,
                 nexus_object_results['ACTIVATE_DEACTIVATE'].append(new_activation_change)
 
         else:
-            new_activation_change = NexusActivationChange(change=change, name=affected_connection_name, date=current_date,
-                                                          start_date=start_date, date_format=date_format)
+            new_activation_change = NexusActivationChange(change=change, name=affected_connection_name,
+                                                          date=current_date, start_date=start_date,
+                                                          date_format=date_format)
             nexus_object_results['ACTIVATE_DEACTIVATE'].append(new_activation_change)
 
         found_connections.append(affected_connection_name)

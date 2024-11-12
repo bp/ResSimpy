@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Sequence, TYPE_CHECKING
+from typing import Sequence, TYPE_CHECKING, Optional
 
 from ResSimpy.Nexus.DataModels.Network.NexusActivationChange import NexusActivationChange
 
@@ -27,6 +27,9 @@ class NexusActivationChanges:
         self.__parent_network.get_load_status()
         return self.__activationChanges
 
-    def _add_to_memory(self, activations_to_add: list[NexusActivationChange]) -> None:
+    def _add_to_memory(self, activations_to_add: Optional[list[NexusActivationChange]]) -> None:
         """Adds the list of Nexus Action objects to memory."""
+        if activations_to_add is None:
+            return
+
         self.__activationChanges.extend(activations_to_add)

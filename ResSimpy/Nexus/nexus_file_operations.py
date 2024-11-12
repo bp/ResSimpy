@@ -416,7 +416,6 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
                           preserve_previous_object_attributes: bool = False,
                           well_names: Optional[list[str]] = None,
                           welllists: Optional[list[NexusWellList]] = None,
-                          well_connections: Optional[list[NexusWellConnection]] = None,
                           start_date: Optional[str] = None) -> list[tuple[Any, int]]:
     """Loads a table row by row to an object provided in the row_object.
 
@@ -436,7 +435,6 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
         date_format (Optional[DateFormat]): The date format of the object.
         well_names (Optional[str]): A list of all the network object names.
         welllists (Optional[list[WellList]]): A list of all the WELLLISTs loaded in so far.
-        well_connections (Optional[list[NexusWellConnection]]): A list of all the Well Connections loaded in so far.
         start_date (Optional[str]): The start date of the simulation.
 
     Returns:
