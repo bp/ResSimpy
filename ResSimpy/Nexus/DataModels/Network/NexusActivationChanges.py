@@ -14,7 +14,7 @@ class NexusActivationChanges:
     __activationChanges: list[NexusActivationChange] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork) -> None:
-        """Initialises the NexusProcs class.
+        """Initialises the NexusActivationChanges class.
 
         Args:
             parent_network (NexusNetwork): The network that the actions are a part of.
@@ -23,12 +23,12 @@ class NexusActivationChanges:
         self.__activationChanges = []
 
     def get_all(self) -> Sequence[NexusActivationChange]:
-        """Returns a list of actions loaded from the simulator."""
+        """Ensures the surface network file has been loaded."""
         self.__parent_network.get_load_status()
         return self.__activationChanges
 
     def _add_to_memory(self, activations_to_add: Optional[list[NexusActivationChange]]) -> None:
-        """Adds the list of Nexus Action objects to memory."""
+        """Adds the list of NexusActivationChange objects to memory."""
         if activations_to_add is None:
             return
 
