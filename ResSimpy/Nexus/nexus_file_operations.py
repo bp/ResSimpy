@@ -490,23 +490,8 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
 
         for name in object_well_names:
             keyword_store['name'] = name
-            if issubclass(row_object, NexusWellConnection):
-                # If we are creating a Well Connection, carry across the activated state of the previous one.
-                if well_connections is not None and len(well_connections) > 0:
-                    ordered_well_connections = sorted(well_connections, key=lambda x: x.iso_date, reverse=True)
-                    previous_well_connection = next((x for x in ordered_well_connections if x.name == name), None)
-                    if previous_well_connection is not None:
-                        is_activated = previous_well_connection.is_activated
-                    else:
-                        is_activated = True
-                else:
-                    is_activated = True
 
-                new_object = NexusWellConnection(properties_dict=keyword_store, date=current_date,
-                                                 unit_system=unit_system, date_format=date_format,
-                                                 is_activated=is_activated, start_date=start_date)
-
-            elif preserve_previous_object_attributes:
+            if preserve_previous_object_attributes:
                 all_matching_existing_constraints = constraint_obj_dict.get(name, None)
                 if all_matching_existing_constraints is not None:
                     # use the previous object to update this

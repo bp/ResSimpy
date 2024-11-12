@@ -14,6 +14,8 @@ from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.DataModelBaseClasses.Network import Network
 from ResSimpy.Nexus.DataModels.Network.NexusAction import NexusAction
 from ResSimpy.Nexus.DataModels.Network.NexusActions import NexusActions
+from ResSimpy.Nexus.DataModels.Network.NexusActivationChange import NexusActivationChange
+from ResSimpy.Nexus.DataModels.Network.NexusActivationChanges import NexusActivationChanges
 from ResSimpy.Nexus.DataModels.Network.NexusConList import NexusConList
 from ResSimpy.Nexus.DataModels.Network.NexusConLists import NexusConLists
 from ResSimpy.Nexus.DataModels.Network.NexusProc import NexusProc
@@ -61,6 +63,7 @@ class NexusNetwork(Network):
     actions: NexusActions
     targets: NexusTargets
     welllists: NexusWellLists
+    activation_changes: NexusActivationChanges
     __has_been_loaded: bool = False
 
     def __init__(self, model: NexusSimulator) -> None:
@@ -82,6 +85,7 @@ class NexusNetwork(Network):
         self.procs: NexusProcs = NexusProcs(self)
         self.actions: NexusActions = NexusActions(self)
         self.conlists: NexusConLists = NexusConLists(self)
+        self.activation_changes: NexusActivationChanges = NexusActivationChanges(self)
 
     def get_load_status(self) -> bool:
         """Checks load status and loads the network if it hasn't already been loaded."""
@@ -243,6 +247,7 @@ class NexusNetwork(Network):
                                       'WELLLIST': NexusWellList,
                                       'CONLIST': NexusConList,
                                       'ACTIONS': NexusAction,
+                                      'ACTIVATE_DEACTIVATE': NexusActivationChange
                                       }
 
         for surface in self.__model.model_files.surface_files.values():
@@ -263,6 +268,7 @@ class NexusNetwork(Network):
             self.targets._add_to_memory(type_check_lists(nexus_obj_dict.get('TARGET')))
             self.welllists._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLLIST')))
             self.conlists._add_to_memory(type_check_lists(nexus_obj_dict.get('CONLIST')))
+            self.activation_changes._add_to_memory(type_check_lists(nexus_obj_dict.get('ACTIVATE_DEACTIVATE')))
 
             actions_check = type_check_lists(nexus_obj_dict.get('ACTIONS'))
             if actions_check is not None:

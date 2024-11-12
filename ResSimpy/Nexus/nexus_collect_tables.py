@@ -8,6 +8,8 @@ import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.FileOperations.File import File
 from ResSimpy.FileOperations.file_operations import get_next_value
+from ResSimpy.Nexus.DataModels.Network.NexusActivationChange import NexusActivationChange
+from ResSimpy.Nexus.NexusEnums.ActivationChangeEnum import ActivationChangeEnum
 from ResSimpy.Time.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.Network.NexusConLists import NexusConLists
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
@@ -65,6 +67,7 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
     is_deactivate_block = False
     is_activate_block = False
     is_actions_block = False
+    is_constraints_block = False
     for index, line in enumerate(file_as_list):
         # check for changes in unit system
         check_property_in_line(line, property_dict, file_as_list)
@@ -76,17 +79,20 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
         if current_date is None:
             raise ValueError("Unable to determine date for object")
 
+        # Important!: DEACTIVATE can also appear in the ACTIONS table in the surface network and CONSTRAINTS tables.
+        # If we are already in one of those blocks, we don't want to consider it a new activate / deactivate block.
         if fo.check_token('ACTIONS', line=line):
             is_actions_block = True
-        # Important!: DEACTIVATE can also appear in the ACTIONS table in the surface network
-        # If we are already in the actions block, we don;=
         if fo.check_token('ENDACTIONS', line=line):
             is_actions_block = False
-        if not is_actions_block:
+        if fo.check_token('CONSTRAINTS', line=line):
+            is_constraints_block = True
+        if fo.check_token('ENDCONSTRAINTS', line=line):
+            is_constraints_block = False
+
+        if not is_actions_block and not is_constraints_block:
             is_activate_block, is_deactivate_block, should_continue = \
                 __activate_deactivate_checks(line=line,
-                                             table_start=table_start,
-                                             table_end=table_end,
                                              is_activate_block=is_activate_block,
                                              is_deactivate_block=is_deactivate_block,
                                              current_date=current_date,
@@ -95,7 +101,8 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                              nexus_object_results=nexus_object_results)
 
             if should_continue:
-                # If we have already read in the value for this line in the previous call, continue onto the next one.
+                # If we have already read in all the values for this line in the previous call, continue onto the next
+                # line.
                 continue
 
         if check_token('TIME', line) and table_start < 0:
@@ -209,6 +216,8 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                                      well_names=well_names, well_connections=well_connections,
                                                      start_date=start_date)
 
+                # if token_found == 'ACTIVATE' or token_found == 'DEACTIVATE':
+
             # store objects found into right dictionary
             list_of_token_obj = nexus_object_results[token_found]
             # This statement ensures that CONSTRAINT that are found in tables are actually added to the dictionary
@@ -253,7 +262,7 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
     return nexus_object_results, nexus_constraints
 
 
-def __activate_deactivate_checks(line: str, table_start: int, table_end: int, is_activate_block: bool,
+def __activate_deactivate_checks(line: str, is_activate_block: bool,
                                  is_deactivate_block: bool, current_date: str, start_date: str | None,
                                  date_format: DateFormat, nexus_object_results: dict[str, list[Any]]) \
         -> tuple[bool, bool, bool]:
@@ -265,11 +274,11 @@ def __activate_deactivate_checks(line: str, table_start: int, table_end: int, is
         it is a deactivate block, and whether the loop calling this method should continue to the next line.
     """
     # Handle activation / deactivation of well connections
-    if check_token('DEACTIVATE', line) and table_start <= table_end:
+    if check_token('DEACTIVATE', line):
         is_deactivate_block = True
         return is_activate_block, is_deactivate_block, True
 
-    if check_token('ACTIVATE', line) and table_start <= table_end:
+    if check_token('ACTIVATE', line):
         is_activate_block = True
         return is_activate_block, is_deactivate_block, True
 
@@ -284,71 +293,40 @@ def __activate_deactivate_checks(line: str, table_start: int, table_end: int, is
         is_activate_block = False
         return is_activate_block, is_deactivate_block, True
 
-    # Find the most recent matching Well Connection, and apply 'deactivated' or 'activated' to it.
+    # loop through all the connection names found in the block, and create the ActivationChange objects.
+    found_connections = []
     affected_connection_name = get_next_value(start_line_index=0, file_as_list=[line])
 
-    if affected_connection_name is None:
-        # No valid name, continue to the next line
-        return is_activate_block, is_deactivate_block, True
+    # Get a list of all the distinct connection names that might be affected.
+    all_well_connection_names = []
+    connection_types = {'WELLS', 'GASWELLS', 'NODECON'} & set(nexus_object_results)
+    for connection_type in connection_types:
+        all_well_connection_names.extend([connection.name for
+                                          connection in nexus_object_results[connection_type]])
+    all_well_connections = list(dict.fromkeys(all_well_connection_names))
 
-    # If a wildcard is found, ensure that all connections that match the wildcard are dealt with.
-    all_affected_well_connections = []
-    # case-insensitive matching
-    affected_connection_name = affected_connection_name.upper()
-    if '*' in affected_connection_name:
-        all_well_connection_names = []
-        for connection_type in ['WELLS', 'GASWELLS', 'NODECON']:
-            all_well_connection_names.extend([connection.name.upper() for
-                                              connection in nexus_object_results[connection_type]])
-        # Get a list of all the distinct well connection names that match the wildcard in the same order.
-        all_well_connections = list(dict.fromkeys(all_well_connection_names))
-        all_affected_well_connections = [x for x in all_well_connections if
-                                         fnmatch.fnmatch(x, affected_connection_name)]
-    else:
-        all_affected_well_connections = [affected_connection_name]
+    while affected_connection_name is not None:
+        change = ActivationChangeEnum.ACTIVATE if is_activate_block else ActivationChangeEnum.DEACTIVATE
+        # If a wildcard is found, ensure that all connections that match the wildcard are dealt with.
+        if '*' in affected_connection_name:
+            all_affected_well_connections = [x for x in all_well_connections if
+                                             fnmatch.fnmatch(x, affected_connection_name)]
 
-    # Loop through all affected well connections and apply the activated / deactivated state.
-    for well_connection_name in all_affected_well_connections:
-        current_iso_date = ISODateTime.convert_to_iso(date=current_date, date_format=date_format,
-                                                      start_date=start_date)
-        matching_well_connections = []
-        for connection_type in ['WELLS', 'GASWELLS', 'NODECON']:
-            matching_connections = [x for x in nexus_object_results[connection_type] if
-                                    x.name.upper() == well_connection_name and
-                                    x.iso_date <= current_iso_date]
-            matching_well_connections.extend(matching_connections)
+            # Create an object for each affected connection
+            for connection in all_affected_well_connections:
+                new_activation_change = NexusActivationChange(change=change, name=connection,
+                                                              date=current_date,
+                                                              start_date=start_date, date_format=date_format)
+                nexus_object_results['ACTIVATE_DEACTIVATE'].append(new_activation_change)
 
-        if len(matching_well_connections) == 0:
-            raise ValueError(f"Unable to find well connection with name {well_connection_name}")
-
-        ordered_matching_well_connections = sorted(matching_well_connections, key=lambda x: x.iso_date, reverse=True)
-        most_recent_matching_connection = ordered_matching_well_connections[0]
-
-        if most_recent_matching_connection.iso_date == current_iso_date:
-            # Set all matching connections for the same date to active / inactive
-            exact_matching_connections = [x for x in ordered_matching_well_connections if
-                                          x.iso_date == current_iso_date]
-            for connection in exact_matching_connections:
-                connection.is_activated = is_activate_block
-        elif isinstance(most_recent_matching_connection, NexusNodeConnection):
-            # Create a new instance of the NodeConnection object to reflect the change in activation status
-            new_node_connection = NexusNodeConnection(properties_dict={'name': most_recent_matching_connection.name},
-                                                      is_activated=is_activate_block,
-                                                      date=current_date,
-                                                      date_format=most_recent_matching_connection.date_format,
-                                                      unit_system=most_recent_matching_connection.unit_system,
-                                                      start_date=start_date)
-
-            nexus_object_results['NODECON'].append(new_node_connection)
         else:
-            # Create a new instance of the WellConnection object to reflect the change in activation status
-            new_well_connection = NexusWellConnection(properties_dict={'name': most_recent_matching_connection.name},
-                                                      is_activated=is_activate_block,
-                                                      date=current_date,
-                                                      date_format=most_recent_matching_connection.date_format,
-                                                      unit_system=most_recent_matching_connection.unit_system,
-                                                      start_date=start_date)
+            new_activation_change = NexusActivationChange(change=change, name=affected_connection_name, date=current_date,
+                                                          start_date=start_date, date_format=date_format)
+            nexus_object_results['ACTIVATE_DEACTIVATE'].append(new_activation_change)
 
-            nexus_object_results['WELLS'].append(new_well_connection)
+        found_connections.append(affected_connection_name)
+        # Move to the next value
+        affected_connection_name = get_next_value(start_line_index=0, file_as_list=[line],
+                                                  ignore_values=found_connections)
 
     return is_activate_block, is_deactivate_block, False

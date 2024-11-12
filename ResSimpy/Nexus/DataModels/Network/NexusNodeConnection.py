@@ -59,7 +59,6 @@ class NexusNodeConnection(NodeConnection):
     gravity_pressure_gradient_mult: Optional[float] = None
     friction_pressure_gradient_mult: Optional[float] = None
     acceleration_pressure_gradient_mult: Optional[float] = None
-    is_activated: bool = True
 
     def __init__(self, properties_dict: dict[str, None | int | str | float], date: Optional[str] = None,
                  date_format: Optional[DateFormat] = None, start_date: Optional[str] = None, name: Optional[str] = None,
@@ -77,7 +76,7 @@ class NexusNodeConnection(NodeConnection):
                  insulation_conductivity: Optional[float] = None,
                  gravity_pressure_gradient_mult: Optional[float] = None,
                  friction_pressure_gradient_mult: Optional[float] = None,
-                 acceleration_pressure_gradient_mult: Optional[float] = None, is_activated: bool = True,
+                 acceleration_pressure_gradient_mult: Optional[float] = None,
                  node_in: Optional[str] = None, node_out: Optional[str] = None, con_type: Optional[str] = None,
                  hyd_method: Optional[str | int] = None, pvt_method: Optional[int] = None,
                  water_method: Optional[int] = None) -> None:
@@ -119,7 +118,6 @@ class NexusNodeConnection(NodeConnection):
             pressure drop correlations (FRPGCR).
             acceleration_pressure_gradient_mult (Optional[float]): Correction Factor for the acceleration pressure
             gradient for pressure drop correlations (ACPGCR).
-            is_activated: bool: Whether the Connection has been set as activated. Defaults to True.
             con_type (Optional[str]): Connection type.
             hyd_method (optional[str | int]): Hydraulic method (METHOD)
             node_in (Optional[str]): Inflow node name.
@@ -154,7 +152,6 @@ class NexusNodeConnection(NodeConnection):
         self.gravity_pressure_gradient_mult = gravity_pressure_gradient_mult
         self.friction_pressure_gradient_mult = friction_pressure_gradient_mult
         self.acceleration_pressure_gradient_mult = acceleration_pressure_gradient_mult
-        self.is_activated = is_activated
 
         super().__init__(date_format=date_format, start_date=start_date, unit_system=unit_system, name=name, date=date,
                          properties_dict=properties_dict, node_in=node_in, node_out=node_out, con_type=con_type,
