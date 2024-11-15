@@ -281,6 +281,7 @@ def test_load_constraints(mocker, file_contents, expected_content):
 
     expected_single_name_constraint = {'well1': expected_constraints['well1']}
     mock_nexus_network = mocker.MagicMock()
+    mock_nexus_network._
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
     expected_df = pd.DataFrame(expected_content)
 

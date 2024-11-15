@@ -13,8 +13,7 @@ from copy import deepcopy
 def test_find_constraint(mocker):
     # Arrange
     mock_nexus_sim = get_fake_nexus_simulator(mocker)
-    mock_nexus_network = NexusNetwork(mock_nexus_sim)
-    mock_nexus_network.__setattr__('_NexusNetwork__has_been_loaded', True)
+    mock_nexus_network = NexusNetwork(model=mock_nexus_sim, assume_loaded=True)
 
     mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
                                                                 'uuid_6', 'uuid_7'])
@@ -50,8 +49,7 @@ def test_find_constraint(mocker):
 def test_find_constraint_too_many_too_few_constraints_found(mocker):
     # Arrange
     mock_nexus_sim = get_fake_nexus_simulator(mocker)
-    mock_nexus_network = NexusNetwork(mock_nexus_sim)
-    mock_nexus_network.__setattr__('_NexusNetwork__has_been_loaded', True)
+    mock_nexus_network = NexusNetwork(mock_nexus_sim, assume_loaded=True)
 
     constraints = NexusConstraints(mock_nexus_network, mock_nexus_sim)
     well1_constraint_props = ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000.0,

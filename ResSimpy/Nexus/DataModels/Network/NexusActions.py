@@ -14,7 +14,7 @@ class NexusActions:
     __actions: list[NexusAction] = field(default_factory=list)
 
     def __init__(self, parent_network: NexusNetwork) -> None:
-        """Initialises the NexusProcs class.
+        """Initialises the NexusActions class.
 
         Args:
             parent_network (NexusNetwork): The network that the actions are a part of.

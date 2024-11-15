@@ -198,8 +198,7 @@ ENDWELLLIST'''
 
     def test_get_all_by_name(self, mocker: MockerFixture):
         dummy_model = get_fake_nexus_simulator(mocker, mock_open=True)
-        dummy_network = NexusNetwork(model=dummy_model)
-        dummy_network._NexusNetwork__has_been_loaded = True
+        dummy_network = NexusNetwork(model=dummy_model, assume_loaded=True)
 
         welllists = [
             NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'], date='01/01/2020',
@@ -226,8 +225,7 @@ ENDWELLLIST'''
 
     def test_welllist_get_df(self, mocker: MockerFixture):
         dummy_model = get_fake_nexus_simulator(mocker, mock_open=True)
-        dummy_network = NexusNetwork(model=dummy_model)
-        dummy_network._NexusNetwork__has_been_loaded = True
+        dummy_network = NexusNetwork(model=dummy_model, assume_loaded=True)
 
         welllists = [
             NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'], date='01/01/2020',

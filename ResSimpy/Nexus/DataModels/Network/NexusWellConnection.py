@@ -97,7 +97,6 @@ class NexusWellConnection(WellConnection):
     station: Optional[str] = None
     drill_queue: Optional[str] = None
     drill_order_benefit: Optional[float] = None
-    is_activated: bool = True
 
     def __init__(self, properties_dict: Optional[dict[str, None | int | str | float]] = None,
                  date: Optional[str] = None, date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
@@ -108,7 +107,7 @@ class NexusWellConnection(WellConnection):
                  add_tubing: Optional[int] = None, tracer: Optional[str] = None, con_type: Optional[str] = None,
                  pvt_method: Optional[int] = None, water_method: Optional[int] = None, bat_method: Optional[int] = None,
                  elevation_profile: Optional[str] = None, temperature_profile: Optional[str] = None,
-                 inj_mobility: Optional[str] = None, crosshut: Optional[str] = None, crossflow: Optional[str] = None,
+                 inj_mobility: Optional[str] = None, crossshut: Optional[str] = None, crossflow: Optional[str] = None,
                  on_time: Optional[float] = None, heat_transfer_coeff: Optional[float] = None,
                  well_index_mult: Optional[float] = None, vip_productivity_index: Optional[float] = None,
                  productivity_index_phase: Optional[str] = None, d_factor: Optional[float] = None,
@@ -116,8 +115,8 @@ class NexusWellConnection(WellConnection):
                  gas_mobility: Optional[float] = None, capillary_number_model: Optional[str] = None,
                  dp_add: Optional[float] = None, dt_add: Optional[float] = None, rate_mult: Optional[float] = None,
                  polymer: Optional[str] = None, station: Optional[str] = None, drill_queue: Optional[str] = None,
-                 drill_order_benefit: Optional[float] = None, is_activated: bool = True,
-                 bhdepth: Optional[float] = None, datum_depth: Optional[float] = None, x_pos: Optional[float] = None,
+                 drill_order_benefit: Optional[float] = None, bhdepth: Optional[float] = None,
+                 datum_depth: Optional[float] = None, x_pos: Optional[float] = None,
                  y_pos: Optional[float] = None, length: Optional[float] = None, temperature: Optional[float] = None,
                  diameter: Optional[float] = None, roughness: Optional[float] = None,
                  inner_diameter: Optional[float] = None, productivity_index: Optional[float] = None,
@@ -149,7 +148,7 @@ class NexusWellConnection(WellConnection):
             elevation_profile (Optional[str]): Elevation profile identifier (ELEVPR).
             temperature_profile (Optional[str]): Temperature profile identifier (TEMPPR).
             inj_mobility (Optional[str]): Injection mobility identifier (INJMOB).
-            crosshut (Optional[str]): Cross-shut identifier (CROSS_SHUT).
+            crossshut (Optional[str]): Cross-shut identifier (CROSS_SHUT).
             crossflow (Optional[str]): Crossflow identifier (CROSSFLOW).
             on_time (Optional[float]): On-time duration (ONTIME).
             heat_transfer_coeff (Optional[float]): Heat transfer coefficient (HTC).
@@ -204,7 +203,7 @@ class NexusWellConnection(WellConnection):
         self.elevation_profile = elevation_profile
         self.temperature_profile = temperature_profile
         self.inj_mobility = inj_mobility
-        self.crossshut = crosshut
+        self.crossshut = crossshut
         self.crossflow = crossflow
         self.on_time = on_time
         self.heat_transfer_coeff = heat_transfer_coeff
@@ -223,14 +222,11 @@ class NexusWellConnection(WellConnection):
         self.station = station
         self.drill_queue = drill_queue
         self.drill_order_benefit = drill_order_benefit
-        self.is_activated = is_activated
         super().__init__(date_format=date_format, start_date=start_date, unit_system=unit_system, name=name, date=date,
                          properties_dict=properties_dict, bhdepth=bhdepth, datum_depth=datum_depth, x_pos=x_pos,
                          y_pos=y_pos, length=length, temperature=temperature, diameter=diameter, roughness=roughness,
                          inner_diameter=inner_diameter, productivity_index=productivity_index, hyd_method=hyd_method,
                          group=group, i=i, j=j, drainage_radius=drainage_radius)
-
-        self.is_activated = is_activated
 
         if self.name is not None:
             self.bh_node_name = self.name + '%bh'

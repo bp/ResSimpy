@@ -157,8 +157,7 @@ def test_read_wildcard(mocker, file_contents, expected_constraints):
 def test_add_remove_wildcard_well(mocker):
     # Arrange
     model = get_fake_nexus_simulator(mocker)
-    parent_network = NexusNetwork(model)
-    parent_network.__setattr__('_NexusNetwork__has_been_loaded', True)
+    parent_network = NexusNetwork(model, assume_loaded=True)
     constraints = NexusConstraints(parent_network, model)
     constraint_props = {'name': 'P*', 'date': '01/01/2020', 'max_surface_oil_rate': 100.2}
     # Act Assert
