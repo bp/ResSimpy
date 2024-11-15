@@ -141,7 +141,7 @@ class NetworkOperationsMixIn(ABC):
         return resolved_objects
 
     @staticmethod
-    def __sort_by_date_name_sim_order(objects_to_resolve: Sequence[T]) -> tuple[Sequence[T], list[str]]:
+    def __sort_by_date_name_sim_order(objects_to_resolve: Sequence[T]) -> tuple[Sequence[T], list[str | None]]:
         """Sorts objects by date and name.
 
         Args:
