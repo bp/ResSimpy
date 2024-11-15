@@ -64,7 +64,7 @@ class NexusNetwork(Network):
     targets: NexusTargets
     welllists: NexusWellLists
     activation_changes: NexusActivationChanges
-    __has_been_loaded: bool = False
+    _has_been_loaded: bool = False
 
     def __init__(self, model: NexusSimulator) -> None:
         """Initialises the NexusNetwork class.
