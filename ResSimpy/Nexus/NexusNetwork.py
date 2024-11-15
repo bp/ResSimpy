@@ -66,13 +66,15 @@ class NexusNetwork(Network):
     activation_changes: NexusActivationChanges
     _has_been_loaded: bool = False
 
-    def __init__(self, model: NexusSimulator) -> None:
+    def __init__(self, model: NexusSimulator, assume_loaded: bool = False) -> None:
         """Initialises the NexusNetwork class.
 
         Args:
             model (NexusSimulator): NexusSimulator object to be used to loading of the network object.
+            assume_loaded (bool): Should be set to True if this object should be created rather than read in from a
+                                  file.
         """
-        self.__has_been_loaded: bool = False
+        super().__init__(assume_loaded=assume_loaded)
         self.__model: NexusSimulator = model
         self.nodes: NexusNodes = NexusNodes(self)
         self.connections: NexusNodeConnections = NexusNodeConnections(self)
@@ -86,12 +88,6 @@ class NexusNetwork(Network):
         self.actions: NexusActions = NexusActions(self)
         self.conlists: NexusConLists = NexusConLists(self)
         self.activation_changes: NexusActivationChanges = NexusActivationChanges(self)
-
-    def get_load_status(self) -> bool:
-        """Checks load status and loads the network if it hasn't already been loaded."""
-        if not self.__has_been_loaded:
-            self.load()
-        return self.__has_been_loaded
 
     @property
     def model(self) -> NexusSimulator:
@@ -277,7 +273,7 @@ class NexusNetwork(Network):
             add_procs_to_mem = self.__load_procs
             self.procs._add_to_memory(add_procs_to_mem)
 
-        self.__has_been_loaded = True
+        self._has_been_loaded = True
         self.__update_well_types()
 
         if self.model.options is not None:

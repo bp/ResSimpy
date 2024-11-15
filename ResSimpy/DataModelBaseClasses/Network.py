@@ -31,7 +31,7 @@ class Network(ABC):
                  constraints: Optional[Constraints] = None, targets: Optional[Targets] = None,
                  well_connections: Optional[WellConnections] = None, wellheads: Optional[Wellheads] = None,
                  wellbores: Optional[Wellbores] = None, welllists: Optional[NetworkLists] = None,
-                 assume_loaded: bool = False):
+                 assume_loaded: bool = False) -> None:
         """Initialising the Network Abstract Base class."""
         self._has_been_loaded = assume_loaded
         self.nodes = nodes

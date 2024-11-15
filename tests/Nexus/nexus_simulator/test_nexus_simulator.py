@@ -2020,8 +2020,7 @@ def test_hash_and_attr_info_to_tuple(mocker):
                    'max_reverse_surface_liquid_rate': 10000.0, 'max_surface_liquid_rate': None}
 
     nexus_constraint_dict = {"SP200": [NexusConstraint(constraint1), NexusConstraint(constraint2)]}
-    dummy_nexus_network = NexusNetwork(model=fake_simulator)
-    dummy_nexus_network._NexusNetwork__has_been_loaded = True
+    dummy_nexus_network = NexusNetwork(model=fake_simulator, assume_loaded=True)
     fake_simulator._network = dummy_nexus_network
 
     constraints = NexusConstraints(dummy_nexus_network, fake_simulator)
@@ -2099,8 +2098,7 @@ def test_hash_tuple_empty(mocker):
 
     # network
     nexus_constraint_dict = {}
-    dummy_nexus_network = NexusNetwork(model=fake_simulator)
-    dummy_nexus_network._NexusNetwork__has_been_loaded = True
+    dummy_nexus_network = NexusNetwork(model=fake_simulator, assume_loaded=True)
     fake_simulator._network = dummy_nexus_network
 
     constraints = NexusConstraints(dummy_nexus_network, fake_simulator)
@@ -2126,8 +2124,7 @@ def test_wells_and_network_equal(mocker):
     constraint1 = {'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0}
 
     nexus_constraint_dict = {"SP200": [NexusConstraint(constraint1)]}
-    dummy_nexus_network = NexusNetwork(model=fake_simulator1)
-    dummy_nexus_network._NexusNetwork__has_been_loaded = True
+    dummy_nexus_network = NexusNetwork(model=fake_simulator1, assume_loaded=True)
     fake_simulator1._network = dummy_nexus_network
 
     constraints = NexusConstraints(dummy_nexus_network, fake_simulator1)
@@ -2138,8 +2135,7 @@ def test_wells_and_network_equal(mocker):
     constraint2 = {'date': '01/01/2019', 'name': 'well2', 'max_surface_liquid_rate': 234.0}
 
     nexus_constraint_dict2 = {"SP200": [NexusConstraint(constraint2)]}
-    dummy_nexus_network2 = NexusNetwork(model=fake_simulator2)
-    dummy_nexus_network2._NexusNetwork__has_been_loaded = True
+    dummy_nexus_network2 = NexusNetwork(model=fake_simulator2, assume_loaded=True)
     fake_simulator2._network = dummy_nexus_network2
 
     constraints2 = NexusConstraints(dummy_nexus_network2, fake_simulator2)
@@ -2180,8 +2176,7 @@ def test_wells_and_network_equal_empty(mocker):
     constraint1 = {}
 
     nexus_constraint_dict = {}
-    dummy_nexus_network = NexusNetwork(model=fake_simulator1)
-    dummy_nexus_network._NexusNetwork__has_been_loaded = True
+    dummy_nexus_network = NexusNetwork(model=fake_simulator1, assume_loaded=True)
     fake_simulator1._network = dummy_nexus_network
 
     constraints = NexusConstraints(dummy_nexus_network, fake_simulator1)
@@ -2192,8 +2187,7 @@ def test_wells_and_network_equal_empty(mocker):
     constraint2 = {}
 
     nexus_constraint_dict2 = {}
-    dummy_nexus_network2 = NexusNetwork(model=fake_simulator2)
-    dummy_nexus_network2._NexusNetwork__has_been_loaded = True
+    dummy_nexus_network2 = NexusNetwork(model=fake_simulator2, assume_loaded=True)
     fake_simulator2._network = dummy_nexus_network2
 
     constraints2 = NexusConstraints(dummy_nexus_network2, fake_simulator2)
