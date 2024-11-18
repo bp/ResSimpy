@@ -142,7 +142,7 @@ def test_load_run_control_invalid_times(mocker, date_format, run_control_content
                 "START 01/01/1980\nINCLUDE     path/to/include\nTIME 01/01/1981\nTIME 0.1",
                 "TIME 0.3\nTIME 15/10/1983\nytime invalidtime\nTIME 1503.1\nTIME 15/12/1996\nTIME 01/01/2000\nSTOP\n",
                 ['0.3', '01/01/1981', '01/01/2000', '08/05/2015'], 'REMOVE',
-                ['0.1', '15/10/1983', '1503.1', '15/12/1996']),
+                ['15/10/1983', '1503.1', '15/12/1996']),
         # Non-USA date format, replace, duplicate in run control
         ("DD/MM/YYYY", DateFormat.DD_MM_YYYY, "START 01/01/1980\nINCLUDE     path/to/include",
          "TIME 01/01/1980\nTIME 15/10/1983\nxtime invalidtime\nTIME 1503.1\nTIME 15/12/2021",
@@ -759,6 +759,27 @@ def test_output_request_to_table_line():
     expected_result = 'RFT TNEXT\n'
     # Act
     result = output_req.to_table_line(headers=[])
+
+    # Assert
+    assert result == expected_result
+
+
+def test_get_times_run_control():
+    # Arrange
+    run_control_content = """
+TIME 01/01/2023
+TIME 01/01/2024
+TIME 01/01/2025
+    
+STOP
+TIME 01/01/2026
+"""
+    options_file_content = run_control_content.splitlines(keepends=True)
+    expected_result = ['01/01/2023', '01/01/2024', '01/01/2025']
+    sim_controls = SimControls(model=None)
+
+    # Act
+    result = sim_controls.get_times(options_file_content)
 
     # Assert
     assert result == expected_result
