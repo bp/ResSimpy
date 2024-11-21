@@ -66,7 +66,7 @@ class SimControls:
         """
         self.__model = model
         self.__times: None | list[str] = None
-        self.__date_format_string: str = ''
+        self.__date_format_string: str = "%m/%d/%Y"
         self.__number_of_processors: None | int = None
         self.__grid_to_proc: None | GridToProc = None
         self.__solver_parameters: NexusSolverParameters = NexusSolverParameters(model)
