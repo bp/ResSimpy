@@ -201,17 +201,9 @@ class NetworkOperationsMixIn(ABC):
                 resolved_objects.append(unresolved_obj)
                 continue
             last_resolved_object = resolved_objects[-1]
-
+            # copy to prevent overriding previously resolved objects
+            last_resolved_copy = copy.deepcopy(last_resolved_object)
             new_resolved_object = copy.deepcopy(unresolved_obj)
-
-            skip_attributes = ['id', 'date', 'name', 'iso_date', 'clear_q', 'clear_p', 'clear_limit', 'clear_alq',
-                               'clear_all']
-
-            for attr, value in last_resolved_object.__dict__.items():
-                if value is None or attr in skip_attributes:
-                    continue
-                if getattr(unresolved_obj, attr, None) is None:
-                    setattr(new_resolved_object, attr, value)
 
             # collect which attributes to clear:
             clear_constraints_dict = {}
@@ -228,8 +220,17 @@ class NetworkOperationsMixIn(ABC):
                 clear_constraints_dict.update(unresolved_obj.get_pressure_constraints_map())
                 clear_constraints_dict.update(unresolved_obj.get_limit_constraints_map())
                 clear_constraints_dict.update(unresolved_obj.get_alq_constraints_map())
-            # Clear them by setting to None.
+            # Clear them by setting to None on the copied previously resolved object
             for (clear_attr, _) in clear_constraints_dict.values():
-                setattr(new_resolved_object, clear_attr, None)
+                setattr(last_resolved_copy, clear_attr, None)
+
+            skip_attributes = ['id', 'date', 'name', 'iso_date', 'clear_q', 'clear_p', 'clear_limit', 'clear_alq',
+                               'clear_all']
+            for attr, value in last_resolved_copy.__dict__.items():
+                if value is None or attr in skip_attributes:
+                    continue
+                if getattr(unresolved_obj, attr, None) is None:
+                    setattr(new_resolved_object, attr, value)
+
             resolved_objects.append(new_resolved_object)
         return resolved_objects
