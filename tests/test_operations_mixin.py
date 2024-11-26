@@ -5,8 +5,8 @@ from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.DataModelBaseClasses.OperationsMixin import NetworkOperationsMixIn
-from multifile_mocker import mock_multiple_files
-from utility_for_tests import get_fake_nexus_simulator
+from tests.multifile_mocker import mock_multiple_files
+from tests.utility_for_tests import get_fake_nexus_simulator
 
 
 def test_resolve_carried_over_attributes():
