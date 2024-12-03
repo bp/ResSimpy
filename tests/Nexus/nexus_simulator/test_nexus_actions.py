@@ -25,8 +25,8 @@ ACTIONTIME  ACTION     CONNECTION
 ENDACTIONS
 """
 
-    properties_dict1 = {'action_time': 7500.0, 'action': 'ACTIVATE', 'connection': 'WELL1'}
-    properties_dict2 = {'action_time': 8000.0, 'action': 'DEACTIVATE', 'connection': 'WELL2'}
+    properties_dict1 = {'action_time': 7500.0, 'change': ActivationChangeEnum.ACTIVATE, 'connection': 'WELL1'}
+    properties_dict2 = {'action_time': 8000.0, 'change': ActivationChangeEnum.DEACTIVATE, 'connection': 'WELL2'}
     surface_file = NexusFile(location='surface.dat', file_content_as_list=surface_file_contents.splitlines())
 
     expected_action1 = NexusAction(properties_dict1, date_format=DateFormat.MM_DD_YYYY, start_date=start_date)
@@ -96,8 +96,8 @@ ACTIONTIME  ACTION     CONNECTION
 ENDACTIONS
 """
 
-    properties_dict1 = {'action_time': 7500.0, 'action': 'ACTIVATE', 'connection': 'WELL1'}
-    properties_dict2 = {'action_time': 8000.0, 'action': 'DEACTIVATE', 'connection': 'WELL2'}
+    properties_dict1 = {'action_time': 7500.0, 'change': ActivationChangeEnum.ACTIVATE, 'connection': 'WELL1'}
+    properties_dict2 = {'action_time': 8000.0, 'change': ActivationChangeEnum.DEACTIVATE, 'connection': 'WELL2'}
 
     surface_file = NexusFile(location='surface.dat', file_content_as_list=surface_file_contents.splitlines())
     expected_action1 = NexusAction(properties_dict1, date_format=DateFormat.MM_DD_YYYY, start_date=start_date)
@@ -136,8 +136,8 @@ ACTIONTIME  ACTION     CONNECTION
 ENDACTIONS
 """
 
-    properties_dict1 = {'action_time': 7500.0, 'action': 'ACTIVATE', 'connection': 'WELL1'}
-    properties_dict2 = {'action_time': 8000.0, 'action': 'DEACTIVATE', 'connection': 'WELL2'}
+    properties_dict1 = {'action_time': 7500.0, 'change': ActivationChangeEnum.ACTIVATE, 'connection': 'WELL1'}
+    properties_dict2 = {'action_time': 8000.0, 'change': ActivationChangeEnum.DEACTIVATE, 'connection': 'WELL2'}
 
     surface_file = NexusFile(location='surface.dat', file_content_as_list=surface_file_contents.splitlines())
     expected_action1 = NexusAction(properties_dict1, date_format=DateFormat.MM_DD_YYYY, start_date=start_date)
@@ -184,8 +184,8 @@ ACTIONTIME  ACTION     CONNECTION
 ENDACTIONS
 """
 
-    properties_dict1 = {'action_time': 7500.0, 'action': 'ACTIVATE', 'connection': 'WELL1'}
-    properties_dict2 = {'action_time': 8000.0, 'action': 'DEACTIVATE', 'connection': 'WELL2'}
+    properties_dict1 = {'action_time': 7500.0, 'change': ActivationChangeEnum.ACTIVATE, 'connection': 'WELL1'}
+    properties_dict2 = {'action_time': 8000.0, 'change': ActivationChangeEnum.DEACTIVATE, 'connection': 'WELL2'}
 
     surface_file = NexusFile(location='surface.dat', file_content_as_list=surface_file_contents.splitlines())
     expected_action1 = NexusAction(properties_dict1, date_format=DateFormat.MM_DD_YYYY, start_date=start_date)
@@ -236,8 +236,8 @@ WELL4
 ENDDEACTIVATE
 """
 
-    properties_dict1 = {'action_time': 7500.0, 'action': 'ACTIVATE', 'connection': 'WELL1'}
-    properties_dict2 = {'action_time': 8000.0, 'action': 'DEACTIVATE', 'connection': 'WELL2'}
+    properties_dict1 = {'action_time': 7500.0, 'change': ActivationChangeEnum.ACTIVATE, 'connection': 'WELL1'}
+    properties_dict2 = {'action_time': 8000.0, 'change': ActivationChangeEnum.DEACTIVATE, 'connection': 'WELL2'}
     welcon_props_1 = {'name': 'WELL3', 'stream': 'PRODUCER', 'datum_depth': 1234.0, 'date': '01/01/2045',
                       'unit_system': UnitSystem.ENGLISH}
     welcon_props_2 = {'name': 'WELL4', 'stream': 'PRODUCER', 'datum_depth': 5678.0, 'date': '01/01/2045',
