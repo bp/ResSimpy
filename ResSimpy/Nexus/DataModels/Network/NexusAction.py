@@ -3,6 +3,7 @@ from typing import Optional
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.DataModelBaseClasses.NetworkObject import NetworkObject
+from ResSimpy.Nexus.NexusEnums.ActivationChangeEnum import ActivationChangeEnum
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 
@@ -12,7 +13,7 @@ class NexusAction(NetworkObject):
     """A class representing a single Nexus action."""
 
     action_time: float  # don't assume it is an int just yet
-    action: str
+    change: ActivationChangeEnum
     connection: str
 
     def __init__(self, properties_dict: Optional[dict[str, None | int | str | float]] = None,
@@ -46,7 +47,7 @@ class NexusAction(NetworkObject):
         """Gets the mapping of keywords to attribute definitions."""
         keywords = {
             'ACTIONTIME': ('action_time', float),
-            'ACTION': ('action', str),
+            'ACTION': ('change', ActivationChangeEnum),
             'CONNECTION': ('connection', str),
         }
         return keywords
