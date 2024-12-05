@@ -6,8 +6,6 @@ import pandas as pd
 import pytest
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.ISODateTime import ISODateTime
-from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Utils import to_dict_generic
 from ResSimpy.Utils.general_utilities import expand_string_list_of_numbers, convert_to_number
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str

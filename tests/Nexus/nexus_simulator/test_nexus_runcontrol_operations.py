@@ -142,7 +142,7 @@ def test_load_run_control_invalid_times(mocker, date_format, run_control_content
                 "START 01/01/1980\nINCLUDE     path/to/include\nTIME 01/01/1981\nTIME 0.1",
                 "TIME 0.3\nTIME 15/10/1983\nytime invalidtime\nTIME 1503.1\nTIME 15/12/1996\nTIME 01/01/2000\nSTOP\n",
                 ['0.3', '01/01/1981', '01/01/2000', '08/05/2015'], 'REMOVE',
-                ['0.1', '15/10/1983', '1503.1', '15/12/1996']),
+                ['15/10/1983', '1503.1', '15/12/1996']),
         # Non-USA date format, replace, duplicate in run control
         ("DD/MM/YYYY", DateFormat.DD_MM_YYYY, "START 01/01/1980\nINCLUDE     path/to/include",
          "TIME 01/01/1980\nTIME 15/10/1983\nxtime invalidtime\nTIME 1503.1\nTIME 15/12/2021",
@@ -457,7 +457,7 @@ def test_load_grid_to_proc_auto():
 def test_get_output_request(file_content: str, mocker: MockerFixture):
     date = '01/01/2020'
     output_type = OutputType.ARRAY
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
     # Act
     result = NexusReporting._get_output_request(table_file_as_list=file_content.splitlines(keepends=True),
                                                 date=date, output_type=output_type)
@@ -563,7 +563,7 @@ ENDOUTPUT
 TIME 24/01/1999
     '''
     file_content_as_list = file_content.splitlines(keepends=True)
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
     expected_ss_output_requests = [
         NexusOutputRequest(output_type=OutputType.SPREADSHEET, date='01/01/1950', output='FIELD',
                            output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None),
@@ -592,7 +592,7 @@ TIME 24/01/1999
         NexusOutputRequest(output_type=OutputType.ARRAY, date='01/10/1953', output='MAPS',
                            output_frequency=FrequencyEnum.FREQ, output_frequency_number=120),
         NexusOutputRequest(output_type=OutputType.ARRAY, date='01/10/1953', output='RFTFILE',
-                           output_frequency=FrequencyEnum.TNEXT,output_frequency_number=None)
+                           output_frequency=FrequencyEnum.TNEXT, output_frequency_number=None)
     ]
 
     expected_ss_output_contents = [
@@ -640,7 +640,7 @@ TIME 24/01/1999
     assert nexus_reporting.array_output_contents == expected_array_output_contents
 
 
-@pytest.mark.parametrize('new_rft_date, expected_result',[
+@pytest.mark.parametrize('new_rft_date, expected_result', [
     # basic test - at existing time stamp
     ('01/02/1951', '''START 01/01/1950
                     TIME 01/01/1951
@@ -728,6 +728,7 @@ def test_add_array_output_request(mocker, new_rft_date, expected_result):
         RUNCONTROL /nexus_data/runcontrol.dat
         SURFACE Network 1  /surface_file_01.dat
         '''
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             '/path/fcs_file.fcs': fcs_file_contents,
@@ -762,3 +763,64 @@ def test_output_request_to_table_line():
 
     # Assert
     assert result == expected_result
+
+
+def test_get_times_run_control():
+    # Arrange
+    run_control_content = """
+TIME 01/01/2023
+TIME 01/01/2024
+TIME 01/01/2025
+    
+STOP
+TIME 01/01/2026
+"""
+    options_file_content = run_control_content.splitlines(keepends=True)
+    expected_result = ['01/01/2023', '01/01/2024', '01/01/2025']
+    sim_controls = SimControls(model=None)
+
+    # Act
+    result = sim_controls.get_times(options_file_content)
+
+    # Assert
+    assert result == expected_result
+
+
+def test_modify_times_run_control(mocker: MockerFixture):
+    # Arrange
+
+    nex_model = get_fake_nexus_simulator(mocker=mocker)
+    nex_model._start_date = '01/01/2023'
+    sim_controls = SimControls(model=nex_model)
+    time_content = ['01/01/2025', '01/01/2026']
+    sim_controls._SimControls__times = ['01/01/2023', '01/01/2024']
+
+    sim_controls.modify_times(content=time_content, operation='MERGE')
+
+    # Assert
+    assert sim_controls.times == ['01/01/2023', '01/01/2024'] + time_content
+
+
+def test_modify_times_run_control_with_get_times(mocker: MockerFixture):
+    # Arrange
+    run_control_content = """
+TIME 01/01/2023
+TIME 01/01/2024
+TIME 01/01/2025
+
+STOP
+TIME 01/01/2028
+"""
+    run_file_content = run_control_content.splitlines(keepends=True)
+
+    nex_model = get_fake_nexus_simulator(mocker=mocker)
+    nex_model._start_date = '01/01/2023'
+    sim_controls = SimControls(model=nex_model)
+
+    time_content = ['01/01/2026', '01/01/2027']
+    sim_controls._SimControls__times = sim_controls.get_times(run_file_content)
+
+    sim_controls.modify_times(content=time_content, operation='MERGE')
+
+    # Assert
+    assert sim_controls.times == ['01/01/2023', '01/01/2024', '01/01/2025'] + time_content

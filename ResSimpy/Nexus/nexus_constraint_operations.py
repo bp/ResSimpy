@@ -12,7 +12,7 @@ from ResSimpy.Utils.invert_nexus_map import nexus_keyword_to_attribute_name
 import fnmatch
 
 if TYPE_CHECKING:
-    from ResSimpy.File import File
+    from ResSimpy.FileOperations.File import File
 
 
 def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConstraint], current_date: Optional[str],
@@ -76,8 +76,12 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
             if token_value in ['CLEAR', 'CLEARP', 'CLEARQ', 'CLEARLIMIT', 'CLEARALQ']:
                 properties_dict[nexus_keyword_to_attribute_name(constraint.get_keyword_mapping(), token_value)] = True
                 nones_overwrite = True
-                # break out of the while loop as the next value will not be there
-                break
+                trimmed_line = trimmed_line.replace(next_value, "", 1)
+                next_value = get_next_value(0, [trimmed_line])
+                if next_value is None:
+                    break
+                token_value = next_value.upper()
+
             elif token_value == 'ACTIVATE' or token_value == 'DEACTIVATE':
                 properties_dict.update({'active_node': token_value == 'ACTIVATE'})
                 trimmed_line = trimmed_line.replace(next_value, "", 1)

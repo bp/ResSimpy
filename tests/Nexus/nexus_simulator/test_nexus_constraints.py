@@ -1,10 +1,9 @@
-import uuid
 from unittest.mock import Mock
 import pandas as pd
 import pytest
 from pytest_mock import MockerFixture
 
-from ResSimpy.ISODateTime import ISODateTime
+from ResSimpy.Time.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -14,17 +13,18 @@ from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator
 
-@pytest.mark.parametrize("file_contents, expected_content",[
+
+@pytest.mark.parametrize("file_contents, expected_content", [
     #'basic_test'
     (''' CONSTRAINTS
     well1	 QLIQSMAX 	3884.0  QWSMAX 	0
     well2	 QWSMAX 	0.0  QLIQSMAX- 10000.0 QLIQSMAX 15.5
     ENDCONSTRAINTS
     ''',
-    ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
-    'unit_system': UnitSystem.ENGLISH},
-     {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
-      'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH})),
+     ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
+       'unit_system': UnitSystem.ENGLISH},
+      {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
+       'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH})),
 
     #'Change in Time'
     ('''CONSTRAINTS
@@ -36,25 +36,25 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     well1	 QLIQSMAX 	5000
     well2	 QWSMAX 	0.0  QLIQSMAX 20.5
     ENDCONSTRAINTS''',
-    ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0,
-      'max_surface_water_rate': 0,'unit_system': UnitSystem.ENGLISH},
-     {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
-      'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
-     {'date': '01/01/2020', 'name': 'well1', 'max_surface_liquid_rate': 5000.0, 'unit_system': UnitSystem.ENGLISH},
-   {'date': '01/01/2020', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_surface_liquid_rate': 20.5,
-    'unit_system': UnitSystem.ENGLISH}
-     )),
+     ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0,
+       'max_surface_water_rate': 0, 'unit_system': UnitSystem.ENGLISH},
+      {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
+       'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
+      {'date': '01/01/2020', 'name': 'well1', 'max_surface_liquid_rate': 5000.0, 'unit_system': UnitSystem.ENGLISH},
+      {'date': '01/01/2020', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_surface_liquid_rate': 20.5,
+       'unit_system': UnitSystem.ENGLISH}
+      )),
 
     #'more Keywords'
-     ('''CONSTRAINTS
+    ('''CONSTRAINTS
     well1	 QHCMAX- 	3884.0  PMIN 	0
     well2	 PMAX 	0.0  QLIQMIN 10000.0 QLIQMIN- 15.5 WORPLUGPLUS 85 CWLIM 155554
     ENDCONSTRAINTS''',
-    ({'date': '01/01/2019', 'name': 'well1', 'max_reverse_reservoir_hc_rate': 3884.0, 'min_pressure': 0,
-    'unit_system': UnitSystem.ENGLISH},
-    {'date': '01/01/2019', 'name': 'well2', 'max_pressure': 0, 'min_reservoir_liquid_rate': 10000.0,
-    'min_reverse_reservoir_liquid_rate': 15.5, 'max_wor_plug_plus': 85, 'max_cum_water_prod': 155554,
-    'unit_system': UnitSystem.ENGLISH})),
+     ({'date': '01/01/2019', 'name': 'well1', 'max_reverse_reservoir_hc_rate': 3884.0, 'min_pressure': 0,
+       'unit_system': UnitSystem.ENGLISH},
+      {'date': '01/01/2019', 'name': 'well2', 'max_pressure': 0, 'min_reservoir_liquid_rate': 10000.0,
+       'min_reverse_reservoir_liquid_rate': 15.5, 'max_wor_plug_plus': 85, 'max_cum_water_prod': 155554,
+       'unit_system': UnitSystem.ENGLISH})),
 
     #'constraint table'
     ('''CONSTRAINT
@@ -67,11 +67,11 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     well1	 QLIQSMAX 	1000.0
     ENDCONSTRAINTS
     ''', ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0.0,
-    'unit_system': UnitSystem.ENGLISH},
-    {'date': '01/01/2019', 'name': 'well2', 'max_surface_liquid_rate': 0.0, 'max_surface_water_rate': 10000,
-    'unit_system': UnitSystem.ENGLISH},
-    {'date': '01/12/2023', 'name': 'well1', 'max_surface_liquid_rate': 1000.0, 'unit_system': UnitSystem.ENGLISH},
-    )),
+           'unit_system': UnitSystem.ENGLISH},
+          {'date': '01/01/2019', 'name': 'well2', 'max_surface_liquid_rate': 0.0, 'max_surface_water_rate': 10000,
+           'unit_system': UnitSystem.ENGLISH},
+          {'date': '01/12/2023', 'name': 'well1', 'max_surface_liquid_rate': 1000.0, 'unit_system': UnitSystem.ENGLISH},
+          )),
 
     #'multiple constraints on same well'
     ('''CONSTRAINTS
@@ -79,12 +79,12 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     well1   pmin    1700
     well1   thp     2000    ! comment
     ENDCONSTRAINTS''',
-    ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000.0, 'min_pressure': 1700.0,
-    'tubing_head_pressure': 2000.0, 'unit_system': UnitSystem.ENGLISH},)
-    ),
+     ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000.0, 'min_pressure': 1700.0,
+       'tubing_head_pressure': 2000.0, 'unit_system': UnitSystem.ENGLISH},)
+     ),
 
     #'inline before table'
-('''
+    ('''
     CONSTRAINTS
     well1	 QLIQSMAX 	1000.0    WORMAX 95
     ENDCONSTRAINTS
@@ -96,15 +96,15 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     ENDCONSTRAINT
     
     ''', ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000.0,
-            'unit_system': UnitSystem.ENGLISH, 'max_wor': 95.0},
-    {'date': '01/12/2023', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0.0,
-    'unit_system': UnitSystem.ENGLISH},
-    {'date': '01/12/2023', 'name': 'well2', 'max_surface_liquid_rate': 0.0, 'max_surface_water_rate': 10000,
-    'unit_system': UnitSystem.ENGLISH},
-    )),
+           'unit_system': UnitSystem.ENGLISH, 'max_wor': 95.0},
+          {'date': '01/12/2023', 'name': 'well1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0.0,
+           'unit_system': UnitSystem.ENGLISH},
+          {'date': '01/12/2023', 'name': 'well2', 'max_surface_liquid_rate': 0.0, 'max_surface_water_rate': 10000,
+           'unit_system': UnitSystem.ENGLISH},
+          )),
 
     #'QMULT'
-(''' CONSTRAINTS
+    (''' CONSTRAINTS
     well1	 QLIQSMAX 	MULT  QOSMAX 	MULT
     well2	 QALLRMAX 	0
     well3   QALLRMAX        MULT 
@@ -116,18 +116,19 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     well3  10.2 123   203
     ENDQMULT
     ''',
-    ({'date': '01/01/2019', 'name': 'well1', 'use_qmult_qoilqwat_surface_rate': True, 'use_qmult_qoil_surface_rate': True,
-    'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 121.0, 'qmult_gas_rate': 53.6, 'qmult_water_rate': 2.5,
-      'well_name':'well1'},
-     {'date': '01/01/2019', 'name': 'well2', 'max_qmult_total_reservoir_rate': 0.0, 'unit_system': UnitSystem.ENGLISH,
-     'qmult_oil_rate': 211.0, 'qmult_gas_rate': 102.4, 'qmult_water_rate': 35.7, 'well_name':'well2'},
-    {'date': '01/01/2019', 'name': 'well3', 'convert_qmult_to_reservoir_barrels': True,
-    'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 10.2, 'qmult_gas_rate': 123, 'qmult_water_rate': 203,
-     'well_name':'well3'},
+     ({'date': '01/01/2019', 'name': 'well1', 'use_qmult_qoilqwat_surface_rate': True,
+       'use_qmult_qoil_surface_rate': True,
+       'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 121.0, 'qmult_gas_rate': 53.6, 'qmult_water_rate': 2.5,
+       'well_name': 'well1'},
+      {'date': '01/01/2019', 'name': 'well2', 'max_qmult_total_reservoir_rate': 0.0, 'unit_system': UnitSystem.ENGLISH,
+       'qmult_oil_rate': 211.0, 'qmult_gas_rate': 102.4, 'qmult_water_rate': 35.7, 'well_name': 'well2'},
+      {'date': '01/01/2019', 'name': 'well3', 'convert_qmult_to_reservoir_barrels': True,
+       'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 10.2, 'qmult_gas_rate': 123, 'qmult_water_rate': 203,
+       'well_name': 'well3'},
       )),
 
     #'Clearing Constraints'
-      ('''
+    ('''
     CONSTRAINTS
     well1	 QLIQSMAX 	1000.0    WORMAX 95
     well2  QLIQSMAX 1.8 PMAX    10000.2 QOSMAX MULT
@@ -145,14 +146,14 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     ENDCONSTRAINTS
     
     ''', ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000.0,
-            'unit_system': UnitSystem.ENGLISH, 'max_wor': 95.0},
-    {'date': '01/01/2019', 'name': 'well2', 'max_surface_liquid_rate': 1.8, 'max_pressure': 10000.2,
-        'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True},
-    {'date': '01/12/2023', 'name': 'well1', 'unit_system': UnitSystem.ENGLISH, 'clear_q': True},
-    {'date': '01/12/2023', 'name': 'well2', 'unit_system': UnitSystem.ENGLISH, 'clear_all': True},
-    {'date': '01/01/2024', 'name': 'well1', 'max_surface_oil_rate': 1.8,
-        'unit_system': UnitSystem.ENGLISH}
-    )),
+           'unit_system': UnitSystem.ENGLISH, 'max_wor': 95.0},
+          {'date': '01/01/2019', 'name': 'well2', 'max_surface_liquid_rate': 1.8, 'max_pressure': 10000.2,
+           'unit_system': UnitSystem.ENGLISH, 'use_qmult_qoil_surface_rate': True},
+          {'date': '01/12/2023', 'name': 'well1', 'unit_system': UnitSystem.ENGLISH, 'clear_q': True},
+          {'date': '01/12/2023', 'name': 'well2', 'unit_system': UnitSystem.ENGLISH, 'clear_all': True},
+          {'date': '01/01/2024', 'name': 'well1', 'max_surface_oil_rate': 1.8,
+           'unit_system': UnitSystem.ENGLISH}
+          )),
 
     #'activate keyword'
     (''' 
@@ -167,10 +168,10 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     well1 QLIQSMAX 0 DEACTIVATE
     ENDCONSTRAINTS
     ''',
-    ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 0.0, 'active_node': False,
-    'unit_system': UnitSystem.ENGLISH},
-     {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'active_node': False,
-      'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
+     ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 0.0, 'active_node': False,
+       'unit_system': UnitSystem.ENGLISH},
+      {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'active_node': False,
+       'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH},
       )),
 
     #'GORLIM_drawdowncards'
@@ -179,9 +180,9 @@ from tests.utility_for_tests import get_fake_nexus_simulator
       well1	 DPBHAVG 1024.2  DPBHMX OFF  GORLIM NONE EXPONENT 9999
       ENDCONSTRAINTS
       ''',
-      ({'date': '01/01/2019', 'name': 'well1', 'max_avg_comp_dp': 1024.2, 'gor_limit_exponent': 9999.0,
-        'unit_system': UnitSystem.ENGLISH},
-        )),
+     ({'date': '01/01/2019', 'name': 'well1', 'max_avg_comp_dp': 1024.2, 'gor_limit_exponent': 9999.0,
+       'unit_system': UnitSystem.ENGLISH},
+      )),
     # MULT keyword with a number after it
     ('''
 CONSTRAINTS
@@ -192,9 +193,9 @@ QMULT
 WELL       QOIL        QGAS        QWATER
 well1      0           0.0         0
 ENDQMULT ''',
-         ({'date': '01/01/2019', 'name': 'well1', 'use_qmult_qoil_surface_rate': True,
-    'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 0.0, 'qmult_gas_rate': 0.0, 'qmult_water_rate': 0.0,
-           'well_name':'well1'},)
+     ({'date': '01/01/2019', 'name': 'well1', 'use_qmult_qoil_surface_rate': True,
+       'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 0.0, 'qmult_gas_rate': 0.0, 'qmult_water_rate': 0.0,
+       'well_name': 'well1'},)
      ),
 
     # 'Change in Time, loading in pressure also'
@@ -241,14 +242,14 @@ ENDCONSTRAINTS
        'unit_system': UnitSystem.ENGLISH},
       {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
        'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH})),
-    ], ids=['basic_test', 'Change in Time', 'more Keywords', 'constraint table', 'multiple constraints on same well',
-    'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword', 'GORLIM_drawdowncards',
-    'MULT keyword with a number after it', 'loading in pressure', 'line continuation',
-    'line continuation with whitespace'])
+], ids=['basic_test', 'Change in Time', 'more Keywords', 'constraint table', 'multiple constraints on same well',
+        'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword', 'GORLIM_drawdowncards',
+        'MULT keyword with a number after it', 'loading in pressure', 'line continuation',
+        'line continuation with whitespace'])
 def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
 
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
     expected_constraints = {}
@@ -277,9 +278,10 @@ def test_load_constraints(mocker, file_contents, expected_content):
         # set the expected iso_date in the constraints for adding to the expected dataframe
         constraint['iso_date'] = ISODateTime.convert_to_iso(date=constraint['date'], date_format=DateFormat.MM_DD_YYYY,
                                                             start_date=start_date)
-        
+
     expected_single_name_constraint = {'well1': expected_constraints['well1']}
     mock_nexus_network = mocker.MagicMock()
+    mock_nexus_network._
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
     expected_df = pd.DataFrame(expected_content)
 
@@ -297,7 +299,7 @@ def test_load_constraints(mocker, file_contents, expected_content):
     result_df = result_df.sort_values('date').reset_index(drop=True)
 
     expected_df['date'] = pd.to_datetime(expected_df['date'])
-    
+
     expected_df = expected_df.sort_values('date').reset_index(drop=True)
     # Assert
     assert result_single == expected_single_name_constraint
@@ -305,19 +307,20 @@ def test_load_constraints(mocker, file_contents, expected_content):
     pd.testing.assert_frame_equal(result_df, expected_df, check_like=True)
     assert result_date_filtered == expected_date_filtered_constraints
 
+
 @pytest.mark.parametrize('file_contents, object_locations', [
-        ('''CONSTRAINTS
+    ('''CONSTRAINTS
         ! comment
             well1	 QLIQSMAX 	3884.0  QWSMAX 	0
 
             well2	 QWSMAX 	0.0  QLIQSMAX- 10000.0 QLIQSMAX 15.5
     ENDCONSTRAINTS
         ''',
-        {'uuid1': [2],
-         'uuid2': [4]}
-        ),
+     {'uuid1': [2],
+      'uuid2': [4]}
+     ),
 
-('''CONSTRAINTS
+    ('''CONSTRAINTS
         ! comment
             well1	 QLIQSMAX 	3884.0  QWSMAX 	0
 
@@ -331,13 +334,13 @@ def test_load_constraints(mocker, file_contents, expected_content):
             well4	 QWSMAX 	0.0  QLIQSMAX- 10000.0
     ENDCONSTRAINTS
         ''',
-        {'uuid1': [2],
-         'uuid2': [4],
-         'uuid3': [9],
-         'uuid4': [11]}
-        ),
+     {'uuid1': [2],
+      'uuid2': [4],
+      'uuid3': [9],
+      'uuid4': [11]}
+     ),
 
-('''CONSTRAINTS
+    ('''CONSTRAINTS
         ! comment
             well1	 QLIQSMAX 	3884.0  QWSMAX 	0
 
@@ -351,11 +354,11 @@ def test_load_constraints(mocker, file_contents, expected_content):
             well1	 QWSMAX 	12334  QLIQSMAX- 10000.0
     ENDCONSTRAINTS
         ''',
-        {'uuid1': [2, 4, 9, 11],
-     }
-            ),
+     {'uuid1': [2, 4, 9, 11],
+      }
+     ),
 
-            ('''CONSTRAINT
+    ('''CONSTRAINT
         NAME    QLIQSMAX    QWSMAX  QLIQSMAX-
         
         well1	3884.0   	0       NA
@@ -366,10 +369,10 @@ def test_load_constraints(mocker, file_contents, expected_content):
         
         ENDCONSTRAINT
         ''',
-    {'uuid1': [3],
-    'uuid2': [6]
-     }
-    ),
+     {'uuid1': [3],
+      'uuid2': [6]
+      }
+     ),
 
     (''' TIME 01/01/2019
     CONSTRAINTS
@@ -381,10 +384,10 @@ def test_load_constraints(mocker, file_contents, expected_content):
     well1 121.0 53.6 2.5
     well2 211.0 102.4 35.7
     ENDQMULT''',
-    {'uuid1': [2, 7],
-     'uuid2': [3, 8]}
-    ),
-        ], ids=['basic_test', 'two tables', 'several constraints for one well', 'constraint_table', 'qmults'])
+     {'uuid1': [2, 7],
+      'uuid2': [3, 8]}
+     ),
+], ids=['basic_test', 'two tables', 'several constraints for one well', 'constraint_table', 'qmults'])
 def test_constraint_ids(mocker, file_contents, object_locations):
     # Arrange
     fcs_file_data = '''RUN_UNITS ENGLISH
@@ -396,13 +399,14 @@ def test_constraint_ids(mocker, file_contents, object_locations):
     SURFACE Network 1 surface.dat'''
     runcontrol_data = 'START 01/01/2020'
 
-    def mock_open_wrapper(filename,  mode):
+    def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             'fcs_file.dat': fcs_file_data,
             'surface.dat': file_contents,
             'ref_runcontrol.dat': runcontrol_data,
         }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
 
     ls_dir = Mock(side_effect=lambda x: [])
@@ -412,8 +416,9 @@ def test_constraint_ids(mocker, file_contents, object_locations):
 
     model = NexusSimulator('fcs_file.dat')
 
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6',
-                                                                'uuid7'])
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4',
+                 side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5', 'uuid6',
+                              'uuid7'])
 
     # Act
     model.network.constraints.get_all()
@@ -422,17 +427,19 @@ def test_constraint_ids(mocker, file_contents, object_locations):
     # Assert
     assert result == object_locations
 
+
 def test_nexus_constraint_repr(mocker):
     # Arrange
     # patch the uuid
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
     constraint = NexusConstraint({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0,
                                   'max_surface_water_rate': 0})
     expected_repr = ("NexusConstraint(ID='uuid1', Date='01/01/2019', name='well1', "
-                     "max_surface_water_rate=0, max_surface_liquid_rate=3884.0, ISO_Date='2019-01-01T00:00:00')")
-    expected_str = ("NexusConstraint(_DataObjectMixin__date='01/01/2019', "
-                    "name='well1', max_surface_water_rate=0, "
-                     "max_surface_liquid_rate=3884.0, _DataObjectMixin__iso_date=ISODateTime(2019,T1,T1,T0,T0))")
+                     'max_surface_water_rate=0, max_surface_liquid_rate=3884.0, '
+                     "ISO_Date='2019-01-01T00:00:00')")
+    expected_str = ("NexusConstraint(_DataObjectMixin__date='01/01/2019', name='well1', "
+                    'max_surface_water_rate=0, max_surface_liquid_rate=3884.0, '
+                    '_DataObjectMixin__iso_date=ISODateTime(2019,T1,T1,T0,T0))')
     # Act
     repr_result = constraint.__repr__()
     str_result = constraint.__str__()
@@ -440,6 +447,7 @@ def test_nexus_constraint_repr(mocker):
     # Assert
     assert repr_result == expected_repr
     assert str_result == expected_str
+
 
 def test_nexus_constraints_skip_procs(mocker):
     # Arrange
@@ -478,7 +486,8 @@ ENDCONSTRAINTS
  ENDDO
  ENDIF
 ENDPROCS'''
-    def mock_open_wrapper(filename,  mode):
+
+    def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             'fcs_file.dat': fcs_file_data,
             'surface.dat': surface_content,
@@ -495,6 +504,7 @@ ENDPROCS'''
     # Assert
     assert constraint.date == '04/10/2019'
     assert len(procs) == 2
+
 
 def test_load_constraints_welllist(mocker: MockerFixture):
     """Ensure that a constraint applied to a welllist has the properties applied to all wells within it. """
@@ -544,7 +554,8 @@ def test_load_constraints_welllist(mocker: MockerFixture):
     ENDCONSTRAINTS
     
     """
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             '/path/fcs_file.fcs': fcs_file_contents,
@@ -556,19 +567,21 @@ def test_load_constraints_welllist(mocker: MockerFixture):
     mocker.patch("builtins.open", mock_open_wrapper)
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
 
-    well_1_constraint_properties_1 = {'date': '09/07/2024', 'name': 'well_1', 'max_surface_liquid_rate': 3884.0, 'max_surface_water_rate': 0,
-    'unit_system': UnitSystem.ENGLISH}
-    well_1_expected_constraint_1 = NexusConstraint(properties_dict=well_1_constraint_properties_1, date_format=DateFormat.DD_MM_YYYY,
-                                                   start_date=start_date)
-    well_1_constraint_properties_2 = {'date': '23/08/2024', 'name': 'well_1', 'max_surface_oil_rate': 123.4, 'unit_system': UnitSystem.ENGLISH}
-    well_1_expected_constraint_2 = NexusConstraint(properties_dict=well_1_constraint_properties_2, date_format=DateFormat.DD_MM_YYYY,
+    well_1_expected_constraint_1 = NexusConstraint(date='09/07/2024', name='well_1', max_surface_liquid_rate=3884.0,
+                                                   max_surface_water_rate=0, unit_system=UnitSystem.ENGLISH,
+                                                   date_format=DateFormat.DD_MM_YYYY,
                                                    start_date=start_date)
 
-    well_2_constraint_properties_1 = {'date': '23/08/2024', 'name': 'well_2', 'max_surface_oil_rate': 123.4, 'unit_system': UnitSystem.ENGLISH}
-    well_2_expected_constraint_1 = NexusConstraint(properties_dict=well_2_constraint_properties_1, date_format=DateFormat.DD_MM_YYYY,
+    well_1_expected_constraint_2 = NexusConstraint(date='23/08/2024', name='well_1', max_surface_oil_rate=123.4,
+                                                   unit_system=UnitSystem.ENGLISH, date_format=DateFormat.DD_MM_YYYY,
                                                    start_date=start_date)
-    well_2_constraint_properties_2 = {'date': '15/10/2024', 'name': 'well_2', 'max_surface_liquid_rate': 4567, 'unit_system': UnitSystem.ENGLISH}
-    well_2_expected_constraint_2 = NexusConstraint(properties_dict=well_2_constraint_properties_2, date_format=DateFormat.DD_MM_YYYY,
+
+    well_2_expected_constraint_1 = NexusConstraint(date='23/08/2024', name='well_2', max_surface_oil_rate=123.4,
+                                                   unit_system=UnitSystem.ENGLISH, date_format=DateFormat.DD_MM_YYYY,
+                                                   start_date=start_date)
+
+    well_2_expected_constraint_2 = NexusConstraint(date='15/10/2024', name='well_2', max_surface_liquid_rate=4567,
+                                                   date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH,
                                                    start_date=start_date)
 
     # Act
@@ -577,4 +590,3 @@ def test_load_constraints_welllist(mocker: MockerFixture):
     # Assert
     assert result['well_1'] == [well_1_expected_constraint_1, well_1_expected_constraint_2]
     assert result['well_2'] == [well_2_expected_constraint_1, well_2_expected_constraint_2]
-

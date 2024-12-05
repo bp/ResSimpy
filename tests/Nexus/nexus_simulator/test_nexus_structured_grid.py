@@ -1,8 +1,10 @@
 import os
+
+import numpy as np
 import pandas as pd
 import pytest
-from ResSimpy.GridArrayDefinition import GridArrayDefinition
-from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
+from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusLGR import NexusLGR
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
@@ -742,20 +744,20 @@ def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
                               "/path/to/kx.inc",
                               "VALUE", "12 KX", "MULT", "kz.inc", "VALUE"),
                              (
-                             "KX VALUE\n INCLUDE /path/to/kx.inc\nKY VALUE\n\tINCLUDE /path/to/kx.inc\n KZ MULT\n\n\n\t0.1 KX",
-                             "/path/to/kx.inc",
-                             "VALUE", "/path/to/kx.inc", "VALUE", "0.1 KX", "MULT"),
+                                     "KX VALUE\n INCLUDE /path/to/kx.inc\nKY VALUE\n\tINCLUDE /path/to/kx.inc\n KZ MULT\n\n\n\t0.1 KX",
+                                     "/path/to/kx.inc",
+                                     "VALUE", "/path/to/kx.inc", "VALUE", "0.1 KX", "MULT"),
                              ("KX VALUE\n!Comment \n INCLUDE kx.inc\nKY MULT\n\t1 KX\n KZ MULT\n\n!3 KX\n 1 KX",
                               "kx.inc", "VALUE", "1 KX", "MULT", "1 KX", "MULT"),
                              (
-                             "KX MULT\n0.000001 KY\nKY VALUE\n\tINCLUDE ky.inc\n KZ VALUE\n!COMMENT test\n\n INCLUDE /path/to/kz.inc",
-                             "0.000001 KY", "MULT", "ky.inc", "VALUE", "/path/to/kz.inc", "VALUE"),
+                                     "KX MULT\n0.000001 KY\nKY VALUE\n\tINCLUDE ky.inc\n KZ VALUE\n!COMMENT test\n\n INCLUDE /path/to/kz.inc",
+                                     "0.000001 KY", "MULT", "ky.inc", "VALUE", "/path/to/kz.inc", "VALUE"),
                              (
-                             "KX MULT\n 0.1 KY\nKY VALUE\n\t INCLUDE ky.inc\n KZ VALUE\n!COMMENT test\n\n INCLUDE /path/to/kz.inc",
-                             "0.1 KY", "MULT", "ky.inc", "VALUE", "/path/to/kz.inc", "VALUE"),
+                                     "KX MULT\n 0.1 KY\nKY VALUE\n\t INCLUDE ky.inc\n KZ VALUE\n!COMMENT test\n\n INCLUDE /path/to/kz.inc",
+                                     "0.1 KY", "MULT", "ky.inc", "VALUE", "/path/to/kz.inc", "VALUE"),
                              (
-                             "KX VALUE\n INCLUDE /path/to/kx.inc\nKY VALUE\n\tINCLUDE /path/to/kx.inc\n KZ MULT\n\n\n\t\n\t 0.1\tKX",
-                             "/path/to/kx.inc", "VALUE", "/path/to/kx.inc", "VALUE", "0.1 KX", "MULT"),
+                                     "KX VALUE\n INCLUDE /path/to/kx.inc\nKY VALUE\n\tINCLUDE /path/to/kx.inc\n KZ MULT\n\n\n\t\n\t 0.1\tKX",
+                                     "/path/to/kx.inc", "VALUE", "/path/to/kx.inc", "VALUE", "0.1 KX", "MULT"),
                              ("KX VALUE\n INCLUDE kx.inc\nKY MULT\n1 KX\n KZ MULT\n12 Ky",
                               "kx.inc", "VALUE", "1 KX", "MULT", "12 Ky", "MULT"),
                              ("KX CON\n 0.11333\nKY MULT\n1 KX\n KZ MULT\n12 Ky",
@@ -767,9 +769,9 @@ def test_load_structured_grid_file_sw(mocker, structured_grid_file_contents,
                              ("KI CON\n 0.11333\nKJ MULT\n1 KI\n KK MULT\n12 KI",
                               "0.11333", "CON", "1 KI", "MULT", "12 KI", "MULT"),
                              (
-                             "!KX VALUE\nKX VALUE\n INCLUDE /path/to/kx.inc\nKY MULT\n12 KX\n KZ VALUE\n\n\n INCLUDE kz.inc",
-                             "/path/to/kx.inc",
-                             "VALUE", "12 KX", "MULT", "kz.inc", "VALUE"),
+                                     "!KX VALUE\nKX VALUE\n INCLUDE /path/to/kx.inc\nKY MULT\n12 KX\n KZ VALUE\n\n\n INCLUDE kz.inc",
+                                     "/path/to/kx.inc",
+                                     "VALUE", "12 KX", "MULT", "kz.inc", "VALUE"),
                          ])
 def test_load_structured_grid_file_k_values(mocker, structured_grid_file_contents, expected_kx_value,
                                             expected_kx_modifier, expected_ky_value, expected_ky_modifier,
@@ -809,6 +811,7 @@ def test_load_structured_grid_file_k_values(mocker, structured_grid_file_content
     assert result.kz.modifier == expected_kz_modifier
     assert result.kz.value == expected_kz_value
 
+
 def test_load_structured_grid_file_keff_values(mocker):
     # Arrange
     fcs_file = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
@@ -817,7 +820,7 @@ def test_load_structured_grid_file_keff_values(mocker):
                                 "VALUE\n!ANOTHER COMMENT \npath/to/porosity.inc \n"
 
     structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
-    structured_grid_file = (base_structured_grid_file + 
+    structured_grid_file = (base_structured_grid_file +
                             "KXEFF VALUE\n INCLUDE /path/to/kxeff.inc\n KYEFF CON \n2 \n KZEFF VALUE \nINCLUDE\n kzeff.inc")
 
     expected_value_kxeff = "/path/to/kxeff.inc"
@@ -838,19 +841,20 @@ def test_load_structured_grid_file_keff_values(mocker):
          '/path/to/kxeff.inc': '',
          }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
     simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
     result = simulation.grid
-    
+
     # Assert
     assert result.kxeff.value == expected_value_kxeff
     assert result.kxeff.modifier == expected_modifier_kxeff
     assert result.kyeff.value == expected_value_kyeff
     assert result.kyeff.modifier == expected_modifier_kyeff
     assert result.kzeff.value == expected_value_kzeff
-    assert result.kzeff.modifier == expected_modifier_kzeff  
+    assert result.kzeff.modifier == expected_modifier_kzeff
 
 
 @pytest.mark.parametrize("new_porosity, new_sw, new_netgrs, new_kx, new_ky, new_kz",
@@ -934,7 +938,7 @@ def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, n
     mocker.patch("builtins.open", structured_grid_mock)
 
     # Act
-    NexusGrid.NexusGrid.update_structured_grid_file(new_structured_grid_dictionary, simulation)
+    NexusGrid.update_structured_grid_file(new_structured_grid_dictionary, simulation)
     result = simulation.grid
 
     # Assert
@@ -1558,19 +1562,24 @@ def test_nested_includes_with_grid_array_keywords(mocker):
     assert result_kx == expected_kx_result
     assert result_ky == expected_ky_result
 
-@pytest.mark.parametrize('structured_grid_file_contents, modifier, full_file_path', [
+
+@pytest.mark.parametrize('structured_grid_file_contents, modifier, full_file_path, expected_value', [
     ('''! Array data
     KX VALUE
-    INCLUDE inc_file_kx.inc''', 'VALUE', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc')),
-     ('''! Array data
+    INCLUDE inc_file_kx.inc''', 'VALUE', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc'), 'inc_file_kx.inc'),
+    ('''! Array data
      KX ZVAR
-     INCLUDE inc_file_kx.inc''', 'ZVAR', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc')),
+     INCLUDE inc_file_kx.inc''', 'ZVAR', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc'), 'inc_file_kx.inc'),
     ('''! Array data
     KX YVAR
-    INCLUDE inc_file_kx.inc''', 'YVAR', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc')),
+    INCLUDE inc_file_kx.inc''', 'YVAR', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc'), 'inc_file_kx.inc'),
+    # Value directly in grid file
+    ('''! Array data
+    KX VALUE
+    1 2 3 4''', 'VALUE', None, '1 2 3 4'),
 ])
 def test_grid_array_definitions_abs_path(mocker, structured_grid_file_contents, modifier,
-                                         full_file_path):
+                                         full_file_path, expected_value):
     # Arrange
     fcs_path = '/root/nexus_run.fcs'
     structured_grid_path = 'nexus_files/grid/test_structured_grid.dat'
@@ -1593,7 +1602,7 @@ def test_grid_array_definitions_abs_path(mocker, structured_grid_file_contents, 
 
     sim_obj = NexusSimulator(origin=fcs_path)
 
-    expected_kx_result = GridArrayDefinition(modifier=modifier, value='inc_file_kx.inc', mods=None,
+    expected_kx_result = GridArrayDefinition(modifier=modifier, value=expected_value, mods=None,
                                              absolute_path=full_file_path)
 
     # Act
@@ -1653,10 +1662,11 @@ DZNET CON
     assert result.dy.value is None
     assert result.dz.value is None
 
+
 def test_load_arrays_with_different_grid_names_to_lgr_class(mocker):
     fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
     structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
-    structured_grid_file_contents ="""NX  NY  NZ
+    structured_grid_file_contents = """NX  NY  NZ
  80  86  84
 
 CARTREF lgr_01                         
@@ -1686,6 +1696,7 @@ INCLUDE  KX_file.dat
 KY CON
 1
 """
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
         {'testpath1/nexus_run.fcs': fcs_file_contents,
@@ -1695,14 +1706,14 @@ KY CON
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-    
+
     expected_lgr = NexusLGR(parent_grid='ROOT', name='lgr_01', i1=14, i2=20, j1=29, j2=29, k1=1, k2=10,
                             nx=[5, 5, 5, 5, 5, 5, 7, 5, 5, 5, 5, 5, 5],
                             ny=[9],
                             nz=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
                             )
-    expected_lgr._kx = GridArrayDefinition(modifier='ZVAR', value='KX_file.dat', 
-                                           absolute_path=os.path.join('testpath1','KX_file.dat'))
+    expected_lgr._kx = GridArrayDefinition(modifier='ZVAR', value='KX_file.dat',
+                                           absolute_path=os.path.join('testpath1', 'KX_file.dat'))
     expected_lgr._ky = GridArrayDefinition(modifier='CON', value='1')
     expected_root_kx = GridArrayDefinition(modifier='CON', value='100')
     expected_root_ky = GridArrayDefinition(modifier='CON', value='10')
@@ -1758,6 +1769,7 @@ def test_load_lgrs(mocker):
     INCLUDE permx_array.dat
 
     """
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             '/path/to/nexus/fcsfile.dat': input_nexus_fcs_file,
@@ -1785,9 +1797,383 @@ def test_load_lgrs(mocker):
     nexus_model = NexusSimulator(origin='/path/to/nexus/fcsfile.dat')
     kx_array = nexus_model.grid.kx
     lgr_kx_array = nexus_model.grid.lgrs.lgrs[0].kx
-    
+
     # Assert
     assert kx_array.modifier == 'VALUE'
     assert kx_array.value == 'BLAH/BLAH'
     assert lgr_kx_array.modifier == 'VALUE'
     assert lgr_kx_array.value == 'permx_array.dat'
+
+
+def test_load_grid_new_bug(mocker):
+    # Arrange
+    input_run_control = "START 01/07/2023"
+    input_nexus_fcs_file = """DATEFORMAT DD/MM/YYYY
+            GRID_FILES
+                STRUCTURED_GRID    /path/to/grid/file.dat
+
+            RECURRENT_FILES
+                RUNCONTROL /path/to/run_control.dat
+
+            SURFACE Network 1  /surface_file_01.dat
+
+            """
+    input_grid_file = """
+! GRID DEFINITION   
+MAPOUT ALL
+
+NX NY NZ
+ 57  57  82
+
+LGR
+CARTREF lgr1                         
+  14  44   29  29  1  82
+  15*5  1*5 15*5
+  9
+  82*1
+ENDREF 
+ENDLGR
+
+
+DECOMP
+ROOT      4   4  3
+lgr1    16  1  3
+ENDDEC
+
+ARRAYS 
+
+DX  CON                          
+116.0                                                                                                                                                             
+DY  CON                                                                                                                                                            
+116.0
+
+POROSITY ZVAR
+INCLUDE PORO.dat
+
+KX  ZVAR 
+INCLUDE  KX.dat
+MOD
+      1   57    1    57    1   82 *1.10  
+
+KY  ZVAR
+INCLUDE  KX.dat
+MOD
+      1   57    1    57    1   82 *1.10 
+	  
+KZ  ZVAR  
+INCLUDE  KX.dat
+MOD
+      1   57    1    57    1   82 *1.10 
+	  
+NETGRS  CON                                                                                                                                                            
+1.0
+
+SW  ZVAR  
+INCLUDE  SW.dat
+
+"""
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            '/path/to/nexus/fcsfile.dat': input_nexus_fcs_file,
+            '/path/to/run_control.dat': input_run_control,
+            '/path/to/grid/file.dat': input_grid_file,
+            '/surface_file_01.dat': ''
+        }
+                                        ).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    listdir_mock = mocker.Mock(return_value=[])
+    mocker.patch("os.listdir", listdir_mock)
+
+    def mock_isfile(filename):
+        if '_filtered' in filename:
+            return False
+        return True
+
+    mocker.patch("os.path.isfile", mock_isfile)
+    mocker.patch("os.path.exists", mock_isfile)
+
+    expected_sw = GridArrayDefinition(modifier='ZVAR', value='SW.dat',
+                                      absolute_path=os.path.join('/path/to/grid', 'SW.dat'))
+    expected_kz = GridArrayDefinition(modifier='ZVAR', value='KX.dat',
+                                      absolute_path=os.path.join('/path/to/grid', 'KX.dat'),
+                                      mods={'MOD': pd.DataFrame({'i1': [1], 'i2': [57], 'j1': [1], 'j2': [57],
+                                                                 'k1': [1], 'k2': [82], '#v': ['*1.10']})})
+    expected_kx = GridArrayDefinition(modifier='ZVAR', value='KX.dat',
+                                        absolute_path=os.path.join('/path/to/grid', 'KX.dat'),
+                                        mods={'MOD': pd.DataFrame({'i1': [1], 'i2': [57], 'j1': [1], 'j2': [57],
+                                                                     'k1': [1], 'k2': [82], '#v': ['*1.10']})})
+
+    nexus_model = NexusSimulator(origin='/path/to/nexus/fcsfile.dat')
+
+    # Act
+    result_sw = nexus_model.grid.sw
+    result_kz = nexus_model.grid.kz
+    result_kx = nexus_model.grid.kx
+
+    # Assert
+    assert nexus_model.grid.ky.absolute_path is not None
+    assert result_sw == expected_sw
+    
+    assert result_kz.value == expected_kz.value
+    assert result_kz.modifier == expected_kz.modifier
+    assert result_kz.absolute_path == expected_kz.absolute_path
+    pd.testing.assert_frame_equal(result_kz.mods['MOD'], expected_kz.mods['MOD'])
+    
+    assert result_kx.value == expected_kx.value
+    assert result_kx.modifier == expected_kx.modifier
+    assert result_kx.absolute_path == expected_kx.absolute_path    
+    pd.testing.assert_frame_equal(nexus_model.grid.kx.mods['MOD'], expected_kx.mods['MOD'])
+
+def test_load_arrays_with_different_grid_names_to_lgr_class_none_keyword(mocker):
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents = """NX  NY  NZ
+ 80  86  84
+
+CARTREF LGR_01                         
+  14  44   29  29  1  82
+  15*5  1*5 15*5
+  9
+  82*1
+ENDREF 
+ENDLGR
+
+ARRAYS LGR_01
+
+KX  NONE
+MOD 
+    1   155    5    5      1   82 =1000.00  
+
+IREGION NONE
+MOD
+1 10  1  10 1  1  =1
+11 20  1  10 2  2  =2
+
+"""
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+        {'testpath1/nexus_run.fcs': fcs_file_contents,
+         '/run_control/path': '',
+         structured_grid_name: structured_grid_file_contents,
+         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    expected_lgr = NexusLGR(parent_grid='ROOT', name='LGR_01', i1=14, i2=44, j1=29, j2=29, k1=1, k2=82,
+                            nx=[5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+                                5, 5],
+                            ny=[9],
+                            nz=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+
+    # set up dataframe
+    i1 = [1]
+    i2 = [155]
+    j1 = [5]
+    j2 = [5]
+    k1 = [1]
+    k2 = [82]
+    v = ['=1000.00']
+    expected_df = pd.DataFrame({'i1': i1, 'i2': i2, 'j1': j1, 'j2': j2, 'k1': k1, 'k2': k2, '#v': v})
+
+    expected_lgr._kx = GridArrayDefinition(modifier=None, value=None, mods={'MOD': expected_df},
+                                           keyword_in_include_file=False, absolute_path=None, array=None)
+    expected_lgr._iregion = {'IREG1': GridArrayDefinition(modifier=None, value=None, mods={'MOD': pd.DataFrame(
+        {'i1': [1, 11], 'i2': [10, 20], 'j1': [1, 1], 'j2': [10, 10], 'k1': [1, 2], 'k2': [1, 2], '#v': ['=1', '=2']})},
+                                                keyword_in_include_file=False, absolute_path=None, array=None)}
+    
+    model = NexusSimulator('testpath1/nexus_run.fcs')
+    # Act
+    result = model.grid
+    result_lgr = result.lgrs.lgrs[0]
+    result_iregion = result_lgr.iregion['IREG1']
+
+    # Assert
+    pd.testing.assert_frame_equal(result_lgr.kx.mods['MOD'], expected_lgr.kx.mods['MOD'])
+    assert result_lgr.kx.value == expected_lgr.kx.value
+    assert result_lgr.kx.modifier == expected_lgr.kx.modifier
+    assert len(result.lgrs.lgrs) == 1
+    assert result_iregion.value == expected_lgr._iregion['IREG1'].value
+    assert result_iregion.modifier == expected_lgr._iregion['IREG1'].modifier
+    pd.testing.assert_frame_equal(result_iregion.mods['MOD'], expected_lgr._iregion['IREG1'].mods['MOD'])
+
+
+def test_load_arrays_with_mods_in_include_files(mocker):
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents = """NX  NY  NZ
+ 80  86  84
+
+CARTREF LGR_01                         
+  14  44   29  29  1  82
+  15*5  1*5 15*5
+  9
+  82*1
+ENDREF 
+ENDLGR
+
+ARRAYS LGR_01
+
+KX  NONE
+MOD 
+!20 2 02 50 2 02 =1000.00
+INCLUDE kx_mod.mod
+
+IREGION NONE
+MOD
+! 1 1 1 2 2 2 *10
+INCLUDE iregion_mod.mod
+
+"""
+    kx_mod_path = os.path.join('testpath1', 'kx_mod.mod')
+    kx_mod_content = '''79          79           5           5           8           8 =   1.89576540E-02 ! A comment
+           77          77           5           5           8           8 =   1.89576540E-02
+           78          78           5           5           8           8 =  0.240092114    
+           79          79           5           5           9           9 =   977.063721  
+           77          77           5           5           9           9 =   977.063721
+           80          80           5           5           9           9 =   915.068970
+'''
+    iregion_mod_path = os.path.join('testpath1', 'iregion_mod.mod')
+    iregion_mod_content = '''1           10           1           10           1           1 =  1
+              11           20           1           10           2           2 =  2
+              '''
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+        {'testpath1/nexus_run.fcs': fcs_file_contents,
+         '/run_control/path': '',
+         structured_grid_name: structured_grid_file_contents,
+         kx_mod_path: kx_mod_content,
+         iregion_mod_path: iregion_mod_content,
+         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    expected_lgr = NexusLGR(parent_grid='ROOT', name='LGR_01', i1=14, i2=44, j1=29, j2=29, k1=1, k2=82,
+                            nx=[5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+                                5, 5],
+                            ny=[9],
+                            nz=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+
+    # set up dataframe
+    i1 = [79, 77, 78, 79, 77, 80]
+    i2 = [79, 77, 78, 79, 77, 80]
+    j1 = [5, 5, 5, 5, 5, 5]
+    j2 = [5, 5, 5, 5, 5, 5]
+    k1 = [8, 8, 8, 9, 9, 9]
+    k2 = [8, 8, 8, 9, 9, 9]
+    v = ['=0.018957654', '=0.018957654', '=0.240092114', '=977.063721', '=977.063721', '=915.06897']
+    expected_df = pd.DataFrame({'i1': i1, 'i2': i2, 'j1': j1, 'j2': j2, 'k1': k1, 'k2': k2, '#v': v})
+    expected_lgr._kx = GridArrayDefinition(modifier=None, value=None, mods={'MOD': expected_df},
+                                           keyword_in_include_file=False, absolute_path=None, array=None)
+    # set up iregion dataframe
+    expected_lgr._iregion = {'IREG1': GridArrayDefinition(modifier=None, value=None, mods={'MOD': pd.DataFrame(
+        {'i1': [1, 11], 'i2': [10, 20], 'j1': [1, 1], 'j2': [10, 10], 'k1': [1, 2], 'k2': [1, 2], '#v': ['=1', '=2']})},
+                                                keyword_in_include_file=False, absolute_path=None, array=None)}
+
+    model = NexusSimulator('testpath1/nexus_run.fcs')
+    # Act
+    result = model.grid
+    result_lgr = result.lgrs.lgrs[0]
+    result_iregion = result_lgr.iregion['IREG1']
+
+    # Assert
+    pd.testing.assert_frame_equal(result_lgr.kx.mods['MOD'], expected_lgr.kx.mods['MOD'])
+    assert result_lgr.kx.value == expected_lgr.kx.value
+    assert result_lgr.kx.modifier == expected_lgr.kx.modifier
+    assert len(result.lgrs.lgrs) == 1
+    assert result_iregion.value == expected_lgr._iregion['IREG1'].value
+    assert result_iregion.modifier == expected_lgr._iregion['IREG1'].modifier
+    pd.testing.assert_frame_equal(result_iregion.mods['MOD'], expected_lgr._iregion['IREG1'].mods['MOD'])
+
+
+def test_read_mods(mocker):
+    # Arrange
+    input_run_control = "START 01/07/2023"
+    input_nexus_fcs_file = """DATEFORMAT DD/MM/YYYY
+        GRID_FILES
+            STRUCTURED_GRID    /path/to/grid/file.dat
+
+        RECURRENT_FILES
+            RUNCONTROL /path/to/run_control.dat
+
+        SURFACE Network 1  /surface_file_01.dat
+
+        """
+    input_grid_file = """
+
+NX NY NZ
+69 30  1
+
+KX VALUE
+INCLUDE BLAH/BLAH
+
+KY CON
+200.50
+
+LGR
+CARTREF lgr_01                         
+  14  20   29  29  1  10
+  6*5  1*7
+  9
+  10*1
+ENDREF 
+ENDLGR
+
+ARRAYS lgr_01
+KX VALUE
+INCLUDE permx_array.dat
+
+IPVT CON
+1
+MOD 
+1 5 1 2 1 1 = 2\t! A comment
+1 5 3 4 1 1 =3 ! A comment
+
+SG ZVAR
+5*0.8
+5*0.2
+"""
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            '/path/to/nexus/fcsfile.dat': input_nexus_fcs_file,
+            '/path/to/run_control.dat': input_run_control,
+            '/path/to/grid/file.dat': input_grid_file,
+            '/surface_file_01.dat': ''
+        }
+                                        ).return_value
+        return mock_open
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    listdir_mock = mocker.Mock(return_value=[])
+    mocker.patch("os.listdir", listdir_mock)
+
+    def mock_isfile(filename):
+        if '_filtered' in filename:
+            return False
+        return True
+
+    mocker.patch("os.path.isfile", mock_isfile)
+    mocker.patch("os.path.exists", mock_isfile)
+    
+    expected_ipvt_mod = pd.DataFrame({'i1': [1, 1], 'i2': [5, 5], 'j1': [1, 3], 'j2': [2, 4], 
+                                      'k1': [1, 1], 'k2': [1, 1], '#v': ['=2', '=3']})
+
+    # Act
+    nexus_model = NexusSimulator(origin='/path/to/nexus/fcsfile.dat')
+    
+    # Assert
+    x = nexus_model.grid.kx
+    ipvt_mods = nexus_model.grid.lgrs.lgrs[0].ipvt.mods['MOD']
+    assert len(ipvt_mods) == 2
+    pd.testing.assert_frame_equal(ipvt_mods, expected_ipvt_mod)

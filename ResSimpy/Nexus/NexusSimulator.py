@@ -31,7 +31,7 @@ from ResSimpy.Nexus.NexusWells import NexusWells
 from ResSimpy.Nexus.runcontrol_operations import SimControls
 from ResSimpy.Nexus.logfile_operations import Logging
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
-from ResSimpy.Simulator import Simulator
+from ResSimpy.DataModelBaseClasses.Simulator import Simulator
 
 
 class NexusSimulator(Simulator):
@@ -551,6 +551,8 @@ class NexusSimulator(Simulator):
                 value = fo.get_token_value('DEFAULT_UNITS', line, fcs_content_with_includes)
                 if value is not None:
                     self._default_units = UnitSystem(value.upper())
+            elif nfo.check_token(token='RESERVOIR', line=line):
+                raise NotImplementedError('Multiple reservoir models are not currently supported by ResSimpy.')
 
         # Load in the Nexus options information
         if self.model_files.options_file is not None:

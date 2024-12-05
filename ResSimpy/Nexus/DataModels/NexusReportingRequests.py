@@ -8,7 +8,7 @@ from typing import Optional
 from ResSimpy.Enums.FrequencyEnum import FrequencyEnum
 from ResSimpy.Enums.OutputType import OutputType
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from ResSimpy.output_request import OutputRequest, OutputContents
+from ResSimpy.DataModelBaseClasses.output_request import OutputRequest, OutputContents
 
 
 @dataclass(kw_only=True)

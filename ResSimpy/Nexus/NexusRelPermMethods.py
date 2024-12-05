@@ -6,7 +6,7 @@ from typing import Optional, MutableMapping
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusRelPermMethod import NexusRelPermMethod
-from ResSimpy.RelPerm import RelPerm
+from ResSimpy.DataModelBaseClasses.RelPerm import RelPerm
 
 
 @dataclass(kw_only=True)

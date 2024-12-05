@@ -14,7 +14,8 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
 from ResSimpy.Nexus.NexusSolverParameters import NexusSolverParameters
 from ResSimpy.Nexus.constants import DATE_WITH_TIME_LENGTH
-from ResSimpy.SolverParameter import SolverParameter
+from ResSimpy.DataModelBaseClasses.SolverParameter import SolverParameter
+
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
@@ -52,6 +53,7 @@ class GridToProc:
 
 class SimControls:
     """Class for controlling all runcontrol and time related functionality."""
+
     def __init__(self, model: NexusSimulator) -> None:
         """Class for controlling all runcontrol and time related functionality.
 
@@ -64,7 +66,7 @@ class SimControls:
         """
         self.__model = model
         self.__times: None | list[str] = None
-        self.__date_format_string: str = ''
+        self.__date_format_string: str = "%m/%d/%Y"
         self.__number_of_processors: None | int = None
         self.__grid_to_proc: None | GridToProc = None
         self.__solver_parameters: NexusSolverParameters = NexusSolverParameters(model)
@@ -95,11 +97,15 @@ class SimControls:
                 empty list if no values found
         """
         times = []
+
         for line in times_file:
+
             if fo.check_token('TIME', line):
                 value = fo.get_token_value('TIME', line, times_file)
                 if value is not None:
                     times.append(value)
+            if fo.check_token('STOP', line):
+                break
 
         return times
 
@@ -415,7 +421,7 @@ class SimControls:
         read_table = True
         for i, line in enumerate(options_file_as_list):
             if nfo.check_token(grid_to_procs.table_header, line):
-                start_index = i+1
+                start_index = i + 1
             if start_index is not None and nfo.check_token('AUTO', line):
                 grid_to_procs.auto_distribute = nfo.get_expected_token_value('AUTO', line, options_file_as_list)
                 read_table = False

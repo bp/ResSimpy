@@ -4,7 +4,7 @@ import os
 from typing import Optional, TYPE_CHECKING
 
 import pandas as pd
-from ResSimpy.GridArrayDefinition import GridArrayDefinition
+from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_KEYWORDS, STRUCTURED_GRID_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_FORMAT_KEYWORDS
@@ -30,7 +30,9 @@ class StructuredGridOperations:
                                     token_property: GridArrayDefinition | dict[str, GridArrayDefinition],
                                     line: str, file_as_list: list[str], line_indx: int,
                                     grid_nexus_file: NexusFile,
-                                    ignore_values: Optional[list[str]] = None) -> None:
+                                    original_line_location: int,
+                                    ignore_values: Optional[list[str]] = None,
+                                    ) -> None:
         """Gets a token's value if there is one and loads it into the token_property.
 
         Args:
@@ -43,6 +45,8 @@ class StructuredGridOperations:
             line_indx (int): index of line in file_as_list
             file_as_list (list[str]): a list of strings containing each line of the file as a new entry
             grid_nexus_file (NexusFile): the NexusFile object containing the grid file.
+            original_line_location (int): the line location relative to the expanded file as list with the include
+            file paths.
             ignore_values (Optional[list[str]]): values to be ignored. Defaults to None.
 
         Raises:
@@ -57,7 +61,7 @@ class StructuredGridOperations:
         region_name: str = ''
         modifier_found = False
         token_found = nfo.check_token(token, line)
-        found_modifier = line.strip().split()[-1]
+        found_modifier = nfo.get_previous_value([line])
         token_modifier: str = ''
 
         if token_found:
@@ -69,7 +73,8 @@ class StructuredGridOperations:
             token_modifier = f"{token} {modifier}"
         # If IREGION and the region_group is named
         elif token == 'IREGION' and found_modifier in GRID_ARRAY_FORMAT_KEYWORDS and len(line.strip().split()) == 3:
-            region_name = line.strip().split()[1]
+            region_name = nfo.get_expected_token_value(token, line, file_as_list[line_indx:],
+                                                       ignore_values=ignore_values)
             modifier_found = found_modifier == modifier
             token_modifier = f"{token} {region_name} {modifier}"
         if token == 'IREGION' and isinstance(token_property, dict):
@@ -83,7 +88,8 @@ class StructuredGridOperations:
             # piece two: find out if we have any MOD cards to deal with
             # piece three: make the mod table and add it to the grid array
             StructuredGridOperations.__make_grid_def(file_as_list, ignore_values, line, line_indx, modifier,
-                                                     region_name, token_modifier, token_property, grid_nexus_file)
+                                                     region_name, token_modifier, token_property, grid_nexus_file,
+                                                     original_line_location=original_line_location)
 
             mod_start_end = StructuredGridOperations.__extract_mod_positions(line_indx, file_as_list)
             StructuredGridOperations.__make_mod_table(mod_start_end, file_as_list,
@@ -93,7 +99,7 @@ class StructuredGridOperations:
     def __make_grid_def(file_as_list: list[str], ignore_values: list[str], line: str, line_indx: int, modifier: str,
                         region_name: str, token_modifier: str,
                         token_property: GridArrayDefinition | dict[str, GridArrayDefinition],
-                        grid_file: NexusFile) -> None:
+                        grid_file: NexusFile, original_line_location: int) -> None:
         """A function that begins the process of populating the grid away."""
 
         if modifier == 'MULT':
@@ -112,6 +118,15 @@ class StructuredGridOperations:
                     token_property[region_name] = GridArrayDefinition()
                     token_property[region_name].modifier = 'MULT'
                     token_property[region_name].value = f"{numerical_value} {value_to_multiply}"
+        elif modifier == 'NONE':
+            if not isinstance(token_property, dict):
+                token_property.modifier = None
+                token_property.value = None
+            elif region_name != '':
+                token_property[region_name] = GridArrayDefinition()
+                token_property[region_name].modifier = None
+                token_property[region_name].value = None
+
         else:
             value = fo.get_token_value(modifier, line, file_as_list[line_indx:], ignore_values=ignore_values)
             if value is None:
@@ -130,20 +145,24 @@ class StructuredGridOperations:
                 for i in range(line_indx+1, min(line_indx+3, len(file_as_list))):
                     if value in file_as_list[i]:
                         line_to_check = file_as_list[i]
-                if 'INCLUDE' in line_to_check:
+                if fo.check_token('INCLUDE', line_to_check):
                     if not isinstance(token_property, dict):
                         token_property.value = value
                         token_property.modifier = modifier
                         StructuredGridOperations.__add_absolute_path_to_grid_array_definition(
-                            grid_array_definition=token_property, line_index_of_include_file=line_indx,
+                            grid_array_definition=token_property, line_index_of_include_file=original_line_location,
                             grid_nexus_file=grid_file)
                     elif region_name != '':  # IREGION
-                        token_property[region_name] = GridArrayDefinition()
-                        token_property[region_name].modifier = modifier
-                        token_property[region_name].value = value
+                        region_grid_def = GridArrayDefinition()
+                        region_grid_def.modifier = modifier
+                        region_grid_def.value = value
                         StructuredGridOperations.__add_absolute_path_to_grid_array_definition(
-                            grid_array_definition=token_property[region_name], line_index_of_include_file=line_indx,
+                            grid_array_definition=region_grid_def,
+                            line_index_of_include_file=original_line_location,
                             grid_nexus_file=grid_file)
+                        # store it in the dictionary of region grid definitions
+                        token_property[region_name] = region_grid_def
+
                 elif check_if_string_is_float(value[0]) or value[0] == '.':
                     start_indx = line_indx + 1
                     end_indx = len(file_as_list)
@@ -166,13 +185,13 @@ class StructuredGridOperations:
                         token_property[region_name].value = '\n'.join([line.strip() for line in
                                                                        file_as_list[start_indx:end_indx]]).strip()
                 else:  # The grid array keyword is likely inside an include file, presented on previous line
-                    if 'INCLUDE' in file_as_list[line_indx - 1]:
+                    if fo.check_token('INCLUDE', file_as_list[line_indx - 1]):
                         if not isinstance(token_property, dict):
                             token_property.modifier = modifier
                             token_property.value = file_as_list[line_indx - 1].split('INCLUDE')[1].strip()
                             token_property.keyword_in_include_file = True
                             StructuredGridOperations.__add_absolute_path_to_grid_array_definition(
-                                grid_array_definition=token_property, line_index_of_include_file=line_indx,
+                                grid_array_definition=token_property, line_index_of_include_file=original_line_location,
                                 grid_nexus_file=grid_file
                             )
                         elif region_name != '':  # IREGION
@@ -181,7 +200,8 @@ class StructuredGridOperations:
                             token_property[region_name].value \
                                 = file_as_list[line_indx - 1].split('INCLUDE')[1].strip()
                             StructuredGridOperations.__add_absolute_path_to_grid_array_definition(
-                                grid_array_definition=token_property[region_name], line_index_of_include_file=line_indx,
+                                grid_array_definition=token_property[region_name],
+                                line_index_of_include_file=original_line_location,
                                 grid_nexus_file=grid_file
                             )
                             token_property[region_name].keyword_in_include_file = True
@@ -330,6 +350,8 @@ class StructuredGridOperations:
 
         mod_start_end: dict[str, list[list[int]]] = {}
         break_flag = False
+        keywords_to_stop_on = STRUCTURED_GRID_KEYWORDS + GRID_ARRAY_KEYWORDS
+        keywords_to_stop_on.remove('INCLUDE')
         for i in range(line_indx + 1, len(file_as_list)):
             if nfo.check_token('MODX', file_as_list[i]):
                 mod_start_end['MODX'] = [[i + 1, i + 2]]
@@ -344,7 +366,7 @@ class StructuredGridOperations:
                     mod_start_end['MOD'] = [[i + 1, len(file_as_list)]]
                 found_end_of_mod_table = False
                 for j in range(i + 1, len(file_as_list)):
-                    for keyword in STRUCTURED_GRID_KEYWORDS + GRID_ARRAY_KEYWORDS:
+                    for keyword in keywords_to_stop_on:
                         if nfo.check_token(keyword, file_as_list[j]):
                             mod_start_end['MOD'][-1][1] = j
                             found_end_of_mod_table = True
@@ -368,43 +390,55 @@ class StructuredGridOperations:
 
         for key in mod_start_end.keys():
             for i in range(len(mod_start_end[key])):
-                if mod_start_end[key][i][1] > mod_start_end[key][i][0]:
-                    mod_table = nfo.read_table_to_df(
-                        file_as_list[mod_start_end[key][i][0]:mod_start_end[key][i][1]], noheader=True)
-                    if len(mod_table.columns) == 7:
-                        mod_table.columns = ['i1', 'i2', 'j1', 'j2', 'k1', 'k2', '#v']
-                    elif len(mod_table.columns) == 8:
-                        mod_table[8] = mod_table[6].astype(str) + mod_table[7].astype(str)
-                        mod_table = mod_table.drop([6, 7], axis=1)
-                        mod_table.columns = ['i1', 'i2', 'j1', 'j2', 'k1', 'k2', '#v']
+                if mod_start_end[key][i][1] <= mod_start_end[key][i][0]:
+                    continue
+                file_slice = file_as_list[mod_start_end[key][i][0]:mod_start_end[key][i][1]]
+                # exclude lines with INCLUDE keyword
+                file_slice = [x for x in file_slice if not nfo.check_token('INCLUDE', x)]
+                mod_table = nfo.read_table_to_df(file_slice, noheader=True)
+                if len(mod_table.columns) == 7:
+                    mod_table.columns = ['i1', 'i2', 'j1', 'j2', 'k1', 'k2', '#v']
+                elif len(mod_table.columns) == 8:
+                    # clean nan's when there is a mix of 7 length and 8 length columns
+                    mod_table[7] = mod_table[7].convert_dtypes().astype(str)
+                    mod_table[7] = mod_table[7].replace('nan', '')
+                    mod_table[7] = mod_table[7].replace('<NA>', '')
+                    # Put the last two columns together and drop them to make the #v column
+                    mod_table[8] = mod_table[6].astype(str) + mod_table[7].astype(str)
+                    mod_table = mod_table.drop([6, 7], axis=1)
+
+                    mod_table.columns = ['i1', 'i2', 'j1', 'j2', 'k1', 'k2', '#v']
+                else:
+                    raise ValueError(
+                        f'Unsuitable mod card for {token_modifier} keyword in line: {line}')
+                if not isinstance(token_property, dict):
+                    # If we are dealing with a single grid array definition
+                    if token_property.mods is not None:
+                        if key in token_property.mods.keys():
+                            orig_mod_tab = token_property.mods[key].copy()
+                            token_property.mods[key] = \
+                                pd.concat([orig_mod_tab, mod_table]).reset_index(drop=True)
+                        else:
+                            token_property.mods[key] = mod_table
                     else:
-                        raise ValueError(
-                            f'Unsuitable mod card for {token_modifier} keyword in line: {line}')
-                    if not isinstance(token_property, dict):
-                        if token_property.mods is not None:
-                            if key in token_property.mods.keys():
-                                orig_mod_tab = token_property.mods[key].copy()
-                                token_property.mods[key] = \
+                        token_property.mods = {key: mod_table}
+                else:  # IREGION
+                    # If we are dealing with a dictionary of grid array definitions representing an iregion dict
+                    if token_property[region_name].mods is not None:
+                        tmp_dict = token_property[region_name].mods
+                        if isinstance(tmp_dict, dict):
+                            if key in tmp_dict.keys():
+                                orig_mod_tab = tmp_dict[key].copy()
+                                tmp_dict[key] = \
                                     pd.concat([orig_mod_tab, mod_table]).reset_index(drop=True)
-                            else:
-                                token_property.mods[key] = mod_table
-                        else:
-                            token_property.mods = {key: mod_table}
-                    else:  # IREGION
-                        if token_property[region_name].mods is not None:
-                            tmp_dict = token_property[region_name].mods
-                            if isinstance(tmp_dict, dict):
-                                if key in tmp_dict.keys():
-                                    orig_mod_tab = tmp_dict[key].copy()
-                                    tmp_dict[key] = \
-                                        pd.concat([orig_mod_tab, mod_table]).reset_index(drop=True)
-                        else:
-                            token_property[region_name].mods = {key: mod_table}
+                    else:
+                        token_property[region_name].mods = {key: mod_table}
 
     @staticmethod
     def __add_absolute_path_to_grid_array_definition(grid_array_definition: GridArrayDefinition,
                                                      line_index_of_include_file: int,
-                                                     grid_nexus_file: NexusFile) -> None:
+                                                     grid_nexus_file: NexusFile,
+                                                     ) -> None:
         """Adds the absolute path to the grid array definition.
 
         Args:
@@ -420,15 +454,23 @@ class StructuredGridOperations:
             return
         if grid_nexus_file is None:
             return
-        file_containing_include_line, _ = grid_nexus_file.find_which_include_file(line_index_of_include_file)
+
+        # create a default to fallback on.
+        default_root = os.path.dirname(grid_nexus_file.location)
+        absolute_file_path = os.path.join(default_root, grid_array_definition.value)
+
+        line_with_file_uuid = grid_nexus_file.get_flat_list_str_with_file_ids_with_includes
+        line, uuid = line_with_file_uuid[line_index_of_include_file]
+
         # find the include path from within this include file
-        if file_containing_include_line.include_objects is None:
+        if grid_nexus_file.include_objects is None:
+            grid_array_definition.absolute_path = absolute_file_path
             return
-        matching_includes = [x for x in file_containing_include_line.include_objects if
-                             grid_array_definition.value in x.location]
+        matching_includes = [x for x in grid_nexus_file.include_objects if uuid == x.id]
         if len(matching_includes) == 0:
+            grid_array_definition.absolute_path = absolute_file_path
             return
         include_file = matching_includes[0]
 
-        absolute_file_path = include_file.location
+        absolute_file_path = os.path.join(os.path.dirname(include_file.location), grid_array_definition.value)
         grid_array_definition.absolute_path = absolute_file_path

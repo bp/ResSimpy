@@ -774,7 +774,7 @@ def test_collect_all_tables_to_objects(mocker, file_contents, node1_props, node2
     # Arrange
     # mock out a surface file:
     start_date = '01/01/2023'
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid1')
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
     surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
 
     node_1 = NexusNode(node1_props, date_format=DateFormat.MM_DD_YYYY, start_date=start_date)
@@ -819,3 +819,29 @@ def test_load_file_as_list_unicode_error(mocker, ):
     result = nfo.load_file_as_list(file_path)
     # Assert
     assert result == expected_file_as_list
+
+
+@pytest.mark.parametrize('line, expected_result',[
+    ('some kind of token line', ['some', 'kind', 'of', 'token', 'line']),
+    ('some !comment finshes the line', ['some']),
+        ('!only comment', []),
+        ('', [])
+])
+def test_split_line(line, expected_result):
+    # Act
+    result = nfo.split_line(line, upper=False)
+    # Assert
+    assert result == expected_result
+
+
+@pytest.mark.parametrize('line, expected_result',[
+    ('some kind of token line', ['SOME', 'KIND', 'OF', 'TOKEN', 'LINE']),
+    ('some !comment finshes the line', ['SOME']),
+        ('!only comment', []),
+        ('', [])
+])
+def test_split_line(line, expected_result):
+    # Act
+    result = nfo.split_line(line, upper=True)
+    # Assert
+    assert result == expected_result

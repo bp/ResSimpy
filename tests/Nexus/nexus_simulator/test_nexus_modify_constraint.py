@@ -13,10 +13,9 @@ from copy import deepcopy
 def test_find_constraint(mocker):
     # Arrange
     mock_nexus_sim = get_fake_nexus_simulator(mocker)
-    mock_nexus_network = NexusNetwork(mock_nexus_sim)
-    mock_nexus_network.__setattr__('_NexusNetwork__has_been_loaded', True)
+    mock_nexus_network = NexusNetwork(model=mock_nexus_sim, assume_loaded=True)
 
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
                                                                 'uuid_6', 'uuid_7'])
 
     constraints = NexusConstraints(mock_nexus_network, mock_nexus_sim)
@@ -50,8 +49,7 @@ def test_find_constraint(mocker):
 def test_find_constraint_too_many_too_few_constraints_found(mocker):
     # Arrange
     mock_nexus_sim = get_fake_nexus_simulator(mocker)
-    mock_nexus_network = NexusNetwork(mock_nexus_sim)
-    mock_nexus_network.__setattr__('_NexusNetwork__has_been_loaded', True)
+    mock_nexus_network = NexusNetwork(mock_nexus_sim, assume_loaded=True)
 
     constraints = NexusConstraints(mock_nexus_network, mock_nexus_sim)
     well1_constraint_props = ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 1000.0,
@@ -280,7 +278,7 @@ def test_remove_constraint(mocker, file_contents, expected_result_file,
             expected_constraint._DataObjectMixin__id = expected_ids[c]
             expected_constraint_dict[node_name].append(expected_constraint)
 
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
                                                                 'uuid_6', 'uuid_7'])
 
     # Act
@@ -563,7 +561,7 @@ def test_add_constraint(mocker, file_contents, expected_file_contents, new_const
                                         ).return_value
         return mock_open
 
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4'])
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4'])
 
     mocker.patch("builtins.open", mock_open_wrapper)
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
@@ -588,7 +586,7 @@ def test_add_constraint(mocker, file_contents, expected_file_contents, new_const
         expected_constraints[well_name].append(NexusConstraint(new_constraint))
 
     # Mark out the new objected with the id 'new_obj_uuid'
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['new_obj_uuid'])
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['new_obj_uuid'])
 
     # Act
     nexus_sim.network.constraints.add(new_constraint, comments='test user comments')
@@ -728,7 +726,7 @@ def test_modify_constraints(mocker, file_contents, expected_file_contents, curre
     mocker.patch("builtins.open", writing_mock_open)
 
     # patch in uuids for the constraints
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=uuid_side_effect())
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=uuid_side_effect())
 
     # Act
     nexus_sim.network.constraints.modify('well1', current_constraint, new_constraint)

@@ -66,7 +66,7 @@ def test_add_connection(mocker, file_contents, expected_file_contents, connectio
     expected_cons[0]._DataObjectMixin__id = 'uuid_1'
     expected_cons[1]._DataObjectMixin__id = 'uuid_2'
 
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
                                                                 'uuid_6', 'uuid_7'])
     # Act
     nexus_sim.network.connections.add(connection_to_add)
@@ -114,7 +114,7 @@ def test_remove_connection(mocker, file_contents, expected_file_contents, connec
         start_date = '01/01/2019'
         runcontrol_contents = '''START 01/01/2019'''
 
-        mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+        mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
                                                                     'uuid_6', 'uuid_7'])
 
         def mock_open_wrapper(filename, mode):
@@ -201,13 +201,13 @@ def test_modify_connections(mocker, file_contents, expected_file_contents, obj_t
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
 
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_3'])
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_3'])
 
     expected_objs = [NexusNodeConnection(node, date_format=DateFormat.DD_MM_YYYY,
                                          start_date=start_date) for node in expected_objs]
     expected_objs.sort(key=lambda x: x.name)
 
-    mocker.patch('ResSimpy.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
                                                                 'uuid_6', 'uuid_7'])
     # Act
     nexus_sim.network.connections.modify(obj_to_modify, modified_properties)

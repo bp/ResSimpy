@@ -15,6 +15,7 @@ import pandas as pd
 from ResSimpy.Enums.UnitsEnum import UnitSystem, TemperatureUnits, SUnits
 from ResSimpy.FileOperations.file_operations import get_next_value, check_token, get_expected_token_value, \
     strip_file_of_comments, load_file_as_list
+from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
@@ -415,7 +416,6 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
                           preserve_previous_object_attributes: bool = False,
                           well_names: Optional[list[str]] = None,
                           welllists: Optional[list[NexusWellList]] = None,
-                          well_connections: Optional[list[NexusWellConnection]] = None,
                           start_date: Optional[str] = None) -> list[tuple[Any, int]]:
     """Loads a table row by row to an object provided in the row_object.
 
@@ -435,7 +435,6 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
         date_format (Optional[DateFormat]): The date format of the object.
         well_names (Optional[str]): A list of all the network object names.
         welllists (Optional[list[WellList]]): A list of all the WELLLISTs loaded in so far.
-        well_connections (Optional[list[NexusWellConnection]]): A list of all the Well Connections loaded in so far.
         start_date (Optional[str]): The start date of the simulation.
 
     Returns:
@@ -467,6 +466,10 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
             row_name = keyword_store.get('well_name', None)
             keyword_store['name'] = row_name
 
+        if row_name is None:
+            row_name = keyword_store.get('connection', None)
+            keyword_store['name'] = row_name
+
         if not isinstance(keyword_store['name'], str):
             raise ValueError(f'Cannot find valid well name for object: {keyword_store}')
 
@@ -485,23 +488,8 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
 
         for name in object_well_names:
             keyword_store['name'] = name
-            if issubclass(row_object, NexusWellConnection):
-                # If we are creating a Well Connection, carry across the activated state of the previous one.
-                if well_connections is not None and len(well_connections) > 0:
-                    ordered_well_connections = sorted(well_connections, key=lambda x: x.iso_date, reverse=True)
-                    previous_well_connection = next((x for x in ordered_well_connections if x.name == name), None)
-                    if previous_well_connection is not None:
-                        is_activated = previous_well_connection.is_activated
-                    else:
-                        is_activated = True
-                else:
-                    is_activated = True
 
-                new_object = NexusWellConnection(properties_dict=keyword_store, date=current_date,
-                                                 unit_system=unit_system, date_format=date_format,
-                                                 is_activated=is_activated, start_date=start_date)
-
-            elif preserve_previous_object_attributes:
+            if preserve_previous_object_attributes:
                 all_matching_existing_constraints = constraint_obj_dict.get(name, None)
                 if all_matching_existing_constraints is not None:
                     # use the previous object to update this
@@ -523,6 +511,12 @@ def load_table_to_objects(file_as_list: list[str], row_object: Any, property_map
             else:
                 new_object = row_object(properties_dict=keyword_store, date=current_date, unit_system=unit_system,
                                         date_format=date_format, start_date=start_date)
+
+            # If we are creating a PIPEGRAD connection of some kind, set hyd_method to None for now, as this column has
+            # a different meaning in the Nexus format for such connections.
+            if isinstance(new_object, NexusWellConnection) or isinstance(new_object, NexusNodeConnection):
+                if new_object.con_type == 'PIPEGRAD':
+                    new_object.hyd_method = None
 
             return_objects.append((new_object, index))
     return return_objects
@@ -582,3 +576,23 @@ def correct_datatypes(value: None | float | str, dtype: type,
                 return None
         case _:
             return dtype(value)
+
+
+def split_line(line: str, upper: bool = True) -> list[str]:
+    """Splits a line into a list of strings through sequential application of get_next_value.
+    Does not include comments. A line with no valid tokens will return an empty list.
+    """
+    stored_values: list[str] = []
+    value = get_next_value(0, [line])
+    if value is None:
+        return stored_values
+    trimmed_line = line
+    while value is not None:
+        if upper:
+            stored_values.append(value.upper())
+        else:
+            stored_values.append(value)
+        trimmed_line = trimmed_line.replace(value, "", 1)
+        value = get_next_value(0, [trimmed_line])
+
+    return stored_values

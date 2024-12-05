@@ -5,7 +5,7 @@ from typing import Optional
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from ResSimpy.Wellhead import Wellhead
+from ResSimpy.DataModelBaseClasses.Wellhead import Wellhead
 
 
 @dataclass(kw_only=True)
@@ -33,7 +33,7 @@ class NexusWellhead(Wellhead):
         temperature (float):  The temperature of the fluid in the well  (TEMP)
         elevation_profile (str):  The well elevation profile. (ELEVPR)
         temperature_profile (str):  The well temperature profile. (TEMPPR)
-        dp_add (float):  The additional pressure drop across the well (DPADD)
+        dp_add (float):  The additional pressure drop across the well  (DPADD)
         rate_mult (float):  The rate multiplier for the well. (RATEMULT)
         delta_depth (float):  The depth difference between the two points in the connection  (DDEPTH)
         heat_transfer_coeff (float):  The heat transfer coefficient for the well  (HTC)
@@ -70,7 +70,9 @@ class NexusWellhead(Wellhead):
                  length: Optional[float] = None, temperature: Optional[float] = None,
                  elevation_profile: Optional[str] = None, temperature_profile: Optional[str] = None,
                  dp_add: Optional[float] = None, rate_mult: Optional[float] = None, delta_depth: Optional[float] = None,
-                 heat_transfer_coeff: Optional[float] = None, dt_add: Optional[float] = None) -> None:
+                 heat_transfer_coeff: Optional[float] = None, dt_add: Optional[float] = None,
+                 well: Optional[str] = None, wellhead_type: Optional[str] = None, depth: Optional[float] = None,
+                 x_pos: Optional[float] = None, y_pos: Optional[float] = None) -> None:
         """Initialises the NexusWellhead class.
 
         Args:
@@ -101,6 +103,11 @@ class NexusWellhead(Wellhead):
             delta_depth (Optional[float]): The depth difference between the two points in the connection (DDEPTH).
             heat_transfer_coeff (Optional[float]): The heat transfer coefficient for the well (HTC).
             dt_add (Optional[float]): The additional temperature difference across the well (DTADD).
+            well (Optional[str]): Associates the wellhead to the well.
+            wellhead_type (Optional[str]): The type of well.
+            depth (Optional[float]): The depth of the wellhead
+            x_pos (Optional[float]): The x-coordinate of the wellhead (x).
+            y_pos (Optional[float]): The y-coordinate of the wellhead (y).
         """
 
         self.pvt_method = pvt_method
@@ -124,7 +131,8 @@ class NexusWellhead(Wellhead):
         self.dt_add = dt_add
 
         super().__init__(date_format=date_format, start_date=start_date, unit_system=unit_system, name=name, date=date,
-                         properties_dict=properties_dict)
+                         properties_dict=properties_dict, well=well, wellhead_type=wellhead_type, depth=depth,
+                         x_pos=x_pos, y_pos=y_pos)
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:

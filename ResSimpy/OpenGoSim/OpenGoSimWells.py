@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from ResSimpy.OpenGoSim.DataModels.OpenGoSimWell import OpenGoSimWell
-from ResSimpy.Wells import Wells
+from ResSimpy.GenericContainerClasses.Wells import Wells
 
 
 @dataclass(kw_only=True, init=False)

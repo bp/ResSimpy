@@ -124,7 +124,7 @@ ENDWELLLIST'''
 
     def test_load_several_welllists(self, mocker: MockerFixture):
         # Arrange
-        mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
+        mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
         expected_welllists = [
             NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'],
                           date='01/01/2020', date_format=DateFormat.MM_DD_YYYY),
@@ -198,8 +198,7 @@ ENDWELLLIST'''
 
     def test_get_all_by_name(self, mocker: MockerFixture):
         dummy_model = get_fake_nexus_simulator(mocker, mock_open=True)
-        dummy_network = NexusNetwork(model=dummy_model)
-        dummy_network._NexusNetwork__has_been_loaded = True
+        dummy_network = NexusNetwork(model=dummy_model, assume_loaded=True)
 
         welllists = [
             NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'], date='01/01/2020',
@@ -226,8 +225,7 @@ ENDWELLLIST'''
 
     def test_welllist_get_df(self, mocker: MockerFixture):
         dummy_model = get_fake_nexus_simulator(mocker, mock_open=True)
-        dummy_network = NexusNetwork(model=dummy_model)
-        dummy_network._NexusNetwork__has_been_loaded = True
+        dummy_network = NexusNetwork(model=dummy_model, assume_loaded=True)
 
         welllists = [
             NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'], date='01/01/2020',
@@ -252,7 +250,7 @@ ENDWELLLIST'''
 
     def test_add_then_remove_wells_from_welllist(self, mocker: MockerFixture):
         # Arrange
-        mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
+        mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
         expected_welllists = [
             NexusWellList(name='some_wells', elements_in_the_list=['well_1'],
                           date='09/07/2024', date_format=DateFormat.DD_MM_YYYY),
@@ -297,7 +295,7 @@ ENDWELLLIST'''
 
     def test_multiple_changes_same_date(self, mocker: MockerFixture):
         # Arrange
-        mocker.patch('ResSimpy.DataObjectMixin.uuid4', return_value='uuid_1')
+        mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
         expected_welllists = [
             NexusWellList(name='some_wells', elements_in_the_list=['well_1'],
                           date='09/07/2024', date_format=DateFormat.DD_MM_YYYY),

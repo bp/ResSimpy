@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from typing import Sequence, Optional
 
-from ResSimpy.Completion import Completion
+from ResSimpy.DataModelBaseClasses.Completion import Completion
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.OpenGoSim.DataModels.OpenGoSimCompletion import OpenGoSimCompletion
-from ResSimpy.Well import Well
+from ResSimpy.DataModelBaseClasses.Well import Well
 
 
 @dataclass(kw_only=True)

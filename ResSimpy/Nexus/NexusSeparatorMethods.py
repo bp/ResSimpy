@@ -6,7 +6,7 @@ from typing import Optional, MutableMapping
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusSeparatorMethod import NexusSeparatorMethod
-from ResSimpy.Separator import Separator
+from ResSimpy.DataModelBaseClasses.Separator import Separator
 
 
 @dataclass(kw_only=True)

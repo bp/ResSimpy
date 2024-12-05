@@ -6,7 +6,7 @@ from typing import Optional, MutableMapping
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusValveMethod import NexusValveMethod
-from ResSimpy.Valve import Valve
+from ResSimpy.DataModelBaseClasses.Valve import Valve
 
 
 @dataclass(kw_only=True)

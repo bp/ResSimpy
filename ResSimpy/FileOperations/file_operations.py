@@ -3,7 +3,7 @@ from typing import Optional, Union
 import re
 from string import whitespace
 
-from ResSimpy.GridArrayDefinition import GridArrayDefinition
+from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
 
 
 def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,

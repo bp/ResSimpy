@@ -6,7 +6,7 @@ from typing import Optional, MutableMapping
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusEquilMethod import NexusEquilMethod
-from ResSimpy.Equilibration import Equilibration
+from ResSimpy.DataModelBaseClasses.Equilibration import Equilibration
 
 
 @dataclass(kw_only=True)

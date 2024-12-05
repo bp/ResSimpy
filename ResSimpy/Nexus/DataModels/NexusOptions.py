@@ -6,7 +6,7 @@ import pandas as pd
 from enum import Enum
 from ResSimpy.Enums.UnitsEnum import TemperatureUnits, UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.DynamicProperty import DynamicProperty
+from ResSimpy.DataModelBaseClasses.DynamicProperty import DynamicProperty
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Utils.factory_methods import get_empty_dict_union
 from ResSimpy.Units.AttributeMappings.DynamicPropertyUnitMapping import OptionsUnits
