@@ -453,6 +453,7 @@ def test_get_next_value_single_c_acts_as_comment(file, single_c_acts_as_comment,
     ('KX Include /path/to/include/folder/file.dat another', ['kx', 'INCLUDE'], '/path/to/include/folder/file.dat'),
     ('KX include includes/folder/file.dat another', ['kx', 'include'], 'includes/folder/file.dat'),
     ('exclude excludepartoflongertext 1', ['exclude'], 'excludepartoflongertext'),
+    ('exclude ! comment', ['exclude'], None),
 ])
 def test_get_next_value_ignore(line: str, ignore: list[str], expected_result: str):
     # Act

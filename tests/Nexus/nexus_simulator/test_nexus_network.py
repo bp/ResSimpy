@@ -1149,7 +1149,7 @@ ENDDEACTIVATE
 TIME 10/09/2024
 ACTIVATE
     CONNECTION
-    well1
+    well1  ! comment
 ENDACTIVATE
     """
 
