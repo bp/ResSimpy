@@ -113,6 +113,9 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
         comment_characters = ['!']
     invalid_characters = ["\n", "\t", " ", ","]
     invalid_characters.extend(comment_characters)
+    if ignore_values is None:
+        ignore_values = []
+    ignore_values = [x.upper() for x in ignore_values]
 
     value_found = False
     value = ''
@@ -149,10 +152,17 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
                 search_string = temp_search_string
                 break
             elif character not in invalid_characters:
-                character_location, new_search_string, search_string, value = (
-                    __extract_substring_until_next_invalid_character(character_location, ignore_values,
-                                                                     invalid_characters, new_search_string,
-                                                                     search_string, value))
+                ignore_value_found = True  # Initialise as True because Python doesn't want to implement a do loop...
+                while ignore_value_found:
+                    character_location, new_search_string, search_string, value = (
+                        __extract_substring_until_next_invalid_character(character_location=character_location,
+                                                                         invalid_characters=invalid_characters,
+                                                                         new_search_string=new_search_string,
+                                                                         search_string=search_string,
+                                                                         comment_characters=comment_characters))
+
+                    ignore_value_found = value.upper() in ignore_values
+
                 # if the substring is a not an empty string, we've found a value
                 if value != "":
                     value_found = True
@@ -208,20 +218,19 @@ def __replace_value_in_file_as_list(file_as_list: list[str], line_index: int, re
 
 
 def __extract_substring_until_next_invalid_character(character_location: int,
-                                                     ignore_values: list[str] | None,
                                                      invalid_characters: list[str],
                                                      new_search_string: bool,
                                                      search_string: str,
-                                                     value: str) -> tuple[int, bool, str, str]:
+                                                     comment_characters: list[str]) \
+        -> tuple[int, bool, str, str]:
     """Extracts a substring from the search_string until an invalid character is found.
 
     Args:
         character_location (int): current location in the search_string
-        ignore_values (list[str] | None): list of values to ignore if found
         invalid_characters (list[str]): list of characters that are considered invalid
         new_search_string (bool): whether we are starting a new search string
         search_string (str): string to search from within the first indexed line
-        value (str): current value being built up
+        comment_characters (list[str]): A list of the comment characters for the current simulator
     Returns:
         int: new character location in the search_string
         bool: whether we are starting a new search string
@@ -229,40 +238,25 @@ def __extract_substring_until_next_invalid_character(character_location: int,
         str: the value that has been built up, or blank if a value has been ignored
     """
     value_string = search_string[character_location: len(search_string)]
-    if ignore_values is not None:
-        ignore_values = [x.upper() for x in ignore_values]
-    confirm_exclude: bool = False
-
+    value = ''
     for value_character in value_string:
-        if value_character not in invalid_characters:
-            value += value_character
-
-        if confirm_exclude and value_character in invalid_characters:
-            # String to ignore found, ignore it and get the next value
-            search_string = search_string[character_location: len(search_string)]
-            new_search_string = True
-            value = ""
-
-        confirm_exclude = False
-
-        # If we've formed a string value we're supposed to ignore, check the next character ends the value on the next
-        # loop through. Avoids us excluding values that happen to occur in a longer string.
-        if ignore_values is not None and value.upper() in ignore_values:
-            if character_location >= len(value_string) - 1:
-                value = ""
-                break
-            else:
-                confirm_exclude = True
-
-        character_location += 1
+        if value_character.upper() in comment_characters:
+            character_location = len(search_string)
+            return character_location, new_search_string, search_string, value
 
         # stop adding to the value once we hit an invalid_character
         if value_character in invalid_characters and value != '':
             break
+
+        if value_character not in invalid_characters:
+            value += value_character
+
+        character_location += 1
+
     return character_location, new_search_string, search_string, value
 
 
-def __replace_with_variable_entry(new_line: str, original_line: str, replace_with: GridArrayDefinition, value: str)\
+def __replace_with_variable_entry(new_line: str, original_line: str, replace_with: GridArrayDefinition, value: str) \
         -> tuple[str, str, str]:
     new_value = replace_with.value if replace_with.value is not None else ''
     if replace_with.modifier != 'VALUE':
@@ -535,8 +529,8 @@ def split_lines_for_long_string(long_string: str, max_length: int) -> str:
     for i in range(len(whitespace_indices) - 1):
         if whitespace_indices[i + 1] > max_length:
             compiled_string += long_string[:whitespace_indices[i]] + '\n'
-            length_of_short_line = len(long_string[:whitespace_indices[i]+1])
-            long_string = long_string[whitespace_indices[i]+1:]
+            length_of_short_line = len(long_string[:whitespace_indices[i] + 1])
+            long_string = long_string[whitespace_indices[i] + 1:]
             # adjust the indices for the newly created line and check the line length again
             whitespace_indices = [x - length_of_short_line for x in whitespace_indices]
     compiled_string += long_string
