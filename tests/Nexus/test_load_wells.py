@@ -378,13 +378,13 @@ def test_load_wells_all_columns_present_structured_grid(mocker):
                                                  grid='GRID_A', measured_depth=1.38974, well_indices=2.84,
                                                  depth_to_top=None, depth_to_top_str='TOP', depth_to_bottom_str='BOT',
                                                  depth_to_bottom=None, perm_thickness_ovr=1.23,
-                                                 kh_mult=0.363, date_format=date_format, unit_system=UnitSystem.ENGLISH,
+                                                 perm_thickness_mult=0.363, date_format=date_format, unit_system=UnitSystem.ENGLISH,
                                                  peaceman_well_block_radius=1234, start_date=start_date)
     expected_well_completion_2 = NexusCompletion(date='01/03/2023', i=6, j=7, k=8, skin=4.52, depth=8.955,
                                                  well_radius=9.11, x=9000.48974, y=2, angle_a=1, angle_v=5.68,
                                                  grid='GRID_B', measured_depth=1.568, well_indices=0.2874,
                                                  depth_to_top=0.2132, depth_to_bottom=5.45454, perm_thickness_ovr=4.56,
-                                                 kh_mult=1.567, date_format=date_format, unit_system=UnitSystem.ENGLISH,
+                                                 perm_thickness_mult=1.567, date_format=date_format, unit_system=UnitSystem.ENGLISH,
                                                  peaceman_well_block_radius=1.589, start_date=start_date)
 
     dummy_model = get_fake_nexus_simulator(mocker)

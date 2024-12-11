@@ -41,7 +41,7 @@ def test_nexus_completion_to_dict_include_nones():
                        'i': 1,
                        'j': 2,
                        'k': 3,
-                       'kh_mult': None,
+                       'perm_thickness_mult': None,
                        'layer_assignment': None,
                        'length': None,
                        'mdcon': None,
