@@ -432,6 +432,7 @@ def test_load_wells_all_columns_present_structured_grid(mocker):
     assert result_wells[0].completions[0].polymer_well_radius == expected_wells[0].completions[0].polymer_well_radius
     assert result_wells[0].completions[0].rel_perm_end_point == expected_wells[0].completions[0].rel_perm_end_point
     assert result_wells[0].completions[0].kh_mult == expected_wells[0].completions[0].kh_mult
+    assert result_wells[0].completions[0].perm_thickness_mult == expected_wells[0].completions[0].perm_thickness_mult
     assert result_wells[0].completions[0].depth_to_top_str == expected_wells[0].completions[0].depth_to_top_str
     assert result_wells[0].completions[0].depth_to_bottom_str == expected_wells[0].completions[0].depth_to_bottom_str
 
