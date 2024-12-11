@@ -140,7 +140,7 @@ class NexusCompletion(Completion):
             portype: Optional[str]: The pore type for the completion FRACTURE OR MATRIX. 'PORTYPE' in Nexus
             rel_perm_end_point: Optional[NexusRelPermEndPoint]: instance of the NexusRelPermEndPoint class holding the
             rel perm end point data settings.
-            perm_thickness_mult: Optional[float]: The multiplier that is applied to the permeability-thickness. 
+            perm_thickness_mult: Optional[float]: The multiplier that is applied to the permeability-thickness.
             'KHMULT' in Nexus.
             date_format: Optional[DateFormatEnum.DateFormat]: The date format to use for the date as an enum.
             start_date: Optional[str]: The start date of the simulation.
