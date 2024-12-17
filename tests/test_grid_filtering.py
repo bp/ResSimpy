@@ -1,6 +1,8 @@
 # tests for filtering the grid file to ensure it is only numeric values
 import numpy as np
 import pytest
+
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.FileOperations.File import File
 from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
@@ -80,7 +82,7 @@ def test_grid_to_numpy_array(mocker):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    grid = NexusGrid(assume_loaded=True)
+    grid = NexusGrid(assume_loaded=True, model_unit_system=UnitSystem.ENGLISH)
     grid._porosity = GridArrayDefinition(modifier='VALUE', value=file_path, keyword_in_include_file=False,
                                          absolute_path=file_path)
     grid._range_x = 2
@@ -112,7 +114,7 @@ def test_grid_to_numpy_array_values_in_file(mocker):
         return mock_open
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    grid = NexusGrid(assume_loaded=True)
+    grid = NexusGrid(assume_loaded=True, model_unit_system=UnitSystem.ENGLISH)
     grid._porosity = GridArrayDefinition(modifier='VALUE', value=file_contents, keyword_in_include_file=False,
                                          absolute_path=None)
     grid._range_x = 2

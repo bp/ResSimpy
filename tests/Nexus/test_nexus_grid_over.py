@@ -1,3 +1,4 @@
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusOver import NexusOver
@@ -134,7 +135,8 @@ def test_read_nexus_over_from_grid():
     expected_result = [NexusOver(i1=1, i2=12, j1=1, j2=46, k1=10, k2=11, operator='*', value=0.0,
                                  array='TX', grid='ROOT')]
     grid = NexusGrid(grid_nexus_file=NexusFile(location='loc.dat',
-                                               file_content_as_list=grid_file_content.splitlines(keepends=True)))
+                                               file_content_as_list=grid_file_content.splitlines(keepends=True)),
+                     model_unit_system=UnitSystem.ENGLISH)
     # Act
     result = grid.overs
 

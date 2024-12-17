@@ -629,7 +629,8 @@ class NexusSimulator(Simulator):
 
         if self.model_files.structured_grid_file is not None:
             self._grid = NexusGrid.load_structured_grid_file(self.model_files.structured_grid_file,
-                                                             lazy_loading=self.__lazy_loading)
+                                                             lazy_loading=self.__lazy_loading,
+                                                             model_unit_system=self.default_units)
 
         # Load in wellspec files
         if self.model_files.well_files is not None and \

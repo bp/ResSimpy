@@ -1,6 +1,7 @@
 import pandas as pd
 
 from ResSimpy.Enums.GridFunctionTypes import GridFunctionTypeEnum
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.StructuredGrid import NexusGrid
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
@@ -180,7 +181,7 @@ WORKA6 OUTPUT WORKA7
 
     # Act
     test_input_grid_file_object: NexusFile = NexusFile.generate_file_include_structure('mock/str_grid/path.inc')
-    new_sim_grid = NexusGrid.load_structured_grid_file(test_input_grid_file_object)
+    new_sim_grid = NexusGrid.load_structured_grid_file(test_input_grid_file_object, model_unit_system=UnitSystem.ENGLISH)
     func_list = new_sim_grid.get_array_functions_list()
     func_summary_df = new_sim_grid.get_array_functions_df()
 
