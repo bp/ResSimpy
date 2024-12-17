@@ -2,6 +2,7 @@ import pandas as pd
 import pytest
 
 from ResSimpy.DataModelBaseClasses.Multir import Multir
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusMultir import NexusMultir
@@ -83,7 +84,7 @@ def test_load_multir():
     """
     nexus_grid_file = NexusFile('loc.dat', file_content_as_list=file_content.splitlines(keepends=True))
 
-    grid = NexusGrid(grid_nexus_file=nexus_grid_file)
+    grid = NexusGrid(grid_nexus_file=nexus_grid_file, model_unit_system=UnitSystem.ENGLISH)
     grid._nexus_file_content = file_content
     
     expected_result = [NexusMultir(region_1=1, region_2=2, tmult=0, directions='XYZ', std_connections=True, non_std_connections=True),
