@@ -32,7 +32,6 @@ class NexusCompletion(Completion):
         cell_number (Optional[int]): cell number for the completion in unstructured grids. 'CELL' in Nexus
         portype (Optional[str]): indicates the pore type for the completion FRACTURE OR MATRIX. 'PORTYPE' in Nexus
         sector (None | str | int): the section of the wellbore to which this completion flows. 'SECT' in Nexus
-        khmult (Optional[float]): the multiplier that is applied to the permeability-thickness. 'KHMULT' in Nexus.
     """
 
     __measured_depth: Optional[float] = None
@@ -59,7 +58,6 @@ class NexusCompletion(Completion):
     __polymer_block_radius: Optional[float] = None
     __polymer_well_radius: Optional[float] = None
     __rel_perm_end_point: Optional[NexusRelPermEndPoint] = None
-    __kh_mult: Optional[float] = None
 
     def __init__(self, date: str, i: Optional[int] = None, j: Optional[int] = None, k: Optional[int] = None,
                  skin: Optional[float] = None, depth: Optional[float] = None, well_radius: Optional[float] = None,
@@ -79,7 +77,7 @@ class NexusCompletion(Completion):
                  comp_dz: Optional[float] = None, layer_assignment: Optional[int] = None,
                  polymer_bore_radius: Optional[float] = None, polymer_well_radius: Optional[float] = None,
                  portype: Optional[str] = None, rel_perm_end_point: Optional[NexusRelPermEndPoint] = None,
-                 kh_mult: Optional[float] = None,
+                 perm_thickness_mult: Optional[float] = None,
                  date_format: Optional[DateFormatEnum.DateFormat] = None,
                  start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None,
@@ -142,7 +140,8 @@ class NexusCompletion(Completion):
             portype: Optional[str]: The pore type for the completion FRACTURE OR MATRIX. 'PORTYPE' in Nexus
             rel_perm_end_point: Optional[NexusRelPermEndPoint]: instance of the NexusRelPermEndPoint class holding the
             rel perm end point data settings.
-            kh_mult: Optional[float]: The multiplier that is applied to the permeability-thickness. 'KHMULT' in Nexus.
+            perm_thickness_mult: Optional[float]: The multiplier that is applied to the permeability-thickness.
+            'KHMULT' in Nexus.
             date_format: Optional[DateFormatEnum.DateFormat]: The date format to use for the date as an enum.
             start_date: Optional[str]: The start date of the simulation.
             unit_system: Optional[UnitSystem]: The unit system to use for the completion.
@@ -173,7 +172,6 @@ class NexusCompletion(Completion):
         self.__polymer_well_radius = polymer_well_radius
         self.__portype = portype
         self.__rel_perm_end_point = rel_perm_end_point
-        self.__kh_mult = kh_mult
 
         if unit_system is None:
             unit_system = UnitSystem.ENGLISH
@@ -182,7 +180,8 @@ class NexusCompletion(Completion):
                          angle_a=angle_a, angle_v=angle_v, grid=grid, depth_to_top=depth_to_top,
                          depth_to_bottom=depth_to_bottom, perm_thickness_ovr=perm_thickness_ovr, dfactor=dfactor,
                          rel_perm_method=rel_perm_method, status=status, date_format=date_format, start_date=start_date,
-                         unit_system=unit_system, peaceman_well_block_radius=peaceman_well_block_radius)
+                         unit_system=unit_system, peaceman_well_block_radius=peaceman_well_block_radius,
+                         perm_thickness_mult=perm_thickness_mult)
 
     @property
     def measured_depth(self) -> float | None:
@@ -304,9 +303,9 @@ class NexusCompletion(Completion):
         return self.__rel_perm_end_point
 
     @property
-    def kh_mult(self) -> float | None:
-        """Returns multiplier that is applied to the permeability-thickness. 'KHMULT' in Nexus."""
-        return self.__kh_mult
+    def kh_mult(self) -> Optional[float]:
+        """Returns the perm thickness multiplier."""
+        return self.perm_thickness_mult
 
     @property
     def depth_to_top_str(self) -> str | None:
@@ -410,7 +409,7 @@ class NexusCompletion(Completion):
             'LAYER': ('layer_assignment', int),
             'RADBP': ('polymer_block_radius', float),
             'RADWP': ('polymer_well_radius', float),
-            'KHMULT': ('kh_mult', float),
+            'KHMULT': ('perm_thickness_mult', float),
         }
 
         return nexus_mapping

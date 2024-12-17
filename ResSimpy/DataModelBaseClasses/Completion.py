@@ -62,6 +62,7 @@ class Completion(DataObjectMixin, ABC):
     __status: Optional[str] = None
     __unit_system: Optional[UnitSystem] = None
     __peaceman_well_block_radius: Optional[float] = None
+    __perm_thickness_mult: Optional[float] = None
 
     def __init__(self, date: str, i: Optional[int] = None, j: Optional[int] = None, k: Optional[int] = None,
                  skin: Optional[float] = None, depth: Optional[float] = None, well_radius: Optional[float] = None,
@@ -69,7 +70,8 @@ class Completion(DataObjectMixin, ABC):
                  angle_v: Optional[float] = None, grid: Optional[str] = None, depth_to_top: Optional[float] = None,
                  depth_to_bottom: Optional[float] = None, perm_thickness_ovr: Optional[float] = None,
                  dfactor: Optional[float] = None, rel_perm_method: Optional[int] = None,
-                 status: Optional[str] = None, date_format: Optional[DateFormatEnum.DateFormat] = None,
+                 perm_thickness_mult: Optional[float] = None, status: Optional[str] = None,
+                 date_format: Optional[DateFormatEnum.DateFormat] = None,
                  peaceman_well_block_radius: Optional[float] = None, start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None) -> None:
         """Initialises the Completion class.
@@ -93,6 +95,7 @@ class Completion(DataObjectMixin, ABC):
             completion interval.
             dfactor: Optional[float]: non-darcy factor to use for rate dependent skin calculations.
             rel_perm_method: Optional[int]: rel perm method to use for the completion.
+            perm_thickness_mult: Optional[float]: permeability thickness multiplier to use for the completion interval.
             status: Optional[str]: the status of the layer, can be 'ON' or 'OFF'
             date_format: Optional[DateFormatEnum.DateFormat]: The date format to use for the date as an enum.
             peaceman_well_block_radius: Optional[float]: The pressure equivalent radius of the grid block
@@ -116,6 +119,7 @@ class Completion(DataObjectMixin, ABC):
         self.__perm_thickness_ovr = perm_thickness_ovr
         self.__dfactor = dfactor
         self.__rel_perm_method = rel_perm_method
+        self.__perm_thickness_mult = perm_thickness_mult
         self.__status = status
         self.__unit_system = unit_system
         self.__peaceman_well_block_radius = peaceman_well_block_radius
@@ -209,6 +213,11 @@ class Completion(DataObjectMixin, ABC):
     def peaceman_well_block_radius(self) -> Optional[float]:
         """Writes the pressure equivalent radius of the grid block."""
         return self.__peaceman_well_block_radius
+
+    @property
+    def perm_thickness_mult(self) -> Optional[float]:
+        """Returns the permeability thickness multiplier to use for the completion interval."""
+        return self.__perm_thickness_mult
 
     @property
     def date_format(self) -> Optional[DateFormat]:

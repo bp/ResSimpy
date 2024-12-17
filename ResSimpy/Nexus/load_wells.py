@@ -90,7 +90,7 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
     layer_assignment: Optional[str] = None
     polymer_bore_radius: Optional[str] = None
     polymer_well_radius: Optional[str] = None
-    kh_mult: Optional[float] = None
+    perm_thickness_mult: Optional[float] = None
 
     # End point values:
     swl: Optional[str] = None
@@ -123,7 +123,7 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
         'GROUP': well_group, 'ZONE': zone, 'ANGLE': angle_open_flow, 'TEMP': temperature, 'FLOWSECT': flowsector,
         'PARENT': parent_node, 'MDCON': mdcon, 'IPTN': pressure_avg_pattern, 'LENGTH': length, 'K': permeability,
         'ND': non_darcy_model, 'DZ': comp_dz, 'LAYER': layer_assignment, 'RADBP': polymer_bore_radius,
-        'RADWP': polymer_well_radius, 'KHMULT': kh_mult
+        'RADWP': polymer_well_radius, 'KHMULT': perm_thickness_mult
     }
     end_point_scaling_header_values: dict[str, None | int | float | str] = {
         'SWL': swl, 'SWR': swr, 'SWU': swu, 'SGL': sgl, 'SGR': sgr, 'SGU': sgu,
@@ -386,7 +386,7 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
             polymer_well_radius=convert_header_value_float('RADWP'),
             portype=(None if header_values['PORTYPE'] is None else str(header_values['PORTYPE'])),
             rel_perm_end_point=new_rel_perm_end_point,
-            kh_mult=convert_header_value_float('KHMULT'),
+            perm_thickness_mult=convert_header_value_float('KHMULT'),
             date_format=date_format,
             unit_system=unit_system,
             start_date=start_date,
