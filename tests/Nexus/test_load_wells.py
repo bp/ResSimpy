@@ -1229,12 +1229,16 @@ def test_load_wells_maddog(mocker):
     mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
 
     wellspec_contents = f"""
-DATEFORMAT       DD/MM/YYYY
-TIME 01/12/2005 
-WELLSPEC WELL1
-IW  JW  L   GRID  ANGLA    ANGLV   LENGTH    RADW  STAT  KHMULT             SKIN
-163 126  9  ROOT  108.345  38.5919  11.8571  0.35   ON   0.786908177144367   0
-163	126	10	ROOT  108.274  38.5919	11.8544	 0.35	ON	 0.786908177144367   0
+WELLSPEC MD224
+        IW      JW      L       GRID    ANGLA   ANGLV   LENGTH  RADW    STAT    KH              SKIN    !       DEPTH   MD
+        153     95      9       ROOT    298.192 60.4133 12.745  0.35    ON      3752.773908     -1.6    !       21694.6 22799.8
+WELLSPEC SP6
+! Glen A.: shifted well location slightly to move away from new OBN fault
+        IW      JW      L       GRID    ANGLA   ANGLV   LENGTH  RADW    STAT    KHMULT  SKIN
+        163     126     9       ROOT    108.345 38.5919 11.8571 0.35    ON      0.786908177144367       0
+        163     126     10      ROOT    108.274 38.5919 11.8544 0.35    ON      0.786908177144367       0
+        163     126     11      ROOT    108.204 38.5919 11.8531 0.35    ON      0.786908177144367       0
+        163     126     12      ROOT    108.132 38.5919 11.8492 0.35    ON      0.786908177144367       0
 """
 
     dummy_model = get_fake_nexus_simulator(mocker)
@@ -1250,6 +1254,16 @@ IW  JW  L   GRID  ANGLA    ANGLV   LENGTH    RADW  STAT  KHMULT             SKIN
                                              kh_mult=0.786908177144367, skin=0, date_format=DateFormat.DD_MM_YYYY,
                                              start_date=start_date)
 
+    expected_completions_3 = NexusCompletion(date=expected_date, i=163, j=126, k=11, grid='ROOT', angle_a=108.204,
+                                             angle_v=38.5919, length=11.8531, well_radius=0.35, status='ON',
+                                             kh_mult=0.786908177144367, skin=0, date_format=date_format,
+                                             start_date=start_date)
+
+    expected_completions_4 = NexusCompletion(date=expected_date, i=163, j=126, k=12, grid='ROOT', angle_a=108.132,
+                                             angle_v=38.5919, length=11.8492, well_radius=0.35, status='ON',
+                                             kh_mult=0.786908177144367, skin=0, date_format=date_format,
+                                             start_date=start_date)
+
     # mock out open to return our test file contents
     open_mock = mocker.mock_open(read_data=wellspec_contents)
     mocker.patch("builtins.open", open_mock)
@@ -1259,7 +1273,11 @@ IW  JW  L   GRID  ANGLA    ANGLV   LENGTH    RADW  STAT  KHMULT             SKIN
                               model_date_format=date_format, parent_wells_instance=dummy_wells)[0]
 
     # Assert
-    assert result_wells[0].completions[0].date == expected_date
-    assert result_wells[0].completions[0] == expected_completion_1
-    assert result_wells[0].completions[1].date == expected_date
-    assert result_wells[0].completions[1] == expected_completions_2
+    assert result_wells[1].completions[0].date == expected_date
+    assert result_wells[1].completions[0] == expected_completion_1
+    assert result_wells[1].completions[1].date == expected_date
+    assert result_wells[1].completions[1] == expected_completions_2
+    assert result_wells[1].completions[2].date == expected_date
+    assert result_wells[1].completions[2] == expected_completions_3
+    assert result_wells[1].completions[3].date == expected_date
+    assert result_wells[1].completions[3] == expected_completions_4
