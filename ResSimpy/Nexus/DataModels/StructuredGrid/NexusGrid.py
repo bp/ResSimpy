@@ -8,10 +8,12 @@ from dataclasses import dataclass, field
 from typing import Optional, TYPE_CHECKING, Any, Final
 import warnings
 
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.FileOperations.File import File
 from ResSimpy.DataModelBaseClasses.Grid import Grid
 from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusFtrans import NexusFtrans
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGridArrayFunction import NexusGridArrayFunction
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusLGRs import NexusLGRs
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusMultir import NexusMultir
@@ -122,11 +124,16 @@ class NexusGrid(Grid):
     __multir: Optional[list[NexusMultir]] = None
     __lgrs: NexusLGRs
     __overs: list[NexusOver] = field(default_factory=list)
+    __ftrans: list[NexusFtrans] = field(default_factory=list)
+    __model_unit_system: UnitSystem
 
-    def __init__(self, grid_nexus_file: Optional[NexusFile] = None, assume_loaded: bool = False) -> None:
+    def __init__(self, model_unit_system: UnitSystem, grid_nexus_file: Optional[NexusFile] = None,
+                 assume_loaded: bool = False,
+                 ) -> None:
         """Initialises the NexusGrid class.
 
         Args:
+            model_unit_system (UnitSystem): the default unit system to use for the model.
             grid_nexus_file (Optional[NexusFile]): the NexusFile representation of a structured grid file for \
                 reading and interpreting the grid properties from.
             assume_loaded (bool): Create the object assuming the grid has already been loaded into memory.
@@ -218,6 +225,8 @@ class NexusGrid(Grid):
 
         self.__lgrs: NexusLGRs = NexusLGRs(grid_file_as_list=self.__grid_file_contents, parent_grid=self)
         self.__overs: list[NexusOver] = []
+        self.__ftrans: list[NexusFtrans] = []
+        self.__model_unit_system: UnitSystem = model_unit_system
 
     def __wrap(self, value: Any) -> Any:
         if isinstance(value, tuple | list | set | frozenset):
@@ -512,6 +521,8 @@ class NexusGrid(Grid):
 
         ignore_line = False
         array_name = 'ROOT'
+        property_dict: dict = {}
+        unit_system = self.__model_unit_system
 
         for idx, (original_line_location, line) in enumerate(file_as_list_with_original_line_numbers):
 
@@ -530,6 +541,9 @@ class NexusGrid(Grid):
 
             if ignore_line:
                 continue
+
+            nfo.check_property_in_line(line, property_dict, file_as_list)
+            unit_system = property_dict.get('UNIT_SYSTEM', self.__model_unit_system)
 
             if nfo.check_token('ARRAYS', line):
                 temp_array_name = fo.get_token_value('ARRAYS', line, [line])
@@ -583,12 +597,15 @@ class NexusGrid(Grid):
         # load the overs:
         if fo.value_in_file('OVER', file_as_list):
             self.__overs = NexusGrid.load_nexus_overs(file_as_list)
+        if fo.value_in_file('FTRANS', file_as_list):
+            self.__ftrans = NexusGrid.load_nexus_ftrans(file_as_list, unit_system)
 
         self._grid_properties_loaded = True
 
     @classmethod
     def load_structured_grid_file(cls: type[NexusGrid], structured_grid_file: File,
-                                  lazy_loading: bool = True) -> NexusGrid:
+                                  model_unit_system: UnitSystem, lazy_loading: bool = True,
+                                  ) -> NexusGrid:
         """Loads in a structured grid file with all grid properties, and the array functions defined with 'FUNCTION'.
 
         Other grid modifiers are currently not supported.
@@ -596,6 +613,7 @@ class NexusGrid(Grid):
         Args:
             structured_grid_file (NexusFile): the NexusFile representation of a structured grid file for converting \
                 into a structured grid file class
+            model_unit_system (UnitSystem): the default unit system to use for the model
             lazy_loading (bool): If set to True, parts of the grid will only be loaded in when requested via \
                 properties on the object.
 
@@ -611,7 +629,7 @@ class NexusGrid(Grid):
         if not isinstance(structured_grid_file, NexusFile):
             raise ValueError(f"Cannot load file of type {type(structured_grid_file)}.")
 
-        loaded_structured_grid_file = cls(grid_nexus_file=structured_grid_file)
+        loaded_structured_grid_file = cls(grid_nexus_file=structured_grid_file, model_unit_system=model_unit_system)
 
         if not lazy_loading:
             loaded_structured_grid_file.load_grid_properties_if_not_loaded()
@@ -1485,7 +1503,7 @@ class NexusGrid(Grid):
             if nfo.check_token('OVER', line):
                 reading_over = True
                 over_split_line = nfo.split_line(line)
-                arrays = over_split_line[over_split_line.index('OVER')+1:]
+                arrays = over_split_line[over_split_line.index('OVER') + 1:]
 
         return overs_list
 
@@ -1495,3 +1513,56 @@ class NexusGrid(Grid):
         if not self._grid_properties_loaded:
             self.load_grid_properties_if_not_loaded()
         return self.__overs
+
+    @staticmethod
+    def load_nexus_ftrans(file_content_as_list: list[str], unit_system: UnitSystem) -> list[NexusFtrans]:
+        """Function to read in FTRANS tables from a file.
+
+        Args:
+            file_content_as_list (list[str]): list of strings representing the file contents.
+            unit_system (UnitSystem): the unit system used in the grid file.
+
+        Returns:
+            list[NexusFtrans]: list of NexusFtrans objects representing the FTRANS table.
+        """
+        ignore_list = ['FTRANS', 'GRID', 'FNAME', 'ROOT']
+        valid_end_tokens = [x for x in VALID_NEXUS_KEYWORDS if x not in ignore_list]
+        ftrans_list: list[NexusFtrans] = []
+        reading = False
+        grid = 'ROOT'
+        fname = None
+        for line in file_content_as_list:
+            if nfo.nexus_token_found(line, valid_end_tokens):
+                reading = False
+                grid = 'ROOT'
+                fname = None
+                continue
+
+            if reading:
+                split_line = nfo.split_line(line)
+                if nfo.check_token('GRID', line):
+                    grid = nfo.get_expected_token_value('GRID', line, file_content_as_list)
+                if nfo.check_token('FNAME', line):
+                    fname = nfo.get_expected_token_value('FNAME', line, file_content_as_list)
+                if len(split_line) == 7:
+                    i1, j1, k1, i2, j2, k2 = (int(x) for x in split_line[0:6])
+                    value = float(split_line[-1])
+                    # cut out the ranges
+                    ftrans_list.append(NexusFtrans(grid=grid, fault_name=fname,
+                                                   i1=i1, i2=i2, j1=j1, j2=j2, k1=k1, k2=k2,
+                                                   value=value, unit_system=unit_system))
+
+            if nfo.check_token('FTRANS', line):
+                # reset the default values if another FTRANS call is found
+                grid = 'ROOT'
+                fname = None
+                reading = True
+
+        return ftrans_list
+
+    @property
+    def ftrans(self) -> list[NexusFtrans]:
+        """Returns the OVER table as a list of NexusOver objects."""
+        if not self._grid_properties_loaded:
+            self.load_grid_properties_if_not_loaded()
+        return self.__ftrans

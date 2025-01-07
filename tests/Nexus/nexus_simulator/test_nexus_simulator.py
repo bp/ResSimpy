@@ -2217,7 +2217,7 @@ def test_wells_and_network_equal_empty(mocker):
 def test_model_summary(mocker, fluid_type, expected_fluid_type):
     model = NexusSimulator(origin='test.fcs')
     model._start_date = '15/01/2020'
-    grid = NexusGrid(assume_loaded=True)
+    grid = NexusGrid(assume_loaded=True, model_unit_system=model.default_units)
     grid._range_x = 1
     grid._range_y = 2
     grid._range_z = 3

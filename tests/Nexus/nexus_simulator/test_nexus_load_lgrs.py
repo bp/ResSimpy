@@ -1,4 +1,5 @@
 """Unit tests for the NexusLGRs.load_lgrs method."""
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusLGR import NexusLGR
@@ -64,7 +65,7 @@ ENDLGR
         # Arrange
         grid_nexus_file = NexusFile(location='grid.dat',
                                     file_content_as_list=self.grid_file_contents.splitlines(keepends=True))
-        nexus_grid = NexusGrid(grid_nexus_file=grid_nexus_file)
+        nexus_grid = NexusGrid(grid_nexus_file=grid_nexus_file, model_unit_system=UnitSystem.ENGLISH)
 
         # Act
         # call it this way so that we can also test lazy loading via the property

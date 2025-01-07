@@ -1,4 +1,5 @@
 from ResSimpy.Enums.GridFunctionTypes import GridFunctionTypeEnum
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGridArrayFunction import NexusGridArrayFunction
@@ -79,7 +80,7 @@ KX OUTPUT KX
         output_array=['KX'],
         function_values=[0.0])
     ]
-    grid = NexusGrid(file)
+    grid = NexusGrid(grid_nexus_file=file, model_unit_system=UnitSystem.ENGLISH)
     # Act
     result = grid.array_functions
     # Assert
@@ -130,7 +131,7 @@ KX OUTPUT KX
         output_array=['KX'],
         function_values=[0.0])
     ]
-    grid = NexusGrid(assume_loaded=True)
+    grid = NexusGrid(assume_loaded=True, model_unit_system=UnitSystem.ENGLISH)
     grid._NexusGrid__grid_array_functions = input_grid_function
 
     # Act
@@ -451,7 +452,7 @@ def test_tabular_array_function_block(input_file, expected_result):
     file = NexusFile(location='path/to/file.dat',
                      file_content_as_list=[str(line) for line in input_file.splitlines(keepends=True)])
 
-    grid = NexusGrid(file)
+    grid = NexusGrid(grid_nexus_file=file, model_unit_system=UnitSystem.ENGLISH)
 
     # Act
     result = grid.array_functions
