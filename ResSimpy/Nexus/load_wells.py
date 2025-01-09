@@ -147,7 +147,9 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
 
         trimmed_line = line.strip()
 
-        # Exclude block comments
+        if trimmed_line.startswith('!'):
+            continue
+
         if len(trimmed_line) > 0 and trimmed_line[0] == '[':
             exclude_section = True
 
