@@ -11,6 +11,7 @@ import numpy as np
 from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
 from ResSimpy.DataModelBaseClasses.GridArrayFunction import GridArrayFunction
 from ResSimpy.DataModelBaseClasses.Over import Over
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.FileOperations.File import File
 from ResSimpy.GenericContainerClasses.LGRs import LGRs
 
@@ -169,7 +170,8 @@ class Grid(ABC):
         return self._lgrs
 
     @abstractmethod
-    def load_structured_grid_file(self, structure_grid_file: File, lazy_loading: bool) -> Grid:
+    def load_structured_grid_file(self, structure_grid_file: File,
+                                  model_unit_system: UnitSystem, lazy_loading: bool) -> Grid:
         """Loads in a structured grid file with all grid properties, and the array functions defined with 'FUNCTION'.
 
         Args:
@@ -177,6 +179,7 @@ class Grid(ABC):
             converting into a structured grid file class.
             lazy_loading(bool): If set to True, parts of the grid will only be loaded in
              when requested via properties on the object.
+            model_unit_system(UnitSystem): The default unit system used in the model.
         """
         raise NotImplementedError("Implement this in the derived class")
 
