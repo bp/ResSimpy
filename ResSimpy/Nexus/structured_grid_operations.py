@@ -352,22 +352,46 @@ class StructuredGridOperations:
         break_flag = False
         keywords_to_stop_on = STRUCTURED_GRID_KEYWORDS + GRID_ARRAY_KEYWORDS
         keywords_to_stop_on.remove('INCLUDE')
+        skip_lines = False
+        found_end_of_mod_table = False
+
         for i in range(line_indx + 1, len(file_as_list)):
-            if nfo.check_token('MODX', file_as_list[i]):
+            line = file_as_list[i]
+            # if in a skip line block then skip the line
+            if nfo.check_token('SKIP', line):
+                skip_lines = True
+            if nfo.check_token('NOSKIP', line):
+                skip_lines = False
+            if skip_lines:
+                continue
+
+            if nfo.check_token('MODX', line):
                 mod_start_end['MODX'] = [[i + 1, i + 2]]
-            if nfo.check_token('MODY', file_as_list[i]):
+            if nfo.check_token('MODY', line):
                 mod_start_end['MODY'] = [[i + 1, i + 2]]
-            if nfo.check_token('MODZ', file_as_list[i]):
+            if nfo.check_token('MODZ', line):
                 mod_start_end['MODZ'] = [[i + 1, i + 2]]
-            if nfo.check_token('MOD', file_as_list[i]):
+            if nfo.check_token('MOD', line):
                 if 'MOD' in mod_start_end.keys():  # Already found a prior mod for this token, append
                     mod_start_end['MOD'].append([i + 1, len(file_as_list)])
                 else:
                     mod_start_end['MOD'] = [[i + 1, len(file_as_list)]]
                 found_end_of_mod_table = False
                 for j in range(i + 1, len(file_as_list)):
+                    line_find_end = file_as_list[j]
+                    # find the end of the mod table:
+                    if nfo.check_token('SKIP', line_find_end):
+                        skip_lines = True
+                        # terminate reading mods:
+                        mod_start_end['MOD'][-1][1] = j
+                    if nfo.check_token('NOSKIP', line_find_end):
+                        skip_lines = False
+                        # restart reading mods
+                        mod_start_end['MOD'].append([j+1, len(file_as_list)])
+                    if skip_lines:
+                        continue
                     for keyword in keywords_to_stop_on:
-                        if nfo.check_token(keyword, file_as_list[j]):
+                        if nfo.check_token(keyword, line_find_end):
                             mod_start_end['MOD'][-1][1] = j
                             found_end_of_mod_table = True
                             break
