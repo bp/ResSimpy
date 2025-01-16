@@ -90,13 +90,14 @@ class StructuredGridOperations:
             StructuredGridOperations.__make_grid_def(file_as_list, ignore_values, line, line_indx, modifier,
                                                      region_name, token_modifier, token_property, grid_nexus_file,
                                                      original_line_location=original_line_location)
-
+            grid_array_definition = token_property if not isinstance(token_property, dict) else (
+                token_property)[region_name]
             mod_start_end = StructuredGridOperations.__extract_mod_positions(line_indx, file_as_list)
             if 'VMOD' in mod_start_end:
                 vmod_indices = mod_start_end.pop('VMOD')
-                StructuredGridOperations.__make_vmod_table(vmod_indices, file_as_list, token_property)
+                StructuredGridOperations.__make_vmod_table(vmod_indices, file_as_list, grid_array_definition)
             StructuredGridOperations.__make_mod_table(mod_start_end, file_as_list,
-                                                      line, token_property, region_name, token_modifier)
+                                                      line, grid_array_definition, token_modifier)
 
     @staticmethod
     def __make_grid_def(file_as_list: list[str], ignore_values: list[str], line: str, line_indx: int, modifier: str,
@@ -418,8 +419,7 @@ class StructuredGridOperations:
 
     @staticmethod
     def __make_mod_table(mod_start_end: dict[str, list[list[int]]], file_as_list: list[str], line: str,
-                         token_property: GridArrayDefinition | dict[str, GridArrayDefinition], region_name: str,
-                         token_modifier: str) -> None:
+                         grid_array_definition: GridArrayDefinition, token_modifier: str) -> None:
         """A function that creates the mod table."""
 
         for key in mod_start_end.keys():
@@ -445,28 +445,16 @@ class StructuredGridOperations:
                 else:
                     raise ValueError(
                         f'Unsuitable mod card for {token_modifier} keyword in line: {line}')
-                if not isinstance(token_property, dict):
-                    # If we are dealing with a single grid array definition
-                    if token_property.mods is not None:
-                        if key in token_property.mods.keys():
-                            orig_mod_tab = token_property.mods[key].copy()
-                            token_property.mods[key] = \
-                                pd.concat([orig_mod_tab, mod_table]).reset_index(drop=True)
-                        else:
-                            token_property.mods[key] = mod_table
+
+                if grid_array_definition.mods is not None:
+                    if key in grid_array_definition.mods.keys():
+                        orig_mod_tab = grid_array_definition.mods[key].copy()
+                        grid_array_definition.mods[key] = \
+                            pd.concat([orig_mod_tab, mod_table]).reset_index(drop=True)
                     else:
-                        token_property.mods = {key: mod_table}
-                else:  # IREGION
-                    # If we are dealing with a dictionary of grid array definitions representing an iregion dict
-                    if token_property[region_name].mods is not None:
-                        tmp_dict = token_property[region_name].mods
-                        if isinstance(tmp_dict, dict):
-                            if key in tmp_dict.keys():
-                                orig_mod_tab = tmp_dict[key].copy()
-                                tmp_dict[key] = \
-                                    pd.concat([orig_mod_tab, mod_table]).reset_index(drop=True)
-                    else:
-                        token_property[region_name].mods = {key: mod_table}
+                        grid_array_definition.mods[key] = mod_table
+                else:
+                    grid_array_definition.mods = {key: mod_table}
 
     @staticmethod
     def __add_absolute_path_to_grid_array_definition(grid_array_definition: GridArrayDefinition,
@@ -511,8 +499,15 @@ class StructuredGridOperations:
 
     @staticmethod
     def __make_vmod_table(vmod_indices: list[list[int]], file_as_list: list[str],
-                          token_property: GridArrayDefinition) -> None:
-        """A function that creates the vmod table from a set of line indices."""
+                          grid_array_definition: GridArrayDefinition) -> None:
+        """A function that creates the vmod table from a set of line indices.
+
+        Args:
+        vmod_indices (list[list[int]]): list of line indices which the VMOD keyword refers to.
+        file_as_list (list[str]): a list of strings containing each line of the file as a new entry.
+        grid_array_definition (GridArrayDefinition): the grid array definition to add the vmod table to,
+        adds the vmod table to the mods attribute dictionary on the grid array definition.
+        """
         store_i1, store_i2, store_j1, store_j2, store_k1, store_k2, store_operation, store_include = (
             [], [], [], [], [], [], [], [])
         for (start_block, end_block) in vmod_indices:
@@ -534,10 +529,10 @@ class StructuredGridOperations:
                     # might need to add absolute path here at some point
                     store_include.append(include_file)
                     continue
-        if token_property.mods is None:
-            token_property.mods = {'VMOD': pd.DataFrame({
+        if grid_array_definition.mods is None:
+            grid_array_definition.mods = {'VMOD': pd.DataFrame({
                 'i1': store_i1, 'i2': store_i2, 'j1': store_j1, 'j2': store_j2, 'k1': store_k1, 'k2': store_k2,
                 'operation': store_operation, 'include': store_include})}
-        token_property.mods['VMOD'] = pd.DataFrame({
+        grid_array_definition.mods['VMOD'] = pd.DataFrame({
             'i1': store_i1, 'i2': store_i2, 'j1': store_j1, 'j2': store_j2, 'k1': store_k1, 'k2': store_k2,
             'operation': store_operation, 'include_file': store_include})
