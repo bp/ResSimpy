@@ -92,6 +92,9 @@ class StructuredGridOperations:
                                                      original_line_location=original_line_location)
 
             mod_start_end = StructuredGridOperations.__extract_mod_positions(line_indx, file_as_list)
+            if 'VMOD' in mod_start_end:
+                vmod_indices = mod_start_end.pop('VMOD')
+                StructuredGridOperations.__make_vmod_table(vmod_indices, file_as_list, token_property)
             StructuredGridOperations.__make_mod_table(mod_start_end, file_as_list,
                                                       line, token_property, region_name, token_modifier)
 
@@ -365,12 +368,19 @@ class StructuredGridOperations:
             if skip_lines:
                 continue
 
-            if nfo.check_token('MODX', line):
-                mod_start_end['MODX'] = [[i + 1, i + 2]]
-            if nfo.check_token('MODY', line):
-                mod_start_end['MODY'] = [[i + 1, i + 2]]
-            if nfo.check_token('MODZ', line):
-                mod_start_end['MODZ'] = [[i + 1, i + 2]]
+            one_line_mod_tokens = ['MODX', 'MODY', 'MODZ']
+            for token in one_line_mod_tokens:
+                if nfo.check_token(token, line):
+                    mod_start_end[token] = [[i + 1, i + 2]]
+            if nfo.check_token('VMOD', line):
+                if mod_start_end.get('VMOD', None) is None:
+                    mod_start_end['VMOD'] = []
+                mod_start_end['VMOD'].append([i + 1, i + 3])
+                for j, vmod_line in enumerate(file_as_list[i+1::], start=i + 1):
+                    # find the include file
+                    if nfo.check_token('INCLUDE', vmod_line):
+                        mod_start_end['VMOD'][-1][1] = j
+                        break
             if nfo.check_token('MOD', line):
                 if 'MOD' in mod_start_end.keys():  # Already found a prior mod for this token, append
                     mod_start_end['MOD'].append([i + 1, len(file_as_list)])
@@ -498,3 +508,36 @@ class StructuredGridOperations:
 
         absolute_file_path = os.path.join(os.path.dirname(include_file.location), grid_array_definition.value)
         grid_array_definition.absolute_path = absolute_file_path
+
+    @staticmethod
+    def __make_vmod_table(vmod_indices: list[list[int]], file_as_list: list[str],
+                          token_property: GridArrayDefinition) -> None:
+        """A function that creates the vmod table from a set of line indices."""
+        store_i1, store_i2, store_j1, store_j2, store_k1, store_k2, store_operation, store_include = (
+            [], [], [], [], [], [], [], [])
+        for (start_block, end_block) in vmod_indices:
+            file_section = file_as_list[start_block:end_block+1]
+            for line in file_section:
+                split_line = nfo.split_line(line, upper=False)
+                if len(split_line) == 7:
+                    i1, i2, j1, j2, k1, k2, operation = split_line
+                    store_i1.append(int(i1))
+                    store_i2.append(int(i2))
+                    store_j1.append(int(j1))
+                    store_j2.append(int(j2))
+                    store_k1.append(int(k1))
+                    store_k2.append(int(k2))
+                    store_operation.append(operation)
+                    continue
+                if len(split_line) == 2 and nfo.check_token('INCLUDE', line.upper()):
+                    include_file = split_line[1]
+                    # might need to add absolute path here at some point
+                    store_include.append(include_file)
+                    continue
+        if token_property.mods is None:
+            token_property.mods = {'VMOD': pd.DataFrame({
+                'i1': store_i1, 'i2': store_i2, 'j1': store_j1, 'j2': store_j2, 'k1': store_k1, 'k2': store_k2,
+                'operation': store_operation, 'include': store_include})}
+        token_property.mods['VMOD'] = pd.DataFrame({
+            'i1': store_i1, 'i2': store_i2, 'j1': store_j1, 'j2': store_j2, 'k1': store_k1, 'k2': store_k2,
+            'operation': store_operation, 'include_file': store_include})
