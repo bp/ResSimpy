@@ -2244,7 +2244,6 @@ INCLUDE permx_array.dat
         assert ipvt_mods is None
 
 
-
 def test_load_structured_grid_file_vmod(mocker):
     """Read in VMOD keyword with include file after."""
     # Arrange

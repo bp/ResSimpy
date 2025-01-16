@@ -33,7 +33,7 @@ class NexusWellhead(Wellhead):
         temperature (float):  The temperature of the fluid in the well  (TEMP)
         elevation_profile (str):  The well elevation profile. (ELEVPR)
         temperature_profile (str):  The well temperature profile. (TEMPPR)
-        dp_add (float):  The additional pressure drop across the well (DPADD)
+        dp_add (float):  The additional pressure drop across the well  (DPADD)
         rate_mult (float):  The rate multiplier for the well. (RATEMULT)
         delta_depth (float):  The depth difference between the two points in the connection  (DDEPTH)
         heat_transfer_coeff (float):  The heat transfer coefficient for the well  (HTC)
