@@ -1536,9 +1536,10 @@ class NexusGrid(Grid):
         Returns:
             list[NexusOver]: list of NexusTOver objects representing the TOVER table.
         """
-        ignore_list = ['OVER', 'TX', 'TY', 'TZ', 'GRID', 'ROOT', 'TOVER','MULT',
+        ignore_list = ['OVER', 'TX', 'TY', 'TZ', 'GRID', 'ROOT', 'TOVER',
                        'TX+', 'TX-', 'TZ+', 'TZ-', 'TY+', 'TY-',
-                       'TXF+', 'TXF-', 'TYF+', 'TYF-', 'TZF+', 'TZF-', 'INCLUDE']
+                       'TXF+', 'TXF-', 'TYF+', 'TYF-', 'TZF+', 'TZF-', 'INCLUDE',
+                       'ADD', 'SUB', 'DIV', 'EQ', 'MULT']
         valid_end_tokens = [x for x in VALID_NEXUS_KEYWORDS if x not in ignore_list]
         tovers_list: list[NexusTOver] = []
         reading_tover = False
@@ -1549,7 +1550,7 @@ class NexusGrid(Grid):
         include_file = ''
         operator = ''
         for i, line in enumerate(file_content_as_list):
-            if nfo.check_token('TOVER', line):
+            if nfo.check_token('TOVER', line.upper()):
                 array = nfo.get_expected_token_value(token='TOVER', token_line=line,
                                                      file_list=file_content_as_list[i:])
                 reading_tover = True
@@ -1565,9 +1566,9 @@ class NexusGrid(Grid):
                 operator = ''
                 continue
 
-            if any(nfo.check_token(x, line) for x in potential_operators):
+            if any(nfo.check_token(x,  line.upper()) for x in potential_operators):
                 i1, i2, j1, j2, k1, k2, operator = nfo.split_line(line)
-            if nfo.check_token('INCLUDE', line):
+            if nfo.check_token('INCLUDE',  line.upper()):
                 include_file = nfo.get_expected_token_value(token='INCLUDE', token_line=line,
                                                             file_list=file_content_as_list[i:])
                 new_tover = NexusTOver(i1=int(i1), i2=int(i2), j1=int(j1), j2=int(j2), k1=int(k1), k2=int(k2),
