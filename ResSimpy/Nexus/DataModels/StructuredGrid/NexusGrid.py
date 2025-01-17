@@ -18,6 +18,7 @@ from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGridArrayFunction import Nexu
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusLGRs import NexusLGRs
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusMultir import NexusMultir
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusOver import NexusOver
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusTOver import NexusTOver
 from ResSimpy.Nexus.NexusKeywords.nexus_keywords import VALID_NEXUS_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_FORMAT_KEYWORDS
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
@@ -124,6 +125,7 @@ class NexusGrid(Grid):
     __multir: Optional[list[NexusMultir]] = None
     __lgrs: NexusLGRs
     __overs: list[NexusOver] = field(default_factory=list)
+    __tovers: list[NexusTOver] = field(default_factory=list)
     __ftrans: list[NexusFtrans] = field(default_factory=list)
     __model_unit_system: UnitSystem
 
@@ -225,6 +227,7 @@ class NexusGrid(Grid):
 
         self.__lgrs: NexusLGRs = NexusLGRs(grid_file_as_list=self.__grid_file_contents, parent_grid=self)
         self.__overs: list[NexusOver] = []
+        self.__tovers: list[NexusTOver] = []
         self.__ftrans: list[NexusFtrans] = []
         self.__model_unit_system: UnitSystem = model_unit_system
 
@@ -599,6 +602,8 @@ class NexusGrid(Grid):
             self.__overs = NexusGrid.load_nexus_overs(file_as_list)
         if fo.value_in_file('FTRANS', file_as_list):
             self.__ftrans = NexusGrid.load_nexus_ftrans(file_as_list, unit_system)
+        if fo.value_in_file('TOVER', file_as_list):
+            self.__tovers = NexusGrid.load_nexus_tovers(file_as_list)
 
         self._grid_properties_loaded = True
 
@@ -1513,6 +1518,63 @@ class NexusGrid(Grid):
         if not self._grid_properties_loaded:
             self.load_grid_properties_if_not_loaded()
         return self.__overs
+
+    @property
+    def tovers(self) -> list[NexusOver]:
+        """Returns the TOVER table as a list of NexusTOver objects."""
+        if not self._grid_properties_loaded:
+            self.load_grid_properties_if_not_loaded()
+        return self.__tovers
+
+    @staticmethod
+    def load_nexus_tovers(file_content_as_list: list[str]) -> list[NexusTOver]:
+        """Loads the Nexus TOVER tables to a list of objects.
+
+        Args:
+        file_content_as_list (list[str]): list of strings representing the file contents.
+
+        Returns:
+            list[NexusOver]: list of NexusTOver objects representing the TOVER table.
+        """
+        ignore_list = ['OVER', 'TX', 'TY', 'TZ', 'GRID', 'ROOT', 'TOVER','MULT',
+                       'TX+', 'TX-', 'TZ+', 'TZ-', 'TY+', 'TY-',
+                       'TXF+', 'TXF-', 'TYF+', 'TYF-', 'TZF+', 'TZF-', 'INCLUDE']
+        valid_end_tokens = [x for x in VALID_NEXUS_KEYWORDS if x not in ignore_list]
+        tovers_list: list[NexusTOver] = []
+        reading_tover = False
+        grid = 'ROOT'
+        array = ''
+        potential_operators: Final = ['ADD', 'SUB', 'DIV', 'MULT', 'EQ']
+        i1, i2, j1, j2, k1, k2 = '', '', '', '', '', ''
+        include_file = ''
+        operator = ''
+        for i, line in enumerate(file_content_as_list):
+            if nfo.check_token('TOVER', line):
+                array = nfo.get_expected_token_value(token='TOVER', token_line=line,
+                                                     file_list=file_content_as_list[i:])
+                reading_tover = True
+
+            if not reading_tover:
+                continue
+            if nfo.nexus_token_found(line, valid_end_tokens):
+                # reset reading after another token found
+                reading_tover = False
+                grid = 'ROOT'
+                array = ''
+                include_file = ''
+                operator = ''
+                continue
+
+            if any(nfo.check_token(x, line) for x in potential_operators):
+                i1, i2, j1, j2, k1, k2, operator = nfo.split_line(line)
+            if nfo.check_token('INCLUDE', line):
+                include_file = nfo.get_expected_token_value(token='INCLUDE', token_line=line,
+                                                            file_list=file_content_as_list[i:])
+                new_tover = NexusTOver(i1=int(i1), i2=int(i2), j1=int(j1), j2=int(j2), k1=int(k1), k2=int(k2),
+                                       include_file=include_file, array=array, grid=grid, operator=operator)
+                tovers_list.append(new_tover)
+
+        return tovers_list
 
     @staticmethod
     def load_nexus_ftrans(file_content_as_list: list[str], unit_system: UnitSystem) -> list[NexusFtrans]:
