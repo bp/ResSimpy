@@ -23,9 +23,9 @@ INCLUDE ../../tover_1.inc
 INCLUDE ../../tover_2.inc
 """,
      [NexusTOver(i1=1, i2=10, j1=1, j2=15, k1=1, k2=3, operator='MULT', array='TX+',
-                 grid='ROOT', include_file='../../tover_1.inc'),
+                 grid='ROOT', include_file='../../tover_1.inc', value=0),
       NexusTOver(i1=1, i2=10, j1=1, j2=25, k1=4, k2=6, operator='MULT', array='TX+',
-                 grid='ROOT', include_file='../../tover_2.inc')]
+                 grid='ROOT', include_file='../../tover_2.inc', value=0)]
 
      ),
     ("""ARRAYS ROOT
@@ -53,11 +53,11 @@ INCLUDE ../../tover_2.inc
     INCLUDE txf.inc ! comment
     """,
         [NexusTOver(i1=1, i2=10, j1=1, j2=15, k1=1, k2=3, operator='EQ', array='TX-',
-                    grid='ROOT', include_file='tover_1.inc'),
+                    grid='ROOT', include_file='tover_1.inc', value=0),
         NexusTOver(i1=1, i2=10, j1=1, j2=15, k1=1, k2=3, operator='DIV', array='TY-',
-                    grid='ROOT', include_file='tover2.inc'),
+                    grid='ROOT', include_file='tover2.inc', value=0),
         NexusTOver(i1=1, i2=2, j1=3, j2=4, k1=5, k2=6, operator='EQ', array='TXF+',
-                    grid='ROOT', include_file='txf.inc')]
+                    grid='ROOT', include_file='txf.inc', value=0)]
     
         ),
 ], ids=['basic', 'multiple reads'])
