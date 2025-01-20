@@ -15,21 +15,6 @@ from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator, uuid_side_effect
 
 
-def mock_different_includes(mocker, filename, test_file_contents, inc_file_content1, inc_file_content2='',
-                            ):
-    """Mock method that returns different test file contents depending upon the model"""
-    if "test_file_path" in filename:
-        file_contents = test_file_contents
-    elif "inc_file1" in filename:
-        file_contents = inc_file_content1
-    elif "inc_file2" in filename:
-        file_contents = inc_file_content2
-    else:
-        raise FileNotFoundError(filename)
-    open_mock = mocker.mock_open(read_data=file_contents)
-    return open_mock
-
-
 def test_generate_file_include_structure_basic(mocker):
     # Arrange
     file_path = 'test_file_path.dat'
