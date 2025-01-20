@@ -237,6 +237,7 @@ class NexusFile(File):
                     for inc_file_line in inc_file_as_list[0:50]:
                         split_line = nfo.split_line(inc_file_line, upper=False)
                         # check if it is numeric data
+                        # this won't work if the array has scientific notation.
                         if any(not x.lstrip('-+').replace('.', '', 1).isnumeric() for x in split_line):
                             # don't set skip_next_include if the line is not entirely numeric
                             all_numeric = False
