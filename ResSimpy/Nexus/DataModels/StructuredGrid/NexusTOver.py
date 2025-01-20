@@ -1,11 +1,12 @@
-from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
 
+from ResSimpy.DataModelBaseClasses.Over import Over
 
-@dataclass
-class NexusTOver(ABC):
-    """Used to represent an abstract base of Overrides for transmissibility arrays using values per cell.
+
+@dataclass(kw_only=True)
+class NexusTOver(Over):
+    """Used to represent an Override for transmissibility arrays using values per cell.
 
     Attributes:
         array (str): The array to be modified by the over.
@@ -27,5 +28,5 @@ class NexusTOver(ABC):
     k1: int
     k2: int
     operator: str
+    include_file: str
     grid: Optional[str] = None
-    include_file: str = None
