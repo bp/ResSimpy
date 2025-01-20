@@ -1520,7 +1520,7 @@ class NexusGrid(Grid):
         return self.__overs
 
     @property
-    def tovers(self) -> list[NexusOver]:
+    def tovers(self) -> list[NexusTOver]:
         """Returns the TOVER table as a list of NexusTOver objects."""
         if not self._grid_properties_loaded:
             self.load_grid_properties_if_not_loaded()
@@ -1547,7 +1547,6 @@ class NexusGrid(Grid):
         array = ''
         potential_operators: Final = ['ADD', 'SUB', 'DIV', 'MULT', 'EQ']
         i1, i2, j1, j2, k1, k2 = '', '', '', '', '', ''
-        include_file = ''
         operator = ''
         for i, line in enumerate(file_content_as_list):
             if nfo.check_token('TOVER', line.upper()):
@@ -1562,7 +1561,6 @@ class NexusGrid(Grid):
                 reading_tover = False
                 grid = 'ROOT'
                 array = ''
-                include_file = ''
                 operator = ''
                 continue
 
@@ -1572,7 +1570,8 @@ class NexusGrid(Grid):
                 include_file = nfo.get_expected_token_value(token='INCLUDE', token_line=line,
                                                             file_list=file_content_as_list[i:])
                 new_tover = NexusTOver(i1=int(i1), i2=int(i2), j1=int(j1), j2=int(j2), k1=int(k1), k2=int(k2),
-                                       include_file=include_file, array=array, grid=grid, operator=operator)
+                                       include_file=include_file, array=array, grid=grid, operator=operator,
+                                       value=0)
                 tovers_list.append(new_tover)
 
         return tovers_list
