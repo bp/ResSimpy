@@ -533,6 +533,7 @@ class StructuredGridOperations:
             grid_array_definition.mods = {'VMOD': pd.DataFrame({
                 'i1': store_i1, 'i2': store_i2, 'j1': store_j1, 'j2': store_j2, 'k1': store_k1, 'k2': store_k2,
                 'operation': store_operation, 'include': store_include})}
-        grid_array_definition.mods['VMOD'] = pd.DataFrame({
-            'i1': store_i1, 'i2': store_i2, 'j1': store_j1, 'j2': store_j2, 'k1': store_k1, 'k2': store_k2,
-            'operation': store_operation, 'include_file': store_include})
+        else:
+            grid_array_definition.mods['VMOD'] = pd.DataFrame({
+                'i1': store_i1, 'i2': store_i2, 'j1': store_j1, 'j2': store_j2, 'k1': store_k1, 'k2': store_k2,
+                'operation': store_operation, 'include_file': store_include})
