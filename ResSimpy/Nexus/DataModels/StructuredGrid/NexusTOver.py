@@ -28,5 +28,6 @@ class NexusTOver(Over):
     k1: int
     k2: int
     operator: str
-    include_file: str
+    include_file: Optional[str]
     grid: Optional[str] = None
+    array_values: Optional[list[float]] = None
