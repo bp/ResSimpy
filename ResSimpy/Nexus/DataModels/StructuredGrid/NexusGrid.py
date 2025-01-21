@@ -1546,7 +1546,7 @@ class NexusGrid(Grid):
         grid = 'ROOT'
         array = ''
         potential_operators: Final = ['ADD', 'SUB', 'DIV', 'MULT', 'EQ']
-        i1, i2, j1, j2, k1, k2 = '', '', '', '', '', ''
+        i1, i2, j1, j2, k1, k2 = 0, 0, 0, 0, 0, 0
         operator = ''
         for i, line in enumerate(file_content_as_list):
             if nfo.check_token('TOVER', line.upper()):
@@ -1562,10 +1562,13 @@ class NexusGrid(Grid):
                 grid = 'ROOT'
                 array = ''
                 operator = ''
+                i1, i2, j1, j2, k1, k2 = '', '', '', '', '', ''
                 continue
 
             if any(nfo.check_token(x,  line.upper()) for x in potential_operators):
-                i1, i2, j1, j2, k1, k2, operator = nfo.split_line(line)
+                split_line = nfo.split_line(line)
+                i1, i2, j1, j2, k1, k2 = (int(x) for x in split_line[0:6])
+                operator = split_line[-1]
             if nfo.check_token('INCLUDE',  line.upper()):
                 include_file = nfo.get_expected_token_value(token='INCLUDE', token_line=line,
                                                             file_list=file_content_as_list[i:])
@@ -1573,6 +1576,12 @@ class NexusGrid(Grid):
                                        include_file=include_file, array=array, grid=grid, operator=operator,
                                        value=0)
                 tovers_list.append(new_tover)
+            elif i1 and i2 and j1 and j2 and k1 and k2 and operator and nfo.get_next_value(0, [line]):
+                # not an include file, so it must be a value or array of values
+                number_of_values = (i2-i1+1) * (j2-j1+1) * (k2-k1+1)
+                values = fo.get_multiple_expected_sequential_values(file_content_as_list[i:],
+                                                                    number_tokens=number_of_values)
+
 
         return tovers_list
 
