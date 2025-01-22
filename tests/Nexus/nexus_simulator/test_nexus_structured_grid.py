@@ -2242,3 +2242,58 @@ INCLUDE permx_array.dat
         pd.testing.assert_frame_equal(ipvt_mods, expected_ipvt_mod)
     else:
         assert ipvt_mods is None
+
+
+def test_load_structured_grid_file_vmod(mocker):
+    """Read in VMOD keyword with include file after."""
+    # Arrange
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents = """ARRAYS ROOT
+! grid
+NX  NY  NZ
+10  10  10
+
+NETGRS VALUE
+INCLUDE NTG.inc
+VMOD
+1 10 1 10  1 5 EQ  ! comment
+INCluDE vmod_1.inc ! comment
+VMOD
+1 10 1 10  6 10 EQ
+
+INCLUDE vmod_2.inc
+
+"""  # ends structured_grid_file_contents
+    # set up dataframe
+    i1 = [1, 1]
+    i2 = [10, 10]
+    j1 = [1, 1]
+    j2 = [10, 10]
+    k1 = [1, 6]
+    k2 = [5, 10]
+    operation = ['EQ', 'EQ']
+    include_file = ['vmod_1.inc', 'vmod_2.inc']
+    expected_vmod = pd.DataFrame({'i1': i1, 'i2': i2, 'j1': j1, 'j2': j2, 'k1': k1, 'k2': k2, 'operation': operation,
+                                  'include_file': include_file})
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+        {'testpath1/nexus_run.fcs': fcs_file_contents,
+         '/run_control/path': '',
+         structured_grid_name: structured_grid_file_contents,
+         # include_file_location: include_file_contents
+         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
+    result = simulation.grid
+
+    # Assert
+    assert result.netgrs.keyword_in_include_file is False
+    pd.testing.assert_frame_equal(result.netgrs.mods['VMOD'], expected_vmod)
+    assert result.netgrs.modifier == 'VALUE'
+    assert result.netgrs.value == 'NTG.inc'
