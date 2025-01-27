@@ -86,7 +86,7 @@ class NexusRockMethod(DynamicProperty):
                 printable_str += f'{key}\n'
                 printable_str += value.to_string(na_rep='', index=False) + '\n\n'
             elif isinstance(value, dict):
-                printable_str += f"{key.replace('_',' ')}\n"
+                printable_str += f"{key.replace('_', ' ')}\n"
                 for subkey in value.keys():
                     printable_str += f"SWINIT {subkey}\n"
                     df = value[subkey]
