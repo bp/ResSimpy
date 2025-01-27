@@ -95,7 +95,8 @@ class StructuredGridOperations:
             mod_start_end = StructuredGridOperations.__extract_mod_positions(line_indx, file_as_list)
             if 'VMOD' in mod_start_end:
                 vmod_indices = mod_start_end.pop('VMOD')
-                StructuredGridOperations.__make_vmod_table(vmod_indices, file_as_list, grid_array_definition)
+                StructuredGridOperations.__make_vmod_table(vmod_indices, file_as_list, grid_array_definition,
+                                                           grid_nexus_file)
             StructuredGridOperations.__make_mod_table(mod_start_end, file_as_list,
                                                       line, grid_array_definition, token_modifier)
 
@@ -499,7 +500,7 @@ class StructuredGridOperations:
 
     @staticmethod
     def __make_vmod_table(vmod_indices: list[list[int]], file_as_list: list[str],
-                          grid_array_definition: GridArrayDefinition) -> None:
+                          grid_array_definition: GridArrayDefinition, grid_nexus_file: NexusFile) -> None:
         """A function that creates the vmod table from a set of line indices.
 
         Args:
@@ -507,9 +508,14 @@ class StructuredGridOperations:
         file_as_list (list[str]): a list of strings containing each line of the file as a new entry.
         grid_array_definition (GridArrayDefinition): the grid array definition to add the vmod table to,
         adds the vmod table to the mods attribute dictionary on the grid array definition.
+        grid_nexus_file (NexusFile): the NexusFile object representing the top level grid file.
         """
         store_i1, store_i2, store_j1, store_j2, store_k1, store_k2, store_operation, store_include = (
             [], [], [], [], [], [], [], [])
+
+        # assume it is the same as the grid file - this might not work if the vmod is in an include file
+        absolute_path_root = os.path.dirname(grid_nexus_file.location)
+
         for (start_block, end_block) in vmod_indices:
             file_section = file_as_list[start_block:end_block+1]
             for line in file_section:
@@ -526,6 +532,8 @@ class StructuredGridOperations:
                     continue
                 if len(split_line) == 2 and nfo.check_token('INCLUDE', line.upper()):
                     include_file = split_line[1]
+                    if not os.path.isabs(include_file):
+                        include_file = os.path.join(absolute_path_root, split_line[1])
                     # might need to add absolute path here at some point
                     store_include.append(include_file)
                     continue
