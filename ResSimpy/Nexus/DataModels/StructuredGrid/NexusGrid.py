@@ -1492,8 +1492,14 @@ class NexusGrid(Grid):
                         else:
                             operator = operator_matches[0]
                             # remove the operator and the remaining string is the value
-                            value = float(split_line[0][1:])
-                            split_line_position = 1
+                            trimmed_value = split_line[0].replace(operator, '')
+                            if trimmed_value == '':
+                                # then the value is in the next element of split_line
+                                value = float(split_line[1])
+                                split_line_position = 2
+                            else:
+                                value = float(split_line[0][1:])
+                                split_line_position = 1
                         overs_list.append(NexusOver(array=array, grid=grid, fault_name=fname,
                                                     i1=i1, i2=i2, j1=j1, j2=j2, k1=k1, k2=k2, operator=operator,
                                                     value=value, threshold=threshold_value))
