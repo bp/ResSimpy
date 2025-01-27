@@ -885,6 +885,7 @@ files = [
 numpy = [
     {version = ">=1.22.4", markers = "python_version < \"3.11\""},
     {version = ">=1.23.2", markers = "python_version == \"3.11\""},
+    {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
 ]
 python-dateutil = ">=2.8.2"
 pytz = ">=2020.1"
@@ -1071,13 +1072,13 @@ use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
 name = "resqpy"
-version = "5.1.7"
+version = "5.1.9"
 description = "Python API for working with RESQML models"
 optional = false
 python-versions = "<3.13,>=3.9"
 files = [
-    {file = "resqpy-5.1.7-py3-none-any.whl", hash = "sha256:6b14c2f1a9d76d5c240861338a4b106dfdd4a2405db741348aeaf6904feea929"},
-    {file = "resqpy-5.1.7.tar.gz", hash = "sha256:b79b66275605fce8966d42d014a4751198eecba0a50685d7cacabf6b1b995397"},
+    {file = "resqpy-5.1.9-py3-none-any.whl", hash = "sha256:d66f9895166877f0750acd90133cf993d05aa777efba9dd7863a6644d3528a9f"},
+    {file = "resqpy-5.1.9.tar.gz", hash = "sha256:4c912fad2b8d91d4d094de78d7abb41ce228e26f21d1e41108a144b41fda2adc"},
 ]
 
 [package.dependencies]
@@ -1440,5 +1441,5 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.10, <3.12"
-content-hash = "c8d7e9535b3b91f3d33e0575b94f0ca30c696ea5683c8cf43e61a05b29b10703"
+python-versions = ">=3.10, <3.13"
+content-hash = "ae1914eb8750d1c2b9741854979a6dbd1e485e835b43cbc4bc6213a10e2bfc00"
