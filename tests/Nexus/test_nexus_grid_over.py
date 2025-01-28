@@ -162,7 +162,7 @@ def test_over_multiple_values_arrays():
     file_content = """OVER	TY TYF							
 GRID	ROOT							
 227 	240 	91 	91 	29 	40	*0.0	*0.0
-1      1        2   2   3   3   / 2.5   * 2.5
+1      1        2   2   3   3   / 2.5   *    2.5 ! COMMENT
 """
     # Act
     result = NexusGrid.load_nexus_overs(file_content.splitlines(keepends=True))
