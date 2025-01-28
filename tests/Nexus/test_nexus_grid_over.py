@@ -14,7 +14,8 @@ def test_read_nexus_over():
     1 14  1 44 12 13  -1.5
     1 15  1 43 13 14  /2.0
     1 16  1 42 14 15  =2.0
-    298 306 46 62 16 17 * 0.1  
+    298 306 46 62 16 17 * 0.1
+    2 3  4  5  6  7   0.5
     """
 
     expected_result = [NexusOver(i1=1, i2=12, j1=1, j2=46, k1=10, k2=11, operator='*', value=0.0,
@@ -28,6 +29,8 @@ def test_read_nexus_over():
                        NexusOver(i1=1, i2=16, j1=1, j2=42, k1=14, k2=15, operator='=', value=2.0,
                                  array='TX', grid='ROOT'),
                        NexusOver(i1=298, i2=306, j1=46, j2=62, k1=16, k2=17, operator='*', value=0.1,
+                                 array='TX', grid='ROOT'),
+                       NexusOver(i1=2, i2=3, j1=4, j2=5, k1=6, k2=7, operator='*', value=0.5,
                                  array='TX', grid='ROOT')]
 
     # Act
