@@ -14,6 +14,8 @@ def test_read_nexus_over():
     1 14  1 44 12 13  -1.5
     1 15  1 43 13 14  /2.0
     1 16  1 42 14 15  =2.0
+    298 306 46 62 16 17 * 0.1
+    2 3  4  5  6  7   0.5
     """
 
     expected_result = [NexusOver(i1=1, i2=12, j1=1, j2=46, k1=10, k2=11, operator='*', value=0.0,
@@ -25,6 +27,10 @@ def test_read_nexus_over():
                        NexusOver(i1=1, i2=15, j1=1, j2=43, k1=13, k2=14, operator='/', value=2.0,
                                  array='TX', grid='ROOT'),
                        NexusOver(i1=1, i2=16, j1=1, j2=42, k1=14, k2=15, operator='=', value=2.0,
+                                 array='TX', grid='ROOT'),
+                       NexusOver(i1=298, i2=306, j1=46, j2=62, k1=16, k2=17, operator='*', value=0.1,
+                                 array='TX', grid='ROOT'),
+                       NexusOver(i1=2, i2=3, j1=4, j2=5, k1=6, k2=7, operator='*', value=0.5,
                                  array='TX', grid='ROOT')]
 
     # Act
@@ -149,11 +155,17 @@ def test_over_multiple_values_arrays():
     expected_result = [NexusOver(i1=227, i2=240, j1=91, j2=91, k1=29, k2=40, operator='*', value=0.0,
                                  array='TY', grid='ROOT'),
                        NexusOver(i1=227, i2=240, j1=91, j2=91, k1=29, k2=40, operator='*', value=0.0,
-                                 array='TYF', grid='ROOT')]
+                                 array='TYF', grid='ROOT'),
+                       NexusOver(i1=1, i2=1, j1=2, j2=2, k1=3, k2=3, operator='/', value=2.5,
+                                 array='TY', grid='ROOT'),
+                       NexusOver(i1=1, i2=1, j1=2, j2=2, k1=3, k2=3, operator='*', value=2.5,
+                                 array='TYF', grid='ROOT'),
+                       ]
     
     file_content = """OVER	TY TYF							
 GRID	ROOT							
 227 	240 	91 	91 	29 	40	*0.0	*0.0
+1      1        2   2   3   3   / 2.5   *    2.5 ! COMMENT
 """
     # Act
     result = NexusGrid.load_nexus_overs(file_content.splitlines(keepends=True))

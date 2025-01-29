@@ -1488,16 +1488,27 @@ class NexusGrid(Grid):
                     for array in arrays:
                         operator_value = split_line[0]
                         operator_matches = [x for x in potential_operators if x == operator_value[0]]
-                        if not operator_matches:
+                        if not operator_matches and ('GE' in split_line or 'LE' in split_line):
                             # if the operator is not found then it is GE or LE
                             value = float(split_line[0])
                             operator = split_line[1]
                             threshold_value = float(split_line[2])
                             split_line_position = 3
-                        else:
+                        elif operator_matches:
                             operator = operator_matches[0]
                             # remove the operator and the remaining string is the value
-                            value = float(split_line[0][1:])
+                            trimmed_value = split_line[0].replace(operator, '')
+                            if trimmed_value == '':
+                                # then the value is in the next element of split_line
+                                value = float(split_line[1])
+                                split_line_position = 2
+                            else:
+                                value = float(split_line[0][1:])
+                                split_line_position = 1
+                        else:
+                            # no operator match and not GE or LE then it is implicitly '*'
+                            value = float(split_line[0])
+                            operator = '*'
                             split_line_position = 1
                         overs_list.append(NexusOver(array=array, grid=grid, fault_name=fname,
                                                     i1=i1, i2=i2, j1=j1, j2=j2, k1=k1, k2=k2, operator=operator,
