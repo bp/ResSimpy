@@ -1230,8 +1230,8 @@ def test_load_wells_bug_1(mocker):
     mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
 
     wellspec_contents = f"""
-WELLSPEC Well1\r
-\r
+WELLSPEC Well1
+
         IW      JW      L     GRID    ANGLA   ANGLV   LENGTH  RADW    STAT    perm_thickness_ovr    SKIN    !    DEPTH   MD
         153     95      9     ROOT    298.192 60.4133 12.745  0.35    ON      3752.773908        -1.6    !    21694.6 22799.8
         
@@ -1241,6 +1241,7 @@ WELLSPEC Well1\r
 WELLSPEC        Well2     !Comment      Well1
 ! First comment.: first comment
 ! Second comment.: second comment
+
         IW      JW      L       GRID    ANGLA   ANGLV   LENGTH  RADW    STAT    perm_thickness_ovr      SKIN
         163     126     9       ROOT    108.345 38.5919 11.8571 0.35    ON      0.786908177144367       0.0
         163     126     10      ROOT    108.274 38.5919 11.8544 0.35    ON      0.786908177144367       0.0
@@ -1284,3 +1285,5 @@ WELLSPEC        Well2     !Comment      Well1
     assert result_wells[1].completions[2] == expected_completions_3
     assert result_wells[1].completions[3].date == expected_date
     assert result_wells[1].completions[3] == expected_completions_4
+
+""""""
