@@ -8,15 +8,27 @@ from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
 
-def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock_open: Mock,
-                                     mocker_fixture: MockerFixture, write_file_name: str, number_of_writes=1,
-                                     expected_write_method='w'):
+def check_file_read_write_is_correct(expected_file_writes: list[tuple[str, str]], modifying_mock_open: Mock):
+    number_of_writes = len(expected_file_writes)
+
+    # Check that the number of calls to write is as expected
     assert len(modifying_mock_open.call_args_list) == number_of_writes
-    assert modifying_mock_open.call_args_list[0] == mocker_fixture.call(write_file_name, expected_write_method)
-    # Get all the calls to write() and check that the contents are what we expect
+
+    # Get the list of write calls, and loop through them, checking that they all match a call in the expected_files list
     list_of_writes = [call for call in modifying_mock_open.mock_calls if 'call().write' in str(call)]
     assert len(list_of_writes) == number_of_writes
-    assert list_of_writes[-1].args[0] == expected_file_contents
+
+    for c, write_call in enumerate(list_of_writes):
+        write_matched = False
+        write_location = modifying_mock_open.call_args_list[c].args[0]
+        for file in expected_file_writes:
+            if file[0] == write_location:
+                assert write_call.args[0] == file[1]
+                write_matched = True
+
+        if not write_matched:
+            raise ValueError(f"Unexpected write found at location: {write_location}")
+
 
 
 def check_sequential_write_is_correct(expected_file_contents: list[str], modifying_mock_open: Mock,

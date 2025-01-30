@@ -97,9 +97,9 @@ def test_write_to_file(mocker, fcs_file_contents, wells_file, expected_result):
                                         preserve_previous_completions=True)
     mock_nexus_sim.model_files.well_files[1].write_to_file(overwrite_file=True)
     # Assert
-    check_file_read_write_is_correct(expected_file_contents=expected_result,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/my/wellspec/file.dat')
+    expected_file_writes = [('/my/prop/file.dat', expected_result)]
+    check_file_read_write_is_correct(expected_file_writes=expected_file_writes,
+                                     modifying_mock_open=writing_mock_open)
 
 @pytest.mark.parametrize('wells_file, expected_result, remove_perf_date, expected_removed_completion_line,'
 'expected_obj_locations', [
@@ -249,10 +249,9 @@ def test_remove_completion_write_to_file(mocker, wells_file, expected_result, re
     result_object_ids = mock_nexus_sim.model_files.well_files[1].object_locations
     mock_nexus_sim.model_files.well_files[1].write_to_file(overwrite_file=True)
     # Assert
-    check_file_read_write_is_correct(expected_file_contents=expected_result,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/my/wellspec/file.dat',
-                                     number_of_writes=1)
+    expected_file_writes = [('/my/wellspec/file.dat', expected_result)]
+    check_file_read_write_is_correct(expected_file_writes=expected_file_writes,
+                                     modifying_mock_open=writing_mock_open)
 
     assert result_object_ids == object_locations_minus_completion
 
@@ -335,11 +334,9 @@ def test_modify_completion_write_to_file(mocker, fcs_file_contents, wells_file, 
                                            completion_to_change=modify_perf_target )
     mock_nexus_sim.model_files.well_files[1].write_to_file(overwrite_file=True)
     # Assert
-    check_file_read_write_is_correct(expected_file_contents=expected_result,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/my/wellspec/file.dat',
-                                     number_of_writes=1,
-                                     )
+    expected_file_writes = [('/my/wellspec/file.dat', expected_result)]
+    check_file_read_write_is_correct(expected_file_writes=expected_file_writes,
+                                     modifying_mock_open=writing_mock_open)
 
 @pytest.mark.parametrize('folder_exists, expected_number_calls', [
     (True, 0),
@@ -404,9 +401,9 @@ ENGLISH
     dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
-    check_file_read_write_is_correct(expected_file_contents=expected_result,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
+    expected_file_writes = [('/my/prop/file.dat', expected_result)]
+    check_file_read_write_is_correct(expected_file_writes=expected_file_writes,
+                                     modifying_mock_open=writing_mock_open)
 
 
 def test_nexus_pvt_write_to_new_file_existing_file_raises_error(mocker):
@@ -471,9 +468,8 @@ DAQI 9600
     dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
-    check_file_read_write_is_correct(expected_file_contents=expected_result,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
+    expected_file_writes = [('/my/prop/file.dat', expected_result)]
+    check_file_read_write_is_correct(expected_file_writes=expected_file_writes, modifying_mock_open=writing_mock_open)
 
 
 def test_nexus_equil_write_to_file(mocker):
@@ -504,9 +500,9 @@ PSAT 3600
     dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
-    check_file_read_write_is_correct(expected_file_contents=expected_result,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
+    expected_file_writes = [('/my/prop/file.dat', expected_result)]
+    check_file_read_write_is_correct(expected_file_writes=expected_file_writes,
+                                     modifying_mock_open=writing_mock_open)
 
 
 def test_nexus_gaslift_write_to_file(mocker):
@@ -540,9 +536,9 @@ PRESSURE 2500 4500
     dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
-    check_file_read_write_is_correct(expected_file_contents=expected_result,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
+    expected_file_writes = [('/my/prop/file.dat', expected_result)]
+    check_file_read_write_is_correct(expected_file_writes=expected_file_writes,
+                                     modifying_mock_open=writing_mock_open)
 
 
 def test_nexus_hydraulics_write_to_file(mocker):
@@ -606,9 +602,9 @@ NOCHK
     dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
-    check_file_read_write_is_correct(expected_file_contents=expected_result,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
+    expected_file_writes = [('/my/prop/file.dat', expected_result)]
+    check_file_read_write_is_correct(expected_file_writes=expected_file_writes,
+                                     modifying_mock_open=writing_mock_open)
 
 
 def test_nexus_valve_write_to_file(mocker):
@@ -638,9 +634,9 @@ ENDVALVE
     dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
-    check_file_read_write_is_correct(expected_file_contents=expected_result,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
+    expected_file_writes = [('/my/prop/file.dat', expected_result)]
+    check_file_read_write_is_correct(expected_file_writes=expected_file_writes,
+                                     modifying_mock_open=writing_mock_open)
 
 
 def test_nexus_relperm_write_to_file(mocker):
@@ -744,9 +740,9 @@ HYSTERESIS KRG LINEAR MAXTRAP 0.2 NOMOD
     dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
-    check_file_read_write_is_correct(expected_file_contents=expected_result,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
+    expected_file_writes = [('/my/prop/file.dat', expected_result)]
+    check_file_read_write_is_correct(expected_file_writes=expected_file_writes,
+                                     modifying_mock_open=writing_mock_open)
 
 
 def test_nexus_rock_write_to_file(mocker):
@@ -794,9 +790,9 @@ TOLREV_SW 0.01
     dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
-    check_file_read_write_is_correct(expected_file_contents=expected_result,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
+    expected_file_writes = [('/my/prop/file.dat', expected_result)]
+    check_file_read_write_is_correct(expected_file_writes=expected_file_writes,
+                                     modifying_mock_open=writing_mock_open)
 
 
 def test_nexus_separator_write_to_file(mocker):
@@ -838,9 +834,9 @@ WATERMETHOD 1
     dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
-    check_file_read_write_is_correct(expected_file_contents=expected_result,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
+    expected_file_writes = [('/my/prop/file.dat', expected_result)]
+    check_file_read_write_is_correct(expected_file_writes=expected_file_writes,
+                                     modifying_mock_open=writing_mock_open)
 
 
 def test_nexus_water_write_to_file(mocker):
@@ -876,9 +872,9 @@ CVW 0.001
     dataobj.write_to_file(new_file_path='/my/prop/file.dat')
 
     # Assert
-    check_file_read_write_is_correct(expected_file_contents=expected_result,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
+    expected_file_writes = [('/my/prop/file.dat', expected_result)]
+    check_file_read_write_is_correct(expected_file_writes=expected_file_writes,
+                                     modifying_mock_open=writing_mock_open)
 
 
 def test_nexus_pvt_write_to_existing_file(mocker):
@@ -915,9 +911,9 @@ ENGLISH
     mock_nexus_sim.pvt.inputs[1].write_to_file(overwrite_file=True)
 
     # Assert
-    check_file_read_write_is_correct(expected_file_contents=expected_result,
-                                     modifying_mock_open=writing_mock_open,
-                                     mocker_fixture=mocker, write_file_name='/my/prop/file.dat')
+    expected_file_writes = [('/my/prop/file.dat', expected_result)]
+    check_file_read_write_is_correct(expected_file_writes=expected_file_writes,
+                                     modifying_mock_open=writing_mock_open)
 
 
 def test_write_includes_empty_include_raises_warning(mocker:MockerFixture, recwarn):
