@@ -254,6 +254,7 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
                 well_name_list.append(well_name.upper())
                 wells.append(new_well)
             wellspec_found = False
+            header_index = -1
     return wells, date_format
 
 
