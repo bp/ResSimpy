@@ -1230,7 +1230,8 @@ def test_load_wells_bug_1(mocker):
     mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
 
     wellspec_contents = f"""
-WELLSPEC Well1
+WELLSPEC Well1\r
+\r
         IW      JW      L     GRID    ANGLA   ANGLV   LENGTH  RADW    STAT    perm_thickness_ovr    SKIN    !    DEPTH   MD
         153     95      9     ROOT    298.192 60.4133 12.745  0.35    ON      3752.773908        -1.6    !    21694.6 22799.8
         
