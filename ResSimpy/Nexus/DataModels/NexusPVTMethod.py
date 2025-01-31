@@ -181,7 +181,7 @@ class NexusPVTMethod(DynamicProperty):
                 printable_str += '\n'
             elif isinstance(value, dict):
                 for subkey in value.keys():
-                    printable_str += f"{key.replace('_',' ')} {subkey}\n"
+                    printable_str += f"{key.replace('_', ' ')} {subkey}\n"
                     df = value[subkey]
                     if isinstance(df, pd.DataFrame):
                         printable_str += df.to_string(na_rep='', index=False,

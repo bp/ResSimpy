@@ -1,11 +1,12 @@
-from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
 
+from ResSimpy.DataModelBaseClasses.Over import Over
 
-@dataclass
-class Over(ABC):
-    """Used to represent an abstract base of Overrides for transmissibility and pore volumes.
+
+@dataclass(kw_only=True)
+class NexusTOver(Over):
+    """Used to represent an Override for transmissibility arrays using values per cell.
 
     Attributes:
         array (str): The array to be modified by the over.
@@ -16,10 +17,8 @@ class Over(ABC):
         k1 (int): The start of the k range.
         k2 (int): The end of the k range.
         operator (str): The operator to be assigned to the range.
-        value (float): The value to be assigned to the range.
-        threshold (Optional[float]): The value for which GE or LE is used.
         grid (Optional[str]): The grid that the Over function relates to.
-        fault_name (Optional[str]): The named fault that the Over function relates to.
+        include_file (str): The include file that the TOver function reads values from.
     """
     array: str
     i1: int
@@ -29,9 +28,6 @@ class Over(ABC):
     k1: int
     k2: int
     operator: str
-    value: float
-    threshold: Optional[float] = None
+    include_file: Optional[str]
     grid: Optional[str] = None
-    fault_name: Optional[str] = None
     array_values: Optional[list[float]] = None
-    include_file: Optional[str] = None

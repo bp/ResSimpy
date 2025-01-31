@@ -223,6 +223,29 @@ class NexusFile(File):
             inc_full_path = nfo.get_full_file_path(inc_file_path, origin=full_file_path)
             # store the included files as files inside the object
             inc_file_list.append(inc_full_path)
+
+            # test the include to see if the first few lines have only array data
+            # limit number of lines loaded here in future?
+            if skip_arrays:
+                try:
+                    inc_file_as_list = nfo.load_file_as_list(inc_full_path)
+                except FileNotFoundError:
+                    # handle files not found - this is handled in an exception in the main loop
+                    pass
+                else:
+                    all_numeric = False
+                    for inc_file_line in inc_file_as_list[0:50]:
+                        split_line = nfo.split_line(inc_file_line, upper=False)
+                        # check if it is numeric data
+                        # this won't work if the array has scientific notation.
+                        if any(not x.lstrip('-+').replace('.', '', 1).isnumeric() for x in split_line):
+                            # don't set skip_next_include if the line is not entirely numeric
+                            all_numeric = False
+                            break
+                        all_numeric = True
+                    if all_numeric:
+                        skip_next_include = True
+
             if not recursive:
                 continue
             elif skip_arrays and skip_next_include:

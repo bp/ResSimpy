@@ -275,8 +275,10 @@ class FcsNexusFile(NexusFile):
                                             nexus_file.last_modified))
             elif key in cls.fcs_keyword_map_single():
                 full_file_path = nfo.get_full_file_path(value, origin_path)
+                skip_arrays = True if key == 'STRUCTURED_GRID' else False
                 nexus_file = NexusFile.generate_file_include_structure(
-                    file_path=value, origin=fcs_file_path, recursive=recursive, top_level_file=True)
+                    file_path=value, origin=fcs_file_path, recursive=recursive, top_level_file=True,
+                    skip_arrays=skip_arrays)
                 setattr(fcs_file, cls.fcs_keyword_map_single()[key], nexus_file)
                 fcs_file.include_objects.append(nexus_file)
                 fcs_file.include_locations.append(full_file_path)

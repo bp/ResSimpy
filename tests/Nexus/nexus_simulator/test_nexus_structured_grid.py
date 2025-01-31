@@ -2262,7 +2262,7 @@ INCluDE vmod_1.inc ! comment
 VMOD
 1 10 1 10  6 10 EQ
 
-INCLUDE vmod_2.inc
+INCLUDE /vmod_2.inc
 
 """  # ends structured_grid_file_contents
     # set up dataframe
@@ -2273,7 +2273,7 @@ INCLUDE vmod_2.inc
     k1 = [1, 6]
     k2 = [5, 10]
     operation = ['EQ', 'EQ']
-    include_file = ['vmod_1.inc', 'vmod_2.inc']
+    include_file = [os.path.join('testpath1', 'vmod_1.inc'), '/vmod_2.inc']
     expected_vmod = pd.DataFrame({'i1': i1, 'i2': i2, 'j1': j1, 'j2': j2, 'k1': k1, 'k2': k2, 'operation': operation,
                                   'include_file': include_file})
 
