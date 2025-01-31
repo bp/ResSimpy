@@ -1321,6 +1321,7 @@ IW JW L RADW SKIN PPERF
 
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
+
     # Act
     model.wells.add_completion(well_name='well1', completion_properties=add_perf_dict)
     model.model_files.well_files[1].write_to_file(overwrite_file=True)
