@@ -1488,16 +1488,27 @@ class NexusGrid(Grid):
                     for array in arrays:
                         operator_value = split_line[0]
                         operator_matches = [x for x in potential_operators if x == operator_value[0]]
-                        if not operator_matches:
+                        if not operator_matches and ('GE' in split_line or 'LE' in split_line):
                             # if the operator is not found then it is GE or LE
                             value = float(split_line[0])
                             operator = split_line[1]
                             threshold_value = float(split_line[2])
                             split_line_position = 3
-                        else:
+                        elif operator_matches:
                             operator = operator_matches[0]
                             # remove the operator and the remaining string is the value
-                            value = float(split_line[0][1:])
+                            trimmed_value = split_line[0].replace(operator, '')
+                            if trimmed_value == '':
+                                # then the value is in the next element of split_line
+                                value = float(split_line[1])
+                                split_line_position = 2
+                            else:
+                                value = float(split_line[0][1:])
+                                split_line_position = 1
+                        else:
+                            # no operator match and not GE or LE then it is implicitly '*'
+                            value = float(split_line[0])
+                            operator = '*'
                             split_line_position = 1
                         overs_list.append(NexusOver(array=array, grid=grid, fault_name=fname,
                                                     i1=i1, i2=i2, j1=j1, j2=j2, k1=k1, k2=k2, operator=operator,
@@ -1546,7 +1557,7 @@ class NexusGrid(Grid):
         grid = 'ROOT'
         array = ''
         potential_operators: Final = ['ADD', 'SUB', 'DIV', 'MULT', 'EQ']
-        i1, i2, j1, j2, k1, k2 = '', '', '', '', '', ''
+        i1, i2, j1, j2, k1, k2 = 0, 0, 0, 0, 0, 0
         operator = ''
         for i, line in enumerate(file_content_as_list):
             if nfo.check_token('TOVER', line.upper()):
@@ -1562,16 +1573,35 @@ class NexusGrid(Grid):
                 grid = 'ROOT'
                 array = ''
                 operator = ''
+                i1, i2, j1, j2, k1, k2 = 0, 0, 0, 0, 0, 0
                 continue
 
-            if any(nfo.check_token(x,  line.upper()) for x in potential_operators):
-                i1, i2, j1, j2, k1, k2, operator = nfo.split_line(line)
-            if nfo.check_token('INCLUDE',  line.upper()):
+            if any(nfo.check_token(x, line.upper()) for x in potential_operators):
+                split_line = nfo.split_line(line)
+                i1, i2, j1, j2, k1, k2 = (int(x) for x in split_line[0:6])
+                operator = split_line[-1]
+                continue
+            if nfo.check_token('INCLUDE', line.upper()):
                 include_file = nfo.get_expected_token_value(token='INCLUDE', token_line=line,
                                                             file_list=file_content_as_list[i:])
-                new_tover = NexusTOver(i1=int(i1), i2=int(i2), j1=int(j1), j2=int(j2), k1=int(k1), k2=int(k2),
+                new_tover = NexusTOver(i1=i1, i2=i2, j1=j1, j2=j2, k1=k1, k2=k2,
                                        include_file=include_file, array=array, grid=grid, operator=operator,
                                        value=0)
+                tovers_list.append(new_tover)
+                i1, i2, j1, j2, k1, k2 = 0, 0, 0, 0, 0, 0
+                operator = ''
+
+            elif i1 and i2 and j1 and j2 and k1 and k2 and operator and nfo.get_next_value(0, [line]):
+                # not an include file, so it must be a value or array of values
+                number_of_values = (i2 - i1 + 1) * (j2 - j1 + 1) * (k2 - k1 + 1)
+                array_values = fo.get_multiple_expected_sequential_values(file_content_as_list[i:],
+                                                                          number_tokens=number_of_values,
+                                                                          ignore_values=[])
+                new_tover = NexusTOver(i1=i1, i2=i2, j1=j1, j2=j2, k1=k1, k2=k2,
+                                       include_file=None, array=array, grid=grid, operator=operator,
+                                       value=0, array_values=[float(x) for x in array_values])
+                i1, i2, j1, j2, k1, k2 = 0, 0, 0, 0, 0, 0
+                operator = ''
                 tovers_list.append(new_tover)
 
         return tovers_list

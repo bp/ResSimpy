@@ -33,3 +33,5 @@ class Over(ABC):
     threshold: Optional[float] = None
     grid: Optional[str] = None
     fault_name: Optional[str] = None
+    array_values: Optional[list[float]] = None
+    include_file: Optional[str] = None
