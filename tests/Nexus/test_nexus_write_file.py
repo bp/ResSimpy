@@ -96,8 +96,9 @@ def test_write_to_file(mocker, fcs_file_contents, wells_file, expected_result):
     mock_nexus_sim._wells.add_completion(well_name='well1', completion_properties=add_perf_dict,
                                         preserve_previous_completions=True)
     mock_nexus_sim.model_files.well_files[1].write_to_file(overwrite_file=True)
+
     # Assert
-    expected_file_writes = [('/my/prop/file.dat', expected_result)]
+    expected_file_writes = [('/my/wellspec/file.dat', expected_result)]
     check_file_read_write_is_correct(expected_file_writes=expected_file_writes,
                                      modifying_mock_open=writing_mock_open)
 
