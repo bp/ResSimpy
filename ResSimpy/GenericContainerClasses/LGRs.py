@@ -8,17 +8,17 @@ from ResSimpy.DataModelBaseClasses.LGR import LGR
 @dataclass
 class LGRs(ABC):
     """Abstract base class for Local Grid Refinements (LGR)."""
-    _lgrs: Sequence[LGR] = field(default_factory=list)
+    _lgr_list: Sequence[LGR] = field(default_factory=list)
 
-    def __init__(self, lgrs: None | Sequence[LGR] = None) -> None:
+    def __init__(self, lgr_list: None | Sequence[LGR] = None) -> None:
         """Initializes the LGRs class."""
-        self._lgrs: Sequence[LGR] = [] if lgrs is None else lgrs
+        self._lgr_list: Sequence[LGR] = [] if lgr_list is None else lgr_list
 
     @property
     def lgrs(self) -> Sequence[LGR]:
         """Returns the list of LGRs."""
-        return self._lgrs
+        return self._lgr_list
 
     def get_all(self) -> Sequence[LGR]:
         """Returns all LGRs."""
-        return self.lgrs
+        return self._lgr_list

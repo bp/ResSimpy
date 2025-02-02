@@ -35,7 +35,7 @@ class Grid(ABC):
     _kz: GridArrayDefinition
     _iregion: dict[str, GridArrayDefinition]
     _grid_properties_loaded: bool = False
-    _lgrs: LGRs
+    _lgr_list: LGRs
     _overs: Sequence[Over]
 
     def __init__(self, assume_loaded: bool = False) -> None:
@@ -58,7 +58,7 @@ class Grid(ABC):
         self._grid_properties_loaded = assume_loaded
 
         # LGRs
-        self._lgrs: LGRs = LGRs()
+        self._lgr_list: LGRs = LGRs()
 
     @property
     def range_x(self) -> int | None:
@@ -167,7 +167,7 @@ class Grid(ABC):
     @property
     def lgrs(self) -> LGRs:
         """Returns the LGR module object associated with the grid."""
-        return self._lgrs
+        return self._lgr_list
 
     @abstractmethod
     def load_structured_grid_file(self, structure_grid_file: File,
