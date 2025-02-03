@@ -272,7 +272,7 @@ class NexusWellConnection(WellConnection):
             'D': ('d_factor', float),
             'ND': ('non_darcy_flow_model', str),
             'DPERF': ('non_darcy_flow_method', str),
-            'GASMOB': ('gas_mobility', float),
+            'GASMOB': ('gas_mobility', str),
             'CN': ('capillary_number_model', str),
             'DPADD': ('dp_add', float),
             'DTADD': ('dt_add', float),

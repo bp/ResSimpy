@@ -391,7 +391,7 @@ ENDWELLS
 
 GASWELLS
 NAME 		D 		DPERF GASMOB
-P01		1.123e-5	INVKH	#
+P01		1.123e-5	INVKH	CB
 ENDGASWELLS
 
 TIME 01/01/2021
@@ -412,7 +412,7 @@ ENDGASWELLS
                               'gradient_calc': 'MOBGRAD', 'crossflow': 'OFF', 'crossshut': 'CALC',
                               'date': '01/01/2020', 'unit_system': UnitSystem.METRIC}
     well_connection_props4 = {'name': 'P01', 'd_factor': 1.123e-5, 'non_darcy_flow_method': 'INVKH',
-                              'gas_mobility': None, 'date': '01/01/2020', 'unit_system': UnitSystem.METRIC}
+                              'gas_mobility': 'CB', 'date': '01/01/2020', 'unit_system': UnitSystem.METRIC}
     well_connection_props5 = {'name': 'P02', 'd_factor': 2.345e-5, 'non_darcy_flow_method': 'random',
                               'gas_mobility': None, 'date': '01/01/2021', 'unit_system': UnitSystem.METRIC}
     start_date = '01/01/2019'
