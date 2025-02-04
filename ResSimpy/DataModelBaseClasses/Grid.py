@@ -168,7 +168,7 @@ class Grid(ABC):
     def lgrs(self) -> LGRs:
         """Returns the LGR module object associated with the grid."""
         return self._lgrs
-    
+
     @abstractmethod
     def load_structured_grid_file(self, structure_grid_file: File,
                                   model_unit_system: UnitSystem, lazy_loading: bool) -> Grid:
