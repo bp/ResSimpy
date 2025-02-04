@@ -15,21 +15,6 @@ from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator, uuid_side_effect
 
 
-def mock_different_includes(mocker, filename, test_file_contents, inc_file_content1, inc_file_content2='',
-                            ):
-    """Mock method that returns different test file contents depending upon the model"""
-    if "test_file_path" in filename:
-        file_contents = test_file_contents
-    elif "inc_file1" in filename:
-        file_contents = inc_file_content1
-    elif "inc_file2" in filename:
-        file_contents = inc_file_content2
-    else:
-        raise FileNotFoundError(filename)
-    open_mock = mocker.mock_open(read_data=file_contents)
-    return open_mock
-
-
 def test_generate_file_include_structure_basic(mocker):
     # Arrange
     file_path = 'test_file_path.dat'
@@ -255,10 +240,10 @@ def test_iterate_line_nested(max_depth, expected_results):
     ('basic_file KH VAlUE !comment\n\n INCLUDE nexus_data/inc_file1.inc'),
     ('basic_file KH VAlUE\n\n INCLUDE nexus_data/inc_file1.inc\n\nVALUE 10'),
     ('basic_file KH VAlUE\n\n 10 \n\nKH VALUE INCLUDE\n\n nexus_data/inc_file1.inc'),
-
+    ('basic_file \n\nKH CON 1\n\n \nVMOD 1 10 1 10 2 5 MULT\nINCLUDE nexus_data/inc_file1.inc'),
 ], ids=['basic_test', 'newline',
         'comment',
-        'another_token', 'second_token'])
+        'another_token', 'second_token', 'vmods'])
 def test_generate_file_include_structure_skip_array(mocker, test_file_contents):
     # Arrange
     file_path = '/origin/path/test_file_path.dat'
@@ -268,7 +253,7 @@ def test_generate_file_include_structure_skip_array(mocker, test_file_contents):
     nexus_file_include1 = NexusFile(location=include_full_file_path_1, include_locations=None,
                                     origin=file_path, include_objects=None,
                                     file_content_as_list=None, file_loading_skipped=True)
-    nexus_file_include1._input_file_location='nexus_data/inc_file1.inc'
+    nexus_file_include1._input_file_location = 'nexus_data/inc_file1.inc'
     nexus_file_include1._location_in_including_file = 'nexus_data/inc_file1.inc'
 
     def mock_open_wrapper(filename, mode):
@@ -291,6 +276,7 @@ def test_generate_file_include_structure_skip_array(mocker, test_file_contents):
     assert nexus_file.include_objects[0].file_loading_skipped is True
     assert nexus_file.include_objects[0] == expected_result
 
+
 @pytest.mark.parametrize("file_with_nested_grid_array_contents, expected_file_contents", [
     ("""C Corner point grid layout
 C
@@ -312,7 +298,7 @@ CORP VALUE
 C    
 1 2 3 234234 12313""",
 
-"""C Corner point grid layout
+     """C Corner point grid layout
 C
 NX     NY     NZ
 112    95     233
@@ -331,12 +317,12 @@ KX ZVAR
 CORP VALUE
 """),
 
-("""porosity value
+    ("""porosity value
 12 38923 7439327 7234923723 9274
 KX ZVAR
 500 50 200
 """,
- """porosity value\n""")
+     """porosity value\n""")
 ], ids=['basic case', 'exclude from start of file'])
 def test_generate_file_include_structure_skip_file_with_nested_array(mocker: MockerFixture,
                                                                      file_with_nested_grid_array_contents: str,
@@ -348,8 +334,8 @@ def test_generate_file_include_structure_skip_file_with_nested_array(mocker: Moc
     expected_file_contents_as_list = expected_file_contents.splitlines(keepends=True)
 
     expected_included_file = NexusFile(location=expected_include_file_path, include_locations=None,
-                                    origin=file_path, include_objects=None,
-                                    file_content_as_list=expected_file_contents_as_list)
+                                       origin=file_path, include_objects=None,
+                                       file_content_as_list=expected_file_contents_as_list)
     expected_included_file._location_in_including_file = 'nexus_data/inc_file1.inc'
 
     def mock_open_wrapper(filename, mode):
@@ -368,6 +354,7 @@ def test_generate_file_include_structure_skip_file_with_nested_array(mocker: Moc
     assert len(nexus_file.include_objects) == 1
     assert nexus_file.include_objects[0].file_content_as_list == expected_included_file.file_content_as_list
     assert nexus_file.include_objects[0] == expected_included_file
+
 
 def test_generate_file_include_structure_not_skipping_file(mocker: MockerFixture):
     # Arrange
@@ -389,12 +376,13 @@ KZ CON 1
     nested_include_file_location = 'nested/include/file/path.dat'
     expected_nested_include_file_path = os.path.join('/origin/path', 'nexus_data', nested_include_file_location)
     expected_nested_included_file = NexusFile(location=nested_include_file_location, include_locations=None,
-                                    origin=expected_include_file_path, include_objects=None,
-                                    file_content_as_list=['another file'])
+                                              origin=expected_include_file_path, include_objects=None,
+                                              file_content_as_list=['another file'])
 
-    expected_included_file = NexusFile(location=expected_include_file_path, include_locations=[expected_nested_include_file_path],
-                                    origin=file_path, include_objects=[expected_nested_included_file],
-                                    file_content_as_list=file_contents.splitlines(keepends=True))
+    expected_included_file = NexusFile(location=expected_include_file_path,
+                                       include_locations=[expected_nested_include_file_path],
+                                       origin=file_path, include_objects=[expected_nested_included_file],
+                                       file_content_as_list=file_contents.splitlines(keepends=True))
     expected_included_file._location_in_including_file = 'nexus_data/inc_file1.inc'
 
     def mock_open_wrapper(filename, mode):
@@ -432,8 +420,9 @@ def test_file_object_locations(mocker, test_file_contents, expected_results):
     dummy_model = get_fake_nexus_simulator(mocker)
     dummy_wells = NexusWells(model=dummy_model)
 
-    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5',
-                                                    'uuid6', 'uuid7'])  # Mocking the object IDs
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4',
+                 side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5',
+                              'uuid6', 'uuid7'])  # Mocking the object IDs
 
     mocker.patch.object(uuid, 'uuid4', side_effect=['file_uuid'])  # Mocking the file IDs
 
@@ -448,7 +437,8 @@ def test_file_object_locations(mocker, test_file_contents, expected_results):
     wells_file = NexusFile.generate_file_include_structure(file_path='wells.dat', skip_arrays=True, )
 
     # Act
-    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH, model_date_format=DateFormat.DD_MM_YYYY, parent_wells_instance=dummy_wells)
+    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH,
+               model_date_format=DateFormat.DD_MM_YYYY, parent_wells_instance=dummy_wells)
     result = wells_file.object_locations
 
     # Assert
@@ -761,8 +751,9 @@ def test_update_object_locations(mocker, test_file_contents, expected_results):
     dummy_model = get_fake_nexus_simulator(mocker)
     dummy_wells = NexusWells(model=dummy_model)
 
-    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5',
-                                                    'uuid6', 'uuid7'])  # Mocking the object IDs
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4',
+                 side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5',
+                              'uuid6', 'uuid7'])  # Mocking the object IDs
 
     mocker.patch.object(uuid, 'uuid4', side_effect=['file_uuid'])  # Mocking the file IDs
 
@@ -776,7 +767,8 @@ def test_update_object_locations(mocker, test_file_contents, expected_results):
 
     wells_file = NexusFile.generate_file_include_structure(file_path='wells.dat', skip_arrays=True, )
     # load the uuids
-    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH, model_date_format=DateFormat.DD_MM_YYYY, parent_wells_instance=dummy_wells)
+    load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH,
+               model_date_format=DateFormat.DD_MM_YYYY, parent_wells_instance=dummy_wells)
 
     # Act
     # effectively add 2 lines at location 5
@@ -852,23 +844,25 @@ def test_remove_from_file_as_list(mocker):
     assert nexus_file == expected_result
     assert nexus_file.file_modified
 
+
 @pytest.mark.parametrize('file_content, expected_file_content', [
     (
-        'test_file_content\nInCluDE oRigINAl_Include.inc\nend of the file\n',
-        'test_file_content\nInCluDE New_FiLe_Path.inc\nend of the file\n',
+            'test_file_content\nInCluDE oRigINAl_Include.inc\nend of the file\n',
+            'test_file_content\nInCluDE New_FiLe_Path.inc\nend of the file\n',
     ),
     (
-        'test_file_content\nInCluDE\noRigINAl_Include.inc\nend of the file\n',
-        'test_file_content\nInCluDE\nNew_FiLe_Path.inc\nend of the file\n',
+            'test_file_content\nInCluDE\noRigINAl_Include.inc\nend of the file\n',
+            'test_file_content\nInCluDE\nNew_FiLe_Path.inc\nend of the file\n',
     ),
     (
-        'test_file_content\nInCluDE /abs_path/oRigINAl_Include.inc\nend of the file\n',
-        'test_file_content\nInCluDE New_FiLe_Path.inc\nend of the file\n',
+            'test_file_content\nInCluDE /abs_path/oRigINAl_Include.inc\nend of the file\n',
+            'test_file_content\nInCluDE New_FiLe_Path.inc\nend of the file\n',
     )
 ], ids=['basic', 'on another line', 'next line'])
 def test_update_include_location_in_file_as_list(mocker, file_content, expected_file_content):
     # Arrange
     file_path = '/root/file.dat'
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             file_path: file_content,
@@ -876,6 +870,7 @@ def test_update_include_location_in_file_as_list(mocker, file_content, expected_
             '/abs_path/oRigINAl_Include.inc': 'inc file contents',
         }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
     nexus_file = NexusFile.generate_file_include_structure(file_path)
 
@@ -904,10 +899,11 @@ def test_write_to_file(mocker):
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             file_path: file_content,
-            os.path.join('/root','original_include.inc'): 'inc file contents',
+            os.path.join('/root', 'original_include.inc'): 'inc file contents',
             '/abs_path/another_file.inc': 'inc file contents',
         }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
     nexus_file = NexusFile.generate_file_include_structure(file_path)
 
@@ -941,6 +937,7 @@ def test_write_to_file_only_modified(mocker):
 
     expected_file_content = f'''test_file_content\nInCluDE {expected_include_path_1}\nINCLUDE
                     /abs_path/another_file.inc\nend of the file\n'''
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             file_path: file_content,
@@ -948,6 +945,7 @@ def test_write_to_file_only_modified(mocker):
             '/abs_path/another_file.inc': 'inc file contents',
         }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
     nexus_file = NexusFile.generate_file_include_structure(file_path)
     nexus_file._file_modified_set(True)
@@ -1025,11 +1023,13 @@ def test_missing_file(mocker):
     file_content = '''test_file_content\nInCluDE original_include.inc\nINCLUDE'''
     file_path = '/root/file.dat'
     expected_missing_file = os.path.join('/root', 'original_include.inc')
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             file_path: file_content,
         }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
     path_mock = mocker.MagicMock()
     mocker.patch('pathlib.Path', path_mock)
@@ -1050,16 +1050,19 @@ def test_missing_file(mocker):
     assert warn_msg[0].message.args[0] == 'FileNotFoundError when trying to access file at /root/file.dat'
     assert warn_msg[1].message.args[0] == 'No file found for: original_include.inc while loading /root/file.dat'
 
+
 def test_group_not_found(mocker):
     # Arrange
     file_content = '''test_file_content\nInCluDE original_include.inc\nINCLUDE'''
     file_path = '/root/file.dat'
     expected_missing_file = os.path.join('/root', 'original_include.inc')
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             file_path: file_content,
         }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
     path_mock = mocker.MagicMock()
     mocker.patch('pathlib.Path', path_mock)
@@ -1090,6 +1093,7 @@ def test_nexusfile_repr(mocker):
             file_path: file_content,
         }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
     nexus_file = NexusFile.generate_file_include_structure(file_path)
     expected_result = f"""FILE PATH: /root/file.dat
@@ -1131,8 +1135,8 @@ def test_get_full_network_nexus_file(mocker):
                                     file_content_as_list=['third_file'])
 
     nexus_file = NexusFile(location=expected_location, include_locations=expected_includes_list,
-                                    origin=None, include_objects=[nexus_file_include1, nexus_file_include3],
-                                    file_content_as_list=['basic_file INCLUDE nexus_data/inc_file1.inc'])
+                           origin=None, include_objects=[nexus_file_include1, nexus_file_include3],
+                           file_content_as_list=['basic_file INCLUDE nexus_data/inc_file1.inc'])
 
     expected_from_list = [None, file_path, include_full_file_path_1, file_path]
     expected_to_list = [file_path, include_full_file_path_1, include_full_file_path_2, include_full_file_path_3]
@@ -1154,21 +1158,21 @@ def test_get_full_network_nexus_file(mocker):
 
 @pytest.mark.parametrize('callable, expected_result', [
     ('get_flat_list_str_with_file_ids', [('basic_file ', 'uuid0'),
-                       ('first inc file contents\n', 'uuid0'),
-                       ('second line in incfile', 'uuid0'),
-                       ('line 1 parent\n', 'uuid1'),
-                       ('line 2 parent\n', 'uuid1'),
-                       ]),
+                                         ('first inc file contents\n', 'uuid0'),
+                                         ('second line in incfile', 'uuid0'),
+                                         ('line 1 parent\n', 'uuid1'),
+                                         ('line 2 parent\n', 'uuid1'),
+                                         ]),
     ('get_flat_list_str_with_file_ids_with_includes', [('basic_file INCLUDE inc_file1.inc\n', 'uuid1'),
-                       ('basic_file ', 'uuid0'),
-                       ('first inc file contents\n', 'uuid0'),
-                       ('second line in incfile', 'uuid0'),
-                       ('line 1 parent\n', 'uuid1'),
-                       ('line 2 parent\n', 'uuid1'),
-                       ]),
+                                                       ('basic_file ', 'uuid0'),
+                                                       ('first inc file contents\n', 'uuid0'),
+                                                       ('second line in incfile', 'uuid0'),
+                                                       ('line 1 parent\n', 'uuid1'),
+                                                       ('line 2 parent\n', 'uuid1'),
+                                                       ]),
     ('get_flat_list_str_file', ['basic_file ', 'first inc file contents\n', 'second line in incfile',
-                            'line 1 parent\n', 'line 2 parent\n']),
-                         ],ids=['file_ids', 'file_ids_with_includes', 'no_file_ids'])
+                                'line 1 parent\n', 'line 2 parent\n']),
+], ids=['file_ids', 'file_ids_with_includes', 'no_file_ids'])
 def test_iterate_line_with_file_origins(mocker, callable, expected_result):
     # Arrange
     # mock out the uuids
@@ -1181,18 +1185,62 @@ line 2 parent
 '''
     )
     include_file_contents = 'first inc file contents\nsecond line in incfile'
-        
+
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             'test_file_path.dat': test_file_contents,
             'inc_file1.inc': include_file_contents,
         }).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
-        
+
     nexus_file = NexusFile.generate_file_include_structure(file_path=file_path)
     # Act
     result = getattr(nexus_file, callable)
-    
+
     # Assert
     assert result == expected_result
+
+
+def test_generate_file_include_structure_skip_multiple_includes(mocker):
+    # Arrange
+    file_path = '/origin/path/test_file_path.dat'
+    include_file_contents = '1 2.2 3\n 2.3\n 4.1231235 -24.43 +2303 \n +2013\n'
+    include_full_file_path_1 = os.path.join('/origin/path', 'nexus_data/inc_file1.inc')
+    test_file_contents = 'KX VALUE\nINCLUDE nexus_data/inc_file1.inc\nINCLUDE nexus_data/inc_file2.inc\n'
+    expected_include_file_1 = NexusFile(location=include_full_file_path_1, include_locations=None,
+                                        origin=file_path, include_objects=None,
+                                        file_content_as_list=None, file_loading_skipped=True)
+    expected_include_file_1._input_file_location = 'nexus_data/inc_file1.inc'
+    expected_include_file_1._location_in_including_file = 'nexus_data/inc_file1.inc'
+
+    include_file_contents_2 = '1 2.2 3\n 2.3\n 4.1231235 -24.43 +2303 \n +2013\n'
+
+    include_full_file_path_2 = os.path.join('/origin/path', 'nexus_data/inc_file2.inc')
+    expected_include_file_2 = NexusFile(location='nexus_data/inc_file2.inc', include_locations=None,
+                                        origin=file_path, include_objects=None,
+                                        file_content_as_list=None, file_loading_skipped=True)
+    expected_include_file_2._input_file_location = 'nexus_data/inc_file2.inc'
+    expected_include_file_2._location_in_including_file = 'nexus_data/inc_file2.inc'
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            file_path: test_file_contents,
+            include_full_file_path_1: include_file_contents,
+            include_full_file_path_2: include_file_contents_2,
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act
+    nexus_file = NexusFile.generate_file_include_structure(file_path, skip_arrays=True)
+
+    # Assert
+    assert len(nexus_file.include_objects) == 2
+    assert nexus_file.file_loading_skipped is False
+    assert nexus_file.include_objects[0].file_loading_skipped is True
+    assert nexus_file.include_objects[0] == expected_include_file_1
+    assert nexus_file.include_objects[1].file_loading_skipped is True
+    assert nexus_file.include_objects[1] == expected_include_file_2

@@ -90,10 +90,15 @@ class StructuredGridOperations:
             StructuredGridOperations.__make_grid_def(file_as_list, ignore_values, line, line_indx, modifier,
                                                      region_name, token_modifier, token_property, grid_nexus_file,
                                                      original_line_location=original_line_location)
-
+            grid_array_definition = token_property if not isinstance(token_property, dict) else (
+                token_property)[region_name]
             mod_start_end = StructuredGridOperations.__extract_mod_positions(line_indx, file_as_list)
+            if 'VMOD' in mod_start_end:
+                vmod_indices = mod_start_end.pop('VMOD')
+                StructuredGridOperations.__make_vmod_table(vmod_indices, file_as_list, grid_array_definition,
+                                                           grid_nexus_file)
             StructuredGridOperations.__make_mod_table(mod_start_end, file_as_list,
-                                                      line, token_property, region_name, token_modifier)
+                                                      line, grid_array_definition, token_modifier)
 
     @staticmethod
     def __make_grid_def(file_as_list: list[str], ignore_values: list[str], line: str, line_indx: int, modifier: str,
@@ -352,22 +357,53 @@ class StructuredGridOperations:
         break_flag = False
         keywords_to_stop_on = STRUCTURED_GRID_KEYWORDS + GRID_ARRAY_KEYWORDS
         keywords_to_stop_on.remove('INCLUDE')
+        skip_lines = False
+        found_end_of_mod_table = False
+
         for i in range(line_indx + 1, len(file_as_list)):
-            if nfo.check_token('MODX', file_as_list[i]):
-                mod_start_end['MODX'] = [[i + 1, i + 2]]
-            if nfo.check_token('MODY', file_as_list[i]):
-                mod_start_end['MODY'] = [[i + 1, i + 2]]
-            if nfo.check_token('MODZ', file_as_list[i]):
-                mod_start_end['MODZ'] = [[i + 1, i + 2]]
-            if nfo.check_token('MOD', file_as_list[i]):
+            line = file_as_list[i]
+            # if in a skip line block then skip the line
+            if nfo.check_token('SKIP', line):
+                skip_lines = True
+            if nfo.check_token('NOSKIP', line):
+                skip_lines = False
+            if skip_lines:
+                continue
+
+            one_line_mod_tokens = ['MODX', 'MODY', 'MODZ']
+            for token in one_line_mod_tokens:
+                if nfo.check_token(token, line):
+                    mod_start_end[token] = [[i + 1, i + 2]]
+            if nfo.check_token('VMOD', line):
+                if mod_start_end.get('VMOD', None) is None:
+                    mod_start_end['VMOD'] = []
+                mod_start_end['VMOD'].append([i + 1, i + 3])
+                for j, vmod_line in enumerate(file_as_list[i+1::], start=i + 1):
+                    # find the include file
+                    if nfo.check_token('INCLUDE', vmod_line):
+                        mod_start_end['VMOD'][-1][1] = j
+                        break
+            if nfo.check_token('MOD', line):
                 if 'MOD' in mod_start_end.keys():  # Already found a prior mod for this token, append
                     mod_start_end['MOD'].append([i + 1, len(file_as_list)])
                 else:
                     mod_start_end['MOD'] = [[i + 1, len(file_as_list)]]
                 found_end_of_mod_table = False
                 for j in range(i + 1, len(file_as_list)):
+                    line_find_end = file_as_list[j]
+                    # find the end of the mod table:
+                    if nfo.check_token('SKIP', line_find_end):
+                        skip_lines = True
+                        # terminate reading mods:
+                        mod_start_end['MOD'][-1][1] = j
+                    if nfo.check_token('NOSKIP', line_find_end):
+                        skip_lines = False
+                        # restart reading mods
+                        mod_start_end['MOD'].append([j+1, len(file_as_list)])
+                    if skip_lines:
+                        continue
                     for keyword in keywords_to_stop_on:
-                        if nfo.check_token(keyword, file_as_list[j]):
+                        if nfo.check_token(keyword, line_find_end):
                             mod_start_end['MOD'][-1][1] = j
                             found_end_of_mod_table = True
                             break
@@ -384,8 +420,7 @@ class StructuredGridOperations:
 
     @staticmethod
     def __make_mod_table(mod_start_end: dict[str, list[list[int]]], file_as_list: list[str], line: str,
-                         token_property: GridArrayDefinition | dict[str, GridArrayDefinition], region_name: str,
-                         token_modifier: str) -> None:
+                         grid_array_definition: GridArrayDefinition, token_modifier: str) -> None:
         """A function that creates the mod table."""
 
         for key in mod_start_end.keys():
@@ -411,28 +446,16 @@ class StructuredGridOperations:
                 else:
                     raise ValueError(
                         f'Unsuitable mod card for {token_modifier} keyword in line: {line}')
-                if not isinstance(token_property, dict):
-                    # If we are dealing with a single grid array definition
-                    if token_property.mods is not None:
-                        if key in token_property.mods.keys():
-                            orig_mod_tab = token_property.mods[key].copy()
-                            token_property.mods[key] = \
-                                pd.concat([orig_mod_tab, mod_table]).reset_index(drop=True)
-                        else:
-                            token_property.mods[key] = mod_table
+
+                if grid_array_definition.mods is not None:
+                    if key in grid_array_definition.mods.keys():
+                        orig_mod_tab = grid_array_definition.mods[key].copy()
+                        grid_array_definition.mods[key] = \
+                            pd.concat([orig_mod_tab, mod_table]).reset_index(drop=True)
                     else:
-                        token_property.mods = {key: mod_table}
-                else:  # IREGION
-                    # If we are dealing with a dictionary of grid array definitions representing an iregion dict
-                    if token_property[region_name].mods is not None:
-                        tmp_dict = token_property[region_name].mods
-                        if isinstance(tmp_dict, dict):
-                            if key in tmp_dict.keys():
-                                orig_mod_tab = tmp_dict[key].copy()
-                                tmp_dict[key] = \
-                                    pd.concat([orig_mod_tab, mod_table]).reset_index(drop=True)
-                    else:
-                        token_property[region_name].mods = {key: mod_table}
+                        grid_array_definition.mods[key] = mod_table
+                else:
+                    grid_array_definition.mods = {key: mod_table}
 
     @staticmethod
     def __add_absolute_path_to_grid_array_definition(grid_array_definition: GridArrayDefinition,
@@ -474,3 +497,51 @@ class StructuredGridOperations:
 
         absolute_file_path = os.path.join(os.path.dirname(include_file.location), grid_array_definition.value)
         grid_array_definition.absolute_path = absolute_file_path
+
+    @staticmethod
+    def __make_vmod_table(vmod_indices: list[list[int]], file_as_list: list[str],
+                          grid_array_definition: GridArrayDefinition, grid_nexus_file: NexusFile) -> None:
+        """A function that creates the vmod table from a set of line indices.
+
+        Args:
+        vmod_indices (list[list[int]]): list of line indices which the VMOD keyword refers to.
+        file_as_list (list[str]): a list of strings containing each line of the file as a new entry.
+        grid_array_definition (GridArrayDefinition): the grid array definition to add the vmod table to,
+        adds the vmod table to the mods attribute dictionary on the grid array definition.
+        grid_nexus_file (NexusFile): the NexusFile object representing the top level grid file.
+        """
+        store_i1, store_i2, store_j1, store_j2, store_k1, store_k2, store_operation, store_include = (
+            [], [], [], [], [], [], [], [])
+
+        # assume it is the same as the grid file - this might not work if the vmod is in an include file
+        absolute_path_root = os.path.dirname(grid_nexus_file.location)
+
+        for (start_block, end_block) in vmod_indices:
+            file_section = file_as_list[start_block:end_block+1]
+            for line in file_section:
+                split_line = nfo.split_line(line, upper=False)
+                if len(split_line) == 7:
+                    i1, i2, j1, j2, k1, k2, operation = split_line
+                    store_i1.append(int(i1))
+                    store_i2.append(int(i2))
+                    store_j1.append(int(j1))
+                    store_j2.append(int(j2))
+                    store_k1.append(int(k1))
+                    store_k2.append(int(k2))
+                    store_operation.append(operation)
+                    continue
+                if len(split_line) == 2 and nfo.check_token('INCLUDE', line.upper()):
+                    include_file = split_line[1]
+                    if not os.path.isabs(include_file):
+                        include_file = os.path.join(absolute_path_root, split_line[1])
+                    # might need to add absolute path here at some point
+                    store_include.append(include_file)
+                    continue
+        if grid_array_definition.mods is None:
+            grid_array_definition.mods = {'VMOD': pd.DataFrame({
+                'i1': store_i1, 'i2': store_i2, 'j1': store_j1, 'j2': store_j2, 'k1': store_k1, 'k2': store_k2,
+                'operation': store_operation, 'include_file': store_include})}
+        else:
+            grid_array_definition.mods['VMOD'] = pd.DataFrame({
+                'i1': store_i1, 'i2': store_i2, 'j1': store_j1, 'j2': store_j2, 'k1': store_k1, 'k2': store_k2,
+                'operation': store_operation, 'include_file': store_include})
