@@ -126,7 +126,7 @@ from tests.utility_for_tests import get_fake_nexus_simulator
        'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 10.2, 'qmult_gas_rate': 123, 'qmult_water_rate': 203,
        'well_name': 'well3'},
       )),
-
+   
     #'Clearing Constraints'
     ('''
     CONSTRAINTS
