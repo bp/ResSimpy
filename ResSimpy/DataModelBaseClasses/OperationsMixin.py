@@ -239,7 +239,11 @@ class NetworkOperationsMixIn(ABC):
                                                 unresolved_obj.max_surface_oil_rate,
                                                 ]
                 if any(x for x in overriding_qmult_constraints if x is not None):
+                    # clear any qmult constraints if any of the surface rate constraints for oil, gas, water are set
                     new_resolved_object.convert_qmult_to_reservoir_barrels = None
+                    new_resolved_object.qmult_oil_rate = None
+                    new_resolved_object.qmult_gas_rate = None
+                    new_resolved_object.qmult_water_rate = None
                 else:
                     new_resolved_object.convert_qmult_to_reservoir_barrels = True
 
