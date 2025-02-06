@@ -147,7 +147,7 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
 
         trimmed_line = line.strip()
 
-        if trimmed_line.startswith('!') or nfo.get_next_value(0, [trimmed_line]) is None:
+        if trimmed_line.startswith('!'):
             continue
 
         if len(trimmed_line) > 0 and trimmed_line[0] == '[':
