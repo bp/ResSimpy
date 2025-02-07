@@ -1361,7 +1361,11 @@ IW JW L KH RADW SKIN RADB WI STAT LENGTH ANGLV ANGLA
                               model_date_format=date_format, parent_wells_instance=dummy_wells)[0]
 
     # Assert
+    assert result_wells[0].well_name == 'well1'
     assert result_wells[0].completions[0] == expected_completion_1
+    assert result_wells[1].well_name == 'well---_2'
     assert result_wells[1].completions[0] == expected_completion_2
+    assert result_wells[2].well_name == 'well3'
     assert result_wells[2].completions[0] == expected_completion_3
+    assert result_wells[3].well_name == 'well4'
     assert result_wells[3].completions[0] == expected_completion_4
