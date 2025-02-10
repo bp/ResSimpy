@@ -433,7 +433,8 @@ class NexusConstraint(Constraint):
                          max_gor_plug=max_gor_plug, max_gor_plug_plus=max_gor_plug_plus, max_gor_perf=max_gor_perf,
                          max_gor_perfplus=max_gor_perfplus, max_lgr=max_lgr, max_lgr_plug=max_lgr_plug,
                          max_lgr_plug_plus=max_lgr_plug_plus, max_lgr_perf=max_lgr_perf,
-                         max_lgr_perfplus=max_lgr_perfplus)
+                         max_lgr_perfplus=max_lgr_perfplus,
+                         convert_qmult_to_reservoir_barrels=convert_qmult_to_reservoir_barrels)
 
         if date is None and properties_dict is not None:
             if 'date' not in properties_dict or not isinstance(properties_dict['date'], str):

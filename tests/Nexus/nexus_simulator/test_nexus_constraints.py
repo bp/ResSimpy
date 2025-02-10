@@ -126,7 +126,7 @@ from tests.utility_for_tests import get_fake_nexus_simulator
        'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 10.2, 'qmult_gas_rate': 123, 'qmult_water_rate': 203,
        'well_name': 'well3'},
       )),
-
+   
     #'Clearing Constraints'
     ('''
     CONSTRAINTS
@@ -281,7 +281,6 @@ def test_load_constraints(mocker, file_contents, expected_content):
 
     expected_single_name_constraint = {'well1': expected_constraints['well1']}
     mock_nexus_network = mocker.MagicMock()
-    mock_nexus_network._
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
     expected_df = pd.DataFrame(expected_content)
 
