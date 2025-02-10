@@ -16,23 +16,23 @@ if TYPE_CHECKING:
 class NexusLGRs(LGRs):
     """Class for handling the set of Local Grid Refinements (LGR) in the NexusGrid."""
 
-    _lgrs: list[NexusLGR] = field(default_factory=list)
+    _lgr_list: list[NexusLGR] = field(default_factory=list)
     _grid_file_as_list: list[str] = field(default_factory=list)
     __has_been_loaded: bool = False
     __parent_grid: NexusGrid
 
-    def __init__(self, parent_grid: NexusGrid, grid_file_as_list: None | list[str], lgrs: None | list[NexusLGR] = None,
-                 assume_loaded: bool = False) -> None:
+    def __init__(self, parent_grid: NexusGrid, grid_file_as_list: None | list[str],
+                 lgr_list: None | list[NexusLGR] = None, assume_loaded: bool = False) -> None:
         """Initializes the NexusLGRs class.
 
         Args:
             parent_grid (NexusGrid): The NexusGrid object that the LGRs belong to.
             grid_file_as_list (None | list[str]): List of strings representing the file to load the LGRs from.
-            lgrs (None | list[NexusLGR]): List of LGRs to initialize the class with. Defaults to None for loading
+            lgr_list (None | list[NexusLGR]): List of LGRs to initialize the class with. Defaults to None for loading
             purposes.
             assume_loaded (bool): Whether the LGRs have already been loaded. Defaults to False.
         """
-        super().__init__(lgrs=lgrs)
+        super().__init__(lgr_list=lgr_list)
         self._grid_file_as_list = grid_file_as_list if grid_file_as_list is not None else []
         self.__has_been_loaded = assume_loaded
         self.__parent_grid = parent_grid
@@ -60,7 +60,7 @@ class NexusLGRs(LGRs):
                 new_lgr = self.__read_lgr_table(
                     file_subsection=self._grid_file_as_list[start_cartref_index + 1:end_cartref_index],
                     lgr_name=lgr_name)
-                self._lgrs.append(new_lgr)
+                self._lgr_list.append(new_lgr)
                 start_cartref_index = -1
                 end_cartref_index = -1
 
@@ -121,7 +121,7 @@ class NexusLGRs(LGRs):
         if not self.__has_been_loaded:
             self.load_lgrs()
             self.__parent_grid.load_grid_properties_if_not_loaded()
-        return self._lgrs
+        return self._lgr_list
 
     def get_all(self) -> list[NexusLGR]:
         """Returns the collection of LGRs in the NexusGrid."""
