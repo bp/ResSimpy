@@ -6,6 +6,7 @@ from pytest_mock import MockerFixture
 from ResSimpy import NexusSimulator
 from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.Nexus.DataModels.Network.NexusActivationChange import NexusActivationChange
+from ResSimpy.Nexus.DataModels.Network.NexusProc import NexusProc
 from ResSimpy.Nexus.NexusEnums.ActivationChangeEnum import ActivationChangeEnum
 from ResSimpy.Time.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
@@ -391,7 +392,7 @@ ENDWELLS
 
 GASWELLS
 NAME 		D 		DPERF GASMOB
-P01		1.123e-5	INVKH	#
+P01		1.123e-5	INVKH	CB
 ENDGASWELLS
 
 TIME 01/01/2021
@@ -412,7 +413,7 @@ ENDGASWELLS
                               'gradient_calc': 'MOBGRAD', 'crossflow': 'OFF', 'crossshut': 'CALC',
                               'date': '01/01/2020', 'unit_system': UnitSystem.METRIC}
     well_connection_props4 = {'name': 'P01', 'd_factor': 1.123e-5, 'non_darcy_flow_method': 'INVKH',
-                              'gas_mobility': None, 'date': '01/01/2020', 'unit_system': UnitSystem.METRIC}
+                              'gas_mobility': 'CB', 'date': '01/01/2020', 'unit_system': UnitSystem.METRIC}
     well_connection_props5 = {'name': 'P02', 'd_factor': 2.345e-5, 'non_darcy_flow_method': 'random',
                               'gas_mobility': None, 'date': '01/01/2021', 'unit_system': UnitSystem.METRIC}
     start_date = '01/01/2019'
@@ -1016,27 +1017,32 @@ def test_load_surface_file_activate_deactivate(mocker):
     gas_welcon_4 = NexusWellConnection(gas_welcon_props_4, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
     node_n1_n2 = NexusNodeConnection(node_con_prop_n1_n2, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
 
-    activation_change_1 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, date_format=DateFormat.DD_MM_YYYY,
-                                                date='01/02/2024', name='WELCON_1', start_date = '01/01/2023')
-    activation_change_2 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, date_format=DateFormat.DD_MM_YYYY,
-                                                date='01/02/2024', name='welcon_1_2', start_date = '01/01/2023')
-    activation_change_3 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, date_format=DateFormat.DD_MM_YYYY,
-                                                date='01/02/2024', name='gaswelcon_2', start_date = '01/01/2023')
-    activation_change_4 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, date_format=DateFormat.DD_MM_YYYY,
-                                                date='01/02/2024', name='N1_N2', start_date = '01/01/2023')
+    activation_change_1 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE,
+                                                date_format=DateFormat.DD_MM_YYYY,
+                                                date='01/02/2024', name='WELCON_1', start_date='01/01/2023')
+    activation_change_2 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE,
+                                                date_format=DateFormat.DD_MM_YYYY,
+                                                date='01/02/2024', name='welcon_1_2', start_date='01/01/2023')
+    activation_change_3 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE,
+                                                date_format=DateFormat.DD_MM_YYYY,
+                                                date='01/02/2024', name='gaswelcon_2', start_date='01/01/2023')
+    activation_change_4 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE,
+                                                date_format=DateFormat.DD_MM_YYYY,
+                                                date='01/02/2024', name='N1_N2', start_date='01/01/2023')
 
     activation_change_5 = NexusActivationChange(change=ActivationChangeEnum.ACTIVATE, date_format=DateFormat.DD_MM_YYYY,
-                                                date='09/07/2024', name='WELCON_1', start_date = '01/01/2023')
+                                                date='09/07/2024', name='WELCON_1', start_date='01/01/2023')
     activation_change_6 = NexusActivationChange(change=ActivationChangeEnum.ACTIVATE, date_format=DateFormat.DD_MM_YYYY,
-                                                date='09/07/2024', name='welcon_1_2', start_date = '01/01/2023')
+                                                date='09/07/2024', name='welcon_1_2', start_date='01/01/2023')
 
     activation_change_7 = NexusActivationChange(change=ActivationChangeEnum.ACTIVATE, date_format=DateFormat.DD_MM_YYYY,
-                                                date='23/08/2024', name='gaswelcon_2', start_date = '01/01/2023')
+                                                date='23/08/2024', name='gaswelcon_2', start_date='01/01/2023')
     activation_change_8 = NexusActivationChange(change=ActivationChangeEnum.ACTIVATE, date_format=DateFormat.DD_MM_YYYY,
-                                                date='23/08/2024', name='N1_N2', start_date = '01/01/2023')
+                                                date='23/08/2024', name='N1_N2', start_date='01/01/2023')
 
-    activation_change_9 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, date_format=DateFormat.DD_MM_YYYY,
-                                                date='23/08/2024', name='gaswelcon_1', start_date = '01/01/2023')
+    activation_change_9 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE,
+                                                date_format=DateFormat.DD_MM_YYYY,
+                                                date='23/08/2024', name='gaswelcon_1', start_date='01/01/2023')
 
     # Create the expected objects
     expected_wellcons = [welcon_1, welcon_2, welcon_1_2, original_gas_welcon_1, original_gas_welcon_2, gas_welcon_1,
@@ -1045,7 +1051,6 @@ def test_load_surface_file_activate_deactivate(mocker):
     expected_activation_changes = [activation_change_1, activation_change_2, activation_change_3, activation_change_4,
                                    activation_change_5, activation_change_6, activation_change_7, activation_change_8,
                                    activation_change_9]
-
 
     # Act
     result_wellcons = nexus_sim.network.well_connections.get_all()
@@ -1057,6 +1062,7 @@ def test_load_surface_file_activate_deactivate(mocker):
     assert result_wellcons[0] == welcon_1
     assert sorted(result_wellcons, key=lambda x: (x.iso_date)) == expected_wellcons
     assert sorted(result_nodecons, key=lambda x: (x.iso_date)) == expected_node_cons
+
 
 def test_load_surface_file_activate_deactivate_basic(mocker):
     # Arrange
@@ -1193,3 +1199,59 @@ ENDACTIVATE
     # Assert
     assert result_wellcons == expected_wellcons
     assert result_activation_changes == expected_activation_changes
+
+
+def test_load_between_procs(mocker):
+    fcs_file_contents = 'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data/surface.inc'
+    surface_file_content = '''TIME 01/01/2023
+    
+PROCS NAME TUNING
+REAL_1D     list
+REAL  t_last = 0
+IF (t_last == 0 THEN
+t_last = TIME
+ENDIF
+ENDPROCS
+    
+    NODECON
+    	NAME            NODEIN    NODEOUT       TYPE        METHOD    DDEPTH
+    	CP01            CP01      wh_cp01       PIPE        2          7002.67
+    	cp01_gaslift    GAS       CP01          GASLIFT     NONE        NA ! Checked NODECON 13/05/2020 
+    	ENDNODECON
+    	'''
+    expected_nodecons = [NexusNodeConnection(name='CP01', node_in='CP01', node_out='wh_cp01', con_type='PIPE',
+                                             hyd_method='2', delta_depth=7002.67, date='01/01/2023',
+                                             unit_system=UnitSystem.ENGLISH, properties_dict={}, 
+                                             date_format=DateFormat.DD_MM_YYYY, start_date='01/01/2023'),
+                         NexusNodeConnection(name='cp01_gaslift', node_in='GAS', node_out='CP01', con_type='GASLIFT',
+                                             hyd_method=None, delta_depth=None, date='01/01/2023',
+                                             unit_system=UnitSystem.ENGLISH, properties_dict={},
+                                             date_format=DateFormat.DD_MM_YYYY, start_date='01/01/2023')]
+    
+    expected_proc = NexusProc(date='01/01/2023', name='TUNING', 
+                              contents=['REAL_1D     list\n', 'REAL  t_last = 0\n', 'IF (t_last == 0 THEN\n', 
+                                        't_last = TIME\n', 'ENDIF\n'],)
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            fcs_file_path: fcs_file_contents,
+            'nexus_data/surface.inc': surface_file_content,
+            'run_control.inc': 'START 01/01/2023',
+        }).return_value
+        return mock_open
+
+    start_date = '01/01/2023'
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    fcs_file_path = 'fcs_file.fcs'
+    nexus_sim = NexusSimulator(fcs_file_path)
+
+    # Act
+    result_nodecons = nexus_sim.network.connections.get_all()
+    result_procs = nexus_sim.network.procs.get_all()[0]
+
+    # Assert
+    assert result_nodecons == expected_nodecons
+    assert result_procs.contents == expected_proc.contents
+    assert result_procs.date == expected_proc.date
+    assert result_procs.name == expected_proc.name
