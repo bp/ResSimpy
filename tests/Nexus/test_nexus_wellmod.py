@@ -248,3 +248,31 @@ class TestNexusWellMod:
                                   default_units=self.unit_system, parent_wells_instance=dummy_wells)[0]
         # Assert
         assert result_wells == expected_wells
+
+    def test_load_nexus_wellmod_warn_wellmod_missing(self, mocker, recwarn):
+        # Arrange
+        wellfile_content = """TIME 01/01/2021
+            TIME 14/01/2023
+            WELLMOD not_a_well KHMULT CON 0.4 RADW CON 4.102"""
+        
+        expected_warning_msg = "Cannot find well name 'not_a_well' in wellspec file: 'test_well_file.dat'"
+        
+        date = '14/01/2023'
+        mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
+        wellfile_content = self.well_file_content + wellfile_content
+
+        dummy_model = get_fake_nexus_simulator(mocker)
+        dummy_model.start_date = self.start_date
+        dummy_wells = NexusWells(model=dummy_model)
+        dummy_wells.__setattr__('_NexusWells__date_format', DateFormat.DD_MM_YYYY)
+
+        open_mock = mocker.mock_open(read_data=wellfile_content)
+        mocker.patch("builtins.open", open_mock)
+        wells_file = NexusFile.generate_file_include_structure('test_well_file.dat')
+
+        # Act
+        _ = load_wells(wells_file, start_date=self.start_date, model_date_format=self.date_format,
+                                  default_units=self.unit_system, parent_wells_instance=dummy_wells)[0]
+
+        # Assert
+        assert recwarn.pop().message.args[0] == expected_warning_msg
