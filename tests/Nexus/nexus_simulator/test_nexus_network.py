@@ -6,6 +6,7 @@ from pytest_mock import MockerFixture
 from ResSimpy import NexusSimulator
 from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.Nexus.DataModels.Network.NexusActivationChange import NexusActivationChange
+from ResSimpy.Nexus.DataModels.Network.NexusProc import NexusProc
 from ResSimpy.Nexus.NexusEnums.ActivationChangeEnum import ActivationChangeEnum
 from ResSimpy.Time.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
@@ -1204,13 +1205,13 @@ def test_load_between_procs(mocker):
     fcs_file_contents = 'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data/surface.inc'
     surface_file_content = '''TIME 01/01/2023
     
-    PROCS NAME TUNING
-    REAL_1D     list
-    REAL  t_last = 0
-    IF (t_last == 0 THEN
-    t_last = TIME
-    ENDIF
-    ENDPROCS
+PROCS NAME TUNING
+REAL_1D     list
+REAL  t_last = 0
+IF (t_last == 0 THEN
+t_last = TIME
+ENDIF
+ENDPROCS
     
     NODECON
     	NAME            NODEIN    NODEOUT       TYPE        METHOD    DDEPTH
@@ -1226,6 +1227,10 @@ def test_load_between_procs(mocker):
                                              hyd_method=None, delta_depth=None, date='01/01/2023',
                                              unit_system=UnitSystem.ENGLISH, properties_dict={},
                                              date_format=DateFormat.DD_MM_YYYY, start_date='01/01/2023')]
+    
+    expected_proc = NexusProc(date='01/01/2023', name='TUNING', 
+                              contents=['REAL_1D     list\n', 'REAL  t_last = 0\n', 'IF (t_last == 0 THEN\n', 
+                                        't_last = TIME\n', 'ENDIF\n'],)
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -1243,6 +1248,10 @@ def test_load_between_procs(mocker):
 
     # Act
     result_nodecons = nexus_sim.network.connections.get_all()
+    result_procs = nexus_sim.network.procs.get_all()[0]
 
     # Assert
     assert result_nodecons == expected_nodecons
+    assert result_procs.contents == expected_proc.contents
+    assert result_procs.date == expected_proc.date
+    assert result_procs.name == expected_proc.name
