@@ -161,7 +161,8 @@ from ResSimpy.Nexus.NexusHydraulicsMethods import NexusHydraulicsMethods
     ENGLISH
 
     ! Comment
-    QOIL 1.0 1000. 3000.
+    QOIL 1.0 1000. >
+    3000.
     GOR 0.0 0.5     !  comment ! Gas oil ratio
     ! Another comment
     WCUT 0.0
@@ -169,7 +170,7 @@ from ResSimpy.Nexus.NexusHydraulicsMethods import NexusHydraulicsMethods
     THP 100. 500. 900. 1400. 2000.
     IGOR IWCUT  IALQ  IQOIL  >
     BHP(ITHP)
-       1     1     1      1  2470. 2545. >
+       1     1     1      1  2470. 2545. >  
                              2600. 2820. >
                              3070.
        1     1     1      2  2478. 2548. >
@@ -183,10 +184,10 @@ from ResSimpy.Nexus.NexusHydraulicsMethods import NexusHydraulicsMethods
        2     1     1      2  1881. 2002. 2101. 2438. 2836.
        2     1     1      3  1947. 2039. 2131. 2448. 2848.
        2     1     2      1  1990. 2100. 2190. 2530. 2916.
-       2     1     2      2  2004. 2109. >
+       2     1     2      2  2004. 2109. >            
                              2206. 2537. >
-                             2926.
-       2     1     2      3  2033. 2130. >
+                             2926.                                              
+       2     1     2      3  2033. 2130. >                    
                              2224. 2548. >
                              2946.
     """, {'DESC': ['Hydraulics Data'],
@@ -213,12 +214,12 @@ from ResSimpy.Nexus.NexusHydraulicsMethods import NexusHydraulicsMethods
                                               2830., 2836., 2848., 2916., 2926., 2946.]
                                      })
           }
-    )
+    ),
     ], ids=['basic_hyd', 'complex_hyd', 'with_alq', 'alq_gr_and_line_continuation']
 )
 def test_read_hydraulics_properties_from_file(mocker, file_contents, expected_hydraulics_properties):
     # Arrange
-    hyd_file = NexusFile(location='', file_content_as_list=file_contents.splitlines())
+    hyd_file = NexusFile(location='', file_content_as_list=file_contents.splitlines(keepends=True))
     hydraulics_obj = NexusHydraulicsMethod(file=hyd_file, input_number=1, model_unit_system=UnitSystem.ENGLISH)
 
     # mock out open to return our test file contents
