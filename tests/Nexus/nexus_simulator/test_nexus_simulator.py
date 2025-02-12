@@ -2354,18 +2354,24 @@ def test_load_fcs_file_multires_throws_error(mocker):
     assert str(nie.value) == 'Multiple reservoir models are not currently supported by ResSimpy.'
 
 
-def test_convert_line_to_full_file_path():
+@pytest.mark.parametrize('original_line, expected_line', [
+    ('EQUIL method 1 my_file.dat', os.path.join('EQUIL method 1 /path/to', 'my_file.dat')),
+    ('PVT method 1 my_file.dat', os.path.join('PVT method 1 /path/to', 'my_file.dat')),
+    ('SEPARATOR method 1 my_file.dat', os.path.join('SEPARATOR method 1 /path/to', 'my_file.dat')),
+    ('OTHER method 1 my_file.dat', 'OTHER method 1 my_file.dat'),
+])
+def test_convert_line_to_full_file_path(original_line: str, expected_line: str):
     """Testing the functionality to retrieve equilibration methods from Nexus include files."""
     # Arrange
-    original_line = 'EQUIL method 1 my_file.dat'
     full_file_path = '/path/to/file.inc'
-    expected_line = os.path.join('EQUIL method 1 /path/to', 'my_file.dat')
 
     # Act
-    result = NexusFile._NexusFile__convert_line_to_full_file_path(line=original_line, full_file_path=full_file_path)
+    result = NexusFile._NexusFile__convert_line_to_full_file_path(line=original_line,
+                                                                  full_base_file_path=full_file_path)
 
     # Assert
     assert result == expected_line
+
 
 def test_load_equil_methods_in_include(mocker: MockerFixture, recwarn: WarningsRecorder):
     """Testing the functionality to retrieve equilibration methods from Nexus include files."""
@@ -2407,9 +2413,9 @@ INCLUDE /path/nexus_data/init/equil_info.txt
         eq_files.append(eq_file)
 
     expected_equils = {1: NexusEquilMethod(file=eq_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
-                      2: NexusEquilMethod(file=eq_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
-                      3: NexusEquilMethod(file=eq_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH)
-                      }
+                       2: NexusEquilMethod(file=eq_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                       3: NexusEquilMethod(file=eq_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH)
+                       }
 
     simulation = NexusSimulator(origin=fcs_path)
 
