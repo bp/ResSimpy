@@ -1048,7 +1048,7 @@ def test_missing_file(mocker):
     assert result_include_file.linked_user is None
     assert result_include_file.last_modified is None
     assert warn_msg[0].message.args[0] == 'FileNotFoundError when trying to access file at /root/file.dat'
-    assert warn_msg[1].message.args[0] == f'No file found for: {os.path.join('/root', 'original_include.inc')} while loading /root/file.dat'
+    assert warn_msg[1].message.args[0] == f"No file found for: {os.path.join('/root', 'original_include.inc')} while loading /root/file.dat"
 
 
 def test_group_not_found(mocker):
