@@ -5,6 +5,8 @@ import pytest
 import pandas as pd
 from datetime import datetime, timezone
 
+from _pytest.recwarn import WarningsRecorder
+
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
@@ -2277,7 +2279,7 @@ def test_model_summary(mocker, fluid_type, expected_fluid_type):
     fake_pvt = NexusPVTMethods(inputs=loaded_pvt, model_unit_system=UnitSystem.ENGLISH)
     model._pvt = fake_pvt
 
-    #Hydraulics
+    # Hydraulics
     hyd_files = []
     for i in range(3):
         hyd_file = NexusFile(location=f'my/hyd/file{i + 1}.dat', origin='path/nexus_run.fcs')
@@ -2291,7 +2293,7 @@ def test_model_summary(mocker, fluid_type, expected_fluid_type):
     fake_hyd = NexusHydraulicsMethods(inputs=loaded_hyd, model_unit_system=UnitSystem.ENGLISH)
     model._hydraulics = fake_hyd
 
-    #Equil
+    # Equil
     eq_files = []
     for i in range(3):
         eq_file = NexusFile(location=f'my/equil/file{i + 1}.dat', origin='path/nexus_run.fcs')
@@ -2337,6 +2339,7 @@ def test_model_summary(mocker, fluid_type, expected_fluid_type):
     # Assert
     assert result == expected_summary
 
+
 def test_load_fcs_file_multires_throws_error(mocker):
     # Arrange
     fcs_file = f"RUNCONTROL /path/to/runcontrol.dat\nRESERVoir res1 res1.fcs\n"
@@ -2350,3 +2353,69 @@ def test_load_fcs_file_multires_throws_error(mocker):
     # Assert
     assert str(nie.value) == 'Multiple reservoir models are not currently supported by ResSimpy.'
 
+
+def test_convert_line_to_full_file_path():
+    """Testing the functionality to retrieve equilibration methods from Nexus include files."""
+    # Arrange
+    original_line = 'EQUIL method 1 my_file.dat'
+    full_file_path = '/path/to/file.inc'
+    expected_line = os.path.join('EQUIL method 1 /path/to', 'my_file.dat')
+
+    # Act
+    result = NexusFile._NexusFile__convert_line_to_full_file_path(line=original_line, full_file_path=full_file_path)
+
+    # Assert
+    assert result == expected_line
+
+def test_load_equil_methods_in_include(mocker: MockerFixture, recwarn: WarningsRecorder):
+    """Testing the functionality to retrieve equilibration methods from Nexus include files."""
+    # Arrange
+
+    fcs_path = os.path.normpath('/path/nexus_run.fs')
+    mocker.patch('ResSimpy.FileOperations.File.uuid.uuid4', return_value='uuid_1')
+
+    fcs_file_contents = f"""
+    INITIALIZATION_FILES
+! included equil file
+INCLUDE /path/nexus_data/init/equil_info.txt
+"""
+
+    included_file_contents = """
+       EQUIL method 1 equil_1.fluid
+       equil Method 2 equil_2.fluid
+       Equil METHOD 3 equil_3.fluid
+"""
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            os.path.join('/path/nexus_data/init', 'equil_1.fluid'): '',
+            os.path.join('/path/nexus_data/init', 'equil_2.fluid'): '',
+            os.path.join('/path/nexus_data/init', 'equil_3.fluid'): '',
+            os.path.join('/path/nexus_data/init', 'equil_info.txt'): included_file_contents,
+            '/path/nexus_data/init/equil_info.txt': included_file_contents,
+            fcs_path: fcs_file_contents,
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    eq_files = []
+    for i in range(3):
+        file_location = os.path.join('/path/nexus_data/init', f'equil_{i + 1}.fluid')
+        eq_file = NexusFile(location=file_location, origin=fcs_path, file_content_as_list=[])
+        eq_file.line_locations = [(0, 'uuid_1')]
+        eq_files.append(eq_file)
+
+    expected_equils = {1: NexusEquilMethod(file=eq_files[0], input_number=1, model_unit_system=UnitSystem.ENGLISH),
+                      2: NexusEquilMethod(file=eq_files[1], input_number=2, model_unit_system=UnitSystem.ENGLISH),
+                      3: NexusEquilMethod(file=eq_files[2], input_number=3, model_unit_system=UnitSystem.ENGLISH)
+                      }
+
+    simulation = NexusSimulator(origin=fcs_path)
+
+    # Act
+    result = simulation.equil.inputs
+
+    # Assert
+    assert len(recwarn) == 0
+    assert result == expected_equils

@@ -7,6 +7,8 @@ import sys
 from dataclasses import dataclass, field
 from typing import Optional, Generator, Sequence
 
+from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
+
 if sys.version_info >= (3, 11):
     from typing import Self
 else:
@@ -83,6 +85,20 @@ class NexusFile(File):
         self.linked_user = linked_user
         self.last_modified = last_modified
 
+    @staticmethod
+    def __convert_line_to_full_file_path(line: str, full_file_path: str) -> str:
+        """Modifies a file reference to contain the full file path for easier loading later."""
+        modified_line = line
+        for keyword in FCS_KEYWORDS:
+            if nfo.check_token(line=line, token=keyword):
+                original_file_path = fo.get_nth_value(list_of_strings=[line], value_number=4, ignore_values=['NORPT'])
+                if not os.path.isabs(original_file_path):
+                    full_base_directory = os.path.dirname(full_file_path)
+                    new_file_path = os.path.join(full_base_directory, original_file_path)
+                    modified_line = modified_line.replace(original_file_path, new_file_path)
+
+        return modified_line
+
     @classmethod
     def generate_file_include_structure(cls: type[Self], file_path: str, origin: Optional[str] = None,
                                         recursive: bool = True, skip_arrays: bool = True,
@@ -153,7 +169,7 @@ class NexusFile(File):
                                    file_content_as_list=None,
                                    linked_user=None,
                                    last_modified=None)
-            warnings.warn(UserWarning(f'No file found for: {file_path} while loading {origin}'))
+            warnings.warn(UserWarning(f'No file found for: {full_file_path} while loading {origin}'))
             return nexus_file_class
 
         # check last modified and user for the file
@@ -171,12 +187,17 @@ class NexusFile(File):
         for i, line in enumerate(file_as_list):
             if len(modified_file_as_list) >= 1:
                 previous_line = modified_file_as_list[len(modified_file_as_list) - 1].rstrip('\n')
+                # Handle lines continued with the '>' character
                 if previous_line.endswith('>'):
                     modified_file_as_list[len(modified_file_as_list) - 1] = previous_line[:-1] + line
                 else:
-                    modified_file_as_list.append(line)
+                    converted_line = NexusFile.__convert_line_to_full_file_path(line=line,
+                                                                                full_file_path=full_file_path)
+                    modified_file_as_list.append(converted_line)
             else:
-                modified_file_as_list.append(line)
+                converted_line = NexusFile.__convert_line_to_full_file_path(line=line, full_file_path=full_file_path)
+                modified_file_as_list.append(converted_line)
+
             if line.rstrip('\n').endswith('>'):
                 continue
             if nfo.check_token("INCLUDE", line):
