@@ -242,10 +242,29 @@ ENDCONSTRAINTS
        'unit_system': UnitSystem.ENGLISH},
       {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
        'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH})),
+   
+    # QALLMAX None values
+    (''' 
+    CONSTRAINTS        
+well1   PMIN    5.0
+well1  QALLMAX 0.00
+well1  QGSMAX  0.00
+ENDCONSTRAINTS
+
+    CONSTRAINTS
+well1  ACTIVATE
+well1 QALLMAX NONE QALLRMAX NONE QOSMIN 20 QOSMAX 2025.52
+well1 QGSMAX 204015021.2
+ENDCONSTRAINTS
+''',
+     ({'date': '01/01/2019', 'name': 'well1', 'min_surface_oil_rate': 20.0, 'max_surface_oil_rate': 2025.52,
+       'max_surface_gas_rate': 204015021.2, 'active_node': True, 'unit_system': UnitSystem.ENGLISH,
+       'min_pressure': 5.0},
+      )),
 ], ids=['basic_test', 'Change in Time', 'more Keywords', 'constraint table', 'multiple constraints on same well',
         'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword', 'GORLIM_drawdowncards',
         'MULT keyword with a number after it', 'loading in pressure', 'line continuation',
-        'line continuation with whitespace'])
+        'line continuation with whitespace', 'QALLMAX None values'])
 def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'

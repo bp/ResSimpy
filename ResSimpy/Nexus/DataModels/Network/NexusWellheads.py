@@ -93,7 +93,7 @@ class NexusWellheads(Wellheads):
         self._wellheads.extend(additional_list)
 
     def remove(self, obj_to_remove: dict[str, None | str | float | int] | UUID) -> None:
-        """Remove a wellhead from the network based on the properties matching a dictionary or id.
+        """Remo#ve a wellhead from the network based on the properties matching a dictionary or id.
 
         Args:
             obj_to_remove (UUID | dict[str, None | str | float | int]): UUID of the wellhead to remove or a dictionary \
