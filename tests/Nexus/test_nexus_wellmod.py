@@ -275,4 +275,5 @@ class TestNexusWellMod:
                                   default_units=self.unit_system, parent_wells_instance=dummy_wells)[0]
 
         # Assert
+        assert len(recwarn) == 1
         assert recwarn.pop().message.args[0] == expected_warning_msg
