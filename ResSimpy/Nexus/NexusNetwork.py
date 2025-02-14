@@ -149,7 +149,7 @@ class NexusNetwork(Network):
             for line in file_contents:
 
                 # check for TIME keyword
-                if fo.check_token('TIME', line=line):
+                if not grab_line and fo.check_token('TIME', line=line):
                     time = fo.get_expected_token_value(token='TIME', file_list=[line], token_line=line)
 
                 # check for keyword ENDPROCS to signal end of the procedure
