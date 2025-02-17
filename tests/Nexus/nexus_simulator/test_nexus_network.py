@@ -482,10 +482,16 @@ IW JW L RADW
 13 14 15 16
 """
 
+    wellspec_2_contents = """TIME 02/10/2035
+WELLSPEC well_inj_wat
+      IW JW L RADW
+    5 6 7 10
+"""
     fcs_file_contents = """
 DATEFORMAT DD/MM/YYYY    
 RECURRENT_FILES
 	 WELLS Set 1        wells.dat
+	 WELLS Set 2     wells_2.dat
 	 SURFACE Network 1  surface.dat
 	 RUNCONTROL runcontrol.dat
 """
@@ -494,6 +500,7 @@ RECURRENT_FILES
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             'model.fcs': fcs_file_contents,
             'wells.dat': wellspec_file_contents,
+            'wells_2.dat': wellspec_2_contents,
             'surface.dat': surface_file_contents,
             'runcontrol.dat': 'START 01/01/2018'
         }).return_value
@@ -514,16 +521,18 @@ RECURRENT_FILES
     expected_well_1 = NexusWell(well_name='well_prod_1', completions=[expected_completion_1],
                                 unit_system=UnitSystem.ENGLISH,
                                 well_type=WellType.PRODUCER, parent_wells_instance=parent_wells_instance)
-    expected_completion_2 = NexusCompletion(date='02/10/2032', i=5, j=6, k=7, well_radius=8.0,
+    expected_completion_2_1 = NexusCompletion(date='02/10/2032', i=5, j=6, k=7, well_radius=8.0,
                                             date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH,
                                             start_date=start_date)
-    expected_well_2 = NexusWell(well_name='well_inj_wat', completions=[expected_completion_2],
-                                unit_system=UnitSystem.ENGLISH,
-                                well_type=WellType.WATER_INJECTOR, parent_wells_instance=parent_wells_instance)
+    expected_completion_2_2 = NexusCompletion(date='02/10/2035', i=5, j=6, k=7, well_radius=10.0,
+                                            date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH,
+                                            start_date=start_date)
+    expected_well_2 = NexusWell(well_name='well_inj_wat', completions=[expected_completion_2_1, expected_completion_2_2],
+                                unit_system=UnitSystem.ENGLISH, well_type=WellType.WATER_INJECTOR, 
+                                parent_wells_instance=parent_wells_instance)
     expected_completion_3 = NexusCompletion(date='02/10/2032', i=9, j=10, k=11, well_radius=12.1,
                                             date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH,
                                             start_date=start_date)
-
     expected_well_3 = NexusWell(well_name='well_inj_oil', completions=[expected_completion_3],
                                 unit_system=UnitSystem.ENGLISH,
                                 well_type=WellType.OIL_INJECTOR, parent_wells_instance=parent_wells_instance)
