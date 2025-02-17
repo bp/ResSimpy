@@ -24,6 +24,7 @@ class GenericTest:
     unit_system: UnitSystem
     date: str
     attr_4: Optional[str] = None
+    attr_5: Optional[str] = 'asdj'
     __id: uuid.UUID = field(default_factory=lambda: uuid.uuid4(), compare=False, repr=False)
 
     @staticmethod
@@ -33,6 +34,7 @@ class GenericTest:
             'ATTR_2': ('attr_2', int),
             'ATTR_3': ('attr_3', float),
             'ATTR_4': ('attr_4', str),
+            'ATTR_5': ('attr_5', str)
             }
         return mapping_dict
 
@@ -41,7 +43,7 @@ class GenericTest:
                                        add_iso_date=add_iso_date)
 
     def __repr__(self):
-        return generic_repr(self)
+        return generic_repr(self, exclude_attributes=['attr_5'])
 
     def __str__(self):
         return generic_str(self)
@@ -52,15 +54,15 @@ def test_to_dict():
     class_inst = GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=UnitSystem.METRIC,
                              date='01/01/2030')
     expected = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'attr_4': None, 'unit_system': 'METRIC',
-                'date': '01/01/2030'}
-    expected_no_date_no_units = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'attr_4': None, }
+                'date': '01/01/2030', 'attr_5': 'asdj',}
+    expected_no_date_no_units = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'attr_4': None, 'attr_5': 'asdj',}
     expected_nexus_style = {
         'ATTR_1': 'hello', 'ATTR_2': 10, 'ATTR_3': 43020.2, 'unit_system': 'METRIC',
-        'date': '01/01/2030', 'ATTR_4': None
+        'date': '01/01/2030', 'ATTR_4': None, 'ATTR_5': 'asdj',
     }
     expected_without_nones = {
         'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'unit_system': 'METRIC',
-        'date': '01/01/2030'
+        'date': '01/01/2030', 'attr_5': 'asdj',
     }
     # Act
     result = to_dict(class_inst)
@@ -88,6 +90,7 @@ def test_obj_to_dataframe():
         'attr_1': ['hello', 'world'],
         'attr_2': [10, 2],
         'attr_3': [43020.2, 2.2],
+        'attr_5': ['asdj', 'asdj'],
         'unit_system': ['METRIC', 'ENGLISH'],
         'date': ['01/01/2030', '01/01/2033'],
     })
@@ -106,8 +109,9 @@ def test_generic_repr_str(mocker):
 
     expected_repr = ("GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=<UnitSystem.METRIC: 'METRIC'>, "
                      "date='01/01/2030', attr_4='world', GenericTest__id='uuid1')")
+    
     expected_str = ("GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=<UnitSystem.METRIC: 'METRIC'>, "
-                     "date='01/01/2030', attr_4='world')")
+                     "date='01/01/2030', attr_4='world', attr_5='asdj')")
     # Act Assert
     assert repr(class_inst) == expected_repr
     assert str(class_inst) == expected_str
