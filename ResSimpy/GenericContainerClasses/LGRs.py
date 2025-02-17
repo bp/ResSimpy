@@ -15,7 +15,7 @@ class LGRs(ABC):
         self._lgr_list: Sequence[LGR] = [] if lgr_list is None else lgr_list
 
     @property
-    def lgrs(self) -> Sequence[LGR]:
+    def lgr_list(self) -> Sequence[LGR]:
         """Returns the list of LGRs."""
         return self._lgr_list
 
