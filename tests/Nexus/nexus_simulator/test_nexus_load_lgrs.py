@@ -58,8 +58,8 @@ ENDLGR
         lgrs.load_lgrs()
 
         # Assert
-        assert lgrs.lgrs[0] == self.expected_lgr_1
-        assert lgrs.lgrs[1] == self.expected_lgr_2
+        assert lgrs.lgr_list[0] == self.expected_lgr_1
+        assert lgrs.lgr_list[1] == self.expected_lgr_2
 
     def test_load_lgrs_into_grid_object(self):
         # Arrange
@@ -69,7 +69,7 @@ ENDLGR
 
         # Act
         # call it this way so that we can also test lazy loading via the property
-        lgrs_list = nexus_grid.lgrs.lgrs
+        lgrs_list = nexus_grid.lgrs.lgr_list
 
         # Assert
         assert lgrs_list[0] == self.expected_lgr_1

@@ -116,7 +116,7 @@ class NexusLGRs(LGRs):
         return store_final_values
 
     @property
-    def lgrs(self) -> list[NexusLGR]:
+    def lgr_list(self) -> list[NexusLGR]:
         """Collection of the LGRs in the NexusGrid."""
         if not self.__has_been_loaded:
             self.load_lgrs()
@@ -125,7 +125,7 @@ class NexusLGRs(LGRs):
 
     def get_all(self) -> list[NexusLGR]:
         """Returns the collection of LGRs in the NexusGrid."""
-        return self.lgrs
+        return self.lgr_list
 
     def get(self, name: str) -> NexusLGR:
         """Returns the LGR with the specified name.
@@ -133,7 +133,7 @@ class NexusLGRs(LGRs):
         Args:
             name (str): the name of the LGR to get from the grid.
         """
-        lgr = next((x for x in self.lgrs if x.name == name), None)
+        lgr = next((x for x in self.lgr_list if x.name == name), None)
         if lgr is None:
             raise ValueError(f'No LGR with name {name} found in the NexusGrid.')
         return lgr

@@ -1724,7 +1724,7 @@ KY CON
     model = NexusSimulator('testpath1/nexus_run.fcs')
     # Act
     result = model.grid
-    result_lgr = result.lgrs.lgrs[0]
+    result_lgr = result.lgrs.lgr_list[0]
 
     # assert
     assert result.kx == expected_root_kx
@@ -1732,7 +1732,7 @@ KY CON
     assert result_lgr == expected_lgr
     assert result_lgr.kx == expected_lgr._kx
     assert result_lgr.ky == expected_lgr._ky
-    assert len(result.lgrs.lgrs) == 1
+    assert len(result.lgrs.lgr_list) == 1
 
 
 def test_load_lgrs(mocker):
@@ -1799,7 +1799,7 @@ def test_load_lgrs(mocker):
     # Act
     nexus_model = NexusSimulator(origin='/path/to/nexus/fcsfile.dat')
     kx_array = nexus_model.grid.kx
-    lgr_kx_array = nexus_model.grid.lgrs.lgrs[0].kx
+    lgr_kx_array = nexus_model.grid.lgrs.lgr_list[0].kx
 
     # Assert
     assert kx_array.modifier == 'VALUE'
@@ -1997,14 +1997,14 @@ MOD
     model = NexusSimulator('testpath1/nexus_run.fcs')
     # Act
     result = model.grid
-    result_lgr = result.lgrs.lgrs[0]
+    result_lgr = result.lgrs.lgr_list[0]
     result_iregion = result_lgr.iregion['IREG1']
 
     # Assert
     pd.testing.assert_frame_equal(result_lgr.kx.mods['MOD'], expected_lgr.kx.mods['MOD'])
     assert result_lgr.kx.value == expected_lgr.kx.value
     assert result_lgr.kx.modifier == expected_lgr.kx.modifier
-    assert len(result.lgrs.lgrs) == 1
+    assert len(result.lgrs.lgr_list) == 1
     assert result_iregion.value == expected_lgr._iregion['IREG1'].value
     assert result_iregion.modifier == expected_lgr._iregion['IREG1'].modifier
     pd.testing.assert_frame_equal(result_iregion.mods['MOD'], expected_lgr._iregion['IREG1'].mods['MOD'])
@@ -2090,14 +2090,14 @@ INCLUDE iregion_mod.mod
     model = NexusSimulator('testpath1/nexus_run.fcs')
     # Act
     result = model.grid
-    result_lgr = result.lgrs.lgrs[0]
+    result_lgr = result.lgrs.lgr_list[0]
     result_iregion = result_lgr.iregion['IREG1']
 
     # Assert
     pd.testing.assert_frame_equal(result_lgr.kx.mods['MOD'], expected_lgr.kx.mods['MOD'])
     assert result_lgr.kx.value == expected_lgr.kx.value
     assert result_lgr.kx.modifier == expected_lgr.kx.modifier
-    assert len(result.lgrs.lgrs) == 1
+    assert len(result.lgrs.lgr_list) == 1
     assert result_iregion.value == expected_lgr._iregion['IREG1'].value
     assert result_iregion.modifier == expected_lgr._iregion['IREG1'].modifier
     pd.testing.assert_frame_equal(result_iregion.mods['MOD'], expected_lgr._iregion['IREG1'].mods['MOD'])
@@ -2236,7 +2236,7 @@ INCLUDE permx_array.dat
 
     # Assert
     _ = nexus_model.grid.kx
-    ipvt_mods = nexus_model.grid.lgrs.lgrs[0].ipvt.mods
+    ipvt_mods = nexus_model.grid.lgrs.lgr_list[0].ipvt.mods
     ipvt_mods = ipvt_mods['MOD'] if ipvt_mods is not None else None
     if expected_ipvt_mod is not None:
         pd.testing.assert_frame_equal(ipvt_mods, expected_ipvt_mod)
