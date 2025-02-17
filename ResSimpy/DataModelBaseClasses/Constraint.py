@@ -55,6 +55,7 @@ class Constraint(DataObjectMixin, ABC):
     max_lgr_perf: Optional[float] = None
     max_lgr_perfplus: Optional[float] = None
     convert_qmult_to_reservoir_barrels: Optional[bool] = None
+    active_node: Optional[bool] = None
 
     @property
     def units(self) -> ConstraintUnits:
