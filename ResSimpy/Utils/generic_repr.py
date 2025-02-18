@@ -1,13 +1,14 @@
 """Creates a repr for data objects that removes attributes that are None from the representation."""
-from typing import Any
+from typing import Any, Optional
 
 
-def generic_repr(input_class: Any) -> str:
+def generic_repr(input_class: Any, exclude_attributes: Optional[list[str]] = None) -> str:
     """Creates a prettier object representation while removing attributes that are None from that representation.
 
     Args:
     ----
         input_class (Any): a class with attributes to summarise
+        exclude_attributes (list[str]): a list of attributes to exclude. Defaults to None.
 
     Returns:
     -------
@@ -18,7 +19,9 @@ def generic_repr(input_class: Any) -> str:
     # Remove the leading underscores from the repr.
     sanitised_attrs = {}
     for key in filtered_attrs.keys():
-        if key == '_DataObjectMixin__id':
+        if exclude_attributes is not None and key in exclude_attributes:
+            continue
+        elif key == '_DataObjectMixin__id':
             sanitised_key = 'ID'
         elif key == '_DataObjectMixin__iso_date':
             sanitised_key = 'ISO_Date'

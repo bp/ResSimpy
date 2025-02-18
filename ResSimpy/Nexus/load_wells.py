@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Optional, Sequence, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from datetime import time, timedelta
 
 from ResSimpy.Time.ISODateTime import ISODateTime
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 
 def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem, parent_wells_instance: NexusWells,
-               model_date_format: DateFormat) -> tuple[Sequence[NexusWell], DateFormat]:
+               model_date_format: DateFormat) -> tuple[list[NexusWell], DateFormat]:
     """Loads a list of Nexus Well instances and populates it with the wells completions over time from a wells file.
 
     Args:
@@ -40,7 +40,7 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
 
     Returns:
         A tuple containing:
-        Sequence[NexusWell]: list of Nexus well classes contained within a wellspec file.
+        list[NexusWell]: list of Nexus well classes contained within a wellspec file.
         DateFormat: The date format found in the wellspec file if present, otherwise just the model date format.
     """
     date_format = model_date_format
@@ -137,8 +137,8 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
     header_index: int = -1
     wellspec_found: bool = False
     current_date: str = start_date
-    wells: list[NexusWell] = []
-    well_name_list: list[str] = []
+    wells: list[NexusWell] = [] if parent_wells_instance._wells is None else parent_wells_instance._wells
+    well_name_list: list[str] = [x.well_name.upper() for x in parent_wells_instance._wells]
 
     exclude_section: bool = False
 
