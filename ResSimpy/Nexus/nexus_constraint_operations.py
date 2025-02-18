@@ -49,7 +49,6 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
         properties_dict: dict[str, str | float | UnitSystem | None] = {'date': current_date, 'unit_system': unit_system}
         # first value in the line has to be the node/wellname
         name = get_next_value(0, [line])
-        nones_overwrite = False
         constraint_names_to_add: list[str] = []
         if name is None:
             continue
@@ -75,7 +74,6 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
             token_value = next_value.upper()
             if token_value in ['CLEAR', 'CLEARP', 'CLEARQ', 'CLEARLIMIT', 'CLEARALQ']:
                 properties_dict[nexus_keyword_to_attribute_name(constraint.get_keyword_mapping(), token_value)] = True
-                nones_overwrite = True
                 trimmed_line = trimmed_line.replace(next_value, "", 1)
                 next_value = get_next_value(0, [trimmed_line])
                 if next_value is None:
@@ -120,7 +118,7 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
             if well_constraints is not None:
                 latest_constraint = well_constraints[-1]
                 if latest_constraint.date == current_date:
-                    latest_constraint.update(properties_dict, nones_overwrite)
+                    latest_constraint.update(properties_dict, True)
                     nexus_file.add_object_locations(latest_constraint.id, [index + start_line_index])
                 else:
                     # otherwise take a copy of the previous constraint and add the additional properties
