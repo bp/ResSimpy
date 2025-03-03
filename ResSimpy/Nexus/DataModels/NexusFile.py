@@ -92,6 +92,12 @@ class NexusFile(File):
 
         for keyword in FCS_KEYWORDS:
             if nfo.check_token(line=line, token=keyword):
+                second_word = fo.get_nth_value(list_of_strings=[line], value_number=2, ignore_values=['NORPT'])
+
+                if second_word is not None and second_word.upper() != 'METHOD':
+                    # We found a keyword not related to an included file. Therefore don't modify it.
+                    continue
+
                 original_file_path = fo.get_nth_value(list_of_strings=[line], value_number=4, ignore_values=['NORPT'])
                 if original_file_path is not None and not os.path.isabs(original_file_path):
                     full_base_directory = os.path.dirname(full_base_file_path)
