@@ -2360,6 +2360,7 @@ def test_load_fcs_file_multires_throws_error(mocker):
     ('SEPARATOR method 1 my_file.dat', os.path.join('SEPARATOR method 1 /path/to', 'my_file.dat')),
     ('OTHER method 1 my_file.dat', 'OTHER method 1 my_file.dat'),
     ('EQUIL method 1 /absolute/path/to/my_file.dat', 'EQUIL method 1 /absolute/path/to/my_file.dat'),
+    ('EQUIL other 1     my_file.dat', 'EQUIL other 1     my_file.dat'),
 ])
 def test_convert_line_to_full_file_path(original_line: str, expected_line: str):
     """Testing the functionality to retrieve equilibration methods from Nexus include files."""
