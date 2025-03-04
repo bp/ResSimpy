@@ -62,7 +62,7 @@ def expand_string_list_of_numbers(s: str) -> str:
 
 
 def is_number(s: str) -> float:
-    """Function that checks for floats, numbers and scientific notation to see if it can be converted to a float
+    """Function that checks for floats, numbers and scientific notation to see if it can be converted to a float.
 
     Args:
         s (str): String input to check
