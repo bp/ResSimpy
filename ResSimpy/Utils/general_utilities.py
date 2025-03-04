@@ -79,5 +79,3 @@ def is_number(s: str) -> float:
         return float(s)
     except ValueError:
         return None
-
-

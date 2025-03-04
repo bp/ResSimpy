@@ -28,6 +28,7 @@ import os
 from datetime import datetime, timezone
 from ResSimpy.Utils.general_utilities import is_number
 
+
 @dataclass(kw_only=True, repr=False)
 class NexusFile(File):
     """Class to deal with origin and structure of Nexus files and preserve origin of include files.
@@ -310,7 +311,7 @@ class NexusFile(File):
         )
 
         return nexus_file_class
-    
+
     @dataclass
     class FileIndex:
         """Class to store the index when iterating over a list of strings with nested NexusFile objects in them.
