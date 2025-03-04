@@ -73,9 +73,9 @@ def is_number(s: str) -> float:
     s = s.strip()
 
     if not (s.lstrip('-+').replace('.', '', 1).isnumeric()):
-        return None
+        return float('nan')
 
     try:
         return float(s)
     except ValueError:
-        return None
+        return float('nan')
