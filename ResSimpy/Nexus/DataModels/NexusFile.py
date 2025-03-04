@@ -26,7 +26,7 @@ from ResSimpy.FileOperations.File import File
 import pathlib
 import os
 from datetime import datetime, timezone
-
+from ResSimpy.Utils.general_utilities import is_number
 
 @dataclass(kw_only=True, repr=False)
 class NexusFile(File):
@@ -267,7 +267,7 @@ class NexusFile(File):
                         split_line = nfo.split_line(inc_file_line, upper=False)
                         # check if it is numeric data
                         # this won't work if the array has scientific notation.
-                        if any(not x.lstrip('-+').replace('.', '', 1).isnumeric() for x in split_line):
+                        if any(is_number(x) is None for x in split_line):
                             # don't set skip_next_include if the line is not entirely numeric
                             all_numeric = False
                             break
@@ -310,7 +310,7 @@ class NexusFile(File):
         )
 
         return nexus_file_class
-
+    
     @dataclass
     class FileIndex:
         """Class to store the index when iterating over a list of strings with nested NexusFile objects in them.

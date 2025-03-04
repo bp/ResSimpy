@@ -7,7 +7,7 @@ import pytest
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Utils import to_dict_generic
-from ResSimpy.Utils.general_utilities import expand_string_list_of_numbers, convert_to_number
+from ResSimpy.Utils.general_utilities import expand_string_list_of_numbers, convert_to_number, is_number
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Utils.invert_nexus_map import invert_nexus_map, attribute_name_to_nexus_keyword, \
     nexus_keyword_to_attribute_name
@@ -35,11 +35,11 @@ class GenericTest:
             'ATTR_3': ('attr_3', float),
             'ATTR_4': ('attr_4', str),
             'ATTR_5': ('attr_5', str)
-            }
+        }
         return mapping_dict
 
     def to_dict(self, include_nones=True, add_iso_date=True):
-        return to_dict_generic.to_dict(self, add_date=True, add_units=True, include_nones=include_nones, 
+        return to_dict_generic.to_dict(self, add_date=True, add_units=True, include_nones=include_nones,
                                        add_iso_date=add_iso_date)
 
     def __repr__(self):
@@ -54,8 +54,8 @@ def test_to_dict():
     class_inst = GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=UnitSystem.METRIC,
                              date='01/01/2030')
     expected = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'attr_4': None, 'unit_system': 'METRIC',
-                'date': '01/01/2030', 'attr_5': 'asdj',}
-    expected_no_date_no_units = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'attr_4': None, 'attr_5': 'asdj',}
+                'date': '01/01/2030', 'attr_5': 'asdj', }
+    expected_no_date_no_units = {'attr_1': 'hello', 'attr_2': 10, 'attr_3': 43020.2, 'attr_4': None, 'attr_5': 'asdj', }
     expected_nexus_style = {
         'ATTR_1': 'hello', 'ATTR_2': 10, 'ATTR_3': 43020.2, 'unit_system': 'METRIC',
         'date': '01/01/2030', 'ATTR_4': None, 'ATTR_5': 'asdj',
@@ -80,7 +80,7 @@ def test_to_dict():
 def test_obj_to_dataframe():
     # Arrange
     class_inst_1 = GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=UnitSystem.METRIC,
-                               date='01/01/2030', 
+                               date='01/01/2030',
                                )
     class_inst_2 = GenericTest(attr_1='world', attr_2=2, attr_3=2.2, unit_system=UnitSystem.ENGLISH,
                                date='01/01/2033')
@@ -103,15 +103,17 @@ def test_obj_to_dataframe():
 def test_generic_repr_str(mocker):
     # Arrange
     mocker.patch('uuid.uuid4', return_value='uuid1')
-    class_inst = GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=UnitSystem.METRIC, date='01/01/2030',
+    class_inst = GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=UnitSystem.METRIC,
+                             date='01/01/2030',
                              attr_4='world')
     # mock out id
 
-    expected_repr = ("GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=<UnitSystem.METRIC: 'METRIC'>, "
-                     "date='01/01/2030', attr_4='world', GenericTest__id='uuid1')")
-    
+    expected_repr = (
+        "GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=<UnitSystem.METRIC: 'METRIC'>, "
+        "date='01/01/2030', attr_4='world', GenericTest__id='uuid1')")
+
     expected_str = ("GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=<UnitSystem.METRIC: 'METRIC'>, "
-                     "date='01/01/2030', attr_4='world', attr_5='asdj')")
+                    "date='01/01/2030', attr_4='world', attr_5='asdj')")
     # Act Assert
     assert repr(class_inst) == expected_repr
     assert str(class_inst) == expected_str
@@ -192,10 +194,11 @@ def test_nexus_keyword_to_attribute_name():
     # not in attributes
     (['ATTR_1', 'ATTR_NOT_VALID', 'ATTR_1', 'ATTR_4'],
      None),
-    ], ids=['basic', 'repeated + No value to NA', 'not in attributes'])
+], ids=['basic', 'repeated + No value to NA', 'not in attributes'])
 def test_to_string_generic(mocker, headers, expected_result):
     # Arrange
-    test_object = GenericTest(attr_1='name', attr_2=10, attr_3=3.14, attr_4=None, date='01/01/2020', unit_system=UnitSystem.ENGLISH)
+    test_object = GenericTest(attr_1='name', attr_2=10, attr_3=3.14, attr_4=None, date='01/01/2020',
+                              unit_system=UnitSystem.ENGLISH)
 
     # Act
     if expected_result is None:
@@ -217,7 +220,7 @@ def test_to_string_generic(mocker, headers, expected_result):
     # no repeats
     ('1 2 3 4 5',
      '1 2 3 4 5')
-    ], ids=['string_with_repeats', 'no_repeats'])
+], ids=['string_with_repeats', 'no_repeats'])
 def test_expand_string_list_of_numbers(input_string, expected_result):
     # Arrange
 
@@ -239,3 +242,17 @@ def test_convert_to_number_error():
 
     # Assert
     assert str(error.value) == expected_error_msg
+
+
+@pytest.mark.parametrize('input_string, expected', [
+    # string with scientific notation, floats and integers
+    ('3', 3.0),
+    ('-3', -3),
+    ('-3.3', -3.3),
+])
+def test_is_number(input_string, expected):
+    # Act
+    result = is_number(input_string)
+
+    # Assert
+    assert result == expected

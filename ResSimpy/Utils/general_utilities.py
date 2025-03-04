@@ -38,7 +38,7 @@ def convert_to_number(x: str) -> int | float:
 
 
 def expand_string_list_of_numbers(s: str) -> str:
-    """Function thats a string of numbers with repeats such as 1 2 3*4 5 and expands it appropriately into 1 2 4 4 4 5.
+    """Function that's a string of numbers with repeats such as 1 2 3*4 5 and expands it appropriately into 1 2 4 4 4 5.
 
     Args:
         s (str): Input string of numbers with repeats, e.g., 1 2 3*4 5
@@ -59,3 +59,25 @@ def expand_string_list_of_numbers(s: str) -> str:
         s = s.replace(f'{count}*{str_value}', expanded)
 
     return s
+
+
+def is_number(s: str) -> float:
+    """Function that checks for floats, numbers and scientific notation to see if it can be converted to a float
+
+    Args:
+        s (str): String input to check
+
+    Returns:
+       float: converts string to a float
+    """
+    s = s.strip()
+
+    if not (s.lstrip('-+').replace('.', '', 1).isnumeric()):
+        return None
+
+    try:
+        return float(s)
+    except ValueError:
+        return None
+
+
