@@ -246,9 +246,23 @@ def test_convert_to_number_error():
 
 @pytest.mark.parametrize('input_string, expected', [
     # string with scientific notation, floats and integers
-    ('3', 3.0),
-    ('-3', -3),
-    ('-3.3', -3.3),
+    ('3', True),
+    ('-3', True),
+    ('-3.3', True),
+    ('1e3', True),
+    ('1E3', True),
+    ('2E+4', True),
+    ('-2e+4', True),
+    ('1e-300', True),
+    ('-0.0', True),
+
+    #False cases
+    ('--3.3', False),
+    ('12..34', False),
+    ('+-123.45', False),
+    ('e123', False),
+    ('abc', False),
+    ('', False),
 ])
 def test_is_number(input_string, expected):
     # Act

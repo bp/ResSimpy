@@ -61,21 +61,27 @@ def expand_string_list_of_numbers(s: str) -> str:
     return s
 
 
-def is_number(s: str) -> float:
-    """Function that checks for floats, numbers and scientific notation to see if it can be converted to a float.
+def is_number(s: str) -> bool:
+    """Function that checks for floats, numbers and scientific notation to see if it can be converted to a float
 
     Args:
         s (str): String input to check
 
     Returns:
-       float: converts string to a float
+        bool: True if string can be converted into float
     """
-    s = s.strip()
 
-    if not (s.lstrip('-+').replace('.', '', 1).isnumeric()):
-        return float('nan')
+    #s = s.strip()
+
+    # The following logic does not handle scientific notation
+    #if not (s.strip('-+').replace('.', '', 1).isnumeric()):
+
+    # return False
 
     try:
-        return float(s)
+        float(s)
+        return True
     except ValueError:
-        return float('nan')
+        return False
+
+
