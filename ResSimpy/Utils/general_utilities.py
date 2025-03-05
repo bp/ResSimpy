@@ -71,12 +71,11 @@ def is_number(s: str) -> bool:
         bool: True if string can be converted into float
     """
 
-    # s = s.strip()
-
-    # The following logic does not handle scientific notation
-    # if not (s.strip('-+').replace('.', '', 1).isnumeric()):
-
-    # return False
+    # The below docstring is the original function which does not handle scientific notation.
+    """ s = s.strip()
+    if not (s.strip('-+').replace('.', '', 1).isnumeric()):
+    return False
+    """
 
     try:
         float(s)
