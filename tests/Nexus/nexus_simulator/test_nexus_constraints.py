@@ -3,6 +3,7 @@ import pandas as pd
 import pytest
 from pytest_mock import MockerFixture
 
+from ResSimpy.DataModelBaseClasses.OperationsMixin import NetworkOperationsMixIn
 from ResSimpy.Time.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
@@ -608,3 +609,80 @@ def test_load_constraints_welllist(mocker: MockerFixture):
     # Assert
     assert result['well_1'] == [well_1_expected_constraint_1, well_1_expected_constraint_2]
     assert result['well_2'] == [well_2_expected_constraint_1, well_2_expected_constraint_2]
+
+
+def test_load_constraints_deactivated_then_activated_differently(mocker: MockerFixture):
+    # Arrange
+    fcs_file_contents = '''
+         RUN_UNITS ENGLISH
+         DATEFORMAT DD/MM/YYYY
+         RECURRENT_FILES
+         RUNCONTROL /nexus_data/runcontrol.dat
+         SURFACE Network 1  /surface_file_01.dat
+         Wells Set 1 /wells.dat
+         '''
+    runcontrol_contents = '''START 24/09/2021'''
+
+    surface_file_contents = """
+WELLS
+NAME    STREAM    IBAT    IPVT
+well_1  PRODUCER    1    1
+ENDWELLS
+
+CONSTRAINTS
+well_1 DEACTIVATE
+ENDCONSTRAINTS
+
+CONSTRAINTS
+    well_1	 QWSMAX 1234
+ENDCONSTRAINTS
+
+TIME 25/07/2026
+ACTIVATE
+CONNECTION
+well_1
+ENDACTIVATE
+
+TIME 26/07/2026
+CONSTRAINTS
+    well_1	 QWSMAX 4321
+ENDCONSTRAINTS
+
+"""
+    wellspec_file_contents = """
+        WELLSPEC well_1
+        IW JW L RADW KHMULT SKIN
+        1  2  3  4.5 NA 00.00
+    """
+
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            '/path/fcs_file.fcs': fcs_file_contents,
+            '/surface_file_01.dat': surface_file_contents,
+            '/nexus_data/runcontrol.dat': runcontrol_contents,
+            '/wells.dat': wellspec_file_contents}
+                                        ).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+    nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
+
+    well_1_expected_constraint_0 = NexusConstraint(date='24/09/2021', start_date='24/09/2021', name='well_1',
+                                                   active_node=False, date_format=DateFormat.DD_MM_YYYY,
+                                                   unit_system=UnitSystem.ENGLISH, max_surface_water_rate=1234.0)
+
+    well_1_expected_constraint_1 = NexusConstraint(date='26/07/2026', start_date='24/09/2021', name='well_1',
+                                                   active_node=None, max_surface_water_rate=4321,
+                                                   date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH)
+
+    # Act
+    constraints = nexus_sim.network.constraints.get_all()['well_1']
+    result = NetworkOperationsMixIn.resolve_same_named_objects_constraints(constraints)
+    ordered_result = sorted(result, key=lambda x: x.iso_date)
+
+    # Assert
+    assert len(ordered_result) == 2
+    assert ordered_result[0] == well_1_expected_constraint_0
+    assert ordered_result[1] == well_1_expected_constraint_1
