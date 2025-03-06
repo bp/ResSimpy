@@ -225,7 +225,7 @@ class NetworkOperationsMixIn(ABC):
                 setattr(last_resolved_copy, clear_attr, None)
 
             skip_attributes = ['id', 'date', 'name', 'iso_date', 'clear_q', 'clear_p', 'clear_limit', 'clear_alq',
-                               'clear_all', 'convert_qmult_to_reservoir_barrels']
+                               'clear_all', 'convert_qmult_to_reservoir_barrels', 'active_node']
             for attr, value in last_resolved_copy.__dict__.items():
                 if value is None or attr in skip_attributes:
                     continue
