@@ -1098,6 +1098,7 @@ def test_get_all(mocker: MockerFixture, fcs_file_contents: str):
                                    ['\n', '       WelLS sEt 1 my/wellspec/file.dat\n', '    '])
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
+    simulation.model_files.surface_files = {}
 
     # Act
     result = simulation.wells.get_all()
@@ -1142,6 +1143,7 @@ def test_get_wells_windows(mocker: MockerFixture, fcs_file_contents: str):
                                    ['\n', '       WelLS sEt 1 my\wellspec\file.dat\n', '    '])
 
     simulation = NexusSimulator(origin='path\nexus_run.fcs')
+    simulation.model_files.surface_files = {}
 
     # Act
     result = simulation.wells.get_all()
@@ -1185,8 +1187,11 @@ def test_get_df(mocker: MockerFixture):
     mock_load_wells = mocker.Mock(return_value=(loaded_wells, ''))
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
     simulation = NexusSimulator(origin='nexus_run.fcs')
+    simulation.model_files.surface_files = {}
+
     # Act
     result = simulation.wells.get_df()
+
     # Assert
 
     pd.testing.assert_frame_equal(result, loaded_wells_df, check_like=True)
@@ -1227,6 +1232,7 @@ def test_get(mocker: MockerFixture, fcs_file_contents: str):
                                    ['\n', '       WelLS set 1 my/wellspec/file.dat\n', '    '])
 
     simulation = NexusSimulator(origin='path/nexus_run.fcs')
+    simulation.model_files.surface_files = {}
 
     # Act
     result = simulation.wells.get(well_name='WELL2')
@@ -1274,6 +1280,7 @@ def test_get_well_windows(mocker: MockerFixture, fcs_file_contents: str):
                                    ['\n', '       WelLS set 1 my\\wellspec\\file.dat\n', '    '])
 
     simulation = NexusSimulator(origin='path\\nexus_run.fcs')
+    simulation.model_files.surface_files = {}
 
     # Act
     result = simulation.wells.get(well_name='WELL2')
@@ -2360,6 +2367,7 @@ def test_load_fcs_file_multires_throws_error(mocker):
     ('SEPARATOR method 1 my_file.dat', os.path.join('SEPARATOR method 1 /path/to', 'my_file.dat')),
     ('OTHER method 1 my_file.dat', 'OTHER method 1 my_file.dat'),
     ('EQUIL method 1 /absolute/path/to/my_file.dat', 'EQUIL method 1 /absolute/path/to/my_file.dat'),
+    ('EQUIL other 1     my_file.dat', 'EQUIL other 1     my_file.dat'),
 ])
 def test_convert_line_to_full_file_path(original_line: str, expected_line: str):
     """Testing the functionality to retrieve equilibration methods from Nexus include files."""

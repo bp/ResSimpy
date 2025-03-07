@@ -26,6 +26,7 @@ from ResSimpy.FileOperations.File import File
 import pathlib
 import os
 from datetime import datetime, timezone
+from ResSimpy.Utils.general_utilities import is_number
 
 
 @dataclass(kw_only=True, repr=False)
@@ -92,6 +93,12 @@ class NexusFile(File):
 
         for keyword in FCS_KEYWORDS:
             if nfo.check_token(line=line, token=keyword):
+                second_word = fo.get_nth_value(list_of_strings=[line], value_number=2, ignore_values=['NORPT'])
+
+                if second_word is not None and second_word.upper() != 'METHOD':
+                    # We found a keyword not related to an included file. Therefore don't modify it.
+                    continue
+
                 original_file_path = fo.get_nth_value(list_of_strings=[line], value_number=4, ignore_values=['NORPT'])
                 if original_file_path is not None and not os.path.isabs(original_file_path):
                     full_base_directory = os.path.dirname(full_base_file_path)
@@ -267,7 +274,7 @@ class NexusFile(File):
                         split_line = nfo.split_line(inc_file_line, upper=False)
                         # check if it is numeric data
                         # this won't work if the array has scientific notation.
-                        if any(not x.lstrip('-+').replace('.', '', 1).isnumeric() for x in split_line):
+                        if any(not is_number(x) for x in split_line):
                             # don't set skip_next_include if the line is not entirely numeric
                             all_numeric = False
                             break

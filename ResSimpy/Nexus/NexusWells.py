@@ -128,6 +128,8 @@ class NexusWells(Wells):
             self._wells = wells
             self.__date_format = date_format
         self._wells_loaded = True
+        # Ensure the newly added wells have additional information populated from the surface file.
+        self.model.network.get_load_status()
 
     def modify(self, well_name: str, completion_properties_list: list[dict[str, None | float | int | str]],
                how: OperationEnum = OperationEnum.ADD) -> None:

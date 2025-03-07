@@ -791,6 +791,7 @@ def test_wells_modify(mocker):
     mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
 
     nexus_sim = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='fcs_file.fcs', mock_open=False)
+    nexus_sim.model_files.surface_files = {}
 
     well_1_completions = [
         NexusCompletion(date='01/01/2023', i=1, j=2, k=3, skin=None, well_radius=4.5, angle_v=None, grid='GRID1',
@@ -1025,6 +1026,7 @@ def test_add_completion_write(mocker, file_as_list, add_perf_date,
 
     # add the required attributes to the model class
     fake_nexus_sim.model_files.well_files = {1: file}
+    fake_nexus_sim.model_files.surface_files = {}
     fake_nexus_sim.date_format = DateFormat.DD_MM_YYYY
     fake_nexus_sim._sim_controls.date_format_string = "%d/%m/%Y"
     fake_nexus_sim.start_date = start_date
@@ -1071,6 +1073,7 @@ def test_add_completion_correct_wellspec(mocker, date_format):
 
     # add the required attributes to the model class
     mock_nexus_sim.model_files.well_files = {1: file_1, 2: file_2, 3: file_target}
+    mock_nexus_sim.model_files.surface_files = {}
     mock_nexus_sim.date_format = DateFormat.DD_MM_YYYY
     mock_nexus_sim._sim_controls.date_format_string = "%d/%m/%Y"
     mock_nexus_sim.start_date = start_date
@@ -1168,6 +1171,7 @@ def test_add_completion_include_files(mocker, fcs_file_contents, wells_file,
     mocker.patch("builtins.open", mock_open_wrapper)
 
     mock_nexus_sim = get_fake_nexus_simulator(mocker=mocker, fcs_file_path=fcs_file_path, mock_open=False)
+    mock_nexus_sim.model_files.surface_files = {}
 
     mock_nexus_sim.start_date = start_date
     # mock out open
@@ -1313,6 +1317,7 @@ IW JW L RADW SKIN PPERF
     mocker.patch("builtins.open", mock_open_wrapper)
 
     model = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='fcs_file.dat', mock_open=False)
+    model.model_files.surface_files = {}
 
     add_perf_date = '01/02/2020'
 
@@ -1405,6 +1410,7 @@ def test_object_locations_updating(mocker, well_file_data, expected_uuid):
     mocker.patch("builtins.open", mock_open_wrapper)
 
     model = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='fcs_file.dat', mock_open=False)
+    model.model_files.surface_files = {}
 
     add_perf_date = '01/01/2020'
 

@@ -3,6 +3,8 @@ import warnings
 import pytest
 from pytest_mock import MockerFixture
 
+from ResSimpy import NexusSimulator
+from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusRelPermEndPoint import NexusRelPermEndPoint
@@ -690,12 +692,15 @@ def test_load_full_model_with_wells(mocker: MockerFixture, first_line_wellspec,
     IW JW L RADW
     1  2  3  4.5"""
 
-    fcs_file_contents = f"{first_line_fcs_file} \n WELLS Set 1 data/wells.dat\n"
+    surface_contents = ""
+
+    fcs_file_contents = f"{first_line_fcs_file} \n WELLS Set 1 data/wells.dat\n SURFACE Network 1 data/surface.dat"
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             'model.fcs': fcs_file_contents,
-            'data/wells.dat': wellspec_contents
+            'data/wells.dat': wellspec_contents,
+            'data/surface.dat': surface_contents
         }).return_value
         return mock_open
 
@@ -1211,6 +1216,7 @@ WELLS set 1 wells.dat"""
     mocker.patch("builtins.open", mock_open_wrapper)
 
     nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='model.fcs', mock_open=False)
+    nexus_sim.model_files.surface_files = {}
 
     mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4',
                  side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
@@ -1369,3 +1375,74 @@ IW JW L KH RADW SKIN RADB WI STAT LENGTH ANGLV ANGLA
     assert result_wells[2].completions[0] == expected_completion_3
     assert result_wells[3].well_name == 'well4'
     assert result_wells[3].completions[0] == expected_completion_4
+
+
+@pytest.mark.parametrize('stream_text, expected_well_type', [
+    ('WATER', WellType.WATER_INJECTOR),
+    ('PRODUCER', WellType.PRODUCER),
+    ('GAS', WellType.GAS_INJECTOR),
+    ('OIL', WellType.OIL_INJECTOR),
+])
+def test_load_wells_gives_correct_well_type(mocker: MockerFixture, stream_text: str, expected_well_type: WellType):
+    input_run_control = "DATEFORMAT DD/MM/YYYY\n START 25/07/2026"
+    input_nexus_fcs_file = """DATEFORMAT DD/MM/YYYY
+    RECURRENT_FILES
+    RUNCONTROL /path/to/run_control.dat
+    WELLS set 1 /path/to/wells.dat
+    SURFACE Network 1  /surface_file_01.dat
+    """
+
+    surface_file_contents = f"""
+WELLS
+NAME    STREAM
+well_1  {stream_text}
+ENDWELLS
+
+TIME 26/07/2026
+ACTIVATE
+CONNECTION
+well_1
+ENDACTIVATE
+
+TIME 27/07/2026
+CONSTRAINTS
+well_1 QWSMAX 1234
+ENDCONSTRAINTS
+
+"""
+
+    wellspec_file = """
+        WELLSPEC well_1
+        IW JW L RADW
+        1  2  3  4.5
+    """
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            '/path/to/nexus/fcsfile.fcs': input_nexus_fcs_file,
+            '/path/to/run_control.dat': input_run_control,
+            '/path/to/wells.dat': wellspec_file,
+            '/surface_file_01.dat': surface_file_contents}).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    dummy_model = get_fake_nexus_simulator(mocker=mocker, mock_open=False)
+    dummy_wells = NexusWells(dummy_model)
+    expected_completion_1 = NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='25/07/2026',
+                                            date_format=DateFormat.DD_MM_YYYY, start_date='25/07/2026')
+    expected_completions = [expected_completion_1]
+    expected_well_1 = NexusWell(well_name='well_1', well_type=expected_well_type, completions=expected_completions,
+                                parent_wells_instance=dummy_wells, unit_system=UnitSystem.ENGLISH)
+    expected_wells = [expected_well_1]
+
+    listdir_mock = mocker.Mock(return_value=[])
+    mocker.patch("os.listdir", listdir_mock)
+    mocker.patch("os.path.isfile", lambda x: True)
+
+    # Act
+    nexus_model = NexusSimulator(origin='/path/to/nexus/fcsfile.fcs')
+    result = nexus_model.wells.wells
+
+    # Assert
+    assert result == expected_wells
