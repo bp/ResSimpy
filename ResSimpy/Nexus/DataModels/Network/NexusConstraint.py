@@ -403,7 +403,6 @@ class NexusConstraint(Constraint):
         self.max_choke_setting = max_choke_setting
         self.min_gas_lift_efficiency = min_gas_lift_efficiency
         self.gl_additive_correction = gl_additive_correction
-        self.active_node = active_node
         self.pump_power = pump_power
         self.pump_speed = pump_speed
         self.choke_limit = choke_limit
@@ -434,7 +433,7 @@ class NexusConstraint(Constraint):
                          max_gor_perfplus=max_gor_perfplus, max_lgr=max_lgr, max_lgr_plug=max_lgr_plug,
                          max_lgr_plug_plus=max_lgr_plug_plus, max_lgr_perf=max_lgr_perf,
                          max_lgr_perfplus=max_lgr_perfplus,
-                         convert_qmult_to_reservoir_barrels=convert_qmult_to_reservoir_barrels)
+                         convert_qmult_to_reservoir_barrels=convert_qmult_to_reservoir_barrels, active_node=active_node)
 
         if date is None and properties_dict is not None:
             if 'date' not in properties_dict or not isinstance(properties_dict['date'], str):
