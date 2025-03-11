@@ -22,7 +22,7 @@ class WellConnection(NetworkObject, ABC):
     inner_diameter: Optional[float] = None
     productivity_index: Optional[float] = None
     hyd_method: Optional[str] = None
-    crossflow: Optional[bool] = None
+    crossflow: Optional[str] = None
     crossshut: Optional[str] = None
     inj_mobility: Optional[str] = None
     polymer: Optional[str] = None
@@ -38,7 +38,7 @@ class WellConnection(NetworkObject, ABC):
     def __init__(self, properties_dict: Optional[dict[str, None | int | str | float]] = None,
                  date: Optional[str] = None, date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None, name: Optional[str] = None,
-                 datum_depth: Optional[float] = None, crossflow: Optional[bool] = None, crossshut: Optional[str] = None,
+                 datum_depth: Optional[float] = None, crossflow: Optional[str] = None, crossshut: Optional[str] = None,
                  inj_mobility: Optional[str] = None, polymer: Optional[str] = None, stream: Optional[str] = None,
                  group: Optional[str] = None, i: Optional[int] = None, j: Optional[int] = None,
                  drainage_radius: Optional[float] = None, pvt_method: Optional[int] = None,
@@ -57,7 +57,7 @@ class WellConnection(NetworkObject, ABC):
             unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
             name (Optional[str]): The name of the object.
             crossshut (Optional[str]): Cross-shut identifier.
-            crossflow (Optional[bool]): Crossflow identifier.
+            crossflow (Optional[str]): Crossflow identifier.
             d_factor (Optional[float]): Non-Darcy D-factor (D).
             datum_depth (Optional[float]): Depth relative to a datum.
             drainage_radius (Optional[float]): The drainage radius.
