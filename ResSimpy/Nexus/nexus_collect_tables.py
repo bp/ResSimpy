@@ -1,6 +1,7 @@
 """Functions for collecting tables from a Nexus file to populate Nexus objects."""
 from __future__ import annotations
 
+import copy
 import fnmatch
 from datetime import timedelta, time
 from typing import Any, Optional
@@ -8,7 +9,7 @@ from typing import Any, Optional
 import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.FileOperations.File import File
-from ResSimpy.FileOperations.file_operations import get_next_value
+from ResSimpy.FileOperations.file_operations import get_next_value, get_expected_token_value
 from ResSimpy.Nexus.DataModels.Network.NexusActivationChange import NexusActivationChange
 from ResSimpy.Nexus.DataModels.Network.NexusConLists import NexusConLists
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
@@ -67,6 +68,8 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
     is_activate_block = False
     is_actions_block = False
     is_constraints_block = False
+    default_crossflow: Optional[str] = None
+    default_shutin: Optional[str] = None
     for index, line in enumerate(file_as_list):
         # check for changes in unit system
         check_property_in_line(line, property_dict, file_as_list)
@@ -132,6 +135,16 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                     else:
                         current_date = new_datetime.strftime('%m/%d/%Y(%H:%M:%S)')
             continue
+        if check_token(token='CROSSFLOW', line=line) and table_start == -1:
+            crossflow_value = get_expected_token_value(token='CROSSFLOW', token_line=line,
+                                                       file_list=file_as_list[index:])
+            default_crossflow = crossflow_value
+        if check_token(token='SHUTINON', line=line) and table_start == -1:
+            default_shutin = 'ON'
+        if check_token(token='SHUTINOFF', line=line) and table_start == -1:
+            default_shutin = 'OFF'
+        if check_token(token='SHUTIN_CELLGRAD', line=line) and table_start == -1:
+            default_shutin = 'CELLGRAD'
         if table_start < 0:
             token_found = check_list_tokens(list(table_object_map.keys()), line)
             if token_found is None or check_token('WELLCONTROL', line):
@@ -251,7 +264,23 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
             table_start = -1
             table_end = -1
             token_found = None
+
+        if 'GASWELLS' in nexus_object_results.keys():
+            __apply_default_values(nexus_object_results=nexus_object_results, default_crossflow=default_crossflow,
+                                   default_shutin=default_shutin)
+            
     return nexus_object_results, nexus_constraints
+
+
+def __apply_default_values(nexus_object_results: dict[str, list[Any]], default_crossflow: Optional[bool],
+                           default_shutin: Optional[str]) -> None:
+    """Applies the values for Crossflow from the defaults if they aren't set separately in a table."""
+    all_connections = nexus_object_results['WELLS'] + nexus_object_results['GASWELLS']
+    for connection in all_connections:
+        if connection.crossflow is None:
+            connection.crossflow = default_crossflow
+        if connection.crossshut is None:
+            connection.crossshut = default_shutin
 
 
 def __activate_deactivate_checks(line: str, is_activate_block: bool,

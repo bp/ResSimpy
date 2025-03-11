@@ -78,8 +78,6 @@ class NexusWellConnection(WellConnection):
     elevation_profile: Optional[str] = None
     temperature_profile: Optional[str] = None
     inj_mobility: Optional[str] = None
-    crossshut: Optional[str] = None
-    crossflow: Optional[str] = None
     on_time: Optional[float] = None
     heat_transfer_coeff: Optional[float] = None
     well_index_mult: Optional[float] = None
@@ -203,8 +201,6 @@ class NexusWellConnection(WellConnection):
         self.elevation_profile = elevation_profile
         self.temperature_profile = temperature_profile
         self.inj_mobility = inj_mobility
-        self.crossshut = crossshut
-        self.crossflow = crossflow
         self.on_time = on_time
         self.heat_transfer_coeff = heat_transfer_coeff
         self.well_index_mult = well_index_mult
@@ -226,7 +222,8 @@ class NexusWellConnection(WellConnection):
                          properties_dict=properties_dict, bhdepth=bhdepth, datum_depth=datum_depth, x_pos=x_pos,
                          y_pos=y_pos, length=length, temperature=temperature, diameter=diameter, roughness=roughness,
                          inner_diameter=inner_diameter, productivity_index=productivity_index, hyd_method=hyd_method,
-                         group=group, i=i, j=j, drainage_radius=drainage_radius)
+                         group=group, i=i, j=j, drainage_radius=drainage_radius, crossflow=crossflow,
+                         crossshut=crossshut)
 
         if self.name is not None:
             self.bh_node_name = self.name + '%bh'

@@ -321,6 +321,7 @@ WELLS
       'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
      ),
 
+    # Pipegrad
     (''' TIME 02/10/2032
 METRIC
 WELLS
@@ -335,8 +336,119 @@ WELLS
       'date': '02/10/2032', 'unit_system': UnitSystem.METRIC, 'hyd_method': '1', 'con_type': 'PIPE'},
      {'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 4039.3, 'crossflow': 'OFF', 'crossshut': 'CALC',
       'date': '02/10/2032', 'unit_system': UnitSystem.METRIC, 'hyd_method': None, 'con_type': 'PIPEGRAD'},
-     )
-], ids=['Normal', 'Pipegrad'])
+     ),
+
+    # Default Crossflow
+    (''' TIME 02/10/2032
+METRIC
+
+CROSSFLOW ON
+
+WELLS
+  NAME    STREAM   NUMBER   DATUM 
+  prod   PRODUCER   94     4039.3 
+  inj   WATER      95     4039.3 
+    ENDWELLS
+''',
+     {'name': 'prod', 'stream': 'PRODUCER', 'number': 94, 'datum_depth': 4039.3, 'crossflow': 'ON',
+      'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
+     {'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 4039.3, 'crossflow': 'ON',
+      'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
+     ),
+
+
+    # Override Default Crossflow
+    (''' TIME 02/10/2032
+METRIC
+
+CROSSFLOW ON
+
+WELLS
+  NAME    STREAM   NUMBER   DATUM CROSSFLOW
+  prod   PRODUCER   94     4039.3 OFF
+  inj   WATER      95     4039.3  OFF
+    ENDWELLS
+''',
+     {'name': 'prod', 'stream': 'PRODUCER', 'number': 94, 'datum_depth': 4039.3, 'crossflow': 'OFF',
+      'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
+     {'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 4039.3, 'crossflow': 'OFF',
+      'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
+     ),
+
+    # Default Shutin on
+    (''' TIME 02/10/2032
+METRIC
+
+SHUTINON
+
+WELLS
+  NAME    STREAM   NUMBER   DATUM 
+  prod   PRODUCER   94     4039.3 
+  inj   WATER      95     4039.3 
+    ENDWELLS
+''',
+     {'name': 'prod', 'stream': 'PRODUCER', 'number': 94, 'datum_depth': 4039.3, 'crossshut': 'ON',
+      'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
+     {'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 4039.3, 'crossshut': 'ON',
+      'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
+     ),
+
+    # Default Shutin off
+    (''' TIME 02/10/2032
+METRIC
+
+SHUTINOFF
+
+WELLS
+  NAME    STREAM   NUMBER   DATUM 
+  prod   PRODUCER   94     4039.3 
+  inj   WATER      95     4039.3 
+    ENDWELLS
+''',
+     {'name': 'prod', 'stream': 'PRODUCER', 'number': 94, 'datum_depth': 4039.3, 'crossshut': 'OFF',
+      'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
+     {'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 4039.3, 'crossshut': 'OFF',
+      'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
+     ),
+
+    # Default shutin Cellgrad
+    (''' TIME 02/10/2032
+METRIC
+
+SHUTIN_CELLGRAD
+
+WELLS
+  NAME    STREAM   NUMBER   DATUM 
+  prod   PRODUCER   94     4039.3 
+  inj   WATER      95     4039.3 
+    ENDWELLS
+''',
+     {'name': 'prod', 'stream': 'PRODUCER', 'number': 94, 'datum_depth': 4039.3, 'crossshut': 'CELLGRAD',
+      'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
+     {'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 4039.3, 'crossshut': 'CELLGRAD',
+      'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
+     ),
+
+    # Override default crossflow and shutin
+    (''' TIME 02/10/2032
+METRIC
+
+CROSSFLOW OFF
+SHUTINOFF
+
+WELLS
+  NAME    STREAM   NUMBER   DATUM CROSS_SHUT CROSSFLOW
+  prod   PRODUCER   94     4039.3   CELLGRAD  OFF
+  inj   WATER      95     4039.3  ON   ON
+    ENDWELLS
+''',
+     {'name': 'prod', 'stream': 'PRODUCER', 'number': 94, 'datum_depth': 4039.3, 'crossshut': 'CELLGRAD',
+      'crossflow': 'OFF', 'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
+     {'name': 'inj', 'stream': 'WATER', 'number': 95, 'datum_depth': 4039.3, 'crossshut': 'ON',
+      'crossflow': 'ON', 'date': '02/10/2032', 'unit_system': UnitSystem.METRIC},
+     ),
+], ids=['Normal', 'Pipegrad', 'Default Crossflow', 'Crossflow override', 'Default shutin on', 'Default shutin off',
+        'Default shutin cellgrad', 'override both'])
 def test_load_well_connections(mocker, file_contents, well_connection_props1, well_connection_props2, ):
     # Arrange
     start_date = '01/01/2023'
