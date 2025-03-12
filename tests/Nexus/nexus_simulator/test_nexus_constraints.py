@@ -262,10 +262,29 @@ ENDCONSTRAINTS
        'max_surface_gas_rate': 204015021.2, 'active_node': True, 'unit_system': UnitSystem.ENGLISH,
        'min_pressure': 5.0},
       )),
+    
+    # two constraint tables 1 date same well
+    ('''TIME 01/04/2024
+
+CONSTRAINTS
+well1      ACTIVATE
+well1           DPBHAVG 10.24
+well1            QALLMAX NONE    QALLRMAX NONE   QOSMIN 25.2     QOSMAX 4000.49
+well1            QGSMAX 12222.26
+well1           WCUTMAX 0.90
+ENDCONSTRAINTS
+
+CONSTRAINTS
+well1           WCUTMAX 0.95
+ENDCONSTRAINTS
+''',
+     ({'date': '01/04/2024', 'name': 'well1', 'max_avg_comp_dp': 10.24, 'max_reservoir_total_fluids_rate': None,
+       'max_qmult_total_reservoir_rate': None, 'min_surface_oil_rate': 25.2, 'max_surface_oil_rate': 4000.49,
+       'max_surface_gas_rate': 12222.26, 'max_watercut': 0.95, 'active_node': True, 'unit_system': UnitSystem.ENGLISH},))
 ], ids=['basic_test', 'Change in Time', 'more Keywords', 'constraint table', 'multiple constraints on same well',
         'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword', 'GORLIM_drawdowncards',
         'MULT keyword with a number after it', 'loading in pressure', 'line continuation',
-        'line continuation with whitespace', 'QALLMAX None values'])
+        'line continuation with whitespace', 'QALLMAX None values',  'two constraint tables 1 date same well'])
 def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'
@@ -302,7 +321,7 @@ def test_load_constraints(mocker, file_contents, expected_content):
     expected_single_name_constraint = {'well1': expected_constraints['well1']}
     mock_nexus_network = mocker.MagicMock()
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
-    expected_df = pd.DataFrame(expected_content)
+    expected_df = pd.DataFrame([{k: v for k, v in x.items() if v is not None} for x in expected_content])
 
     mock_nexus_sim = get_fake_nexus_simulator(mocker)
 
