@@ -18,7 +18,7 @@ from ResSimpy.Nexus.NexusEnums.ActivationChangeEnum import ActivationChangeEnum
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.nexus_constraint_operations import load_inline_constraints
 from ResSimpy.Nexus.nexus_file_operations import check_property_in_line, check_token, check_list_tokens, \
-                                                 load_table_to_objects
+    load_table_to_objects
 from ResSimpy.Nexus.nexus_load_list_table import load_table_to_lists
 from ResSimpy.Time.ISODateTime import ISODateTime
 
@@ -67,7 +67,7 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
     is_activate_block = False
     is_actions_block = False
     is_constraints_block = False
-    default_crossflow: Optional[bool] = None
+    default_crossflow: Optional[str] = None
     default_shutin: Optional[str] = None
     for index, line in enumerate(file_as_list):
         # check for changes in unit system
@@ -138,7 +138,6 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
         if table_start < 0:
             token_found = check_list_tokens(list(table_object_map.keys()), line)
             if token_found is None or check_token('WELLCONTROL', line):
-
                 default_crossflow, default_shutin = __set_crossflow_and_shutin_defaults(default_crossflow,
                                                                                         default_shutin,
                                                                                         file_as_list, index, line)
@@ -266,8 +265,8 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
     return nexus_object_results, nexus_constraints
 
 
-def __set_crossflow_and_shutin_defaults(default_crossflow: Optional[bool], default_shutin: Optional[str],
-                                        file_as_list: list[str], index: int, line: str) -> tuple[Optional[bool],
+def __set_crossflow_and_shutin_defaults(default_crossflow: Optional[str], default_shutin: Optional[str],
+                                        file_as_list: list[str], index: int, line: str) -> tuple[Optional[str],
                                                                                                  Optional[str]]:
     """Sets the default values for Crossflow and Shutin."""
     if check_token(token='CROSSFLOW', line=line):
@@ -284,8 +283,8 @@ def __set_crossflow_and_shutin_defaults(default_crossflow: Optional[bool], defau
     return default_crossflow, default_shutin
 
 
-def __apply_default_connection_values(nexus_object_results: dict[str, list[Any]], default_crossflow: Optional[bool],
-                           default_shutin: Optional[str]) -> None:
+def __apply_default_connection_values(nexus_object_results: dict[str, list[Any]], default_crossflow: Optional[str],
+                                      default_shutin: Optional[str]) -> None:
     """Applies the values for Crossflow from the defaults if they aren't set separately in a table."""
     all_connections = nexus_object_results['WELLS'] + nexus_object_results['GASWELLS']
     for connection in all_connections:
