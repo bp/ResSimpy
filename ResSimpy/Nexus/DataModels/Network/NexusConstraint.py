@@ -134,7 +134,6 @@ class NexusConstraint(Constraint):
     min_reverse_reservoir_liquid_rate: Optional[float] = None
     min_reverse_reservoir_total_fluids_rate: Optional[float] = None
     min_reverse_reservoir_hc_rate: Optional[float] = None
-    gor_limit: Optional[float] = None
     gor_limit_exponent: Optional[float] = None
     gor_limit_frequency: Optional[float] = None
     max_cum_gas_prod: Optional[float] = None
@@ -384,7 +383,6 @@ class NexusConstraint(Constraint):
         self.min_reverse_reservoir_liquid_rate = min_reverse_reservoir_liquid_rate
         self.min_reverse_reservoir_total_fluids_rate = min_reverse_reservoir_total_fluids_rate
         self.min_reverse_reservoir_hc_rate = min_reverse_reservoir_hc_rate
-        self.gor_limit = gor_limit
         self.gor_limit_exponent = gor_limit_exponent
         self.gor_limit_frequency = gor_limit_frequency
         self.max_cum_gas_prod = max_cum_gas_prod
@@ -433,7 +431,9 @@ class NexusConstraint(Constraint):
                          max_gor_perfplus=max_gor_perfplus, max_lgr=max_lgr, max_lgr_plug=max_lgr_plug,
                          max_lgr_plug_plus=max_lgr_plug_plus, max_lgr_perf=max_lgr_perf,
                          max_lgr_perfplus=max_lgr_perfplus,
-                         convert_qmult_to_reservoir_barrels=convert_qmult_to_reservoir_barrels, active_node=active_node)
+                         convert_qmult_to_reservoir_barrels=convert_qmult_to_reservoir_barrels, active_node=active_node,
+                         gor_limit=gor_limit,
+                         )
 
         if date is None and properties_dict is not None:
             if 'date' not in properties_dict or not isinstance(properties_dict['date'], str):
