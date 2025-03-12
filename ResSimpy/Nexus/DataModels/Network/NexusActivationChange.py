@@ -23,6 +23,7 @@ class NexusActivationChange(NetworkObject):
             date_format (Optional[DateFormat]): The date format that the object uses.
             start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
             name (Optional[str]): The name of the object that is being activated / deactivated.
+            is_constraint_change (bool): Whether the activation change is the result of a constraint or not.
         """
         self.change = change
         self.is_constraint_change = is_constraint_change

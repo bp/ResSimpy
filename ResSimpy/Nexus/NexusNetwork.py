@@ -286,8 +286,9 @@ class NexusNetwork(Network):
             # assign the region numbers for the targets with a region name
             self.targets._look_up_region_numbers_for_targets(self.model.options)
 
-    def __get_constraint_activation_changes(self, constraints: dict[str, list[NexusConstraint]]):
-
+    def __get_constraint_activation_changes(self, constraints: dict[str, list[NexusConstraint]]) \
+            -> list[NexusActivationChange]:
+        """Get all the activation changes held in constraint objects."""
         activation_changes = []
         for connection_name, connection_constraints in constraints.items():
             for constraint in connection_constraints:
@@ -302,7 +303,6 @@ class NexusNetwork(Network):
                     activation_changes.append(new_activation_change)
 
         return activation_changes
-
 
     def __update_well_types(self) -> None:
         """Updates the types of all of the wells using information found in the wells table."""

@@ -1196,7 +1196,8 @@ ENDACTIVATE
     activation_change_1 = NexusActivationChange(change=ActivationChangeEnum.ACTIVATE, name='well1', date='23/08/2024',
                                                 date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
     activation_change_2 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, name='well1', date='10/09/2024',
-                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date,
+                                                is_constraint_change=True)
     activation_change_3 = NexusActivationChange(change=ActivationChangeEnum.ACTIVATE, name='well1', date='15/01/2025',
                                                 date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
     expected_activation_changes = [activation_change_1, activation_change_2, activation_change_3]
