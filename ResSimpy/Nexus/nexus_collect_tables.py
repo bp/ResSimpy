@@ -259,9 +259,9 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
             table_end = -1
             token_found = None
 
-        if 'GASWELLS' in nexus_object_results.keys():
-            __apply_default_values(nexus_object_results=nexus_object_results, default_crossflow=default_crossflow,
-                                   default_shutin=default_shutin)
+        if 'WELLS' in nexus_object_results.keys():
+            __apply_default_connection_values(nexus_object_results=nexus_object_results,
+                                              default_crossflow=default_crossflow, default_shutin=default_shutin)
 
     return nexus_object_results, nexus_constraints
 
@@ -274,7 +274,7 @@ def __set_crossflow_and_shutin_defaults(default_crossflow: Optional[bool], defau
         crossflow_value = get_expected_token_value(token='CROSSFLOW', token_line=line,
                                                    file_list=file_as_list[index:])
 
-        default_crossflow = crossflow_value == 'ON'
+        default_crossflow = crossflow_value
     if check_token(token='SHUTINON', line=line):
         default_shutin = 'ON'
     elif check_token(token='SHUTINOFF', line=line):
@@ -284,7 +284,7 @@ def __set_crossflow_and_shutin_defaults(default_crossflow: Optional[bool], defau
     return default_crossflow, default_shutin
 
 
-def __apply_default_values(nexus_object_results: dict[str, list[Any]], default_crossflow: Optional[bool],
+def __apply_default_connection_values(nexus_object_results: dict[str, list[Any]], default_crossflow: Optional[bool],
                            default_shutin: Optional[str]) -> None:
     """Applies the values for Crossflow from the defaults if they aren't set separately in a table."""
     all_connections = nexus_object_results['WELLS'] + nexus_object_results['GASWELLS']
