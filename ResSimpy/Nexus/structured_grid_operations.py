@@ -92,6 +92,9 @@ class StructuredGridOperations:
                                                      original_line_location=original_line_location)
             grid_array_definition = token_property if not isinstance(token_property, dict) else (
                 token_property)[region_name]
+            grid_id = grid_array_definition.id
+            grid_nexus_file.add_object_locations(grid_id, [original_line_location])
+
             mod_start_end = StructuredGridOperations.__extract_mod_positions(line_indx, file_as_list)
             if 'VMOD' in mod_start_end:
                 vmod_indices = mod_start_end.pop('VMOD')
@@ -106,6 +109,8 @@ class StructuredGridOperations:
                         token_property: GridArrayDefinition | dict[str, GridArrayDefinition],
                         grid_file: NexusFile, original_line_location: int) -> None:
         """A function that begins the process of populating the grid away."""
+
+        object_line_locs_relative_to_file_as_list = []
 
         if modifier == 'MULT':
             numerical_value = nfo.get_expected_token_value(modifier, line, file_as_list[line_indx:],

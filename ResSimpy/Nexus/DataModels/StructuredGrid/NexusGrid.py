@@ -1658,3 +1658,21 @@ class NexusGrid(Grid):
         if not self._grid_properties_loaded:
             self.load_grid_properties_if_not_loaded()
         return self.__ftrans
+
+    def modify(self, array: str, new_properties: GridArrayDefinition) -> None:
+        """Modifies the properties of a grid array in the grid file.
+
+        Args:
+            array (str): the name of the grid array to modify.
+            new_properties (GridArrayDefinition): the new properties to set for the grid array.
+        """
+        if array not in self.__dict__:
+            raise ValueError(f'Array {array} not found in grid file')
+        # get the existing grid array definition
+        old_properties = getattr(self, array)
+
+        # update the properties in the object
+        setattr(self, array, new_properties)
+
+        # update the properties in the grid file
+
