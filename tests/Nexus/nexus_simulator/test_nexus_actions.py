@@ -280,8 +280,3 @@ ENDDEACTIVATE
     assert result_wellcons == expected_welcons
     assert result_activation_changes == expected_activation_changes
 
-    # assert result[0] == expected_result[0]
-    # assert result[1] == expected_result[1]
-    # assert result_wellcons[0] == expected_welcons[0]
-    # assert result_wellcons[1] == expected_welcons[1]
-

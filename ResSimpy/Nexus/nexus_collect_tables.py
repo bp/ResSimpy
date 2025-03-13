@@ -218,7 +218,7 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
 
             # store objects found into right dictionary
             list_of_token_obj = nexus_object_results[token_found]
-            # This statement ensures that CONSTRAINT that are found in tables are actually added to the dictionary
+            # This statement ensures that CONSTRAINTs that are found in tables are actually added to the dictionary
             # under the same key as constraints to preserve their order
             if (token_found == 'CONSTRAINT' or token_found == 'QMULT') and list_objects is not None:
                 for constraint, id_index in list_objects:

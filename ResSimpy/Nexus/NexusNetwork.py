@@ -21,6 +21,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusConLists import NexusConLists
 from ResSimpy.Nexus.DataModels.Network.NexusProc import NexusProc
 from ResSimpy.Nexus.DataModels.Network.NexusProcs import NexusProcs
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
+from ResSimpy.Nexus.NexusEnums.ActivationChangeEnum import ActivationChangeEnum
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
@@ -265,6 +266,8 @@ class NexusNetwork(Network):
             self.welllists._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLLIST')))
             self.conlists._add_to_memory(type_check_lists(nexus_obj_dict.get('CONLIST')))
             self.activation_changes._add_to_memory(type_check_lists(nexus_obj_dict.get('ACTIVATE_DEACTIVATE')))
+            constraint_activation_changes = self.__get_constraint_activation_changes(constraints=constraints)
+            self.activation_changes._add_to_memory(type_check_lists(constraint_activation_changes))
 
             actions_check = type_check_lists(nexus_obj_dict.get('ACTIONS'))
             if actions_check is not None:
@@ -282,6 +285,24 @@ class NexusNetwork(Network):
 
             # assign the region numbers for the targets with a region name
             self.targets._look_up_region_numbers_for_targets(self.model.options)
+
+    def __get_constraint_activation_changes(self, constraints: dict[str, list[NexusConstraint]]) \
+            -> list[NexusActivationChange]:
+        """Get all the activation changes held in constraint objects."""
+        activation_changes = []
+        for connection_name, connection_constraints in constraints.items():
+            for constraint in connection_constraints:
+                if constraint.active_node is not None:
+                    change = ActivationChangeEnum.ACTIVATE if constraint.active_node is True \
+                        else ActivationChangeEnum.DEACTIVATE
+                    new_activation_change = NexusActivationChange(change=change, name=connection_name,
+                                                                  date=constraint.date,
+                                                                  date_format=constraint.date_format,
+                                                                  start_date=constraint.start_date,
+                                                                  is_constraint_change=True)
+                    activation_changes.append(new_activation_change)
+
+        return activation_changes
 
     def __update_well_types(self) -> None:
         """Updates the types of all of the wells using information found in the wells table."""
