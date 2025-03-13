@@ -395,6 +395,25 @@ def get_expected_token_value(token: str, token_line: str, file_list: list[str],
     return value
 
 
+def get_token_value_with_line_index(token: str, token_line: str, file_list: list[str],
+                                    ignore_values: Optional[list[str]] = None,
+                                    replace_with: Union[str, GridArrayDefinition, None] = None) -> tuple[str, int]:
+    """Gets the value following a token and the line index of that value.
+
+    Args:
+        token (str): the token being searched for.
+        token_line (str): string value of the line that the token was found in.
+        file_list (list[str]): a list of strings containing each line of the file as a new entry
+        ignore_values (list[str], optional): a list of values that should be ignored if found. \
+            Defaults to None.
+        replace_with (Union[str, VariableEntry, None], optional):  a value to replace the existing value with. \
+            Defaults to None.
+
+    Returns:
+        tuple[str, int]: The value following the supplied token and the line index of that value.
+    """
+
+
 def load_in_three_part_date(initial_token: str, token_line: str, file_as_list: list[str], start_index: int) -> str:
     """Function that reads in a three part date separated by spaces e.g. 1 JAN 2024.
 
