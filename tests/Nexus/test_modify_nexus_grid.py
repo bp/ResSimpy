@@ -113,7 +113,7 @@ KX CON
     !dummy text
 
     other text
-    NETGRS VALUE
+NETGRS VALUE
     NOLIST
 INCLUDE /new_path_to_netgrs_file/new_net_to_gross_file.inc
 

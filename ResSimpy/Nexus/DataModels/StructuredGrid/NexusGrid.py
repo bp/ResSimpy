@@ -563,7 +563,8 @@ class NexusGrid(Grid):
                         StructuredGridOperations.load_token_value_if_present(
                             token_property.token, modifier, token_property.property, line, file_as_list, idx,
                             grid_nexus_file=self.__grid_nexus_file, ignore_values=['INCLUDE', 'NOLIST'],
-                            original_line_location=original_line_location)
+                            original_line_location=original_line_location,
+                            file_as_list_with_original_line_numbers=file_as_list_with_original_line_numbers)
                     else:
                         # get the LGR object to add the grid array to:
                         lgr = self.lgrs.get(array_name)
@@ -572,7 +573,8 @@ class NexusGrid(Grid):
                         StructuredGridOperations.load_token_value_if_present(
                             token_property.token, modifier, grid_array_def_to_modify, line, file_as_list, idx,
                             grid_nexus_file=self.__grid_nexus_file, ignore_values=['INCLUDE', 'NOLIST'],
-                            original_line_location=original_line_location)
+                            original_line_location=original_line_location,
+                            file_as_list_with_original_line_numbers=file_as_list_with_original_line_numbers)
 
             # Load in grid dimensions
             if nfo.check_token('NX', line):
