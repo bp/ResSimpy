@@ -129,3 +129,12 @@ class GridArrayDefinition:
     def id(self) -> UUID:
         """Unique identifier for each object."""
         return self.__id
+
+    def to_string(self, array: str) -> str:
+        """Converts the object to a string."""
+        grid_string = f'{array.upper()} {self.modifier}\n'
+        if self.modifier == 'VALUE':
+            grid_string += f'INCLUDE {self.value}\n'
+        else:
+            grid_string += f'{self.value}\n'
+        return grid_string
