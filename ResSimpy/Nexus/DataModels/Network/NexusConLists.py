@@ -28,6 +28,7 @@ class NexusConLists(NetworkLists):
             con_lists (list[NexusConList]): The list of con lists to be added to the NexusConLists object
         """
         self._lists = con_lists if con_lists is not None else []
+        self.__parent_network = parent_network
         super().__init__(parent_network=parent_network)
 
     def get_all(self) -> list[NexusConList]:
