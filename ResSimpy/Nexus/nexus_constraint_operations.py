@@ -57,7 +57,7 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
                 raise ValueError('No existing nodes found to add wildcards to')
             else:
                 # filter names that match the pattern
-                pattern = re.compile(name, re.IGNORECASE)
+                pattern = re.compile(name.replace('*', '.*'), re.IGNORECASE)
                 constraint_names_to_add = [network_name for network_name in network_names if
                                            pattern.match(network_name)]
         elif name in welllist_names:

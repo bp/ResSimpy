@@ -69,6 +69,8 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     ENDCONSTRAINTS''',
     [{'name': 'CP01', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'max_surface_oil_rate': 2.02,
       'unit_system': UnitSystem.ENGLISH},
+    {'name': 'cp01_gaslift', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'max_surface_oil_rate': 2.02,
+      'unit_system': UnitSystem.ENGLISH},
     ],
     ),
 
