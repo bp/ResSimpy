@@ -1,12 +1,10 @@
 import os
-import uuid
-import pytest
 from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
-from multifile_mocker import mock_multiple_files
-from utility_for_tests import uuid_side_effect
+from tests.multifile_mocker import mock_multiple_files
+from tests.utility_for_tests import uuid_side_effect
 
 class TestModifyNexusGrid:
     def setup_method(self, mocker):
