@@ -2,14 +2,13 @@
 from __future__ import annotations
 
 from typing import Optional, TYPE_CHECKING
-
+import re
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.nexus_file_operations import get_next_value, correct_datatypes
 from ResSimpy.Utils.invert_nexus_map import nexus_keyword_to_attribute_name
-import fnmatch
 
 if TYPE_CHECKING:
     from ResSimpy.FileOperations.File import File
@@ -58,7 +57,9 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
                 raise ValueError('No existing nodes found to add wildcards to')
             else:
                 # filter names that match the pattern
-                constraint_names_to_add = fnmatch.filter(network_names, name)
+                pattern = re.compile(name, re.IGNORECASE)
+                constraint_names_to_add = [network_name for network_name in network_names if
+                                           pattern.match(network_name)]
         elif name in welllist_names:
             # If the name refers to a welllist, apply the constraints to all of the wells in that.
             welllist_for_constraining = next(x for x in welllists if x.name == name)
