@@ -31,8 +31,8 @@ class StructuredGridOperations:
                                     line: str, file_as_list: list[str], line_indx: int,
                                     grid_nexus_file: NexusFile,
                                     original_line_location: int,
+                                    file_as_list_with_original_line_numbers: list[tuple[int, str]],
                                     ignore_values: Optional[list[str]] = None,
-                                    file_as_list_with_original_line_numbers: Optional[list[tuple[int, str]]] = None
                                     ) -> None:
         """Gets a token's value if there is one and loads it into the token_property.
 
@@ -48,6 +48,8 @@ class StructuredGridOperations:
             grid_nexus_file (NexusFile): the NexusFile object containing the grid file.
             original_line_location (int): the line location relative to the expanded file as list with the include
             file paths.
+            file_as_list_with_original_line_numbers (list[tuple[int, str]]): a list of tuples containing the line
+            number from the expanded file_as_list and the line itself.
             ignore_values (Optional[list[str]]): values to be ignored. Defaults to None.
 
         Raises:
@@ -108,7 +110,6 @@ class StructuredGridOperations:
                                  for x in relative_line_locations]
             grid_nexus_file.add_object_locations(grid_array_definition.id, file_line_indices)
 
-
     @staticmethod
     def __make_grid_def(file_as_list: list[str], ignore_values: list[str], line: str, line_indx: int, modifier: str,
                         region_name: str, token_modifier: str,
@@ -125,12 +126,15 @@ class StructuredGridOperations:
         if modifier == 'MULT':
             numerical_value, line_loc = fo.get_token_value_with_line_index(
                 modifier, line, file_as_list[line_indx:], ignore_values=ignore_values)
-            if numerical_value is None:
+            if numerical_value is None or line_loc is None:
                 raise ValueError(
                     f'No numerical value found after {token_modifier} keyword in line: {line}')
             object_line_locs_relative_to_file_as_list.append(line_indx + line_loc)
             value_to_multiply, line_loc = fo.get_token_value_with_line_index(
                 modifier, line, file_as_list[line_indx:], ignore_values=[numerical_value, *ignore_values])
+            if value_to_multiply is None or line_loc is None:
+                raise ValueError(
+                    f'No value found to multiply after {numerical_value} in line: {line}')
             object_line_locs_relative_to_file_as_list.append(line_indx + line_loc)
             if numerical_value is not None and value_to_multiply is not None:
                 if not isinstance(token_property, dict):

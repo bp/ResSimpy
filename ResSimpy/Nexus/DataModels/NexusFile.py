@@ -733,6 +733,8 @@ class NexusFile(File):
             string_to_remove (Optional[str]): aligning call signature with remove_from_file_as_list - \
             not used in this method.
         """
+        # disable the string_to_remove argument as it is not used in this method
+        _ = string_to_remove
         nexusfile_to_write_to = self
 
         # remove the line in the file:

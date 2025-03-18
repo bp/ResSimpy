@@ -1680,6 +1680,12 @@ class NexusGrid(Grid):
         Returns:
             list[int]: the line indices for object locations of the removed array.
         """
+
+        if self.__grid_nexus_file is None or self.__grid_nexus_file.file_content_as_list is None or \
+                self.__grid_nexus_file.object_locations is None:
+            # No grid file to remove object from
+            return []
+
         # get the object id
         array_object = getattr(self, array.lower(), None)
         if not isinstance(array_object, GridArrayDefinition):
@@ -1687,6 +1693,8 @@ class NexusGrid(Grid):
         array_id = array_object.id
         # remove the array from the grid file
         obj_locs = self.__grid_nexus_file.object_locations.get(array_id, None)
+        if obj_locs is None:
+            raise ValueError(f'No object found with id: "{array_id}" .')
         self.__grid_nexus_file.remove_object_from_file_as_list([array_id], with_includes=True)
 
         blank_grid_array = GridArrayDefinition()
@@ -1696,12 +1704,21 @@ class NexusGrid(Grid):
         return obj_locs
 
     def add(self, array: str, grid_array_definition: GridArrayDefinition, index: int | None = None) -> None:
-        """Adds a new grid array to the grid file."""
+        """Adds a new grid array to the grid file. Does not support IREGION changes. If the array already exists in the
+        grid file, it will be added to the end of the file and the grid array definition will only contain the newly
+        added information.
+
+        Args:
+            array (str): the name of the array to add.
+            grid_array_definition (GridArrayDefinition): the grid array definition to add.
+            index (int, optional): the index to add the array to. If None, the array will be added to the end of the
+            file.
+        """
         # get the object id
         array_id = grid_array_definition.id
         # remove the array from the grid file
-        if self.__grid_nexus_file is None:
-            return
+        if self.__grid_nexus_file is None or self.__grid_nexus_file.file_content_as_list is None:
+            raise ValueError('No grid file to add object to.')
         grid_array_str = grid_array_definition.to_string(array=array).splitlines(keepends=True)
 
         if index is None:
@@ -1710,7 +1727,7 @@ class NexusGrid(Grid):
         self.__grid_nexus_file.add_to_file_as_list(
             additional_content=grid_array_str,
             index=index,
-            additional_objects={array_id: list(range(index, len(grid_array_str)+index))})
+            additional_objects={array_id: list(range(index, len(grid_array_str) + index))})
 
         array_def_to_override = getattr(self, array.lower())
         for attribute in grid_array_definition.__dict__:
