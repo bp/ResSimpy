@@ -29,3 +29,16 @@ def test_grid_array_definition_max_min(mocker, modifier, value):
     # Assert
     assert result_max == expected_max
     assert result_min == expected_min
+
+
+@pytest.mark.parametrize('modifier, value, array, expected_result', [
+    ('VALUE', '/some/path/to/file.dat', 'KX', 'KX VALUE\nINCLUDE /some/path/to/file.dat\n'),
+    ('CON', 25, 'porosity', 'POROSITY CON\n25\n'),
+])
+def test_grid_array_definition_to_string(modifier, value, array, expected_result):
+    # Arrange
+    grid_array_definition = GridArrayDefinition(modifier=modifier, value=value, keyword_in_include_file=False)
+    # Act
+    result = grid_array_definition.to_string(array)
+    # Assert
+    assert result == expected_result

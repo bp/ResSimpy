@@ -605,12 +605,12 @@ class NexusFile(File):
         nexus_file = None
         for file in self.include_objects:
             if file.id == uuid_index:
-                nexus_file = file
+                nexus_file = file if not file.file_loading_skipped else self
             elif file.include_objects is not None:
                 # CURRENTLY THIS ONLY SUPPORTS 2 LEVELS OF INCLUDES
                 for lvl_2_include in file.include_objects:
                     if lvl_2_include.id == uuid_index:
-                        nexus_file = lvl_2_include
+                        nexus_file = lvl_2_include if not lvl_2_include.file_loading_skipped else file
         if nexus_file is None:
             raise ValueError(f'No file with {uuid_index=} found within include objects')
 
@@ -650,8 +650,14 @@ class NexusFile(File):
         for object_id, line_index in additional_objects.items():
             self.add_object_locations(obj_uuid=object_id, line_indices=line_index)
 
-    def remove_object_from_file_as_list(self, objects_to_remove: list[UUID]) -> None:
-        """Removes all associated lines in the file as well as the object locations relating to a list of objects."""
+    def remove_object_from_file_as_list(self, objects_to_remove: list[UUID], with_includes: bool = False) -> None:
+        """Removes all associated lines in the file as well as the object locations relating to a list of objects.
+
+        Args:
+            objects_to_remove (list[UUID]): list of object id's to remove from the object locations.
+            with_includes (bool): if set to True, the method will set the index relative to a file with includes.
+            Defaults to False.
+        """
         if self.object_locations is None:
             raise ValueError('Cannot remove object from object_locations as object_locations is None. '
                              'Check object locations is being populated properly.')
@@ -662,13 +668,17 @@ class NexusFile(File):
                 continue
             # sort from highest to lowest to ensure line indices are not affected by removal of lines
             sorted_obj_locs = sorted(obj_locs, reverse=True)
+
+            remove_func = self.remove_from_file_as_list if not with_includes else (
+                self.remove_from_file_as_list_with_includes)
+
             for i, index in enumerate(sorted_obj_locs):
                 if i == 0:
                     # for the first removal remove the object location
-                    self.remove_from_file_as_list(index, objects_to_remove=[obj_to_remove])
+                    remove_func(index, objects_to_remove=[obj_to_remove])
                 else:
                     # the remaining iterations remove just the lines
-                    self.remove_from_file_as_list(index)
+                    remove_func(index)
         self._file_modified_set(True)
 
     def remove_from_file_as_list(self, index: int, objects_to_remove: Optional[list[UUID]] = None,
@@ -704,6 +714,36 @@ class NexusFile(File):
                 raise ValueError(
                     f'Tried to replace at non string value at index: {relative_index} in '
                     f'file_as_list instead got {entry_to_replace}')
+
+        if objects_to_remove is not None:
+            for object_id in objects_to_remove:
+                self.__remove_object_locations(object_id)
+        self._file_modified_set(True)
+
+    def remove_from_file_as_list_with_includes(self, index: int, objects_to_remove: Optional[list[UUID]] = None,
+                                               string_to_remove: Optional[str] = None) -> None:
+        """Remove an entry from the file as list relative to file_as_list_with_includes.
+
+        Also updates existing object locations and removes any specified objects from the object locations dictionary.
+
+        Args:
+            index (int): index n the calling flat_file_as_list to remove the entry from
+            objects_to_remove (Optional[list[UUID]]): list of object id's to remove from the object locations. \
+            Defaults to None.
+            string_to_remove (Optional[str]): aligning call signature with remove_from_file_as_list - \
+            not used in this method.
+        """
+        # disable the string_to_remove argument as it is not used in this method
+        _ = string_to_remove
+        nexusfile_to_write_to = self
+
+        # remove the line in the file:
+        if nexusfile_to_write_to.file_content_as_list is None:
+            raise ValueError(
+                f'No file content in the file attempting to remove line from {nexusfile_to_write_to.location}')
+
+        nexusfile_to_write_to.file_content_as_list.pop(index)
+        self.__update_object_locations(line_number=index, number_additional_lines=-1)
 
         if objects_to_remove is not None:
             for object_id in objects_to_remove:
