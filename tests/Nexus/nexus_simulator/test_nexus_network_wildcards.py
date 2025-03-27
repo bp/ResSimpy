@@ -69,6 +69,8 @@ from tests.utility_for_tests import get_fake_nexus_simulator
     ENDCONSTRAINTS''',
     [{'name': 'CP01', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'max_surface_oil_rate': 2.02,
       'unit_system': UnitSystem.ENGLISH},
+    {'name': 'cp01_gaslift', 'date': '01/01/2019', 'max_surface_water_rate': 100.0, 'max_surface_oil_rate': 2.02,
+      'unit_system': UnitSystem.ENGLISH},
     ],
     ),
 
@@ -113,8 +115,27 @@ from tests.utility_for_tests import get_fake_nexus_simulator
       'unit_system': UnitSystem.ENGLISH},
     ],
     ),
+
+    # Deactivate all wells
+    ('''
+     WELLS
+    NAME    STREAM    IBAT    IPVT
+    well_1  WATER    1    1
+    well_2  OIL    1    1
+    ENDWELLS   
+    
+    TIME 01/01/2019   
+    CONSTRAINTS
+    W*   DEACTIVATE 
+    ENDCONSTRAINTS
+    ''',
+    [{'name': 'well_1', 'date': '01/01/2019', 'active_node': False,
+      'unit_system': UnitSystem.ENGLISH},
+    {'name': 'well_2', 'date': '01/01/2019', 'active_node': False,
+      'unit_system': UnitSystem.ENGLISH}],
+    ),
     ], ids=['basic_test', 'with extra nodes', 'with extra constraints', 'wildcard in the middle + case sensitivity',
-            'previous time card'])
+            'previous time card', 'deactivate all wells'])
 def test_read_wildcard(mocker, file_contents, expected_constraints):
     # Arrange
     fcs_file_contents = '''
