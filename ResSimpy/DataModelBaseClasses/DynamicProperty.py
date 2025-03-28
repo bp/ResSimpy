@@ -1,7 +1,7 @@
 """Base class for handling any dynamic property simulator inputs, for use in inputs such as PVT, relperm, etc."""
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 import numpy as np
@@ -19,9 +19,9 @@ class DynamicProperty(ABC):
         input_number (int): Method, table or input number, in order as entered in the simulation input deck.
     """
 
-    input_number: int
-    file: File
-    properties: dict
+    input_number: int = field(compare=False)
+    file: File = field(compare=False)
+    properties: dict = field(compare=True)
 
     def __init__(self, input_number: int, file: File) -> None:
         """Initialises the DynamicProperty class.

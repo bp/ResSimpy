@@ -45,7 +45,7 @@ class NexusPVTMethod(DynamicProperty):
     """
 
     # General parameters
-    file: NexusFile
+    file: NexusFile = field(compare=False)
     pvt_type: Optional[PvtType] = None
     eos_nhc: Optional[int] = None  # Number of hydrocarbon components
     eos_temp: Optional[float] = None  # Default temperature for EOS method
