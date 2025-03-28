@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
+from uuid import UUID, uuid4
 
 import numpy as np
 import pandas as pd
@@ -28,6 +29,28 @@ class GridArrayDefinition:
     keyword_in_include_file: bool = False
     absolute_path: Optional[str] = None
     array: Optional[np.ndarray] = None
+    __id: UUID = field(default_factory=lambda: uuid4(), compare=False)
+
+    def __init__(self, modifier: Optional[str] = None, value: Optional[str] = None,
+                 mods: Optional[dict[str, pd.DataFrame]] = None, keyword_in_include_file: bool = False,
+                 absolute_path: Optional[str] = None, array: Optional[np.ndarray] = None) -> None:
+        """Initializes a grid array definition object, representing a grid array property.
+
+        Args:
+            modifier (Optional[str]): the modifier for the grid array property (e.g. CON, MULT, etc.)
+            value (Optional[str]): the actual values for the grid array property in question. Can be an include file.
+            mods (Optional[dict[str, pd.DataFrame]): if the grid array has an associated mod card we capture it.
+            keyword_in_include_file (bool): an indicator to tell you if the grid array keyword was found in an inc file
+            absolute_path (Optional[str]): the absolute path to the path if value is an include file.
+            array (Optional[np.ndarray]): The loaded array from the grid file. Loads from the absolute path.
+        """
+        self.__id = uuid4()
+        self.modifier = modifier
+        self.value = value
+        self.mods = mods
+        self.keyword_in_include_file = keyword_in_include_file
+        self.absolute_path = absolute_path
+        self.array = array
 
     def load_grid_array_definition_to_file_as_list(self) -> list[str]:
         """Loads the grid array definition to a file as a list of strings."""
@@ -101,3 +124,17 @@ class GridArrayDefinition:
     def get_array(self) -> np.ndarray:
         """Returns the array from the grid array definition."""
         return self.get_array_from_file()
+
+    @property
+    def id(self) -> UUID:
+        """Unique identifier for each object."""
+        return self.__id
+
+    def to_string(self, array: str) -> str:
+        """Converts the object to a string."""
+        grid_string = f'{array.upper()} {self.modifier}\n'
+        if self.modifier == 'VALUE':
+            grid_string += f'INCLUDE {self.value}\n'
+        else:
+            grid_string += f'{self.value}\n'
+        return grid_string
