@@ -2,10 +2,11 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from enum import Enum
 
 import numpy as np
 import pandas as pd
-from typing import Optional
+from typing import Optional, Union
 from ResSimpy.FileOperations.File import File
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 
@@ -105,3 +106,22 @@ class DynamicProperty(ABC):
             else:
                 continue
         return ranges
+
+    @staticmethod
+    def convert_to_hashable(value: Union[str, float, pd.DataFrame, list[str], dict[str, float],
+                                         tuple[str, dict[str, float]], dict[str, pd.DataFrame], np.ndarray,
+                                         dict[str, Union[float, pd.DataFrame]]]) -> Union[str, float, tuple, frozenset]:
+        """Converts a value of a mix of datatypes and nested dictionaries to a hashable value."""
+        if isinstance(value, pd.DataFrame):
+            pd_hash = pd.util.hash_pandas_object(value)
+            return tuple(pd_hash.values)
+        elif isinstance(value, np.ndarray):
+            return tuple([tuple(row) for row in value])
+        elif isinstance(value, list):
+            return tuple(value)
+        elif isinstance(value, dict):
+            return frozenset((k, DynamicProperty.convert_to_hashable(v)) for k, v in value.items())
+        elif isinstance(value, Enum):
+            return value.value
+        else:
+            return value
