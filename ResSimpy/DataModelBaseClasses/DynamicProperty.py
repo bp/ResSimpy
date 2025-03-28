@@ -19,9 +19,9 @@ class DynamicProperty(ABC):
         input_number (int): Method, table or input number, in order as entered in the simulation input deck.
     """
 
+    properties: dict
     input_number: int = field(compare=False)
     file: File = field(compare=False)
-    properties: dict = field(compare=True)
 
     def __init__(self, input_number: int, file: File) -> None:
         """Initialises the DynamicProperty class.

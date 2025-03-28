@@ -64,7 +64,7 @@ def test_pvt_method_hash():
                               eos_options=eos_options, properties=properties_3
                               )
     # act + assert
-    assert method_1 != method_2
+    assert method_1 == method_2
     assert method_1.properties == method_2.properties
     assert hash(method_1) == hash(method_2)
     assert hash(method_1) != hash(method_3)
