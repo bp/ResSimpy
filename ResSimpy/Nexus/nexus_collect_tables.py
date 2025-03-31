@@ -11,6 +11,7 @@ from ResSimpy.FileOperations.File import File
 from ResSimpy.FileOperations.file_operations import get_next_value, get_expected_token_value
 from ResSimpy.Nexus.DataModels.Network.NexusActivationChange import NexusActivationChange
 from ResSimpy.Nexus.DataModels.Network.NexusConLists import NexusConLists
+from ResSimpy.Nexus.DataModels.Network.NexusNodeLists import NexusNodeLists
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusWellLists import NexusWellLists
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
@@ -187,7 +188,7 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
                                                      welllists=well_lists,
                                                      start_date=start_date)
 
-            elif token_found in [NexusWellLists.table_header(), NexusConLists.table_header()]:
+            elif token_found in [NexusWellLists.table_header(), NexusConLists.table_header(), NexusNodeLists.table_header()]:
                 list_objects = load_table_to_lists(file_as_list=file_as_list[table_start - 1:table_end],
                                                    row_object=table_object_map[token_found],
                                                    table_header=token_found,
