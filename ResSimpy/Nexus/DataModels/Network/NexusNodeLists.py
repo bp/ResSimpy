@@ -1,4 +1,5 @@
 """Contains a class for representing a set of NodeList objects for the Nexus model."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -17,14 +18,18 @@ class NexusNodeLists(NetworkLists):
     """Class for representing a set of NodeList objects for the Nexus model."""
 
     _lists: list[NexusNodeList] = field(default_factory=list)
-    __parent_network: NexusNetwork    
+    __parent_network: NexusNetwork
 
-    def __init__(self, parent_network: NexusNetwork, node_lists: None | list[NexusNodeList] = None) -> None:
-        """ Initialises the NexusNodeLists class. Supports CLEAR, ADD and REMOVE operations on the NodeList.
+    def __init__(
+        self,
+        parent_network: NexusNetwork,
+        node_lists: None | list[NexusNodeList] = None,
+    ) -> None:
+        """Initialises the NexusNodeLists class. Supports CLEAR, ADD and REMOVE operations on the NodeList.
 
         Args:
             parent_network (NexusNetwork): The network that the node lists are a part of.
-            node_lists (list[NexusNodeList]): The list of node lists to be added to the NexusNodeLists object
+            node_lists (list[NexusNodeList]): The list of node lists to be added to the NexusNodeLists object.
         """
         self._lists = node_lists if node_lists is not None else []
         self.__parent_network = parent_network
@@ -42,18 +47,18 @@ class NexusNodeLists(NetworkLists):
         return self._lists
 
     @staticmethod
-    def table_header() -> Literal['NODELIST']:
-        """Start of the Node definition tanle."""
-        return 'NODELIST'
+    def table_header() -> Literal["NODELIST"]:
+        """Start of the Node definition table."""
+        return "NODELIST"
 
     @staticmethod
-    def table_footer() -> Literal['ENDNODELIST']:
+    def table_footer() -> Literal["ENDNODELIST"]:
         """End of the Node definition table."""
-        return 'ENDNODELIST'
+        return "ENDNODELIST"
 
     @property
-    def _network_element_name(self) -> Literal['nodelists']:
-        return 'nodelists'
+    def _network_element_name(self) -> Literal["nodelists"]:
+        return "nodelists"
 
     def _add_to_memory(self, additional_list: None | Sequence[NetworkList]) -> None:
         """Extends the nodelist stored in memory by a list of nodelist provided to it."""
