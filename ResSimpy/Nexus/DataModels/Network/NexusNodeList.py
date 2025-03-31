@@ -5,13 +5,14 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.DataModelBaseClasses.NetworkList import NetworkList
 
+
 @dataclass(kw_only=True, init=False)
 class NexusNodeList(NetworkList):
     """Class for representing a single NodeList or group for the Nexus model."""
 
-    def __init__(self, name: str, elements_in_the_list:list[str], date: str, date_format: DateFormat) -> None:
+    def __init__(self, name: str, elements_in_the_list: list[str], date: str, date_format: DateFormat) -> None:
         """Initialises the NexusNodeList class.
-        
+
         Args:
             name (str): Name of the NodeList.
             elements_in_the_list (list[str]): List of node names in the NodeList.
@@ -24,12 +25,12 @@ class NexusNodeList(NetworkList):
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
         """Returns mapping of keywords."""
         return {}
-    
+
     @property
     def units(self) -> BaseUnitMapping:
         """Returns the attribute to unit map for the data object."""
         return BaseUnitMapping
-    
+
     @property
     def nodes(self) -> list[str]:
         """Returns the list of nodes in the NodeList."""

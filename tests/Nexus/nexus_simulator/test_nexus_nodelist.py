@@ -9,6 +9,7 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.nexus_load_list_table import load_table_to_lists
 
+
 class TestNexusNodeList:
     file_content = '''TIME 01/01/2020
     NODELIST nodelist_name
@@ -21,12 +22,13 @@ class TestNexusNodeList:
 
     def test_nexus_nodelist_add(self):
         # Arrange
-        existing_nodelist = NexusNodeList(name='nodelist_name',elements_in_the_list=['node1', 'node2'],
+        existing_nodelist = NexusNodeList(name='nodelist_name', elements_in_the_list=['node1', 'node2'],
                                           date='01/12/2019', date_format=DateFormat.DD_MM_YYYY)
-        expected_nodelist = NexusNodeList(name='nodelist_name', elements_in_the_list=['node1', 'node2','node3', 'node4'],
+        expected_nodelist = NexusNodeList(name='nodelist_name', elements_in_the_list=['node1', 'node2',
+                                                                                      'node3', 'node4'],
                                           date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
         file_as_list = self.file_content.splitlines()
-        
+
         # Act
         nodelist = load_table_to_lists(file_as_list=file_as_list,
                                        row_object=NexusNodeList,
@@ -35,7 +37,7 @@ class TestNexusNodeList:
                                        date_format=DateFormat.DD_MM_YYYY,
                                        table_header='NODELIST',
                                        table_start_index=0)[0][0]
-        
+
         # Assert
         assert nodelist == expected_nodelist
 
@@ -50,7 +52,7 @@ class TestNexusNodeList:
         ]
         expected_conlists = [
             NexusConList(name='conlist_name', elements_in_the_list=['wellcon_1', 'wellcon_3', 'well_1'],
-                          date='01/01/2020', date_format=DateFormat.MM_DD_YYYY),
+                         date='01/01/2020', date_format=DateFormat.MM_DD_YYYY),
             NexusConList(name='conlist_name', elements_in_the_list=['wellcon_1', 'well_1'],
                          date='01/01/2023', date_format=DateFormat.MM_DD_YYYY),
         ]
@@ -58,10 +60,10 @@ class TestNexusNodeList:
         expected_nodelists = [
             NexusNodeList(name='nodelist_name', elements_in_the_list=['node_1', 'node_2', 'node_3'],
                           date='01/01/2020', date_format=DateFormat.MM_DD_YYYY),
-            NexusNodeList(name='nodelist_name', elements_in_the_list=['node_1', 'node_2', 'node_3','node_4'],
-                         date='01/01/2023', date_format=DateFormat.MM_DD_YYYY),
+            NexusNodeList(name='nodelist_name', elements_in_the_list=['node_1', 'node_2', 'node_3', 'node_4'],
+                          date='01/01/2023', date_format=DateFormat.MM_DD_YYYY),
             NexusNodeList(name='nodelist_name', elements_in_the_list=['node_1', 'node_2', 'node_4'],
-                         date='01/01/2023', date_format=DateFormat.MM_DD_YYYY),
+                          date='01/01/2023', date_format=DateFormat.MM_DD_YYYY),
         ]
 
         file_as_list = '''
@@ -70,7 +72,7 @@ class TestNexusNodeList:
         ADD
         well_1
         well_2
-        
+
         well_3
         ENDWELLLIST
         CONLIST conlist_name
@@ -78,7 +80,7 @@ class TestNexusNodeList:
         wellcon_1
         wellcon_3
         ! comment
-        
+
         well_1
         ENDCONLIST
         NODELIST nodelist_name
@@ -93,7 +95,7 @@ class TestNexusNodeList:
         REMOVE
         well_1
         ENDWELLLIST
-        
+
         CONLIST conlist_name    !Comment
         REMOVE
         wellcon_3

@@ -11,6 +11,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusNodeList import NexusNodeList
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 
+
 @dataclass(kw_only=True)
 class NexusNodeLists(NetworkLists):
     """Class for representing a set of NodeList objects for the Nexus model."""
@@ -20,7 +21,7 @@ class NexusNodeLists(NetworkLists):
 
     def __init__(self, parent_network: NexusNetwork, node_lists: None | list[NexusNodeList] = None) -> None:
         """ Initialises the NexusNodeLists class. Supports CLEAR, ADD and REMOVE operations on the NodeList.
-        
+
         Args:
             parent_network (NexusNetwork): The network that the node lists are a part of.
             node_lists (list[NexusNodeList]): The list of node lists to be added to the NexusNodeLists object
@@ -33,18 +34,18 @@ class NexusNodeLists(NetworkLists):
         """Returns all NodeList names."""
         self.__parent_network.get_load_status()
         return self._lists
-    
+
     @property
     def nodelists(self) -> list[NexusNodeList]:
         """Returns list of all NodeList objects."""
         self.__parent_network.get_load_status()
         return self._lists
-    
+
     @staticmethod
     def table_header() -> Literal['NODELIST']:
         """Start of the Node definition tanle."""
         return 'NODELIST'
-    
+
     @staticmethod
     def table_footer() -> Literal['ENDNODELIST']:
         """End of the Node definition table."""
@@ -62,7 +63,3 @@ class NexusNodeLists(NetworkLists):
             additional_list = list(additional_list)
         only_nodelist = [x for x in additional_list if isinstance(x, NexusNodeList)]
         self._lists.extend(only_nodelist)
-
-    
-
-
