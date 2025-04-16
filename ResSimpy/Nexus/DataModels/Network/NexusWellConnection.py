@@ -82,7 +82,6 @@ class NexusWellConnection(WellConnection):
     crossflow: Optional[str] = None
     on_time: Optional[float] = None
     heat_transfer_coeff: Optional[float] = None
-    well_index_mult: Optional[float] = None
     vip_productivity_index: Optional[float] = None
     productivity_index_phase: Optional[str] = None
     d_factor: Optional[float] = None
@@ -97,6 +96,7 @@ class NexusWellConnection(WellConnection):
     station: Optional[str] = None
     drill_queue: Optional[str] = None
     drill_order_benefit: Optional[float] = None
+    well_index_mult: Optional[float] = None
 
     def __init__(self, properties_dict: Optional[dict[str, None | int | str | float]] = None,
                  date: Optional[str] = None, date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
@@ -152,7 +152,6 @@ class NexusWellConnection(WellConnection):
             crossflow (Optional[str]): Crossflow identifier (CROSSFLOW).
             on_time (Optional[float]): On-time duration (ONTIME).
             heat_transfer_coeff (Optional[float]): Heat transfer coefficient (HTC).
-            well_index_mult (Optional[float]): Well index multiplier (WIMULT).
             vip_productivity_index (Optional[float]): VIP productivity index identifier (VIPPI).
             productivity_index_phase (Optional[str]): Productivity index phase identifier (PIPHASE).
             d_factor (Optional[float]): Non-Darcy D-factor (D).
@@ -207,7 +206,6 @@ class NexusWellConnection(WellConnection):
         self.crossflow = crossflow
         self.on_time = on_time
         self.heat_transfer_coeff = heat_transfer_coeff
-        self.well_index_mult = well_index_mult
         self.vip_productivity_index = vip_productivity_index
         self.productivity_index_phase = productivity_index_phase
         self.d_factor = d_factor
@@ -215,6 +213,7 @@ class NexusWellConnection(WellConnection):
         self.non_darcy_flow_method = non_darcy_flow_method
         self.gas_mobility = gas_mobility
         self.capillary_number_model = capillary_number_model
+        self.dp_add = dp_add
         self.dp_add = dp_add
         self.dt_add = dt_add
         self.rate_mult = rate_mult
@@ -226,7 +225,7 @@ class NexusWellConnection(WellConnection):
                          properties_dict=properties_dict, bhdepth=bhdepth, datum_depth=datum_depth, x_pos=x_pos,
                          y_pos=y_pos, length=length, temperature=temperature, diameter=diameter, roughness=roughness,
                          inner_diameter=inner_diameter, productivity_index=productivity_index, hyd_method=hyd_method,
-                         group=group, i=i, j=j, drainage_radius=drainage_radius)
+                         group=group, i=i, j=j, drainage_radius=drainage_radius, well_index_mult=well_index_mult)
 
         if self.name is not None:
             self.bh_node_name = self.name + '%bh'
