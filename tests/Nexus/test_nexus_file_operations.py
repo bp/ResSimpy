@@ -5,6 +5,8 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 import pytest
 import pandas as pd
 import numpy as np
+
+from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Enums.UnitsEnum import UnitSystem
@@ -744,10 +746,10 @@ def test_load_table_to_objects_date_units():
  ! Riser Nodes
   node1         NA        NA    60.5    100.5 300.5   1     station
   ENDNODES
-  WELLS
+  NODES
     NAME       TYPE       DEPTH   TemP       NUMBER  StatiON    
 node_2        WELLHEAD     1167.3 #  2   station2 
-ENDWELLS
+ENDNODES
   content outside of the node statement
   node1         NA        NA    60.5    10.5 3.5   1     station_null
   ''',
@@ -789,7 +791,7 @@ def test_collect_all_tables_to_objects(mocker, file_contents, node1_props, node2
     result_dict, _ = ResSimpy.Nexus.nexus_collect_tables.collect_all_tables_to_objects(
         nexus_file=surface_file,
         table_object_map={'NODES': NexusNode,
-         'WELLS': NexusNode}, start_date=start_date,
+         'WELLS': NexusWellConnection, 'GASWELLS': NexusWellConnection}, start_date=start_date,
         default_units=UnitSystem.ENGLISH,
         date_format=DateFormat.MM_DD_YYYY,
         )

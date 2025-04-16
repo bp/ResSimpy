@@ -121,13 +121,15 @@ class NexusWells(Wells):
             if well_file.location is None:
                 warnings.warn(f'Well file location has not been found for {well_file}')
                 continue
-            new_wells, date_format = load_wells(nexus_file=well_file, start_date=self.__model.start_date,
-                                                default_units=self.__model.default_units, parent_wells_instance=self,
-                                                model_date_format=self.__model.date_format)
+            wells, date_format = load_wells(nexus_file=well_file, start_date=self.__model.start_date,
+                                            default_units=self.__model.default_units, parent_wells_instance=self,
+                                            model_date_format=self.__model.date_format)
 
-            self._wells += new_wells
+            self._wells = wells
             self.__date_format = date_format
         self._wells_loaded = True
+        # Ensure the newly added wells have additional information populated from the surface file.
+        self.model.network.get_load_status()
 
     def modify(self, well_name: str, completion_properties_list: list[dict[str, None | float | int | str]],
                how: OperationEnum = OperationEnum.ADD) -> None:

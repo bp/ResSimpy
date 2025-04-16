@@ -14,7 +14,7 @@ def test_resolve_carried_over_attributes():
     existing_objects = [
         NexusWellConnection(dict(name='well1', polymer='polymer'),
                             date='01/01/2022', date_format=DateFormat.DD_MM_YYYY),
-        NexusWellConnection(dict(name='well1', bhdepth=1000.2, datum_depth=100.3, ), 
+        NexusWellConnection(dict(name='well1', bhdepth=1000.2, datum_depth=100.3, ),
                             date='01/01/2020', date_format=DateFormat.DD_MM_YYYY),
         NexusWellConnection(dict(name='well1', d_factor=0.0001, heat_transfer_coeff=0.2, datum_depth=10),
                             date='01/01/2021', date_format=DateFormat.DD_MM_YYYY),
@@ -30,10 +30,10 @@ def test_resolve_carried_over_attributes():
                                  d_factor=0.0001, heat_transfer_coeff=0.2, datum_depth=10),
                             date='01/01/2022', date_format=DateFormat.DD_MM_YYYY),
     ]
-    
+
     # Act
     result = NetworkOperationsMixIn.resolve_carried_over_attributes(existing_objects)
-    
+
     # Assert
     assert result == expected_result
 
@@ -76,9 +76,9 @@ def test_resolve_carried_over_fails_with_multiple_types():
     existing_objects = [
         NexusWellConnection(dict(name='well1', bhdepth=1000.2, datum_depth=100.3, ),
                             date='01/01/2020', date_format=DateFormat.DD_MM_YYYY),
-        NexusNode(dict(name='well1', type='WELLHEAD', station='station1'), date='01/01/2021', 
+        NexusNode(dict(name='well1', type='WELLHEAD', station='station1'), date='01/01/2021',
                   date_format=DateFormat.DD_MM_YYYY)
-        ]
+    ]
 
     # Act and Assert
     with pytest.raises(ValueError) as e_info:
@@ -100,7 +100,7 @@ def test_resolve_carried_over_attributes_same_date():
     expected_result = [
         NexusWellConnection(dict(name='well1', polymer='polymer'),
                             date='01/01/2020', date_format=DateFormat.DD_MM_YYYY),
-        NexusWellConnection(dict(name='well1', polymer='polymer', bhdepth=1000.2, datum_depth=100.3,),
+        NexusWellConnection(dict(name='well1', polymer='polymer', bhdepth=1000.2, datum_depth=100.3, ),
                             date='01/01/2020', date_format=DateFormat.DD_MM_YYYY),
         NexusWellConnection(dict(name='well1', polymer='polymer', bhdepth=1000.2,
                                  d_factor=0.0001, heat_transfer_coeff=0.2, datum_depth=10),
@@ -122,7 +122,7 @@ def test_apply_clears():
         NexusConstraint(clear_q=True, name='well1', date='01/02/2020', date_format=DateFormat.DD_MM_YYYY),
         NexusConstraint(max_reservoir_oil_rate=120, name='well1', date='01/03/2020', date_format=DateFormat.DD_MM_YYYY),
     ]
-    
+
     expected_result = [
         NexusConstraint(max_surface_gas_rate=12.3, max_surface_liquid_rate=123.4, name='well1', max_pressure=100,
                         date='01/01/2020', date_format=DateFormat.DD_MM_YYYY),
@@ -131,10 +131,10 @@ def test_apply_clears():
         NexusConstraint(max_reservoir_oil_rate=120, name='well1', date='01/03/2020', date_format=DateFormat.DD_MM_YYYY,
                         max_pressure=100),
     ]
-    
+
     # Act
     result = NetworkOperationsMixIn.resolve_same_named_objects_constraints(constraints_for_well)
-    
+
     # Assert
     assert result == expected_result
 
@@ -155,7 +155,7 @@ def test_apply_clear_all():
         NexusConstraint(clear_all=True, name='well1', date='01/02/2020', date_format=DateFormat.DD_MM_YYYY),
         NexusConstraint(max_reservoir_oil_rate=122, name='well1', date='01/03/2020', date_format=DateFormat.DD_MM_YYYY,
                         ),
-        NexusConstraint(max_reservoir_oil_rate=122, max_surface_gas_rate=120, name='well1', date='01/04/2020', 
+        NexusConstraint(max_reservoir_oil_rate=122, max_surface_gas_rate=120, name='well1', date='01/04/2020',
                         date_format=DateFormat.DD_MM_YYYY)
 
     ]
@@ -165,6 +165,7 @@ def test_apply_clear_all():
 
     # Assert
     assert result == expected_result
+
 
 def test_apply_clear_p():
     # Arrange
@@ -179,9 +180,9 @@ def test_apply_clear_p():
         NexusConstraint(max_surface_gas_rate=12.3, max_surface_liquid_rate=123.4, name='well1', max_pressure=100,
                         date='01/01/2020', date_format=DateFormat.DD_MM_YYYY),
         NexusConstraint(clear_p=True, name='well1', date='01/02/2020', date_format=DateFormat.DD_MM_YYYY,
-                        max_surface_gas_rate=12.3, max_surface_liquid_rate=123.4,),
+                        max_surface_gas_rate=12.3, max_surface_liquid_rate=123.4, ),
         NexusConstraint(max_reservoir_oil_rate=120, name='well1', date='01/03/2020', date_format=DateFormat.DD_MM_YYYY,
-                        max_surface_gas_rate=12.3, max_surface_liquid_rate=123.4,),
+                        max_surface_gas_rate=12.3, max_surface_liquid_rate=123.4, ),
     ]
 
     # Act
@@ -214,6 +215,7 @@ def test_apply_clear_limits():
 
     # Assert
     assert result == expected_result
+
 
 def test_apply_clear_alq():
     # Arrange
@@ -288,3 +290,44 @@ def test_apply_clears_from_read(mocker):
     assert resolved_constraints['well2'][0].max_surface_liquid_rate == 5678.0
     assert resolved_constraints['well2'][1].max_surface_liquid_rate == 20.02
     assert resolved_constraints['well2'][1].min_pressure == 1200
+
+
+def test_override_qallrmax():
+    # Arrange
+    constraints_for_well = [
+        NexusConstraint(
+            qmult_oil_rate=12.3, qmult_water_rate=123.4, qmult_gas_rate=5.5, name='well1', max_pressure=100,
+            date='01/01/2020', date_format=DateFormat.DD_MM_YYYY, convert_qmult_to_reservoir_barrels=True),
+        NexusConstraint(
+            qmult_oil_rate=10.3, qmult_water_rate=24, qmult_gas_rate=0, name='well1', date='01/02/2020',
+            date_format=DateFormat.DD_MM_YYYY),
+        NexusConstraint(
+            max_pressure=200.5, name='well1', date='01/03/2020', date_format=DateFormat.DD_MM_YYYY),
+        NexusConstraint(
+            max_surface_oil_rate=2.34567, name='well1', date='01/04/2020', date_format=DateFormat.DD_MM_YYYY),
+    ]
+
+    expected_result = [
+        NexusConstraint(
+            qmult_oil_rate=12.3, qmult_water_rate=123.4, qmult_gas_rate=5.5, name='well1', max_pressure=100,
+            date='01/01/2020', date_format=DateFormat.DD_MM_YYYY, convert_qmult_to_reservoir_barrels=True
+        ),
+        NexusConstraint(
+            qmult_oil_rate=10.3, qmult_water_rate=24, qmult_gas_rate=0, max_pressure=100,
+            name='well1', date='01/02/2020', date_format=DateFormat.DD_MM_YYYY, convert_qmult_to_reservoir_barrels=True,
+        ),
+        NexusConstraint(
+            qmult_oil_rate=10.3, qmult_water_rate=24, qmult_gas_rate=0, max_pressure=200.5,
+            name='well1', date='01/03/2020', date_format=DateFormat.DD_MM_YYYY, convert_qmult_to_reservoir_barrels=True,
+        ),
+        NexusConstraint(
+            name='well1', date='01/04/2020', date_format=DateFormat.DD_MM_YYYY,
+            max_surface_oil_rate=2.34567, max_pressure=200.5,
+        ),
+    ]
+
+    # Act
+    result = NetworkOperationsMixIn.resolve_same_named_objects_constraints(constraints_for_well)
+
+    # Assert
+    assert result == expected_result

@@ -7,6 +7,8 @@ import sys
 from dataclasses import dataclass, field
 from typing import Optional, Generator, Sequence
 
+from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
+
 if sys.version_info >= (3, 11):
     from typing import Self
 else:
@@ -24,6 +26,7 @@ from ResSimpy.FileOperations.File import File
 import pathlib
 import os
 from datetime import datetime, timezone
+from ResSimpy.Utils.general_utilities import is_number
 
 
 @dataclass(kw_only=True, repr=False)
@@ -82,6 +85,27 @@ class NexusFile(File):
             self.line_locations = []
         self.linked_user = linked_user
         self.last_modified = last_modified
+
+    @staticmethod
+    def __convert_line_to_full_file_path(line: str, full_base_file_path: str) -> str:
+        """Modifies a file reference to contain the full file path for easier loading later."""
+        modified_line = line
+
+        for keyword in FCS_KEYWORDS:
+            if nfo.check_token(line=line, token=keyword):
+                second_word = fo.get_nth_value(list_of_strings=[line], value_number=2, ignore_values=['NORPT'])
+
+                if second_word is not None and second_word.upper() != 'METHOD':
+                    # We found a keyword not related to an included file. Therefore don't modify it.
+                    continue
+
+                original_file_path = fo.get_nth_value(list_of_strings=[line], value_number=4, ignore_values=['NORPT'])
+                if original_file_path is not None and not os.path.isabs(original_file_path):
+                    full_base_directory = os.path.dirname(full_base_file_path)
+                    new_file_path = os.path.join(full_base_directory, original_file_path)
+                    modified_line = modified_line.replace(original_file_path, new_file_path)
+
+        return modified_line
 
     @classmethod
     def generate_file_include_structure(cls: type[Self], file_path: str, origin: Optional[str] = None,
@@ -153,7 +177,7 @@ class NexusFile(File):
                                    file_content_as_list=None,
                                    linked_user=None,
                                    last_modified=None)
-            warnings.warn(UserWarning(f'No file found for: {file_path} while loading {origin}'))
+            warnings.warn(UserWarning(f'No file found for: {full_file_path} while loading {origin}'))
             return nexus_file_class
 
         # check last modified and user for the file
@@ -171,12 +195,24 @@ class NexusFile(File):
         for i, line in enumerate(file_as_list):
             if len(modified_file_as_list) >= 1:
                 previous_line = modified_file_as_list[len(modified_file_as_list) - 1].rstrip('\n')
+                # Handle lines continued with the '>' character
                 if previous_line.endswith('>'):
                     modified_file_as_list[len(modified_file_as_list) - 1] = previous_line[:-1] + line
                 else:
-                    modified_file_as_list.append(line)
+                    if not top_level_file:
+                        converted_line = NexusFile.__convert_line_to_full_file_path(line=line,
+                                                                                    full_base_file_path=full_file_path)
+                    else:
+                        converted_line = line
+                    modified_file_as_list.append(converted_line)
             else:
-                modified_file_as_list.append(line)
+                if not top_level_file:
+                    converted_line = NexusFile.__convert_line_to_full_file_path(line=line,
+                                                                                full_base_file_path=full_file_path)
+                else:
+                    converted_line = line
+                modified_file_as_list.append(converted_line)
+
             if line.rstrip('\n').endswith('>'):
                 continue
             if nfo.check_token("INCLUDE", line):
@@ -223,6 +259,29 @@ class NexusFile(File):
             inc_full_path = nfo.get_full_file_path(inc_file_path, origin=full_file_path)
             # store the included files as files inside the object
             inc_file_list.append(inc_full_path)
+
+            # test the include to see if the first few lines have only array data
+            # limit number of lines loaded here in future?
+            if skip_arrays:
+                try:
+                    inc_file_as_list = nfo.load_file_as_list(inc_full_path)
+                except FileNotFoundError:
+                    # handle files not found - this is handled in an exception in the main loop
+                    pass
+                else:
+                    all_numeric = False
+                    for inc_file_line in inc_file_as_list[0:50]:
+                        split_line = nfo.split_line(inc_file_line, upper=False)
+                        # check if it is numeric data
+                        # this won't work if the array has scientific notation.
+                        if any(not is_number(x) for x in split_line):
+                            # don't set skip_next_include if the line is not entirely numeric
+                            all_numeric = False
+                            break
+                        all_numeric = True
+                    if all_numeric:
+                        skip_next_include = True
+
             if not recursive:
                 continue
             elif skip_arrays and skip_next_include:

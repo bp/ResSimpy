@@ -10,10 +10,11 @@ from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 @dataclass(kw_only=True, repr=True)
 class NexusActivationChange(NetworkObject):
     change: ActivationChangeEnum
+    is_constraint_change: bool
 
     def __init__(self, change: ActivationChangeEnum, date: Optional[str] = None,
                  date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
-                 name: Optional[str] = None) -> None:
+                 name: Optional[str] = None, is_constraint_change: bool = False) -> None:
         """Initialises the NexusTarget class.
 
         Args:
@@ -22,8 +23,10 @@ class NexusActivationChange(NetworkObject):
             date_format (Optional[DateFormat]): The date format that the object uses.
             start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
             name (Optional[str]): The name of the object that is being activated / deactivated.
+            is_constraint_change (bool): Whether the activation change is the result of a constraint block or not.
         """
         self.change = change
+        self.is_constraint_change = is_constraint_change
         super().__init__(date_format=date_format, start_date=start_date, name=name, date=date)
 
     @staticmethod

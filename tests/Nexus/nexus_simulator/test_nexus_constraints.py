@@ -3,6 +3,7 @@ import pandas as pd
 import pytest
 from pytest_mock import MockerFixture
 
+from ResSimpy.DataModelBaseClasses.OperationsMixin import NetworkOperationsMixIn
 from ResSimpy.Time.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
@@ -126,7 +127,7 @@ from tests.utility_for_tests import get_fake_nexus_simulator
        'unit_system': UnitSystem.ENGLISH, 'qmult_oil_rate': 10.2, 'qmult_gas_rate': 123, 'qmult_water_rate': 203,
        'well_name': 'well3'},
       )),
-
+   
     #'Clearing Constraints'
     ('''
     CONSTRAINTS
@@ -242,10 +243,48 @@ ENDCONSTRAINTS
        'unit_system': UnitSystem.ENGLISH},
       {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
        'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH})),
+   
+    # QALLMAX None values
+    (''' 
+    CONSTRAINTS        
+well1   PMIN    5.0
+well1  QALLMAX 0.00
+well1  QGSMAX  0.00
+ENDCONSTRAINTS
+
+    CONSTRAINTS
+well1  ACTIVATE
+well1 QALLMAX NONE QALLRMAX NONE QOSMIN 20 QOSMAX 2025.52
+well1 QGSMAX 204015021.2
+ENDCONSTRAINTS
+''',
+     ({'date': '01/01/2019', 'name': 'well1', 'min_surface_oil_rate': 20.0, 'max_surface_oil_rate': 2025.52,
+       'max_surface_gas_rate': 204015021.2, 'active_node': True, 'unit_system': UnitSystem.ENGLISH,
+       'min_pressure': 5.0},
+      )),
+    
+    # two constraint tables 1 date same well
+    ('''TIME 01/04/2024
+
+CONSTRAINTS
+well1      ACTIVATE
+well1           DPBHAVG 10.24
+well1            QALLMAX NONE    QALLRMAX NONE   QOSMIN 25.2     QOSMAX 4000.49
+well1            QGSMAX 12222.26
+well1           WCUTMAX 0.90
+ENDCONSTRAINTS
+
+CONSTRAINTS
+well1           WCUTMAX 0.95
+ENDCONSTRAINTS
+''',
+     ({'date': '01/04/2024', 'name': 'well1', 'max_avg_comp_dp': 10.24, 'max_reservoir_total_fluids_rate': None,
+       'max_qmult_total_reservoir_rate': None, 'min_surface_oil_rate': 25.2, 'max_surface_oil_rate': 4000.49,
+       'max_surface_gas_rate': 12222.26, 'max_watercut': 0.95, 'active_node': True, 'unit_system': UnitSystem.ENGLISH},))
 ], ids=['basic_test', 'Change in Time', 'more Keywords', 'constraint table', 'multiple constraints on same well',
         'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword', 'GORLIM_drawdowncards',
         'MULT keyword with a number after it', 'loading in pressure', 'line continuation',
-        'line continuation with whitespace'])
+        'line continuation with whitespace', 'QALLMAX None values',  'two constraint tables 1 date same well'])
 def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'
@@ -281,9 +320,8 @@ def test_load_constraints(mocker, file_contents, expected_content):
 
     expected_single_name_constraint = {'well1': expected_constraints['well1']}
     mock_nexus_network = mocker.MagicMock()
-    mock_nexus_network._
     mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
-    expected_df = pd.DataFrame(expected_content)
+    expected_df = pd.DataFrame([{k: v for k, v in x.items() if v is not None} for x in expected_content])
 
     mock_nexus_sim = get_fake_nexus_simulator(mocker)
 
@@ -590,3 +628,80 @@ def test_load_constraints_welllist(mocker: MockerFixture):
     # Assert
     assert result['well_1'] == [well_1_expected_constraint_1, well_1_expected_constraint_2]
     assert result['well_2'] == [well_2_expected_constraint_1, well_2_expected_constraint_2]
+
+
+def test_load_constraints_deactivated_then_activated_differently(mocker: MockerFixture):
+    # Arrange
+    fcs_file_contents = '''
+         RUN_UNITS ENGLISH
+         DATEFORMAT DD/MM/YYYY
+         RECURRENT_FILES
+         RUNCONTROL /nexus_data/runcontrol.dat
+         SURFACE Network 1  /surface_file_01.dat
+         Wells Set 1 /wells.dat
+         '''
+    runcontrol_contents = '''START 24/09/2021'''
+
+    surface_file_contents = """
+WELLS
+NAME    STREAM    IBAT    IPVT
+well_1  PRODUCER    1    1
+ENDWELLS
+
+CONSTRAINTS
+well_1 DEACTIVATE
+ENDCONSTRAINTS
+
+CONSTRAINTS
+    well_1	 QWSMAX 1234
+ENDCONSTRAINTS
+
+TIME 25/07/2026
+ACTIVATE
+CONNECTION
+well_1
+ENDACTIVATE
+
+TIME 26/07/2026
+CONSTRAINTS
+    well_1	 QWSMAX 4321
+ENDCONSTRAINTS
+
+"""
+    wellspec_file_contents = """
+        WELLSPEC well_1
+        IW JW L RADW KHMULT SKIN
+        1  2  3  4.5 NA 00.00
+    """
+
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            '/path/fcs_file.fcs': fcs_file_contents,
+            '/surface_file_01.dat': surface_file_contents,
+            '/nexus_data/runcontrol.dat': runcontrol_contents,
+            '/wells.dat': wellspec_file_contents}
+                                        ).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+    nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
+
+    well_1_expected_constraint_0 = NexusConstraint(date='24/09/2021', start_date='24/09/2021', name='well_1',
+                                                   active_node=False, date_format=DateFormat.DD_MM_YYYY,
+                                                   unit_system=UnitSystem.ENGLISH, max_surface_water_rate=1234.0)
+
+    well_1_expected_constraint_1 = NexusConstraint(date='26/07/2026', start_date='24/09/2021', name='well_1',
+                                                   active_node=None, max_surface_water_rate=4321,
+                                                   date_format=DateFormat.DD_MM_YYYY, unit_system=UnitSystem.ENGLISH)
+
+    # Act
+    constraints = nexus_sim.network.constraints.get_all()['well_1']
+    result = NetworkOperationsMixIn.resolve_same_named_objects_constraints(constraints)
+    ordered_result = sorted(result, key=lambda x: x.iso_date)
+
+    # Assert
+    assert len(ordered_result) == 2
+    assert ordered_result[0] == well_1_expected_constraint_0
+    assert ordered_result[1] == well_1_expected_constraint_1

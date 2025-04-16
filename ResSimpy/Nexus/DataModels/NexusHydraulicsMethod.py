@@ -154,7 +154,7 @@ class NexusHydraulicsMethod(DynamicProperty):
             while line_indx < len(file_as_list0):
                 prev_line = file_as_list[-1]
                 line = file_as_list0[line_indx]
-                if prev_line.endswith(('>', '>\n')):
+                if prev_line.rstrip().endswith(('>', '>\n')):
                     file_as_list[-1] = prev_line.split('>')[0] + ' ' + line.strip()
                 else:
                     file_as_list.append(line)

@@ -1566,13 +1566,16 @@ def test_nested_includes_with_grid_array_keywords(mocker):
 @pytest.mark.parametrize('structured_grid_file_contents, modifier, full_file_path, expected_value', [
     ('''! Array data
     KX VALUE
-    INCLUDE inc_file_kx.inc''', 'VALUE', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc'), 'inc_file_kx.inc'),
+    INCLUDE inc_file_kx.inc''', 'VALUE', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc'),
+     'inc_file_kx.inc'),
     ('''! Array data
      KX ZVAR
-     INCLUDE inc_file_kx.inc''', 'ZVAR', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc'), 'inc_file_kx.inc'),
+     INCLUDE inc_file_kx.inc''', 'ZVAR', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc'),
+     'inc_file_kx.inc'),
     ('''! Array data
     KX YVAR
-    INCLUDE inc_file_kx.inc''', 'YVAR', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc'), 'inc_file_kx.inc'),
+    INCLUDE inc_file_kx.inc''', 'YVAR', os.path.join('/root', 'nexus_files/grid', 'inc_file_kx.inc'),
+     'inc_file_kx.inc'),
     # Value directly in grid file
     ('''! Array data
     KX VALUE
@@ -1721,7 +1724,7 @@ KY CON
     model = NexusSimulator('testpath1/nexus_run.fcs')
     # Act
     result = model.grid
-    result_lgr = result.lgrs.lgrs[0]
+    result_lgr = result.lgrs.lgr_list[0]
 
     # assert
     assert result.kx == expected_root_kx
@@ -1729,7 +1732,7 @@ KY CON
     assert result_lgr == expected_lgr
     assert result_lgr.kx == expected_lgr._kx
     assert result_lgr.ky == expected_lgr._ky
-    assert len(result.lgrs.lgrs) == 1
+    assert len(result.lgrs.lgr_list) == 1
 
 
 def test_load_lgrs(mocker):
@@ -1796,7 +1799,7 @@ def test_load_lgrs(mocker):
     # Act
     nexus_model = NexusSimulator(origin='/path/to/nexus/fcsfile.dat')
     kx_array = nexus_model.grid.kx
-    lgr_kx_array = nexus_model.grid.lgrs.lgrs[0].kx
+    lgr_kx_array = nexus_model.grid.lgrs.lgr_list[0].kx
 
     # Assert
     assert kx_array.modifier == 'VALUE'
@@ -1903,9 +1906,9 @@ INCLUDE  SW.dat
                                       mods={'MOD': pd.DataFrame({'i1': [1], 'i2': [57], 'j1': [1], 'j2': [57],
                                                                  'k1': [1], 'k2': [82], '#v': ['*1.10']})})
     expected_kx = GridArrayDefinition(modifier='ZVAR', value='KX.dat',
-                                        absolute_path=os.path.join('/path/to/grid', 'KX.dat'),
-                                        mods={'MOD': pd.DataFrame({'i1': [1], 'i2': [57], 'j1': [1], 'j2': [57],
-                                                                     'k1': [1], 'k2': [82], '#v': ['*1.10']})})
+                                      absolute_path=os.path.join('/path/to/grid', 'KX.dat'),
+                                      mods={'MOD': pd.DataFrame({'i1': [1], 'i2': [57], 'j1': [1], 'j2': [57],
+                                                                 'k1': [1], 'k2': [82], '#v': ['*1.10']})})
 
     nexus_model = NexusSimulator(origin='/path/to/nexus/fcsfile.dat')
 
@@ -1917,16 +1920,17 @@ INCLUDE  SW.dat
     # Assert
     assert nexus_model.grid.ky.absolute_path is not None
     assert result_sw == expected_sw
-    
+
     assert result_kz.value == expected_kz.value
     assert result_kz.modifier == expected_kz.modifier
     assert result_kz.absolute_path == expected_kz.absolute_path
     pd.testing.assert_frame_equal(result_kz.mods['MOD'], expected_kz.mods['MOD'])
-    
+
     assert result_kx.value == expected_kx.value
     assert result_kx.modifier == expected_kx.modifier
-    assert result_kx.absolute_path == expected_kx.absolute_path    
+    assert result_kx.absolute_path == expected_kx.absolute_path
     pd.testing.assert_frame_equal(nexus_model.grid.kx.mods['MOD'], expected_kx.mods['MOD'])
+
 
 def test_load_arrays_with_different_grid_names_to_lgr_class_none_keyword(mocker):
     fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
@@ -1987,19 +1991,20 @@ MOD
                                            keyword_in_include_file=False, absolute_path=None, array=None)
     expected_lgr._iregion = {'IREG1': GridArrayDefinition(modifier=None, value=None, mods={'MOD': pd.DataFrame(
         {'i1': [1, 11], 'i2': [10, 20], 'j1': [1, 1], 'j2': [10, 10], 'k1': [1, 2], 'k2': [1, 2], '#v': ['=1', '=2']})},
-                                                keyword_in_include_file=False, absolute_path=None, array=None)}
-    
+                                                          keyword_in_include_file=False, absolute_path=None,
+                                                          array=None)}
+
     model = NexusSimulator('testpath1/nexus_run.fcs')
     # Act
     result = model.grid
-    result_lgr = result.lgrs.lgrs[0]
+    result_lgr = result.lgrs.lgr_list[0]
     result_iregion = result_lgr.iregion['IREG1']
 
     # Assert
     pd.testing.assert_frame_equal(result_lgr.kx.mods['MOD'], expected_lgr.kx.mods['MOD'])
     assert result_lgr.kx.value == expected_lgr.kx.value
     assert result_lgr.kx.modifier == expected_lgr.kx.modifier
-    assert len(result.lgrs.lgrs) == 1
+    assert len(result.lgrs.lgr_list) == 1
     assert result_iregion.value == expected_lgr._iregion['IREG1'].value
     assert result_iregion.modifier == expected_lgr._iregion['IREG1'].modifier
     pd.testing.assert_frame_equal(result_iregion.mods['MOD'], expected_lgr._iregion['IREG1'].mods['MOD'])
@@ -2079,25 +2084,91 @@ INCLUDE iregion_mod.mod
     # set up iregion dataframe
     expected_lgr._iregion = {'IREG1': GridArrayDefinition(modifier=None, value=None, mods={'MOD': pd.DataFrame(
         {'i1': [1, 11], 'i2': [10, 20], 'j1': [1, 1], 'j2': [10, 10], 'k1': [1, 2], 'k2': [1, 2], '#v': ['=1', '=2']})},
-                                                keyword_in_include_file=False, absolute_path=None, array=None)}
+                                                          keyword_in_include_file=False, absolute_path=None,
+                                                          array=None)}
 
     model = NexusSimulator('testpath1/nexus_run.fcs')
     # Act
     result = model.grid
-    result_lgr = result.lgrs.lgrs[0]
+    result_lgr = result.lgrs.lgr_list[0]
     result_iregion = result_lgr.iregion['IREG1']
 
     # Assert
     pd.testing.assert_frame_equal(result_lgr.kx.mods['MOD'], expected_lgr.kx.mods['MOD'])
     assert result_lgr.kx.value == expected_lgr.kx.value
     assert result_lgr.kx.modifier == expected_lgr.kx.modifier
-    assert len(result.lgrs.lgrs) == 1
+    assert len(result.lgrs.lgr_list) == 1
     assert result_iregion.value == expected_lgr._iregion['IREG1'].value
     assert result_iregion.modifier == expected_lgr._iregion['IREG1'].modifier
     pd.testing.assert_frame_equal(result_iregion.mods['MOD'], expected_lgr._iregion['IREG1'].mods['MOD'])
 
 
-def test_read_mods(mocker):
+@pytest.mark.parametrize("input_grid_file, expected_ipvt_mod", [
+    ("""IPVT CON
+1
+MOD 
+1 5 1 2 1 1 = 2\t! A comment
+1 5 3 4 1 1 =3 ! A comment
+
+SG ZVAR
+5*0.8
+5*0.2
+""",
+     pd.DataFrame({'i1': [1, 1], 'i2': [5, 5], 'j1': [1, 3], 'j2': [2, 4],
+                   'k1': [1, 1], 'k2': [1, 1], '#v': ['=2', '=3']})
+     ),
+    ("""IPVT CON
+1
+MOD
+1 5 1 2 1 1 = 2\t! A comment
+1 5 3 4 1 1 =3 ! A comment
+SKIP
+MOD 
+12 55 11 21 11 11 = 12050\t! A comment
+12 55 31 41 11 11 =330303 ! A comment
+NOSKIP
+
+SG ZVAR
+5*0.8
+5*0.2
+""",
+     pd.DataFrame({'i1': [1, 1], 'i2': [5, 5], 'j1': [1, 3], 'j2': [2, 4],
+                   'k1': [1, 1], 'k2': [1, 1], '#v': ['=2', '=3']})
+     ),
+    ("""IPVT CON
+1
+MOD
+1 5 1 2 1 1 = 2\t! A comment
+SKIP
+MOD 
+12 55 11 21 11 11 = 12050\t! A comment
+12 55 31 41 11 11 =330303 ! A comment
+NOSKIP
+1 5 3 4 1 1 =3 ! A comment
+
+SG ZVAR
+5*0.8
+5*0.2
+""",
+     pd.DataFrame({'i1': [1, 1], 'i2': [5, 5], 'j1': [1, 3], 'j2': [2, 4],
+                   'k1': [1, 1], 'k2': [1, 1], '#v': ['=2', '=3']})
+     ),
+    ("""IPVT CON
+1
+SKIP
+MOD
+1 5 1 2 1 1 = 2\t! A comment
+12 55 11 21 11 11 = 12050\t! A comment
+12 55 31 41 11 11 =330303 ! A comment
+NOSKIP
+
+SG ZVAR
+5*0.8
+5*0.2
+""",
+     None),
+])
+def test_read_mods(mocker, input_grid_file, expected_ipvt_mod, ):
     # Arrange
     input_run_control = "START 01/07/2023"
     input_nexus_fcs_file = """DATEFORMAT DD/MM/YYYY
@@ -2110,13 +2181,14 @@ def test_read_mods(mocker):
         SURFACE Network 1  /surface_file_01.dat
 
         """
-    input_grid_file = """
-
+    
+    base_grid_file = """
+    
 NX NY NZ
 69 30  1
 
 KX VALUE
-INCLUDE BLAH/BLAH
+INCLUDE kx_array.inc
 
 KY CON
 200.50
@@ -2133,17 +2205,9 @@ ENDLGR
 ARRAYS lgr_01
 KX VALUE
 INCLUDE permx_array.dat
-
-IPVT CON
-1
-MOD 
-1 5 1 2 1 1 = 2\t! A comment
-1 5 3 4 1 1 =3 ! A comment
-
-SG ZVAR
-5*0.8
-5*0.2
 """
+    input_grid_file = base_grid_file + input_grid_file
+    
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             '/path/to/nexus/fcsfile.dat': input_nexus_fcs_file,
@@ -2153,6 +2217,7 @@ SG ZVAR
         }
                                         ).return_value
         return mock_open
+
     mocker.patch("builtins.open", mock_open_wrapper)
 
     listdir_mock = mocker.Mock(return_value=[])
@@ -2165,15 +2230,70 @@ SG ZVAR
 
     mocker.patch("os.path.isfile", mock_isfile)
     mocker.patch("os.path.exists", mock_isfile)
-    
-    expected_ipvt_mod = pd.DataFrame({'i1': [1, 1], 'i2': [5, 5], 'j1': [1, 3], 'j2': [2, 4], 
-                                      'k1': [1, 1], 'k2': [1, 1], '#v': ['=2', '=3']})
 
     # Act
     nexus_model = NexusSimulator(origin='/path/to/nexus/fcsfile.dat')
-    
+
     # Assert
-    x = nexus_model.grid.kx
-    ipvt_mods = nexus_model.grid.lgrs.lgrs[0].ipvt.mods['MOD']
-    assert len(ipvt_mods) == 2
-    pd.testing.assert_frame_equal(ipvt_mods, expected_ipvt_mod)
+    _ = nexus_model.grid.kx
+    ipvt_mods = nexus_model.grid.lgrs.lgr_list[0].ipvt.mods
+    ipvt_mods = ipvt_mods['MOD'] if ipvt_mods is not None else None
+    if expected_ipvt_mod is not None:
+        pd.testing.assert_frame_equal(ipvt_mods, expected_ipvt_mod)
+    else:
+        assert ipvt_mods is None
+
+
+def test_load_structured_grid_file_vmod(mocker):
+    """Read in VMOD keyword with include file after."""
+    # Arrange
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents = """ARRAYS ROOT
+! grid
+NX  NY  NZ
+10  10  10
+
+NETGRS VALUE
+INCLUDE NTG.inc
+VMOD
+1 10 1 10  1 5 EQ  ! comment
+INCluDE vmod_1.inc ! comment
+VMOD
+1 10 1 10  6 10 EQ
+
+INCLUDE /vmod_2.inc
+
+"""  # ends structured_grid_file_contents
+    # set up dataframe
+    i1 = [1, 1]
+    i2 = [10, 10]
+    j1 = [1, 1]
+    j2 = [10, 10]
+    k1 = [1, 6]
+    k2 = [5, 10]
+    operation = ['EQ', 'EQ']
+    include_file = [os.path.join('testpath1', 'vmod_1.inc'), '/vmod_2.inc']
+    expected_vmod = pd.DataFrame({'i1': i1, 'i2': i2, 'j1': j1, 'j2': j2, 'k1': k1, 'k2': k2, 'operation': operation,
+                                  'include_file': include_file})
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+        {'testpath1/nexus_run.fcs': fcs_file_contents,
+         '/run_control/path': '',
+         structured_grid_name: structured_grid_file_contents,
+         # include_file_location: include_file_contents
+         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
+    result = simulation.grid
+
+    # Assert
+    assert result.netgrs.keyword_in_include_file is False
+    pd.testing.assert_frame_equal(result.netgrs.mods['VMOD'], expected_vmod)
+    assert result.netgrs.modifier == 'VALUE'
+    assert result.netgrs.value == 'NTG.inc'

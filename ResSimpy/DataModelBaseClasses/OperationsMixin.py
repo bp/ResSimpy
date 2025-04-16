@@ -225,12 +225,27 @@ class NetworkOperationsMixIn(ABC):
                 setattr(last_resolved_copy, clear_attr, None)
 
             skip_attributes = ['id', 'date', 'name', 'iso_date', 'clear_q', 'clear_p', 'clear_limit', 'clear_alq',
-                               'clear_all']
+                               'clear_all', 'convert_qmult_to_reservoir_barrels', 'active_node']
             for attr, value in last_resolved_copy.__dict__.items():
                 if value is None or attr in skip_attributes:
                     continue
                 if getattr(unresolved_obj, attr, None) is None:
                     setattr(new_resolved_object, attr, value)
+
+            # resolve convert_qmult_to_reservoir_barrels
+            if last_resolved_object.convert_qmult_to_reservoir_barrels:
+                overriding_qmult_constraints = [unresolved_obj.max_surface_gas_rate,
+                                                unresolved_obj.max_surface_water_rate,
+                                                unresolved_obj.max_surface_oil_rate,
+                                                ]
+                if any(x for x in overriding_qmult_constraints if x is not None):
+                    # clear any qmult constraints if any of the surface rate constraints for oil, gas, water are set
+                    new_resolved_object.convert_qmult_to_reservoir_barrels = None
+                    new_resolved_object.qmult_oil_rate = None
+                    new_resolved_object.qmult_gas_rate = None
+                    new_resolved_object.qmult_water_rate = None
+                else:
+                    new_resolved_object.convert_qmult_to_reservoir_barrels = True
 
             resolved_objects.append(new_resolved_object)
         return resolved_objects

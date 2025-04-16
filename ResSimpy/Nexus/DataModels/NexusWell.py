@@ -47,7 +47,7 @@ class NexusWell(Well):
         super().__init__(well_name=well_name, completions=completions, unit_system=unit_system, well_type=well_type)
 
     def __repr__(self) -> str:
-        return generic_repr(self)
+        return generic_repr(self, exclude_attributes=['_parent_wells_instance'])
 
     def __str__(self) -> str:
         return generic_str(self)

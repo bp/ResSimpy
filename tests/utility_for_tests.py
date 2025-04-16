@@ -8,15 +8,38 @@ from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
 
-def check_file_read_write_is_correct(expected_file_contents: str, modifying_mock_open: Mock,
-                                     mocker_fixture: MockerFixture, write_file_name: str, number_of_writes=1,
-                                     expected_write_method='w'):
+def check_file_read_write_is_correct(expected_file_writes: list[tuple[str, str]], modifying_mock_open: Mock) -> None:
+    """Utility test function that checks if the calls to write to files using open match what is expected.
+
+       Args:
+           expected_file_writes: (list[tuple[str, str]]): A list of the expected calls to write. Each entry in the list
+            is a tuple with the first part being the expected location to write to, and the second part being the
+            expected contents of the file.
+           modifying_mock_open (Mock): The mock object being used to mock out `open()`.
+
+       Raises:
+           ValueError: If there is a call to write that isn't listed in the expected file writes.
+       """
+
+    # Check that the number of calls to write is as expected.
+    number_of_writes = len(expected_file_writes)
     assert len(modifying_mock_open.call_args_list) == number_of_writes
-    assert modifying_mock_open.call_args_list[0] == mocker_fixture.call(write_file_name, expected_write_method)
-    # Get all the calls to write() and check that the contents are what we expect
     list_of_writes = [call for call in modifying_mock_open.mock_calls if 'call().write' in str(call)]
     assert len(list_of_writes) == number_of_writes
-    assert list_of_writes[-1].args[0] == expected_file_contents
+
+    # Loop through all of the writes that actually happened, and confirm they match what we expected.
+    for c, write_call in enumerate(list_of_writes):
+        write_matched = False
+        write_location = modifying_mock_open.call_args_list[c].args[0]
+        for file in expected_file_writes:
+            if file[0] == write_location:
+                assert write_call.args[0] == file[1]
+                write_matched = True
+                expected_file_writes.remove(file)
+
+        if not write_matched:
+            raise ValueError(f"Unexpected write found at location: {write_location}")
+
 
 
 def check_sequential_write_is_correct(expected_file_contents: list[str], modifying_mock_open: Mock,

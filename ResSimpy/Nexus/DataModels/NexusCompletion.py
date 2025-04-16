@@ -461,3 +461,5 @@ class NexusCompletion(Completion):
                 setattr(self, '_NexusCompletion__' + k, v)
             elif hasattr(super(), '_Completion__' + k):
                 setattr(self, '_Completion__' + k, v)
+            elif hasattr(self, '_' + k):
+                setattr(self, '_' + k, v)
