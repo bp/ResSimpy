@@ -1252,22 +1252,24 @@ WELLSPEC        SP6     !FINAL_zMD_DC1_SP1_B2_JLPP      MD2
 
     expected_completion_1 = NexusCompletion(date=expected_date, i=163, j=126, k=9, grid='ROOT', angle_a=108.345,
                                             angle_v=38.5919, length=11.8571, well_radius=0.35, status='ON',
-                                            kh_mult=0.786908177144367, skin=0, date_format=DateFormat.DD_MM_YYYY,
+                                            perm_thickness_mult=0.786908177144367, skin=0,
+                                            date_format=DateFormat.DD_MM_YYYY,
                                             start_date=start_date)
 
     expected_completions_2 = NexusCompletion(date=expected_date, i=163, j=126, k=10, grid='ROOT', angle_a=108.274,
                                              angle_v=38.5919, length=11.8544, well_radius=0.35, status='ON',
-                                             kh_mult=0.786908177144367, skin=0, date_format=DateFormat.DD_MM_YYYY,
+                                             perm_thickness_mult=0.786908177144367, skin=0,
+                                             date_format=DateFormat.DD_MM_YYYY,
                                              start_date=start_date)
 
     expected_completions_3 = NexusCompletion(date=expected_date, i=163, j=126, k=11, grid='ROOT', angle_a=108.204,
                                              angle_v=38.5919, length=11.8531, well_radius=0.35, status='ON',
-                                             kh_mult=0.786908177144367, skin=0, date_format=date_format,
+                                             perm_thickness_mult=0.786908177144367, skin=0, date_format=date_format,
                                              start_date=start_date)
 
     expected_completions_4 = NexusCompletion(date=expected_date, i=163, j=126, k=12, grid='ROOT', angle_a=108.132,
                                              angle_v=38.5919, length=11.8492, well_radius=0.35, status='ON',
-                                             kh_mult=0.786908177144367, skin=0, date_format=date_format,
+                                             perm_thickness_mult=0.786908177144367, skin=0, date_format=date_format,
                                              start_date=start_date)
 
     # mock out open to return our test file contents
