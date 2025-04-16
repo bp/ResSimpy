@@ -59,6 +59,7 @@ class NexusWellConnection(WellConnection):
     drill_queue (str): Drill queue identifier (ASSCDR)
     drill_order_benefit (float): Benefit of the drill order (BENEFIT)
     is_activated (bool): Whether the Well Connection has been activated using ACTIVATED / DEACTIVATE. Defaults to True.
+    well_index_mult (Optional[float]): Well index multiplier (WIMULT).
     """
 
     bh_node_name: Optional[str] = None
@@ -182,6 +183,7 @@ class NexusWellConnection(WellConnection):
             i (Optional[int]): The location of the Well Connection in the i direction.
             j (Optional[int]): The location of the Well Connection in the j direction.
             productivity_index (Optional[float]): Productivity index (PI).
+            well_index_mult (Optional[float]): Well index multiplier (WIMULT).
         """
 
         self.bh_node_name = bh_node_name
