@@ -34,6 +34,7 @@ class WellConnection(NetworkObject, ABC):
     pvt_method: Optional[int] = None
     d_factor: Optional[float] = None
     on_time: Optional[float] = None
+    well_index_mult: Optional[float] = None
 
     def __init__(self, properties_dict: Optional[dict[str, None | int | str | float]] = None,
                  date: Optional[str] = None, date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
@@ -46,7 +47,8 @@ class WellConnection(NetworkObject, ABC):
                  x_pos: Optional[float] = None, y_pos: Optional[float] = None, length: Optional[float] = None,
                  temperature: Optional[float] = None, diameter: Optional[float] = None,
                  inner_diameter: Optional[float] = None, roughness: Optional[float] = None,
-                 productivity_index: Optional[float] = None, hyd_method: Optional[str] = None) -> None:
+                 productivity_index: Optional[float] = None, hyd_method: Optional[str] = None,
+                 well_index_mult: Optional[float] = None) -> None:
         """Initialises the WellConnection class.
 
         Args:
@@ -79,6 +81,7 @@ class WellConnection(NetworkObject, ABC):
             roughness (Optional[float]): Pipe roughness (ROUGHNESS).
             productivity_index (Optional[float]): Productivity index (PI).
             hyd_method (Optional[str]): Hydraulic method (METHOD).
+            well_index_mult (Optional[float]): Well index multiplier (WIMULT).
         """
 
         self.bhdepth = bhdepth
@@ -91,6 +94,7 @@ class WellConnection(NetworkObject, ABC):
         self.roughness = roughness
         self.productivity_index = productivity_index
         self.hyd_method = hyd_method
+        self.well_index_mult = well_index_mult
 
         super().__init__(properties_dict=properties_dict, date=date, date_format=date_format, start_date=start_date,
                          unit_system=unit_system, name=name)
@@ -108,6 +112,7 @@ class WellConnection(NetworkObject, ABC):
         self.pvt_method = pvt_method if pvt_method is not None else self.pvt_method
         self.d_factor = d_factor if d_factor is not None else self.d_factor
         self.on_time = on_time if on_time is not None else self.on_time
+        self.well_index_mult = well_index_mult if well_index_mult is not None else self.well_index_mult
 
     @property
     def units(self) -> NetworkUnits:
