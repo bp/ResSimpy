@@ -280,7 +280,7 @@ class StructuredGridOperations:
     @staticmethod
     def append_include_to_grid_file(include_file_location: str, structured_grid_file_path: str) -> None:
         # TODO: change append to be an optional parameter
-        """Appe7nds an include file to the end of a grid for adding LGRs.
+        """Appends an include file to the end of a grid for adding LGRs.
 
         Args:
         ----
