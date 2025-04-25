@@ -20,7 +20,7 @@ class NetworkLists(ABC):
 
     @property
     @abstractmethod
-    def _network_element_name(self) -> Literal['conlists', 'welllists', 'node_lists']:
+    def _network_element_name(self) -> Literal['conlists', 'welllists', 'nodelists']:
         raise NotImplementedError('This method must be implemented in the derived class.')
 
     @property
@@ -35,13 +35,13 @@ class NetworkLists(ABC):
 
     @staticmethod
     @abstractmethod
-    def table_header() -> Literal['WELLLIST', 'CONLIST']:
+    def table_header() -> Literal['WELLLIST', 'CONLIST', 'NODELIST']:
         """Start of the table."""
         raise NotImplementedError('This method must be implemented in the derived class.')
 
     @staticmethod
     @abstractmethod
-    def table_footer() -> Literal['ENDWELLLIST', 'ENDCONLIST']:
+    def table_footer() -> Literal['ENDWELLLIST', 'ENDCONLIST', 'ENDNODELIST']:
         """End of the table."""
         raise NotImplementedError('This method must be implemented in the derived class.')
 

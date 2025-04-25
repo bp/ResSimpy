@@ -61,6 +61,7 @@ class NexusWellConnection(WellConnection):
     drill_queue (str): Drill queue identifier (ASSCDR)
     drill_order_benefit (float): Benefit of the drill order (BENEFIT)
     is_activated (bool): Whether the Well Connection has been activated using ACTIVATED / DEACTIVATE. Defaults to True.
+    well_index_mult (Optional[float]): Well index multiplier (WIMULT).
     """
 
     bh_node_name: Optional[str] = None
@@ -189,7 +190,6 @@ class NexusWellConnection(WellConnection):
             crossflow (Optional[str]): Crossflow identifier (CROSSFLOW).
             on_time (Optional[float]): On-time duration (ONTIME).
             heat_transfer_coeff (Optional[float]): Heat transfer coefficient (HTC).
-            well_index_mult (Optional[float]): Well index multiplier (WIMULT).
             vip_productivity_index (Optional[float]): VIP productivity index identifier (VIPPI).
             productivity_index_phase (Optional[str]): Productivity index phase identifier (PIPHASE).
             d_factor (Optional[float]): Non-Darcy D-factor (D).
@@ -223,6 +223,7 @@ class NexusWellConnection(WellConnection):
             i (Optional[int]): The location of the Well Connection in the i direction.
             j (Optional[int]): The location of the Well Connection in the j direction.
             productivity_index (Optional[float]): Productivity index (PI).
+            well_index_mult (Optional[float]): Well index multiplier (WIMULT).
         """
 
         self.bh_node_name = bh_node_name
@@ -263,8 +264,8 @@ class NexusWellConnection(WellConnection):
                          properties_dict=properties_dict, bhdepth=bhdepth, datum_depth=datum_depth, x_pos=x_pos,
                          y_pos=y_pos, length=length, temperature=temperature, diameter=diameter, roughness=roughness,
                          inner_diameter=inner_diameter, productivity_index=productivity_index, hyd_method=hyd_method,
-                         group=group, i=i, j=j, drainage_radius=drainage_radius, crossflow=crossflow,
-                         crossshut=crossshut)
+                         group=group, i=i, j=j, drainage_radius=drainage_radius, well_index_mult=well_index_mult,
+                         crossflow=crossflow, crossshut=crossshut)
 
         if self.name is not None:
             self.bh_node_name = self.name + '%bh'

@@ -4,8 +4,8 @@ from pytest_mock import MockerFixture
 import ResSimpy.FileOperations.file_operations as fo
 
 
-@pytest.mark.parametrize("line_contents, file_contents, expected_result", [
-    ("MYTESTTOKEN 3", "MYTESTTOKEN 3\n ANOTHER_TOKEN 8", '3'),
+@pytest.mark.parametrize("line_contents, file_contents, expected_result, expected_line_index", [
+    ("MYTESTTOKEN 3", "MYTESTTOKEN 3\n ANOTHER_TOKEN 8", '3', 0),
     ("MYTESTTOKEN 123",
      """GOTABLE 
                SG         KRG        KROG        PCGO
@@ -19,7 +19,7 @@ import ResSimpy.FileOperations.file_operations as fo
           FINALTOKEN 90
 
           """,
-     '123'),
+     '123', 7),
     ("MYTESTTOKEN",
      """GOTABLE 
        SG         KRG        KROG        PCGO
@@ -35,27 +35,35 @@ MYTESTTOKEN
   FINALTOKEN 90
 
   """,
-     '7'),
+     '7', 9),
     ("MYTESTTOKEN",
      '''MYTESTTOKEN
      C Comment line
      token_value''',
-     'token_value'),
+     'token_value', 2),
     ("not a comment C MYTESTTOKEN",
      '''not a comment C MYTESTTOKEN
      C Comment line
      C
      Ctoken_value''',
-     'Ctoken_value'),
+     'Ctoken_value', 3),
     ("MYTESTTOKEN",
      '''MYTESTTOKEN
      C Comment line
      "token value"''',
-     'token value'),
+     'token value', 2),
+    
+    ("Values before MYTESTTOKEN",
+     '''Values before MYTESTTOKEN
+     C Comment line
+     ! another comment
+     !comment
+     "token value"''',
+     'token value', 4),
 
 ], ids=['basic case', 'multiple lines', 'value on next line', 'Comment character C', 'complex C comment'
-    , 'get value in double quotes'])
-def test_get_token_value(mocker: MockerFixture, line_contents, file_contents, expected_result):
+    , 'get value in double quotes', 'more values before token'])
+def test_get_token_value(mocker: MockerFixture, line_contents, file_contents, expected_result, expected_line_index):
     # Arrange
     dummy_file_as_list = [y for y in (x.strip() for x in file_contents.splitlines()) if y]
     open_mock = mocker.mock_open(read_data=file_contents)
@@ -64,9 +72,11 @@ def test_get_token_value(mocker: MockerFixture, line_contents, file_contents, ex
     # Act
     result = fo.get_token_value(token='MYTESTTOKEN', token_line=line_contents,
                                 file_list=dummy_file_as_list)
-
+    with_index_result = fo.get_token_value_with_line_index(token='MYTESTTOKEN', token_line=line_contents,
+                                file_list=dummy_file_as_list)
     # Assert
     assert result == expected_result
+    assert with_index_result == (expected_result, expected_line_index)
 
 
 @pytest.mark.parametrize("line, number_tokens, expected_result", [

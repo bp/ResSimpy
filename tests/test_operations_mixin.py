@@ -291,10 +291,8 @@ def test_apply_clears_from_read(mocker):
     assert resolved_constraints['well2'][1].max_surface_liquid_rate == 20.02
     assert resolved_constraints['well2'][1].min_pressure == 1200
 
-
-def test_override_qallrmax():
-    # Arrange
-    constraints_for_well = [
+@pytest.mark.parametrize('constraints_for_well, expected_result',[
+    ([
         NexusConstraint(
             qmult_oil_rate=12.3, qmult_water_rate=123.4, qmult_gas_rate=5.5, name='well1', max_pressure=100,
             date='01/01/2020', date_format=DateFormat.DD_MM_YYYY, convert_qmult_to_reservoir_barrels=True),
@@ -305,9 +303,8 @@ def test_override_qallrmax():
             max_pressure=200.5, name='well1', date='01/03/2020', date_format=DateFormat.DD_MM_YYYY),
         NexusConstraint(
             max_surface_oil_rate=2.34567, name='well1', date='01/04/2020', date_format=DateFormat.DD_MM_YYYY),
-    ]
-
-    expected_result = [
+    ],
+                         [
         NexusConstraint(
             qmult_oil_rate=12.3, qmult_water_rate=123.4, qmult_gas_rate=5.5, name='well1', max_pressure=100,
             date='01/01/2020', date_format=DateFormat.DD_MM_YYYY, convert_qmult_to_reservoir_barrels=True
@@ -324,8 +321,39 @@ def test_override_qallrmax():
             name='well1', date='01/04/2020', date_format=DateFormat.DD_MM_YYYY,
             max_surface_oil_rate=2.34567, max_pressure=200.5,
         ),
-    ]
-
+]),
+    ([
+        NexusConstraint(
+            qmult_oil_rate=12.3, qmult_water_rate=123.4, qmult_gas_rate=5.5, name='well1', max_pressure=100,
+            date='01/01/2020', date_format=DateFormat.DD_MM_YYYY, convert_qmult_to_reservoir_barrels=True),
+        NexusConstraint(
+            qmult_oil_rate=10.3, qmult_water_rate=24, qmult_gas_rate=0, name='well1', date='01/02/2020',
+            date_format=DateFormat.DD_MM_YYYY),
+        NexusConstraint(
+            max_pressure=200.5, name='well1', date='01/03/2020', date_format=DateFormat.DD_MM_YYYY, clear_q=True),
+        NexusConstraint(
+            max_surface_oil_rate=2.34567, name='well1', date='01/04/2020', date_format=DateFormat.DD_MM_YYYY),
+    ],
+                         [
+        NexusConstraint(
+            qmult_oil_rate=12.3, qmult_water_rate=123.4, qmult_gas_rate=5.5, name='well1', max_pressure=100,
+            date='01/01/2020', date_format=DateFormat.DD_MM_YYYY, convert_qmult_to_reservoir_barrels=True
+        ),
+        NexusConstraint(
+            qmult_oil_rate=10.3, qmult_water_rate=24, qmult_gas_rate=0, max_pressure=100,
+            name='well1', date='01/02/2020', date_format=DateFormat.DD_MM_YYYY, convert_qmult_to_reservoir_barrels=True,
+        ),
+        NexusConstraint(
+            max_pressure=200.5, name='well1', date='01/03/2020', date_format=DateFormat.DD_MM_YYYY, 
+            convert_qmult_to_reservoir_barrels=None, clear_q=True,
+        ),
+        NexusConstraint(
+            name='well1', date='01/04/2020', date_format=DateFormat.DD_MM_YYYY,
+            max_surface_oil_rate=2.34567, max_pressure=200.5,
+        ),
+])
+], ids=['overide_qmult_to_reservoir_barrels', 'with clear'])
+def test_override_qallrmax(constraints_for_well, expected_result):
     # Act
     result = NetworkOperationsMixIn.resolve_same_named_objects_constraints(constraints_for_well)
 

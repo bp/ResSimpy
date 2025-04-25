@@ -18,6 +18,8 @@ from ResSimpy.Nexus.DataModels.Network.NexusActivationChange import NexusActivat
 from ResSimpy.Nexus.DataModels.Network.NexusActivationChanges import NexusActivationChanges
 from ResSimpy.Nexus.DataModels.Network.NexusConList import NexusConList
 from ResSimpy.Nexus.DataModels.Network.NexusConLists import NexusConLists
+from ResSimpy.Nexus.DataModels.Network.NexusNodeList import NexusNodeList
+from ResSimpy.Nexus.DataModels.Network.NexusNodeLists import NexusNodeLists
 from ResSimpy.Nexus.DataModels.Network.NexusProc import NexusProc
 from ResSimpy.Nexus.DataModels.Network.NexusProcs import NexusProcs
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
@@ -93,6 +95,7 @@ class NexusNetwork(Network):
         self.actions: NexusActions = NexusActions(self)
         self.conlists: NexusConLists = NexusConLists(self)
         self.stations: NexusStations = NexusStations(self)
+        self.nodelists: NexusNodeLists = NexusNodeLists(self)
         self.activation_changes: NexusActivationChanges = NexusActivationChanges(self)
 
     @property
@@ -248,6 +251,7 @@ class NexusNetwork(Network):
                                       'PROCS': None,
                                       'WELLLIST': NexusWellList,
                                       'CONLIST': NexusConList,
+                                      'NODELIST': NexusNodeList,
                                       'ACTIONS': NexusAction,
                                       'ACTIVATE_DEACTIVATE': NexusActivationChange,
                                       'STATION': NexusStation,
@@ -271,6 +275,7 @@ class NexusNetwork(Network):
             self.targets._add_to_memory(type_check_lists(nexus_obj_dict.get('TARGET')))
             self.welllists._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLLIST')))
             self.conlists._add_to_memory(type_check_lists(nexus_obj_dict.get('CONLIST')))
+            self.nodelists._add_to_memory(type_check_lists(nexus_obj_dict.get('NODELIST')))
             self.activation_changes._add_to_memory(type_check_lists(nexus_obj_dict.get('ACTIVATE_DEACTIVATE')))
             constraint_activation_changes = self.__get_constraint_activation_changes(constraints=constraints)
             self.activation_changes._add_to_memory(type_check_lists(constraint_activation_changes))
