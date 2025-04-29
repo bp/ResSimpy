@@ -37,6 +37,12 @@ class NexusWaterParams:
     salinity: Optional[float] = None
     water_density: Optional[float] = None
 
+    def __hash__(self) -> int:
+        """Hash function for the NexusWaterParams class."""
+        return hash((self.water_compressibility, self.water_formation_volume_factor,
+                     self.water_viscosity, self.water_viscosity_compressibility,
+                     self.temperature, self.salinity, self.water_density))
+
 
 @dataclass(kw_only=True, repr=False)  # Doesn't need to write an _init_, _eq_ methods, etc.
 class NexusWaterMethod(DynamicProperty):
@@ -224,3 +230,8 @@ class NexusWaterMethod(DynamicProperty):
                                       water_viscosity_compressibility=water_props_dict['CVW']
                                       )
             self.parameters.append(params)
+
+    def __hash__(self) -> int:
+        """Hash function for the NexusWaterMethod class. Excludes file and input_number attributes."""
+        property_hash = self.convert_to_hashable(self.properties)
+        return hash((self.reference_pressure, tuple(self.parameters), property_hash))

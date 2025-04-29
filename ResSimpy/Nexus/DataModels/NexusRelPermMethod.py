@@ -356,3 +356,9 @@ class NexusRelPermMethod(DynamicProperty):
                         if nfo.check_token(hyst_keyword, line):
                             self.hysteresis_params[hyst_keyword] = float(
                                 nfo.get_expected_token_value(hyst_keyword, line, file_as_list))
+
+    def __hash__(self) -> int:
+        """Returns the hash of the object. Excludes the file and input number attributes."""
+        property_hash = self.convert_to_hashable(self.properties)
+        hysteresis_params_hash = self.convert_to_hashable(self.hysteresis_params)
+        return hash((property_hash, self.unit_system, hysteresis_params_hash))

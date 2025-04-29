@@ -116,7 +116,7 @@ class DynamicProperty(ABC):
             pd_hash = pd.util.hash_pandas_object(value)
             return tuple(pd_hash.values)
         elif isinstance(value, np.ndarray):
-            return tuple([tuple(row) for row in value])
+            return np.array2string(value)
         elif isinstance(value, list):
             return tuple(value)
         elif isinstance(value, dict):
@@ -125,3 +125,8 @@ class DynamicProperty(ABC):
             return value.value
         else:
             return value
+
+    def __hash__(self) -> int:
+        """Returns the hash of the object. Excludes the file and input number attributes."""
+        property_hash = self.convert_to_hashable(self.properties)
+        return hash(property_hash)
