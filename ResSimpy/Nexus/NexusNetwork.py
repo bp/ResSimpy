@@ -18,6 +18,8 @@ from ResSimpy.Nexus.DataModels.Network.NexusActivationChange import NexusActivat
 from ResSimpy.Nexus.DataModels.Network.NexusActivationChanges import NexusActivationChanges
 from ResSimpy.Nexus.DataModels.Network.NexusConList import NexusConList
 from ResSimpy.Nexus.DataModels.Network.NexusConLists import NexusConLists
+from ResSimpy.Nexus.DataModels.Network.NexusDrill import NexusDrill
+from ResSimpy.Nexus.DataModels.Network.NexusDrills import NexusDrills
 from ResSimpy.Nexus.DataModels.Network.NexusNodeList import NexusNodeList
 from ResSimpy.Nexus.DataModels.Network.NexusNodeLists import NexusNodeLists
 from ResSimpy.Nexus.DataModels.Network.NexusProc import NexusProc
@@ -67,6 +69,7 @@ class NexusNetwork(Network):
     targets: NexusTargets
     welllists: NexusWellLists
     activation_changes: NexusActivationChanges
+    drills: NexusDrills
     _has_been_loaded: bool = False
 
     def __init__(self, model: NexusSimulator, assume_loaded: bool = False) -> None:
@@ -92,6 +95,7 @@ class NexusNetwork(Network):
         self.conlists: NexusConLists = NexusConLists(self)
         self.nodelists: NexusNodeLists = NexusNodeLists(self)
         self.activation_changes: NexusActivationChanges = NexusActivationChanges(self)
+        self.drills: NexusDrills = NexusDrills(self)
 
     @property
     def model(self) -> NexusSimulator:
@@ -248,7 +252,8 @@ class NexusNetwork(Network):
                                       'CONLIST': NexusConList,
                                       'NODELIST': NexusNodeList,
                                       'ACTIONS': NexusAction,
-                                      'ACTIVATE_DEACTIVATE': NexusActivationChange
+                                      'ACTIVATE_DEACTIVATE': NexusActivationChange,
+                                      'DRILL': NexusDrill
                                       }
 
         for surface in self.__model.model_files.surface_files.values():
@@ -273,6 +278,7 @@ class NexusNetwork(Network):
             self.activation_changes._add_to_memory(type_check_lists(nexus_obj_dict.get('ACTIVATE_DEACTIVATE')))
             constraint_activation_changes = self.__get_constraint_activation_changes(constraints=constraints)
             self.activation_changes._add_to_memory(type_check_lists(constraint_activation_changes))
+            self.drills._add_to_memory(type_check_lists(nexus_obj_dict.get('DRILL')))
 
             actions_check = type_check_lists(nexus_obj_dict.get('ACTIONS'))
             if actions_check is not None:
