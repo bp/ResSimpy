@@ -338,13 +338,23 @@ def get_token_value(token: str, token_line: str, file_list: list[str],
     Returns:
         Optional[str]: The value following the supplied token, if it is present.
     """
+    search_string, line_index = __extract_search_string(token, token_line, file_list)
+    if search_string is None or line_index is None:
+        return None
+    value = get_next_value(line_index, file_list, search_string, ignore_values, replace_with)
+    return value
 
+
+def __extract_search_string(token: str, token_line: str, file_list: list[str]) -> tuple[str | None, int | None]:
+    """Extracts the search string from the token line and returns the line index.
+    The line index is index of the token line.
+    """
     token_upper = token.upper()
     token_line_upper = token_line.upper()
 
     # If this line is commented out, don't return a value
     if "!" in token_line_upper and token_line_upper.index("!") < token_line_upper.index(token_upper):
-        return None
+        return None, None
 
     search_start = token_line_upper.index(token_upper) + len(token) + 1
     search_string = token_line[search_start: len(token_line)]
@@ -354,12 +364,11 @@ def get_token_value(token: str, token_line: str, file_list: list[str],
     if len(search_string) < 1:
         line_index += 1
         if line_index >= len(file_list):
-            return None
+            return None, None
         search_string = file_list[line_index]
     if not isinstance(search_string, str):
         raise ValueError
-    value = get_next_value(line_index, file_list, search_string, ignore_values, replace_with)
-    return value
+    return search_string, line_index
 
 
 def get_expected_token_value(token: str, token_line: str, file_list: list[str],
@@ -393,6 +402,37 @@ def get_expected_token_value(token: str, token_line: str, file_list: list[str],
             raise ValueError(f"{custom_message} {token_line}")
 
     return value
+
+
+def get_token_value_with_line_index(token: str, token_line: str, file_list: list[str],
+                                    ignore_values: Optional[list[str]] = None,
+                                    replace_with: Union[str, GridArrayDefinition, None] = None) \
+        -> tuple[None | str, None | int]:
+    """Gets the value following a token and the line index of that value.
+
+    Args:
+        token (str): the token being searched for.
+        token_line (str): string value of the line that the token was found in.
+        file_list (list[str]): a list of strings containing each line of the file as a new entry
+        ignore_values (list[str], optional): a list of values that should be ignored if found. \
+            Defaults to None.
+        replace_with (Union[str, VariableEntry, None], optional):  a value to replace the existing value with. \
+            Defaults to None.
+
+    Returns:
+        tuple[None | str, None | int]: The value following the supplied token and the line index of that value.
+            If None then no value was found.
+    """
+    search_string, line_index = __extract_search_string(token, token_line, file_list)
+    if search_string is None or line_index is None:
+        return None, None
+    for i, line in enumerate(file_list[line_index:]):
+        if i != 0:
+            search_string = line
+        value = get_next_value(0, [line], search_string, ignore_values, replace_with)
+        if value is not None:
+            return value, line_index + i
+    return None, None
 
 
 def load_in_three_part_date(initial_token: str, token_line: str, file_as_list: list[str], start_index: int) -> str:

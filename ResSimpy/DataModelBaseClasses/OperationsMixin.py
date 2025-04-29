@@ -244,6 +244,9 @@ class NetworkOperationsMixIn(ABC):
                     new_resolved_object.qmult_oil_rate = None
                     new_resolved_object.qmult_gas_rate = None
                     new_resolved_object.qmult_water_rate = None
+                elif 'QALLRMAX' in clear_constraints_dict:
+                    # if the object is cleared, set to None
+                    new_resolved_object.convert_qmult_to_reservoir_barrels = None
                 else:
                     new_resolved_object.convert_qmult_to_reservoir_barrels = True
 
