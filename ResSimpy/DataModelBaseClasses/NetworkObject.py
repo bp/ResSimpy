@@ -65,4 +65,5 @@ class NetworkObject(DataObjectMixin, ABC):
         protected_attributes = ['date_format', 'start_date', 'unit_system', 'name']
         remaining_properties = [x for x in properties_dict.keys() if x not in protected_attributes]
         for key in remaining_properties:
-            self.__setattr__(key, properties_dict[key])
+            if properties_dict[key] is not None:
+                self.__setattr__(key, properties_dict[key])

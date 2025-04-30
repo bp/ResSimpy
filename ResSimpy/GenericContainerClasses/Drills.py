@@ -11,5 +11,5 @@ class Drills(NetworkOperationsMixIn, ABC):
     _drills: Sequence[Drill] = field(default_factory=list)
 
     @property
-    def _network_element_name(self) -> Literal['drill']:
-        return 'drill'
+    def _network_element_name(self) -> Literal['drills']:
+        return 'drills'

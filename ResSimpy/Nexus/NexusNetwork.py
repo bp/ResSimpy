@@ -19,6 +19,8 @@ from ResSimpy.Nexus.DataModels.Network.NexusActivationChanges import NexusActiva
 from ResSimpy.Nexus.DataModels.Network.NexusConList import NexusConList
 from ResSimpy.Nexus.DataModels.Network.NexusConLists import NexusConLists
 from ResSimpy.Nexus.DataModels.Network.NexusDrill import NexusDrill
+from ResSimpy.Nexus.DataModels.Network.NexusDrillSite import NexusDrillSite
+from ResSimpy.Nexus.DataModels.Network.NexusDrillSites import NexusDrillSites
 from ResSimpy.Nexus.DataModels.Network.NexusDrills import NexusDrills
 from ResSimpy.Nexus.DataModels.Network.NexusNodeList import NexusNodeList
 from ResSimpy.Nexus.DataModels.Network.NexusNodeLists import NexusNodeLists
@@ -70,6 +72,7 @@ class NexusNetwork(Network):
     welllists: NexusWellLists
     activation_changes: NexusActivationChanges
     drills: NexusDrills
+    drill_sites: NexusDrillSites
     _has_been_loaded: bool = False
 
     def __init__(self, model: NexusSimulator, assume_loaded: bool = False) -> None:
@@ -96,6 +99,7 @@ class NexusNetwork(Network):
         self.nodelists: NexusNodeLists = NexusNodeLists(self)
         self.activation_changes: NexusActivationChanges = NexusActivationChanges(self)
         self.drills: NexusDrills = NexusDrills(self)
+        self.drill_sites: NexusDrillSites = NexusDrillSites(self)
 
     @property
     def model(self) -> NexusSimulator:
@@ -253,7 +257,8 @@ class NexusNetwork(Network):
                                       'NODELIST': NexusNodeList,
                                       'ACTIONS': NexusAction,
                                       'ACTIVATE_DEACTIVATE': NexusActivationChange,
-                                      'DRILL': NexusDrill
+                                      'DRILL': NexusDrill,
+                                      'DRILLSITE': NexusDrillSite
                                       }
 
         for surface in self.__model.model_files.surface_files.values():
@@ -279,6 +284,7 @@ class NexusNetwork(Network):
             constraint_activation_changes = self.__get_constraint_activation_changes(constraints=constraints)
             self.activation_changes._add_to_memory(type_check_lists(constraint_activation_changes))
             self.drills._add_to_memory(type_check_lists(nexus_obj_dict.get('DRILL')))
+            self.drill_sites._add_to_memory(type_check_lists(nexus_obj_dict.get('DRILLSITE')))
 
             actions_check = type_check_lists(nexus_obj_dict.get('ACTIONS'))
             if actions_check is not None:
@@ -362,7 +368,8 @@ class NexusNetwork(Network):
 
     def find_network_element_with_dict(self, name: str, search_dict: dict[str, None | float | str | int],
                                        network_element_type: Literal['nodes', 'connections', 'well_connections',
-                                       'wellheads', 'wellbores', 'constraints', 'targets']) -> Any:
+                                       'wellheads', 'wellbores', 'constraints', 'targets', 'drills', 'drillsites']) \
+                                        -> Any:
         """Finds a uniquely matching constraint from a given set of properties in a dictionary of attributes.
 
         Args:

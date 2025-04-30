@@ -1,6 +1,5 @@
-import pytest
-
 from ResSimpy.Nexus.DataModels.Network.NexusDrill import NexusDrill
+from ResSimpy.Nexus.DataModels.Network.NexusDrillSite import NexusDrillSite
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
@@ -37,10 +36,94 @@ ENDDRILL
     expected_result = [expected_drill_1, expected_drill_2]
 
     # Act
-    # loaded_network_object = network_object.load()
     result = network_object.drills.get_all()
 
     # Assert
     assert result == expected_result
     assert result[0].total_drill_time == 260
     assert result[1].total_drill_time == 120
+
+def test_load_nexus_drill_site(mocker):
+    # Arrange
+    start_date = '15/01/2025'
+    surface_file_contents = """
+    TIME 25/07/2026
+    DRILLSITE
+NAME    MAXRIGS
+site_1  5
+site_2  1
+ENDDRILLSITE
+    """
+
+    surface_file = NexusFile(location='surface.dat',
+                             file_content_as_list=surface_file_contents.splitlines(keepends=True))
+
+    dummy_model = get_fake_nexus_simulator(mocker=mocker, mock_open=True)
+    dummy_model.model_files.surface_files = {1: surface_file}
+    dummy_model.start_date = start_date
+    dummy_model.date_format = DateFormat.DD_MM_YYYY
+
+    network_object = NexusNetwork(model=dummy_model)
+
+    expected_drill_site_1 = NexusDrillSite(name='site_1', max_rigs=5, date='25/07/2026',
+                                           date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    expected_drill_site_2 = NexusDrillSite(name='site_2', max_rigs=1, date='25/07/2026',
+                                           date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    expected_result = [expected_drill_site_1, expected_drill_site_2]
+
+    # Act
+    result = network_object.drill_sites.get_all()
+
+    # Assert
+    assert result == expected_result
+
+# Loading both at the same time, checking defaults match Nexus Defaults
+def test_load_nexus_drill_and_drill_site(mocker):
+    # Arrange
+    start_date = '15/01/2025'
+    surface_file_contents = """
+    TIME 25/07/2026
+    DRILLSITE
+NAME
+site_1
+site_2
+ENDDRILLSITE
+
+    DRILL
+WELL    DRILLSITE   DRILLTIME  
+well_1  site_1   123 
+well_2  ALL   1.5 
+ENDDRILL
+    """
+
+    surface_file = NexusFile(location='surface.dat',
+                             file_content_as_list=surface_file_contents.splitlines(keepends=True))
+
+    dummy_model = get_fake_nexus_simulator(mocker=mocker, mock_open=True)
+    dummy_model.model_files.surface_files = {1: surface_file}
+    dummy_model.start_date = start_date
+    dummy_model.date_format = DateFormat.DD_MM_YYYY
+
+    network_object = NexusNetwork(model=dummy_model)
+
+    expected_drill_site_1 = NexusDrillSite(name='site_1', max_rigs=1, date='25/07/2026',
+                                           date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    expected_drill_site_2 = NexusDrillSite(name='site_2', max_rigs=1, date='25/07/2026',
+                                           date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    expected_drill_sites = [expected_drill_site_1, expected_drill_site_2]
+
+    expected_drill_1 = NexusDrill(drillsite='site_1', name='well_1', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY,
+                                  drill_time=123, workover_time=0, completion_time=0, rigs='ALL',
+                                  start_date=start_date, replacement=None)
+    expected_drill_2 = NexusDrill(drillsite='ALL', name='well_2', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY,
+                                  drill_time=1.5, workover_time=0, completion_time=0, rigs='ALL',
+                                  start_date=start_date, replacement=None)
+    expected_drills = [expected_drill_1, expected_drill_2]
+
+    # Act
+    result_drill_sites = network_object.drill_sites.get_all()
+    result_drills = network_object.drills.get_all()
+
+    # Assert
+    assert result_drill_sites == expected_drill_sites
+    assert result_drills == expected_drills
