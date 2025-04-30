@@ -120,7 +120,7 @@ class RemoveObjectOperations:
     def remove_object_from_network_main(self, obj_to_remove: dict[str, None | str | float | int] | UUID,
                                         network_element_name: Literal['nodes', 'connections', 'well_connections',
                                                                       'wellheads', 'wellbores', 'constraints',
-                                                                      'targets', 'drills', 'drillsites'],
+                                                                      'targets', 'drills', 'drill_sites'],
                                         existing_objects: list[T]) -> None:
         """Removes object from file and from the list of objects based on matching a set of attributes provided in a \
         dictionary or a unique id.
