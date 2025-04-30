@@ -313,7 +313,7 @@ class AddObjectOperations:
         name, date = self.check_name_date(node_to_add)
         date_format = network.model.date_format
         new_obj_type = obj_type
-        new_object = new_obj_type(node_to_add, date_format=date_format)
+        new_object = new_obj_type(properties_dict=node_to_add, date_format=date_format)
         file_as_list = file_to_add_to.get_flat_list_str_file
         if file_as_list is None:
             raise ValueError(f'No file content found in the surface file specified at {file_to_add_to.location}')

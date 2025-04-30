@@ -6,7 +6,9 @@ import pytest
 import pandas as pd
 import numpy as np
 
+from ResSimpy.Nexus.DataModels.Network.NexusDrill import NexusDrill
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
+from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Enums.UnitsEnum import UnitSystem
@@ -14,6 +16,7 @@ from unittest.mock import Mock
 
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+from ResSimpy.Nexus.nexus_remove_object_from_file import RemoveObjectOperations
 from tests.multifile_mocker import mock_multiple_files
 
 
@@ -791,15 +794,55 @@ def test_collect_all_tables_to_objects(mocker, file_contents, node1_props, node2
     result_dict, _ = ResSimpy.Nexus.nexus_collect_tables.collect_all_tables_to_objects(
         nexus_file=surface_file,
         table_object_map={'NODES': NexusNode,
-         'WELLS': NexusWellConnection, 'GASWELLS': NexusWellConnection}, start_date=start_date,
+                          'WELLS': NexusWellConnection, 'GASWELLS': NexusWellConnection}, start_date=start_date,
         default_units=UnitSystem.ENGLISH,
         date_format=DateFormat.MM_DD_YYYY,
-        )
+    )
     result = result_dict.get('NODES')
     if result_dict.get('WELLS') is not None:
         result.extend(result_dict.get('WELLS'))
     # Assert
     assert result == expected_result
+
+
+@pytest.mark.parametrize('file_as_list', [
+    ("""WELLHEAD
+WELL NAME DEPTH X Y\t IPVT\t IWAT
+testwell testwell_wellhead 1000 102 302 2 3
+ENDWELLHEAD
+        """.splitlines()),
+
+    ("""DRILL
+WELL    DRILLSITE   DRILLTIME   
+well_1  site_1   654.1
+ENDDRILL
+        """.splitlines())
+])
+def test_collect_all_tables_to_objects_correct_line_numbers(mocker, file_as_list):
+    # Arrange
+    mocker.patch(
+        "ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4", return_value="uuid_1"
+    )
+
+    nexus_file = NexusFile(location="", file_content_as_list=file_as_list)
+
+    expected_object_locations = {'uuid_1': [2]}
+
+    # Act
+    nexus_obj_dict, _ = ResSimpy.Nexus.nexus_collect_tables.collect_all_tables_to_objects(
+        nexus_file=nexus_file,
+        table_object_map={
+            "DRILL": NexusDrill,
+            "WELLHEAD": NexusWellhead,
+        },
+        start_date="01/01/2019",
+        default_units=UnitSystem.ENGLISH,
+        date_format=DateFormat.DD_MM_YYYY,
+    )
+
+    # Assert
+    # Check that the line numbers are correct
+    assert nexus_file.object_locations == expected_object_locations
 
 
 def test_load_file_as_list_unicode_error(mocker, ):
@@ -824,11 +867,11 @@ def test_load_file_as_list_unicode_error(mocker, ):
     assert result == expected_file_as_list
 
 
-@pytest.mark.parametrize('line, expected_result',[
+@pytest.mark.parametrize('line, expected_result', [
     ('some kind of token line', ['some', 'kind', 'of', 'token', 'line']),
     ('some !comment finshes the line', ['some']),
-        ('!only comment', []),
-        ('', [])
+    ('!only comment', []),
+    ('', [])
 ])
 def test_split_line(line, expected_result):
     # Act
@@ -837,14 +880,46 @@ def test_split_line(line, expected_result):
     assert result == expected_result
 
 
-@pytest.mark.parametrize('line, expected_result',[
+@pytest.mark.parametrize('line, expected_result', [
     ('some kind of token line', ['SOME', 'KIND', 'OF', 'TOKEN', 'LINE']),
     ('some !comment finshes the line', ['SOME']),
-        ('!only comment', []),
-        ('', [])
+    ('!only comment', []),
+    ('', [])
 ])
 def test_split_line(line, expected_result):
     # Act
     result = nfo.split_line(line, upper=True)
     # Assert
     assert result == expected_result
+
+
+@pytest.mark.parametrize('file_as_list, table_header, table_footer', [
+    ("""WELLHEAD
+WELL NAME DEPTH X Y\t IPVT\t IWAT
+testwell testwell_wellhead 1000 102 302 2 3
+ENDWELLHEAD
+        """.splitlines(), 'WELLHEAD', 'ENDWELLHEAD'),
+
+# Table keyword repeated in header
+    ("""DRILL
+WELL    DRILLSITE   DRILLTIME   
+well_1  site_1   654.1
+ENDDRILL
+        """.splitlines(), 'DRILL', 'ENDDRILL')
+], ids=['WELLHEAD', 'DRILL'])
+def test_check_for_empty_table_returns_correct_indices(mocker, file_as_list, table_header, table_footer):
+    # Arrange
+    mocker.patch(
+        "ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4", return_value="uuid_1"
+    )
+
+    nexus_file = NexusFile(location="", file_content_as_list=file_as_list)
+
+    obj = RemoveObjectOperations(network=None, table_header=table_header, table_footer=table_footer)
+    expected_indices_to_remove =[0, 1, 2, 3]
+
+    # Act
+    indices_to_remove = obj.check_for_empty_table(file=nexus_file, line_numbers_in_file_to_remove=[2], obj_id='uuid_1')
+
+    # Assert
+    assert indices_to_remove == expected_indices_to_remove

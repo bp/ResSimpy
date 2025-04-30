@@ -1,6 +1,8 @@
 import uuid
 import pytest
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.DataModels.Network.NexusDrill import NexusDrill
+from ResSimpy.Nexus.DataModels.Network.NexusDrillSite import NexusDrillSite
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
@@ -49,6 +51,17 @@ WELL TEMPPR DIAM
 testwell textdata 10.2
 testwell2 temppr NA
 ENDWELLBORE
+
+DRILLSITE
+NAME    MAXRIGS
+site_1  5
+site_2  1
+ENDDRILLSITE
+
+DRILL
+WELL    DRILLSITE   DRILLTIME   
+well_1  site_1   654.1
+ENDDRILL
 
 TIME 01/01/2024
 '''
@@ -106,6 +119,17 @@ testwell textdata 10.2
 testwell2 temppr NA
 ENDWELLBORE
 
+DRILLSITE
+NAME    MAXRIGS
+site_1  5
+site_2  1
+ENDDRILLSITE
+
+DRILL
+WELL    DRILLSITE   DRILLTIME   
+well_1  site_1   654.1
+ENDDRILL
+
 TIME 01/01/2024
 ''',
                                   {'well': 'testwell', 'name': 'testwell_wellhead', 'date': '01/01/2023',
@@ -156,6 +180,17 @@ testwell2 temppr NA NA
 testwell textdata 10.2 NEW_METHOD
 ENDWELLBORE
 
+DRILLSITE
+NAME    MAXRIGS
+site_1  5
+site_2  1
+ENDDRILLSITE
+
+DRILL
+WELL    DRILLSITE   DRILLTIME   
+well_1  site_1   654.1
+ENDDRILL
+
 TIME 01/01/2024
 ''',
                                   {'name': 'testwell', 'date': '01/01/2023'},
@@ -203,6 +238,17 @@ WELL TEMPPR DIAM
 testwell textdata 10.2
 testwell2 temppr NA
 ENDWELLBORE
+
+DRILLSITE
+NAME    MAXRIGS
+site_1  5
+site_2  1
+ENDDRILLSITE
+
+DRILL
+WELL    DRILLSITE   DRILLTIME   
+well_1  site_1   654.1
+ENDDRILL
 
 TIME 01/01/2024
 ''',
@@ -253,6 +299,17 @@ testwell textdata 10.2
 testwell2 temppr NA
 ENDWELLBORE
 
+DRILLSITE
+NAME    MAXRIGS
+site_1  5
+site_2  1
+ENDDRILLSITE
+
+DRILL
+WELL    DRILLSITE   DRILLTIME   
+well_1  site_1   654.1
+ENDDRILL
+
 TIME 01/01/2024
 ''',
                                   {'name': 'test_name_2', 'date': '01/01/2023'},
@@ -269,7 +326,112 @@ TIME 01/01/2024
                                   ],
                                   ['uuid_1', 'uuid_9']
                                   ),
-                             ], ids=['wellhead', 'wellbore', 'wellconnection', 'nodeconnections'])
+        # NexusDrill
+        (NexusDrill, 'drills',
+         """TIME 01/01/2019
+    ! comment
+    TIME 01/01/2020
+    Something here!
+    TIME 01/01/2023
+NODECON
+NAME        NODEIN     NODEOUT      TYPE ROUGHNESS  TEMPPR
+test_name_1 test_node test_node_out PIPE 3.2        tempprof
+test_name_2 test_node test_node_out PIPE 100  NA
+ENDNODECON
+
+WELLS
+  NAME    STREAM   NUMBER   DATUM   CROSSFLOW   CROSS_SHUT
+  testwell   PRODUCER   94     2020     ON        CELLGRAD
+  inj   WATER      95     2020     OFF        CALC
+  bad_data
+    ENDWELLS
+
+WELLHEAD
+WELL NAME DEPTH X Y\t IPVT\t IWAT
+testwell testwell_wellhead 1000 102 302 2 3
+testwell2 testwell_wellhead2 1000 102 302 2 3
+ENDWELLHEAD
+
+WELLBORE
+WELL TEMPPR DIAM
+testwell textdata 10.2
+testwell2 temppr NA
+ENDWELLBORE
+
+DRILLSITE
+NAME    MAXRIGS
+site_1  5
+site_2  1
+ENDDRILLSITE
+
+
+
+DRILL
+WELL DRILLSITE DRILLTIME CMPLTIME WORKTIME RIGS
+well_1 site_1 123 0 0 ALL
+ENDDRILL
+
+TIME 01/01/2024
+""",
+         {'name': 'well_1', 'drill_time': 654.1, 'date': '01/01/2023', 'date_format': DateFormat.DD_MM_YYYY},
+         {'name': 'well_1', 'drill_time': 123},
+         [{'name': 'well_1', 'drill_time': 123, 'date': '01/01/2023', 'date_format': DateFormat.DD_MM_YYYY,
+           'drill_site': 'site_1'}],
+         ['uuid_10']
+         ),
+
+        # NexusDrillSite
+        (NexusDrillSite, 'drill_sites',
+                                  '''TIME 01/01/2019
+    ! comment
+    TIME 01/01/2020
+    Something here!
+    TIME 01/01/2023
+NODECON
+NAME        NODEIN     NODEOUT      TYPE ROUGHNESS  TEMPPR
+test_name_1 test_node test_node_out PIPE 3.2        tempprof
+test_name_2 test_node test_node_out PIPE 100  NA
+ENDNODECON
+
+WELLS
+  NAME    STREAM   NUMBER   DATUM   CROSSFLOW   CROSS_SHUT
+  testwell   PRODUCER   94     2020     ON        CELLGRAD
+  inj   WATER      95     2020     OFF        CALC
+  bad_data
+    ENDWELLS
+
+WELLHEAD
+WELL NAME DEPTH X Y\t IPVT\t IWAT
+testwell testwell_wellhead 1000 102 302 2 3
+testwell2 testwell_wellhead2 1000 102 302 2 3
+ENDWELLHEAD
+
+WELLBORE
+WELL TEMPPR DIAM
+testwell textdata 10.2
+testwell2 temppr NA
+ENDWELLBORE
+
+DRILLSITE
+NAME    MAXRIGS
+site_2  1
+site_1 4
+ENDDRILLSITE
+
+DRILL
+WELL    DRILLSITE   DRILLTIME   
+well_1  site_1   654.1
+ENDDRILL
+
+TIME 01/01/2024
+''',
+         {'name': 'site_1', 'max_rigs': 5, 'date': '01/01/2023', 'date_format': DateFormat.DD_MM_YYYY},
+         {'name': 'site_1', 'max_rigs': 4},
+         [{'name': 'site_1', 'max_rigs': 4, 'date': '01/01/2023', 'date_format': DateFormat.DD_MM_YYYY},
+          {'name': 'site_2', 'max_rigs': 1, 'date': '01/01/2023', 'date_format': DateFormat.DD_MM_YYYY},],
+         ['uuid_11', 'uuid_12']
+         )
+         ], ids=['wellhead', 'wellbore', 'wellconnection', 'nodeconnections', 'NexusDrill', 'NexusDrillSite'])
     def test_modify_network_component(self, mocker, object_type, network_component,
                                       expected_file_contents, obj_to_modify,
                                       modified_properties, expected_objs, expected_ids):
@@ -283,7 +445,8 @@ TIME 01/01/2024
 
         # Reset the ID allocation
         mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
-                                                                    'uuid_6', 'uuid_7', 'uuid_8', 'uuid_9'])
+                                                                    'uuid_6', 'uuid_7', 'uuid_8', 'uuid_9', 'uuid_10',
+                                                                    'uuid_11', 'uuid_12'])
 
         # Act
         network_objects = getattr(nexus_sim.network, network_component)
