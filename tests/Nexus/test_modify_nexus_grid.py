@@ -1,4 +1,8 @@
 import os
+
+import numpy as np
+import pytest
+
 from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -168,3 +172,18 @@ INCLUDE /new_path_to_netgrs_file/new_net_to_gross_file.inc
         # check the ids:
         assert grid.netgrs.id == self.new_grid_array_definition.id
         assert grid.netgrs == self.new_grid_array_definition
+
+
+@pytest.mark.parametrize('array, expected_string, dtype', [
+    (np.array([1, 2, 3, 4, 5, 6, 7, 8, 9]), """1 2 3 4 5 6 7 8 9""", 'integer'),
+    (np.array([[1.2, 2.3, 3.4], [4.5, 5.6, 6.7], [7.8, 8.9, 9.0]]), 
+     """   1.200000    2.300000    3.400000
+    4.500000    5.600000    6.700000
+    7.800000    8.900000    9.000000""", 'float'),
+], ids=['integer', 'float', ])
+def test_write_nexus_array_to_string(array, expected_string, dtype):
+    # Arrange
+    # Act
+    result = NexusGrid.write_nexus_array_to_string(array=array, dtype=dtype)
+    # Assert
+    assert result == expected_string
