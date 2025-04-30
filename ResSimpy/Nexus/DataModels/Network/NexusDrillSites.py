@@ -76,7 +76,7 @@ class NexusDrillSites(DrillSites):
                                                            start_date=start_date,
                                                            default_units=default_units,
                                                            date_format=self.__parent_network.model.date_format)
-        drill_sites_list = new_drill_sites.get('NexusDrillSite')
+        drill_sites_list = new_drill_sites.get('DRILLSITE')
         self._add_to_memory(drill_sites_list)
 
     def _add_to_memory(self, additional_list: Optional[list[NexusDrillSite]]) -> None:
