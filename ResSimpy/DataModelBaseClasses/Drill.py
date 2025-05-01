@@ -38,5 +38,5 @@ class Drill(NetworkObject, ABC):
 
     @property
     def units(self) -> NetworkUnits:
-        """Returns the attribute to unit map for the WellConnection."""
+        """Returns the attribute to unit map for the Drill."""
         return NetworkUnits(self.unit_system)
