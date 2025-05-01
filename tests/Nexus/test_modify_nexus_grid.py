@@ -175,7 +175,7 @@ INCLUDE /new_path_to_netgrs_file/new_net_to_gross_file.inc
 
 
 @pytest.mark.parametrize('array, expected_string, dtype', [
-    (np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]), """1 2 3 4 5 6 7 8 9 10 11 12""", 'integer'),
+    (np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]), """ 1  2  3  4  5  6  7  8  9 10 11 12""", 'integer'),
     (np.array([[1.2, 2.3, 3.4], [4.5, 5.6, 6.7], [7.8, 8.9, 9.0]]), 
      """   1.200000    2.300000    3.400000
     4.500000    5.600000    6.700000
