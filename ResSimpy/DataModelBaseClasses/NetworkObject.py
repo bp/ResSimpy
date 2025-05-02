@@ -13,7 +13,7 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
 @dataclass(kw_only=True)
 class NetworkObject(DataObjectMixin, ABC):
-    """Abstract base class for the object that form part of the surface network."""
+    """Abstract base class for an object that forms part of the surface network."""
 
     def __init__(self, properties_dict: Optional[dict[str, None | int | str | float]] = None,
                  date: Optional[str] = None, date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
@@ -65,4 +65,5 @@ class NetworkObject(DataObjectMixin, ABC):
         protected_attributes = ['date_format', 'start_date', 'unit_system', 'name']
         remaining_properties = [x for x in properties_dict.keys() if x not in protected_attributes]
         for key in remaining_properties:
-            self.__setattr__(key, properties_dict[key])
+            if properties_dict[key] is not None:
+                self.__setattr__(key, properties_dict[key])

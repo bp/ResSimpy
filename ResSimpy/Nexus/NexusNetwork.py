@@ -10,41 +10,44 @@ import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional, Any, Literal
 
-from ResSimpy.Enums.WellTypeEnum import WellType
+import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.DataModelBaseClasses.Network import Network
+from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.Nexus.DataModels.Network.NexusAction import NexusAction
 from ResSimpy.Nexus.DataModels.Network.NexusActions import NexusActions
 from ResSimpy.Nexus.DataModels.Network.NexusActivationChange import NexusActivationChange
 from ResSimpy.Nexus.DataModels.Network.NexusActivationChanges import NexusActivationChanges
 from ResSimpy.Nexus.DataModels.Network.NexusConList import NexusConList
 from ResSimpy.Nexus.DataModels.Network.NexusConLists import NexusConLists
-from ResSimpy.Nexus.DataModels.Network.NexusNodeList import NexusNodeList
-from ResSimpy.Nexus.DataModels.Network.NexusNodeLists import NexusNodeLists
-from ResSimpy.Nexus.DataModels.Network.NexusProc import NexusProc
-from ResSimpy.Nexus.DataModels.Network.NexusProcs import NexusProcs
-from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
-from ResSimpy.Nexus.NexusEnums.ActivationChangeEnum import ActivationChangeEnum
-from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
+from ResSimpy.Nexus.DataModels.Network.NexusDrill import NexusDrill
+from ResSimpy.Nexus.DataModels.Network.NexusDrillSite import NexusDrillSite
+from ResSimpy.Nexus.DataModels.Network.NexusDrillSites import NexusDrillSites
+from ResSimpy.Nexus.DataModels.Network.NexusDrills import NexusDrills
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
-from ResSimpy.Nexus.DataModels.Network.NexusStation import NexusStation
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnections import NexusNodeConnections
+from ResSimpy.Nexus.DataModels.Network.NexusNodeList import NexusNodeList
+from ResSimpy.Nexus.DataModels.Network.NexusNodeLists import NexusNodeLists
 from ResSimpy.Nexus.DataModels.Network.NexusNodes import NexusNodes
+from ResSimpy.Nexus.DataModels.Network.NexusProc import NexusProc
+from ResSimpy.Nexus.DataModels.Network.NexusProcs import NexusProcs
+from ResSimpy.Nexus.DataModels.Network.NexusStation import NexusStation
 from ResSimpy.Nexus.DataModels.Network.NexusStations import NexusStations
+from ResSimpy.Nexus.DataModels.Network.NexusTarget import NexusTarget
+from ResSimpy.Nexus.DataModels.Network.NexusTargets import NexusTargets
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnections import NexusWellConnections
+from ResSimpy.Nexus.DataModels.Network.NexusWellLists import NexusWellLists
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
 from ResSimpy.Nexus.DataModels.Network.NexusWellbores import NexusWellbores
 from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.Network.NexusWellheads import NexusWellheads
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.Nexus.DataModels.Network.NexusTarget import NexusTarget
-from ResSimpy.Nexus.DataModels.Network.NexusTargets import NexusTargets
-from ResSimpy.Nexus.DataModels.Network.NexusWellLists import NexusWellLists
-
-import ResSimpy.FileOperations.file_operations as fo
+from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
+from ResSimpy.Nexus.NexusEnums.ActivationChangeEnum import ActivationChangeEnum
+from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
@@ -69,6 +72,8 @@ class NexusNetwork(Network):
     targets: NexusTargets
     welllists: NexusWellLists
     activation_changes: NexusActivationChanges
+    drills: NexusDrills
+    drill_sites: NexusDrillSites
     conlists: NexusConLists
     stations: NexusStations
     _has_been_loaded: bool = False
@@ -97,6 +102,8 @@ class NexusNetwork(Network):
         self.stations: NexusStations = NexusStations(self)
         self.nodelists: NexusNodeLists = NexusNodeLists(self)
         self.activation_changes: NexusActivationChanges = NexusActivationChanges(self)
+        self.drills: NexusDrills = NexusDrills(self)
+        self.drill_sites: NexusDrillSites = NexusDrillSites(self)
 
     @property
     def model(self) -> NexusSimulator:
@@ -255,6 +262,8 @@ class NexusNetwork(Network):
                                       'ACTIONS': NexusAction,
                                       'ACTIVATE_DEACTIVATE': NexusActivationChange,
                                       'STATION': NexusStation,
+                                      'DRILL': NexusDrill,
+                                      'DRILLSITE': NexusDrillSite
                                       }
 
         for surface in self.__model.model_files.surface_files.values():
@@ -280,6 +289,8 @@ class NexusNetwork(Network):
             constraint_activation_changes = self.__get_constraint_activation_changes(constraints=constraints)
             self.activation_changes._add_to_memory(type_check_lists(constraint_activation_changes))
             self.stations._add_to_memory(type_check_lists(nexus_obj_dict.get('STATION')))
+            self.drills._add_to_memory(type_check_lists(nexus_obj_dict.get('DRILL')))
+            self.drill_sites._add_to_memory(type_check_lists(nexus_obj_dict.get('DRILLSITE')))
 
             actions_check = type_check_lists(nexus_obj_dict.get('ACTIONS'))
             if actions_check is not None:
@@ -363,8 +374,9 @@ class NexusNetwork(Network):
         return constraint_names_to_add
 
     def find_network_element_with_dict(self, name: str, search_dict: dict[str, None | float | str | int],
-                                       network_element_type: Literal['nodes', 'connections', 'well_connections',
-                                       'wellheads', 'wellbores', 'constraints', 'targets', 'stations']) -> Any:
+                                       network_element_type: Literal[
+                                           'nodes', 'connections', 'well_connections', 'wellheads', 'wellbores',
+                                           'constraints', 'targets', 'drills', 'drill_sites', 'stations']) -> Any:
         """Finds a uniquely matching constraint from a given set of properties in a dictionary of attributes.
 
         Args:
@@ -372,7 +384,7 @@ class NexusNetwork(Network):
             search_dict (dict[str, float | str | int]): dictionary of attributes to match on. \
             Allows for partial matches if it finds a unique object.
             network_element_type (Literal[str]): one of nodes, connections, well_connections, wellheads, wellbores,
-                constraints, targets, stations
+                constraints, targets, stations, drills or drill_sites.
 
         Returns:
             NexusConstraint of an existing constraint in the model that uniquely matches the provided \

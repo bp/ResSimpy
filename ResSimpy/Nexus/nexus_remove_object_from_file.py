@@ -4,6 +4,7 @@ from typing import Any, TYPE_CHECKING, Literal, TypeVar, Optional
 from uuid import UUID
 
 from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
+from ResSimpy.FileOperations.file_operations import check_token
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 T = TypeVar('T', bound=DataObjectMixin)
 
@@ -56,10 +57,10 @@ class RemoveObjectOperations:
         remove_table = True
         # get all the indices for the tables:
         file_content = file.get_flat_list_str_file
-        start_node_keyword_index_to_remove = max([i for i, x in enumerate(file_content) if self.table_header in x and
-                                                  i < first_obj_index])
-        end_node_keyword_index_to_remove = min([i for i, x in enumerate(file_content) if self.table_footer in x and
-                                                i > last_obj_index])
+        start_node_keyword_index_to_remove = max([i for i, x in enumerate(file_content) if
+                                                  check_token(token=self.table_header, line=x) and i < first_obj_index])
+        end_node_keyword_index_to_remove = min([i for i, x in enumerate(file_content) if
+                                                check_token(token=self.table_footer, line=x) and i > last_obj_index])
         # check there are any nodes left in the specified table
         if file.object_locations is None:
             raise ValueError(f'No object locations specified, cannot find id: {obj_id} in {file.object_locations}')
@@ -119,7 +120,7 @@ class RemoveObjectOperations:
     def remove_object_from_network_main(self, obj_to_remove: dict[str, None | str | float | int] | UUID,
                                         network_element_name: Literal['nodes', 'connections', 'well_connections',
                                                                       'wellheads', 'wellbores', 'constraints',
-                                                                      'targets', 'stations'],
+                                                                      'targets', 'stations', 'drills', 'drill_sites'],
                                         existing_objects: list[T]) -> None:
         """Removes object from file and from the list of objects based on matching a set of attributes provided in a \
         dictionary or a unique id.
