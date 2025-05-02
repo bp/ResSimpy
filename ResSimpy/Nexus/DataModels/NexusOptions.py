@@ -24,6 +24,7 @@ class NexusOptions(DynamicProperty):
         field(default_factory=get_empty_dict_union)
     unit_system: UnitSystem
     __properties_loaded: bool = False  # Used in lazy loading
+    __hash__ = DynamicProperty.__hash__
 
     def __init__(self, file: NexusFile, model_unit_system: UnitSystem, input_number: int = 1,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,

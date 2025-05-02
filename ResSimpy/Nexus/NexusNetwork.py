@@ -32,9 +32,11 @@ from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
+from ResSimpy.Nexus.DataModels.Network.NexusStation import NexusStation
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnections import NexusNodeConnections
 from ResSimpy.Nexus.DataModels.Network.NexusNodes import NexusNodes
+from ResSimpy.Nexus.DataModels.Network.NexusStations import NexusStations
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnections import NexusWellConnections
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
@@ -73,6 +75,8 @@ class NexusNetwork(Network):
     activation_changes: NexusActivationChanges
     drills: NexusDrills
     drill_sites: NexusDrillSites
+    conlists: NexusConLists
+    stations: NexusStations
     _has_been_loaded: bool = False
 
     def __init__(self, model: NexusSimulator, assume_loaded: bool = False) -> None:
@@ -96,6 +100,7 @@ class NexusNetwork(Network):
         self.procs: NexusProcs = NexusProcs(self)
         self.actions: NexusActions = NexusActions(self)
         self.conlists: NexusConLists = NexusConLists(self)
+        self.stations: NexusStations = NexusStations(self)
         self.nodelists: NexusNodeLists = NexusNodeLists(self)
         self.activation_changes: NexusActivationChanges = NexusActivationChanges(self)
         self.drills: NexusDrills = NexusDrills(self)
@@ -257,6 +262,7 @@ class NexusNetwork(Network):
                                       'NODELIST': NexusNodeList,
                                       'ACTIONS': NexusAction,
                                       'ACTIVATE_DEACTIVATE': NexusActivationChange,
+                                      'STATION': NexusStation,
                                       'DRILL': NexusDrill,
                                       'DRILLSITE': NexusDrillSite
                                       }
@@ -283,6 +289,7 @@ class NexusNetwork(Network):
             self.activation_changes._add_to_memory(type_check_lists(nexus_obj_dict.get('ACTIVATE_DEACTIVATE')))
             constraint_activation_changes = self.__get_constraint_activation_changes(constraints=constraints)
             self.activation_changes._add_to_memory(type_check_lists(constraint_activation_changes))
+            self.stations._add_to_memory(type_check_lists(nexus_obj_dict.get('STATION')))
             self.drills._add_to_memory(type_check_lists(nexus_obj_dict.get('DRILL')))
             self.drill_sites._add_to_memory(type_check_lists(nexus_obj_dict.get('DRILLSITE')))
 
@@ -295,6 +302,7 @@ class NexusNetwork(Network):
 
         self._has_been_loaded = True
         self.__update_well_types()
+        self.__associate_wells_with_stations()
 
         if self.model.options is not None:
             # load the options file
@@ -369,6 +377,7 @@ class NexusNetwork(Network):
     def find_network_element_with_dict(self, name: str, search_dict: dict[str, None | float | str | int],
                                        network_element_type: Literal['nodes', 'connections', 'well_connections',
                                        'wellheads', 'wellbores', 'constraints', 'targets', 'drills', 'drill_sites']) \
+                                       'wellheads', 'wellbores', 'constraints', 'targets', 'stations']) -> Any:
             -> Any:
         """Finds a uniquely matching constraint from a given set of properties in a dictionary of attributes.
 
@@ -377,7 +386,7 @@ class NexusNetwork(Network):
             search_dict (dict[str, float | str | int]): dictionary of attributes to match on. \
             Allows for partial matches if it finds a unique object.
             network_element_type (Literal[str]): one of nodes, connections, well_connections, wellheads, wellbores,
-                constraints
+                constraints, targets, stations
 
         Returns:
             NexusConstraint of an existing constraint in the model that uniquely matches the provided \
@@ -412,3 +421,13 @@ class NexusNetwork(Network):
         else:
             raise ValueError(f'No unique matching {network_element_type} with the properties provided.'
                              f'Instead found: {len(matching_elements)} matching {network_element_type}.')
+
+    def __associate_wells_with_stations(self) -> None:
+        """Associates wells with stations based on the station number in the well connection."""
+        stations_list = self.stations.get_all()
+        for well_connection in self.well_connections.get_all():
+            station = well_connection.station
+            if (station is not None) and (station.isnumeric()):
+                station_idx = int(station)
+                station_obj = next((x for x in stations_list if (x.number == station_idx) and (x.level == 1)), None)
+                well_connection.station_object = station_obj

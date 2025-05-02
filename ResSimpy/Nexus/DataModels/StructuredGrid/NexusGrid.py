@@ -3,10 +3,12 @@ from __future__ import annotations
 
 import copy
 
+import numpy as np
 import pandas as pd
 from dataclasses import dataclass, field
 from typing import Optional, TYPE_CHECKING, Any, Final
 import warnings
+from sys import maxsize
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.FileOperations.File import File
@@ -1732,3 +1734,32 @@ class NexusGrid(Grid):
         array_def_to_override = getattr(self, array.lower())
         for attribute in grid_array_definition.__dict__:
             setattr(array_def_to_override, attribute, getattr(grid_array_definition, attribute))
+
+    @staticmethod
+    def write_nexus_array_to_string(array: np.ndarray, dtype: str, cols: int = 10) -> str:
+        """Writes a numpy array to a string in a Nexus friendly format.
+
+        Args:
+            array (np.ndarray): The numpy array to write.
+            dtype (str): The type of the array. Can be 'integer', 'pressure', or 'float'.
+            cols (int): The number of columns to write in the string.
+
+        Returns:
+            str: The string representation of the array for writing to file.
+        """
+        compiled_str = ''
+        # reshape the array to have the correct number of columns
+        if dtype == 'integer':
+            formatting = "6d"
+            formatting_length = 8
+        elif dtype == 'pressure':
+            formatting = "11.3f"
+            formatting_length = 14
+        else:
+            formatting = "11.6f"
+            formatting_length = 14
+        compiled_str += np.array2string(array, max_line_width=cols * formatting_length,
+                                        precision=6, separator=' ', threshold=maxsize,
+                                        formatter={'float_kind': lambda x: f"{x:{formatting}}"}) \
+            .replace('[', '').replace(']', '')
+        return compiled_str

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.DataModels.Network.NexusStation import NexusStation
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.DataModelBaseClasses.WellConnection import WellConnection
 
@@ -56,6 +57,7 @@ class NexusWellConnection(WellConnection):
     rate_mult (float): Rate multiplier (RATEMULT)
     polymer (str): Polymer identifier (POLYMER)
     station (str): Station identifier (STATION)
+    station_object (NexusStation): Instance of NexusStation class.
     drill_queue (str): Drill queue identifier (ASSCDR)
     drill_order_benefit (float): Benefit of the drill order (BENEFIT)
     is_activated (bool): Whether the Well Connection has been activated using ACTIVATED / DEACTIVATE. Defaults to True.
@@ -94,6 +96,7 @@ class NexusWellConnection(WellConnection):
     rate_mult: Optional[float] = None
     polymer: Optional[str] = None
     station: Optional[str] = None
+    station_object: Optional[NexusStation] = None
     drill_queue: Optional[str] = None
     drill_order_benefit: Optional[float] = None
 
@@ -113,7 +116,8 @@ class NexusWellConnection(WellConnection):
                  non_darcy_flow_model: Optional[str] = None, non_darcy_flow_method: Optional[str] = None,
                  gas_mobility: Optional[float] = None, capillary_number_model: Optional[str] = None,
                  dp_add: Optional[float] = None, dt_add: Optional[float] = None, rate_mult: Optional[float] = None,
-                 polymer: Optional[str] = None, station: Optional[str] = None, drill_queue: Optional[str] = None,
+                 polymer: Optional[str] = None, station: Optional[str] = None,
+                 station_object: Optional[NexusStation] = None, drill_queue: Optional[str] = None,
                  drill_order_benefit: Optional[float] = None, bhdepth: Optional[float] = None,
                  datum_depth: Optional[float] = None, x_pos: Optional[float] = None,
                  y_pos: Optional[float] = None, length: Optional[float] = None, temperature: Optional[float] = None,
@@ -163,6 +167,7 @@ class NexusWellConnection(WellConnection):
             rate_mult (Optional[float]): Rate multiplier (RATEMULT).
             polymer (Optional[str]): Polymer identifier (POLYMER).
             station (Optional[str]): Station identifier (STATION).
+            station_object (NexusStation): Instance of NexusStation class.
             drill_queue (Optional[str]): Drill queue identifier (ASSCDR).
             drill_order_benefit (Optional[float]): Benefit of the drill order (BENEFIT).
             is_activated (bool): Whether the Well Connection has been activated using ACTIVATED / DEACTIVATE
@@ -217,6 +222,7 @@ class NexusWellConnection(WellConnection):
         self.rate_mult = rate_mult
         self.polymer = polymer
         self.station = station
+        self.station_object = station_object
         self.drill_queue = drill_queue
         self.drill_order_benefit = drill_order_benefit
         super().__init__(date_format=date_format, start_date=start_date, unit_system=unit_system, name=name, date=date,

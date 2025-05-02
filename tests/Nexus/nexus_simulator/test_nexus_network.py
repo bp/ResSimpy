@@ -4,6 +4,8 @@ import pytest
 from pytest_mock import MockerFixture
 
 from ResSimpy import NexusSimulator
+from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
+from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.Nexus.DataModels.Network.NexusActivationChange import NexusActivationChange
 from ResSimpy.Nexus.DataModels.Network.NexusProc import NexusProc
@@ -18,6 +20,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusWellheads import NexusWellheads
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
+from ResSimpy.Nexus.DataModels.Network.NexusStation import NexusStation
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnections import NexusNodeConnections
@@ -1448,3 +1451,478 @@ ENDPROCS
     assert result_procs.contents == expected_proc.contents
     assert result_procs.date == expected_proc.date
     assert result_procs.name == expected_proc.name
+
+def test_load_nexus_station(mocker: MockerFixture):
+    # Arrange
+
+    dummy_nexus_model = get_fake_nexus_simulator(mocker=mocker)
+    start_date = '01/01/2023'
+    file_contents = f"""
+TIME {start_date}
+STATION
+    NAME        NUMBER  LEVEL   PARENT
+    GRP1        1       2       NONE
+    GRP2        2       2       NONE
+    GRP1PRD     1       1       GRP1
+    GRP1INJ     2       1       GRP1
+    GRP2PRD     3       1       GRP2
+    GRP2INJ     4       1       GRP2
+ENDSTATION
+"""
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
+    surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
+
+    dummy_nexus_model._model_files = FcsNexusFile(location='test', surface_files={'1': surface_file})
+    dummy_nexus_model._start_date = start_date
+    network_object = NexusNetwork(model=dummy_nexus_model)
+
+    expected_station_1 = NexusStation(
+        name="GRP1",
+        number=1,
+        level=2,
+        parent=None,
+        start_date=start_date,
+        date=start_date,
+        unit_system=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+    )
+    expected_station_2 = NexusStation(  
+        name="GRP2",
+        number=2,
+        level=2,
+        parent=None,
+        start_date=start_date,
+        date=start_date,
+        unit_system=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+    )
+    expected_station_3 = NexusStation(
+        name="GRP1PRD",
+        number=1,
+        level=1,
+        parent="GRP1",
+        start_date=start_date,
+        date=start_date,
+        unit_system=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+    )
+    expected_station_4 = NexusStation(
+        name="GRP1INJ",
+        number=2,
+        level=1,
+        parent="GRP1",
+        start_date=start_date,
+        date=start_date,
+        unit_system=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+    )
+    expected_station_5 = NexusStation(
+        name="GRP2PRD",
+        number=3,
+        level=1,
+        parent="GRP2",
+        start_date=start_date,
+        date=start_date,
+        unit_system=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+    )
+    expected_station_6 = NexusStation(
+        name="GRP2INJ",
+        number=4,
+        level=1,
+        parent="GRP2",
+        start_date=start_date,
+        date=start_date,
+        unit_system=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+    )
+    mock_nexus_network = mocker.MagicMock()
+    mock_nexus_network.model.date_format = DateFormat.MM_DD_YYYY
+    mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
+    expected_result = [
+        expected_station_1,
+        expected_station_2,
+        expected_station_3,
+        expected_station_4,
+        expected_station_5,
+        expected_station_6,
+    ]
+
+    # Act
+    result = network_object.stations.get_all()
+
+    # Assert
+    assert result == expected_result
+
+def test_load_nexus_station_multiple_dates(mocker: MockerFixture):
+    # Arrange
+
+    dummy_nexus_model = get_fake_nexus_simulator(mocker=mocker)
+    start_date = '01/01/2023'
+    date_2 = '01/01/2024'
+    file_contents = f"""
+TIME {start_date}
+STATION
+    NAME        NUMBER  LEVEL   PARENT
+    GRP1        1       2       NONE
+    GRP1PRD     1       1       GRP1
+    GRP1INJ     2       1       GRP1
+ENDSTATION
+
+TIME {date_2}
+STATION
+    NAME        NUMBER  LEVEL   PARENT
+    GRP2        2       2       NONE
+    GRP2PRD     3       1       GRP2
+    GRP2INJ     4       1       GRP2
+ENDSTATION
+"""
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
+    surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
+
+    dummy_nexus_model._model_files = FcsNexusFile(location='test', surface_files={'1': surface_file})
+    dummy_nexus_model._start_date = start_date
+    network_object = NexusNetwork(model=dummy_nexus_model)
+
+    expected_station_1 = NexusStation(
+        name="GRP1",
+        number=1,
+        level=2,
+        parent=None,
+        start_date=start_date,
+        date=start_date,
+        unit_system=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+    )
+    expected_station_2 = NexusStation(
+        name="GRP1PRD",
+        number=1,
+        level=1,
+        parent="GRP1",
+        start_date=start_date,
+        date=start_date,
+        unit_system=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+    )
+    expected_station_3 = NexusStation(
+        name="GRP1INJ",
+        number=2,
+        level=1,
+        parent="GRP1",
+        start_date=start_date,
+        date=start_date,
+        unit_system=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+    )
+    expected_station_4 = NexusStation(
+        name="GRP2",
+        number=2,
+        level=2,
+        parent=None,
+        start_date=start_date,
+        date=date_2,
+        unit_system=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+    )
+    expected_station_5 = NexusStation(
+        name="GRP2PRD",
+        number=3,
+        level=1,
+        parent="GRP2",
+        start_date=start_date,
+        date=date_2,
+        unit_system=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+    )
+    expected_station_6 = NexusStation(
+        name="GRP2INJ",
+        number=4,
+        level=1,
+        parent="GRP2",
+        start_date=start_date,
+        date=date_2,
+        unit_system=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+    )
+
+    mock_nexus_network = mocker.MagicMock()
+    mock_nexus_network.model.date_format = DateFormat.MM_DD_YYYY
+    mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
+    expected_result = [
+        expected_station_1,
+        expected_station_2,
+        expected_station_3,
+        expected_station_4,
+        expected_station_5,
+        expected_station_6,
+    ]
+
+    # Act
+    result = network_object.stations.get_all()
+
+    # Assert
+    assert result == expected_result
+
+def test_load_nexus_station_with_wells_table(mocker: MockerFixture):
+    # Arrange
+
+    dummy_nexus_model = get_fake_nexus_simulator(mocker=mocker)
+    start_date = '01/01/2023'
+    file_contents = f"""
+TIME {start_date}
+STATION
+    NAME        NUMBER  LEVEL   PARENT
+    GRP1        1       2       NONE
+    GRP1PRD     1       1       GRP1
+    GRP1INJ     2       1       GRP1
+ENDSTATION
+
+WELLS
+NAME            STREAM            STATION !       gauge depth 5000 ft
+WELL_1          PRODUCER          1       !       arbitrary comments
+WELL_2          INJECTOR          2       !       arbitrary comments
+ENDWELLS
+"""
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
+    surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
+
+    dummy_nexus_model._model_files = FcsNexusFile(location='test', surface_files={'1': surface_file})
+    dummy_nexus_model._start_date = start_date
+    network_object = NexusNetwork(model=dummy_nexus_model)
+
+    expected_station_1 = NexusStation(
+        name="GRP1",
+        number=1,
+        level=2,
+        parent=None,
+        start_date=start_date,
+        date=start_date,
+        unit_system=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+    )
+    expected_station_2 = NexusStation(
+        name="GRP1PRD",
+        number=1,
+        level=1,
+        parent="GRP1",
+        start_date=start_date,
+        date=start_date,
+        unit_system=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+    )
+    expected_station_3 = NexusStation(
+        name="GRP1INJ",
+        number=2,
+        level=1,
+        parent="GRP1",
+        start_date=start_date,
+        date=start_date,
+        unit_system=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+    )
+
+    mock_nexus_network = mocker.MagicMock()
+    mock_nexus_network.model.date_format = DateFormat.MM_DD_YYYY
+    mocker.patch('ResSimpy.Nexus.NexusNetwork.NexusNetwork', mock_nexus_network)
+    expected_stations = [
+        expected_station_1,
+        expected_station_2,
+        expected_station_3,
+    ]
+
+    expected_wellcon_1 = NexusWellConnection(
+        name = "WELL_1",
+        station = "1",
+        station_object=expected_station_2,
+        date_format=DateFormat.MM_DD_YYYY,
+        start_date=start_date,
+        date=start_date,
+        stream="PRODUCER"
+    )
+    expected_wellcon_2 = NexusWellConnection(
+        name = "WELL_2",
+        station = "2",
+        station_object=expected_station_3,
+        date_format=DateFormat.MM_DD_YYYY,
+        start_date=start_date,
+        date=start_date,
+        stream="INJECTOR"
+    )
+
+    expected_well_connections = [
+        expected_wellcon_1,
+        expected_wellcon_2
+    ]
+
+    # Act
+    result_stations = network_object.stations.get_all()
+    result_well_connections = network_object.well_connections.get_all()
+
+    # Assert
+    assert result_stations == expected_stations
+    assert result_well_connections == expected_well_connections
+
+
+def test_load_nexus_station_with_wells_table_multiple_dates(mocker: MockerFixture):
+    # Arrange
+
+    dummy_nexus_model = get_fake_nexus_simulator(mocker=mocker)
+    start_date = '01/01/2023'
+    date_2 = '01/01/2024'
+    file_contents = f"""
+TIME {start_date}
+STATION
+    NAME        NUMBER  LEVEL   PARENT
+    GRP1        1       2       NONE
+    GRP1PRD     1       1       GRP1
+    GRP1INJ     2       1       GRP1
+ENDSTATION
+
+WELLS
+NAME            STREAM            STATION
+WELL_1          PRODUCER          1
+WELL_2          INJECTOR          2
+ENDWELLS
+
+TIME {date_2}
+STATION
+    NAME        NUMBER  LEVEL   PARENT
+    GRP2        2       2       NONE
+    GRP2PRD     3       1       GRP2
+    GRP2INJ     4       1       GRP2
+ENDSTATION
+
+WELLS
+NAME            STREAM            STATION
+WELL_3          PRODUCER          3
+WELL_4          INJECTOR          4
+ENDWELLS
+"""
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
+    surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
+
+    dummy_nexus_model._model_files = FcsNexusFile(location='test', surface_files={'1': surface_file})
+    dummy_nexus_model._start_date = start_date
+    network_object = NexusNetwork(model=dummy_nexus_model)
+
+    expected_station_1 = NexusStation(
+        name="GRP1",
+        number=1,
+        level=2,
+        parent=None,
+        start_date=start_date,
+        date=start_date,
+        unit_system=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+    )
+    expected_station_2 = NexusStation(
+        name="GRP1PRD",
+        number=1,
+        level=1,
+        parent="GRP1",
+        start_date=start_date,
+        date=start_date,
+        unit_system=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+    )
+    expected_station_3 = NexusStation(
+        name="GRP1INJ",
+        number=2,
+        level=1,
+        parent="GRP1",
+        start_date=start_date,
+        date=start_date,
+        unit_system=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+    )
+    expected_station_4 = NexusStation(
+        name="GRP2",
+        number=2,
+        level=2,
+        parent=None,
+        start_date=start_date,
+        date=date_2,
+        unit_system=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+    )
+    expected_station_5 = NexusStation(
+        name="GRP2PRD",
+        number=3,
+        level=1,
+        parent="GRP2",
+        start_date=start_date,
+        date=date_2,
+        unit_system=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+    )
+    expected_station_6 = NexusStation(
+        name="GRP2INJ",
+        number=4,
+        level=1,
+        parent="GRP2",
+        start_date=start_date,
+        date=date_2,
+        unit_system=UnitSystem.ENGLISH,
+        date_format=DateFormat.MM_DD_YYYY,
+    )
+
+    expected_stations = [
+        expected_station_1,
+        expected_station_2,
+        expected_station_3,
+        expected_station_4,
+        expected_station_5,
+        expected_station_6,
+    ]
+
+    expected_wellcon_1 = NexusWellConnection(
+        name="WELL_1",
+        station="1",
+        station_object=expected_station_2,
+        date_format=DateFormat.MM_DD_YYYY,
+        start_date=start_date,
+        date=start_date,
+        stream="PRODUCER",
+    )
+    expected_wellcon_2 = NexusWellConnection(
+        name="WELL_2",
+        station="2",
+        station_object=expected_station_3,
+        date_format=DateFormat.MM_DD_YYYY,
+        start_date=start_date,
+        date=start_date,
+        stream="INJECTOR",
+    )
+    expected_wellcon_3 = NexusWellConnection(
+        name="WELL_3",
+        station="3",
+        station_object=expected_station_5,
+        date_format=DateFormat.MM_DD_YYYY,
+        start_date=start_date,
+        date=date_2,
+        stream="PRODUCER",
+    )
+    expected_wellcon_4 = NexusWellConnection(
+        name="WELL_4",
+        station="4",
+        station_object=expected_station_6,
+        date_format=DateFormat.MM_DD_YYYY,
+        start_date=start_date,
+        date=date_2,
+        stream="INJECTOR",
+    )
+
+    expected_well_connections = [
+        expected_wellcon_1,
+        expected_wellcon_2,
+        expected_wellcon_3,
+        expected_wellcon_4,
+    ]
+
+    # Act
+    result_stations = network_object.stations.get_all()
+    result_well_connections = network_object.well_connections.get_all()
+
+    # Assert
+    assert result_stations == expected_stations
+    assert result_well_connections == expected_well_connections

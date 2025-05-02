@@ -120,6 +120,7 @@ class RemoveObjectOperations:
     def remove_object_from_network_main(self, obj_to_remove: dict[str, None | str | float | int] | UUID,
                                         network_element_name: Literal['nodes', 'connections', 'well_connections',
                                                                       'wellheads', 'wellbores', 'constraints',
+                                                                      'targets', 'stations'],
                                                                       'targets', 'drills', 'drill_sites'],
                                         existing_objects: list[T]) -> None:
         """Removes object from file and from the list of objects based on matching a set of attributes provided in a \
@@ -129,7 +130,7 @@ class RemoveObjectOperations:
             obj_to_remove (dict[str, None | str | float | int] | UUID): dictionary of properties for identifying which
             object to remove. Can also take an object id.
             network_element_name (str): One of: 'nodes', 'connections', 'well_connections', 'wellheads', 'wellbores',
-            'constraints'. Identifies the attribute name of the element inside the network
+            'constraints', 'targets', 'stations'. Identifies the attribute name of the element inside the network.
             existing_objects (list[T]): list of all existing network objects for the network element. e.g. self.__nodes
         """
         if self.__network is None:

@@ -45,7 +45,7 @@ class NexusPVTMethod(DynamicProperty):
     """
 
     # General parameters
-    file: NexusFile
+    file: NexusFile = field(compare=False)
     pvt_type: Optional[PvtType] = None
     eos_nhc: Optional[int] = None  # Number of hydrocarbon components
     eos_temp: Optional[float] = None  # Default temperature for EOS method
@@ -64,9 +64,9 @@ class NexusPVTMethod(DynamicProperty):
                  eos_nhc: Optional[int] = None, eos_temp: Optional[float] = None,
                  eos_components: Optional[list[str]] = None,
                  eos_options: Optional[dict[str, Union[str, int, float, pd.DataFrame, list[str], dict[str, float],
-                                       tuple[str, dict[str, float]], dict[str, pd.DataFrame]]]] = None,
+                                                       tuple[str, dict[str, float]], dict[str, pd.DataFrame]]]] = None,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
-                                      dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
+                                                      dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
         """Initialises the NexusGasliftMethod class.
 
         Args:
@@ -136,6 +136,27 @@ class NexusPVTMethod(DynamicProperty):
         }
         return keywords
 
+    @staticmethod
+    def __hash_props(props: Optional[dict[str, Union[str, int, float, pd.DataFrame, list[str], dict[str, float],
+                                                     tuple[str, dict[str, float]], dict[str, pd.DataFrame], np.ndarray,
+                                                     dict[str, Union[float, pd.DataFrame]]]]]) -> int:
+        """Converts properties and EOS options to a hashable format."""
+        if props is None:
+            return hash(None)
+
+        hashable_dict = frozenset((k, DynamicProperty.convert_to_hashable(v)) for k, v in props.items())
+        return hash(hashable_dict)
+
+    def __hash__(self) -> int:
+        """Hash the PVT method object."""
+        eos_options_hash = self.__hash_props(self.eos_options)
+        eos_components = None if self.eos_components is None else tuple(self.eos_components)
+        eos_attributes = (self.eos_nhc, self.eos_temp, eos_components, eos_options_hash)
+        properties_hash = self.__hash_props(self.properties)
+        # add the units to the hash
+        unit_system_hash = hash(self.unit_system)
+        return hash((eos_attributes, properties_hash, unit_system_hash))
+
     @property
     def units(self) -> PVTUnits:
         """Returns the attribute to unit map for the PVT method."""
@@ -177,7 +198,7 @@ class NexusPVTMethod(DynamicProperty):
                     printable_str += value.to_string(na_rep='', index=False,
                                                      float_format=lambda x: f'{x:.9f}') + '\n'
                 if key in PVT_TABLES_WITH_ENDWORDS:
-                    printable_str += 'END'+key+'\n'
+                    printable_str += 'END' + key + '\n'
                 printable_str += '\n'
             elif isinstance(value, dict):
                 for subkey in value.keys():
@@ -516,10 +537,11 @@ class NexusPVTMethod(DynamicProperty):
         for key in pvt_table_indices.keys():
             if key == 'IGS_CP':
                 self.properties[key] = nfo.read_table_to_df(file_as_list[
-                    pvt_table_indices[key][0]:pvt_table_indices[key][1]], noheader=True)
+                                                            pvt_table_indices[key][0]:pvt_table_indices[key][1]],
+                                                            noheader=True)
             else:
                 self.properties[key] = nfo.read_table_to_df(file_as_list[
-                    pvt_table_indices[key][0]:pvt_table_indices[key][1]])
+                                                            pvt_table_indices[key][0]:pvt_table_indices[key][1]])
         for key in pvt_table_indices_dict.keys():
             self.properties[key] = {}
             for subkey in pvt_table_indices_dict[key].keys():
