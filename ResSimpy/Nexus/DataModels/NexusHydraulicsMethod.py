@@ -273,3 +273,8 @@ class NexusHydraulicsMethod(DynamicProperty):
         # Correctly set WATINJ properties, if needed
         if found_waterinj:
             self.properties['WATINJ'] = watinj_dict
+
+    def __hash__(self) -> int:
+        """Returns the hash of the object. Excludes the file and input number attributes."""
+        property_hash = self.convert_to_hashable(self.properties)
+        return hash((property_hash, self.unit_system, self.ratio_thousands))

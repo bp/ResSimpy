@@ -1,11 +1,12 @@
 """Base class for handling any dynamic property simulator inputs, for use in inputs such as PVT, relperm, etc."""
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from enum import Enum
 
 import numpy as np
 import pandas as pd
-from typing import Optional
+from typing import Optional, Union
 from ResSimpy.FileOperations.File import File
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 
@@ -18,9 +19,9 @@ class DynamicProperty(ABC):
         input_number (int): Method, table or input number, in order as entered in the simulation input deck.
     """
 
-    input_number: int
-    file: File
     properties: dict
+    input_number: int = field(compare=False)
+    file: File = field(compare=False)
 
     def __init__(self, input_number: int, file: File) -> None:
         """Initialises the DynamicProperty class.
@@ -105,3 +106,27 @@ class DynamicProperty(ABC):
             else:
                 continue
         return ranges
+
+    @staticmethod
+    def convert_to_hashable(value: Union[str, float, pd.DataFrame, list[str], dict[str, float],
+                                         tuple[str, dict[str, float]], dict[str, pd.DataFrame], np.ndarray,
+                                         dict[str, Union[float, pd.DataFrame]]]) -> Union[str, float, tuple, frozenset]:
+        """Converts a value of a mix of datatypes and nested dictionaries to a hashable value."""
+        if isinstance(value, pd.DataFrame):
+            pd_hash = pd.util.hash_pandas_object(value)
+            return tuple(pd_hash.values)
+        elif isinstance(value, np.ndarray):
+            return np.array2string(value)
+        elif isinstance(value, list):
+            return tuple(value)
+        elif isinstance(value, dict):
+            return frozenset((k, DynamicProperty.convert_to_hashable(v)) for k, v in value.items())
+        elif isinstance(value, Enum):
+            return value.value
+        else:
+            return value
+
+    def __hash__(self) -> int:
+        """Returns the hash of the object. Excludes the file and input number attributes."""
+        property_hash = self.convert_to_hashable(self.properties)
+        return hash(property_hash)
