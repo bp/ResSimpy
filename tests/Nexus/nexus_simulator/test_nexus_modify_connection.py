@@ -1,8 +1,12 @@
 import uuid
 import pytest
+from pytest_mock import MockerFixture
+
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
+from ResSimpy.Nexus.DataModels.Network.NexusNodeConnections import NexusNodeConnections
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
+from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator, check_file_read_write_is_correct
 
@@ -217,3 +221,132 @@ def test_modify_connections(mocker, file_contents, expected_file_contents, obj_t
     # Assert
     assert result_nodes == expected_objs
     assert nexus_sim.model_files.surface_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
+
+
+@pytest.mark.parametrize('connections, obj_to_check, expected_connected_objects', [
+    # One after
+    ([NexusNodeConnection(name='well_1', node_in='well_1', node_out='well_1_wh', properties_dict={},
+                                       date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+                   NexusNodeConnection(name='well_1_wh', node_in='well_1', node_out='SINK', properties_dict={},
+                                       date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)],
+
+    'well_1',
+    ([],
+     [NexusNodeConnection(name='well_1_wh', node_in='well_1', node_out='SINK',
+                                                      properties_dict={}, date='25/07/2026',
+                                        date_format=DateFormat.DD_MM_YYYY)])),
+
+     # One before
+        ([NexusNodeConnection(name='well_1_gl', node_in='GAS', node_out='well_1', properties_dict={},
+                              date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+             NexusNodeConnection(name='well_1', node_in='well_1', node_out='well_1_wh', properties_dict={},
+                              date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)],
+
+         'well_1',
+         ([NexusNodeConnection(name='well_1_gl', node_in='GAS', node_out='well_1',
+                               properties_dict={}, date='25/07/2026',
+                               date_format=DateFormat.DD_MM_YYYY)],
+         [])),
+
+     # No connected nodes
+        ([NexusNodeConnection(name='well_1', node_in='well_1', node_out='SINK', properties_dict={},
+                              date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)],
+
+         'well_1',
+         ([],
+          [])),
+
+    # Multiple before + after
+    ([NexusNodeConnection(name='well_1_gl', node_in='GAS', node_out='well_1_pipe_in', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+      NexusNodeConnection(name='well_1_pipe_in', node_in='well_1_gl', node_out='well_1', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+      NexusNodeConnection(name='well_1', node_in='well_1', node_out='well_1_pipe_out', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+      NexusNodeConnection(name='well_1_pipe_out', node_in='well_1', node_out='well_1_wh', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+      NexusNodeConnection(name='well_1_wh', node_in='well_1_pipe_out', node_out='SINK', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)
+      ],
+
+     'well_1',
+
+     ([NexusNodeConnection(name='well_1_gl', node_in='GAS', node_out='well_1_pipe_in', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+      NexusNodeConnection(name='well_1_pipe_in', node_in='well_1_gl', node_out='well_1', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),],
+      [NexusNodeConnection(name='well_1_pipe_out', node_in='well_1', node_out='well_1_wh', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+      NexusNodeConnection(name='well_1_wh', node_in='well_1_pipe_out', node_out='SINK', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)])),
+
+    # Non well object
+    ([NexusNodeConnection(name='well_1_gl', node_in='GAS', node_out='well_1_pipe_in', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+      NexusNodeConnection(name='well_1_pipe_in', node_in='well_1_gl', node_out='well_1', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+      NexusNodeConnection(name='well_1', node_in='well_1', node_out='well_1_pipe_out', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+      NexusNodeConnection(name='well_1_pipe_out', node_in='well_1', node_out='well_1_wh', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+      NexusNodeConnection(name='well_1_wh', node_in='well_1_pipe_out', node_out='SINK', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)
+      ],
+
+     'well_1_pipe_out',
+
+     ([NexusNodeConnection(name='well_1_gl', node_in='GAS', node_out='well_1_pipe_in', properties_dict={},
+                           date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+       NexusNodeConnection(name='well_1_pipe_in', node_in='well_1_gl', node_out='well_1', properties_dict={},
+                           date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+       NexusNodeConnection(name='well_1', node_in='well_1', node_out='well_1_pipe_out', properties_dict={},
+                           date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)],
+
+      [NexusNodeConnection(name='well_1_wh', node_in='well_1_pipe_out', node_out='SINK', properties_dict={},
+                           date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)])),
+
+    # Non well object higher up
+    ([NexusNodeConnection(name='well_1_gl', node_in='GAS', node_out='well_1_pipe_in', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+      NexusNodeConnection(name='well_1_pipe_in', node_in='well_1_gl', node_out='well_1', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+      NexusNodeConnection(name='well_1', node_in='well_1', node_out='well_1_pipe_out', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+      NexusNodeConnection(name='well_1_pipe_out', node_in='well_1', node_out='well_1_wh', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+      NexusNodeConnection(name='well_1_wh', node_in='well_1_pipe_out', node_out='SINK', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)
+      ],
+
+     'well_1_pipe_in',
+
+     ([NexusNodeConnection(name='well_1_gl', node_in='GAS', node_out='well_1_pipe_in', properties_dict={},
+                           date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)],
+
+    [NexusNodeConnection(name='well_1', node_in='well_1', node_out='well_1_pipe_out', properties_dict={},
+                         date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+     NexusNodeConnection(name='well_1_pipe_out', node_in='well_1', node_out='well_1_wh', properties_dict={},
+                         date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+      NexusNodeConnection(name='well_1_wh', node_in='well_1_pipe_out', node_out='SINK', properties_dict={},
+                       date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)])),
+
+], ids=['One after', 'One before', 'No connected nodes', 'Multiple before + after', 'Non well object',
+        'Non well object different location'])
+def test_get_connected_objects(mocker: MockerFixture, connections, obj_to_check, expected_connected_objects):
+    # Arrange
+
+    dummy_model = get_fake_nexus_simulator(mocker=mocker)
+    network_obj = NexusNetwork(assume_loaded=True, model=dummy_model)
+    node_connections_obj = NexusNodeConnections(parent_network=network_obj)
+    node_connections_obj._connections = connections
+    network_obj.connections = node_connections_obj
+
+    # Act
+    result = network_obj.get_connected_objects(connection_name=obj_to_check)
+
+    # Assert
+    assert result == expected_connected_objects
+
+
+# Non well object(s)
+# Integration test reading in the info + Nicely printed method?
