@@ -65,14 +65,14 @@ class NexusNodeConnections(NodeConnections):
         self.__parent_network.get_load_status()
         return self._connections
 
-    def get_by_name(self, connection_name: str) -> Optional[NodeConnection]:
+    def get_by_name(self, name: str) -> Optional[NodeConnection]:
         """Returns the node connection name.
 
         Args:
-            connection_name(str): Node connection name
+            name(str): Node connection name
         """
         self.__parent_network.get_load_status()
-        connections_to_return = filter(lambda x: False if x.name is None else x.name.upper() == connection_name.upper(),
+        connections_to_return = filter(lambda x: False if x.name is None else x.name.upper() == name.upper(),
                                        self._connections)
         return next(connections_to_return, None)
 

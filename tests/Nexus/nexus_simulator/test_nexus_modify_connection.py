@@ -347,6 +347,59 @@ def test_get_connected_objects(mocker: MockerFixture, connections, obj_to_check,
     # Assert
     assert result == expected_connected_objects
 
+def test_print_connected_objects(mocker):
+        # Arrange
+        fcs_file_contents = '''
+            RUN_UNITS ENGLISH
+            DATEFORMAT DD/MM/YYYY
+            RECURRENT_FILES
+            RUNCONTROL /nexus_data/runcontrol.dat
+            SURFACE Network 1  /surface_file_01.dat
+            '''
 
-# Non well object(s)
-# Integration test reading in the info + Nicely printed method?
+        runcontrol_contents = '''START 01/01/2019'''
+
+        mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
+                                                                    'uuid_6', 'uuid_7'])
+
+        surface_file_contents = """ NODECON
+NAME        NODEIN     NODEOUT      TYPE  DPADD
+well_1_gl   GAS well_1_pipe_in  GASLIFT  NA
+well_1_pipe_in   well_1_gl well_1  PIPE  NA
+well_1  well_1  well_1_pipe_out   PIPE    -35.8
+well_1_pipe_out   well_1 well_1_wh  PIPE  NA
+well_1_wh   well_1_wh   SINK    NA  NA 
+well_2  well_2  well_2_wh   NA NA 
+ENDNODECON
+"""
+
+        def mock_open_wrapper(filename, mode):
+            mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+                '/path/fcs_file.fcs': fcs_file_contents,
+                '/surface_file_01.dat': surface_file_contents,
+                '/nexus_data/runcontrol.dat': runcontrol_contents}
+                ).return_value
+            return mock_open
+        mocker.patch("builtins.open", mock_open_wrapper)
+        nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/path/fcs_file.fcs', mock_open=False)
+        # make a mock for the write operation
+        writing_mock_open = mocker.mock_open()
+        mocker.patch("builtins.open", writing_mock_open)
+
+        expected_output = \
+"""NAME            TYPE
+-----------------------
+well_1_gl       GASLIFT
+well_1_pipe_in  PIPE
+
+well_1          PIPE - Requested Node
+
+well_1_pipe_out PIPE
+well_1_wh       None
+"""
+
+        # Act
+        result = nexus_sim.network.print_connected_objects(connection_name='well_1')
+
+        # Assert
+        assert result == expected_output

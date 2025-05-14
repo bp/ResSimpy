@@ -57,17 +57,26 @@ class Network(ABC):
 
     def get_connected_objects(self, connection_name: str) -> Tuple[list[NodeConnection], list[NodeConnection]]:
         """Returns a list of all objects connected to a node in a surface network.
-        x"""
+
+        Arguments:
+            connection_name (str): The name of the connection to retrieve the connected nodes for.
+        """
+
+        if self.connections is None:
+            raise ValueError("No connections found for this model.")
+
+        connection_to_check = self.connections.get_by_name(name=connection_name)
+
+        if connection_to_check is None or not isinstance(connection_to_check, NodeConnection):
+            raise ValueError(f"Invalid node connection requested:{connection_name}")
 
         all_connections = self.connections.get_all()
-        connection_to_check = self.connections.get_by_name(connection_name=connection_name)
-
         connections_directly_before_connection = [x for x in all_connections if
                                                   x.node_out == connection_name and x.name != connection_name]
 
         # Add the in connection directly referenced by the connection itself if it is missing
         if connection_to_check.node_in != connection_name:
-            node_in_connection = self.connections.get_by_name(connection_name=connection_to_check.node_in)
+            node_in_connection = self.connections.get_by_name(name=connection_to_check.node_in)
             if node_in_connection is not None and node_in_connection not in connections_directly_before_connection:
                 connections_directly_before_connection.append(node_in_connection)
 
@@ -76,7 +85,7 @@ class Network(ABC):
 
         # Add the out connection directly referenced by the connection itself if it is missing
         if connection_to_check.node_out != connection_name:
-            node_out_connection = self.connections.get_by_name(connection_name=connection_to_check.node_out)
+            node_out_connection = self.connections.get_by_name(name=connection_to_check.node_out)
             if node_out_connection is not None and node_out_connection not in connections_directly_after_connection:
                 connections_directly_after_connection.append(node_out_connection)
 
@@ -94,15 +103,25 @@ class Network(ABC):
         return connections_in, connections_out
 
     def __get_linked_connections(self, all_connections: Sequence[NodeConnection],
-                                 direct_connections: list[NodeConnection], search_upwards: bool):
+                                 direct_connections: list[NodeConnection], search_upwards: bool) \
+            -> list[NodeConnection]:
+
+        if self.connections is None:
+            raise ValueError("No connections found for this model.")
 
         endpoints = ['GAS', 'SINK', 'WATER', 'IPR-SOURCE', 'IPR-SINK']
-        found_connections = []
+        found_connections: list[NodeConnection] = []
 
         for current_node in direct_connections:
             next_node_name = current_node.name
-            while next_node_name not in endpoints and next_node_name not in [x.name for x in found_connections]:
-                next_node = self.connections.get_by_name(connection_name=next_node_name)
+            while (next_node_name is not None
+                   and next_node_name not in endpoints
+                   and next_node_name not in [x.name for x in found_connections]):
+
+                next_node = self.connections.get_by_name(name=next_node_name)
+                if next_node is None or not isinstance(next_node, NodeConnection):
+                    raise ValueError(f"Invalid node connection name found:{next_node_name}")
+
                 found_connections.append(next_node)
 
                 if search_upwards:
@@ -136,3 +155,34 @@ class Network(ABC):
                             break
 
         return found_connections
+
+    def print_connected_objects(self, connection_name: str) -> str:
+        """Prints a list of the connected objects.
+
+        Arguments:
+            connection_name (str): The name of the connection to retrieve the connected nodes for.
+        """
+
+        if self.connections is None:
+            raise ValueError("No connections found for this model.")
+
+        requested_node = self.connections.get_by_name(name=connection_name)
+        if requested_node is None or not isinstance(requested_node, NodeConnection):
+            raise ValueError(f"Invalid node connection requested:{connection_name}")
+
+        connections_str = """NAME            TYPE
+-----------------------
+"""
+
+        connected_objects = self.get_connected_objects(connection_name=connection_name)
+
+        # Add the in node connections, then the object itself, then the out node connections
+        for node in connected_objects[0]:
+            connections_str += f"{node.name:<16}{node.con_type}\n"
+
+        connections_str += f"\n{requested_node.name:<16}{requested_node.con_type} - Requested Node\n\n"
+
+        for node in connected_objects[1]:
+            connections_str += f"{node.name:<16}{node.con_type}\n"
+
+        return connections_str
