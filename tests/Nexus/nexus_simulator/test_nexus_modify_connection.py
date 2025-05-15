@@ -330,8 +330,25 @@ def test_modify_connections(mocker, file_contents, expected_file_contents, obj_t
       NexusNodeConnection(name='well_1_wh', node_in='well_1_pipe_out', node_out='SINK', properties_dict={},
                        date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)])),
 
+    # Info from other node
+    ([NexusNodeConnection(name='well_1', node_in='well_1', node_out='well_1', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+      NexusNodeConnection(name='well_1_pipe', node_in='well_1', node_out='well_1_pipe', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+      NexusNodeConnection(name='well_1_wh', node_in='well_1_pipe', node_out='SINK', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)
+      ],
+
+     'well_1',
+     ([],
+      [NexusNodeConnection(name='well_1_pipe', node_in='well_1', node_out='well_1_pipe', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+      NexusNodeConnection(name='well_1_wh', node_in='well_1_pipe', node_out='SINK', properties_dict={},
+                          date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)
+       ])),
+
 ], ids=['One after', 'One before', 'No connected nodes', 'Multiple before + after', 'Non well object',
-        'Non well object different location'])
+        'Non well object different location', 'info from other node'])
 def test_get_connected_objects(mocker: MockerFixture, connections, obj_to_check, expected_connected_objects):
     # Arrange
 
