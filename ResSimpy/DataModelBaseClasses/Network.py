@@ -56,7 +56,7 @@ class Network(ABC):
         return self._has_been_loaded
 
     def get_connected_objects(self, connection_name: str) -> Tuple[list[NodeConnection], list[NodeConnection]]:
-        """Returns a list of all objects connected to a node in a surface network.
+        """Returns a list of all objects connected to a node connection in a surface network.
 
         Arguments:
             connection_name (str): The name of the connection to retrieve the connected nodes for.
@@ -109,7 +109,7 @@ class Network(ABC):
         if self.connections is None:
             raise ValueError("No connections found for this model.")
 
-        endpoints = ['GAS', 'SINK', 'WATER', 'IPR-SOURCE', 'IPR-SINK']
+        endpoints = ['GAS', 'SINK', 'WATER', 'IPR-SOURCE', 'IPR-SINK', 'FIELD']
         found_connections: list[NodeConnection] = []
 
         for current_node in direct_connections:
