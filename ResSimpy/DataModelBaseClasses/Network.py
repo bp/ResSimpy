@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Any, Mapping
 
 from ResSimpy.GenericContainerClasses.Constraints import Constraints
 from ResSimpy.GenericContainerClasses.NetworkLists import NetworkLists
@@ -53,3 +53,50 @@ class Network(ABC):
         if not self._has_been_loaded:
             self.load()
         return self._has_been_loaded
+
+    def get_all_linked_objects(self, object_name: str) -> dict[str, list[Any]]:
+        """Gets a list of all the objects in the surface network linked to the specified object name.
+
+        Args:
+            object_name(str): The name of the object to search for.
+        """
+        linked_objects = {}
+
+        if self.nodes is not None:
+            linked_nodes = [x for x in self.nodes.get_all() if x.name == object_name]
+            linked_objects['NODES'] = linked_nodes
+
+        if self.connections is not None:
+            linked_connections = [x for x in self.connections.get_all() if x.name == object_name]
+            linked_objects['CONNECTIONS'] = linked_connections
+
+        if self.constraints is not None:
+            if isinstance(self.constraints.constraints, Mapping):
+                linked_constraints = list(self.constraints.constraints[object_name])
+            else:
+                linked_constraints = [x for x in self.constraints.constraints if x.name == object_name]
+            linked_objects['CONSTRAINTS'] = linked_constraints
+
+        if self.welllists is not None:
+            linked_well_lists = [x for x in self.welllists.lists if object_name in x.elements_in_the_list]
+            linked_objects['WELLLISTS'] = linked_well_lists
+
+            well_list_names = [x.name for x in linked_well_lists]
+
+            if self.targets is not None:
+                linked_targets = [x for x in self.targets.get_all() if x.control_connections in well_list_names]
+                linked_objects['TARGETS'] = linked_targets
+
+        if self.well_connections is not None:
+            linked_well_connections = [x for x in self.well_connections.get_all() if x.name == object_name]
+            linked_objects['WELL_CONNECTIONS'] = linked_well_connections
+
+        if self.wellheads is not None:
+            linked_well_heads = [x for x in self.wellheads.get_all() if x.well == object_name]
+            linked_objects['WELLHEADS'] = linked_well_heads
+
+        if self.wellbores is not None:
+            linked_well_bores = [x for x in self.wellbores.get_all() if x.name == object_name]
+            linked_objects['WELLBORES'] = linked_well_bores
+
+        return linked_objects
