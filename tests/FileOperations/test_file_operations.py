@@ -177,8 +177,21 @@ def test_split_list_of_strings_by_length():
 DATES
     25 JUL         2026 /
 /
-    """, 4)
-], ids=['simple case', 'multiple occurrences of token'])
+    """, 4),
+
+    ("""DATES
+    15 JAN 2025 /
+/
+   
+   
+    
+DATES
+
+
+    25 JUL         2026 /
+/
+    """, 6)
+], ids=['simple case', 'multiple occurrences of token', 'Multiple blank lines + whitespace'])
 def test_load_three_part_date(date_str: str, start_index: int):
     # Arrange
 
