@@ -105,6 +105,7 @@ class Network(ABC):
     def __get_linked_connections(self, all_connections: Sequence[NodeConnection],
                                  direct_connections: list[NodeConnection], search_upwards: bool) \
             -> list[NodeConnection]:
+        """Returns a list of connections linked to the provided direct connections."""
 
         if self.connections is None:
             raise ValueError("No connections found for this model.")
@@ -112,6 +113,7 @@ class Network(ABC):
         endpoints = ['GAS', 'SINK', 'WATER', 'IPR-SOURCE', 'IPR-SINK', 'FIELD']
         found_connections: list[NodeConnection] = []
 
+        # Loop through all the direct connections, getting all the connections connected to each.
         for current_node in direct_connections:
             next_node_name = current_node.name
             while (next_node_name is not None
