@@ -52,7 +52,7 @@ MYTESTTOKEN
      C Comment line
      "token value"''',
      'token value', 2),
-    
+
     ("Values before MYTESTTOKEN",
      '''Values before MYTESTTOKEN
      C Comment line
@@ -73,7 +73,7 @@ def test_get_token_value(mocker: MockerFixture, line_contents, file_contents, ex
     result = fo.get_token_value(token='MYTESTTOKEN', token_line=line_contents,
                                 file_list=dummy_file_as_list)
     with_index_result = fo.get_token_value_with_line_index(token='MYTESTTOKEN', token_line=line_contents,
-                                file_list=dummy_file_as_list)
+                                                           file_list=dummy_file_as_list)
     # Assert
     assert result == expected_result
     assert with_index_result == (expected_result, expected_line_index)
@@ -138,14 +138,15 @@ def test_get_nth_value(list_of_strings, value_number_to_get, expected_result):
     ('This is a long string that needs to be split into multiple lines based on a certain length.\n',
      'This is a long string that needs to be split into multiple lines based on a certain length.\n', 100),
     ('This is a long string that needs to be split into multiple lines based on a certain length.\n',
-     'This is a long\nstring that needs to\nbe split into\nmultiple lines based\non a certain length.\n', 20),])
+     'This is a long\nstring that needs to\nbe split into\nmultiple lines based\non a certain length.\n', 20), ])
 def test_split_lines_for_long_string(long_string, expected_result, max_length):
     # Arrange
     # Act
     result = fo.split_lines_for_long_string(long_string, max_length=max_length)
-    
+
     # Assert
     assert result == expected_result
+
 
 def test_split_list_of_strings_by_length():
     # Arrange
@@ -161,3 +162,42 @@ def test_split_list_of_strings_by_length():
 
     # Assert
     assert result == expected_result
+
+
+@pytest.mark.parametrize("date_str, start_index", [
+    ("""DATES
+    25 JUL 2026 /
+    /
+    """, 0),
+
+    ("""DATES
+    15 JAN 2025 /
+/
+    
+DATES
+    25 JUL         2026 /
+/
+    """, 4),
+
+    ("""DATES
+    15 JAN 2025 /
+/
+   
+   
+    
+DATES
+
+
+    25 JUL         2026 /
+/
+    """, 6)
+], ids=['simple case', 'multiple occurrences of token', 'Multiple blank lines + whitespace'])
+def test_load_three_part_date(date_str: str, start_index: int):
+    # Arrange
+
+    # Act
+    result = fo.load_in_three_part_date(initial_token='DATES', token_line='DATES\n',
+                                        file_as_list=date_str.splitlines(keepends=True), start_index=start_index)
+
+    # Assert
+    assert result == "25 JUL 2026"

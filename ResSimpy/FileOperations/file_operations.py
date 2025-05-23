@@ -449,19 +449,25 @@ def load_in_three_part_date(initial_token: str, token_line: str, file_as_list: l
     """
 
     # Get the three parts of the date
-    first_date_part = get_expected_token_value(token=initial_token, token_line=token_line,
-                                               file_list=file_as_list)
+    list_to_search = file_as_list[start_index::]
+    first_date_part, value_index = get_token_value_with_line_index(token=initial_token, token_line=token_line,
+                                                                   file_list=list_to_search)
 
-    snipped_string = token_line.replace(initial_token, '')
+    if value_index is None or first_date_part is None:
+        raise ValueError("Token or value not found in list of strings")
+
+    value_line = list_to_search[value_index]
+
+    snipped_string = value_line.replace(initial_token, '')
     snipped_string = snipped_string.replace(first_date_part, '', 1)
 
-    second_date_part = get_expected_next_value(start_line_index=start_index, file_as_list=file_as_list,
+    second_date_part = get_expected_next_value(start_line_index=0, file_as_list=[snipped_string],
                                                search_string=snipped_string)
 
     snipped_string = snipped_string.replace(second_date_part, '', 1)
 
-    third_date_part = get_next_value(start_line_index=start_index, file_as_list=file_as_list,
-                                     search_string=snipped_string)
+    third_date_part = get_expected_next_value(start_line_index=0, file_as_list=[snipped_string],
+                                              search_string=snipped_string)
 
     full_date = f"{first_date_part} {second_date_part} {third_date_part}"
     return full_date
