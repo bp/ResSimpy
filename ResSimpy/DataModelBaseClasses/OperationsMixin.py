@@ -35,10 +35,10 @@ class NetworkOperationsMixIn(ABC):
 
     @abstractmethod
     def get_by_name(self, name: str) -> Optional[Any]:
-        """Returns network operation with provided name.
+        """Returns network object with provided name.
 
         Args:
-            name(str): Name of network operation.
+            name(str): Name of network object.
         """
         raise NotImplementedError("Implement this in the derived class")
 
