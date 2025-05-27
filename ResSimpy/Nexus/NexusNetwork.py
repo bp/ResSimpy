@@ -25,6 +25,8 @@ from ResSimpy.Nexus.DataModels.Network.NexusDrill import NexusDrill
 from ResSimpy.Nexus.DataModels.Network.NexusDrillSite import NexusDrillSite
 from ResSimpy.Nexus.DataModels.Network.NexusDrillSites import NexusDrillSites
 from ResSimpy.Nexus.DataModels.Network.NexusDrills import NexusDrills
+from ResSimpy.Nexus.DataModels.Network.NexusGuideRate import NexusGuideRate
+from ResSimpy.Nexus.DataModels.Network.NexusGuideRates import NexusGuideRates
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnections import NexusNodeConnections
@@ -76,6 +78,7 @@ class NexusNetwork(Network):
     drill_sites: NexusDrillSites
     conlists: NexusConLists
     stations: NexusStations
+    guide_rates: NexusGuideRates
     _has_been_loaded: bool = False
 
     def __init__(self, model: NexusSimulator, assume_loaded: bool = False) -> None:
@@ -104,6 +107,7 @@ class NexusNetwork(Network):
         self.activation_changes: NexusActivationChanges = NexusActivationChanges(self)
         self.drills: NexusDrills = NexusDrills(self)
         self.drill_sites: NexusDrillSites = NexusDrillSites(self)
+        self.guide_rates: NexusGuideRates = NexusGuideRates(self)
 
     @property
     def model(self) -> NexusSimulator:
@@ -254,7 +258,7 @@ class NexusNetwork(Network):
                                       'QMULT': NexusConstraint,
                                       'CONDEFAULTS': None,
                                       'TARGET': NexusTarget,
-                                      'GUIDERATE': None,
+                                      'GUIDERATE': NexusGuideRate,
                                       'PROCS': None,
                                       'WELLLIST': NexusWellList,
                                       'CONLIST': NexusConList,
@@ -263,7 +267,7 @@ class NexusNetwork(Network):
                                       'ACTIVATE_DEACTIVATE': NexusActivationChange,
                                       'STATION': NexusStation,
                                       'DRILL': NexusDrill,
-                                      'DRILLSITE': NexusDrillSite
+                                      'DRILLSITE': NexusDrillSite,
                                       }
 
         for surface in self.__model.model_files.surface_files.values():
@@ -291,6 +295,7 @@ class NexusNetwork(Network):
             self.stations._add_to_memory(type_check_lists(nexus_obj_dict.get('STATION')))
             self.drills._add_to_memory(type_check_lists(nexus_obj_dict.get('DRILL')))
             self.drill_sites._add_to_memory(type_check_lists(nexus_obj_dict.get('DRILLSITE')))
+            self.guide_rates._add_to_memory(type_check_lists(nexus_obj_dict.get('GUIDERATE')))
 
             actions_check = type_check_lists(nexus_obj_dict.get('ACTIONS'))
             if actions_check is not None:
@@ -376,7 +381,8 @@ class NexusNetwork(Network):
     def find_network_element_with_dict(self, name: str, search_dict: dict[str, None | float | str | int],
                                        network_element_type: Literal[
                                            'nodes', 'connections', 'well_connections', 'wellheads', 'wellbores',
-                                           'constraints', 'targets', 'drills', 'drill_sites', 'stations']) -> Any:
+                                           'constraints', 'targets', 'drills', 'drill_sites', 'stations',
+                                           'guide_rates']) -> Any:
         """Finds a uniquely matching constraint from a given set of properties in a dictionary of attributes.
 
         Args:
