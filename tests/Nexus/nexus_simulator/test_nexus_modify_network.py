@@ -393,6 +393,10 @@ site_2  1
 ENDDRILLSITE
 
 
+GUIDERATE
+TARGET    DTMIN   PHASE   A B C D E F INCREASE DAMP
+targ_1     12.1      GAS     1 0 2.1 3 8 4 YES  1.15      
+ENDGUIDERATE
 
 DRILL
 WELL DRILLSITE DRILLTIME CMPLTIME WORKTIME RIGS
@@ -451,6 +455,11 @@ WELL    DRILLSITE   DRILLTIME
 well_1  site_1   654.1
 ENDDRILL
 
+GUIDERATE
+TARGET    DTMIN   PHASE   A B C D E F INCREASE DAMP
+targ_1     12.1      GAS     1 0 2.1 3 8 4 YES  1.15      
+ENDGUIDERATE
+
 TIME 01/01/2024
 ''',
          {'name': 'site_1', 'max_rigs': 5, 'date': '01/01/2023', 'date_format': DateFormat.DD_MM_YYYY},
@@ -502,7 +511,6 @@ DRILL
 WELL    DRILLSITE   DRILLTIME   
 well_1  site_1   654.1
 ENDDRILL
-
 
 
 GUIDERATE
