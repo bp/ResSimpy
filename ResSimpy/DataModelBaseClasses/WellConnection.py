@@ -83,7 +83,7 @@ class WellConnection(NetworkObject, ABC):
             productivity_index (Optional[float]): Productivity index (PI).
             hyd_method (Optional[str]): Hydraulic method (METHOD).
             well_index_mult (Optional[float]): Well index multiplier (WIMULT).
-            gas_mobility (str): Gas mobility value (GASMOB)
+            gas_mobility (str): Gas mobility value (GASMOB).
 
         """
 
