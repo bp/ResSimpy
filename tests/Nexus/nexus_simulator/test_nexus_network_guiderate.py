@@ -48,3 +48,4 @@ ENDGUIDERATE
 
 
 # Check defaults applied properly
+# Check All phase types
