@@ -14,3 +14,13 @@ class SeparatorType(str, Enum):
     BLACKOIL = 'BLACKOIL'
     GASPLANT = 'GASPLANT'
     EOS = 'EOS'
+
+
+class PhaseType(str, Enum):
+    """Enum representing the different phase types."""
+    OIL = 'OIL'
+    LIQUID = 'LIQ'
+    GAS = 'GAS'
+    RESERVOIR = 'RES'
+    COMBINED = 'COMB'
+    NONE = 'NONE'

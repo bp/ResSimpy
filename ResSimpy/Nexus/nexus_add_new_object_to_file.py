@@ -177,7 +177,7 @@ class AddObjectOperations:
         """
         nexus_mapping = new_obj.get_keyword_mapping()
 
-        new_table_as_list = ['']
+        new_table_as_list = []
         if not date_found:
             new_table_as_list.append('TIME ' + obj_date)
         new_table_as_list += [self.table_header]
@@ -276,6 +276,11 @@ class AddObjectOperations:
             if date_comparison > 0 or nfo.check_token('STOP', line):
                 new_table, obj_in_table_index = self.write_out_new_table_containing_object(
                     obj_date=date, object_properties=object_properties, date_found=date_found, new_obj=new_object)
+
+                # If we don't have a blank line before our newly inserted table, add one.
+                if index > 0 and file_as_list[index - 1] != '\n':
+                    additional_content.append('\n')
+
                 additional_content.extend(new_table)
                 insert_line_index = index
                 id_line_locs = [obj_in_table_index + index - 1]
@@ -283,12 +288,17 @@ class AddObjectOperations:
             if insert_line_index >= 0:
                 break
         else:
-            # if we've finished the loop normally that means we haven't added any additional objects or lines
-            # This means we have to add the date and a new table to the end of the file.
+            # If we've finished the loop normally that means we haven't added any additional objects or lines
+            # this means we have to add the date and a new table to the end of the file.
             new_table, obj_in_table_index = self.write_out_new_table_containing_object(
                 obj_date=date, object_properties=object_properties, date_found=date_found, new_obj=new_object)
-            additional_content.extend(new_table)
+
             insert_line_index = len(file_as_list)
+            # If we don't have a blank line before our newly inserted date, add one.
+            if insert_line_index > 0 and file_as_list[insert_line_index - 1] != '\n':
+                additional_content.append('\n')
+
+            additional_content.extend(new_table)
             id_line_locs = [obj_in_table_index + insert_line_index - 1]
         if len(additional_content) == 0:
             raise ValueError('Could not find place to add the additional table lines.')
