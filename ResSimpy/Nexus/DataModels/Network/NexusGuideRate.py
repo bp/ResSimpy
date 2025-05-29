@@ -15,10 +15,10 @@ class NexusGuideRate(GuideRate):
 
     def __init__(self, unit_system: Optional[UnitSystem] = None, name: Optional[str] = None, date: Optional[str] = None,
                  date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
-                 time_interval: Optional[float] = None, phase: Optional[PhaseType] = None, a: Optional[float] = None,
-                 b: Optional[float] = None, c: Optional[float] = None, d: Optional[float] = None,
-                 e: Optional[float] = None, f: Optional[float] = None, increase_permitted: Optional[bool] = None,
-                 damping_factor: Optional[float] = None,
+                 time_interval: Optional[float] = 0, phase: Optional[PhaseType] = PhaseType.OIL, a: Optional[float] = 0,
+                 b: Optional[float] = 0, c: Optional[float] = 0, d: Optional[float] = 0,
+                 e: Optional[float] = 0, f: Optional[float] = 0, increase_permitted: Optional[bool] = True,
+                 damping_factor: Optional[float] = 1.0,
                  properties_dict: Optional[dict[str, None | int | str | float]] = None) -> None:
         """Initialises the NexusDrill class.
 

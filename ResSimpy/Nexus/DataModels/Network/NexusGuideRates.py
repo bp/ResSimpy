@@ -71,12 +71,12 @@ class NexusGuideRates(GuideRates):
             start_date(str): start date of the run.
             default_units(UnitSystem): default units used if no units are found.
         """
-        new_drills, _ = collect_all_tables_to_objects(surface_file, {'GUIDRATE': NexusGuideRate},
-                                                      start_date=start_date,
-                                                      default_units=default_units,
-                                                      date_format=self.__parent_network.model.date_format)
-        drills_list = new_drills.get('GUIDRATE')
-        self._add_to_memory(drills_list)
+        new_guide_rates, _ = collect_all_tables_to_objects(surface_file, {'GUIDERATE': NexusGuideRate},
+                                                           start_date=start_date,
+                                                           default_units=default_units,
+                                                           date_format=self.__parent_network.model.date_format)
+        guide_rates_list = new_guide_rates.get('GUIDERATE')
+        self._add_to_memory(guide_rates_list)
 
     def _add_to_memory(self, additional_list: Optional[list[NexusGuideRate]]) -> None:
         """Extends the guide rates object by a list of guide rates provided to it.
