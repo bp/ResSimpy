@@ -31,6 +31,7 @@ class WellConnection(NetworkObject, ABC):
     i: Optional[int] = None
     j: Optional[int] = None
     drainage_radius: Optional[float] = None
+    gas_mobility: Optional[str] = None
     pvt_method: Optional[int] = None
     d_factor: Optional[float] = None
     on_time: Optional[float] = None
@@ -48,7 +49,7 @@ class WellConnection(NetworkObject, ABC):
                  temperature: Optional[float] = None, diameter: Optional[float] = None,
                  inner_diameter: Optional[float] = None, roughness: Optional[float] = None,
                  productivity_index: Optional[float] = None, hyd_method: Optional[str] = None,
-                 well_index_mult: Optional[float] = None) -> None:
+                 well_index_mult: Optional[float] = None, gas_mobility: Optional[str] = None) -> None:
         """Initialises the WellConnection class.
 
         Args:
@@ -82,6 +83,8 @@ class WellConnection(NetworkObject, ABC):
             productivity_index (Optional[float]): Productivity index (PI).
             hyd_method (Optional[str]): Hydraulic method (METHOD).
             well_index_mult (Optional[float]): Well index multiplier (WIMULT).
+            gas_mobility (str): Gas mobility value (GASMOB).
+
         """
 
         self.bhdepth = bhdepth
@@ -113,6 +116,7 @@ class WellConnection(NetworkObject, ABC):
         self.d_factor = d_factor if d_factor is not None else self.d_factor
         self.on_time = on_time if on_time is not None else self.on_time
         self.well_index_mult = well_index_mult if well_index_mult is not None else self.well_index_mult
+        self.gas_mobility = gas_mobility if gas_mobility is not None else self.gas_mobility
 
     @property
     def units(self) -> NetworkUnits:

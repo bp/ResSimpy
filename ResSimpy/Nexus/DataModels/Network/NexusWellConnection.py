@@ -50,7 +50,7 @@ class NexusWellConnection(WellConnection):
     d_factor (float): Non-Darcy D-factor (D)
     non_darcy_flow_model (str): Non-Darcy flow model identifier (ND)
     non_darcy_flow_method (str): Non-Darcy flow method identifier (DPERF)
-    gas_mobility (float): Gas mobility value (GASMOB)
+    gas_mobility (str): Gas mobility value (GASMOB)
     capillary_number_model (str): Capillary number model identifier (CN)
     dp_add (float): Additional pressure drop (DPADD)
     dt_add (float): Additional temperature change (DTADD)
@@ -89,7 +89,7 @@ class NexusWellConnection(WellConnection):
     d_factor: Optional[float] = None
     non_darcy_flow_model: Optional[str] = None
     non_darcy_flow_method: Optional[str] = None
-    gas_mobility: Optional[float] = None
+    gas_mobility: Optional[str] = None
     capillary_number_model: Optional[str] = None
     dp_add: Optional[float] = None
     dt_add: Optional[float] = None
@@ -114,7 +114,7 @@ class NexusWellConnection(WellConnection):
                  well_index_mult: Optional[float] = None, vip_productivity_index: Optional[float] = None,
                  productivity_index_phase: Optional[str] = None, d_factor: Optional[float] = None,
                  non_darcy_flow_model: Optional[str] = None, non_darcy_flow_method: Optional[str] = None,
-                 gas_mobility: Optional[float] = None, capillary_number_model: Optional[str] = None,
+                 gas_mobility: Optional[str] = None, capillary_number_model: Optional[str] = None,
                  dp_add: Optional[float] = None, dt_add: Optional[float] = None, rate_mult: Optional[float] = None,
                  polymer: Optional[str] = None, station: Optional[str] = None,
                  station_object: Optional[NexusStation] = None, drill_queue: Optional[str] = None,
