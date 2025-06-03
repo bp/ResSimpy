@@ -196,6 +196,9 @@ class Network(ABC):
             object_name(str): The name of the object to search for.
         """
         linked_objects = {}
+        linked_well_list_names = []
+        linked_con_list_names = []
+        linked_connection_names = []
 
         if self.nodes is not None:
             linked_nodes = [x for x in self.nodes.get_all() if x.name == object_name]
@@ -204,6 +207,13 @@ class Network(ABC):
         if self.connections is not None:
             linked_connections = [x for x in self.connections.get_all() if x.name == object_name]
             linked_objects['CONNECTIONS'] = linked_connections
+            linked_connection_names = [x.name for x in linked_connections]
+
+        if self.well_connections is not None:
+            linked_well_connections = [x for x in self.well_connections.get_all() if x.name == object_name]
+            linked_objects['WELL_CONNECTIONS'] = linked_well_connections
+            linked_well_connection_names = [x.name for x in linked_well_connections]
+            linked_connection_names.append(linked_well_connection_names)
 
         if self.constraints is not None:
             if isinstance(self.constraints.constraints, Mapping):
@@ -212,19 +222,21 @@ class Network(ABC):
                 linked_constraints = [x for x in self.constraints.constraints if x.name == object_name]
             linked_objects['CONSTRAINTS'] = linked_constraints
 
+        if hasattr(self, 'conlists') and self.conlists is not None:
+            linked_connection_lists = [x for x in self.conlists.lists if object_name in x.elements_in_the_list]
+            linked_objects['CONLISTS'] = linked_connection_lists
+            linked_con_list_names = [x.name for x in linked_connection_lists]
+
         if self.welllists is not None:
             linked_well_lists = [x for x in self.welllists.lists if object_name in x.elements_in_the_list]
             linked_objects['WELLLISTS'] = linked_well_lists
+            linked_well_list_names = [x.name for x in linked_well_lists]
 
-            well_list_names = [x.name for x in linked_well_lists]
-
-            if self.targets is not None:
-                linked_targets = [x for x in self.targets.get_all() if x.control_connections in well_list_names]
-                linked_objects['TARGETS'] = linked_targets
-
-        if self.well_connections is not None:
-            linked_well_connections = [x for x in self.well_connections.get_all() if x.name == object_name]
-            linked_objects['WELL_CONNECTIONS'] = linked_well_connections
+        if self.targets is not None:
+            linked_targets = [x for x in self.targets.get_all() if x.control_connections in linked_well_list_names or
+                              x.control_connections in linked_connection_names or
+                              x.control_connections in linked_con_list_names]
+            linked_objects['TARGETS'] = linked_targets
 
         if self.wellheads is not None:
             linked_well_heads = [x for x in self.wellheads.get_all() if x.well == object_name]
