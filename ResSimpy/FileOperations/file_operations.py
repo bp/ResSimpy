@@ -4,7 +4,7 @@ import re
 from string import whitespace
 
 from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
-
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
 def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,
                            comment_characters: Optional[list[str]] = None,
@@ -588,3 +588,39 @@ def split_list_of_strings_by_length(list_of_strings: list[str], max_length: int)
         list[str]: A new list of strings split from the original list.
     """
     return [split_lines_for_long_string(string, max_length) for string in list_of_strings]
+
+
+def chunk_by_datetime(file_as_list: list[str], date_format: DateFormat) -> dict[str, list[str]]:
+    """Creates a dictionary of file contents chunked by datetime.
+
+    Args:
+        file_as_list (list[str]): the file contents as a list of strings.
+        date_format (DateFormat): The date format to use for chunking the file contents.
+
+    Returns:
+        dict[str, list[str]]: Dictionary with datetime as keys and list of strings as values.
+    """
+    chunked_content = {}
+    current_date = 'START'
+
+    if date_format == DateFormat.DD_MMM_YYYY:
+        time_token = 'DATES'
+    else:
+        time_token = 'TIME'
+
+    for i, line in enumerate(file_as_list):
+        # Check if the line contains a TIME token
+        if check_token(time_token, line):
+            if time_token == 'TIME':
+                current_date = get_expected_token_value(token='TIME', token_line=line, file_list=file_as_list)
+            # Update the current date and create a new chunk
+            if time_token == 'DATES':
+                current_date = load_in_three_part_date('DATES', line, file_as_list=file_as_list,
+                                                       start_index=0)
+        if current_date not in chunked_content:
+            chunked_content[current_date] = []
+        # Add the line to the current date's chunk
+        if current_date:
+            chunked_content[current_date].append(line)
+
+    return chunked_content
