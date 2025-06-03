@@ -621,7 +621,7 @@ def chunk_by_datetime(file_as_list: list[str], date_format: DateFormat) -> dict[
                 current_date = get_expected_token_value(token='TIME', token_line=line, file_list=file_as_list)
             # Update the current date and create a new chunk
             if time_token == 'DATES':
-                current_date = load_in_three_part_date('DATES', line, file_as_list=file_as_list,
+                current_date = load_in_three_part_date('DATES', line, file_as_list=file_as_list[i:],
                                                        start_index=0)
         if current_date not in chunked_content:
             chunked_content[current_date] = []

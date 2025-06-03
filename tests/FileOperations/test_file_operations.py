@@ -283,11 +283,11 @@ END
             'START': ['Starting Content\n', '    !comment\n'],
             '2 MAR 2024': ['DATES\n', '2 MAR 2024 /\n', '/\n', 'WELLS\n',
                             'NAME STREAM SCALE\n', 'I-1 WATER 4.0\n', 'P-1 PRODUCER 4.0\n',
-                            'ENDWELLS\n'],
-            '3 MAR 2024': ['DATES\n', '3 MAR 2024 /\n', '/\n', 'NODES\n',
+                            'ENDWELLS\n', '\n'],
+            '3 MAR 2024': ['DATES\n', ' 3 MAR 2024 /\n', '/\n', 'NODES\n',
                             'NAME DEPTH\n', 'node1 100.0\n', 'node2 -50.0\n',
-                            'node3 -25.0\n', 'node4 25.0\n', 'ENDNODES\n'],
-            '1 APR 2024': ['DATES\n', '1 APR 2024 /\n', '/\n'],
+                            'node3 -25.0\n', 'node4 25.0\n', 'ENDNODES\n', '\n'],
+            '1 APR 2024': ['DATES\n', ' 1 APR 2024 /\n', '/\n', 'END\n'],
      },
      DateFormat.DD_MMM_YYYY)
                          ],ids=['date_format_dd_mm_yyyy', 'date_format_dd_mmm_yyyy'],)
