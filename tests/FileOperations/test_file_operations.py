@@ -2,6 +2,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 import ResSimpy.FileOperations.file_operations as fo
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
 
 @pytest.mark.parametrize("line_contents, file_contents, expected_result, expected_line_index", [
@@ -201,3 +202,101 @@ def test_load_three_part_date(date_str: str, start_index: int):
 
     # Assert
     assert result == "25 JUL 2026"
+
+
+@pytest.mark.parametrize("file_contents, expected_result, date_format", [
+    # Basic DD/MM/YYYY
+    ("""Starting Content
+    !comment
+TIME 01/01/2024
+WELLS
+NAME STREAM SCALE
+I-1 WATER 4.0
+P-1 PRODUCER 4.0
+ENDWELLS
+!TIME 02/01/2024
+
+NODES
+NAME DEPTH TYPE TEMP STATION X Y
+WH_W1 3000 WELLHEAD 35 DEEP # #
+WH_W2 3500 WELLHEAD 34 DEEP # #
+WH_W3 1100 WELLHEAD 38 2 # #
+FPSO -50 NA 70 NA 1000. 2500.
+ENDNODES
+
+TIME 03/01/2024
+NODES
+NAME DEPTH
+node1 100.0
+node2 -50.0
+node3 -25.0
+node4 25.0
+ENDNODES
+
+TIME 01/01/2025
+TIME 01/01/2026
+END
+""",
+     {
+         'START': ['Starting Content\n', '    !comment\n'],
+         '01/01/2024': ['TIME 01/01/2024\n', 'WELLS\n',
+                        'NAME STREAM SCALE\n', 'I-1 WATER 4.0\n', 'P-1 PRODUCER 4.0\n',
+                        'ENDWELLS\n', '!TIME 02/01/2024\n', '\n', 'NODES\n',
+                        'NAME DEPTH TYPE TEMP STATION X Y\n', 'WH_W1 3000 WELLHEAD 35 DEEP # #\n',
+                        'WH_W2 3500 WELLHEAD 34 DEEP # #\n', 'WH_W3 1100 WELLHEAD 38 2 # #\n',
+                        'FPSO -50 NA 70 NA 1000. 2500.\n', 'ENDNODES\n', '\n'],
+         '03/01/2024': ['TIME 03/01/2024\n', 'NODES\n', 'NAME DEPTH\n', 'node1 100.0\n',
+                        'node2 -50.0\n', 'node3 -25.0\n', 'node4 25.0\n', 'ENDNODES\n', '\n'],
+         '01/01/2025': ['TIME 01/01/2025\n'],
+         '01/01/2026': ['TIME 01/01/2026\n', 'END\n'],
+     },
+     DateFormat.DD_MM_YYYY
+     ),
+    # three part date d MMM YYYY
+    ("""Starting Content
+    !comment
+DATES
+2 MAR 2024 /
+/
+WELLS
+NAME STREAM SCALE
+I-1 WATER 4.0
+P-1 PRODUCER 4.0
+ENDWELLS
+
+DATES
+ 3 MAR 2024 /
+/
+NODES
+NAME DEPTH
+node1 100.0
+node2 -50.0
+node3 -25.0
+node4 25.0
+ENDNODES
+
+DATES
+ 1 APR 2024 /
+/
+END
+""",
+     {
+         'START': ['Starting Content\n', '    !comment\n'],
+         '2 MAR 2024': ['DATES\n', '2 MAR 2024 /\n', '/\n', 'WELLS\n',
+                        'NAME STREAM SCALE\n', 'I-1 WATER 4.0\n', 'P-1 PRODUCER 4.0\n',
+                        'ENDWELLS\n', '\n'],
+         '3 MAR 2024': ['DATES\n', ' 3 MAR 2024 /\n', '/\n', 'NODES\n',
+                        'NAME DEPTH\n', 'node1 100.0\n', 'node2 -50.0\n',
+                        'node3 -25.0\n', 'node4 25.0\n', 'ENDNODES\n', '\n'],
+         '1 APR 2024': ['DATES\n', ' 1 APR 2024 /\n', '/\n', 'END\n'],
+     },
+     DateFormat.DD_MMM_YYYY)
+], ids=['date_format_dd_mm_yyyy', 'date_format_dd_mmm_yyyy'], )
+def test_chunk_by_datetime(file_contents, expected_result, date_format):
+    # arrange
+    file_as_list = file_contents.splitlines(keepends=True)
+    # Act
+    result = fo.chunk_by_datetime(file_as_list, date_format=date_format)
+
+    # Assert
+    assert result == expected_result
