@@ -6,6 +6,7 @@ from string import whitespace
 from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
+
 def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,
                            comment_characters: Optional[list[str]] = None,
                            square_bracket_comments: bool = False) -> list[str]:
@@ -606,7 +607,7 @@ def chunk_by_datetime(file_as_list: list[str], date_format: DateFormat) -> dict[
     Returns:
         dict[str, list[str]]: Dictionary with datetime as keys and list of strings as values.
     """
-    chunked_content = {}
+    chunked_content: dict[str, list[str]] = {}
     current_date = 'START'
 
     if date_format == DateFormat.DD_MMM_YYYY:
