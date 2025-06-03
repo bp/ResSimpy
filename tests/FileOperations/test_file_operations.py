@@ -164,6 +164,45 @@ def test_split_list_of_strings_by_length():
     # Assert
     assert result == expected_result
 
+
+@pytest.mark.parametrize("date_str, start_index", [
+    ("""DATES
+    25 JUL 2026 /
+    /
+    """, 0),
+
+    ("""DATES
+    15 JAN 2025 /
+/
+    
+DATES
+    25 JUL         2026 /
+/
+    """, 4),
+
+    ("""DATES
+    15 JAN 2025 /
+/
+   
+   
+    
+DATES
+
+
+    25 JUL         2026 /
+/
+    """, 6)
+], ids=['simple case', 'multiple occurrences of token', 'Multiple blank lines + whitespace'])
+def test_load_three_part_date(date_str: str, start_index: int):
+    # Arrange
+
+    # Act
+    result = fo.load_in_three_part_date(initial_token='DATES', token_line='DATES\n',
+                                        file_as_list=date_str.splitlines(keepends=True), start_index=start_index)
+
+    # Assert
+    assert result == "25 JUL 2026"
+
 @pytest.mark.parametrize("file_contents, expected_result, date_format", [
     # Basic DD/MM/YYYY
     ("""Starting Content
