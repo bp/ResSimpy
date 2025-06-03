@@ -42,5 +42,9 @@ def to_table_line(obj: SupportsKeywordMapping, headers: list[str]) -> str:
         attribute_value = properties[attribute_name]
         if attribute_value is None:
             attribute_value = 'NA'
+        elif attribute_value is True:
+            attribute_value = 'YES'
+        elif attribute_value is False:
+            attribute_value = 'NO'
         constructed_values.append(attribute_value)
     return ' '.join([str(x) for x in constructed_values]) + '\n'
