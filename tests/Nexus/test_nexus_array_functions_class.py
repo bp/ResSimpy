@@ -190,7 +190,8 @@ WORKA6 OUTPUT WORKA7
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    test_input_grid_file_object: NexusFile = NexusFile.generate_file_include_structure('mock/str_grid/path.inc')
+    test_input_grid_file_object: NexusFile = NexusFile.generate_file_include_structure(cls=NexusFile,
+                                                                                       file_path='mock/str_grid/path.inc')
     new_sim_grid = NexusGrid.load_structured_grid_file(test_input_grid_file_object,
                                                        model_unit_system=UnitSystem.ENGLISH)
     func_list = new_sim_grid.get_array_functions_list()

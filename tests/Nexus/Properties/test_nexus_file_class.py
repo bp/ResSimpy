@@ -43,8 +43,9 @@ def test_generate_file_include_structure_basic(mocker):
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
+
     # Act
-    nexus_file = NexusFile.generate_file_include_structure(file_path)
+    nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=file_path)
 
     # Assert
     assert nexus_file.file_content_as_list == expected_nexus_file.file_content_as_list
@@ -84,7 +85,7 @@ second_file INCLUDE inc_file2.inc''')
 
     mocker.patch("builtins.open", mock_open_wrapper)
     # Act
-    nexus_file = NexusFile.generate_file_include_structure(file_path)
+    nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=file_path)
 
     # Assert
     assert nexus_file.file_content_as_list == expected_nexus_file.file_content_as_list
@@ -125,7 +126,7 @@ def test_generate_file_include_structure_nested_includes(mocker):
 
     mocker.patch("builtins.open", mock_open_wrapper)
     # Act
-    nexus_file = NexusFile.generate_file_include_structure(file_path)
+    nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=file_path)
 
     # Assert
     assert nexus_file.file_content_as_list == expected_nexus_file.file_content_as_list
@@ -167,7 +168,7 @@ def test_generate_file_include_structure_origin_path(mocker):
 
     mocker.patch("builtins.open", mock_open_wrapper)
     # Act
-    nexus_file = NexusFile.generate_file_include_structure(file_path)
+    nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=file_path)
 
     # Assert
     assert nexus_file.include_objects[0].include_objects[0] == nexus_file_include2
@@ -268,7 +269,7 @@ def test_generate_file_include_structure_skip_array(mocker, test_file_contents):
     expected_result = nexus_file_include1
 
     # Act
-    nexus_file = NexusFile.generate_file_include_structure(file_path, skip_arrays=True)
+    nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=file_path, skip_arrays=True)
 
     # Assert
     assert len(nexus_file.include_objects) == 1
@@ -348,7 +349,7 @@ def test_generate_file_include_structure_skip_file_with_nested_array(mocker: Moc
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    nexus_file = NexusFile.generate_file_include_structure(file_path, skip_arrays=True)
+    nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=file_path, skip_arrays=True)
 
     # Assert
     assert len(nexus_file.include_objects) == 1
@@ -396,7 +397,7 @@ KZ CON 1
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    nexus_file = NexusFile.generate_file_include_structure(file_path, skip_arrays=False)
+    nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=file_path, skip_arrays=False)
 
     # Assert
     assert len(nexus_file.include_objects) == 1
@@ -434,7 +435,7 @@ def test_file_object_locations(mocker, test_file_contents, expected_results):
 
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    wells_file = NexusFile.generate_file_include_structure(file_path='wells.dat', skip_arrays=True, )
+    wells_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path='wells.dat', skip_arrays=True, )
 
     # Act
     load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH,
@@ -499,7 +500,7 @@ second_file INCLUDE inc_file2.inc continuation''')
 
     mocker.patch("builtins.open", mock_open_wrapper)
     # Act
-    nexus_file = NexusFile.generate_file_include_structure(file_path)
+    nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=file_path)
     flat_file = nexus_file.get_flat_list_str_file
     # Assert
     assert flat_file == expected_flat_file_as_list
@@ -557,7 +558,7 @@ continuation''')
 
     mocker.patch("builtins.open", mock_open_wrapper)
     # Act
-    nexus_file = NexusFile.generate_file_include_structure(file_path)
+    nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=file_path)
     # do the generation of the flat file a few times to catch the issue of continually appending duplicate line locations
     nexus_file.get_flat_list_str_file
     nexus_file.get_flat_list_str_file
@@ -623,7 +624,7 @@ continuation''')
 
     mocker.patch("builtins.open", mock_open_wrapper)
     # Act
-    nexus_file = NexusFile.generate_file_include_structure(file_path)
+    nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=file_path)
     # do the generation of the flat file a few times to catch the issue of continually appending duplicate line locations
     # nexus_file.get_flat_list_str_file
     nexus_file.file_content_as_list.insert(1, 'New line in here\n')
@@ -707,7 +708,7 @@ continuation''')
     expected_return_file = [expected_nexus_file, nexus_file_include1, nexus_file_include2][expected_file_number]
 
     # Act
-    nexus_file = NexusFile.generate_file_include_structure(file_path)
+    nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=file_path)
     flat_file = nexus_file.get_flat_list_str_file
     nexus_file_result, index_in_file = nexus_file.find_which_include_file(flattened_index=index)
 
@@ -765,7 +766,7 @@ def test_update_object_locations(mocker, test_file_contents, expected_results):
 
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    wells_file = NexusFile.generate_file_include_structure(file_path='wells.dat', skip_arrays=True, )
+    wells_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path='wells.dat', skip_arrays=True)
     # load the uuids
     load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH,
                model_date_format=DateFormat.DD_MM_YYYY, parent_wells_instance=dummy_wells)
@@ -872,7 +873,7 @@ def test_update_include_location_in_file_as_list(mocker, file_content, expected_
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-    nexus_file = NexusFile.generate_file_include_structure(file_path)
+    nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=file_path)
 
     new_file_path = 'New_FiLe_Path.inc'
     include_file = nexus_file.include_objects[0]
@@ -905,7 +906,7 @@ def test_write_to_file(mocker):
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-    nexus_file = NexusFile.generate_file_include_structure(file_path)
+    nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=file_path)
 
     writing_mock_open = mocker.mock_open()
     mocker.patch("builtins.open", writing_mock_open)
@@ -947,7 +948,7 @@ def test_write_to_file_only_modified(mocker):
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-    nexus_file = NexusFile.generate_file_include_structure(file_path)
+    nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=file_path)
     nexus_file._file_modified_set(True)
     nexus_file.include_objects[0]._file_modified_set(True)
     writing_mock_open = mocker.mock_open()
@@ -1037,7 +1038,7 @@ def test_missing_file(mocker):
     path_mock.return_value.group.side_effect = FileNotFoundError("File not found")
     # Act Assert
     with pytest.warns(UserWarning, match=r'No file found for:') as warn_msg:
-        nexus_file = NexusFile.generate_file_include_structure(file_path)
+        nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=file_path)
     mocker.stopall()
     result_include_file = nexus_file.include_objects[0]
     assert result_include_file.file_content_as_list == []
@@ -1070,7 +1071,7 @@ def test_group_not_found(mocker):
     path_mock.return_value.group.side_effect = KeyError(f"Unable to find the group for the file at {file_path}")
     # Act Assert
     with pytest.warns(UserWarning, match=r'Unable to find the group for the file at') as warn_msg:
-        nexus_file = NexusFile.generate_file_include_structure(file_path)
+        nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=file_path)
     mocker.stopall()
     result_include_file = nexus_file.include_objects[0]
     assert result_include_file.file_content_as_list == []
@@ -1095,7 +1096,7 @@ def test_nexusfile_repr(mocker):
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
-    nexus_file = NexusFile.generate_file_include_structure(file_path)
+    nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=file_path)
     expected_result = f"""FILE PATH: /root/file.dat
 
 Include files: {[os.path.join(os.path.dirname(file_path), 'original_include.inc')]}
@@ -1195,7 +1196,7 @@ line 2 parent
 
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    nexus_file = NexusFile.generate_file_include_structure(file_path=file_path)
+    nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=file_path)
     # Act
     result = getattr(nexus_file, callable)
 
@@ -1235,7 +1236,7 @@ def test_generate_file_include_structure_skip_multiple_includes(mocker):
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    nexus_file = NexusFile.generate_file_include_structure(file_path, skip_arrays=True)
+    nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=file_path, skip_arrays=True)
 
     # Assert
     assert len(nexus_file.include_objects) == 2

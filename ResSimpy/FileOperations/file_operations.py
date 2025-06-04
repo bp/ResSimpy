@@ -1,3 +1,4 @@
+import os
 from functools import partial
 from typing import Optional, Union
 import re
@@ -185,6 +186,54 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
         return None
 
     return value
+
+
+def get_previous_value(file_as_list: list[str], search_before: Optional[str] = None,
+                       ignore_values: Optional[list[str]] = None) -> Optional[str]:
+    """Gets the previous non-blank value in a list of lines.
+
+    Starts from the last instance of search_before, working backwards.
+
+    Args:
+        file_as_list (list[str]): a list of strings containing each line of the file as a new entry,
+        ending with the line to start searching from.
+        search_before (Optional[str]): The string to start the search from in a backwards direction
+        ignore_values (Optional[list[str]], optional): a list of values that should be ignored if found. \
+                    Defaults to None.
+
+    Returns:
+        Optional[str]: Next non-blank value from the list, if none found returns None
+    """
+
+    # Reverse the order of the lines
+    file_as_list.reverse()
+
+    # If we are searching before a specific token, remove that and the rest of the line.
+    if search_before is not None:
+        search_before_location = file_as_list[0].upper().rfind(search_before)
+        file_as_list[0] = file_as_list[0][0: search_before_location]
+
+    previous_value: str = ''
+    first_line = True
+    for line in file_as_list:
+        string_to_search: str = line
+        # Retrieve all of the values in the line, then return the last one found if one is found.
+        # Otherwise search the next line
+        next_value = get_next_value(0, [string_to_search], ignore_values=ignore_values)
+
+        while next_value is not None and (search_before != next_value or not first_line):
+            previous_value = next_value
+            string_to_search = string_to_search.replace(next_value, '')
+            next_value = get_next_value(0, [string_to_search], ignore_values=ignore_values)
+
+        if previous_value != '':
+            return previous_value
+
+        # If we are not on the first line, we can search the whole line
+        first_line = False
+
+    # Start of file reached, no values found
+    return None
 
 
 def __replace_value_in_file_as_list(file_as_list: list[str], line_index: int, replace_with: str | GridArrayDefinition,
@@ -606,3 +655,36 @@ def split_list_of_strings_by_length(list_of_strings: list[str], max_length: int)
         list[str]: A new list of strings split from the original list.
     """
     return [split_lines_for_long_string(string, max_length) for string in list_of_strings]
+
+def get_full_file_path(file_path: str, origin: str) -> str:
+    """Returns the full file path including the base directories if they aren't present in the string.
+
+    Args:
+        file_path (str): the initial file path found in a file
+        origin (str): the initial origin of the file
+    """
+    if os.path.isabs(file_path):
+        return_path = file_path
+    else:
+        return_path = os.path.join(os.path.dirname(origin), file_path)
+    return return_path
+
+
+def split_line(line: str, upper: bool = True) -> list[str]:
+    """Splits a line into a list of strings through sequential application of get_next_value.
+    Does not include comments. A line with no valid tokens will return an empty list.
+    """
+    stored_values: list[str] = []
+    value = get_next_value(0, [line])
+    if value is None:
+        return stored_values
+    trimmed_line = line
+    while value is not None:
+        if upper:
+            stored_values.append(value.upper())
+        else:
+            stored_values.append(value)
+        trimmed_line = trimmed_line.replace(value, "", 1)
+        value = get_next_value(0, [trimmed_line])
+
+    return stored_values

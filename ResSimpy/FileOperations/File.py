@@ -5,14 +5,18 @@ import pathlib
 from datetime import datetime, timezone
 from uuid import uuid4, UUID
 from dataclasses import dataclass, field
-from typing import Optional, Sequence
+from typing import Optional, Sequence, TypeVar, Self
 import warnings
 from ResSimpy.FileOperations.FileBase import FileBase
 import ResSimpy.FileOperations.file_operations as fo
+from ResSimpy.Utils.general_utilities import is_number
 import uuid
 
+from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_FORMAT_KEYWORDS, GRID_OPERATION_KEYWORDS, \
+    GRID_ARRAY_KEYWORDS
 from ResSimpy.Utils.factory_methods import get_empty_list_file
 
+T = TypeVar("T", bound='File')
 
 @dataclass(kw_only=True)
 class File(FileBase):
@@ -196,9 +200,9 @@ class File(FileBase):
         return datetime.fromtimestamp(timestamp, tz=timezone.utc)
 
     @staticmethod
-    def generate_file_include_structure(cls: type[Self], file_path: str, origin: Optional[str] = None,
+    def generate_file_include_structure(cls: type[T], file_path: str, origin: Optional[str] = None,
                                         recursive: bool = True, skip_arrays: bool = True,
-                                        top_level_file: bool = True) -> Self:
+                                        top_level_file: bool = True) -> T:
         """Generates a nexus file instance for a provided text file with information storing the included files.
 
         Args:
@@ -239,7 +243,7 @@ class File(FileBase):
         modified_file_as_list: list[str] = []
         # search for the INCLUDE keyword and append to a list:
         inc_file_list: list[str] = []
-        includes_objects: Optional[list[NexusFile]] = []
+        includes_objects: Optional[list[T]] = []
         skip_next_include = False
         previous_line: str
 
@@ -251,15 +255,15 @@ class File(FileBase):
                     modified_file_as_list[len(modified_file_as_list) - 1] = previous_line[:-1] + line
                 else:
                     if not top_level_file:
-                        converted_line = NexusFile.__convert_line_to_full_file_path(line=line,
-                                                                                    full_base_file_path=full_file_path)
+                        converted_line = cls.convert_line_to_full_file_path(line=line,
+                                                                            full_base_file_path=full_file_path)
                     else:
                         converted_line = line
                     modified_file_as_list.append(converted_line)
             else:
                 if not top_level_file:
-                    converted_line = NexusFile.__convert_line_to_full_file_path(line=line,
-                                                                                full_base_file_path=full_file_path)
+                    converted_line = cls.convert_line_to_full_file_path(line=line,
+                                                                        full_base_file_path=full_file_path)
                 else:
                     converted_line = line
                 modified_file_as_list.append(converted_line)
@@ -269,7 +273,7 @@ class File(FileBase):
             if fo.check_token("INCLUDE", line):
                 # Include found, check if we should skip loading it in (e.g. if it is a large array file)
                 ignore_keywords = ['NOLIST']
-                previous_value = nfo.get_previous_value(file_as_list=file_as_list[0: i + 1], search_before='INCLUDE',
+                previous_value = fo.get_previous_value(file_as_list=file_as_list[0: i + 1], search_before='INCLUDE',
                                                         ignore_values=ignore_keywords)
 
                 keywords_to_skip_include = GRID_ARRAY_FORMAT_KEYWORDS + GRID_OPERATION_KEYWORDS + ["CORP"]
@@ -282,8 +286,8 @@ class File(FileBase):
             elif fo.check_token("VALUE", line) and not top_level_file:
                 # Check if this is an 'embedded' grid array file. If it is, return this file with only the content up
                 # to this point to help with performance when analysing the files.
-                previous_value = nfo.get_previous_value(file_as_list=file_as_list[0: i + 1], search_before='VALUE')
-                next_value = nfo.get_next_value(start_line_index=0, file_as_list=file_as_list[i:],
+                previous_value = fo.get_previous_value(file_as_list=file_as_list[0: i + 1], search_before='VALUE')
+                next_value = fo.get_next_value(start_line_index=0, file_as_list=file_as_list[i:],
                                                 search_string=line.upper().split('VALUE')[1])
 
                 if previous_value is None or next_value is None:
@@ -307,7 +311,7 @@ class File(FileBase):
             inc_file_path = fo.get_token_value('INCLUDE', line, file_as_list)
             if inc_file_path is None:
                 continue
-            inc_full_path = nfo.get_full_file_path(inc_file_path, origin=full_file_path)
+            inc_full_path = fo.get_full_file_path(inc_file_path, origin=full_file_path)
             # store the included files as files inside the object
             inc_file_list.append(inc_full_path)
 
@@ -315,14 +319,14 @@ class File(FileBase):
             # limit number of lines loaded here in future?
             if skip_arrays:
                 try:
-                    inc_file_as_list = nfo.load_file_as_list(inc_full_path)
+                    inc_file_as_list = fo.load_file_as_list(inc_full_path)
                 except FileNotFoundError:
                     # handle files not found - this is handled in an exception in the main loop
                     pass
                 else:
                     all_numeric = False
                     for inc_file_line in inc_file_as_list[0:50]:
-                        split_line = nfo.split_line(inc_file_line, upper=False)
+                        split_line = fo.split_line(inc_file_line, upper=False)
                         # check if it is numeric data
                         # this won't work if the array has scientific notation.
                         if any(not is_number(x) for x in split_line):
@@ -348,8 +352,9 @@ class File(FileBase):
                     raise ValueError('include_objects is None - recursion failure.')
                 skip_next_include = False
             else:
-                inc_file = cls.generate_file_include_structure(inc_file_path, origin=full_file_path, recursive=True,
-                                                               skip_arrays=skip_arrays, top_level_file=False)
+                inc_file = cls.generate_file_include_structure(cls=cls, file_path=inc_file_path, origin=full_file_path,
+                                                               recursive=True, skip_arrays=skip_arrays,
+                                                               top_level_file=False)
                 if includes_objects is None:
                     raise ValueError('include_objects is None - recursion failure.')
 

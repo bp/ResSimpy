@@ -5,7 +5,7 @@ import pathlib
 
 @pytest.fixture(scope='function', autouse=True)
 def mock_out_file_datetime_operations(mocker, request):
-    """ mocks pathlibpath, os.stat and datetime"""
+    """mocks pathlibpath and os.stat"""
 
     # Mock out pathlib and stat libraries
     owner_mock = mocker.MagicMock(return_value=None)

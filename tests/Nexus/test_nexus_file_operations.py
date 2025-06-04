@@ -511,7 +511,7 @@ def test_get_next_value_ignore(line: str, ignore: list[str], expected_result: st
 ])
 def test_get_previous_value_single_line(line, expected_result):
     # Act
-    result = nfo.get_previous_value([line])
+    result = fo.get_previous_value([line])
     # Assert
     assert result == expected_result
 
@@ -525,7 +525,7 @@ def test_get_previous_value_single_line(line, expected_result):
 ])
 def test_get_previous_value_single_line_specify_search_before(line, search_before, expected_result):
     # Act
-    result = nfo.get_previous_value([line], search_before=search_before)
+    result = fo.get_previous_value([line], search_before=search_before)
     # Assert
     assert result == expected_result
 
@@ -545,7 +545,7 @@ def test_get_previous_value_single_line_specify_search_before(line, search_befor
 ])
 def test_get_previous_value_multiple_lines_specify_search_before(file, search_before, expected_result):
     # Act
-    result = nfo.get_previous_value(file_as_list=file, search_before=search_before)
+    result = fo.get_previous_value(file_as_list=file, search_before=search_before)
     # Assert
     assert result == expected_result
 
@@ -906,7 +906,7 @@ def test_load_file_as_list_unicode_error(mocker, ):
 ])
 def test_split_line(line, expected_result):
     # Act
-    result = nfo.split_line(line, upper=False)
+    result = fo.split_line(line, upper=False)
     # Assert
     assert result == expected_result
 
@@ -919,7 +919,7 @@ def test_split_line(line, expected_result):
 ])
 def test_split_line(line, expected_result):
     # Act
-    result = nfo.split_line(line, upper=True)
+    result = fo.split_line(line, upper=True)
     # Assert
     assert result == expected_result
 

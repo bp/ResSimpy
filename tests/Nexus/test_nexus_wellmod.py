@@ -67,7 +67,7 @@ class TestNexusWellMod:
                                     unit_system=self.unit_system, parent_wells_instance=dummy_wells)]
         open_mock = mocker.mock_open(read_data=wellfile_content)
         mocker.patch("builtins.open", open_mock)
-        wells_file = NexusFile.generate_file_include_structure('test_well_file.dat')
+        wells_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path='test_well_file.dat')
 
         # Act
         result_wells = load_wells(wells_file, start_date=self.start_date, model_date_format=self.date_format,
@@ -125,7 +125,7 @@ class TestNexusWellMod:
 
         open_mock = mocker.mock_open(read_data=well_file_content)
         mocker.patch("builtins.open", open_mock)
-        wells_file = NexusFile.generate_file_include_structure('test_well_file.dat')
+        wells_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path='test_well_file.dat')
 
         # Act
         result_wells = load_wells(wells_file, start_date=self.start_date, model_date_format=self.date_format,
@@ -165,7 +165,7 @@ class TestNexusWellMod:
         open_mock = mocker.mock_open(read_data=self.well_file_content + extra_completion + extra_well_file_content)
         mocker.patch("builtins.open", open_mock)
 
-        wells_file = NexusFile.generate_file_include_structure('test_well_file.dat')
+        wells_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path='test_well_file.dat')
 
         # Act
         result_wells = load_wells(wells_file, start_date=self.start_date, model_date_format=self.date_format,
@@ -241,7 +241,7 @@ class TestNexusWellMod:
         open_mock = mocker.mock_open(read_data=self.well_file_content + extra_well_file_content)
         mocker.patch("builtins.open", open_mock)
 
-        wells_file = NexusFile.generate_file_include_structure('test_well_file.dat')
+        wells_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path='test_well_file.dat')
 
         # Act
         result_wells = load_wells(wells_file, start_date=self.start_date, model_date_format=self.date_format,
@@ -268,7 +268,7 @@ class TestNexusWellMod:
 
         open_mock = mocker.mock_open(read_data=wellfile_content)
         mocker.patch("builtins.open", open_mock)
-        wells_file = NexusFile.generate_file_include_structure('test_well_file.dat')
+        wells_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path='test_well_file.dat')
 
         # Act
         _ = load_wells(wells_file, start_date=self.start_date, model_date_format=self.date_format,

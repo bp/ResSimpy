@@ -26,7 +26,7 @@ from ResSimpy.FileOperations.File import File
 import pathlib
 import os
 from datetime import datetime, timezone
-from ResSimpy.Utils.general_utilities import is_number
+
 
 
 @dataclass(kw_only=True, repr=False)
@@ -73,7 +73,7 @@ class NexusFile(File):
         super().__init__(location=location, file_content_as_list=file_content_as_list, include_objects=include_objects,
                          file_loading_skipped=file_loading_skipped)
         if origin is not None:
-            self.location = nfo.get_full_file_path(location, origin)
+            self.location = fo.get_full_file_path(location, origin)
         else:
             self.location = location
         self.include_locations: Optional[list[str]] = get_empty_list_str() if include_locations is None else \
@@ -87,7 +87,7 @@ class NexusFile(File):
         self.last_modified = last_modified
 
     @staticmethod
-    def __convert_line_to_full_file_path(line: str, full_base_file_path: str) -> str:
+    def convert_line_to_full_file_path(line: str, full_base_file_path: str) -> str:
         """Modifies a file reference to contain the full file path for easier loading later."""
         modified_line = line
 
@@ -186,7 +186,7 @@ class NexusFile(File):
                         include_file = obj
                         break
                     if self.origin is not None and \
-                            obj.location == nfo.get_full_file_path(incfile_location, self.origin):
+                            obj.location == fo.get_full_file_path(incfile_location, self.origin):
                         include_file = obj
                         break
                     if obj.location is not None and \
@@ -595,11 +595,14 @@ class NexusFile(File):
         index_of_path_to_replace = self.include_locations.index(include_file.location)
         # get the full path and update it in the include file object
         # TODO maybe include this in a setter attr for the location.
-        include_file.location = nfo.get_full_file_path(new_path, self.location)
+        include_file.location = fo.get_full_file_path(new_path, self.location)
 
         self.include_locations[index_of_path_to_replace] = include_file.location
         # update the new path
         include_file._location_in_including_file = new_path
+
+    # def generate_file_include_structure(file_path:str, cls:NexusFile=None):
+    #     super().generate_file_include_structure(cls=NexusFile, file_path=file_path)
 
     @property
     def get_flat_list_str_with_file_ids(self) -> list[tuple[str, UUID]]:
