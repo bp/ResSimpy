@@ -2,10 +2,12 @@ import os
 from dataclasses import dataclass
 import ResSimpy.Nexus.nexus_collect_tables
 import ResSimpy.Nexus.nexus_file_operations as nfo
+import ResSimpy.FileOperations.file_operations as fo
 import pytest
 import pandas as pd
 import numpy as np
 
+from ResSimpy.FileOperations.simulator_constants import OTHER_SIMULATOR_COMMENT_CHARACTERS
 from ResSimpy.Nexus.DataModels.Network.NexusDrill import NexusDrill
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
@@ -32,15 +34,44 @@ from tests.multifile_mocker import mock_multiple_files
                           ("TOKEN  value", "TOKEN", True),
                           ("TOKEN\n", "TOKEN", True),
                           ("T", "T", True),
-                          ("Brian", "B", False)
+                          ("Brian", "B", False),
+                          ("C TOKEN", "TOKEN", False)
                           ], ids=["standard case", "token at start", "token at end", "no token", "token commented out",
                                   "token only part of longer word 1", "token only part of longer word 2",
                                   "token before comment", "token then tab", "token then newline", "single character",
-                                  "token in string"
+                                  "token in string", "C Comment"
                                   ])
 def test_check_token(line_string, token, expected_result):
     # Act
-    result = nfo.check_token(token=token, line=line_string)
+    result = fo.check_token(token=token, line=line_string)
+
+    # Assert
+    assert result == expected_result
+
+
+@pytest.mark.parametrize("line_string, token, expected_result",
+                         [("Line contains TOKEN 124", "ToKEN", True),
+                          ("TokeN 323 and other text", "TOKEN", True),
+                          ("other text and TokEN", "TOKEN", True),
+                          ("No T0k3N here", "TOKEN", False),
+                          ("--TOKEN", "TOKEN", False),
+                          ("THISTOKEN etc", "TOKEN", False),
+                          ("TOKENLONGERWORD etc", "TOKEN", False),
+                          ("TOKEN--comment", "TOKEN", True),
+                          ("TOKEN  value", "TOKEN", True),
+                          ("TOKEN\n", "TOKEN", True),
+                          ("T", "T", True),
+                          ("Brian", "B", False),
+                          ("C TOKEN", "TOKEN", True),
+                          ("! TOKEN", "TOKEN", True)
+                          ], ids=["standard case", "token at start", "token at end", "no token", "token commented out",
+                                  "token only part of longer word 1", "token only part of longer word 2",
+                                  "token before comment", "token then tab", "token then newline", "single character",
+                                  "token in string", "invalid comment character 1", "invalid comment character 2"
+                                  ])
+def test_check_token_other_comment_characters(line_string, token, expected_result):
+    # Act
+    result = fo.check_token(token=token, line=line_string, comment_characters=OTHER_SIMULATOR_COMMENT_CHARACTERS)
 
     # Assert
     assert result == expected_result
@@ -900,7 +931,7 @@ testwell testwell_wellhead 1000 102 302 2 3
 ENDWELLHEAD
         """.splitlines(), 'WELLHEAD', 'ENDWELLHEAD'),
 
-# Table keyword repeated in header
+    # Table keyword repeated in header
     ("""DRILL
 WELL    DRILLSITE   DRILLTIME   
 well_1  site_1   654.1
@@ -916,7 +947,7 @@ def test_check_for_empty_table_returns_correct_indices(mocker, file_as_list, tab
     nexus_file = NexusFile(location="", file_content_as_list=file_as_list)
 
     obj = RemoveObjectOperations(network=None, table_header=table_header, table_footer=table_footer)
-    expected_indices_to_remove =[0, 1, 2, 3]
+    expected_indices_to_remove = [0, 1, 2, 3]
 
     # Act
     indices_to_remove = obj.check_for_empty_table(file=nexus_file, line_numbers_in_file_to_remove=[2], obj_id='uuid_1')

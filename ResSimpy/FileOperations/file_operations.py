@@ -4,6 +4,7 @@ import re
 from string import whitespace
 
 from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
+from ResSimpy.FileOperations.simulator_constants import NEXUS_COMMENT_CHARACTERS
 
 
 def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,
@@ -32,7 +33,7 @@ def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,
     for comment_character in comment_characters:
         if comment_character == 'C':  # handle VIP comment with single C character at the start of a line
             file_without_comments = [line for line in file_without_comments if not line.startswith('C ') and not
-                                     line.strip() == 'C']
+            line.strip() == 'C']
         else:
             # remove any empty lines
             # regex: look back and forward 1 character from an ! and check if it's a quotation mark and
@@ -269,7 +270,7 @@ def __replace_with_variable_entry(new_line: str, original_line: str, replace_wit
     return new_line, new_value, value
 
 
-def check_token(token: str, line: str) -> bool:
+def check_token(token: str, line: str, comment_characters: Optional[list[str]] = None) -> bool:
     """Checks if the text line contains the supplied token and is not commented out.
 
     Args:
@@ -278,18 +279,25 @@ def check_token(token: str, line: str) -> bool:
     Returns:
         bool: True if the text line contains the supplied token, False otherwise.
     """
-    token_separator_chars = [" ", '\n', '\t', '!']
     uppercase_line = line.upper()
     token_location = uppercase_line.find(token.upper())
+    token_separator_chars = [" ", '\n', '\t']
 
     # Not found at all, return false
     if token_location == -1:
         return False
 
-    if line.startswith('C '):
-        return False
+    if comment_characters is None:
+        # Assume Nexus as the default for now
+        if line.startswith('C '):
+            return False
+        comment_characters = NEXUS_COMMENT_CHARACTERS
 
-    comment_character_location = line.find("!")
+    comment_character_location = -1
+    for character in comment_characters:
+        comment_character_location = line.find(character)
+        if comment_character_location != -1:
+            break
 
     # Check if the line is commented out before the token appears
     if comment_character_location != -1 and comment_character_location < token_location:
@@ -298,6 +306,10 @@ def check_token(token: str, line: str) -> bool:
     # Check if the character before the token is a separator such as space, tab etc and not another alphanumeric char
     if token_location != 0 and line[token_location - 1] not in token_separator_chars:
         return False
+
+    # If we reach the end of the line or a comment character after the token, return true.
+    if token_location + len(token) == len(line) or token_location + len(token) == comment_character_location:
+        return True
 
     # Check if the character after the token is a separator such as space, tab etc and not another alphanumeric char
     if token_location + len(token) != len(line) and line[token_location + len(token)] not in token_separator_chars:
