@@ -1,54 +1,26 @@
 """Handle Nexus files and preserve origin of include files."""
 from __future__ import annotations
 
-import os.path
-# Use correct Self type depending upon Python version
-import sys
-from dataclasses import dataclass, field
-from typing import Optional, Generator, Sequence
-
-from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
-
-if sys.version_info >= (3, 11):
-    from typing import Self
-else:
-    from typing_extensions import Self
-
-from uuid import UUID
-import re
-import ResSimpy.Nexus.nexus_file_operations as nfo
-import ResSimpy.FileOperations.file_operations as fo
-import warnings
-from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_OPERATION_KEYWORDS, GRID_ARRAY_FORMAT_KEYWORDS, \
-    GRID_ARRAY_KEYWORDS
-from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_dict_uuid_list_int
-from ResSimpy.FileOperations.File import File
-import pathlib
 import os
-from datetime import datetime, timezone
+import os.path
+import re
+import warnings
+# Use correct Self type depending upon Python version
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Optional, Generator, Sequence
+from uuid import UUID
 
+import ResSimpy.FileOperations.file_operations as fo
+import ResSimpy.Nexus.nexus_file_operations as nfo
+from ResSimpy.FileOperations.File import File
+from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
+from ResSimpy.Utils.factory_methods import get_empty_dict_uuid_list_int
 
 
 @dataclass(kw_only=True, repr=False)
 class NexusFile(File):
-    """Class to deal with origin and structure of Nexus files and preserve origin of include files.
-
-    Attributes:
-        location (Optional[str]): Path to the original file being opened. Defaults to None.
-        include_locations (Optional[list[str]]): list of file paths that the file contains. Defaults to None.
-        origin (Optional[str]): Where the file was opened from. Defaults to None.
-        include_objects (Optional[list[NexusFile]]): The include files but generated as a NexusFile instance. \
-            Defaults to None.
-        linked_user (Optional[str]): user or owner of the file. Defaults to None
-        last_modified (Optional[datetime]): last modified date of the file
-    """
-
-    include_locations: Optional[list[str]] = field(default=None)
-    origin: Optional[str] = None
-    object_locations: Optional[dict[UUID, list[int]]] = field(default=None, repr=False)
-    line_locations: Optional[list[tuple[int, UUID]]] = field(default=None, repr=False)
-    linked_user: Optional[str] = field(default=None)
-    last_modified: Optional[datetime] = field(default=None)
+    """Class to deal with origin and structure of Nexus files and preserve origin of include files."""
 
     def __init__(self, location: str,
                  include_locations: Optional[list[str]] = None,
@@ -71,20 +43,8 @@ class NexusFile(File):
             file_loading_skipped (bool): If set to True, the file loading was skipped. Defaults to False.
         """
         super().__init__(location=location, file_content_as_list=file_content_as_list, include_objects=include_objects,
-                         file_loading_skipped=file_loading_skipped)
-        if origin is not None:
-            self.location = fo.get_full_file_path(location, origin)
-        else:
-            self.location = location
-        self.include_locations: Optional[list[str]] = get_empty_list_str() if include_locations is None else \
-            include_locations
-        self.origin: Optional[str] = origin
-        if self.object_locations is None:
-            self.object_locations: dict[UUID, list[int]] = get_empty_dict_uuid_list_int()
-        if self.line_locations is None:
-            self.line_locations = []
-        self.linked_user = linked_user
-        self.last_modified = last_modified
+                         file_loading_skipped=file_loading_skipped, include_locations=include_locations, origin=origin,
+                         linked_user=linked_user, last_modified=last_modified)
 
     @staticmethod
     def convert_line_to_full_file_path(line: str, full_base_file_path: str) -> str:
@@ -600,9 +560,6 @@ class NexusFile(File):
         self.include_locations[index_of_path_to_replace] = include_file.location
         # update the new path
         include_file._location_in_including_file = new_path
-
-    # def generate_file_include_structure(file_path:str, cls:NexusFile=None):
-    #     super().generate_file_include_structure(cls=NexusFile, file_path=file_path)
 
     @property
     def get_flat_list_str_with_file_ids(self) -> list[tuple[str, UUID]]:

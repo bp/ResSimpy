@@ -34,7 +34,7 @@ def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,
     for comment_character in comment_characters:
         if comment_character == 'C':  # handle VIP comment with single C character at the start of a line
             file_without_comments = [line for line in file_without_comments if not line.startswith('C ') and not
-            line.strip() == 'C']
+                                     line.strip() == 'C']
         else:
             # remove any empty lines
             # regex: look back and forward 1 character from an ! and check if it's a quotation mark and
@@ -323,8 +323,10 @@ def check_token(token: str, line: str, comment_characters: Optional[list[str]] =
     """Checks if the text line contains the supplied token and is not commented out.
 
     Args:
-        token (str): keyword value to search the line for
-        line (str): string to search the token in
+        token (str): Keyword value to search the line for.
+        line (str): String to search the token in.
+        comment_characters(Optional[list[str]]): A list of characters that denote a comment for the simulator.
+
     Returns:
         bool: True if the text line contains the supplied token, False otherwise.
     """
@@ -655,6 +657,7 @@ def split_list_of_strings_by_length(list_of_strings: list[str], max_length: int)
         list[str]: A new list of strings split from the original list.
     """
     return [split_lines_for_long_string(string, max_length) for string in list_of_strings]
+
 
 def get_full_file_path(file_path: str, origin: str) -> str:
     """Returns the full file path including the base directories if they aren't present in the string.

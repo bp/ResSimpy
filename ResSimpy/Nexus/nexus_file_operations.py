@@ -1,13 +1,12 @@
 """A collection of Utility functions for handling parsing Nexus files."""
 from __future__ import annotations
 
-import os
+import fnmatch
 import re
 from enum import Enum
 from io import StringIO
 from string import Template
 from typing import Optional, Union, Any
-import fnmatch
 
 import numpy as np
 import pandas as pd

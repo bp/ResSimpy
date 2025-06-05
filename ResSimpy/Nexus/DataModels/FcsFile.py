@@ -225,7 +225,8 @@ class FcsNexusFile(NexusFile):
         if not os.path.isfile(fcs_file_path):
             raise FileNotFoundError(f'fcs file not found for path {fcs_file_path}')
         origin_path = fcs_file_path
-        fcs_nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=fcs_file_path, origin=None)
+        fcs_nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path=fcs_file_path,
+                                                                   origin=None)
         fcs_file.files_info.append((fcs_nexus_file.location, fcs_nexus_file.linked_user,
                                     fcs_nexus_file.last_modified))
 
@@ -256,7 +257,7 @@ class FcsNexusFile(NexusFile):
                     fo.get_multiple_expected_sequential_values(flat_fcs_file_content[i::], 4, ['NORPT'])
                 )
                 full_file_path = fo.get_full_file_path(value, origin_path)
-                nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=value,
+                nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path=value,
                                                                        origin=fcs_file_path, recursive=recursive,
                                                                        top_level_file=True)
                 fcs_property = getattr(fcs_file, cls.fcs_keyword_map_multi()[key])
@@ -276,7 +277,7 @@ class FcsNexusFile(NexusFile):
             elif key in cls.fcs_keyword_map_single():
                 full_file_path = fo.get_full_file_path(value, origin_path)
                 skip_arrays = True if key == 'STRUCTURED_GRID' else False
-                nexus_file = NexusFile.generate_file_include_structure(cls=NexusFile, file_path=value,
+                nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path=value,
                                                                        origin=fcs_file_path, recursive=recursive,
                                                                        top_level_file=True, skip_arrays=skip_arrays)
                 setattr(fcs_file, cls.fcs_keyword_map_single()[key], nexus_file)

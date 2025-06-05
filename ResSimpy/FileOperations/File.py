@@ -5,7 +5,7 @@ import pathlib
 from datetime import datetime, timezone
 from uuid import uuid4, UUID
 from dataclasses import dataclass, field
-from typing import Optional, Sequence, TypeVar, Self
+from typing import Optional, Sequence, TypeVar
 import warnings
 from ResSimpy.FileOperations.FileBase import FileBase
 import ResSimpy.FileOperations.file_operations as fo
@@ -14,9 +14,10 @@ import uuid
 
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_FORMAT_KEYWORDS, GRID_OPERATION_KEYWORDS, \
     GRID_ARRAY_KEYWORDS
-from ResSimpy.Utils.factory_methods import get_empty_list_file
+from ResSimpy.Utils.factory_methods import get_empty_list_file, get_empty_list_str, get_empty_dict_uuid_list_int
 
 T = TypeVar("T", bound='File')
+
 
 @dataclass(kw_only=True)
 class File(FileBase):
@@ -25,6 +26,12 @@ class File(FileBase):
     Attributes:
         location (str): Full path to file location
         file_content_as_list (list[str]): List of lines in the file
+        include_locations (Optional[list[str]]): list of file paths that the file contains. Defaults to None.
+        origin (Optional[str]): Where the file was opened from. Defaults to None.
+        include_objects (Optional[list[NexusFile]]): The include files but generated as a NexusFile instance. \
+            Defaults to None.
+        linked_user (Optional[str]): user or owner of the file. Defaults to None
+        last_modified (Optional[datetime]): last modified date of the file
     """
 
     location: str
@@ -32,12 +39,21 @@ class File(FileBase):
     include_objects: Optional[Sequence[File]]
     include_locations: Optional[list[str]] = None
     file_content_as_list: Optional[list[str]] = field(default=None, repr=False)
+    origin: Optional[str] = None
+    object_locations: Optional[dict[UUID, list[int]]] = field(default=None, repr=False)
+    line_locations: Optional[list[tuple[int, UUID]]] = field(default=None, repr=False)
+    linked_user: Optional[str] = field(default=None)
+    last_modified: Optional[datetime] = field(default=None)
     __id: UUID = field(default_factory=lambda: uuid4(), compare=False)
     __file_modified: bool = False
     __file_loading_skipped: bool = False
 
     def __init__(self, location: str,
+                 include_locations: Optional[list[str]] = None,
+                 origin: Optional[str] = None,
                  file_content_as_list: Optional[list[str]] = None,
+                 linked_user: Optional[str] = None,
+                 last_modified: Optional[datetime] = None,
                  include_objects: Optional[Sequence[File]] = None, create_as_modified: bool = False,
                  file_loading_skipped: bool = False) -> None:
         """Initialises the File class.
@@ -48,8 +64,14 @@ class File(FileBase):
             include_objects (Optional[Sequence[File]]): The files included in the file.
             create_as_modified (bool): Set the object to modified.
             file_loading_skipped (bool): Whether the file loading was skipped due to the file being too large an array.
+            include_locations: Optional[list[str]]: list of file paths to the included files.
+            origin: Optional[str]: The file path to the file that included this file. None for top level files.
+            include_objects: Optional[list[NexusFile]: list of NexusFile objects that are included in this file.
+            file_content_as_list: Optional[list[str]]: list of strings representing the content of the file.
+            linked_user (Optional[str]): user or owner of the file. Defaults to None
+            last_modified (Optional[datetime]): last modified date of the file, Defaults to None
+            file_loading_skipped (bool): If set to True, the file loading was skipped. Defaults to False.
         """
-        self.location = location
         self._location_in_including_file = location
         self.include_objects: Optional[list[File]] = get_empty_list_file() \
             if include_objects is None else include_objects
@@ -57,6 +79,21 @@ class File(FileBase):
             self.file_content_as_list = []
         else:
             self.file_content_as_list = file_content_as_list
+
+        if origin is not None:
+            self.location = fo.get_full_file_path(location, origin)
+        else:
+            self.location = location
+        self.include_locations: Optional[list[str]] = get_empty_list_str() if include_locations is None else \
+            include_locations
+        self.origin: Optional[str] = origin
+        if self.object_locations is None:
+            self.object_locations: dict[UUID, list[int]] = get_empty_dict_uuid_list_int()
+        if self.line_locations is None:
+            self.line_locations = []
+        self.linked_user = linked_user
+        self.last_modified = last_modified
+
         self.__id = uuid.uuid4()
         self.__file_modified = create_as_modified
         self.__file_loading_skipped = file_loading_skipped
@@ -162,7 +199,13 @@ class File(FileBase):
         # reset the modified file state
         self._file_modified_set(False)
 
-    def __get_pathlib_path_details(full_file_path: str) -> None | str:
+    @staticmethod
+    def get_pathlib_path_details(full_file_path: str) -> None | str:
+        """Gets the owner and the group of a particular file.
+
+        Args:
+           full_file_path (str): The address of the file.
+        """
         if full_file_path == "" or full_file_path is None:
             return None
         pathlib_path = pathlib.Path(full_file_path)
@@ -190,7 +233,13 @@ class File(FileBase):
             return owner
         return None
 
-    def __get_datetime_from_os_stat(full_file_path: str) -> None | datetime:
+    @staticmethod
+    def get_datetime_from_os_stat(full_file_path: str) -> None | datetime:
+        """Gets a datetime object representing the last time a file was modified.
+
+        Args:
+           full_file_path (str): The address of the file.
+        """
         if full_file_path == "" or full_file_path is None:
             return None
         stat_obj = os.stat(full_file_path)
@@ -200,13 +249,14 @@ class File(FileBase):
         return datetime.fromtimestamp(timestamp, tz=timezone.utc)
 
     @staticmethod
-    def generate_file_include_structure(cls: type[T], file_path: str, origin: Optional[str] = None,
+    def generate_file_include_structure(simulator_type: type[T], file_path: str, origin: Optional[str] = None,
                                         recursive: bool = True, skip_arrays: bool = True,
                                         top_level_file: bool = True) -> T:
         """Generates a nexus file instance for a provided text file with information storing the included files.
 
         Args:
-            file_path (str): path to a file
+            simulator_type (type[T]): The type of the Simulator e.g. NexusSimulator
+            file_path (str): Path to the file to generate the structure from.
             origin (Optional[str], optional): Where the file was opened from. Defaults to None.
             recursive (bool): Whether the method should recursively drill down multiple layers of include_locations.
             skip_arrays (bool): If set True skips the INCLUDE arrays that come after property array and VALUE
@@ -225,19 +275,19 @@ class File(FileBase):
             file_as_list = fo.load_file_as_list(full_file_path)
         except FileNotFoundError:
             # handle if a file can't be found
-            nexus_file_class = cls(location=file_path,
-                                   include_locations=None,
-                                   origin=origin,
-                                   include_objects=None,
-                                   file_content_as_list=None,
-                                   linked_user=None,
-                                   last_modified=None)
+            nexus_file_class = simulator_type(location=file_path,
+                                              include_locations=None,
+                                              origin=origin,
+                                              include_objects=None,
+                                              file_content_as_list=None,
+                                              linked_user=None,
+                                              last_modified=None)
             warnings.warn(UserWarning(f'No file found for: {full_file_path} while loading {origin}'))
             return nexus_file_class
 
         # check last modified and user for the file
-        user = File.__get_pathlib_path_details(full_file_path)
-        last_changed = File.__get_datetime_from_os_stat(full_file_path)
+        user = File.get_pathlib_path_details(full_file_path)
+        last_changed = File.get_datetime_from_os_stat(full_file_path)
 
         # prevent python from mutating the lists that it's iterating over
         modified_file_as_list: list[str] = []
@@ -255,15 +305,16 @@ class File(FileBase):
                     modified_file_as_list[len(modified_file_as_list) - 1] = previous_line[:-1] + line
                 else:
                     if not top_level_file:
-                        converted_line = cls.convert_line_to_full_file_path(line=line,
-                                                                            full_base_file_path=full_file_path)
+                        converted_line = (simulator_type
+                                          .convert_line_to_full_file_path(line=line,
+                                                                          full_base_file_path=full_file_path))
                     else:
                         converted_line = line
                     modified_file_as_list.append(converted_line)
             else:
                 if not top_level_file:
-                    converted_line = cls.convert_line_to_full_file_path(line=line,
-                                                                        full_base_file_path=full_file_path)
+                    converted_line = simulator_type.convert_line_to_full_file_path(line=line,
+                                                                                   full_base_file_path=full_file_path)
                 else:
                     converted_line = line
                 modified_file_as_list.append(converted_line)
@@ -274,7 +325,7 @@ class File(FileBase):
                 # Include found, check if we should skip loading it in (e.g. if it is a large array file)
                 ignore_keywords = ['NOLIST']
                 previous_value = fo.get_previous_value(file_as_list=file_as_list[0: i + 1], search_before='INCLUDE',
-                                                        ignore_values=ignore_keywords)
+                                                       ignore_values=ignore_keywords)
 
                 keywords_to_skip_include = GRID_ARRAY_FORMAT_KEYWORDS + GRID_OPERATION_KEYWORDS + ["CORP"]
                 if previous_value is None:
@@ -288,13 +339,13 @@ class File(FileBase):
                 # to this point to help with performance when analysing the files.
                 previous_value = fo.get_previous_value(file_as_list=file_as_list[0: i + 1], search_before='VALUE')
                 next_value = fo.get_next_value(start_line_index=0, file_as_list=file_as_list[i:],
-                                                search_string=line.upper().split('VALUE')[1])
+                                               search_string=line.upper().split('VALUE')[1])
 
                 if previous_value is None or next_value is None:
                     continue
 
                 if next_value.upper() != 'INCLUDE' and previous_value.upper() in GRID_ARRAY_KEYWORDS:
-                    nexus_file_class = cls(
+                    nexus_file_class = simulator_type(
                         location=file_path,
                         include_locations=inc_file_list,
                         origin=origin,
@@ -340,21 +391,22 @@ class File(FileBase):
             if not recursive:
                 continue
             elif skip_arrays and skip_next_include:
-                inc_file = cls(location=inc_file_path,
-                               include_locations=None,
-                               origin=full_file_path,
-                               include_objects=None,
-                               file_content_as_list=None,
-                               linked_user=user,
-                               last_modified=last_changed,
-                               file_loading_skipped=True)
+                inc_file = simulator_type(location=inc_file_path,
+                                          include_locations=None,
+                                          origin=full_file_path,
+                                          include_objects=None,
+                                          file_content_as_list=None,
+                                          linked_user=user,
+                                          last_modified=last_changed,
+                                          file_loading_skipped=True)
                 if includes_objects is None:
                     raise ValueError('include_objects is None - recursion failure.')
                 skip_next_include = False
             else:
-                inc_file = cls.generate_file_include_structure(cls=cls, file_path=inc_file_path, origin=full_file_path,
-                                                               recursive=True, skip_arrays=skip_arrays,
-                                                               top_level_file=False)
+                inc_file = simulator_type.generate_file_include_structure(simulator_type=simulator_type,
+                                                                          file_path=inc_file_path,
+                                                                          origin=full_file_path, recursive=True,
+                                                                          skip_arrays=skip_arrays, top_level_file=False)
                 if includes_objects is None:
                     raise ValueError('include_objects is None - recursion failure.')
 
@@ -362,7 +414,7 @@ class File(FileBase):
 
         includes_objects = None if not includes_objects else includes_objects
 
-        nexus_file_class = cls(
+        nexus_file_class = simulator_type(
             location=file_path,
             include_locations=inc_file_list,
             origin=origin,
@@ -477,3 +529,8 @@ class File(FileBase):
         if self.file_content_as_list is None:
             return ''
         return ''.join(self.file_content_as_list)
+
+    @staticmethod
+    def convert_line_to_full_file_path(line: str, full_base_file_path: str) -> str:
+        """Modifies a file reference to contain the full file path for easier loading later."""
+        raise NotImplementedError("Implement this in the simulator specific class")
