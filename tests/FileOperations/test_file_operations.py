@@ -61,8 +61,15 @@ MYTESTTOKEN
      "token value"''',
      'token value', 4),
 
+    ("MYTESTTOKEN",
+     """MYTESTTOKEN
+   'value in quotes'
+     
+     /""",
+    'value in quotes',
+     1)
 ], ids=['basic case', 'multiple lines', 'value on next line', 'Comment character C', 'complex C comment'
-    , 'get value in double quotes', 'more values before token'])
+    , 'get value in double quotes', 'more values before token', 'value in quotes'])
 def test_get_token_value(mocker: MockerFixture, line_contents, file_contents, expected_result, expected_line_index):
     # Arrange
     dummy_file_as_list = [y for y in (x.strip() for x in file_contents.splitlines()) if y]

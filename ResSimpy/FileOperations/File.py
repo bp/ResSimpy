@@ -5,10 +5,11 @@ import pathlib
 from datetime import datetime, timezone
 from uuid import uuid4, UUID
 from dataclasses import dataclass, field
-from typing import Optional, Sequence, TypeVar
+from typing import Optional, Sequence, TypeVar, TYPE_CHECKING
 import warnings
 from ResSimpy.FileOperations.FileBase import FileBase
 import ResSimpy.FileOperations.file_operations as fo
+from ResSimpy.FileOperations.simulator_constants import NEXUS_COMMENT_CHARACTERS, OTHER_SIMULATOR_COMMENT_CHARACTERS
 from ResSimpy.Utils.general_utilities import is_number
 import uuid
 
@@ -266,6 +267,9 @@ class File(FileBase):
         Returns:
             NexusFile: a class instance for NexusFile with knowledge of include files
         """
+        is_nexus_file = simulator_type.__name__ == "NexusFile"  # Can't use isinstance() as importing NexusFile would
+        # create a circular reference.
+        comment_characters = NEXUS_COMMENT_CHARACTERS if is_nexus_file else OTHER_SIMULATOR_COMMENT_CHARACTERS
 
         full_file_path = file_path
         if origin is not None:
@@ -298,53 +302,17 @@ class File(FileBase):
         previous_line: str
 
         for i, line in enumerate(file_as_list):
-            if len(modified_file_as_list) >= 1:
-                previous_line = modified_file_as_list[len(modified_file_as_list) - 1].rstrip('\n')
-                # Handle lines continued with the '>' character
-                if previous_line.endswith('>'):
-                    modified_file_as_list[len(modified_file_as_list) - 1] = previous_line[:-1] + line
-                else:
-                    if not top_level_file:
-                        converted_line = (simulator_type
-                                          .convert_line_to_full_file_path(line=line,
-                                                                          full_base_file_path=full_file_path))
-                    else:
-                        converted_line = line
-                    modified_file_as_list.append(converted_line)
-            else:
-                if not top_level_file:
-                    converted_line = simulator_type.convert_line_to_full_file_path(line=line,
-                                                                                   full_base_file_path=full_file_path)
-                else:
-                    converted_line = line
-                modified_file_as_list.append(converted_line)
+            if is_nexus_file:
+                File.__convert_line(full_file_path, is_nexus_file, line, modified_file_as_list, simulator_type,
+                                    top_level_file)
 
-            if line.rstrip('\n').endswith('>'):
-                continue
-            if fo.check_token("INCLUDE", line):
-                # Include found, check if we should skip loading it in (e.g. if it is a large array file)
-                ignore_keywords = ['NOLIST']
-                previous_value = fo.get_previous_value(file_as_list=file_as_list[0: i + 1], search_before='INCLUDE',
-                                                       ignore_values=ignore_keywords)
+                should_continue, should_return, skip_next_include = File.__nexus_grid_file_checks(
+                    file_as_list=file_as_list, line=line, line_number=i, is_top_level_file=top_level_file,
+                    skip_next_include=skip_next_include)
 
-                keywords_to_skip_include = GRID_ARRAY_FORMAT_KEYWORDS + GRID_OPERATION_KEYWORDS + ["CORP"]
-                if previous_value is None:
-                    skip_next_include = False
-
-                elif previous_value.upper() in keywords_to_skip_include:
-                    skip_next_include = True
-
-            elif fo.check_token("VALUE", line) and not top_level_file:
-                # Check if this is an 'embedded' grid array file. If it is, return this file with only the content up
-                # to this point to help with performance when analysing the files.
-                previous_value = fo.get_previous_value(file_as_list=file_as_list[0: i + 1], search_before='VALUE')
-                next_value = fo.get_next_value(start_line_index=0, file_as_list=file_as_list[i:],
-                                               search_string=line.upper().split('VALUE')[1])
-
-                if previous_value is None or next_value is None:
+                if should_continue:
                     continue
-
-                if next_value.upper() != 'INCLUDE' and previous_value.upper() in GRID_ARRAY_KEYWORDS:
+                elif should_return:
                     nexus_file_class = simulator_type(
                         location=file_path,
                         include_locations=inc_file_list,
@@ -354,12 +322,16 @@ class File(FileBase):
                     )
 
                     return nexus_file_class
-                else:
-                    continue
 
             else:
+                modified_file_as_list.append(line)
+
+            if not fo.check_token(token="INCLUDE", line=line, comment_characters=comment_characters):
+                # No include on this line, go to the next one.
                 continue
-            inc_file_path = fo.get_token_value('INCLUDE', line, file_as_list)
+
+            inc_file_path = fo.get_token_value(token='INCLUDE', token_line=line, file_list=file_as_list,
+                                               comment_characters=comment_characters, single_c_comments=is_nexus_file)
             if inc_file_path is None:
                 continue
             inc_full_path = fo.get_full_file_path(inc_file_path, origin=full_file_path)
@@ -425,6 +397,68 @@ class File(FileBase):
         )
 
         return nexus_file_class
+
+    @staticmethod
+    def __nexus_grid_file_checks(line: str, file_as_list: list[str], line_number: int, is_top_level_file: bool,
+                                 skip_next_include: bool) -> tuple[bool, bool, bool]:
+
+        if line.rstrip('\n').endswith('>'):
+            return True, False, skip_next_include
+
+        if fo.check_token("INCLUDE", line):
+            # Include found, check if we should skip loading it in (e.g. if it is a large array file)
+            ignore_keywords = ['NOLIST']
+            previous_value = fo.get_previous_value(file_as_list=file_as_list[0: line_number + 1],
+                                                   search_before='INCLUDE', ignore_values=ignore_keywords)
+
+            keywords_to_skip_include = GRID_ARRAY_FORMAT_KEYWORDS + GRID_OPERATION_KEYWORDS + ["CORP"]
+            if previous_value is None:
+                skip_next_include = False
+
+            elif previous_value.upper() in keywords_to_skip_include:
+                skip_next_include = True
+
+            return False, False, skip_next_include
+
+        elif fo.check_token("VALUE", line) and not is_top_level_file:
+            # Check if this is an 'embedded' grid array file. If it is, return this file with only the content up
+            # to this point to help with performance when analysing the files.
+            previous_value = fo.get_previous_value(file_as_list=file_as_list[0: line_number + 1], search_before='VALUE')
+            next_value = fo.get_next_value(start_line_index=0, file_as_list=file_as_list[line_number:],
+                                           search_string=line.upper().split('VALUE')[1])
+
+            if previous_value is None or next_value is None:
+                return True, False, skip_next_include
+
+            if next_value.upper() != 'INCLUDE' and previous_value.upper() in GRID_ARRAY_KEYWORDS:
+                return False, True, skip_next_include
+            else:
+                return True, False, skip_next_include
+
+        else:
+            return True, False, skip_next_include
+
+    @staticmethod
+    def __convert_line(full_file_path, is_nexus_file, line, modified_file_as_list, simulator_type, top_level_file):
+        if len(modified_file_as_list) >= 1:
+            previous_line = modified_file_as_list[len(modified_file_as_list) - 1].rstrip('\n')
+            # Handle lines continued with the '>' character
+            if is_nexus_file and previous_line.endswith('>'):
+                modified_file_as_list[len(modified_file_as_list) - 1] = previous_line[:-1] + line
+            else:
+                if not top_level_file:
+                    converted_line = simulator_type.convert_line_to_full_file_path(line=line,
+                                                                                   full_base_file_path=full_file_path)
+                else:
+                    converted_line = line
+                modified_file_as_list.append(converted_line)
+        else:
+            if not top_level_file:
+                converted_line = simulator_type.convert_line_to_full_file_path(line=line,
+                                                                               full_base_file_path=full_file_path)
+            else:
+                converted_line = line
+            modified_file_as_list.append(converted_line)
 
     def _file_modified_set(self, value: bool) -> None:
         """Set the modified file status.
@@ -533,4 +567,4 @@ class File(FileBase):
     @staticmethod
     def convert_line_to_full_file_path(line: str, full_base_file_path: str) -> str:
         """Modifies a file reference to contain the full file path for easier loading later."""
-        raise NotImplementedError("Implement this in the simulator specific class")
+        raise NotImplementedError("Not implemented yet.")

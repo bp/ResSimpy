@@ -34,7 +34,7 @@ def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,
     for comment_character in comment_characters:
         if comment_character == 'C':  # handle VIP comment with single C character at the start of a line
             file_without_comments = [line for line in file_without_comments if not line.startswith('C ') and not
-                                     line.strip() == 'C']
+            line.strip() == 'C']
         else:
             # remove any empty lines
             # regex: look back and forward 1 character from an ! and check if it's a quotation mark and
@@ -129,9 +129,12 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
         new_search_string = False
         line_already_skipped = False
 
+        stripped_search_string = search_string.strip()
+
         # If the string is wrapped in quotation marks, return the full string (including invalid characters)
-        if len(search_string) > 2 and search_string.startswith("\"") and search_string.endswith("\""):
-            value += search_string[1:len(search_string) - 1]
+        if len(stripped_search_string) > 2 and ((stripped_search_string.startswith("\"") and stripped_search_string.endswith("\"")) or
+                                       (stripped_search_string.startswith("\'") and stripped_search_string.endswith("\'"))):
+            value += stripped_search_string[1:len(stripped_search_string) - 1]
             value_found = True
             break
 
@@ -140,7 +143,20 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
             starts_with_c_only = (single_c_acts_as_comment and
                                   (character_location == 0 and character == "C" and
                                    (len(search_string) == 1 or search_string[character_location + 1] == ' ')))
-            if character in comment_characters or character == "\n" or starts_with_c_only:
+
+            two_char_comment_char_found = (len(search_string) > character_location + 1 and
+                                           search_string[character_location] + search_string[character_location + 1] in
+                                           comment_characters)
+
+            # potential_comment_character = search_string[i-1] + search_string[i]
+            # comment_character_reached = search_string[i-1] + search_string[i] == '--'
+
+            # comment_character_reached = character in comment_characters or (i < len(search_string) and
+            #                                                                 search_string[i-1] + search_string[i] in
+            #                                                                 comment_characters)
+            # if comment_character_reached:
+            #     pass
+            if character in comment_characters or character == "\n" or starts_with_c_only or two_char_comment_char_found:
                 line_index += 1
                 line_already_skipped = True
                 # If we've reached the end of the file, return None
@@ -386,7 +402,8 @@ def value_in_file(token: str, file: list[str]) -> bool:
 
 def get_token_value(token: str, token_line: str, file_list: list[str],
                     ignore_values: Optional[list[str]] = None,
-                    replace_with: Union[str, GridArrayDefinition, None] = None) -> Optional[str]:
+                    replace_with: Union[str, GridArrayDefinition, None] = None,
+                    comment_characters: list[str] | None = None, single_c_comments: bool = True) -> Optional[str]:
     """Gets the value following a token if supplied with a line containing the token.
 
     Arguments:
@@ -404,7 +421,8 @@ def get_token_value(token: str, token_line: str, file_list: list[str],
     search_string, line_index = __extract_search_string(token, token_line, file_list)
     if search_string is None or line_index is None:
         return None
-    value = get_next_value(line_index, file_list, search_string, ignore_values, replace_with)
+    value = get_next_value(line_index, file_list, search_string, ignore_values, replace_with,
+                           comment_characters=comment_characters, single_c_acts_as_comment=single_c_comments)
     return value
 
 
