@@ -66,9 +66,3 @@ class FileBase(ABC):
     @abstractmethod
     def __repr__(self) -> str:
         raise NotImplementedError("Implement this in the derived class")
-
-    @staticmethod
-    @abstractmethod
-    def convert_line_to_full_file_path(line: str, full_base_file_path: str) -> str:
-        """Modifies a file reference to contain the full file path for easier loading later."""
-        raise NotImplementedError("Implement this in the derived class")

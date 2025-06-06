@@ -5,7 +5,7 @@ import pathlib
 from datetime import datetime, timezone
 from uuid import uuid4, UUID
 from dataclasses import dataclass, field
-from typing import Optional, Sequence, TypeVar, TYPE_CHECKING
+from typing import Optional, Sequence, TypeVar
 import warnings
 from ResSimpy.FileOperations.FileBase import FileBase
 import ResSimpy.FileOperations.file_operations as fo
@@ -299,12 +299,12 @@ class File(FileBase):
         inc_file_list: list[str] = []
         includes_objects: Optional[list[T]] = []
         skip_next_include = False
-        previous_line: str
 
         for i, line in enumerate(file_as_list):
             if is_nexus_file:
-                File.__convert_line(full_file_path, is_nexus_file, line, modified_file_as_list, simulator_type,
-                                    top_level_file)
+                File.__convert_line(full_file_path=full_file_path, is_nexus_file=is_nexus_file, line=line,
+                                    modified_file_as_list=modified_file_as_list, simulator_type=simulator_type,
+                                    top_level_file=top_level_file)
 
                 should_continue, should_return, skip_next_include = File.__nexus_grid_file_checks(
                     file_as_list=file_as_list, line=line, line_number=i, is_top_level_file=top_level_file,
@@ -439,7 +439,9 @@ class File(FileBase):
             return True, False, skip_next_include
 
     @staticmethod
-    def __convert_line(full_file_path, is_nexus_file, line, modified_file_as_list, simulator_type, top_level_file):
+    def __convert_line(full_file_path: str, is_nexus_file: bool, line: str, modified_file_as_list: list[str],
+                       simulator_type: type[T], top_level_file: bool) -> None:
+
         if len(modified_file_as_list) >= 1:
             previous_line = modified_file_as_list[len(modified_file_as_list) - 1].rstrip('\n')
             # Handle lines continued with the '>' character
@@ -567,4 +569,4 @@ class File(FileBase):
     @staticmethod
     def convert_line_to_full_file_path(line: str, full_base_file_path: str) -> str:
         """Modifies a file reference to contain the full file path for easier loading later."""
-        raise NotImplementedError("Not implemented yet.")
+        raise NotImplementedError("Implement in the inheriting class")
