@@ -40,7 +40,7 @@ def test_load_wells_multiple_dates_formats_DD_MM_YYYY_h_m_s(mocker):
 
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)
-    wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
+    wells_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path='test/file/location.dat')
 
     # Act
     result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH,
@@ -84,7 +84,7 @@ def test_load_wells_multiple_dates_formats_MM_DD_YYYY_h_m_s(mocker):
 
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)
-    wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
+    wells_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path='test/file/location.dat')
 
     # Act
     result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH,
@@ -127,7 +127,7 @@ def test_load_wells_multiple_dates_formats_DD_MM_YYYY_with_time_added(mocker):
 
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)
-    wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
+    wells_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path='test/file/location.dat')
 
     # Act
     result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH,
@@ -170,7 +170,7 @@ def test_load_wells_multiple_dates_formats_MM_DD_YYYY_with_time_added(mocker):
 
     open_mock = mocker.mock_open(read_data=file_contents)
     mocker.patch("builtins.open", open_mock)
-    wells_file = NexusFile.generate_file_include_structure('test/file/location.dat')
+    wells_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path='test/file/location.dat')
 
     # Act
     result_wells = load_wells(wells_file, start_date=start_date, default_units=UnitSystem.ENGLISH,

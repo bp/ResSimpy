@@ -64,7 +64,7 @@ class StructuredGridOperations:
         region_name: str = ''
         modifier_found = False
         token_found = nfo.check_token(token, line)
-        found_modifier = nfo.get_previous_value([line])
+        found_modifier = fo.get_previous_value([line])
         token_modifier: str = ''
 
         if token_found:
@@ -548,7 +548,7 @@ class StructuredGridOperations:
         for (start_block, end_block) in vmod_indices:
             file_section = file_as_list[start_block:end_block + 1]
             for line in file_section:
-                split_line = nfo.split_line(line, upper=False)
+                split_line = fo.split_line(line, upper=False)
                 if len(split_line) == 7:
                     i1, i2, j1, j2, k1, k2, operation = split_line
                     store_i1.append(int(i1))
