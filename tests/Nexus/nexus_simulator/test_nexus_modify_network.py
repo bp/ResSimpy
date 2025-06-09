@@ -66,6 +66,11 @@ WELL    DRILLSITE   DRILLTIME
 well_1  site_1   654.1
 ENDDRILL
 
+TARGET
+NAME VALUE   ADDVALUE
+targ_1 1.0   11.0
+ENDTARGET
+
 GUIDERATE
 TARGET    DTMIN   PHASE   A B C D E F INCREASE DAMP
 targ_1     12.1      GAS     1 0 2.1 3 8 4 YES  1.15      
@@ -138,6 +143,11 @@ WELL    DRILLSITE   DRILLTIME
 well_1  site_1   654.1
 ENDDRILL
 
+TARGET
+NAME VALUE   ADDVALUE
+targ_1 1.0   11.0
+ENDTARGET
+
 GUIDERATE
 TARGET    DTMIN   PHASE   A B C D E F INCREASE DAMP
 targ_1     12.1      GAS     1 0 2.1 3 8 4 YES  1.15      
@@ -204,6 +214,11 @@ WELL    DRILLSITE   DRILLTIME
 well_1  site_1   654.1
 ENDDRILL
 
+TARGET
+NAME VALUE   ADDVALUE
+targ_1 1.0   11.0
+ENDTARGET
+
 GUIDERATE
 TARGET    DTMIN   PHASE   A B C D E F INCREASE DAMP
 targ_1     12.1      GAS     1 0 2.1 3 8 4 YES  1.15      
@@ -267,6 +282,11 @@ DRILL
 WELL    DRILLSITE   DRILLTIME   
 well_1  site_1   654.1
 ENDDRILL
+
+TARGET
+NAME VALUE   ADDVALUE
+targ_1 1.0   11.0
+ENDTARGET
 
 GUIDERATE
 TARGET    DTMIN   PHASE   A B C D E F INCREASE DAMP
@@ -333,6 +353,11 @@ WELL    DRILLSITE   DRILLTIME
 well_1  site_1   654.1
 ENDDRILL
 
+TARGET
+NAME VALUE   ADDVALUE
+targ_1 1.0   11.0
+ENDTARGET
+
 GUIDERATE
 TARGET    DTMIN   PHASE   A B C D E F INCREASE DAMP
 targ_1     12.1      GAS     1 0 2.1 3 8 4 YES  1.15      
@@ -392,6 +417,11 @@ site_1  5
 site_2  1
 ENDDRILLSITE
 
+
+TARGET
+NAME VALUE   ADDVALUE
+targ_1 1.0   11.0
+ENDTARGET
 
 GUIDERATE
 TARGET    DTMIN   PHASE   A B C D E F INCREASE DAMP
@@ -455,6 +485,11 @@ WELL    DRILLSITE   DRILLTIME
 well_1  site_1   654.1
 ENDDRILL
 
+TARGET
+NAME VALUE   ADDVALUE
+targ_1 1.0   11.0
+ENDTARGET
+
 GUIDERATE
 TARGET    DTMIN   PHASE   A B C D E F INCREASE DAMP
 targ_1     12.1      GAS     1 0 2.1 3 8 4 YES  1.15      
@@ -512,6 +547,11 @@ WELL    DRILLSITE   DRILLTIME
 well_1  site_1   654.1
 ENDDRILL
 
+TARGET
+NAME VALUE   ADDVALUE
+targ_1 1.0   11.0
+ENDTARGET
+
 
 GUIDERATE
 TARGET DTMIN PHASE A B C D E F INCREASE DAMP
@@ -545,7 +585,7 @@ TIME 01/01/2024
         # Reset the ID allocation
         mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
                                                                     'uuid_6', 'uuid_7', 'uuid_8', 'uuid_9', 'uuid_10',
-                                                                    'uuid_11', 'uuid_12', 'uuid_13'])
+                                                                    'uuid_11', 'uuid_12', 'uuid_13', 'uuid_14'])
 
         # Act
         network_objects = getattr(nexus_sim.network, network_component)

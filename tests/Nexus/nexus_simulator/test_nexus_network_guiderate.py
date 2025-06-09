@@ -35,9 +35,9 @@ ENDGUIDERATE
 TIME 27/07/2026
 GUIDERATE
 TARGET    DTMIN   PHASE   A B C D E F INCREASE DAMP
-targ3     12      GAS     1 0 2.1 3 8 4 YES  1.15      
-targ4    12      LIQ     1 0 2.1 3 8 4 YES  1.15  
-targ5     12      RES     1 0 2.1 3 8 4 YES  1.15  
+targ3     12      GAS     0 1.5 122 2 9.65 4 YES  1.15      
+targ4    12      LIQ     7.85 0.002 451 6.31 0.25 7.8 YES  1.15  
+targ5     12      RES     2.005 0 8.9    5 88 1.425 YES  1.15  
 ENDGUIDERATE
 
 
@@ -61,15 +61,15 @@ ENDGUIDERATE
                                            increase_permitted=True, damping_factor=1.0, start_date='15/01/2025')
 
     expected_guide_rate_3 = NexusGuideRate(date='27/07/2026', date_format=DateFormat.DD_MM_YYYY, name='targ3',
-                                           time_interval=12, phase=PhaseType.GAS, a=1, b=0, c=2.1, d=3, e=8, f=4,
+                                           time_interval=12, phase=PhaseType.GAS, a=0, b=1.5, c=122, d=2, e=9.65, f=4,
                                            increase_permitted=True, damping_factor=1.15, start_date='15/01/2025')
 
     expected_guide_rate_4 = NexusGuideRate(date='27/07/2026', date_format=DateFormat.DD_MM_YYYY, name='targ4',
-                                           time_interval=12, phase=PhaseType.LIQUID, a=1, b=0, c=2.1, d=3, e=8, f=4,
+                                           time_interval=12, phase=PhaseType.LIQUID, a=7.85, b=0.002, c=451, d=6.31, e=0.25, f=7.8,
                                            increase_permitted=True, damping_factor=1.15, start_date='15/01/2025')
 
     expected_guide_rate_5 = NexusGuideRate(date='27/07/2026', date_format=DateFormat.DD_MM_YYYY, name='targ5',
-                                           time_interval=12, phase=PhaseType.RESERVOIR, a=1, b=0, c=2.1, d=3, e=8, f=4,
+                                           time_interval=12, phase=PhaseType.RESERVOIR, a=2.005, b=0, c=8.9, d=5, e=88, f=1.425,
                                            increase_permitted=True, damping_factor=1.15, start_date='15/01/2025')
 
     expected_result = [expected_guide_rate_1, expected_guide_rate_2, expected_guide_rate_3, expected_guide_rate_4,
