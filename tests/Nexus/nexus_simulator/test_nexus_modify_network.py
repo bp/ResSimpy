@@ -1,8 +1,11 @@
 import uuid
 import pytest
+
+from ResSimpy.Enums.FluidTypeEnums import PhaseType
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.Network.NexusDrill import NexusDrill
 from ResSimpy.Nexus.DataModels.Network.NexusDrillSite import NexusDrillSite
+from ResSimpy.Nexus.DataModels.Network.NexusGuideRate import NexusGuideRate
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.Network.NexusWellbore import NexusWellbore
@@ -62,6 +65,16 @@ DRILL
 WELL    DRILLSITE   DRILLTIME   
 well_1  site_1   654.1
 ENDDRILL
+
+TARGET
+NAME VALUE   ADDVALUE
+targ_1 1.0   11.0
+ENDTARGET
+
+GUIDERATE
+TARGET    DTMIN   PHASE   A B C D E F INCREASE DAMP
+targ_1     12.1      GAS     1 0 2.1 3 8 4 YES  1.15      
+ENDGUIDERATE
 
 TIME 01/01/2024
 '''
@@ -130,6 +143,16 @@ WELL    DRILLSITE   DRILLTIME
 well_1  site_1   654.1
 ENDDRILL
 
+TARGET
+NAME VALUE   ADDVALUE
+targ_1 1.0   11.0
+ENDTARGET
+
+GUIDERATE
+TARGET    DTMIN   PHASE   A B C D E F INCREASE DAMP
+targ_1     12.1      GAS     1 0 2.1 3 8 4 YES  1.15      
+ENDGUIDERATE
+
 TIME 01/01/2024
 ''',
                                   {'well': 'testwell', 'name': 'testwell_wellhead', 'date': '01/01/2023',
@@ -191,6 +214,16 @@ WELL    DRILLSITE   DRILLTIME
 well_1  site_1   654.1
 ENDDRILL
 
+TARGET
+NAME VALUE   ADDVALUE
+targ_1 1.0   11.0
+ENDTARGET
+
+GUIDERATE
+TARGET    DTMIN   PHASE   A B C D E F INCREASE DAMP
+targ_1     12.1      GAS     1 0 2.1 3 8 4 YES  1.15      
+ENDGUIDERATE
+
 TIME 01/01/2024
 ''',
                                   {'name': 'testwell', 'date': '01/01/2023'},
@@ -249,6 +282,16 @@ DRILL
 WELL    DRILLSITE   DRILLTIME   
 well_1  site_1   654.1
 ENDDRILL
+
+TARGET
+NAME VALUE   ADDVALUE
+targ_1 1.0   11.0
+ENDTARGET
+
+GUIDERATE
+TARGET    DTMIN   PHASE   A B C D E F INCREASE DAMP
+targ_1     12.1      GAS     1 0 2.1 3 8 4 YES  1.15      
+ENDGUIDERATE
 
 TIME 01/01/2024
 ''',
@@ -310,6 +353,16 @@ WELL    DRILLSITE   DRILLTIME
 well_1  site_1   654.1
 ENDDRILL
 
+TARGET
+NAME VALUE   ADDVALUE
+targ_1 1.0   11.0
+ENDTARGET
+
+GUIDERATE
+TARGET    DTMIN   PHASE   A B C D E F INCREASE DAMP
+targ_1     12.1      GAS     1 0 2.1 3 8 4 YES  1.15      
+ENDGUIDERATE
+
 TIME 01/01/2024
 ''',
                                   {'name': 'test_name_2', 'date': '01/01/2023'},
@@ -365,6 +418,15 @@ site_2  1
 ENDDRILLSITE
 
 
+TARGET
+NAME VALUE   ADDVALUE
+targ_1 1.0   11.0
+ENDTARGET
+
+GUIDERATE
+TARGET    DTMIN   PHASE   A B C D E F INCREASE DAMP
+targ_1     12.1      GAS     1 0 2.1 3 8 4 YES  1.15      
+ENDGUIDERATE
 
 DRILL
 WELL DRILLSITE DRILLTIME CMPLTIME WORKTIME RIGS
@@ -423,6 +485,16 @@ WELL    DRILLSITE   DRILLTIME
 well_1  site_1   654.1
 ENDDRILL
 
+TARGET
+NAME VALUE   ADDVALUE
+targ_1 1.0   11.0
+ENDTARGET
+
+GUIDERATE
+TARGET    DTMIN   PHASE   A B C D E F INCREASE DAMP
+targ_1     12.1      GAS     1 0 2.1 3 8 4 YES  1.15      
+ENDGUIDERATE
+
 TIME 01/01/2024
 ''',
          {'name': 'site_1', 'max_rigs': 5, 'date': '01/01/2023', 'date_format': DateFormat.DD_MM_YYYY},
@@ -430,8 +502,75 @@ TIME 01/01/2024
          [{'name': 'site_1', 'max_rigs': 4, 'date': '01/01/2023', 'date_format': DateFormat.DD_MM_YYYY},
           {'name': 'site_2', 'max_rigs': 1, 'date': '01/01/2023', 'date_format': DateFormat.DD_MM_YYYY},],
          ['uuid_11', 'uuid_12']
+         ),
+
+        # NexusGuideRate
+        (NexusGuideRate, 'guide_rates',
+         '''TIME 01/01/2019
+    ! comment
+    TIME 01/01/2020
+    Something here!
+    TIME 01/01/2023
+NODECON
+NAME        NODEIN     NODEOUT      TYPE ROUGHNESS  TEMPPR
+test_name_1 test_node test_node_out PIPE 3.2        tempprof
+test_name_2 test_node test_node_out PIPE 100  NA
+ENDNODECON
+
+WELLS
+  NAME    STREAM   NUMBER   DATUM   CROSSFLOW   CROSS_SHUT
+  testwell   PRODUCER   94     2020     ON        CELLGRAD
+  inj   WATER      95     2020     OFF        CALC
+  bad_data
+    ENDWELLS
+
+WELLHEAD
+WELL NAME DEPTH X Y\t IPVT\t IWAT
+testwell testwell_wellhead 1000 102 302 2 3
+testwell2 testwell_wellhead2 1000 102 302 2 3
+ENDWELLHEAD
+
+WELLBORE
+WELL TEMPPR DIAM
+testwell textdata 10.2
+testwell2 temppr NA
+ENDWELLBORE
+
+DRILLSITE
+NAME    MAXRIGS
+site_1  5
+site_2  1
+ENDDRILLSITE
+
+DRILL
+WELL    DRILLSITE   DRILLTIME   
+well_1  site_1   654.1
+ENDDRILL
+
+TARGET
+NAME VALUE   ADDVALUE
+targ_1 1.0   11.0
+ENDTARGET
+
+
+GUIDERATE
+TARGET DTMIN PHASE A B C D E F INCREASE DAMP
+targ_1 10.1 GAS 1.0 4.0 2.1 3.0 8.0 4.0 YES 1.15
+ENDGUIDERATE
+
+TIME 01/01/2024
+''',
+         {'name': 'targ_1', 'time_interval': 12.1, 'phase': PhaseType.GAS, 'date_format': DateFormat.DD_MM_YYYY,
+          'date': '01/01/2023'},
+         {'time_interval': 10.1, 'b': 4.0},
+         [{'name': 'targ_1', 'time_interval': 10.1, 'phase': PhaseType.GAS, 'date_format': DateFormat.DD_MM_YYYY,
+           'date': '01/01/2023', 'a': 1, 'b': 4, 'c': 2.1, 'd': 3, 'e': 8, 'f': 4, 'increase_permitted': True,
+           'damping_factor': 1.15}],
+         ['uuid_13']
          )
-         ], ids=['wellhead', 'wellbore', 'wellconnection', 'nodeconnections', 'NexusDrill', 'NexusDrillSite'])
+
+         ], ids=['wellhead', 'wellbore', 'wellconnection', 'nodeconnections', 'NexusDrill', 'NexusDrillSite',
+                 'NexusGuideRate'])
     def test_modify_network_component(self, mocker, object_type, network_component,
                                       expected_file_contents, obj_to_modify,
                                       modified_properties, expected_objs, expected_ids):
@@ -446,7 +585,7 @@ TIME 01/01/2024
         # Reset the ID allocation
         mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid_1', 'uuid_2', 'uuid_3', 'uuid_4', 'uuid_5',
                                                                     'uuid_6', 'uuid_7', 'uuid_8', 'uuid_9', 'uuid_10',
-                                                                    'uuid_11', 'uuid_12'])
+                                                                    'uuid_11', 'uuid_12', 'uuid_13', 'uuid_14'])
 
         # Act
         network_objects = getattr(nexus_sim.network, network_component)
