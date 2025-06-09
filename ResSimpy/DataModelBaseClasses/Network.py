@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional, Tuple, Sequence
+from typing import Optional, Tuple, Sequence, Any, Mapping
 
 from ResSimpy.DataModelBaseClasses.NodeConnection import NodeConnection
 from ResSimpy.GenericContainerClasses.Constraints import Constraints
@@ -102,6 +102,37 @@ class Network(ABC):
 
         return connections_in, connections_out
 
+    def print_connected_objects(self, connection_name: str) -> str:
+        """Prints a list of the connected objects.
+
+        Arguments:
+            connection_name (str): The name of the connection to retrieve the connected nodes for.
+        """
+
+        if self.connections is None:
+            raise ValueError("No connections found for this model.")
+
+        requested_node = self.connections.get_by_name(name=connection_name)
+        if requested_node is None or not isinstance(requested_node, NodeConnection):
+            raise ValueError(f"Invalid node connection requested:{connection_name}")
+
+        connections_str = """NAME            TYPE
+-----------------------
+"""
+
+        connected_objects = self.get_connected_objects(connection_name=connection_name)
+
+        # Add the in node connections, then the object itself, then the out node connections
+        for node in connected_objects[0]:
+            connections_str += f"{node.name:<16}{node.con_type}\n"
+
+        connections_str += f"\n{requested_node.name:<16}{requested_node.con_type} - Requested Node\n\n"
+
+        for node in connected_objects[1]:
+            connections_str += f"{node.name:<16}{node.con_type}\n"
+
+        return connections_str
+
     def __get_linked_connections(self, all_connections: Sequence[NodeConnection],
                                  direct_connections: list[NodeConnection], search_upwards: bool) \
             -> list[NodeConnection]:
@@ -158,33 +189,61 @@ class Network(ABC):
 
         return found_connections
 
-    def print_connected_objects(self, connection_name: str) -> str:
-        """Prints a list of the connected objects.
+    def get_all_linked_objects(self, object_name: str) -> dict[str, list[Any]]:
+        """Gets a list of all the objects in the surface network linked to the specified object name.
 
-        Arguments:
-            connection_name (str): The name of the connection to retrieve the connected nodes for.
+        Args:
+            object_name(str): The name of the object to search for.
         """
+        linked_objects = {}
+        linked_well_list_names = []
+        linked_con_list_names = []
+        linked_connection_names = []
 
-        if self.connections is None:
-            raise ValueError("No connections found for this model.")
+        if self.nodes is not None:
+            linked_nodes = [x for x in self.nodes.get_all() if x.name == object_name]
+            linked_objects['NODES'] = linked_nodes
 
-        requested_node = self.connections.get_by_name(name=connection_name)
-        if requested_node is None or not isinstance(requested_node, NodeConnection):
-            raise ValueError(f"Invalid node connection requested:{connection_name}")
+        if self.connections is not None:
+            linked_connections = [x for x in self.connections.get_all() if x.name == object_name]
+            linked_objects['CONNECTIONS'] = linked_connections
+            linked_connection_names = [x.name for x in linked_connections]
 
-        connections_str = """NAME            TYPE
------------------------
-"""
+        if self.well_connections is not None:
+            linked_well_connections = [x for x in self.well_connections.get_all() if x.name == object_name]
+            linked_objects['WELL_CONNECTIONS'] = linked_well_connections
+            linked_well_connection_names = [x.name for x in linked_well_connections]
+            linked_connection_names.append(linked_well_connection_names)
 
-        connected_objects = self.get_connected_objects(connection_name=connection_name)
+        if self.constraints is not None:
+            if isinstance(self.constraints.constraints, Mapping):
+                linked_constraints = list(self.constraints.constraints[object_name])
+            else:
+                linked_constraints = [x for x in self.constraints.constraints if x.name == object_name]
+            linked_objects['CONSTRAINTS'] = linked_constraints
 
-        # Add the in node connections, then the object itself, then the out node connections
-        for node in connected_objects[0]:
-            connections_str += f"{node.name:<16}{node.con_type}\n"
+        if hasattr(self, 'conlists') and self.conlists is not None:
+            linked_connection_lists = [x for x in self.conlists.lists if object_name in x.elements_in_the_list]
+            linked_objects['CONLISTS'] = linked_connection_lists
+            linked_con_list_names = [x.name for x in linked_connection_lists]
 
-        connections_str += f"\n{requested_node.name:<16}{requested_node.con_type} - Requested Node\n\n"
+        if self.welllists is not None:
+            linked_well_lists = [x for x in self.welllists.lists if object_name in x.elements_in_the_list]
+            linked_objects['WELLLISTS'] = linked_well_lists
+            linked_well_list_names = [x.name for x in linked_well_lists]
 
-        for node in connected_objects[1]:
-            connections_str += f"{node.name:<16}{node.con_type}\n"
+        if self.targets is not None:
+            linked_targets = [x for x in self.targets.get_all() if x.control_connections in linked_well_list_names or
+                              x.control_connections in linked_connection_names or
+                              x.control_connections in linked_con_list_names]
+            linked_objects['TARGETS'] = linked_targets
 
-        return connections_str
+        if self.wellheads is not None:
+            linked_well_heads = [x for x in self.wellheads.get_all() if x.well == object_name]
+            linked_objects['WELLHEADS'] = linked_well_heads
+
+        if self.wellbores is not None:
+            linked_well_bores = [x for x in self.wellbores.get_all() if x.name == object_name]
+            linked_objects['WELLBORES'] = linked_well_bores
+
+        return linked_objects

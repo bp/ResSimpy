@@ -21,10 +21,12 @@ class NexusNode(Node):
                  date: Optional[str] = None, date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None, x_pos: Optional[float] = x_pos,
                  y_pos: Optional[float] = None, number: Optional[int] = None, temp: Optional[float] = None,
-                 station: Optional[str] = None) -> None:
+                 station: Optional[str] = None, name: Optional[str] = None, depth: Optional[float] = None,
+                 type: Optional[str] = None) -> None:
         """Initialises the NexusNode class.
 
         Args:
+            name (Optional[str]): The name of the object.
             properties_dict (dict): dict of the properties to set on the object.
             x_pos (Optional[float]): The x-coordinate location of the wellhead (x).
             y_pos (Optional[float]): The y-coordinate location of the wellhead (y).
@@ -37,7 +39,8 @@ class NexusNode(Node):
             date_format (Optional[DateFormat]): The date format that the object uses.
             start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
             unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
-
+            type (Optional[str]): Well type.
+            depth (Optional[float]): The depth of the wellhead.
         """
         self.x_pos = x_pos
         self.y_pos = y_pos
@@ -46,7 +49,7 @@ class NexusNode(Node):
         self.station = station
 
         super().__init__(properties_dict=properties_dict, date=date, date_format=date_format, start_date=start_date,
-                         unit_system=unit_system)
+                         unit_system=unit_system, name=name, type=type, depth=depth)
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
