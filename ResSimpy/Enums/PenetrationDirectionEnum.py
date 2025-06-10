@@ -3,7 +3,7 @@ from enum import Enum
 
 
 class PenetrationDirectionEnum(str, Enum):
-    """Enum representing the penetration direction options."""
+    """Enum representing the penetration direction options in other simulators."""
     X = 'X'
     Y = 'Y'
     Z = 'Z'
