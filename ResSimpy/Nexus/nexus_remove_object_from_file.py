@@ -67,7 +67,7 @@ class RemoveObjectOperations:
 
         for obj_uuid, line_locations_list in file.object_locations.items():
             if obj_uuid == obj_id:
-                # ignore the uuid's for the node that we want to remove
+                # ignore the uuids for the node that we want to remove
                 continue
             for value in line_locations_list:
                 # if we find an object in the middle of the table then don't remove it
@@ -113,14 +113,15 @@ class RemoveObjectOperations:
         # get table_header and footers
         remove_empty_table_indices = self.check_for_empty_table(
             file, line_numbers_in_file_to_remove, obj_id)
-        # remove the table if there aren't any more remaining
+        # remove the table if there aren't any more rows remaining
         line_numbers_in_file_to_remove.extend(remove_empty_table_indices)
         self.remove_lines_from_file(line_numbers_in_file_to_remove, file, obj_id)
 
     def remove_object_from_network_main(self, obj_to_remove: dict[str, None | str | float | int] | UUID,
                                         network_element_name: Literal['nodes', 'connections', 'well_connections',
                                                                       'wellheads', 'wellbores', 'constraints',
-                                                                      'targets', 'stations', 'drills', 'drill_sites'],
+                                                                      'targets', 'stations', 'drills', 'drill_sites',
+                                                                      'guide_rates'],
                                         existing_objects: list[T]) -> None:
         """Removes object from file and from the list of objects based on matching a set of attributes provided in a \
         dictionary or a unique id.
