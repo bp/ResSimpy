@@ -393,7 +393,7 @@ class NexusGrid(Grid):
             -------
                 tuple[str, str]: the next value found in the line, the line with the value stripped out.
             """
-            value = nfo.get_next_value(0, [next_line], next_line)
+            value = fo.get_next_value(0, [next_line], next_line)
             if value is None:
                 raise ValueError(f"No value found within the provided line: {next_line}")
             next_line = next_line.replace(value, "", 1)
@@ -411,7 +411,7 @@ class NexusGrid(Grid):
         # Strip file of comments
         file_as_list_with_original_line_numbers = []
         for i, line in enumerate(self.__grid_file_contents):
-            cleaned_line = nfo.strip_file_of_comments([line], comment_characters=['!', 'C'])
+            cleaned_line = fo.strip_file_of_comments([line], comment_characters=['!', 'C'])
             if len(cleaned_line) == 0 or cleaned_line[0].strip() == '':
                 pass
             else:
@@ -799,7 +799,7 @@ class NexusGrid(Grid):
     @staticmethod
     def __extract_multir_tableline(line: str) -> None | NexusMultir:
         """Takes a single line in a file and extracts a Multir object from it."""
-        stored_values = nfo.split_line(line)
+        stored_values = fo.split_line(line)
         if not stored_values:
             return None
         region_1_str, region_2_str, tmult_str = stored_values[0:3]
@@ -1480,7 +1480,7 @@ class NexusGrid(Grid):
                 arrays = []
                 continue
             if reading_over:
-                split_line = nfo.split_line(line)
+                split_line = fo.split_line(line)
                 if nfo.check_token('GRID', line):
                     grid = nfo.get_expected_token_value('GRID', line, file_content_as_list)
                 if nfo.check_token('FNAME', line):
@@ -1522,7 +1522,7 @@ class NexusGrid(Grid):
 
             if nfo.check_token('OVER', line):
                 reading_over = True
-                over_split_line = nfo.split_line(line)
+                over_split_line = fo.split_line(line)
                 arrays = over_split_line[over_split_line.index('OVER') + 1:]
 
         return overs_list
@@ -1581,7 +1581,7 @@ class NexusGrid(Grid):
                 continue
 
             if any(nfo.check_token(x, line.upper()) for x in potential_operators):
-                split_line = nfo.split_line(line)
+                split_line = fo.split_line(line)
                 i1, i2, j1, j2, k1, k2 = (int(x) for x in split_line[0:6])
                 operator = split_line[-1]
                 continue
@@ -1635,7 +1635,7 @@ class NexusGrid(Grid):
                 continue
 
             if reading:
-                split_line = nfo.split_line(line)
+                split_line = fo.split_line(line)
                 if nfo.check_token('GRID', line):
                     grid = nfo.get_expected_token_value('GRID', line, file_content_as_list)
                 if nfo.check_token('FNAME', line):

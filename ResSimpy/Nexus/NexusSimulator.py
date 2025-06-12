@@ -529,7 +529,8 @@ class NexusSimulator(Simulator):
         # token in front of it to prevent it from reading through all the other files. We need this here to extract the
         # fcs properties only. The FcsFile structure is then generated and stored in the object (with all the nesting of
         # the NexusFiles as self.model_files (e.g. STRUCTURED_GRID, RUNCONTROL etc.)
-        fcs_content_with_includes = (NexusFile.generate_file_include_structure(origin=self.origin,
+        fcs_content_with_includes = (NexusFile.generate_file_include_structure(simulator_type=NexusFile,
+                                                                               origin=self.origin,
                                                                                file_path=self.__new_fcs_file_path)
                                      .get_flat_list_str_file)
         self._model_files = FcsNexusFile.generate_fcs_structure(self.__new_fcs_file_path)
