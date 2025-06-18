@@ -17,9 +17,12 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from unittest.mock import Mock
 
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
+from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Nexus.nexus_remove_object_from_file import RemoveObjectOperations
 from tests.multifile_mocker import mock_multiple_files
+from tests.utility_for_tests import get_fake_nexus_simulator
 
 
 @pytest.mark.parametrize("line_string, token, expected_result",
@@ -956,3 +959,65 @@ def test_check_for_empty_table_returns_correct_indices(mocker, file_as_list, tab
 
     # Assert
     assert indices_to_remove == expected_indices_to_remove
+
+
+def test_add_network_obj(mocker):
+    # Arrange
+
+    file_contents = """
+TIME 15/01/2025
+    
+DRILLSITE
+NAME    MAXRIGS
+site_1  5
+site_2  1
+ENDDRILLSITE
+
+TIME 25/07/2026
+
+TIME 26/07/2026
+"""
+
+    expected_file_contents = """
+TIME 15/01/2025
+    
+DRILLSITE
+NAME    MAXRIGS
+site_1  5
+site_2  1
+ENDDRILLSITE
+
+TIME 25/07/2026
+
+DRILL
+WELL DRILLSITE DRILLTIME
+well_1 site_1 30.3
+ENDDRILL
+
+TIME 26/07/2026
+"""
+
+    table_header = 'DRILL'
+    table_footer = 'ENDDRILL'
+
+    nexus_file = NexusFile(location="", file_content_as_list=file_contents.splitlines(keepends=True))
+
+    model = get_fake_nexus_simulator(mocker=mocker)
+    model.date_format = DateFormat.DD_MM_YYYY
+    model._sim_controls.date_format_string = "%d/%m/%Y"
+    model._model_files.surface_files = {1: nexus_file}
+    model._start_date = '15/01/2025'
+
+    network_obj = NexusNetwork(model=model, assume_loaded=True)
+
+    obj = AddObjectOperations(table_header=table_header, table_footer=table_footer, model=model, obj_type=NexusDrill)
+
+    # Act
+    expected_object = obj.add_network_obj(node_to_add={'drill_site': 'site_1', 'drill_time': 30.3, 'date': '25/07/2026',
+                                                       'date_format': DateFormat.DD_MM_YYYY, 'name': 'well_1'},
+                                          obj_type=NexusDrill, network=network_obj)
+
+    # Assert
+    assert nexus_file.get_flat_list_str_file == expected_file_contents.splitlines(keepends=True)
+    assert expected_object == NexusDrill(drillsite='site_1', drill_time=30.3, date_format=DateFormat.DD_MM_YYYY,
+                                         date='25/07/2026', name='well_1')
