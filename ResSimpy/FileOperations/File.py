@@ -1,6 +1,7 @@
 """This module contains the abstract base class for file manipulations for simulator files."""
 from __future__ import annotations
 import os
+from datetime import datetime
 from uuid import uuid4, UUID
 from dataclasses import dataclass, field
 from typing import Optional, Sequence
@@ -9,6 +10,8 @@ from ResSimpy.FileOperations.FileBase import FileBase
 import ResSimpy.FileOperations.file_operations as fo
 import uuid
 
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
+from ResSimpy.Time.ISODateTime import ISODateTime
 from ResSimpy.Utils.factory_methods import get_empty_list_file
 
 
@@ -74,6 +77,33 @@ class File(FileBase):
     def location_in_including_file(self) -> str:
         """The location of the file as it is written after the INCLUDE token in the file including it."""
         return self._location_in_including_file
+
+    def get_content_between_dates(self, start_date: datetime, end_date: datetime,
+                                  date_format: DateFormat = DateFormat.MM_DD_YYYY,
+                                  model_start_date: Optional[str] = None
+                                  ) -> list[str]:
+        content_between_dates = []
+        end_content_collection = False
+
+        for i, line in enumerate(self.file_content_as_list):
+            if fo.check_token('TIME', line):
+                date_value = fo.get_expected_token_value('TIME', token_line=line,
+                                                         file_list=self.file_content_as_list[i:])
+                date_value_as_iso = ISODateTime.convert_to_iso(date=date_value, date_format=date_format,
+                                                               start_date=model_start_date)
+
+                if date_value_as_iso >= end_date:
+                    content_between_dates.append(line)
+                    break
+
+                elif date_value_as_iso >= start_date:
+                    content_between_dates.append(line)
+                    continue
+
+            if any(content_between_dates):
+                content_between_dates.append(line)
+
+        return content_between_dates
 
     def update_include_location_in_file_as_list(self, new_path: str, include_file: File) -> None:
         """update_include_location_in_file_as_list.
