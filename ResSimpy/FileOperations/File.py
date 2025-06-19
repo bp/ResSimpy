@@ -401,8 +401,8 @@ class File(FileBase):
     @staticmethod
     def __nexus_grid_file_checks(line: str, file_as_list: list[str], line_number: int, is_top_level_file: bool,
                                  skip_next_include: bool) -> tuple[bool, bool, bool]:
-
-        if line.rstrip('\n').endswith('>'):
+        """Checks a file to see if it is a grid array file, that doesn't need to be loaded in."""
+        if line.rstrip().endswith('>'):
             return True, False, skip_next_include
 
         if fo.check_token("INCLUDE", line):
@@ -441,9 +441,9 @@ class File(FileBase):
     @staticmethod
     def __convert_line(full_file_path: str, is_nexus_file: bool, line: str, modified_file_as_list: list[str],
                        simulator_type: type[T], top_level_file: bool) -> None:
-
+        """Modifies a line in a text file to allow easier loading of the contents."""
         if len(modified_file_as_list) >= 1:
-            previous_line = modified_file_as_list[len(modified_file_as_list) - 1].rstrip('\n')
+            previous_line = modified_file_as_list[len(modified_file_as_list) - 1].rstrip()
             # Handle lines continued with the '>' character
             if is_nexus_file and previous_line.endswith('>'):
                 modified_file_as_list[len(modified_file_as_list) - 1] = previous_line[:-1] + line
