@@ -1,13 +1,12 @@
 """A collection of Utility functions for handling parsing Nexus files."""
 from __future__ import annotations
 
-import os
+import fnmatch
 import re
 from enum import Enum
 from io import StringIO
 from string import Template
 from typing import Optional, Union, Any
-import fnmatch
 
 import numpy as np
 import pandas as pd
@@ -42,54 +41,6 @@ def nexus_token_found(line_to_check: str, valid_list: list[str] = VALID_NEXUS_KE
     split_line = set(strip_comments[0].split())
 
     return not valid_set.isdisjoint(split_line)
-
-
-def get_previous_value(file_as_list: list[str], search_before: Optional[str] = None,
-                       ignore_values: Optional[list[str]] = None) -> Optional[str]:
-    """Gets the previous non-blank value in a list of lines.
-
-    Starts from the last instance of search_before, working backwards.
-
-    Args:
-        file_as_list (list[str]): a list of strings containing each line of the file as a new entry,
-        ending with the line to start searching from.
-        search_before (Optional[str]): The string to start the search from in a backwards direction
-        ignore_values (Optional[list[str]], optional): a list of values that should be ignored if found. \
-                    Defaults to None.
-
-    Returns:
-        Optional[str]: Next non-blank value from the list, if none found returns None
-    """
-
-    # Reverse the order of the lines
-    file_as_list.reverse()
-
-    # If we are searching before a specific token, remove that and the rest of the line.
-    if search_before is not None:
-        search_before_location = file_as_list[0].upper().rfind(search_before)
-        file_as_list[0] = file_as_list[0][0: search_before_location]
-
-    previous_value: str = ''
-    first_line = True
-    for line in file_as_list:
-        string_to_search: str = line
-        # Retrieve all of the values in the line, then return the last one found if one is found.
-        # Otherwise search the next line
-        next_value = get_next_value(0, [string_to_search], ignore_values=ignore_values)
-
-        while next_value is not None and (search_before != next_value or not first_line):
-            previous_value = next_value
-            string_to_search = string_to_search.replace(next_value, '')
-            next_value = get_next_value(0, [string_to_search], ignore_values=ignore_values)
-
-        if previous_value != '':
-            return previous_value
-
-        # If we are not on the first line, we can search the whole line
-        first_line = False
-
-    # Start of file reached, no values found
-    return None
 
 
 def create_templated_file(template_location: str, substitutions: dict, output_file_name: str) -> None:
@@ -161,20 +112,6 @@ def expand_include(file_as_list: list[str], recursive: bool = True) -> tuple[lis
         while inc_file_path is not None:
             expanded_file, inc_file_path = expand_include(expanded_file)
     return expanded_file, inc_file_path
-
-
-def get_full_file_path(file_path: str, origin: str) -> str:
-    """Returns the full file path including the base directories if they aren't present in the string.
-
-    Args:
-        file_path (str): the initial file path found in a file
-        origin (str): the initial origin of the file
-    """
-    if os.path.isabs(file_path):
-        return_path = file_path
-    else:
-        return_path = os.path.join(os.path.dirname(origin), file_path)
-    return return_path
 
 
 def read_table_to_df(file_as_list: list[str], keep_comments: bool = False, noheader: bool = False) -> pd.DataFrame:
@@ -576,23 +513,3 @@ def correct_datatypes(value: None | float | str, dtype: type,
                 return None
         case _:
             return dtype(value)
-
-
-def split_line(line: str, upper: bool = True) -> list[str]:
-    """Splits a line into a list of strings through sequential application of get_next_value.
-    Does not include comments. A line with no valid tokens will return an empty list.
-    """
-    stored_values: list[str] = []
-    value = get_next_value(0, [line])
-    if value is None:
-        return stored_values
-    trimmed_line = line
-    while value is not None:
-        if upper:
-            stored_values.append(value.upper())
-        else:
-            stored_values.append(value)
-        trimmed_line = trimmed_line.replace(value, "", 1)
-        value = get_next_value(0, [trimmed_line])
-
-    return stored_values
