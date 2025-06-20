@@ -82,13 +82,31 @@ class File(FileBase):
                                   date_format: DateFormat = DateFormat.MM_DD_YYYY,
                                   model_start_date: Optional[str] = None
                                   ) -> list[str]:
+        """Gets all the content in a file between the provided dates as a list of strings.
+
+        Args:
+            start_date (datetime): The date to search from.
+            end_date (datetime): The date to search to. If not provided, all lines will be returned until the end of the
+                                file.
+            date_format (DateFormat): The date format of the file. Defaults to the Nexus default (MM/DD/YYYY).
+            model_start_date (Optional[str]): The start date of the model. Required if the dates are in decimal format.
+        """
         content_between_dates = []
-        end_content_collection = False
+
+        if self.file_content_as_list is None:
+            return []
+
+        time_card_text = 'DATES' if date_format == DateFormat.DD_MMM_YYYY else 'TIME'
 
         for i, line in enumerate(self.file_content_as_list):
-            if fo.check_token('TIME', line):
-                date_value = fo.get_expected_token_value('TIME', token_line=line,
-                                                         file_list=self.file_content_as_list[i:])
+            if fo.check_token(time_card_text, line):
+                if time_card_text == 'TIME':
+                    date_value = fo.get_expected_token_value(time_card_text, token_line=line,
+                                                             file_list=self.file_content_as_list[i:])
+                else:
+                    date_value = fo.load_in_three_part_date(initial_token='DATES', token_line=line,
+                                                            file_as_list=self.file_content_as_list[i:], start_index=0)
+
                 date_value_as_iso = ISODateTime.convert_to_iso(date=date_value, date_format=date_format,
                                                                start_date=model_start_date)
 
