@@ -44,41 +44,41 @@ KX OUTPUT KX
                      file_content_as_list=[str(line) for line in input_file.splitlines(keepends=True)])
 
     expected_result = [
-     NexusGridArrayFunction(
-        region_type='IREGION',
-        region_number=[1, 2, 3],
-        function_type=GridFunctionTypeEnum.POLYN,
-        input_array=['KX'],
-        output_array=['KY'],
-        function_values=[1.0, 0.0]),
-     NexusGridArrayFunction(
-        blocks=[1, 5, 1, 7, 1, 9],
-        function_type=GridFunctionTypeEnum.POLYN,
-        input_array=['KX'],
-        output_array=['KY', 'KZ'],
-        function_values=[3.0, 2.0, 1.0, 0.0]),
-     NexusGridArrayFunction(
-        blocks=[1, 5, 1, 7, 1, 9],
-        function_type=GridFunctionTypeEnum.POLYN,
-        input_array=['KX'],
-        output_array=['KY', 'KZ'],
-        function_values=[3.0, 2.0, 1.0, 0.0]),
-     NexusGridArrayFunction(
-        region_type='ITRAN',
-        region_number=[1, 3, 5, 7],
-        grid_name='LGR1',
-        function_type=GridFunctionTypeEnum.POLYN,
-        input_range=[(-1.e10, 0.), (1.e5, 1.e10)],
-        input_array=['KX'],
-        output_array=['KX'],
-        function_values=[0.0]),
-     NexusGridArrayFunction(
-        grid_name='ROOT',
-        function_type=GridFunctionTypeEnum.POLYN,
-        output_range=[(-1.e12, 0.)],
-        input_array=['KX'],
-        output_array=['KX'],
-        function_values=[0.0])
+        NexusGridArrayFunction(
+            region_type='IREGION',
+            region_number=[1, 2, 3],
+            function_type=GridFunctionTypeEnum.POLYN,
+            input_array=['KX'],
+            output_array=['KY'],
+            function_values=[1.0, 0.0]),
+        NexusGridArrayFunction(
+            blocks=[1, 5, 1, 7, 1, 9],
+            function_type=GridFunctionTypeEnum.POLYN,
+            input_array=['KX'],
+            output_array=['KY', 'KZ'],
+            function_values=[3.0, 2.0, 1.0, 0.0]),
+        NexusGridArrayFunction(
+            blocks=[1, 5, 1, 7, 1, 9],
+            function_type=GridFunctionTypeEnum.POLYN,
+            input_array=['KX'],
+            output_array=['KY', 'KZ'],
+            function_values=[3.0, 2.0, 1.0, 0.0]),
+        NexusGridArrayFunction(
+            region_type='ITRAN',
+            region_number=[1, 3, 5, 7],
+            grid_name='LGR1',
+            function_type=GridFunctionTypeEnum.POLYN,
+            input_range=[(-1.e10, 0.), (1.e5, 1.e10)],
+            input_array=['KX'],
+            output_array=['KX'],
+            function_values=[0.0]),
+        NexusGridArrayFunction(
+            grid_name='ROOT',
+            function_type=GridFunctionTypeEnum.POLYN,
+            output_range=[(-1.e12, 0.)],
+            input_array=['KX'],
+            output_array=['KX'],
+            function_values=[0.0])
     ]
     grid = NexusGrid(grid_nexus_file=file, model_unit_system=UnitSystem.ENGLISH)
     # Act
@@ -87,69 +87,91 @@ KX OUTPUT KX
     assert result == expected_result
 
 
-def test_nexus_grid_function_tostring_repr_simple():
-    # Arrange
-    expected_result1 = '''FUNCTION IREGION
-1 2 3
-ANALYT POLYN 1.0 0.0
-KX OUTPUT KY
-'''
-    expected_result2 = '''FUNCTION
-BLOCKS 1 5 1 7 1 9
-ANALYT POLYN 3.0 2.0 1.0 0.0
-KX OUTPUT KY KZ
-'''
-    expected_result3 = '''FUNCTION
-GRID ROOT
-RANGE OUTPUT -1.0e+12 0.0
-ANALYT POLYN 0.0
-KX OUTPUT KX
-'''
-
-    expected_repr1 = """NexusGridArrayFunction(region_type=IREGION,region_number=[1, 2, 3],input_array=['KX'],output_array=['KY'],function_type=GridFunctionTypeEnum.POLYN,function_values=[1.0, 0.0])"""
-    expected_repr2 = """NexusGridArrayFunction(input_array=['KX'],output_array=['KY', 'KZ'],function_type=GridFunctionTypeEnum.POLYN,function_values=[3.0, 2.0, 1.0, 0.0],blocks=[1, 5, 1, 7, 1, 9])"""
-    expected_repr3 = """NexusGridArrayFunction(input_array=['KX'],output_array=['KX'],function_type=GridFunctionTypeEnum.POLYN,function_values=[0.0],grid_name=ROOT,output_range=[(-1000000000000.0, 0.0)])"""
-    input_grid_function = [
-     NexusGridArrayFunction(
+@pytest.mark.parametrize(
+    "input_array_func, expected_result, expected_repr",
+    [(NexusGridArrayFunction(
         region_type='IREGION',
         region_number=[1, 2, 3],
         function_type=GridFunctionTypeEnum.POLYN,
         input_array=['KX'],
         output_array=['KY'],
-        function_values=[1.0, 0.0]),
-     NexusGridArrayFunction(
-        blocks=[1, 5, 1, 7, 1, 9],
-        function_type=GridFunctionTypeEnum.POLYN,
-        input_array=['KX'],
-        output_array=['KY', 'KZ'],
-        function_values=[3.0, 2.0, 1.0, 0.0]),
-     NexusGridArrayFunction(
-        grid_name='ROOT',
-        function_type=GridFunctionTypeEnum.POLYN,
-        output_range=[(-1.0e+12, 0.)],
-        input_array=['KX'],
-        output_array=['KX'],
-        function_values=[0.0])
-    ]
+        function_values=[1.0, 0.0],
+        blocks=[1, 2, 3, 10, 11,12]
+      ),
+      '''FUNCTION IREGION
+1 2 3
+BLOCKS 1 2 3 10 11 12
+ANALYT POLYN 1.0 0.0
+KX OUTPUT KY
+''',
+      "NexusGridArrayFunction(region_type=IREGION,region_number=[1, 2, 3],input_array=['KX'],"
+      "output_array=['KY'],function_type=GridFunctionTypeEnum.POLYN,function_values=[1.0, 0.0],blocks=[1, 2, 3, 10, 11, 12])"
+    ),
+        (NexusGridArrayFunction(
+            blocks=[1, 5, 1, 7, 1, 9],
+            function_type=GridFunctionTypeEnum.MULT,
+            input_array=['KX', 'KY'],
+            output_array=['KY', 'KZ'],
+            function_values=None),
+         '''FUNCTION
+BLOCKS 1 5 1 7 1 9
+ANALYT MULT
+KX KY OUTPUT KY KZ
+''',
+         "NexusGridArrayFunction(input_array=['KX', 'KY'],output_array=['KY', 'KZ'],"
+         "function_type=GridFunctionTypeEnum.MULT,blocks=[1, 5, 1, 7, 1, 9])"
+        ),
+        (NexusGridArrayFunction(
+            grid_name='ROOT',
+            function_type=GridFunctionTypeEnum.POLYN,
+            output_range=[(-1.0e+12, 0.)],
+            input_array=['KX'],
+            output_array=['KX'],
+            function_values=[0.0]),
+         '''FUNCTION
+GRID ROOT
+RANGE OUTPUT -1.00000e+12 0.0
+ANALYT POLYN 0.0
+KX OUTPUT KX
+''',
+         "NexusGridArrayFunction(input_array=['KX'],output_array=['KX'],function_type=GridFunctionTypeEnum.POLYN,"
+         "function_values=[0.0],grid_name=ROOT,output_range=[(-1000000000000.0, 0.0)])"
+        ),
+        (NexusGridArrayFunction(
+            grid_name='ROOT',
+            function_type=GridFunctionTypeEnum.POLYN,
+            input_array=['KX'],
+            output_array=['KX', 'KY'],
+            input_range=[(0.120, 0.312)],
+            output_range=[(0.0, 10.25232), (0, 10000.212)],
+            function_values=[0.0, 10.25232, 128.212],
+            drange=[2.4, 102305],
+        ),
+         '''FUNCTION
+GRID ROOT
+RANGE INPUT 0.12 0.312
+RANGE OUTPUT 0.0 1.02523e+01 0 1.00002e+04
+DRANGE 2.4 1.02305e+05
+ANALYT POLYN 0.0 10.25232 128.212
+KX OUTPUT KX KY
+''',
+         "NexusGridArrayFunction(input_array=['KX'],output_array=['KX', 'KY'],function_type=GridFunctionTypeEnum.POLYN,"
+         "function_values=[0.0, 10.25232, 128.212],grid_name=ROOT,input_range=[(0.12, 0.312)],"
+         "output_range=[(0.0, 10.25232), (0, 10000.212)],drange=[2.4, 102305])"
+        )],
+)
+def test_nexus_grid_function_tostring_repr_simple(input_array_func, expected_result, expected_repr):
+    # Arrange
     grid = NexusGrid(assume_loaded=True, model_unit_system=UnitSystem.ENGLISH)
-    grid._NexusGrid__grid_array_functions = input_grid_function
+    grid._NexusGrid__grid_array_functions = [input_array_func]
 
     # Act
-    result_str1 = grid.array_functions[0].__str__()
-    result_str2 = grid.array_functions[1].__str__()
-    result_str3 = grid.array_functions[2].__str__()
+    result_str = str(grid.array_functions[0])
+    result_repr = repr(grid.array_functions[0])
 
-    result_repr1 = grid.array_functions[0].__repr__()
-    result_repr2 = grid.array_functions[1].__repr__()
-    result_repr3 = grid.array_functions[2].__repr__()
     # Assert
-    assert result_str1 == expected_result1
-    assert result_str2 == expected_result2
-    assert result_str3 == expected_result3
-
-    assert result_repr1 == expected_repr1
-    assert result_repr2 == expected_repr2
-    assert result_repr3 == expected_repr3
+    assert result_str == expected_result
+    assert result_repr == expected_repr
 
 
 @pytest.mark.parametrize("function_number, function_list, expected_grid_array_function_obj",
@@ -341,20 +363,20 @@ KX OUTPUT KY KZ
 IEQUIL CON 1
 ''',
                            [
-                            NexusGridArrayFunction(
-                                function_type=GridFunctionTypeEnum.FUNCTION_TABLE,
-                                input_array=['WORKA5'],
-                                output_array=['WORKA1'],
-                                function_table_m=1,
-                                function_table=pd.DataFrame({'WORKA5': [1, 2, 3, 4, 5, 6, 7],
-                                                            'WORKA1': [10., 9., 8., 7., 6., 5., 4.]})),
-                            NexusGridArrayFunction(
-                                blocks=[1, 5, 1, 7, 1, 9],
-                                function_type=GridFunctionTypeEnum.POLYN,
-                                input_array=['KX'],
-                                output_array=['KY', 'KZ'],
-                                function_values=[3.0, 2.0, 1.0, 0.0])
-                            ]
+                               NexusGridArrayFunction(
+                                   function_type=GridFunctionTypeEnum.FUNCTION_TABLE,
+                                   input_array=['WORKA5'],
+                                   output_array=['WORKA1'],
+                                   function_table_m=1,
+                                   function_table=pd.DataFrame({'WORKA5': [1, 2, 3, 4, 5, 6, 7],
+                                                                'WORKA1': [10., 9., 8., 7., 6., 5., 4.]})),
+                               NexusGridArrayFunction(
+                                   blocks=[1, 5, 1, 7, 1, 9],
+                                   function_type=GridFunctionTypeEnum.POLYN,
+                                   input_array=['KX'],
+                                   output_array=['KY', 'KZ'],
+                                   function_values=[3.0, 2.0, 1.0, 0.0])
+                           ]
                            ),
                           ('''FUNCTION 1 2.0 3.0 4.0
 WORKA5 OUTPUT WORKA1
@@ -381,21 +403,21 @@ KX OUTPUT KY KZ
 IEQUIL CON 1
 ''',
                            [
-                            NexusGridArrayFunction(
-                                function_type=GridFunctionTypeEnum.FUNCTION_TABLE,
-                                input_array=['WORKA5'],
-                                output_array=['WORKA1'],
-                                function_table_m=1,
-                                function_table_p_list=[2., 3., 4.],
-                                function_table=pd.DataFrame({'WORKA5': [1, 2, 3, 4, 5, 6, 7],
-                                                            'WORKA1': [10., 9., 8., 7., 6., 5., 4.]})),
-                            NexusGridArrayFunction(
-                                blocks=[1, 5, 1, 7, 1, 9],
-                                function_type=GridFunctionTypeEnum.POLYN,
-                                input_array=['KX'],
-                                output_array=['KY', 'KZ'],
-                                function_values=[3.0, 2.0, 1.0, 0.0])
-                            ]
+                               NexusGridArrayFunction(
+                                   function_type=GridFunctionTypeEnum.FUNCTION_TABLE,
+                                   input_array=['WORKA5'],
+                                   output_array=['WORKA1'],
+                                   function_table_m=1,
+                                   function_table_p_list=[2., 3., 4.],
+                                   function_table=pd.DataFrame({'WORKA5': [1, 2, 3, 4, 5, 6, 7],
+                                                                'WORKA1': [10., 9., 8., 7., 6., 5., 4.]})),
+                               NexusGridArrayFunction(
+                                   blocks=[1, 5, 1, 7, 1, 9],
+                                   function_type=GridFunctionTypeEnum.POLYN,
+                                   input_array=['KX'],
+                                   output_array=['KY', 'KZ'],
+                                   function_values=[3.0, 2.0, 1.0, 0.0])
+                           ]
                            ),
                           ('''FUNCTION IREGION 1 2.0 3.0 4.0
 6 7 8 9
@@ -425,29 +447,28 @@ KX OUTPUT KY KZ
 IEQUIL CON 1
 ''',
                            [
-                            NexusGridArrayFunction(
-                                region_type='IREGION',
-                                region_number=[6, 7, 8, 9],
-                                function_type=GridFunctionTypeEnum.FUNCTION_TABLE,
-                                input_array=['WORKA5'],
-                                output_array=['WORKA1'],
-                                function_table_m=1,
-                                function_table_p_list=[2., 3., 4.],
-                                drange=[0.1, 0.2, 0.3],
-                                function_table=pd.DataFrame({'WORKA5': [1, 2, 3, 4, 5, 6, 7],
-                                                            'WORKA1': [10., 9., 8., 7., 6., 5., 4.]})),
-                            NexusGridArrayFunction(
-                                blocks=[1, 5, 1, 7, 1, 9],
-                                function_type=GridFunctionTypeEnum.POLYN,
-                                input_array=['KX'],
-                                output_array=['KY', 'KZ'],
-                                function_values=[3.0, 2.0, 1.0, 0.0])
-                            ]
+                               NexusGridArrayFunction(
+                                   region_type='IREGION',
+                                   region_number=[6, 7, 8, 9],
+                                   function_type=GridFunctionTypeEnum.FUNCTION_TABLE,
+                                   input_array=['WORKA5'],
+                                   output_array=['WORKA1'],
+                                   function_table_m=1,
+                                   function_table_p_list=[2., 3., 4.],
+                                   drange=[0.1, 0.2, 0.3],
+                                   function_table=pd.DataFrame({'WORKA5': [1, 2, 3, 4, 5, 6, 7],
+                                                                'WORKA1': [10., 9., 8., 7., 6., 5., 4.]})),
+                               NexusGridArrayFunction(
+                                   blocks=[1, 5, 1, 7, 1, 9],
+                                   function_type=GridFunctionTypeEnum.POLYN,
+                                   input_array=['KX'],
+                                   output_array=['KY', 'KZ'],
+                                   function_values=[3.0, 2.0, 1.0, 0.0])
+                           ]
                            )
                           ],
                          ids=['basic_function_table', 'ft_m_and_ps', 'ft_w_iregion'])
 def test_tabular_array_function_block(input_file, expected_result):
-
     # Arrange
     file = NexusFile(location='path/to/file.dat',
                      file_content_as_list=[str(line) for line in input_file.splitlines(keepends=True)])
