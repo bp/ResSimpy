@@ -1,54 +1,26 @@
 """Handle Nexus files and preserve origin of include files."""
 from __future__ import annotations
 
-import os.path
-# Use correct Self type depending upon Python version
-import sys
-from dataclasses import dataclass, field
-from typing import Optional, Generator, Sequence
-
-from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
-
-if sys.version_info >= (3, 11):
-    from typing import Self
-else:
-    from typing_extensions import Self
-
-from uuid import UUID
-import re
-import ResSimpy.Nexus.nexus_file_operations as nfo
-import ResSimpy.FileOperations.file_operations as fo
-import warnings
-from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_OPERATION_KEYWORDS, GRID_ARRAY_FORMAT_KEYWORDS, \
-    GRID_ARRAY_KEYWORDS
-from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_dict_uuid_list_int
-from ResSimpy.FileOperations.File import File
-import pathlib
 import os
-from datetime import datetime, timezone
-from ResSimpy.Utils.general_utilities import is_number
+import os.path
+import re
+import warnings
+# Use correct Self type depending upon Python version
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Optional, Generator, Sequence
+from uuid import UUID
+
+import ResSimpy.FileOperations.file_operations as fo
+import ResSimpy.Nexus.nexus_file_operations as nfo
+from ResSimpy.FileOperations.File import File
+from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
+from ResSimpy.Utils.factory_methods import get_empty_dict_uuid_list_int
 
 
 @dataclass(kw_only=True, repr=False)
 class NexusFile(File):
-    """Class to deal with origin and structure of Nexus files and preserve origin of include files.
-
-    Attributes:
-        location (Optional[str]): Path to the original file being opened. Defaults to None.
-        include_locations (Optional[list[str]]): list of file paths that the file contains. Defaults to None.
-        origin (Optional[str]): Where the file was opened from. Defaults to None.
-        include_objects (Optional[list[NexusFile]]): The include files but generated as a NexusFile instance. \
-            Defaults to None.
-        linked_user (Optional[str]): user or owner of the file. Defaults to None
-        last_modified (Optional[datetime]): last modified date of the file
-    """
-
-    include_locations: Optional[list[str]] = field(default=None)
-    origin: Optional[str] = None
-    object_locations: Optional[dict[UUID, list[int]]] = field(default=None, repr=False)
-    line_locations: Optional[list[tuple[int, UUID]]] = field(default=None, repr=False)
-    linked_user: Optional[str] = field(default=None)
-    last_modified: Optional[datetime] = field(default=None)
+    """Class to deal with origin and structure of Nexus files and preserve origin of include files."""
 
     def __init__(self, location: str,
                  include_locations: Optional[list[str]] = None,
@@ -71,23 +43,11 @@ class NexusFile(File):
             file_loading_skipped (bool): If set to True, the file loading was skipped. Defaults to False.
         """
         super().__init__(location=location, file_content_as_list=file_content_as_list, include_objects=include_objects,
-                         file_loading_skipped=file_loading_skipped)
-        if origin is not None:
-            self.location = nfo.get_full_file_path(location, origin)
-        else:
-            self.location = location
-        self.include_locations: Optional[list[str]] = get_empty_list_str() if include_locations is None else \
-            include_locations
-        self.origin: Optional[str] = origin
-        if self.object_locations is None:
-            self.object_locations: dict[UUID, list[int]] = get_empty_dict_uuid_list_int()
-        if self.line_locations is None:
-            self.line_locations = []
-        self.linked_user = linked_user
-        self.last_modified = last_modified
+                         file_loading_skipped=file_loading_skipped, include_locations=include_locations, origin=origin,
+                         linked_user=linked_user, last_modified=last_modified)
 
     @staticmethod
-    def __convert_line_to_full_file_path(line: str, full_base_file_path: str) -> str:
+    def convert_line_to_full_file_path(line: str, full_base_file_path: str) -> str:
         """Modifies a file reference to contain the full file path for easier loading later."""
         modified_line = line
 
@@ -106,217 +66,6 @@ class NexusFile(File):
                     modified_line = modified_line.replace(original_file_path, new_file_path)
 
         return modified_line
-
-    @classmethod
-    def generate_file_include_structure(cls: type[Self], file_path: str, origin: Optional[str] = None,
-                                        recursive: bool = True, skip_arrays: bool = True,
-                                        top_level_file: bool = True) -> Self:
-        """Generates a nexus file instance for a provided text file with information storing the included files.
-
-        Args:
-            file_path (str): path to a file
-            origin (Optional[str], optional): Where the file was opened from. Defaults to None.
-            recursive (bool): Whether the method should recursively drill down multiple layers of include_locations.
-            skip_arrays (bool): If set True skips the INCLUDE arrays that come after property array and VALUE
-            top_level_file (bool): If set to True, the code assumes this is a 'top level' file rather than an included
-            one.
-
-        Returns:
-            NexusFile: a class instance for NexusFile with knowledge of include files
-        """
-
-        def __get_pathlib_path_details(full_file_path: str) -> None | str:
-            if full_file_path == "" or full_file_path is None:
-                return None
-            pathlib_path = pathlib.Path(full_file_path)
-            owner: str = ''
-            group: str = ''
-            try:
-                owner = pathlib_path.owner()  # type: ignore
-                group = pathlib_path.group()  # type: ignore
-            except NotImplementedError:
-                # owner or group not supported on this system, continue without filling out that information
-                pass
-            except PermissionError:
-                # user doesn't have permission to access the file, continue without filling out that information
-                warnings.warn(f'PermissionError when trying to access file at {full_file_path}')
-            except FileNotFoundError:
-                # file not found, continue without filling out that information
-                warnings.warn(f'FileNotFoundError when trying to access file at {full_file_path}')
-            except KeyError:
-                # Group or owner doesn't exist on this system, continue without filling out that information
-                warnings.warn(f'Unable to find the group for the file at {full_file_path}')
-
-            if owner is not None and group is not None:
-                return f"{owner}:{group}"
-            elif owner is not None:
-                return owner
-            return None
-
-        def __get_datetime_from_os_stat(full_file_path: str) -> None | datetime:
-            if full_file_path == "" or full_file_path is None:
-                return None
-            stat_obj = os.stat(full_file_path)
-            timestamp = stat_obj.st_mtime
-            if timestamp is None:
-                return None
-            return datetime.fromtimestamp(timestamp, tz=timezone.utc)
-
-        full_file_path = file_path
-        if origin is not None:
-            full_file_path = nfo.get_full_file_path(file_path, origin)
-
-        try:
-            file_as_list = nfo.load_file_as_list(full_file_path)
-        except FileNotFoundError:
-            # handle if a file can't be found
-            nexus_file_class = cls(location=file_path,
-                                   include_locations=None,
-                                   origin=origin,
-                                   include_objects=None,
-                                   file_content_as_list=None,
-                                   linked_user=None,
-                                   last_modified=None)
-            warnings.warn(UserWarning(f'No file found for: {full_file_path} while loading {origin}'))
-            return nexus_file_class
-
-        # check last modified and user for the file
-        user = __get_pathlib_path_details(full_file_path)
-        last_changed = __get_datetime_from_os_stat(full_file_path)
-
-        # prevent python from mutating the lists that it's iterating over
-        modified_file_as_list: list[str] = []
-        # search for the INCLUDE keyword and append to a list:
-        inc_file_list: list[str] = []
-        includes_objects: Optional[list[NexusFile]] = []
-        skip_next_include = False
-        previous_line: str
-
-        for i, line in enumerate(file_as_list):
-            if len(modified_file_as_list) >= 1:
-                previous_line = modified_file_as_list[len(modified_file_as_list) - 1].rstrip('\n')
-                # Handle lines continued with the '>' character
-                if previous_line.endswith('>'):
-                    modified_file_as_list[len(modified_file_as_list) - 1] = previous_line[:-1] + line
-                else:
-                    if not top_level_file:
-                        converted_line = NexusFile.__convert_line_to_full_file_path(line=line,
-                                                                                    full_base_file_path=full_file_path)
-                    else:
-                        converted_line = line
-                    modified_file_as_list.append(converted_line)
-            else:
-                if not top_level_file:
-                    converted_line = NexusFile.__convert_line_to_full_file_path(line=line,
-                                                                                full_base_file_path=full_file_path)
-                else:
-                    converted_line = line
-                modified_file_as_list.append(converted_line)
-
-            if line.rstrip('\n').endswith('>'):
-                continue
-            if nfo.check_token("INCLUDE", line):
-                # Include found, check if we should skip loading it in (e.g. if it is a large array file)
-                ignore_keywords = ['NOLIST']
-                previous_value = nfo.get_previous_value(file_as_list=file_as_list[0: i + 1], search_before='INCLUDE',
-                                                        ignore_values=ignore_keywords)
-
-                keywords_to_skip_include = GRID_ARRAY_FORMAT_KEYWORDS + GRID_OPERATION_KEYWORDS + ["CORP"]
-                if previous_value is None:
-                    skip_next_include = False
-
-                elif previous_value.upper() in keywords_to_skip_include:
-                    skip_next_include = True
-
-            elif nfo.check_token("VALUE", line) and not top_level_file:
-                # Check if this is an 'embedded' grid array file. If it is, return this file with only the content up
-                # to this point to help with performance when analysing the files.
-                previous_value = nfo.get_previous_value(file_as_list=file_as_list[0: i + 1], search_before='VALUE')
-                next_value = nfo.get_next_value(start_line_index=0, file_as_list=file_as_list[i:],
-                                                search_string=line.upper().split('VALUE')[1])
-
-                if previous_value is None or next_value is None:
-                    continue
-
-                if next_value.upper() != 'INCLUDE' and previous_value.upper() in GRID_ARRAY_KEYWORDS:
-                    nexus_file_class = cls(
-                        location=file_path,
-                        include_locations=inc_file_list,
-                        origin=origin,
-                        include_objects=includes_objects,
-                        file_content_as_list=modified_file_as_list
-                    )
-
-                    return nexus_file_class
-                else:
-                    continue
-
-            else:
-                continue
-            inc_file_path = fo.get_token_value('INCLUDE', line, file_as_list)
-            if inc_file_path is None:
-                continue
-            inc_full_path = nfo.get_full_file_path(inc_file_path, origin=full_file_path)
-            # store the included files as files inside the object
-            inc_file_list.append(inc_full_path)
-
-            # test the include to see if the first few lines have only array data
-            # limit number of lines loaded here in future?
-            if skip_arrays:
-                try:
-                    inc_file_as_list = nfo.load_file_as_list(inc_full_path)
-                except FileNotFoundError:
-                    # handle files not found - this is handled in an exception in the main loop
-                    pass
-                else:
-                    all_numeric = False
-                    for inc_file_line in inc_file_as_list[0:50]:
-                        split_line = nfo.split_line(inc_file_line, upper=False)
-                        # check if it is numeric data
-                        # this won't work if the array has scientific notation.
-                        if any(not is_number(x) for x in split_line):
-                            # don't set skip_next_include if the line is not entirely numeric
-                            all_numeric = False
-                            break
-                        all_numeric = True
-                    if all_numeric:
-                        skip_next_include = True
-
-            if not recursive:
-                continue
-            elif skip_arrays and skip_next_include:
-                inc_file = cls(location=inc_file_path,
-                               include_locations=None,
-                               origin=full_file_path,
-                               include_objects=None,
-                               file_content_as_list=None,
-                               linked_user=user,
-                               last_modified=last_changed,
-                               file_loading_skipped=True)
-                if includes_objects is None:
-                    raise ValueError('include_objects is None - recursion failure.')
-                skip_next_include = False
-            else:
-                inc_file = cls.generate_file_include_structure(inc_file_path, origin=full_file_path, recursive=True,
-                                                               skip_arrays=skip_arrays, top_level_file=False)
-                if includes_objects is None:
-                    raise ValueError('include_objects is None - recursion failure.')
-
-            includes_objects.append(inc_file)
-
-        includes_objects = None if not includes_objects else includes_objects
-
-        nexus_file_class = cls(
-            location=file_path,
-            include_locations=inc_file_list,
-            origin=origin,
-            include_objects=includes_objects,
-            file_content_as_list=modified_file_as_list,
-            linked_user=user,
-            last_modified=last_changed
-        )
-
-        return nexus_file_class
 
     @dataclass
     class FileIndex:
@@ -397,7 +146,7 @@ class NexusFile(File):
                         include_file = obj
                         break
                     if self.origin is not None and \
-                            obj.location == nfo.get_full_file_path(incfile_location, self.origin):
+                            obj.location == fo.get_full_file_path(incfile_location, self.origin):
                         include_file = obj
                         break
                     if obj.location is not None and \
@@ -806,7 +555,7 @@ class NexusFile(File):
         index_of_path_to_replace = self.include_locations.index(include_file.location)
         # get the full path and update it in the include file object
         # TODO maybe include this in a setter attr for the location.
-        include_file.location = nfo.get_full_file_path(new_path, self.location)
+        include_file.location = fo.get_full_file_path(new_path, self.location)
 
         self.include_locations[index_of_path_to_replace] = include_file.location
         # update the new path
