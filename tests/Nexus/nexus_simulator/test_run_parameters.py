@@ -343,13 +343,30 @@ class TestNexusSolverParameters:
                                    ),
               ]),
 
+            # drsdt
+            ('''START 01/01/2020
+            DRSDT LIMIT 0.1''',
+             [NexusSolverParameter(date='01/01/2020',
+                                   drsdt_limit=0.1,
+                                   ),
+              ]),
+
+            # drsdt_two_phases
+            ('''START 01/01/2020
+            DRSDT LIMIT 0.1 2PHASE''',
+             [NexusSolverParameter(date='01/01/2020',
+                                   drsdt_limit=0.1,
+                                   drsdt_two_phases=True
+                                   ),
+              ]),
             # Keywords in a line
 
         ],
         ids=['basic_test', 'more_DT_keywords', 'TIME_dependent_runcontrols', 'Solver_keywords',
              'Combined_solver_and_dt', 'Duplicate_keywords_in_a_given_timestep', 'All_solver_keywords',
              'Implicit_Mbal_keywords', 'Impstab_keywords', 'GRIDSOLVER_keywords', 'Solo keywords',
-             'TOLS_keywords', 'DCMAX_KEYWORDS', ])  # 'Keywords_in_a_line'])
+             'TOLS_keywords', 'DCMAX_KEYWORDS', 'drsdt', 'drsdt_two_phases'])  # 'Keywords_in_a_line'])
+    
     def test_load_run_parameters(self, mocker, file_content, expected_result):
         # Arrange
         def mock_open_wrapper(filename, mode):
