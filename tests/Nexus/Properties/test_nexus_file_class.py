@@ -5,6 +5,8 @@ from unittest.mock import MagicMock
 import pytest
 from pytest_mock import MockerFixture
 
+from ResSimpy.Nexus.DataModels import FcsFile
+from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
@@ -1245,3 +1247,110 @@ def test_generate_file_include_structure_skip_multiple_includes(mocker):
     assert nexus_file.include_objects[0] == expected_include_file_1
     assert nexus_file.include_objects[1].file_loading_skipped is True
     assert nexus_file.include_objects[1] == expected_include_file_2
+
+@pytest.mark.parametrize('filename, expected_result', [
+    ('file_in_restart_include.dat',
+     [NexusFile(location='file_in_restart_include.dat', include_objects=[])]),
+    ('structured_grid_file.dat',
+     [NexusFile(location='structured_grid_file.dat', include_objects=[])]),
+    ('options_file.dat',
+     [NexusFile(location='options_file.dat', include_objects=[])]),
+    ('runcontrol_file.dat',
+     [NexusFile(location='runcontrol_file.dat', include_objects=[])]),
+    ('override_file.dat',
+     [NexusFile(location='override_file.dat', include_objects=[])]),
+    ('eos_default_file.dat',
+     [NexusFile(location='eos_default_file.dat', include_objects=[])]),
+    ('well_file.dat',
+     [NexusFile(location='well_file.dat', include_objects=[])]),
+    ('surface_file.dat',
+     [NexusFile(location='surface_file.dat', include_objects=[])]),
+    ('rock_file.dat',
+     [NexusFile(location='rock_file.dat', include_objects=[])]),
+    ('relperm_file.dat',
+     [NexusFile(location='relperm_file.dat', include_objects=[])]),
+    ('pvt_file.dat',
+     [NexusFile(location='pvt_file.dat', include_objects=[])]),
+    ('file_in_water_include.dat',
+     [NexusFile(location='file_in_water_include.dat', include_objects=[])]),
+    ('equil_file2.dat',
+     [NexusFile(location='equil_file2.dat', include_objects=[])]),
+    ('tracer_init_file.dat',
+     [NexusFile(location='tracer_init_file.dat', include_objects=[])]),
+    ('aquifer_file.dat',
+     [NexusFile(location='aquifer_file.dat', include_objects=[])]),
+    ('hyd_file.dat',
+     [NexusFile(location='hyd_file.dat', include_objects=[])]),
+    ('valve_file.dat',
+     [NexusFile(location='valve_file.dat', include_objects=[])]),
+    ('separator_file.dat',
+     [NexusFile(location='separator_file.dat', include_objects=[])]),
+    ('ipr_file.dat',
+     [NexusFile(location='ipr_file.dat', include_objects=[])]),
+    ('gas_lift_file.dat',
+     [NexusFile(location='gas_lift_file.dat', include_objects=[])]),
+    ('pump_file.dat',
+     [NexusFile(location='pump_file.dat', include_objects=[])]),
+    ('compressor_file.dat',
+     [NexusFile(location='compressor_file.dat', include_objects=[])]),
+    ('choke_file.dat',
+     [NexusFile(location='choke_file.dat', include_objects=[])]),
+    ('icd_file.dat',
+     [NexusFile(location='icd_file.dat', include_objects=[])]),
+    ('esp_file.dat',
+     [NexusFile(location='esp_file.dat', include_objects=[])]),
+    ('polymer_file.dat',
+     [NexusFile(location='polymer_file.dat', include_objects=[])]),
+    ('adsorption_file.dat',
+     [NexusFile(location='adsorption_file.dat', include_objects=[])]),
+    ('flux_in_file.dat',
+     [NexusFile(location='flux_in_file.dat', include_objects=[])])
+])
+def test_get_model_files_by_filename(filename, expected_result):
+    # Arrange
+    restart_file = NexusFile(location='restart_file.dat', include_objects=[NexusFile(location='file_in_restart_include.dat')])
+    structured_grid_file = NexusFile(location='structured_grid_file.dat', include_objects=[])
+    options_file = NexusFile(location='options_file.dat', include_objects=[])
+    runcontrol_file = NexusFile(location='runcontrol_file.dat', include_objects=[])
+    override_file = NexusFile(location='override_file.dat', include_objects=[])
+    eos_default_file = NexusFile(location='eos_default_file.dat', include_objects=[])
+    well_files = {1: NexusFile(location='well_file.dat', include_objects=[])}
+    surface_files = {1: NexusFile(location='surface_file.dat', include_objects=[])}
+    rock_files = {1: NexusFile(location='rock_file.dat', include_objects=[])}
+    relperm_files = {1: NexusFile(location='relperm_file.dat', include_objects=[])}
+    pvt_files = {1: NexusFile(location='pvt_file.dat', include_objects=[])}
+    water_files = {1: NexusFile(location='water_file.dat', include_objects=[NexusFile(location='file_in_water_include.dat')])}
+    equil_files = {1: NexusFile(location='equil_file1.dat', include_objects=[]),
+                   2: NexusFile(location='equil_file2.dat', include_objects=[])}
+    tracer_init_files = {1: NexusFile(location='tracer_init_file.dat', include_objects=[])}
+    aquifer_files = {1: NexusFile(location='aquifer_file.dat', include_objects=[])}
+    hyd_files = {1: NexusFile(location='hyd_file.dat', include_objects=[])}
+    valve_files = {1: NexusFile(location='valve_file.dat', include_objects=[])}
+    separator_files = {1: NexusFile(location='separator_file.dat', include_objects=[])}
+    ipr_files = {1: NexusFile(location='ipr_file.dat', include_objects=[])}
+    gas_lift_files = {1: NexusFile(location='gas_lift_file.dat', include_objects=[])}
+    pump_files = {1: NexusFile(location='pump_file.dat', include_objects=[])}
+    compressor_files = {1: NexusFile(location='compressor_file.dat', include_objects=[])}
+    choke_files = {1: NexusFile(location='choke_file.dat', include_objects=[])}
+    icd_files = {1: NexusFile(location='icd_file.dat', include_objects=[])}
+    esp_files = {1: NexusFile(location='esp_file.dat', include_objects=[])}
+    polymer_files = {1: NexusFile(location='polymer_file.dat', include_objects=[])}
+    adsorption_files = {1: NexusFile(location='adsorption_file.dat', include_objects=[])}
+    flux_in_files = {1: NexusFile(location='flux_in_file.dat', include_objects=[])}
+
+    fcs_file = FcsNexusFile(location='model.fcs', restart_file=restart_file, structured_grid_file=structured_grid_file,
+                            options_file=options_file, runcontrol_file=runcontrol_file, override_file=override_file,
+                            eos_default_file=eos_default_file, well_files=well_files, surface_files=surface_files,
+                            rock_files=rock_files, relperm_files=relperm_files, pvt_files=pvt_files,
+                            water_files=water_files, equil_files=equil_files, tracer_init_files=tracer_init_files,
+                            aquifer_files=aquifer_files, hyd_files=hyd_files, valve_files=valve_files,
+                            separator_files=separator_files, ipr_files=ipr_files, gas_lift_files=gas_lift_files,
+                            pump_files=pump_files, compressor_files=compressor_files, choke_files=choke_files,
+                            icd_files=icd_files, esp_files=esp_files, polymer_files=polymer_files,
+                            adsorption_files=adsorption_files, flux_in_files=flux_in_files)
+
+    # Act
+    result = fcs_file.get_model_files_by_filename(filename=filename)
+
+    # Assert
+    assert result == expected_result

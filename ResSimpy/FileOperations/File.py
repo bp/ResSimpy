@@ -613,6 +613,31 @@ class File(FileBase):
             return ''
         return ''.join(self.file_content_as_list)
 
+    def get_include_file_from_filename(self, filename: str) -> list[File]:
+        """Retrieves a list of files matching the provided file name.
+
+        Args:
+            filename(str): file name to search for.
+        """
+        matching_files: list[File] = []
+
+        if filename in self.location:
+            matching_files.append(self)
+
+        if self.include_objects is None:
+            return matching_files
+
+        for file in self.include_objects:
+            if filename in file.location:
+                matching_files.append(file)
+            elif file.include_objects is not None and any(file.include_objects):
+                # If there are includes within this included file, search them as well.
+                embedded_matching_files = file.get_include_file_from_filename(filename=filename)
+                if any(embedded_matching_files):
+                    matching_files.extend(embedded_matching_files)
+
+        return matching_files
+
     @staticmethod
     def convert_line_to_full_file_path(line: str, full_base_file_path: str) -> str:
         """Modifies a file reference to contain the full file path for easier loading later."""
