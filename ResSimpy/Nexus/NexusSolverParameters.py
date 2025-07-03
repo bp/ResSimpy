@@ -146,6 +146,13 @@ class NexusSolverParameters(SolverParameters):
                 solver_parameter_for_timestep.perfrev = fo.get_expected_token_value('PERFREV', line,
                                                                                     file_list=self.file_content)
 
+            if fo.check_token(token='DRSDT', line=line):
+                drsdt_limit = fo.get_expected_token_value('LIMIT', line,
+                                                          file_list=self.file_content)
+                solver_parameter_for_timestep.drsdt_limit = float(drsdt_limit)
+                if "2PHASE" in line:
+                    solver_parameter_for_timestep.drsdt_two_phases = True
+
             for keyword in SOLO_KEYWORDS:
                 if fo.check_token(token=keyword, line=line):
                     self.__get_generic_solver_token_values(keyword, line, solver_parameter_for_timestep,
