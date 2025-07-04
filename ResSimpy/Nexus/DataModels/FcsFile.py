@@ -4,8 +4,9 @@ from dataclasses import dataclass, field
 import os
 import warnings
 
+from ResSimpy.FileOperations.File import File
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from typing import Optional
+from typing import Optional, Generator
 
 # Use correct Self type depending upon Python version
 import sys
@@ -488,3 +489,40 @@ class FcsNexusFile(NexusFile):
             file_changed = True
             self._file_modified_set(file_changed)
         return file_changed
+
+    @property
+    def all_model_files(self) -> Generator[File]:
+        """Generator property returning all the files linked to in the FCS file."""
+
+        # Loop through all the individual files in the model
+        individual_files_in_model = [self.restart_file, self.structured_grid_file, self.options_file,
+                                     self.runcontrol_file, self.override_file, self.eos_default_file]
+
+        for individual_file in individual_files_in_model:
+            if individual_file is not None:
+                yield individual_file
+
+        # Loop through all the files linked to the model via keys e.g. WELLS set 1, WELLS set 2 etc.
+        dicts_of_files_in_model = [self.well_files, self.surface_files, self.rock_files, self.relperm_files,
+                                   self.pvt_files, self.water_files, self.equil_files, self.tracer_init_files,
+                                   self.aquifer_files, self.hyd_files, self.valve_files, self.separator_files,
+                                   self.ipr_files, self.gas_lift_files, self.pump_files, self.compressor_files,
+                                   self.choke_files, self.icd_files, self.esp_files, self.polymer_files,
+                                   self.adsorption_files, self.flux_in_files]
+
+        for dict_of_files in dicts_of_files_in_model:
+            if dict_of_files is not None and any(dict_of_files):
+                yield from dict_of_files.values()
+
+    def get_model_files_by_filename(self, filename: str) -> list[File]:
+        """Retrieves a list of files in the Nexus model matching the provided file name.
+
+        Args:
+            filename(str): file name to search for.
+        """
+        matching_files: list[File] = []
+
+        for file in self.all_model_files:
+            matching_files.extend(file.get_include_file_from_filename(filename=filename))
+
+        return matching_files

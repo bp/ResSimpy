@@ -160,5 +160,45 @@ def test_get_content_between_dates(file_contents, start_date, end_date, date_for
     # Assert
     assert result == expected_result
 
+@pytest.mark.parametrize('include_objects, filename, expected_result',
+[  # Basic case
+   ([File(location='/path/to/file_1.dat', file_content_as_list=[]),
+     File(location='/path/to/file_2.dat', file_content_as_list=[])],
+    'file_1.dat',
+    [File(location='/path/to/file_1.dat', file_content_as_list=[])]
+   ),
 
-# Eclipse format for date keyword and date format
+   # No matches
+   ([File(location='/path/to/file_1.dat', file_content_as_list=[]),
+     File(location='/path/to/file_2.dat', file_content_as_list=[])],
+    'file_3.dat',
+    []
+   ),
+
+   # Multiple matches
+   ([File(location='/path/to/file_1.dat', file_content_as_list=[]),
+     File(location='/path/to/file_2.dat', file_content_as_list=[]),
+     File(location='/path/to/other/file_1.dat', file_content_as_list=[])],
+    'file_1.dat',
+    [File(location='/path/to/file_1.dat', file_content_as_list=[]),
+     File(location='/path/to/other/file_1.dat', file_content_as_list=[])]
+   ),
+
+   # Match multiple levels down
+   ([File(location='/path/to/file_1.dat', file_content_as_list=[],
+          include_objects=[File(location='/path/to/embedded/file_3.dat', file_content_as_list=[])]),
+     File(location='/path/to/file_2.dat', file_content_as_list=[])],
+    'file_3.dat',
+    [File(location='/path/to/embedded/file_3.dat', file_content_as_list=[])]
+   ),
+
+], ids=['Basic Case', 'No matches', 'Multiple matches', 'Match further down the tree'])
+def test_get_include_file_from_filename(include_objects, filename, expected_result):
+    # Arrange
+    base_file = File(location='', file_content_as_list=[], include_objects=include_objects)
+
+    # Act
+    result = base_file.get_include_file_from_filename(filename=filename)
+
+    # Assert
+    assert result == expected_result
