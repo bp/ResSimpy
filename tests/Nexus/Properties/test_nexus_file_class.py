@@ -271,7 +271,8 @@ def test_generate_file_include_structure_skip_array(mocker, test_file_contents):
     expected_result = nexus_file_include1
 
     # Act
-    nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path=file_path, skip_arrays=True)
+    nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path=file_path,
+                                                           skip_arrays=True)
 
     # Assert
     assert len(nexus_file.include_objects) == 1
@@ -351,7 +352,8 @@ def test_generate_file_include_structure_skip_file_with_nested_array(mocker: Moc
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path=file_path, skip_arrays=True)
+    nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path=file_path,
+                                                           skip_arrays=True)
 
     # Assert
     assert len(nexus_file.include_objects) == 1
@@ -399,7 +401,8 @@ KZ CON 1
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path=file_path, skip_arrays=False)
+    nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path=file_path,
+                                                           skip_arrays=False)
 
     # Assert
     assert len(nexus_file.include_objects) == 1
@@ -437,7 +440,8 @@ def test_file_object_locations(mocker, test_file_contents, expected_results):
 
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    wells_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path='wells.dat', skip_arrays=True, )
+    wells_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path='wells.dat',
+                                                           skip_arrays=True, )
 
     # Act
     load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH,
@@ -768,7 +772,8 @@ def test_update_object_locations(mocker, test_file_contents, expected_results):
 
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    wells_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path='wells.dat', skip_arrays=True)
+    wells_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path='wells.dat',
+                                                           skip_arrays=True)
     # load the uuids
     load_wells(wells_file, start_date='01/01/2012', default_units=UnitSystem.ENGLISH,
                model_date_format=DateFormat.DD_MM_YYYY, parent_wells_instance=dummy_wells)
@@ -1020,6 +1025,7 @@ def test_write_to_file_failure(mocker):
                            overwrite_file=False)
     assert str(ve.value) == 'File already exists at new_somefile.dat and overwrite_file set to False'
 
+
 # TODO: Convert this test to run independently of the other tests.
 def test_missing_file(mocker):
     # Arrange
@@ -1051,7 +1057,8 @@ def test_missing_file(mocker):
     assert result_include_file.linked_user is None
     assert result_include_file.last_modified is None
     assert warn_msg[0].message.args[0] == 'FileNotFoundError when trying to access file at /root/file.dat'
-    assert warn_msg[1].message.args[0] == f"No file found for: {os.path.join('/root', 'original_include.inc')} while loading /root/file.dat"
+    assert warn_msg[1].message.args[
+               0] == f"No file found for: {os.path.join('/root', 'original_include.inc')} while loading /root/file.dat"
 
 
 def test_group_not_found(mocker):
@@ -1238,7 +1245,8 @@ def test_generate_file_include_structure_skip_multiple_includes(mocker):
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path=file_path, skip_arrays=True)
+    nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path=file_path,
+                                                           skip_arrays=True)
 
     # Assert
     assert len(nexus_file.include_objects) == 2
@@ -1247,6 +1255,7 @@ def test_generate_file_include_structure_skip_multiple_includes(mocker):
     assert nexus_file.include_objects[0] == expected_include_file_1
     assert nexus_file.include_objects[1].file_loading_skipped is True
     assert nexus_file.include_objects[1] == expected_include_file_2
+
 
 @pytest.mark.parametrize('filename, expected_result', [
     ('file_in_restart_include.dat',
@@ -1308,7 +1317,8 @@ def test_generate_file_include_structure_skip_multiple_includes(mocker):
 ])
 def test_get_model_files_by_filename(filename, expected_result):
     # Arrange
-    restart_file = NexusFile(location='restart_file.dat', include_objects=[NexusFile(location='file_in_restart_include.dat')])
+    restart_file = NexusFile(location='restart_file.dat',
+                             include_objects=[NexusFile(location='file_in_restart_include.dat')])
     structured_grid_file = NexusFile(location='structured_grid_file.dat', include_objects=[])
     options_file = NexusFile(location='options_file.dat', include_objects=[])
     runcontrol_file = NexusFile(location='runcontrol_file.dat', include_objects=[])
@@ -1319,7 +1329,8 @@ def test_get_model_files_by_filename(filename, expected_result):
     rock_files = {1: NexusFile(location='rock_file.dat', include_objects=[])}
     relperm_files = {1: NexusFile(location='relperm_file.dat', include_objects=[])}
     pvt_files = {1: NexusFile(location='pvt_file.dat', include_objects=[])}
-    water_files = {1: NexusFile(location='water_file.dat', include_objects=[NexusFile(location='file_in_water_include.dat')])}
+    water_files = {
+        1: NexusFile(location='water_file.dat', include_objects=[NexusFile(location='file_in_water_include.dat')])}
     equil_files = {1: NexusFile(location='equil_file1.dat', include_objects=[]),
                    2: NexusFile(location='equil_file2.dat', include_objects=[])}
     tracer_init_files = {1: NexusFile(location='tracer_init_file.dat', include_objects=[])}
@@ -1354,3 +1365,17 @@ def test_get_model_files_by_filename(filename, expected_result):
 
     # Assert
     assert result == expected_result
+
+
+def test_get_model_files_by_filename_file_not_found():
+    # Arrange
+    restart_file = NexusFile(location='restart_file.dat',
+                             include_objects=[NexusFile(location='file_in_restart_include.dat')])
+
+    fcs_file = FcsNexusFile(location='model.fcs', restart_file=restart_file)
+
+    # Act
+    result = fcs_file.get_model_files_by_filename(filename='missing_file.dat')
+
+    # Assert
+    assert result == []
