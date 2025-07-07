@@ -9,7 +9,7 @@ from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinitio
 def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,
                            comment_characters: Optional[list[str]] = None,
                            square_bracket_comments: bool = False) -> list[str]:
-    """Strips all of the inline, single and multi line comments out of a file.
+    """Strips all the inline, single and multi line comments out of a file.
 
     Comment characters assumed are: ! and square brackets. Escaped characters are ones wrapped in quotation marks.
 
@@ -91,7 +91,7 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
                    replace_with: str | GridArrayDefinition | None = None,
                    comment_characters: None | list[str] = None,
                    single_c_acts_as_comment: bool = True) -> Optional[str]:
-    """Gets the next non blank value in a list of lines.
+    """Gets the next non-blank value in a list of lines.
 
     Args:
         start_line_index (int): line number to start reading file_as_list from
@@ -477,7 +477,7 @@ def get_expected_next_value(start_line_index: int, file_as_list: list[str], sear
                             ignore_values: Optional[list[str]] = None,
                             replace_with: Union[str, GridArrayDefinition, None] = None,
                             custom_message: Optional[str] = None) -> str:
-    """Gets the next non blank value in a list of lines.
+    """Gets the next non-blank value in a list of lines.
 
     Args:
         start_line_index (int): line number to start reading file_as_list from
@@ -490,7 +490,7 @@ def get_expected_next_value(start_line_index: int, file_as_list: list[str], sear
         custom_message (Optional[str]): A custom error message if no value is found
 
     Returns:
-        str: Next non blank value from the list, if none found raises ValueError
+        str: Next non-blank value from the list, if none found raises ValueError
     """
     value = get_next_value(start_line_index, file_as_list, search_string, ignore_values, replace_with)
 
