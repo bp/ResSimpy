@@ -51,7 +51,7 @@ class TestModifyNexusGrid:
 
         mocker.patch("builtins.open", mock_open_wrapper)
 
-        grid_nexus_file = NexusFile.generate_file_include_structure(file_path='test_location/grid.dat')
+        grid_nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path='test_location/grid.dat')
 
         grid = NexusGrid(model_unit_system=UnitSystem.METRIC,
                          grid_nexus_file=grid_nexus_file)
@@ -116,7 +116,7 @@ class TestModifyNexusGrid:
             return mock_open
 
         mocker.patch("builtins.open", mock_open_wrapper)
-        grid_nexus_file = NexusFile.generate_file_include_structure(file_path='test_location/grid.dat')
+        grid_nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path='test_location/grid.dat')
         grid = NexusGrid(model_unit_system=UnitSystem.METRIC,
                          grid_nexus_file=grid_nexus_file)
         array_to_remove = 'netgrs'
@@ -161,7 +161,7 @@ INCLUDE /new_path_to_netgrs_file/new_net_to_gross_file.inc
             return mock_open
 
         mocker.patch("builtins.open", mock_open_wrapper)
-        grid_nexus_file = NexusFile.generate_file_include_structure(file_path='test_location/grid.dat')
+        grid_nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path='test_location/grid.dat')
         grid = NexusGrid(model_unit_system=UnitSystem.METRIC,
                          grid_nexus_file=grid_nexus_file)
         array_to_modify = 'NETGRS'

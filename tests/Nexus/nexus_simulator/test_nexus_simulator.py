@@ -2366,7 +2366,7 @@ def test_convert_line_to_full_file_path(original_line: str, expected_line: str):
     full_file_path = '/path/to/file.inc'
 
     # Act
-    result = NexusFile._NexusFile__convert_line_to_full_file_path(line=original_line,
+    result = NexusFile.convert_line_to_full_file_path(line=original_line,
                                                                   full_base_file_path=full_file_path)
 
     # Assert

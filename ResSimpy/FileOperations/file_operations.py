@@ -1,9 +1,11 @@
+import os
 from functools import partial
 from typing import Optional, Union
 import re
 from string import whitespace
 
 from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
+from ResSimpy.FileOperations.simulator_constants import NEXUS_COMMENT_CHARACTERS
 
 
 def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,
@@ -127,9 +129,13 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
         new_search_string = False
         line_already_skipped = False
 
+        stripped_search_string = search_string.strip()
+
         # If the string is wrapped in quotation marks, return the full string (including invalid characters)
-        if len(search_string) > 2 and search_string.startswith("\"") and search_string.endswith("\""):
-            value += search_string[1:len(search_string) - 1]
+        if (len(stripped_search_string) > 2 and
+                ((stripped_search_string.startswith("\"") and stripped_search_string.endswith("\"")) or
+                 (stripped_search_string.startswith("\'") and stripped_search_string.endswith("\'")))):
+            value += stripped_search_string[1:len(stripped_search_string) - 1]
             value_found = True
             break
 
@@ -138,7 +144,15 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
             starts_with_c_only = (single_c_acts_as_comment and
                                   (character_location == 0 and character == "C" and
                                    (len(search_string) == 1 or search_string[character_location + 1] == ' ')))
-            if character in comment_characters or character == "\n" or starts_with_c_only:
+
+            two_char_comment_char_found = (len(search_string) > character_location + 1 and
+                                           search_string[character_location] + search_string[character_location + 1] in
+                                           comment_characters)
+
+            if (character in comment_characters
+                    or character == "\n"
+                    or starts_with_c_only
+                    or two_char_comment_char_found):
                 line_index += 1
                 line_already_skipped = True
                 # If we've reached the end of the file, return None
@@ -184,6 +198,54 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
         return None
 
     return value
+
+
+def get_previous_value(file_as_list: list[str], search_before: Optional[str] = None,
+                       ignore_values: Optional[list[str]] = None) -> Optional[str]:
+    """Gets the previous non-blank value in a list of lines.
+
+    Starts from the last instance of search_before, working backwards.
+
+    Args:
+        file_as_list (list[str]): a list of strings containing each line of the file as a new entry,
+        ending with the line to start searching from.
+        search_before (Optional[str]): The string to start the search from in a backwards direction
+        ignore_values (Optional[list[str]], optional): a list of values that should be ignored if found. \
+                    Defaults to None.
+
+    Returns:
+        Optional[str]: Next non-blank value from the list, if none found returns None
+    """
+
+    # Reverse the order of the lines
+    file_as_list.reverse()
+
+    # If we are searching before a specific token, remove that and the rest of the line.
+    if search_before is not None:
+        search_before_location = file_as_list[0].upper().rfind(search_before)
+        file_as_list[0] = file_as_list[0][0: search_before_location]
+
+    previous_value: str = ''
+    first_line = True
+    for line in file_as_list:
+        string_to_search: str = line
+        # Retrieve all of the values in the line, then return the last one found if one is found.
+        # Otherwise search the next line
+        next_value = get_next_value(0, [string_to_search], ignore_values=ignore_values)
+
+        while next_value is not None and (search_before != next_value or not first_line):
+            previous_value = next_value
+            string_to_search = string_to_search.replace(next_value, '')
+            next_value = get_next_value(0, [string_to_search], ignore_values=ignore_values)
+
+        if previous_value != '':
+            return previous_value
+
+        # If we are not on the first line, we can search the whole line
+        first_line = False
+
+    # Start of file reached, no values found
+    return None
 
 
 def __replace_value_in_file_as_list(file_as_list: list[str], line_index: int, replace_with: str | GridArrayDefinition,
@@ -269,27 +331,36 @@ def __replace_with_variable_entry(new_line: str, original_line: str, replace_wit
     return new_line, new_value, value
 
 
-def check_token(token: str, line: str) -> bool:
+def check_token(token: str, line: str, comment_characters: Optional[list[str]] = None) -> bool:
     """Checks if the text line contains the supplied token and is not commented out.
 
     Args:
-        token (str): keyword value to search the line for
-        line (str): string to search the token in
+        token (str): Keyword value to search the line for.
+        line (str): String to search the token in.
+        comment_characters(Optional[list[str]]): A list of characters that denote a comment for the simulator.
+
     Returns:
         bool: True if the text line contains the supplied token, False otherwise.
     """
-    token_separator_chars = [" ", '\n', '\t', '!']
     uppercase_line = line.upper()
     token_location = uppercase_line.find(token.upper())
+    token_separator_chars = [" ", '\n', '\t']
 
     # Not found at all, return false
     if token_location == -1:
         return False
 
-    if line.startswith('C '):
-        return False
+    if comment_characters is None:
+        # Assume Nexus as the default for now
+        if line.startswith('C '):
+            return False
+        comment_characters = NEXUS_COMMENT_CHARACTERS
 
-    comment_character_location = line.find("!")
+    comment_character_location = -1
+    for character in comment_characters:
+        comment_character_location = line.find(character)
+        if comment_character_location != -1:
+            break
 
     # Check if the line is commented out before the token appears
     if comment_character_location != -1 and comment_character_location < token_location:
@@ -298,6 +369,10 @@ def check_token(token: str, line: str) -> bool:
     # Check if the character before the token is a separator such as space, tab etc and not another alphanumeric char
     if token_location != 0 and line[token_location - 1] not in token_separator_chars:
         return False
+
+    # If we reach the end of the line or a comment character after the token, return true.
+    if token_location + len(token) == len(line) or token_location + len(token) == comment_character_location:
+        return True
 
     # Check if the character after the token is a separator such as space, tab etc and not another alphanumeric char
     if token_location + len(token) != len(line) and line[token_location + len(token)] not in token_separator_chars:
@@ -323,7 +398,8 @@ def value_in_file(token: str, file: list[str]) -> bool:
 
 def get_token_value(token: str, token_line: str, file_list: list[str],
                     ignore_values: Optional[list[str]] = None,
-                    replace_with: Union[str, GridArrayDefinition, None] = None) -> Optional[str]:
+                    replace_with: Union[str, GridArrayDefinition, None] = None,
+                    comment_characters: list[str] | None = None, single_c_comments: bool = True) -> Optional[str]:
     """Gets the value following a token if supplied with a line containing the token.
 
     Arguments:
@@ -334,6 +410,10 @@ def get_token_value(token: str, token_line: str, file_list: list[str],
             Defaults to None.
         replace_with (Union[str, VariableEntry, None], optional):  a value to replace the existing value with. \
             Defaults to None.
+        comment_characters (Optional[list[str]], optional): a list of characters that are considered inline comments.
+            Defaults to the Nexus format (!)
+        single_c_comments: (bool): whether a single C character at the start of a line should be treated as a
+            comment. Defaults to Nexus setting which is True.
 
     Returns:
         Optional[str]: The value following the supplied token, if it is present.
@@ -341,7 +421,8 @@ def get_token_value(token: str, token_line: str, file_list: list[str],
     search_string, line_index = __extract_search_string(token, token_line, file_list)
     if search_string is None or line_index is None:
         return None
-    value = get_next_value(line_index, file_list, search_string, ignore_values, replace_with)
+    value = get_next_value(line_index, file_list, search_string, ignore_values, replace_with,
+                           comment_characters=comment_characters, single_c_acts_as_comment=single_c_comments)
     return value
 
 
@@ -594,3 +675,37 @@ def split_list_of_strings_by_length(list_of_strings: list[str], max_length: int)
         list[str]: A new list of strings split from the original list.
     """
     return [split_lines_for_long_string(string, max_length) for string in list_of_strings]
+
+
+def get_full_file_path(file_path: str, origin: str) -> str:
+    """Returns the full file path including the base directories if they aren't present in the string.
+
+    Args:
+        file_path (str): the initial file path found in a file
+        origin (str): the initial origin of the file
+    """
+    if os.path.isabs(file_path):
+        return_path = file_path
+    else:
+        return_path = os.path.join(os.path.dirname(origin), file_path)
+    return return_path
+
+
+def split_line(line: str, upper: bool = True) -> list[str]:
+    """Splits a line into a list of strings through sequential application of get_next_value.
+    Does not include comments. A line with no valid tokens will return an empty list.
+    """
+    stored_values: list[str] = []
+    value = get_next_value(0, [line])
+    if value is None:
+        return stored_values
+    trimmed_line = line
+    while value is not None:
+        if upper:
+            stored_values.append(value.upper())
+        else:
+            stored_values.append(value)
+        trimmed_line = trimmed_line.replace(value, "", 1)
+        value = get_next_value(0, [trimmed_line])
+
+    return stored_values
