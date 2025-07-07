@@ -33,7 +33,7 @@ from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+from ResSimpy.Nexus.NexusSimulator import NexusSimulator, IPRTable
 from pytest_mock import MockerFixture
 from unittest.mock import Mock
 from ResSimpy.Enums.UnitsEnum import UnitSystem
@@ -320,8 +320,7 @@ def test_output_destination_missing(mocker, run_control_path, expected_run_contr
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    simulation = NexusSimulator(
-        origin='test/Path.fcs', destination='original_output_path')
+    simulation = NexusSimulator(origin='test/Path.fcs', destination='original_output_path')
     with pytest.raises(ValueError):
         simulation.set_output_path(None)
 
@@ -371,8 +370,7 @@ def test_output_to_existing_directory(mocker):
 
     # Act + Assert
     with pytest.raises(FileExistsError):
-        NexusSimulator(origin='test/Path.fcs',
-                       destination='original_output_path')
+        NexusSimulator(origin='test/Path.fcs', destination='original_output_path')
     # Arrange for windows
     fcs_file_win = "RUNCONTROL path\to\run\control\nDATEFORMAT DD/MM/YYYYY"
     open_mock_win = mocker.mock_open(read_data=fcs_file)
@@ -383,8 +381,7 @@ def test_output_to_existing_directory(mocker):
 
     # Act + Assert
     with pytest.raises(FileExistsError):
-        NexusSimulator(origin='test\Path.fcs',
-                       destination='original_output_path')
+        NexusSimulator(origin='test\Path.fcs', destination='original_output_path')
 
 
 @pytest.mark.parametrize("fcs_file, expected_default_unit_value",
@@ -519,8 +516,7 @@ def test_run_simulator(mocker):
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    simulation = NexusSimulator(
-        origin='testpath1/Path.fcs', destination="test_new_destination")
+    simulation = NexusSimulator(origin='testpath1/Path.fcs', destination="test_new_destination")
     result = simulation.run_simulation()
 
     # Assert
@@ -746,8 +742,7 @@ def test_update_token_file_value(mocker, original_file_contents, expected_file_c
     mock_original_opens = mocker.mock_open()
     mocker.patch("builtins.open", mock_original_opens)
 
-    simulation = NexusSimulator(
-        origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
 
     modifying_mock_open = mocker.mock_open(read_data=original_file_contents)
     mocker.patch("builtins.open", modifying_mock_open)
@@ -847,8 +842,7 @@ def test_update_token_file_value(mocker, original_file_contents, expected_file_c
     mock_original_opens = mocker.mock_open()
     mocker.patch("builtins.open", mock_original_opens)
 
-    simulation = NexusSimulator(
-        origin='testpath1\nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1\nexus_run.fcs', destination="new_destination")
 
     modifying_mock_open = mocker.mock_open(read_data=original_file_contents)
     mocker.patch("builtins.open", modifying_mock_open)
@@ -876,7 +870,6 @@ GRIDSOLVER IMPLICIT_COUPLING NONE
 
 !     Use vip units for output to vdb
 VIPUNITS""",
-
                               """START 11/01/1992
 
 !     Timestepping method
@@ -895,8 +888,7 @@ def test_comment_out_file_value(mocker, original_file_contents, expected_file_co
     mock_original_opens = mocker.mock_open()
     mocker.patch("builtins.open", mock_original_opens)
 
-    simulation = NexusSimulator(
-        origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
 
     modifying_mock_open = mocker.mock_open(read_data=original_file_contents)
     mocker.patch("builtins.open", modifying_mock_open)
@@ -942,8 +934,7 @@ def test_comment_out_file_value(mocker, original_file_contents, expected_file_co
     mock_original_opens = mocker.mock_open()
     mocker.patch("builtins.open", mock_original_opens)
 
-    simulation = NexusSimulator(
-        origin='testpath1\nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1\nexus_run.fcs', destination="new_destination")
 
     modifying_mock_open = mocker.mock_open(read_data=original_file_contents)
     mocker.patch("builtins.open", modifying_mock_open)
@@ -2434,3 +2425,51 @@ INCLUDE /path/nexus_data/init/equil_info.txt
     # Assert
     assert len(recwarn) == 0
     assert result == expected_equils
+
+
+@pytest.mark.parametrize("file_contents, expected_data",
+                         # ("""Test CASE 1:
+# SOURCE
+#   EOS NHC 7 COMPONENTS N2C1 CO2C3 C4-5 C6-14 C15-19 C20-35 C36+
+#    !
+#    TIME    15/08/2026
+#    IPRTABLE
+#    PRES       QO       QW       QG         N2C1    C6-14
+#    9999       5772.7   0.0      89460.0     0.9       0.1
+#    12300     5.523    23412.   20319    0.85     0.15
+#     ENDIPRTABLE
+#
+#     TIME    15/09/2026
+#   IPRTABLE
+#    PRES       QO       QW       QG    N2C1    C6-14
+#    9999   5588.7      0.0  89460.0     0.9       0.1
+#  ENDIPRTABLE
+#
+#   TIME    15/10/2026
+#   IPRTABLE
+#   PRES       QO       QW       QG    N2C1    C6-14
+#   9999   5539.6      0.0  89460.0     0.9       0.1
+#   ENDIPRTABLE"""),
+                         [
+                          ("""TEST CASE 2:
+SOURCE BLACKOIL 
+TIME    5/15/2013 
+IPRTABLE 
+PRES        QO         QW          QG       N2C1    C6-14
+4490.647  16.15331  0.0000001   5.750577    0.9     0.1
+2257.057  4135.247  0.0000221    1472.148   0.9     0.1
+14.7      8270.493  0.0000441    2944.296   0.9     0.1
+ENDIPRTABLE
+""", {'PRES': [4490.647, 2257.057]})
+                          ])
+def test_read_iprtables(file_contents, expected_data):
+    """Testing reading IPRTables"""
+
+    # Arrange
+    expected_result = pd.DataFrame(data=expected_data)
+
+    # Act
+    df = IPRTable.read_iprtables_as_df(file_contents.splitlines(keepends=True))
+
+    # Assert
+    assert df.equals(expected_result)
