@@ -613,6 +613,7 @@ class File(FileBase):
             return ''
         return ''.join(self.file_content_as_list)
 
+<<<<<<< Updated upstream
     def get_include_file_from_filename(self, filename: str) -> list[File]:
         """Retrieves a list of files matching the provided file name.
 
@@ -642,3 +643,43 @@ class File(FileBase):
     def convert_line_to_full_file_path(line: str, full_base_file_path: str) -> str:
         """Modifies a file reference to contain the full file path for easier loading later."""
         raise NotImplementedError("Implement in the inheriting class")
+=======
+    @staticmethod
+    def _get_pathlib_path_details(full_file_path: str) -> None | str:
+        if full_file_path == "" or full_file_path is None:
+            return None
+        pathlib_path = pathlib.Path(full_file_path)
+        owner: str = ''
+        group: str = ''
+        try:
+            owner = pathlib_path.owner()  # type: ignore
+            group = pathlib_path.group()  # type: ignore
+        except NotImplementedError:
+            # owner or group not supported on this system, continue without filling out that information
+            pass
+        except PermissionError:
+            # user doesn't have permission to access the file, continue without filling out that information
+            warnings.warn(f'PermissionError when trying to access file at {full_file_path}')
+        except FileNotFoundError:
+            # file not found, continue without filling out that information
+            warnings.warn(f'FileNotFoundError when trying to access file at {full_file_path}')
+        except KeyError:
+            # Group or owner doesn't exist on this system, continue without filling out that information
+            warnings.warn(f'Unable to find the group for the file at {full_file_path}')
+
+        if owner is not None and group is not None:
+            return f"{owner}:{group}"
+        elif owner is not None:
+            return owner
+        return None
+
+    @staticmethod
+    def _get_datetime_from_os_stat(full_file_path: str) -> None | datetime:
+        if full_file_path == "" or full_file_path is None:
+            return None
+        stat_obj = os.stat(full_file_path)
+        timestamp = stat_obj.st_mtime
+        if timestamp is None:
+            return None
+        return datetime.fromtimestamp(timestamp, tz=timezone.utc)
+>>>>>>> Stashed changes
