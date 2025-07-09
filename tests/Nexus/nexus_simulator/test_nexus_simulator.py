@@ -6,6 +6,7 @@ import pandas as pd
 from datetime import datetime, timezone
 
 from _pytest.recwarn import WarningsRecorder
+from pandas._testing import assert_frame_equal
 
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
@@ -2367,7 +2368,7 @@ def test_convert_line_to_full_file_path(original_line: str, expected_line: str):
 
     # Act
     result = NexusFile.convert_line_to_full_file_path(line=original_line,
-                                                                  full_base_file_path=full_file_path)
+                                                      full_base_file_path=full_file_path)
 
     # Assert
     assert result == expected_line
@@ -2428,7 +2429,54 @@ INCLUDE /path/nexus_data/init/equil_info.txt
 
 
 @pytest.mark.parametrize("file_contents, expected_data",
-                         # ("""Test CASE 1:
+                         [
+                             ("""TEST CASE 1:
+SOURCE BLACKOIL 
+TIME    5/15/2013 
+IPRTABLE 
+PRES            QO            QW          QG           N2C1        C6-14
+4490.64700    16.15331      0.00000    5.75058       0.80000     0.30000
+2257.05700    4135.24700    0.00002    1472.14800    0.80000     0.20000
+14.70000      8270.49300    0.00004    2944.29600    0.80000     0.20000
+ENDIPRTABLE
+""", {'PRES': [4490.64700, 2257.05700, 14.70000],
+      'QO': [16.15331, 4135.24700, 8270.49300],
+      'QW': [0.00000, 0.00002, 0.00004],
+      'QG': [5.75058, 1472.14800, 2944.29600],
+      'N2C1': [0.80000, 0.80000, 0.80000],
+      'C6-14': [0.30000, 0.20000, 0.20000]}),
+
+                             ("""Test CASE 2:
+SOURCE
+EOS NHC 7 COMPONENTS N2C1 CO2C3 C4-5 C6-14 C15-19 C20-35 C36+
+!
+TIME    15/08/2026
+IPRTABLE
+PRES       QO       QW       QG         N2C1      C6-14
+9999      5772.7   0.0      89460.0     0.9       0.1
+12300     5.523    23412.   20319       0.85      0.15
+ENDIPRTABLE
+""", {'PRES': [9999, 12300],
+    'QO': [5772.7, 5.523],
+    'QW': [0.0, 23412.],
+    'QG': [89460.0, 20319],
+    'N2C1': [0.9, 0.85],
+    'C6-14': [0.1, 0.15]})
+
+                         ])
+def test_read_iprtables(file_contents, expected_data):
+    """Testing reading IPRTables"""
+
+    # Arrange
+    expected_result = pd.DataFrame(data=expected_data)
+
+    # Act
+    result = IPRTable.read_iprtables_as_df(file_contents.splitlines(keepends=True))
+
+    # Assert
+    assert_frame_equal(result, expected_result)
+
+#                         ("""Test CASE 1:
 # SOURCE
 #   EOS NHC 7 COMPONENTS N2C1 CO2C3 C4-5 C6-14 C15-19 C20-35 C36+
 #    !
@@ -2437,7 +2485,7 @@ INCLUDE /path/nexus_data/init/equil_info.txt
 #    PRES       QO       QW       QG         N2C1    C6-14
 #    9999       5772.7   0.0      89460.0     0.9       0.1
 #    12300     5.523    23412.   20319    0.85     0.15
-#     ENDIPRTABLE
+#     ENDIPRTABLE"""),
 #
 #     TIME    15/09/2026
 #   IPRTABLE
@@ -2450,26 +2498,3 @@ INCLUDE /path/nexus_data/init/equil_info.txt
 #   PRES       QO       QW       QG    N2C1    C6-14
 #   9999   5539.6      0.0  89460.0     0.9       0.1
 #   ENDIPRTABLE"""),
-                         [
-                          ("""TEST CASE 2:
-SOURCE BLACKOIL 
-TIME    5/15/2013 
-IPRTABLE 
-PRES        QO         QW          QG       N2C1    C6-14
-4490.647  16.15331  0.0000001   5.750577    0.9     0.1
-2257.057  4135.247  0.0000221    1472.148   0.9     0.1
-14.7      8270.493  0.0000441    2944.296   0.9     0.1
-ENDIPRTABLE
-""", {'PRES': [4490.647, 2257.057]})
-                          ])
-def test_read_iprtables(file_contents, expected_data):
-    """Testing reading IPRTables"""
-
-    # Arrange
-    expected_result = pd.DataFrame(data=expected_data)
-
-    # Act
-    df = IPRTable.read_iprtables_as_df(file_contents.splitlines(keepends=True))
-
-    # Assert
-    assert df.equals(expected_result)

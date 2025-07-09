@@ -910,35 +910,23 @@ class NexusSimulator(Simulator):
 
 # IPRTable class to read in IPR tables
 class IPRTable:
-    def __init__(self, date: datetime, table: pd.DataFrame, list_of_strings: list[str], number_tokens: Optional[int],
-                 ignore_values: list[str], rates: Optional[pd.DataFrame] = None,
-                 components: Optional[list[float]] = None) -> None:
+    def __init__(self, date: datetime, table: pd.DataFrame, number_tokens: Optional[int],
+                 ignore_values: list[str]) -> None:
+
         """IPRTable class to add read of IPR files. Consolidated oil_rate, water_rate and gas_rate into one variable,
         component_1 and component_2 have also been consolidated into Components.
 
          Args:
              date(datetime): IPR table date.
              table(pd.DataFrame): IPR table.
-             list_of_strings(list[str]): List consisting of string elements.
              number_tokens(int): Total number of tokens used.
              ignore_values(list[str]): List of values to ignore if found.
-             rates(Optional[pd.DataFrame]): oil_rate, water_rate, gas_rate.
-             components(Optional[list[float]]):
          """
 
         self.date = date
         self.number_tokens = number_tokens
         self.ignore_values = ignore_values
-        self.rates = rates
-        # self.pressure = pressure
-        # self.oil_rate = oil_rate
-        # self.water_rate = water_rate
-        # self.gas_rate = gas_rate
-        # self.component_1 = component_1
-        # self.component_2 = component_2
-        self.components = components
         self.table = table
-        self.list_of_strings = list_of_strings
 
     def read_iprtables_as_df(file_as_list: list[str]) -> pd.DataFrame:
         """Reads in IPR files from Nexus into a dataframe
@@ -946,10 +934,8 @@ class IPRTable:
             Args:
                 file_as_list (list): File as list of strings.
         """
-
-        ipr_tables: list[IPRTable] = []
-        date = ''
         reading_line = False
+        table_lines = []
 
         for line in file_as_list:
             if nfo.check_token('TIME', line):
@@ -957,23 +943,14 @@ class IPRTable:
             if nfo.check_token('IPRTABLE', line):
                 reading_line = True
                 continue
-            if nfo.check_token('PRES', line):
-                continue
             if nfo.check_token('ENDIPRTABLE', line):
                 reading_line = False
 
             if reading_line:
-                string_values = fo.get_multiple_expected_sequential_values([line], number_tokens=6,
-                                                                           ignore_values=[])
-                pres, oil_rate, water_rate, gas_rate, component_1, component_2 = [float(x) for x in string_values]
-                ipr_tables.append(IPRTable(
-                    date=date,
-                    pressure=pres,
-                    oil_rate=oil_rate,
-                    water_rate=water_rate,
-                    gas_rate=gas_rate,
-                    component_1=component_1,
-                    component_2=component_2))
+                table_lines.append(line)
 
-        df = pd.DataFrame(ipr_tables)
+        df = read_table_to_df(file_as_list=table_lines)
         return df
+
+
+
