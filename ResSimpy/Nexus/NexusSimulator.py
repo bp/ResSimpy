@@ -912,28 +912,29 @@ class NexusSimulator(Simulator):
 class IPRTable:
     def __init__(self, date: datetime, table: pd.DataFrame, number_tokens: Optional[int],
                  ignore_values: list[str]) -> None:
-
         """IPRTable class to add read of IPR files. Consolidated oil_rate, water_rate and gas_rate into one variable,
         component_1 and component_2 have also been consolidated into Components.
 
-         Args:
+        Args:
              date(datetime): IPR table date.
              table(pd.DataFrame): IPR table.
              number_tokens(int): Total number of tokens used.
              ignore_values(list[str]): List of values to ignore if found.
-         """
+        """
 
         self.date = date
         self.number_tokens = number_tokens
         self.ignore_values = ignore_values
         self.table = table
 
-    def read_iprtables_as_df(file_as_list: list[str]) -> pd.DataFrame:
-        """Reads in IPR files from Nexus into a dataframe
+    def read_iprtables_as_df(self, file_as_list: list[str]) -> pd.DataFrame:
+        """Reads in IPR files from Nexus into a dataframe.
 
-            Args:
-                file_as_list (list): File as list of strings.
+        Args:
+            file_as_list (list): File as list of strings.
         """
+
+        date = ''
         reading_line = False
         table_lines = []
 
@@ -951,6 +952,3 @@ class IPRTable:
 
         df = read_table_to_df(file_as_list=table_lines)
         return df
-
-
-

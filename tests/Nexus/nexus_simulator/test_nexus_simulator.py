@@ -2430,7 +2430,24 @@ INCLUDE /path/nexus_data/init/equil_info.txt
 
 @pytest.mark.parametrize("file_contents, expected_data",
                          [
-                             ("""TEST CASE 1:
+                             ("""Test CASE 1:
+SOURCE
+EOS NHC 7 COMPONENTS N2C1 CO2C3 C4-5 C6-14 C15-19 C20-35 C36+
+!
+TIME    15/08/2026
+IPRTABLE
+PRES       QO       QW       QG         N2C1      C6-14
+9999      5772.7   0.0      89460.0     0.9       0.1
+12300     5.523    23412.   20319       0.85      0.15
+ENDIPRTABLE
+""", {'PRES': [9999, 12300],
+      'QO': [5772.7, 5.523],
+      'QW': [0.0, 23412.],
+      'QG': [89460.0, 20319],
+      'N2C1': [0.9, 0.85],
+      'C6-14': [0.1, 0.15]}),
+
+                             ("""TEST CASE 2:
 SOURCE BLACKOIL 
 TIME    5/15/2013 
 IPRTABLE 
@@ -2446,22 +2463,18 @@ ENDIPRTABLE
       'N2C1': [0.80000, 0.80000, 0.80000],
       'C6-14': [0.30000, 0.20000, 0.20000]}),
 
-                             ("""Test CASE 2:
-SOURCE
-EOS NHC 7 COMPONENTS N2C1 CO2C3 C4-5 C6-14 C15-19 C20-35 C36+
-!
-TIME    15/08/2026
+                             ("""TEST CASE 3"
+TIME  15/09/2026
 IPRTABLE
-PRES       QO       QW       QG         N2C1      C6-14
-9999      5772.7   0.0      89460.0     0.9       0.1
-12300     5.523    23412.   20319       0.85      0.15
-ENDIPRTABLE
-""", {'PRES': [9999, 12300],
-    'QO': [5772.7, 5.523],
-    'QW': [0.0, 23412.],
-    'QG': [89460.0, 20319],
-    'N2C1': [0.9, 0.85],
-    'C6-14': [0.1, 0.15]})
+PRES       QO       QW       QG       N2C1      C6-14    
+9999      5588.7    0.0     8946.0    0.9       0.1
+ENDIPRTABLE                                    
+""", {'PRES': [9999],
+      'QO': [5588.7],
+      'QW': [0.0],
+      'QG': [8946.0],
+      'N2C1': [0.9],
+      'C6-14': [0.1]})
 
                          ])
 def test_read_iprtables(file_contents, expected_data):
@@ -2475,26 +2488,3 @@ def test_read_iprtables(file_contents, expected_data):
 
     # Assert
     assert_frame_equal(result, expected_result)
-
-#                         ("""Test CASE 1:
-# SOURCE
-#   EOS NHC 7 COMPONENTS N2C1 CO2C3 C4-5 C6-14 C15-19 C20-35 C36+
-#    !
-#    TIME    15/08/2026
-#    IPRTABLE
-#    PRES       QO       QW       QG         N2C1    C6-14
-#    9999       5772.7   0.0      89460.0     0.9       0.1
-#    12300     5.523    23412.   20319    0.85     0.15
-#     ENDIPRTABLE"""),
-#
-#     TIME    15/09/2026
-#   IPRTABLE
-#    PRES       QO       QW       QG    N2C1    C6-14
-#    9999   5588.7      0.0  89460.0     0.9       0.1
-#  ENDIPRTABLE
-#
-#   TIME    15/10/2026
-#   IPRTABLE
-#   PRES       QO       QW       QG    N2C1    C6-14
-#   9999   5539.6      0.0  89460.0     0.9       0.1
-#   ENDIPRTABLE"""),
