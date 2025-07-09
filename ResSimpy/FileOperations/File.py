@@ -377,7 +377,7 @@ class File(FileBase):
                 # No include on this line, go to the next one.
                 continue
 
-            inc_file_path = fo.get_token_value(token='INCLUDE', token_line=line, file_list=file_as_list,
+            inc_file_path = fo.get_token_value(token='INCLUDE', token_line=line, file_list=file_as_list[i:],
                                                comment_characters=comment_characters, single_c_comments=is_nexus_file)
             if inc_file_path is None:
                 continue
@@ -613,7 +613,6 @@ class File(FileBase):
             return ''
         return ''.join(self.file_content_as_list)
 
-<<<<<<< Updated upstream
     def get_include_file_from_filename(self, filename: str) -> list[File]:
         """Retrieves a list of files matching the provided file name.
 
@@ -643,7 +642,7 @@ class File(FileBase):
     def convert_line_to_full_file_path(line: str, full_base_file_path: str) -> str:
         """Modifies a file reference to contain the full file path for easier loading later."""
         raise NotImplementedError("Implement in the inheriting class")
-=======
+
     @staticmethod
     def _get_pathlib_path_details(full_file_path: str) -> None | str:
         if full_file_path == "" or full_file_path is None:
@@ -682,4 +681,3 @@ class File(FileBase):
         if timestamp is None:
             return None
         return datetime.fromtimestamp(timestamp, tz=timezone.utc)
->>>>>>> Stashed changes

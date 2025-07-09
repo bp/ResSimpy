@@ -1,7 +1,6 @@
 """Handle Nexus files and preserve origin of include files."""
 from __future__ import annotations
 
-<<<<<<< Updated upstream
 import os
 import os.path
 import re
@@ -17,33 +16,19 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.FileOperations.File import File
 from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
 from ResSimpy.Utils.factory_methods import get_empty_dict_uuid_list_int
-=======
-import os.path
 # Use correct Self type depending upon Python version
 import sys
-from dataclasses import dataclass, field
-from typing import Optional, Generator, Sequence
 
-from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
 
 if sys.version_info >= (3, 11):
     from typing import Self
 else:
     from typing_extensions import Self
 
-from uuid import UUID
-import re
-import ResSimpy.Nexus.nexus_file_operations as nfo
-import ResSimpy.FileOperations.file_operations as fo
-import warnings
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_OPERATION_KEYWORDS, GRID_ARRAY_FORMAT_KEYWORDS, \
     GRID_ARRAY_KEYWORDS
-from ResSimpy.Utils.factory_methods import get_empty_list_str, get_empty_dict_uuid_list_int
-from ResSimpy.FileOperations.File import File
 import os
-from datetime import datetime
 from ResSimpy.Utils.general_utilities import is_number
->>>>>>> Stashed changes
 
 
 @dataclass(kw_only=True, repr=False)
@@ -95,8 +80,6 @@ class NexusFile(File):
 
         return modified_line
 
-<<<<<<< Updated upstream
-=======
     @classmethod
     def generate_file_include_structure(cls: type[Self], file_path: str, origin: Optional[str] = None,
                                         recursive: bool = True, skip_arrays: bool = True,
@@ -271,7 +254,6 @@ class NexusFile(File):
 
         return nexus_file_class
 
->>>>>>> Stashed changes
     @dataclass
     class FileIndex:
         """Class to store the index when iterating over a list of strings with nested NexusFile objects in them.
