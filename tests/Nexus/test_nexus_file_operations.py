@@ -446,7 +446,9 @@ def test_get_next_value_single_line(line, expected_result):
     (['!Comment Line 1', '\n', '\n', '\t', ' !Comment Line 2 ', '\n', ' ABCDEFG '], 'ABCDEFG'),
     (['!"First Value"', '"Second Value"'], 'Second Value'),
     (['C comment line', '1'], '1'),
-    (['"1 2"'], '1 2'),  # Checks that quoted values are returned in their entirety
+    (['"1 2" a'], '1 2'),  # Checks that quoted values are returned in their entirety
+    (["'3 4' /"], '3 4'),  # Checks that quoted values are returned in their entirety
+    (["'5 6 7' / '8 9'"], '5 6 7'),  # Multiple quoted lines
     (["! commented line", "  '3 4'\n"], '3 4'),
 ])
 def test_get_next_value_multiple_lines(file, expected_result):

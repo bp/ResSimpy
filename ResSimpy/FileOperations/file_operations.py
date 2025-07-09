@@ -88,6 +88,23 @@ def load_file_as_list(file_path: str, strip_comments: bool = False, strip_str: b
     return file_content
 
 
+def __strip_quotation_marks(original_string: str) -> str:
+    """Removes the quotation marks at the start and end of a string."""
+    first_single_quote_occurrence = original_string.find("\'")
+    if first_single_quote_occurrence != -1:
+        second_single_quote_occurrence = original_string.find("\'", first_single_quote_occurrence + 1)
+        if second_single_quote_occurrence != -1:
+            return original_string[first_single_quote_occurrence + 1:second_single_quote_occurrence]
+
+    first_double_quote_occurrence = original_string.find("\"")
+    if first_double_quote_occurrence != -1:
+        second_double_quote_occurrence = original_string.find("\"", first_double_quote_occurrence + 1)
+        if second_double_quote_occurrence != -1:
+            return original_string[first_double_quote_occurrence + 1:second_double_quote_occurrence]
+
+    return original_string
+
+
 def get_next_value(start_line_index: int, file_as_list: list[str], search_string: None | str = None,
                    ignore_values: None | list[str] = None,
                    replace_with: str | GridArrayDefinition | None = None,
@@ -131,14 +148,6 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
 
         stripped_search_string = search_string.strip()
 
-        # If the string is wrapped in quotation marks, return the full string (including invalid characters)
-        if (len(stripped_search_string) > 2 and
-                ((stripped_search_string.startswith("\"") and stripped_search_string.endswith("\"")) or
-                 (stripped_search_string.startswith("\'") and stripped_search_string.endswith("\'")))):
-            value += stripped_search_string[1:len(stripped_search_string) - 1]
-            value_found = True
-            break
-
         for character in search_string:
             # move lines once we hit a comment character or new line character,or are at the end of search string
             starts_with_c_only = (single_c_acts_as_comment and
@@ -166,6 +175,12 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
                 search_string = temp_search_string
                 break
             elif character not in invalid_characters:
+                # If the string is wrapped in quotation marks, return the full string (including invalid characters)
+                if character == '"' or character == "'":
+                    value = __strip_quotation_marks(original_string=stripped_search_string)
+                    value_found = True
+                    break
+
                 ignore_value_found = True  # Initialise as True because Python doesn't want to implement a do loop...
                 while ignore_value_found:
                     character_location, new_search_string, search_string, value = (
