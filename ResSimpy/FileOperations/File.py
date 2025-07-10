@@ -377,7 +377,7 @@ class File(FileBase):
                 # No include on this line, go to the next one.
                 continue
 
-            inc_file_path = fo.get_token_value(token='INCLUDE', token_line=line, file_list=file_as_list,
+            inc_file_path = fo.get_token_value(token='INCLUDE', token_line=line, file_list=file_as_list[i:],
                                                comment_characters=comment_characters, single_c_comments=is_nexus_file)
             if inc_file_path is None:
                 continue
