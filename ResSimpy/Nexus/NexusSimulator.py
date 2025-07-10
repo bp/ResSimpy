@@ -8,6 +8,8 @@ from typing import Any, Union, Optional, Sequence
 import pandas as pd
 import resqpy.model as rq
 from datetime import datetime
+
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
 from ResSimpy.Nexus.DataModels.NexusOptions import NexusOptions
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
@@ -909,7 +911,7 @@ class NexusSimulator(Simulator):
 
 
 # IPRTable class to read in IPR tables
-class IPRTable:
+class IPRTable(DataObjectMixin):
     def __init__(self, date: datetime, table: pd.DataFrame, number_tokens: Optional[int],
                  ignore_values: list[str]) -> None:
         """IPRTable class to add read of IPR files. Consolidated oil_rate, water_rate and gas_rate into one variable,
@@ -922,11 +924,13 @@ class IPRTable:
              ignore_values(list[str]): List of values to ignore if found.
         """
 
-        self.date = date
+        # self.date = date
         self.number_tokens = number_tokens
         self.ignore_values = ignore_values
         self.table = table
-        
+
+        super().__init__(date=date)
+
     @staticmethod
     def read_iprtables_as_df(file_as_list: list[str]) -> pd.DataFrame:
         """Reads in IPR files from Nexus into a dataframe.
