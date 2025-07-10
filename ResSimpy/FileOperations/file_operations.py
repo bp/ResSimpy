@@ -359,7 +359,7 @@ def check_token(token: str, line: str, comment_characters: Optional[list[str]] =
     """
     uppercase_line = line.upper()
     token_location = uppercase_line.find(token.upper())
-    token_separator_chars = [" ", '\n', '\t']
+    token_separator_chars = [" ", '\n', '\t', "'", '"']
 
     # Not found at all, return false
     if token_location == -1:

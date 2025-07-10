@@ -38,11 +38,13 @@ from tests.utility_for_tests import get_fake_nexus_simulator
                           ("TOKEN\n", "TOKEN", True),
                           ("T", "T", True),
                           ("Brian", "B", False),
-                          ("C TOKEN", "TOKEN", False)
+                          ("C TOKEN", "TOKEN", False),
+                          ("'TOKEN' other stuff", "TOKEN", True),
+                          ('some stuff "TOKEN" other stuff', "TOKEN", True)
                           ], ids=["standard case", "token at start", "token at end", "no token", "token commented out",
                                   "token only part of longer word 1", "token only part of longer word 2",
                                   "token before comment", "token then tab", "token then newline", "single character",
-                                  "token in string", "C Comment"
+                                  "token in string", "C Comment", "Token in quotes", "Token in single quotes"
                                   ])
 def test_check_token(line_string, token, expected_result):
     # Act
