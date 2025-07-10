@@ -926,8 +926,9 @@ class IPRTable:
         self.number_tokens = number_tokens
         self.ignore_values = ignore_values
         self.table = table
-
-    def read_iprtables_as_df(self, file_as_list: list[str]) -> pd.DataFrame:
+        
+    @staticmethod
+    def read_iprtables_as_df(file_as_list: list[str]) -> pd.DataFrame:
         """Reads in IPR files from Nexus into a dataframe.
 
         Args:
