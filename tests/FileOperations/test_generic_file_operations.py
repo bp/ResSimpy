@@ -14,13 +14,12 @@ def test_generate_file_include_structure_nested_includes_non_nexus(mocker: Mocke
 
     test_file_contents = """basic_file 
 INCLUDE 
-    inc_file1.inc 
-/
+    inc_file1.inc /
 
 -- Test comment
 -- INCLUDE
 -- incfile_3.inc
--- /
+-- 
 
 something after"""
 
@@ -28,9 +27,8 @@ something after"""
 INCLUDE 
 
 -- test comment before file
-  '/path/to/inc_file_2.inc'
+  "/path/to/inc_file_2.inc" /
 
-/
 """
 
     include_file_contents_2 = 'inc2 file contents'
