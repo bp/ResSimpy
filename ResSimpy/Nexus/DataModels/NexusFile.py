@@ -16,16 +16,6 @@ import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.FileOperations.File import File
 from ResSimpy.Nexus.NexusKeywords.fcs_keywords import FCS_KEYWORDS
 from ResSimpy.Utils.factory_methods import get_empty_dict_uuid_list_int
-# Use correct Self type depending upon Python version
-import sys
-
-
-if sys.version_info >= (3, 11):
-    pass
-else:
-    pass
-
-import os
 
 
 @dataclass(kw_only=True, repr=False)
