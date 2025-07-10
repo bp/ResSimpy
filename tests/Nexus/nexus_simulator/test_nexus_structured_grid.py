@@ -689,8 +689,7 @@ def test_load_structured_grid_file_fails(mocker):
 
     # Act
     with pytest.raises(ValueError):
-        simulation = NexusSimulator(
-            origin='testpath1/nexus_run.fcs', destination="new_destination")
+        simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
 
 
 @pytest.mark.parametrize("structured_grid_file_contents, expected_water_saturation_modifier, "

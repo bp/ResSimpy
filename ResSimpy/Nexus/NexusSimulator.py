@@ -5,8 +5,11 @@ import os
 import warnings
 from typing import Any, Union, Optional, Sequence
 
+import pandas as pd
 import resqpy.model as rq
 from datetime import datetime
+
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
 from ResSimpy.Nexus.DataModels.NexusOptions import NexusOptions
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
@@ -32,6 +35,7 @@ from ResSimpy.Nexus.runcontrol_operations import SimControls
 from ResSimpy.Nexus.logfile_operations import Logging
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 from ResSimpy.DataModelBaseClasses.Simulator import Simulator
+from ResSimpy.Nexus.nexus_file_operations import read_table_to_df
 
 
 class NexusSimulator(Simulator):
@@ -904,3 +908,52 @@ class NexusSimulator(Simulator):
     def options(self) -> NexusOptions | None:
         """Returns an instance of Nexus options class."""
         return self._options
+
+
+# IPRTable class to read in IPR tables
+class IPRTable(DataObjectMixin):
+    def __init__(self, date: datetime, table: pd.DataFrame, number_tokens: Optional[int],
+                 ignore_values: list[str]) -> None:
+        """IPRTable class to add read of IPR files. Consolidated oil_rate, water_rate and gas_rate into one variable,
+        component_1 and component_2 have also been consolidated into Components.
+
+        Args:
+             date(datetime): IPR table date.
+             table(pd.DataFrame): IPR table.
+             number_tokens(int): Total number of tokens used.
+             ignore_values(list[str]): List of values to ignore if found.
+        """
+
+        # self.date = date
+        self.number_tokens = number_tokens
+        self.ignore_values = ignore_values
+        self.table = table
+
+        super().__init__(date=date)
+
+    @staticmethod
+    def read_iprtables_as_df(file_as_list: list[str]) -> pd.DataFrame:
+        """Reads in IPR files from Nexus into a dataframe.
+
+        Args:
+            file_as_list (list): File as list of strings.
+        """
+
+        date = ''
+        reading_line = False
+        table_lines = []
+
+        for line in file_as_list:
+            if nfo.check_token('TIME', line):
+                date = nfo.get_expected_token_value(token='TIME', token_line=line, file_list=[line])
+            if nfo.check_token('IPRTABLE', line):
+                reading_line = True
+                continue
+            if nfo.check_token('ENDIPRTABLE', line):
+                reading_line = False
+
+            if reading_line:
+                table_lines.append(line)
+
+        df = read_table_to_df(file_as_list=table_lines)
+        return df
