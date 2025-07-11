@@ -136,6 +136,11 @@ class NexusSimulator(Simulator):
         self.get_simulation_status(from_startup=True)
 
         self._model_files: FcsNexusFile
+
+        self.__is_multi_reservoir: bool = False  # Flag to indicate if the model is a multi-reservoir model
+        self.__reservoir_paths: dict[str, str] = {}
+        self.__multi_reservoirs: dict[str, NexusSimulator] = {}
+
         # Load in the model
         self.__load_fcs_file()
 
@@ -553,8 +558,10 @@ class NexusSimulator(Simulator):
                 value = fo.get_token_value('DEFAULT_UNITS', line, fcs_content_with_includes)
                 if value is not None:
                     self._default_units = UnitSystem(value.upper())
-            elif nfo.check_token(token='RESERVOIR', line=line):
-                raise NotImplementedError('Multiple reservoir models are not currently supported by ResSimpy.')
+
+        if self._model_files.multi_reservoir_files:
+            self.__is_multi_reservoir = True
+            self.__process_multi_reservoir_model()
 
         # Load in the Nexus options information
         if self.model_files.options_file is not None:
@@ -904,3 +911,38 @@ class NexusSimulator(Simulator):
     def options(self) -> NexusOptions | None:
         """Returns an instance of Nexus options class."""
         return self._options
+
+    @property
+    def is_multi_reservoir(self) -> bool:
+        """Returns True if the model is a multi-reservoir model, False otherwise."""
+        return self.__is_multi_reservoir
+
+    @property
+    def reservoir_paths(self) -> dict[str, str]:
+        """Returns a dictionary of reservoir names and their corresponding file paths."""
+        return self.__reservoir_paths
+
+    @property
+    def multi_reservoirs(self) -> dict[str, NexusSimulator]:
+        return self.__multi_reservoirs
+
+    def __process_multi_reservoir_model(self) -> None:
+        """Processes a multi-reservoir model by extracting reservoir paths and creating NexusSimulator instances
+        for each.
+        """
+        warnings.warn('Multi-reservoir models are partially supported. '
+                      'Some features may not work as expected.')
+        for reservoir_name, reservoir_file in self.model_files.multi_reservoir_files.items():
+            if reservoir_file.location is None:
+                warnings.warn(f'Reservoir file location for {reservoir_name} not found.')
+                continue
+
+            # Store the reservoir path
+            self.__reservoir_paths[reservoir_name] = reservoir_file.location
+
+            # Create a NexusSimulator instance for the reservoir
+            self.__multi_reservoirs[reservoir_name] = NexusSimulator(
+                origin=reservoir_file.location,
+                destination=self.destination,
+                lazy_loading=self.__lazy_loading
+            )

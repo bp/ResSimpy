@@ -55,6 +55,7 @@ class FcsNexusFile(NexusFile):
     adsorption_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
     flux_in_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
     files_info: list[tuple[Optional[str], Optional[str], Optional[datetime]]]
+    multi_reservoir_files: Optional[dict[str, FcsNexusFile]] = field(default_factory=dict)
 
     def __init__(
             self, location: str,
@@ -89,7 +90,8 @@ class FcsNexusFile(NexusFile):
             esp_files: Optional[dict[int, NexusFile]] = None,
             polymer_files: Optional[dict[int, NexusFile]] = None,
             adsorption_files: Optional[dict[int, NexusFile]] = None,
-            flux_in_files: Optional[dict[int, NexusFile]] = None
+            flux_in_files: Optional[dict[int, NexusFile]] = None,
+            multi_reservoir_files: Optional[dict[str, FcsNexusFile]] = None,
     ) -> None:
         """Initialises the FcsNexusFile class.
 
@@ -149,6 +151,8 @@ class FcsNexusFile(NexusFile):
             method number.
             flux_in_files: Optional[dict[int, NexusFile]: Collection of flux in files for the fcs file. Indexed by
             method number.
+            multi_reservoir_files: Optional[dict[str, FcsNexusFile]]: Collection of multi-reservoir files for the
+            top level fcs file. Indexed by reservoir name.
         """
         self.restart_file = restart_file
 
@@ -179,6 +183,8 @@ class FcsNexusFile(NexusFile):
         self.polymer_files = polymer_files if polymer_files is not None else get_empty_dict_int_nexus_file()
         self.adsorption_files = adsorption_files if adsorption_files is not None else get_empty_dict_int_nexus_file()
         self.flux_in_files = flux_in_files if flux_in_files is not None else get_empty_dict_int_nexus_file()
+        self.multi_reservoir_files: dict[str, FcsNexusFile] = multi_reservoir_files if (multi_reservoir_files
+                                                                                        is not None) else {}
         self.files_info = []
         super().__init__(location=location, include_locations=include_locations, origin=origin,
                          include_objects=include_objects, file_content_as_list=file_content_as_list)
@@ -187,7 +193,7 @@ class FcsNexusFile(NexusFile):
         printable_str = f'fcs file location: {self.location}\n'
         printable_str += '\tFCS file contains:\n'
         for file_type in self.fcs_keyword_map_single().values():
-            if getattr(self, file_type) is not None:
+            if getattr(self, file_type, None) is not None:
                 printable_str += f'\t\t{file_type}: {getattr(self, file_type).location}\n'
         for multi_file_type in self.fcs_keyword_map_multi().values():
             multi_file_list = getattr(self, multi_file_type, None)
@@ -255,7 +261,7 @@ class FcsNexusFile(NexusFile):
                 # for keywords that have multiple methods we store the value in a dictionary
                 # with the method number and the NexusFile object
                 _, method_string, method_number, value = (
-                    fo.get_multiple_expected_sequential_values(flat_fcs_file_content[i::], 4, ['NORPT'])
+                    fo.get_multiple_expected_sequential_values(flat_fcs_file_content[i:], 4, ['NORPT'])
                 )
                 full_file_path = fo.get_full_file_path(value, origin_path)
                 nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path=value,
@@ -286,6 +292,15 @@ class FcsNexusFile(NexusFile):
                 fcs_file.include_locations.append(full_file_path)
                 fcs_file.files_info.append((nexus_file.location, nexus_file.linked_user,
                                             nexus_file.last_modified))
+
+            elif key == 'RESERVOIR':
+                # this is a special case for multi-reservoir files
+                _, reservoir_name, submodel_fcs_path = (
+                    fo.get_multiple_expected_sequential_values(flat_fcs_file_content[i:], 3, ['NORPT']))
+                submodel_fcs_path = fo.get_full_file_path(submodel_fcs_path, origin_path)
+                fcs_file.multi_reservoir_files[reservoir_name] = FcsNexusFile.generate_fcs_structure(
+                    fcs_file_path=submodel_fcs_path, recursive=recursive)
+
             else:
                 continue
         return fcs_file
