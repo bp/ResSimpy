@@ -531,11 +531,12 @@ def get_token_value_with_line_index(token: str, token_line: str, file_list: list
     return None, None
 
 
-def load_in_three_part_date(initial_token: str, token_line: str, file_as_list: list[str], start_index: int) -> str:
+def load_in_three_part_date(initial_token: Optional[str], token_line: str, file_as_list: list[str], start_index: int) \
+                            -> str:
     """Function that reads in a three part date separated by spaces e.g. 1 JAN 2024.
 
     Args:
-    initial_token (str): The token that will appear before the start of the date e.g. DATE
+    initial_token (Optional[str]): The token that will appear before the start of the date e.g. DATE
     token_line (str): Line in the file that the token has been found.
     file_as_list (list[str]): The whole file as a list of strings.
     start_index (int): The index in file_as_list where the token can be found.
@@ -545,16 +546,19 @@ def load_in_three_part_date(initial_token: str, token_line: str, file_as_list: l
     """
 
     # Get the three parts of the date
-    list_to_search = file_as_list[start_index::]
-    first_date_part, value_index = get_token_value_with_line_index(token=initial_token, token_line=token_line,
-                                                                   file_list=list_to_search)
+    if initial_token is not None:
+        list_to_search = file_as_list[start_index::]
+        first_date_part, value_index = get_token_value_with_line_index(token=initial_token, token_line=token_line,
+                                                                       file_list=list_to_search)
+        if value_index is None or first_date_part is None:
+            raise ValueError("Token or value not found in list of strings")
+        snipped_string = list_to_search[value_index]
+        snipped_string = snipped_string.replace(initial_token, '')
+    else:
+        first_date_part = get_expected_next_value(start_line_index=0, file_as_list=[token_line],
+                                                  search_string=token_line)
+        snipped_string = token_line
 
-    if value_index is None or first_date_part is None:
-        raise ValueError("Token or value not found in list of strings")
-
-    value_line = list_to_search[value_index]
-
-    snipped_string = value_line.replace(initial_token, '')
     snipped_string = snipped_string.replace(first_date_part, '', 1)
 
     second_date_part = get_expected_next_value(start_line_index=0, file_as_list=[snipped_string],
