@@ -88,6 +88,23 @@ def load_file_as_list(file_path: str, strip_comments: bool = False, strip_str: b
     return file_content
 
 
+def __strip_quotation_marks(original_string: str) -> str:
+    """Removes the quotation marks at the start and end of a string."""
+    first_single_quote_occurrence = original_string.find("\'")
+    if first_single_quote_occurrence != -1:
+        second_single_quote_occurrence = original_string.find("\'", first_single_quote_occurrence + 1)
+        if second_single_quote_occurrence != -1:
+            return original_string[first_single_quote_occurrence + 1:second_single_quote_occurrence]
+
+    first_double_quote_occurrence = original_string.find("\"")
+    if first_double_quote_occurrence != -1:
+        second_double_quote_occurrence = original_string.find("\"", first_double_quote_occurrence + 1)
+        if second_double_quote_occurrence != -1:
+            return original_string[first_double_quote_occurrence + 1:second_double_quote_occurrence]
+
+    return original_string
+
+
 def get_next_value(start_line_index: int, file_as_list: list[str], search_string: None | str = None,
                    ignore_values: None | list[str] = None,
                    replace_with: str | GridArrayDefinition | None = None,
@@ -131,14 +148,6 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
 
         stripped_search_string = search_string.strip()
 
-        # If the string is wrapped in quotation marks, return the full string (including invalid characters)
-        if (len(stripped_search_string) > 2 and
-                ((stripped_search_string.startswith("\"") and stripped_search_string.endswith("\"")) or
-                 (stripped_search_string.startswith("\'") and stripped_search_string.endswith("\'")))):
-            value += stripped_search_string[1:len(stripped_search_string) - 1]
-            value_found = True
-            break
-
         for character in search_string:
             # move lines once we hit a comment character or new line character,or are at the end of search string
             starts_with_c_only = (single_c_acts_as_comment and
@@ -166,6 +175,12 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
                 search_string = temp_search_string
                 break
             elif character not in invalid_characters:
+                # If the string is wrapped in quotation marks, return the full string (including invalid characters)
+                if character == '"' or character == "'":
+                    value = __strip_quotation_marks(original_string=stripped_search_string)
+                    value_found = True
+                    break
+
                 ignore_value_found = True  # Initialise as True because Python doesn't want to implement a do loop...
                 while ignore_value_found:
                     character_location, new_search_string, search_string, value = (
@@ -344,7 +359,7 @@ def check_token(token: str, line: str, comment_characters: Optional[list[str]] =
     """
     uppercase_line = line.upper()
     token_location = uppercase_line.find(token.upper())
-    token_separator_chars = [" ", '\n', '\t']
+    token_separator_chars = [" ", '\n', '\t', "'", '"']
 
     # Not found at all, return false
     if token_location == -1:
@@ -516,11 +531,12 @@ def get_token_value_with_line_index(token: str, token_line: str, file_list: list
     return None, None
 
 
-def load_in_three_part_date(initial_token: str, token_line: str, file_as_list: list[str], start_index: int) -> str:
+def load_in_three_part_date(initial_token: Optional[str], token_line: str, file_as_list: list[str], start_index: int) \
+                            -> str:
     """Function that reads in a three part date separated by spaces e.g. 1 JAN 2024.
 
     Args:
-    initial_token (str): The token that will appear before the start of the date e.g. DATE
+    initial_token (Optional[str]): The token that will appear before the start of the date e.g. DATE
     token_line (str): Line in the file that the token has been found.
     file_as_list (list[str]): The whole file as a list of strings.
     start_index (int): The index in file_as_list where the token can be found.
@@ -530,16 +546,19 @@ def load_in_three_part_date(initial_token: str, token_line: str, file_as_list: l
     """
 
     # Get the three parts of the date
-    list_to_search = file_as_list[start_index::]
-    first_date_part, value_index = get_token_value_with_line_index(token=initial_token, token_line=token_line,
-                                                                   file_list=list_to_search)
+    if initial_token is not None:
+        list_to_search = file_as_list[start_index::]
+        first_date_part, value_index = get_token_value_with_line_index(token=initial_token, token_line=token_line,
+                                                                       file_list=list_to_search)
+        if value_index is None or first_date_part is None:
+            raise ValueError("Token or value not found in list of strings")
+        snipped_string = list_to_search[value_index]
+        snipped_string = snipped_string.replace(initial_token, '')
+    else:
+        first_date_part = get_expected_next_value(start_line_index=0, file_as_list=[token_line],
+                                                  search_string=token_line)
+        snipped_string = token_line
 
-    if value_index is None or first_date_part is None:
-        raise ValueError("Token or value not found in list of strings")
-
-    value_line = list_to_search[value_index]
-
-    snipped_string = value_line.replace(initial_token, '')
     snipped_string = snipped_string.replace(first_date_part, '', 1)
 
     second_date_part = get_expected_next_value(start_line_index=0, file_as_list=[snipped_string],

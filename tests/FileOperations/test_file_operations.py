@@ -208,3 +208,15 @@ def test_load_three_part_date(date_str: str, start_index: int):
 
     # Assert
     assert result == "25 JUL 2026"
+
+
+def test_load_three_part_date_no_token():
+    # Arrange
+    token_line = """   25 JUL  2026"""
+
+    # Act
+    result = fo.load_in_three_part_date(initial_token=None, token_line=token_line,
+                                        file_as_list=[token_line], start_index=0)
+
+    # Assert
+    assert result == "25 JUL 2026"
