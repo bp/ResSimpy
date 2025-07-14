@@ -150,6 +150,11 @@ def test_multi_reservoir_handling(mocker, recwarn):
     assert result.model_files.surface_files[1] == expected_multires_files.surface_files[1]
 
     assert result.model_files == expected_multires_files
+    
+    # test one of the subreservoir models for correct loading of grid.
+    assert result.multi_reservoirs['RUM'].grid.range_x == 10
+    assert result.multi_reservoirs['RUM'].grid.range_y == 10
+    assert result.multi_reservoirs['RUM'].grid.range_z == 10
 
     matching_warnings = [x for x in recwarn if expected_warning_message in str(x.message)]
     assert len(matching_warnings) == 1

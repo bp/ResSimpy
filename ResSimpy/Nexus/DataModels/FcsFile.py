@@ -295,9 +295,12 @@ class FcsNexusFile(NexusFile):
 
             elif key == 'RESERVOIR':
                 # this is a special case for multi-reservoir files
+                if fcs_file.multi_reservoir_files is None:
+                    fcs_file.multi_reservoir_files = {}
                 _, reservoir_name, submodel_fcs_path = (
                     fo.get_multiple_expected_sequential_values(flat_fcs_file_content[i:], 3, ['NORPT']))
                 submodel_fcs_path = fo.get_full_file_path(submodel_fcs_path, origin_path)
+                reservoir_name = str(reservoir_name)
                 fcs_file.multi_reservoir_files[reservoir_name] = FcsNexusFile.generate_fcs_structure(
                     fcs_file_path=submodel_fcs_path, recursive=recursive)
 

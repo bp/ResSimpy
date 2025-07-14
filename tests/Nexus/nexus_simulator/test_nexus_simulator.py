@@ -2346,21 +2346,6 @@ def test_model_summary(mocker, fluid_type, expected_fluid_type):
     # Assert
     assert result == expected_summary
 
-
-def test_load_fcs_file_multires_throws_error(mocker):
-    # Arrange
-    fcs_file = f"RUNCONTROL /path/to/runcontrol.dat\nRESERVoir res1 res1.fcs\n"
-    open_mock = mocker.mock_open(read_data=fcs_file)
-    mocker.patch("builtins.open", open_mock)
-
-    # Act
-    with pytest.raises(NotImplementedError) as nie:
-        _ = NexusSimulator(origin='testpath1/Path.fcs')
-
-    # Assert
-    assert str(nie.value) == 'Multiple reservoir models are not currently supported by ResSimpy.'
-
-
 @pytest.mark.parametrize('original_line, expected_line', [
     ('EQUIL method 1 my_file.dat', os.path.join('EQUIL method 1 /path/to', 'my_file.dat')),
     ('PVT method 1 my_file.dat', os.path.join('PVT method 1 /path/to', 'my_file.dat')),

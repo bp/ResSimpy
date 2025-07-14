@@ -933,6 +933,9 @@ class NexusSimulator(Simulator):
         """
         warnings.warn('Multi-reservoir models are partially supported. '
                       'Some features may not work as expected.')
+        if self.model_files.multi_reservoir_files is None:
+            return
+
         for reservoir_name, reservoir_file in self.model_files.multi_reservoir_files.items():
             if reservoir_file.location is None:
                 warnings.warn(f'Reservoir file location for {reservoir_name} not found.')
