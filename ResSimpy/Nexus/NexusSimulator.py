@@ -124,7 +124,7 @@ class NexusSimulator(Simulator):
         self._gaslift: NexusGasliftMethods = NexusGasliftMethods(model_unit_system=self.default_units)
         # Nexus operations modules
         self.logging: Logging = Logging(self)
-        self.reporting: NexusReporting = NexusReporting(self)
+        self._reporting: NexusReporting = NexusReporting(self)
         self._structured_grid_operations: StructuredGridOperations = StructuredGridOperations(self)
         self.__lazy_loading: bool = lazy_loading
         self._sim_controls: SimControls = SimControls(self)
@@ -924,6 +924,7 @@ class NexusSimulator(Simulator):
 
     @property
     def multi_reservoirs(self) -> dict[str, NexusSimulator]:
+        """Returns a dictionary of multi-reservoir names and their corresponding NexusSimulator instances."""
         return self.__multi_reservoirs
 
     def __process_multi_reservoir_model(self) -> None:

@@ -1003,7 +1003,7 @@ PLOTBINARY
     mocker.patch("builtins.open", modifying_mock_open)
 
     # Act
-    simulation.reporting.add_map_properties_to_start_of_grid_file()
+    simulation._reporting.add_map_properties_to_start_of_grid_file()
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
@@ -1057,7 +1057,7 @@ PLOTBINARY
     mocker.patch("builtins.open", modifying_mock_open)
 
     # Act
-    simulation.reporting.add_map_properties_to_start_of_grid_file()
+    simulation._reporting.add_map_properties_to_start_of_grid_file()
 
     # Assert
     check_file_read_write_is_correct_for_windows(expected_file_contents=expected_file_contents,
