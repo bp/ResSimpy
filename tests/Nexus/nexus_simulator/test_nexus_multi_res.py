@@ -53,32 +53,6 @@ def test_multi_reservoir_handling(mocker, recwarn):
     """
     field_2_content = field_1_content.replace('rum', 'gaw')
     field_3_content = field_1_content.replace('rum', 'burg')
-
-    include_file_contents_1 = field_1_content.splitlines(keepends=True)
-    include_file_contents_2 = field_2_content.splitlines(keepends=True)
-    include_file_contents_3 = field_3_content.splitlines(keepends=True)
-    
-    expected_field_1_file = FcsNexusFile(
-        location=field_1_path,
-        file_content_as_list=include_file_contents_1,
-        include_locations=[],
-        origin=None,
-        include_objects=None
-    )
-    expected_field_2_file = FcsNexusFile(
-        location=field_2_path,
-        file_content_as_list=include_file_contents_2,
-        include_locations=[],
-        origin=None,
-        include_objects=None
-    )
-    expected_field_3_file = FcsNexusFile(
-        location=field_3_path,
-        file_content_as_list=include_file_contents_3,
-        include_locations=[],
-        origin=None,
-        include_objects=None
-    )
     
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -167,7 +141,7 @@ def test_multi_reservoir_handling(mocker, recwarn):
             expected_multires_files.multi_reservoir_files['GAW'])
     assert (result.model_files.multi_reservoir_files['BURG'] == 
             expected_multires_files.multi_reservoir_files['BURG'])
-    
+
     result.model_files.runcontrol_file.get_flat_list_str_file
     assert result.model_files.runcontrol_file == expected_multires_files.runcontrol_file
     
