@@ -78,9 +78,9 @@ def test_get_token_value(mocker: MockerFixture, line_contents, file_contents, ex
 
     # Act
     result = fo.get_token_value(token='MYTESTTOKEN', token_line=line_contents,
-                                file_list=dummy_file_as_list)
+                                file_list=dummy_file_as_list, remove_quotation_marks=True)
     with_index_result = fo.get_token_value_with_line_index(token='MYTESTTOKEN', token_line=line_contents,
-                                                           file_list=dummy_file_as_list)
+                                                           file_list=dummy_file_as_list, remove_quotation_marks=True)
     # Assert
     assert result == expected_result
     assert with_index_result == (expected_result, expected_line_index)

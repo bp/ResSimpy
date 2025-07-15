@@ -2140,10 +2140,10 @@ ENDWELLS
     network_object = NexusNetwork(model=dummy_nexus_model)
 
     expected_well_connections = [
-        NexusWellConnection(name='1', stream='WATER', number=1, datum_depth=2776.728,
+        NexusWellConnection(name='"1"', stream='WATER', number=1, datum_depth=2776.728,
                             date='01/01/1980', crossflow='OFF', crossshut='OFF',
                             date_format=DateFormat.MM_DD_YYYY, start_date=start_date),
-        NexusWellConnection(name='2', stream='PRODUCER', number=2, datum_depth=2776.728,
+        NexusWellConnection(name='"2"', stream='PRODUCER', number=2, datum_depth=2776.728,
                             date='01/01/1980', crossflow='OFF', crossshut='OFF',
                             date_format=DateFormat.MM_DD_YYYY, start_date=start_date)
     ]
