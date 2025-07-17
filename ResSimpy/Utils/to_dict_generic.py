@@ -1,9 +1,12 @@
-from typing import Any
-
+from __future__ import annotations
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ResSimpy.Utils.obj_to_table_string import SupportsKeywordMapping
 
 
-def to_dict(nexus_object: Any, keys_in_nexus_style: bool = False, add_date: bool = True, add_iso_date: bool = False,
+def to_dict(nexus_object: SupportsKeywordMapping, keys_in_nexus_style: bool = False, add_date: bool = True,
+            add_iso_date: bool = False,
             add_units: bool = True, include_nones: bool = True,
             units_as_string: bool = True) -> dict[str, None | str | int | float]:
     """Returns a dictionary of the attributes of a Nexus object. Requires a nexus mapping dictionary.
