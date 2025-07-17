@@ -158,3 +158,7 @@ def test_multi_reservoir_handling(mocker, recwarn):
 
     matching_warnings = [x for x in recwarn if expected_warning_message in str(x.message)]
     assert len(matching_warnings) == 1
+    
+    # ensure the submodels don't have multires set
+    assert result.model_files.multi_reservoir_files['RUM'].multi_reservoir_files == {}
+    assert result.multi_reservoirs['RUM'].is_multi_reservoir is False
