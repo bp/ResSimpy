@@ -2253,7 +2253,7 @@ def test_model_summary(mocker, fluid_type, expected_fluid_type):
     # data for get_fluid_type
     fake_model_files = FcsNexusFile(location='test_location')
     fake_surface_file = NexusFile(location='test_surface_location', file_content_as_list=[f'BLACKOIL'])
-    fake_surface_files = {0: fake_surface_file}
+    fake_surface_files = {1: fake_surface_file}
     fake_model_files.surface_files = fake_surface_files
     model._model_files = fake_model_files
 

@@ -850,22 +850,20 @@ class NexusSimulator(Simulator):
     @property
     def summary(self) -> str:
         """Returns a summary of the model contents."""
-
-        # Initialize 'fluid_type' to an empty string.
         fluid_type = ''
-
-        # Verify if 'surface_file' is a dictionary.
-        if (isinstance(self.model_files.surface_files, dict) and
-                # Checks if the first item in 'surface_files'(at index 0) has a valid value and is not none.
-                self.model_files.surface_files[0].file_content_as_list is not None):
-            # If conditions in lines 857 and 859 are met, get_fluid_type is called to retrieve the fluid type.
+        # Verify if 'surface_file' exists.
+        if (self.model_files.surface_files is not None and
+                self.model_files.surface_files[1].file_content_as_list is not None):
             fluid_type = self.get_fluid_type(
-                surface_file_content=self.model_files.surface_files[0].file_content_as_list
+                surface_file_content=self.model_files.surface_files[1].file_content_as_list
             )
+
+        # Create a summary of number of completions per well:
         list_of_wells = self.wells.get_all()
         list_of_well_names = [well.well_name for well in list_of_wells]
-        completions = [len(well.completions) for well in list_of_wells]
-        well_summary = [f'{y} has: {z} completions' for y, z in zip(list_of_well_names, completions)]
+        number_of_completions = [len(well.completions) for well in list_of_wells]
+        well_summary = [f'{y} has: {z} completions' for y, z in zip(list_of_well_names, number_of_completions)]
+
         model_reporting_date = self.sim_controls.times[-1]
         range_x = None
         range_y = None
