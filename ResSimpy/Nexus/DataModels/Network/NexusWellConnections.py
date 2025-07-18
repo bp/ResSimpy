@@ -15,11 +15,13 @@ from ResSimpy.FileOperations.File import File
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Nexus.nexus_modify_object_in_file import ModifyObjectOperations
 from ResSimpy.Nexus.nexus_remove_object_from_file import RemoveObjectOperations
+from ResSimpy.Time.ISODateTime import ISODateTime
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.GenericContainerClasses.WellConnections import WellConnections
+from ResSimpy.Utils.obj_to_table_string import get_column_headers_required
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
@@ -155,3 +157,18 @@ class NexusWellConnections(WellConnections):
         """Returns a list of all well connections loaded."""
         self.__parent_network.get_load_status()
         return self._well_connections
+
+    def to_string_for_date(self, date: ISODateTime) -> str:
+        """Returns a string representation of the well connections for the date."""
+        printable_str = ''
+        # get the required well connections
+        well_connections_for_date = [x for x in self._well_connections if x.iso_date == date]
+        if not well_connections_for_date:
+            return printable_str
+        printable_str += f'{self.table_header}\n'
+        # collect the required table column header:
+        headers = get_column_headers_required(well_connections_for_date)
+        for well_connection in well_connections_for_date:
+            printable_str += f'{well_connection.to_table_line(headers=headers)}\n'
+
+        return printable_str
