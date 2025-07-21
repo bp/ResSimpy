@@ -11,18 +11,19 @@ from ResSimpy.DataModelBaseClasses.Target import Target
 @dataclass(kw_only=True, repr=False)
 class NexusTarget(Target):
     """Class that represents a single nexus target in the NexusSimulator."""
+
     def __init__(self, properties_dict: None | dict[str, None | int | str | float] = None, date: Optional[str] = None,
                  date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None, name: Optional[str] = None,
                  control_quantity: None | str = None, control_conditions: None | str = None,
-                    control_connections: None | str = None, control_method: None | str = None,
-                    calculation_method: None | str = None, calculation_conditions: None | str = None,
-                    calculation_connections: None | str = None, value: None | float = None,
-                    add_value: None | float = None, region: None | str = None, priority: None | int = None,
-                    minimum_rate: None | float = None, minimum_rate_no_shut: None | float = None,
-                    guide_rate: None | str = None, max_change_pressure: None | float = None,
-                    rank_dt: None | float = None, control_type: None | str = None,
-                    calculation_type: None | str = None
+                 control_connections: None | str = None, control_method: None | str = None,
+                 calculation_method: None | str = None, calculation_conditions: None | str = None,
+                 calculation_connections: None | str = None, value: None | float = None,
+                 add_value: None | float = None, region: None | str = None, priority: None | int = None,
+                 minimum_rate: None | str = None, minimum_rate_no_shut: None | float = None,
+                 guide_rate: None | str = None, max_change_pressure: None | float = None,
+                 rank_dt: None | float = None, control_type: None | str = None,
+                 calculation_type: None | str = None
                  ) -> None:
         """Initialises the NexusTarget class.
 
@@ -33,6 +34,31 @@ class NexusTarget(Target):
             start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
             unit_system (Optional[UnitSystem]): The unit system of the object e.g. ENGLISH, METRIC.
             name (Optional[str]): The name of the target.
+                        control_quantity(Optional[str]): Specifies control type for connections.
+            control_quantity(Optional[str]): Specifies control type for connections.
+            control_conditions(Optional[str]): Column heading keyword indicating the conditions used for control.
+            control_connections(Optional[str]): Specifies connections controlled to meet targets, using lists or single
+            connections; constraints ensure targets are satisfied.
+            control_method(Optional[str]): Indicates the method used to allocate the target constraint to controlling
+            connections.
+            calculation_method (Optional[str]): Specifies how the target rate is determined.
+            calculation_conditions (Optional[str]): Indicates the conditions used to calculate the target rate.
+            calculation_connections (Optional[str]): Indicates which connections contribute to the target calculation.
+            value (Optional[float]): Indicates the value for the target rate.
+            add_value (Optional[float]): Specifies an amount to be added to the target rate calculated by CALCMETHOD.
+            region (Optional[str]): Specified a region name from REGDATA table.
+            priority (Optional[int]): Column heading for target priority; lower integers indicate higher priority.
+            minimum_rate (Optional[str]): Indicates the minimum rate for each connection. Applies to all CTRL
+            unless an individual qmin is specified for a connections in a subsequent TGTCON table.
+            minimum_rate_no_shut (Optional[float]): Indicates the minimum rate for each connection. Applies to all CTRL
+            unless an individual qmin_noshut is specified for a connections in a subsequent TGTCON table.
+            guide_rate (Optional[str]): Specifies the guide rate for each connection.
+            max_change_pressure (Optional[float]): Specifies the maximum rate of change of region pressure versus time.
+            rank_dt (Optional[float]): Specifies the minimum time change between reranking the connections.
+            control_type (Optional[str]): Specifies which connections (or wells) should be included from CTRLCONS
+            connections.
+            calculation_type (Optional[str]): Specifies which connections (or wells) should be included from CALCONS
+            connections.
         """
         super().__init__(date_format=date_format, start_date=start_date, unit_system=unit_system, name=name, date=date,
                          properties_dict=properties_dict, control_quantity=control_quantity,
@@ -61,14 +87,14 @@ class NexusTarget(Target):
             'ADDVALUE': ('add_value', float),
             'REGION': ('region', str),
             'PRIORITY': ('priority', int),
-            'QMIN': ('minimum_rate', float),
+            'QMIN': ('minimum_rate', str),
             'QMIN_NOSHUT': ('minimum_rate_no_shut', float),
             'QGUIDE': ('guide_rate', str),
             'MAXDPDT': ('max_change_pressure', float),
             'RANKDT': ('rank_dt', float),
             'CTRLTYPE': ('control_type', str),
             'CALCTYPE': ('calculation_type', str)
-            }
+        }
         return keywords
 
     def update(self, new_data: dict[str, None | int | str | float | UnitSystem], nones_overwrite: bool = False) -> None:
