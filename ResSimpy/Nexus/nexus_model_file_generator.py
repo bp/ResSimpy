@@ -102,16 +102,6 @@ class NexusModelFileGenerator:
                 full_schedule += self.model.network.well_connections.to_string_for_date(date=date)
                 full_schedule += '\n'
 
-            constraints_for_date = [x for x in all_constraints if x.iso_date == date]
-            if any(constraints_for_date) and self.model.network.constraints is not None:
-                full_schedule += self.model.network.constraints.to_string_for_date(date=date)
-                full_schedule += '\n'
-
-            targets_for_date = [x for x in all_targets if x.iso_date == date]
-            if any(targets_for_date) and self.model.network.targets is not None:
-                full_schedule += self.model.network.targets.to_string_for_date(date=date)
-                full_schedule += '\n'
-
             welllists_for_date = [x for x in all_welllists if x.iso_date == date]
             if any(welllists_for_date) and self.model.network.welllists is not None:
                 full_schedule += self.model.network.welllists.to_string_for_date(date=date)
@@ -123,6 +113,16 @@ class NexusModelFileGenerator:
             connections_for_date = [x for x in all_connections if x.iso_date == date]
             if any(connections_for_date) and self.model.network.connections is not None:
                 full_schedule += self.model.network.connections.to_string_for_date(date=date)
+                full_schedule += '\n'
+
+            constraints_for_date = [x for x in all_constraints if x.iso_date == date]
+            if any(constraints_for_date) and self.model.network.constraints is not None:
+                full_schedule += self.model.network.constraints.to_string_for_date(date=date)
+                full_schedule += '\n'
+
+            targets_for_date = [x for x in all_targets if x.iso_date == date]
+            if any(targets_for_date) and self.model.network.targets is not None:
+                full_schedule += self.model.network.targets.to_string_for_date(date=date)
                 full_schedule += '\n'
 
         return full_schedule

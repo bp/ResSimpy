@@ -11,9 +11,19 @@ from ResSimpy.DataModelBaseClasses.Target import Target
 @dataclass(kw_only=True, repr=False)
 class NexusTarget(Target):
     """Class that represents a single nexus target in the NexusSimulator."""
-    def __init__(self, properties_dict: dict[str, None | int | str | float], date: Optional[str] = None,
+    def __init__(self, properties_dict: None | dict[str, None | int | str | float] = None, date: Optional[str] = None,
                  date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
-                 unit_system: Optional[UnitSystem] = None, name: Optional[str] = None) -> None:
+                 unit_system: Optional[UnitSystem] = None, name: Optional[str] = None,
+                 control_quantity: None | str = None, control_conditions: None | str = None,
+                    control_connections: None | str = None, control_method: None | str = None,
+                    calculation_method: None | str = None, calculation_conditions: None | str = None,
+                    calculation_connections: None | str = None, value: None | float = None,
+                    add_value: None | float = None, region: None | str = None, priority: None | int = None,
+                    minimum_rate: None | float = None, minimum_rate_no_shut: None | float = None,
+                    guide_rate: None | str = None, max_change_pressure: None | float = None,
+                    rank_dt: None | float = None, control_type: None | str = None,
+                    calculation_type: None | str = None
+                 ) -> None:
         """Initialises the NexusTarget class.
 
         Args:
@@ -25,7 +35,15 @@ class NexusTarget(Target):
             name (Optional[str]): The name of the target.
         """
         super().__init__(date_format=date_format, start_date=start_date, unit_system=unit_system, name=name, date=date,
-                         properties_dict=properties_dict)
+                         properties_dict=properties_dict, control_quantity=control_quantity,
+                         control_conditions=control_conditions, control_connections=control_connections,
+                         control_method=control_method,
+                         calculation_method=calculation_method, calculation_conditions=calculation_conditions,
+                         calculation_connections=calculation_connections, value=value, add_value=add_value,
+                         region=region, priority=priority, minimum_rate=minimum_rate,
+                         minimum_rate_no_shut=minimum_rate_no_shut, guide_rate=guide_rate,
+                         max_change_pressure=max_change_pressure, rank_dt=rank_dt,
+                         control_type=control_type, calculation_type=calculation_type)
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
