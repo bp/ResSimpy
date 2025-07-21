@@ -39,7 +39,7 @@ class Target(NetworkObject, ABC):
                  calculation_method: Optional[str] = None, calculation_conditions: Optional[str] = None,
                  calculation_connections: Optional[str] = None, value: Optional[float] = None,
                  add_value: Optional[float] = None, region: Optional[str] = None, priority: Optional[int] = None,
-                 minimum_rate: Optional[str] = None, minimum_rate_no_shut: Optional[float] = None,
+                 minimum_rate: Optional[float] = None, minimum_rate_no_shut: Optional[float] = None,
                  guide_rate: Optional[str] = None, max_change_pressure: Optional[float] = None,
                  rank_dt: Optional[float] = None, control_type: Optional[str] = None,
                  calculation_type: Optional[str] = None, region_number: Optional[int] = None) -> None:
@@ -65,7 +65,7 @@ class Target(NetworkObject, ABC):
             add_value (Optional[float]): Specifies an amount to be added to the target rate calculated by CALCMETHOD.
             region (Optional[str]): Specified a region name from REGDATA table.
             priority (Optional[int]): Column heading for target priority; lower integers indicate higher priority.
-            minimum_rate (Optional[str]): Indicates the minimum rate for each connection. Applies to all CTRL
+            minimum_rate (Optional[float]): Indicates the minimum rate for each connection. Applies to all CTRL
             unless an individual qmin is specified for a connections in a subsequent TGTCON table.
             minimum_rate_no_shut (Optional[float]): Indicates the minimum rate for each connection. Applies to all CTRL
             unless an individual qmin_noshut is specified for a connections in a subsequent TGTCON table.

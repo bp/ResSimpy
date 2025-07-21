@@ -7,7 +7,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConne
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.nexus_model_file_generator import NexusModelFileGenerator
-from utility_for_tests import get_fake_nexus_simulator
+from tests.utility_for_tests import get_fake_nexus_simulator
 
 
 def test_write_surface_section(mocker):

@@ -174,9 +174,9 @@ def test_load_fcs_space_in_filename(mocker, run_control_path, expected_root, exp
         ("RUNCONTROL /path/to/run/control\n  DATE_FORMAT MM/DD/YYYY", DateFormat.MM_DD_YYYY),
         ("RUNCONTROL /path/to/run/control\n  DATE_FORMAT DD/MM/YYYY", DateFormat.DD_MM_YYYY),
         ("RUNCONTROL /path/to/run/control\n", DateFormat.MM_DD_YYYY),
-        ("RUNCONTROL c:\path\to\run\control\n  DATE_FORMAT MM/DD/YYYY", DateFormat.MM_DD_YYYY),
-        ("RUNCONTROL c:\path\to\run\control\n  DATE_FORMAT DD/MM/YYYY", DateFormat.DD_MM_YYYY),
-        ("RUNCONTROL c:\path\to\run\control\n", DateFormat.MM_DD_YYYY),
+        ("RUNCONTROL c:\path\\to\\run\control\n  DATE_FORMAT MM/DD/YYYY", DateFormat.MM_DD_YYYY),
+        ("RUNCONTROL c:\path\\to\\run\control\n  DATE_FORMAT DD/MM/YYYY", DateFormat.DD_MM_YYYY),
+        ("RUNCONTROL c:\path\\to\\run\control\n", DateFormat.MM_DD_YYYY),
     ],
     ids=['US date format', 'non-us date format', 'default (us format)', 'Win US Date Format', 'Win non-us date format',
          'Win default (us format)', ])
@@ -338,10 +338,10 @@ def test_output_destination_missing(mocker, run_control_path, expected_run_contr
                              ("run/control/path", "original_output_path/run/control/path",
                               "DD/MM/YYYY", False),
                              # Providing a relative path to the fcs file + Non-USA date format
-                             ("c:\run\control\path",
-                              "c:\run\control\path", "MM/DD/YYYY", True),
+                             ("c:\\run\control\path",
+                              "c:\\run\control\path", "MM/DD/YYYY", True),
                              # Providing an absolute path to the fcs file + USA date format
-                             ("run\control\path", "original_output_path\run\control\path",
+                             ("run\control\path", "original_output_path\\run\\control\path",
                               "DD/MM/YYYY", False)
                              # Providing a relative path to the fcs file + Non-USA date format
                          ])
@@ -1067,7 +1067,7 @@ PLOTBINARY
 
 # TODO: move these methods to a separate WELLS test file
 @pytest.mark.parametrize("fcs_file_contents", [
-    ("""
+    (r"""
        WelLS sEt 1 my/wellspec/file.dat
     """)
 ], ids=['path_after_set'])
@@ -1113,7 +1113,7 @@ def test_get_all(mocker: MockerFixture, fcs_file_contents: str):
 
 @pytest.mark.parametrize("fcs_file_contents", [
     ("""
-       WelLS sEt 1 my\wellspec\file.dat
+       WelLS sEt 1 my\\wellspec\\file.dat
     """)
 ], ids=['path_after_set'])
 def test_get_wells_windows(mocker: MockerFixture, fcs_file_contents: str):
@@ -1138,9 +1138,9 @@ def test_get_wells_windows(mocker: MockerFixture, fcs_file_contents: str):
     mocker.patch('ResSimpy.Nexus.NexusWells.load_wells', mock_load_wells)
 
     # NB file_content_as_list needs to be set as below due to the mocker open re-reading fcs contents
-    expected_well_file = NexusFile(location='my\wellspec\file.dat',
+    expected_well_file = NexusFile(location=r'my\wellspec\file.dat',
                                    include_locations=[], origin='path\nexus_run.fcs', file_content_as_list=
-                                   ['\n', '       WelLS sEt 1 my\wellspec\file.dat\n', '    '])
+                                   ['\n', '       WelLS sEt 1 my\\wellspec\\file.dat\n', '    '])
 
     simulation = NexusSimulator(origin='path\nexus_run.fcs')
     simulation.model_files.surface_files = {}

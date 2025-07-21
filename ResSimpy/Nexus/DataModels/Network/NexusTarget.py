@@ -20,7 +20,7 @@ class NexusTarget(Target):
                  calculation_method: None | str = None, calculation_conditions: None | str = None,
                  calculation_connections: None | str = None, value: None | float = None,
                  add_value: None | float = None, region: None | str = None, priority: None | int = None,
-                 minimum_rate: None | str = None, minimum_rate_no_shut: None | float = None,
+                 minimum_rate: None | float = None, minimum_rate_no_shut: None | float = None,
                  guide_rate: None | str = None, max_change_pressure: None | float = None,
                  rank_dt: None | float = None, control_type: None | str = None,
                  calculation_type: None | str = None
@@ -48,7 +48,7 @@ class NexusTarget(Target):
             add_value (Optional[float]): Specifies an amount to be added to the target rate calculated by CALCMETHOD.
             region (Optional[str]): Specified a region name from REGDATA table.
             priority (Optional[int]): Column heading for target priority; lower integers indicate higher priority.
-            minimum_rate (Optional[str]): Indicates the minimum rate for each connection. Applies to all CTRL
+            minimum_rate (Optional[float]): Indicates the minimum rate for each connection. Applies to all CTRL
             unless an individual qmin is specified for a connections in a subsequent TGTCON table.
             minimum_rate_no_shut (Optional[float]): Indicates the minimum rate for each connection. Applies to all CTRL
             unless an individual qmin_noshut is specified for a connections in a subsequent TGTCON table.
@@ -87,7 +87,7 @@ class NexusTarget(Target):
             'ADDVALUE': ('add_value', float),
             'REGION': ('region', str),
             'PRIORITY': ('priority', int),
-            'QMIN': ('minimum_rate', str),
+            'QMIN': ('minimum_rate', float),
             'QMIN_NOSHUT': ('minimum_rate_no_shut', float),
             'QGUIDE': ('guide_rate', str),
             'MAXDPDT': ('max_change_pressure', float),
