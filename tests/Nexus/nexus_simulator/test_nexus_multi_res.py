@@ -19,11 +19,11 @@ def test_multi_reservoir_handling(mocker, recwarn):
     
     DATEFORMAT DD/MM/YYYY
     
-    RESERVOIR  RUM  rumaila.fcs
+    RESERVOIR  res_1  reservoir_1.fcs
     
-    RESERVOIR GAW  ghawar.fcs
+    RESERVOIR res_2  reservoir_2.fcs
     
-    RESERVOIR BURG  burgan.fcs
+    RESERVOIR res_3  reservoir_3.fcs
 
     SURFACE Method 1 surface.dat
     
@@ -32,9 +32,9 @@ def test_multi_reservoir_handling(mocker, recwarn):
     
     fcs_path = '/this/is/a/test/path/test.fcs'
     base_dir = os.path.dirname(fcs_path)
-    field_1_path = os.path.join(base_dir, 'rumaila.fcs')
-    field_2_path = os.path.join(base_dir, 'ghawar.fcs')
-    field_3_path = os.path.join(base_dir, 'burgan.fcs')
+    field_1_path = os.path.join(base_dir, 'reservoir_1.fcs')
+    field_2_path = os.path.join(base_dir, 'reservoir_2.fcs')
+    field_3_path = os.path.join(base_dir, 'reservoir_3.fcs')
     
     field_1_content = """! Field 1 content
     RUN_UNITS METBAR
@@ -42,17 +42,17 @@ def test_multi_reservoir_handling(mocker, recwarn):
     
     DATEFORMAT DD/MM/YYYY
     GRID_FILES
-    STRUCTURED_GRID nexus_data/rum_grid.dat
+    STRUCTURED_GRID nexus_data/res_1_grid.dat
 
     PVT_FILES
-    PVT Method 1 nexus_data/rum_pvt.dat
+    PVT Method 1 nexus_data/res_1_pvt.dat
     
     RECURRENT_FILES
-    WELLS SET 1   rum_wells.dat
+    WELLS SET 1   res_1_wells.dat
     
     """
-    field_2_content = field_1_content.replace('rum', 'gaw')
-    field_3_content = field_1_content.replace('rum', 'burg')
+    field_2_content = field_1_content.replace('res_1', 'res_2')
+    field_3_content = field_1_content.replace('res_1', 'res_3')
     
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -60,7 +60,7 @@ def test_multi_reservoir_handling(mocker, recwarn):
             field_1_path: field_1_content,
             field_2_path: field_2_content,
             field_3_path: field_3_content,
-            os.path.join(base_dir, 'nexus_data/rum_grid.dat'): 'NX NY NZ\n 10 10 10\n',
+            os.path.join(base_dir, 'nexus_data/res_1_grid.dat'): 'NX NY NZ\n 10 10 10\n',
             
         }).return_value
         return mock_open
@@ -76,9 +76,9 @@ def test_multi_reservoir_handling(mocker, recwarn):
     field_3_expected_model = NexusSimulator(field_3_path)
 
     expected_reservoirs_dict = {
-        'RUM': field_1_expected_model,
-        'GAW': field_2_expected_model,
-        'BURG': field_3_expected_model,
+        'res_1': field_1_expected_model,
+        'res_2': field_2_expected_model,
+        'res_3': field_3_expected_model,
     }
     expected_warning_message = "Multi-reservoir models are partially supported. " \
                                        "Some features may not work as expected."
@@ -109,9 +109,9 @@ def test_multi_reservoir_handling(mocker, recwarn):
                                                             expected_multires_runcontrol_file],
                                            file_content_as_list=test_fcs_file.splitlines(keepends=True),
                                            origin=None,
-                                           multi_reservoir_files={'RUM': field_1_expected_model.model_files,
-                                                                  'GAW': field_2_expected_model.model_files,
-                                                                  'BURG': field_3_expected_model.model_files,
+                                           multi_reservoir_files={'res_1': field_1_expected_model.model_files,
+                                                                  'res_2': field_2_expected_model.model_files,
+                                                                  'res_3': field_3_expected_model.model_files,
                                                                   },
                                            runcontrol_file=expected_multires_runcontrol_file,
                                            surface_files={1: expected_multires_surface_file},
@@ -126,21 +126,21 @@ def test_multi_reservoir_handling(mocker, recwarn):
 
     # Assert
     assert result.is_multi_reservoir is True
-    assert result.reservoir_paths == {'RUM': field_1_path, 'GAW': field_2_path, 'BURG': field_3_path}
-    assert result.multi_reservoirs['RUM'].model_files == expected_reservoirs_dict['RUM'].model_files
-    assert result.multi_reservoirs['GAW'].model_files == expected_reservoirs_dict['GAW'].model_files
-    assert result.multi_reservoirs['BURG'].model_files == expected_reservoirs_dict['BURG'].model_files
+    assert result.reservoir_paths == {'res_1': field_1_path, 'res_2': field_2_path, 'res_3': field_3_path}
+    assert result.multi_reservoirs['res_1'].model_files == expected_reservoirs_dict['res_1'].model_files
+    assert result.multi_reservoirs['res_2'].model_files == expected_reservoirs_dict['res_2'].model_files
+    assert result.multi_reservoirs['res_3'].model_files == expected_reservoirs_dict['res_3'].model_files
     
     # calls to get_flat_list_str_file to ensure file line locations are loaded correctly
-    result.model_files.multi_reservoir_files['RUM'].structured_grid_file.get_flat_list_str_file
-    result.model_files.multi_reservoir_files['GAW'].structured_grid_file.get_flat_list_str_file
-    result.model_files.multi_reservoir_files['BURG'].structured_grid_file.get_flat_list_str_file
-    assert (result.model_files.multi_reservoir_files['RUM'] == 
-            expected_multires_files.multi_reservoir_files['RUM'])
-    assert (result.model_files.multi_reservoir_files['GAW'] == 
-            expected_multires_files.multi_reservoir_files['GAW'])
-    assert (result.model_files.multi_reservoir_files['BURG'] == 
-            expected_multires_files.multi_reservoir_files['BURG'])
+    result.model_files.multi_reservoir_files['res_1'].structured_grid_file.get_flat_list_str_file
+    result.model_files.multi_reservoir_files['res_2'].structured_grid_file.get_flat_list_str_file
+    result.model_files.multi_reservoir_files['res_3'].structured_grid_file.get_flat_list_str_file
+    assert (result.model_files.multi_reservoir_files['res_1'] == 
+            expected_multires_files.multi_reservoir_files['res_1'])
+    assert (result.model_files.multi_reservoir_files['res_2'] == 
+            expected_multires_files.multi_reservoir_files['res_2'])
+    assert (result.model_files.multi_reservoir_files['res_3'] == 
+            expected_multires_files.multi_reservoir_files['res_3'])
 
     result.model_files.runcontrol_file.get_flat_list_str_file
     assert result.model_files.runcontrol_file == expected_multires_files.runcontrol_file
@@ -152,13 +152,13 @@ def test_multi_reservoir_handling(mocker, recwarn):
     assert result.model_files == expected_multires_files
     
     # test one of the subreservoir models for correct loading of grid.
-    assert result.multi_reservoirs['RUM'].grid.range_x == 10
-    assert result.multi_reservoirs['RUM'].grid.range_y == 10
-    assert result.multi_reservoirs['RUM'].grid.range_z == 10
+    assert result.multi_reservoirs['res_1'].grid.range_x == 10
+    assert result.multi_reservoirs['res_1'].grid.range_y == 10
+    assert result.multi_reservoirs['res_1'].grid.range_z == 10
 
     matching_warnings = [x for x in recwarn if expected_warning_message in str(x.message)]
     assert len(matching_warnings) == 1
     
     # ensure the submodels don't have multires set
-    assert result.model_files.multi_reservoir_files['RUM'].multi_reservoir_files == {}
-    assert result.multi_reservoirs['RUM'].is_multi_reservoir is False
+    assert result.model_files.multi_reservoir_files['res_1'].multi_reservoir_files == {}
+    assert result.multi_reservoirs['res_1'].is_multi_reservoir is False
