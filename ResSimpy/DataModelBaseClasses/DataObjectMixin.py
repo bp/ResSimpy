@@ -10,11 +10,11 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Utils import to_dict_generic
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
-from ResSimpy.Utils.obj_to_table_string import to_table_line
+from ResSimpy.Utils.obj_to_table_string import to_table_line, SupportsKeywordMapping
 
 
 @dataclass(kw_only=True)
-class DataObjectMixin(ABC):
+class DataObjectMixin(ABC, SupportsKeywordMapping):
     """Base class representing a data object in ResSimpy."""
     __id: UUID = field(default_factory=lambda: uuid4(), compare=False)
     __iso_date: ISODateTime = field(init=False, repr=True)

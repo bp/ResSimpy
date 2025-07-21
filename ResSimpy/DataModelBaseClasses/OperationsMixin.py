@@ -11,6 +11,8 @@ from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.FileOperations.File import File
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
+from ResSimpy.Time.ISODateTime import ISODateTime
+from ResSimpy.Utils.obj_to_table_string import get_column_headers_required
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import Network
@@ -27,6 +29,7 @@ class NetworkOperationsMixIn(ABC):
             parent_network (Network): The parent network that the object is a part of.
         """
         self.__parent_network = parent_network
+        self._network_objects: list[DataObjectMixin]
 
     @abstractmethod
     def get_all(self) -> Sequence[Any]:
@@ -252,3 +255,21 @@ class NetworkOperationsMixIn(ABC):
 
             resolved_objects.append(new_resolved_object)
         return resolved_objects
+
+    def to_string_for_date(self, date: ISODateTime) -> str:
+        """Returns a string representation of the network object for the date."""
+        printable_str = ''
+        # get the required objects for the date
+        network_objects_for_date: list[DataObjectMixin] = [x for x in self.get_all() if x.iso_date == date]
+        if not network_objects_for_date:
+            return printable_str
+        printable_str += f'{self.table_header}\n'
+        # collect the required table column header:
+        headers = get_column_headers_required(network_objects_for_date)
+        printable_str += ' '.join(headers) + '\n'
+        for network_object in network_objects_for_date:
+            printable_str += f'{network_object.to_table_line(headers=headers)}'
+
+        printable_str += f'{self.table_footer}\n'
+
+        return printable_str

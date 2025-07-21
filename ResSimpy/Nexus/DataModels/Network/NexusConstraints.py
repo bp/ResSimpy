@@ -19,6 +19,7 @@ from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Time.ISODateTime import ISODateTime
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
 import ResSimpy.Nexus.nexus_file_operations as nfo
 
@@ -434,3 +435,24 @@ class NexusConstraints(Constraints):
         combination_of_constraints.update(cleaned_new_constraint)
 
         self.add(combination_of_constraints, comments)
+
+    def to_string_for_date(self, date: ISODateTime) -> str:
+        """Converts the constraints for a specific date to a string representation.
+
+        Args:
+            date (ISODateTime): The date for which to convert the constraints.
+
+        Returns:
+            str: String representation of the constraints for the specified date.
+        """
+        constraints_for_date = {name: [x for x in constraints if x.iso_date == date] for name, constraints in
+                                self._constraints.items()}
+        if not constraints_for_date:
+            return ''
+
+        printable_string = 'CONSTRAINTS\n'
+        for name, constraints in constraints_for_date.items():
+            for constraint in constraints:
+                printable_string += constraint.to_table_line([])
+        printable_string += 'ENDCONSTRAINTS\n'
+        return printable_string
