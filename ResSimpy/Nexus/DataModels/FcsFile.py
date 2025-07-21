@@ -4,12 +4,15 @@ from dataclasses import dataclass, field
 import os
 import warnings
 
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.FileOperations.File import File
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from typing import Optional, Generator
 
 # Use correct Self type depending upon Python version
 import sys
+
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -544,3 +547,81 @@ class FcsNexusFile(NexusFile):
             matching_files.extend(file.get_include_file_from_filename(filename=filename))
 
         return matching_files
+
+    def to_string(self, dateformat: None | DateFormat = None, run_units: None | UnitSystem = None,
+                  description: None | str = None) -> str:
+        """Writes a new FCS file contents to a string in Nexus format.
+
+        Returns:
+            str: string representation of the FCS file contents.
+        """
+        def print_method(method_files: None | dict[int, NexusFile], keyword: str, category: str = 'METHOD') -> str:
+            """Helper function to print methods with their files."""
+            printable_str = ''
+            if method_files is None:
+                return printable_str
+            for method_number, file in method_files.items():
+                printable_str += f'    {keyword} {category} {method_number} {file.location}\n'
+            return printable_str
+
+        printable_str = ''
+        printable_str += 'DESC Model created with ResSimpy\n'
+        if description is not None:
+            printable_str += f'DESC {description}\n'
+        if run_units is not None:
+            printable_str += f'RUN_UNITS {run_units.value}\n'
+        else:
+            # if not provided print the default Nexus unit system
+            printable_str += f'RUN_UNITS {UnitSystem.ENGLISH.value}\n'
+
+        if dateformat is not None:
+            printable_str += f'DATEFORMAT {dateformat.value}\n'
+        else:
+            # if not provided print the default Nexus date format
+            printable_str += f'DATEFORMAT {DateFormat.MM_DD_YYYY.value}\n'
+
+        # Loop through all the individual files in the model
+        printable_str += '\nGRID_FILES\n'
+
+        if self.structured_grid_file is not None:
+            printable_str += f'    STRUCTURED_GRID {self.structured_grid_file.location}\n'
+        if self.options_file is not None:
+            printable_str += f'    OPTIONS {self.options_file.location}\n'
+
+        printable_str += '\nINITIALIZATION_FILES\n'
+        printable_str += print_method(method_files=self.equil_files, keyword='EQUIL')
+        printable_str += print_method(method_files=self.tracer_init_files, keyword='TRACER_INIT')
+
+        printable_str += '\nROCK_FILES\n'
+        rock_section_files = {'ROCK': self.rock_files, 'RELPM': self.relperm_files, 'ADSORPTION': self.adsorption_files}
+        for method, method_files in rock_section_files.items():
+            printable_str += print_method(method_files=method_files, keyword=method)
+
+        printable_str += '\nPVT_FILES\n'
+        pvt_section_files = {'PVT': self.pvt_files, 'WATER': self.water_files, 'POLYMER': self.polymer_files,
+                             'SEPARATOR': self.separator_files}
+        for method, method_files in pvt_section_files.items():
+            printable_str += print_method(method_files=method_files, keyword=method)
+
+        if self.aquifer_files is not None and len(self.aquifer_files) > 0:
+            printable_str += '\nAQUIFER_FILES\n'
+            printable_str += print_method(method_files=self.aquifer_files, keyword='AQUIFER')
+
+        printable_str += '\nRECURRENT_FILES\n'
+        if self.runcontrol_file is not None:
+            printable_str += f'    RUNCONTROL {self.runcontrol_file.location}\n'
+        printable_str += print_method(method_files=self.well_files, keyword='WELLS', category='SET')
+        printable_str += print_method(method_files=self.surface_files, keyword='SURFACE', category='NETWORK')
+        printable_str += print_method(method_files=self.ipr_files, keyword='IPR')
+        if self.override_file is not None:
+            printable_str += f'OVERRIDE {self.override_file.location}\n'
+
+        printable_str += '\nNET_METHOD_FILES\n'
+        net_methods = {'VALVE': self.valve_files,
+                       'GASLIFT': self.gas_lift_files, 'PUMP': self.pump_files,
+                       'COMPRESSOR': self.compressor_files, 'CHOKE': self.choke_files,
+                       'ICD': self.icd_files, 'ESP': self.esp_files, 'HYD': self.hyd_files}
+        for method, method_files in net_methods.items():
+            printable_str += print_method(method_files=method_files, keyword=method)
+
+        return printable_str
