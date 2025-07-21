@@ -22,7 +22,7 @@ class Target(NetworkObject, ABC):
     add_value: Optional[float] = None
     region: Optional[str] = None
     priority: Optional[int] = None
-    minimum_rate: Optional[str] = None
+    minimum_rate: Optional[float] = None
     minimum_rate_no_shut: Optional[float] = None
     guide_rate: Optional[str] = None
     max_change_pressure: Optional[float] = None
