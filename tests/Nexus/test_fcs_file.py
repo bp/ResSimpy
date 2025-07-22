@@ -213,6 +213,7 @@ def test_fcs_file_all_methods(mocker):
     # Assert
     assert result.file_content_as_list == expected_fcs_file.file_content_as_list
     assert result == expected_fcs_file
+    assert result.multi_reservoir_files == {}
 
 
 def test_get_full_network(mocker):
