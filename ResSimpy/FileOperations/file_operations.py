@@ -109,7 +109,7 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
                    ignore_values: None | list[str] = None,
                    replace_with: str | GridArrayDefinition | None = None,
                    comment_characters: None | list[str] = None,
-                   single_c_acts_as_comment: bool = True) -> Optional[str]:
+                   single_c_acts_as_comment: bool = True, remove_quotation_marks: bool = False) -> Optional[str]:
     """Gets the next non blank value in a list of lines.
 
     Args:
@@ -124,6 +124,8 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
             Defaults to the Nexus format (!)
         single_c_acts_as_comment: (bool): whether a single C character at the start of a line should be treated as a
             comment. Defaults to Nexus setting which is True.
+        remove_quotation_marks: (bool): whether the returned value should remove quotation marks surrounding the value,
+            if there are any.
 
     Returns:
         Optional[str]: Next non blank value from the list, if none found returns None
@@ -176,7 +178,7 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
                 break
             elif character not in invalid_characters:
                 # If the string is wrapped in quotation marks, return the full string (including invalid characters)
-                if character == '"' or character == "'":
+                if remove_quotation_marks and (character == '"' or character == "'"):
                     value = __strip_quotation_marks(original_string=stripped_search_string)
                     value_found = True
                     break
@@ -414,7 +416,8 @@ def value_in_file(token: str, file: list[str]) -> bool:
 def get_token_value(token: str, token_line: str, file_list: list[str],
                     ignore_values: Optional[list[str]] = None,
                     replace_with: Union[str, GridArrayDefinition, None] = None,
-                    comment_characters: list[str] | None = None, single_c_comments: bool = True) -> Optional[str]:
+                    comment_characters: list[str] | None = None, single_c_comments: bool = True,
+                    remove_quotation_marks: bool = False) -> Optional[str]:
     """Gets the value following a token if supplied with a line containing the token.
 
     Arguments:
@@ -429,6 +432,8 @@ def get_token_value(token: str, token_line: str, file_list: list[str],
             Defaults to the Nexus format (!)
         single_c_comments: (bool): whether a single C character at the start of a line should be treated as a
             comment. Defaults to Nexus setting which is True.
+        remove_quotation_marks: (bool): whether the returned value should remove quotation marks surrounding the value,
+            if there are any.
 
     Returns:
         Optional[str]: The value following the supplied token, if it is present.
@@ -437,7 +442,8 @@ def get_token_value(token: str, token_line: str, file_list: list[str],
     if search_string is None or line_index is None:
         return None
     value = get_next_value(line_index, file_list, search_string, ignore_values, replace_with,
-                           comment_characters=comment_characters, single_c_acts_as_comment=single_c_comments)
+                           comment_characters=comment_characters, single_c_acts_as_comment=single_c_comments,
+                           remove_quotation_marks=remove_quotation_marks)
     return value
 
 
@@ -502,7 +508,8 @@ def get_expected_token_value(token: str, token_line: str, file_list: list[str],
 
 def get_token_value_with_line_index(token: str, token_line: str, file_list: list[str],
                                     ignore_values: Optional[list[str]] = None,
-                                    replace_with: Union[str, GridArrayDefinition, None] = None) \
+                                    replace_with: Union[str, GridArrayDefinition, None] = None,
+                                    remove_quotation_marks: bool = False) \
         -> tuple[None | str, None | int]:
     """Gets the value following a token and the line index of that value.
 
@@ -514,6 +521,8 @@ def get_token_value_with_line_index(token: str, token_line: str, file_list: list
             Defaults to None.
         replace_with (Union[str, VariableEntry, None], optional):  a value to replace the existing value with. \
             Defaults to None.
+        remove_quotation_marks: (bool): whether the returned value should remove quotation marks surrounding the value,
+            if there are any.
 
     Returns:
         tuple[None | str, None | int]: The value following the supplied token and the line index of that value.
@@ -525,14 +534,16 @@ def get_token_value_with_line_index(token: str, token_line: str, file_list: list
     for i, line in enumerate(file_list[line_index:]):
         if i != 0:
             search_string = line
-        value = get_next_value(0, [line], search_string, ignore_values, replace_with)
+        value = get_next_value(start_line_index=0, file_as_list=[line], search_string=search_string,
+                               ignore_values=ignore_values, replace_with=replace_with,
+                               remove_quotation_marks=remove_quotation_marks)
         if value is not None:
             return value, line_index + i
     return None, None
 
 
 def load_in_three_part_date(initial_token: Optional[str], token_line: str, file_as_list: list[str], start_index: int) \
-                            -> str:
+        -> str:
     """Function that reads in a three part date separated by spaces e.g. 1 JAN 2024.
 
     Args:
