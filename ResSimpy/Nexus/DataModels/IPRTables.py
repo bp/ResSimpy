@@ -50,6 +50,7 @@ class IPRTables:
         date = ''
         reading_line = False
         table_lines = []
+        all_tables = []
 
         for line in file_as_list:
             if nfo.check_token('TIME', line):
@@ -64,7 +65,11 @@ class IPRTables:
                 new_iprtable = IPRTable(date=date, table=df)
                 self.tables.append(new_iprtable)
 
+                all_tables.append(df)
                 table_lines = []
+                continue
 
             if reading_line:
                 table_lines.append(line)
+
+        return pd.concat(all_tables, ignore_index=True) if all_tables else pd.DataFrame()
