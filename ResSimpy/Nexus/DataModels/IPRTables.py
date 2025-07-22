@@ -1,5 +1,4 @@
 """Class for collection of IPRs."""
-import os
 from typing import Optional
 import pandas as pd
 
@@ -13,40 +12,17 @@ class IPRTables:
     __inputs: list[IPRTable]
     __files: dict[int, NexusFile]
 
-    def __init__(self, tables: Optional[list[IPRTable]] = None, files: Optional[dict[int, NexusFile]] = None,
-                 inputs: Optional[list[IPRTable]] = None) -> None:
+    def __init__(self, tables: Optional[list[IPRTable]] = None) -> None:
         """Class for collections of IPRs.
 
         Args:
             tables: Collections of IPR tables
-            inputs (Optional[list[IPRTable]]): Collection of Nexus IPR methods.
-            files (Optional[list[IPRTable]]): Collection of IPR files.
         """
 
         if tables is None:
             self.tables = []
         else:
             self.tables = tables
-
-        if inputs is None:
-            self.__inputs = []
-        else:
-            self.__inputs = inputs
-
-        if files is None:
-            self.__files = {}
-        else:
-            self.__files = files
-
-    # def load_iprtables(self) -> None:
-    #     """Loads a collection of iprtables."""
-    #     if self.__files is not None and len(self.__files) > 0:
-    #         for table_line in self.__files.keys():
-    #             ipr_file = self.__files[table_line]
-    #             if ipr_file.location is None:
-    #                 raise ValueError(f'Unable to find ipr table file: {ipr_file}')
-    #             if os.path.isfile(ipr_file.location):
-    #                 self.read_iprtables_as_df(file_as_list=ipr_file.get_flat_list_str_file)
 
     def read_iprtables_as_df(self, file_as_list: list[str]) -> pd.DataFrame:
         """Reads in IPR files from Nexus into a dataframe.
