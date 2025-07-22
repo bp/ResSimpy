@@ -13,7 +13,7 @@ class IPRTables:
     __inputs: list[IPRTable]
     __files: dict[int, NexusFile]
 
-    def __init__(self, tables: Optional[list[IPRTable]], files: Optional[dict[int, NexusFile]] = None,
+    def __init__(self, tables: Optional[list[IPRTable]] = None, files: Optional[dict[int, NexusFile]] = None,
                  inputs: Optional[list[IPRTable]] = None) -> None:
         """Class for collections of IPRs.
 
