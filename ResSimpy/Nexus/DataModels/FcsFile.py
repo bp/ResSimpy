@@ -616,12 +616,13 @@ class FcsNexusFile(NexusFile):
         if self.override_file is not None:
             printable_str += f'OVERRIDE {self.override_file.location}\n'
 
-        printable_str += '\nNET_METHOD_FILES\n'
         net_methods = {'VALVE': self.valve_files,
                        'GASLIFT': self.gas_lift_files, 'PUMP': self.pump_files,
                        'COMPRESSOR': self.compressor_files, 'CHOKE': self.choke_files,
                        'ICD': self.icd_files, 'ESP': self.esp_files, 'HYD': self.hyd_files}
-        for method, method_files in net_methods.items():
-            printable_str += print_method(method_files=method_files, keyword=method)
+        if any(x for x in net_methods.values()):
+            printable_str += '\nNET_METHOD_FILES\n'
+            for method, method_files in net_methods.items():
+                printable_str += print_method(method_files=method_files, keyword=method)
 
         return printable_str
