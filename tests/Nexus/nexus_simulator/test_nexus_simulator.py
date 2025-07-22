@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from _pytest.recwarn import WarningsRecorder
 from pandas._testing import assert_frame_equal
 
+from ResSimpy import NexusSimulator
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
@@ -34,10 +35,11 @@ from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from ResSimpy.Nexus.NexusSimulator import NexusSimulator, IPRTable
+from ResSimpy.Nexus.DataModels.IPRTables import IPRTables
 from pytest_mock import MockerFixture
 from unittest.mock import Mock
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.NexusSimulator import IPRTable
 from ResSimpy.Nexus.NexusWells import NexusWells
 from ResSimpy.Nexus.NexusRelPermMethods import NexusRelPermMethods
 from ResSimpy.Nexus.NexusPVTMethods import NexusPVTMethods
@@ -2434,23 +2436,23 @@ INCLUDE /path/nexus_data/init/equil_info.txt
 SOURCE
 EOS NHC 7 COMPONENTS N2C1 CO2C3 C4-5 C6-14 C15-19 C20-35 C36+
 !
-TIME    15/08/2026
+TIME    08/15/2026
 IPRTABLE
-PRES       QO       QW       QG         N2C1      C6-14
-9999      5772.7   0.0      89460.0     0.9       0.1
-12300     5.523    23412.   20319       0.85      0.15
+PRES       QO           QW              QG          N2C1         C6-14
+9999     5772.70000   0.00000      89460.00000     0.90000      0.10000
+12300    5.52300     23412.00000   20319.00000     0.850000     0.15000
 ENDIPRTABLE
 """, {'PRES': [9999, 12300],
-      'QO': [5772.7, 5.523],
-      'QW': [0.0, 23412.],
-      'QG': [89460.0, 20319],
-      'N2C1': [0.9, 0.85],
-      'C6-14': [0.1, 0.15]}),
+      'QO': [5772.70000, 5.52300],
+      'QW': [0.00000, 23412.00000],
+      'QG': [89460.00000, 20319.00000],
+      'N2C1': [0.90000, 0.850000],
+      'C6-14': [0.10000, 0.15000]}),
 
 
                              ("""TEST CASE 2:
 SOURCE BLACKOIL 
-TIME    5/15/2013 
+TIME    05/15/2013 
 IPRTABLE 
 PRES            QO            QW          QG           N2C1        C6-14
 4490.64700    16.15331      0.00000    5.75058       0.80000     0.30000
@@ -2465,17 +2467,17 @@ ENDIPRTABLE
       'C6-14': [0.30000, 0.20000, 0.20000]}),
 
                              ("""TEST CASE 3"
-TIME  15/09/2026
+TIME  09/15/2026
 IPRTABLE
-PRES       QO       QW       QG       N2C1      C6-14    
-9999      5588.7    0.0     8946.0    0.9       0.1
+PRES       QO       QW           QG         N2C1      C6-14    
+9999      5588.7   0.00000   8946.00000   0.90000     0.10000
 ENDIPRTABLE                                    
 """, {'PRES': [9999],
-      'QO': [5588.7],
-      'QW': [0.0],
-      'QG': [8946.0],
-      'N2C1': [0.9],
-      'C6-14': [0.1]})
+      'QO': [5588.70000],
+      'QW': [0.00000],
+      'QG': [8946.00000],
+      'N2C1': [0.90000],
+      'C6-14': [0.10000]})
 
                          ])
 def test_read_iprtables(file_contents, expected_data):
@@ -2485,7 +2487,41 @@ def test_read_iprtables(file_contents, expected_data):
     expected_result = pd.DataFrame(data=expected_data)
 
     # Act
-    result = IPRTable.read_iprtables_as_df(file_contents.splitlines(keepends=True))
+
+    read = IPRTables()
+    result = read.read_iprtables_as_df(file_contents.splitlines(keepends=True))
 
     # Assert
     assert_frame_equal(result, expected_result)
+
+
+
+
+
+def test_load_iprtables():
+    """Testing loading in the IPRTables"""
+
+    # Arrange
+    file_contents = """
+    IPRTABLE
+    PRES       QO   
+    9999      5772.7
+    12300     5.523
+    ENDIPRTABLE
+    """
+
+    load = IPRTables()
+    data = {'PRES': [9999, 12300],
+            'QO': [5772.7, 5.523]}
+    df = pd.DataFrame(data=data)
+    expected_tables = [IPRTable(table=df)]
+
+
+    # Act
+    load.read_iprtables_as_df(file_as_list=file_contents.splitlines(keepends=True))
+    result = load.tables
+
+    # Assert
+    assert result == expected_tables
+
+
