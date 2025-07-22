@@ -2449,7 +2449,6 @@ ENDIPRTABLE
       'N2C1': [0.90000, 0.850000],
       'C6-14': [0.10000, 0.15000]}),
 
-
                              ("""TEST CASE 2:
 SOURCE BLACKOIL 
 TIME    05/15/2013 
@@ -2495,14 +2494,14 @@ def test_read_iprtables(file_contents, expected_data):
     assert_frame_equal(result, expected_result)
 
 
-
-
-
 def test_load_iprtables():
+    # basic test case to load in the IPRTables with one dict.
+
     """Testing loading in the IPRTables"""
 
     # Arrange
     file_contents = """
+    TIME  08/15/2026
     IPRTABLE
     PRES       QO   
     9999      5772.7
@@ -2514,8 +2513,7 @@ def test_load_iprtables():
     data = {'PRES': [9999, 12300],
             'QO': [5772.7, 5.523]}
     df = pd.DataFrame(data=data)
-    expected_tables = [IPRTable(table=df)]
-
+    expected_tables = [IPRTable(table=df, date='08/15/2026')]
 
     # Act
     load.read_iprtables_as_df(file_as_list=file_contents.splitlines(keepends=True))
@@ -2523,5 +2521,3 @@ def test_load_iprtables():
 
     # Assert
     assert result == expected_tables
-
-
