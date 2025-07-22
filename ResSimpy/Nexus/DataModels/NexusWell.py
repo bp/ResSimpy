@@ -22,7 +22,7 @@ class NexusWell(Well):
     _wellmods: list[NexusWellMod]
     _parent_wells_instance: NexusWells = field(compare=False, repr=False)
 
-    def __init__(self, well_name: str, completions: list[NexusCompletion], unit_system: UnitSystem,
+    def __init__(self, well_name: str, completions: Sequence[NexusCompletion], unit_system: UnitSystem,
                  parent_wells_instance: NexusWells, wellmods: Sequence[NexusWellMod] | None = None,
                  well_type: Optional[WellType] = None) -> None:
         """Initialises the NexusWell class.
@@ -36,8 +36,7 @@ class NexusWell(Well):
             well_type (Optional[WellType]): Type of the well as an enum. Defaults to None.
         """
         self._parent_wells_instance = parent_wells_instance
-        if not isinstance(completions, list):
-            completions = list(completions)
+
         if wellmods is None:
             wellmods = []
         elif not isinstance(wellmods, list):
