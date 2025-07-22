@@ -1,4 +1,4 @@
-"""Class for collection of IPRs"""
+"""Class for collection of IPRs."""
 import os
 from typing import Optional
 import pandas as pd
@@ -13,13 +13,14 @@ class IPRTables:
     __inputs: list[IPRTable]
     __files: dict[int, NexusFile]
 
-    def __init__(self, tables: Optional[list[IPRTable]] = None, files: Optional[dict[int, NexusFile]] = None,
+    def __init__(self, tables: Optional[list[IPRTable]], files: Optional[dict[int, NexusFile]] = None,
                  inputs: Optional[list[IPRTable]] = None) -> None:
-        """ Class for collections of IPRs
+        """Class for collections of IPRs.
+
         Args:
-            tables: Collections of IPR tables.
-            inputs(Optional[list[IPRTable]]): Collection of Nexus IPR methods.
-            files(Optional[list[IPRTable]]): Collection of IPR files.
+            tables: Collections of IPR tables
+            inputs (Optional[list[IPRTable]]): Collection of Nexus IPR methods.
+            files (Optional[list[IPRTable]]): Collection of IPR files.
         """
 
         if tables is None:
@@ -31,7 +32,7 @@ class IPRTables:
         self.__files = files
 
     def load_iprtables(self) -> None:
-        """loads a collection of iprtables"""
+        """Loads a collection of iprtables."""
         if self.__files is not None and len(self.__files) > 0:
             for table_line in self.__files.keys():
                 ipr_file = self.__files[table_line]
