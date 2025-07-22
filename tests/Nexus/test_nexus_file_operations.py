@@ -437,7 +437,7 @@ def test_get_expected_token_value_value_present():
 ])
 def test_get_next_value_single_line(line, expected_result):
     # Act
-    result = nfo.get_next_value(0, [line])
+    result = nfo.get_next_value(0, [line], remove_quotation_marks=True)
     # Assert
     assert result == expected_result
 
@@ -455,7 +455,7 @@ def test_get_next_value_single_line(line, expected_result):
 ])
 def test_get_next_value_multiple_lines(file, expected_result):
     # Act
-    result = nfo.get_next_value(0, file)
+    result = nfo.get_next_value(0, file, remove_quotation_marks=True)
     # Assert
     assert result == expected_result
 
