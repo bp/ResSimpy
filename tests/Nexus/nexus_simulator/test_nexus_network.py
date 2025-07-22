@@ -1941,56 +1941,61 @@ ENDWELLS
 
 
 @pytest.mark.parametrize('model_constraints, model_targets, expected_targets',
-    [
-    # Constraints as dict
-    ({'well_1': [NexusConstraint(name='well_1', qmult_oil_rate=123.4, date='25/07/2026',
-                                                   date_format=DateFormat.DD_MM_YYYY)]},
-    [NexusTarget(properties_dict={'control_connections': 'well_list_1', 'value': 10000.0},
-                                 name='well_targ_1', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
-                     NexusTarget(properties_dict={'control_connections': 'well_list_2', 'value': 10000.0},
-                                 name='well_targ_2', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)
-                     ],
-    [NexusTarget(properties_dict={'control_connections': 'well_list_1', 'value': 10000.0}, name='well_targ_1',
-                                date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)]
-      ),
+                         [
+                             # Constraints as dict
+                             ({'well_1': [NexusConstraint(name='well_1', qmult_oil_rate=123.4, date='25/07/2026',
+                                                          date_format=DateFormat.DD_MM_YYYY)]},
+                              [NexusTarget(properties_dict={'control_connections': 'well_list_1', 'value': 10000.0},
+                                           name='well_targ_1', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+                               NexusTarget(properties_dict={'control_connections': 'well_list_2', 'value': 10000.0},
+                                           name='well_targ_2', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)
+                               ],
+                              [NexusTarget(properties_dict={'control_connections': 'well_list_1', 'value': 10000.0},
+                                           name='well_targ_1',
+                                           date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)]
+                              ),
 
-     # Constraints as a list
-    ([NexusConstraint(name='well_1', qmult_oil_rate=123.4, date='25/07/2026',
-                                                   date_format=DateFormat.DD_MM_YYYY)],
-    [NexusTarget(properties_dict={'control_connections': 'well_list_1', 'value': 10000.0},
-                                 name='well_targ_1', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
-                     NexusTarget(properties_dict={'control_connections': 'well_list_2', 'value': 10000.0},
-                                 name='well_targ_2', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)
-                     ],
-    [NexusTarget(properties_dict={'control_connections': 'well_list_1', 'value': 10000.0}, name='well_targ_1',
-                                date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)]
-     ),
+                             # Constraints as a list
+                             ([NexusConstraint(name='well_1', qmult_oil_rate=123.4, date='25/07/2026',
+                                               date_format=DateFormat.DD_MM_YYYY)],
+                              [NexusTarget(properties_dict={'control_connections': 'well_list_1', 'value': 10000.0},
+                                           name='well_targ_1', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+                               NexusTarget(properties_dict={'control_connections': 'well_list_2', 'value': 10000.0},
+                                           name='well_targ_2', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)
+                               ],
+                              [NexusTarget(properties_dict={'control_connections': 'well_list_1', 'value': 10000.0},
+                                           name='well_targ_1',
+                                           date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)]
+                              ),
 
-    # Target single connection
-    ([NexusConstraint(name='well_1', qmult_oil_rate=123.4, date='25/07/2026',
-                      date_format=DateFormat.DD_MM_YYYY)],
-     [NexusTarget(properties_dict={'control_connections': 'well_1', 'value': 10000.0},
-                  name='well_targ_1', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
-      NexusTarget(properties_dict={'control_connections': 'well_list_2', 'value': 10000.0},
-                  name='well_targ_2', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)
-      ],
-     [NexusTarget(properties_dict={'control_connections': 'well_1', 'value': 10000.0}, name='well_targ_1',
-                  date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)]
-     ),
+                             # Target single connection
+                             ([NexusConstraint(name='well_1', qmult_oil_rate=123.4, date='25/07/2026',
+                                               date_format=DateFormat.DD_MM_YYYY)],
+                              [NexusTarget(properties_dict={'control_connections': 'well_1', 'value': 10000.0},
+                                           name='well_targ_1', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+                               NexusTarget(properties_dict={'control_connections': 'well_list_2', 'value': 10000.0},
+                                           name='well_targ_2', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)
+                               ],
+                              [NexusTarget(properties_dict={'control_connections': 'well_1', 'value': 10000.0},
+                                           name='well_targ_1',
+                                           date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)]
+                              ),
 
-    # Target conlist
-    ([NexusConstraint(name='well_1', qmult_oil_rate=123.4, date='25/07/2026',
-                      date_format=DateFormat.DD_MM_YYYY)],
-     [NexusTarget(properties_dict={'control_connections': 'con_list_1', 'value': 10000.0},
-                  name='well_targ_1', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
-      NexusTarget(properties_dict={'control_connections': 'con_list_2', 'value': 10000.0},
-                  name='well_targ_2', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)
-      ],
-     [NexusTarget(properties_dict={'control_connections': 'con_list_1', 'value': 10000.0}, name='well_targ_1',
-                  date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)]
-     ),
-     ],
-ids=['constraints as dict', 'constraints as a list', 'target single connection', 'target conlist'])
+                             # Target conlist
+                             ([NexusConstraint(name='well_1', qmult_oil_rate=123.4, date='25/07/2026',
+                                               date_format=DateFormat.DD_MM_YYYY)],
+                              [NexusTarget(properties_dict={'control_connections': 'con_list_1', 'value': 10000.0},
+                                           name='well_targ_1', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
+                               NexusTarget(properties_dict={'control_connections': 'con_list_2', 'value': 10000.0},
+                                           name='well_targ_2', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)
+                               ],
+                              [NexusTarget(properties_dict={'control_connections': 'con_list_1', 'value': 10000.0},
+                                           name='well_targ_1',
+                                           date='25/07/2026', date_format=DateFormat.DD_MM_YYYY)]
+                              ),
+                         ],
+                         ids=['constraints as dict', 'constraints as a list', 'target single connection',
+                              'target conlist'])
 def test_get_all_linked_objects(mocker: MockerFixture, model_constraints, model_targets, expected_targets):
     # Arrange
     model_nodes = [NexusNode(name='well_1', depth=456, date='25/07/2026', date_format=DateFormat.DD_MM_YYYY),
@@ -2014,12 +2019,13 @@ def test_get_all_linked_objects(mocker: MockerFixture, model_constraints, model_
                                                   date_format=DateFormat.DD_MM_YYYY)
                               ]
 
-    model_well_heads = [NexusWellhead(name='well_1_wh', well='well_1', properties_dict={}, pvt_method=1, date='25/07/2026',
-                                      date_format=DateFormat.DD_MM_YYYY),
-                        NexusWellhead(name='well_2_wh', well='well_2', properties_dict={}, pvt_method=1,
-                                      date='25/07/2026',
-                                      date_format=DateFormat.DD_MM_YYYY),
-                        ]
+    model_well_heads = [
+        NexusWellhead(name='well_1_wh', well='well_1', properties_dict={}, pvt_method=1, date='25/07/2026',
+                      date_format=DateFormat.DD_MM_YYYY),
+        NexusWellhead(name='well_2_wh', well='well_2', properties_dict={}, pvt_method=1,
+                      date='25/07/2026',
+                      date_format=DateFormat.DD_MM_YYYY),
+        ]
 
     model_well_bores = [NexusWellbore(properties_dict={'diameter': 0.356}, name='well_1', date='25/07/2026',
                                       date_format=DateFormat.DD_MM_YYYY),
@@ -2034,7 +2040,7 @@ def test_get_all_linked_objects(mocker: MockerFixture, model_constraints, model_
                         ]
 
     model_conlists = [NexusConList(name='con_list_1', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY,
-                                      elements_in_the_list=['well_1', 'well_2']),
+                                   elements_in_the_list=['well_1', 'well_2']),
                       NexusConList(name='con_list_2', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY,
                                    elements_in_the_list=['well_2', 'well_3'])
                       ]
@@ -2086,18 +2092,19 @@ def test_get_all_linked_objects(mocker: MockerFixture, model_constraints, model_
                                             node_out='well_1_wh', date='25/07/2026',
                                             date_format=DateFormat.DD_MM_YYYY)],
         'CONSTRAINTS': [NexusConstraint(name='well_1', qmult_oil_rate=123.4, date='25/07/2026',
-                                                   date_format=DateFormat.DD_MM_YYYY)],
+                                        date_format=DateFormat.DD_MM_YYYY)],
         'TARGETS': expected_targets,
         'WELL_CONNECTIONS': [NexusWellConnection(name='well_1', stream='GAS', date='25/07/2026',
-                                                  date_format=DateFormat.DD_MM_YYYY)],
-        'WELLHEADS': [NexusWellhead(name='well_1_wh', well='well_1', properties_dict={}, pvt_method=1, date='25/07/2026',
-                                      date_format=DateFormat.DD_MM_YYYY)],
+                                                 date_format=DateFormat.DD_MM_YYYY)],
+        'WELLHEADS': [
+            NexusWellhead(name='well_1_wh', well='well_1', properties_dict={}, pvt_method=1, date='25/07/2026',
+                          date_format=DateFormat.DD_MM_YYYY)],
         'WELLBORES': [NexusWellbore(properties_dict={'diameter': 0.356}, name='well_1', date='25/07/2026',
-                                      date_format=DateFormat.DD_MM_YYYY)],
+                                    date_format=DateFormat.DD_MM_YYYY)],
         'WELLLISTS': [NexusWellList(name='well_list_1', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY,
-                                      elements_in_the_list=['well_1', 'well_2'])],
+                                    elements_in_the_list=['well_1', 'well_2'])],
         'CONLISTS': [NexusConList(name='con_list_1', date='25/07/2026', date_format=DateFormat.DD_MM_YYYY,
-                                      elements_in_the_list=['well_1', 'well_2'])]
+                                  elements_in_the_list=['well_1', 'well_2'])]
     }
 
     # Act
@@ -2105,3 +2112,44 @@ def test_get_all_linked_objects(mocker: MockerFixture, model_constraints, model_
 
     # Assert
     assert result == expected_result
+
+
+def test_load_network_well_names_with_quotation_marks(mocker):
+    # Arrange
+
+    dummy_nexus_model = get_fake_nexus_simulator(mocker=mocker)
+    start_date = '01/01/1980'
+
+    file_contents = """
+!     Fluid model for network
+BLACKOIL
+
+!     Wells definition
+WELLS
+NAME   STREAM NUMBER DATUM CROSSFLOW CROSS_SHUT
+ "1"    WATER      1  2776.728       OFF        OFF
+ "2" PRODUCER      2  2776.728       OFF        OFF
+ENDWELLS
+
+"""
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
+    surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
+
+    dummy_nexus_model._model_files = FcsNexusFile(location='test', surface_files={'1': surface_file})
+    dummy_nexus_model._start_date = start_date
+    network_object = NexusNetwork(model=dummy_nexus_model)
+
+    expected_well_connections = [
+        NexusWellConnection(name='"1"', stream='WATER', number=1, datum_depth=2776.728,
+                            date='01/01/1980', crossflow='OFF', crossshut='OFF',
+                            date_format=DateFormat.MM_DD_YYYY, start_date=start_date),
+        NexusWellConnection(name='"2"', stream='PRODUCER', number=2, datum_depth=2776.728,
+                            date='01/01/1980', crossflow='OFF', crossshut='OFF',
+                            date_format=DateFormat.MM_DD_YYYY, start_date=start_date)
+    ]
+
+    # Act
+    result = network_object.well_connections.get_all()
+
+    # Assert
+    assert result == expected_well_connections

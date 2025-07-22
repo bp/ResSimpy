@@ -378,7 +378,8 @@ class File(FileBase):
                 continue
 
             inc_file_path = fo.get_token_value(token='INCLUDE', token_line=line, file_list=file_as_list[i:],
-                                               comment_characters=comment_characters, single_c_comments=is_nexus_file)
+                                               comment_characters=comment_characters, single_c_comments=is_nexus_file,
+                                               remove_quotation_marks=True)
             if inc_file_path is None:
                 continue
             inc_full_path = fo.get_full_file_path(inc_file_path, origin=full_file_path)
