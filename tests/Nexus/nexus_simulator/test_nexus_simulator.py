@@ -10,6 +10,7 @@ from pandas._testing import assert_frame_equal
 
 from ResSimpy import NexusSimulator
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
+from ResSimpy.Nexus.DataModels.IPRTable import IPRTable
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
@@ -39,7 +40,6 @@ from ResSimpy.Nexus.DataModels.IPRTables import IPRTables
 from pytest_mock import MockerFixture
 from unittest.mock import Mock
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.Nexus.NexusSimulator import IPRTable
 from ResSimpy.Nexus.NexusWells import NexusWells
 from ResSimpy.Nexus.NexusRelPermMethods import NexusRelPermMethods
 from ResSimpy.Nexus.NexusPVTMethods import NexusPVTMethods
