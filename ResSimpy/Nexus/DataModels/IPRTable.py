@@ -21,10 +21,10 @@ class IPRTable(DataObjectMixin):
     @property
     def units(self) -> BaseUnitMapping:
         """Returns BaseUnitMapping."""
-        return BaseUnitMapping()
+        return BaseUnitMapping(unit_system=None)
 
     @staticmethod
-    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
+    def get_keyword_mapping() -> dict[str, tuple[str, type[float]]]:
         """Gets the mapping of keywords to attribute definitions."""
         mapping = {
             'PRES': ('pressure', float),

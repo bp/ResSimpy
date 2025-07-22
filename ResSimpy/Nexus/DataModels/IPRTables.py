@@ -28,8 +28,15 @@ class IPRTables:
         else:
             self.tables = tables
 
-        self.__inputs = inputs
-        self.__files = files
+        if inputs is None:
+            self.__inputs = []
+        else:
+            self.__inputs = inputs
+
+        if files is None:
+            self.__files = {}
+        else:
+            self.__files = files
 
     def load_iprtables(self) -> None:
         """Loads a collection of iprtables."""
@@ -50,7 +57,7 @@ class IPRTables:
 
         date = ''
         reading_line = False
-        table_lines = []
+        table_lines: list[str] = []
         all_tables = []
 
         for line in file_as_list:
