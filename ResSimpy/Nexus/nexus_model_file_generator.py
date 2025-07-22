@@ -93,7 +93,7 @@ class NexusModelFileGenerator:
 
         # Write out all events for each date
         for date in all_event_dates:
-            if date != self.model.start_date:
+            if date != self.model.start_iso_date:
                 full_schedule += f"TIME {date.strftime_dateformat(self.model.date_format)}\n"
 
             well_connections_for_date = [x for x in all_well_connections if x.iso_date == date]

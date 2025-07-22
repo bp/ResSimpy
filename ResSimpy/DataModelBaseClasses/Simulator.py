@@ -20,6 +20,7 @@ from ResSimpy.DataModelBaseClasses.Separator import Separator
 from ResSimpy.DataModelBaseClasses.Valve import Valve
 from ResSimpy.DataModelBaseClasses.Water import Water
 from ResSimpy.GenericContainerClasses.Wells import Wells
+from ResSimpy.Time.ISODateTime import ISODateTime
 
 
 @dataclass(kw_only=True, init=False)
@@ -160,6 +161,12 @@ class Simulator(ABC):
         """Returns model file of this instance."""
 
         return self._model_files
+
+    @property
+    @abstractmethod
+    def start_iso_date(self) -> ISODateTime:
+        """Returns the start date of the model in ISO format."""
+        raise NotImplementedError("Implement this method on the derived class")
 
     """ Class Methods """
 

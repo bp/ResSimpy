@@ -14,28 +14,37 @@ def test_write_surface_section(mocker):
     # Arrange
     model = get_fake_nexus_simulator(mocker)
     start_date = '01/01/2019'
+    model.start_date = start_date
+
     model_file_generator = NexusModelFileGenerator(model=model, model_name='new_path.fcs')
-    well_connection_props1 = {'name': 'P01', 'stream': 'PRODUCER', 'number': 1, 'datum_depth': 14000,
-                              'gradient_calc': 'MOBGRAD', 'crossflow': 'OFF', 'crossshut': 'OFF',
-                              'date': '01/01/2020', 'unit_system': UnitSystem.METRIC}
-    well_connection_props2 = {'name': 'P02', 'stream': 'PRODUCER', 'number': 2, 'datum_depth': 14000,
-                              'gradient_calc': 'MOBGRAD', 'crossflow': 'OFF', 'crossshut': 'OFF',
-                              'date': '01/01/2020', 'unit_system': UnitSystem.METRIC}
-    wellcon1 = NexusWellConnection(well_connection_props1, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
-    wellcon2 = NexusWellConnection(well_connection_props2, date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    model.network._has_been_loaded = True
+
+    wellcon1 = NexusWellConnection(name='P01', stream='PRODUCER', number=1, datum_depth=14000,
+                                   gradient_calc='MOBGRAD', crossflow='OFF', crossshut='OFF',
+                                   date='01/01/2020', unit_system=UnitSystem.METRIC, date_format=DateFormat.DD_MM_YYYY,
+                                   start_date=start_date)
+    wellcon2 = NexusWellConnection(name='P02', stream='PRODUCER', number=2, datum_depth=14000,
+                                   gradient_calc='MOBGRAD', crossflow='OFF', crossshut='OFF',
+                                   date='01/01/2020', unit_system=UnitSystem.METRIC, 
+                                   date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    # these should be combined to give 1 entry
+    wellcon2_additional_wellcon = NexusWellConnection(name='P02', gas_mobility='GASMETHOD', non_darcy_flow_model='ND',
+                                                      crossflow='ON',
+                                                      date='01/01/2020', unit_system=UnitSystem.METRIC,
+                                                      date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    model.network.well_connections._add_to_memory([wellcon1, wellcon2, wellcon2_additional_wellcon])
 
     # add some constraints
-
-    constraints = {'P01': [NexusConstraint(name='P01', max_surface_oil_rate=1000.23, max_pressure=234.223,
+    constraints = {'P01': [NexusConstraint(name='P01', max_gor=100000, max_pressure=234.223,
+                                           date='01/01/2019', unit_system=UnitSystem.METRIC),
+                           NexusConstraint(name='P01', max_surface_oil_rate=1000.23, max_pressure=234.223,
                                            date='01/01/2020', unit_system=UnitSystem.METRIC)],
                    'P02': [NexusConstraint(name='P02', max_surface_oil_rate=1500.45, max_pressure=300.123,
                                            date='01/01/2020', unit_system=UnitSystem.METRIC),
                            NexusConstraint(name='P02', max_surface_oil_rate=2000.67, max_pressure=400.456,
                                            date='01/01/2021', unit_system=UnitSystem.METRIC)]}
-    
-    model.network._has_been_loaded = True
-    model.network.well_connections._add_to_memory([wellcon1, wellcon2])
     model.network.constraints._add_to_memory(constraints)
+    
     model.network.nodes._add_to_memory([
         NexusNode(name='NODE1', date='01/01/2020', unit_system=UnitSystem.METRIC, type='test', 
                   date_format=DateFormat.DD_MM_YYYY),
@@ -59,11 +68,15 @@ def test_write_surface_section(mocker):
     ])
 
 
-    expected_result = """TIME 01/01/2020
+    expected_result = """CONSTRAINTS
+P01 GORMAX 100000 PMAX 234.223
+ENDCONSTRAINTS
+
+TIME 01/01/2020
 WELLS
-NAME STREAM NUMBER DATUM DATGRAD CROSS_SHUT CROSSFLOW
-P01 PRODUCER 1 14000 MOBGRAD OFF OFF
-P02 PRODUCER 2 14000 MOBGRAD OFF OFF
+NAME STREAM NUMBER DATUM DATGRAD CROSS_SHUT CROSSFLOW ND GASMOB
+P01 PRODUCER 1 14000 MOBGRAD OFF OFF NA NA
+P02 PRODUCER 2 14000 MOBGRAD OFF ON ND GASMETHOD
 ENDWELLS
 
 NODES

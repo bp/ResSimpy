@@ -32,13 +32,14 @@ from ResSimpy.Nexus.runcontrol_operations import SimControls
 from ResSimpy.Nexus.logfile_operations import Logging
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 from ResSimpy.DataModelBaseClasses.Simulator import Simulator
+from ResSimpy.Time.ISODateTime import ISODateTime
 
 
 class NexusSimulator(Simulator):
 
     def __init__(self, origin: Optional[str] = None, destination: Optional[str] = None,
                  root_name: Optional[str] = None, nexus_data_name: str = "data", write_times: bool = False,
-                 manual_fcs_tidy_call: bool = False, lazy_loading: bool = True) -> None:
+                 manual_fcs_tidy_call: bool = False, lazy_loading: bool = True, start_date: None | str = None) -> None:
         """Nexus simulator class. Inherits from the Simulator super class.
 
         Args:
@@ -52,6 +53,8 @@ class NexusSimulator(Simulator):
                 Defaults to False.
             lazy_loading(bool): If set to True, parts of the model will only be loaded in when requested via \
                 properties on the object.
+            start_date: (str, optional): The start date of the model. If not provided, it will be inferred from a read \
+                in reservoir deck, specifically the runcontrol file.
 
         Attributes:
             run_control_file_path (Optional[str]): file path to the run control file - derived from the fcs file
@@ -91,7 +94,7 @@ class NexusSimulator(Simulator):
             raise ValueError(f'Origin path to model fcs file is required. Instead got {origin}.')
         self.origin: str = origin
 
-        self._start_date: str = ''
+        self._start_date: str = '' if start_date is None else start_date.strip()
         self.run_control_file_path: Optional[str] = ''
         self.__destination: Optional[str] = None
         self.date_format: DateFormat = DateFormat.MM_DD_YYYY  # Nexus default
@@ -331,6 +334,11 @@ class NexusSimulator(Simulator):
             rootname = os.path.basename(self._origin)
             rootname = rootname.split(".fcs")[0]
         self.__root_name = rootname
+
+    @property
+    def start_iso_date(self) -> ISODateTime:
+        """Returns the start date of the model in ISO format."""
+        return ISODateTime.convert_to_iso(date=self._start_date, date_format=self.date_format)
 
     @staticmethod
     def get_check_run_input_units_for_models(models: list[str]) -> tuple[Optional[bool], Optional[bool]]:

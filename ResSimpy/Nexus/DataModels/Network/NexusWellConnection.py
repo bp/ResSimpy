@@ -105,7 +105,7 @@ class NexusWellConnection(WellConnection):
                  unit_system: Optional[UnitSystem] = None, name: Optional[str] = None,
                  bh_node_name: Optional[str] = None, wh_node_name: Optional[str] = None,
                  stream: Optional[str] = None, number: Optional[int] = None, scale: Optional[float] = None,
-                 gradient_cal: Optional[str] = None, bottomhole_measured_depth: Optional[float] = None,
+                 gradient_calc: Optional[str] = None, bottomhole_measured_depth: Optional[float] = None,
                  add_tubing: Optional[int] = None, tracer: Optional[str] = None, con_type: Optional[str] = None,
                  pvt_method: Optional[int] = None, water_method: Optional[int] = None, bat_method: Optional[int] = None,
                  elevation_profile: Optional[str] = None, temperature_profile: Optional[str] = None,
@@ -140,7 +140,7 @@ class NexusWellConnection(WellConnection):
             stream (Optional[str]): Stream identifier (STREAM).
             number (Optional[int]): Identificaiton number (Number).
             scale (Optional[float]): Scaling factor (SCALE).
-            gradient_cal (Optional[str]): Gradient calculation method (DATGRAD).
+            gradient_calc (Optional[str]): Gradient calculation method (DATGRAD).
             bottomhole_measured_depth (Optional[float]): Measured depth of the bottom hole (BHMD).
             add_tubing (Optional[int]): Additional tubing indicator (ADDTUBING).
             tracer (Optional[str]): Tracer substance identifier (TRACERS).
@@ -196,7 +196,7 @@ class NexusWellConnection(WellConnection):
         self.stream = stream
         self.number = number
         self.scale = scale
-        self.gradient_calc = gradient_cal
+        self.gradient_calc = gradient_calc
         self.bottomhole_measured_depth = bottomhole_measured_depth
         self.add_tubing = add_tubing
         self.tracer = tracer
