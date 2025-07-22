@@ -3,12 +3,6 @@ from typing import Sequence, TypeVar
 
 from ResSimpy import NexusSimulator
 from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
-from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
-from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
-from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
-from ResSimpy.Nexus.DataModels.Network.NexusTarget import NexusTarget
-from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
-from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Time.ISODateTime import ISODateTime
 
 T = TypeVar('T', bound=DataObjectMixin)
@@ -55,44 +49,31 @@ class NexusModelFileGenerator:
 
         if self.model.network is None:
             return full_schedule
-        all_event_dates: list[ISODateTime] = []
-        all_constraints: list[NexusConstraint] = []
-        all_well_connections: list[NexusWellConnection] = []
-        all_targets: list[NexusTarget] = []
-        all_welllists: list[NexusWellList] = []
-        all_nodes: list[NexusNode] = []
-        all_connections: list[NexusNodeConnection] = []
+        all_well_connections = self.model.network.well_connections.get_all()
+        all_targets = self.model.network.targets.get_all()
+        all_welllists = self.model.network.welllists.get_all()
+        all_nodes = self.model.network.nodes.get_all()
+        all_connections = self.model.network.connections.get_all()
+
+        network_objects = [all_well_connections, all_targets, all_welllists, all_nodes, all_connections]
+
+        all_constraints = self.model.network.constraints.get_all()
+
+        all_event_dates: set[ISODateTime] = set()
+
+        all_event_dates.add(self.model.start_iso_date)
+        for name, constraints in all_constraints.items():
+            all_event_dates.update({x.iso_date for x in constraints})
+
         # get dates for all the items
-        if self.model.network.welllists is not None:
-            for welllist in self.model.network.welllists.welllists:
-                all_welllists = store_dates_for_objects(all_welllists, all_event_dates, welllist)
-
-        if self.model.network.constraints is not None:
-            for name, constraints in self.model.network.constraints.get_all().items():
-                for constraint in constraints:
-                    all_constraints = store_dates_for_objects(all_constraints, all_event_dates, constraint)
-
-        if self.model.network.well_connections is not None:
-            for well_connection in self.model.network.well_connections.get_all():
-                all_well_connections = store_dates_for_objects(all_well_connections, all_event_dates, well_connection)
-
-        if self.model.network.targets is not None:
-            for target in self.model.network.targets.get_all():
-                all_targets = store_dates_for_objects(all_targets, all_event_dates, target)
-
-        if self.model.network.connections is not None:
-            for connection in self.model.network.connections.get_all():
-                all_connections = store_dates_for_objects(all_connections, all_event_dates, connection)
-
-        if self.model.network.nodes is not None:
-            for node in self.model.network.nodes.get_all():
-                all_nodes = store_dates_for_objects(all_nodes, all_event_dates, node)
+        for net_obj in network_objects:
+            all_event_dates.update({x.iso_date for x in net_obj})
 
         # Sort the dates
-        all_event_dates.sort()
+        ordered_all_event_dates = sorted(all_event_dates)
 
         # Write out all events for each date
-        for date in all_event_dates:
+        for date in ordered_all_event_dates:
             if date != self.model.start_iso_date:
                 full_schedule += f"TIME {date.strftime_dateformat(self.model.date_format)}\n"
 
@@ -115,7 +96,7 @@ class NexusModelFileGenerator:
                 full_schedule += self.model.network.connections.to_string_for_date(date=date)
                 full_schedule += '\n'
 
-            constraints_for_date = [x for x in all_constraints if x.iso_date == date]
+            constraints_for_date = {k: [x for x in v if x.iso_date == date] for k,v in all_constraints.items()}
             if any(constraints_for_date) and self.model.network.constraints is not None:
                 full_schedule += self.model.network.constraints.to_string_for_date(date=date)
                 full_schedule += '\n'

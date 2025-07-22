@@ -159,7 +159,7 @@ class NetworkOperationsMixIn(ABC):
         sorted_by_date_sim_ordering = sorted(current_ordering, key=lambda x: (x[1].iso_date, x[0]))
         sorted_by_date = [x[1] for x in sorted_by_date_sim_ordering]
         # split by the name of the object
-        unique_names = list({x.name for x in sorted_by_date})
+        unique_names = list({x.name: x for x in sorted_by_date}.keys())
         return sorted_by_date, unique_names
 
     @staticmethod
@@ -256,11 +256,24 @@ class NetworkOperationsMixIn(ABC):
             resolved_objects.append(new_resolved_object)
         return resolved_objects
 
+    @property
+    def resolved_network_objects(self) -> Sequence[DataObjectMixin]:
+        """Returns the resolved network objects."""
+        if not hasattr(self, '_resolved_network_objects'):
+            self._resolved_network_objects = self.resolve_carried_over_attributes(self.get_all())
+        return self._resolved_network_objects
+
     def to_string_for_date(self, date: ISODateTime) -> str:
         """Returns a string representation of the network object for the date."""
         printable_str = ''
         # get the required objects for the date
-        network_objects_for_date: list[DataObjectMixin] = [x for x in self.get_all() if x.iso_date == date]
+        network_objects_for_date: list[DataObjectMixin] = [x for x in self.resolved_network_objects if
+                                                           x.iso_date == date]
+        named_network_objects_for_date = {x.name: x for x in network_objects_for_date}
+        # only pick the last object by name for the date
+        network_objects_for_date = [[x for x in network_objects_for_date if x.name == y][-1]
+                                    for y in named_network_objects_for_date.keys()]
+
         if not network_objects_for_date:
             return printable_str
         printable_str += f'{self.table_header}\n'
