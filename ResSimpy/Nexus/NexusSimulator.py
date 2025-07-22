@@ -89,7 +89,7 @@ class NexusSimulator(Simulator):
         """
         if origin is None:
             raise ValueError(f'Origin path to model fcs file is required. Instead got {origin}.')
-        self.origin: str = origin
+        self.origin = origin
 
         self._start_date: str = ''
         self.run_control_file_path: Optional[str] = ''

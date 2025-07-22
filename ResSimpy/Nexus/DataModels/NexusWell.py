@@ -22,14 +22,14 @@ class NexusWell(Well):
     _wellmods: list[NexusWellMod]
     _parent_wells_instance: NexusWells = field(compare=False, repr=False)
 
-    def __init__(self, well_name: str, completions: Sequence[NexusCompletion], unit_system: UnitSystem,
+    def __init__(self, well_name: str, completions: list[NexusCompletion], unit_system: UnitSystem,
                  parent_wells_instance: NexusWells, wellmods: Sequence[NexusWellMod] | None = None,
                  well_type: Optional[WellType] = None) -> None:
         """Initialises the NexusWell class.
 
         Args:
             well_name (str): Name of the well
-            completions (Sequence[NexusCompletion]): List of completions for the well.
+            completions (list[NexusCompletion]): List of completions for the well.
             unit_system (UnitSystem): Unit system for the well.
             parent_wells_instance (NexusWells): Instance of the parent wells class that the well belongs to.
             wellmods (Sequence[NexusWellMod] | None): List of wellmods for the well. Defaults to None.

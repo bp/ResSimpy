@@ -62,9 +62,10 @@ class DataObjectMixin(ABC):
         return self.__date
 
     @date.setter
-    def date(self, value: str) -> None:
+    def date(self, value: None | str) -> None:
         self.__date = value
-        self.set_iso_date()
+        if value is not None:
+            self.set_iso_date()
 
     @property
     def start_date(self) -> Optional[str]:
