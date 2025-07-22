@@ -29,7 +29,6 @@ class NetworkOperationsMixIn(ABC):
             parent_network (Network): The parent network that the object is a part of.
         """
         self.__parent_network = parent_network
-        self._network_objects: list[DataObjectMixin]
 
     @abstractmethod
     def get_all(self) -> Sequence[Any]:
