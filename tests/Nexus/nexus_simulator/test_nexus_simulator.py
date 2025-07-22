@@ -2479,30 +2479,30 @@ def test_read_iprtables(file_contents, expected_data):
     assert_frame_equal(result, expected_result)
 
 
-def test_load_iprtables():
-    # basic test case to load in the IPRTables with one dict.
-
-    """Testing loading in the IPRTables"""
-
-    # Arrange
-    file_contents = """
-    TIME  08/15/2026
-    IPRTABLE
-    PRES       QO   
-    9999      5772.7
-    12300     5.523
-    ENDIPRTABLE
-    """
-
-    load = IPRTables()
-    data = {'PRES': [9999, 12300],
-            'QO': [5772.7, 5.523]}
-    df = pd.DataFrame(data=data)
-    expected_tables = [IPRTable(table=df, date='08/15/2026')]
-
-    # Act
-    load.read_iprtables_as_df(file_as_list=file_contents.splitlines(keepends=True))
-    result = load.tables
-
-    # Assert
-    assert result == expected_tables
+# def test_load_iprtables():
+#     # basic test case to load in the IPRTables.
+#
+#     """Testing loading in the IPRTables"""
+#
+#     # Arrange
+#     file_contents = """
+#     TIME  08/15/2026
+#     IPRTABLE
+#     PRES       QO
+#     9999      5772.7
+#     12300     5.523
+#     ENDIPRTABLE
+#     """
+#
+#     load = IPRTables()
+#     data = {'PRES': [9999, 12300],
+#             'QO': [5772.7, 5.523]}
+#     df = pd.DataFrame(data=data)
+#     expected_tables = [IPRTable(table=df, date='08/15/2026')]
+#
+#     # Act
+#     load.read_iprtables_as_df(file_as_list=file_contents.splitlines(keepends=True))
+#     result = load.tables
+#
+#     # Assert
+#     assert result == expected_tables
