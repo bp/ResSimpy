@@ -96,7 +96,7 @@ class NexusModelFileGenerator:
                 full_schedule += self.model.network.connections.to_string_for_date(date=date)
                 full_schedule += '\n'
 
-            constraints_for_date = {k: [x for x in v if x.iso_date == date] for k,v in all_constraints.items()}
+            constraints_for_date = {k: [x for x in v if x.iso_date == date] for k, v in all_constraints.items()}
             if any(constraints_for_date) and self.model.network.constraints is not None:
                 full_schedule += self.model.network.constraints.to_string_for_date(date=date)
                 full_schedule += '\n'
