@@ -997,7 +997,7 @@ PLOTBINARY
     mocker.patch("builtins.open", modifying_mock_open)
 
     # Act
-    simulation.reporting.add_map_properties_to_start_of_grid_file()
+    simulation._reporting.add_map_properties_to_start_of_grid_file()
 
     # Assert
     check_file_read_write_is_correct(expected_file_contents=expected_file_contents,
@@ -1051,7 +1051,7 @@ PLOTBINARY
     mocker.patch("builtins.open", modifying_mock_open)
 
     # Act
-    simulation.reporting.add_map_properties_to_start_of_grid_file()
+    simulation._reporting.add_map_properties_to_start_of_grid_file()
 
     # Assert
     check_file_read_write_is_correct_for_windows(expected_file_contents=expected_file_contents,
@@ -2247,7 +2247,7 @@ def test_model_summary(mocker, fluid_type, expected_fluid_type):
     # data for get_fluid_type
     fake_model_files = FcsNexusFile(location='test_location')
     fake_surface_file = NexusFile(location='test_surface_location', file_content_as_list=[f'BLACKOIL'])
-    fake_surface_files = {0: fake_surface_file}
+    fake_surface_files = {1: fake_surface_file}
     fake_model_files.surface_files = fake_surface_files
     model._model_files = fake_model_files
 
@@ -2339,21 +2339,6 @@ def test_model_summary(mocker, fluid_type, expected_fluid_type):
 
     # Assert
     assert result == expected_summary
-
-
-def test_load_fcs_file_multires_throws_error(mocker):
-    # Arrange
-    fcs_file = f"RUNCONTROL /path/to/runcontrol.dat\nRESERVoir res1 res1.fcs\n"
-    open_mock = mocker.mock_open(read_data=fcs_file)
-    mocker.patch("builtins.open", open_mock)
-
-    # Act
-    with pytest.raises(NotImplementedError) as nie:
-        _ = NexusSimulator(origin='testpath1/Path.fcs')
-
-    # Assert
-    assert str(nie.value) == 'Multiple reservoir models are not currently supported by ResSimpy.'
-
 
 @pytest.mark.parametrize('original_line, expected_line', [
     ('EQUIL method 1 my_file.dat', os.path.join('EQUIL method 1 /path/to', 'my_file.dat')),

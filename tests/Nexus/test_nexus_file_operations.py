@@ -38,11 +38,13 @@ from tests.utility_for_tests import get_fake_nexus_simulator
                           ("TOKEN\n", "TOKEN", True),
                           ("T", "T", True),
                           ("Brian", "B", False),
-                          ("C TOKEN", "TOKEN", False)
+                          ("C TOKEN", "TOKEN", False),
+                          ("'TOKEN' other stuff", "TOKEN", True),
+                          ('some stuff "TOKEN" other stuff', "TOKEN", True)
                           ], ids=["standard case", "token at start", "token at end", "no token", "token commented out",
                                   "token only part of longer word 1", "token only part of longer word 2",
                                   "token before comment", "token then tab", "token then newline", "single character",
-                                  "token in string", "C Comment"
+                                  "token in string", "C Comment", "Token in quotes", "Token in single quotes"
                                   ])
 def test_check_token(line_string, token, expected_result):
     # Act
@@ -435,7 +437,7 @@ def test_get_expected_token_value_value_present():
 ])
 def test_get_next_value_single_line(line, expected_result):
     # Act
-    result = nfo.get_next_value(0, [line])
+    result = nfo.get_next_value(0, [line], remove_quotation_marks=True)
     # Assert
     assert result == expected_result
 
@@ -446,12 +448,14 @@ def test_get_next_value_single_line(line, expected_result):
     (['!Comment Line 1', '\n', '\n', '\t', ' !Comment Line 2 ', '\n', ' ABCDEFG '], 'ABCDEFG'),
     (['!"First Value"', '"Second Value"'], 'Second Value'),
     (['C comment line', '1'], '1'),
-    (['"1 2"'], '1 2'),  # Checks that quoted values are returned in their entirety
+    (['"1 2" a'], '1 2'),  # Checks that quoted values are returned in their entirety
+    (["'3 4' /"], '3 4'),  # Checks that quoted values are returned in their entirety
+    (["'5 6 7' / '8 9'"], '5 6 7'),  # Multiple quoted lines
     (["! commented line", "  '3 4'\n"], '3 4'),
 ])
 def test_get_next_value_multiple_lines(file, expected_result):
     # Act
-    result = nfo.get_next_value(0, file)
+    result = nfo.get_next_value(0, file, remove_quotation_marks=True)
     # Assert
     assert result == expected_result
 

@@ -377,8 +377,9 @@ class File(FileBase):
                 # No include on this line, go to the next one.
                 continue
 
-            inc_file_path = fo.get_token_value(token='INCLUDE', token_line=line, file_list=file_as_list,
-                                               comment_characters=comment_characters, single_c_comments=is_nexus_file)
+            inc_file_path = fo.get_token_value(token='INCLUDE', token_line=line, file_list=file_as_list[i:],
+                                               comment_characters=comment_characters, single_c_comments=is_nexus_file,
+                                               remove_quotation_marks=True)
             if inc_file_path is None:
                 continue
             inc_full_path = fo.get_full_file_path(inc_file_path, origin=full_file_path)
@@ -612,6 +613,31 @@ class File(FileBase):
         if self.file_content_as_list is None:
             return ''
         return ''.join(self.file_content_as_list)
+
+    def get_include_file_from_filename(self, filename: str) -> list[File]:
+        """Retrieves a list of files matching the provided file name.
+
+        Args:
+            filename(str): file name to search for.
+        """
+        matching_files: list[File] = []
+
+        if filename in self.location:
+            matching_files.append(self)
+
+        if self.include_objects is None:
+            return matching_files
+
+        for file in self.include_objects:
+            if filename in file.location:
+                matching_files.append(file)
+            elif file.include_objects is not None and any(file.include_objects):
+                # If there are includes within this included file, search them as well.
+                embedded_matching_files = file.get_include_file_from_filename(filename=filename)
+                if any(embedded_matching_files):
+                    matching_files.extend(embedded_matching_files)
+
+        return matching_files
 
     @staticmethod
     def convert_line_to_full_file_path(line: str, full_base_file_path: str) -> str:

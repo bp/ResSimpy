@@ -78,9 +78,9 @@ def test_get_token_value(mocker: MockerFixture, line_contents, file_contents, ex
 
     # Act
     result = fo.get_token_value(token='MYTESTTOKEN', token_line=line_contents,
-                                file_list=dummy_file_as_list)
+                                file_list=dummy_file_as_list, remove_quotation_marks=True)
     with_index_result = fo.get_token_value_with_line_index(token='MYTESTTOKEN', token_line=line_contents,
-                                                           file_list=dummy_file_as_list)
+                                                           file_list=dummy_file_as_list, remove_quotation_marks=True)
     # Assert
     assert result == expected_result
     assert with_index_result == (expected_result, expected_line_index)
@@ -205,6 +205,18 @@ def test_load_three_part_date(date_str: str, start_index: int):
     # Act
     result = fo.load_in_three_part_date(initial_token='DATES', token_line='DATES\n',
                                         file_as_list=date_str.splitlines(keepends=True), start_index=start_index)
+
+    # Assert
+    assert result == "25 JUL 2026"
+
+
+def test_load_three_part_date_no_token():
+    # Arrange
+    token_line = """   25 JUL  2026"""
+
+    # Act
+    result = fo.load_in_three_part_date(initial_token=None, token_line=token_line,
+                                        file_as_list=[token_line], start_index=0)
 
     # Assert
     assert result == "25 JUL 2026"

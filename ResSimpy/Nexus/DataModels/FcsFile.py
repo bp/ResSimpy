@@ -4,11 +4,15 @@ from dataclasses import dataclass, field
 import os
 import warnings
 
+from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.FileOperations.File import File
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from typing import Optional
+from typing import Optional, Generator
 
 # Use correct Self type depending upon Python version
 import sys
+
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -54,6 +58,7 @@ class FcsNexusFile(NexusFile):
     adsorption_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
     flux_in_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
     files_info: list[tuple[Optional[str], Optional[str], Optional[datetime]]]
+    multi_reservoir_files: Optional[dict[str, FcsNexusFile]] = field(default_factory=dict)
 
     def __init__(
             self, location: str,
@@ -88,7 +93,8 @@ class FcsNexusFile(NexusFile):
             esp_files: Optional[dict[int, NexusFile]] = None,
             polymer_files: Optional[dict[int, NexusFile]] = None,
             adsorption_files: Optional[dict[int, NexusFile]] = None,
-            flux_in_files: Optional[dict[int, NexusFile]] = None
+            flux_in_files: Optional[dict[int, NexusFile]] = None,
+            multi_reservoir_files: Optional[dict[str, FcsNexusFile]] = None,
     ) -> None:
         """Initialises the FcsNexusFile class.
 
@@ -148,6 +154,8 @@ class FcsNexusFile(NexusFile):
             method number.
             flux_in_files: Optional[dict[int, NexusFile]: Collection of flux in files for the fcs file. Indexed by
             method number.
+            multi_reservoir_files: Optional[dict[str, FcsNexusFile]]: Collection of multi-reservoir files for the
+            top level fcs file. Indexed by reservoir name.
         """
         self.restart_file = restart_file
 
@@ -178,6 +186,8 @@ class FcsNexusFile(NexusFile):
         self.polymer_files = polymer_files if polymer_files is not None else get_empty_dict_int_nexus_file()
         self.adsorption_files = adsorption_files if adsorption_files is not None else get_empty_dict_int_nexus_file()
         self.flux_in_files = flux_in_files if flux_in_files is not None else get_empty_dict_int_nexus_file()
+        self.multi_reservoir_files: dict[str, FcsNexusFile] = multi_reservoir_files if (multi_reservoir_files
+                                                                                        is not None) else {}
         self.files_info = []
         super().__init__(location=location, include_locations=include_locations, origin=origin,
                          include_objects=include_objects, file_content_as_list=file_content_as_list)
@@ -186,7 +196,7 @@ class FcsNexusFile(NexusFile):
         printable_str = f'fcs file location: {self.location}\n'
         printable_str += '\tFCS file contains:\n'
         for file_type in self.fcs_keyword_map_single().values():
-            if getattr(self, file_type) is not None:
+            if getattr(self, file_type, None) is not None:
                 printable_str += f'\t\t{file_type}: {getattr(self, file_type).location}\n'
         for multi_file_type in self.fcs_keyword_map_multi().values():
             multi_file_list = getattr(self, multi_file_type, None)
@@ -254,7 +264,7 @@ class FcsNexusFile(NexusFile):
                 # for keywords that have multiple methods we store the value in a dictionary
                 # with the method number and the NexusFile object
                 _, method_string, method_number, value = (
-                    fo.get_multiple_expected_sequential_values(flat_fcs_file_content[i::], 4, ['NORPT'])
+                    fo.get_multiple_expected_sequential_values(flat_fcs_file_content[i:], 4, ['NORPT'])
                 )
                 full_file_path = fo.get_full_file_path(value, origin_path)
                 nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path=value,
@@ -285,6 +295,18 @@ class FcsNexusFile(NexusFile):
                 fcs_file.include_locations.append(full_file_path)
                 fcs_file.files_info.append((nexus_file.location, nexus_file.linked_user,
                                             nexus_file.last_modified))
+
+            elif key == 'RESERVOIR':
+                # this is a special case for multi-reservoir files
+                if fcs_file.multi_reservoir_files is None:
+                    fcs_file.multi_reservoir_files = {}
+                _, reservoir_name, submodel_fcs_path = (
+                    fo.get_multiple_expected_sequential_values(flat_fcs_file_content[i:], 3, ['NORPT']))
+                submodel_fcs_path = fo.get_full_file_path(submodel_fcs_path, origin_path)
+                reservoir_name = str(reservoir_name)
+                fcs_file.multi_reservoir_files[reservoir_name] = FcsNexusFile.generate_fcs_structure(
+                    fcs_file_path=submodel_fcs_path, recursive=recursive)
+
             else:
                 continue
         return fcs_file
@@ -488,3 +510,118 @@ class FcsNexusFile(NexusFile):
             file_changed = True
             self._file_modified_set(file_changed)
         return file_changed
+
+    @property
+    def all_model_files(self) -> Generator[File]:
+        """Generator property returning all the files linked to in the FCS file."""
+
+        # Loop through all the individual files in the model
+        individual_files_in_model = [self.restart_file, self.structured_grid_file, self.options_file,
+                                     self.runcontrol_file, self.override_file, self.eos_default_file]
+
+        for individual_file in individual_files_in_model:
+            if individual_file is not None:
+                yield individual_file
+
+        # Loop through all the files linked to the model via keys e.g. WELLS set 1, WELLS set 2 etc.
+        dicts_of_files_in_model = [self.well_files, self.surface_files, self.rock_files, self.relperm_files,
+                                   self.pvt_files, self.water_files, self.equil_files, self.tracer_init_files,
+                                   self.aquifer_files, self.hyd_files, self.valve_files, self.separator_files,
+                                   self.ipr_files, self.gas_lift_files, self.pump_files, self.compressor_files,
+                                   self.choke_files, self.icd_files, self.esp_files, self.polymer_files,
+                                   self.adsorption_files, self.flux_in_files]
+
+        for dict_of_files in dicts_of_files_in_model:
+            if dict_of_files is not None and any(dict_of_files):
+                yield from dict_of_files.values()
+
+    def get_model_files_by_filename(self, filename: str) -> list[File]:
+        """Retrieves a list of files in the Nexus model matching the provided file name.
+
+        Args:
+            filename(str): file name to search for.
+        """
+        matching_files: list[File] = []
+
+        for file in self.all_model_files:
+            matching_files.extend(file.get_include_file_from_filename(filename=filename))
+
+        return matching_files
+
+    def to_string(self, dateformat: None | DateFormat = None, run_units: None | UnitSystem = None,
+                  description: None | str = None) -> str:
+        """Writes a new FCS file contents to a string in Nexus format.
+
+        Returns:
+            str: string representation of the FCS file contents.
+        """
+        def print_method(method_files: None | dict[int, NexusFile], keyword: str, category: str = 'METHOD') -> str:
+            """Helper function to print methods with their files."""
+            printable_str = ''
+            if method_files is None:
+                return printable_str
+            for method_number, file in method_files.items():
+                printable_str += f'    {keyword} {category} {method_number} {file.location}\n'
+            return printable_str
+
+        printable_str = ''
+        printable_str += 'DESC Model created with ResSimpy\n'
+        if description is not None:
+            printable_str += f'DESC {description}\n'
+        if run_units is not None:
+            printable_str += f'RUN_UNITS {run_units.value}\n'
+        else:
+            # if not provided print the default Nexus unit system
+            printable_str += f'RUN_UNITS {UnitSystem.ENGLISH.value}\n'
+
+        if dateformat is not None:
+            printable_str += f'DATEFORMAT {dateformat.value}\n'
+        else:
+            # if not provided print the default Nexus date format
+            printable_str += f'DATEFORMAT {DateFormat.MM_DD_YYYY.value}\n'
+
+        # Loop through all the individual files in the model
+        printable_str += '\nGRID_FILES\n'
+
+        if self.structured_grid_file is not None:
+            printable_str += f'    STRUCTURED_GRID {self.structured_grid_file.location}\n'
+        if self.options_file is not None:
+            printable_str += f'    OPTIONS {self.options_file.location}\n'
+
+        printable_str += '\nINITIALIZATION_FILES\n'
+        printable_str += print_method(method_files=self.equil_files, keyword='EQUIL')
+        printable_str += print_method(method_files=self.tracer_init_files, keyword='TRACER_INIT')
+
+        printable_str += '\nROCK_FILES\n'
+        rock_section_files = {'ROCK': self.rock_files, 'RELPM': self.relperm_files, 'ADSORPTION': self.adsorption_files}
+        for method, method_files in rock_section_files.items():
+            printable_str += print_method(method_files=method_files, keyword=method)
+
+        printable_str += '\nPVT_FILES\n'
+        pvt_section_files = {'PVT': self.pvt_files, 'WATER': self.water_files, 'POLYMER': self.polymer_files,
+                             'SEPARATOR': self.separator_files}
+        for method, method_files in pvt_section_files.items():
+            printable_str += print_method(method_files=method_files, keyword=method)
+
+        if self.aquifer_files is not None and len(self.aquifer_files) > 0:
+            printable_str += '\nAQUIFER_FILES\n'
+            printable_str += print_method(method_files=self.aquifer_files, keyword='AQUIFER')
+
+        printable_str += '\nRECURRENT_FILES\n'
+        if self.runcontrol_file is not None:
+            printable_str += f'    RUNCONTROL {self.runcontrol_file.location}\n'
+        printable_str += print_method(method_files=self.well_files, keyword='WELLS', category='SET')
+        printable_str += print_method(method_files=self.surface_files, keyword='SURFACE', category='NETWORK')
+        printable_str += print_method(method_files=self.ipr_files, keyword='IPR')
+        if self.override_file is not None:
+            printable_str += f'OVERRIDE {self.override_file.location}\n'
+
+        printable_str += '\nNET_METHOD_FILES\n'
+        net_methods = {'VALVE': self.valve_files,
+                       'GASLIFT': self.gas_lift_files, 'PUMP': self.pump_files,
+                       'COMPRESSOR': self.compressor_files, 'CHOKE': self.choke_files,
+                       'ICD': self.icd_files, 'ESP': self.esp_files, 'HYD': self.hyd_files}
+        for method, method_files in net_methods.items():
+            printable_str += print_method(method_files=method_files, keyword=method)
+
+        return printable_str

@@ -125,7 +125,7 @@ class NexusSimulator(Simulator):
         self._gaslift: NexusGasliftMethods = NexusGasliftMethods(model_unit_system=self.default_units)
         # Nexus operations modules
         self.logging: Logging = Logging(self)
-        self.reporting: NexusReporting = NexusReporting(self)
+        self._reporting: NexusReporting = NexusReporting(self)
         self._structured_grid_operations: StructuredGridOperations = StructuredGridOperations(self)
         self.__lazy_loading: bool = lazy_loading
         self._sim_controls: SimControls = SimControls(self)
@@ -137,6 +137,11 @@ class NexusSimulator(Simulator):
         self.get_simulation_status(from_startup=True)
 
         self._model_files: FcsNexusFile
+
+        self.__is_multi_reservoir: bool = False  # Flag to indicate if the model is a multi-reservoir model
+        self.__reservoir_paths: dict[str, str] = {}
+        self.__multi_reservoirs: dict[str, NexusSimulator] = {}
+
         # Load in the model
         self.__load_fcs_file()
 
@@ -554,8 +559,10 @@ class NexusSimulator(Simulator):
                 value = fo.get_token_value('DEFAULT_UNITS', line, fcs_content_with_includes)
                 if value is not None:
                     self._default_units = UnitSystem(value.upper())
-            elif nfo.check_token(token='RESERVOIR', line=line):
-                raise NotImplementedError('Multiple reservoir models are not currently supported by ResSimpy.')
+
+        if self._model_files.multi_reservoir_files:
+            self.__is_multi_reservoir = True
+            self.__process_multi_reservoir_model()
 
         # Load in the Nexus options information
         if self.model_files.options_file is not None:
@@ -851,22 +858,20 @@ class NexusSimulator(Simulator):
     @property
     def summary(self) -> str:
         """Returns a summary of the model contents."""
-
-        # Initialize 'fluid_type' to an empty string.
         fluid_type = ''
-
-        # Verify if 'surface_file' is a dictionary.
-        if (isinstance(self.model_files.surface_files, dict) and
-                # Checks if the first item in 'surface_files'(at index 0) has a valid value and is not none.
-                self.model_files.surface_files[0].file_content_as_list is not None):
-            # If conditions in lines 857 and 859 are met, get_fluid_type is called to retrieve the fluid type.
+        # Verify if 'surface_file' exists.
+        if (self.model_files.surface_files is not None and
+                self.model_files.surface_files[1].file_content_as_list is not None):
             fluid_type = self.get_fluid_type(
-                surface_file_content=self.model_files.surface_files[0].file_content_as_list
+                surface_file_content=self.model_files.surface_files[1].file_content_as_list
             )
+
+        # Create a summary of number of completions per well:
         list_of_wells = self.wells.get_all()
         list_of_well_names = [well.well_name for well in list_of_wells]
-        completions = [len(well.completions) for well in list_of_wells]
-        well_summary = [f'{y} has: {z} completions' for y, z in zip(list_of_well_names, completions)]
+        number_of_completions = [len(well.completions) for well in list_of_wells]
+        well_summary = [f'{y} has: {z} completions' for y, z in zip(list_of_well_names, number_of_completions)]
+
         model_reporting_date = self.sim_controls.times[-1]
         range_x = None
         range_y = None
@@ -905,3 +910,42 @@ class NexusSimulator(Simulator):
     def options(self) -> NexusOptions | None:
         """Returns an instance of Nexus options class."""
         return self._options
+
+    @property
+    def is_multi_reservoir(self) -> bool:
+        """Returns True if the model is a multi-reservoir model, False otherwise."""
+        return self.__is_multi_reservoir
+
+    @property
+    def reservoir_paths(self) -> dict[str, str]:
+        """Returns a dictionary of reservoir names and their corresponding file paths."""
+        return self.__reservoir_paths
+
+    @property
+    def multi_reservoirs(self) -> dict[str, NexusSimulator]:
+        """Returns a dictionary of multi-reservoir names and their corresponding NexusSimulator instances."""
+        return self.__multi_reservoirs
+
+    def __process_multi_reservoir_model(self) -> None:
+        """Processes a multi-reservoir model by extracting reservoir paths and creating NexusSimulator instances
+        for each.
+        """
+        warnings.warn('Multi-reservoir models are partially supported. '
+                      'Some features may not work as expected.')
+        if self.model_files.multi_reservoir_files is None:
+            return
+
+        for reservoir_name, reservoir_file in self.model_files.multi_reservoir_files.items():
+            if reservoir_file.location is None:
+                warnings.warn(f'Reservoir file location for {reservoir_name} not found.')
+                continue
+
+            # Store the reservoir path
+            self.__reservoir_paths[reservoir_name] = reservoir_file.location
+
+            # Create a NexusSimulator instance for the reservoir
+            self.__multi_reservoirs[reservoir_name] = NexusSimulator(
+                origin=reservoir_file.location,
+                destination=self.destination,
+                lazy_loading=self.__lazy_loading
+            )
