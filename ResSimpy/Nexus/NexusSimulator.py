@@ -5,11 +5,9 @@ import os
 import warnings
 from typing import Any, Union, Optional, Sequence
 
-import pandas as pd
 import resqpy.model as rq
 from datetime import datetime
 
-from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
 from ResSimpy.Nexus.DataModels.NexusOptions import NexusOptions
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
@@ -35,7 +33,6 @@ from ResSimpy.Nexus.runcontrol_operations import SimControls
 from ResSimpy.Nexus.logfile_operations import Logging
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 from ResSimpy.DataModelBaseClasses.Simulator import Simulator
-from ResSimpy.Nexus.nexus_file_operations import read_table_to_df
 
 
 class NexusSimulator(Simulator):

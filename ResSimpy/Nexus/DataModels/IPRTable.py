@@ -1,6 +1,5 @@
 from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
 import pandas as pd
-from datetime import datetime
 from dataclasses import dataclass
 
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
@@ -10,8 +9,9 @@ from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 class IPRTable(DataObjectMixin):
     def __init__(self, date: str, table: pd.DataFrame) -> None:
         """Individual IPRTable class to add read of IPR files.
+
         Args:
-             date(datetime): IPR table date.
+             date(str): IPR table date.
              table(pd.DataFrame): IPR table.
         """
         self.table = table
@@ -20,10 +20,12 @@ class IPRTable(DataObjectMixin):
 
     @property
     def units(self) -> BaseUnitMapping:
+        """Returns BaseUnitMapping."""
         return BaseUnitMapping()
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """Gets the mapping of keywords to attribute definitions."""
         mapping = {
             'PRES': ('pressure', float),
             'QO': ('oil_surface_rate', float),
