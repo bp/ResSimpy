@@ -6,8 +6,11 @@ import pandas as pd
 from datetime import datetime, timezone
 
 from _pytest.recwarn import WarningsRecorder
+from pandas._testing import assert_frame_equal
 
+from ResSimpy import NexusSimulator
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
+from ResSimpy.Nexus.DataModels.IPRTable import IPRTable
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
@@ -33,7 +36,7 @@ from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+from ResSimpy.Nexus.DataModels.IPRTables import IPRTables
 from pytest_mock import MockerFixture
 from unittest.mock import Mock
 from ResSimpy.Enums.UnitsEnum import UnitSystem
@@ -320,8 +323,7 @@ def test_output_destination_missing(mocker, run_control_path, expected_run_contr
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    simulation = NexusSimulator(
-        origin='test/Path.fcs', destination='original_output_path')
+    simulation = NexusSimulator(origin='test/Path.fcs', destination='original_output_path')
     with pytest.raises(ValueError):
         simulation.set_output_path(None)
 
@@ -371,8 +373,7 @@ def test_output_to_existing_directory(mocker):
 
     # Act + Assert
     with pytest.raises(FileExistsError):
-        NexusSimulator(origin='test/Path.fcs',
-                       destination='original_output_path')
+        NexusSimulator(origin='test/Path.fcs', destination='original_output_path')
     # Arrange for windows
     fcs_file_win = "RUNCONTROL path\to\run\control\nDATEFORMAT DD/MM/YYYYY"
     open_mock_win = mocker.mock_open(read_data=fcs_file)
@@ -383,8 +384,7 @@ def test_output_to_existing_directory(mocker):
 
     # Act + Assert
     with pytest.raises(FileExistsError):
-        NexusSimulator(origin='test\Path.fcs',
-                       destination='original_output_path')
+        NexusSimulator(origin='test\Path.fcs', destination='original_output_path')
 
 
 @pytest.mark.parametrize("fcs_file, expected_default_unit_value",
@@ -519,8 +519,7 @@ def test_run_simulator(mocker):
     mocker.patch("builtins.open", open_mock)
 
     # Act
-    simulation = NexusSimulator(
-        origin='testpath1/Path.fcs', destination="test_new_destination")
+    simulation = NexusSimulator(origin='testpath1/Path.fcs', destination="test_new_destination")
     result = simulation.run_simulation()
 
     # Assert
@@ -746,8 +745,7 @@ def test_update_token_file_value(mocker, original_file_contents, expected_file_c
     mock_original_opens = mocker.mock_open()
     mocker.patch("builtins.open", mock_original_opens)
 
-    simulation = NexusSimulator(
-        origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
 
     modifying_mock_open = mocker.mock_open(read_data=original_file_contents)
     mocker.patch("builtins.open", modifying_mock_open)
@@ -847,8 +845,7 @@ def test_update_token_file_value(mocker, original_file_contents, expected_file_c
     mock_original_opens = mocker.mock_open()
     mocker.patch("builtins.open", mock_original_opens)
 
-    simulation = NexusSimulator(
-        origin='testpath1\nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1\nexus_run.fcs', destination="new_destination")
 
     modifying_mock_open = mocker.mock_open(read_data=original_file_contents)
     mocker.patch("builtins.open", modifying_mock_open)
@@ -876,7 +873,6 @@ GRIDSOLVER IMPLICIT_COUPLING NONE
 
 !     Use vip units for output to vdb
 VIPUNITS""",
-
                               """START 11/01/1992
 
 !     Timestepping method
@@ -895,8 +891,7 @@ def test_comment_out_file_value(mocker, original_file_contents, expected_file_co
     mock_original_opens = mocker.mock_open()
     mocker.patch("builtins.open", mock_original_opens)
 
-    simulation = NexusSimulator(
-        origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
 
     modifying_mock_open = mocker.mock_open(read_data=original_file_contents)
     mocker.patch("builtins.open", modifying_mock_open)
@@ -942,8 +937,7 @@ def test_comment_out_file_value(mocker, original_file_contents, expected_file_co
     mock_original_opens = mocker.mock_open()
     mocker.patch("builtins.open", mock_original_opens)
 
-    simulation = NexusSimulator(
-        origin='testpath1\nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1\nexus_run.fcs', destination="new_destination")
 
     modifying_mock_open = mocker.mock_open(read_data=original_file_contents)
     mocker.patch("builtins.open", modifying_mock_open)
@@ -2346,6 +2340,7 @@ def test_model_summary(mocker, fluid_type, expected_fluid_type):
     # Assert
     assert result == expected_summary
 
+
 @pytest.mark.parametrize('original_line, expected_line', [
     ('EQUIL method 1 my_file.dat', os.path.join('EQUIL method 1 /path/to', 'my_file.dat')),
     ('PVT method 1 my_file.dat', os.path.join('PVT method 1 /path/to', 'my_file.dat')),
@@ -2361,7 +2356,7 @@ def test_convert_line_to_full_file_path(original_line: str, expected_line: str):
 
     # Act
     result = NexusFile.convert_line_to_full_file_path(line=original_line,
-                                                                  full_base_file_path=full_file_path)
+                                                      full_base_file_path=full_file_path)
 
     # Assert
     assert result == expected_line
@@ -2419,3 +2414,67 @@ INCLUDE /path/nexus_data/init/equil_info.txt
     # Assert
     assert len(recwarn) == 0
     assert result == expected_equils
+
+
+@pytest.mark.parametrize("file_contents, expected_data",
+                         [
+                             ("""Test CASE 1:
+SOURCE
+EOS NHC 7 COMPONENTS N2C1 CO2C3 C4-5 C6-14 C15-19 C20-35 C36+
+!
+TIME    08/15/2026
+IPRTABLE
+PRES       QO           QW              QG          N2C1         C6-14
+9999     5772.70000   0.00000      89460.00000     0.90000      0.10000
+12300    5.52300     23412.00000   20319.00000     0.850000     0.15000
+ENDIPRTABLE
+""", {'PRES': [9999, 12300],
+      'QO': [5772.70000, 5.52300],
+      'QW': [0.00000, 23412.00000],
+      'QG': [89460.00000, 20319.00000],
+      'N2C1': [0.90000, 0.850000],
+      'C6-14': [0.10000, 0.15000]}),
+
+                             ("""TEST CASE 2:
+SOURCE BLACKOIL 
+TIME    05/15/2013 
+IPRTABLE 
+PRES            QO            QW          QG           N2C1        C6-14
+4490.64700    16.15331      0.00000    5.75058       0.80000     0.30000
+2257.05700    4135.24700    0.00002    1472.14800    0.80000     0.20000
+14.70000      8270.49300    0.00004    2944.29600    0.80000     0.20000
+ENDIPRTABLE
+""", {'PRES': [4490.64700, 2257.05700, 14.70000],
+      'QO': [16.15331, 4135.24700, 8270.49300],
+      'QW': [0.00000, 0.00002, 0.00004],
+      'QG': [5.75058, 1472.14800, 2944.29600],
+      'N2C1': [0.80000, 0.80000, 0.80000],
+      'C6-14': [0.30000, 0.20000, 0.20000]}),
+
+                             ("""TEST CASE 3"
+TIME  09/15/2026
+IPRTABLE
+PRES       QO       QW           QG         N2C1      C6-14    
+9999      5588.7   0.00000   8946.00000   0.90000     0.10000
+ENDIPRTABLE                                    
+""", {'PRES': [9999],
+      'QO': [5588.70000],
+      'QW': [0.00000],
+      'QG': [8946.00000],
+      'N2C1': [0.90000],
+      'C6-14': [0.10000]})
+
+                         ])
+def test_read_iprtables(file_contents, expected_data):
+    """Testing reading IPRTables"""
+
+    # Arrange
+    expected_result = pd.DataFrame(data=expected_data)
+
+    # Act
+
+    read = IPRTables()
+    result = read.read_iprtables_as_df(file_contents.splitlines(keepends=True))
+
+    # Assert
+    assert_frame_equal(result, expected_result)

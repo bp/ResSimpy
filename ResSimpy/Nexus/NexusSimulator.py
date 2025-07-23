@@ -7,6 +7,7 @@ from typing import Any, Union, Optional, Sequence
 
 import resqpy.model as rq
 from datetime import datetime
+
 from ResSimpy.Nexus.DataModels.NexusOptions import NexusOptions
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo

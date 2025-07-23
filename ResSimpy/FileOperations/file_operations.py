@@ -588,7 +588,7 @@ def get_expected_next_value(start_line_index: int, file_as_list: list[str], sear
                             ignore_values: Optional[list[str]] = None,
                             replace_with: Union[str, GridArrayDefinition, None] = None,
                             custom_message: Optional[str] = None) -> str:
-    """Gets the next non blank value in a list of lines.
+    """Gets the next non-blank value in a list of lines.
 
     Args:
         start_line_index (int): line number to start reading file_as_list from
@@ -601,7 +601,7 @@ def get_expected_next_value(start_line_index: int, file_as_list: list[str], sear
         custom_message (Optional[str]): A custom error message if no value is found
 
     Returns:
-        str: Next non blank value from the list, if none found raises ValueError
+        str: Next non-blank value from the list, if none found raises ValueError
     """
     value = get_next_value(start_line_index, file_as_list, search_string, ignore_values, replace_with)
 
