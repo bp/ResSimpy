@@ -1,20 +1,30 @@
+import pytest
+
+from ResSimpy import NexusSimulator
+from ResSimpy.Enums.FluidTypeEnums import PvtType
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.DataModels.Network.NexusActivationChange import NexusActivationChange
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.DataModels.Network.NexusTarget import NexusTarget
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
+from ResSimpy.Nexus.NexusEnums.ActivationChangeEnum import ActivationChangeEnum
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.nexus_model_file_generator import NexusModelFileGenerator
 from tests.utility_for_tests import get_fake_nexus_simulator
 
-
-def test_write_surface_section(mocker):
+@pytest.mark.parametrize('pvt_type, eos_details, expected_pvt_string', [
+    (PvtType.BLACKOIL, None, 'BLACKOIL'),
+    (PvtType.EOS, ['NHC', '3', 'COMPONENTS', 'C1', 'C2', 'C3'], 'EOS NHC 3 COMPONENTS C1 C2 C3'),])
+def test_write_surface_section(pvt_type, eos_details, expected_pvt_string):
     # Arrange
-    model = get_fake_nexus_simulator(mocker)
     start_date = '01/01/2019'
-    model.start_date = start_date
+    model = NexusSimulator(origin='test_file', assume_loaded=True, start_date=start_date, 
+                           date_format=DateFormat.DD_MM_YYYY, run_units=UnitSystem.METRIC, 
+                           default_units=UnitSystem.METRIC, pvt_type=pvt_type,
+                           eos_details=eos_details)
 
     model_file_generator = NexusModelFileGenerator(model=model, model_name='new_path.fcs')
     model.network._has_been_loaded = True
@@ -66,9 +76,21 @@ def test_write_surface_section(mocker):
                     date_format=DateFormat.DD_MM_YYYY, control_quantity='control1', value=2592.3, 
                     control_connections='welllist1', control_conditions='SURFACE')
     ])
+    
+    model.network.activation_changes._add_to_memory([
+        NexusActivationChange(name='P01', date='01/01/2021', date_format=DateFormat.DD_MM_YYYY,
+                              change=ActivationChangeEnum.ACTIVATE),
+        NexusActivationChange(name='P02', date='15/10/2021', date_format=DateFormat.DD_MM_YYYY,
+                              change=ActivationChangeEnum.DEACTIVATE),
+        NexusActivationChange(name='P01', date='15/10/2021', date_format=DateFormat.DD_MM_YYYY,
+                              change=ActivationChangeEnum.DEACTIVATE),
+        
+    ])
 
 
-    expected_result = """CONSTRAINTS
+    expected_result = f"""{expected_pvt_string}
+
+CONSTRAINTS
 P01 GORMAX 100000 PMAX 234.223
 ENDCONSTRAINTS
 
@@ -110,6 +132,18 @@ TARGET
 NAME CTRL CTRLCOND CTRLCONS VALUE
 TARGET1 control1 SURFACE welllist1 2592.3
 ENDTARGET
+
+ACTIVATE
+CONNECTION
+P01
+ENDACTIVATE
+
+TIME 15/10/2021
+DEACTIVATE
+CONNECTION
+P02
+P01
+ENDDEACTIVATE
 
 """
 

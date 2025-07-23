@@ -7,6 +7,7 @@ class PvtType(str, Enum):
     GASWATER = 'GASWATER'
     WATEROIL = 'WATEROIL'
     EOS = 'EOS'
+    API = 'API'
 
 
 class SeparatorType(str, Enum):

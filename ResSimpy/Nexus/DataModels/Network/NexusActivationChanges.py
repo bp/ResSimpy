@@ -3,6 +3,8 @@ from dataclasses import dataclass, field
 from typing import Sequence, TYPE_CHECKING, Optional
 
 from ResSimpy.Nexus.DataModels.Network.NexusActivationChange import NexusActivationChange
+from ResSimpy.Nexus.NexusEnums.ActivationChangeEnum import ActivationChangeEnum
+from ResSimpy.Time.ISODateTime import ISODateTime
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
@@ -33,3 +35,27 @@ class NexusActivationChanges:
             return
 
         self.__activationChanges.extend(activations_to_add)
+
+    def to_string_for_date(self, date: ISODateTime) -> str:
+        """Outputs the activation changes for a specific date."""
+        output_str = ''
+        activations_for_date = [x for x in self.__activationChanges if x.iso_date == date and
+                                x.change == ActivationChangeEnum.ACTIVATE]
+        deactivations_for_date = [x for x in self.__activationChanges if x.iso_date == date and
+                                  x.change == ActivationChangeEnum.DEACTIVATE]
+
+        if activations_for_date:
+            output_str += "ACTIVATE\nCONNECTION\n"
+        for activation in activations_for_date:
+            output_str += f"{activation.name}\n"
+        if activations_for_date:
+            output_str += "ENDACTIVATE\n"
+
+        if deactivations_for_date:
+            output_str += "DEACTIVATE\nCONNECTION\n"
+        for deactivation in deactivations_for_date:
+            output_str += f"{deactivation.name}\n"
+        if deactivations_for_date:
+            output_str += "ENDDEACTIVATE\n"
+
+        return output_str

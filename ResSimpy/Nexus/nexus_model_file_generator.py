@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Sequence, TypeVar
+from typing import TypeVar
 
 from ResSimpy import NexusSimulator
 from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
@@ -35,18 +35,11 @@ class NexusModelFileGenerator:
         """Outputs the surface section of the Nexus model file."""
         full_schedule = ''
 
-        def store_dates_for_objects(all_network_objects: Sequence[T], date_storage: list[ISODateTime],
-                                    data_object: T) -> list[T]:
-            """Stores the dates for all objects in the model."""
-            if isinstance(all_network_objects, list):
-                all_network_objects_as_list = all_network_objects
-            else:
-                all_network_objects_as_list = list(all_network_objects)
-            all_network_objects_as_list.append(data_object)
-            object_date = data_object.iso_date
-            if object_date not in date_storage:
-                date_storage.append(object_date)
-            return all_network_objects_as_list
+        # add the pvt type and EOS properties:
+        full_schedule += f"{self.model.pvt_type.name}"
+        if self.model.eos_details is not None:
+            full_schedule += " " + " ".join(self.model.eos_details)
+        full_schedule += '\n\n'
 
         if self.model.network is None:
             return full_schedule
@@ -55,8 +48,10 @@ class NexusModelFileGenerator:
         all_welllists = self.model.network.welllists.get_all()
         all_nodes = self.model.network.nodes.get_all()
         all_connections = self.model.network.connections.get_all()
+        all_activations = self.model.network.activation_changes.get_all()
 
-        network_objects = [all_well_connections, all_targets, all_welllists, all_nodes, all_connections]
+        network_objects = [all_well_connections, all_targets, all_welllists, all_nodes, all_connections,
+                           all_activations]
 
         all_constraints = self.model.network.constraints.get_all()
 
@@ -98,13 +93,18 @@ class NexusModelFileGenerator:
                 full_schedule += '\n'
 
             constraints_for_date = {k: [x for x in v if x.iso_date == date] for k, v in all_constraints.items()}
-            if any(constraints_for_date) and self.model.network.constraints is not None:
+            if any(x for x in constraints_for_date.values()) and self.model.network.constraints is not None:
                 full_schedule += self.model.network.constraints.to_string_for_date(date=date)
                 full_schedule += '\n'
 
             targets_for_date = [x for x in all_targets if x.iso_date == date]
             if any(targets_for_date) and self.model.network.targets is not None:
                 full_schedule += self.model.network.targets.to_string_for_date(date=date)
+                full_schedule += '\n'
+
+            activations_for_date = [x for x in all_activations if x.iso_date == date]
+            if any(activations_for_date) and self.model.network.activation_changes is not None:
+                full_schedule += self.model.network.activation_changes.to_string_for_date(date=date)
                 full_schedule += '\n'
 
         return full_schedule

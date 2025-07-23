@@ -7,6 +7,8 @@ from typing import Any, Union, Optional, Sequence
 
 import resqpy.model as rq
 from datetime import datetime
+
+from ResSimpy.Enums.FluidTypeEnums import PvtType
 from ResSimpy.Nexus.DataModels.NexusOptions import NexusOptions
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
@@ -39,7 +41,10 @@ class NexusSimulator(Simulator):
 
     def __init__(self, origin: Optional[str] = None, destination: Optional[str] = None,
                  root_name: Optional[str] = None, nexus_data_name: str = "data", write_times: bool = False,
-                 manual_fcs_tidy_call: bool = False, lazy_loading: bool = True, start_date: None | str = None) -> None:
+                 manual_fcs_tidy_call: bool = False, lazy_loading: bool = True, start_date: None | str = None,
+                 run_units: None | UnitSystem = None, default_units: None | UnitSystem = None,
+                 pvt_type: None | PvtType = None, assume_loaded: bool = False,
+                 eos_details: None | list[str] = None, date_format: DateFormat = DateFormat.MM_DD_YYYY) -> None:
         """Nexus simulator class. Inherits from the Simulator super class.
 
         Args:
@@ -55,6 +60,17 @@ class NexusSimulator(Simulator):
                 properties on the object.
             start_date: (str, optional): The start date of the model. If not provided, it will be inferred from a read \
                 in reservoir deck, specifically the runcontrol file.
+            run_units (Optional[UnitSystem], optional): The run units of the model. If not provided, it will be read \
+                from the fcs file or defaulted to the Nexus default ENGLISH.
+            default_units (Optional[UnitSystem], optional): The default units of the model. If not provided, it will \
+                be read from the fcs file or defaulted to the Nexus default ENGLISH.
+            pvt_type (Optional[PvtType], optional): The PVT type of the model. If not provided, it will be read from \
+                the fcs file. Defaults to None.
+            assume_loaded (bool, optional): If True, assumes that the model is already loaded and does not attempt to \
+                load the fcs file. Defaults to False.
+            eos_details (None | list[str], optional): A list of strings containing the EOS details. If not provided, \
+                it will be set to None and read from the fcs file if applicable. Defaults to None.
+            date_format (DateFormat, optional): The date format to use for the model. Defaults to MM_DD_YYYY.
 
         Attributes:
             run_control_file_path (Optional[str]): file path to the run control file - derived from the fcs file
@@ -97,18 +113,22 @@ class NexusSimulator(Simulator):
         self._start_date: str = '' if start_date is None else start_date.strip()
         self.run_control_file_path: Optional[str] = ''
         self.__destination: Optional[str] = None
-        self.date_format: DateFormat = DateFormat.MM_DD_YYYY  # Nexus default
+        self.date_format: DateFormat = date_format  # Nexus default
         self.__original_fcs_file_path: str = self.origin
         self.__new_fcs_file_path: str = self.origin
         self.__nexus_data_name: str = nexus_data_name
-        self.__run_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
+        self.__run_units: UnitSystem = run_units if run_units is not None else UnitSystem.ENGLISH  # The Nexus default
         self.root_name: str = root_name
         self.use_american_run_units: bool = False
         self.use_american_input_units: bool = False
         self.__write_times: bool = write_times
         self.__manual_fcs_tidy_call: bool = manual_fcs_tidy_call
 
-        self._default_units: UnitSystem = UnitSystem.ENGLISH  # The Nexus default
+        self._default_units: UnitSystem = default_units if default_units is not None else (
+            UnitSystem.ENGLISH)  # The Nexus default
+
+        self._pvt_type: PvtType = pvt_type if pvt_type is not None else PvtType.BLACKOIL
+        self._eos_details: None | list[str] = eos_details
 
         self._network: NexusNetwork = NexusNetwork(model=self)
         self._wells: NexusWells = NexusWells(self)
@@ -145,7 +165,8 @@ class NexusSimulator(Simulator):
         self.__multi_reservoirs: dict[str, NexusSimulator] = {}
 
         # Load in the model
-        self.__load_fcs_file()
+        if not assume_loaded:
+            self.__load_fcs_file()
 
     def __repr__(self) -> str:
         """Pretty printing NexusSimulator data."""
@@ -300,6 +321,29 @@ class NexusSimulator(Simulator):
     def run_units(self) -> UnitSystem:
         """Returns the run units."""
         return self.__run_units
+
+    @property
+    def pvt_type(self) -> PvtType:
+        """Returns the PVT type."""
+        return self._pvt_type
+
+    def set_pvt_type(self, value: str) -> PvtType:
+        """Sets the PVT type for the model.
+
+        Args:
+            value (str): The PVT type to set from the fluid_type string (e.g., 'BLACKOIL', 'WATEROIL', etc.).
+
+        Returns:
+            PvtType: The PVT type set for the model.
+        """
+
+        self._pvt_type = PvtType(value)
+        return self._pvt_type
+
+    @property
+    def eos_details(self) -> Optional[list[str]]:
+        """Returns the EOS details."""
+        return self._eos_details
 
     @property
     def new_fcs_name(self) -> Optional[str]:
@@ -656,6 +700,14 @@ class NexusSimulator(Simulator):
                 if well_file.location is None:
                     warnings.warn(f'Well file location has not been found for {well_file}')
                     continue
+
+        # load the pvt type
+        if self.model_files.surface_files is not None and self.model_files.surface_files[1] is not None:
+            surface_file = self.model_files.surface_files[1].get_flat_list_str_file
+            self.set_pvt_type(NexusSimulator.get_fluid_type(
+                surface_file_content=surface_file))
+            if self.pvt_type == PvtType.EOS:
+                self._eos_details = self.get_eos_details(surface_file)
 
     @staticmethod
     def update_file_value(file_path: str, token: str, new_value: str, add_to_start: bool = False) -> None:

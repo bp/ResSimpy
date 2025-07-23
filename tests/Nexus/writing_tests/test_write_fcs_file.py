@@ -69,7 +69,7 @@ def test_fcs_file_to_string(mocker):
                             include_locations=include_locations)
     expected_string = """DESC Model created with ResSimpy
 RUN_UNITS ENGLISH
-DEFAULT_UNITS ENGLISH
+DEFAULT_UNITS METBAR
 DATEFORMAT DD/MM/YYYY
 
 GRID_FILES
@@ -103,7 +103,7 @@ NET_METHOD_FILES
 
     # Act
     result = fcs_file.to_string(dateformat=DateFormat.DD_MM_YYYY, run_units=UnitSystem.ENGLISH,
-                                default_units=UnitSystem.ENGLISH)
+                                default_units=UnitSystem.METBAR)
 
     # Assert
     assert result == expected_string
