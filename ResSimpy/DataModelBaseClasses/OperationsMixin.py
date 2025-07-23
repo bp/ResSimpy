@@ -268,7 +268,7 @@ class NetworkOperationsMixIn(ABC):
         # get the required objects for the date
         network_objects_for_date: list[DataObjectMixin] = [x for x in self.resolved_network_objects if
                                                            x.iso_date == date]
-        named_network_objects_for_date = {x.name: x for x in network_objects_for_date}
+        named_network_objects_for_date = {x.name: None for x in network_objects_for_date}
         # only pick the last object by name for the date
         network_objects_for_date = [[x for x in network_objects_for_date if x.name == y][-1]
                                     for y in named_network_objects_for_date.keys()]
