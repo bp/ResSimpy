@@ -549,7 +549,7 @@ class FcsNexusFile(NexusFile):
         return matching_files
 
     def to_string(self, dateformat: None | DateFormat = None, run_units: None | UnitSystem = None,
-                  description: None | str = None) -> str:
+                  default_units: None | UnitSystem = None, description: None | str = None) -> str:
         """Writes a new FCS file contents to a string in Nexus format.
 
         Returns:
@@ -557,12 +557,12 @@ class FcsNexusFile(NexusFile):
         """
         def print_method(method_files: None | dict[int, NexusFile], keyword: str, category: str = 'METHOD') -> str:
             """Helper function to print methods with their files."""
-            printable_str = ''
+            prt_str = ''
             if method_files is None:
-                return printable_str
+                return prt_str
             for method_number, file in method_files.items():
-                printable_str += f'    {keyword} {category} {method_number} {file.location}\n'
-            return printable_str
+                prt_str += f'    {keyword} {category} {method_number} {file.location}\n'
+            return prt_str
 
         printable_str = ''
         printable_str += 'DESC Model created with ResSimpy\n'
@@ -573,6 +573,12 @@ class FcsNexusFile(NexusFile):
         else:
             # if not provided print the default Nexus unit system
             printable_str += f'RUN_UNITS {UnitSystem.ENGLISH.value}\n'
+
+        if default_units is not None:
+            printable_str += f'DEFAULT_UNITS {default_units.value}\n'
+        else:
+            # if not provided print the default Nexus unit system
+            printable_str += f'DEFAULT_UNITS {UnitSystem.ENGLISH.value}\n'
 
         if dateformat is not None:
             printable_str += f'DATEFORMAT {dateformat.value}\n'
