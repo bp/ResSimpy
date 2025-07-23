@@ -44,7 +44,7 @@ class NexusSimulator(Simulator):
                  manual_fcs_tidy_call: bool = False, lazy_loading: bool = True, start_date: None | str = None,
                  run_units: None | UnitSystem = None, default_units: None | UnitSystem = None,
                  pvt_type: None | PvtType = None, assume_loaded: bool = False,
-                 eos_details: None | list[str] = None, date_format: DateFormat = DateFormat.MM_DD_YYYY) -> None:
+                 eos_details: None | str = None, date_format: DateFormat = DateFormat.MM_DD_YYYY) -> None:
         """Nexus simulator class. Inherits from the Simulator super class.
 
         Args:
@@ -68,7 +68,7 @@ class NexusSimulator(Simulator):
                 the fcs file. Defaults to None.
             assume_loaded (bool, optional): If True, assumes that the model is already loaded and does not attempt to \
                 load the fcs file. Defaults to False.
-            eos_details (None | list[str], optional): A list of strings containing the EOS details. If not provided, \
+            eos_details (None | str, optional): A string containing the EOS details. If not provided, \
                 it will be set to None and read from the fcs file if applicable. Defaults to None.
             date_format (DateFormat, optional): The date format to use for the model. Defaults to MM_DD_YYYY.
 
@@ -128,7 +128,7 @@ class NexusSimulator(Simulator):
             UnitSystem.ENGLISH)  # The Nexus default
 
         self._pvt_type: PvtType = pvt_type if pvt_type is not None else PvtType.BLACKOIL
-        self._eos_details: None | list[str] = eos_details
+        self._eos_details: None | str = eos_details
 
         self._network: NexusNetwork = NexusNetwork(model=self)
         self._wells: NexusWells = NexusWells(self)
@@ -327,7 +327,7 @@ class NexusSimulator(Simulator):
         """Returns the PVT type."""
         return self._pvt_type
 
-    def set_pvt_type(self, value: str) -> PvtType:
+    def set_pvt_type(self, value: str) -> None:
         """Sets the PVT type for the model.
 
         Args:
@@ -336,12 +336,13 @@ class NexusSimulator(Simulator):
         Returns:
             PvtType: The PVT type set for the model.
         """
-
-        self._pvt_type = PvtType(value)
-        return self._pvt_type
+        if 'EOS' in value.upper():
+            self._pvt_type = PvtType.EOS
+        else:
+            self._pvt_type = PvtType(value)
 
     @property
-    def eos_details(self) -> Optional[list[str]]:
+    def eos_details(self) -> Optional[str]:
         """Returns the EOS details."""
         return self._eos_details
 
@@ -704,8 +705,7 @@ class NexusSimulator(Simulator):
         # load the pvt type
         if self.model_files.surface_files is not None and self.model_files.surface_files[1] is not None:
             surface_file = self.model_files.surface_files[1].get_flat_list_str_file
-            self.set_pvt_type(NexusSimulator.get_fluid_type(
-                surface_file_content=surface_file))
+            self.set_pvt_type(NexusSimulator.get_fluid_type(surface_file_content=surface_file))
             if self.pvt_type == PvtType.EOS:
                 self._eos_details = self.get_eos_details(surface_file)
 

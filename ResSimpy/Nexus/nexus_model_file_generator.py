@@ -3,6 +3,7 @@ from typing import TypeVar
 
 from ResSimpy import NexusSimulator
 from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
+from ResSimpy.Enums.FluidTypeEnums import PvtType
 from ResSimpy.Time.ISODateTime import ISODateTime
 
 T = TypeVar('T', bound=DataObjectMixin)
@@ -36,9 +37,11 @@ class NexusModelFileGenerator:
         full_schedule = ''
 
         # add the pvt type and EOS properties:
-        full_schedule += f"{self.model.pvt_type.name}"
-        if self.model.eos_details is not None:
-            full_schedule += " " + " ".join(self.model.eos_details)
+
+        if self.model.pvt_type == PvtType.EOS and self.model.eos_details is not None:
+            full_schedule += self.model.eos_details
+        else:
+            full_schedule += self.model.pvt_type.name
         full_schedule += '\n\n'
 
         if self.model.network is None:

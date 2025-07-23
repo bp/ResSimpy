@@ -17,7 +17,7 @@ from tests.utility_for_tests import get_fake_nexus_simulator
 
 @pytest.mark.parametrize('pvt_type, eos_details, expected_pvt_string', [
     (PvtType.BLACKOIL, None, 'BLACKOIL'),
-    (PvtType.EOS, ['NHC', '3', 'COMPONENTS', 'C1', 'C2', 'C3'], 'EOS NHC 3 COMPONENTS C1 C2 C3'),])
+    (PvtType.EOS, 'EOS NHC 3 COMPONENTS C1 C2 C3', 'EOS NHC 3 COMPONENTS C1 C2 C3'),])
 def test_write_surface_section(pvt_type, eos_details, expected_pvt_string):
     # Arrange
     start_date = '01/01/2019'
