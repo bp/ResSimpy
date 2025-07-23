@@ -16,7 +16,7 @@ class Well(ABC):
     __unit_system: UnitSystem
     _well_type: Optional[WellType]
 
-    def __init__(self, well_name: str, completions: list[Completion], unit_system: UnitSystem,
+    def __init__(self, well_name: str, completions: Sequence[Completion], unit_system: UnitSystem,
                  well_type: Optional[WellType] = None) -> None:
         """Initialises the ConstraintUnits class.
 
@@ -27,6 +27,10 @@ class Well(ABC):
             well_type (Optional[WellType]): The type of the well represented by a WellType Enum.
         """
         self._well_name = well_name
+
+        if not isinstance(completions, list):
+            completions = list(completions)
+
         self._completions = completions
         self.__unit_system = unit_system
         self._well_type = well_type
