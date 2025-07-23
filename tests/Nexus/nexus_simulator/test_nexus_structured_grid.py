@@ -1039,7 +1039,7 @@ def test_get_abs_structured_grid_path(mocker, fcs_file, expected_root, expected_
                              ("""
 
       KX VALUE
-      INCLUDE BLAH/BLAH
+      INCLUDE path/kx.dat
 
       MULT TX ALL PLUS MULT
        FNAME F1
@@ -1083,7 +1083,7 @@ def test_get_abs_structured_grid_path(mocker, fcs_file, expected_root, expected_
                              ("""
 
       KX VALUE
-      INCLUDE BLAH/BLAH
+      INCLUDE path/kx.dat
 
       MULT TX ALL PLUS MULT
        FNAME F1
@@ -1122,8 +1122,30 @@ def test_get_abs_structured_grid_path(mocker, fcs_file, expected_root, expected_
                        'NAME': ['F1', 'F1', 'F1', 'F1', 'F2', 'F2', 'F2', 'F2'],
                        'FACE': ['I', 'I', 'J', 'J', 'I-', 'I-', 'J', 'J']}
                       )
-                              )
-                         ], ids=['basic_nomultfl', 'no_faults', 'basic_w_multfl']
+                              ),
+                             ("""
+                             MULT TXF ALL MINUS MULT
+                                GRID ROOT
+                                FNAME fault1
+                                22 222 90 90 1 1 1
+                                22 222 90 90 9 9 1
+                                22 222 90 90 11 11 1
+                                22 223 91 90 13 13 1
+                                22 223 91 90 14 14 1
+                                22 223 91 90 15 15 1""",
+                              pd.DataFrame({'I1': [22] * 6,
+                                             'I2': [222, 222, 222, 223, 223, 223],
+                                             'J1': [90, 90, 90, 91, 91, 91],
+                                             'J2': [90, 90, 90, 90, 90, 90],
+                                             'K1': [1, 9, 11, 13, 14, 15],
+                                             'K2': [1, 9, 11, 13, 14, 15],
+                                             'MULT': [1.0] * 6,
+                                             'GRID': ['ROOT'] * 6,
+                                             'NAME': ['fault1'] * 6,
+                                             'FACE': ['IF-'] * 6,
+                                            })
+                              ),
+                         ], ids=['basic_nomultfl', 'no_faults', 'basic_w_multfl', 'with txf + txy']
                          )
 def test_load_faults(mocker, structured_grid_file_contents, expected_results):
     """Read in Structured Grid File and test extraction of fault information"""
