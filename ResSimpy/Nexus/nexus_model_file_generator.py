@@ -27,7 +27,8 @@ class NexusModelFileGenerator:
     def generate_base_model_file_contents(self) -> str:
         """Generates the base contents of the Nexus model file."""
         fcs_file_contents = self.model.model_files.to_string(dateformat=self.model.date_format,
-                                                             run_units=self.model.run_units)
+                                                             run_units=self.model.run_units,
+                                                             default_units=self.model.default_units)
         return fcs_file_contents
 
     def output_surface_section(self) -> str:
