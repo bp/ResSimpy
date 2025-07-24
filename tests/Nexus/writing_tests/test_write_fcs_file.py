@@ -19,7 +19,7 @@ def test_fcs_file_to_string(mocker):
     structured_grid_file = NexusFile(location='nexus_data/structured_grid_1_reg_update.dat',
                                      origin=fcs_path, include_locations=None,
                                      include_objects=None, file_content_as_list=None)
-    options_file = NexusFile(location='nexus_data/nexus_data/ref_options_reg_update.dat',
+    options_file = NexusFile(location='/abs/nexus_data/ref_options_reg_update.dat',
                              include_locations=None,
                              origin=fcs_path, include_objects=None, file_content_as_list=None)
     wells_file_1 = NexusFile(location='wells_1.dat', origin=fcs_path, include_locations=None, include_objects=None,
@@ -36,7 +36,7 @@ def test_fcs_file_to_string(mocker):
                                         origin=fcs_path, include_locations=None,
                                         include_objects=None, file_content_as_list=None)
     
-    rock_file = NexusFile(location='nexus_data/rock_1.dat', origin=fcs_path,
+    rock_file = NexusFile(location='/abs/path/nexus_data/rock_1.dat', origin=fcs_path,
                             include_locations=None, include_objects=None, file_content_as_list=None)
     relperm_file = NexusFile(location='nexus_data/relperm_1.dat', origin=fcs_path,
                             include_locations=None, include_objects=None, file_content_as_list=None)
@@ -74,7 +74,7 @@ DATEFORMAT DD/MM/YYYY
 
 GRID_FILES
     STRUCTURED_GRID nexus_data/structured_grid_1_reg_update.dat
-    OPTIONS nexus_data/nexus_data/ref_options_reg_update.dat
+    OPTIONS /abs/nexus_data/ref_options_reg_update.dat
 
 INITIALIZATION_FILES
     EQUIL METHOD 1 nexus_data/nexus_data/ref_equil_01.dat
@@ -82,7 +82,7 @@ INITIALIZATION_FILES
     EQUIL METHOD 3 nexus_data/nexus_data/ref_equil_03.dat
 
 ROCK_FILES
-    ROCK METHOD 1 nexus_data/rock_1.dat
+    ROCK METHOD 1 /abs/path/nexus_data/rock_1.dat
     RELPM METHOD 1 nexus_data/relperm_1.dat
 
 PVT_FILES
