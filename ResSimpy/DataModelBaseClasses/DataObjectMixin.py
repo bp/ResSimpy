@@ -14,7 +14,7 @@ from ResSimpy.Utils.obj_to_table_string import to_table_line, SupportsKeywordMap
 
 
 @dataclass(kw_only=True)
-class DataObjectMixin(ABC, SupportsKeywordMapping):
+class DataObjectMixin(ABC):
     """Base class representing a data object in ResSimpy."""
     __id: UUID = field(default_factory=lambda: uuid4(), compare=False)
     __iso_date: ISODateTime = field(init=False, repr=True)
