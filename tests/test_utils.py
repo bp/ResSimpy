@@ -12,7 +12,7 @@ from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Utils.invert_nexus_map import invert_nexus_map, attribute_name_to_nexus_keyword, \
     nexus_keyword_to_attribute_name
 from ResSimpy.Utils.obj_to_dataframe import obj_to_dataframe
-from ResSimpy.Utils.obj_to_table_string import to_table_line
+from ResSimpy.Utils.obj_to_table_string import to_table_line, get_column_headers_required
 from ResSimpy.Utils.to_dict_generic import to_dict
 
 
@@ -256,7 +256,7 @@ def test_convert_to_number_error():
     ('1e-300', True),
     ('-0.0', True),
 
-    #False cases
+    # False cases
     ('--3.3', False),
     ('12..34', False),
     ('+-123.45', False),
@@ -270,3 +270,21 @@ def test_is_number(input_string, expected):
 
     # Assert
     assert result == expected
+
+
+def test_get_column_headers_required():
+    # Arrange
+    class_inst_1 = GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, unit_system=UnitSystem.METRIC,
+                               date='01/01/2030')
+    class_inst_2 = GenericTest(attr_1='hello', attr_2=10, attr_3=43020.2, attr_5='hello', unit_system=UnitSystem.METRIC,
+                               date='01/01/2030')
+    
+    expected_headers = ['ATTR_1', 'ATTR_2', 'ATTR_3', 'ATTR_5']
+    
+    objects_list = [class_inst_1, class_inst_2]
+    
+    # Act
+    result_headers = get_column_headers_required(objects_list)
+
+    # Assert
+    assert result_headers == expected_headers

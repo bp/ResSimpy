@@ -170,6 +170,14 @@ def test_multi_reservoir_handling(mocker, recwarn):
     result.model_files.multi_reservoir_files['res_1'].structured_grid_file.get_flat_list_str_file
     result.model_files.multi_reservoir_files['res_2'].structured_grid_file.get_flat_list_str_file
     result.model_files.multi_reservoir_files['res_3'].structured_grid_file.get_flat_list_str_file
+    
+    result.model_files.multi_reservoir_files['res_1'].surface_files[1].get_flat_list_str_file
+    result.model_files.multi_reservoir_files['res_2'].surface_files[1].get_flat_list_str_file
+    result.model_files.multi_reservoir_files['res_3'].surface_files[1].get_flat_list_str_file
+
+    assert (result.model_files.multi_reservoir_files['res_1'].surface_files[1] ==
+            expected_multires_files.multi_reservoir_files['res_1'].surface_files[1])
+    
     assert (result.model_files.multi_reservoir_files['res_1'] ==
             expected_multires_files.multi_reservoir_files['res_1'])
     assert (result.model_files.multi_reservoir_files['res_2'] ==
@@ -182,6 +190,8 @@ def test_multi_reservoir_handling(mocker, recwarn):
 
     assert result.model_files.files_info == expected_multires_files.files_info
 
+    result.model_files.surface_files[1].get_flat_list_str_file
+    expected_multires_files.surface_files[1].get_flat_list_str_file
     assert result.model_files.surface_files[1] == expected_multires_files.surface_files[1]
 
     assert result.model_files == expected_multires_files

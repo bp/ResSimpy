@@ -11,6 +11,8 @@ from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.FileOperations.File import File
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
+from ResSimpy.Time.ISODateTime import ISODateTime
+from ResSimpy.Utils.obj_to_table_string import get_column_headers_required
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import Network
@@ -156,7 +158,7 @@ class NetworkOperationsMixIn(ABC):
         sorted_by_date_sim_ordering = sorted(current_ordering, key=lambda x: (x[1].iso_date, x[0]))
         sorted_by_date = [x[1] for x in sorted_by_date_sim_ordering]
         # split by the name of the object
-        unique_names = list({x.name for x in sorted_by_date})
+        unique_names = list({x.name: x for x in sorted_by_date}.keys())
         return sorted_by_date, unique_names
 
     @staticmethod
@@ -252,3 +254,34 @@ class NetworkOperationsMixIn(ABC):
 
             resolved_objects.append(new_resolved_object)
         return resolved_objects
+
+    @property
+    def resolved_network_objects(self) -> Sequence[DataObjectMixin]:
+        """Returns the resolved network objects."""
+        if not hasattr(self, '_resolved_network_objects'):
+            self._resolved_network_objects = self.resolve_carried_over_attributes(self.get_all())
+        return self._resolved_network_objects
+
+    def to_string_for_date(self, date: ISODateTime) -> str:
+        """Returns a string representation of the network object for the date."""
+        printable_str = ''
+        # get the required objects for the date
+        network_objects_for_date: list[DataObjectMixin] = [x for x in self.resolved_network_objects if
+                                                           x.iso_date == date]
+        named_network_objects_for_date = {x.name: None for x in network_objects_for_date}
+        # only pick the last object by name for the date
+        network_objects_for_date = [[x for x in network_objects_for_date if x.name == y][-1]
+                                    for y in named_network_objects_for_date.keys()]
+
+        if not network_objects_for_date:
+            return printable_str
+        printable_str += f'{self.table_header}\n'
+        # collect the required table column header:
+        headers = get_column_headers_required(network_objects_for_date)
+        printable_str += ' '.join(headers) + '\n'
+        for network_object in network_objects_for_date:
+            printable_str += f'{network_object.to_table_line(headers=headers)}'
+
+        printable_str += f'{self.table_footer}\n'
+
+        return printable_str

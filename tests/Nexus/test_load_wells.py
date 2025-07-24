@@ -812,7 +812,7 @@ DATEFORMAT     DD/MM/YYYY
             'model.fcs': fcs_file_contents,
             'data/wells1.dat': wellspec_1_contents,
             'data/wells2.dat': wellspec_2_contents,
-            'data/surface.date': ''
+            'data/surface.date': 'BLACKOIL'
         }).return_value
         return mock_open
 

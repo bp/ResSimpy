@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from typing import Literal, Sequence, TYPE_CHECKING, Optional
 
 from ResSimpy.DataModelBaseClasses.NetworkList import NetworkList
+from ResSimpy.Time.ISODateTime import ISODateTime
+
 if TYPE_CHECKING:
     from ResSimpy.DataModelBaseClasses.Network import Network
 
@@ -15,7 +17,7 @@ class NetworkLists(ABC):
     __parent_network: Network
 
     def __init__(self, parent_network: Network) -> None:
-        """Initialises the ConLists class."""
+        """Initialises the NetworkList ABC."""
         self.__parent_network: Network = parent_network
 
     @property
@@ -25,12 +27,12 @@ class NetworkLists(ABC):
 
     @property
     def lists(self) -> Sequence[NetworkList]:
-        """Returns all ConList instances."""
+        """Returns all NetworkList instances."""
         return self._lists
 
     @property
     def unique_names(self) -> list[str]:
-        """Returns all ConList names."""
+        """Returns all NetworkList names."""
         return list({x.name for x in self.lists if x.name is not None})
 
     @staticmethod
@@ -63,3 +65,17 @@ class NetworkLists(ABC):
     def _add_to_memory(self, additional_list: Optional[Sequence[NetworkList]]) -> None:
         """Adds additional lists to the current list."""
         raise NotImplementedError('This method must be implemented in the derived class.')
+
+    def to_string_for_date(self, date: ISODateTime) -> str:
+        """Returns a string representation of the lists for a specific date."""
+        lists_for_date = [x for x in self._lists if x.iso_date == date]
+        if not lists_for_date:
+            return ''
+        printable_string = ''
+        for list_item in lists_for_date:
+            printable_string += f'{self.table_header()} {list_item.name}\n'
+            # remove all the previous wells and reinitialise the list
+            printable_string += 'CLEAR\nADD\n'
+            printable_string += ' '.join(list_item.elements_in_the_list) + '\n'
+            printable_string += self.table_footer() + '\n'
+        return printable_string

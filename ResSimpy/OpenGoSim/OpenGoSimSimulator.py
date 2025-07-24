@@ -10,6 +10,7 @@ from ResSimpy.DataModelBaseClasses.Equilibration import Equilibration
 from ResSimpy.FileOperations.File import File
 from ResSimpy.DataModelBaseClasses.Gaslift import Gaslift
 from ResSimpy.GenericContainerClasses.Hydraulics import Hydraulics
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.OpenGoSim.DataModels.OpenGoSimCompletion import OpenGoSimCompletion
 from ResSimpy.OpenGoSim.DataModels.OpenGoSimWell import OpenGoSimWell
 from ResSimpy.OpenGoSim.Enums.SimulationTypeEnum import SimulationType
@@ -24,6 +25,7 @@ from ResSimpy.DataModelBaseClasses.Separator import Separator
 from ResSimpy.DataModelBaseClasses.Simulator import Simulator
 from ResSimpy.DataModelBaseClasses.Valve import Valve
 from ResSimpy.DataModelBaseClasses.Water import Water
+from ResSimpy.Time.ISODateTime import ISODateTime
 
 
 def line_contains_block_ending(line: str) -> bool:
@@ -47,6 +49,7 @@ class OpenGoSimSimulator(Simulator):
         super().__init__()
         self._origin = origin
         self._wells: OpenGoSimWells = OpenGoSimWells()
+        self.date_format: DateFormat = DateFormat.DD_MMM_YYYY  # OGS default
 
         self.__final_date = None
 
@@ -77,6 +80,11 @@ class OpenGoSimSimulator(Simulator):
     def final_date(self) -> Optional[str]:
         """Returns final date in the simulator."""
         return self.__final_date
+
+    @property
+    def start_iso_date(self) -> ISODateTime:
+        """Returns the start date in ISO format."""
+        return ISODateTime.convert_to_iso(self._start_date, self.date_format)
 
     @staticmethod
     def sim_default_unit_system() -> UnitSystem:

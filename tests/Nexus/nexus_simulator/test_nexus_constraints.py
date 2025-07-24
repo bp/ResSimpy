@@ -705,3 +705,44 @@ ENDCONSTRAINTS
     assert len(ordered_result) == 2
     assert ordered_result[0] == well_1_expected_constraint_0
     assert ordered_result[1] == well_1_expected_constraint_1
+
+def test_constraints_to_string_for_date():
+    # Arrange
+    constraints_props = ({'date': '01/01/2019', 'name': 'well1', 'max_surface_liquid_rate': 3884.0,
+      'max_surface_water_rate': 0, 'unit_system': UnitSystem.ENGLISH, 'max_pressure': 3000},
+     {'date': '01/01/2019', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_reverse_surface_liquid_rate': 10000.0,
+      'max_surface_liquid_rate': 15.5, 'unit_system': UnitSystem.ENGLISH, 'min_pressure': 1200},
+     {'date': '01/01/2020', 'name': 'well1', 'max_surface_liquid_rate': 5000.0, 'unit_system': UnitSystem.ENGLISH},
+     {'date': '01/01/2020', 'name': 'well2', 'max_surface_water_rate': 0.0, 'max_surface_liquid_rate': 20.5,
+      'unit_system': UnitSystem.ENGLISH}
+     )
+    constraints = {'well1': [NexusConstraint(constraint, date_format=DateFormat.MM_DD_YYYY, start_date='01/01/2019')
+                             for constraint in constraints_props if constraint['name'] == 'well1'],
+                   'well2': [NexusConstraint(constraint, date_format=DateFormat.MM_DD_YYYY, start_date='01/01/2019')
+                             for constraint in constraints_props if constraint['name'] == 'well2']}
+    
+    # create a dummy constraints object to call the method on
+    nexus_constraints = NexusConstraints(None, None) 
+    nexus_constraints._constraints = constraints
+    
+    date_for_string_1 = ISODateTime(year=2019, month=1, day=1)
+    date_for_string_2 = ISODateTime(year=2020, month=1, day=1)
+    
+    expected_result_1 = """CONSTRAINTS
+well1 PMAX 3000 QWSMAX 0 QLIQSMAX 3884.0
+well2 PMIN 1200 QWSMAX 0.0 QLIQSMAX 15.5 QLIQSMAX- 10000.0
+ENDCONSTRAINTS
+"""
+
+    expected_result_2 = """CONSTRAINTS
+well1 QLIQSMAX 5000.0
+well2 QWSMAX 0.0 QLIQSMAX 20.5
+ENDCONSTRAINTS
+"""
+    # Act
+    result_1 = nexus_constraints.to_string_for_date(date_for_string_1)
+    result_2 = nexus_constraints.to_string_for_date(date_for_string_2)
+    
+    # Assert
+    assert result_1 == expected_result_1
+    assert result_2 == expected_result_2
