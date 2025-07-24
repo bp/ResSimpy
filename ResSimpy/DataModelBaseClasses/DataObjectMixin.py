@@ -10,7 +10,7 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 from ResSimpy.Utils import to_dict_generic
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
-from ResSimpy.Utils.obj_to_table_string import to_table_line, SupportsKeywordMapping
+from ResSimpy.Utils.obj_to_table_string import to_table_line
 
 
 @dataclass(kw_only=True)
