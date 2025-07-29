@@ -2418,7 +2418,7 @@ INCLUDE /path/nexus_data/init/equil_info.txt
 
 @pytest.mark.parametrize("file_contents, expected_data",
                          [
-                             ("""Test CASE 1:
+                             ("""! Test CASE 1:
 SOURCE
 EOS NHC 7 COMPONENTS N2C1 CO2C3 C4-5 C6-14 C15-19 C20-35 C36+
 !
@@ -2435,7 +2435,7 @@ ENDIPRTABLE
       'N2C1': [0.90000, 0.850000],
       'C6-14': [0.10000, 0.15000]}),
 
-                             ("""TEST CASE 2:
+                             ("""! TEST CASE 2:
 SOURCE BLACKOIL 
 TIME    05/15/2013 
 IPRTABLE 
@@ -2451,7 +2451,7 @@ ENDIPRTABLE
       'N2C1': [0.80000, 0.80000, 0.80000],
       'C6-14': [0.30000, 0.20000, 0.20000]}),
 
-                             ("""TEST CASE 3"
+                             ("""! TEST CASE 3"
 TIME  09/15/2026
 IPRTABLE
 PRES       QO       QW           QG         N2C1      C6-14    
