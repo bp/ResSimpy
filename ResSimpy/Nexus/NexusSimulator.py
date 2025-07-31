@@ -109,6 +109,7 @@ class NexusSimulator(Simulator):
         if origin is None:
             raise ValueError(f'Origin path to model fcs file is required. Instead got {origin}.')
         self.origin = origin
+        self._model_files: FcsNexusFile = FcsNexusFile(location=self.origin, origin=None)
 
         self._start_date: str = '' if start_date is None else start_date.strip()
         self.run_control_file_path: Optional[str] = ''
@@ -143,7 +144,8 @@ class NexusSimulator(Simulator):
         self._relperm: NexusRelPermMethods = NexusRelPermMethods(model_unit_system=self.default_units)
         self._valve: NexusValveMethods = NexusValveMethods(model_unit_system=self.default_units)
         self._aquifer: NexusAquiferMethods = NexusAquiferMethods(model_unit_system=self.default_units)
-        self._hydraulics: NexusHydraulicsMethods = NexusHydraulicsMethods(model_unit_system=self.default_units)
+        self._hydraulics: NexusHydraulicsMethods = NexusHydraulicsMethods(model_unit_system=self.default_units,
+                                                                          model_files=self.model_files)
         self._gaslift: NexusGasliftMethods = NexusGasliftMethods(model_unit_system=self.default_units)
         # Nexus operations modules
         self.logging: Logging = Logging(self)
@@ -157,8 +159,6 @@ class NexusSimulator(Simulator):
 
         # Check the status of any existing or completed runs related to this model
         self.get_simulation_status(from_startup=True)
-
-        self._model_files: FcsNexusFile
 
         self.__is_multi_reservoir: bool = False  # Flag to indicate if the model is a multi-reservoir model
         self.__reservoir_paths: dict[str, str] = {}
@@ -674,7 +674,8 @@ class NexusSimulator(Simulator):
         if self.model_files.hyd_files is not None and \
                 len(self.model_files.hyd_files) > 0:
             self._hydraulics = NexusHydraulicsMethods(files=self.model_files.hyd_files,
-                                                      model_unit_system=self.default_units)
+                                                      model_unit_system=self.default_units,
+                                                      model_files=self.model_files)
 
         # Read in gaslift properties from Nexus gaslift method files
         if self.model_files.gas_lift_files is not None and \

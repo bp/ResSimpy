@@ -21,17 +21,18 @@ class DynamicProperty(ABC):
 
     properties: dict
     input_number: int = field(compare=False)
-    file: File = field(compare=False)
+    file: Optional[File] = field(compare=False)
 
-    def __init__(self, input_number: int, file: File) -> None:
+    def __init__(self, input_number: int, file: Optional[File]) -> None:
         """Initialises the DynamicProperty class.
 
         Args:
             input_number (int): Method, table or input number, in order as entered in the simulation input deck.
-            file (File): The File that the dynamic property is read from.
+            file (Optional[File]): The File that the dynamic property is read from. If None, the dynamic property
+                is not associated with a file.
         """
         self.input_number: int = input_number
-        self.file: File = file
+        self.file: Optional[File] = file
 
     @property
     @abstractmethod
@@ -41,13 +42,15 @@ class DynamicProperty(ABC):
 
     def __repr__(self) -> str:
         """Repr for dynamic property data."""
-        printable_str = f'\nFILE_PATH: {self.file.location}\n\n'
+        if self.file is not None:
+            printable_str = f'\nFILE_PATH: {self.file.location}\n\n'
         printable_str += self.to_string()
         return printable_str
 
     def __str__(self) -> str:
         """Pretty printing dynamic property in human-readable format, e.g. output of print function."""
-        printable_str = f'\nFILE_PATH: {self.file.location}\n\n'
+        if self.file is not None:
+            printable_str = f'\nFILE_PATH: {self.file.location}\n\n'
         printable_str += self.to_string()
         return printable_str
 
@@ -70,9 +73,11 @@ class DynamicProperty(ABC):
             raise ValueError('Please specify either overwrite_file as True or provide new_file_location.')
 
         # Overwriting existing file contents
-        if overwrite_file is True:
+        if overwrite_file is True and self.file is not None:
             self.file.file_content_as_list = new_file_contents
             self.file.write_to_file(overwrite_file=overwrite_file)
+        elif overwrite_file is True and self.file is None:
+            raise ValueError('Please specify a file to overwrite or provide new_file_location.')
 
     @property
     def ranges(self) -> dict[str, tuple[float, float]]:

@@ -22,3 +22,14 @@ class Hydraulics(ABC):
     def inputs(self) -> Mapping[int, DynamicProperty]:
         """A Collection of hydraulics inputs, as a dictionary."""
         raise NotImplementedError("Implement this in the derived class")
+
+    def add_method(self, method: DynamicProperty, new_file_name: str,
+                   create_new_file: bool = False) -> None:
+        """Adds a new hydraulics method to the collection.
+
+        Args:
+            method (Hydraulics): The hydraulics method to add.
+            new_file_name (str): The name of the file to save the method to.
+            create_new_file (bool): Whether to create a new file for the method.
+        """
+        raise NotImplementedError("Implement this in the derived class")
