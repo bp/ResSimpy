@@ -86,25 +86,27 @@ def test_get_token_value(mocker: MockerFixture, line_contents, file_contents, ex
     assert with_index_result == (expected_result, expected_line_index)
 
 
-@pytest.mark.parametrize("line, number_tokens, expected_result", [
-    ('EQUIL METHOD 1 /path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
-    ('EQUIL METHOD 1 /path/equil.dat ! comment', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
+@pytest.mark.parametrize("line, number_tokens, expected_result, comment_chars", [
+    ('EQUIL METHOD 1 /path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat'], None),
+    ('EQUIL METHOD 1 /path/equil.dat ! comment', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat'], None),
     ('EQUIL NorPT METHOD 1 /path/equil.dat TOKEN TOKEN', 6,
-     ['EQUIL', 'METHOD', '1', '/path/equil.dat', 'TOKEN', 'TOKEN']),
-    ('EQUIL METHOD 1 \n /path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
-    ('EQUIL METHOD !comment\n \t 1 ', 3, ['EQUIL', 'METHOD', '1']),
-    ('EQUIL\n NORPT METHOD\n1\n/path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat']),
-    ('EQUIL METHOD 1 /path/equil.dat', 2, ['EQUIL', 'METHOD']),
-    ('\n \n \n EQUIL METHOD 1 /path/equil.dat', 2, ['EQUIL', 'METHOD']),
+     ['EQUIL', 'METHOD', '1', '/path/equil.dat', 'TOKEN', 'TOKEN'], None),
+    ('EQUIL METHOD 1 \n /path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat'], None),
+    ('EQUIL METHOD !comment\n \t 1 ', 3, ['EQUIL', 'METHOD', '1'], None),
+    ('EQUIL\n NORPT METHOD\n1\n/path/equil.dat', 4, ['EQUIL', 'METHOD', '1', '/path/equil.dat'], None),
+    ('EQUIL METHOD 1 /path/equil.dat', 2, ['EQUIL', 'METHOD'], None),
+    ('\n \n \n EQUIL --comment\n METHOD 1 /path/equil.dat', 2, ['EQUIL', 'METHOD'], ['--']),
 ], ids=["basic", "more tokens", "get more tokens", "new line", "newline comment", "lots of newlines",
         "more text than declared tokens", "starting with new lines"])
-def test_get_multiple_sequential_values(line, number_tokens, expected_result):
+def test_get_multiple_sequential_values(line, number_tokens, expected_result, comment_chars):
     # Arrange
     list_of_strings = line.splitlines()
     # Act
-    result = fo.get_multiple_expected_sequential_values(list_of_strings, number_tokens, ['NORPT'])
+    result = fo.get_multiple_expected_sequential_values(list_of_strings, number_tokens, ['NORPT'],
+                                                        comment_characters=comment_chars)
     # Assert
     assert result == expected_result
+
 
 
 def test_get_multiple_sequential_values_fail_case():

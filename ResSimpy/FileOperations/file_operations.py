@@ -615,13 +615,16 @@ def get_expected_next_value(start_line_index: int, file_as_list: list[str], sear
 
 
 def get_multiple_expected_sequential_values(list_of_strings: list[str], number_tokens: int,
-                                            ignore_values: list[str]) -> list[str]:
+                                            ignore_values: list[str], comment_characters: Optional[list[str]]=None) \
+        -> list[str]:
     """Returns a sequential list of values as long as the number of tokens requested.
 
     Args:
         list_of_strings (list[str]): list of strings to represent the file with a new entry per line in the file.
         number_tokens (int): number of tokens to return values of
         ignore_values (list[str]): list of values to ignore if found
+        comment_characters (Optional[list[str]]): a list of characters that are considered inline comments.
+            If None, defaults to the Nexus format (!)
 
     Raises:
         ValueError: if too many tokens are requested compared to the file provided
@@ -633,7 +636,7 @@ def get_multiple_expected_sequential_values(list_of_strings: list[str], number_t
     filter_list = list_of_strings.copy()
     for i in range(number_tokens):
         value = get_next_value(0, filter_list, filter_list[0], replace_with='',
-                               ignore_values=ignore_values)
+                               ignore_values=ignore_values, comment_characters=comment_characters)
         if value is None:
             # if no valid value found, raise an error
             raise ValueError('Too many values requested from the list of strings passed,'
