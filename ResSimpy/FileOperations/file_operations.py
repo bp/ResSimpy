@@ -615,7 +615,7 @@ def get_expected_next_value(start_line_index: int, file_as_list: list[str], sear
 
 
 def get_multiple_expected_sequential_values(list_of_strings: list[str], number_tokens: int,
-                                            ignore_values: list[str], comment_characters: Optional[list[str]]=None) \
+                                            ignore_values: list[str], comment_characters: Optional[list[str]] = None) \
         -> list[str]:
     """Returns a sequential list of values as long as the number of tokens requested.
 
