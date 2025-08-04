@@ -1,12 +1,15 @@
 from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
-import pandas as pd
 from dataclasses import dataclass
-
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
+import pandas as pd
 
 
 @dataclass
-class IPRTable(DataObjectMixin):
+class NexusIprMethod(DataObjectMixin):
+    """Class to hold IPR Method"""
+
+    __table: pd.DataFrame
+
     def __init__(self, date: str, table: pd.DataFrame) -> None:
         """Individual IPRTable class to add read of IPR files.
 
@@ -14,7 +17,8 @@ class IPRTable(DataObjectMixin):
              date(str): IPR table date.
              table(pd.DataFrame): IPR table.
         """
-        self.table = table
+
+        self.__table = table
 
         super().__init__(date=date)
 
@@ -33,3 +37,7 @@ class IPRTable(DataObjectMixin):
             'QG': ('gas_surface_rate', float),
         }
         return mapping
+
+    @property
+    def table(self):
+        return self.__table

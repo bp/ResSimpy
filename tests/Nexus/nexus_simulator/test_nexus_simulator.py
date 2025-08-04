@@ -10,7 +10,6 @@ from pandas._testing import assert_frame_equal
 
 from ResSimpy import NexusSimulator
 from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
-from ResSimpy.Nexus.DataModels.IPRTable import IPRTable
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
@@ -36,7 +35,8 @@ from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
-from ResSimpy.Nexus.DataModels.IPRTables import IPRTables
+from ResSimpy.Nexus.NexusIPRMethods import NexusIprMethods
+from ResSimpy.Nexus.DataModels.NexusIPRMethod import NexusIprMethod
 from pytest_mock import MockerFixture
 from unittest.mock import Mock
 from ResSimpy.Enums.UnitsEnum import UnitSystem
@@ -2451,7 +2451,7 @@ ENDIPRTABLE
       'N2C1': [0.80000, 0.80000, 0.80000],
       'C6-14': [0.30000, 0.20000, 0.20000]}),
 
-                             ("""! TEST CASE 3"
+                             ("""! TEST CASE 3:
 TIME  09/15/2026
 IPRTABLE
 PRES       QO       QW           QG         N2C1      C6-14    
@@ -2473,8 +2473,81 @@ def test_read_iprtables(file_contents, expected_data):
 
     # Act
 
-    read = IPRTables()
+    read = NexusIprMethods()
     result = read.read_iprtables_as_df(file_contents.splitlines(keepends=True))
 
     # Assert
     assert_frame_equal(result, expected_result)
+
+
+def test_read_iprtables_one(mocker):
+    """Testing multiple IPR tables ine one IPR method file"""
+
+    # Arrange
+    # Mock surface
+    IPR_file_contents = """SOURCE
+EOS NHC 7 COMPONENTS N2C1 CO2C3 C4-5 C6-14 C15-19 C20-35 C36+
+!
+TIME    08/25/2026
+IPRTABLE
+PRES       QO           QW              QG          N2C1         C6-14
+8888     6772.80000   0.00000      78350.00000     0.80000      0.10000
+ENDIPRTABLE
+
+TIME    08/26/2026
+IPRTABLE
+PRES      QO            QW              QG           N2C1         C6-14
+7777    5111.70000    0.00000      66350.00000     0.70000      0.10000
+ENDIPRTABLE
+"""
+
+    # Arrange
+    ipr_file = NexusFile(location='', file_content_as_list=IPR_file_contents.splitlines())
+    expected_df_1 = pd.DataFrame(data={
+        'PRES': [8888],
+        'QO': [6772.80000],
+        'QW': [0.00000],
+        'QG': [78350.00000],
+        'N2C1': [0.80000],
+        'C6-14': [0.10000]})
+
+    expected_df_2 = pd.DataFrame(data={
+        'PRES': [7777],
+        'QO': [5111.70000],
+        'QW': [0.00000],
+        'QG': [66350.00000],
+        'N2C1': [0.70000],
+        'C6-14': [0.10000],
+    })
+
+    expected_IprTable_1 = NexusIprMethod(date='08/25/2026', table=expected_df_1)
+    expected_IprTable_2 = NexusIprMethod(date='08/26/2026', table=expected_df_2)
+
+    expected_result = [expected_IprTable_1, expected_IprTable_2]
+
+    fcs_file_contents = """RECURRENT_FILES
+    IPR Method 1 ipr_file_1.dat
+    """
+
+    # Mock out the fcs file
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'fcs_file.fcs': fcs_file_contents,
+            'ipr_file_1.dat': IPR_file_contents,
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='fcs_file.fcs', mock_open=False)
+
+    # Act
+    result = nexus_sim.ipr_methods.get_all()
+
+    # Assert
+    assert result[0].date == expected_IprTable_1.date
+    assert_frame_equal(result[0].table, expected_IprTable_1.table)
+
+    assert result[1].date == expected_IprTable_2.date
+    assert_frame_equal(result[1].table, expected_IprTable_2.table)
+

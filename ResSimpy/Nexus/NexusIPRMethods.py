@@ -1,18 +1,24 @@
 """Class for collection of IPRs."""
-from typing import Optional
+from __future__ import annotations
+from typing import Optional, MutableMapping, TYPE_CHECKING
 import pandas as pd
 
 import ResSimpy.Nexus.nexus_file_operations as nfo
-from ResSimpy.Nexus.DataModels.IPRTable import IPRTable
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.DataModels.NexusIPRMethod import NexusIprMethod
 from ResSimpy.Nexus.nexus_file_operations import read_table_to_df
 
+if TYPE_CHECKING:
+    from ResSimpy import NexusSimulator
 
-class IPRTables:
-    __inputs: list[IPRTable]
+
+class NexusIprMethods:
+    __inputs: MutableMapping[int, NexusIprMethod]
     __files: dict[int, NexusFile]
+    __model: NexusSimulator
+    __has_been_loaded: bool = False
 
-    def __init__(self, tables: Optional[list[IPRTable]] = None) -> None:
+    def __init__(self, model: NexusSimulator, tables: Optional[list[NexusIprMethod]] = None) -> None:
         """Class for collections of IPRs.
 
         Args:
@@ -23,6 +29,8 @@ class IPRTables:
             self.tables = []
         else:
             self.tables = tables
+
+        self.__model = model
 
     def read_iprtables_as_df(self, file_as_list: list[str]) -> pd.DataFrame:
         """Reads in IPR files from Nexus into a dataframe.
@@ -46,7 +54,7 @@ class IPRTables:
                 reading_line = False
 
                 df = read_table_to_df(file_as_list=table_lines)
-                new_iprtable = IPRTable(date=date, table=df)
+                new_iprtable = NexusIprMethod(date=date, table=df)
                 self.tables.append(new_iprtable)
 
                 all_tables.append(df)
@@ -57,3 +65,14 @@ class IPRTables:
                 table_lines.append(line)
 
         return pd.concat(all_tables, ignore_index=True) if all_tables else pd.DataFrame()
+
+    def get_all(self):
+        """"""
+        if not self.__has_been_loaded:
+            self.load()
+        return self.tables
+
+    def load(self):
+        for ipr_file in self.__model.model_files.ipr_files.values():
+            self.read_iprtables_as_df(file_as_list=ipr_file.get_flat_list_str_file)
+        self.__has_been_loaded = True
