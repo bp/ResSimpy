@@ -1,7 +1,8 @@
 from __future__ import annotations
 from ResSimpy.DataModelBaseClasses.DynamicProperty import DynamicProperty
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeAlias
+
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusAquiferMethods import NexusAquiferMethods
     from ResSimpy.Nexus.NexusEquilMethods import NexusEquilMethods
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusValveMethods import NexusValveMethods
     from ResSimpy.Nexus.NexusWaterMethods import NexusWaterMethods
 
-    DynamicMethodCollection = (
+    DynamicMethodCollection: TypeAlias = (
             NexusRockMethods | NexusPVTMethods | NexusEquilMethods | NexusWaterMethods |
             NexusSeparatorMethods | NexusHydraulicsMethods | NexusAquiferMethods | NexusValveMethods |
             NexusGasliftMethods | NexusRelPermMethods
@@ -37,6 +38,11 @@ def add_dynamic_method(dynamic_method_collection: DynamicMethodCollection, metho
     if method.input_number in dynamic_method_collection.inputs:
         raise ValueError(f'Method with input number {method.input_number} already exists in the collection.')
 
+    method_type = dynamic_method_collection._method_type()
+
+    if not isinstance(method, method_type):
+        raise TypeError(f'Expected method of type {method_type.__name__}, but got {type(method).__name__}.')
+
     dynamic_method_collection.__properties_loaded = True  # We are adding a new method so no more loading can happen.
 
     new_nexus_file = NexusFile(location=new_file_name,
@@ -50,8 +56,9 @@ def add_dynamic_method(dynamic_method_collection: DynamicMethodCollection, metho
     if create_new_file:
         method.write_to_file(new_file_path=new_file_name, overwrite_file=False)
 
-    dynamic_method_collection.inputs[method.input_number] = method
+    # explicit guard against the method type is used above so ignore mypy.
+    dynamic_method_collection.inputs[method.input_number] = method  # type: ignore[assignment]
     dynamic_method_collection.files[method.input_number] = method.file
     if dynamic_method_collection._model_files is not None:
         dynamic_method_collection._model_files._add_file(new_nexus_file, keyword=dynamic_method_collection.keyword,
-                                                          method_number=method.input_number)
+                                                         method_number=method.input_number)

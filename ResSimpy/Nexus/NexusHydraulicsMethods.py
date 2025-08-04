@@ -127,3 +127,7 @@ class NexusHydraulicsMethods(Hydraulics):
     def keyword(self) -> str:
         """Returns the keyword for the hydraulics methods."""
         return 'HYD'
+
+    def _method_type(self) -> type[NexusHydraulicsMethod]:
+        """Returns the expected type of the dynamic property."""
+        return NexusHydraulicsMethod

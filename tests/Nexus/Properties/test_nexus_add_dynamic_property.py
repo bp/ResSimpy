@@ -1,9 +1,11 @@
 import numpy as np
 import pandas as pd
+import pytest
 
 from ResSimpy import NexusSimulator
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusHydraulicsMethod import NexusHydraulicsMethod
+from ResSimpy.Nexus.DataModels.NexusRelPermMethod import NexusRelPermMethod
 
 
 def test_add_hydraulics_method():
@@ -56,10 +58,9 @@ GWTABLE
 0.75 0.000 0.8789   3.0
 
 SCALING TWOPOINT
-
 """.splitlines(keepends=True)
     
-    relpm_method = NexusHydraulicsMethod(input_number=10, properties=relpm_props,
+    relpm_method = NexusRelPermMethod(input_number=10, properties=relpm_props,
                                          file=None, model_unit_system=model.run_units,
                                          )
 
@@ -78,3 +79,16 @@ SCALING TWOPOINT
     assert model.model_files is not None
     assert model.model_files.relperm_files is not None
     assert model.model_files.relperm_files[10] == expected_generated_nexus_file
+
+def test_add_wrong_type_of_dynamic_method():
+    # Arrange
+    model = NexusSimulator(origin='new_model.fcs', assume_loaded=True, start_date='01/01/2020', )
+
+    hydraulic_method = NexusHydraulicsMethod(input_number=10, properties={'ALQ': 1000},
+                                             file=None, model_unit_system=model.run_units,
+                                             )
+
+    # Act + Assert
+    with pytest.raises(Exception) as e_info:
+        model.relperm.add_method(hydraulic_method, new_file_name='new_method.dat', create_new_file=False)
+    assert str(e_info.value) == "Expected method of type NexusRelPermMethod, but got NexusHydraulicsMethod."

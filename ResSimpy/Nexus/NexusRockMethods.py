@@ -40,7 +40,7 @@ class NexusRockMethods(Rock):
             files (Optional[dict[int, NexusFile]]): Collection of rock property files, as defined in Nexus fcs file.
                 Keyed by the method number.
             assume_loaded (bool): If True, assumes that the rock methods have already been loaded.
-            model_files (Optional[FcsNexusFile]): The FcsFile object that contains all the model files for keeping the 
+            model_files (Optional[FcsNexusFile]): The FcsFile object that contains all the model files for keeping the
                 files in sync across the whole model.
         """
         if inputs:
@@ -119,3 +119,7 @@ class NexusRockMethods(Rock):
         """
         add_dynamic_method(dynamic_method_collection=self, method=method, new_file_name=new_file_name,
                            create_new_file=create_new_file)
+
+    def _method_type(self) -> type[NexusRockMethod]:
+        """Returns the expected type of the dynamic property."""
+        return NexusRockMethod

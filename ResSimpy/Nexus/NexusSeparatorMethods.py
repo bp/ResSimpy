@@ -52,6 +52,8 @@ class NexusSeparatorMethods(Separator):
         else:
             self.__files = {}
         self.__model_unit_system = model_unit_system
+        self._model_files = model_files
+        self.__properties_loaded = assume_loaded
         super().__init__()
 
     def __repr__(self) -> str:
@@ -122,3 +124,7 @@ class NexusSeparatorMethods(Separator):
         """
         add_dynamic_method(dynamic_method_collection=self, method=method, new_file_name=new_file_name,
                            create_new_file=create_new_file)
+
+    def _method_type(self) -> type[NexusSeparatorMethod]:
+        """Returns the expected type of the dynamic property."""
+        return NexusSeparatorMethod

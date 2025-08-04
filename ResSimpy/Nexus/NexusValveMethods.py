@@ -77,8 +77,8 @@ class NexusValveMethods(Valve):
         return self.__inputs
 
     @property
-    def valve_files(self) -> dict[int, NexusFile]:
-        """Returns dictionary of valve files."""
+    def files(self) -> dict[int, NexusFile]:
+        """Returns dictionary of NexusFile where keys are of type int."""
         return self.__files
 
     def load_valve_methods(self) -> None:
@@ -116,3 +116,7 @@ class NexusValveMethods(Valve):
         """
         add_dynamic_method(dynamic_method_collection=self, method=method, new_file_name=new_file_name,
                            create_new_file=create_new_file)
+
+    def _method_type(self) -> type[NexusValveMethod]:
+        """Returns the expected type of the dynamic property."""
+        return NexusValveMethod

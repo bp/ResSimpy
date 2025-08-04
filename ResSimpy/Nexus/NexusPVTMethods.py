@@ -126,3 +126,7 @@ class NexusPVTMethods(PVT):
         """
         add_dynamic_method(dynamic_method_collection=self, method=method, new_file_name=new_file_name,
                            create_new_file=create_new_file)
+
+    def _method_type(self) -> type[NexusPVTMethod]:
+        """Returns the expected type of the dynamic property."""
+        return NexusPVTMethod
