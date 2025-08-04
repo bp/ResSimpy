@@ -4,6 +4,7 @@ from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 import pandas as pd
 from pandas import DataFrame
 
+
 @dataclass
 class NexusIprMethod(DataObjectMixin):
     """Class to hold IPR Method."""

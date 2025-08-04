@@ -75,6 +75,11 @@ class NexusIprMethods:
 
     def load(self) -> None:
         """Loads IPRTables."""
-        for ipr_file in self.__model.model_files.ipr_files.values():
-            self.read_iprtables_as_df(file_as_list=ipr_file.get_flat_list_str_file)
-        self.__has_been_loaded = True
+        ipr_files = self.__model.model_files.ipr_files
+
+        if ipr_files is not None:
+            for ipr_file in ipr_files.values():
+                self.read_iprtables_as_df(file_as_list=ipr_file.get_flat_list_str_file)
+            self.__has_been_loaded = True
+        else:
+            raise ValueError("""IPR files are missing. Can not load IPRTables.""")
