@@ -23,6 +23,7 @@ class NexusIprMethods:
 
         Args:
             tables: Collections of IPR tables
+            model: NexusSimulator instance
         """
 
         if tables is None:
@@ -66,13 +67,14 @@ class NexusIprMethods:
 
         return pd.concat(all_tables, ignore_index=True) if all_tables else pd.DataFrame()
 
-    def get_all(self):
-        """"""
+    def get_all(self) -> list[NexusIprMethod]:
+        """Returns loaded IPRTables."""
         if not self.__has_been_loaded:
             self.load()
         return self.tables
 
-    def load(self):
+    def load(self) -> None:
+        """Loads IPRTables."""
         for ipr_file in self.__model.model_files.ipr_files.values():
             self.read_iprtables_as_df(file_as_list=ipr_file.get_flat_list_str_file)
         self.__has_been_loaded = True
