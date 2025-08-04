@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from typing import Any, TYPE_CHECKING
 
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
+
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 
@@ -16,8 +18,8 @@ class ModifyObjectOperations:
         """
         self.object_to_modify = object_to_modify
 
-    def modify_network_object(self, object_to_modify: dict[str, None | str | float | int],
-                              new_properties: dict[str, None | str | float | int], network: NexusNetwork) -> None:
+    def modify_network_object(self, object_to_modify: DataObjectMixinDictType,
+                              new_properties: DataObjectMixinDictType, network: NexusNetwork) -> None:
         """Modifies an existing object based on a matching dictionary of properties.
 
         Partial matches allowed if precisely 1 matching object is found.
@@ -25,9 +27,9 @@ class ModifyObjectOperations:
         Applies primarily to network based objects.
 
         Args:
-            object_to_modify (dict[str, None | str | float | int]): dictionary containing attributes to match in the
+            object_to_modify (DataObjectMixinDictType): dictionary containing attributes to match in the
             existing object set. Requires an implemented add, remove
-            new_properties (dict[str, None | str | float | int]): properties to switch to in the new object
+            new_properties (DataObjectMixinDictType): properties to switch to in the new object
             network (NexusNetwork): The network object containing the object to modify.
         """
         # TODO apply this to more of the network attributes through the Base Class

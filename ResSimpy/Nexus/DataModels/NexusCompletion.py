@@ -7,6 +7,7 @@ from typing import Optional, Union
 # Use correct Self type depending upon Python version
 import sys
 
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums import DateFormatEnum
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
@@ -319,8 +320,7 @@ class NexusCompletion(Completion):
 
     def to_dict(self, keys_in_keyword_style: bool = False, add_date: bool = True, add_units: bool = False,
                 add_iso_date: bool = False,
-                include_nones: bool = True, units_as_string: bool = True) -> \
-            dict[str, None | str | int | float]:
+                include_nones: bool = True, units_as_string: bool = True) -> DataObjectMixinDictType:
         """Returns dictionary of the completion attributes.
 
         Args:
@@ -420,7 +420,7 @@ class NexusCompletion(Completion):
         return [v[0] for v in NexusCompletion.get_keyword_mapping().values()]
 
     @classmethod
-    def from_dict(cls: type[Self], input_dictionary: dict[str, None | float | int | str],
+    def from_dict(cls: type[Self], input_dictionary: DataObjectMixinDictType,
                   date_format: DateFormat) -> Self:
         """Generates a NexusCompletion from a dictionary."""
         skip_mapping_keys = ['date', 'date_format', 'unit_system', 'start_date', 'iso_date']
@@ -452,7 +452,7 @@ class NexusCompletion(Completion):
         constructed_class.update(input_dictionary)
         return constructed_class
 
-    def update(self, input_dictionary: dict[str, None | float | int | str]) -> None:
+    def update(self, input_dictionary: DataObjectMixinDictType) -> None:
         """Updates a completion based on a dictionary of attributes."""
         for k, v in input_dictionary.items():
             if v is None:

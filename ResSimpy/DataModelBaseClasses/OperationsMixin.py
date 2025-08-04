@@ -7,7 +7,7 @@ from uuid import UUID
 
 import pandas as pd
 
-from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin, DataObjectMixinDictType
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.FileOperations.File import File
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
@@ -75,33 +75,33 @@ class NetworkOperationsMixIn(ABC):
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
-    def remove(self, obj_to_remove: UUID | dict[str, None | str | float | int]) -> None:
+    def remove(self, obj_to_remove: UUID | DataObjectMixinDictType) -> None:
         """Removes the UUID from the network.
 
         Args:
-            obj_to_remove(UUID | dict[str, None | str | float | int]): UUID of the network to be removed
+            obj_to_remove(UUID | DataObjectMixinDictType): UUID of the network to be removed
             from the dictionary.
         """
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
-    def add(self, obj_to_add: dict[str, None | str | float | int]) -> None:
+    def add(self, obj_to_add: DataObjectMixinDictType) -> None:
         """Adding a connection to a network taking a dictionary with properties for the new connection.
 
         Args:
-            obj_to_add(dict[str, None | str | float | int]): dictionary taking all the new properties for the network.
+            obj_to_add(DataObjectMixinDictType): dictionary taking all the new properties for the network.
         """
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
-    def modify(self, obj_to_modify: dict[str, None | str | float | int],
-               new_properties: dict[str, None | str | float | int]) -> None:
+    def modify(self, obj_to_modify: DataObjectMixinDictType,
+               new_properties: DataObjectMixinDictType) -> None:
         """Modify existing object based on a matching dictionary of properties.
 
         Args:
-            obj_to_modify(dict[str, None | str | float | int]): dictionary containing attributes to match
+            obj_to_modify(DataObjectMixinDictType): dictionary containing attributes to match
             in the existing object.
-            new_properties(dict[str, None | str | float | int]): properties to switch to in the new object.
+            new_properties(DataObjectMixinDictType): properties to switch to in the new object.
         """
         raise NotImplementedError("Implement this in the derived class")
 

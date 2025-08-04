@@ -1,4 +1,6 @@
 from abc import abstractmethod
+
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.Utils.invert_nexus_map import nexus_keyword_to_attribute_name
 from typing import Protocol, Sequence
 
@@ -17,8 +19,8 @@ class SupportsKeywordMapping(Protocol):
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
-    def to_dict(self) -> dict[str, None | str | int | float]:
-        """Writes a dictionary with the following types:[str, None | str | int | float]."""
+    def to_dict(self) -> DataObjectMixinDictType:
+        """Writes a dictionary with the following types:[str, None | str | int | float | dict[int | float]]."""
         raise NotImplementedError("Implement this in the derived class")
 
 
