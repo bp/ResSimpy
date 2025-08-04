@@ -9,6 +9,7 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.nexus_load_list_table import load_list_from_table
+from ResSimpy.Time.ISODateTime import ISODateTime
 from tests.utility_for_tests import get_fake_nexus_simulator
 
 
@@ -22,13 +23,25 @@ wellname_2
 
 wellname_n
 ENDWELLLIST'''
+    well_list = NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'],
+                              date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
+    well_list2 = NexusWellList(name='well_list_name_2',
+                               elements_in_the_list=['wellname_4', 'wellname_5', 'wellname_6'],
+                               date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
+    well_list3 = NexusWellList(name='well_list_name',
+                               elements_in_the_list=['wellname_2', 'wellname_3'],
+                               date='01/01/2023', date_format=DateFormat.DD_MM_YYYY)
+    well_list4 = NexusWellList(name='well_list_name_2',
+                               elements_in_the_list=['wellname_4', 'wellname_5', 'wellname_6'],
+                               date='01/02/2023', date_format=DateFormat.DD_MM_YYYY)
 
     def test_nexus_welllist_add(self):
         # Arrange
         existing_welllist = NexusWellList(name='well_list_name', elements_in_the_list=['test_well', 'test_well2'],
                                           date='01/01/2019', date_format=DateFormat.DD_MM_YYYY)
         expected_welllist = NexusWellList(name='well_list_name', elements_in_the_list=['test_well', 'test_well2',
-                                                                        'wellname_1', 'wellname_2', 'wellname_n'],
+                                                                                       'wellname_1', 'wellname_2',
+                                                                                       'wellname_n'],
                                           date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
         file_as_list = self.file_content.splitlines()
 
@@ -65,7 +78,8 @@ ENDWELLLIST'''
         # Arrange
         existing_welllist = NexusWellList(name='well_list_name', elements_in_the_list=['test_well', 'test_well2'],
                                           date='01/01/2019', date_format=DateFormat.DD_MM_YYYY)
-        expected_welllist = NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'],
+        expected_welllist = NexusWellList(name='well_list_name',
+                                          elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'],
                                           date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
         file_as_list = '''TIME 01/01/2020
         WELLLIST well_list_name
@@ -87,7 +101,8 @@ ENDWELLLIST'''
 
     def test_nexus_welllist_no_previous(self):
         # Arrange
-        expected_welllist = NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'],
+        expected_welllist = NexusWellList(name='well_list_name',
+                                          elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'],
                                           date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
         file_as_list = '''TIME 01/01/2020
         WELLLIST well_list_name
@@ -171,24 +186,15 @@ ENDWELLLIST'''
 
     def test_get_by_name(self, mocker):
         # Arrange
-        well_list = NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'],
-                                  date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
-        well_list2 = NexusWellList(name='well_list_name_2',
-                                   elements_in_the_list=['wellname_4', 'wellname_5', 'wellname_6'],
-                                   date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
-        well_list3 = NexusWellList(name='well_list_name',
-                                   elements_in_the_list=['wellname_2', 'wellname_3'],
-                                   date='01/01/2023', date_format=DateFormat.DD_MM_YYYY)
-        well_list4 = NexusWellList(name='well_list_name_2',
-                                   elements_in_the_list=['wellname_4', 'wellname_5', 'wellname_6'],
-                                   date='01/02/2023', date_format=DateFormat.DD_MM_YYYY)
+
         # get a mock network
 
         mock_nexus_network = mocker.MagicMock()
-        well_lists = NexusWellLists(mock_nexus_network, well_lists=[well_list, well_list2, well_list3, well_list4])
+        well_lists = NexusWellLists(mock_nexus_network, well_lists=[self.well_list, self.well_list2, self.well_list3,
+                                                                    self.well_list4])
 
-        expected_result_1 = [well_list, well_list3]
-        expected_result_2 = [well_list2, well_list4]
+        expected_result_1 = [self.well_list, self.well_list3]
+        expected_result_2 = [self.well_list2, self.well_list4]
         # Act
         result = well_lists.get_all_by_name('well_list_name')
         result_2 = well_lists.get_all_by_name('well_list_name_2')
@@ -201,9 +207,11 @@ ENDWELLLIST'''
         dummy_network = NexusNetwork(model=dummy_model, assume_loaded=True)
 
         welllists = [
-            NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'], date='01/01/2020',
+            NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'],
+                          date='01/01/2020',
                           date_format=DateFormat.DD_MM_YYYY),
-            NexusWellList(name='well_list_name_2', elements_in_the_list=['wellname_4', 'wellname_5', 'wellname_6'], date='01/01/2020',
+            NexusWellList(name='well_list_name_2', elements_in_the_list=['wellname_4', 'wellname_5', 'wellname_6'],
+                          date='01/01/2020',
                           date_format=DateFormat.DD_MM_YYYY),
             NexusWellList(name='well_list_name', elements_in_the_list=['wellname_2', 'wellname_3'], date='01/01/2023',
                           date_format=DateFormat.DD_MM_YYYY)]
@@ -211,7 +219,8 @@ ENDWELLLIST'''
         welllist = NexusWellLists(parent_network=dummy_network, well_lists=welllists)
 
         expected_result_1 = [
-            NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'], date='01/01/2020',
+            NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'],
+                          date='01/01/2020',
                           date_format=DateFormat.DD_MM_YYYY),
             NexusWellList(name='well_list_name', elements_in_the_list=['wellname_2', 'wellname_3'], date='01/01/2023',
                           date_format=DateFormat.DD_MM_YYYY)]
@@ -221,27 +230,29 @@ ENDWELLLIST'''
 
         # Assert
         assert result == expected_result_1
- 
 
     def test_welllist_get_df(self, mocker: MockerFixture):
         dummy_model = get_fake_nexus_simulator(mocker, mock_open=True)
         dummy_network = NexusNetwork(model=dummy_model, assume_loaded=True)
 
         welllists = [
-            NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'], date='01/01/2020',
+            NexusWellList(name='well_list_name', elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3'],
+                          date='01/01/2020',
                           date_format=DateFormat.DD_MM_YYYY),
-            NexusWellList(name='well_list_name_2', elements_in_the_list=['wellname_4', 'wellname_5', 'wellname_6'], date='01/01/2020',
+            NexusWellList(name='well_list_name_2', elements_in_the_list=['wellname_4', 'wellname_5', 'wellname_6'],
+                          date='01/01/2020',
                           date_format=DateFormat.DD_MM_YYYY),
             NexusWellList(name='well_list_name', elements_in_the_list=['wellname_2', 'wellname_3'], date='01/01/2023',
                           date_format=DateFormat.DD_MM_YYYY)]
 
         welllist = NexusWellLists(parent_network=dummy_network, well_lists=welllists)
 
-        expected_result = pd.DataFrame({'name': ['well_list_name']*3 + ['well_list_name_2']*3 + ['well_list_name']*2,
-                                        'well': ['wellname_1', 'wellname_2', 'wellname_3',
-                                                 'wellname_4', 'wellname_5', 'wellname_6',
-                                                 'wellname_2', 'wellname_3'],
-                                        'date': ['01/01/2020']*6 + ['01/01/2023']*2})
+        expected_result = pd.DataFrame(
+            {'name': ['well_list_name'] * 3 + ['well_list_name_2'] * 3 + ['well_list_name'] * 2,
+             'well': ['wellname_1', 'wellname_2', 'wellname_3',
+                      'wellname_4', 'wellname_5', 'wellname_6',
+                      'wellname_2', 'wellname_3'],
+             'date': ['01/01/2020'] * 6 + ['01/01/2023'] * 2})
         # Act
         result = welllist.get_df()
 
@@ -342,3 +353,31 @@ ENDWELLLIST'''
         )
         # Assert
         assert nexus_obj_dict['WELLLIST'] == expected_welllists
+
+    def test_to_string_for_date(self, mocker):
+        # Arrange
+
+        # get a mock network
+
+        mock_nexus_network = mocker.MagicMock()
+        well_lists = NexusWellLists(mock_nexus_network, well_lists=[self.well_list, self.well_list2, self.well_list3,
+                                                                    self.well_list4])
+        
+        date = ISODateTime(year=2020, month=1, day=1)
+        
+        expected_string = """WELLLIST well_list_name
+CLEAR
+ADD
+wellname_1 wellname_2 wellname_3
+ENDWELLLIST
+WELLLIST well_list_name_2
+CLEAR
+ADD
+wellname_4 wellname_5 wellname_6
+ENDWELLLIST
+"""
+        # Act
+        result = well_lists.to_string_for_date(date)
+
+        # Assert
+        assert result == expected_string

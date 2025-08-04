@@ -2,10 +2,12 @@ from datetime import datetime
 
 import pytest
 
+from ResSimpy import NexusSimulator
 from ResSimpy.Time.ISODateTime import ISODateTime
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
+from tests.utility_for_tests import get_fake_nexus_simulator
 
 
 @pytest.mark.maintain_datetime_behaviour
@@ -217,7 +219,8 @@ def test_datetime_to_iso(iso_date, expected_str, dateformat):
     ('01/14/2025(23:11:01)', DateFormat.MM_DD_YYYY, datetime(2025, 1, 14, 23, 11, 1), '%Y-%m-%d %H:%M:%S'),
     ('14 JAN 2025', DateFormat.DD_MMM_YYYY, datetime(2025, 1, 14), '%Y-%m-%d %H:%M:%S'),
     ('14 JAN 2025 23:11:01', DateFormat.DD_MMM_YYYY, datetime(2025, 1, 14, 23, 11, 1), '%Y-%m-%d %H:%M:%S'),
-    ('14 JAN 2025 23:11:01.1234', DateFormat.DD_MMM_YYYY, datetime(2025, 1, 14, 23, 11, 1, 123400), '%Y-%m-%d %H:%M:%S.%f'),
+    ('14 JAN 2025 23:11:01.1234', DateFormat.DD_MMM_YYYY, datetime(2025, 1, 14, 23, 11, 1, 123400),
+     '%Y-%m-%d %H:%M:%S.%f'),
     ('1 NOV 2024 23:11:01', DateFormat.DD_MMM_YYYY, datetime(2024, 11, 1, 23, 11, 1), '%Y-%m-%d %H:%M:%S'),
 ], ids=['dd/mm/yyyy', 'mm/dd/yyyy', 'dd/mm/yyyy(time)', 'mm/dd/yyyy(time)', '3 letter month',
         '3 letter month with time', '3 letter month with time + decimal seconds', 'single digit day'])
@@ -231,3 +234,15 @@ def test_convert_to_iso(initial_date_str, date_format, expected_date_object, dat
 
     # Assert
     assert result == expected_iso_date_object
+
+
+@pytest.mark.maintain_datetime_behaviour
+def test_nexus_simulator_start_iso_date(mocker):
+    # Arrange
+    start_date = '01/14/2022'
+    model = get_fake_nexus_simulator(mocker, start_date=start_date)
+    expected_date = ISODateTime(year=2022, month=1, day=14)
+
+    # Act + Assert
+    assert model.start_date == start_date
+    assert model.start_iso_date == expected_date

@@ -1,6 +1,8 @@
 from abc import abstractmethod
 from ResSimpy.Utils.invert_nexus_map import nexus_keyword_to_attribute_name
-from typing import Protocol
+from typing import Protocol, Sequence
+
+from ResSimpy.Utils.to_dict_generic import to_dict
 
 
 class SupportsKeywordMapping(Protocol):
@@ -48,3 +50,24 @@ def to_table_line(obj: SupportsKeywordMapping, headers: list[str]) -> str:
             attribute_value = 'NO'
         constructed_values.append(attribute_value)
     return ' '.join([str(x) for x in constructed_values]) + '\n'
+
+
+def get_column_headers_required(obj_list: Sequence[SupportsKeywordMapping]) -> list[str]:
+    """Returns the column headers required to represent all non None attributes of the Nexus objects.
+
+    Args:
+        obj_list (list[SupportsKeywordMapping]): List of Nexus objects with a get_keyword_mapping method.
+
+    Returns:
+        list[str] representing the column headers in Nexus keyword format.
+    """
+    if not obj_list:
+        return []
+    headers: set[str] = set()
+    for obj in obj_list:
+        attr_as_dict = to_dict(obj, keys_in_nexus_style=True, include_nones=False, add_date=False, add_units=False)
+        headers.update(attr_as_dict.keys())
+
+    keyword_mapping = obj_list[0].get_keyword_mapping()
+    headers_ordered_by_keyword_mapping = [x for x in keyword_mapping.keys() if x in headers]
+    return headers_ordered_by_keyword_mapping

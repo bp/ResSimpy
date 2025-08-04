@@ -549,7 +549,7 @@ class FcsNexusFile(NexusFile):
         return matching_files
 
     def to_string(self, dateformat: None | DateFormat = None, run_units: None | UnitSystem = None,
-                  description: None | str = None) -> str:
+                  default_units: None | UnitSystem = None, description: None | str = None) -> str:
         """Writes a new FCS file contents to a string in Nexus format.
 
         Returns:
@@ -557,12 +557,12 @@ class FcsNexusFile(NexusFile):
         """
         def print_method(method_files: None | dict[int, NexusFile], keyword: str, category: str = 'METHOD') -> str:
             """Helper function to print methods with their files."""
-            printable_str = ''
+            prt_str = ''
             if method_files is None:
-                return printable_str
+                return prt_str
             for method_number, file in method_files.items():
-                printable_str += f'    {keyword} {category} {method_number} {file.location}\n'
-            return printable_str
+                prt_str += f'    {keyword} {category} {method_number} {file.location}\n'
+            return prt_str
 
         printable_str = ''
         printable_str += 'DESC Model created with ResSimpy\n'
@@ -573,6 +573,12 @@ class FcsNexusFile(NexusFile):
         else:
             # if not provided print the default Nexus unit system
             printable_str += f'RUN_UNITS {UnitSystem.ENGLISH.value}\n'
+
+        if default_units is not None:
+            printable_str += f'DEFAULT_UNITS {default_units.value}\n'
+        else:
+            # if not provided print the default Nexus unit system
+            printable_str += f'DEFAULT_UNITS {UnitSystem.ENGLISH.value}\n'
 
         if dateformat is not None:
             printable_str += f'DATEFORMAT {dateformat.value}\n'
@@ -616,12 +622,13 @@ class FcsNexusFile(NexusFile):
         if self.override_file is not None:
             printable_str += f'OVERRIDE {self.override_file.location}\n'
 
-        printable_str += '\nNET_METHOD_FILES\n'
         net_methods = {'VALVE': self.valve_files,
                        'GASLIFT': self.gas_lift_files, 'PUMP': self.pump_files,
                        'COMPRESSOR': self.compressor_files, 'CHOKE': self.choke_files,
                        'ICD': self.icd_files, 'ESP': self.esp_files, 'HYD': self.hyd_files}
-        for method, method_files in net_methods.items():
-            printable_str += print_method(method_files=method_files, keyword=method)
+        if any(x for x in net_methods.values()):
+            printable_str += '\nNET_METHOD_FILES\n'
+            for method, method_files in net_methods.items():
+                printable_str += print_method(method_files=method_files, keyword=method)
 
         return printable_str
