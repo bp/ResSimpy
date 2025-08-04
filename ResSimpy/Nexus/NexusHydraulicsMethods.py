@@ -9,6 +9,7 @@ from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusHydraulicsMethod import NexusHydraulicsMethod
 from ResSimpy.GenericContainerClasses.Hydraulics import Hydraulics
+from ResSimpy.Utils.dynamic_method_manipulations import add_dynamic_method
 
 
 @dataclass(kw_only=True)
@@ -24,7 +25,7 @@ class NexusHydraulicsMethods(Hydraulics):
     __files: dict[int, NexusFile]
     __properties_loaded: bool = False  # Used in lazy loading
     __model_unit_system: UnitSystem
-    __model_files: Optional[FcsNexusFile] = field(default=None, repr=False, compare=False)
+    _model_files: Optional[FcsNexusFile] = field(default=None, repr=False, compare=False)
 
     def __init__(self, model_unit_system: UnitSystem,
                  inputs: Optional[MutableMapping[int, NexusHydraulicsMethod]] = None,
@@ -50,7 +51,7 @@ class NexusHydraulicsMethods(Hydraulics):
             self.__files = {}
         self.__model_unit_system = model_unit_system
         self.__properties_loaded = assume_loaded
-        self.__model_files = model_files
+        self._model_files = model_files
         super().__init__()
 
     def __repr__(self) -> str:
@@ -119,31 +120,10 @@ class NexusHydraulicsMethods(Hydraulics):
             new_file_name (str): The name of the file to save the method to.
             create_new_file (bool): Whether to create a new file for the method.
         """
-        if new_file_name is None or new_file_name.strip() == '':
-            raise ValueError('New file name must be provided and cannot be empty when adding a new method.')
-        if not isinstance(method, NexusHydraulicsMethod):
-            raise TypeError(f'Expected NexusHydraulicsMethod, got {type(method)}')
-        if method.input_number in self.__inputs:
-            raise ValueError(f'Method with input number {method.input_number} already exists in the collection.')
+        add_dynamic_method(dynamic_method_collection=self, method=method, new_file_name=new_file_name,
+                           create_new_file=create_new_file)
 
-        if self.__model_unit_system != method.unit_system:
-            raise ValueError(f'Model unit system {self.__model_unit_system} does not match method unit system '
-                             f'{method.unit_system}.')
-
-        self.__properties_loaded = True  # We are adding a new method so no more loading can happen.
-
-        new_nexus_file = NexusFile(location=new_file_name,
-                                   origin=None,  # Should get connected to the parent fcs file later
-                                   include_objects=None,
-                                   file_content_as_list=method.to_string().splitlines(keepends=True)
-                                   )
-        new_nexus_file._file_modified_set(True)  # Mark the file as modified
-        method.file = new_nexus_file
-
-        if create_new_file:
-            method.write_to_file(new_file_path=new_file_name, overwrite_file=False)
-
-        self.__inputs[method.input_number] = method
-        self.__files[method.input_number] = method.file
-        if self.__model_files is not None:
-            self.__model_files._add_file(new_nexus_file, keyword='HYD', method_number=method.input_number)
+    @property
+    def keyword(self) -> str:
+        """Returns the keyword for the hydraulics methods."""
+        return 'HYD'

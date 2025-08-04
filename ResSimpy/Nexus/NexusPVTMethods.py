@@ -1,13 +1,17 @@
 """Class for collection of Nexus PVT property methods."""
 
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import os
 from typing import Optional, MutableMapping
+
+from ResSimpy.DataModelBaseClasses.DynamicProperty import DynamicProperty
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.DataModels.FcsFile import FcsNexusFile
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.NexusPVTMethod import NexusPVTMethod
 from ResSimpy.DataModelBaseClasses.PVT import PVT
+from ResSimpy.Utils.dynamic_method_manipulations import add_dynamic_method
 
 
 @dataclass(kw_only=True)
@@ -23,9 +27,11 @@ class NexusPVTMethods(PVT):
     __files: dict[int, NexusFile]
     __properties_loaded: bool = False  # Used in lazy loading
     __model_unit_system: UnitSystem
+    _model_files: Optional[FcsNexusFile] = field(default=None, repr=False, compare=False)
 
     def __init__(self, model_unit_system: UnitSystem, inputs: Optional[MutableMapping[int, NexusPVTMethod]] = None,
-                 files: Optional[dict[int, NexusFile]] = None) -> None:
+                 files: Optional[dict[int, NexusFile]] = None, assume_loaded: bool = False,
+                 model_files: Optional[FcsNexusFile] = None) -> None:
         """Initialises the NexusPVTMethods class.
 
         Args:
@@ -33,6 +39,8 @@ class NexusPVTMethods(PVT):
             inputs (Optional[MutableMapping[int, NexusPVTMethod]]): Collection of Nexus PVT property methods.
             files (Optional[dict[int, NexusFile]]): Collection of PVT property files, as defined in Nexus fcs file.
                 Keyed by the method number.
+            assume_loaded (bool): If True, assumes that the properties are already loaded.
+            model_files (Optional[FcsNexusFile]): The Nexus fcs file containing the model files.
         """
         if inputs:
             self.__inputs = inputs
@@ -43,6 +51,8 @@ class NexusPVTMethods(PVT):
         else:
             self.__files = {}
         self.__model_unit_system = model_unit_system
+        self.__properties_loaded = assume_loaded
+        self._model_files = model_files
         super().__init__()
 
     def __repr__(self) -> str:
@@ -100,3 +110,19 @@ class NexusPVTMethods(PVT):
         for key, value in self.inputs.items():
             pvt_summary += f'        {key}: {value.file.location}\n'
         return pvt_summary
+
+    @property
+    def keyword(self) -> str:
+        """Returns the keyword for the NexusPVTMethods."""
+        return 'PVT'
+
+    def add_method(self, method: DynamicProperty, new_file_name: str, create_new_file: bool = False) -> None:
+        """Adds a new rock method to the collection.
+
+        Args:
+            method (DynamicProperty): The rock method to add.
+            new_file_name (str): The name of the file to save the method to.
+            create_new_file (bool): Whether to create a new file for the method.
+        """
+        add_dynamic_method(dynamic_method_collection=self, method=method, new_file_name=new_file_name,
+                           create_new_file=create_new_file)
