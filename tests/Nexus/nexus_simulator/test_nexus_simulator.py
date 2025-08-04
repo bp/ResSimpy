@@ -2473,7 +2473,7 @@ def test_read_iprtables(file_contents, expected_data):
 
     # Act
 
-    read = NexusIprMethods()
+    read = NexusIprMethods(model=NexusSimulator)
     result = read.read_iprtables_as_df(file_contents.splitlines(keepends=True))
 
     # Assert
