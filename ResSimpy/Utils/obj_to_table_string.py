@@ -1,11 +1,13 @@
+from __future__ import annotations
 from abc import abstractmethod
 
-from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.Utils.invert_nexus_map import nexus_keyword_to_attribute_name
-from typing import Protocol, Sequence
+from typing import Protocol, Sequence, TYPE_CHECKING
 
 from ResSimpy.Utils.to_dict_generic import to_dict
 
+if TYPE_CHECKING:
+    from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 
 class SupportsKeywordMapping(Protocol):
     @staticmethod
