@@ -9,6 +9,7 @@ from ResSimpy.Utils.to_dict_generic import to_dict
 if TYPE_CHECKING:
     from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 
+
 class SupportsKeywordMapping(Protocol):
     @staticmethod
     @abstractmethod
