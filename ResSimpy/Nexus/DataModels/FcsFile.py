@@ -632,3 +632,25 @@ class FcsNexusFile(NexusFile):
                 printable_str += print_method(method_files=method_files, keyword=method)
 
         return printable_str
+
+    def _add_file(self, file: NexusFile, keyword: str, method_number: int | None = None) -> None:
+        """Adds a file to the FCS file under the specified keyword and method number.
+
+        Args:
+            file (NexusFile): The NexusFile to add.
+            keyword (str): The keyword under which to add the file.
+            method_number (int | None): The method number for the file. If None, adds as a single file.
+        """
+        if method_number is not None:
+            if not hasattr(self, self.fcs_keyword_map_multi()[keyword]):
+                setattr(self, self.fcs_keyword_map_multi()[keyword], {})
+            getattr(self, self.fcs_keyword_map_multi()[keyword])[method_number] = file
+        else:
+            setattr(self, self.fcs_keyword_map_single()[keyword], file)
+
+        if self.include_objects is not None:
+            if isinstance(self.include_objects, list):
+                self.include_objects.append(file)
+        if self.include_locations is not None and file.location not in self.include_locations:
+            self.include_locations.append(file.location)
+        self.files_info.append((file.location, file.linked_user, file.last_modified))
