@@ -978,7 +978,7 @@ class NexusSimulator(Simulator):
             for method_no, method in prop.inputs.items():
                 file_name = f"{new_model_name}_pvt_{method_no}.dat"
                 dyn_files[method_no] = NexusFile(
-                    file_content_as_list=method.to_string.splitlines(keepends=True),
+                    file_content_as_list=method.to_string().splitlines(keepends=True),
                     location=os.path.join(new_include_file_location, file_name),
                     origin=new_model_path
                 )
