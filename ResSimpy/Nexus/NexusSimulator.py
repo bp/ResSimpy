@@ -989,6 +989,7 @@ class NexusSimulator(Simulator):
         fcs_content = model_file_generator.generate_base_model_file_contents()
         self.model_files.file_content_as_list = fcs_content.splitlines(keepends=True)
         self.model_files.location = new_model_path
+        self.model_files.write_to_file(new_file_path=new_model_path, overwrite_file=overwrite_files)
 
     @property
     def summary(self) -> str:
