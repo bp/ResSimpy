@@ -950,6 +950,7 @@ class NexusSimulator(Simulator):
 
         # update the structured grid file
         warnings.warn('Structured grid file is not updated in NexusSimulator.write_out_new_model. ')
+
         # update the wells file
         warnings.warn('Wells file is not updated in NexusSimulator.write_out_new_model. ')
 
@@ -959,25 +960,22 @@ class NexusSimulator(Simulator):
         # update the options file
         warnings.warn('Options file is not updated in NexusSimulator.write_out_new_model. ')
 
-        # update the wells file
-        warnings.warn('Wells file is not updated in NexusSimulator.write_out_new_model. ')
-
         # update each of the dynamic properties files
         dynamic_props = {
-            self.pvt: ('pvt', self.model_files.pvt_files),
-            self.separator: ('separator', self.model_files.separator_files),
-            self.water: ('water', self.model_files.water_files),
-            self.equil: ('equil', self.model_files.equil_files),
-            self.rock: ('rock', self.model_files.rock_files),
-            self.relperm: ('relperm', self.model_files.relperm_files),
-            self.valve: ('valve', self.model_files.valve_files),
-            self.aquifer: ('aquifer', self.model_files.aquifer_files),
-            self.hydraulics: ('hyd', self.model_files.hyd_files),
-            self.gaslift: ('gaslift', self.model_files.gas_lift_files)
+            'pvt': (self.pvt, self.model_files.pvt_files),
+            'separator': (self.separator, self.model_files.separator_files),
+            'water': (self.water, self.model_files.water_files),
+            'equil': (self.equil, self.model_files.equil_files),
+            'rock': (self.rock, self.model_files.rock_files),
+            'relperm': (self.relperm, self.model_files.relperm_files),
+            'valve': (self.valve, self.model_files.valve_files),
+            'aquifer': (self.aquifer, self.model_files.aquifer_files),
+            'hyd': (self.hydraulics, self.model_files.hyd_files),
+            'gaslift': (self.gaslift, self.model_files.gas_lift_files)
         }
 
-        for prop, suffix in dynamic_props.items():
-            for method_no, (method, dyn_files) in prop.inputs.items():
+        for suffix, (prop, dyn_files) in dynamic_props.items():
+            for method_no, method in prop.inputs.items():
                 file_name = f"{new_model_name}_pvt_{method_no}.dat"
                 dyn_files[method_no] = NexusFile(
                     file_content_as_list=method.to_string.splitlines(keepends=True),
