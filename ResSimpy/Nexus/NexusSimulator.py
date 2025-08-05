@@ -976,7 +976,7 @@ class NexusSimulator(Simulator):
 
         for suffix, (prop, dyn_files) in dynamic_props.items():
             for method_no, method in prop.inputs.items():
-                file_name = f"{new_model_name}_pvt_{method_no}.dat"
+                file_name = f"{new_model_name}_{suffix}_{method_no}.dat"
                 method_file_path = os.path.join(new_include_file_location, file_name)
                 dyn_files[method_no] = NexusFile(
                     file_content_as_list=method.to_string().splitlines(keepends=True),

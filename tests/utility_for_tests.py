@@ -41,7 +41,6 @@ def check_file_read_write_is_correct(expected_file_writes: list[tuple[str, str]]
             raise ValueError(f"Unexpected write found at location: {write_location}")
 
 
-
 def check_sequential_write_is_correct(expected_file_contents: list[str], modifying_mock_open: Mock,
                                      mocker_fixture: MockerFixture, write_file_name: str, number_of_writes=1):
     assert len(modifying_mock_open.call_args_list) == number_of_writes
