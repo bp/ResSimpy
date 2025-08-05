@@ -949,16 +949,16 @@ class NexusSimulator(Simulator):
                           new_name=new_model_name, suffix='_surface.dat')
 
         # update the structured grid file
-        warnings.warn('Structured grid file is not updated in NexusSimulator.write_out_new_model. ')
+        warnings.warn('Structured grid file is not yet implemented in NexusSimulator.write_out_new_model. ')
 
         # update the wells file
-        warnings.warn('Wells file is not updated in NexusSimulator.write_out_new_model. ')
+        warnings.warn('Wells file is not yet implemented in NexusSimulator.write_out_new_model. ')
 
         # update the run control file
-        warnings.warn('Run control file is not updated in NexusSimulator.write_out_new_model. ')
+        warnings.warn('Run control file is not yet implemented in NexusSimulator.write_out_new_model. ')
 
         # update the options file
-        warnings.warn('Options file is not updated in NexusSimulator.write_out_new_model. ')
+        warnings.warn('Options file is not yet implemented in NexusSimulator.write_out_new_model. ')
 
         # update each of the dynamic properties files
         dynamic_props = {
@@ -977,12 +977,13 @@ class NexusSimulator(Simulator):
         for suffix, (prop, dyn_files) in dynamic_props.items():
             for method_no, method in prop.inputs.items():
                 file_name = f"{new_model_name}_pvt_{method_no}.dat"
+                method_file_path = os.path.join(new_include_file_location, file_name)
                 dyn_files[method_no] = NexusFile(
                     file_content_as_list=method.to_string().splitlines(keepends=True),
-                    location=os.path.join(new_include_file_location, file_name),
+                    location=method_file_path,
                     origin=new_model_path
                 )
-                method.write_to_file(new_file_path=file_name, overwrite_file=overwrite_files)
+                method.write_to_file(new_file_path=method_file_path, overwrite_file=overwrite_files)
 
         # create new fcsfile
         fcs_content = model_file_generator.generate_base_model_file_contents()
