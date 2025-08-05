@@ -3,10 +3,11 @@ from abc import ABC
 from typing import Mapping
 
 from ResSimpy.DataModelBaseClasses.DynamicProperty import DynamicProperty
+from ResSimpy.DataModelBaseClasses.DynamicPropertyContainer import DynamicPropertyContainer
 
 
 @dataclass(kw_only=True)
-class RelPerm(ABC):
+class RelPerm(DynamicPropertyContainer):
     """The abstract base class for a collection of relative permeability and capillary pressure property inputs.
 
     Attributes:
