@@ -218,7 +218,8 @@ def get_next_value(start_line_index: int, file_as_list: list[str], search_string
 
 
 def get_previous_value(file_as_list: list[str], search_before: Optional[str] = None,
-                       ignore_values: Optional[list[str]] = None) -> Optional[str]:
+                       ignore_values: Optional[list[str]] = None, comment_characters: None | list[str] = None) \
+        -> Optional[str]:
     """Gets the previous non-blank value in a list of lines.
 
     Starts from the last instance of search_before, working backwards.
@@ -229,6 +230,8 @@ def get_previous_value(file_as_list: list[str], search_before: Optional[str] = N
         search_before (Optional[str]): The string to start the search from in a backwards direction
         ignore_values (Optional[list[str]], optional): a list of values that should be ignored if found. \
                     Defaults to None.
+        comment_characters (Optional[list[str]], optional): a list of characters that are considered inline comments.
+            Defaults to the Nexus format (!)
 
     Returns:
         Optional[str]: Next non-blank value from the list, if none found returns None
@@ -248,12 +251,14 @@ def get_previous_value(file_as_list: list[str], search_before: Optional[str] = N
         string_to_search: str = line
         # Retrieve all of the values in the line, then return the last one found if one is found.
         # Otherwise search the next line
-        next_value = get_next_value(0, [string_to_search], ignore_values=ignore_values)
+        next_value = get_next_value(0, [string_to_search], ignore_values=ignore_values,
+                                    comment_characters=comment_characters)
 
         while next_value is not None and (search_before != next_value or not first_line):
             previous_value = next_value
             string_to_search = string_to_search.replace(next_value, '')
-            next_value = get_next_value(0, [string_to_search], ignore_values=ignore_values)
+            next_value = get_next_value(0, [string_to_search], ignore_values=ignore_values,
+                                        comment_characters=comment_characters)
 
         if previous_value != '':
             return previous_value
@@ -476,7 +481,7 @@ def __extract_search_string(token: str, token_line: str, file_list: list[str]) -
 def get_expected_token_value(token: str, token_line: str, file_list: list[str],
                              ignore_values: Optional[list[str]] = None,
                              replace_with: Union[str, GridArrayDefinition, None] = None,
-                             custom_message: Optional[str] = None) -> str:
+                             custom_message: Optional[str] = None, comment_characters: None | list[str] = None) -> str:
     """Function that returns the result of get_token_value if a value is found, otherwise it raises a ValueError.
 
     Args:
@@ -488,6 +493,8 @@ def get_expected_token_value(token: str, token_line: str, file_list: list[str],
         replace_with (Union[str, VariableEntry, None], optional):  a value to replace the existing value with. \
             Defaults to None.
         custom_message (Optional[str]): A custom error message if no value is found.
+        comment_characters (Optional[list[str]], optional): a list of characters that are considered inline comments.
+            Defaults to the Nexus format (!)
 
     Returns:
         str:  The value following the supplied token, if it is present.
@@ -495,7 +502,8 @@ def get_expected_token_value(token: str, token_line: str, file_list: list[str],
     Raises:
         ValueError if a value is not found
     """
-    value = get_token_value(token, token_line, file_list, ignore_values, replace_with)
+    value = get_token_value(token=token, token_line=token_line, file_list=file_list, ignore_values=ignore_values,
+                            replace_with=replace_with, comment_characters=comment_characters)
 
     if value is None:
         if custom_message is None:
@@ -509,7 +517,7 @@ def get_expected_token_value(token: str, token_line: str, file_list: list[str],
 def get_token_value_with_line_index(token: str, token_line: str, file_list: list[str],
                                     ignore_values: Optional[list[str]] = None,
                                     replace_with: Union[str, GridArrayDefinition, None] = None,
-                                    remove_quotation_marks: bool = False) \
+                                    remove_quotation_marks: bool = False, comment_characters: None | list[str] = None) \
         -> tuple[None | str, None | int]:
     """Gets the value following a token and the line index of that value.
 
@@ -523,6 +531,8 @@ def get_token_value_with_line_index(token: str, token_line: str, file_list: list
             Defaults to None.
         remove_quotation_marks: (bool): whether the returned value should remove quotation marks surrounding the value,
             if there are any.
+        comment_characters (Optional[list[str]], optional): a list of characters that are considered inline comments.
+            Defaults to the Nexus format (!)
 
     Returns:
         tuple[None | str, None | int]: The value following the supplied token and the line index of that value.
@@ -536,13 +546,14 @@ def get_token_value_with_line_index(token: str, token_line: str, file_list: list
             search_string = line
         value = get_next_value(start_line_index=0, file_as_list=[line], search_string=search_string,
                                ignore_values=ignore_values, replace_with=replace_with,
-                               remove_quotation_marks=remove_quotation_marks)
+                               remove_quotation_marks=remove_quotation_marks, comment_characters=comment_characters)
         if value is not None:
             return value, line_index + i
     return None, None
 
 
-def load_in_three_part_date(initial_token: Optional[str], token_line: str, file_as_list: list[str], start_index: int) \
+def load_in_three_part_date(initial_token: Optional[str], token_line: str, file_as_list: list[str], start_index: int,
+                            comment_characters: None | list[str] = None) \
         -> str:
     """Function that reads in a three part date separated by spaces e.g. 1 JAN 2024.
 
@@ -551,6 +562,8 @@ def load_in_three_part_date(initial_token: Optional[str], token_line: str, file_
     token_line (str): Line in the file that the token has been found.
     file_as_list (list[str]): The whole file as a list of strings.
     start_index (int): The index in file_as_list where the token can be found.
+    comment_characters (Optional[list[str]], optional): a list of characters that are considered inline comments.
+            Defaults to the Nexus format (!)
 
     Returns:
     str:  The three part date as a string.
@@ -560,25 +573,26 @@ def load_in_three_part_date(initial_token: Optional[str], token_line: str, file_
     if initial_token is not None:
         list_to_search = file_as_list[start_index::]
         first_date_part, value_index = get_token_value_with_line_index(token=initial_token, token_line=token_line,
-                                                                       file_list=list_to_search)
+                                                                       file_list=list_to_search,
+                                                                       comment_characters=comment_characters)
         if value_index is None or first_date_part is None:
             raise ValueError("Token or value not found in list of strings")
         snipped_string = list_to_search[value_index]
         snipped_string = snipped_string.replace(initial_token, '')
     else:
         first_date_part = get_expected_next_value(start_line_index=0, file_as_list=[token_line],
-                                                  search_string=token_line)
+                                                  search_string=token_line, comment_characters=comment_characters)
         snipped_string = token_line
 
     snipped_string = snipped_string.replace(first_date_part, '', 1)
 
     second_date_part = get_expected_next_value(start_line_index=0, file_as_list=[snipped_string],
-                                               search_string=snipped_string)
+                                               search_string=snipped_string, comment_characters=comment_characters)
 
     snipped_string = snipped_string.replace(second_date_part, '', 1)
 
     third_date_part = get_expected_next_value(start_line_index=0, file_as_list=[snipped_string],
-                                              search_string=snipped_string)
+                                              search_string=snipped_string, comment_characters=comment_characters)
 
     full_date = f"{first_date_part} {second_date_part} {third_date_part}"
     return full_date
@@ -587,7 +601,7 @@ def load_in_three_part_date(initial_token: Optional[str], token_line: str, file_
 def get_expected_next_value(start_line_index: int, file_as_list: list[str], search_string: Optional[str] = None,
                             ignore_values: Optional[list[str]] = None,
                             replace_with: Union[str, GridArrayDefinition, None] = None,
-                            custom_message: Optional[str] = None) -> str:
+                            custom_message: Optional[str] = None, comment_characters: None | list[str] = None) -> str:
     """Gets the next non blank value in a list of lines.
 
     Args:
@@ -599,11 +613,15 @@ def get_expected_next_value(start_line_index: int, file_as_list: list[str], sear
         replace_with (Union[str, VariableEntry, None], optional): a value to replace the existing value with. \
             Defaults to None.
         custom_message (Optional[str]): A custom error message if no value is found
+        comment_characters (Optional[list[str]], optional): a list of characters that are considered inline comments.
+            Defaults to the Nexus format (!)
 
     Returns:
         str: Next non blank value from the list, if none found raises ValueError
     """
-    value = get_next_value(start_line_index, file_as_list, search_string, ignore_values, replace_with)
+    value = get_next_value(start_line_index=start_line_index, file_as_list=file_as_list, search_string=search_string,
+                           ignore_values=ignore_values, replace_with=replace_with,
+                           comment_characters=comment_characters)
 
     if value is None:
         if custom_message is None:
@@ -615,13 +633,16 @@ def get_expected_next_value(start_line_index: int, file_as_list: list[str], sear
 
 
 def get_multiple_expected_sequential_values(list_of_strings: list[str], number_tokens: int,
-                                            ignore_values: list[str]) -> list[str]:
+                                            ignore_values: list[str], comment_characters: None | list[str] = None) \
+        -> list[str]:
     """Returns a sequential list of values as long as the number of tokens requested.
 
     Args:
         list_of_strings (list[str]): list of strings to represent the file with a new entry per line in the file.
         number_tokens (int): number of tokens to return values of
         ignore_values (list[str]): list of values to ignore if found
+        comment_characters (Optional[list[str]], optional): a list of characters that are considered inline comments.
+            Defaults to the Nexus format (!)
 
     Raises:
         ValueError: if too many tokens are requested compared to the file provided
@@ -633,7 +654,7 @@ def get_multiple_expected_sequential_values(list_of_strings: list[str], number_t
     filter_list = list_of_strings.copy()
     for i in range(number_tokens):
         value = get_next_value(0, filter_list, filter_list[0], replace_with='',
-                               ignore_values=ignore_values)
+                               ignore_values=ignore_values, comment_characters=comment_characters)
         if value is None:
             # if no valid value found, raise an error
             raise ValueError('Too many values requested from the list of strings passed,'
@@ -643,13 +664,16 @@ def get_multiple_expected_sequential_values(list_of_strings: list[str], number_t
     return store_values
 
 
-def get_nth_value(list_of_strings: list[str], value_number: int, ignore_values: list[str]) -> Optional[str]:
+def get_nth_value(list_of_strings: list[str], value_number: int, ignore_values: list[str],
+                  comment_characters: None | list[str] = None) -> Optional[str]:
     """Returns the Nth value from a list of strings.
 
     Args:
         list_of_strings (list[str]): list of strings to represent the file with a new entry per line in the file.
         value_number (int): the index of the value that should be returned.One-based rather than zero-based.
         ignore_values (list[str]): list of values to ignore if found.
+        comment_characters (Optional[list[str]], optional): a list of characters that are considered inline comments.
+            Defaults to the Nexus format (!)
 
     Returns:
         Optional[str]: the value found at that location, if one is found
@@ -662,7 +686,7 @@ def get_nth_value(list_of_strings: list[str], value_number: int, ignore_values: 
 
     for i in range(value_number):
         found_value = get_next_value(0, filter_list, filter_list[0], replace_with='',
-                                     ignore_values=ignore_values)
+                                     ignore_values=ignore_values, comment_characters=comment_characters)
         if found_value is None:
             return None
 
@@ -721,9 +745,15 @@ def get_full_file_path(file_path: str, origin: str) -> str:
     return return_path
 
 
-def split_line(line: str, upper: bool = True) -> list[str]:
+def split_line(line: str, upper: bool = True, comment_characters: None | list[str] = None) -> list[str]:
     """Splits a line into a list of strings through sequential application of get_next_value.
     Does not include comments. A line with no valid tokens will return an empty list.
+
+    Args:
+        line (str): the line to split up.
+        upper (Optional[str]): the initial origin of the file
+        comment_characters (Optional[list[str]], optional): a list of characters that are considered inline comments.
+            Defaults to the Nexus format (!)
     """
     stored_values: list[str] = []
     value = get_next_value(0, [line])
@@ -736,6 +766,6 @@ def split_line(line: str, upper: bool = True) -> list[str]:
         else:
             stored_values.append(value)
         trimmed_line = trimmed_line.replace(value, "", 1)
-        value = get_next_value(0, [trimmed_line])
+        value = get_next_value(0, [trimmed_line], comment_characters=comment_characters)
 
     return stored_values
