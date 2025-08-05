@@ -1002,7 +1002,7 @@ class NexusSimulator(Simulator):
                     location=method_file_path,
                     origin=new_model_path
                 )
-                method.write_to_file(new_file_path=method_file_path, overwrite_file=overwrite_files)
+                method.write_to_file(new_file_path=method_file_path, overwrite_file=False)
 
         # create new fcsfile
         fcs_content = model_file_generator.generate_base_model_file_contents()

@@ -143,11 +143,11 @@ class TestWriteOutSimulator:
 
         model.network.constraints._add_to_memory({'well1': [new_constraint]})
         
-        expected_hydraulics_path = os.path.join('/new_path/', 'nexus_files', 'hyd_method.dat')
-        expected_surface_path = os.path.join('/new_path/', 'nexus_files', 'new_model_surface_1.dat')
+        expected_hydraulics_path = os.path.join('/new_path/', 'nexus_files', 'new_model_hyd_1.dat')
+        expected_surface_path = os.path.join('/new_path/', 'nexus_files', 'new_model_surface.dat')
         expected_fcs_path = os.path.join('/new_path/', 'new_model.fcs')
         
-        expected_fcs_contents = '''1   DESC Model created with ResSimpy
+        expected_fcs_contents = f'''DESC Model created with ResSimpy
 RUN_UNITS ENGLISH
 DEFAULT_UNITS ENGLISH
 DATEFORMAT MM/DD/YYYY
@@ -157,28 +157,30 @@ GRID_FILES
 INITIALIZATION_FILES
 
 ROCK_FILES
- 
+
 PVT_FILES
 
 RECURRENT_FILES
-    SURFACE NETWORK 1 /tccsun/scratch/hajq7y/ResSimpy/new_models/include_files/temp_model_surface.dat
- 
+    SURFACE NETWORK 1 {expected_surface_path}
+
 NET_METHOD_FILES
-    HYD METHOD 1 /tccsun/scratch/hajq7y/ResSimpy/new_models/include_files/temp_model_hyd_1.dat'''
-        
+    HYD METHOD 1 {expected_hydraulics_path}
+'''
+
         expected_hydraulics_file_content = '''DESC Hydraulics Data
 ENGLISH
 QOIL 1.0 1000.0 3000.0
 GOR 0.0 0.5
 WCUT 0.0
 THP 100.0 500.0
-IGOR  IWCUT  IQOIL   BHP0   BHP1
-   1      1      1 2470.0 2545.0
-   1      1      2 2478.0 2548.0
-   1      1      3 2493.0 2569.0
+ IGOR  IWCUT  IQOIL   BHP0   BHP1
+    1      1      1 2470.0 2545.0
+    1      1      2 2478.0 2548.0
+    1      1      3 2493.0 2569.0
     2      1      1 1860.0 1990.0
     2      1      2 1881.0 2002.0
     2      1      3 1947.0 2039.0
+
 
 '''
         expected_surface_file_content = '''BLACKOIL
@@ -187,6 +189,7 @@ TIME 01/01/2020
 CONSTRAINTS
 well1 QOSMAX 10240
 ENDCONSTRAINTS
+
 '''
         expected_writes = [(expected_surface_path, expected_surface_file_content),
                            (expected_hydraulics_path, expected_hydraulics_file_content),
@@ -197,8 +200,9 @@ ENDCONSTRAINTS
         file_exists_mock = MagicMock(side_effect=lambda x: False)
         mocker.patch('os.path.exists', file_exists_mock)
         mocker.patch('os.makedirs', MagicMock())  # ensures no dirs are created
-        
-        writer_mock = mocker.patch('builtins.open', mocker.mock_open())
+
+        writing_mock_open = mocker.mock_open()
+        mocker.patch("builtins.open", writing_mock_open)
         
         # Act
         model.write_out_new_model(new_location='/new_path/', new_model_name='new_model', 
@@ -206,4 +210,4 @@ ENDCONSTRAINTS
         
         # Assert
         # Check that the hydraulics file was written correctly
-        check_file_read_write_is_correct(expected_file_writes=expected_writes, modifying_mock_open=mocker)
+        check_file_read_write_is_correct(expected_file_writes=expected_writes, modifying_mock_open=writing_mock_open)
