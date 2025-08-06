@@ -2485,7 +2485,7 @@ def test_read_iprtables_one(mocker):
 
     # Arrange
     # Mock surface
-    IPR_file_contents = """SOURCE
+    ipr_file_contents = """SOURCE
 EOS NHC 7 COMPONENTS N2C1 CO2C3 C4-5 C6-14 C15-19 C20-35 C36+
 !
 TIME    08/25/2026
@@ -2502,7 +2502,7 @@ ENDIPRTABLE
 """
 
     # Arrange
-    ipr_file = NexusFile(location='', file_content_as_list=IPR_file_contents.splitlines())
+    ipr_file = NexusFile(location='', file_content_as_list=ipr_file_contents.splitlines())
     expected_df_1 = pd.DataFrame(data={
         'PRES': [8888],
         'QO': [6772.80000],
@@ -2533,7 +2533,7 @@ ENDIPRTABLE
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
             'fcs_file.fcs': fcs_file_contents,
-            'ipr_file_1.dat': IPR_file_contents,
+            'ipr_file_1.dat': ipr_file_contents,
         }).return_value
         return mock_open
 
