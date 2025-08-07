@@ -330,7 +330,7 @@ class NexusWells(Wells):
                                       date_found: bool, index: int, new_completion_index: int,
                                       preserve_previous_completions: bool, well: NexusWell, well_name: str) -> \
             tuple[list[str], int, list[str], bool]:
-        """Writes out the existing wellspec for a well at a new time stamp."""
+        """Writes out the existing wellspec for a well at a new time stamp, with an additional completion."""
         nexus_mapping = NexusCompletion.get_keyword_mapping()
         completion_table_as_list = ['\n']
         if not date_found:

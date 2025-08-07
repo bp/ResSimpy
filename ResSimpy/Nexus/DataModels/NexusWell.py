@@ -8,9 +8,11 @@ from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusWellMod import NexusWellMod
+from ResSimpy.Time.ISODateTime import ISODateTime
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.DataModelBaseClasses.Well import Well
+from ResSimpy.Utils.obj_to_table_string import get_column_headers_required
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusWells import NexusWells
@@ -187,3 +189,27 @@ class NexusWell(Well):
         """
         for completion in completions_to_remove:
             self._remove_completion_from_memory(completion)
+
+    def to_string_for_date(self, date: ISODateTime) -> str:
+        """Outputs the string that represents the wellspec for a specific date."""
+        output_str = ''
+        completions_for_date = [x for x in self._completions if x.iso_date == date]
+        wellmods_for_date = [x for x in self._wellmods if x.iso_date == date]
+
+        if not completions_for_date and not wellmods_for_date:
+            return output_str
+
+        if completions_for_date:
+            output_str += f"WELLSPEC {self.well_name}\n"
+            # work out the required headers:
+            headers = get_column_headers_required(completions_for_date)
+            output_str += ' '.join(headers) + '\n'
+            for completion in completions_for_date:
+                output_str += completion.to_table_line(headers)
+
+        if wellmods_for_date:
+            for wellmod in wellmods_for_date:
+                output_str += wellmod.to_string()
+
+        output_str += '\n'
+        return output_str

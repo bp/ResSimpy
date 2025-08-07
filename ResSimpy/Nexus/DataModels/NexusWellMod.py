@@ -91,3 +91,17 @@ class NexusWellMod(DataObjectMixin):
     def units(self) -> CompletionUnits:
         """Returns the completion units for the wellmod."""
         return CompletionUnits(self.unit_system)
+
+    def to_string(self) -> str:
+        """Returns a string representation of the wellmod."""
+        output_string = f'WELLMOD {self.well_name}\n'
+        for key, value in self.to_dict(keys_in_nexus_style=True, add_date=False, add_units=False).items():
+            if value is None:
+                continue
+            elif isinstance(value, list):
+                value_str = 'VAR ' + ' '.join([str(v) for v in value])
+            else:
+                value_str = 'CON ' + str(value)
+            output_string += f'{key} {value_str}\n'
+
+        return output_string
