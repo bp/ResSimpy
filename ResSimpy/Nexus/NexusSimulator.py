@@ -8,7 +8,6 @@ from typing import Any, Union, Optional, Sequence
 import resqpy.model as rq
 from datetime import datetime
 
-from ResSimpy.DataModelBaseClasses.DynamicPropertyContainer import DynamicPropertyContainer
 from ResSimpy.Enums.FluidTypeEnums import PvtType
 from ResSimpy.Nexus.DataModels.NexusOptions import NexusOptions
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -982,7 +981,7 @@ class NexusSimulator(Simulator):
         warnings.warn('Options file is not yet implemented in NexusSimulator.write_out_new_model. ')
 
         # update each of the dynamic properties files
-        dynamic_props: dict[str, tuple[DynamicPropertyContainer, dict[int, NexusFile]]] = {
+        dynamic_props = {
             'pvt': (self.pvt, self.model_files.pvt_files),
             'separator': (self.separator, self.model_files.separator_files),
             'water': (self.water, self.model_files.water_files),
