@@ -195,7 +195,7 @@ ENDCONSTRAINTS
                            (expected_hydraulics_path, expected_hydraulics_file_content),
                            (expected_fcs_path, expected_fcs_contents),
                            ]
-        
+
         # Mock out the file exists
         file_exists_mock = MagicMock(side_effect=lambda x: False)
         mocker.patch('os.path.exists', file_exists_mock)

@@ -8,6 +8,7 @@ from typing import Any, Union, Optional, Sequence
 import resqpy.model as rq
 from datetime import datetime
 
+from ResSimpy.DataModelBaseClasses.DynamicPropertyContainer import DynamicPropertyContainer
 from ResSimpy.Enums.FluidTypeEnums import PvtType
 from ResSimpy.Nexus.DataModels.NexusOptions import NexusOptions
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -696,9 +697,9 @@ class NexusSimulator(Simulator):
                                                       model_files=self.model_files)
 
         # Read in gaslift properties from Nexus gaslift method files
-        if self.model_files.gas_lift_files is not None and \
-                len(self.model_files.gas_lift_files) > 0:
-            self._gaslift = NexusGasliftMethods(files=self.model_files.gas_lift_files,
+        if self.model_files.gaslift_files is not None and \
+                len(self.model_files.gaslift_files) > 0:
+            self._gaslift = NexusGasliftMethods(files=self.model_files.gaslift_files,
                                                 model_unit_system=self.default_units,
                                                 model_files=self.model_files)
 
@@ -934,6 +935,7 @@ class NexusSimulator(Simulator):
                             new_include_file_location: str | None = None,
                             overwrite_files: bool = True) -> None:
         """Writes out a new model at a new location with a new_model_name.fcs."""
+
         def update_model_file(file: NexusFile, new_content: str,
                               new_folder_path: str, new_name: str, suffix: str) -> None:
             """Updates a model file with new content and location."""
@@ -980,7 +982,7 @@ class NexusSimulator(Simulator):
         warnings.warn('Options file is not yet implemented in NexusSimulator.write_out_new_model. ')
 
         # update each of the dynamic properties files
-        dynamic_props = {
+        dynamic_props: dict[str, tuple[DynamicPropertyContainer, dict[int, NexusFile]]] = {
             'pvt': (self.pvt, self.model_files.pvt_files),
             'separator': (self.separator, self.model_files.separator_files),
             'water': (self.water, self.model_files.water_files),
@@ -990,18 +992,24 @@ class NexusSimulator(Simulator):
             'valve': (self.valve, self.model_files.valve_files),
             'aquifer': (self.aquifer, self.model_files.aquifer_files),
             'hyd': (self.hydraulics, self.model_files.hyd_files),
-            'gaslift': (self.gaslift, self.model_files.gas_lift_files)
+            'gaslift': (self.gaslift, self.model_files.gaslift_files)
         }
 
         for suffix, (prop, dyn_files) in dynamic_props.items():
             for method_no, method in prop.inputs.items():
                 file_name = f"{new_model_name}_{suffix}_{method_no}.dat"
                 method_file_path = os.path.join(new_include_file_location, file_name)
-                dyn_files[method_no] = NexusFile(
-                    file_content_as_list=method.to_string().splitlines(keepends=True),
-                    location=method_file_path,
-                    origin=new_model_path
-                )
+                new_dyn_file = NexusFile(
+                        file_content_as_list=method.to_string().splitlines(keepends=True),
+                        location=method_file_path,
+                        origin=new_model_path
+                    )
+                if dyn_files is None:
+                    # ensure the dynamic files collection exists and if it doesn't then set it
+                    files_collection_name = f"{suffix}_files"
+                    self.model_files.__setattr__(files_collection_name, {method_no: new_dyn_file})
+                else:
+                    dyn_files[method_no] = new_dyn_file
                 method.write_to_file(new_file_path=method_file_path, overwrite_file=False)
 
         # create new fcsfile

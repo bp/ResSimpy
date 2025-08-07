@@ -48,7 +48,7 @@ class FcsNexusFile(NexusFile):
     valve_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
     separator_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
     ipr_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
-    gas_lift_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
+    gaslift_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
     pump_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
     compressor_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
     choke_files: Optional[dict[int, NexusFile]] = field(default_factory=get_empty_dict_int_nexus_file)
@@ -85,7 +85,7 @@ class FcsNexusFile(NexusFile):
             valve_files: Optional[dict[int, NexusFile]] = None,
             separator_files: Optional[dict[int, NexusFile]] = None,
             ipr_files: Optional[dict[int, NexusFile]] = None,
-            gas_lift_files: Optional[dict[int, NexusFile]] = None,
+            gaslift_files: Optional[dict[int, NexusFile]] = None,
             pump_files: Optional[dict[int, NexusFile]] = None,
             compressor_files: Optional[dict[int, NexusFile]] = None,
             choke_files: Optional[dict[int, NexusFile]] = None,
@@ -136,7 +136,7 @@ class FcsNexusFile(NexusFile):
             method number.
             ipr_files: Optional[dict[int, NexusFile]: Collection of ipr files for the fcs file. Indexed by method
             number.
-            gas_lift_files: Optional[dict[int, NexusFile]: Collection of gas lift files for the fcs file. Indexed by
+            gaslift_files: Optional[dict[int, NexusFile]: Collection of gas lift files for the fcs file. Indexed by
             method number.
             pump_files: Optional[dict[int, NexusFile]: Collection of pump files for the fcs file. Indexed by method
             number.
@@ -177,7 +177,7 @@ class FcsNexusFile(NexusFile):
         self.valve_files = valve_files if valve_files is not None else get_empty_dict_int_nexus_file()
         self.separator_files = separator_files if separator_files is not None else get_empty_dict_int_nexus_file()
         self.ipr_files = ipr_files if ipr_files is not None else get_empty_dict_int_nexus_file()
-        self.gas_lift_files = gas_lift_files if gas_lift_files is not None else get_empty_dict_int_nexus_file()
+        self.gaslift_files = gaslift_files if gaslift_files is not None else get_empty_dict_int_nexus_file()
         self.pump_files = pump_files if pump_files is not None else get_empty_dict_int_nexus_file()
         self.compressor_files = compressor_files if compressor_files is not None else get_empty_dict_int_nexus_file()
         self.choke_files = choke_files if choke_files is not None else get_empty_dict_int_nexus_file()
@@ -339,7 +339,7 @@ class FcsNexusFile(NexusFile):
             'WATER': 'water_files',
             'SEPARATOR': 'separator_files',
             'IPR': 'ipr_files',
-            'GASLIFT': 'gas_lift_files',
+            'GASLIFT': 'gaslift_files',
             'PUMP': 'pump_files',
             'COMPRESSOR': 'compressor_files',
             'CHOKE': 'choke_files',
@@ -527,7 +527,7 @@ class FcsNexusFile(NexusFile):
         dicts_of_files_in_model = [self.well_files, self.surface_files, self.rock_files, self.relperm_files,
                                    self.pvt_files, self.water_files, self.equil_files, self.tracer_init_files,
                                    self.aquifer_files, self.hyd_files, self.valve_files, self.separator_files,
-                                   self.ipr_files, self.gas_lift_files, self.pump_files, self.compressor_files,
+                                   self.ipr_files, self.gaslift_files, self.pump_files, self.compressor_files,
                                    self.choke_files, self.icd_files, self.esp_files, self.polymer_files,
                                    self.adsorption_files, self.flux_in_files]
 
@@ -623,7 +623,7 @@ class FcsNexusFile(NexusFile):
             printable_str += f'OVERRIDE {self.override_file.location}\n'
 
         net_methods = {'VALVE': self.valve_files,
-                       'GASLIFT': self.gas_lift_files, 'PUMP': self.pump_files,
+                       'GASLIFT': self.gaslift_files, 'PUMP': self.pump_files,
                        'COMPRESSOR': self.compressor_files, 'CHOKE': self.choke_files,
                        'ICD': self.icd_files, 'ESP': self.esp_files, 'HYD': self.hyd_files}
         if any(x for x in net_methods.values()):

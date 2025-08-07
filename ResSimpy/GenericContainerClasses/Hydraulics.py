@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from abc import ABC
 from typing import Mapping
 
 from ResSimpy.DataModelBaseClasses.DynamicProperty import DynamicProperty
