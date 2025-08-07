@@ -1008,3 +1008,8 @@ class NexusSimulator(Simulator):
                 destination=self.destination,
                 lazy_loading=self.__lazy_loading
             )
+
+    @property
+    def wells(self) -> NexusWells:
+        """Returns the associated NexusWells for the simulator."""
+        return self._wells

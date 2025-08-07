@@ -200,12 +200,13 @@ class NexusWells(Wells):
             return new_well
 
         # add the well to the well file
-        for completion in completions:
-            self.add_completion(well_name=name, completion_properties=completion.to_dict())
-        new_well = self.get(name)
-        if new_well is None:
+        if completions is not None:
+            for completion in completions:
+                self.add_completion(well_name=name, completion_properties=completion.to_dict())
+        updated_new_well = self.get(name)
+        if updated_new_well is None:
             raise ValueError(f'Well {name} could not be added to the wells collection.')
-        return new_well
+        return updated_new_well
 
     def add_completion(self, well_name: str, completion_properties: dict[str, None | float | int | str],
                        preserve_previous_completions: bool = True, comments: Optional[str] = None) -> None:
@@ -235,15 +236,15 @@ class NexusWells(Wells):
                                                         completion_properties=completion_properties,
                                                         date_format=self.date_format)
 
-        if self.__model.model_files.well_files is None:
+        if self.model.model_files.well_files is None:
             raise FileNotFoundError('No well file found, cannot modify ')
 
         if well_id is not None:
             wellspec_file = self.__add_object_operations.find_which_file_from_id(obj_id=well_id,
-                                                                             file_type_to_search='well_files')
+                                                                                 file_type_to_search='well_files')
         else:
-            # assume the base file to add to.
-            wellspec_file = self.model.model_files.well_files.get(1, None)
+            # assume to add to the first well file found
+            wellspec_file = next(iter(self.model.model_files.well_files.values()))
         # initialise some storage variables
         nexus_mapping = NexusCompletion.get_keyword_mapping()
         new_completion_time_index = -1
