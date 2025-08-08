@@ -1011,6 +1011,17 @@ class NexusSimulator(Simulator):
                     dyn_files[method_no] = new_dyn_file
                 method.write_to_file(new_file_path=method_file_path, overwrite_file=False)
 
+        options_file_name = f"{new_model_name}_options.dat"
+        if self.model_files.options_file is None and self._options is not None:
+            self.set_options(self._options, os.path.join(new_include_file_location, options_file_name))
+        elif self.model_files.options_file is not None:
+            # update the existing options file
+            self.model_files.options_file.location = os.path.join(new_include_file_location, options_file_name)
+            self.model_files.options_file.origin = new_model_path
+            self.model_files.options_file.file_content_as_list = self._options.to_string().splitlines(keepends=True)
+            self.model_files.options_file.write_to_file(
+                new_file_path=self.model_files.options_file.location, overwrite_file=overwrite_files)
+
         # create new fcsfile
         fcs_content = model_file_generator.generate_base_model_file_contents()
         self.model_files.file_content_as_list = fcs_content.splitlines(keepends=True)
@@ -1112,12 +1123,25 @@ class NexusSimulator(Simulator):
                 lazy_loading=self.__lazy_loading
             )
 
-    def set_options(self, options: NexusOptions) -> None:
+    def set_options(self, options: NexusOptions, options_file_path: Optional[str] = None) -> None:
         """Sets the Nexus options for the simulator.
 
         Args:
             options (NexusOptions): An instance of NexusOptions to set.
+            options_file_path (str): Path to the options file to be set.
         """
         if not isinstance(options, NexusOptions):
             raise TypeError("options must be an instance of NexusOptions")
+        if options_file_path is None:
+            # pick a default name
+            options_file_path = os.path.join(os.path.dirname(self.model_files.location),
+                                             f'{self.root_name}_options.dat')
         self._options = options
+        # Ensure the options file is set correctly
+        new_options_file = NexusFile(
+            file_content_as_list=options.to_string().splitlines(keepends=True),
+            location=options_file_path,
+            origin=self.model_files.location,
+        )
+        self.model_files.options_file = new_options_file
+        self._options.file = new_options_file

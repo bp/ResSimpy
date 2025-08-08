@@ -112,3 +112,8 @@ class NexusModelFileGenerator:
                 full_schedule += '\n'
 
         return full_schedule
+
+    def output_options_section(self) -> str:
+        """Outputs the options section of the Nexus model file."""
+        options = self.model.options.to_string()
+        return options

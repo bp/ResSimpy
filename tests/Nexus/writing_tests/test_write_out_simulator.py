@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from ResSimpy.Nexus.DataModels.NexusOptions import NexusOptions
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator, check_file_read_write_is_correct
 from ResSimpy import NexusSimulator
@@ -142,9 +143,27 @@ class TestWriteOutSimulator:
                                          max_surface_oil_rate=10240)
 
         model.network.constraints._add_to_memory({'well1': [new_constraint]})
+
+        opts_obj = NexusOptions(file=None, model_unit_system=UnitSystem.ENGLISH)
+        opts_obj.properties = {'DESC': ['Simulation Options'],
+                               'UNIT_SYSTEM': UnitSystem.ENGLISH,
+                               'PSTD': 14.7,
+                               'TSTD': 60.0,
+                               'RES_TEMP': 200.0,
+                               'REGDATA': {
+                                   'Injection_regions': pd.DataFrame({'NAME': ['Reg1', 'Reg2'],
+                                                                      'NUMBER': [1, 2],
+                                                                      'IBAT': [2, 2]
+                                                                      }),
+                                   'Fruit_regions': pd.DataFrame({'NUMBER': [10, 22, 33, 44],
+                                                                  'NAME': ['Apple', 'Grape', 'Orange', 'Reg1']
+                                                                  })}
+                               }
+        model.set_options(opts_obj)
         
         expected_hydraulics_path = os.path.join('/new_path/', 'nexus_files', 'new_model_hyd_1.dat')
         expected_surface_path = os.path.join('/new_path/', 'nexus_files', 'new_model_surface.dat')
+        expected_options_path = os.path.join('/new_path/', 'nexus_files', 'new_model_options.dat')
         expected_fcs_path = os.path.join('/new_path/', 'new_model.fcs')
         
         expected_fcs_contents = f'''DESC Model created with ResSimpy
@@ -153,6 +172,7 @@ DEFAULT_UNITS ENGLISH
 DATEFORMAT MM/DD/YYYY
 
 GRID_FILES
+    OPTIONS {expected_options_path}
 
 INITIALIZATION_FILES
 
@@ -166,6 +186,7 @@ RECURRENT_FILES
 NET_METHOD_FILES
     HYD METHOD 1 {expected_hydraulics_path}
 '''
+
 
         expected_hydraulics_file_content = '''DESC Hydraulics Data
 ENGLISH
@@ -191,8 +212,30 @@ well1 QOSMAX 10240
 ENDCONSTRAINTS
 
 '''
+        expected_options_content = """DESC Simulation Options
+ENGLISH
+PSTD 14.7
+TSTD 60.0
+RES_TEMP 200.0
+
+REGDATA Injection_regions
+NAME  NUMBER  IBAT
+Reg1       1     2
+Reg2       2     2
+ENDREGDATA
+
+REGDATA Fruit_regions
+ NUMBER   NAME
+     10  Apple
+     22  Grape
+     33 Orange
+     44   Reg1
+ENDREGDATA
+
+"""
         expected_writes = [(expected_surface_path, expected_surface_file_content),
                            (expected_hydraulics_path, expected_hydraulics_file_content),
+                            (expected_options_path, expected_options_content),
                            (expected_fcs_path, expected_fcs_contents),
                            ]
 

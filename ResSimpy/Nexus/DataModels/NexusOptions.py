@@ -18,7 +18,7 @@ from ResSimpy.Utils.general_utilities import check_if_string_is_float
 @dataclass(kw_only=True, repr=False)
 class NexusOptions(DynamicProperty):
     """Class to hold Nexus options data."""
-    file: NexusFile
+    file: Optional[NexusFile]
     properties: dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
                                 dict[str, Union[float, pd.DataFrame]]]] = \
         field(default_factory=get_empty_dict_union)
@@ -26,14 +26,14 @@ class NexusOptions(DynamicProperty):
     __properties_loaded: bool = False  # Used in lazy loading
     __hash__ = DynamicProperty.__hash__
 
-    def __init__(self, file: NexusFile, model_unit_system: UnitSystem, input_number: int = 1,
+    def __init__(self, file: Optional[NexusFile], model_unit_system: UnitSystem, input_number: int = 1,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
                                                       dict[str, Union[float, pd.DataFrame]]]]] = None
                  ) -> None:
         """Initialises the NexusOptions class.
 
         Args:
-            file (NexusFile): Nexus options file object
+            file (Optional[NexusFile]): Nexus options file object
             model_unit_system (UnitSystem): unit system used in the model
             input_number (int): Always set to 1 as there is always one input file
             properties: Dictionary holding Nexus options information. Defaults to empty dictionary
@@ -43,6 +43,8 @@ class NexusOptions(DynamicProperty):
             self.properties = properties
         else:
             self.properties = {}
+        if file is None:
+            file = NexusFile(location='')
         super().__init__(input_number=input_number, file=file)
 
     @staticmethod
