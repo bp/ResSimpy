@@ -1008,3 +1008,13 @@ class NexusSimulator(Simulator):
                 destination=self.destination,
                 lazy_loading=self.__lazy_loading
             )
+
+    def set_options(self, options: NexusOptions) -> None:
+        """Sets the Nexus options for the simulator.
+
+        Args:
+            options (NexusOptions): An instance of NexusOptions to set.
+        """
+        if not isinstance(options, NexusOptions):
+            raise TypeError("options must be an instance of NexusOptions")
+        self._options = options
