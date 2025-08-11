@@ -3,6 +3,7 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
 
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.DataModelBaseClasses.NetworkObject import NetworkObject
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
@@ -31,7 +32,7 @@ class Target(NetworkObject, ABC):
     calculation_type: Optional[str] = None
     region_number: Optional[int] = None
 
-    def __init__(self, properties_dict: Optional[dict[str, None | int | str | float]] = None,
+    def __init__(self, properties_dict: Optional[DataObjectMixinDictType] = None,
                  date: Optional[str] = None, date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None, name: Optional[str] = None,
                  control_quantity: Optional[str] = None, control_conditions: Optional[str] = None,

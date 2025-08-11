@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.DataModelBaseClasses.GuideRate import GuideRate
 from ResSimpy.Enums.FluidTypeEnums import PhaseType
 from ResSimpy.Enums.UnitsEnum import UnitSystem
@@ -19,7 +20,7 @@ class NexusGuideRate(GuideRate):
                  b: Optional[float] = 0, c: Optional[float] = 0, d: Optional[float] = 0,
                  e: Optional[float] = 0, f: Optional[float] = 0, increase_permitted: Optional[bool] = True,
                  damping_factor: Optional[float] = 1.0,
-                 properties_dict: Optional[dict[str, None | int | str | float]] = None) -> None:
+                 properties_dict: Optional[DataObjectMixinDictType] = None) -> None:
         """Initialises the NexusDrill class.
 
         Args:

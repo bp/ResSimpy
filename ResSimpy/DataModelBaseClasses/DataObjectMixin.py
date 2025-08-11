@@ -12,6 +12,9 @@ from ResSimpy.Utils import to_dict_generic
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Utils.obj_to_table_string import to_table_line
 
+# generic type for dict
+DataObjectMixinDictType = dict[str, None | str | int | float | dict[int, float]]
+
 
 @dataclass(kw_only=True)
 class DataObjectMixin(ABC):
@@ -96,7 +99,7 @@ class DataObjectMixin(ABC):
 
     def to_dict(self, keys_in_keyword_style: bool = False, add_date: bool = True, add_units: bool = True,
                 add_iso_date: bool = False, include_nones: bool = True,
-                units_as_string: bool = True) -> dict[str, None | str | int | float]:
+                units_as_string: bool = True) -> DataObjectMixinDictType:
         """Returns a dictionary of the attributes of the object.
 
         Args:

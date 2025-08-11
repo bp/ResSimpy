@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, TYPE_CHECKING, Literal, TypeVar, Optional
 from uuid import UUID
 
-from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin, DataObjectMixinDictType
 from ResSimpy.FileOperations.file_operations import check_token
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 T = TypeVar('T', bound=DataObjectMixin)
@@ -117,7 +117,7 @@ class RemoveObjectOperations:
         line_numbers_in_file_to_remove.extend(remove_empty_table_indices)
         self.remove_lines_from_file(line_numbers_in_file_to_remove, file, obj_id)
 
-    def remove_object_from_network_main(self, obj_to_remove: dict[str, None | str | float | int] | UUID,
+    def remove_object_from_network_main(self, obj_to_remove: DataObjectMixinDictType | UUID,
                                         network_element_name: Literal['nodes', 'connections', 'well_connections',
                                                                       'wellheads', 'wellbores', 'constraints',
                                                                       'targets', 'stations', 'drills', 'drill_sites',

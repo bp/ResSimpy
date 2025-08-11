@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.DataModelBaseClasses.Wellhead import Wellhead
@@ -60,7 +61,7 @@ class NexusWellhead(Wellhead):
     heat_transfer_coeff: Optional[float] = None
     dt_add: Optional[float] = None
 
-    def __init__(self, properties_dict: dict[str, None | int | str | float], date: Optional[str] = None,
+    def __init__(self, properties_dict: DataObjectMixinDictType, date: Optional[str] = None,
                  date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None, name: Optional[str] = None, pvt_method: Optional[int] = None,
                  water_method: Optional[int] = None, bat_method: Optional[int] = None,

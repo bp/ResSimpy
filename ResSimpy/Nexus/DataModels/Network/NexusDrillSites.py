@@ -11,6 +11,7 @@ from uuid import UUID
 
 import pandas as pd
 
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.FileOperations.File import File
 from ResSimpy.GenericContainerClasses.DrillSites import DrillSites
@@ -89,7 +90,7 @@ class NexusDrillSites(DrillSites):
             return
         self._drill_sites.extend(additional_list)
 
-    def remove(self, obj_to_remove: dict[str, None | str | float | int] | UUID) -> None:
+    def remove(self, obj_to_remove: DataObjectMixinDictType | UUID) -> None:
         """Remove a drill site from the network based on the properties matching a dictionary or id.
 
         Args:
@@ -100,7 +101,7 @@ class NexusDrillSites(DrillSites):
         self.__remove_object_operations.remove_object_from_network_main(
             obj_to_remove, self._network_element_name, self._drill_sites)
 
-    def add(self, obj_to_add: dict[str, None | str | float | int]) -> None:
+    def add(self, obj_to_add: DataObjectMixinDictType) -> None:
         """Adds a drill site to a network, taking a dictionary with properties for the new drill site.
 
         Args:
@@ -111,8 +112,7 @@ class NexusDrillSites(DrillSites):
         new_object = self.__add_object_operations.add_network_obj(obj_to_add, NexusDrillSite, self.__parent_network)
         self._add_to_memory([new_object])
 
-    def modify(self, obj_to_modify: dict[str, None | str | float | int],
-               new_properties: dict[str, None | str | float | int]) -> None:
+    def modify(self, obj_to_modify: DataObjectMixinDictType, new_properties: DataObjectMixinDictType) -> None:
         """Modifies an existing drill site based on a matching dictionary of properties.
 
         Partial matches allowed if precisely 1 matching node is found.
