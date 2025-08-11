@@ -37,7 +37,7 @@ from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusIPRMethods import NexusIprMethods
 from ResSimpy.Nexus.DataModels.NexusIPRMethod import NexusIprMethod
-from pytest_mock import MockerFixture
+from pytest_mock import MockerFixture, mocker
 from unittest.mock import Mock
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusWells import NexusWells
@@ -2480,7 +2480,7 @@ def test_read_iprtables(file_contents, expected_data):
     assert_frame_equal(result, expected_result)
 
 
-def test_read_iprtables_one(mocker):
+def test_read_multiple_iprtables(mocker):
     """Testing multiple IPR tables ine one IPR method file"""
 
     # Arrange
@@ -2493,7 +2493,6 @@ IPRTABLE
 PRES       QO           QW              QG          N2C1         C6-14
 8888     6772.80000   0.00000      78350.00000     0.80000      0.10000
 ENDIPRTABLE
-
 TIME    08/26/2026
 IPRTABLE
 PRES      QO            QW              QG           N2C1         C6-14
@@ -2551,3 +2550,80 @@ ENDIPRTABLE
     assert result[1].date == expected_IprTable_2.date
     assert_frame_equal(result[1].table, expected_IprTable_2.table)
 
+
+def test_read_ipr_files_in_fcs(mocker):
+    """Testing two different IPR files in the same FCS file"""
+
+    # Arrange
+    # Mock surface
+    ipr_file_contents_1 = """SOURCE
+EOS NHC 7 COMPONENTS N2C1 CO2C3 C4-5 C6-14 C15-19 C20-35 C36+
+!
+TIME    08/25/2026
+IPRTABLE
+PRES       QO           QW              QG          N2C1         C6-14
+5555     5552.70000   0.00000      85560.00000     0.60000      0.10000
+ENDIPRTABLE
+"""
+    ipr_file_contents_2 = """SOURCE
+EOS NHC 7 COMPONENTS N2C1 CO2C3 C4-5 C6-14 C15-19 C20-35 C36+
+!
+TIME    08/26/2026
+IPRTABLE
+PRES            QO            QW          QG           N2C1        C6-14
+4490.44700    16.15221      0.00000    5.77058       0.30000     0.20000
+ENDIPRTABLE
+"""
+
+    # Arrange
+    ipr_file = NexusFile(location='', file_content_as_list=ipr_file_contents_1.splitlines())
+    expected_df_1 = pd.DataFrame(data={
+        'PRES': [5555],
+        'QO': [5552.70000],
+        'QW': [0.00000],
+        'QG': [85560.00000],
+        'N2C1': [0.60000],
+        'C6-14': [0.10000]})
+
+    ipr_file_2 = NexusFile(location='', file_content_as_list=ipr_file_contents_2.splitlines())
+    expected_df_2 = pd.DataFrame(data={
+        'PRES': [4490.44700],
+        'QO': [16.15221],
+        'QW': [0.00000],
+        'QG': [5.77058],
+        'N2C1': [0.30000],
+        'C6-14': [0.20000],
+    })
+
+    expected_IprTable_1 = NexusIprMethod(date='08/25/2026', table=expected_df_1)
+    expected_IprTable_2 = NexusIprMethod(date='08/26/2026', table=expected_df_2)
+
+    expected_result = [expected_IprTable_1, expected_IprTable_2]
+
+    fcs_file_contents = """RECURRENT_FILES
+    IPR Method 1 ipr_file_1.dat
+    IPR Method 2 ipr_file_2.dat
+    """
+
+    # Mock out the fcs file
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'fcs_file.fcs': fcs_file_contents,
+            'ipr_file_1.dat': ipr_file_contents_1,
+            'ipr_file_2.dat': ipr_file_contents_2
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='fcs_file.fcs', mock_open=False)
+
+    # Act
+    result = nexus_sim.ipr_methods.get_all()
+
+    # Assert
+    assert result[0].date == expected_IprTable_1.date
+    assert_frame_equal(result[0].table, expected_IprTable_1.table)
+
+    assert result[1].date == expected_IprTable_2.date
+    assert_frame_equal(result[1].table, expected_IprTable_2.table)
