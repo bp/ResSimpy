@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.DataModelBaseClasses.Drill import Drill
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
@@ -33,7 +34,7 @@ class NexusDrill(Drill):
                  drillsite: Optional[str] = None, drill_time: Optional[float] = None,
                  completion_time: float = 0, workover_time: float = 0, rigs: str = 'ALL',
                  replacement: Optional[str] = None,
-                 properties_dict: Optional[dict[str, None | int | str | float]] = None) -> None:
+                 properties_dict: Optional[DataObjectMixinDictType] = None) -> None:
         """Initialises the NexusDrill class.
 
         Args:

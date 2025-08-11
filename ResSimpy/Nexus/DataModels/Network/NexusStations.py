@@ -10,6 +10,7 @@ from typing import Literal, Sequence, Optional, TYPE_CHECKING
 
 import pandas as pd
 
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.FileOperations.File import File
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
@@ -143,12 +144,12 @@ class NexusStations(NetworkOperationsMixIn):
         self._stations.extend(additional_list)
 
     def remove(
-        self, station_to_remove: dict[str, None | str | float | int] | UUID
+        self, station_to_remove: DataObjectMixinDictType | UUID
     ) -> None:
         """Remove a station from the network based on the properties matching a dictionary or id.
 
         Args:
-            station_to_remove (UUID | dict[str, None | str | float | int]): UUID of the station to remove
+            station_to_remove (UUID | DataObjectMixinDictType): UUID of the station to remove
             or a dictionary with sufficient matching parameters to uniquely identify a station
 
         """
@@ -156,11 +157,11 @@ class NexusStations(NetworkOperationsMixIn):
             station_to_remove, self._network_element_name, self._stations
         )
 
-    def add(self, station_to_add: dict[str, None | str | float | int]) -> None:
+    def add(self, station_to_add: DataObjectMixinDictType) -> None:
         """Adds a station to a network, taking a dictionary with properties for the new station.
 
         Args:
-            station_to_add (dict[str, None | str | float | int]): dictionary taking all the properties for new station.
+            station_to_add (DataObjectMixinDictType): dictionary taking all the properties for new station.
             Requires date and a station name.
         """
         new_object = self.__add_object_operations.add_network_obj(
@@ -170,8 +171,8 @@ class NexusStations(NetworkOperationsMixIn):
 
     def modify(
         self,
-        station_to_modify: dict[str, None | str | float | int],
-        new_properties: dict[str, None | str | float | int],
+        station_to_modify: DataObjectMixinDictType,
+        new_properties: DataObjectMixinDictType,
     ) -> None:
         """Modifies an existing station based on a matching dictionary of properties.
 
@@ -179,9 +180,9 @@ class NexusStations(NetworkOperationsMixIn):
         new_properties dictionary.
 
         Args:
-            station_to_modify (dict[str, None | str | float | int]): dictionary containing attributes to match in the
+            station_to_modify (DataObjectMixinDictType): dictionary containing attributes to match in the
             existing station set.
-            new_properties (dict[str, None | str | float | int]): properties to switch to in the new station
+            new_properties (DataObjectMixinDictType): properties to switch to in the new station
         """
         self.__parent_network.get_load_status()
 

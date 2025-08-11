@@ -4,6 +4,7 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
 
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.DataModelBaseClasses.NetworkObject import NetworkObject
 from ResSimpy.Enums.FluidTypeEnums import PhaseType
 from ResSimpy.Enums.UnitsEnum import UnitSystem
@@ -26,7 +27,7 @@ class GuideRate(NetworkObject, ABC):
 
     def __init__(self, unit_system: Optional[UnitSystem] = None, name: Optional[str] = None, date: Optional[str] = None,
                  date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
-                 properties_dict: Optional[dict[str, None | int | str | float]] = None,
+                 properties_dict: Optional[DataObjectMixinDictType] = None,
                  time_interval: Optional[float] = None, phase: Optional[PhaseType] = None, a: Optional[float] = None,
                  b: Optional[float] = None, c: Optional[float] = None, d: Optional[float] = None,
                  e: Optional[float] = None, f: Optional[float] = None, increase_permitted: Optional[bool] = None,

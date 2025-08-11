@@ -3,6 +3,7 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
 
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.DataModelBaseClasses.NetworkObject import NetworkObject
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
@@ -16,7 +17,7 @@ class DrillSite(NetworkObject, ABC):
     def __init__(self, date: Optional[str] = None, date_format: Optional[DateFormat] = None,
                  start_date: Optional[str] = None, unit_system: Optional[UnitSystem] = None, name: Optional[str] = None,
                  max_rigs: Optional[int] = None,
-                 properties_dict: Optional[dict[str, None | int | str | float]] = None) -> None:
+                 properties_dict: Optional[DataObjectMixinDictType] = None) -> None:
         """Initialises the DrillSite class.
 
         Args:

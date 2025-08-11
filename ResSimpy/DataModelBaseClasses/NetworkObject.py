@@ -6,7 +6,7 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
 
-from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin, DataObjectMixinDictType
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
@@ -15,7 +15,7 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 class NetworkObject(DataObjectMixin, ABC):
     """Abstract base class for an object that forms part of the surface network."""
 
-    def __init__(self, properties_dict: Optional[dict[str, None | int | str | float]] = None,
+    def __init__(self, properties_dict: Optional[DataObjectMixinDictType] = None,
                  date: Optional[str] = None, date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None, name: Optional[str] = None) -> None:
         """Initialises the NetworkObject class."""

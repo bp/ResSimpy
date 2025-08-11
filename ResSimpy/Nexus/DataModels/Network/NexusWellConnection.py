@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.Network.NexusStation import NexusStation
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
@@ -100,7 +101,7 @@ class NexusWellConnection(WellConnection):
     drill_queue: Optional[str] = None
     drill_order_benefit: Optional[float] = None
 
-    def __init__(self, properties_dict: Optional[dict[str, None | int | str | float]] = None,
+    def __init__(self, properties_dict: Optional[DataObjectMixinDictType] = None,
                  date: Optional[str] = None, date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None, name: Optional[str] = None,
                  bh_node_name: Optional[str] = None, wh_node_name: Optional[str] = None,
