@@ -1396,7 +1396,7 @@ def test_object_locations_updating(mocker, well_file_data, expected_uuid):
     mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', side_effect=['uuid1', 'uuid2', 'uuid3', 'uuid4', 'uuid5',
                                                     'uuid6', 'uuid7']) # Mocking the object IDs
 
-    mocker.patch.object(uuid, 'uuid4', side_effect=['file_uuid', 'runcontrol_uuid', 'wells_file_uuid',
+    mocker.patch.object(uuid, 'uuid4', side_effect=['fcsfile', 'file_uuid', 'runcontrol_uuid', 'wells_file_uuid',
                                                     '1', 'wells_file_uuid']) # Mocking the file IDs
 
     def mock_open_wrapper(filename, mode):
