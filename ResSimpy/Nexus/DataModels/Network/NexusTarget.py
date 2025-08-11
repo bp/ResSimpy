@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.DataModelBaseClasses.Target import Target
@@ -12,7 +13,7 @@ from ResSimpy.DataModelBaseClasses.Target import Target
 class NexusTarget(Target):
     """Class that represents a single nexus target in the NexusSimulator."""
 
-    def __init__(self, properties_dict: None | dict[str, None | int | str | float] = None, date: Optional[str] = None,
+    def __init__(self, properties_dict: None | DataObjectMixinDictType = None, date: Optional[str] = None,
                  date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None, name: Optional[str] = None,
                  control_quantity: None | str = None, control_conditions: None | str = None,

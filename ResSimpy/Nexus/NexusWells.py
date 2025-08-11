@@ -11,6 +11,7 @@ from uuid import UUID
 
 import pandas as pd
 
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.Enums.HowEnum import OperationEnum
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -104,7 +105,7 @@ class NexusWells(Wells):
         store_dictionaries = []
         for well in self._wells:
             for completion in well.completions:
-                completion_props: dict[str, None | float | int | str] = {
+                completion_props: DataObjectMixinDictType = {
                     'well_name': well.well_name,
                     'units': well.unit_system.name,
                 }
@@ -131,7 +132,7 @@ class NexusWells(Wells):
         # Ensure the newly added wells have additional information populated from the surface file.
         self.model.network.get_load_status()
 
-    def modify(self, well_name: str, completion_properties_list: list[dict[str, None | float | int | str]],
+    def modify(self, well_name: str, completion_properties_list: list[DataObjectMixinDictType],
                how: OperationEnum = OperationEnum.ADD) -> None:
         """Modify the existing wells in memory using a dictionary of properties.
 
@@ -170,7 +171,7 @@ class NexusWells(Wells):
             else:
                 raise ValueError('Please select one of the valid OperationEnum values: e.g. OperationEnum.ADD')
 
-    def add_completion(self, well_name: str, completion_properties: dict[str, None | float | int | str],
+    def add_completion(self, well_name: str, completion_properties: DataObjectMixinDictType,
                        preserve_previous_completions: bool = True, comments: Optional[str] = None) -> None:
         """Adds a completion to an existing wellspec file.
 
@@ -183,7 +184,7 @@ class NexusWells(Wells):
             to the new completion
             comments (Optional[str]): Comments to add to the object line in the file.
         """
-        basic_dict: dict[str, float | int | str | None] = {'name': well_name}
+        basic_dict: DataObjectMixinDictType = {'name': well_name}
         _, completion_date = self.__add_object_operations.check_name_date(basic_dict | completion_properties)
         well = self.get(well_name)
         if well is None:
@@ -285,7 +286,7 @@ class NexusWells(Wells):
                                           additional_objects=new_completion_object_ids, comments=comments)
 
     def __write_out_existing_wellspec(self, completion_date: str,
-                                      completion_properties: dict[str, None | float | int | str],
+                                      completion_properties: DataObjectMixinDictType,
                                       date_found: bool, index: int, new_completion_index: int,
                                       preserve_previous_completions: bool, well: NexusWell, well_name: str) -> \
             tuple[list[str], int, list[str], bool]:
@@ -313,7 +314,7 @@ class NexusWells(Wells):
             # get the most recent date that is earlier than the new completion date
             previous_dates = sorted(previous_dates, key=cmp_to_key(self.__model._sim_controls.compare_dates))
             last_date = str(previous_dates[-1])
-            completion_to_find: dict[str, None | float | int | str] = {'date': last_date}
+            completion_to_find: DataObjectMixinDictType = {'date': last_date}
             # find all completions at this date
             previous_completion_list = well.find_completions(completion_to_find)
             if len(previous_completion_list) > 0:
@@ -337,7 +338,7 @@ class NexusWells(Wells):
         return headers, new_completion_index, completion_table_as_list, True
 
     def remove_completion(self, well_name: str,
-                          completion_properties: Optional[dict[str, None | float | int | str]] = None,
+                          completion_properties: Optional[DataObjectMixinDictType] = None,
                           completion_id: Optional[UUID] = None) -> None:
         """Removes well completion from wellspec file.
 
@@ -381,7 +382,7 @@ class NexusWells(Wells):
                 wellspec_file.remove_from_file_as_list(comp_index, [completion_id])
 
         # check that we have completions left:
-        find_completions_dict: dict[str, None | float | int | str] = {'date': completion_date}
+        find_completions_dict: DataObjectMixinDictType = {'date': completion_date}
         remaining_completions = well.find_completions(find_completions_dict)
         if len(remaining_completions) == 0:
             # if there are no more completions remaining for that time stamp then remove the wellspec header!
@@ -416,8 +417,8 @@ class NexusWells(Wells):
         wellspec_file.remove_from_file_as_list(header_index)
         wellspec_file.remove_from_file_as_list(wellspec_index)
 
-    def modify_completion(self, well_name: str, properties_to_modify: dict[str, None | float | int | str],
-                          completion_to_change: Optional[dict[str, None | float | int | str]] = None,
+    def modify_completion(self, well_name: str, properties_to_modify: DataObjectMixinDictType,
+                          completion_to_change: Optional[DataObjectMixinDictType] = None,
                           completion_id: Optional[UUID] = None,
                           comments: Optional[str] = None) -> None:
         """Modify an existing matching completion, preserves attributes and modifies only additional properties \
@@ -444,7 +445,7 @@ class NexusWells(Wells):
             raise ValueError('Must provide one of completion_to_change dictionary or completion_id')
 
         # start with the existing properties
-        update_completion_properties: dict[str, None | float | int | str] = \
+        update_completion_properties: DataObjectMixinDictType = \
             {k: v for k, v in completion.to_dict().items() if v is not None}
 
         update_completion_properties.update(properties_to_modify)

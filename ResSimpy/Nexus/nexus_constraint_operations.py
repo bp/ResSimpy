@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from typing import Optional, TYPE_CHECKING
 import re
+
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
@@ -45,7 +47,7 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
     """
     welllist_names = [x.name for x in welllists]
     for index, line in enumerate(file_as_list):
-        properties_dict: dict[str, str | float | UnitSystem | None] = {'date': current_date, 'unit_system': unit_system}
+        properties_dict: DataObjectMixinDictType = {'date': current_date, 'unit_system': unit_system}
         # first value in the line has to be the node/wellname
         name = get_next_value(0, [line])
         constraint_names_to_add: list[str] = []
@@ -88,6 +90,43 @@ def load_inline_constraints(file_as_list: list[str], constraint: type[NexusConst
                 if next_value is None:
                     break
                 token_value = next_value.upper()
+
+            elif token_value == 'DPBHMX':
+                # see if the next value if a Zone or a value
+                trimmed_line = trimmed_line.replace(next_value, "", 1)
+                next_value = get_next_value(0, [trimmed_line])
+                if next_value is None:
+                    break
+                elif next_value == 'ZONE':
+                    # if the next value is a zone then we need to add a dictionary entry for the zone
+                    trimmed_line = trimmed_line.replace(next_value, "", 1)
+                    next_value = get_next_value(0, [trimmed_line])
+                    if next_value is None:
+                        break
+                    zone_number = int(next_value)
+                    trimmed_line = trimmed_line.replace(next_value, "", 1)
+                    next_value = get_next_value(0, [trimmed_line])
+                    if next_value is None:
+                        raise ValueError(f'No value found after ZONE in {line}')
+
+                    pressure_limit = correct_datatypes(next_value, float)
+
+                    if properties_dict.get('max_comp_dp_by_zone', None) is None:
+                        properties_dict.update({'max_comp_dp_by_zone': {}})
+                    if not isinstance(properties_dict['max_comp_dp_by_zone'], dict):
+                        raise TypeError('max_comp_dp_by_zone should be a dictionary')
+                    properties_dict['max_comp_dp_by_zone'][zone_number] = pressure_limit if (
+                        isinstance(pressure_limit, float)) else -1
+                    break
+                else:
+                    # otherwise the next value is a pressure limit
+                    pressure_limit = correct_datatypes(next_value, float)
+                    properties_dict['max_comp_dp'] = pressure_limit
+                    trimmed_line = trimmed_line.replace(next_value, "", 1)
+                    next_value = get_next_value(0, [trimmed_line])
+                    if next_value is None:
+                        break
+                    continue
 
             trimmed_line = trimmed_line.replace(next_value, "", 1)
             # extract the attribute name for the given nexus constraint token

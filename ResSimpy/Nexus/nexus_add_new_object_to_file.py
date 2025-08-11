@@ -4,7 +4,7 @@ import copy
 from typing import TYPE_CHECKING, Any, TypeVar, Optional
 from uuid import UUID
 
-from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin, DataObjectMixinDictType
 from ResSimpy.FileOperations.File import File
 from ResSimpy.DataModelBaseClasses.NetworkObject import NetworkObject
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
@@ -76,7 +76,7 @@ class AddObjectOperations:
 
     @staticmethod
     def get_and_write_new_header(additional_headers: list[str],
-                                 object_properties: dict[str, None | str | float | int],
+                                 object_properties: DataObjectMixinDictType,
                                  file_content: list[str], index: int,
                                  nexus_mapping: dict[str, tuple[str, type]], file: File) -> \
             tuple[int, list[str], list[str]]:
@@ -85,7 +85,7 @@ class AddObjectOperations:
 
         Args:
             additional_headers (list[str]): New headers required for the objects new columns.
-            object_properties (dict[str, None | str | float | int]): dictionary containing new attributes of the object.
+            object_properties (DataObjectMixinDictType): dictionary containing new attributes of the object.
             file_content (list[str]): flattened file content as a list of strings.
             index (int): index to start reading the new headers from.
             nexus_mapping (dict[str, tuple[str, type]]): dictionary controlling the mapping from keyword to attribute.
@@ -161,13 +161,13 @@ class AddObjectOperations:
             return -1
 
     def write_out_new_table_containing_object(self, obj_date: str,
-                                              object_properties: dict[str, None | str | float | int],
+                                              object_properties: DataObjectMixinDictType,
                                               date_found: bool, new_obj: Any) -> tuple[list[str], int]:
         """Writes out the existing table for an object being added at a new time stamp.
 
         Args:
             obj_date (str): date for the object to be added at.
-            object_properties (dict[str, None | str | float | int]): dictionary containing new attributes of the object.
+            object_properties (DataObjectMixinDictType): dictionary containing new attributes of the object.
             date_found (bool): Whether a new TIME card is required or not.
             new_obj (Any): The object getting added that requires the new table to represent it.
 
@@ -193,7 +193,7 @@ class AddObjectOperations:
         return new_table_as_list, new_obj_index
 
     @staticmethod
-    def check_name_date(object_properties: dict[str, None | str | float | int]) -> tuple[str, str]:
+    def check_name_date(object_properties: DataObjectMixinDictType) -> tuple[str, str]:
         """Checks for the presence of a name and a date in the additional object properties provided."""
         name = object_properties.get('name', None)
         if name is None:
@@ -209,7 +209,7 @@ class AddObjectOperations:
         return name, date
 
     def add_object_to_file(self, date: str, file_as_list: list[str], file_to_add_to: File, new_object: T,
-                           object_properties: dict[str, None | str | float | int], skip_reading_headers: bool = False) \
+                           object_properties: DataObjectMixinDictType, skip_reading_headers: bool = False) \
             -> None:
         """Finds where the object should be added based on the date and existing tables.
 
@@ -219,7 +219,7 @@ class AddObjectOperations:
             file_to_add_to (NexusFile): file to add the new text to.
             new_object (Any): an object with a to_dict, table_header, table_footer, get_keyword_mapping and to_string
             methods.
-            object_properties (dict[str, None | str | float | int]): dictionary containing new attributes of the object.
+            object_properties (DataObjectMixinDictType): dictionary containing new attributes of the object.
             skip_reading_headers (bool): if True skips reading the headers and just adds the new object to the file.
             Used for when objects do not have header tables.
         """
@@ -309,12 +309,12 @@ class AddObjectOperations:
         file_to_add_to.add_to_file_as_list(additional_content=additional_content, index=insert_line_index,
                                            additional_objects=new_object_ids)
 
-    def add_network_obj(self, node_to_add: dict[str, None | str | float | int], obj_type: type[U],
+    def add_network_obj(self, node_to_add: DataObjectMixinDictType, obj_type: type[U],
                         network: NexusNetwork) -> U:
         """Add new node to the nexus network file.
 
         Args:
-            node_to_add(dict[str, None | str | float | int]): dictionary taking all the properties for the new node.
+            node_to_add(DataObjectMixinDictType): dictionary taking all the properties for the new node.
             obj_type(type [U]): type of object to add to the file.
             network(NexusNetwork): network that the new nodes are part of.
         """

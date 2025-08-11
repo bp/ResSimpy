@@ -10,6 +10,7 @@ from typing import Sequence, Optional, TYPE_CHECKING
 
 import pandas as pd
 
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.FileOperations.File import File
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
@@ -126,38 +127,38 @@ class NexusNodes(Nodes):
             return
         self._nodes.extend(additional_list)
 
-    def remove(self, node_to_remove: dict[str, None | str | float | int] | UUID) -> None:
+    def remove(self, node_to_remove: DataObjectMixinDictType | UUID) -> None:
         """Remove a node from the network based on the properties matching a dictionary or id.
 
         Args:
-            node_to_remove (UUID | dict[str, None | str | float | int]): UUID of the node to remove or a dictionary \
+            node_to_remove (UUID | DataObjectMixinDictType): UUID of the node to remove or a dictionary \
             with sufficient matching parameters to uniquely identify a node
 
         """
         self.__remove_object_operations.remove_object_from_network_main(
             node_to_remove, self._network_element_name, self._nodes)
 
-    def add(self, node_to_add: dict[str, None | str | float | int]) -> None:
+    def add(self, node_to_add: DataObjectMixinDictType) -> None:
         """Adds a node to a network, taking a dictionary with properties for the new node.
 
         Args:
-            node_to_add (dict[str, None | str | float | int]): dictionary taking all the properties for the new node.
+            node_to_add (DataObjectMixinDictType): dictionary taking all the properties for the new node.
             Requires date and a node name.
         """
         new_object = self.__add_object_operations.add_network_obj(node_to_add, NexusNode, self.__parent_network)
         self._add_to_memory([new_object])
 
-    def modify(self, node_to_modify: dict[str, None | str | float | int],
-               new_properties: dict[str, None | str | float | int]) -> None:
+    def modify(self, node_to_modify: DataObjectMixinDictType,
+               new_properties: DataObjectMixinDictType) -> None:
         """Modifies an existing node based on a matching dictionary of properties.
 
         Partial matches allowed if precisely 1 matching node is found. Updates the properties with properties in the
         new_properties dictionary.
 
         Args:
-            node_to_modify (dict[str, None | str | float | int]): dictionary containing attributes to match in the
+            node_to_modify (DataObjectMixinDictType): dictionary containing attributes to match in the
             existing node set.
-            new_properties (dict[str, None | str | float | int]): properties to switch to in the new node
+            new_properties (DataObjectMixinDictType): properties to switch to in the new node
         """
         self.__parent_network.get_load_status()
 
