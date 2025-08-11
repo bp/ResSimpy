@@ -17,13 +17,13 @@ from ResSimpy.Nexus.runcontrol_operations import SimControls
                 'PORTYPE': ['MATRIX', 'MATRIX', 'FRACTURE', 'FRACTURE']
             }), auto_distribute=None),
             """GRIDTOPROC
-             GRID  PROCESS PORTYPE 
-            1     1          MATRIX
-            2     2          MATRIX
-            3     3        FRACTURE
-            4     4        FRACTURE
-            ENDGRIDTOPROC
-            """
+ GRID  PROCESS PORTYPE 
+1     1          MATRIX
+2     2          MATRIX
+3     3        FRACTURE
+4     4        FRACTURE
+ENDGRIDTOPROC
+"""
     ),
     (
             GridToProc(grid_to_proc_table=None, auto_distribute='GRIDBLOCKS'),
