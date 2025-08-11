@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 import warnings
-from dataclasses import dataclass
 from datetime import datetime, timedelta
 from functools import cmp_to_key
 from typing import Sequence, TYPE_CHECKING
 
-import pandas as pd
 
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
@@ -19,37 +17,6 @@ from ResSimpy.DataModelBaseClasses.SolverParameter import SolverParameter
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
-
-
-@dataclass
-class GridToProc:
-    """Class for storing the GRIDTOPROC table information from the Options file."""
-    grid_to_proc_table: None | pd.DataFrame = None
-    auto_distribute: None | str = None
-
-    @property
-    def table_header(self) -> str:
-        """Start of the GRIDTOPROC definition table."""
-        return 'GRIDTOPROC'
-
-    @property
-    def table_footer(self) -> str:
-        """End of the GRIDTOPROC definition table."""
-        return 'END' + self.table_header
-
-    def get_number_of_processors(self) -> int:
-        """Returns the number of processors to use for the simulation.
-
-        Returns:
-        -------
-            int: number of processors to use for the simulation
-        """
-        if self.grid_to_proc_table is None:
-            return 0
-        if 'PROCESS' in self.grid_to_proc_table.columns:
-            return self.grid_to_proc_table['PROCESS'].max()
-        else:
-            return 0
 
 
 class SimControls:
