@@ -1145,3 +1145,15 @@ class NexusSimulator(Simulator):
         )
         self.model_files.options_file = new_options_file
         self._options.file = new_options_file
+
+    def set_sim_controls(self, sim_controls: SimControls) -> None:
+        """Sets the simulation controls for the simulator.
+
+        Args:
+            sim_controls (SimControls): An instance of SimControls to set.
+        """
+        if not isinstance(sim_controls, SimControls):
+            raise TypeError("sim_controls must be an instance of SimControls")
+        self._sim_controls = sim_controls
+        # ensure the model is correctly set in sim_controls
+        setattr(self._sim_controls, '_SimControls__model', self)

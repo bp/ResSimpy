@@ -45,8 +45,7 @@ class NexusSolverParameters(SolverParameters):
             raise ValueError('No solver parameters found.')
         return self.__solver_parameters
 
-    @solver_parameters.setter
-    def solver_parameters(self, value: list[NexusSolverParameter]) -> None:
+    def set_solver_parameters(self, value: list[NexusSolverParameter]) -> None:
         """Sets solver parameters for this instance.
 
         Args:

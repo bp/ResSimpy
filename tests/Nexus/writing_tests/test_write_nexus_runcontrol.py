@@ -74,4 +74,10 @@ def test_sim_controls_to_string():
                           solver_reservoir_cycle_length=11.0,
                           ),
      ]
-    solver_params = NexusSolverParameters('', )
+    solver_params = NexusSolverParameters(model)
+    solver_params.set_solver_parameters(solver_param_list)
+    
+    sim_controls.set_solver_parameters(solver_params)
+    
+    model.set_sim_controls(sim_controls)
+    expected_output = """"""
