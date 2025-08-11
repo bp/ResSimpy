@@ -1,8 +1,8 @@
 """Enum representing the different timestepping and solver methods."""
-from enum import Enum
+from enum import StrEnum
 
 
-class TimeSteppingMethod(str, Enum):
+class TimeSteppingMethod(StrEnum):
     """Enum representing the different timestepping and solver methods."""
-    implicit = 'IMPLICIT'
-    impes = 'IMPES'
+    IMPLICIT = 'IMPLICIT'
+    IMPES = 'IMPES'

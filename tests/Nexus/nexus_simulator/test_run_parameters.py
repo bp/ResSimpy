@@ -40,7 +40,7 @@ class TestNexusSolverParameters:
                                    dt_min=0.001,
                                    dt_max=60.0,
                                    dt_max_increase=8.0,
-                                   timestepping_method=TimeSteppingMethod.implicit,
+                                   timestepping_method=TimeSteppingMethod.IMPLICIT,
                                    ),
               ]),
 
@@ -98,7 +98,7 @@ class TestNexusSolverParameters:
                                    dt_min=0.001,
                                    dt_max=60.0,
                                    dt_max_increase=8.0,
-                                   timestepping_method=TimeSteppingMethod.implicit,
+                                   timestepping_method=TimeSteppingMethod.IMPLICIT,
                                    ),
               NexusSolverParameter(date='01/05/2020',
                                    dt_min=10.0,
@@ -176,7 +176,7 @@ class TestNexusSolverParameters:
                                    dt_min=0.001,
                                    dt_max=60.0,
                                    dt_max_increase=8.0,
-                                   timestepping_method=TimeSteppingMethod.implicit,
+                                   timestepping_method=TimeSteppingMethod.IMPLICIT,
                                    ),
               NexusSolverParameter(date='01/05/2020',
                                    dt_min=10.0,
@@ -408,7 +408,7 @@ class TestNexusSolverParameters:
                                                 dt_min=0.001,
                                                 dt_max=60.0,
                                                 dt_max_increase=8.0,
-                                                timestepping_method=TimeSteppingMethod.implicit,
+                                                timestepping_method=TimeSteppingMethod.IMPLICIT,
                                                 )]
         # Act
         result = nexus_sim.sim_controls.solver_parameters

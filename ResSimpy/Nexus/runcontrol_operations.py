@@ -10,6 +10,7 @@ import pandas as pd
 
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
+from ResSimpy.Nexus.DataModels.nexus_grid_to_proc import GridToProc
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
 from ResSimpy.Nexus.NexusSolverParameters import NexusSolverParameters
@@ -461,6 +462,17 @@ class SimControls:
             self._load_options_file()
         return self.__grid_to_proc
 
+    def set_grid_to_proc(self, grid_to_proc: GridToProc) -> None:
+        """Sets the GridToProc object.
+
+        Args:
+            grid_to_proc (GridToProc): The GridToProc object to set.
+        """
+        if not isinstance(grid_to_proc, GridToProc):
+            raise TypeError("grid_to_proc must be an instance of GridToProc")
+        self.__grid_to_proc = grid_to_proc
+        self.__number_of_processors = grid_to_proc.get_number_of_processors()
+
     @property
     def solver_parameters(self) -> Sequence[SolverParameter]:
         """Returns the NexusSolverParameters object.
@@ -470,3 +482,13 @@ class SimControls:
             NexusSolverParameters: NexusSolverParameters object
         """
         return self.__solver_parameters.solver_parameters
+
+    def set_solver_parameters(self, solver_parameters: NexusSolverParameters) -> None:
+        """Sets the NexusSolverParameters object.
+
+        Args:
+            solver_parameters (NexusSolverParameters): The NexusSolverParameters object to set.
+        """
+        if not isinstance(solver_parameters, NexusSolverParameters):
+            raise TypeError("solver_parameters must be an instance of NexusSolverParameters")
+        self.__solver_parameters = solver_parameters

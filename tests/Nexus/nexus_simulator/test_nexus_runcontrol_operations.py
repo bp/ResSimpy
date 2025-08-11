@@ -5,6 +5,7 @@ from pytest_mock import MockerFixture
 from ResSimpy.Enums.FrequencyEnum import FrequencyEnum
 from ResSimpy.Enums.OutputType import OutputType
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.DataModels.nexus_grid_to_proc import GridToProc
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusReporting import NexusReporting
 from ResSimpy.Nexus.DataModels.NexusReportingRequests import NexusOutputRequest, NexusOutputContents
@@ -12,7 +13,7 @@ from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from tests.multifile_mocker import mock_multiple_files
 
 from tests.Nexus.nexus_simulator.test_nexus_simulator import mock_multiple_opens
-from ResSimpy.Nexus.runcontrol_operations import SimControls, GridToProc
+from ResSimpy.Nexus.runcontrol_operations import SimControls
 from tests.utility_for_tests import get_fake_nexus_simulator
 
 

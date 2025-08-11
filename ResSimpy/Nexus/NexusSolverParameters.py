@@ -47,7 +47,7 @@ class NexusSolverParameters(SolverParameters):
 
     @solver_parameters.setter
     def solver_parameters(self, value: list[NexusSolverParameter]) -> None:
-        """Sets solver parameters for this instance and returns none.
+        """Sets solver parameters for this instance.
 
         Args:
             value(list[NexusSolverParameter]): list of solver parameters.
@@ -104,9 +104,9 @@ class NexusSolverParameters(SolverParameters):
                 timestep_method = fo.get_expected_token_value('METHOD', line, file_list=self.file_content)
                 # convert the string to the enum
                 if timestep_method.lower() == 'implicit':
-                    timestep_method_enum = TimeSteppingMethod.implicit
+                    timestep_method_enum = TimeSteppingMethod.IMPLICIT
                 else:
-                    timestep_method_enum = TimeSteppingMethod.impes
+                    timestep_method_enum = TimeSteppingMethod.IMPES
                 # set the timestepping_method in the object
                 solver_parameter_for_timestep.timestepping_method = timestep_method_enum
 
