@@ -30,6 +30,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from ResSimpy.Nexus.NexusReporting import NexusReporting
 from ResSimpy.Nexus.NexusWells import NexusWells
+from ResSimpy.Nexus.nexus_model_file_generator import NexusModelFileGenerator
 from ResSimpy.Nexus.runcontrol_operations import SimControls
 from ResSimpy.Nexus.logfile_operations import Logging
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
@@ -695,9 +696,9 @@ class NexusSimulator(Simulator):
                                                       model_files=self.model_files)
 
         # Read in gaslift properties from Nexus gaslift method files
-        if self.model_files.gas_lift_files is not None and \
-                len(self.model_files.gas_lift_files) > 0:
-            self._gaslift = NexusGasliftMethods(files=self.model_files.gas_lift_files,
+        if self.model_files.gaslift_files is not None and \
+                len(self.model_files.gaslift_files) > 0:
+            self._gaslift = NexusGasliftMethods(files=self.model_files.gaslift_files,
                                                 model_unit_system=self.default_units,
                                                 model_files=self.model_files)
 
@@ -929,9 +930,111 @@ class NexusSimulator(Simulator):
 
         self.model_files.move_model_files(new_file_path, new_include_file_location, overwrite_files)
 
-    def write_out_new_model(self, new_location: str, new_model_name: str) -> None:
-        """Not implemented for Nexus yet."""
-        raise NotImplementedError("Not Implemented Yet")
+    def write_out_new_model(self, new_location: str, new_model_name: str,
+                            new_include_file_location: str | None = None,
+                            overwrite_files: bool = True) -> None:
+        """Writes out a new model at a new location with a new_model_name.fcs.
+
+        This method is used for creating an entirely new model based on the ResSimpy internal memory objects and will
+        not include any comments or other content that ResSimpy does not yet interpret. Often used with the
+        "assume_loaded" attribute set to True for creating new NexusSimulator instances from scratch.
+
+        Args:
+            new_location (str): The location to write the new model to.
+            new_model_name (str): The name of the new model without the .fcs extension.
+            new_include_file_location (str | None): Optional path to save include files to. If None, defaults to
+                'include_files' in the new_location.
+            overwrite_files (bool): Overwrite files if they already exist. Defaults to True.
+
+        Example usage:
+        >>> from ResSimpy import NexusSimulator
+        >>> nexus_sim = NexusSimulator(origin='path/to/original_model.fcs', assume_loaded=True)
+        >>> # Modify the nexus_sim object as needed
+        >>> nexus_sim.write_out_new_model(new_location='path/to/new_model_directory',
+        ... new_model_name='new_model_name', new_include_file_location='optional_include_path')
+        """
+
+        def update_model_file(file: NexusFile, new_content: str,
+                              new_folder_path: str, new_name: str, suffix: str) -> None:
+            """Updates a model file with new content and location."""
+            file.file_content_as_list = new_content.splitlines(keepends=True)
+            file.location = os.path.join(new_folder_path, new_name + suffix)
+            file.origin = new_model_path
+            file.write_to_file(new_file_path=file.location, overwrite_file=overwrite_files)
+
+        # ensure the full path is made
+        if new_include_file_location is None:
+            new_include_file_location = os.path.join(new_location, 'include_files')
+        elif not os.path.isabs(new_include_file_location):
+            new_include_file_location = os.path.join(new_location, new_include_file_location)
+        new_model_name = new_model_name.replace('.fcs', '')  # remove .fcs if it exists
+        new_model_path = os.path.join(new_location, new_model_name + '.fcs')
+
+        if not os.path.exists(new_include_file_location):
+            # make the folders if they don't already exist
+            os.makedirs(new_include_file_location)
+
+        model_file_generator = NexusModelFileGenerator(model=self, model_name=new_model_name)
+
+        # update the content in the surface file:
+        if self.model_files.surface_files is not None and self.model_files.surface_files.get(1, None) is not None:
+            surface_file = self.model_files.surface_files[1]
+        else:
+            # create an empty surface file if it doesn't exist
+            surface_file = NexusFile(file_content_as_list=[], location='', origin=None)
+            self.model_files.surface_files = {1: surface_file}
+        surface_content = model_file_generator.output_surface_section()
+        update_model_file(file=surface_file, new_content=surface_content, new_folder_path=new_include_file_location,
+                          new_name=new_model_name, suffix='_surface.dat')
+
+        # update the structured grid file
+        warnings.warn('Structured grid file is not yet implemented in NexusSimulator.write_out_new_model. ')
+
+        # update the wells file
+        warnings.warn('Wells file is not yet implemented in NexusSimulator.write_out_new_model. ')
+
+        # update the run control file
+        warnings.warn('Run control file is not yet implemented in NexusSimulator.write_out_new_model. ')
+
+        # update the options file
+        warnings.warn('Options file is not yet implemented in NexusSimulator.write_out_new_model. ')
+
+        # update each of the dynamic properties files
+        dynamic_props = {
+            'pvt': (self.pvt, self.model_files.pvt_files),
+            'separator': (self.separator, self.model_files.separator_files),
+            'water': (self.water, self.model_files.water_files),
+            'equil': (self.equil, self.model_files.equil_files),
+            'rock': (self.rock, self.model_files.rock_files),
+            'relperm': (self.relperm, self.model_files.relperm_files),
+            'valve': (self.valve, self.model_files.valve_files),
+            'aquifer': (self.aquifer, self.model_files.aquifer_files),
+            'hyd': (self.hydraulics, self.model_files.hyd_files),
+            'gaslift': (self.gaslift, self.model_files.gaslift_files)
+        }
+
+        for suffix, (prop, dyn_files) in dynamic_props.items():
+            for method_no, method in prop.inputs.items():
+                file_name = f"{new_model_name}_{suffix}_{method_no}.dat"
+                method_file_path = os.path.join(new_include_file_location, file_name)
+                new_dyn_file = NexusFile(
+                        file_content_as_list=method.to_string().splitlines(keepends=True),
+                        location=method_file_path,
+                        origin=new_model_path
+                    )
+                if dyn_files is None:
+                    # ensure the dynamic files collection exists and if it doesn't then set it
+                    files_collection_name = f"{suffix}_files"
+                    self.model_files.__setattr__(files_collection_name, {method_no: new_dyn_file})
+                else:
+                    dyn_files[method_no] = new_dyn_file
+                method.write_to_file(new_file_path=method_file_path, overwrite_file=False)
+
+        # create new fcsfile
+        fcs_content = model_file_generator.generate_base_model_file_contents()
+        self.model_files.file_content_as_list = fcs_content.splitlines(keepends=True)
+        self.model_files.location = new_model_path
+        self.model_files.write_to_file(new_file_path=new_model_path, overwrite_file=overwrite_files)
 
     @property
     def summary(self) -> str:

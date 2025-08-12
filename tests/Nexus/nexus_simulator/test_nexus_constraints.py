@@ -280,11 +280,26 @@ ENDCONSTRAINTS
 ''',
      ({'date': '01/04/2024', 'name': 'well1', 'max_avg_comp_dp': 10.24, 'max_reservoir_total_fluids_rate': None,
        'max_qmult_total_reservoir_rate': None, 'min_surface_oil_rate': 25.2, 'max_surface_oil_rate': 4000.49,
-       'max_surface_gas_rate': 12222.26, 'max_watercut': 0.95, 'active_node': True, 'unit_system': UnitSystem.ENGLISH},))
+       'max_surface_gas_rate': 12222.26, 'max_watercut': 0.95, 'active_node': True, 'unit_system': UnitSystem.ENGLISH},)
+     ),
+    ("""
+CONSTRAINTS
+
+	well1	DPBHMX 		ZONE 1	2000 
+
+	well1	DPBHMX 		ZONE 2	4000
+	
+	well2   DPBHMX 25.62
+
+ENDCONSTRAINTS
+""",
+     ({'date': '01/01/2019', 'name': 'well1', 'max_comp_dp_by_zone': {1: 2000.0, 2: 4000.0}, 'unit_system': UnitSystem.ENGLISH},
+      {'date': '01/01/2019', 'name': 'well2', 'max_comp_dp': 25.62, 'unit_system': UnitSystem.ENGLISH}))
 ], ids=['basic_test', 'Change in Time', 'more Keywords', 'constraint table', 'multiple constraints on same well',
         'inline before table', 'QMULT', 'Clearing Constraints', 'activate keyword', 'GORLIM_drawdowncards',
         'MULT keyword with a number after it', 'loading in pressure', 'line continuation',
-        'line continuation with whitespace', 'QALLMAX None values',  'two constraint tables 1 date same well'])
+        'line continuation with whitespace', 'QALLMAX None values',  'two constraint tables 1 date same well',
+        'zone constraints'])
 def test_load_constraints(mocker, file_contents, expected_content):
     # Arrange
     start_date = '01/01/2019'
@@ -746,3 +761,4 @@ ENDCONSTRAINTS
     # Assert
     assert result_1 == expected_result_1
     assert result_2 == expected_result_2
+

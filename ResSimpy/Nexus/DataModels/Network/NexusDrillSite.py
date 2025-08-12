@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.DataModelBaseClasses.DrillSite import DrillSite
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
@@ -19,7 +20,7 @@ class NexusDrillSite(DrillSite):
 
     def __init__(self, unit_system: Optional[UnitSystem] = None, name: Optional[str] = None, date: Optional[str] = None,
                  date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
-                 max_rigs: int = 1, properties_dict: Optional[dict[str, None | int | str | float]] = None)\
+                 max_rigs: int = 1, properties_dict: Optional[DataObjectMixinDictType] = None)\
             -> None:
         """Initialises the NexusDrill class.
 

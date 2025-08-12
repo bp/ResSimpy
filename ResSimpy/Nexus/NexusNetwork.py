@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional, Any, Literal
 
 import ResSimpy.FileOperations.file_operations as fo
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.DataModelBaseClasses.Network import Network
 from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.Nexus.DataModels.Network.NexusAction import NexusAction
@@ -378,7 +379,7 @@ class NexusNetwork(Network):
 
         return constraint_names_to_add
 
-    def find_network_element_with_dict(self, name: str, search_dict: dict[str, None | float | str | int],
+    def find_network_element_with_dict(self, name: str, search_dict: DataObjectMixinDictType,
                                        network_element_type: Literal[
                                            'nodes', 'connections', 'well_connections', 'wellheads', 'wellbores',
                                            'constraints', 'targets', 'drills', 'drill_sites', 'stations',

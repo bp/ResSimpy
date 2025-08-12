@@ -4,6 +4,8 @@ from abc import ABC
 from uuid import UUID
 
 import pandas as pd
+
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.Enums.HowEnum import OperationEnum
 
 from ResSimpy.DataModelBaseClasses.Well import Well
@@ -57,7 +59,7 @@ class Wells(ABC):
         """Returns wells as pandas data frame."""
         raise NotImplementedError("Implement this in the derived class")
 
-    def modify(self, well_name: str, completion_properties_list: list[dict[str, None | float | int | str]],
+    def modify(self, well_name: str, completion_properties_list: list[DataObjectMixinDictType],
                how: OperationEnum = OperationEnum.ADD) -> None:
         """Modifies a completion in a named well using a list of properties. How enum determines if the completions are
         added, removed or modified.
@@ -73,7 +75,7 @@ class Wells(ABC):
         """
         raise NotImplementedError("Implement this in the derived class")
 
-    def add_completion(self, well_name: str, completion_properties: dict[str, None | float | int | str],
+    def add_completion(self, well_name: str, completion_properties: DataObjectMixinDictType,
                        preserve_previous_completions: bool = True, comments: Optional[str] = None) -> None:
         """Adds completion to an existing wellspecfile.
 
@@ -90,7 +92,7 @@ class Wells(ABC):
         raise NotImplementedError("Implement this in the derived class")
 
     def remove_completion(self, well_name: str,
-                          completion_properties: Optional[dict[str, None | float | int | str]] = None,
+                          completion_properties: Optional[DataObjectMixinDictType] = None,
                           completion_id: Optional[UUID] = None) -> None:
         """Well name to remove the completion from.
 
@@ -104,8 +106,8 @@ class Wells(ABC):
         """
         raise NotImplementedError("Implement this in the derived class")
 
-    def modify_completion(self, well_name: str, properties_to_modify: dict[str, None | float | int | str],
-                          completion_to_change: Optional[dict[str, None | float | int | str]] = None,
+    def modify_completion(self, well_name: str, properties_to_modify: DataObjectMixinDictType,
+                          completion_to_change: Optional[DataObjectMixinDictType] = None,
                           completion_id: Optional[UUID] = None,
                           comments: Optional[str] = None) -> None:
         """Well name to modify completion from.

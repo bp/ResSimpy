@@ -1,12 +1,12 @@
 from dataclasses import dataclass
-from abc import ABC
 from typing import Mapping
 
 from ResSimpy.DataModelBaseClasses.DynamicProperty import DynamicProperty
+from ResSimpy.DataModelBaseClasses.DynamicPropertyContainer import DynamicPropertyContainer
 
 
 @dataclass(kw_only=True)
-class Hydraulics(ABC):
+class Hydraulics(DynamicPropertyContainer):
     """The abstract base class for a collection of hydraulics inputs.
 
     Attributes:

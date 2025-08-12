@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from ResSimpy.DataModelBaseClasses.Constraint import Constraint
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
@@ -114,6 +115,7 @@ class NexusConstraint(Constraint):
     max_reverse_reservoir_hc_rate: Optional[float] = None
     max_avg_comp_dp: Optional[float] = None
     max_comp_dp: Optional[float] = None
+    max_comp_dp_by_zone: Optional[dict[int, float]] = None
     min_pressure: Optional[float] = None
     max_pressure: Optional[float] = None
     max_wag_water_pressure: Optional[float] = None
@@ -163,7 +165,7 @@ class NexusConstraint(Constraint):
     clear_alq: Optional[bool] = None
     clear_p: Optional[bool] = None
 
-    def __init__(self, properties_dict: Optional[dict[str, None | int | str | float | UnitSystem]] = None,
+    def __init__(self, properties_dict: Optional[DataObjectMixinDictType] = None,
                  date: Optional[str] = None, date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None, name: Optional[str] = None, well_name: Optional[str] = None,
                  max_surface_oil_rate: Optional[float] = None, max_surface_gas_rate: Optional[float] = None,
@@ -223,7 +225,8 @@ class NexusConstraint(Constraint):
                  max_gor_perf: Optional[float] = None, max_gor_perfplus: Optional[float] = None,
                  max_lgr: Optional[float] = None, max_lgr_plug: Optional[float] = None,
                  max_lgr_plug_plus: Optional[float] = None, max_lgr_perf: Optional[float] = None,
-                 max_lgr_perfplus: Optional[float] = None) -> None:
+                 max_lgr_perfplus: Optional[float] = None, max_comp_dp_by_zone: Optional[dict[int, float]] = None) \
+            -> None:
         r"""Initialises the NexusConstraint class.
 
         Args:
@@ -257,6 +260,8 @@ class NexusConstraint(Constraint):
             max_reverse_reservoir_hc_rate (Optional[float]): Max reverse reservoir hc rate (QHCMAX-).
             max_avg_comp_dp (Optional[float]): Specifies average drawdown/build up for well (DPBHAVG).
             max_comp_dp (Optional[float]): Specifies maximum drawdown/build up for well (DPBHMX).
+            max_comp_dp_by_zone (Optional[dict[int, float]]): Specifies maximum drawdown/build up for well by zone
+            (DPBHMX).
             min_pressure (Optional[float]): Min pressure (PMIN).
             max_pressure (Optional[float]): Max pressure (PMAX).
             max_wag_water_pressure (Optional[float]): Max wag water pressure (PWMAX).
@@ -410,6 +415,7 @@ class NexusConstraint(Constraint):
         self.clear_limit = clear_limit
         self.clear_alq = clear_alq
         self.clear_p = clear_p
+        self.max_comp_dp_by_zone = max_comp_dp_by_zone
 
         super().__init__(_date_format=date_format, _start_date=start_date, _unit_system=unit_system, name=name,
                          max_surface_oil_rate=max_surface_oil_rate,
@@ -536,6 +542,7 @@ class NexusConstraint(Constraint):
             'QGAS': ('qmult_gas_rate', float),
             'DPBHAVG': ('max_avg_comp_dp', float),
             'DPBHMX': ('max_comp_dp', float),
+            'DPBHMX_ZONE': ('max_comp_dp_by_zone', dict[int, float]),
         }
         return nexus_mapping
 
@@ -601,14 +608,19 @@ class NexusConstraint(Constraint):
         }
         return nexus_mapping
 
-    def update(self, new_data: dict[str, None | int | str | float | UnitSystem], nones_overwrite: bool = False) -> None:
+    def update(self, new_data: dict[str, None | int | str | float | UnitSystem | dict],
+               nones_overwrite: bool = False) -> None:
         """Updates attributes in the object based on the dictionary provided."""
         protected_attributes = ['date', 'date_format', 'start_date', 'unit_system']
         for key, value in new_data.items():
             modified_key = key
             if key in protected_attributes:
                 modified_key = '_' + key
-            if value is not None or nones_overwrite:
+            if key == 'max_comp_dp_by_zone':
+                # Special case for max_comp_dp_by_zone which is a dict[int, float]
+                if isinstance(value, dict):
+                    getattr(self, 'max_comp_dp_by_zone', {}).update(value)
+            elif value is not None or nones_overwrite:
                 setattr(self, modified_key, value)
 
     def to_table_line(self, headers: list[str]) -> str:
@@ -638,6 +650,10 @@ class NexusConstraint(Constraint):
                 continue
             elif value and attribute in clear_attributes:
                 constraint_string += ' ' + attribute
+            elif attribute == 'DPBHMX_ZONE' and isinstance(value, dict):
+                # Special case for DPBHMX_ZONE which is a dict[int, float]
+                for zone, zone_value in value.items():
+                    constraint_string += f' {attribute} {zone} {zone_value}'
             else:
                 constraint_string += (' ' + attribute + ' ' + str(value))
 

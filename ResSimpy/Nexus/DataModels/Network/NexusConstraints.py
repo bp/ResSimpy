@@ -14,6 +14,7 @@ import pandas as pd
 import re
 
 from ResSimpy.DataModelBaseClasses.Constraint import Constraint
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.GenericContainerClasses.Constraints import Constraints
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
@@ -141,7 +142,7 @@ class NexusConstraints(Constraints):
             existing_constraints.extend(constraints)
             self._constraints[name] = existing_constraints
 
-    def find_by_properties(self, object_name: str, constraint_dict: dict[str, None | float | str | int]) -> \
+    def find_by_properties(self, object_name: str, constraint_dict: DataObjectMixinDictType) -> \
             NexusConstraint:
         """Finds a uniquely matching constraint from a given set of properties in a dictionary of attributes.
 
@@ -164,7 +165,7 @@ class NexusConstraints(Constraints):
             raise TypeError(f'Wrong object type returned expected NexusConstraint, '
                             f'instead returned {type(found_object_from_network)}')
 
-    def remove(self, constraint_dict: Optional[dict[str, None | float | str | int]] = None,
+    def remove(self, constraint_dict: Optional[DataObjectMixinDictType] = None,
                constraint_id: Optional[UUID] = None) -> None:
         """Remove a constraint based on closest matching constraint, requires node name and date.
 
@@ -261,7 +262,7 @@ class NexusConstraints(Constraints):
                                     f'with an existing constraint that has: {constraint_id=}')
         return surface_file
 
-    def add(self, constraint_to_add: dict[str, None | float | int | str | UnitSystem] | Constraint,
+    def add(self, constraint_to_add: DataObjectMixinDictType | Constraint,
             comments: str | None = None) -> None:
         """Adds a constraint to the network and corresponding surface file.
 
@@ -400,8 +401,8 @@ class NexusConstraints(Constraints):
                 break
 
     def modify(self, name: str,
-               current_constraint: dict[str, None | float | int | str] | Constraint,
-               new_constraint_props: dict[str, None | float | int | str | UnitSystem] | Constraint,
+               current_constraint: DataObjectMixinDictType | Constraint,
+               new_constraint_props: DataObjectMixinDictType | Constraint,
                comments: Optional[str] = None) \
             -> None:
         """Modify an existing constraint.
@@ -414,11 +415,10 @@ class NexusConstraints(Constraints):
             with enough attributes to identify a unique existing constraint in the model.
             new_constraint_props (dict[str, None | float | int | str] | Constraint): dictionary or constraint to \
             update the constraint with.
-            comments (Optional[str]): ??
+            comments (Optional[str]): comments to add inline to the constraint line in the surface file.
         """
 
-        def clean_constraint_inputs(constraint: dict[str, None | float | int | str] | Constraint) -> \
-                dict[str, None | float | int | str]:
+        def clean_constraint_inputs(constraint: DataObjectMixinDictType | Constraint) -> DataObjectMixinDictType:
             """Cleans up an input ensuring consistent type is returned."""
             if isinstance(constraint, Constraint):
                 cleaned_dict = constraint.to_dict()

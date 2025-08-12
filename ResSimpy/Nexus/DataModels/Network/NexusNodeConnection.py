@@ -2,6 +2,8 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
+
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.DataModelBaseClasses.NodeConnection import NodeConnection
@@ -60,7 +62,7 @@ class NexusNodeConnection(NodeConnection):
     friction_pressure_gradient_mult: Optional[float] = None
     acceleration_pressure_gradient_mult: Optional[float] = None
 
-    def __init__(self, properties_dict: None | dict[str, None | int | str | float] = None, date: Optional[str] = None,
+    def __init__(self, properties_dict: None | DataObjectMixinDictType = None, date: Optional[str] = None,
                  date_format: Optional[DateFormat] = None, start_date: Optional[str] = None, name: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None, bat_method: Optional[int] = None,
                  elevation_profile: Optional[str] = None, measured_depth_in: Optional[float] = None,
