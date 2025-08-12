@@ -7,6 +7,7 @@ from typing import Optional, Sequence
 from ResSimpy.DataModelBaseClasses.Completion import Completion
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Enums.WellTypeEnum import WellType
+from ResSimpy.Time.ISODateTime import ISODateTime
 
 
 @dataclass
@@ -139,3 +140,7 @@ class Well(ABC):
                     events.append((completion.date, (completion.depth_to_top, completion.depth_to_bottom)))
 
         return events
+
+    def to_string_for_date(self, date: ISODateTime) -> str:
+        """Returns a string representation of the well for the given date."""
+        raise NotImplementedError("Implement this in the derived class")

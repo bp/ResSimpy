@@ -663,7 +663,7 @@ def test_remove_completion_from_memory(mocker):
 
     # Assert
     assert remove_well == expected_result
-
+    
 
 def test_modify_completion(mocker):
     # Arrange
@@ -1008,11 +1008,15 @@ def test_wells_modify(mocker):
       ' ! test user comments\n', 'TIME 01/06/2020\n', 'WELLSPEC well1\n', 'IW JW L RADB\n', '2 3 4 555.2\n',
       '4 5 6 7.5\n', '\n'],
      ),
+    (['TIME 01/01/2020', 'WELLSPEC well_not_to_add_to', 'iw  jw   l    RADB', '1  2   3   1.5'],
+     '01/02/2020', True,
+     ['TIME 01/01/2020', 'WELLSPEC well_not_to_add_to', 'iw  jw   l    RADB', '1  2   3   1.5',
+      ' ! test user comments\n','TIME 01/02/2020\n', 'WELLSPEC well1\n', 'IW JW L RADB\n', '4 5 6 7.5\n', '\n'])
 ], ids=['basic_test', 'insert in middle of file', 'No time card for new comp', 'preserve previous completions',
         'No previous well',
         'Not overlapping columns', 'no overlap and multiple rows', 'Time card no comp',
         'comment with not overlapping columns',
-        'comment inline with headers', 'date_after_end_of_file'])
+        'comment inline with headers', 'date_after_end_of_file', 'without_a_well'])
 def test_add_completion_write(mocker, file_as_list, add_perf_date,
                               preserve_previous_completions, expected_result):
     ''' TODO insert into include files

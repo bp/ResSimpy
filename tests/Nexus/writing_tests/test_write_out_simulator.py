@@ -6,6 +6,8 @@ import pytest
 from ResSimpy.Nexus.DataModels.NexusOptions import NexusOptions
 from ResSimpy.Nexus.DataModels.nexus_grid_to_proc import GridToProc
 from ResSimpy.Nexus.runcontrol_operations import SimControls
+from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
+from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator, check_file_read_write_is_correct
 from ResSimpy import NexusSimulator
@@ -168,11 +170,15 @@ class TestWriteOutSimulator:
         sim_controls = SimControls(model=model)
         sim_controls.set_grid_to_proc(grid_to_proc)
         model.set_sim_controls(sim_controls)
-    
-        
+
+        completions = [NexusCompletion(date='01/01/2020', i=20, j=30, k=40, well_radius=0.34, skin=2),
+                       NexusCompletion(date='01/01/2020', i=21, j=31, k=41, well_radius=0.34, skin=2)]
+        model.wells.add_well(name='well1', units=model.default_units, completions=completions, add_to_file=False)
+
         expected_hydraulics_path = os.path.join('/new_path/', 'nexus_files', 'new_model_hyd_1.dat')
         expected_surface_path = os.path.join('/new_path/', 'nexus_files', 'new_model_surface.dat')
         expected_options_path = os.path.join('/new_path/', 'nexus_files', 'new_model_options.dat')
+        expected_wells_path = os.path.join('/new_path/', 'nexus_files', 'new_model_wells.dat')
         expected_fcs_path = os.path.join('/new_path/', 'new_model.fcs')
         
         expected_fcs_contents = f'''DESC Model created with ResSimpy
@@ -190,12 +196,12 @@ ROCK_FILES
 PVT_FILES
 
 RECURRENT_FILES
+    WELLS SET 1 {expected_wells_path}
     SURFACE NETWORK 1 {expected_surface_path}
 
 NET_METHOD_FILES
     HYD METHOD 1 {expected_hydraulics_path}
 '''
-
 
         expected_hydraulics_file_content = '''DESC Hydraulics Data
 ENGLISH
@@ -246,9 +252,26 @@ GRIDTOPROC
 AUTO GRIDBLOCKS
 ENDGRIDTOPROC
 """
+        expected_wells_content = '''TIME 01/01/2020
+        WELLSPEC well1
+        IW JW L SKIN RADW
+        20 30 40 2 0.34
+        21 31 41 2 0.34
+
+        '''
+        
+        expected_wells_content = '''TIME 01/01/2020
+WELLSPEC well1
+IW JW L SKIN RADW
+20 30 40 2 0.34
+21 31 41 2 0.34
+
+'''
+        
         expected_writes = [(expected_surface_path, expected_surface_file_content),
                            (expected_hydraulics_path, expected_hydraulics_file_content),
-                            (expected_options_path, expected_options_content),
+                           (expected_options_path, expected_options_content),
+                           (expected_wells_path, expected_wells_content),
                            (expected_fcs_path, expected_fcs_contents),
                            ]
 

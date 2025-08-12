@@ -11,6 +11,8 @@ from ResSimpy.Enums.HowEnum import OperationEnum
 from ResSimpy.DataModelBaseClasses.Well import Well
 from typing import Sequence, Optional
 
+from ResSimpy.Time.ISODateTime import ISODateTime
+
 
 @dataclass(kw_only=True)
 class Wells(ABC):
@@ -135,6 +137,14 @@ class Wells(ABC):
         set_dates: set[str] = set()
         for well in self.wells:
             set_dates.update(set(well.dates_of_completions))
+
+        return set_dates
+
+    def get_wells_iso_dates(self) -> set[ISODateTime]:
+        """Returns a set of the unique ISO dates in the wellspec file over all wells."""
+        set_dates: set[ISODateTime] = set()
+        for well in self.wells:
+            set_dates.update({x.iso_date for x in well.completions})
 
         return set_dates
 

@@ -113,6 +113,37 @@ class NexusModelFileGenerator:
 
         return full_schedule
 
+    def output_wells_section(self) -> str:
+        """Outputs the wells section of the Nexus model file."""
+        if not self.model.wells._wells_loaded:
+            return ''
+
+        full_wells = ''
+
+        all_well_completions = []
+        all_well_mods = []
+        for well in self.model.wells.get_all():
+            all_well_completions.extend(well.completions)
+            all_well_mods.extend(well.wellmods)
+
+        well_mod_dates = {x.iso_date for x in all_well_mods}
+
+        all_event_dates: set[ISODateTime] = self.model.wells.get_wells_iso_dates()
+        all_event_dates.add(self.model.start_iso_date)
+        all_event_dates.update(well_mod_dates)
+
+        # Sort the dates
+        ordered_all_event_dates = sorted(all_event_dates)
+
+        # Write out all events for each date
+        for date in ordered_all_event_dates:
+            if date != self.model.start_iso_date:
+                full_wells += f"TIME {date.strftime_dateformat(self.model.date_format)}\n"
+            for well in self.model.wells.get_all():
+                full_wells += well.to_string_for_date(date=date)
+
+        return full_wells
+
     def output_options_section(self) -> str:
         """Outputs the options section of the Nexus model file."""
         options = self.model.options.to_string()

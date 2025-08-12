@@ -110,6 +110,7 @@ class NexusSimulator(Simulator):
         if origin is None:
             raise ValueError(f'Origin path to model fcs file is required. Instead got {origin}.')
         self.origin = origin
+        self.assume_loaded: bool = assume_loaded
         self._model_files: FcsNexusFile = FcsNexusFile(location=self.origin, origin=None)
 
         self._start_date: str = '' if start_date is None else start_date.strip()
@@ -132,7 +133,7 @@ class NexusSimulator(Simulator):
         self._pvt_type: PvtType = pvt_type if pvt_type is not None else PvtType.BLACKOIL
         self._eos_details: None | str = eos_details
 
-        self._network: NexusNetwork = NexusNetwork(model=self)
+        self._network: NexusNetwork = NexusNetwork(model=self, assume_loaded=assume_loaded)
         self._wells: NexusWells = NexusWells(self)
         self._grid: Optional[NexusGrid] = None
         self._options: Optional[NexusOptions] = None
@@ -933,7 +934,26 @@ class NexusSimulator(Simulator):
     def write_out_new_model(self, new_location: str, new_model_name: str,
                             new_include_file_location: str | None = None,
                             overwrite_files: bool = True) -> None:
-        """Writes out a new model at a new location with a new_model_name.fcs."""
+        """Writes out a new model at a new location with a new_model_name.fcs.
+
+        This method is used for creating an entirely new model based on the ResSimpy internal memory objects and will
+        not include any comments or other content that ResSimpy does not yet interpret. Often used with the
+        "assume_loaded" attribute set to True for creating new NexusSimulator instances from scratch.
+
+        Args:
+            new_location (str): The location to write the new model to.
+            new_model_name (str): The name of the new model without the .fcs extension.
+            new_include_file_location (str | None): Optional path to save include files to. If None, defaults to
+                'include_files' in the new_location.
+            overwrite_files (bool): Overwrite files if they already exist. Defaults to True.
+
+        Example usage:
+        >>> from ResSimpy import NexusSimulator
+        >>> nexus_sim = NexusSimulator(origin='path/to/original_model.fcs', assume_loaded=True)
+        >>> # Modify the nexus_sim object as needed
+        >>> nexus_sim.write_out_new_model(new_location='path/to/new_model_directory',
+        ... new_model_name='new_model_name', new_include_file_location='optional_include_path')
+        """
 
         def update_model_file(file: NexusFile, new_content: str,
                               new_folder_path: str, new_name: str, suffix: str) -> None:
@@ -972,10 +992,15 @@ class NexusSimulator(Simulator):
         warnings.warn('Structured grid file is not yet implemented in NexusSimulator.write_out_new_model. ')
 
         # update the wells file
-        warnings.warn('Wells file is not yet implemented in NexusSimulator.write_out_new_model. ')
-
-        # update the run control file
-        warnings.warn('Run control file is not yet implemented in NexusSimulator.write_out_new_model. ')
+        if self.model_files.well_files is not None and self.model_files.well_files.get(1, None) is not None:
+            wells_file = self.model_files.well_files[1]
+        else:
+            # create an empty wells file if it doesn't exist
+            wells_file = NexusFile(file_content_as_list=[], location='', origin=None)
+            self.model_files.well_files = {1: wells_file}
+        wells_content = model_file_generator.output_wells_section()
+        update_model_file(file=wells_file, new_content=wells_content, new_folder_path=new_include_file_location,
+                          new_name=new_model_name, suffix='_wells.dat')
 
         # update each of the dynamic properties files
         dynamic_props = {
@@ -1026,6 +1051,8 @@ class NexusSimulator(Simulator):
 
             self.model_files.options_file.write_to_file(
                 new_file_path=self.model_files.options_file.location, overwrite_file=overwrite_files)
+
+        # TODO: update the run control file
 
         # create new fcsfile
         fcs_content = model_file_generator.generate_base_model_file_contents()
@@ -1162,3 +1189,8 @@ class NexusSimulator(Simulator):
         self._sim_controls = sim_controls
         # ensure the model is correctly set in sim_controls
         setattr(self._sim_controls, '_SimControls__model', self)
+
+    @property
+    def wells(self) -> NexusWells:
+        """Returns the associated NexusWells for the simulator."""
+        return self._wells
