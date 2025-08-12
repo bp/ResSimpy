@@ -1,11 +1,12 @@
+from __future__ import annotations
 from dataclasses import dataclass
-from typing import TypeVar
+from typing import TypeVar, TYPE_CHECKING
 
-from ResSimpy import NexusSimulator
 from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.FluidTypeEnums import PvtType
 from ResSimpy.Time.ISODateTime import ISODateTime
-
+if TYPE_CHECKING:
+    from ResSimpy import NexusSimulator
 T = TypeVar('T', bound=DataObjectMixin)
 
 

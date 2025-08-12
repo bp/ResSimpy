@@ -1355,7 +1355,7 @@ def test_get_model_files_by_filename(filename, expected_result):
                             rock_files=rock_files, relperm_files=relperm_files, pvt_files=pvt_files,
                             water_files=water_files, equil_files=equil_files, tracer_init_files=tracer_init_files,
                             aquifer_files=aquifer_files, hyd_files=hyd_files, valve_files=valve_files,
-                            separator_files=separator_files, ipr_files=ipr_files, gas_lift_files=gas_lift_files,
+                            separator_files=separator_files, ipr_files=ipr_files, gaslift_files=gas_lift_files,
                             pump_files=pump_files, compressor_files=compressor_files, choke_files=choke_files,
                             icd_files=icd_files, esp_files=esp_files, polymer_files=polymer_files,
                             adsorption_files=adsorption_files, flux_in_files=flux_in_files)
