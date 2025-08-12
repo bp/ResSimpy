@@ -4,6 +4,8 @@ from unittest.mock import MagicMock
 import pytest
 
 from ResSimpy.Nexus.DataModels.NexusOptions import NexusOptions
+from ResSimpy.Nexus.DataModels.nexus_grid_to_proc import GridToProc
+from ResSimpy.Nexus.runcontrol_operations import SimControls
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import get_fake_nexus_simulator, check_file_read_write_is_correct
 from ResSimpy import NexusSimulator
@@ -160,6 +162,13 @@ class TestWriteOutSimulator:
                                                                   })}
                                }
         model.set_options(opts_obj)
+
+        grid_to_proc = GridToProc(grid_to_proc_table=None, auto_distribute='GRIDBLOCKS')
+        
+        sim_controls = SimControls(model=model)
+        sim_controls.set_grid_to_proc(grid_to_proc)
+        model.set_sim_controls(sim_controls)
+    
         
         expected_hydraulics_path = os.path.join('/new_path/', 'nexus_files', 'new_model_hyd_1.dat')
         expected_surface_path = os.path.join('/new_path/', 'nexus_files', 'new_model_surface.dat')
@@ -232,6 +241,10 @@ REGDATA Fruit_regions
      44   Reg1
 ENDREGDATA
 
+
+GRIDTOPROC
+AUTO GRIDBLOCKS
+ENDGRIDTOPROC
 """
         expected_writes = [(expected_surface_path, expected_surface_file_content),
                            (expected_hydraulics_path, expected_hydraulics_file_content),

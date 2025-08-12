@@ -977,9 +977,6 @@ class NexusSimulator(Simulator):
         # update the run control file
         warnings.warn('Run control file is not yet implemented in NexusSimulator.write_out_new_model. ')
 
-        # update the options file
-        warnings.warn('Options file is not yet implemented in NexusSimulator.write_out_new_model. ')
-
         # update each of the dynamic properties files
         dynamic_props = {
             'pvt': (self.pvt, self.model_files.pvt_files),
@@ -1011,14 +1008,22 @@ class NexusSimulator(Simulator):
                     dyn_files[method_no] = new_dyn_file
                 method.write_to_file(new_file_path=method_file_path, overwrite_file=False)
 
+        # update the options file
         options_file_name = f"{new_model_name}_options.dat"
         if self.model_files.options_file is None and self._options is not None:
             self.set_options(self._options, os.path.join(new_include_file_location, options_file_name))
         elif self.model_files.options_file is not None:
             # update the existing options file
+            options_file_content = self._options.to_string()
+            # add the gridtoprocs to options:
+            if self.sim_controls.grid_to_proc is not None:
+                options_file_content += '\n'
+                options_file_content += self.sim_controls.grid_to_proc.to_string()
+
             self.model_files.options_file.location = os.path.join(new_include_file_location, options_file_name)
             self.model_files.options_file.origin = new_model_path
-            self.model_files.options_file.file_content_as_list = self._options.to_string().splitlines(keepends=True)
+            self.model_files.options_file.file_content_as_list = options_file_content.splitlines(keepends=True)
+
             self.model_files.options_file.write_to_file(
                 new_file_path=self.model_files.options_file.location, overwrite_file=overwrite_files)
 
