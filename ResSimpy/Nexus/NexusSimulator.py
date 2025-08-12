@@ -110,6 +110,7 @@ class NexusSimulator(Simulator):
         if origin is None:
             raise ValueError(f'Origin path to model fcs file is required. Instead got {origin}.')
         self.origin = origin
+        self.assume_loaded: bool = assume_loaded
         self._model_files: FcsNexusFile = FcsNexusFile(location=self.origin, origin=None)
 
         self._start_date: str = '' if start_date is None else start_date.strip()
@@ -132,7 +133,7 @@ class NexusSimulator(Simulator):
         self._pvt_type: PvtType = pvt_type if pvt_type is not None else PvtType.BLACKOIL
         self._eos_details: None | str = eos_details
 
-        self._network: NexusNetwork = NexusNetwork(model=self)
+        self._network: NexusNetwork = NexusNetwork(model=self, assume_loaded=assume_loaded)
         self._wells: NexusWells = NexusWells(self)
         self._grid: Optional[NexusGrid] = None
         self._options: Optional[NexusOptions] = None
@@ -991,7 +992,15 @@ class NexusSimulator(Simulator):
         warnings.warn('Structured grid file is not yet implemented in NexusSimulator.write_out_new_model. ')
 
         # update the wells file
-        warnings.warn('Wells file is not yet implemented in NexusSimulator.write_out_new_model. ')
+        if self.model_files.well_files is not None and self.model_files.well_files.get(1, None) is not None:
+            wells_file = self.model_files.well_files[1]
+        else:
+            # create an empty wells file if it doesn't exist
+            wells_file = NexusFile(file_content_as_list=[], location='', origin=None)
+            self.model_files.well_files = {1: wells_file}
+        wells_content = model_file_generator.output_wells_section()
+        update_model_file(file=wells_file, new_content=wells_content, new_folder_path=new_include_file_location,
+                          new_name=new_model_name, suffix='_wells.dat')
 
         # update the run control file
         warnings.warn('Run control file is not yet implemented in NexusSimulator.write_out_new_model. ')

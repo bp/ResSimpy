@@ -53,7 +53,7 @@ class NexusWells(Wells):
         """
         self.__model = model
         self.__add_object_operations = AddObjectOperations(NexusCompletion, self.table_header, self.table_footer, model)
-        super().__init__()
+        super().__init__(assume_loaded=model.assume_loaded)
 
     @property
     def model(self) -> NexusSimulator:
