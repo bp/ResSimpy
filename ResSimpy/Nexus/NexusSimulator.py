@@ -933,7 +933,26 @@ class NexusSimulator(Simulator):
     def write_out_new_model(self, new_location: str, new_model_name: str,
                             new_include_file_location: str | None = None,
                             overwrite_files: bool = True) -> None:
-        """Writes out a new model at a new location with a new_model_name.fcs."""
+        """Writes out a new model at a new location with a new_model_name.fcs.
+
+        This method is used for creating an entirely new model based on the ResSimpy internal memory objects and will
+        not include any comments or other content that ResSimpy does not yet interpret. Often used with the
+        "assume_loaded" attribute set to True for creating new NexusSimulator instances from scratch.
+
+        Args:
+            new_location (str): The location to write the new model to.
+            new_model_name (str): The name of the new model without the .fcs extension.
+            new_include_file_location (str | None): Optional path to save include files to. If None, defaults to
+                'include_files' in the new_location.
+            overwrite_files (bool): Overwrite files if they already exist. Defaults to True.
+
+        Example usage:
+        >>> from ResSimpy import NexusSimulator
+        >>> nexus_sim = NexusSimulator(origin='path/to/original_model.fcs', assume_loaded=True)
+        >>> # Modify the nexus_sim object as needed
+        >>> nexus_sim.write_out_new_model(new_location='path/to/new_model_directory',
+        ... new_model_name='new_model_name', new_include_file_location='optional_include_path')
+        """
 
         def update_model_file(file: NexusFile, new_content: str,
                               new_folder_path: str, new_name: str, suffix: str) -> None:
