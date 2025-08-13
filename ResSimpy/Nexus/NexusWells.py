@@ -209,7 +209,7 @@ class NexusWells(Wells):
             raise ValueError(f'Well {name} could not be added to the wells collection.')
         return updated_new_well
 
-    def add_completion(self, well_name: str, completion_properties: dict[str, None | float | int | str],
+    def add_completion(self, well_name: str, completion_properties: DataObjectMixinDictType,
                        preserve_previous_completions: bool = True, comments: Optional[str] = None) -> None:
         """Adds a completion to an existing wellspec file.
 
