@@ -318,17 +318,17 @@ class NexusReporting(Reporting):
         result = ''
         ss_output_requests_for_date = [x for x in self.ss_output_requests if x.iso_date == date]
         if ss_output_requests_for_date:
-            result += 'SSOUT\n'
+            result += 'SPREADSHEET\n'
             for request in ss_output_requests_for_date:
                 result += request.to_table_line(headers=[])
-            result += 'ENDSSOUT\n'
+            result += 'ENDSPREADSHEET\n'
 
         ss_output_contents_for_date = [x for x in self.ss_output_contents if x.iso_date == date]
         if ss_output_contents_for_date:
-            result += 'SPREADSHEET\n'
+            result += 'SSOUT\n'
             for content in ss_output_contents_for_date:
                 result += content.to_table_line(headers=[])
-            result += 'ENDSPREADSHEET\n'
+            result += 'ENDSSOUT\n'
 
         array_output_requests_for_date = [x for x in self.array_output_requests if x.iso_date == date]
         if array_output_requests_for_date:

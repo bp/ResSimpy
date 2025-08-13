@@ -171,7 +171,7 @@ class NexusModelFileGenerator:
 
         for date in ordered_all_dates:
             if date != self.model.start_iso_date:
-                run_control_content += f'TIME {date.strftime_dateformat(self.model.date_format)}\n'
+                run_control_content += f'\nTIME {date.strftime_dateformat(self.model.date_format)}\n'
 
             run_control_content += self.model.sim_controls.solver_parameters.to_string_for_date(date=date)
             run_control_content += self.model.reporting.to_string_for_date(date=date)

@@ -53,8 +53,6 @@ def test_sim_controls_to_string():
     reporting = NexusReporting(model=model, assume_loaded=True)
     output_requests = [NexusOutputRequest(date='01/02/2020', output='RFT', output_type=OutputType.ARRAY,
                                           output_frequency=FrequencyEnum.TNEXT, output_frequency_number=None),
-                       NexusOutputRequest(date='01/02/2020', output='RFT', output_type=OutputType.ARRAY,
-                                          output_frequency=FrequencyEnum.TNEXT, output_frequency_number=None),
                        NexusOutputRequest(date='01/02/2020', output='WELLS', output_type=OutputType.ARRAY,
                                           output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None),
                        NexusOutputRequest(output_type=OutputType.SPREADSHEET, date='01/02/2020', output='NETWORK',
@@ -93,8 +91,8 @@ def test_sim_controls_to_string():
     expected_result = """START 01/01/2019
 
 SSOUT
-WELLS DATE TSNUM QOP QWP COP CWP QWI CWI WCUT WPAVE CGP QGP QLP GOR BHP SAL
-FIELD DATE TSNUM COP CGP CWP CWI QOP QGP QWP QLP QWI WCUT OREC PAVT PAVH
+    WELLS DATE TSNUM QOP QWP COP CWP QWI CWI WCUT WPAVE CGP QGP QLP GOR BHP SAL
+    FIELD DATE TSNUM COP CGP CWP CWI QOP QGP QWP QLP QWI WCUT OREC PAVT PAVH
 ENDSSOUT
 
 TIME 01/01/2020
@@ -114,25 +112,22 @@ SOLVER FACILITIES NOGRID
 IMPSTAB OFF
 DCMAX IMPES 0.52
 
-TIME 01/02/2020
-OUTPUT 
-    FIELD MONTHLY
-    WELLS YEARLY
-    MAPS FREQ 120
-    RFT TNEXT
-ENDOUTPUT
 
+TIME 01/02/2020
 SPREADSHEET
     NETWORK FREQ 120
 ENDSPREADSHEET
+OUTPUT
+    RFT TNEXT
+    WELLS YEARLY
+ENDOUTPUT
 
 TIME 01/04/2020
-MAPOUT 
-    P
+MAPOUT
+    P 
     SAT OIL GAS WATER
     KR OIL WATER
 ENDMAPOUT
-
 
 TIME 01/05/2020
 DT MIN 10.0
