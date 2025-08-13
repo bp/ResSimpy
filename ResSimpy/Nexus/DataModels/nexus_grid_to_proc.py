@@ -40,7 +40,7 @@ class GridToProc:
         output_str = self.table_header + '\n'
         if self.auto_distribute is not None:
             output_str += f"AUTO {self.auto_distribute}\n"
-        elif self.grid_to_proc_table.empty is not None and not self.grid_to_proc_table.empty:
+        elif self.grid_to_proc_table is not None and not self.grid_to_proc_table.empty:
             output_str += self.grid_to_proc_table.to_string(index=False, header=True, justify='left') + '\n'
         output_str += self.table_footer + '\n'
 

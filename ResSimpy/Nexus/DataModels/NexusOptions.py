@@ -112,6 +112,8 @@ class NexusOptions(DynamicProperty):
 
     def load_nexus_options(self) -> None:
         """Read Nexus Options file contents and populate NexusOptions object."""
+        if self.file is None:
+            raise ValueError("NexusOptions file is not set. Please provide a NexusFile object to load Options.")
         file_as_list = self.file.get_flat_list_str_file
 
         # Check for common input data

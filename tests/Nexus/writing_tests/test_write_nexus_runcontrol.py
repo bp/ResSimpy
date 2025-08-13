@@ -1,7 +1,9 @@
 from ResSimpy import NexusSimulator
 from ResSimpy.Enums.TimeSteppingMethodEnum import TimeSteppingMethod
 from ResSimpy.Nexus.DataModels.NexusSolverParameter import NexusSolverParameter
+from ResSimpy.Nexus.NexusReporting import NexusReporting
 from ResSimpy.Nexus.NexusSolverParameters import NexusSolverParameters
+from ResSimpy.Nexus.nexus_model_file_generator import NexusModelFileGenerator
 from ResSimpy.Nexus.runcontrol_operations import SimControls
 
 
@@ -27,7 +29,10 @@ def test_sim_controls_to_string():
                              dt_min=0.001,
                              dt_max=60.0,
                              dt_max_increase=8.0,
-                             timestepping_method=TimeSteppingMethod.IMPLICIT,
+                             dcmax_impes=0.52,
+                             impstab_on=False,
+                             timestepping_method=TimeSteppingMethod.IMPLICIT
+
                              ),
         NexusSolverParameter(date='01/05/2020',
                              dt_min=10.0,
@@ -38,8 +43,42 @@ def test_sim_controls_to_string():
     solver_params.set_solver_parameters(solver_param_list)
 
     sim_controls.set_solver_parameters(solver_params)
-
     model.set_sim_controls(sim_controls)
-    expected_output = """START 01/01/2019
+
+    # Add reporting controls
     
-TIME 01/01/2020"""
+    reporting = NexusReporting(model=model, assume_loaded=True)
+    
+    
+    model_file_generator = NexusModelFileGenerator(model=model, model_name='new_model')
+    
+    expected_result = """START 01/01/2019
+
+TIME 01/01/2020
+DT AUTO 0.1
+DT MIN 0.001
+DT MAX 60.0
+DT MAXINCREASE 8.0
+METHOD IMPLICIT
+SOLVER RESERVOIR CYCLELENGTH 10.0
+SOLVER RESERVOIR MAXCYCLES 100.0
+SOLVER RESERVOIR GLOBALTOL 0.0001
+SOLVER GLOBAL DIRECT
+SOLVER NOCUT
+SOLVER PRECON_ILU
+SOLVER KSUB_METHOD OrTHoMIN
+SOLVER FACILITIES NOGRID
+IMPSTAB OFF
+DCMAX IMPES 0.52
+
+TIME 01/05/2020
+DT MIN 10.0
+SOLVER RESERVOIR CYCLELENGTH 11.0
+
+"""
+
+    # Act
+    result = model_file_generator.output_runcontrol_section()
+
+    # Assert
+    assert result == expected_result

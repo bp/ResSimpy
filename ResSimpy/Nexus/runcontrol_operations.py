@@ -3,7 +3,7 @@ from __future__ import annotations
 import warnings
 from datetime import datetime, timedelta
 from functools import cmp_to_key
-from typing import Sequence, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -13,7 +13,6 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
 from ResSimpy.Nexus.NexusSolverParameters import NexusSolverParameters
 from ResSimpy.Nexus.constants import DATE_WITH_TIME_LENGTH
-from ResSimpy.DataModelBaseClasses.SolverParameter import SolverParameter
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
@@ -441,14 +440,14 @@ class SimControls:
         self.__number_of_processors = grid_to_proc.get_number_of_processors()
 
     @property
-    def solver_parameters(self) -> Sequence[SolverParameter]:
+    def solver_parameters(self) -> NexusSolverParameters:
         """Returns the NexusSolverParameters object.
 
         Returns:
         -------
             NexusSolverParameters: NexusSolverParameters object
         """
-        return self.__solver_parameters.solver_parameters
+        return self.__solver_parameters
 
     def set_solver_parameters(self, solver_parameters: NexusSolverParameters) -> None:
         """Sets the NexusSolverParameters object.

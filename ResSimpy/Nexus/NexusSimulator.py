@@ -1039,11 +1039,7 @@ class NexusSimulator(Simulator):
             self.set_options(self._options, os.path.join(new_include_file_location, options_file_name))
         elif self.model_files.options_file is not None:
             # update the existing options file
-            options_file_content = self._options.to_string()
-            # add the gridtoprocs to options:
-            if self.sim_controls.grid_to_proc is not None:
-                options_file_content += '\n'
-                options_file_content += self.sim_controls.grid_to_proc.to_string()
+            options_file_content = model_file_generator.output_options_section()
 
             self.model_files.options_file.location = os.path.join(new_include_file_location, options_file_name)
             self.model_files.options_file.origin = new_model_path

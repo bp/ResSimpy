@@ -411,6 +411,6 @@ class TestNexusSolverParameters:
                                                 timestepping_method=TimeSteppingMethod.IMPLICIT,
                                                 )]
         # Act
-        result = nexus_sim.sim_controls.solver_parameters
+        result = nexus_sim.sim_controls.solver_parameters.get_all()
         # Assert
         assert result == expected_result
