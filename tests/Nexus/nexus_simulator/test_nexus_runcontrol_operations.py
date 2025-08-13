@@ -747,11 +747,12 @@ def test_add_array_output_request(mocker, new_rft_date, expected_result):
                                             output_frequency=FrequencyEnum.TNEXT, output_frequency_number=None)
 
     # Act
-    nexus_reporting._add_array_output_request(new_output_request)
+    nexus_reporting.add_array_output_request(new_output_request)
     result = model.model_files.runcontrol_file.file_content_as_list
 
     # Assert
     assert result == expected_result
+    assert nexus_reporting.array_output_requests[-1] == new_output_request
 
 
 def test_output_request_to_table_line():

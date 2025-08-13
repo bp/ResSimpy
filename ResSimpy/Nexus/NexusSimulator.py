@@ -1190,3 +1190,20 @@ class NexusSimulator(Simulator):
     def wells(self) -> NexusWells:
         """Returns the associated NexusWells for the simulator."""
         return self._wells
+
+    @property
+    def reporting(self) -> NexusReporting:
+        """Returns the associated NexusReporting for the simulator."""
+        return self._reporting
+
+    def set_reporting_controls(self, reporting: NexusReporting) -> None:
+        """Sets the reporting controls for the simulator.
+
+        Args:
+            reporting (NexusReporting): An instance of NexusReporting to set.
+        """
+        if not isinstance(reporting, NexusReporting):
+            raise TypeError("reporting must be an instance of NexusReporting")
+        self._reporting = reporting
+        # ensure the model is correctly set in reporting
+        setattr(self._reporting, '_NexusReporting__model', self)

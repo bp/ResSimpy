@@ -59,3 +59,10 @@ class NexusOutputContents(OutputContents):
     output_contents: list[str]
     output_type: OutputType
     output: str
+
+    def to_table_line(self, headers: list[str]) -> str:
+        """String representation of the single line within an Output contents table."""
+        _ = headers
+        result = f'{self.output} {" ".join(self.output_contents)}'
+        result += '\n'
+        return result

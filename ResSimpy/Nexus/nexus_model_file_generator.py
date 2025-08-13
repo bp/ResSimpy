@@ -163,6 +163,8 @@ class NexusModelFileGenerator:
         all_dates: set[ISODateTime] = {self.model.start_iso_date}
         for solver_param in self.model.sim_controls.solver_parameters.get_all():
             all_dates.add(solver_param.iso_date)
+        # collect all the dates from the reporting controls
+        all_dates.update(self.model.reporting.get_all_reporting_dates())
 
         # Sort the dates
         ordered_all_dates = sorted(all_dates)
@@ -172,5 +174,6 @@ class NexusModelFileGenerator:
                 run_control_content += f'TIME {date.strftime_dateformat(self.model.date_format)}\n'
 
             run_control_content += self.model.sim_controls.solver_parameters.to_string_for_date(date=date)
+            run_control_content += self.model.reporting.to_string_for_date(date=date)
 
         return run_control_content
