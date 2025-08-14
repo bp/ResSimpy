@@ -166,6 +166,9 @@ class NexusModelFileGenerator:
         # collect all the dates from the reporting controls
         all_dates.update(self.model.reporting.get_all_reporting_dates())
 
+        # add all the TIME cards:
+        all_dates.update(set(self.model.sim_controls.times_iso_date))
+
         # Sort the dates
         ordered_all_dates = sorted(all_dates)
 

@@ -265,7 +265,8 @@ class NexusReporting(Reporting):
 
         file_as_list = self.__model.model_files.runcontrol_file.get_flat_list_str_file
         obj_props = output_request.to_dict(add_units=False)
-
+        if output_request.date is None:
+            output_request.date = self.__model.start_date
         self.__add_object_operations.add_object_to_file(date=output_request.date,
                                                         file_as_list=file_as_list,
                                                         file_to_add_to=self.__model.model_files.runcontrol_file,
@@ -282,6 +283,11 @@ class NexusReporting(Reporting):
         """
         if output_request.date is None:
             raise ValueError(f"No date on NexusOutputRequest object: {output_request}")
+        if isinstance(output_request, NexusOutputContents):
+            raise TypeError("NexusOutputRequest object should not be an instance of NexusOutputContents."
+                            "Use add_array_output_contents_to_memory instead.")
+        elif not isinstance(output_request, NexusOutputRequest):
+            raise TypeError(f"Expected NexusOutputRequest object, got {type(output_request)}")
 
         if output_request.output_type == OutputType.ARRAY:
             self.__array_output_requests.append(output_request)
@@ -294,10 +300,17 @@ class NexusReporting(Reporting):
         """Adds an output contents to the array output contents list in memory.
 
         Args:
-            output_contents (NexusOutputContents): The output contents to add to the model and associated in memory files.
+            output_contents (NexusOutputContents): The output contents to add to the model and associated in
+                memory files.
         """
+
         if output_contents.date is None:
             raise ValueError(f"No date on NexusOutputContents object: {output_contents}")
+        if isinstance(output_contents, NexusOutputRequest):
+            raise TypeError("NexusOutputContents object should not be an instance of NexusOutputRequest."
+                            "Use add_array_output_request_to_memory instead.")
+        elif not isinstance(output_contents, NexusOutputContents):
+            raise TypeError(f"Expected NexusOutputContents object, got {type(output_contents)}")
 
         if output_contents.output_type == OutputType.ARRAY:
             self.__array_output_contents.append(output_contents)

@@ -1048,7 +1048,15 @@ class NexusSimulator(Simulator):
             self.model_files.options_file.write_to_file(
                 new_file_path=self.model_files.options_file.location, overwrite_file=overwrite_files)
 
-        # TODO: update the run control file
+        # update runcontrol
+        runcontrol_path = os.path.join(new_include_file_location, f"{new_model_name}_reporting.dat")
+        if self.model_files.runcontrol_file is None and self.reporting is not None and self.sim_controls is not None:
+            self.set_reporting_controls(reporting=self.reporting, new_file_path=runcontrol_path)
+        elif self.model_files.runcontrol_file is not None:
+            runcontrol_file_content = model_file_generator.output_runcontrol_section()
+            update_model_file(file=self.model_files.runcontrol_file, new_content=runcontrol_file_content,
+                              new_folder_path=new_include_file_location,
+                              new_name=new_model_name, suffix='_runcontrol.dat')
 
         # create new fcsfile
         fcs_content = model_file_generator.generate_base_model_file_contents()
@@ -1196,14 +1204,31 @@ class NexusSimulator(Simulator):
         """Returns the associated NexusReporting for the simulator."""
         return self._reporting
 
-    def set_reporting_controls(self, reporting: NexusReporting) -> None:
-        """Sets the reporting controls for the simulator.
+    def set_reporting_controls(self, reporting: NexusReporting, new_file_path: str | None = None) -> None:
+        """Sets the new reporting controls for the simulator.
 
         Args:
             reporting (NexusReporting): An instance of NexusReporting to set.
+            new_file_path (str | None): Optional path to save the reporting file. If None, a default path is used.
         """
         if not isinstance(reporting, NexusReporting):
             raise TypeError("reporting must be an instance of NexusReporting")
+        if new_file_path is None:
+            # pick a default name
+            new_file_path = os.path.join(os.path.dirname(self.model_files.location), f'{self.root_name}_reporting.dat')
+        # Ensure the options file is set correctly
+
         self._reporting = reporting
+        model_name = self.root_name
+        if model_name is None:
+            model_name = 'default_name.fcs'
+        model_file_generator = NexusModelFileGenerator(model=self, model_name=model_name)
+        new_reporting_file = NexusFile(
+            file_content_as_list=model_file_generator.output_runcontrol_section().splitlines(keepends=True),
+            location=new_file_path,
+            origin=self.model_files.location,
+        )
+        self.model_files.runcontrol_file = new_reporting_file
+
         # ensure the model is correctly set in reporting
         setattr(self._reporting, '_NexusReporting__model', self)

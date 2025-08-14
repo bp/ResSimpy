@@ -20,17 +20,19 @@ if TYPE_CHECKING:
 
 
 class NexusSolverParameters(SolverParameters):
-    def __init__(self, model: NexusSimulator) -> None:
+    def __init__(self, model: NexusSimulator, assume_loaded: bool = False) -> None:
         """NexusSolverParameters class constructor.
 
         Args:
             model (NexusSimulator): Originating NexusSimulator object.
-            start_date (str): Start date of the simulation.
+            assume_loaded (bool): If True, assumes that the solver parameters are already loaded and does not attempt
+                to load them.
         """
         self.__solver_parameters: Sequence[NexusSolverParameter] | None = None
         self.__model = model
         self.file_content = ['']
         self.start_date = ''
+        self.__assume_loaded = assume_loaded
 
     @property
     def solver_parameters(self) -> Sequence[NexusSolverParameter]:
@@ -39,10 +41,10 @@ class NexusSolverParameters(SolverParameters):
         If solver parameters are not loaded 'self.load' will attempt to load them.
         If loading fails it will return a value error.
         """
-        if self.__solver_parameters is None:
+        if self.__solver_parameters is None and not self.__assume_loaded:
             self.load()
         if self.__solver_parameters is None:
-            raise ValueError('No solver parameters found.')
+            return []
         return self.__solver_parameters
 
     def get_all(self) -> Sequence[NexusSolverParameter]:

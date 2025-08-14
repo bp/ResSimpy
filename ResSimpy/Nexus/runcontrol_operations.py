@@ -13,6 +13,7 @@ from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
 from ResSimpy.Nexus.NexusSolverParameters import NexusSolverParameters
 from ResSimpy.Nexus.constants import DATE_WITH_TIME_LENGTH
+from ResSimpy.Time.ISODateTime import ISODateTime
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
@@ -36,7 +37,7 @@ class SimControls:
         self.__date_format_string: str = "%m/%d/%Y"
         self.__number_of_processors: None | int = None
         self.__grid_to_proc: None | GridToProc = None
-        self.__solver_parameters: NexusSolverParameters = NexusSolverParameters(model)
+        self.__solver_parameters: NexusSolverParameters = NexusSolverParameters(model, model.assume_loaded)
 
     @property
     def date_format_string(self) -> str:
@@ -51,6 +52,14 @@ class SimControls:
     def times(self) -> list[str]:
         """Returns list of times, if value is not provided it will return none."""
         return self.__times if self.__times is not None else []
+
+    @property
+    def times_iso_date(self) -> list[ISODateTime]:
+        """Returns list of times as ISODateTime objects, if value is not provided it will return none."""
+        if self.times is None:
+            return []
+        return [ISODateTime.convert_to_iso(date=date, date_format=self.__model.date_format,
+                                           start_date=self.__model.start_date) for date in self.times]
 
     @staticmethod
     def get_times(times_file: list[str]) -> list[str]:
@@ -317,14 +326,17 @@ class SimControls:
 
         self.modify_times(content=times, operation='replace')
 
-    def modify_times(self, content: None | list[str] = None, operation: str = 'merge') -> None:
+    def modify_times(self, content: None | list[str] = None, operation: str = 'merge',
+                     update_in_file: bool = True) -> None:
         """Modifies the output times in the simulation.
 
         Args:
         ----
-            content (list[str]], optional): The content to modify using the above operation, \
+            content (list[str], optional): The content to modify using the above operation, \
             represented as a list of strings with a new entry per line of the file. Defaults to None.
             operation (str, optional): operation to perform on the content provided (e.g. 'merge'). Defaults to 'merge'.
+            update_in_file (bool, optional): If True, updates the times in the run control file otherwise sets the times
+                in memory only. Defaults to True.
 
         Raises:
         ------
@@ -355,7 +367,7 @@ class SimControls:
 
         self.__times = self.sort_remove_duplicate_times(self.__times)
 
-        if self.__model.destination is not None:
+        if self.__model.destination is not None and update_in_file:
             self.__update_times_in_file()
 
     @property

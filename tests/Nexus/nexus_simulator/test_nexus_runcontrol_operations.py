@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock
+
 import pandas as pd
 import pytest
 from pytest_mock import MockerFixture
@@ -381,7 +383,7 @@ ENDGRIDTOPROC
         'PROCESS': [1, 2, 3, 4, 1, 2, 3, 4],
         'PORTYPE': ['MATRIX', 'MATRIX', 'MATRIX', 'MATRIX', 'FRAC', 'FRAC', 'FRAC', 'FRAC']}),
         auto_distribute=None)
-    sim_controls = SimControls(model=None)
+    sim_controls = SimControls(model=MagicMock())
     expected_number_processors = 4
     # Act
     result = sim_controls._load_grid_to_procs(options_file_content)
@@ -427,7 +429,7 @@ def test_load_grid_to_proc_auto():
     '''
     options_file_content = options_file_content.splitlines(keepends=True)
     expected_result = GridToProc(grid_to_proc_table=None, auto_distribute='GRIDBLOCKS')
-    sim_controls = SimControls(model=None)
+    sim_controls = SimControls(model=MagicMock())
     expected_number_processors = 0
     # Act
     result = sim_controls._load_grid_to_procs(options_file_content)
@@ -648,7 +650,7 @@ TIME 24/01/1999
                     TIME 01/02/1951
 
 OUTPUT
-RFT TNEXT
+    RFT TNEXT
 ENDOUTPUT
 
                     TIME 01/05/1951
@@ -665,7 +667,7 @@ ENDOUTPUT
 
 TIME 01/03/1951
 OUTPUT
-RFT TNEXT
+    RFT TNEXT
 ENDOUTPUT
 
                     TIME 01/05/1951
@@ -682,7 +684,7 @@ ENDOUTPUT
                     TIME 01/05/1951
                     OUTPUT 
                         FIELD MONTHLY
-RFT TNEXT
+    RFT TNEXT
                     ENDOUTPUT
                     TIME 01/01/1952
                     STOP
@@ -699,7 +701,7 @@ RFT TNEXT
 
 TIME 01/01/1953
 OUTPUT
-RFT TNEXT
+    RFT TNEXT
 ENDOUTPUT
 
                     STOP
@@ -759,7 +761,7 @@ def test_output_request_to_table_line():
     # Arrange
     output_req = NexusOutputRequest(date='01/02/1951', output='RFT', output_type=OutputType.ARRAY,
                                     output_frequency=FrequencyEnum.TNEXT, output_frequency_number=None)
-    expected_result = 'RFT TNEXT\n'
+    expected_result = '    RFT TNEXT\n'
     # Act
     result = output_req.to_table_line(headers=[])
 
@@ -779,7 +781,7 @@ TIME 01/01/2026
 """
     options_file_content = run_control_content.splitlines(keepends=True)
     expected_result = ['01/01/2023', '01/01/2024', '01/01/2025']
-    sim_controls = SimControls(model=None)
+    sim_controls = SimControls(model=MagicMock())
 
     # Act
     result = sim_controls.get_times(options_file_content)
