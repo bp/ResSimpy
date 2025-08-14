@@ -463,8 +463,8 @@ def check_list_tokens(list_tokens: list[str], line: str) -> Optional[str]:
     """Checks a list of tokens for whether it exists in a string and returns the token that matched.
 
     Args:
-        list_tokens (list[str]): list of tokens to search for within the line
-        line (str): line to search for tokens
+        list_tokens (list[str]): list of tokens to search for within the line.
+        line (str): line to search for tokens.
 
     Returns:
         Optional[str]: returns the token which was found otherwise returns None.
