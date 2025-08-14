@@ -64,7 +64,7 @@ class OutputRequest(DataObjectMixin, ABC):
 
 
 @dataclass(kw_only=True)
-class OutputContents(ABC):
+class OutputContents(DataObjectMixin, ABC):
     """Class to hold data input for an Output Contents.
 
     Attributes:
@@ -77,3 +77,17 @@ class OutputContents(ABC):
     output: str
     output_contents: list[str]
     output_type: OutputType
+
+    @staticmethod
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
+        """No keywords for this class, returns an empty dict."""
+        return {}
+
+    @property
+    def units(self) -> BaseUnitMapping:
+        """Writes unit type for the given unit system.
+
+        Returns:
+            An instance of the BaseUnitMapping class.
+        """
+        return BaseUnitMapping(unit_system=None)

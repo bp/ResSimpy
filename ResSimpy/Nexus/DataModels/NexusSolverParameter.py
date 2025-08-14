@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 from ResSimpy.Enums.TimeSteppingMethodEnum import TimeSteppingMethod
 from ResSimpy.DataModelBaseClasses.SolverParameter import SolverParameter
+from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 
 
 @dataclass(kw_only=True)
@@ -47,14 +48,14 @@ class NexusSolverParameter(SolverParameter):
     solver_all_equation_solver: str | None = None
 
     # Independent Solver options and settings
-    solver_timestep_cut: bool = True  # Default is CUT
+    solver_timestep_cut: bool | None = None
     solver_precon: str | None = None
     solver_precon_setting: str | None = None
     solver_precon_value: float | None = None
     solver_facilities: str | None = None
     solver_ksub_method: str | None = None
-    solver_dual_solver: bool = True  # Default is ON
-    solver_system_reduced: bool = True  # Default is ON
+    solver_dual_solver: bool | None = None  # Default is ON
+    solver_system_reduced: bool | None = None  # Default is ON
     solver_nbad: float | None = None
     solver_pressure_coupling: str | None = None
     solver_pseudo_slack: bool | None = None
@@ -64,9 +65,9 @@ class NexusSolverParameter(SolverParameter):
     implicit_mbal: str | None = None
 
     # Implicit stability (IMPSTAB) options
-    impstab_on: bool = False  # Default is OFF
+    impstab_on: bool | None = None  # Default is OFF
     impstab_criteria: str | None = None
-    impstab_skip_mass_cfl: bool = False  # Default is USEMASSCFL
+    impstab_skip_mass_cfl: bool | None = None
     impstab_target_cfl: float | None = None
     impstab_limit_cfl: float | None = None
     impstab_no_cuts: float | None = None
@@ -323,7 +324,7 @@ class NexusSolverParameter(SolverParameter):
         return dcmax_keyword_map
 
     @staticmethod
-    def keyword_mapping() -> dict[str, tuple[str, type]]:
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
         """Gets the keyword mapping from simulator keyword to ResSimpy attribute and the type of the object.
 
         Compiled keywords for all ResSimpy attributes apart from the DCMAX keywords.
@@ -342,10 +343,12 @@ class NexusSolverParameter(SolverParameter):
             'IMPLICITMBAL': ('implicit_mbal', str),
             'PERFREV': ('perfrev', str),
         }
+        # DCMAX keywords
+        dcmax_keyword_map = NexusSolverParameter.dcmax_keyword_mapping()
 
         # Combine the keyword maps
         keyword_map = {**dt_keyword_map, **misc_keyword_map, **solver_keyword_map, **gridsolver_keyword_map,
-                       **tols_keyword_map, **impstab_keyword_map, **solo_keyword_map}
+                       **tols_keyword_map, **impstab_keyword_map, **solo_keyword_map, **dcmax_keyword_map}
         return keyword_map
 
     @staticmethod
@@ -361,3 +364,68 @@ class NexusSolverParameter(SolverParameter):
         """
         attribute = keyword.lower()
         return attribute+'_'+value.lower(), float
+
+    @property
+    def units(self) -> BaseUnitMapping:
+        """Returns the unit system for the NexusSolverParameter which doesn't have units implemented yet."""
+        return BaseUnitMapping(unit_system=None)
+
+    def to_string(self) -> str:
+        """Outputs the NexusSolverParameters to a string representation for the runcontrol file."""
+        param_dict = self.to_dict(keys_in_keyword_style=True, add_date=False, add_units=False, include_nones=False)
+
+        keyword_mapping = self.get_keyword_mapping()
+
+        # handled vars to prevent duplication of entries in the object
+        handled_vars = set()
+        output_str = ''
+        for key, value in param_dict.items():
+            variable = keyword_mapping[key][0]
+            if value is None or variable in handled_vars:
+                continue
+            if isinstance(value, bool):
+                output_str += self.__handle_truthy_values(variable) + '\n'
+            elif key in self.dt_keyword_mapping():
+                output_str += f'DT {key} {value}\n'
+            elif key in self.solver_keyword_mapping():
+                output_str += self.__handle_solver_keywords_to_string(key, value, variable)
+            elif key in self.gridsolver_keyword_mapping():
+                output_str += f'GRIDSOLVER {key} {value}\n'
+            elif key in self.impstab_keyword_mapping():
+                output_str += f'IMPSTAB {key} {value}\n'
+            elif key in self.tols_keyword_mapping():
+                output_str += f'TOLS {key} {value}\n'
+            elif key in self.dcmax_keyword_mapping():
+                output_str += f'DCMAX {key} {value}\n'
+            elif key in self.solo_keyword_mapping():
+                output_str += f'{key} {value}\n'
+            elif key == 'METHOD' and self.timestepping_method is not None:
+                output_str += f'METHOD {self.timestepping_method.value}\n'
+            handled_vars.add(variable)
+        return output_str + '\n'
+
+    def __handle_solver_keywords_to_string(self, key: str, value: str | float | dict[int, float],
+                                           variable: str) -> str:
+        """Handles the conversion of solver keywords to string format."""
+        if variable == 'solver_all_equation_solver':
+            return f'SOLVER ALL {value}\n'
+        elif variable == 'solver_reservoir_equation_solver':
+            return f'SOLVER RESERVOIR {value}\n'
+        elif variable == 'solver_global_equation_solver':
+            return f'SOLVER GLOBAL {value}\n'
+        elif variable == 'solver_precon':
+            return f'SOLVER {value}\n'
+        else:
+            return f'SOLVER {key} {value}\n'
+
+    def __handle_truthy_values(self, variable: str) -> str:
+        """Handles truthy values for NexusSolverParameter."""
+        if variable == 'solver_timestep_cut':
+            return 'SOLVER CUT' if self.solver_timestep_cut else 'SOLVER NOCUT'
+        elif variable == 'solver_dual_solver':
+            return 'SOLVER DUAL_SOLVER ON' if self.solver_dual_solver else 'SOLVER DUAL_SOLVER OFF'
+        elif variable == 'solver_system_reduced':
+            return 'SYSTEM_REDUCED ON' if self.solver_system_reduced else 'SYSTEM_REDUCED OFF'
+        elif variable == 'impstab_on':
+            return 'IMPSTAB ON' if self.impstab_on else 'IMPSTAB OFF'
+        return ''

@@ -3,6 +3,15 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from ResSimpy.Enums.FrequencyEnum import FrequencyEnum
+from ResSimpy.Enums.OutputType import OutputType
+from ResSimpy.Nexus.DataModels.NexusOptions import NexusOptions
+from ResSimpy.Nexus.DataModels.NexusReportingRequests import NexusOutputContents, NexusOutputRequest
+from ResSimpy.Nexus.DataModels.nexus_grid_to_proc import GridToProc
+from ResSimpy.Nexus.NexusReporting import NexusReporting
+from ResSimpy.Nexus.runcontrol_operations import SimControls
+from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
+from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 from tests.multifile_mocker import mock_multiple_files
@@ -150,9 +159,59 @@ class TestWriteOutSimulator:
         model.wells.add_well(name='well1', units=model.default_units, completions=completions, add_to_file=False)
 
         # check the model file writes to the correct location
+
+        opts_obj = NexusOptions(file=None, model_unit_system=UnitSystem.ENGLISH)
+        opts_obj.properties = {'DESC': ['Simulation Options'],
+                               'UNIT_SYSTEM': UnitSystem.ENGLISH,
+                               'PSTD': 14.7,
+                               'TSTD': 60.0,
+                               'RES_TEMP': 200.0,
+                               'REGDATA': {
+                                   'Injection_regions': pd.DataFrame({'NAME': ['Reg1', 'Reg2'],
+                                                                      'NUMBER': [1, 2],
+                                                                      'IBAT': [2, 2]
+                                                                      }),
+                                   'Fruit_regions': pd.DataFrame({'NUMBER': [10, 22, 33, 44],
+                                                                  'NAME': ['Apple', 'Grape', 'Orange', 'Reg1']
+                                                                  })}
+                               }
+        model.set_options(opts_obj)
+
+        grid_to_proc = GridToProc(grid_to_proc_table=None, auto_distribute='GRIDBLOCKS')
+        
+        sim_controls = SimControls(model=model)
+        sim_controls.set_grid_to_proc(grid_to_proc)
+        times = ['01/05/2019', '01/04/2020', '01/12/2021', '01/10/2022']
+        sim_controls.modify_times(content=times, operation='replace')
+
+        model.set_sim_controls(sim_controls)
+
+        # set the runcontrol
+        new_nexus_reporting = NexusReporting(model=model, assume_loaded=True)
+        new_nexus_reporting.add_array_output_request_to_memory(
+            NexusOutputRequest(date='01/02/2020', output='RFT', output_type=OutputType.ARRAY,
+                               output_frequency=FrequencyEnum.TNEXT, output_frequency_number=None))
+        new_nexus_reporting.add_array_output_request_to_memory(
+            NexusOutputRequest(date='01/02/2020', output='WELLS', output_type=OutputType.ARRAY,
+                               output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None))
+                
+        new_nexus_reporting.add_array_output_contents_to_memory(
+            NexusOutputContents(output_type=OutputType.SPREADSHEET, output='WELLS', date='01/01/2019',
+                            output_contents=['DATE', 'TSNUM', 'QOP', 'QWP', 'COP', 'CWP', 'QWI', 'CWI', 'WCUT',
+                                             'WPAVE', 'CGP', 'QGP', 'QLP', 'GOR', 'BHP', 'SAL']))
+        
+        new_nexus_reporting.add_array_output_contents_to_memory(
+            NexusOutputContents(output_type=OutputType.SPREADSHEET, output='FIELD', date='01/01/2019',
+                                           output_contents=['DATE', 'TSNUM', 'COP', 'CGP', 'CWP', 'CWI', 'QOP', 'QGP',
+                                                            'QWP', 'QLP',
+                                                            'QWI', 'WCUT', 'OREC', 'PAVT', 'PAVH']),)
+        model.set_reporting_controls(new_nexus_reporting)
+
         expected_hydraulics_path = os.path.join('/new_path/', 'nexus_files', 'new_model_hyd_1.dat')
         expected_surface_path = os.path.join('/new_path/', 'nexus_files', 'new_model_surface.dat')
         expected_wells_path = os.path.join('/new_path/', 'nexus_files', 'new_model_wells.dat')
+        expected_options_path = os.path.join('/new_path/', 'nexus_files', 'new_model_options.dat')
+        expected_runcontrol_path = os.path.join('/new_path/', 'nexus_files', 'new_model_runcontrol.dat')
         expected_fcs_path = os.path.join('/new_path/', 'new_model.fcs')
 
         expected_fcs_contents = f'''DESC Model created with ResSimpy
@@ -161,6 +220,7 @@ DEFAULT_UNITS ENGLISH
 DATEFORMAT MM/DD/YYYY
 
 GRID_FILES
+    OPTIONS {expected_options_path}
 
 INITIALIZATION_FILES
 
@@ -169,6 +229,7 @@ ROCK_FILES
 PVT_FILES
 
 RECURRENT_FILES
+    RUNCONTROL {expected_runcontrol_path}
     WELLS SET 1 {expected_wells_path}
     SURFACE NETWORK 1 {expected_surface_path}
 
@@ -200,6 +261,54 @@ well1 QOSMAX 10240
 ENDCONSTRAINTS
 
 '''
+        expected_options_content = """DESC Simulation Options
+ENGLISH
+PSTD 14.7
+TSTD 60.0
+RES_TEMP 200.0
+
+REGDATA Injection_regions
+NAME  NUMBER  IBAT
+Reg1       1     2
+Reg2       2     2
+ENDREGDATA
+
+REGDATA Fruit_regions
+ NUMBER   NAME
+     10  Apple
+     22  Grape
+     33 Orange
+     44   Reg1
+ENDREGDATA
+
+
+GRIDTOPROC
+AUTO GRIDBLOCKS
+ENDGRIDTOPROC
+"""
+
+        expected_runcontrol_contents = """START 01/01/2019
+
+SSOUT
+    WELLS DATE TSNUM QOP QWP COP CWP QWI CWI WCUT WPAVE CGP QGP QLP GOR BHP SAL
+    FIELD DATE TSNUM COP CGP CWP CWI QOP QGP QWP QLP QWI WCUT OREC PAVT PAVH
+ENDSSOUT
+
+TIME 01/05/2019
+
+TIME 01/02/2020
+OUTPUT
+    RFT TNEXT
+    WELLS YEARLY
+ENDOUTPUT
+
+TIME 01/04/2020
+
+TIME 01/12/2021
+
+TIME 01/10/2022
+"""
+
         expected_wells_content = '''TIME 01/01/2020
 WELLSPEC well1
 IW JW L SKIN RADW
@@ -210,6 +319,8 @@ IW JW L SKIN RADW
         
         expected_writes = [(expected_surface_path, expected_surface_file_content),
                            (expected_hydraulics_path, expected_hydraulics_file_content),
+                           (expected_options_path, expected_options_content),
+                           (expected_runcontrol_path, expected_runcontrol_contents),
                            (expected_wells_path, expected_wells_content),
                            (expected_fcs_path, expected_fcs_contents),
                            ]

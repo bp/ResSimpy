@@ -45,7 +45,7 @@ class NexusOutputRequest(OutputRequest):
     def to_table_line(self, headers: list[str]) -> str:
         """String representation of the single line within an Output request table."""
         _ = headers
-        result = f'{self.output} {self.output_frequency.name}'
+        result = f'    {self.output} {self.output_frequency.name}'
         if self.output_frequency_number is not None:
             result += ' ' + str(self.output_frequency_number)
         result += '\n'
@@ -59,3 +59,10 @@ class NexusOutputContents(OutputContents):
     output_contents: list[str]
     output_type: OutputType
     output: str
+
+    def to_table_line(self, headers: list[str]) -> str:
+        """String representation of the single line within an Output contents table."""
+        _ = headers
+        result = f'    {self.output} {" ".join(self.output_contents)}'
+        result += '\n'
+        return result

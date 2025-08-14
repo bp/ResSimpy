@@ -143,3 +143,40 @@ class NexusModelFileGenerator:
                 full_wells += well.to_string_for_date(date=date)
 
         return full_wells
+
+    def output_options_section(self) -> str:
+        """Outputs the options section of the Nexus model file."""
+        options_file_content = ''
+        if self.model.options is not None:
+            options_file_content += self.model.options.to_string()
+        # add the gridtoprocs to options:
+        if self.model.sim_controls.grid_to_proc is not None:
+            options_file_content += '\n'
+            options_file_content += self.model.sim_controls.grid_to_proc.to_string()
+        return options_file_content
+
+    def output_runcontrol_section(self) -> str:
+        """Outputs the run control section of the Nexus model file."""
+        run_control_content = f'START {self.model.start_iso_date.strftime_dateformat(self.model.date_format)}\n\n'
+
+        # collect all the dates from the solver controls
+        all_dates: set[ISODateTime] = {self.model.start_iso_date}
+        for solver_param in self.model.sim_controls.solver_parameters.get_all():
+            all_dates.add(solver_param.iso_date)
+        # collect all the dates from the reporting controls
+        all_dates.update(self.model.reporting.get_all_reporting_dates())
+
+        # add all the TIME cards:
+        all_dates.update(set(self.model.sim_controls.times_iso_date))
+
+        # Sort the dates
+        ordered_all_dates = sorted(all_dates)
+
+        for date in ordered_all_dates:
+            if date != self.model.start_iso_date:
+                run_control_content += f'\nTIME {date.strftime_dateformat(self.model.date_format)}\n'
+
+            run_control_content += self.model.sim_controls.solver_parameters.to_string_for_date(date=date)
+            run_control_content += self.model.reporting.to_string_for_date(date=date)
+
+        return run_control_content

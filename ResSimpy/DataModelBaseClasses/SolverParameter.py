@@ -4,9 +4,11 @@ from dataclasses import dataclass
 from abc import ABC
 from typing import Optional
 
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
+
 
 @dataclass
-class SolverParameter(ABC):
+class SolverParameter(DataObjectMixin, ABC):
     """Abstract Data object storing the solver parameters at a given datetime for the Simulation runs.
 
     Stored as a datetime dependent object as some sims can change these parameters with time.
