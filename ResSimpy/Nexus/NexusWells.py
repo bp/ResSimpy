@@ -203,7 +203,7 @@ class NexusWells(Wells):
         # add the well to the well file
         if completions is not None:
             for completion in completions:
-                self.add_completion(well_name=name, completion_properties=completion.to_dict())
+                self.add_completion(well_name=name, completion_properties=completion.to_dict(include_nones=False))
         updated_new_well = self.get(name)
         if updated_new_well is None:
             raise ValueError(f'Well {name} could not be added to the wells collection.')
@@ -225,12 +225,16 @@ class NexusWells(Wells):
         basic_dict: DataObjectMixinDictType = {'name': well_name}
         _, completion_date = self.__add_object_operations.check_name_date(basic_dict | completion_properties)
         well = self.get(well_name)
+        well_id = None
         if well is None:
             # ensure it gets added as a new well.
             well = self.add_well(name=well_name, units=self.__model.default_units, completions=None, add_to_file=False)
-            well_id = None
         else:
-            well_id = well.completions[0].id
+            # if the well already exists get the id:
+            if len(well.completions) > 0:
+                # if the well has completions then get the first completion id
+                # this is to ensure that we can find the wellspec file to add the new completion to
+                well_id = well.completions[0].id
 
         # add completion in memory
         new_completion = well._add_completion_to_memory(date=completion_date,

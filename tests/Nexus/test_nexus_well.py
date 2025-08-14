@@ -1342,6 +1342,58 @@ IW JW L RADW SKIN PPERF
                                      mocker_fixture=mocker, write_file_name='wells.dat')
 
 
+def test_add_well(mocker): 
+    # Arrange
+    fcs_file_data = '''RUN_UNITS ENGLISH
+
+    DATEFORMAT DD/MM/YYYY
+
+    RECURRENT_FILES
+    RUNCONTROL ref_runcontrol.dat
+    WELLS Set 1 wells.dat'''
+    runcontrol_data = 'START 01/01/2020'
+    
+    
+    existing_wells_data = '''TIME 01/01/2019
+WELLSPEC existing_well
+IW JW L RADW
+3 3 3 3.5
+'''
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            'fcs_file.dat': fcs_file_data,
+            'wells.dat': existing_wells_data,
+            'ref_runcontrol.dat': runcontrol_data,
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    model = get_fake_nexus_simulator(mocker=mocker, fcs_file_path='fcs_file.dat', mock_open=False)
+    model.model_files.surface_files = {}
+    
+    additional_completions = [NexusCompletion(i=1, j=2, k=3, well_radius=4.5, date='01/01/2020'),
+                              NexusCompletion(i=6, j=7, k=8, well_radius=9.11, date='01/01/2020')]
+    
+    expected_file_contents = """TIME 01/01/2019
+WELLSPEC existing_well
+IW JW L RADW
+3 3 3 3.5
+
+TIME 01/01/2020
+WELLSPEC DEV1
+IW JW L RADW
+1 2 3 4.5
+
+6 7 8 9.11
+"""
+    
+    # Act
+    model.wells.add_well(name='DEV1', units=model.run_units, completions=additional_completions)
+
+    # Assert
+    assert model.model_files.well_files[1].file_content_as_list == expected_file_contents.splitlines(keepends=True)
+
 @pytest.mark.parametrize('well_file_data, expected_uuid', [
     (''' TIME 01/01/2020
        WELLSPEC DEV1
