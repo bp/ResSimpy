@@ -175,8 +175,7 @@ def test_modify_times(mocker, date_format, expected_date_format,
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    simulation = NexusSimulator(
-        origin=fcs_file_name, destination="test_new_destination", write_times=True)
+    simulation = NexusSimulator(origin=fcs_file_name, destination="test_new_destination", write_times=True)
     simulation.modify(section="RUNCONTROL", keyword="TIME",
                       content=new_times, operation=operation)
     result_times = simulation.get_content(section="RUNCONTROL", keyword="TIME")
@@ -309,7 +308,7 @@ def test_load_run_control_file_write_times_to_run_control(mocker, fcs_content, r
     mocker.patch("builtins.open", mock_open_wrapper)
 
     # Act
-    simulation = NexusSimulator(origin=fcs_file_name, )
+    simulation = NexusSimulator(origin=fcs_file_name)
     result_times = simulation.get_content(section="RUNCONTROL", keyword="TIME")
 
     # Assert
@@ -348,7 +347,7 @@ def test_runcontrol_no_start_time(mocker):
     mocker.patch("builtins.open", mock_open_wrapper)
     expected_result = '01/01/2016'
     # Act
-    simulation = NexusSimulator(origin=fcs_file_name, )
+    simulation = NexusSimulator(origin=fcs_file_name)
     result = simulation.start_date
 
     # Assert

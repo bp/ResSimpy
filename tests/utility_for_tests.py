@@ -53,7 +53,7 @@ def check_sequential_write_is_correct(expected_file_contents: list[str], modifyi
 
 def get_fake_nexus_simulator(mocker: MockerFixture, fcs_file_path: str = '/path/fcs_file.fcs',
                              mock_open: bool = True, start_date: str | None = None) -> NexusSimulator:
-    """Returns a set up NexusSimulator object that can then be used for testing. Note that if mock_open is set to True,
+    """Returns a set-up NexusSimulator object that can then be used for testing. Note that if mock_open is set to True,
     it mocks out the builtin open method, which may then have to be overwritten by the calling code."""
     if mock_open:
         open_mock = mocker.mock_open(read_data='')

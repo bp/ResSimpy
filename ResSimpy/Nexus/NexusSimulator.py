@@ -8,6 +8,8 @@ from typing import Any, Union, Optional, Sequence
 import resqpy.model as rq
 from datetime import datetime
 
+from ResSimpy.Nexus.NexusIPRMethods import NexusIprMethods
+
 from ResSimpy.Enums.FluidTypeEnums import PvtType
 from ResSimpy.Nexus.DataModels.NexusOptions import NexusOptions
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -164,6 +166,7 @@ class NexusSimulator(Simulator):
         self._structured_grid_operations: StructuredGridOperations = StructuredGridOperations(self)
         self.__lazy_loading: bool = lazy_loading
         self._sim_controls: SimControls = SimControls(self)
+        self.__ipr_methods: NexusIprMethods = NexusIprMethods(self)
 
         if destination is not None and destination != '':
             self.set_output_path(path=destination.strip())
@@ -1193,6 +1196,11 @@ class NexusSimulator(Simulator):
         self._sim_controls = sim_controls
         # ensure the model is correctly set in sim_controls
         setattr(self._sim_controls, '_SimControls__model', self)
+
+    @property
+    def ipr_methods(self) -> NexusIprMethods:
+        """Returns an instance of NexusIPRMethods."""
+        return self.__ipr_methods
 
     @property
     def wells(self) -> NexusWells:

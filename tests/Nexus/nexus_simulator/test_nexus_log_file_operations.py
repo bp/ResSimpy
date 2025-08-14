@@ -86,8 +86,7 @@ def test_get_simulation_progress(mocker, log_file_contents, times, expected_prog
     listdir_mock = mocker.MagicMock(return_value=['nexus_run.log', ''])
     mocker.patch("os.listdir", listdir_mock)
 
-    simulation = NexusSimulator(
-        origin='testpath1/nexus_run.fcs', destination="basic-model")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="basic-model")
     simulation.modify(section="RUNCONTROL", keyword="TIME",
                       content=times, operation='REPLACE')
     mocker.patch("builtins.open", log_file_mock)
@@ -112,8 +111,7 @@ def test_get_status_running(mocker):
     mocker.patch("os.listdir", listdir_mock)
 
     # Act
-    simulation = NexusSimulator(
-        origin='testpath1/Path.fcs', destination="test_new_destination")
+    simulation = NexusSimulator(origin='testpath1/Path.fcs', destination="test_new_destination")
     result = simulation.get_simulation_status()
 
     # Assert
@@ -144,8 +142,7 @@ def test_get_status_finished(mocker, log_file_contents, errors, warnings):
 
     mocker.patch("builtins.open", mock_open_wrapper)
 
-    simulation = NexusSimulator(
-        origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
 
     mocker.patch("builtins.open", log_file_mock)
 
@@ -255,8 +252,7 @@ def test_get_simulation_start_time(mocker, log_file_contents, start_time):
     listdir_mock = mocker.MagicMock(return_value=['nexus_run.log', ''])
     mocker.patch("os.listdir", listdir_mock)
 
-    simulation = NexusSimulator(
-        origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
     mocker.patch("builtins.open", log_file_mock)
 
     # Act
@@ -292,8 +288,7 @@ def test_get_simulation_end_time(mocker, log_file_contents, end_time):
     listdir_mock = mocker.MagicMock(return_value=['nexus_run.log', ''])
     mocker.patch("os.listdir", listdir_mock)
 
-    simulation = NexusSimulator(
-        origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
     mocker.patch("builtins.open", log_file_mock)
 
     # Act
@@ -337,8 +332,7 @@ def test_get_simulation_start_end_time(mocker, log_file_contents, expected_start
     listdir_mock = mocker.MagicMock(return_value=['nexus_run.log', ''])
     mocker.patch("os.listdir", listdir_mock)
 
-    simulation = NexusSimulator(
-        origin='testpath1/nexus_run.fcs', destination="new_destination")
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs', destination="new_destination")
     mocker.patch("builtins.open", log_file_mock)
 
     # Act
