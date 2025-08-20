@@ -1005,12 +1005,6 @@ class NexusSimulator(Simulator):
         update_model_file(file=wells_file, new_content=wells_content, new_folder_path=new_include_file_location,
                           new_name=new_model_name, suffix='_wells.dat')
 
-        # update the run control file
-        warnings.warn('Run control file is not yet implemented in NexusSimulator.write_out_new_model. ')
-
-        # update the options file
-        warnings.warn('Options file is not yet implemented in NexusSimulator.write_out_new_model. ')
-
         # update each of the dynamic properties files
         dynamic_props = {
             'pvt': (self.pvt, self.model_files.pvt_files),
@@ -1041,6 +1035,31 @@ class NexusSimulator(Simulator):
                 else:
                     dyn_files[method_no] = new_dyn_file
                 method.write_to_file(new_file_path=method_file_path, overwrite_file=False)
+
+        # update the options file
+        options_file_name = f"{new_model_name}_options.dat"
+        if self.model_files.options_file is None and self._options is not None:
+            self.set_options(self._options, os.path.join(new_include_file_location, options_file_name))
+        elif self.model_files.options_file is not None:
+            # update the existing options file
+            options_file_content = model_file_generator.output_options_section()
+
+            self.model_files.options_file.location = os.path.join(new_include_file_location, options_file_name)
+            self.model_files.options_file.origin = new_model_path
+            self.model_files.options_file.file_content_as_list = options_file_content.splitlines(keepends=True)
+
+            self.model_files.options_file.write_to_file(
+                new_file_path=self.model_files.options_file.location, overwrite_file=overwrite_files)
+
+        # update runcontrol
+        runcontrol_path = os.path.join(new_include_file_location, f"{new_model_name}_reporting.dat")
+        if self.model_files.runcontrol_file is None and self.reporting is not None and self.sim_controls is not None:
+            self.set_reporting_controls(reporting=self.reporting, new_file_path=runcontrol_path)
+        elif self.model_files.runcontrol_file is not None:
+            runcontrol_file_content = model_file_generator.output_runcontrol_section()
+            update_model_file(file=self.model_files.runcontrol_file, new_content=runcontrol_file_content,
+                              new_folder_path=new_include_file_location,
+                              new_name=new_model_name, suffix='_runcontrol.dat')
 
         # create new fcsfile
         fcs_content = model_file_generator.generate_base_model_file_contents()
@@ -1143,6 +1162,41 @@ class NexusSimulator(Simulator):
                 lazy_loading=self.__lazy_loading
             )
 
+    def set_options(self, options: NexusOptions, options_file_path: Optional[str] = None) -> None:
+        """Sets the Nexus options for the simulator.
+
+        Args:
+            options (NexusOptions): An instance of NexusOptions to set.
+            options_file_path (str): Path to the options file to be set.
+        """
+        if not isinstance(options, NexusOptions):
+            raise TypeError("options must be an instance of NexusOptions")
+        if options_file_path is None:
+            # pick a default name
+            options_file_path = os.path.join(os.path.dirname(self.model_files.location),
+                                             f'{self.root_name}_options.dat')
+        self._options = options
+        # Ensure the options file is set correctly
+        new_options_file = NexusFile(
+            file_content_as_list=options.to_string().splitlines(keepends=True),
+            location=options_file_path,
+            origin=self.model_files.location,
+        )
+        self.model_files.options_file = new_options_file
+        self._options.file = new_options_file
+
+    def set_sim_controls(self, sim_controls: SimControls) -> None:
+        """Sets the simulation controls for the simulator.
+
+        Args:
+            sim_controls (SimControls): An instance of SimControls to set.
+        """
+        if not isinstance(sim_controls, SimControls):
+            raise TypeError("sim_controls must be an instance of SimControls")
+        self._sim_controls = sim_controls
+        # ensure the model is correctly set in sim_controls
+        setattr(self._sim_controls, '_SimControls__model', self)
+
     @property
     def ipr_methods(self) -> NexusIprMethods:
         """Returns an instance of NexusIPRMethods."""
@@ -1152,3 +1206,37 @@ class NexusSimulator(Simulator):
     def wells(self) -> NexusWells:
         """Returns the associated NexusWells for the simulator."""
         return self._wells
+
+    @property
+    def reporting(self) -> NexusReporting:
+        """Returns the associated NexusReporting for the simulator."""
+        return self._reporting
+
+    def set_reporting_controls(self, reporting: NexusReporting, new_file_path: str | None = None) -> None:
+        """Sets the new reporting controls for the simulator.
+
+        Args:
+            reporting (NexusReporting): An instance of NexusReporting to set.
+            new_file_path (str | None): Optional path to save the reporting file. If None, a default path is used.
+        """
+        if not isinstance(reporting, NexusReporting):
+            raise TypeError("reporting must be an instance of NexusReporting")
+        if new_file_path is None:
+            # pick a default name
+            new_file_path = os.path.join(os.path.dirname(self.model_files.location), f'{self.root_name}_reporting.dat')
+        # Ensure the options file is set correctly
+
+        self._reporting = reporting
+        model_name = self.root_name
+        if model_name is None:
+            model_name = 'default_name.fcs'
+        model_file_generator = NexusModelFileGenerator(model=self, model_name=model_name)
+        new_reporting_file = NexusFile(
+            file_content_as_list=model_file_generator.output_runcontrol_section().splitlines(keepends=True),
+            location=new_file_path,
+            origin=self.model_files.location,
+        )
+        self.model_files.runcontrol_file = new_reporting_file
+
+        # ensure the model is correctly set in reporting
+        setattr(self._reporting, '_NexusReporting__model', self)

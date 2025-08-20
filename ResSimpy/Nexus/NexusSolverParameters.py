@@ -11,43 +11,48 @@ from ResSimpy.Nexus.NexusKeywords.runcontrol_keywords import (DT_KEYWORDS, SOLVE
                                                               SOLVER_SCOPED_KEYWORDS, SOLVER_KEYWORDS,
                                                               IMPSTAB_KEYWORDS, GRIDSOLVER_KEYWORDS, SOLO_KEYWORDS,
                                                               TOLS_KEYWORDS, DCMAX_KEYWORDS, MAX_CHANGE_KEYWORDS)
-from ResSimpy.DataModelBaseClasses.SolverParameter import SolverParameter
 from ResSimpy.GenericContainerClasses.SolverParameters import SolverParameters
 from ResSimpy.FileOperations import file_operations as fo
+from ResSimpy.Time.ISODateTime import ISODateTime
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
 
 class NexusSolverParameters(SolverParameters):
-    def __init__(self, model: NexusSimulator) -> None:
+    def __init__(self, model: NexusSimulator, assume_loaded: bool = False) -> None:
         """NexusSolverParameters class constructor.
 
         Args:
             model (NexusSimulator): Originating NexusSimulator object.
-            start_date (str): Start date of the simulation.
+            assume_loaded (bool): If True, assumes that the solver parameters are already loaded and does not attempt
+                to load them.
         """
         self.__solver_parameters: Sequence[NexusSolverParameter] | None = None
         self.__model = model
         self.file_content = ['']
         self.start_date = ''
+        self.__assume_loaded = assume_loaded
 
     @property
-    def solver_parameters(self) -> Sequence[SolverParameter]:
+    def solver_parameters(self) -> Sequence[NexusSolverParameter]:
         """Returns a list of solver parameters (usually of type list).
 
         If solver parameters are not loaded 'self.load' will attempt to load them.
         If loading fails it will return a value error.
         """
-        if self.__solver_parameters is None:
+        if self.__solver_parameters is None and not self.__assume_loaded:
             self.load()
         if self.__solver_parameters is None:
-            raise ValueError('No solver parameters found.')
+            return []
         return self.__solver_parameters
 
-    @solver_parameters.setter
-    def solver_parameters(self, value: list[NexusSolverParameter]) -> None:
-        """Sets solver parameters for this instance and returns none.
+    def get_all(self) -> Sequence[NexusSolverParameter]:
+        """Returns all solver parameters."""
+        return self.solver_parameters
+
+    def set_solver_parameters(self, value: list[NexusSolverParameter]) -> None:
+        """Sets solver parameters for this instance.
 
         Args:
             value(list[NexusSolverParameter]): list of solver parameters.
@@ -104,9 +109,9 @@ class NexusSolverParameters(SolverParameters):
                 timestep_method = fo.get_expected_token_value('METHOD', line, file_list=self.file_content)
                 # convert the string to the enum
                 if timestep_method.lower() == 'implicit':
-                    timestep_method_enum = TimeSteppingMethod.implicit
+                    timestep_method_enum = TimeSteppingMethod.IMPLICIT
                 else:
-                    timestep_method_enum = TimeSteppingMethod.impes
+                    timestep_method_enum = TimeSteppingMethod.IMPES
                 # set the timestepping_method in the object
                 solver_parameter_for_timestep.timestepping_method = timestep_method_enum
 
@@ -294,3 +299,20 @@ class NexusSolverParameters(SolverParameters):
                                            }
         keyword_mapping = solver_param_to_keyword_mapping[current_solver_param_token]
         return keyword_mapping
+
+    def to_string_for_date(self, date: ISODateTime) -> str:
+        """Outputs the string of all the solver parameters for a given date.
+
+        Args:
+        date (ISODateTime): Date for which to output the solver parameters in ISODateTime format.
+
+        Returns:
+            str: String representation of the solver parameters for the given date.
+        """
+
+        solver_parameters_for_date = [x for x in self.solver_parameters if x.iso_date == date]
+        output_str = ''
+
+        for solver_param in solver_parameters_for_date:
+            output_str += solver_param.to_string()
+        return output_str

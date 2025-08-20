@@ -1,54 +1,22 @@
 from __future__ import annotations
 
 import warnings
-from dataclasses import dataclass
 from datetime import datetime, timedelta
 from functools import cmp_to_key
-from typing import Sequence, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
-import pandas as pd
 
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
+from ResSimpy.Nexus.DataModels.nexus_grid_to_proc import GridToProc
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
 from ResSimpy.Nexus.NexusSolverParameters import NexusSolverParameters
 from ResSimpy.Nexus.constants import DATE_WITH_TIME_LENGTH
-from ResSimpy.DataModelBaseClasses.SolverParameter import SolverParameter
+from ResSimpy.Time.ISODateTime import ISODateTime
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
-
-
-@dataclass
-class GridToProc:
-    """Class for storing the GRIDTOPROC table information from the Options file."""
-    grid_to_proc_table: None | pd.DataFrame = None
-    auto_distribute: None | str = None
-
-    @property
-    def table_header(self) -> str:
-        """Start of the GRIDTOPROC definition table."""
-        return 'GRIDTOPROC'
-
-    @property
-    def table_footer(self) -> str:
-        """End of the GRIDTOPROC definition table."""
-        return 'END' + self.table_header
-
-    def get_number_of_processors(self) -> int:
-        """Returns the number of processors to use for the simulation.
-
-        Returns:
-        -------
-            int: number of processors to use for the simulation
-        """
-        if self.grid_to_proc_table is None:
-            return 0
-        if 'PROCESS' in self.grid_to_proc_table.columns:
-            return self.grid_to_proc_table['PROCESS'].max()
-        else:
-            return 0
 
 
 class SimControls:
@@ -69,7 +37,7 @@ class SimControls:
         self.__date_format_string: str = "%m/%d/%Y"
         self.__number_of_processors: None | int = None
         self.__grid_to_proc: None | GridToProc = None
-        self.__solver_parameters: NexusSolverParameters = NexusSolverParameters(model)
+        self.__solver_parameters: NexusSolverParameters = NexusSolverParameters(model, model.assume_loaded)
 
     @property
     def date_format_string(self) -> str:
@@ -84,6 +52,14 @@ class SimControls:
     def times(self) -> list[str]:
         """Returns list of times, if value is not provided it will return none."""
         return self.__times if self.__times is not None else []
+
+    @property
+    def times_iso_date(self) -> list[ISODateTime]:
+        """Returns list of times as ISODateTime objects, if value is not provided it will return none."""
+        if self.times is None:
+            return []
+        return [ISODateTime.convert_to_iso(date=date, date_format=self.__model.date_format,
+                                           start_date=self.__model.start_date) for date in self.times]
 
     @staticmethod
     def get_times(times_file: list[str]) -> list[str]:
@@ -350,14 +326,17 @@ class SimControls:
 
         self.modify_times(content=times, operation='replace')
 
-    def modify_times(self, content: None | list[str] = None, operation: str = 'merge') -> None:
+    def modify_times(self, content: None | list[str] = None, operation: str = 'merge',
+                     update_in_file: bool = True) -> None:
         """Modifies the output times in the simulation.
 
         Args:
         ----
-            content (list[str]], optional): The content to modify using the above operation, \
+            content (list[str], optional): The content to modify using the above operation, \
             represented as a list of strings with a new entry per line of the file. Defaults to None.
             operation (str, optional): operation to perform on the content provided (e.g. 'merge'). Defaults to 'merge'.
+            update_in_file (bool, optional): If True, updates the times in the run control file otherwise sets the times
+                in memory only. Defaults to True.
 
         Raises:
         ------
@@ -388,7 +367,7 @@ class SimControls:
 
         self.__times = self.sort_remove_duplicate_times(self.__times)
 
-        if self.__model.destination is not None:
+        if self.__model.destination is not None and update_in_file:
             self.__update_times_in_file()
 
     @property
@@ -461,12 +440,33 @@ class SimControls:
             self._load_options_file()
         return self.__grid_to_proc
 
+    def set_grid_to_proc(self, grid_to_proc: GridToProc) -> None:
+        """Sets the GridToProc object.
+
+        Args:
+            grid_to_proc (GridToProc): The GridToProc object to set.
+        """
+        if not isinstance(grid_to_proc, GridToProc):
+            raise TypeError("grid_to_proc must be an instance of GridToProc")
+        self.__grid_to_proc = grid_to_proc
+        self.__number_of_processors = grid_to_proc.get_number_of_processors()
+
     @property
-    def solver_parameters(self) -> Sequence[SolverParameter]:
+    def solver_parameters(self) -> NexusSolverParameters:
         """Returns the NexusSolverParameters object.
 
         Returns:
         -------
             NexusSolverParameters: NexusSolverParameters object
         """
-        return self.__solver_parameters.solver_parameters
+        return self.__solver_parameters
+
+    def set_solver_parameters(self, solver_parameters: NexusSolverParameters) -> None:
+        """Sets the NexusSolverParameters object.
+
+        Args:
+            solver_parameters (NexusSolverParameters): The NexusSolverParameters object to set.
+        """
+        if not isinstance(solver_parameters, NexusSolverParameters):
+            raise TypeError("solver_parameters must be an instance of NexusSolverParameters")
+        self.__solver_parameters = solver_parameters
