@@ -858,41 +858,77 @@ def test_load_structured_grid_file_keff_values(mocker):
 
 @pytest.mark.parametrize("new_porosity, new_sw, new_netgrs, new_kx, new_ky, new_kz",
                          [
-                             (GridArrayDefinition("VALUE", "porosity_2.inc"),
-                              GridArrayDefinition("CON", "0.33"),
-                              GridArrayDefinition("VALUE", "/new/netgrs_2.inc"),
-                              GridArrayDefinition("VALUE", "KX.INC"),
-                              GridArrayDefinition("MULT", "0.1 KX"),
-                              GridArrayDefinition("VALUE", "path/to/kz.inc")),
+                             (GridArrayDefinition("POROSITY", "VALUE", "porosity_2.inc"),
+                              GridArrayDefinition("SW",       "CON", "0.33"),
+                              GridArrayDefinition("NETGRS",   "VALUE", "/new/netgrs_2.inc"),
+                              GridArrayDefinition("KX",       "VALUE", "KX.INC"),
+                              GridArrayDefinition("KY",       "MULT", "0.1 KX"),
+                              GridArrayDefinition("KZ",       "VALUE", "path/to/kz.inc")),
 
-                             (GridArrayDefinition("VALUE", "porosity_2.inc"),
-                              GridArrayDefinition("CON", "0.33"),
-                              GridArrayDefinition("VALUE", "/new/netgrs_2.inc"),
-                              GridArrayDefinition("VALUE", "KX.INC"),
-                              GridArrayDefinition("CON", "1.111113"),
-                              GridArrayDefinition("VALUE", "path/to/kz.inc")),
+                             (GridArrayDefinition("POROSITY", "VALUE", "porosity_2.inc"),
+                              GridArrayDefinition("SW",       "CON", "0.33"),
+                              GridArrayDefinition("NETGRS",   "VALUE", "/new/netgrs_2.inc"),
+                              GridArrayDefinition("KX",       "VALUE", "KX.INC"),
+                              GridArrayDefinition("KY",       "CON", "1.111113"),
+                              GridArrayDefinition("KZ",       "VALUE", "path/to/kz.inc")),
 
-                             (GridArrayDefinition("VALUE", "/path/porosity_2.inc"),
-                              GridArrayDefinition("VALUE", "sw_file.inc"),
-                              GridArrayDefinition("VALUE", "/new/netgrs_2.inc"),
-                              GridArrayDefinition("CON", "123"),
-                              GridArrayDefinition("CON", "1.111113"),
-                              GridArrayDefinition("MULT", "1 KX")),
+                             (GridArrayDefinition("POROSITY", "VALUE", "/path/porosity_2.inc"),
+                              GridArrayDefinition("SW",       "VALUE", "sw_file.inc"),
+                              GridArrayDefinition("NETGRS",   "VALUE", "/new/netgrs_2.inc"),
+                              GridArrayDefinition("KX",       "CON", "123"),
+                              GridArrayDefinition("KY",       "CON", "1.111113"),
+                              GridArrayDefinition("KZ",       "MULT", "1 KX")),
 
-                             (GridArrayDefinition("CON", "123456"),
-                              GridArrayDefinition("CON", "0.000041"),
-                              GridArrayDefinition("CON", "1.1"),
-                              GridArrayDefinition("MULT", "0.1 KY"),
-                              GridArrayDefinition("CON", "1.111113"),
-                              GridArrayDefinition("MULT", "10 KX")),
+                             (GridArrayDefinition("POROSITY", "CON", "123456"),
+                              GridArrayDefinition("SW",       "CON", "0.000041"),
+                              GridArrayDefinition("NETGRS",   "CON", "1.1"),
+                              GridArrayDefinition("KX",       "MULT", "0.1 KY"),
+                              GridArrayDefinition("KY",       "CON", "1.111113"),
+                              GridArrayDefinition("KZ",       "MULT", "10 KX")),
 
-                             (GridArrayDefinition("VALUE", "/path/porosity/file.inc"),
-                              GridArrayDefinition("VALUE", "sw_file2.inc"),
-                              GridArrayDefinition("VALUE", "netgrs_3.inc"),
-                              GridArrayDefinition("VALUE", "path/to/kx.inc"),
-                              GridArrayDefinition("VALUE", "path/to/ky.inc"),
-                              GridArrayDefinition("VALUE", "path/to/KZ.inc")),
+                             (GridArrayDefinition("POROSITY", "VALUE", "/path/porosity/file.inc"),
+                              GridArrayDefinition("SW",       "VALUE", "sw_file2.inc"),
+                              GridArrayDefinition("NETGRS",   "VALUE", "netgrs_3.inc"),
+                              GridArrayDefinition("KX",       "VALUE", "path/to/kx.inc"),
+                              GridArrayDefinition("KY",       "VALUE", "path/to/ky.inc"),
+                              GridArrayDefinition("KZ",       "VALUE", "path/to/KZ.inc")),
                          ])
+                        #  [
+                        #      (GridArrayDefinition("POROSITY", "VALUE", "porosity_2.inc"),
+                        #       GridArrayDefinition("SW",       "CON", "0.33"),
+                        #       GridArrayDefinition("NETGRS",   "VALUE", "/new/netgrs_2.inc"),
+                        #       GridArrayDefinition("KX",       "VALUE", "KX.INC"),
+                        #       GridArrayDefinition("KY",       "MULT", "0.1 KX"),
+                        #       GridArrayDefinition("KZ",       "VALUE", "path/to/kz.inc")),
+
+                        #      (GridArrayDefinition("POROSITY", "VALUE", "porosity_2.inc"),
+                        #       GridArrayDefinition("SW",       "CON", "0.33"),
+                        #       GridArrayDefinition("NETGRS",   "VALUE", "/new/netgrs_2.inc"),
+                        #       GridArrayDefinition("KX",       "VALUE", "KX.INC"),
+                        #       GridArrayDefinition("KY",       "CON", "1.111113"),
+                        #       GridArrayDefinition("KZ",       "VALUE", "path/to/kz.inc")),
+
+                        #      (GridArrayDefinition("POROSITY", "VALUE", "/path/porosity_2.inc"),
+                        #       GridArrayDefinition("SW",       "VALUE", "sw_file.inc"),
+                        #       GridArrayDefinition("NETGRS",   "VALUE", "/new/netgrs_2.inc"),
+                        #       GridArrayDefinition("KX",       "CON", "123"),
+                        #       GridArrayDefinition("KY",       "CON", "1.111113"),
+                        #       GridArrayDefinition("KZ",       "MULT", "1 KX")),
+
+                        #      (GridArrayDefinition("POROSITY", "CON", "123456"),
+                        #       GridArrayDefinition("SW",       "CON", "0.000041"),
+                        #       GridArrayDefinition("NETGRS",   "CON", "1.1"),
+                        #       GridArrayDefinition("KX",       "MULT", "0.1 KY"),
+                        #       GridArrayDefinition("KY",       "CON", "1.111113"),
+                        #       GridArrayDefinition("KZ",       "MULT", "10 KX")),
+
+                        #      (GridArrayDefinition("POROSITY", "VALUE", "/path/porosity/file.inc"),
+                        #       GridArrayDefinition("SW",       "VALUE", "sw_file2.inc"),
+                        #       GridArrayDefinition("NETGRS",   "VALUE", "netgrs_3.inc"),
+                        #       GridArrayDefinition("KX",       "VALUE", "path/to/kx.inc"),
+                        #       GridArrayDefinition("KY",       "VALUE", "path/to/ky.inc"),
+                        #       GridArrayDefinition("KZ",       "VALUE", "path/to/KZ.inc")),
+                        #  ])
 def test_save_structured_grid_values(mocker, new_porosity, new_sw, new_netgrs, new_kx, new_ky, new_kz):
     """Test saving values passed from the front end to the structured grid file and update the class"""
     # Arrange
@@ -1571,9 +1607,10 @@ def test_nested_includes_with_grid_array_keywords(mocker):
     sim_obj = NexusSimulator(origin='/nexus_run.fcs')
 
     expected_kx_result = GridArrayDefinition(modifier='VALUE', value='/inc_file_kx.inc', mods=None,
-                                             absolute_path='/inc_file_kx.inc')
+                                             absolute_path='/inc_file_kx.inc', name='KX')
     expected_ky_result = GridArrayDefinition(modifier='VALUE', value='inc_file2.inc', mods=None,
-                                             absolute_path=os.path.join('/nexus_files', 'grid', 'inc_file2.inc'))
+                                             absolute_path=os.path.join('/nexus_files', 'grid', 'inc_file2.inc'),
+                                             name='KY')
 
     # Act
     result_kx = sim_obj.grid.kx
@@ -1627,7 +1664,7 @@ def test_grid_array_definitions_abs_path(mocker, structured_grid_file_contents, 
     sim_obj = NexusSimulator(origin=fcs_path)
 
     expected_kx_result = GridArrayDefinition(modifier=modifier, value=expected_value, mods=None,
-                                             absolute_path=full_file_path)
+                                             absolute_path=full_file_path, name='KX')
 
     # Act
     result_kx = sim_obj.grid.kx
@@ -1737,10 +1774,10 @@ KY CON
                             nz=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
                             )
     expected_lgr._kx = GridArrayDefinition(modifier='ZVAR', value='KX_file.dat',
-                                           absolute_path=os.path.join('testpath1', 'KX_file.dat'))
-    expected_lgr._ky = GridArrayDefinition(modifier='CON', value='1')
-    expected_root_kx = GridArrayDefinition(modifier='CON', value='100')
-    expected_root_ky = GridArrayDefinition(modifier='CON', value='10')
+                                           absolute_path=os.path.join('testpath1', 'KX_file.dat'), name='KX')
+    expected_lgr._ky = GridArrayDefinition(modifier='CON', value='1', name='KY')
+    expected_root_kx = GridArrayDefinition(modifier='CON', value='100', name='KX')
+    expected_root_ky = GridArrayDefinition(modifier='CON', value='10', name='KY')
 
     model = NexusSimulator('testpath1/nexus_run.fcs')
     # Act
@@ -1921,15 +1958,15 @@ INCLUDE  SW.dat
     mocker.patch("os.path.exists", mock_isfile)
 
     expected_sw = GridArrayDefinition(modifier='ZVAR', value='SW.dat',
-                                      absolute_path=os.path.join('/path/to/grid', 'SW.dat'))
+                                      absolute_path=os.path.join('/path/to/grid', 'SW.dat'), name='SW')
     expected_kz = GridArrayDefinition(modifier='ZVAR', value='KX.dat',
                                       absolute_path=os.path.join('/path/to/grid', 'KX.dat'),
                                       mods={'MOD': pd.DataFrame({'i1': [1], 'i2': [57], 'j1': [1], 'j2': [57],
-                                                                 'k1': [1], 'k2': [82], '#v': ['*1.10']})})
+                                                                 'k1': [1], 'k2': [82], '#v': ['*1.10']})}, name='KZ')
     expected_kx = GridArrayDefinition(modifier='ZVAR', value='KX.dat',
                                       absolute_path=os.path.join('/path/to/grid', 'KX.dat'),
                                       mods={'MOD': pd.DataFrame({'i1': [1], 'i2': [57], 'j1': [1], 'j2': [57],
-                                                                 'k1': [1], 'k2': [82], '#v': ['*1.10']})})
+                                                                 'k1': [1], 'k2': [82], '#v': ['*1.10']})}, name='KX')
 
     nexus_model = NexusSimulator(origin='/path/to/nexus/fcsfile.dat')
 

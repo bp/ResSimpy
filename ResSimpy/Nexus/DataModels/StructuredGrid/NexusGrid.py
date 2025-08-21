@@ -1721,7 +1721,7 @@ class NexusGrid(Grid):
         # remove the array from the grid file
         if self.__grid_nexus_file is None or self.__grid_nexus_file.file_content_as_list is None:
             raise ValueError('No grid file to add object to.')
-        grid_array_str = grid_array_definition.to_string(array=array).splitlines(keepends=True)
+        grid_array_str = grid_array_definition.to_string().splitlines(keepends=True)
 
         if index is None:
             # add it to the end of the grid file if no index is provided

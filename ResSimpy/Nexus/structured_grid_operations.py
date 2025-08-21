@@ -91,7 +91,7 @@ class StructuredGridOperations:
             # piece two: find out if we have any MOD cards to deal with
             # piece three: make the mod table and add it to the grid array
             relative_line_locations = (
-                StructuredGridOperations.__make_grid_def(file_as_list, ignore_values, line, line_indx, modifier,
+                StructuredGridOperations.__make_grid_def(token, file_as_list, ignore_values, line, line_indx, modifier,
                                                          region_name, token_modifier, token_property, grid_nexus_file,
                                                          original_line_location=original_line_location))
             grid_array_definition = token_property if not isinstance(token_property, dict) else (
@@ -111,11 +111,11 @@ class StructuredGridOperations:
             grid_nexus_file.add_object_locations(grid_array_definition.id, file_line_indices)
 
     @staticmethod
-    def __make_grid_def(file_as_list: list[str], ignore_values: list[str], line: str, line_indx: int, modifier: str,
-                        region_name: str, token_modifier: str,
+    def __make_grid_def(token: str, file_as_list: list[str], ignore_values: list[str], line: str,
+                        line_indx: int, modifier: str, region_name: str, token_modifier: str,
                         token_property: GridArrayDefinition | dict[str, GridArrayDefinition],
                         grid_file: NexusFile, original_line_location: int) -> list[int]:
-        """A function that begins the process of populating the grid away.
+        """A function that begins the process of populating the grid array.
 
         Returns:
             list[int]: a list of line locations relative to the file as list.
@@ -140,18 +140,22 @@ class StructuredGridOperations:
                 if not isinstance(token_property, dict):
                     token_property.modifier = 'MULT'
                     token_property.value = f"{numerical_value} {value_to_multiply}"
+                    token_property.name = token
                 elif region_name != '':  # IREGION
                     token_property[region_name] = GridArrayDefinition()
                     token_property[region_name].modifier = 'MULT'
                     token_property[region_name].value = f"{numerical_value} {value_to_multiply}"
+                    token_property[region_name].name = f"{token} {region_name}"
         elif modifier == 'NONE':
             if not isinstance(token_property, dict):
                 token_property.modifier = None
                 token_property.value = None
+                token_property.name = token
             elif region_name != '':
                 token_property[region_name] = GridArrayDefinition()
                 token_property[region_name].modifier = None
                 token_property[region_name].value = None
+                token_property[region_name].name = f"{token} {region_name}"
 
         else:
             value, line_loc = fo.get_token_value_with_line_index(modifier, line, file_as_list[line_indx:],
@@ -161,10 +165,12 @@ class StructuredGridOperations:
                 if not isinstance(token_property, dict):
                     token_property.value = None
                     token_property.modifier = modifier
+                    token_property.name = token
                 elif region_name != '':  # IREGION
                     token_property[region_name] = GridArrayDefinition()
                     token_property[region_name].modifier = modifier
                     token_property[region_name].value = None
+                    token_property[region_name].name = f"{token} {region_name}"
             else:
                 # Check if VALUE modifier is followed by a numeric string or an INCLUDE file
                 line_to_check = file_as_list[line_indx + 1]
@@ -176,6 +182,7 @@ class StructuredGridOperations:
                     if not isinstance(token_property, dict):
                         token_property.value = value
                         token_property.modifier = modifier
+                        token_property.name = token
                         StructuredGridOperations.__add_absolute_path_to_grid_array_definition(
                             grid_array_definition=token_property, line_index_of_include_file=original_line_location,
                             grid_nexus_file=grid_file)
@@ -185,6 +192,7 @@ class StructuredGridOperations:
                         region_grid_def = GridArrayDefinition()
                         region_grid_def.modifier = modifier
                         region_grid_def.value = value
+                        region_grid_def.name = f"{token} {region_name}"
                         StructuredGridOperations.__add_absolute_path_to_grid_array_definition(
                             grid_array_definition=region_grid_def,
                             line_index_of_include_file=original_line_location,
@@ -207,12 +215,14 @@ class StructuredGridOperations:
                             break
                     if not isinstance(token_property, dict):
                         token_property.modifier = modifier
+                        token_property.name = token
                         token_property.value = '\n'.join([line.strip()
                                                           for line in file_as_list[start_indx:end_indx]]).strip()
                         object_line_locs_relative_to_file_as_list.extend(list(range(start_indx, end_indx)))
                     elif region_name != '':  # IREGION
                         token_property[region_name] = GridArrayDefinition()
                         token_property[region_name].modifier = modifier
+                        token_property[region_name].name = f"{token} {region_name}"
                         token_property[region_name].value = '\n'.join([line.strip() for line in
                                                                        file_as_list[start_indx:end_indx]]).strip()
                         object_line_locs_relative_to_file_as_list.extend(list(range(start_indx, end_indx)))
@@ -222,6 +232,7 @@ class StructuredGridOperations:
                         if not isinstance(token_property, dict):
                             token_property.modifier = modifier
                             token_property.value = file_as_list[line_indx - 1].split('INCLUDE')[1].strip()
+                            token_property.name = token
                             token_property.keyword_in_include_file = True
                             StructuredGridOperations.__add_absolute_path_to_grid_array_definition(
                                 grid_array_definition=token_property, line_index_of_include_file=original_line_location,
@@ -230,6 +241,7 @@ class StructuredGridOperations:
                         elif region_name != '':  # IREGION
                             token_property[region_name] = GridArrayDefinition()
                             token_property[region_name].modifier = modifier
+                            token_property[region_name].name = f"{token} {region_name}"
                             token_property[region_name].value \
                                 = file_as_list[line_indx - 1].split('INCLUDE')[1].strip()
                             StructuredGridOperations.__add_absolute_path_to_grid_array_definition(
