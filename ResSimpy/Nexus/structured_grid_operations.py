@@ -145,7 +145,8 @@ class StructuredGridOperations:
                     token_property[region_name] = GridArrayDefinition()
                     token_property[region_name].modifier = 'MULT'
                     token_property[region_name].value = f"{numerical_value} {value_to_multiply}"
-                    token_property[region_name].name = f"{token} {region_name}"
+                    token_property[region_name].name = token
+                    token_property[region_name].region_name = region_name
         elif modifier == 'NONE':
             if not isinstance(token_property, dict):
                 token_property.modifier = None
@@ -155,7 +156,8 @@ class StructuredGridOperations:
                 token_property[region_name] = GridArrayDefinition()
                 token_property[region_name].modifier = None
                 token_property[region_name].value = None
-                token_property[region_name].name = f"{token} {region_name}"
+                token_property[region_name].name = token
+                token_property[region_name].region_name = region_name
 
         else:
             value, line_loc = fo.get_token_value_with_line_index(modifier, line, file_as_list[line_indx:],
@@ -170,7 +172,8 @@ class StructuredGridOperations:
                     token_property[region_name] = GridArrayDefinition()
                     token_property[region_name].modifier = modifier
                     token_property[region_name].value = None
-                    token_property[region_name].name = f"{token} {region_name}"
+                    token_property[region_name].name = token
+                    token_property[region_name].region_name = region_name
             else:
                 # Check if VALUE modifier is followed by a numeric string or an INCLUDE file
                 line_to_check = file_as_list[line_indx + 1]
@@ -192,7 +195,8 @@ class StructuredGridOperations:
                         region_grid_def = GridArrayDefinition()
                         region_grid_def.modifier = modifier
                         region_grid_def.value = value
-                        region_grid_def.name = f"{token} {region_name}"
+                        region_grid_def.name = token
+                        region_grid_def.region_name = region_name
                         StructuredGridOperations.__add_absolute_path_to_grid_array_definition(
                             grid_array_definition=region_grid_def,
                             line_index_of_include_file=original_line_location,
@@ -222,7 +226,8 @@ class StructuredGridOperations:
                     elif region_name != '':  # IREGION
                         token_property[region_name] = GridArrayDefinition()
                         token_property[region_name].modifier = modifier
-                        token_property[region_name].name = f"{token} {region_name}"
+                        token_property[region_name].name = token
+                        token_property[region_name].region_name = region_name
                         token_property[region_name].value = '\n'.join([line.strip() for line in
                                                                        file_as_list[start_indx:end_indx]]).strip()
                         object_line_locs_relative_to_file_as_list.extend(list(range(start_indx, end_indx)))
@@ -241,7 +246,8 @@ class StructuredGridOperations:
                         elif region_name != '':  # IREGION
                             token_property[region_name] = GridArrayDefinition()
                             token_property[region_name].modifier = modifier
-                            token_property[region_name].name = f"{token} {region_name}"
+                            token_property[region_name].name = token
+                            token_property[region_name].region_name = region_name
                             token_property[region_name].value \
                                 = file_as_list[line_indx - 1].split('INCLUDE')[1].strip()
                             StructuredGridOperations.__add_absolute_path_to_grid_array_definition(

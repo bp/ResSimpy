@@ -19,6 +19,7 @@ class GridArrayDefinition:
 
     Args:
         name (str): the name of the grid array property.
+        region_name (str): the name of the region this grid array property belongs to.
         modifier (Optional[str]): the modifier for the grid array property (e.g. CON, MULT, etc.)
         value (Optional[str]): the actual values for the grid array property in question. Can be an include file.
         mods (Optional[dict[str, pd.DataFrame]): if the grid array has an associated mod card we capture it.
@@ -26,6 +27,7 @@ class GridArrayDefinition:
         absolute_path (Optional[str]): the absolute path to the path if value is an include file.
     """
     name: str = field(default='', compare=False)
+    region_name: str = field(default='', compare=False)
     modifier: Optional[str] = None
     value: Optional[str] = None
     mods: Optional[dict[str, pd.DataFrame]] = None
@@ -37,11 +39,12 @@ class GridArrayDefinition:
     def __init__(self, modifier: Optional[str] = None, value: Optional[str] = None,
                  mods: Optional[dict[str, pd.DataFrame]] = None, keyword_in_include_file: bool = False,
                  absolute_path: Optional[str] = None, array: Optional[np.ndarray] = None,
-                 name: str = '') -> None:
+                 name: str = '', region_name: str = '') -> None:
         """Initializes a grid array definition object, representing a grid array property.
 
         Args:
-            name (Optional[str]): the name of the grid array property.
+            name (str): the name of the grid array property.
+            region_name (str): the name of the region this grid array property belongs to.
             modifier (Optional[str]): the modifier for the grid array property (e.g. CON, MULT, etc.)
             value (Optional[str]): the actual values for the grid array property in question. Can be an include file.
             mods (Optional[dict[str, pd.DataFrame]): if the grid array has an associated mod card we capture it.
@@ -51,6 +54,7 @@ class GridArrayDefinition:
         """
         self.__id = uuid4()
         self.name = name
+        self.region_name = region_name
         self.modifier = modifier
         self.value = value
         self.mods = mods
@@ -138,7 +142,10 @@ class GridArrayDefinition:
 
     def to_string(self) -> str:
         """Converts the object to a string."""
-        grid_string = f'{self.name.upper()} {self.modifier}\n'
+        if len(self.region_name) == 0:  # If no region name is provided
+            grid_string = f'{self.name.upper()} {self.modifier}\n'
+        else:
+            grid_string = f'{self.name.upper()} {self.region_name} {self.modifier}\n'
 
         # Check if the value is an include file
         if (self.value is not None and isinstance(self.value, str)

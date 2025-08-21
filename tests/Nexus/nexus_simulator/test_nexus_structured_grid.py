@@ -471,9 +471,9 @@ def test_load_structured_grid_file_iregion_multiple(mocker):
 NX  NY  NZ
 10  10  10
 IREGION VALUE
-INCLUDE /path/to/file.inc 
+INCLUDE /path/to/file.inc
 MOD
-30 38  1  30  1  1  = 1       
+30 38  1  30  1  1  = 1
 IREGION inj_02 CON
 3
 MOD
@@ -515,6 +515,14 @@ LIST"""  # ends structured_grid_file_contents
 
     # Assert
     # note that iregion is a dict
+    assert result.iregion['IREG1'].name == 'IREGION'
+    assert result.iregion['inj_02'].name == 'IREGION'
+    assert result.iregion['inj_03'].name == 'IREGION'
+    assert result.iregion['inj_04'].name == 'IREGION'
+    assert result.iregion['IREG1'].region_name == 'IREG1'
+    assert result.iregion['inj_02'].region_name == 'inj_02'
+    assert result.iregion['inj_03'].region_name == 'inj_03'
+    assert result.iregion['inj_04'].region_name == 'inj_04'
     assert result.iregion['IREG1'].keyword_in_include_file is False
     assert result.iregion['inj_02'].keyword_in_include_file is False
     pd.testing.assert_frame_equal(result.iregion['IREG1'].mods['MOD'], ireg1_expected_df)
