@@ -43,7 +43,6 @@ class File(FileBase):
     include_locations: Optional[list[str]] = None
     file_content_as_list: Optional[list[str]] = field(default=None, repr=False)
     origin: Optional[str] = None
-    rootdir: Optional[str] = None
     object_locations: Optional[dict[UUID, list[int]]] = field(default=None, repr=False)
     line_locations: Optional[list[tuple[int, UUID]]] = field(default=None, repr=False)
     linked_user: Optional[str] = field(default=None)
@@ -55,7 +54,6 @@ class File(FileBase):
     def __init__(self, location: str,
                  include_locations: Optional[list[str]] = None,
                  origin: Optional[str] = None,
-                 rootdir: Optional[str] = None,
                  file_content_as_list: Optional[list[str]] = None,
                  linked_user: Optional[str] = None,
                  last_modified: Optional[datetime] = None,
@@ -71,7 +69,6 @@ class File(FileBase):
             file_loading_skipped (bool): Whether the file loading was skipped due to the file being too large an array.
             include_locations: Optional[list[str]]: list of file paths to the included files.
             origin: Optional[str]: The file path to the file that included this file. None for top level files.
-            rootdir (Optional[str]): The root directory of the main simulation file. Defaults to None.
             include_objects: Optional[list[NexusFile]: list of NexusFile objects that are included in this file.
             file_content_as_list: Optional[list[str]]: list of strings representing the content of the file.
             linked_user (Optional[str]): user or owner of the file. Defaults to None
@@ -87,13 +84,12 @@ class File(FileBase):
             self.file_content_as_list = file_content_as_list
 
         if origin is not None:
-            self.location = fo.get_full_file_path(location, origin, rootdir)
+            self.location = fo.get_full_file_path(location, origin)
         else:
             self.location = location
         self.include_locations: Optional[list[str]] = get_empty_list_str() if include_locations is None else \
             include_locations
         self.origin: Optional[str] = origin
-        self.rootdir: Optional[str] = rootdir
         if self.object_locations is None:
             self.object_locations: dict[UUID, list[int]] = get_empty_dict_uuid_list_int()
         if self.line_locations is None:
@@ -302,7 +298,6 @@ class File(FileBase):
 
     @staticmethod
     def generate_file_include_structure(simulator_type: type[T], file_path: str, origin: Optional[str] = None,
-                                        rootdir: Optional[str] = None,
                                         recursive: bool = True, skip_arrays: bool = True,
                                         top_level_file: bool = True) -> T:
         """Generates a nexus file instance for a provided text file with information storing the included files.
@@ -311,14 +306,13 @@ class File(FileBase):
             simulator_type (type[T]): The type of the Simulator e.g. NexusSimulator
             file_path (str): Path to the file to generate the structure from.
             origin (Optional[str], optional): Where the file was opened from. Defaults to None.
-            rootdir (Optional[str], optional): The root directory of the main simulation file. Defaults to None.
             recursive (bool): Whether the method should recursively drill down multiple layers of include_locations.
             skip_arrays (bool): If set True skips the INCLUDE arrays that come after property array and VALUE
             top_level_file (bool): If set to True, the code assumes this is a 'top level' file rather than an included
             one.
 
         Returns:
-            File: a class instance for File with knowledge of include files
+            NexusFile: a class instance for NexusFile with knowledge of include files
         """
         is_nexus_file = simulator_type.__name__ == "NexusFile"  # Can't use isinstance() as importing NexusFile would
         # create a circular reference.
@@ -326,7 +320,7 @@ class File(FileBase):
 
         full_file_path = file_path
         if origin is not None:
-            full_file_path = fo.get_full_file_path(file_path, origin, rootdir)
+            full_file_path = fo.get_full_file_path(file_path, origin)
 
         try:
             file_as_list = fo.load_file_as_list(full_file_path)
@@ -335,7 +329,6 @@ class File(FileBase):
             nexus_file_class = simulator_type(location=file_path,
                                               include_locations=None,
                                               origin=origin,
-                                              rootdir=rootdir,
                                               include_objects=None,
                                               file_content_as_list=None,
                                               linked_user=None,
@@ -371,7 +364,6 @@ class File(FileBase):
                         location=file_path,
                         include_locations=inc_file_list,
                         origin=origin,
-                        rootdir=rootdir,
                         include_objects=includes_objects,
                         file_content_as_list=modified_file_as_list
                     )
@@ -390,7 +382,7 @@ class File(FileBase):
                                                remove_quotation_marks=True)
             if inc_file_path is None:
                 continue
-            inc_full_path = fo.get_full_file_path(inc_file_path, origin=full_file_path, rootdir=rootdir)
+            inc_full_path = fo.get_full_file_path(inc_file_path, origin=full_file_path)
             # store the included files as files inside the object
             inc_file_list.append(inc_full_path)
 
@@ -422,7 +414,6 @@ class File(FileBase):
                 inc_file = simulator_type(location=inc_file_path,
                                           include_locations=None,
                                           origin=full_file_path,
-                                          rootdir=rootdir,
                                           include_objects=None,
                                           file_content_as_list=None,
                                           linked_user=user,
@@ -434,8 +425,7 @@ class File(FileBase):
             else:
                 inc_file = simulator_type.generate_file_include_structure(simulator_type=simulator_type,
                                                                           file_path=inc_file_path,
-                                                                          origin=full_file_path, rootdir=rootdir,
-                                                                          recursive=True,
+                                                                          origin=full_file_path, recursive=True,
                                                                           skip_arrays=skip_arrays, top_level_file=False)
                 if includes_objects is None:
                     raise ValueError('include_objects is None - recursion failure.')
@@ -448,7 +438,6 @@ class File(FileBase):
             location=file_path,
             include_locations=inc_file_list,
             origin=origin,
-            rootdir=rootdir,
             include_objects=includes_objects,
             file_content_as_list=modified_file_as_list,
             linked_user=user,

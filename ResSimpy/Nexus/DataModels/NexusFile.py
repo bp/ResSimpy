@@ -25,7 +25,6 @@ class NexusFile(File):
     def __init__(self, location: str,
                  include_locations: Optional[list[str]] = None,
                  origin: Optional[str] = None,
-                 rootdir: Optional[str] = None,
                  include_objects: Optional[Sequence[File]] = None,
                  file_content_as_list: Optional[list[str]] = None,
                  linked_user: Optional[str] = None,
@@ -37,7 +36,6 @@ class NexusFile(File):
             location: str: The file path to the fcs file.
             include_locations: Optional[list[str]]: list of file paths to the included files.
             origin: Optional[str]: The file path to the file that included this file. None for top level files.
-            rootdir: Optional[str]: The root directory of the file. Defaults to None.
             include_objects: Optional[list[NexusFile]: list of NexusFile objects that are included in this file.
             file_content_as_list: Optional[list[str]]: list of strings representing the content of the file.
             linked_user (Optional[str]): user or owner of the file. Defaults to None
@@ -46,7 +44,7 @@ class NexusFile(File):
         """
         super().__init__(location=location, file_content_as_list=file_content_as_list, include_objects=include_objects,
                          file_loading_skipped=file_loading_skipped, include_locations=include_locations, origin=origin,
-                         rootdir=rootdir, linked_user=linked_user, last_modified=last_modified)
+                         linked_user=linked_user, last_modified=last_modified)
 
     @staticmethod
     def convert_line_to_full_file_path(line: str, full_base_file_path: str) -> str:
