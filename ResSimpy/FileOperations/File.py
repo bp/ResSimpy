@@ -326,7 +326,7 @@ class File(FileBase):
 
         full_file_path = file_path
         if origin is not None:
-            full_file_path = fo.get_full_file_path(file_path, origin, rootdir)
+            full_file_path = fo.get_full_file_path(file_path, origin, rootdir, is_nexus=is_nexus_file)
 
         try:
             file_as_list = fo.load_file_as_list(full_file_path)
