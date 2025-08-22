@@ -10,6 +10,7 @@ from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from tests.multifile_mocker import mock_multiple_files
 from tests.utility_for_tests import uuid_side_effect
 
+
 class TestModifyNexusGrid:
     def setup_method(self, mocker):
         self.grid_text = """! Grid dimensions
@@ -33,7 +34,7 @@ class TestModifyNexusGrid:
         25.2
         """
         self.new_grid_array_definition = GridArrayDefinition(value='/new_path_to_netgrs_file/new_net_to_gross_file.inc',
-                                                             modifier='VALUE')
+                                                             modifier='VALUE', name='NETGRS')
 
     def test_load_grid_with_ids(self, mocker):
         # mock uuid
@@ -51,18 +52,19 @@ class TestModifyNexusGrid:
 
         mocker.patch("builtins.open", mock_open_wrapper)
 
-        grid_nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path='test_location/grid.dat')
+        grid_nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile,
+                                                                    file_path='test_location/grid.dat')
 
         grid = NexusGrid(model_unit_system=UnitSystem.METRIC,
                          grid_nexus_file=grid_nexus_file)
         expected_netgrs = GridArrayDefinition(value='/path_to_netgrs_file/net_to_gross.inc',
                                               absolute_path='/path_to_netgrs_file/net_to_gross.inc',
-                                              modifier='VALUE')
+                                              modifier='VALUE', name='NETGRS')
 
         expected_porosity = GridArrayDefinition(value='path/to/porosity.inc',
                                                 absolute_path=os.path.join('test_location', 'path/to/porosity.inc'),
-                                                modifier='VALUE')
-        expected_kx = GridArrayDefinition(value='25.2', modifier='CON')
+                                                modifier='VALUE', name='POROSITY')
+        expected_kx = GridArrayDefinition(value='25.2', modifier='CON', name='KX')
 
         # uuid number based on how far down the attributes of the NexusGrid the array is
         expected_netgrs_id = 'uuid0'
@@ -116,7 +118,8 @@ class TestModifyNexusGrid:
             return mock_open
 
         mocker.patch("builtins.open", mock_open_wrapper)
-        grid_nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path='test_location/grid.dat')
+        grid_nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile,
+                                                                    file_path='test_location/grid.dat')
         grid = NexusGrid(model_unit_system=UnitSystem.METRIC,
                          grid_nexus_file=grid_nexus_file)
         array_to_remove = 'netgrs'
@@ -150,7 +153,7 @@ INCLUDE /new_path_to_netgrs_file/new_net_to_gross_file.inc
         KX CON
         25.2
         """
-        
+
         def mock_open_wrapper(filename, mode):
             mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
                 'test_location/grid.dat': self.grid_text,
@@ -161,7 +164,8 @@ INCLUDE /new_path_to_netgrs_file/new_net_to_gross_file.inc
             return mock_open
 
         mocker.patch("builtins.open", mock_open_wrapper)
-        grid_nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path='test_location/grid.dat')
+        grid_nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile,
+                                                                    file_path='test_location/grid.dat')
         grid = NexusGrid(model_unit_system=UnitSystem.METRIC,
                          grid_nexus_file=grid_nexus_file)
         array_to_modify = 'NETGRS'
@@ -176,11 +180,11 @@ INCLUDE /new_path_to_netgrs_file/new_net_to_gross_file.inc
 
 @pytest.mark.parametrize('array, expected_string, dtype', [
     (np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]), """ 1  2  3  4  5  6  7  8  9 10 11 12""", 'integer'),
-    (np.array([[1.2, 2.3, 3.4], [4.5, 5.6, 6.7], [7.8, 8.9, 9.0]]), 
+    (np.array([[1.2, 2.3, 3.4], [4.5, 5.6, 6.7], [7.8, 8.9, 9.0]]),
      """   1.200000    2.300000    3.400000
     4.500000    5.600000    6.700000
     7.800000    8.900000    9.000000""", 'float'),
-    (np.array([15005.24, 13005.252, 12005.2525, 10334.35, 9000.66612]), 
+    (np.array([15005.24, 13005.252, 12005.2525, 10334.35, 9000.66612]),
      """  15005.240   13005.252   12005.253   10334.350    9000.666""", 'pressure'),
 ], ids=['integer', 'float', 'pressure'])
 def test_write_nexus_array_to_string(array, expected_string, dtype):
