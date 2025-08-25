@@ -731,17 +731,23 @@ def split_list_of_strings_by_length(list_of_strings: list[str], max_length: int)
     return [split_lines_for_long_string(string, max_length) for string in list_of_strings]
 
 
-def get_full_file_path(file_path: str, origin: str) -> str:
+def get_full_file_path(file_path: str, origin: str, rootdir: Optional[str] = None, is_nexus: bool = True) -> str:
     """Returns the full file path including the base directories if they aren't present in the string.
 
     Args:
         file_path (str): the initial file path found in a file
         origin (str): the initial origin of the file
+        rootdir (Optional[str]): the root directory to search for the file if it is not found in the origin directory
+        is_nexus (bool): whether the file is a Nexus file or not
     """
     if os.path.isabs(file_path):
         return_path = file_path
     else:
         return_path = os.path.join(os.path.dirname(origin), file_path)
+        if not is_nexus and not os.path.exists(return_path):
+            # If the file is not found in the same directory as origin, look in root directory
+            if rootdir is not None:
+                return_path = os.path.join(rootdir, file_path)
     return return_path
 
 
