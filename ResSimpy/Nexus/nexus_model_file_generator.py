@@ -1,11 +1,12 @@
+from __future__ import annotations
 from dataclasses import dataclass
-from typing import TypeVar
+from typing import TypeVar, TYPE_CHECKING
 
-from ResSimpy import NexusSimulator
 from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixin
 from ResSimpy.Enums.FluidTypeEnums import PvtType
 from ResSimpy.Time.ISODateTime import ISODateTime
-
+if TYPE_CHECKING:
+    from ResSimpy import NexusSimulator
 T = TypeVar('T', bound=DataObjectMixin)
 
 
@@ -111,3 +112,71 @@ class NexusModelFileGenerator:
                 full_schedule += '\n'
 
         return full_schedule
+
+    def output_wells_section(self) -> str:
+        """Outputs the wells section of the Nexus model file."""
+        if not self.model.wells._wells_loaded:
+            return ''
+
+        full_wells = ''
+
+        all_well_completions = []
+        all_well_mods = []
+        for well in self.model.wells.get_all():
+            all_well_completions.extend(well.completions)
+            all_well_mods.extend(well.wellmods)
+
+        well_mod_dates = {x.iso_date for x in all_well_mods}
+
+        all_event_dates: set[ISODateTime] = self.model.wells.get_wells_iso_dates()
+        all_event_dates.add(self.model.start_iso_date)
+        all_event_dates.update(well_mod_dates)
+
+        # Sort the dates
+        ordered_all_event_dates = sorted(all_event_dates)
+
+        # Write out all events for each date
+        for date in ordered_all_event_dates:
+            if date != self.model.start_iso_date:
+                full_wells += f"TIME {date.strftime_dateformat(self.model.date_format)}\n"
+            for well in self.model.wells.get_all():
+                full_wells += well.to_string_for_date(date=date)
+
+        return full_wells
+
+    def output_options_section(self) -> str:
+        """Outputs the options section of the Nexus model file."""
+        options_file_content = ''
+        if self.model.options is not None:
+            options_file_content += self.model.options.to_string()
+        # add the gridtoprocs to options:
+        if self.model.sim_controls.grid_to_proc is not None:
+            options_file_content += '\n'
+            options_file_content += self.model.sim_controls.grid_to_proc.to_string()
+        return options_file_content
+
+    def output_runcontrol_section(self) -> str:
+        """Outputs the run control section of the Nexus model file."""
+        run_control_content = f'START {self.model.start_iso_date.strftime_dateformat(self.model.date_format)}\n\n'
+
+        # collect all the dates from the solver controls
+        all_dates: set[ISODateTime] = {self.model.start_iso_date}
+        for solver_param in self.model.sim_controls.solver_parameters.get_all():
+            all_dates.add(solver_param.iso_date)
+        # collect all the dates from the reporting controls
+        all_dates.update(self.model.reporting.get_all_reporting_dates())
+
+        # add all the TIME cards:
+        all_dates.update(set(self.model.sim_controls.times_iso_date))
+
+        # Sort the dates
+        ordered_all_dates = sorted(all_dates)
+
+        for date in ordered_all_dates:
+            if date != self.model.start_iso_date:
+                run_control_content += f'\nTIME {date.strftime_dateformat(self.model.date_format)}\n'
+
+            run_control_content += self.model.sim_controls.solver_parameters.to_string_for_date(date=date)
+            run_control_content += self.model.reporting.to_string_for_date(date=date)
+
+        return run_control_content

@@ -1,16 +1,19 @@
 """Class for representing a well in Nexus. Consists of a list of completions and a well name."""
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Optional, Sequence, Union, TYPE_CHECKING
+from typing import Optional, Sequence, TYPE_CHECKING
 from uuid import UUID
 
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusWellMod import NexusWellMod
+from ResSimpy.Time.ISODateTime import ISODateTime
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.DataModelBaseClasses.Well import Well
+from ResSimpy.Utils.obj_to_table_string import get_column_headers_required
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusWells import NexusWells
@@ -72,7 +75,7 @@ class NexusWell(Well):
         """Property with a list of all the wellmods for the well."""
         return self._wellmods
 
-    def find_completions(self, completion_properties: dict[str, None | float | int | str] | NexusCompletion) -> \
+    def find_completions(self, completion_properties: DataObjectMixinDictType | NexusCompletion) -> \
             list[NexusCompletion]:
         """Returns a list of all completions that match the completion properties provided.
 
@@ -105,7 +108,7 @@ class NexusWell(Well):
         return matching_completions
 
     def find_completion(self,
-                        completion_properties: dict[str, None | float | int | str] | NexusCompletion) \
+                        completion_properties: DataObjectMixinDictType | NexusCompletion) \
             -> NexusCompletion:
         """Returns precisely one completion which matches all the properties provided.
 
@@ -125,7 +128,7 @@ class NexusWell(Well):
                              f'{len(matching_completions)} completions')
         return matching_completions[0]
 
-    def _add_completion_to_memory(self, date: str, completion_properties: dict[str, None | float | int | str],
+    def _add_completion_to_memory(self, date: str, completion_properties: DataObjectMixinDictType,
                                   date_format: DateFormat, completion_index: Optional[int] = None) -> NexusCompletion:
         """Adds a perforation with the properties specified in completion_properties_list.
 
@@ -153,7 +156,7 @@ class NexusWell(Well):
         completion_index_to_remove = [x.id for x in self._completions].index(completion_to_remove)
         self._completions.pop(completion_index_to_remove)
 
-    def _modify_completion_in_memory(self, new_completion_properties: dict[str, Union[None, float, int, str]],
+    def _modify_completion_in_memory(self, new_completion_properties: DataObjectMixinDictType,
                                      completion_to_modify: NexusCompletion | UUID,
                                      ) -> None:
         if isinstance(completion_to_modify, NexusCompletion):
@@ -169,7 +172,7 @@ class NexusWell(Well):
                 return completion
         raise ValueError('No completion found for id: {id}')
 
-    def _modify_completions_in_memory(self, new_completion_properties: dict[str, Union[None, float, int, str]],
+    def _modify_completions_in_memory(self, new_completion_properties: DataObjectMixinDictType,
                                       completions_to_modify: list[NexusCompletion | UUID]) -> None:
         for completion in completions_to_modify:
             if isinstance(completion, UUID):
@@ -187,3 +190,27 @@ class NexusWell(Well):
         """
         for completion in completions_to_remove:
             self._remove_completion_from_memory(completion)
+
+    def to_string_for_date(self, date: ISODateTime) -> str:
+        """Outputs the string that represents the wellspec for a specific date."""
+        output_str = ''
+        completions_for_date = [x for x in self._completions if x.iso_date == date]
+        wellmods_for_date = [x for x in self._wellmods if x.iso_date == date]
+
+        if not completions_for_date and not wellmods_for_date:
+            return output_str
+
+        if completions_for_date:
+            output_str += f"WELLSPEC {self.well_name}\n"
+            # work out the required headers:
+            headers = get_column_headers_required(completions_for_date)
+            output_str += ' '.join(headers) + '\n'
+            for completion in completions_for_date:
+                output_str += completion.to_table_line(headers)
+
+        if wellmods_for_date:
+            for wellmod in wellmods_for_date:
+                output_str += wellmod.to_string()
+
+        output_str += '\n'
+        return output_str

@@ -11,9 +11,12 @@ from uuid import UUID
 
 import pandas as pd
 
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.Enums.HowEnum import OperationEnum
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.DataModels.NexusWellMod import NexusWellMod
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusKeywords.wells_keywords import WELLS_KEYWORDS
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
@@ -22,10 +25,10 @@ from ResSimpy.Nexus.load_wells import load_wells
 import ResSimpy.FileOperations.file_operations as fo
 import ResSimpy.Nexus.nexus_file_operations as nfo
 from ResSimpy.Utils.invert_nexus_map import attribute_name_to_nexus_keyword
+from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
-    from ResSimpy.Nexus.DataModels.NexusWell import NexusWell
 
 
 @dataclass(kw_only=True)
@@ -50,7 +53,7 @@ class NexusWells(Wells):
         """
         self.__model = model
         self.__add_object_operations = AddObjectOperations(NexusCompletion, self.table_header, self.table_footer, model)
-        super().__init__()
+        super().__init__(assume_loaded=model.assume_loaded)
 
     @property
     def model(self) -> NexusSimulator:
@@ -104,7 +107,7 @@ class NexusWells(Wells):
         store_dictionaries = []
         for well in self._wells:
             for completion in well.completions:
-                completion_props: dict[str, None | float | int | str] = {
+                completion_props: DataObjectMixinDictType = {
                     'well_name': well.well_name,
                     'units': well.unit_system.name,
                 }
@@ -131,7 +134,7 @@ class NexusWells(Wells):
         # Ensure the newly added wells have additional information populated from the surface file.
         self.model.network.get_load_status()
 
-    def modify(self, well_name: str, completion_properties_list: list[dict[str, None | float | int | str]],
+    def modify(self, well_name: str, completion_properties_list: list[DataObjectMixinDictType],
                how: OperationEnum = OperationEnum.ADD) -> None:
         """Modify the existing wells in memory using a dictionary of properties.
 
@@ -170,7 +173,43 @@ class NexusWells(Wells):
             else:
                 raise ValueError('Please select one of the valid OperationEnum values: e.g. OperationEnum.ADD')
 
-    def add_completion(self, well_name: str, completion_properties: dict[str, None | float | int | str],
+    def add_well(self, name: str, units: UnitSystem, completions: Optional[list[NexusCompletion]],
+                 wellmods: Optional[list[NexusWellMod]] = None, add_to_file: bool = True) -> NexusWell:
+        """Add a new well to the wells collection.
+
+        Args:
+            name (str): Name of the well.
+            units (UnitSystem): Unit system for the well.
+            completions (Optional[list[NexusCompletion]]): List of completions to add to the well.
+            wellmods (Optional[list[NexusWellMod]]): List of well modifications to add to the well.
+            add_to_file (bool): If True, adds the well to the well file. If False, only adds it to the in-memory list.
+        """
+        existing_well = self.get(name)
+        if existing_well is not None:
+            raise ValueError(f'Well with name {name} already exists, cannot add duplicate well names.')
+        if add_to_file:
+            # the completions will get added later using the add_completion command
+            new_completions = []
+        else:
+            new_completions = completions if completions is not None else []
+
+        new_well = NexusWell(well_name=name, unit_system=units, wellmods=wellmods if wellmods is not None else [],
+                             parent_wells_instance=self, completions=new_completions)
+        self._wells.append(new_well)
+
+        if not add_to_file:
+            return new_well
+
+        # add the well to the well file
+        if completions is not None:
+            for completion in completions:
+                self.add_completion(well_name=name, completion_properties=completion.to_dict(include_nones=False))
+        updated_new_well = self.get(name)
+        if updated_new_well is None:
+            raise ValueError(f'Well {name} could not be added to the wells collection.')
+        return updated_new_well
+
+    def add_completion(self, well_name: str, completion_properties: DataObjectMixinDictType,
                        preserve_previous_completions: bool = True, comments: Optional[str] = None) -> None:
         """Adds a completion to an existing wellspec file.
 
@@ -183,26 +222,34 @@ class NexusWells(Wells):
             to the new completion
             comments (Optional[str]): Comments to add to the object line in the file.
         """
-        basic_dict: dict[str, float | int | str | None] = {'name': well_name}
+        basic_dict: DataObjectMixinDictType = {'name': well_name}
         _, completion_date = self.__add_object_operations.check_name_date(basic_dict | completion_properties)
         well = self.get(well_name)
+        well_id = None
         if well is None:
-            # TODO could make this not raise an error and instead initialize a NexusWell and add it to NexusWells
-            raise ValueError(
-                f"No well found named: {well_name}. Cannot add completion to a well that doesn't exist")
-        well_id = well.completions[0].id
+            # ensure it gets added as a new well.
+            well = self.add_well(name=well_name, units=self.__model.default_units, completions=None, add_to_file=False)
+        else:
+            # if the well already exists get the id:
+            if len(well.completions) > 0:
+                # if the well has completions then get the first completion id
+                # this is to ensure that we can find the wellspec file to add the new completion to
+                well_id = well.completions[0].id
 
         # add completion in memory
         new_completion = well._add_completion_to_memory(date=completion_date,
                                                         completion_properties=completion_properties,
                                                         date_format=self.date_format)
 
-        if self.__model.model_files.well_files is None:
+        if self.model.model_files.well_files is None:
             raise FileNotFoundError('No well file found, cannot modify ')
 
-        wellspec_file = self.__add_object_operations.find_which_file_from_id(obj_id=well_id,
-                                                                             file_type_to_search='well_files')
-
+        if well_id is not None:
+            wellspec_file = self.__add_object_operations.find_which_file_from_id(obj_id=well_id,
+                                                                                 file_type_to_search='well_files')
+        else:
+            # assume to add to the first well file found
+            wellspec_file = next(iter(self.model.model_files.well_files.values()))
         # initialise some storage variables
         nexus_mapping = NexusCompletion.get_keyword_mapping()
         new_completion_time_index = -1
@@ -285,11 +332,11 @@ class NexusWells(Wells):
                                           additional_objects=new_completion_object_ids, comments=comments)
 
     def __write_out_existing_wellspec(self, completion_date: str,
-                                      completion_properties: dict[str, None | float | int | str],
+                                      completion_properties: DataObjectMixinDictType,
                                       date_found: bool, index: int, new_completion_index: int,
                                       preserve_previous_completions: bool, well: NexusWell, well_name: str) -> \
             tuple[list[str], int, list[str], bool]:
-        """Writes out the existing wellspec for a well at a new time stamp."""
+        """Writes out the existing wellspec for a well at a new time stamp, with an additional completion."""
         nexus_mapping = NexusCompletion.get_keyword_mapping()
         completion_table_as_list = ['\n']
         if not date_found:
@@ -313,7 +360,7 @@ class NexusWells(Wells):
             # get the most recent date that is earlier than the new completion date
             previous_dates = sorted(previous_dates, key=cmp_to_key(self.__model._sim_controls.compare_dates))
             last_date = str(previous_dates[-1])
-            completion_to_find: dict[str, None | float | int | str] = {'date': last_date}
+            completion_to_find: DataObjectMixinDictType = {'date': last_date}
             # find all completions at this date
             previous_completion_list = well.find_completions(completion_to_find)
             if len(previous_completion_list) > 0:
@@ -337,7 +384,7 @@ class NexusWells(Wells):
         return headers, new_completion_index, completion_table_as_list, True
 
     def remove_completion(self, well_name: str,
-                          completion_properties: Optional[dict[str, None | float | int | str]] = None,
+                          completion_properties: Optional[DataObjectMixinDictType] = None,
                           completion_id: Optional[UUID] = None) -> None:
         """Removes well completion from wellspec file.
 
@@ -381,7 +428,7 @@ class NexusWells(Wells):
                 wellspec_file.remove_from_file_as_list(comp_index, [completion_id])
 
         # check that we have completions left:
-        find_completions_dict: dict[str, None | float | int | str] = {'date': completion_date}
+        find_completions_dict: DataObjectMixinDictType = {'date': completion_date}
         remaining_completions = well.find_completions(find_completions_dict)
         if len(remaining_completions) == 0:
             # if there are no more completions remaining for that time stamp then remove the wellspec header!
@@ -416,8 +463,8 @@ class NexusWells(Wells):
         wellspec_file.remove_from_file_as_list(header_index)
         wellspec_file.remove_from_file_as_list(wellspec_index)
 
-    def modify_completion(self, well_name: str, properties_to_modify: dict[str, None | float | int | str],
-                          completion_to_change: Optional[dict[str, None | float | int | str]] = None,
+    def modify_completion(self, well_name: str, properties_to_modify: DataObjectMixinDictType,
+                          completion_to_change: Optional[DataObjectMixinDictType] = None,
                           completion_id: Optional[UUID] = None,
                           comments: Optional[str] = None) -> None:
         """Modify an existing matching completion, preserves attributes and modifies only additional properties \
@@ -444,7 +491,7 @@ class NexusWells(Wells):
             raise ValueError('Must provide one of completion_to_change dictionary or completion_id')
 
         # start with the existing properties
-        update_completion_properties: dict[str, None | float | int | str] = \
+        update_completion_properties: DataObjectMixinDictType = \
             {k: v for k, v in completion.to_dict().items() if v is not None}
 
         update_completion_properties.update(properties_to_modify)

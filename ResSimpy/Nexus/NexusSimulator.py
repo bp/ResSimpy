@@ -8,6 +8,8 @@ from typing import Any, Union, Optional, Sequence
 import resqpy.model as rq
 from datetime import datetime
 
+from ResSimpy.Nexus.NexusIPRMethods import NexusIprMethods
+
 from ResSimpy.Enums.FluidTypeEnums import PvtType
 from ResSimpy.Nexus.DataModels.NexusOptions import NexusOptions
 import ResSimpy.Nexus.nexus_file_operations as nfo
@@ -30,6 +32,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from ResSimpy.Nexus.NexusReporting import NexusReporting
 from ResSimpy.Nexus.NexusWells import NexusWells
+from ResSimpy.Nexus.nexus_model_file_generator import NexusModelFileGenerator
 from ResSimpy.Nexus.runcontrol_operations import SimControls
 from ResSimpy.Nexus.logfile_operations import Logging
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
@@ -109,6 +112,8 @@ class NexusSimulator(Simulator):
         if origin is None:
             raise ValueError(f'Origin path to model fcs file is required. Instead got {origin}.')
         self.origin = origin
+        self.assume_loaded: bool = assume_loaded
+        self._model_files: FcsNexusFile = FcsNexusFile(location=self.origin, origin=None)
 
         self._start_date: str = '' if start_date is None else start_date.strip()
         self.run_control_file_path: Optional[str] = ''
@@ -130,35 +135,44 @@ class NexusSimulator(Simulator):
         self._pvt_type: PvtType = pvt_type if pvt_type is not None else PvtType.BLACKOIL
         self._eos_details: None | str = eos_details
 
-        self._network: NexusNetwork = NexusNetwork(model=self)
+        self._network: NexusNetwork = NexusNetwork(model=self, assume_loaded=assume_loaded)
         self._wells: NexusWells = NexusWells(self)
         self._grid: Optional[NexusGrid] = None
         self._options: Optional[NexusOptions] = None
         # Model dynamic properties
-        self._pvt: NexusPVTMethods = NexusPVTMethods(model_unit_system=self.default_units)
-        self._separator: NexusSeparatorMethods = NexusSeparatorMethods(model_unit_system=self.default_units)
-        self._water: NexusWaterMethods = NexusWaterMethods(model_unit_system=self.default_units)
-        self._equil: NexusEquilMethods = NexusEquilMethods(model_unit_system=self.default_units)
-        self._rock: NexusRockMethods = NexusRockMethods(model_unit_system=self.default_units)
-        self._relperm: NexusRelPermMethods = NexusRelPermMethods(model_unit_system=self.default_units)
-        self._valve: NexusValveMethods = NexusValveMethods(model_unit_system=self.default_units)
-        self._aquifer: NexusAquiferMethods = NexusAquiferMethods(model_unit_system=self.default_units)
-        self._hydraulics: NexusHydraulicsMethods = NexusHydraulicsMethods(model_unit_system=self.default_units)
-        self._gaslift: NexusGasliftMethods = NexusGasliftMethods(model_unit_system=self.default_units)
+        self._pvt: NexusPVTMethods = NexusPVTMethods(model_unit_system=self.default_units,
+                                                     model_files=self.model_files)
+        self._separator: NexusSeparatorMethods = NexusSeparatorMethods(model_unit_system=self.default_units,
+                                                                       model_files=self.model_files)
+        self._water: NexusWaterMethods = NexusWaterMethods(model_unit_system=self.default_units,
+                                                           model_files=self.model_files)
+        self._equil: NexusEquilMethods = NexusEquilMethods(model_unit_system=self.default_units,
+                                                           model_files=self.model_files)
+        self._rock: NexusRockMethods = NexusRockMethods(model_unit_system=self.default_units,
+                                                        model_files=self.model_files)
+        self._relperm: NexusRelPermMethods = NexusRelPermMethods(model_unit_system=self.default_units,
+                                                                 model_files=self.model_files)
+        self._valve: NexusValveMethods = NexusValveMethods(model_unit_system=self.default_units,
+                                                           model_files=self.model_files)
+        self._aquifer: NexusAquiferMethods = NexusAquiferMethods(model_unit_system=self.default_units,
+                                                                 model_files=self.model_files)
+        self._hydraulics: NexusHydraulicsMethods = NexusHydraulicsMethods(model_unit_system=self.default_units,
+                                                                          model_files=self.model_files)
+        self._gaslift: NexusGasliftMethods = NexusGasliftMethods(model_unit_system=self.default_units,
+                                                                 model_files=self.model_files)
         # Nexus operations modules
         self.logging: Logging = Logging(self)
         self._reporting: NexusReporting = NexusReporting(self)
         self._structured_grid_operations: StructuredGridOperations = StructuredGridOperations(self)
         self.__lazy_loading: bool = lazy_loading
         self._sim_controls: SimControls = SimControls(self)
+        self.__ipr_methods: NexusIprMethods = NexusIprMethods(self)
 
         if destination is not None and destination != '':
             self.set_output_path(path=destination.strip())
 
         # Check the status of any existing or completed runs related to this model
         self.get_simulation_status(from_startup=True)
-
-        self._model_files: FcsNexusFile
 
         self.__is_multi_reservoir: bool = False  # Flag to indicate if the model is a multi-reservoir model
         self.__reservoir_paths: dict[str, str] = {}
@@ -626,61 +640,71 @@ class NexusSimulator(Simulator):
         if self.model_files.pvt_files is not None and \
                 len(self.model_files.pvt_files) > 0:
             self._pvt = NexusPVTMethods(files=self.model_files.pvt_files,
-                                        model_unit_system=self.default_units)
+                                        model_unit_system=self.default_units,
+                                        model_files=self.model_files)
 
         # Read in separator properties from Nexus separator method files
         if self.model_files.separator_files is not None and \
                 len(self.model_files.separator_files) > 0:
             self._separator = NexusSeparatorMethods(files=self.model_files.separator_files,
-                                                    model_unit_system=self.default_units)
+                                                    model_unit_system=self.default_units,
+                                                    model_files=self.model_files)
 
         # Read in water properties from Nexus water method files
         if self.model_files.water_files is not None and \
                 len(self.model_files.water_files) > 0:
             self._water = NexusWaterMethods(files=self.model_files.water_files,
-                                            model_unit_system=self.default_units)
+                                            model_unit_system=self.default_units,
+                                            model_files=self.model_files)
 
         # Read in equilibration properties from Nexus equil method files
         if self.model_files.equil_files is not None and \
                 len(self.model_files.equil_files) > 0:
             self._equil = NexusEquilMethods(files=self.model_files.equil_files,
-                                            model_unit_system=self.default_units)
+                                            model_unit_system=self.default_units,
+                                            model_files=self.model_files)
 
         # Read in rock properties from Nexus rock method files
         if self.model_files.rock_files is not None and \
                 len(self.model_files.rock_files) > 0:
             self._rock = NexusRockMethods(files=self.model_files.rock_files,
-                                          model_unit_system=self.default_units)
+                                          model_unit_system=self.default_units,
+                                          model_files=self.model_files)
 
         # Read in relative permeability and capillary pressure properties from Nexus relperm method files
         if self.model_files.relperm_files is not None and \
                 len(self.model_files.relperm_files) > 0:
             self._relperm = NexusRelPermMethods(files=self.model_files.relperm_files,
-                                                model_unit_system=self.default_units)
+                                                model_unit_system=self.default_units,
+                                                model_files=self.model_files)
 
         # Read in valve and choke properties from Nexus valve method files
         if self.model_files.valve_files is not None and \
                 len(self.model_files.valve_files) > 0:
             self._valve = NexusValveMethods(files=self.model_files.valve_files,
-                                            model_unit_system=self.default_units)
+                                            model_unit_system=self.default_units,
+                                            model_files=self.model_files)
 
         # Read in aquifer properties from Nexus aquifer method files
         if self.model_files.aquifer_files is not None and \
                 len(self.model_files.aquifer_files) > 0:
             self._aquifer = NexusAquiferMethods(files=self.model_files.aquifer_files,
-                                                model_unit_system=self.default_units)
+                                                model_unit_system=self.default_units,
+                                                model_files=self.model_files)
 
         # Read in hydraulics properties from Nexus hyd method files
         if self.model_files.hyd_files is not None and \
                 len(self.model_files.hyd_files) > 0:
             self._hydraulics = NexusHydraulicsMethods(files=self.model_files.hyd_files,
-                                                      model_unit_system=self.default_units)
+                                                      model_unit_system=self.default_units,
+                                                      model_files=self.model_files)
 
         # Read in gaslift properties from Nexus gaslift method files
-        if self.model_files.gas_lift_files is not None and \
-                len(self.model_files.gas_lift_files) > 0:
-            self._gaslift = NexusGasliftMethods(files=self.model_files.gas_lift_files,
-                                                model_unit_system=self.default_units)
+        if self.model_files.gaslift_files is not None and \
+                len(self.model_files.gaslift_files) > 0:
+            self._gaslift = NexusGasliftMethods(files=self.model_files.gaslift_files,
+                                                model_unit_system=self.default_units,
+                                                model_files=self.model_files)
 
         # === End of dynamic properties loading ===
 
@@ -910,9 +934,138 @@ class NexusSimulator(Simulator):
 
         self.model_files.move_model_files(new_file_path, new_include_file_location, overwrite_files)
 
-    def write_out_new_model(self, new_location: str, new_model_name: str) -> None:
-        """Not implemented for Nexus yet."""
-        raise NotImplementedError("Not Implemented Yet")
+    def write_out_new_model(self, new_location: str, new_model_name: str,
+                            new_include_file_location: str | None = None,
+                            overwrite_files: bool = True) -> None:
+        """Writes out a new model at a new location with a new_model_name.fcs.
+
+        This method is used for creating an entirely new model based on the ResSimpy internal memory objects and will
+        not include any comments or other content that ResSimpy does not yet interpret. Often used with the
+        "assume_loaded" attribute set to True for creating new NexusSimulator instances from scratch.
+
+        Args:
+            new_location (str): The location to write the new model to.
+            new_model_name (str): The name of the new model without the .fcs extension.
+            new_include_file_location (str | None): Optional path to save include files to. If None, defaults to
+                'include_files' in the new_location.
+            overwrite_files (bool): Overwrite files if they already exist. Defaults to True.
+
+        Example usage:
+        >>> from ResSimpy import NexusSimulator
+        >>> nexus_sim = NexusSimulator(origin='path/to/original_model.fcs', assume_loaded=True)
+        >>> # Modify the nexus_sim object as needed
+        >>> nexus_sim.write_out_new_model(new_location='path/to/new_model_directory',
+        ... new_model_name='new_model_name', new_include_file_location='optional_include_path')
+        """
+
+        def update_model_file(file: NexusFile, new_content: str,
+                              new_folder_path: str, new_name: str, suffix: str) -> None:
+            """Updates a model file with new content and location."""
+            file.file_content_as_list = new_content.splitlines(keepends=True)
+            file.location = os.path.join(new_folder_path, new_name + suffix)
+            file.origin = new_model_path
+            file.write_to_file(new_file_path=file.location, overwrite_file=overwrite_files)
+
+        # ensure the full path is made
+        if new_include_file_location is None:
+            new_include_file_location = os.path.join(new_location, 'include_files')
+        elif not os.path.isabs(new_include_file_location):
+            new_include_file_location = os.path.join(new_location, new_include_file_location)
+        new_model_name = new_model_name.replace('.fcs', '')  # remove .fcs if it exists
+        new_model_path = os.path.join(new_location, new_model_name + '.fcs')
+
+        if not os.path.exists(new_include_file_location):
+            # make the folders if they don't already exist
+            os.makedirs(new_include_file_location)
+
+        model_file_generator = NexusModelFileGenerator(model=self, model_name=new_model_name)
+
+        # update the content in the surface file:
+        if self.model_files.surface_files is not None and self.model_files.surface_files.get(1, None) is not None:
+            surface_file = self.model_files.surface_files[1]
+        else:
+            # create an empty surface file if it doesn't exist
+            surface_file = NexusFile(file_content_as_list=[], location='', origin=None)
+            self.model_files.surface_files = {1: surface_file}
+        surface_content = model_file_generator.output_surface_section()
+        update_model_file(file=surface_file, new_content=surface_content, new_folder_path=new_include_file_location,
+                          new_name=new_model_name, suffix='_surface.dat')
+
+        # update the structured grid file
+        warnings.warn('Structured grid file is not yet implemented in NexusSimulator.write_out_new_model. ')
+
+        # update the wells file
+        if self.model_files.well_files is not None and self.model_files.well_files.get(1, None) is not None:
+            wells_file = self.model_files.well_files[1]
+        else:
+            # create an empty wells file if it doesn't exist
+            wells_file = NexusFile(file_content_as_list=[], location='', origin=None)
+            self.model_files.well_files = {1: wells_file}
+        wells_content = model_file_generator.output_wells_section()
+        update_model_file(file=wells_file, new_content=wells_content, new_folder_path=new_include_file_location,
+                          new_name=new_model_name, suffix='_wells.dat')
+
+        # update each of the dynamic properties files
+        dynamic_props = {
+            'pvt': (self.pvt, self.model_files.pvt_files),
+            'separator': (self.separator, self.model_files.separator_files),
+            'water': (self.water, self.model_files.water_files),
+            'equil': (self.equil, self.model_files.equil_files),
+            'rock': (self.rock, self.model_files.rock_files),
+            'relperm': (self.relperm, self.model_files.relperm_files),
+            'valve': (self.valve, self.model_files.valve_files),
+            'aquifer': (self.aquifer, self.model_files.aquifer_files),
+            'hyd': (self.hydraulics, self.model_files.hyd_files),
+            'gaslift': (self.gaslift, self.model_files.gaslift_files)
+        }
+
+        for suffix, (prop, dyn_files) in dynamic_props.items():
+            for method_no, method in prop.inputs.items():
+                file_name = f"{new_model_name}_{suffix}_{method_no}.dat"
+                method_file_path = os.path.join(new_include_file_location, file_name)
+                new_dyn_file = NexusFile(
+                        file_content_as_list=method.to_string().splitlines(keepends=True),
+                        location=method_file_path,
+                        origin=new_model_path
+                    )
+                if dyn_files is None:
+                    # ensure the dynamic files collection exists and if it doesn't then set it
+                    files_collection_name = f"{suffix}_files"
+                    self.model_files.__setattr__(files_collection_name, {method_no: new_dyn_file})
+                else:
+                    dyn_files[method_no] = new_dyn_file
+                method.write_to_file(new_file_path=method_file_path, overwrite_file=False)
+
+        # update the options file
+        options_file_name = f"{new_model_name}_options.dat"
+        if self.model_files.options_file is None and self._options is not None:
+            self.set_options(self._options, os.path.join(new_include_file_location, options_file_name))
+        elif self.model_files.options_file is not None:
+            # update the existing options file
+            options_file_content = model_file_generator.output_options_section()
+
+            self.model_files.options_file.location = os.path.join(new_include_file_location, options_file_name)
+            self.model_files.options_file.origin = new_model_path
+            self.model_files.options_file.file_content_as_list = options_file_content.splitlines(keepends=True)
+
+            self.model_files.options_file.write_to_file(
+                new_file_path=self.model_files.options_file.location, overwrite_file=overwrite_files)
+
+        # update runcontrol
+        runcontrol_path = os.path.join(new_include_file_location, f"{new_model_name}_reporting.dat")
+        if self.model_files.runcontrol_file is None and self.reporting is not None and self.sim_controls is not None:
+            self.set_reporting_controls(reporting=self.reporting, new_file_path=runcontrol_path)
+        elif self.model_files.runcontrol_file is not None:
+            runcontrol_file_content = model_file_generator.output_runcontrol_section()
+            update_model_file(file=self.model_files.runcontrol_file, new_content=runcontrol_file_content,
+                              new_folder_path=new_include_file_location,
+                              new_name=new_model_name, suffix='_runcontrol.dat')
+
+        # create new fcsfile
+        fcs_content = model_file_generator.generate_base_model_file_contents()
+        self.model_files.file_content_as_list = fcs_content.splitlines(keepends=True)
+        self.model_files.location = new_model_path
+        self.model_files.write_to_file(new_file_path=new_model_path, overwrite_file=overwrite_files)
 
     @property
     def summary(self) -> str:
@@ -1008,3 +1161,82 @@ class NexusSimulator(Simulator):
                 destination=self.destination,
                 lazy_loading=self.__lazy_loading
             )
+
+    def set_options(self, options: NexusOptions, options_file_path: Optional[str] = None) -> None:
+        """Sets the Nexus options for the simulator.
+
+        Args:
+            options (NexusOptions): An instance of NexusOptions to set.
+            options_file_path (str): Path to the options file to be set.
+        """
+        if not isinstance(options, NexusOptions):
+            raise TypeError("options must be an instance of NexusOptions")
+        if options_file_path is None:
+            # pick a default name
+            options_file_path = os.path.join(os.path.dirname(self.model_files.location),
+                                             f'{self.root_name}_options.dat')
+        self._options = options
+        # Ensure the options file is set correctly
+        new_options_file = NexusFile(
+            file_content_as_list=options.to_string().splitlines(keepends=True),
+            location=options_file_path,
+            origin=self.model_files.location,
+        )
+        self.model_files.options_file = new_options_file
+        self._options.file = new_options_file
+
+    def set_sim_controls(self, sim_controls: SimControls) -> None:
+        """Sets the simulation controls for the simulator.
+
+        Args:
+            sim_controls (SimControls): An instance of SimControls to set.
+        """
+        if not isinstance(sim_controls, SimControls):
+            raise TypeError("sim_controls must be an instance of SimControls")
+        self._sim_controls = sim_controls
+        # ensure the model is correctly set in sim_controls
+        setattr(self._sim_controls, '_SimControls__model', self)
+
+    @property
+    def ipr_methods(self) -> NexusIprMethods:
+        """Returns an instance of NexusIPRMethods."""
+        return self.__ipr_methods
+
+    @property
+    def wells(self) -> NexusWells:
+        """Returns the associated NexusWells for the simulator."""
+        return self._wells
+
+    @property
+    def reporting(self) -> NexusReporting:
+        """Returns the associated NexusReporting for the simulator."""
+        return self._reporting
+
+    def set_reporting_controls(self, reporting: NexusReporting, new_file_path: str | None = None) -> None:
+        """Sets the new reporting controls for the simulator.
+
+        Args:
+            reporting (NexusReporting): An instance of NexusReporting to set.
+            new_file_path (str | None): Optional path to save the reporting file. If None, a default path is used.
+        """
+        if not isinstance(reporting, NexusReporting):
+            raise TypeError("reporting must be an instance of NexusReporting")
+        if new_file_path is None:
+            # pick a default name
+            new_file_path = os.path.join(os.path.dirname(self.model_files.location), f'{self.root_name}_reporting.dat')
+        # Ensure the options file is set correctly
+
+        self._reporting = reporting
+        model_name = self.root_name
+        if model_name is None:
+            model_name = 'default_name.fcs'
+        model_file_generator = NexusModelFileGenerator(model=self, model_name=model_name)
+        new_reporting_file = NexusFile(
+            file_content_as_list=model_file_generator.output_runcontrol_section().splitlines(keepends=True),
+            location=new_file_path,
+            origin=self.model_files.location,
+        )
+        self.model_files.runcontrol_file = new_reporting_file
+
+        # ensure the model is correctly set in reporting
+        setattr(self._reporting, '_NexusReporting__model', self)

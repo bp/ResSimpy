@@ -11,6 +11,7 @@ from uuid import UUID
 
 import pandas as pd
 
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.FileOperations.File import File
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.Nexus.nexus_modify_object_in_file import ModifyObjectOperations
@@ -101,22 +102,22 @@ class NexusWellConnections(WellConnections):
         self._add_to_memory(cons_list)
         self._add_to_memory(gas_cons_list)
 
-    def remove(self, obj_to_remove: dict[str, None | str | float | int] | UUID) -> None:
+    def remove(self, obj_to_remove: DataObjectMixinDictType | UUID) -> None:
         """Remove a wellbore from the network based on the properties matching a dictionary or id.
 
         Args:
-            obj_to_remove (UUID | dict[str, None | str | float | int]): UUID of the wellbore to remove or a dictionary \
+            obj_to_remove (UUID | DataObjectMixinDictType): UUID of the wellbore to remove or a dictionary \
             with sufficient matching parameters to uniquely identify a wellbore
 
         """
         self.__remove_object_operations.remove_object_from_network_main(
             obj_to_remove, self._network_element_name, self._well_connections)
 
-    def add(self, obj_to_add: dict[str, None | str | float | int]) -> None:
+    def add(self, obj_to_add: DataObjectMixinDictType) -> None:
         """Adds a well connection to a network, taking a dictionary with properties for the new well connection.
 
         Args:
-            obj_to_add (dict[str, None | str | float | int]): dictionary taking all the properties for the new
+            obj_to_add (DataObjectMixinDictType): dictionary taking all the properties for the new
             well connection.
             Requires date and a name.
         """
@@ -124,17 +125,17 @@ class NexusWellConnections(WellConnections):
                                                                   self.__parent_network)
         self._add_to_memory([new_object])
 
-    def modify(self, obj_to_modify: dict[str, None | str | float | int],
-               new_properties: dict[str, None | str | float | int]) -> None:
+    def modify(self, obj_to_modify: DataObjectMixinDictType,
+               new_properties: DataObjectMixinDictType) -> None:
         """Modifies an existing well connection based on a matching dictionary of properties.
 
         Partial matches allowed if precisely 1 matching node is found.
         Updates the properties with properties in the new_properties dictionary.
 
         Args:
-            obj_to_modify (dict[str, None | str | float | int]): dictionary containing attributes to match in the
+            obj_to_modify (DataObjectMixinDictType): dictionary containing attributes to match in the
             existing well connections.
-            new_properties (dict[str, None | str | float | int]): properties to switch to in the new well connection
+            new_properties (DataObjectMixinDictType): properties to switch to in the new well connection
         """
         self.__parent_network.get_load_status()
         self.__modify_object_operations.modify_network_object(obj_to_modify, new_properties,

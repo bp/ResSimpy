@@ -41,7 +41,6 @@ def check_file_read_write_is_correct(expected_file_writes: list[tuple[str, str]]
             raise ValueError(f"Unexpected write found at location: {write_location}")
 
 
-
 def check_sequential_write_is_correct(expected_file_contents: list[str], modifying_mock_open: Mock,
                                      mocker_fixture: MockerFixture, write_file_name: str, number_of_writes=1):
     assert len(modifying_mock_open.call_args_list) == number_of_writes
@@ -54,7 +53,7 @@ def check_sequential_write_is_correct(expected_file_contents: list[str], modifyi
 
 def get_fake_nexus_simulator(mocker: MockerFixture, fcs_file_path: str = '/path/fcs_file.fcs',
                              mock_open: bool = True, start_date: str | None = None) -> NexusSimulator:
-    """Returns a set up NexusSimulator object that can then be used for testing. Note that if mock_open is set to True,
+    """Returns a set-up NexusSimulator object that can then be used for testing. Note that if mock_open is set to True,
     it mocks out the builtin open method, which may then have to be overwritten by the calling code."""
     if mock_open:
         open_mock = mocker.mock_open(read_data='')

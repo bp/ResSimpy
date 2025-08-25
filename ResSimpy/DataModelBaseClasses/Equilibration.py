@@ -1,13 +1,13 @@
 """This module contains the abstract base class for a collection of equilibration inputs."""
 from dataclasses import dataclass
-from abc import ABC
 from typing import Mapping
 
 from ResSimpy.DataModelBaseClasses.DynamicProperty import DynamicProperty
+from ResSimpy.DataModelBaseClasses.DynamicPropertyContainer import DynamicPropertyContainer
 
 
 @dataclass(kw_only=True)
-class Equilibration(ABC):
+class Equilibration(DynamicPropertyContainer):
     """The abstract base class for a collection of equilibration inputs.
 
     Attributes:

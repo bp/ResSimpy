@@ -4,10 +4,14 @@ from abc import ABC
 from uuid import UUID
 
 import pandas as pd
+
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.Enums.HowEnum import OperationEnum
 
 from ResSimpy.DataModelBaseClasses.Well import Well
 from typing import Sequence, Optional
+
+from ResSimpy.Time.ISODateTime import ISODateTime
 
 
 @dataclass(kw_only=True)
@@ -55,7 +59,7 @@ class Wells(ABC):
         """Returns wells as pandas data frame."""
         raise NotImplementedError("Implement this in the derived class")
 
-    def modify(self, well_name: str, completion_properties_list: list[dict[str, None | float | int | str]],
+    def modify(self, well_name: str, completion_properties_list: list[DataObjectMixinDictType],
                how: OperationEnum = OperationEnum.ADD) -> None:
         """Modifies a completion in a named well using a list of properties. How enum determines if the completions are
         added, removed or modified.
@@ -71,7 +75,7 @@ class Wells(ABC):
         """
         raise NotImplementedError("Implement this in the derived class")
 
-    def add_completion(self, well_name: str, completion_properties: dict[str, None | float | int | str],
+    def add_completion(self, well_name: str, completion_properties: DataObjectMixinDictType,
                        preserve_previous_completions: bool = True, comments: Optional[str] = None) -> None:
         """Adds completion to an existing wellspecfile.
 
@@ -88,7 +92,7 @@ class Wells(ABC):
         raise NotImplementedError("Implement this in the derived class")
 
     def remove_completion(self, well_name: str,
-                          completion_properties: Optional[dict[str, None | float | int | str]] = None,
+                          completion_properties: Optional[DataObjectMixinDictType] = None,
                           completion_id: Optional[UUID] = None) -> None:
         """Well name to remove the completion from.
 
@@ -102,8 +106,8 @@ class Wells(ABC):
         """
         raise NotImplementedError("Implement this in the derived class")
 
-    def modify_completion(self, well_name: str, properties_to_modify: dict[str, None | float | int | str],
-                          completion_to_change: Optional[dict[str, None | float | int | str]] = None,
+    def modify_completion(self, well_name: str, properties_to_modify: DataObjectMixinDictType,
+                          completion_to_change: Optional[DataObjectMixinDictType] = None,
                           completion_id: Optional[UUID] = None,
                           comments: Optional[str] = None) -> None:
         """Well name to modify completion from.
@@ -133,6 +137,14 @@ class Wells(ABC):
         set_dates: set[str] = set()
         for well in self.wells:
             set_dates.update(set(well.dates_of_completions))
+
+        return set_dates
+
+    def get_wells_iso_dates(self) -> set[ISODateTime]:
+        """Returns a set of the unique ISO dates in the wellspec file over all wells."""
+        set_dates: set[ISODateTime] = set()
+        for well in self.wells:
+            set_dates.update({x.iso_date for x in well.completions})
 
         return set_dates
 

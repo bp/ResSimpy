@@ -7,7 +7,7 @@ import pandas as pd
 from ResSimpy.DataModelBaseClasses.Constraint import Constraint
 from typing import Optional, Mapping, Sequence
 
-from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 
 
 @dataclass(kw_only=True)
@@ -48,7 +48,7 @@ class Constraints(ABC):
 
     @abstractmethod
     def add(self,
-            constraint_to_add: dict[str, None | float | int | str | UnitSystem] | Constraint,
+            constraint_to_add: DataObjectMixinDictType | Constraint,
             comments: str | None,
             ) -> None:
         """Adds a constraint to the network and corresponding surface file.
@@ -62,15 +62,15 @@ class Constraints(ABC):
 
     @abstractmethod
     def modify(self, name: str,
-               current_constraint: dict[str, None | float | int | str] | Constraint,
-               new_constraint_props: dict[str, None | float | int | str | UnitSystem] | Constraint,
+               current_constraint: DataObjectMixinDictType | Constraint,
+               new_constraint_props: DataObjectMixinDictType | Constraint,
                comments: Optional[str] = None) \
             -> None:
         """Adds optional post line comments in the modified constraint.
 
         Args:
             name(str): The well name.
-            current_constraint(dict[str, None | float | int | str] | Constraint):Modify an existing constraint.
+            current_constraint(DataObjectMixinDictType | Constraint):Modify an existing constraint.
             new_constraint_props(dict[str, None | float | int | str | UnitSystem] | Constraint): dictionary or
             constraint to update the constraint with.
             comments(Optional[str]):??

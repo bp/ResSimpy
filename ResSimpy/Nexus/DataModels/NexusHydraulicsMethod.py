@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import warnings
 from dataclasses import dataclass, field
 from enum import Enum
 import re
@@ -31,14 +33,14 @@ class NexusHydraulicsMethod(DynamicProperty):
     """
 
     # General parameters
-    file: NexusFile
+    file: Optional[NexusFile]
     properties: dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
                      dict[str, Union[float, pd.DataFrame]]]] = \
         field(default_factory=get_empty_dict_union)
     unit_system: UnitSystem
     ratio_thousands: bool
 
-    def __init__(self, file: NexusFile, input_number: int, model_unit_system: UnitSystem,
+    def __init__(self, file: Optional[NexusFile], input_number: int, model_unit_system: UnitSystem,
                  ratio_thousands: bool = True,
                  properties: Optional[dict[str, Union[str, int, float, Enum, list[str], np.ndarray, pd.DataFrame,
                                       dict[str, Union[float, pd.DataFrame]]]]] = None) -> None:
@@ -144,16 +146,19 @@ class NexusHydraulicsMethod(DynamicProperty):
 
     def read_properties(self) -> None:
         """Read Nexus hydraulics file contents and populate the NexusHydraulicsMethod object."""
-        file_as_list0 = self.file.get_flat_list_str_file
+        if self.file is None:
+            warnings.warn('No file provided to read Nexus hydraulics properties from.')
+            return
+        original_file_as_list = self.file.get_flat_list_str_file
 
         # Loop through file_as_list and fix any line continuations that use '>' at the end of the line
         file_as_list: list[str] = []
-        if len(file_as_list0) > 0:
-            file_as_list = [file_as_list0[0]]
+        if len(original_file_as_list) > 0:
+            file_as_list = [original_file_as_list[0]]
             line_indx = 1
-            while line_indx < len(file_as_list0):
+            while line_indx < len(original_file_as_list):
                 prev_line = file_as_list[-1]
-                line = file_as_list0[line_indx]
+                line = original_file_as_list[line_indx]
                 if prev_line.rstrip().endswith(('>', '>\n')):
                     file_as_list[-1] = prev_line.split('>')[0] + ' ' + line.strip()
                 else:

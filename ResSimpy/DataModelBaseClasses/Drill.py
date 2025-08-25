@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional
 
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.DataModelBaseClasses.NetworkObject import NetworkObject
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
@@ -21,7 +22,7 @@ class Drill(NetworkObject, ABC):
 
     def __init__(self, unit_system: Optional[UnitSystem] = None, name: Optional[str] = None, date: Optional[str] = None,
                  date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
-                 properties_dict: Optional[dict[str, None | int | str | float]] = None) -> None:
+                 properties_dict: Optional[DataObjectMixinDictType] = None) -> None:
         """Initialises the Drill class.
 
         Args:

@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.DataModelBaseClasses.Node import Node
@@ -17,7 +18,7 @@ class NexusNode(Node):
     temp: Optional[float] = None
     station: Optional[str] = None
 
-    def __init__(self, properties_dict: Optional[dict[str, None | int | str | float]] = None,
+    def __init__(self, properties_dict: Optional[DataObjectMixinDictType] = None,
                  date: Optional[str] = None, date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None, x_pos: Optional[float] = x_pos,
                  y_pos: Optional[float] = None, number: Optional[int] = None, temp: Optional[float] = None,

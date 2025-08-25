@@ -602,7 +602,7 @@ def get_expected_next_value(start_line_index: int, file_as_list: list[str], sear
                             ignore_values: Optional[list[str]] = None,
                             replace_with: Union[str, GridArrayDefinition, None] = None,
                             custom_message: Optional[str] = None, comment_characters: None | list[str] = None) -> str:
-    """Gets the next non blank value in a list of lines.
+    """Gets the next non-blank value in a list of lines.
 
     Args:
         start_line_index (int): line number to start reading file_as_list from
@@ -617,7 +617,7 @@ def get_expected_next_value(start_line_index: int, file_as_list: list[str], sear
             Defaults to the Nexus format (!)
 
     Returns:
-        str: Next non blank value from the list, if none found raises ValueError
+        str: Next non-blank value from the list, if none found raises ValueError
     """
     value = get_next_value(start_line_index=start_line_index, file_as_list=file_as_list, search_string=search_string,
                            ignore_values=ignore_values, replace_with=replace_with,
@@ -641,8 +641,8 @@ def get_multiple_expected_sequential_values(list_of_strings: list[str], number_t
         list_of_strings (list[str]): list of strings to represent the file with a new entry per line in the file.
         number_tokens (int): number of tokens to return values of
         ignore_values (list[str]): list of values to ignore if found
-        comment_characters (Optional[list[str]], optional): a list of characters that are considered inline comments.
-            Defaults to the Nexus format (!)
+        comment_characters (Optional[list[str]]): a list of characters that are considered inline comments.
+            If None, defaults to the Nexus format (!)
 
     Raises:
         ValueError: if too many tokens are requested compared to the file provided
