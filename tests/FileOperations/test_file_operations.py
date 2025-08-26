@@ -1,3 +1,5 @@
+import os
+
 import pytest
 from pytest_mock import MockerFixture
 
@@ -222,3 +224,28 @@ def test_load_three_part_date_no_token():
 
     # Assert
     assert result == "25 JUL 2026"
+    
+@pytest.mark.parametrize('origin, rootdir, is_nexus, expected_full_path',[
+    (
+        '/full_path/main_file.dat',
+        '/full_path',
+        True,
+        os.path.join('/full_path', 'includes/my_file.dat'),
+    ),
+    (
+        '/full_path/includes/deeper_include/file.dat',
+        '/full_path',
+        False,
+        os.path.join('/full_path', 'includes/my_file.dat')
+    )
+])
+def test_get_full_file_path(mocker, origin, rootdir, is_nexus, expected_full_path):
+    # Arrange
+    file_path = 'includes/my_file.dat'
+    # mock out the os.path.exists:
+    os_path_mock = mocker.MagicMock(return_value=False)
+    mocker.patch('os.path.exists', os_path_mock)
+    # Act
+    result = fo.get_full_file_path(file_path=file_path, origin=origin, is_nexus=is_nexus, rootdir=rootdir)
+    # Assert
+    assert result == expected_full_path
