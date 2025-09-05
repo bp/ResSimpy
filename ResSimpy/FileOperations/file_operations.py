@@ -743,7 +743,9 @@ def get_full_file_path(file_path: str, origin: str, rootdir: Optional[str] = Non
     if os.path.isabs(file_path):
         return_path = file_path
     else:
-        return_path = os.path.join(os.path.dirname(origin), file_path)
+        return_path = file_path.replace('"', '')
+        return_path = return_path.replace("'", '')
+        return_path = os.path.join(os.path.dirname(origin), return_path)
         if not is_nexus and not os.path.exists(return_path):
             # If the file is not found in the same directory as origin, look in root directory
             if rootdir is not None:

@@ -328,6 +328,9 @@ class File(FileBase):
         if origin is not None:
             full_file_path = fo.get_full_file_path(file_path, origin, rootdir, is_nexus=is_nexus_file)
 
+        if origin is None:
+            origin = full_file_path
+
         try:
             file_as_list = fo.load_file_as_list(full_file_path)
         except FileNotFoundError:
@@ -390,7 +393,8 @@ class File(FileBase):
                                                remove_quotation_marks=True)
             if inc_file_path is None:
                 continue
-            inc_full_path = fo.get_full_file_path(inc_file_path, origin=full_file_path, rootdir=rootdir)
+            inc_full_path = fo.get_full_file_path(inc_file_path, origin=full_file_path, rootdir=rootdir,
+                                                  is_nexus=is_nexus_file)
             # store the included files as files inside the object
             inc_file_list.append(inc_full_path)
 

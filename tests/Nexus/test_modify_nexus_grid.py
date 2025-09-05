@@ -43,9 +43,9 @@ class TestModifyNexusGrid:
 
         def mock_open_wrapper(filename, mode):
             mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
-                'test_location/grid.dat': self.grid_text,
+                '/test_location/grid.dat': self.grid_text,
                 '/path_to_netgrs_file/net_to_gross.inc': '',
-                'path/to/porosity.inc': '',
+                '/path/to/porosity.inc': '',
                 os.path.join('test_location', 'path/to/porosity.inc'): '',
             }).return_value
             return mock_open
@@ -53,7 +53,7 @@ class TestModifyNexusGrid:
         mocker.patch("builtins.open", mock_open_wrapper)
 
         grid_nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile,
-                                                                    file_path='test_location/grid.dat')
+                                                                    file_path='/test_location/grid.dat')
 
         grid = NexusGrid(model_unit_system=UnitSystem.METRIC,
                          grid_nexus_file=grid_nexus_file)
@@ -62,7 +62,7 @@ class TestModifyNexusGrid:
                                               modifier='VALUE', name='NETGRS')
 
         expected_porosity = GridArrayDefinition(value='path/to/porosity.inc',
-                                                absolute_path=os.path.join('test_location', 'path/to/porosity.inc'),
+                                                absolute_path=os.path.join('/test_location', 'path/to/porosity.inc'),
                                                 modifier='VALUE', name='POROSITY')
         expected_kx = GridArrayDefinition(value='25.2', modifier='CON', name='KX')
 
