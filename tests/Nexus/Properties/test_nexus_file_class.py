@@ -25,7 +25,7 @@ def test_generate_file_include_structure_basic(mocker):
 
     expected_includes_list = ['inc_file1.inc']
     expected_location = 'test_file_path.dat'
-    expected_origin = None
+    expected_origin = 'test_file_path.dat'
 
     nexus_file_include1 = NexusFile(location='inc_file1.inc', include_locations=[], origin=file_path,
                                     include_objects=None, file_content_as_list=[include_file_contents])
@@ -65,7 +65,7 @@ second_file INCLUDE inc_file2.inc''')
 
     expected_includes_list = ['inc_file1.inc', 'inc_file2.inc']
     expected_location = 'test_file_path.dat'
-    expected_origin = None
+    expected_origin = 'test_file_path.dat'
 
     nexus_file_include1 = NexusFile(location='inc_file1.inc', include_locations=[], origin=file_path,
                                     include_objects=None, file_content_as_list=[include_file_contents])
@@ -104,7 +104,7 @@ def test_generate_file_include_structure_nested_includes(mocker):
 
     expected_includes_list = ['inc_file1.inc']
     expected_location = 'test_file_path.dat'
-    expected_origin = None
+    expected_origin = 'test_file_path.dat'
 
     nexus_file_include2 = NexusFile(location='inc_file2.inc', include_locations=[], origin='inc_file1.inc',
                                     include_objects=None, file_content_as_list=[include_file_contents_2])
@@ -157,7 +157,7 @@ def test_generate_file_include_structure_origin_path(mocker):
     nexus_file_include1._location_in_including_file = 'nexus_data/inc_file1.inc'
 
     expected_nexus_file = NexusFile(location=expected_location, include_locations=expected_includes_list,
-                                    origin=None, include_objects=[nexus_file_include1],
+                                    origin=expected_location, include_objects=[nexus_file_include1],
                                     file_content_as_list=['basic_file INCLUDE nexus_data/inc_file1.inc'])
 
     def mock_open_wrapper(filename, mode):
@@ -468,7 +468,7 @@ second_file INCLUDE inc_file2.inc continuation''')
 
     expected_includes_list = ['inc_file1.inc', 'inc_file2.inc']
     expected_location = 'test_file_path.dat'
-    expected_origin = None
+    expected_origin = 'test_file_path.dat'
 
     nexus_file_include1 = NexusFile(location='inc_file1.inc', include_locations=[], origin=file_path,
                                     include_objects=None,
@@ -529,7 +529,7 @@ continuation''')
     include_file_contents = 'inc file contents\nsecond line in incfile \n include inc_file2.inc end of line \n abc'
     include_file_contents_2 = 'inc2 file contents\nmore content'
     expected_location = 'test_file_path.dat'
-    expected_origin = None
+    expected_origin = 'test_file_path.dat'
     expected_flat_file = ['basic_file ', 'inc file contents\n', 'second line in incfile \n',
                           'inc2 file contents\n', 'more content', ' end of line \n', ' abc',
                           'some random words ! comment\n', 'continuation']
@@ -592,7 +592,7 @@ continuation''')
     include_file_contents = 'inc file contents\nsecond line in incfile \n include inc_file2.inc end of line \n '
     include_file_contents_2 = 'inc2 file contents\nmore content'
     expected_location = 'test_file_path.dat'
-    expected_origin = None
+    expected_origin = 'test_file_path.dat'
 
     nexus_file_include2 = NexusFile(location='inc_file2.inc', include_locations=[], origin='inc_file1.inc',
                                     include_objects=None, file_content_as_list=['inc2 file contents\n', 'more content'])
@@ -670,7 +670,7 @@ continuation''')
     include_file_contents = 'inc file contents\nsecond line in incfile \n include inc_file2.inc end of line \n '
     include_file_contents_2 = 'inc2 file contents\nmore content'
     expected_location = 'test_file_path.dat'
-    expected_origin = None
+    expected_origin = 'test_file_path.dat'
 
     nexus_file_include2 = NexusFile(location='inc_file2.inc', include_locations=[], origin='inc_file1.inc',
                                     include_objects=None, file_content_as_list=['inc2 file contents\n', 'more content'])

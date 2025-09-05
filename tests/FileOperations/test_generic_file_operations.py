@@ -35,7 +35,7 @@ INCLUDE
     inc_file_1_full_path = os.path.join('/path/of', 'inc_file1.inc')
     expected_includes_list = [os.path.join('/path/of', 'inc_file1.inc')]
     expected_location = '/path/of/test_file_path.dat'
-    expected_origin = None
+    expected_origin = '/path/of/test_file_path.dat'
 
     nexus_file_include2 = File(location='/path/to/inc_file_2.inc', include_locations=[], origin=inc_file_1_full_path,
                                include_objects=None, file_content_as_list=[include_file_contents_2])
@@ -91,7 +91,7 @@ INCLUDE '/path/to/inc_file_2.inc'
     inc_file_1_full_path = os.path.join('/path/of', 'inc_file1.inc')
     expected_includes_list = [os.path.join('/path/of', 'inc_file1.inc')]
     expected_location = '/path/of/test_file_path.dat'
-    expected_origin = None
+    expected_origin = '/path/of/test_file_path.dat'
 
     nexus_file_include2 = NexusFile(location='/path/to/inc_file_2.inc', include_locations=[], origin=inc_file_1_full_path,
                                include_objects=None, file_content_as_list=[include_file_contents_2])
