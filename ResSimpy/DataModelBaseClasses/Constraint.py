@@ -26,6 +26,7 @@ class Constraint(DataObjectMixin, ABC):
     min_surface_gas_rate: Optional[float] = None
     min_surface_water_rate: Optional[float] = None
     min_surface_liquid_rate: Optional[float] = None
+    min_reservoir_total_fluids_rate: Optional[float] = None
     bottom_hole_pressure: Optional[float] = None
     tubing_head_pressure: Optional[float] = None
     max_reservoir_total_fluids_rate: Optional[float] = None
