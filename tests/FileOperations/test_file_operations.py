@@ -149,11 +149,22 @@ def test_get_nth_value(list_of_strings, value_number_to_get, expected_result):
     ('This is a long string that needs to be split into multiple lines based on a certain length.\n',
      'This is a long string that needs to be split into multiple lines based on a certain length.\n', 100),
     ('This is a long string that needs to be split into multiple lines based on a certain length.\n',
-     'This is a long\nstring that needs to\nbe split into\nmultiple lines based\non a certain length.\n', 20), ])
+     'This is a long\nstring that needs to\nbe split into\nmultiple lines based\non a certain length.\n', 20),
+    ('This is a long string that needs to be split into -- this is a comment\n',
+     'This is a long string that needs to be split into -- this\n--is a comment\n', 57),
+    ('-- this is a long string that needs to be split\n',
+     '-- this is a long string that needs to be\n--split\n', 40),
+    ('This is a long string that needs to be split into -- this is a comment\n',
+     'This is a long string that needs to be\nsplit into -- this is a comment\n', 38),
+])
+"""
+This is a long string that needs to be split into -- this 
+--is a comment
+"""
 def test_split_lines_for_long_string(long_string, expected_result, max_length):
     # Arrange
     # Act
-    result = fo.split_lines_for_long_string(long_string, max_length=max_length)
+    result = fo.split_lines_for_long_string(long_string, max_length=max_length, comment_characters=['--'])
 
     # Assert
     assert result == expected_result

@@ -693,7 +693,7 @@ def get_nth_value(list_of_strings: list[str], value_number: int, ignore_values: 
     return found_value
 
 
-def split_lines_for_long_string(long_string: str, max_length: int) -> str:
+def split_lines_for_long_string(long_string: str, max_length: int, comment_characters: None | list[str] = None) -> str:
     """Splits a long string into a list of strings with a maximum length.
 
     Args:
@@ -704,6 +704,9 @@ def split_lines_for_long_string(long_string: str, max_length: int) -> str:
         list[str]: A list of strings split from the long string.
     """
     # find the indices of whitespace characters
+
+    if comment_characters is None:
+        comment_characters = NEXUS_COMMENT_CHARACTERS
 
     whitespace_indices = [i for i, char in enumerate(long_string) if char in whitespace]
     compiled_string = ''
@@ -718,7 +721,8 @@ def split_lines_for_long_string(long_string: str, max_length: int) -> str:
     return compiled_string
 
 
-def split_list_of_strings_by_length(list_of_strings: list[str], max_length: int) -> list[str]:
+def split_list_of_strings_by_length(list_of_strings: list[str], max_length: int,
+                                    comment_characters: None | list[str] = None) -> list[str]:
     """Splits a list of strings into a new list of strings with a maximum length.
 
     Args:
