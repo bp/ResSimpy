@@ -699,6 +699,7 @@ def split_lines_for_long_string(long_string: str, max_length: int, comment_chara
     Args:
         long_string (str): The long string to be split.
         max_length (int): The maximum length of each string in the list.
+        comment_characters (Optional[list[str]]): The comment characters to filter out. Defaults to None
 
     Returns:
         list[str]: A list of strings split from the long string.
@@ -728,6 +729,7 @@ def split_list_of_strings_by_length(list_of_strings: list[str], max_length: int,
     Args:
         list_of_strings (list[str]): The list of strings to be split.
         max_length (int): The maximum length of each string in the new list.
+        comment_characters (Optional[list[str]]): The comment characters to filter out. Defaults to None
 
     Returns:
         list[str]: A new list of strings split from the original list.
