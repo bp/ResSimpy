@@ -153,7 +153,9 @@ def test_get_nth_value(list_of_strings, value_number_to_get, expected_result):
     ('This is a long string that needs to be split into multiple lines based on a certain length.\n',
      'This is a long\nstring that needs to\nbe split into\nmultiple lines based\non a certain length.\n', 20),
     ('-- this is a long string that needs to be split\n',
-     '-- this is a long string that needs to be\n--split\n', 40),
+     '-- this is a long string that needs to\n--be split\n', 40),
+    ('--this is a long string that needs to be split\n',
+     '--this is a long string that needs to\n--be split\n', 39),
     ('This is a long string that needs to be split into -- this is a comment\n',
      'This is a long string that needs to be\nsplit into -- this is a comment\n', 38),
 ])
