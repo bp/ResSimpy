@@ -5,7 +5,7 @@ import re
 from string import whitespace
 
 from ResSimpy.DataModelBaseClasses.GridArrayDefinition import GridArrayDefinition
-from ResSimpy.FileOperations.simulator_constants import NEXUS_COMMENT_CHARACTERS, OTHER_SIMULATOR_COMMENT_CHARACTERS
+from ResSimpy.FileOperations.simulator_constants import NEXUS_COMMENT_CHARACTERS
 
 
 def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,
@@ -726,14 +726,12 @@ def split_lines_for_long_string(long_string: str, max_length: int, comment_chara
     return compiled_string
 
 
-def split_list_of_strings_by_length(list_of_strings: list[str], max_length: int,
-                                    comment_characters: None | list[str] = None) -> list[str]:
+def split_list_of_strings_by_length(list_of_strings: list[str], max_length: int) -> list[str]:
     """Splits a list of strings into a new list of strings with a maximum length.
 
     Args:
         list_of_strings (list[str]): The list of strings to be split.
         max_length (int): The maximum length of each string in the new list.
-        comment_characters (Optional[list[str]]): The comment characters to filter out. Defaults to None
 
     Returns:
         list[str]: A new list of strings split from the original list.
