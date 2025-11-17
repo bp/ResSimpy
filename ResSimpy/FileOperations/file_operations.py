@@ -11,7 +11,7 @@ from ResSimpy.FileOperations.simulator_constants import NEXUS_COMMENT_CHARACTERS
 def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,
                            comment_characters: Optional[list[str]] = None,
                            square_bracket_comments: bool = False) -> list[str]:
-    """Strips all of the inline, single and multi line comments out of a file.
+    """Strips all the inline, single and multi line comments out of a file.
 
     Comment characters assumed are: ! and square brackets. Escaped characters are ones wrapped in quotation marks.
 
@@ -693,23 +693,31 @@ def get_nth_value(list_of_strings: list[str], value_number: int, ignore_values: 
     return found_value
 
 
-def split_lines_for_long_string(long_string: str, max_length: int) -> str:
+def split_lines_for_long_string(long_string: str, max_length: int, comment_characters: None | list[str] = None) -> str:
     """Splits a long string into a list of strings with a maximum length.
 
     Args:
         long_string (str): The long string to be split.
         max_length (int): The maximum length of each string in the list.
+        comment_characters (Optional[list[str]]): The comment characters to filter out. Defaults to None
 
     Returns:
         list[str]: A list of strings split from the long string.
     """
     # find the indices of whitespace characters
 
+    if comment_characters is None:
+        comment_characters = NEXUS_COMMENT_CHARACTERS
+
     whitespace_indices = [i for i, char in enumerate(long_string) if char in whitespace]
     compiled_string = ''
+    line_start = ''
     for i in range(len(whitespace_indices) - 1):
         if whitespace_indices[i + 1] > max_length:
-            compiled_string += long_string[:whitespace_indices[i]] + '\n'
+            for comment_character in comment_characters:
+                if comment_character in long_string[:whitespace_indices[i]]:
+                    line_start = comment_character
+            compiled_string += long_string[:whitespace_indices[i]] + '\n' + line_start
             length_of_short_line = len(long_string[:whitespace_indices[i] + 1])
             long_string = long_string[whitespace_indices[i] + 1:]
             # adjust the indices for the newly created line and check the line length again
