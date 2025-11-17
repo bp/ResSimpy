@@ -17,8 +17,8 @@ class TestNexusWellList:
     file_content = '''TIME 01/01/2020
 WELLLIST well_list_name 
 ADD
-wellname_1 
-wellname_2
+wellname_1 wellname_2 wellname_3
+wellname_4
 ! comment
 
 wellname_n
@@ -41,6 +41,7 @@ ENDWELLLIST'''
                                           date='01/01/2019', date_format=DateFormat.DD_MM_YYYY)
         expected_welllist = NexusWellList(name='well_list_name', elements_in_the_list=['test_well', 'test_well2',
                                                                                        'wellname_1', 'wellname_2',
+                                                                                       'wellname_3', 'wellname_4',
                                                                                        'wellname_n'],
                                           date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
         file_as_list = self.file_content.splitlines()
