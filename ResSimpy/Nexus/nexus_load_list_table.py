@@ -104,12 +104,6 @@ def load_list_from_table(table_as_list_str: list[str], row_object: Type[SubTypeN
         if nfo.check_token('END' + table_header, line):
             break
 
-        # otherwise the well should be removed/added from/to the welllist.
-        # name = nfo.get_next_value(0, [line])
-        # if name is None:
-        #     # handle the empty line case
-        #     continue
-
         names = split_line(line, upper=False)
         if not names:
             continue
