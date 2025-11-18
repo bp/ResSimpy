@@ -96,7 +96,7 @@ KX OUTPUT KX
         input_array=['KX'],
         output_array=['KY'],
         function_values=[1.0, 0.0],
-        blocks=[1, 2, 3, 10, 11,12]
+        blocks=[1, 2, 3, 10, 11, 12]
       ),
       '''FUNCTION IREGION
 1 2 3

@@ -7,6 +7,7 @@ from ResSimpy.Enums.FrequencyEnum import FrequencyEnum
 from ResSimpy.Enums.OutputType import OutputType
 from ResSimpy.Nexus.DataModels.NexusOptions import NexusOptions
 from ResSimpy.Nexus.DataModels.NexusReportingRequests import NexusOutputContents, NexusOutputRequest
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from ResSimpy.Nexus.DataModels.nexus_grid_to_proc import GridToProc
 from ResSimpy.Nexus.NexusReporting import NexusReporting
 from ResSimpy.Nexus.runcontrol_operations import SimControls
@@ -206,12 +207,22 @@ class TestWriteOutSimulator:
                                                             'QWP', 'QLP',
                                                             'QWI', 'WCUT', 'OREC', 'PAVT', 'PAVH']),)
         model.set_reporting_controls(new_nexus_reporting)
+        
+        model._grid = NexusGrid(model_unit_system=model.default_units, assume_loaded=True) 
+        model.grid._range_x = 10
+        model.grid._range_y = 10
+        model.grid._range_z = 10
+        # set a simple grid property
+        model.grid.kx.name = 'KX'
+        model.grid.kx.modifier = 'VALUE'
+        model.grid.kx.value = os.path.join('/new_path/', 'nexus_files', 'new_model_grid.dat')
 
         expected_hydraulics_path = os.path.join('/new_path/', 'nexus_files', 'new_model_hyd_1.dat')
         expected_surface_path = os.path.join('/new_path/', 'nexus_files', 'new_model_surface.dat')
         expected_wells_path = os.path.join('/new_path/', 'nexus_files', 'new_model_wells.dat')
         expected_options_path = os.path.join('/new_path/', 'nexus_files', 'new_model_options.dat')
         expected_runcontrol_path = os.path.join('/new_path/', 'nexus_files', 'new_model_runcontrol.dat')
+        expected_grid_path = os.path.join('/new_path/', 'nexus_files', 'new_model_grid.dat')
         expected_fcs_path = os.path.join('/new_path/', 'new_model.fcs')
 
         expected_fcs_contents = f'''DESC Model created with ResSimpy
@@ -220,6 +231,7 @@ DEFAULT_UNITS ENGLISH
 DATEFORMAT MM/DD/YYYY
 
 GRID_FILES
+    STRUCTURED_GRID {expected_grid_path}
     OPTIONS {expected_options_path}
 
 INITIALIZATION_FILES
@@ -286,6 +298,13 @@ GRIDTOPROC
 AUTO GRIDBLOCKS
 ENDGRIDTOPROC
 """
+        expected_grid_contents = f'''NX NY NZ
+10 10 10
+
+KX VALUE
+INCLUDE {model.grid.kx.value}
+
+'''
 
         expected_runcontrol_contents = """START 01/01/2019
 
@@ -323,6 +342,7 @@ IW JW L SKIN RADW
                            (expected_runcontrol_path, expected_runcontrol_contents),
                            (expected_wells_path, expected_wells_content),
                            (expected_fcs_path, expected_fcs_contents),
+                           (expected_grid_path, expected_grid_contents),
                            ]
 
         # Mock out the file exists

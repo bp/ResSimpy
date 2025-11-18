@@ -143,9 +143,10 @@ class NexusGrid(Grid):
             assume_loaded (bool): Create the object assuming the grid has already been loaded into memory.
         """
         super().__init__(assume_loaded=assume_loaded)
+        self.__array_functions_loaded: bool = assume_loaded
+        self.__grid_faults_loaded: bool = assume_loaded
         self.__array_functions_list: Optional[list[list[str]]] = None
         self.__array_functions_df: Optional[pd.DataFrame] = None
-        self.__array_functions_loaded: bool = False
         self.__grid_file_contents: Optional[list[str]] = None if grid_nexus_file is None else \
             grid_nexus_file.get_flat_list_str_file_including_includes
         self.__grid_file_nested: Optional[list[str]] = None if grid_nexus_file is None else \
@@ -697,6 +698,8 @@ class NexusGrid(Grid):
     def load_array_functions(self) -> None:
         """Loads collection of array function defined in the nexus grid file."""
         # for function arrays we need the expanded file contents without includes
+        if self.__array_functions_loaded:
+            return
         if self.__grid_nexus_file is None or self.__grid_nexus_file.get_flat_list_str_file is None:
             raise ValueError("Cannot load array functions as grid file cannot not found")
         file_contents = self.__grid_nexus_file.get_flat_list_str_file
@@ -719,8 +722,6 @@ class NexusGrid(Grid):
 
     def load_faults(self) -> None:
         """Function to read faults in Nexus grid file defined using MULT and FNAME keywords."""
-        if self._grid_properties_loaded:
-            return  # avoid re-loading if already loaded
         file_content_as_list = self.__grid_file_contents
         if file_content_as_list is None:
             raise ValueError('Grid file contents have not been loaded')
