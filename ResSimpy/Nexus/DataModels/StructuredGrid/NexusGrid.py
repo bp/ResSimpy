@@ -1772,8 +1772,9 @@ class NexusGrid(Grid):
         Returns:
             str: The string representation of the NexusGrid for writing to file.
         """
-
-        grid_str = f'NX NY NZ\n{self._range_x} {self._range_y} {self._range_z}\n\n'
+        if self.range_x is None or self.range_y is None or self.range_z is None:
+            raise ValueError('Grid ranges NX, NY, NZ must be defined to write grid to string.')
+        grid_str = f'NX NY NZ\n{self.range_x} {self.range_y} {self.range_z}\n\n'
 
         keyword_mapping = self.keyword_mapping()
         # get the unique ordered array_names from the mapping

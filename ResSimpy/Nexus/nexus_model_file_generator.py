@@ -180,3 +180,10 @@ class NexusModelFileGenerator:
             run_control_content += self.model.reporting.to_string_for_date(date=date)
 
         return run_control_content
+
+    def output_grid_section(self) -> str:
+        """Outputs the grid section of the Nexus model file."""
+        if self.model.grid is None:
+            return ''
+        grid_file_content = self.model.grid.to_string()
+        return grid_file_content
