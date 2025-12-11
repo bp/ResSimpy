@@ -143,9 +143,10 @@ class NexusGrid(Grid):
             assume_loaded (bool): Create the object assuming the grid has already been loaded into memory.
         """
         super().__init__(assume_loaded=assume_loaded)
+        self.__array_functions_loaded: bool = assume_loaded
+        self.__grid_faults_loaded: bool = assume_loaded
         self.__array_functions_list: Optional[list[list[str]]] = None
         self.__array_functions_df: Optional[pd.DataFrame] = None
-        self.__array_functions_loaded: bool = False
         self.__grid_file_contents: Optional[list[str]] = None if grid_nexus_file is None else \
             grid_nexus_file.get_flat_list_str_file_including_includes
         self.__grid_file_nested: Optional[list[str]] = None if grid_nexus_file is None else \
@@ -697,6 +698,8 @@ class NexusGrid(Grid):
     def load_array_functions(self) -> None:
         """Loads collection of array function defined in the nexus grid file."""
         # for function arrays we need the expanded file contents without includes
+        if self.__array_functions_loaded:
+            return
         if self.__grid_nexus_file is None or self.__grid_nexus_file.get_flat_list_str_file is None:
             raise ValueError("Cannot load array functions as grid file cannot not found")
         file_contents = self.__grid_nexus_file.get_flat_list_str_file
@@ -1763,3 +1766,123 @@ class NexusGrid(Grid):
                                         formatter={'float_kind': lambda x: f"{x:{formatting}}"}) \
             .replace('[', '').replace(']', '')
         return compiled_str
+
+    def to_string(self) -> str:
+        """Converts the NexusGrid to a string representation for writing to file.
+
+        Returns:
+            str: The string representation of the NexusGrid for writing to file.
+        """
+        if self.range_x is None or self.range_y is None or self.range_z is None:
+            raise ValueError('Grid ranges NX, NY, NZ must be defined to write grid to string.')
+        grid_str = f'NX NY NZ\n{self.range_x} {self.range_y} {self.range_z}\n\n'
+
+        keyword_mapping = self.keyword_mapping()
+        # get the unique ordered array_names from the mapping
+        unique_array_keys = list(dict.fromkeys([x[0] for x in keyword_mapping.values()]))
+
+        # add each grid array to the string
+        for array_name in unique_array_keys:
+            array_definition: GridArrayDefinition = getattr(self, array_name.lower())
+            if isinstance(array_definition, dict):
+                # for IREGION special case
+                for region_name, region_array_definition in array_definition.items():
+                    if region_array_definition.value is not None:
+                        grid_str += region_array_definition.to_string()
+                        grid_str += '\n'
+            elif array_definition.value is not None:
+                grid_str += array_definition.to_string()
+                grid_str += '\n'
+
+        # Add FTRANS
+        add_header = True
+        previous_grid = None
+        previous_fault_name = None
+        for ftrans in self.ftrans:
+            if ftrans.grid != previous_grid or ftrans.fault_name != previous_fault_name:
+                add_header = True
+            grid_str += ftrans.to_string_line(header=add_header)
+            previous_grid = ftrans.grid
+            previous_fault_name = ftrans.fault_name
+            add_header = False
+        if self.ftrans:
+            grid_str += '\n'
+
+        # Add OVER
+        # TODO - format multiple OVERs for same array better
+
+        # add the faults
+        faults_df = self.get_faults_df()
+        grid_str += NexusGrid.fault_df_to_string(faults_df)
+
+        if self.array_functions:
+            for array_function in self.array_functions:
+                grid_str += array_function.to_string()
+                grid_str += '\n'
+
+        return grid_str
+
+    @staticmethod
+    def fault_direction_to_array(direction: str) -> str:
+        """Converts a fault direction to the corresponding array name.
+
+        Args:
+            direction (str): The fault direction. Must be one of 'I', 'I-', 'J', 'J-', 'K', 'K-'.
+
+        Returns:
+            str: The corresponding array name.
+        """
+        direction_mapping = {
+            'I': 'TX',
+            'I-': 'TX',
+            'J': 'TY',
+            'J-': 'TY',
+            'K': 'TZ',
+            'K-': 'TZ',
+            'IF': 'TXF',
+            'IF-': 'TXF',
+            'JF': 'TYF',
+            'JF-': 'TYF',
+            'KF': 'TZF',
+            'KF-': 'TZF',
+            'I+': 'TX',
+            'J+': 'TY',
+            'K+': 'TZ',
+        }
+        if direction not in direction_mapping:
+            raise ValueError(f'Invalid fault direction: {direction}. Must be one of {list(direction_mapping.keys())}.')
+        return direction_mapping[direction]
+
+    @staticmethod
+    def fault_df_to_string(faults_df: pd.DataFrame) -> str:
+        """Converts a faults DataFrame to a string representation for writing to file.
+
+        Args:
+            faults_df (pd.DataFrame): The faults DataFrame.
+
+        Returns:
+            str: The string representation of the faults for writing to file.
+        """
+        fault_str = ''
+        if faults_df is None or faults_df.empty:
+            return fault_str
+        faults_df['unique_table_id'] = faults_df['NAME'] + faults_df['GRID'] + faults_df['FACE']
+        for table_id in faults_df['unique_table_id'].unique():
+            array_faults = faults_df[faults_df['unique_table_id'] == table_id]
+            direction = array_faults['FACE'].iloc[0]
+            fault_name = array_faults['NAME'].iloc[0]
+            grid_name = array_faults['GRID'].iloc[0]
+
+            printable_trans_array = NexusGrid.fault_direction_to_array(direction)
+            direction_sign = 'MINUS' if '-' in direction else 'PLUS'
+            # PLACEHOLDER ALL as sometimes it can be STD/NONSTD faults
+            fault_str += f"MULT {printable_trans_array} ALL {direction_sign} MULT\n"
+            fault_str += f"FNAME {fault_name}\n"
+            if grid_name != 'ROOT':
+                fault_str += f"GRID {grid_name}\n"
+            for _, fault_row in array_faults.iterrows():
+                fault_str += (f"{fault_row['I1']} {fault_row['I2']}"
+                              f" {fault_row['J1']} {fault_row['J2']}"
+                              f" {fault_row['K1']} {fault_row['K2']} {fault_row['MULT']}\n")
+            fault_str += "\n"
+        return fault_str

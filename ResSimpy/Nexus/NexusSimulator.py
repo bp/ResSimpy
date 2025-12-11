@@ -992,7 +992,16 @@ class NexusSimulator(Simulator):
                           new_name=new_model_name, suffix='_surface.dat')
 
         # update the structured grid file
-        warnings.warn('Structured grid file is not yet implemented in NexusSimulator.write_out_new_model. ')
+        if self.model_files.structured_grid_file is not None:
+            structured_grid_file = self.model_files.structured_grid_file
+        else:
+            # create an empty structured grid file if it doesn't exist
+            structured_grid_file = NexusFile(file_content_as_list=[], location='', origin=None)
+            self.model_files.structured_grid_file = structured_grid_file
+        structured_grid_content = model_file_generator.output_grid_section()
+        update_model_file(file=structured_grid_file, new_content=structured_grid_content,
+                          new_folder_path=new_include_file_location,
+                          new_name=new_model_name, suffix='_grid.dat')
 
         # update the wells file
         if self.model_files.well_files is not None and self.model_files.well_files.get(1, None) is not None:
@@ -1024,10 +1033,10 @@ class NexusSimulator(Simulator):
                 file_name = f"{new_model_name}_{suffix}_{method_no}.dat"
                 method_file_path = os.path.join(new_include_file_location, file_name)
                 new_dyn_file = NexusFile(
-                        file_content_as_list=method.to_string().splitlines(keepends=True),
-                        location=method_file_path,
-                        origin=new_model_path
-                    )
+                    file_content_as_list=method.to_string().splitlines(keepends=True),
+                    location=method_file_path,
+                    origin=new_model_path
+                )
                 if dyn_files is None:
                     # ensure the dynamic files collection exists and if it doesn't then set it
                     files_collection_name = f"{suffix}_files"
@@ -1240,3 +1249,8 @@ class NexusSimulator(Simulator):
 
         # ensure the model is correctly set in reporting
         setattr(self._reporting, '_NexusReporting__model', self)
+
+    @property
+    def grid(self) -> NexusGrid | None:
+        """Returns the associated NexusGrid for the simulator."""
+        return self._grid

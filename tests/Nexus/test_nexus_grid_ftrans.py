@@ -124,3 +124,33 @@ def test_read_nexus_ftrans_from_grid(units, expected_units):
 
     # Assert
     assert result == expected_ftrans
+
+@pytest.mark.parametrize('ftrans, header, expected_string', [(
+        NexusFtrans(i1=1, i2=10, j1=1, j2=20, k1=1, k2=10,value=100.2, unit_system=UnitSystem.METRIC, grid='GRID1',
+                    fault_name='FAULT_A'),
+        True,
+"""FTRANS
+GRID GRID1
+FAULT FAULT_A
+1 1 1 10 20 10 100.2
+"""), 
+    (
+    NexusFtrans(i1=2, i2=10, j1=1, j2=20, k1=1, k2=10,value=100.2, unit_system=UnitSystem.METRIC),
+False,
+    """2 1 1 10 20 10 100.2
+"""
+    ), 
+    (
+    NexusFtrans(i1=3, i2=24, j1=5, j2=30, k1=2, k2=15, value=2500.75, unit_system=UnitSystem.ENGLISH,
+                fault_name='FAULT_B'),
+    True,
+"""FTRANS
+FAULT FAULT_B
+3 5 2 24 30 15 2500.75
+"""),])
+def test_ftrans_to_string_line(ftrans, header, expected_string):
+    # Arrange
+    # Act
+    result = ftrans.to_string_line(header=header)
+    # Assert
+    assert result == expected_string

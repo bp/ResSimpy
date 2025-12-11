@@ -30,3 +30,19 @@ class NexusFtrans(Ftrans):
     unit_system: UnitSystem
     grid: Optional[str] = None
     fault_name: Optional[str] = None
+
+    def to_string_line(self, header: bool = False) -> str:
+        """Convert the NexusFtrans to a string representation for writing to a Nexus file.
+
+        Returns:
+            str: The string representation of the NexusFtrans.
+        """
+        return_string = ''
+        if header:
+            return_string += "FTRANS\n"
+        if self.grid:
+            return_string += f"GRID {self.grid}\n"
+        if self.fault_name:
+            return_string += f"FAULT {self.fault_name}\n"
+        return_string += f"{self.i1} {self.j1} {self.k1} {self.i2} {self.j2} {self.k2} {self.value}\n"
+        return return_string
