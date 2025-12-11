@@ -44,5 +44,5 @@ class NexusFtrans(Ftrans):
             return_string += f"GRID {self.grid}\n"
         if self.fault_name:
             return_string += f"FAULT {self.fault_name}\n"
-        return_string += f"{self.i1} {self.i2} {self.j1} {self.j2} {self.k1} {self.k2} {self.value}\n"
+        return_string += f"{self.i1} {self.j1} {self.k1} {self.i2} {self.j2} {self.k2} {self.value}\n"
         return return_string
