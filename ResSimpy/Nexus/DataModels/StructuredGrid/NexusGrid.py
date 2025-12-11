@@ -1805,7 +1805,8 @@ class NexusGrid(Grid):
             previous_grid = ftrans.grid
             previous_fault_name = ftrans.fault_name
             add_header = False
-        grid_str += '\n'
+        if self.ftrans:
+            grid_str += '\n'
 
         # Add OVER
         # TODO - format multiple OVERs for same array better
