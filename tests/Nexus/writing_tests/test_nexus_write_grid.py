@@ -1,6 +1,7 @@
 import pandas as pd
 from ResSimpy.Enums.GridFunctionTypes import GridFunctionTypeEnum
 from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.DataModels.StructuredGrid.NexusFtrans import NexusFtrans
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGridArrayFunction import NexusGridArrayFunction
 
@@ -51,7 +52,14 @@ def test_write_simple_grid():
     ]
 
     grid.__setattr__('_NexusGrid__grid_array_functions', grid_array_funcs)
-
+    
+    grid_ftrans = [
+        NexusFtrans(i1=1, i2=10, j1=1, j2=10, k1=1, k2=5, value=100.0, unit_system=UnitSystem.METRIC),
+        NexusFtrans(i1=1, i2=10, j1=1, j2=10, k1=6, k2=10, value=200.0, unit_system=UnitSystem.METRIC, 
+                    fault_name='FAULT1')
+    ]
+    grid.__setattr__('_NexusGrid__ftrans', grid_ftrans)
+    
     expected_result = """NX NY NZ
 10 20 10
 
@@ -63,6 +71,12 @@ MOD
 
 KY CON
 150
+
+FTRANS
+1 1 1 10 10 5 100.0
+FTRANS
+FAULT FAULT1
+1 1 6 10 10 10 200.0
 
 MULT TX ALL PLUS MULT
 FNAME F1

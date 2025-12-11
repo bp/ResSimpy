@@ -1795,11 +1795,17 @@ class NexusGrid(Grid):
                 grid_str += '\n'
 
         # Add FTRANS
-        # TODO add this into a test
         add_header = True
+        previous_grid = None
+        previous_fault_name = None
         for ftrans in self.ftrans:
+            if ftrans.grid != previous_grid or ftrans.fault_name != previous_fault_name:
+                add_header = True
             grid_str += ftrans.to_string_line(header=add_header)
+            previous_grid = ftrans.grid
+            previous_fault_name = ftrans.fault_name
             add_header = False
+        grid_str += '\n'
 
         # Add OVER
         # TODO - format multiple OVERs for same array better
