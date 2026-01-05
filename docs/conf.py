@@ -77,4 +77,4 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 # autodoc Options
-autodoc_mock_imports = ["numpy", "pandas", "resqpy"]
+autodoc_mock_imports = ["numpy", "pandas"]

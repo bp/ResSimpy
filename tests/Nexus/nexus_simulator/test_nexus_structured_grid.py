@@ -1044,7 +1044,7 @@ def test_get_abs_structured_grid_path(mocker, fcs_file, expected_root, expected_
 
       KX VALUE
       INCLUDE path/kx.dat
-
+      
       MULT TX ALL PLUS MULT
        FNAME F1
        1 5 2 2 1 10 1.0
@@ -1052,11 +1052,13 @@ def test_get_abs_structured_grid_path(mocker, fcs_file, expected_root, expected_
 
       MULT TY ALL PLUS MULT
        FNAME F1
+        ! comments
        1 1 2 5 1 10 1.0
        1 1 6 9 1 10 0.0
 
       MULT TX ALL MINUS MULT
        FNAME F2
+!comment
        1 5 4 4 1 10 1.0
        6 9 4 4 1 10 1.0
 
@@ -1133,7 +1135,7 @@ def test_get_abs_structured_grid_path(mocker, fcs_file, expected_root, expected_
                                 FNAME fault1
                                 22 222 90 90 1 1 1
                                 22 222 90 90 9 9 1
-                                22 222 90 90 11 11 1
+                                22 222 90 90 11 11 1  ! comment
                                 22 223 91 90 13 13 1
                                 22 223 91 90 14 14 1
                                 22 223 91 90 15 15 1""",

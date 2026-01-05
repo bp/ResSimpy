@@ -1,5 +1,7 @@
 import re
 
+import unicodedata
+
 
 def check_if_string_is_float(x: str) -> bool:
     """Function to check if a string can be successfully cast to a float.
@@ -75,4 +77,12 @@ def is_number(s: str) -> bool:
         float(s)
         return True
     except ValueError:
-        return False
+        pass
+
+    try:
+        unicodedata.numeric(s)
+        return True
+    except (TypeError, ValueError):
+        pass
+
+    return False

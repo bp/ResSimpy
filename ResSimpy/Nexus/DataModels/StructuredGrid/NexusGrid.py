@@ -23,11 +23,12 @@ from ResSimpy.Nexus.DataModels.StructuredGrid.NexusOver import NexusOver
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusTOver import NexusTOver
 from ResSimpy.Nexus.NexusKeywords.nexus_keywords import VALID_NEXUS_KEYWORDS
 from ResSimpy.Nexus.NexusKeywords.structured_grid_keywords import GRID_ARRAY_FORMAT_KEYWORDS
+from ResSimpy.Nexus.nexus_load_faults import load_nexus_fault_mult_table_from_list
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.Nexus.array_function_operations as afo
 from ResSimpy.FileOperations import file_operations as fo
-from resqpy.olio.read_nexus_fault import load_nexus_fault_mult_table_from_list
+
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
