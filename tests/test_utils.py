@@ -255,6 +255,7 @@ def test_convert_to_number_error():
     ('-2e+4', True),
     ('1e-300', True),
     ('-0.0', True),
+    ('½', True),  # Unicode fraction
 
     # False cases
     ('--3.3', False),
