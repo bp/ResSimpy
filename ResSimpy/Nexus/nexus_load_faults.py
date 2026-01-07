@@ -69,10 +69,10 @@ def load_nexus_fault_mult_table_from_list(file_as_list: list[str]) -> pd.DataFra
 
         if is_table:
             if re.match("(.*)GRID(.*)", tokens[0]):
-                if len(tokens) > 0:
+                if len(tokens) > 1:
                     grid = tokens[1]
             elif re.match("(.*)FNAME(.*)", tokens[0]):
-                if len(tokens) > 0:
+                if len(tokens) > 1:
                     name = tokens[1]
             else:
                 if re.match(r"^MULT$", tokens[0]):
@@ -83,7 +83,7 @@ def load_nexus_fault_mult_table_from_list(file_as_list: list[str]) -> pd.DataFra
                     chunks.append(line_without_comments.strip())
 
         if re.match(r"^MULT$", tokens[0]):
-            if len(tokens) > 0:
+            if len(tokens) > 1:
                 face = face_dict[tokens[1]]
             if 'MINUS' in tokens:
                 face += '-'  # indicates data apply to 'negative' faces of specified cells
