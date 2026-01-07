@@ -5,7 +5,6 @@ import os
 import warnings
 from typing import Any, Union, Optional, Sequence
 
-import resqpy.model as rq
 from datetime import datetime
 
 from ResSimpy.Nexus.NexusIPRMethods import NexusIprMethods
@@ -398,66 +397,6 @@ class NexusSimulator(Simulator):
     def start_iso_date(self) -> ISODateTime:
         """Returns the start date of the model in ISO format."""
         return ISODateTime.convert_to_iso(date=self._start_date, date_format=self.date_format)
-
-    @staticmethod
-    def get_check_run_input_units_for_models(models: list[str]) -> tuple[Optional[bool], Optional[bool]]:
-        # TODO: add LAB units
-        """Returns the run and input unit formats for all the supplied models.
-
-        Supported model formats:
-            RESQML type epc files ending in ".epc"
-            Nexus files containing a line identifying the "RUN_UNITS" or "DEFAULT_UNITS".
-
-        Supported units: ENGLISH, METRIC
-
-        Args:
-            models (list[str]): list of paths to supported reservoir models
-
-        Raises:
-            ValueError: if a model in the list is using inconcistent run/default units
-
-        Returns:
-            Tuple[Optional[Bool], Optional[Bool]]: If all units are consistent between models,
-                Returns (True, True) if 'ft' is the length unit in an epc or Nexus specifies "ENGLISH" as the
-                (RUN_UNITS,DEFAULT_UNITS) respectively and False, False otherwise.
-                Returns (None, None) if it can't find a (RUN_UNITS, DEFAULT_UNITS) in the supplied files.
-        """
-        oilfield_run_units: Optional[bool] = None
-        oilfield_default_units: Optional[bool] = None
-
-        for model in models:
-            # If we're checking the units of a RESQML model, read it in and get the units. Otherwise, read the units
-            # from the fcs file
-            if os.path.splitext(model)[1] == '.epc':
-                resqpy_model = rq.Model(epc_file=model)
-
-                # Load in the RESQML grid
-                grid = resqpy_model.grid()
-
-                # Check the grid units
-                grid_length_unit = grid.xy_units()
-                model_oilfield_default_units = grid_length_unit == 'ft'
-                model_oilfield_run_units = grid_length_unit == 'ft'
-            else:
-                simulator = NexusSimulator(origin=model)
-                model_oilfield_default_units = simulator.default_units == UnitSystem.ENGLISH
-                model_oilfield_run_units = simulator.run_units == UnitSystem.ENGLISH
-
-            # If not defined, assign it to model_oilfield_default_units
-            if oilfield_default_units is None:
-                oilfield_default_units = model_oilfield_default_units
-            # Raise ValueError if default units are inconsistent with the other models
-            elif model_oilfield_default_units != oilfield_default_units:
-                raise ValueError(f"Model at {model} using inconsistent default units")
-
-            # If not defined, assign it to model_oilfield_run_units
-            if oilfield_run_units is None:
-                oilfield_run_units = model_oilfield_run_units
-            # Raise ValueError if run units are inconsistent with the other models
-            elif model_oilfield_run_units != oilfield_run_units:
-                raise ValueError(f"Model at {model} using inconsistent run units")
-
-        return oilfield_run_units, oilfield_default_units
 
     @staticmethod
     def get_check_oil_gas_types_for_models(models: list[str]) -> Optional[str]:

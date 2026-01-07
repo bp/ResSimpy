@@ -40,3 +40,14 @@ STRUCTURED_GRID_KEYWORDS = ['ADD', 'ALL', 'ANALYT', 'ARRAYS', 'B', 'BLOCKS', 'C'
                             'SGRO', 'SGRW', 'SGU', 'SINF', 'STD', 'SW', 'SWL', 'SWR', 'SWRO', 'SWRO_LS', 'SWU', 'TMX',
                             'TMY', 'TMZ', 'TOLPV', 'TX', 'TY', 'TZ', 'V98', 'VALUE', 'WATER', 'WINDOW', 'WORKA1', 'X',
                             'XREG', 'Z', 'ZVAR', 'LIST']
+FAULT_FACE_MAPPING = {
+        'TX': 'I',
+        'TY': 'J',
+        'TZ': 'K',
+        'TI': 'I',
+        'TJ': 'J',
+        'TK': 'K',
+        'TXF': 'IF',
+        'TYF': 'JF',
+        'TZF': 'KF'
+    }
