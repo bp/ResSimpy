@@ -22,8 +22,8 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.10, <3.13"
-numpy = "^1.26"
-pandas = "^2.2"
+numpy = ">=1.23.4, <2"
+pandas = ">=1.5.0, <2.3"
 typing-extensions = "^4.12"
 
 [tool.poetry.group.dev.dependencies]
