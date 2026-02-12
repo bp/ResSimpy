@@ -258,6 +258,5 @@ def test_nexus_simulator_start_iso_date(mocker):
     ids=['3 letter-month as literal string', '3 letter month with hyphens'],
 )
 def test_convert_to_iso_value_error(incorrect_date_format, date_format, expected_datetime_format, expected_string):
-    #Uncaught on purpose: this will fail with the exact ValueError message
     dt = ISODateTime.convert_to_iso(date=incorrect_date_format, date_format=date_format)
     assert dt.strftime('%d-%b-%Y %H:%M:%S') == expected_string
