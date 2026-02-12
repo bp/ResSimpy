@@ -247,19 +247,17 @@ def test_nexus_simulator_start_iso_date(mocker):
     assert model.start_date == start_date
     assert model.start_iso_date == expected_date
 
+
 @pytest.mark.maintain_datetime_behaviour
 @pytest.mark.parametrize(
-    'incorrect_date_format, date_format, expected_datetime_format',
+    'incorrect_date_format, date_format, expected_datetime_format, expected_string',
     [
-        ("30 'APR' 1976", DateFormat.DD_MMM_YYYY, '%d-%b-%Y %H:%M:%S'),
-        ("31-oct-2006", DateFormat.DD_MM_YYYY, '%d-%b-%Y %H:%M:%S')
+        ("30 'APR' 1976", DateFormat.DD_MMM_YYYY, '%d-%b-%Y %H:%M:%S', '30-Apr-1976 00:00:00'),
+        ("31-OCT-2006", DateFormat.DD_MMM_YYYY, '%d-%b-%Y %H:%M:%S', '31-Oct-2006 00:00:00'),
     ],
-    ids=['3 letter-month literal string', '3-letter month with hyphens'],
+    ids=['3 letter-month as literal string', '3 letter month with hyphens'],
 )
-def test_convert_to_iso_value_error(incorrect_date_format, date_format, expected_datetime_format):
+def test_convert_to_iso_value_error(incorrect_date_format, date_format, expected_datetime_format, expected_string):
     #Uncaught on purpose: this will fail with the exact ValueError message
-    ISODateTime.convert_to_iso(date=incorrect_date_format, date_format=date_format)
-
-
-
-
+    dt = ISODateTime.convert_to_iso(date=incorrect_date_format, date_format=date_format)
+    assert dt.strftime('%d-%b-%Y %H:%M:%S') == expected_string
