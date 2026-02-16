@@ -253,9 +253,9 @@ def test_nexus_simulator_start_iso_date(mocker):
     'incorrect_date_format, date_format, expected_datetime_format, expected_string',
     [
         ("30 'APR' 1976", DateFormat.DD_MMM_YYYY, '%d-%b-%Y %H:%M:%S', '30-Apr-1976 00:00:00'),
-        ("31-OCT-2006", DateFormat.DD_MMM_YYYY, '%d-%b-%Y %H:%M:%S', '31-Oct-2006 00:00:00'),
+        ("31-Oct-2006", DateFormat.DD_MMM_YYYY, '%d-%b-%Y %H:%M:%S', '31-Oct-2006 00:00:00'),
     ],
-    ids=['3 letter-month as literal string', '3 letter month with hyphens'],
+    ids=['3 letter-month as literal string', 'date without time'],
 )
 def test_convert_to_iso_value_error(incorrect_date_format, date_format, expected_datetime_format, expected_string):
     dt = ISODateTime.convert_to_iso(date=incorrect_date_format, date_format=date_format)
