@@ -50,12 +50,14 @@ class NexusModelFileGenerator:
         all_well_connections = self.model.network.well_connections.get_all()
         all_targets = self.model.network.targets.get_all()
         all_welllists = self.model.network.welllists.get_all()
+        all_conlists = self.model.network.conlists.get_all()
+        all_nodelists = self.model.network.nodelists.get_all()
         all_nodes = self.model.network.nodes.get_all()
         all_connections = self.model.network.connections.get_all()
         all_activations = self.model.network.activation_changes.get_all()
 
         network_objects = [all_well_connections, all_targets, all_welllists, all_nodes, all_connections,
-                           all_activations]
+                           all_activations, all_conlists, all_nodelists]
 
         all_constraints = self.model.network.constraints.get_all()
 
@@ -94,6 +96,16 @@ class NexusModelFileGenerator:
             connections_for_date = [x for x in all_connections if x.iso_date == date]
             if any(connections_for_date) and self.model.network.connections is not None:
                 full_schedule += self.model.network.connections.to_string_for_date(date=date)
+                full_schedule += '\n'
+
+            conlists_for_date = [x for x in all_conlists if x.iso_date == date]
+            if any(conlists_for_date) and self.model.network.conlists is not None:
+                full_schedule += self.model.network.conlists.to_string_for_date(date=date)
+                full_schedule += '\n'
+
+            nodelists_for_date = [x for x in all_nodelists if x.iso_date == date]
+            if any(nodelists_for_date) and self.model.network.nodelists is not None:
+                full_schedule += self.model.network.nodelists.to_string_for_date(date=date)
                 full_schedule += '\n'
 
             constraints_for_date = {k: [x for x in v if x.iso_date == date] for k, v in all_constraints.items()}

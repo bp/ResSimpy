@@ -4,9 +4,11 @@ from ResSimpy import NexusSimulator
 from ResSimpy.Enums.FluidTypeEnums import PvtType
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.Network.NexusActivationChange import NexusActivationChange
+from ResSimpy.Nexus.DataModels.Network.NexusConList import NexusConList
 from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
+from ResSimpy.Nexus.DataModels.Network.NexusNodeList import NexusNodeList
 from ResSimpy.Nexus.DataModels.Network.NexusTarget import NexusTarget
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
@@ -86,7 +88,23 @@ def test_write_surface_section(pvt_type, eos_details, expected_pvt_string):
                               change=ActivationChangeEnum.DEACTIVATE),
         
     ])
-
+    
+    # add some conlists   
+    model.network.conlists._add_to_memory([
+        NexusConList(name='conlist1', date='01/01/2020', date_format=DateFormat.DD_MM_YYYY,
+                     elements_in_the_list=['NODEcon1', 'NODECON2']),
+        NexusConList(name='conlist2', date='01/01/2020', date_format=DateFormat.DD_MM_YYYY,
+                     elements_in_the_list=['NODEcon3', 'NODECON4']),
+    ])
+    
+    
+    # add some nodelists   
+    model.network.nodelists._add_to_memory([
+        NexusNodeList(name='nodelist_1', date='01/01/2020', date_format=DateFormat.DD_MM_YYYY,
+                     elements_in_the_list=['NODE1', 'NODE2']),
+        NexusNodeList(name='nodelist_2', date='01/01/2021', date_format=DateFormat.DD_MM_YYYY,
+                     elements_in_the_list=['NODE3', 'NODE4']),
+    ])
 
     expected_result = f"""{expected_pvt_string}
 
@@ -112,6 +130,23 @@ NAME NODEIN NODEOUT METHOD
 Nodecon_test NODE1 NODE2 23
 ENDNODECON
 
+CONLIST conlist1
+CLEAR
+ADD
+NODEcon1 NODECON2
+ENDCONLIST
+CONLIST conlist2
+CLEAR
+ADD
+NODEcon3 NODECON4
+ENDCONLIST
+
+NODELIST nodelist_1
+CLEAR
+ADD
+NODE1 NODE2
+ENDNODELIST
+
 CONSTRAINTS
 P01 PMAX 234.223 QOSMAX 1000.23
 P02 PMAX 300.123 QOSMAX 1500.45
@@ -123,6 +158,12 @@ CLEAR
 ADD
 P01 P02
 ENDWELLLIST
+
+NODELIST nodelist_2
+CLEAR
+ADD
+NODE3 NODE4
+ENDNODELIST
 
 CONSTRAINTS
 P02 PMAX 400.456 QOSMAX 2000.67
