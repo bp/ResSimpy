@@ -61,7 +61,7 @@ class NexusWellhead(Wellhead):
     heat_transfer_coeff: Optional[float] = None
     dt_add: Optional[float] = None
 
-    def __init__(self, properties_dict: DataObjectMixinDictType, date: Optional[str] = None,
+    def __init__(self, properties_dict: Optional[DataObjectMixinDictType] = None, date: Optional[str] = None,
                  date_format: Optional[DateFormat] = None, start_date: Optional[str] = None,
                  unit_system: Optional[UnitSystem] = None, name: Optional[str] = None, pvt_method: Optional[int] = None,
                  water_method: Optional[int] = None, bat_method: Optional[int] = None,
@@ -77,7 +77,8 @@ class NexusWellhead(Wellhead):
         """Initialises the NexusWellhead class.
 
         Args:
-            properties_dict (dict): dict of the properties to set on the object.
+            properties_dict (Optional[dict]): optional way of importing via a dict of the properties to set on the 
+            object.
             date (Optional[str]): The date of the object.
             date_format (Optional[DateFormat]): The date format that the object uses.
             start_date (Optional[str]): The start date of the model. Required if the object uses a decimal TIME.
