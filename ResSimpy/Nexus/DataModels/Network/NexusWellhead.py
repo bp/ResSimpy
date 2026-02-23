@@ -77,7 +77,7 @@ class NexusWellhead(Wellhead):
         """Initialises the NexusWellhead class.
 
         Args:
-            properties_dict (Optional[dict]): optional way of importing via a dict of the properties to set on the 
+            properties_dict (Optional[dict]): optional way of importing via a dict of the properties to set on the
             object.
             date (Optional[str]): The date of the object.
             date_format (Optional[DateFormat]): The date format that the object uses.
