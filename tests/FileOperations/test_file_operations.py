@@ -258,3 +258,19 @@ def test_get_full_file_path(mocker, origin, rootdir, is_nexus, expected_full_pat
     result = fo.get_full_file_path(file_path=file_path, origin=origin, is_nexus=is_nexus, rootdir=rootdir)
     # Assert
     assert result == expected_full_path
+
+
+def test_split_file_as_list_by_date():
+    # Arrange
+    file_as_list = ['TIME 01/01/2020\n', 'OTHERLINE\n', 'TIME 01/02/2020\n', 'OTHERLINE2\n',
+                    'TIME 01/03/2020\n', 'TIME 01/04/2020\n', '! TIME 01/05/2021\n', 'OTHERLINE3\n', 'Otherline4\n']
+    expected_result = {
+        '01/01/2020': ['TIME 01/01/2020\n', 'OTHERLINE\n'],
+        '01/02/2020': ['TIME 01/02/2020\n', 'OTHERLINE2\n'],
+        '01/03/2020': ['TIME 01/03/2020\n'],
+        '01/04/2020': ['TIME 01/04/2020\n', '! TIME 01/05/2021\n', 'OTHERLINE3\n', 'Otherline4\n']  
+    }
+    # Act
+    result = fo.split_file_as_list_by_date(file_as_list=file_as_list, date_token='TIME')
+    # Assert
+    assert result == expected_result

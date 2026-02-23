@@ -785,3 +785,33 @@ def split_line(line: str, upper: bool = True, comment_characters: None | list[st
         value = get_next_value(0, [trimmed_line], comment_characters=comment_characters)
 
     return stored_values
+
+
+def split_file_as_list_by_date(file_as_list: list[str], date_token: str = 'TIME',
+                               comment_characters: None | list[str] = None) -> dict[str, list[str]]:
+    """Splits a file represented as a list of strings into a dictionary of lists of strings based on the token
+    specified.
+
+    Args:
+        file_as_list (list[str]): a list of strings containing each line of the file as a new entry
+        date_token (str): The date token to split on. Defaults to Nexus format.
+        comment_characters (Optional[list[str]], optional): a list of characters that are considered inline comments.
+            Defaults to the Nexus format (!)
+
+    Returns:
+        dict[str, list[str]]: a dictionary where the keys are the token followed by the first value after the token,
+        and the values are lists of strings containing the lines of the file between that token and the next occurrence
+        of that token.
+    """
+    split_file: dict[str, list[str]] = {}
+    current_token_value = None
+    for i, line in enumerate(file_as_list):
+        if check_token(date_token, line, comment_characters=comment_characters):
+            # TODO handle 3 part dates in this bit
+            current_token_value = get_expected_token_value(token=date_token, token_line=line,
+                                                           file_list=file_as_list[i:],
+                                                           comment_characters=comment_characters)
+            split_file[current_token_value] = [line]
+        elif current_token_value is not None:
+            split_file[current_token_value].append(line)
+    return split_file
