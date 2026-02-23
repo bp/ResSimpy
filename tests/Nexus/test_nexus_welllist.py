@@ -376,7 +376,7 @@ ENDWELLLIST
 WELLLIST well_list_name_2
 CLEAR
 ADD
-wellname_4 
+wellname_4
 wellname_5
 wellname_6
 ENDWELLLIST
