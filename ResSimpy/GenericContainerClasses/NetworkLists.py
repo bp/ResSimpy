@@ -76,6 +76,6 @@ class NetworkLists(ABC):
             printable_string += f'{self.table_header()} {list_item.name}\n'
             # remove all the previous wells and reinitialise the list
             printable_string += 'CLEAR\nADD\n'
-            printable_string += ' '.join(list_item.elements_in_the_list) + '\n'
+            printable_string += '\n'.join(list_item.elements_in_the_list) + '\n'
             printable_string += self.table_footer() + '\n'
         return printable_string

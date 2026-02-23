@@ -369,12 +369,16 @@ ENDWELLLIST'''
         expected_string = """WELLLIST well_list_name
 CLEAR
 ADD
-wellname_1 wellname_2 wellname_3
+wellname_1
+wellname_2
+wellname_3
 ENDWELLLIST
 WELLLIST well_list_name_2
 CLEAR
 ADD
-wellname_4 wellname_5 wellname_6
+wellname_4 
+wellname_5
+wellname_6
 ENDWELLLIST
 """
         # Act
