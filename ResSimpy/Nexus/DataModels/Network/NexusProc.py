@@ -1,6 +1,11 @@
 from dataclasses import dataclass
 from typing import Optional, Mapping
+
+from ResSimpy.DataModelBaseClasses.NetworkObject import NetworkObject
+from ResSimpy.Enums.UnitsEnum import UnitSystem
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusKeywords.proc_keywords import PREDEFINED_VARS, CONDITIONAL_KEYWORDS, NEXUS_ALL_PROC_FUNCS
+from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
 
 
 # set custom error message
@@ -9,18 +14,15 @@ class SetError(Exception):
 
 
 @dataclass(kw_only=True, repr=True)
-class NexusProc:
+class NexusProc(NetworkObject):
     """Class that represents a single nexus procedure."""
-    __date: Optional[str]
-    __name: Optional[str]
     __priority: Optional[int]
     __contents: Optional[list[str]]
     __contents_breakdown: dict[str, int]
 
-    def __init__(self, date: Optional[str] = None,
-                 contents: Optional[list[str]] = None,
-                 name: Optional[str] = None,
-                 priority: Optional[int] = None) -> None:
+    def __init__(self, date: Optional[str] = None, contents: Optional[list[str]] = None,
+                 name: Optional[str] = None, priority: Optional[int] = None, unit_system: Optional[UnitSystem] = None,
+                 start_date: Optional[str] = None, date_format: Optional[DateFormat] = None) -> None:
         """Initialize the attributes of the class.
 
         Attributes:
@@ -33,12 +35,12 @@ class NexusProc:
         Methods:
                 reset_nexus_proc_function_counts(): Returns a dictionary of zero counts for the nexus proc functions.
         """
-
-        self.__date = date
-        self.__name = name
         self.__priority = priority
         self.__contents = contents
+
         self.__contents_breakdown = self.reset_nexus_proc_function_counts()
+        super().__init__(properties_dict={}, date=date, date_format=date_format, start_date=start_date,
+                         unit_system=unit_system, name=name)
 
     @property
     def contents(self) -> Optional[list[str]]:
@@ -46,19 +48,9 @@ class NexusProc:
         return self.__contents
 
     @property
-    def date(self) -> Optional[str]:
-        """Returns the date that the procedure occurred."""
-        return self.__date
-
-    @property
     def priority(self) -> Optional[int]:
         """Returns the priority of the procedure."""
         return self.__priority
-
-    @property
-    def name(self) -> Optional[str]:
-        """Returns the name of the procedure."""
-        return self.__name
 
     @property
     def contents_breakdown(self) -> dict[str, int]:
@@ -99,3 +91,20 @@ class NexusProc:
         to_search = predef_vars | cond | all_proc_funcs
 
         return to_search
+
+    def to_string(self) -> str:
+        """Outputs the procedure as a string in the format it would be written in a Nexus file."""
+        output_str = "PROCS"
+        if self.name is not None:
+            output_str += f" NAME {self.name}"
+        if self.priority is not None:
+            output_str += f" PRIORITY {self.priority}"
+        output_str += '\n'
+        if self.contents is not None:
+            output_str +='\n'.join(self.contents) + '\n'
+        output_str += "ENDPROCS\n"
+        return output_str
+
+    def units(self) -> BaseUnitMapping:
+        """Returns the attribute to unit map for the data object."""
+        return BaseUnitMapping(None)
