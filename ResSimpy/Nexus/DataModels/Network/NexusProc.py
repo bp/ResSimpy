@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Mapping
+from typing import Optional
 
 from ResSimpy.DataModelBaseClasses.NetworkObject import NetworkObject
 from ResSimpy.Enums.UnitsEnum import UnitSystem
@@ -68,9 +68,9 @@ class NexusProc(NetworkObject):
                            'Nexus Keyword Manual page 1013.')
 
     @staticmethod
-    def get_keyword_mapping() -> Mapping[str, tuple[str, type]]:
+    def get_keyword_mapping() -> dict[str, tuple[str, type]]:
         """Gets the mapping of nexus keywords to attribute definitions."""
-        keywords = {
+        keywords: dict[str, tuple[str, type]] = {
             'NAME': ('name', str),
             'PRIORITY': ('priority', str)
         }
@@ -101,10 +101,11 @@ class NexusProc(NetworkObject):
             output_str += f" PRIORITY {self.priority}"
         output_str += '\n'
         if self.contents is not None:
-            output_str +='\n'.join(self.contents) + '\n'
+            output_str += '\n'.join(self.contents) + '\n'
         output_str += "ENDPROCS\n"
         return output_str
 
+    @property
     def units(self) -> BaseUnitMapping:
         """Returns the attribute to unit map for the data object."""
         return BaseUnitMapping(None)
