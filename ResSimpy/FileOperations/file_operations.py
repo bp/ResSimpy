@@ -34,7 +34,7 @@ def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,
     for comment_character in comment_characters:
         if comment_character == 'C':  # handle VIP comment with single C character at the start of a line
             file_without_comments = [line for line in file_without_comments if not line.startswith('C ') and not
-            line.strip() == 'C']
+                                     line.strip() == 'C']
         else:
             # remove any empty lines
             # regex: look back and forward 1 character from an ! and check if it's a quotation mark and
