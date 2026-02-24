@@ -34,7 +34,7 @@ def strip_file_of_comments(file_as_list: list[str], strip_str: bool = False,
     for comment_character in comment_characters:
         if comment_character == 'C':  # handle VIP comment with single C character at the start of a line
             file_without_comments = [line for line in file_without_comments if not line.startswith('C ') and not
-                                     line.strip() == 'C']
+            line.strip() == 'C']
         else:
             # remove any empty lines
             # regex: look back and forward 1 character from an ! and check if it's a quotation mark and
@@ -804,14 +804,20 @@ def split_file_as_list_by_date(file_as_list: list[str], date_token: str = 'TIME'
         of that token.
     """
     split_file: dict[str, list[str]] = {}
-    current_token_value = None
+    date_token_value = None
+    no_token_dict_key = f'BEFORE_FIRST_{date_token}'
+
     for i, line in enumerate(file_as_list):
         if check_token(date_token, line, comment_characters=comment_characters):
             # TODO handle 3 part dates in this bit
-            current_token_value = get_expected_token_value(token=date_token, token_line=line,
-                                                           file_list=file_as_list[i:],
-                                                           comment_characters=comment_characters)
-            split_file[current_token_value] = [line]
-        elif current_token_value is not None:
-            split_file[current_token_value].append(line)
+            date_token_value = get_expected_token_value(token=date_token, token_line=line,
+                                                        file_list=file_as_list[i:],
+                                                        comment_characters=comment_characters)
+            split_file[date_token_value] = [line]
+        elif date_token_value is None:
+            if no_token_dict_key not in split_file:
+                split_file[no_token_dict_key] = []
+            split_file[no_token_dict_key].append(line)
+        elif date_token_value is not None:
+            split_file[date_token_value].append(line)
     return split_file

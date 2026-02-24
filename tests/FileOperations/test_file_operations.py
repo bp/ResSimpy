@@ -262,9 +262,11 @@ def test_get_full_file_path(mocker, origin, rootdir, is_nexus, expected_full_pat
 
 def test_split_file_as_list_by_date():
     # Arrange
-    file_as_list = ['TIME 01/01/2020\n', 'OTHERLINE\n', 'TIME 01/02/2020\n', 'OTHERLINE2\n',
+    file_as_list = ['Some content before the token card\n', 'another line\n', 'TIME 01/01/2020\n', 'OTHERLINE\n', 
+                    'TIME 01/02/2020\n', 'OTHERLINE2\n',
                     'TIME 01/03/2020\n', 'TIME 01/04/2020\n', '! TIME 01/05/2021\n', 'OTHERLINE3\n', 'Otherline4\n']
     expected_result = {
+        'BEFORE_FIRST_TIME': ['Some content before the token card\n', 'another line\n'],
         '01/01/2020': ['TIME 01/01/2020\n', 'OTHERLINE\n'],
         '01/02/2020': ['TIME 01/02/2020\n', 'OTHERLINE2\n'],
         '01/03/2020': ['TIME 01/03/2020\n'],
