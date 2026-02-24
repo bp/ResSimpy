@@ -12,6 +12,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusNodeList import NexusNodeList
 from ResSimpy.Nexus.DataModels.Network.NexusProc import NexusProc
 from ResSimpy.Nexus.DataModels.Network.NexusTarget import NexusTarget
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
+from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
 from ResSimpy.Nexus.NexusEnums.ActivationChangeEnum import ActivationChangeEnum
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
@@ -46,6 +47,12 @@ def test_write_surface_section(pvt_type, eos_details, expected_pvt_string):
                                                       date='01/01/2020', unit_system=UnitSystem.METRIC,
                                                       date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
     model.network.well_connections._add_to_memory([wellcon1, wellcon2, wellcon2_additional_wellcon])
+    
+    wellhead1 = NexusWellhead(name='P01WH', date='01/01/2020', unit_system=UnitSystem.METRIC, 
+                              date_format=DateFormat.DD_MM_YYYY, hyd_method=23, depth=2052.2, well='P01')
+    wellhead2 = NexusWellhead(name='P02WH', date='01/01/2020', unit_system=UnitSystem.METRIC,
+                              date_format=DateFormat.DD_MM_YYYY, hyd_method=25, depth=2152.2, well='P02')
+    model.network.wellheads._add_to_memory([wellhead1, wellhead2])
 
     # add some constraints
     constraints = {'P01': [NexusConstraint(name='P01', max_gor=100000, max_pressure=234.223,
@@ -124,6 +131,12 @@ NAME STREAM NUMBER DATUM DATGRAD CROSS_SHUT CROSSFLOW ND GASMOB
 P01 PRODUCER 1 14000 MOBGRAD OFF OFF NA NA
 P02 PRODUCER 2 14000 MOBGRAD OFF ON ND GASMETHOD
 ENDWELLS
+
+WELLHEAD
+WELL NAME DEPTH METHOD
+P01 P01WH 2052.2 23
+P02 P02WH 2152.2 25
+ENDWELLHEAD
 
 NODES
 NAME TYPE DEPTH
