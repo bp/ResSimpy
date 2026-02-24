@@ -8,7 +8,7 @@ from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictTyp
 from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
 from ResSimpy.Enums.UnitsEnum import UnitSystem
-from ResSimpy.Nexus.DataModels.Network.NexusWellMod import NexusWellMod
+from ResSimpy.Nexus.DataModels.NexusWellMod import NexusWellMod
 from ResSimpy.Time.ISODateTime import ISODateTime
 from ResSimpy.Utils.generic_repr import generic_repr, generic_str
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat

@@ -12,7 +12,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.Network.NexusTarget import NexusTarget
 from ResSimpy.Nexus.DataModels.Network.NexusTargets import NexusTargets
 from ResSimpy.Nexus.DataModels.Network.NexusWellLists import NexusWellLists
-from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
+from ResSimpy.Nexus.DataModels.Network.NexusWellList import NexusWellList
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.Nexus.DataModels.Network.NexusActivationChange import NexusActivationChange

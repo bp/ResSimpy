@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Literal, Sequence
 
 from ResSimpy.DataModelBaseClasses.NetworkList import NetworkList
 from ResSimpy.GenericContainerClasses.NetworkLists import NetworkLists
-from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
+from ResSimpy.Nexus.DataModels.Network.NexusWellList import NexusWellList
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork

@@ -1,7 +1,7 @@
 from ResSimpy import NexusSimulator
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusCompletion import NexusCompletion
-from ResSimpy.Nexus.DataModels.Network.NexusWellMod import NexusWellMod
+from ResSimpy.Nexus.DataModels.NexusWellMod import NexusWellMod
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.nexus_model_file_generator import NexusModelFileGenerator
 

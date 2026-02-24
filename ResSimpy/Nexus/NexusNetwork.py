@@ -48,7 +48,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusWellbores import NexusWellbores
 from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.Network.NexusWellheads import NexusWellheads
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
+from ResSimpy.Nexus.DataModels.Network.NexusWellList import NexusWellList
 from ResSimpy.Nexus.NexusEnums.ActivationChangeEnum import ActivationChangeEnum
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 

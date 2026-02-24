@@ -5,7 +5,7 @@ from typing import Optional, TYPE_CHECKING
 from datetime import time, timedelta
 
 from ResSimpy.Time.ISODateTime import ISODateTime
-from ResSimpy.Nexus.DataModels.Network.NexusWellMod import NexusWellMod
+from ResSimpy.Nexus.DataModels.NexusWellMod import NexusWellMod
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
