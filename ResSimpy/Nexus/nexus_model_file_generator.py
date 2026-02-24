@@ -55,9 +55,10 @@ class NexusModelFileGenerator:
         all_nodes = self.model.network.nodes.get_all()
         all_connections = self.model.network.connections.get_all()
         all_activations = self.model.network.activation_changes.get_all()
+        all_proces = self.model.network.procs.get_all()
 
         network_objects = [all_well_connections, all_targets, all_welllists, all_nodes, all_connections,
-                           all_activations, all_conlists, all_nodelists]
+                           all_activations, all_conlists, all_nodelists, all_proces]
 
         all_constraints = self.model.network.constraints.get_all()
 
@@ -77,7 +78,7 @@ class NexusModelFileGenerator:
         # Write out all events for each date
         for date in ordered_all_event_dates:
             if date != self.model.start_iso_date:
-                full_schedule += f"TIME {date.strftime_dateformat(self.model.date_format)}\n"
+                full_schedule += f"TIME {date.strftime_dateformat(self.model.date_format)}\n\n"
 
             well_connections_for_date = [x for x in all_well_connections if x.iso_date == date]
 
@@ -121,6 +122,11 @@ class NexusModelFileGenerator:
             activations_for_date = [x for x in all_activations if x.iso_date == date]
             if any(activations_for_date) and self.model.network.activation_changes is not None:
                 full_schedule += self.model.network.activation_changes.to_string_for_date(date=date)
+                full_schedule += '\n'
+
+            procs_for_date = [x for x in all_proces if x.iso_date == date]
+            if any(procs_for_date) and self.model.network.procs is not None:
+                full_schedule += self.model.network.procs.to_string_for_date(date=date)
                 full_schedule += '\n'
 
         return full_schedule

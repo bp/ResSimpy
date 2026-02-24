@@ -9,6 +9,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusConstraint import NexusConstraint
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusNodeConnection import NexusNodeConnection
 from ResSimpy.Nexus.DataModels.Network.NexusNodeList import NexusNodeList
+from ResSimpy.Nexus.DataModels.Network.NexusProc import NexusProc
 from ResSimpy.Nexus.DataModels.Network.NexusTarget import NexusTarget
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
 from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
@@ -105,6 +106,10 @@ def test_write_surface_section(pvt_type, eos_details, expected_pvt_string):
         NexusNodeList(name='nodelist_2', date='01/01/2021', date_format=DateFormat.DD_MM_YYYY,
                      elements_in_the_list=['NODE3', 'NODE4']),
     ])
+    
+    # add some procs
+    model.network.procs._add_to_memory([NexusProc(date='15/10/2021', name='STATIC_VARS', priority=1, contents=["THIS IS TEXT"],
+                               date_format=DateFormat.DD_MM_YYYY)])
 
     expected_result = f"""{expected_pvt_string}
 
@@ -113,6 +118,7 @@ P01 GORMAX 100000 PMAX 234.223
 ENDCONSTRAINTS
 
 TIME 01/01/2020
+
 WELLS
 NAME STREAM NUMBER DATUM DATGRAD CROSS_SHUT CROSSFLOW ND GASMOB
 P01 PRODUCER 1 14000 MOBGRAD OFF OFF NA NA
@@ -156,6 +162,7 @@ P02 PMAX 300.123 QOSMAX 1500.45
 ENDCONSTRAINTS
 
 TIME 01/01/2021
+
 WELLLIST welllist1
 CLEAR
 ADD
@@ -185,11 +192,16 @@ P01
 ENDACTIVATE
 
 TIME 15/10/2021
+
 DEACTIVATE
 CONNECTION
 P02
 P01
 ENDDEACTIVATE
+
+PROCS NAME STATIC_VARS PRIORITY 1
+THIS IS TEXT
+ENDPROCS
 
 """
 
