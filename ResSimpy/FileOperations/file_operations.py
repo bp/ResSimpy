@@ -726,17 +726,19 @@ def split_lines_for_long_string(long_string: str, max_length: int, comment_chara
     return compiled_string
 
 
-def split_list_of_strings_by_length(list_of_strings: list[str], max_length: int) -> list[str]:
+def split_list_of_strings_by_length(list_of_strings: list[str], max_length: int,
+                                    comment_characters: None | list[str] = None) -> list[str]:
     """Splits a list of strings into a new list of strings with a maximum length.
 
     Args:
         list_of_strings (list[str]): The list of strings to be split.
         max_length (int): The maximum length of each string in the new list.
+        comment_characters (Optional[list[str]]): The comment characters to filter out. Defaults to None
 
     Returns:
         list[str]: A new list of strings split from the original list.
     """
-    return [split_lines_for_long_string(string, max_length) for string in list_of_strings]
+    return [split_lines_for_long_string(string, max_length, comment_characters) for string in list_of_strings]
 
 
 def get_full_file_path(file_path: str, origin: str, rootdir: Optional[str] = None, is_nexus: bool = True) -> str:
