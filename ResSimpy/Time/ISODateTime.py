@@ -81,6 +81,9 @@ class ISODateTime(datetime):
                 converted_date = ISODateTime.strptime(date, '%m/%d/%Y(%H:%M:%S)')
 
         elif date_format == DateFormat.DD_MMM_YYYY:
+            date = date.replace("'", "")
+            date = date.replace("-", " ")
+            date = " ".join(date.split())
             try:
                 converted_date = ISODateTime.strptime(date, '%d %b %Y')
             except ValueError:  # Handling the case where a time has been added
