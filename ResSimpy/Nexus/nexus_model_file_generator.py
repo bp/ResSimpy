@@ -56,10 +56,10 @@ class NexusModelFileGenerator:
         all_nodes = self.model.network.nodes.get_all()
         all_connections = self.model.network.connections.get_all()
         all_activations = self.model.network.activation_changes.get_all()
-        all_proces = self.model.network.procs.get_all()
+        all_procs = self.model.network.procs.get_all()
 
         network_objects = [all_well_connections, all_wellheads, all_targets, all_welllists, all_nodes, all_connections,
-                           all_activations, all_conlists, all_nodelists, all_proces]
+                           all_activations, all_conlists, all_nodelists, all_procs]
 
         all_constraints = self.model.network.constraints.get_all()
 
@@ -130,7 +130,7 @@ class NexusModelFileGenerator:
                 full_schedule += self.model.network.activation_changes.to_string_for_date(date=date)
                 full_schedule += '\n'
 
-            procs_for_date = [x for x in all_proces if x.iso_date == date]
+            procs_for_date = [x for x in all_procs if x.iso_date == date]
             if any(procs_for_date) and self.model.network.procs is not None:
                 full_schedule += self.model.network.procs.to_string_for_date(date=date)
                 full_schedule += '\n'
