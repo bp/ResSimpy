@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Sequence, TYPE_CHECKING
 
 from ResSimpy.Nexus.DataModels.Network.NexusProc import NexusProc
+from ResSimpy.Time.ISODateTime import ISODateTime
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
@@ -35,3 +36,11 @@ class NexusProcs:
     def _add_to_memory(self, procs_to_add: list[NexusProc]) -> None:
         """Adds the list of Nexus procedure objects to memory."""
         self.__procs.extend(procs_to_add)
+
+    def to_string_for_date(self, date: ISODateTime) -> str:
+        """Outputs the procedures for a specific date."""
+        output_str = ''
+        procs_for_date = [x for x in self.__procs if x.iso_date == date]
+        for proc in procs_for_date:
+            output_str += proc.to_string()
+        return output_str

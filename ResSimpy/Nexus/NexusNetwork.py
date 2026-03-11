@@ -48,7 +48,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusWellbores import NexusWellbores
 from ResSimpy.Nexus.DataModels.Network.NexusWellhead import NexusWellhead
 from ResSimpy.Nexus.DataModels.Network.NexusWellheads import NexusWellheads
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
-from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
+from ResSimpy.Nexus.DataModels.Network.NexusWellList import NexusWellList
 from ResSimpy.Nexus.NexusEnums.ActivationChangeEnum import ActivationChangeEnum
 from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 
@@ -163,9 +163,8 @@ class NexusNetwork(Network):
             time = self.__model.start_date
             name_ = None
             priority_ = None
-            # initialize an empty proc object, so we can use its staticmethod reset_nexus_proc_function_counts
-            proc_obj = NexusProc()
-            nexus_proc_function_counts = proc_obj.reset_nexus_proc_function_counts()
+            nexus_proc_function_counts = NexusProc.reset_nexus_proc_function_counts()
+            date_format = self.__model.date_format
 
             for line in file_contents:
 
@@ -176,7 +175,8 @@ class NexusNetwork(Network):
                 # check for keyword ENDPROCS to signal end of the procedure
                 if fo.check_token('ENDPROCS', line=line):
                     # create the proc object
-                    proc_obj = NexusProc(contents=proc_contents, date=time, name=name_, priority=priority_)
+                    proc_obj = NexusProc(contents=proc_contents, date=time, name=name_, priority=priority_,
+                                         date_format=date_format, start_date=self.__model.start_date)
 
                     # set the proc function counts
                     proc_obj.contents_breakdown = nexus_proc_function_counts

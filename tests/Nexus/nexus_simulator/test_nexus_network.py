@@ -12,7 +12,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusConstraints import NexusConstraints
 from ResSimpy.Nexus.DataModels.Network.NexusTarget import NexusTarget
 from ResSimpy.Nexus.DataModels.Network.NexusTargets import NexusTargets
 from ResSimpy.Nexus.DataModels.Network.NexusWellLists import NexusWellLists
-from ResSimpy.Nexus.DataModels.NexusWellList import NexusWellList
+from ResSimpy.Nexus.DataModels.Network.NexusWellList import NexusWellList
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.Nexus.DataModels.Network.NexusActivationChange import NexusActivationChange
@@ -1424,18 +1424,20 @@ ENDPROCS
     	cp01_gaslift    GAS       CP01          GASLIFT     NONE        NA ! Checked NODECON 13/05/2020 
     	ENDNODECON
     	'''
+    start_date = '01/01/2023'
     expected_nodecons = [NexusNodeConnection(name='CP01', node_in='CP01', node_out='wh_cp01', con_type='PIPE',
                                              hyd_method='2', delta_depth=7002.67, date='01/01/2023',
                                              unit_system=UnitSystem.ENGLISH, properties_dict={},
-                                             date_format=DateFormat.DD_MM_YYYY, start_date='01/01/2023'),
+                                             date_format=DateFormat.DD_MM_YYYY, start_date=start_date),
                          NexusNodeConnection(name='cp01_gaslift', node_in='GAS', node_out='CP01', con_type='GASLIFT',
                                              hyd_method=None, delta_depth=None, date='01/01/2023',
                                              unit_system=UnitSystem.ENGLISH, properties_dict={},
-                                             date_format=DateFormat.DD_MM_YYYY, start_date='01/01/2023')]
+                                             date_format=DateFormat.DD_MM_YYYY, start_date=start_date)]
 
     expected_proc = NexusProc(date='01/01/2023', name='TUNING',
                               contents=['REAL_1D     list\n', 'REAL  t_last = 0\n', 'IF (t_last == 0 THEN\n',
-                                        't_last = TIME\n', 'ENDIF\n'], )
+                                        't_last = TIME\n', 'ENDIF\n'], date_format=DateFormat.DD_MM_YYYY, 
+                              start_date=start_date)
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
@@ -1445,7 +1447,6 @@ ENDPROCS
         }).return_value
         return mock_open
 
-    start_date = '01/01/2023'
     mocker.patch("builtins.open", mock_open_wrapper)
 
     fcs_file_path = 'fcs_file.fcs'

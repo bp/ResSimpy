@@ -268,6 +268,7 @@ THP 100.0 500.0
         expected_surface_file_content = '''BLACKOIL
 
 TIME 01/01/2020
+
 CONSTRAINTS
 well1 QOSMAX 10240
 ENDCONSTRAINTS

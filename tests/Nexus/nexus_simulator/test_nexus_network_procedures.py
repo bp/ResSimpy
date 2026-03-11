@@ -1,8 +1,14 @@
+from datetime import datetime
+
+import pytest
+
 from ResSimpy.Nexus.DataModels.Network.NexusNode import NexusNode
 from ResSimpy.Nexus.DataModels.Network.NexusProc import NexusProc
 from ResSimpy.Nexus.DataModels.Network.NexusProcs import NexusProcs
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
+from ResSimpy.Time.ISODateTime import ISODateTime
 from tests.utility_for_tests import get_fake_nexus_simulator
 
 
@@ -22,7 +28,8 @@ ENDPROCS
 
     # create object
     # date must be the same as the start_date
-    expected_proc = NexusProc(date='01/01/2023', contents=["THIS IS TEXT"])
+    expected_proc = NexusProc(date='01/01/2023', contents=["THIS IS TEXT"], date_format=DateFormat.MM_DD_YYYY,
+                              start_date=start_date)
 
     # create a nexus network object
     dummy_model = get_fake_nexus_simulator(mocker)
@@ -38,7 +45,6 @@ ENDPROCS
     nexus_net.procs = nexus_procs
 
     # Act
-    # nexus_procs.load(surface_file, start_date, default_units=UnitSystem.ENGLISH)
     result = nexus_procs.get_all()
 
     # Assert
@@ -64,7 +70,8 @@ ENDPROCS
 
     # create object
     # date must be the same as the start_date
-    expected_proc = NexusProc(date='01/01/2024', contents=["THIS IS TEXT"])
+    expected_proc = NexusProc(date='01/01/2024', contents=["THIS IS TEXT"], date_format=DateFormat.MM_DD_YYYY,
+                              start_date=start_date)
 
     # create a nexus network object
     dummy_model = get_fake_nexus_simulator(mocker)
@@ -106,7 +113,8 @@ ENDPROCS
 
     # create object
     # date must be the same as the start_date
-    expected_proc = NexusProc(date='01/01/2024', name='STATIC_VARS', priority=1, contents=["THIS IS TEXT"])
+    expected_proc = NexusProc(date='01/01/2024', name='STATIC_VARS', priority=1, contents=["THIS IS TEXT"],
+                              date_format=DateFormat.MM_DD_YYYY, start_date=start_date)
 
     # create a nexus network object
     dummy_model = get_fake_nexus_simulator(mocker)
@@ -151,9 +159,10 @@ ENDPROCS
 
     # create object
     # date must be the same as the start_date
-    expected_proc1 = NexusProc(date='01/01/2024', name='STATIC_VARS', priority=1, contents=["THIS IS TEXT"])
+    expected_proc1 = NexusProc(date='01/01/2024', name='STATIC_VARS', priority=1, contents=["THIS IS TEXT"],
+                               date_format=DateFormat.MM_DD_YYYY, start_date=start_date)
     expected_proc2 = NexusProc(date='01/01/2024', name='DYNAMIC_VARS', priority=2,
-                               contents=["THIS IS MORE TEXT"])
+                               contents=["THIS IS MORE TEXT"], date_format=DateFormat.MM_DD_YYYY, start_date=start_date)
 
     # create a nexus network object
     dummy_model = get_fake_nexus_simulator(mocker)
@@ -197,15 +206,18 @@ ENDPROCS
     """
 
     surface_file = NexusFile(location='surface.dat', file_content_as_list=surface_file_contents.splitlines())
-
+    date_format = DateFormat.DD_MM_YYYY
     # create object
     # date must be the same as the start_date
-    expected_proc1 = NexusProc(date='01/01/2024', name='STATIC_VARS', priority=1, contents=["THIS IS TEXT"])
-    expected_proc2 = NexusProc(date='01/01/2025', name='STATIC_VARS', priority=1, contents=["THIS IS TEXT"])
+    expected_proc1 = NexusProc(date='01/01/2024', name='STATIC_VARS', priority=1, contents=["THIS IS TEXT"],
+                               date_format=date_format, start_date=start_date)
+    expected_proc2 = NexusProc(date='01/01/2025', name='STATIC_VARS', priority=1, contents=["THIS IS TEXT"],
+                               date_format=date_format, start_date=start_date)
 
     # create a nexus network object
     dummy_model = get_fake_nexus_simulator(mocker)
     dummy_model._start_date = start_date
+    dummy_model.date_format = date_format
     dummy_model.model_files.surface_files = {1: surface_file}
 
     nexus_net = NexusNetwork(model=dummy_model)
@@ -251,10 +263,13 @@ ENDPROCS
 
     # create object
     # date must be the same as the start_date
-    expected_proc1 = NexusProc(date='01/01/2024', name='STATIC_VARS', priority=1, contents=["THIS IS TEXT"])
-    expected_proc2 = NexusProc(date='01/01/2025', name='STATIC_VARS', priority=1, contents=["THIS IS TEXT"])
+    expected_proc1 = NexusProc(date='01/01/2024', name='STATIC_VARS', priority=1, contents=["THIS IS TEXT"],
+                               date_format=DateFormat.MM_DD_YYYY, start_date=start_date)
+    expected_proc2 = NexusProc(date='01/01/2025', name='STATIC_VARS', priority=1, contents=["THIS IS TEXT"],
+                               date_format=DateFormat.MM_DD_YYYY, start_date=start_date)
     expected_proc3 = NexusProc(date='01/01/2025', name='DYNAMIC_VARS', priority=2,
-                               contents=["THIS IS DIFFERENT TEXT"])
+                               contents=["THIS IS DIFFERENT TEXT"], date_format=DateFormat.MM_DD_YYYY, 
+                               start_date=start_date)
 
     # create a nexus network object
     dummy_model = get_fake_nexus_simulator(mocker)
@@ -506,3 +521,37 @@ ENDPROCS
     assert result[0].contents_breakdown['P'] == 1
     assert result[0].contents_breakdown['DO'] == 1
 
+@pytest.mark.parametrize('date_to_output, expected_result', [
+    (ISODateTime(2024, 1, 1), """PROCS NAME STATIC_VARS PRIORITY 1
+IF(ABS(MAX(X)) > ABS(MAX(Y))) THEN
+PRINTOUT(2)!PRINTOUT is a built in nexus proc function
+ENDIF
+ENDPROCS
+"""),
+    (ISODateTime(2025, 1, 1), """PROCS NAME STATIC_VARS PRIORITY 1
+THIS IS TEXT
+ENDPROCS
+PROCS NAME DYNAMIC_VARS PRIORITY 2
+THIS IS DIFFERENT TEXT
+ENDPROCS
+""")])
+def test_proc_to_string_for_date(date_to_output: ISODateTime, expected_result: str):
+    # Arrange
+    dateformat = DateFormat.DD_MM_YYYY
+    proc1 = NexusProc(date='01/01/2024', name='STATIC_VARS', priority=1, contents=['IF(ABS(MAX(X)) > ABS(MAX(Y))) THEN',
+                                  'PRINTOUT(2)!PRINTOUT is a built in nexus proc function',
+                                  'ENDIF'],
+                      date_format=dateformat)
+    proc2 = NexusProc(date='01/01/2025', name='STATIC_VARS', priority=1, contents=["THIS IS TEXT"],
+                      date_format=dateformat)
+    proc3 = NexusProc(date='01/01/2025', name='DYNAMIC_VARS', priority=2,
+                      contents=["THIS IS DIFFERENT TEXT"], date_format=dateformat)
+
+    procs_object = NexusProcs(parent_network=None)
+    procs_object._add_to_memory([proc1, proc2, proc3])
+    
+    # Act
+    result = procs_object.to_string_for_date(date_to_output)
+    
+    # Assert
+    assert result == expected_result
