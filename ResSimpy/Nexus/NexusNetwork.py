@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Optional, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import ResSimpy.FileOperations.file_operations as fo
 from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
@@ -38,6 +38,8 @@ from ResSimpy.Nexus.DataModels.Network.NexusProc import NexusProc
 from ResSimpy.Nexus.DataModels.Network.NexusProcs import NexusProcs
 from ResSimpy.Nexus.DataModels.Network.NexusStation import NexusStation
 from ResSimpy.Nexus.DataModels.Network.NexusStations import NexusStations
+from ResSimpy.Nexus.DataModels.Network.NexusStreamTracer import NexusStreamTracer
+from ResSimpy.Nexus.DataModels.Network.NexusStreamTracers import NexusStreamTracers
 from ResSimpy.Nexus.DataModels.Network.NexusTarget import NexusTarget
 from ResSimpy.Nexus.DataModels.Network.NexusTargets import NexusTargets
 from ResSimpy.Nexus.DataModels.Network.NexusWellConnection import NexusWellConnection
@@ -80,6 +82,7 @@ class NexusNetwork(Network):
     conlists: NexusConLists
     stations: NexusStations
     guide_rates: NexusGuideRates
+    stream_tracers: NexusStreamTracers
     _has_been_loaded: bool = False
 
     def __init__(self, model: NexusSimulator, assume_loaded: bool = False) -> None:
@@ -109,6 +112,12 @@ class NexusNetwork(Network):
         self.drills: NexusDrills = NexusDrills(self)
         self.drill_sites: NexusDrillSites = NexusDrillSites(self)
         self.guide_rates: NexusGuideRates = NexusGuideRates(self)
+        self.stream_tracers: NexusStreamTracers = NexusStreamTracers(self)
+
+    @property
+    def stream_tracer_map(self) -> dict[str, str]:
+        """Returns a stream-name to component mapping derived from parsed STREAM_TRACER objects."""
+        return self.stream_tracers.component_map
 
     @property
     def model(self) -> NexusSimulator:
@@ -231,14 +240,15 @@ class NexusNetwork(Network):
         Table headers with None next to their name are currently skipped awaiting development.
         """
 
-        def type_check_lists(value: Optional[list[Any] | dict[str, list[NexusConstraint]]]) -> Optional[list[Any]]:
+        def type_check_lists(value: list[Any] | dict[str, list[NexusConstraint]] | None) -> list[Any] | None:
             """Guards against dictionaries coming from the dictionary."""
             if isinstance(value, dict):
                 raise TypeError(f"Expected a list, instead received a dict: {value}")
             return value
 
-        def type_check_dicts(value: Optional[list[Any] | dict[str, list[NexusConstraint]]]) -> \
-                Optional[dict[str, list[NexusConstraint]]]:
+        def type_check_dicts(
+            value: list[Any] | dict[str, list[NexusConstraint]] | None
+        ) -> dict[str, list[NexusConstraint]] | None:
             """Guards against dictionaries coming from the dictionary."""
             if isinstance(value, list):
                 raise TypeError(f"Expected a dict, instead received a list: {value}")
@@ -269,6 +279,7 @@ class NexusNetwork(Network):
                                       'STATION': NexusStation,
                                       'DRILL': NexusDrill,
                                       'DRILLSITE': NexusDrillSite,
+                                      'STREAM_TRACER': NexusStreamTracer,
                                       }
 
         for surface in self.__model.model_files.surface_files.values():
@@ -297,6 +308,7 @@ class NexusNetwork(Network):
             self.drills._add_to_memory(type_check_lists(nexus_obj_dict.get('DRILL')))
             self.drill_sites._add_to_memory(type_check_lists(nexus_obj_dict.get('DRILLSITE')))
             self.guide_rates._add_to_memory(type_check_lists(nexus_obj_dict.get('GUIDERATE')))
+            self.stream_tracers._add_to_memory(type_check_lists(nexus_obj_dict.get('STREAM_TRACER')))
 
             actions_check = type_check_lists(nexus_obj_dict.get('ACTIONS'))
             if actions_check is not None:
@@ -335,7 +347,9 @@ class NexusNetwork(Network):
         return activation_changes
 
     def __update_well_types(self) -> None:
-        """Updates the types of all of the wells using information found in the wells table."""
+        """Updates the types of all of the wells using information found in the wells table.
+        Falls back to the STREAM_TRACER component_map when the stream name is not a standard phase keyword.
+        """
         for connection in self.well_connections.get_all():
             if connection.name is None or connection.stream is None:
                 # Connection cannot be used to determine well type, so ignore it.
@@ -347,7 +361,8 @@ class NexusNetwork(Network):
                 warnings.warn(UserWarning(f'Cannot find matching well for {connection.name} declared in surface file.'))
                 continue
 
-            match connection.stream.upper():
+            stream_upper = connection.stream.upper()
+            match stream_upper:
                 case 'PRODUCER':
                     well_type = WellType.PRODUCER
                 case 'GAS':
@@ -357,7 +372,18 @@ class NexusNetwork(Network):
                 case 'OIL':
                     well_type = WellType.OIL_INJECTOR
                 case _:
-                    well_type = WellType.PRODUCER
+                    # Look up the stream name in the STREAM_TRACER component map to resolve
+                    # custom stream names (e.g. 'SEAWTR', 'TRTWTR', etc.) to
+                    # their declared COMPONENT and map that to a WellType.
+                    component = self.stream_tracers.component_map.get(stream_upper)
+                    if component == 'WATER':
+                        well_type = WellType.WATER_INJECTOR
+                    elif component == 'GAS':
+                        well_type = WellType.GAS_INJECTOR
+                    elif component == 'OIL':
+                        well_type = WellType.OIL_INJECTOR
+                    else:
+                        well_type = WellType.PRODUCER
 
             well_to_modify.well_type = well_type
 
