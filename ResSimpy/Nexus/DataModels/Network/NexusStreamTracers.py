@@ -66,6 +66,8 @@ class NexusStreamTracers:
             if st.name is not None and st.component is not None
         }
 
-    def _add_to_memory(self, stream_tracers_to_add: list[NexusStreamTracer]) -> None:
+    def _add_to_memory(self, stream_tracers_to_add: list[NexusStreamTracer] | None) -> None:
         """Appends a list of :class:`NexusStreamTracer` objects to the internal store."""
+        if stream_tracers_to_add is None:
+            return
         self.__stream_tracers.extend(stream_tracers_to_add)
