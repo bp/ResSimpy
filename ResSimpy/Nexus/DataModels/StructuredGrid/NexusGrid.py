@@ -6,7 +6,7 @@ import copy
 import numpy as np
 import pandas as pd
 from dataclasses import dataclass, field
-from typing import Optional, TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, Final
 import warnings
 from sys import maxsize
 
@@ -43,14 +43,14 @@ class PropertyToLoad:
 
 @dataclass(kw_only=True)
 class NexusGrid(Grid):
-    __array_functions_list: Optional[list[list[str]]] = None
-    __array_functions_df: Optional[pd.DataFrame] = None
+    __array_functions_list: list[list[str]] | None = None
+    __array_functions_df: pd.DataFrame | None = None
     __array_functions_loaded: bool = False
-    __grid_file_contents: Optional[list[str]] = None
-    __grid_file_nested: Optional[list[str]] = None
-    __faults_df: Optional[pd.DataFrame] = None
+    __grid_file_contents: list[str] | None = None
+    __grid_file_nested: list[str] | None = None
+    __faults_df: pd.DataFrame | None = None
     __grid_faults_loaded: bool = False
-    __grid_nexus_file: Optional[NexusFile] = None
+    __grid_nexus_file: NexusFile | None = None
     __corp: GridArrayDefinition
     __dx: GridArrayDefinition
     __dy: GridArrayDefinition
@@ -125,14 +125,14 @@ class NexusGrid(Grid):
     __kyeff: GridArrayDefinition
     __kzeff: GridArrayDefinition
     __grid_multir_loaded: bool = False
-    __multir: Optional[list[NexusMultir]] = None
+    __multir: list[NexusMultir] | None = None
     __lgrs: NexusLGRs
     __overs: list[NexusOver] = field(default_factory=list)
     __tovers: list[NexusTOver] = field(default_factory=list)
     __ftrans: list[NexusFtrans] = field(default_factory=list)
     __model_unit_system: UnitSystem
 
-    def __init__(self, model_unit_system: UnitSystem, grid_nexus_file: Optional[NexusFile] = None,
+    def __init__(self, model_unit_system: UnitSystem, grid_nexus_file: NexusFile | None = None,
                  assume_loaded: bool = False,
                  ) -> None:
         """Initialises the NexusGrid class.
@@ -146,15 +146,15 @@ class NexusGrid(Grid):
         super().__init__(assume_loaded=assume_loaded)
         self.__array_functions_loaded: bool = assume_loaded
         self.__grid_faults_loaded: bool = assume_loaded
-        self.__array_functions_list: Optional[list[list[str]]] = None
-        self.__array_functions_df: Optional[pd.DataFrame] = None
-        self.__grid_file_contents: Optional[list[str]] = None if grid_nexus_file is None else \
+        self.__array_functions_list: list[list[str]] | None = None
+        self.__array_functions_df: pd.DataFrame | None = None
+        self.__grid_file_contents: list[str] | None = None if grid_nexus_file is None else \
             grid_nexus_file.get_flat_list_str_file_including_includes
-        self.__grid_file_nested: Optional[list[str]] = None if grid_nexus_file is None else \
+        self.__grid_file_nested: list[str] | None = None if grid_nexus_file is None else \
             grid_nexus_file.file_content_as_list
-        self.__faults_df: Optional[pd.DataFrame] = None
-        self.__grid_nexus_file: Optional[NexusFile] = grid_nexus_file
-        self.__grid_array_functions: Optional[list[NexusGridArrayFunction]] = None
+        self.__faults_df: pd.DataFrame | None = None
+        self.__grid_nexus_file: NexusFile | None = grid_nexus_file
+        self.__grid_array_functions: list[NexusGridArrayFunction] | None = None
         self.__corp: GridArrayDefinition = GridArrayDefinition()
         self.__iequil: GridArrayDefinition = GridArrayDefinition()
         self.__ipvt: GridArrayDefinition = GridArrayDefinition()
@@ -257,14 +257,14 @@ class NexusGrid(Grid):
         # Prevent reload from disk
         self._grid_properties_loaded = True
 
-    def to_dict(self) -> dict[str, Optional[int] | GridArrayDefinition]:
+    def to_dict(self) -> dict[str, int | None | GridArrayDefinition]:
         """Returns a dictionary representation of grid array.
         Checks if grid properties are not loaded and loads them.
         """
         self.load_grid_properties_if_not_loaded()
 
         original_dict = self.__dict__
-        new_dict: dict[str, Optional[int] | GridArrayDefinition] = {}
+        new_dict: dict[str, int | None | GridArrayDefinition] = {}
         for key in original_dict.keys():
             new_key = key
             if new_key[0] == '_':
@@ -709,13 +709,13 @@ class NexusGrid(Grid):
         self.__array_functions_df = afo.summarize_model_functions(self.__array_functions_list)
         self.__array_functions_loaded = True
 
-    def get_array_functions_list(self) -> Optional[list[list[str]]]:
+    def get_array_functions_list(self) -> list[list[str]] | None:
         """Returns the grid array functions as a list of function lines."""
         if not self.__array_functions_loaded:
             self.load_array_functions()
         return self.__array_functions_list
 
-    def get_array_functions_df(self) -> Optional[pd.DataFrame]:
+    def get_array_functions_df(self) -> pd.DataFrame | None:
         """Returns the grid array functions as a dataframe."""
         if not self.__array_functions_loaded:
             self.load_array_functions()
@@ -753,7 +753,7 @@ class NexusGrid(Grid):
             self.__faults_df = new_df.drop(['TMULT'], axis=1)
         self.__grid_faults_loaded = True
 
-    def get_faults_df(self) -> Optional[pd.DataFrame]:
+    def get_faults_df(self) -> pd.DataFrame | None:
         """Returns the fault definition and transmissility multiplier information as a dataframe."""
         self.load_grid_properties_if_not_loaded()
         if not self.__grid_faults_loaded:
@@ -804,7 +804,7 @@ class NexusGrid(Grid):
     def __extract_multir_tableline(line: str) -> None | NexusMultir:
         """Takes a single line in a file and extracts a Multir object from it."""
         stored_values = fo.split_line(line)
-        if not stored_values:
+        if not stored_values or len(stored_values) < 3:
             return None
         region_1_str, region_2_str, tmult_str = stored_values[0:3]
         region_1 = int(region_1_str)
@@ -854,7 +854,7 @@ class NexusGrid(Grid):
             return None
 
     @property
-    def array_functions(self) -> Optional[list[NexusGridArrayFunction]]:
+    def array_functions(self) -> list[NexusGridArrayFunction] | None:
         """Returns a list of the array functions defined in the structured grid file."""
         self.load_grid_properties_if_not_loaded()
         if self.__grid_array_functions is None:
@@ -1814,7 +1814,8 @@ class NexusGrid(Grid):
 
         # add the faults
         faults_df = self.get_faults_df()
-        grid_str += NexusGrid.fault_df_to_string(faults_df)
+        if faults_df is not None and not faults_df.empty:
+            grid_str += NexusGrid.fault_df_to_string(faults_df)
 
         if self.array_functions:
             for array_function in self.array_functions:

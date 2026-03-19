@@ -1,7 +1,5 @@
-import pandas as pd
 import pytest
 
-from ResSimpy.DataModelBaseClasses.Multir import Multir
 from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.DataModels.NexusFile import NexusFile
 from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
@@ -11,13 +9,13 @@ from ResSimpy.Nexus.DataModels.StructuredGrid.NexusMultir import NexusMultir
 @pytest.mark.parametrize("file_content, expected_result", [
     # Basic test
     ("""! comment
-    
+
     MULTIR
-    
+
     1	2	0.1	X Y Z	ALL
     1	3	0	Y Z
     1	4	0	XYZ	STD
-    
+
     1	5	0.24	XYZ	NONSTD
     1	6	0	X	ALL""",
      [NexusMultir(region_1=1, region_2=2, tmult=0.1, directions='XYZ', std_connections=True, non_std_connections=True),
@@ -32,9 +30,9 @@ from ResSimpy.Nexus.DataModels.StructuredGrid.NexusMultir import NexusMultir
      []),
 
     # Test with a keyword after MULTIR
-    ("""KX CON 
+    ("""KX CON
      5.1
-     
+
      MULTIR
      2 2 3.1 X StD  ! comment after
      2 4 5 ALL
@@ -43,12 +41,24 @@ from ResSimpy.Nexus.DataModels.StructuredGrid.NexusMultir import NexusMultir
      """,
      [NexusMultir(region_1=2, region_2=2, tmult=3.1, directions='X', std_connections=True, non_std_connections=False),
       NexusMultir(region_1=2, region_2=4, tmult=5, directions='XYZ', std_connections=True, non_std_connections=True)]),
+    # Test with INCLUDE line inside MULTIR section
+    ("""MULTIR
+    INCLUDE zmultirs_perched.inc
+    1 2 0.1 XYZ ALL
+    1 3 0.0 YZ STD
+    KX CON
+    5.1
+    """,
+     [NexusMultir(region_1=1, region_2=2, tmult=0.1, directions='XYZ', std_connections=True,
+                  non_std_connections=True),
+      NexusMultir(region_1=1, region_2=3, tmult=0.0, directions='YZ', std_connections=True,
+                  non_std_connections=False)]),
     # multiple MULTIR tables
     ("""MULTIR
     1 2 3 X StD
     1 4 5 XY Z ALL
-    
-    
+
+
     MULTIR
     2 2 3 X StD
     ! comment line
@@ -58,8 +68,7 @@ from ResSimpy.Nexus.DataModels.StructuredGrid.NexusMultir import NexusMultir
       NexusMultir(region_1=1, region_2=4, tmult=5, directions='XYZ', std_connections=True, non_std_connections=True),
       NexusMultir(region_1=2, region_2=2, tmult=3, directions='X', std_connections=True, non_std_connections=False),
       NexusMultir(region_1=2, region_2=4, tmult=5.5, directions='XYZ', std_connections=True, non_std_connections=True)])
-]
-    , ids=['basic', 'empty', 'stop_on_keyword', 'multiple_tables'])
+], ids=['basic', 'empty', 'stop_on_keyword', 'include_reference_line', 'multiple_tables'])
 def test_load_nexus_multir_table_from_list(file_content, expected_result):
     file_content_as_list = file_content.splitlines(keepends=True)
 
@@ -82,33 +91,38 @@ def test_load_multir():
     1	5	0	XYZ	ALL
     1	6	0	XYZ	ALL
     """
-    nexus_grid_file = NexusFile('loc.dat', file_content_as_list=file_content.splitlines(keepends=True))
+    nexus_grid_file = NexusFile('loc.dat', file_content_as_list=list(file_content.splitlines(keepends=True)))
 
     grid = NexusGrid(grid_nexus_file=nexus_grid_file, model_unit_system=UnitSystem.ENGLISH)
     grid._nexus_file_content = file_content
-    
-    expected_result = [NexusMultir(region_1=1, region_2=2, tmult=0, directions='XYZ', std_connections=True, non_std_connections=True),
-                       NexusMultir(region_1=1, region_2=3, tmult=0, directions='XYZ', std_connections=True, non_std_connections=True),
-                       NexusMultir(region_1=1, region_2=4, tmult=0.1, directions='XYZ', std_connections=True, non_std_connections=True),
-                       NexusMultir(region_1=1, region_2=5, tmult=0, directions='XYZ', std_connections=True, non_std_connections=True),
-                       NexusMultir(region_1=1, region_2=6, tmult=0, directions='XYZ', std_connections=True, non_std_connections=True)]
+
+    expected_result = [NexusMultir(region_1=1, region_2=2, tmult=0, directions='XYZ', std_connections=True,
+                                   non_std_connections=True),
+                       NexusMultir(region_1=1, region_2=3, tmult=0, directions='XYZ', std_connections=True,
+                                   non_std_connections=True),
+                       NexusMultir(region_1=1, region_2=4, tmult=0.1, directions='XYZ', std_connections=True,
+                                   non_std_connections=True),
+                       NexusMultir(region_1=1, region_2=5, tmult=0, directions='XYZ', std_connections=True,
+                                   non_std_connections=True),
+                       NexusMultir(region_1=1, region_2=6, tmult=0, directions='XYZ', std_connections=True,
+                                   non_std_connections=True)]
 
     # Act
     result = grid.multir
 
     # Assert
     assert result == expected_result
-    
+
+
 def test_NexusMultir_to_string():
     # Arrange
-    multir = NexusMultir(region_1=1, region_2=2, tmult=0.1, directions='XYZ', std_connections=True, non_std_connections=True)
-    
+    multir = NexusMultir(region_1=1, region_2=2, tmult=0.1, directions='XYZ', std_connections=True,
+                         non_std_connections=True)
+
     expected_result = '1\t2\t0.1\tXYZ\tSTD\tNONSTD\n'
-    
+
     # Act
     result = multir.to_string()
-    
+
     # Assert
     assert result == expected_result
-    
-    
