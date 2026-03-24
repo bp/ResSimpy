@@ -21,6 +21,9 @@ class TestNexusStreamTracer:
 
     def test_init_from_kwargs(self):
         """NexusStreamTracer can be initialised with explicit keyword arguments."""
+        # Arrange
+
+        # Act
         st = NexusStreamTracer(
             name='SEAWTR',
             component='WATER',
@@ -30,6 +33,8 @@ class TestNexusStreamTracer:
             date_format=DateFormat.MM_DD_YYYY,
             unit_system=UnitSystem.ENGLISH,
         )
+
+        # Assert
         assert st.name == 'SEAWTR'
         assert st.component == 'WATER'
         assert st.tracer == 'SALT'
@@ -37,6 +42,7 @@ class TestNexusStreamTracer:
 
     def test_init_from_properties_dict(self):
         """NexusStreamTracer can be initialised via properties_dict (table-parser path)."""
+        # Arrange
         props = {
             'date': '01/01/2020',
             'name': 'TRTWTR',
@@ -44,11 +50,15 @@ class TestNexusStreamTracer:
             'tracer': 'SALT',
             'concentration': 1.0,
         }
+
+        # Act
         st = NexusStreamTracer(
             properties_dict=props,
             date_format=DateFormat.MM_DD_YYYY,
             unit_system=UnitSystem.ENGLISH,
         )
+
+        # Assert
         assert st.name == 'TRTWTR'
         assert st.component == 'WATER'
         assert st.tracer == 'SALT'
@@ -56,14 +66,24 @@ class TestNexusStreamTracer:
 
     def test_optional_fields_default_none(self):
         """Tracer and concentration are optional and default to None."""
+        # Arrange
+
+        # Act
         st = NexusStreamTracer(name='MYSTREAM', component='GAS', date='01/01/2020',
                                date_format=DateFormat.MM_DD_YYYY, unit_system=UnitSystem.ENGLISH)
+
+        # Assert
         assert st.tracer is None
         assert st.concentration is None
 
     def test_get_keyword_mapping(self):
         """get_keyword_mapping returns the expected column→attribute map."""
+        # Arrange
+
+        # Act
         mapping = NexusStreamTracer.get_keyword_mapping()
+
+        # Assert
         assert mapping['NAME'] == ('name', str)
         assert mapping['COMPONENT'] == ('component', str)
         assert mapping['TRACER'] == ('tracer', str)
@@ -86,39 +106,56 @@ class TestNexusStreamTracers:
         )
 
     def test_get_all_returns_added_tracers(self):
+        # Arrange
         container = self._make_container()
         t1 = self._make_tracer('SEAWTR', 'WATER', 'SALT', 1.0)
         t2 = self._make_tracer('TRTWTR', 'WATER', 'SALT', 1.0)
         container._add_to_memory([t1, t2])
+
+        # Act
         result = list(container.get_all())
+
+        # Assert
         assert len(result) == 2
         assert t1 in result
         assert t2 in result
 
     def test_get_by_name_case_insensitive(self):
+        # Arrange
         container = self._make_container()
         t = self._make_tracer('SEAWTR', 'WATER')
         container._add_to_memory([t])
+
+        # Act / Assert
         assert container.get_by_name('seawtr') is t
         assert container.get_by_name('SEAWTR') is t
         assert container.get_by_name('SeAwTr') is t
 
     def test_get_by_name_returns_none_for_missing(self):
+        # Arrange
         container = self._make_container()
         container._add_to_memory([self._make_tracer('SEAWTR', 'WATER')])
+
+        # Act / Assert
         assert container.get_by_name('NONEXISTENT') is None
 
     def test_component_map_keys_uppercased(self):
+        # Arrange
         container = self._make_container()
         container._add_to_memory([
             self._make_tracer('seawtr', 'water'),
             self._make_tracer('TRTWTR', 'WATER'),
             self._make_tracer('GASSTREAM', 'GAS'),
         ])
+
+        # Act
         cm = container.component_map
+
+        # Assert
         assert cm == {'SEAWTR': 'WATER', 'TRTWTR': 'WATER', 'GASSTREAM': 'GAS'}
 
     def test_component_map_excludes_none_name_or_component(self):
+        # Arrange
         container = self._make_container()
         # Entry with None name should be excluded
         container._add_to_memory([
@@ -129,6 +166,8 @@ class TestNexusStreamTracers:
             NexusStreamTracer(name='GOOD', component='GAS', date='01/01/2020', date_format=DateFormat.MM_DD_YYYY,
                               unit_system=UnitSystem.ENGLISH),
         ])
+
+        # Act / Assert
         assert container.component_map == {'GOOD': 'GAS'}
 
 
@@ -146,9 +185,9 @@ BLACKOIL
 
 STREAM_TRACER
 NAME       COMPONENT   TRACER   CONCENTRATION
-SEAWTR     WATER       SALT     1.0
-TRTWTR     WATER       SALT     1.0
-GASSTREAM  GAS         GASTR    0.5
+SEAWTR         WATER      SALT     1.0
+TRTWTR    WATER SALT     1.0
+GASSTREAM    GAS         GASTR    0.5
 ENDSTREAM_TRACER
 
 WELLS
@@ -197,6 +236,7 @@ IW JW LW RADW
 
     def test_stream_tracers_parsed(self, mocker: MockerFixture):
         """NexusNetwork.stream_tracers contains all rows from the STREAM_TRACER block."""
+        # Arrange
         def mock_open_wrapper(filename, mode='r'):
             return mock_multiple_files(mocker, filename, potential_file_dict={
                 '/fcs_file.fcs': self.fcs_content,
@@ -212,8 +252,10 @@ IW JW LW RADW
         nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/fcs_file.fcs', mock_open=False)
         nexus_sim.start_date = self.start_date
 
+        # Act
         stream_tracers = list(nexus_sim.network.stream_tracers.get_all())
 
+        # Assert
         names = {st.name.upper() for st in stream_tracers if st.name is not None}
         assert 'SEAWTR' in names
         assert 'TRTWTR' in names
@@ -229,6 +271,7 @@ IW JW LW RADW
 
     def test_component_map_populated(self, mocker: MockerFixture):
         """stream_tracer_map and stream_tracers.component_map return the correct dict."""
+        # Arrange
         def mock_open_wrapper(filename, mode='r'):
             return mock_multiple_files(mocker, filename, potential_file_dict={
                 '/fcs_file.fcs': self.fcs_content,
@@ -244,13 +287,17 @@ IW JW LW RADW
         nexus_sim = get_fake_nexus_simulator(mocker, fcs_file_path='/fcs_file.fcs', mock_open=False)
         nexus_sim.start_date = self.start_date
 
+        # Act
         cm = nexus_sim.network.stream_tracer_map
+
+        # Assert
         assert cm.get('SEAWTR') == 'WATER'
         assert cm.get('TRTWTR') == 'WATER'
         assert cm.get('GASSTREAM') == 'GAS'
 
     def test_water_injectors_classified_correctly(self, mocker: MockerFixture):
         """Wells whose STREAM maps to WATER via STREAM_TRACER are classified as WATER_INJECTOR."""
+        # Arrange
         def mock_open_wrapper(filename, mode='r'):
             return mock_multiple_files(mocker, filename, potential_file_dict={
                 '/fcs_file.fcs': self.fcs_content,
@@ -269,11 +316,13 @@ IW JW LW RADW
         # Force network load
         _ = nexus_sim.network.stream_tracers.get_all()
 
+        # Act
         producer = nexus_sim.wells.get('PROD_WELL')
         winj_sea = nexus_sim.wells.get('WINJ_SEA')
         winj_trt = nexus_sim.wells.get('WINJ_TRT')
         ginj = nexus_sim.wells.get('GINJ_1')
 
+        # Assert
         if producer is not None:
             assert producer.well_type == WellType.PRODUCER
         if winj_sea is not None:
