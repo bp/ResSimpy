@@ -804,7 +804,7 @@ class NexusGrid(Grid):
     def __extract_multir_tableline(line: str) -> None | NexusMultir:
         """Takes a single line in a file and extracts a Multir object from it."""
         stored_values = fo.split_line(line)
-        if not stored_values:
+        if not stored_values or len(stored_values) < 3:
             return None
         region_1_str, region_2_str, tmult_str = stored_values[0:3]
         region_1 = int(region_1_str)
