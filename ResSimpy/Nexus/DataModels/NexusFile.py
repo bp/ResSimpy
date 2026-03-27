@@ -152,7 +152,7 @@ class NexusFile(File):
                         include_file = obj
                         break
                     if obj.location is not None and \
-                            os.path.basename(obj.location) == os.path.basename(incfile_location):
+                            obj.location_in_including_file == incfile_location:
                         include_file = obj
                         break
 
