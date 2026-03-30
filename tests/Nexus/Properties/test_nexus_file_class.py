@@ -299,7 +299,7 @@ C
 KX ZVAR
 500 50 200
 CORP VALUE
-C    
+C
 1 2 3 234234 12313""",
 
      """C Corner point grid layout
@@ -585,7 +585,7 @@ def test_line_locations_with_additional_lines(mocker):
 
     file_path = 'test_file_path.dat'
     test_file_contents = (
-        '''basic_file 
+        '''basic_file
 INCLUDE inc_file1.inc
 some random words ! comment
 continuation''')
@@ -604,7 +604,7 @@ continuation''')
                                     include_objects=[nexus_file_include2],
                                     file_content_as_list=inc1_file_content_as_list)
 
-    expected_file_content_as_list = ['basic_file \n', 'New line in here\n', 'INCLUDE inc_file1.inc\n',
+    expected_file_content_as_list = ['basic_file\n', 'New line in here\n', 'INCLUDE inc_file1.inc\n',
                                      'some random words ! comment\n', 'continuation']
 
     expected_line_locations = [(0, 'parent_file'), (2, 'uuid_inc1'), (5, 'uuid_inc2'), (7, 'uuid_inc1'),
@@ -615,7 +615,7 @@ continuation''')
                                     file_content_as_list=expected_file_content_as_list)
     expected_nexus_file.__setattr__('line_locations', expected_line_locations)
 
-    expected_flat_file = ['basic_file \n', 'New line in here\n', 'inc file contents\n', 'new line in include_file\n',
+    expected_flat_file = ['basic_file\n', 'New line in here\n', 'inc file contents\n', 'new line in include_file\n',
                           'second line in incfile \n',
                           'inc2 file contents\n', 'more content', ' end of line \n', ' ',
                           'some random words ! comment\n', 'continuation']
@@ -737,12 +737,12 @@ continuation''')
        IW JW L RADW
        1  2  3  4.5     ! 2
        6 7 8   9.11     ! 3
-       
+
        4 5 6 7.5        ! 5
        2 4 5 11         ! 6
-                       
-       !comment           
-       3 4 5 6.5        ! 9 
+
+       !comment
+       3 4 5 6.5        ! 9
        ''',
                            {'uuid1': [2],
                             'uuid2': [3],
@@ -1027,25 +1027,30 @@ def test_write_to_file_failure(mocker):
 
 
 # TODO: Convert this test to run independently of the other tests.
-def test_missing_file(mocker):
+@pytest.mark.parametrize('error, expected_warning', [(FileNotFoundError, 'No file found for:'),
+                                                     (PermissionError, 'PermissionError when trying to access file at')])
+def test_missing_file(mocker, error, expected_warning):
     # Arrange
     file_content = '''test_file_content\nInCluDE original_include.inc\nINCLUDE'''
     file_path = '/root/file.dat'
     expected_missing_file = os.path.join('/root', 'original_include.inc')
 
     def mock_open_wrapper(filename, mode):
-        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
-            file_path: file_content,
-        }).return_value
+        try:
+            mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+                file_path: file_content,
+            }).return_value
+        except FileNotFoundError:
+            raise error(f'{filename} not found')
         return mock_open
 
     mocker.patch("builtins.open", mock_open_wrapper)
     path_mock = mocker.MagicMock()
     mocker.patch('pathlib.Path', path_mock)
     path_mock.return_value.owner.return_value = "mock_User"
-    path_mock.return_value.group.side_effect = FileNotFoundError("File not found")
+    path_mock.return_value.group.side_effect = error("File not found")
     # Act Assert
-    with pytest.warns(UserWarning, match=r'No file found for:') as warn_msg:
+    with pytest.warns(UserWarning, match=rf'{expected_warning}') as warn_msg:
         nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path=file_path)
     mocker.stopall()
     result_include_file = nexus_file.include_objects[0]
@@ -1056,9 +1061,8 @@ def test_missing_file(mocker):
     assert result_include_file.include_locations == []
     assert result_include_file.linked_user is None
     assert result_include_file.last_modified is None
-    assert warn_msg[0].message.args[0] == 'FileNotFoundError when trying to access file at /root/file.dat'
-    assert warn_msg[1].message.args[
-               0] == f"No file found for: {os.path.join('/root', 'original_include.inc')} while loading /root/file.dat"
+    assert warn_msg[0].message.args[0] == expected_warning
+    assert warn_msg[1].message.args[0] == f"{expected_warning} {os.path.join('/root', 'original_include.inc')} while loading /root/file.dat"
 
 
 def test_group_not_found(mocker):

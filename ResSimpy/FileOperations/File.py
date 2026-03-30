@@ -271,10 +271,10 @@ class File(FileBase):
             pass
         except PermissionError:
             # user doesn't have permission to access the file, continue without filling out that information
-            warnings.warn(f'PermissionError when trying to access file at {full_file_path}')
+            warnings.warn('PermissionError when trying to access file at')
         except FileNotFoundError:
             # file not found, continue without filling out that information
-            warnings.warn(f'FileNotFoundError when trying to access file at {full_file_path}')
+            warnings.warn('No file found for:')
         except KeyError:
             # Group or owner doesn't exist on this system, continue without filling out that information
             warnings.warn(f'Unable to find the group for the file at {full_file_path}')
@@ -345,6 +345,19 @@ class File(FileBase):
                                               last_modified=None)
             warnings.warn(UserWarning(f'No file found for: {full_file_path} while loading {origin}'))
             return nexus_file_class
+        except PermissionError:
+            # handle if a file can't be accessed
+            nexus_file_class = simulator_type(location=file_path,
+                                              include_locations=None,
+                                              origin=origin,
+                                              rootdir=rootdir,
+                                              include_objects=None,
+                                              file_content_as_list=None,
+                                              linked_user=None,
+                                              last_modified=None)
+            warnings.warn(UserWarning(
+                f'PermissionError when trying to access file at {full_file_path} while loading {origin}'))
+            return nexus_file_class
 
         # check last modified and user for the file
         user = File.get_pathlib_path_details(full_file_path)
@@ -403,8 +416,8 @@ class File(FileBase):
             if skip_arrays:
                 try:
                     inc_file_as_list = fo.load_file_as_list(inc_full_path)
-                except FileNotFoundError:
-                    # handle files not found - this is handled in an exception in the main loop
+                except (FileNotFoundError, PermissionError):
+                    # handle files not found or not accessible - this is handled in an exception in the main loop
                     pass
                 else:
                     all_numeric = False
