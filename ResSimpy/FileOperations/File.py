@@ -271,10 +271,10 @@ class File(FileBase):
             pass
         except PermissionError:
             # user doesn't have permission to access the file, continue without filling out that information
-            warnings.warn('PermissionError when trying to access file at')
+            warnings.warn(f'PermissionError when trying to access file at {full_file_path}')
         except FileNotFoundError:
             # file not found, continue without filling out that information
-            warnings.warn('No file found for:')
+            warnings.warn(f'No file found for: {full_file_path}')
         except KeyError:
             # Group or owner doesn't exist on this system, continue without filling out that information
             warnings.warn(f'Unable to find the group for the file at {full_file_path}')
