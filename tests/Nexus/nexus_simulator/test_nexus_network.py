@@ -1,3 +1,5 @@
+import datetime
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -1443,7 +1445,51 @@ def test_combine_lists_into_one_timeline(mocker):
     # Assert
     assert result == expected_combined_activation_changes
 
-# TODO: Warning test
+def test_combine_lists_into_one_timeline_raises_warning_same_date(recwarn):
+    # Arrange
+    start_date = '25/07/2026'
+    activation_change_1 = NexusActivationChange(change=ActivationChangeEnum.ACTIVATE, name='well_1', date='25/07/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date,
+                                                is_constraint_change=True)
+    activation_change_2 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, name='well_1', date='26/07/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    activation_change_3 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, name='well_1', date='28/07/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    activation_change_4 = NexusActivationChange(change=ActivationChangeEnum.ACTIVATE, name='well_1', date='02/08/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date,
+                                                is_constraint_change=True)
+    activation_change_5 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, name='well_1', date='02/08/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date,
+                                                is_constraint_change=True)
+    activation_change_6 = NexusActivationChange(change=ActivationChangeEnum.ACTIVATE, name='well_1', date='03/08/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date,
+                                                is_constraint_change=True)
+    activation_change_7 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, name='well_1', date='03/08/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date,
+                                                is_constraint_change=True)
+    activation_change_8 = NexusActivationChange(change=ActivationChangeEnum.ACTIVATE, name='well_1', date='07/08/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date,
+                                                is_constraint_change=True)
+
+
+    initial_activate_activations = [activation_change_1, activation_change_4, activation_change_6,
+                                    activation_change_7]
+    intial_constraint_activations = [activation_change_2, activation_change_3, activation_change_5, activation_change_8]
+
+    # Act
+    result = NexusNetwork._NexusNetwork__combine_lists_into_one_timeline(initial_activate_activations, intial_constraint_activations)
+
+    # Assert
+    # Check for the warning
+    assert len(recwarn) == 1
+    assert recwarn[0].message.args[0] == ('Multiple activation changes for the same timestamp of different types. '
+                                          'Cannot guarantee the combined order matches the order in the original files')
+
+    # Check that the date order is still correct
+    last_date = datetime.datetime.min
+    for activation_change in result:
+        assert activation_change.iso_date >= last_date
+        last_date = activation_change.iso_date
 
 def test_load_surface_file_activate_deactivate_multiple_on_same_line(mocker):
     # Arrange

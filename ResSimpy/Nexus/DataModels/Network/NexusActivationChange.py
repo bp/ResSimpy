@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from ResSimpy.DataModelBaseClasses.NetworkObject import NetworkObject
+from ResSimpy.Enums.UnitsEnum import UnitSystem
 from ResSimpy.Nexus.NexusEnums.ActivationChangeEnum import ActivationChangeEnum
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Units.AttributeMappings.BaseUnitMapping import BaseUnitMapping
@@ -27,7 +28,8 @@ class NexusActivationChange(NetworkObject):
         """
         self.change = change
         self.is_constraint_change = is_constraint_change
-        super().__init__(date_format=date_format, start_date=start_date, name=name, date=date)
+        super().__init__(date_format=date_format, start_date=start_date, name=name, date=date,
+                         unit_system=UnitSystem.METRIC)
 
     @staticmethod
     def get_keyword_mapping() -> dict[str, tuple[str, type]]:

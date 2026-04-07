@@ -263,6 +263,10 @@ class NexusNetwork(Network):
         current_second_object = list_2_copy[0]
 
         while len(list_1_copy) > 0 or len(list_2_copy) > 0:
+            if current_first_object.iso_date == current_second_object.iso_date:
+                warnings.warn('Multiple activation changes for the same timestamp of different types. Cannot guarantee '
+                              'the combined order matches the order in the original files')
+
             if current_first_object.iso_date < current_second_object.iso_date:
                 combined_list.append(current_first_object)
                 list_1_copy.pop(0)
