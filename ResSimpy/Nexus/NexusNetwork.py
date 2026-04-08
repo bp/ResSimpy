@@ -5,13 +5,14 @@ connections, well connections, wellheads, wellbores, constraints and targets.
 """
 from __future__ import annotations
 
+import copy
 import re
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, TypeVar
 
 import ResSimpy.FileOperations.file_operations as fo
-from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType
+from ResSimpy.DataModelBaseClasses.DataObjectMixin import DataObjectMixinDictType, DataObjectMixin
 from ResSimpy.DataModelBaseClasses.Network import Network
 from ResSimpy.Enums.WellTypeEnum import WellType
 from ResSimpy.Nexus.DataModels.Network.NexusAction import NexusAction
@@ -56,6 +57,7 @@ from ResSimpy.Nexus.nexus_collect_tables import collect_all_tables_to_objects
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
+T = TypeVar('T', bound=DataObjectMixin)
 
 
 @dataclass(kw_only=True)
@@ -234,6 +236,56 @@ class NexusNetwork(Network):
 
         return loaded_procs
 
+    @staticmethod
+    def __combine_lists_into_one_timeline(list_1: list[T],
+                                          list_2: list[T]) -> list[T]:
+        """Combines two lists into one, ensuring that the objects are correctly ordered by iso_date.
+
+        Args:
+            list_1(list[DataObjectMixin]): The first list of objects to be combined
+            list_2(list[DataObjectMixin]): The second list of objects to be combined
+
+        Returns:
+            list[DataObjectMixin]: The combined list of both lists of objects in the correct order.
+        """
+        combined_list = []
+        list_1_copy = copy.deepcopy(list_1)
+        list_2_copy = copy.deepcopy(list_2)
+
+        # If either list is empty, simply return the other one.
+        if len(list_1_copy) == 0:
+            return list_2_copy
+        if len(list_2_copy) == 0:
+            return list_1_copy
+
+        # Loop through both lists, popping each entry as we add them to the combined list.
+        current_first_object = list_1_copy[0]
+        current_second_object = list_2_copy[0]
+
+        while len(list_1_copy) > 0 or len(list_2_copy) > 0:
+            if current_first_object.iso_date == current_second_object.iso_date:
+                warnings.warn('Multiple activation changes for the same timestamp of different types. Cannot guarantee '
+                              'the combined order matches the order in the original files')
+
+            if current_first_object.iso_date < current_second_object.iso_date:
+                combined_list.append(current_first_object)
+                list_1_copy.pop(0)
+                if len(list_1_copy) == 0:
+                    combined_list.extend(list_2_copy)
+                    break
+                else:
+                    current_first_object = list_1_copy[0]
+            else:
+                combined_list.append(current_second_object)
+                list_2_copy.pop(0)
+                if len(list_2_copy) == 0:
+                    combined_list.extend(list_1_copy)
+                    break
+                else:
+                    current_second_object = list_2_copy[0]
+
+        return combined_list
+
     def load(self) -> None:
         """Loads all the objects from the surface files in the Simulator class.
 
@@ -301,9 +353,15 @@ class NexusNetwork(Network):
             self.welllists._add_to_memory(type_check_lists(nexus_obj_dict.get('WELLLIST')))
             self.conlists._add_to_memory(type_check_lists(nexus_obj_dict.get('CONLIST')))
             self.nodelists._add_to_memory(type_check_lists(nexus_obj_dict.get('NODELIST')))
-            self.activation_changes._add_to_memory(type_check_lists(nexus_obj_dict.get('ACTIVATE_DEACTIVATE')))
-            constraint_activation_changes = self.__get_constraint_activation_changes(constraints=constraints)
-            self.activation_changes._add_to_memory(type_check_lists(constraint_activation_changes))
+
+            first_activation_changes = type_check_lists(nexus_obj_dict.get('ACTIVATE_DEACTIVATE'))
+            second_activation_changes = self.__get_constraint_activation_changes(constraints=constraints)
+            if (isinstance(first_activation_changes, list) and
+                    isinstance(second_activation_changes, list)):
+                combined_activation_changes = self.__combine_lists_into_one_timeline(list_1=first_activation_changes,
+                                                                                     list_2=second_activation_changes)
+                self.activation_changes._add_to_memory(type_check_lists(combined_activation_changes))
+
             self.stations._add_to_memory(type_check_lists(nexus_obj_dict.get('STATION')))
             self.drills._add_to_memory(type_check_lists(nexus_obj_dict.get('DRILL')))
             self.drill_sites._add_to_memory(type_check_lists(nexus_obj_dict.get('DRILLSITE')))

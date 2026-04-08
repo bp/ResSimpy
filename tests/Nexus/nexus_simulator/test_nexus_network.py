@@ -1,3 +1,5 @@
+import datetime
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -1333,6 +1335,161 @@ ENDACTIVATE
     assert result_wellcons == expected_wellcons
     assert result_activation_changes == expected_activation_changes
 
+def test_load_surface_file_activate_deactivate_constraints_as_well_multiple_ways(mocker):
+    # Arrange
+    # Mock out the surface and fcs file
+    fcs_file_contents = 'RUNCONTROL run_control.inc\nDATEFORMAT DD/MM/YYYY\nSURFACE NETWORK 1 	nexus_data/surface.inc'
+
+    surface_file_content = """
+WELLS
+NAME    STREAM    IBAT    IPVT
+well_1  WATER    1    1
+ENDWELLS
+ 
+! Deactivate all wells
+CONSTRAINTS
+w*   DEACTIVATE
+ENDCONSTRAINTS
+ 
+CONSTRAINTS
+well_1 QALLRMAX MULT  PMIN 5
+ENDCONSTRAINTS
+ 
+TIME 26/07/2026
+ACTIVATE
+CONNECTION
+well_1
+ENDACTIVATE
+ 
+TIME 27/07/2026
+CONSTRAINTS
+well_1 QWSMAX 1234
+ENDCONSTRAINTS
+    """
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            fcs_file_path: fcs_file_contents,
+            'nexus_data/surface.inc': surface_file_content,
+            'run_control.inc': 'START 25/07/2026',
+        }).return_value
+        return mock_open
+
+    start_date = '25/07/2026'
+    mocker.patch("builtins.open", mock_open_wrapper)
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
+
+    fcs_file_path = 'fcs_file.fcs'
+    nexus_sim = NexusSimulator(fcs_file_path)
+
+    # Create the expected objects
+    welcon_0 = NexusWellConnection(date_format=DateFormat.DD_MM_YYYY, pvt_method=1,
+                                   start_date=start_date, date='25/07/2026', name='well_1', bat_method=1,
+                                   stream='WATER')
+
+    expected_wellcons = [welcon_0]
+    activation_change_1 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, name='well_1', date='25/07/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date,
+                                                is_constraint_change=True)
+    activation_change_2 = NexusActivationChange(change=ActivationChangeEnum.ACTIVATE, name='well_1', date='26/07/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    expected_activation_changes = [activation_change_1, activation_change_2]
+
+    # Act
+    result_wellcons = nexus_sim.network.well_connections.get_all()
+    result_activation_changes = nexus_sim.network.activation_changes.get_all()
+
+    # Assert
+    assert result_wellcons[0] == expected_wellcons[0]
+    assert result_wellcons == expected_wellcons
+    assert result_activation_changes == expected_activation_changes
+
+def test_combine_lists_into_one_timeline(mocker):
+    # Arrange
+    start_date = '25/07/2026'
+    activation_change_1 = NexusActivationChange(change=ActivationChangeEnum.ACTIVATE, name='well_1', date='25/07/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date,
+                                                is_constraint_change=True)
+    activation_change_2 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, name='well_1', date='26/07/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    activation_change_3 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, name='well_1', date='28/07/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    activation_change_4 = NexusActivationChange(change=ActivationChangeEnum.ACTIVATE, name='well_1', date='02/08/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date,
+                                                is_constraint_change=True)
+    activation_change_5 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, name='well_1', date='02/08/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date,
+                                                is_constraint_change=True)
+    activation_change_6 = NexusActivationChange(change=ActivationChangeEnum.ACTIVATE, name='well_1', date='03/08/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date,
+                                                is_constraint_change=True)
+    activation_change_7 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, name='well_1', date='03/08/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date,
+                                                is_constraint_change=True)
+    activation_change_8 = NexusActivationChange(change=ActivationChangeEnum.ACTIVATE, name='well_1', date='07/08/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date,
+                                                is_constraint_change=True)
+
+
+    initial_activate_activations = [activation_change_1, activation_change_4, activation_change_5, activation_change_6,
+                                    activation_change_7]
+    intial_constraint_activations = [activation_change_2, activation_change_3, activation_change_8]
+
+    expected_combined_activation_changes = [activation_change_1, activation_change_2, activation_change_3,
+                                            activation_change_4, activation_change_5, activation_change_6,
+                                            activation_change_7, activation_change_8]
+
+    # Act
+    result = NexusNetwork._NexusNetwork__combine_lists_into_one_timeline(initial_activate_activations, intial_constraint_activations)
+
+    # Assert
+    assert result == expected_combined_activation_changes
+
+def test_combine_lists_into_one_timeline_raises_warning_same_date(recwarn):
+    # Arrange
+    start_date = '25/07/2026'
+    activation_change_1 = NexusActivationChange(change=ActivationChangeEnum.ACTIVATE, name='well_1', date='25/07/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date,
+                                                is_constraint_change=True)
+    activation_change_2 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, name='well_1', date='26/07/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    activation_change_3 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, name='well_1', date='28/07/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date)
+    activation_change_4 = NexusActivationChange(change=ActivationChangeEnum.ACTIVATE, name='well_1', date='02/08/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date,
+                                                is_constraint_change=True)
+    activation_change_5 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, name='well_1', date='02/08/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date,
+                                                is_constraint_change=True)
+    activation_change_6 = NexusActivationChange(change=ActivationChangeEnum.ACTIVATE, name='well_1', date='03/08/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date,
+                                                is_constraint_change=True)
+    activation_change_7 = NexusActivationChange(change=ActivationChangeEnum.DEACTIVATE, name='well_1', date='03/08/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date,
+                                                is_constraint_change=True)
+    activation_change_8 = NexusActivationChange(change=ActivationChangeEnum.ACTIVATE, name='well_1', date='07/08/2026',
+                                                date_format=DateFormat.DD_MM_YYYY, start_date=start_date,
+                                                is_constraint_change=True)
+
+
+    initial_activate_activations = [activation_change_1, activation_change_4, activation_change_6,
+                                    activation_change_7]
+    intial_constraint_activations = [activation_change_2, activation_change_3, activation_change_5, activation_change_8]
+
+    # Act
+    result = NexusNetwork._NexusNetwork__combine_lists_into_one_timeline(initial_activate_activations, intial_constraint_activations)
+
+    # Assert
+    # Check for the warning
+    assert len(recwarn) == 1
+    assert recwarn[0].message.args[0] == ('Multiple activation changes for the same timestamp of different types. '
+                                          'Cannot guarantee the combined order matches the order in the original files')
+
+    # Check that the date order is still correct
+    last_date = datetime.datetime.min
+    for activation_change in result:
+        assert activation_change.iso_date >= last_date
+        last_date = activation_change.iso_date
 
 def test_load_surface_file_activate_deactivate_multiple_on_same_line(mocker):
     # Arrange
