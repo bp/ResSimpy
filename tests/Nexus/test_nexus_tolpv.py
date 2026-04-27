@@ -31,4 +31,4 @@ TOLPV 5000.5
     result = simulation.grid.tolpv
 
     # assert
-    assert result == 5000.5
+    assert result == structured_grid_file_contents
