@@ -59,7 +59,7 @@ class Grid(ABC):
         self._grid_properties_loaded = assume_loaded
 
         # LGRs
-        self._lgrs: LGRs = LGRs
+        self._lgrs: LGRs = LGRs()
 
         # TOLPV
         self._tolpv: Optional[float] = None
@@ -174,7 +174,7 @@ class Grid(ABC):
         return self._lgrs
 
     @property
-    def tolpv(self) -> float:
+    def tolpv(self) -> Optional[float]:
         """Returns float value for TOLPV, if grid property is not loaded."""
         self.load_grid_properties_if_not_loaded()
         return self._tolpv
