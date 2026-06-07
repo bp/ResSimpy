@@ -555,6 +555,20 @@ def test_get_output_request_freq_without_number_warns(mocker: MockerFixture):
                                          output_frequency=FrequencyEnum.FREQ, output_frequency_number=None)]
 
 
+def test_get_output_request_freq_non_numeric_number_warns(mocker: MockerFixture):
+    """FREQ followed by a non-numeric value should warn and set output_frequency_number to None."""
+    file_content = 'MAPS FREQ NOTANUMBER\n'
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
+    with pytest.warns(UserWarning, match='Unable to convert output request number to float: NOTANUMBER'):
+        result = NexusReporting._get_output_request(
+            table_file_as_list=file_content.splitlines(keepends=True),
+            date='01/01/2020',
+            output_type=OutputType.ARRAY,
+        )
+    assert result == [NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/2020', output='MAPS',
+                                         output_frequency=FrequencyEnum.FREQ, output_frequency_number=None)]
+
+
 def test_get_output_contents_numeric_date(mocker: MockerFixture):
     """Numeric TIME steps should not raise in _get_output_contents when start_date is supplied."""
     file_content = 'WELLS DATE TSNUM QOP QWP\n'
