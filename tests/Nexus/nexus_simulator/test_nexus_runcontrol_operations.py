@@ -455,7 +455,17 @@ def test_load_grid_to_proc_auto():
       ! comment
       ! comment
       '''),
-], ids=['basic test', 'test with comments'])
+
+    # multi-line: keyword and frequency on separate lines
+    ('''FIELD
+      MONTHLY
+      REGIONS
+      TIMESTEP 1030
+      WELLS
+      FREQ 123
+      NETWORK
+      YEARLY'''),
+], ids=['basic test', 'test with comments', 'multi-line keyword/frequency'])
 def test_get_output_request(file_content: str, mocker: MockerFixture):
     date = '01/01/2020'
     output_type = OutputType.ARRAY
@@ -518,6 +528,27 @@ def test_get_output_contents(file_content, expected_result):
     assert result == expected_result
 
 
+def test_get_output_contents_numeric_date(mocker: MockerFixture):
+    """Numeric TIME steps should not raise in _get_output_contents when start_date is supplied."""
+    file_content = 'WELLS DATE TSNUM QOP QWP\n'
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
+    # Act
+    result = NexusReporting._get_output_contents(
+        table_file_as_list=file_content.splitlines(keepends=True),
+        date='50',
+        output_type=OutputType.SPREADSHEET,
+        date_format=DateFormat.MM_DD_YYYY,
+        start_date='01/01/2019',
+    )
+    expected_result = [
+        NexusOutputContents(output_type=OutputType.SPREADSHEET, output='WELLS', date='50',
+                            output_contents=['DATE', 'TSNUM', 'QOP', 'QWP'],
+                            _date_format=DateFormat.MM_DD_YYYY, _start_date='01/01/2019'),
+    ]
+    # Assert
+    assert result == expected_result
+
+
 def test_load_output_requests(mocker):
     # Arrange
     file_content = '''START 01/01/1950
@@ -568,63 +599,86 @@ TIME 24/01/1999
     mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
     expected_ss_output_requests = [
         NexusOutputRequest(output_type=OutputType.SPREADSHEET, date='01/01/1950', output='FIELD',
-                           output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None),
+                           output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/1950'),
         NexusOutputRequest(output_type=OutputType.SPREADSHEET, date='01/01/1950', output='REGIONS',
-                           output_frequency=FrequencyEnum.FREQ, output_frequency_number=21),
+                           output_frequency=FrequencyEnum.FREQ, output_frequency_number=21.0,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/1950'),
         NexusOutputRequest(output_type=OutputType.SPREADSHEET, date='01/01/1950', output='WELLS',
-                           output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None),
+                           output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/1950'),
         NexusOutputRequest(output_type=OutputType.SPREADSHEET, date='01/01/1950', output='NETWORK',
-                           output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None),
+                           output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/1950'),
     ]
     expected_array_output_requests = [
         NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1951', output='FIELD',
-                           output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None),
+                           output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/1950'),
         NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1951', output='WELLS',
-                           output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None),
+                           output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/1950'),
         NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1951', output='MAPS',
-                           output_frequency=FrequencyEnum.FREQ, output_frequency_number=120),
+                           output_frequency=FrequencyEnum.FREQ, output_frequency_number=120.0,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/1950'),
         NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1951', output='RFT',
-                           output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None),
+                           output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/1950'),
         NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/1951', output='RFTFILE',
-                           output_frequency=FrequencyEnum.ON, output_frequency_number=None),
+                           output_frequency=FrequencyEnum.ON, output_frequency_number=None,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/1950'),
         NexusOutputRequest(output_type=OutputType.ARRAY, date='01/10/1953', output='FIELD',
-                           output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None),
+                           output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/1950'),
         NexusOutputRequest(output_type=OutputType.ARRAY, date='01/10/1953', output='WELLS',
-                           output_frequency=FrequencyEnum.TIMES, output_frequency_number=None),
+                           output_frequency=FrequencyEnum.TIMES, output_frequency_number=None,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/1950'),
         NexusOutputRequest(output_type=OutputType.ARRAY, date='01/10/1953', output='MAPS',
-                           output_frequency=FrequencyEnum.FREQ, output_frequency_number=120),
+                           output_frequency=FrequencyEnum.FREQ, output_frequency_number=120.0,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/1950'),
         NexusOutputRequest(output_type=OutputType.ARRAY, date='01/10/1953', output='RFTFILE',
-                           output_frequency=FrequencyEnum.TNEXT, output_frequency_number=None)
+                           output_frequency=FrequencyEnum.TNEXT, output_frequency_number=None,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/1950')
     ]
 
     expected_ss_output_contents = [
         NexusOutputContents(output_type=OutputType.SPREADSHEET, output='WELLS', date='01/01/1950',
                             output_contents=['DATE', 'TSNUM', 'QOP', 'QWP', 'COP', 'CWP', 'QWI', 'CWI', 'WCUT',
-                                             'WPAVE', 'CGP', 'QGP', 'QLP', 'GOR', 'BHP', 'SAL']),
+                                             'WPAVE', 'CGP', 'QGP', 'QLP', 'GOR', 'BHP', 'SAL'],
+                            _date_format=DateFormat.MM_DD_YYYY, _start_date='01/01/1950'),
         NexusOutputContents(output_type=OutputType.SPREADSHEET, output='FIELD', date='01/01/1950',
                             output_contents=['DATE', 'TSNUM', 'COP', 'CGP', 'CWP', 'CWI', 'QOP', 'QGP', 'QWP', 'QLP',
-                                             'QWI', 'WCUT', 'OREC', 'PAVT', 'PAVH']),
+                                             'QWI', 'WCUT', 'OREC', 'PAVT', 'PAVH'],
+                            _date_format=DateFormat.MM_DD_YYYY, _start_date='01/01/1950'),
         NexusOutputContents(output_type=OutputType.SPREADSHEET, output='REGIONS', date='01/01/1950',
                             output_contents=['DATE', 'TSNUM', 'COP', 'CGP', 'CWP', 'CWI', 'QOP', 'QGP', 'QWP', 'QWI',
                                              'STOIP', 'ROP', 'RWP', 'RWI', 'CROP', 'CRWP', 'CRWI', 'PDATUMT',
-                                             'PDATUMHC', 'COFLUX', 'CWFLUX', 'AQFLUX', 'RVO', 'RVPVH']),
+                                             'PDATUMHC', 'COFLUX', 'CWFLUX', 'AQFLUX', 'RVO', 'RVPVH'],
+                            _date_format=DateFormat.MM_DD_YYYY, _start_date='01/01/1950'),
         NexusOutputContents(output_type=OutputType.SPREADSHEET, output='WELLS', date='01/10/1953',
-                            output_contents=['DATE', 'TSNUM', 'QOP', 'QWP', 'COP'])
+                            output_contents=['DATE', 'TSNUM', 'QOP', 'QWP', 'COP'],
+                            _date_format=DateFormat.MM_DD_YYYY, _start_date='01/01/1950')
     ]
 
     expected_array_output_contents = [
         NexusOutputContents(output_type=OutputType.ARRAY, output='P', date='01/01/1950',
-                            output_contents=[]),
+                            output_contents=[],
+                            _date_format=DateFormat.MM_DD_YYYY, _start_date='01/01/1950'),
         NexusOutputContents(output_type=OutputType.ARRAY, output='PV', date='01/01/1950',
-                            output_contents=[]),
+                            output_contents=[],
+                            _date_format=DateFormat.MM_DD_YYYY, _start_date='01/01/1950'),
         NexusOutputContents(output_type=OutputType.ARRAY, output='SAT', date='01/01/1950',
-                            output_contents=['OIL', 'GAS', 'WATER']),
+                            output_contents=['OIL', 'GAS', 'WATER'],
+                            _date_format=DateFormat.MM_DD_YYYY, _start_date='01/01/1950'),
         NexusOutputContents(output_type=OutputType.ARRAY, output='KR', date='01/01/1950',
-                            output_contents=['OIL', 'WATER']),
+                            output_contents=['OIL', 'WATER'],
+                            _date_format=DateFormat.MM_DD_YYYY, _start_date='01/01/1950'),
         NexusOutputContents(output_type=OutputType.ARRAY, output='PC', date='01/01/1950',
-                            output_contents=['OIL', 'WATER']),
+                            output_contents=['OIL', 'WATER'],
+                            _date_format=DateFormat.MM_DD_YYYY, _start_date='01/01/1950'),
         NexusOutputContents(output_type=OutputType.ARRAY, output='SAL', date='01/01/1950',
-                            output_contents=[])
+                            output_contents=[],
+                            _date_format=DateFormat.MM_DD_YYYY, _start_date='01/01/1950')
     ]
 
     # fake model
@@ -638,6 +692,115 @@ TIME 24/01/1999
     # Assert
     assert nexus_reporting.ss_output_requests == expected_ss_output_requests
     assert nexus_reporting.array_output_requests == expected_array_output_requests
+    assert nexus_reporting.ss_output_contents == expected_ss_output_contents
+    assert nexus_reporting.array_output_contents == expected_array_output_contents
+
+
+def test_get_output_request_numeric_date(mocker: MockerFixture):
+    """Numeric TIME steps (e.g. TIME 1) should not raise when start_date is supplied."""
+    file_content = '''RFT TNEXT
+    RFTFILE TNEXT
+    '''
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
+    # Act
+    result = NexusReporting._get_output_request(
+        table_file_as_list=file_content.splitlines(keepends=True),
+        date='1',
+        output_type=OutputType.ARRAY,
+        date_format=DateFormat.MM_DD_YYYY,
+        start_date='01/01/2019',
+    )
+    expected_result = [
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='1', output='RFT',
+                           output_frequency=FrequencyEnum.TNEXT, output_frequency_number=None,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/2019'),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='1', output='RFTFILE',
+                           output_frequency=FrequencyEnum.TNEXT, output_frequency_number=None,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/2019'),
+    ]
+    # Assert
+    assert result == expected_result
+
+
+def test_load_output_requests_numeric_dates(mocker):
+    """Runcontrol files using numeric TIME steps should parse without raising ValueError.
+
+    Exercises OUTPUT/ENDOUTPUT, SSOUT/ENDSSOUT, MAPOUT/ENDMAPOUT, and
+    SPREADSHEET/ENDSPREADSHEET blocks that occur at numeric TIME steps.
+    """
+    file_content = '''START 01/01/2019
+SSOUT
+WELLS DATE TSNUM QOP QWP COP
+ENDSSOUT
+TIME 1
+OUTPUT
+    RFT TNEXT
+    RFTFILE TNEXT
+ENDOUTPUT
+SPREADSHEET
+    FIELD MONTHLY
+    WELLS YEARLY
+ENDSPREADSHEET
+MAPOUT
+    P
+    SAT OIL GAS
+ENDMAPOUT
+TIME 100
+OUTPUT
+    FIELD MONTHLY
+    WELLS YEARLY
+ENDOUTPUT
+    '''
+    file_content_as_list = file_content.splitlines(keepends=True)
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
+
+    expected_array_output_requests = [
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='1', output='RFT',
+                           output_frequency=FrequencyEnum.TNEXT, output_frequency_number=None,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/2019'),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='1', output='RFTFILE',
+                           output_frequency=FrequencyEnum.TNEXT, output_frequency_number=None,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/2019'),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='100', output='FIELD',
+                           output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/2019'),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='100', output='WELLS',
+                           output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/2019'),
+    ]
+    expected_ss_output_requests = [
+        NexusOutputRequest(output_type=OutputType.SPREADSHEET, date='1', output='FIELD',
+                           output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/2019'),
+        NexusOutputRequest(output_type=OutputType.SPREADSHEET, date='1', output='WELLS',
+                           output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/2019'),
+    ]
+    expected_ss_output_contents = [
+        NexusOutputContents(output_type=OutputType.SPREADSHEET, output='WELLS', date='01/01/2019',
+                            output_contents=['DATE', 'TSNUM', 'QOP', 'QWP', 'COP'],
+                            _date_format=DateFormat.MM_DD_YYYY, _start_date='01/01/2019'),
+    ]
+    expected_array_output_contents = [
+        NexusOutputContents(output_type=OutputType.ARRAY, output='P', date='1',
+                            output_contents=[],
+                            _date_format=DateFormat.MM_DD_YYYY, _start_date='01/01/2019'),
+        NexusOutputContents(output_type=OutputType.ARRAY, output='SAT', date='1',
+                            output_contents=['OIL', 'GAS'],
+                            _date_format=DateFormat.MM_DD_YYYY, _start_date='01/01/2019'),
+    ]
+
+    model = get_fake_nexus_simulator(mocker)
+    model._start_date = '01/01/2019'
+    nexus_reporting = NexusReporting(model=model)
+    model.model_files.runcontrol_file = NexusFile(location='runcontrol.dat',
+                                                  file_content_as_list=file_content_as_list)
+    # Act
+    nexus_reporting.load_output_requests()
+
+    # Assert
+    assert nexus_reporting.array_output_requests == expected_array_output_requests
+    assert nexus_reporting.ss_output_requests == expected_ss_output_requests
     assert nexus_reporting.ss_output_contents == expected_ss_output_contents
     assert nexus_reporting.array_output_contents == expected_array_output_contents
 
