@@ -528,6 +528,33 @@ def test_get_output_contents(file_content, expected_result):
     assert result == expected_result
 
 
+def test_get_output_request_bare_keyword_warns(mocker: MockerFixture):
+    """A bare keyword with no following frequency should warn and return no requests."""
+    file_content = 'MAPS\n'
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
+    with pytest.warns(UserWarning, match='No frequency found for output request: MAPS'):
+        result = NexusReporting._get_output_request(
+            table_file_as_list=file_content.splitlines(keepends=True),
+            date='01/01/2020',
+            output_type=OutputType.ARRAY,
+        )
+    assert result == []
+
+
+def test_get_output_request_freq_without_number_warns(mocker: MockerFixture):
+    """FREQ/TIMESTEP at end of block with no number following should warn and use None."""
+    file_content = 'MAPS FREQ\n'
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
+    with pytest.warns(UserWarning, match='No number found after FREQ for output request: MAPS'):
+        result = NexusReporting._get_output_request(
+            table_file_as_list=file_content.splitlines(keepends=True),
+            date='01/01/2020',
+            output_type=OutputType.ARRAY,
+        )
+    assert result == [NexusOutputRequest(output_type=OutputType.ARRAY, date='01/01/2020', output='MAPS',
+                                         output_frequency=FrequencyEnum.FREQ, output_frequency_number=None)]
+
+
 def test_get_output_contents_numeric_date(mocker: MockerFixture):
     """Numeric TIME steps should not raise in _get_output_contents when start_date is supplied."""
     file_content = 'WELLS DATE TSNUM QOP QWP\n'
