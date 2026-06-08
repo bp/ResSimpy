@@ -1147,7 +1147,7 @@ def test_get_abs_structured_grid_path(mocker, fcs_file, expected_root, expected_
                                              'K2': [1, 9, 11, 13, 14, 15],
                                              'MULT': [1.0] * 6,
                                              'GRID': ['ROOT'] * 6,
-                                             'NAME': ['fault1'] * 6,
+                                             'NAME': ['FAULT1'] * 6,
                                              'FACE': ['IF-'] * 6,
                                             })
                               ),
