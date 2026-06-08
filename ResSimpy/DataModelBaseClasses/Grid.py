@@ -179,13 +179,14 @@ class Grid(ABC):
         self.load_grid_properties_if_not_loaded()
         return self._tolpv
 
+    @classmethod
     @abstractmethod
-    def load_structured_grid_file(self, structure_grid_file: File,
+    def load_structured_grid_file(cls: type[Grid], structured_grid_file: File,
                                   model_unit_system: UnitSystem, lazy_loading: bool) -> Grid:
         """Loads in a structured grid file with all grid properties, and the array functions defined with 'FUNCTION'.
 
         Args:
-            structure_grid_file(File, lazy_loading: bool):The NexusFile representation of a structured grid file for
+            structured_grid_file(File, lazy_loading: bool):The NexusFile representation of a structured grid file for
             converting into a structured grid file class.
             lazy_loading(bool): If set to True, parts of the grid will only be loaded in
              when requested via properties on the object.
