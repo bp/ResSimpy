@@ -732,6 +732,10 @@ class NexusGrid(Grid):
             # Ensure resulting dataframe has uppercase column names
             df.columns = [col.upper() for col in df.columns]
 
+            # Ensure fault name case insensivity by making all fault names uppercase.
+            # This also ensures that when we check for MULTFL lines, we can do so in a case insensitive way.
+            df['NAME'] = df['NAME'].str.upper()
+
             # Check if any multfls have been used in grid file and update fault trans multipliers accordingly
             f_names = df['NAME'].unique()
             f_mults = [1.] * len(f_names)
@@ -741,6 +745,8 @@ class NexusGrid(Grid):
                     fname = str(nfo.get_expected_token_value(
                         'MULTFL', line, file_content_as_list,
                         custom_message=f'{line} does not have a fault name following MULTFL'))
+                    # Ensure fname is uppercase for case insensitivity
+                    fname = fname.upper()
                     if fname in df['NAME'].unique():
                         tmult = float(str(nfo.get_expected_token_value(
                             fname, line, file_content_as_list,
