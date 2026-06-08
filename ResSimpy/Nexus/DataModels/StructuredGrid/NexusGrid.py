@@ -603,6 +603,18 @@ class NexusGrid(Grid):
                 self._range_y = int(second_value)
                 self._range_z = int(third_value)
 
+            # Load TOLPV scalar value
+            if nfo.check_token('TOLPV', line):
+                tolpv_value = fo.get_token_value('TOLPV', line, [line])
+                if tolpv_value is not None:
+                    self._tolpv = float(tolpv_value)
+
+            # Load TOLPV from CORTOL keyword third value when present.
+            if nfo.check_token('CORTOL', line):
+                cortol_values = line.split()
+                if len(cortol_values) >= 4:
+                    self._tolpv = float(cortol_values[3])
+
         # load the overs:
         if fo.value_in_file('OVER', file_as_list):
             self.__overs = NexusGrid.load_nexus_overs(file_as_list)
