@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import ResSimpy.Nexus.nexus_file_operations as nfo
 import ResSimpy.FileOperations.file_operations as fo
@@ -12,6 +12,7 @@ from ResSimpy.Enums.OutputType import OutputType
 from ResSimpy.Nexus.DataModels.NexusReportingRequests import NexusOutputRequest, NexusOutputContents
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
 from ResSimpy.DataModelBaseClasses.Reporting import Reporting
+from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Time.ISODateTime import ISODateTime
 
 if TYPE_CHECKING:
@@ -145,7 +146,9 @@ class NexusReporting(Reporting):
                 ss_end_index = index
                 list_of_output_requests = self._get_output_request(file_as_list[ss_start_index:ss_end_index],
                                                                    date=current_date,
-                                                                   output_type=OutputType.SPREADSHEET)
+                                                                   output_type=OutputType.SPREADSHEET,
+                                                                   date_format=self.__model.date_format,
+                                                                   start_date=self.__model.start_date)
                 ss_output_requests.extend(list_of_output_requests)
 
             if nfo.check_token('OUTPUT', line):
@@ -154,7 +157,9 @@ class NexusReporting(Reporting):
                 array_end_index = index
                 list_of_output_requests = self._get_output_request(file_as_list[array_start_index:array_end_index],
                                                                    date=current_date,
-                                                                   output_type=OutputType.ARRAY)
+                                                                   output_type=OutputType.ARRAY,
+                                                                   date_format=self.__model.date_format,
+                                                                   start_date=self.__model.start_date)
                 array_output_requests.extend(list_of_output_requests)
 
             if nfo.check_token('SSOUT', line):
@@ -163,7 +168,9 @@ class NexusReporting(Reporting):
                 ss_end_index = index
                 list_of_output_contents = self._get_output_contents(file_as_list[ss_start_index:ss_end_index],
                                                                     date=current_date,
-                                                                    output_type=OutputType.SPREADSHEET)
+                                                                    output_type=OutputType.SPREADSHEET,
+                                                                    date_format=self.__model.date_format,
+                                                                    start_date=self.__model.start_date)
                 ss_output_contents.extend(list_of_output_contents)
 
             if nfo.check_token('MAPOUT', line) or nfo.check_token('ARRAYOUT', line):
@@ -172,7 +179,9 @@ class NexusReporting(Reporting):
                 ss_end_index = index
                 list_of_output_contents = self._get_output_contents(file_as_list[ss_start_index:ss_end_index],
                                                                     date=current_date,
-                                                                    output_type=OutputType.ARRAY)
+                                                                    output_type=OutputType.ARRAY,
+                                                                    date_format=self.__model.date_format,
+                                                                    start_date=self.__model.start_date)
                 array_output_contents.extend(list_of_output_contents)
 
         self.__ss_output_requests = ss_output_requests
@@ -182,50 +191,69 @@ class NexusReporting(Reporting):
         self.__load_status = True
 
     @staticmethod
-    def _get_output_request(table_file_as_list: list[str], date: str, output_type: OutputType) \
-            -> list[NexusOutputRequest]:
+    def _get_output_request(table_file_as_list: list[str], date: str, output_type: OutputType,
+                            date_format: Optional[DateFormat] = None,
+                            start_date: Optional[str] = None) -> list[NexusOutputRequest]:
         """Gets the output objects from the runcontrol file.
 
         Args:
             table_file_as_list (list[str]): The table file as a list of strings
             date (str): The date of the output
             output_type (OutputType): The output type as an Enum
+            date_format (Optional[DateFormat]): The date format of the model.
+            start_date (Optional[str]): The start date of the model (required if dates are numeric).
         """
         output_request_with_number = ['DT', 'DTTOL', 'FREQ', 'TIMESTEP']
 
-        resulting_output_requests: list[NexusOutputRequest] = []
+        # Flatten all tokens across every line so that keyword/frequency pairs
+        # split across lines (e.g. "MAPS\nTNEXT") are handled correctly.
+        all_tokens: list[str] = []
         for line in table_file_as_list:
+            all_tokens.extend(fo.split_line(line))
+
+        resulting_output_requests: list[NexusOutputRequest] = []
+        i = 0
+        while i < len(all_tokens):
             number_defined_float: None | float = None
-            element = nfo.get_next_value(start_line_index=0, file_as_list=[line])
-            if element is None or element == '':
-                continue
-            frequency = nfo.get_expected_token_value(element, token_line=line,
-                                                     file_list=[line])
+            element = all_tokens[i]
+            i += 1
+            if i >= len(all_tokens):
+                warnings.warn(f'No frequency found for output request: {element}')
+                break
+            frequency = all_tokens[i]
+            i += 1
             if frequency in output_request_with_number:
-                number_defined = nfo.get_expected_token_value(frequency, token_line=line,
-                                                              file_list=[line])
-                try:
-                    number_defined_float = float(number_defined)
-                except ValueError:
-                    warnings.warn(f'Unable to convert output request number to float: {number_defined}')
-                    number_defined_float = None
+                if i >= len(all_tokens):
+                    warnings.warn(f'No number found after {frequency} for output request: {element}')
+                else:
+                    number_defined = all_tokens[i]
+                    i += 1
+                    try:
+                        number_defined_float = float(number_defined)
+                    except ValueError:
+                        warnings.warn(f'Unable to convert output request number to float: {number_defined}')
+                        number_defined_float = None
 
             frequency_enum = FrequencyEnum[frequency]
             output_request = NexusOutputRequest(date=date, output=element, output_frequency=frequency_enum,
-                                                output_frequency_number=number_defined_float, output_type=output_type)
+                                                output_frequency_number=number_defined_float, output_type=output_type,
+                                                date_format=date_format, start_date=start_date)
             resulting_output_requests.append(output_request)
 
         return resulting_output_requests
 
     @staticmethod
-    def _get_output_contents(table_file_as_list: list[str], date: str, output_type: OutputType) \
-            -> list[NexusOutputContents]:
+    def _get_output_contents(table_file_as_list: list[str], date: str, output_type: OutputType,
+                             date_format: Optional[DateFormat] = None,
+                             start_date: Optional[str] = None) -> list[NexusOutputContents]:
         """Gets the output contents from a table.
 
         Args:
             table_file_as_list (list[str]): The table file as a list of strings
             date (str): The date of the output
             output_type (OutputType): The output type as an Enum
+            date_format (Optional[DateFormat]): The date format of the model.
+            start_date (Optional[str]): The start date of the model (required if dates are numeric).
         """
         resulting_output_contents: list[NexusOutputContents] = []
         for line in table_file_as_list:
@@ -242,8 +270,8 @@ class NexusReporting(Reporting):
                     output_contents.append(value)
 
             output_contents_obj = NexusOutputContents(date=date, output_contents=output_contents,
-                                                      output_type=output_type,
-                                                      output=element)
+                                                      output_type=output_type, output=element,
+                                                      _date_format=date_format, _start_date=start_date)
             resulting_output_contents.append(output_contents_obj)
 
         return resulting_output_contents
