@@ -846,6 +846,53 @@ ENDOUTPUT
     assert nexus_reporting.array_output_contents == expected_array_output_contents
 
 
+def test_load_output_requests_mixed_numeric_and_calendar_dates(mocker):
+    """Runcontrol files that mix numeric and calendar TIME steps should parse all blocks correctly."""
+    file_content = '''START 01/01/2019
+TIME 50
+OUTPUT
+    RFTFILE TNEXT
+ENDOUTPUT
+TIME 01/06/2019
+OUTPUT
+    FIELD MONTHLY
+    WELLS YEARLY
+ENDOUTPUT
+TIME 200
+OUTPUT
+    MAPS FREQ 120
+ENDOUTPUT
+    '''
+    file_content_as_list = file_content.splitlines(keepends=True)
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid_1')
+
+    expected_array_output_requests = [
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='50', output='RFTFILE',
+                           output_frequency=FrequencyEnum.TNEXT, output_frequency_number=None,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/2019'),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/06/2019', output='FIELD',
+                           output_frequency=FrequencyEnum.MONTHLY, output_frequency_number=None,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/2019'),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='01/06/2019', output='WELLS',
+                           output_frequency=FrequencyEnum.YEARLY, output_frequency_number=None,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/2019'),
+        NexusOutputRequest(output_type=OutputType.ARRAY, date='200', output='MAPS',
+                           output_frequency=FrequencyEnum.FREQ, output_frequency_number=120.0,
+                           date_format=DateFormat.MM_DD_YYYY, start_date='01/01/2019'),
+    ]
+
+    model = get_fake_nexus_simulator(mocker)
+    model._start_date = '01/01/2019'
+    nexus_reporting = NexusReporting(model=model)
+    model.model_files.runcontrol_file = NexusFile(location='runcontrol.dat',
+                                                  file_content_as_list=file_content_as_list)
+    # Act
+    nexus_reporting.load_output_requests()
+
+    # Assert
+    assert nexus_reporting.array_output_requests == expected_array_output_requests
+
+
 @pytest.mark.parametrize('new_rft_date, expected_result', [
     # basic test - at existing time stamp
     ('01/02/1951', '''START 01/01/1950
