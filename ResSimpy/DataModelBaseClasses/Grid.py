@@ -37,6 +37,7 @@ class Grid(ABC):
     _grid_properties_loaded: bool = False
     _lgrs: LGRs
     _overs: Sequence[Over]
+    _tolpv: Optional[float]
 
     def __init__(self, assume_loaded: bool = False) -> None:
         """Initialises the Grid class."""
@@ -59,6 +60,9 @@ class Grid(ABC):
 
         # LGRs
         self._lgrs: LGRs = LGRs()
+
+        # TOLPV
+        self._tolpv: Optional[float] = None
 
     @property
     def range_x(self) -> int | None:
@@ -169,13 +173,20 @@ class Grid(ABC):
         """Returns the LGR module object associated with the grid."""
         return self._lgrs
 
+    @property
+    def tolpv(self) -> Optional[float]:
+        """Returns float value for TOLPV, if grid property is not loaded."""
+        self.load_grid_properties_if_not_loaded()
+        return self._tolpv
+
+    @classmethod
     @abstractmethod
-    def load_structured_grid_file(self, structure_grid_file: File,
+    def load_structured_grid_file(cls: type[Grid], structured_grid_file: File,
                                   model_unit_system: UnitSystem, lazy_loading: bool) -> Grid:
         """Loads in a structured grid file with all grid properties, and the array functions defined with 'FUNCTION'.
 
         Args:
-            structure_grid_file(File, lazy_loading: bool):The NexusFile representation of a structured grid file for
+            structured_grid_file(File, lazy_loading: bool):The NexusFile representation of a structured grid file for
             converting into a structured grid file class.
             lazy_loading(bool): If set to True, parts of the grid will only be loaded in
              when requested via properties on the object.
