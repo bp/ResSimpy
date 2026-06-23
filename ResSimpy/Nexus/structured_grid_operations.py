@@ -481,10 +481,11 @@ class StructuredGridOperations:
                 if len(mod_table.columns) == 7:
                     mod_table.columns = ['i1', 'i2', 'j1', 'j2', 'k1', 'k2', '#v']
                 elif len(mod_table.columns) == 8:
-                    # clean nan's when there is a mix of 7 length and 8 length columns
+                    # clean nans when there is a mix of 7 length and 8 length columns
                     mod_table[7] = mod_table[7].convert_dtypes().astype(str)
                     mod_table[7] = mod_table[7].replace('nan', '')
                     mod_table[7] = mod_table[7].replace('<NA>', '')
+                    mod_table[7] = mod_table[7].fillna('')
                     # Put the last two columns together and drop them to make the #v column
                     mod_table[8] = mod_table[6].astype(str) + mod_table[7].astype(str)
                     mod_table = mod_table.drop([6, 7], axis=1)
