@@ -75,7 +75,7 @@ class Network(ABC):
                                                   x.node_out == connection_name and x.name != connection_name]
 
         # Add the in connection directly referenced by the connection itself if it is missing
-        if connection_to_check.node_in != connection_name:
+        if connection_to_check.node_in is not None and connection_to_check.node_in != connection_name:
             node_in_connection = self.connections.get_by_name(name=connection_to_check.node_in)
             if node_in_connection is not None and node_in_connection not in connections_directly_before_connection:
                 connections_directly_before_connection.append(node_in_connection)
@@ -84,7 +84,7 @@ class Network(ABC):
                                                  x.node_in == connection_name and x.name != connection_name]
 
         # Add the out connection directly referenced by the connection itself if it is missing
-        if connection_to_check.node_out != connection_name:
+        if connection_to_check.node_out is not None and connection_to_check.node_out != connection_name:
             node_out_connection = self.connections.get_by_name(name=connection_to_check.node_out)
             if node_out_connection is not None and node_out_connection not in connections_directly_after_connection:
                 connections_directly_after_connection.append(node_out_connection)

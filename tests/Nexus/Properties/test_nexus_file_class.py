@@ -1105,7 +1105,7 @@ def test_missing_file(mocker, error, expected_warning):
     assert result_include_file.include_locations == []
     assert result_include_file.linked_user is None
     assert result_include_file.last_modified is None
-    assert warn_msg[0].message.args[0] == f"{expected_warning} {os.path.join('/root', 'file.dat')}"
+    assert warn_msg[0].message.args[0] == f"{expected_warning} {file_path}"
     assert warn_msg[1].message.args[0] == f"{expected_warning} {os.path.join('/root', 'original_include.inc')} while loading /root/file.dat"
 
 
