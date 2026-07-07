@@ -30,7 +30,7 @@ numpy = [
   ]
 pandas = [
       { version = ">=2.3,<3",      python = "<3.11" },
-      { version = ">=3.0,<3.0.4",  python = ">=3.11" },
+      { version = ">=2.3,<3.0.4",  python = ">=3.11" },
   ]
 
 typing-extensions = "^4.15"
