@@ -603,17 +603,36 @@ class NexusGrid(Grid):
                 self._range_y = int(second_value)
                 self._range_z = int(third_value)
 
-            # Load TOLPV scalar value
+            # Load TOLPV scalar value, optionally with a grid selector (e.g. TOLPV LGR1 0 or TOLPV ALL 0).
             if nfo.check_token('TOLPV', line):
-                tolpv_value = fo.get_token_value('TOLPV', line, [line])
-                if tolpv_value is not None:
-                    self._tolpv = float(tolpv_value)
+                tolpv_values = fo.split_line(line, upper=False)
+                if len(tolpv_values) >= 2 and tolpv_values[0].upper() == 'TOLPV':
+                    selector: str | None = None
+                    value_index = 1
+
+                    if len(tolpv_values) >= 3:
+                        first_value = tolpv_values[1]
+                        try:
+                            float(first_value)
+                        except ValueError:
+                            selector = first_value.upper()
+                            value_index = 2
+
+                    self._tolpv = float(tolpv_values[value_index])
+                    self._tolpv_grid_name = selector
+
+                    if selector is not None:
+                        warnings.warn(
+                            f'TOLPV in Nexus was applied to grid {selector}.',
+                            UserWarning,
+                        )
 
             # Load TOLPV from CORTOL keyword third value when present.
             if nfo.check_token('CORTOL', line):
                 cortol_values = line.split()
                 if len(cortol_values) >= 4:
                     self._tolpv = float(cortol_values[3])
+                    self._tolpv_grid_name = None
 
         # load the overs:
         if fo.value_in_file('OVER', file_as_list):
