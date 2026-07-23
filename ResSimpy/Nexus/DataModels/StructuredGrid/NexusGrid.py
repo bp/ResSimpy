@@ -610,7 +610,6 @@ class NexusGrid(Grid):
                     selector: str | None = None
                     selector_or_value = fo.get_nth_value([line], value_number=2, ignore_values=[])
                     if selector_or_value is None:
-                        warnings.warn(f'Unable to parse TOLPV line: {line.strip()}', UserWarning)
                         continue
 
                     value_string = selector_or_value
@@ -620,14 +619,12 @@ class NexusGrid(Grid):
                         selector = selector_or_value.upper()
                         next_value = fo.get_nth_value(file_as_list[idx:], value_number=3, ignore_values=[])
                         if next_value is None:
-                            warnings.warn(f'Unable to parse TOLPV line: {line.strip()}', UserWarning)
                             continue
                         value_string = next_value
 
                     try:
                         self._tolpv = float(value_string)
                     except ValueError:
-                        warnings.warn(f'Unable to parse TOLPV line: {line.strip()}', UserWarning)
                         continue
 
                     self._tolpv_grid_name = selector
