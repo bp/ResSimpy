@@ -618,10 +618,11 @@ class NexusGrid(Grid):
                         float(selector_or_value)
                     except ValueError:
                         selector = selector_or_value.upper()
-                        value_string = fo.get_nth_value(file_as_list[idx:], value_number=3, ignore_values=[])
-                        if value_string is None:
+                        next_value = fo.get_nth_value(file_as_list[idx:], value_number=3, ignore_values=[])
+                        if next_value is None:
                             warnings.warn(f'Unable to parse TOLPV line: {line.strip()}', UserWarning)
                             continue
+                        value_string = next_value
 
                     try:
                         self._tolpv = float(value_string)
