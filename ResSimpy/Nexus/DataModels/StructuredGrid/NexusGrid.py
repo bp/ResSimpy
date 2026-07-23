@@ -608,17 +608,27 @@ class NexusGrid(Grid):
                 tolpv_values = fo.split_line(line, upper=False)
                 if len(tolpv_values) >= 2 and tolpv_values[0].upper() == 'TOLPV':
                     selector: str | None = None
-                    value_index = 1
+                    selector_or_value = fo.get_nth_value([line], value_number=2, ignore_values=[])
+                    if selector_or_value is None:
+                        warnings.warn(f'Unable to parse TOLPV line: {line.strip()}', UserWarning)
+                        continue
 
-                    if len(tolpv_values) >= 3:
-                        first_value = tolpv_values[1]
-                        try:
-                            float(first_value)
-                        except ValueError:
-                            selector = first_value.upper()
-                            value_index = 2
+                    value_string = selector_or_value
+                    try:
+                        float(selector_or_value)
+                    except ValueError:
+                        selector = selector_or_value.upper()
+                        value_string = fo.get_nth_value(file_as_list[idx:], value_number=3, ignore_values=[])
+                        if value_string is None:
+                            warnings.warn(f'Unable to parse TOLPV line: {line.strip()}', UserWarning)
+                            continue
 
-                    self._tolpv = float(tolpv_values[value_index])
+                    try:
+                        self._tolpv = float(value_string)
+                    except ValueError:
+                        warnings.warn(f'Unable to parse TOLPV line: {line.strip()}', UserWarning)
+                        continue
+
                     self._tolpv_grid_name = selector
 
                     if selector is not None:
@@ -626,6 +636,8 @@ class NexusGrid(Grid):
                             f'TOLPV in Nexus was applied to grid {selector}.',
                             UserWarning,
                         )
+                else:
+                    warnings.warn(f'Unable to parse TOLPV line: {line.strip()}', UserWarning)
 
             # Load TOLPV from CORTOL keyword third value when present.
             if nfo.check_token('CORTOL', line):
