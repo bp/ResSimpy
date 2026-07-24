@@ -6,6 +6,7 @@ from tests.multifile_mocker import mock_multiple_files
 
 
 def test_load_tolpv(mocker):
+    """Test that TOLPV is loaded correctly from a structured grid file."""
     fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
     structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
     structured_grid_file_contents = """
@@ -223,6 +224,64 @@ TOLPV
     assert simulation.grid is not None
     with pytest.warns(UserWarning, match=r'Unable to parse TOLPV line: TOLPV'):
         result = simulation.grid.tolpv
+
+    assert result is None
+    assert simulation.grid.tolpv_grid_name is None
+
+
+def test_load_tolpv_selector_without_third_value_is_ignored(mocker):
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents = """
+    NX NY NZ
+    10 10 3
+TOLPV ALL
+"""
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+        {'testpath1/nexus_run.fcs': fcs_file_contents,
+         '/run_control/path': '',
+         structured_grid_name: structured_grid_file_contents,
+         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+    mocker.patch("os.path.isfile", lambda x: True)
+    mocker.patch("os.path.exists", lambda x: True)
+
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
+    assert simulation.grid is not None
+    result = simulation.grid.tolpv
+
+    assert result is None
+    assert simulation.grid.tolpv_grid_name is None
+
+
+def test_load_tolpv_selector_with_non_numeric_third_value_is_ignored(mocker):
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents = """
+    NX NY NZ
+    10 10 3
+TOLPV ALL NOT_A_NUMBER
+"""
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+        {'testpath1/nexus_run.fcs': fcs_file_contents,
+         '/run_control/path': '',
+         structured_grid_name: structured_grid_file_contents,
+         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+    mocker.patch("os.path.isfile", lambda x: True)
+    mocker.patch("os.path.exists", lambda x: True)
+
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
+    assert simulation.grid is not None
+    result = simulation.grid.tolpv
 
     assert result is None
     assert simulation.grid.tolpv_grid_name is None
