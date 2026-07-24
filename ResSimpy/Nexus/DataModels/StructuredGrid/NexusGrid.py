@@ -608,9 +608,7 @@ class NexusGrid(Grid):
                 tolpv_values = fo.split_line(line, upper=False)
                 if len(tolpv_values) >= 2 and tolpv_values[0].upper() == 'TOLPV':
                     selector: str | None = None
-                    selector_or_value = fo.get_nth_value([line], value_number=2, ignore_values=[])
-                    if selector_or_value is None:
-                        continue
+                    selector_or_value = tolpv_values[1]
 
                     value_string = selector_or_value
                     try:
