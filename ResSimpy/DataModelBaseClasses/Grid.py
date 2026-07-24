@@ -38,6 +38,7 @@ class Grid(ABC):
     _lgrs: LGRs
     _overs: Sequence[Over]
     _tolpv: Optional[float]
+    _tolpv_grid_name: Optional[str]
 
     def __init__(self, assume_loaded: bool = False) -> None:
         """Initialises the Grid class."""
@@ -63,6 +64,7 @@ class Grid(ABC):
 
         # TOLPV
         self._tolpv: Optional[float] = None
+        self._tolpv_grid_name: Optional[str] = None
 
     @property
     def range_x(self) -> int | None:
@@ -178,6 +180,12 @@ class Grid(ABC):
         """Returns float value for TOLPV, if grid property is not loaded."""
         self.load_grid_properties_if_not_loaded()
         return self._tolpv
+
+    @property
+    def tolpv_grid_name(self) -> Optional[str]:
+        """Returns the grid name (or ALL) that TOLPV was applied to, when provided."""
+        self.load_grid_properties_if_not_loaded()
+        return self._tolpv_grid_name
 
     @classmethod
     @abstractmethod
