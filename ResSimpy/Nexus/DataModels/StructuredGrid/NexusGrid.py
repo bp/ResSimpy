@@ -646,17 +646,17 @@ class NexusGrid(Grid):
             if nfo.check_token('DRSDT', line):
                 drsdt_values = fo.split_line(line, upper=False)
                 if len(drsdt_values) >= 2 and drsdt_values[0].upper() == 'DRSDT' and drsdt_values[1].upper() == 'LIMIT':
-                    selector: str | None = None
+                    drsdt_selector: str | None = None
                     selector_or_value = fo.get_nth_value(file_as_list[idx:], value_number=3, ignore_values=[])
                     if selector_or_value is None:
                         warnings.warn(f'Unable to parse DRSDT line: {line.strip()}', UserWarning)
                         continue
 
-                    value_string = selector_or_value
+                    value_string: str = selector_or_value
                     try:
-                        float(selector_or_value)
+                        float(value_string)
                     except ValueError:
-                        selector = selector_or_value.upper()
+                        drsdt_selector = selector_or_value.upper()
                         next_value = fo.get_nth_value(file_as_list[idx:], value_number=4, ignore_values=[])
                         if next_value is None or next_value.upper() == '2PHASE':
                             continue
@@ -667,12 +667,12 @@ class NexusGrid(Grid):
                     except ValueError:
                         continue
 
-                    self._drsdt_grid_name = selector
+                    self._drsdt_grid_name = drsdt_selector
                     self._drsdt_two_phases = any(value.upper() == '2PHASE' for value in drsdt_values[2:])
 
-                    if selector is not None:
+                    if drsdt_selector is not None:
                         warnings.warn(
-                            f'DRSDT in Nexus was applied to grid {selector}.',
+                            f'DRSDT in Nexus was applied to grid {drsdt_selector}.',
                             UserWarning,
                         )
                 else:
