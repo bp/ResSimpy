@@ -1394,4 +1394,3 @@ class NexusGrid(Grid):
                               f" {fault_row['K1']} {fault_row['K2']} {fault_row['MULT']}\n")
             fault_str += "\n"
         return fault_str
-
