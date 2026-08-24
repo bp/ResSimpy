@@ -652,7 +652,9 @@ class NexusGrid(Grid):
                         warnings.warn(f'Unable to parse DRSDT line: {line.strip()}', UserWarning)
                         continue
 
-                    value_string: str = selector_or_value
+                    # selector_or_value has been checked for None above; help mypy understand that
+                    assert selector_or_value is not None
+                    value_string = selector_or_value
                     try:
                         float(value_string)
                     except ValueError:
