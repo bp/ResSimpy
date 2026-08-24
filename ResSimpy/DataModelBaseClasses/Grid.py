@@ -239,6 +239,11 @@ class Grid(ABC):
         raise NotImplementedError("Implement this in the derived class")
 
     @abstractmethod
+    def to_string(self) -> str:
+        """Return a Nexus-format string representation of the grid file."""
+        raise NotImplementedError("Implement this in the derived class")
+
+    @abstractmethod
     def update_properties_from_dict(self, data: dict[str, int | GridArrayDefinition]) -> None:
         """Allows you to update properties on the class using the provided dict of values.
 

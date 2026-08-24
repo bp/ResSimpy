@@ -22,3 +22,17 @@ class LGRs(ABC):
     def get_all(self) -> Sequence[LGR]:
         """Returns all LGRs."""
         return self._lgr_list
+
+    def get(self, name: str) -> LGR:
+        """Return the LGR with the given name or raise ValueError.
+
+        Concrete subclasses may override with a more specific return type.
+        """
+        for lgr in self._lgr_list:
+            if getattr(lgr, 'name', None) == name:
+                return lgr
+        raise ValueError(f'No LGR with name {name} found')
+
+    def load_lgrs(self) -> None:
+        """No-op default loader; subclasses that support lazy loading should override."""
+        return

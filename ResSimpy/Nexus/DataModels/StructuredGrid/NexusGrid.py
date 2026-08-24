@@ -929,6 +929,209 @@ class NexusGrid(Grid):
         return self.__multir if self.__multir is not None else []
 
     @staticmethod
+    def load_nexus_overs(file_content_as_list: list[str]) -> list[NexusOver]:
+        """Function to read in OVER tables from a file.
+
+        Args:
+            file_content_as_list (list[str]): list of strings representing the file contents.
+
+        Returns:
+            list[NexusOver]: list of NexusOver objects representing the OVER table.
+        """
+        ignore_list = ['OVER', 'TX', 'TY', 'TZ', 'PV', 'PVF', 'TXF', 'TYF', 'TZF', 'GRID', 'FNAME', 'GE', 'LE', 'ROOT']
+        valid_end_tokens = [x for x in VALID_NEXUS_KEYWORDS if x not in ignore_list]
+        overs_list: list[NexusOver] = []
+        reading_over = False
+        grid = 'ROOT'
+        fname = None
+        arrays: list[str] = []
+        potential_operators: Final = ['+', '-', '*', '/', '=']
+        threshold_value = None
+        for line in file_content_as_list:
+            if nfo.nexus_token_found(line, valid_end_tokens):
+                reading_over = False
+                grid = 'ROOT'
+                fname = None
+                arrays = []
+                continue
+            if reading_over:
+                split_line = fo.split_line(line)
+                if nfo.check_token('GRID', line):
+                    grid = nfo.get_expected_token_value('GRID', line, file_content_as_list)
+                if nfo.check_token('FNAME', line):
+                    fname = nfo.get_expected_token_value('FNAME', line, file_content_as_list)
+                if len(split_line) > 6:
+                    i1, i2, j1, j2, k1, k2 = (int(x) for x in split_line[0:6])
+                    # cut out the ranges
+                    split_line = split_line[6:]
+                    for array in arrays:
+                        operator_value = split_line[0]
+                        operator_matches = [x for x in potential_operators if x == operator_value[0]]
+                        if not operator_matches and ('GE' in split_line or 'LE' in split_line):
+                            # if the operator is not found then it is GE or LE
+                            value = float(split_line[0])
+                            operator = split_line[1]
+                            threshold_value = float(split_line[2])
+                            split_line_position = 3
+                        elif operator_matches:
+                            operator = operator_matches[0]
+                            # remove the operator and the remaining string is the value
+                            trimmed_value = split_line[0].replace(operator, '')
+                            if trimmed_value == '':
+                                # then the value is in the next element of split_line
+                                value = float(split_line[1])
+                                split_line_position = 2
+                            else:
+                                value = float(split_line[0][1:])
+                                split_line_position = 1
+                        else:
+                            # no operator match and not GE or LE then it is implicitly '*'
+                            value = float(split_line[0])
+                            operator = '*'
+                            split_line_position = 1
+                        overs_list.append(NexusOver(array=array, grid=grid, fault_name=fname,
+                                                    i1=i1, i2=i2, j1=j1, j2=j2, k1=k1, k2=k2, operator=operator,
+                                                    value=value, threshold=threshold_value))
+                        split_line = split_line[split_line_position:]
+                        threshold_value = None
+
+            if nfo.check_token('OVER', line):
+                reading_over = True
+                over_split_line = fo.split_line(line)
+                arrays = over_split_line[over_split_line.index('OVER') + 1:]
+
+        return overs_list
+
+    @property
+    def overs(self) -> list[NexusOver]:
+        """Returns the OVER table as a list of NexusOver objects."""
+        if not self._grid_properties_loaded:
+            self.load_grid_properties_if_not_loaded()
+        return self.__overs
+
+    @property
+    def tovers(self) -> list[NexusTOver]:
+        """Returns the TOVER table as a list of NexusTOver objects."""
+        if not self._grid_properties_loaded:
+            self.load_grid_properties_if_not_loaded()
+        return self.__tovers
+
+    @staticmethod
+    def load_nexus_tovers(file_content_as_list: list[str]) -> list[NexusTOver]:
+        """Loads the Nexus TOVER tables to a list of objects.
+
+        Args:
+        file_content_as_list (list[str]): list of strings representing the file contents.
+
+        Returns:
+            list[NexusOver]: list of NexusTOver objects representing the TOVER table.
+        """
+        ignore_list = ['OVER', 'TX', 'TY', 'TZ', 'GRID', 'ROOT', 'TOVER',
+                       'TX+', 'TX-', 'TZ+', 'TZ-', 'TY+', 'TY-',
+                       'TXF+', 'TXF-', 'TYF+', 'TYF-', 'TZF+', 'TZF-', 'INCLUDE',
+                       'ADD', 'SUB', 'DIV', 'EQ', 'MULT']
+        valid_end_tokens = [x for x in VALID_NEXUS_KEYWORDS if x not in ignore_list]
+        tovers_list: list[NexusTOver] = []
+        reading_tover = False
+        grid = 'ROOT'
+        array = ''
+        potential_operators: Final = ['ADD', 'SUB', 'DIV', 'MULT', 'EQ']
+        i1, i2, j1, j2, k1, k2 = 0, 0, 0, 0, 0, 0
+        operator = ''
+        for i, line in enumerate(file_content_as_list):
+            if nfo.check_token('TOVER', line.upper()):
+                array = nfo.get_expected_token_value(token='TOVER', token_line=line,
+                                                     file_list=file_content_as_list[i:])
+                reading_tover = True
+
+            if not reading_tover:
+                continue
+            if nfo.nexus_token_found(line, valid_end_tokens):
+                # reset reading after another token found
+                reading_tover = False
+                grid = 'ROOT'
+                array = ''
+                operator = ''
+                i1, i2, j1, j2, k1, k2 = 0, 0, 0, 0, 0, 0
+                continue
+
+            if any(nfo.check_token(x, line.upper()) for x in potential_operators):
+                split_line = fo.split_line(line)
+                i1, i2, j1, j2, k1, k2 = (int(x) for x in split_line[0:6])
+                operator = split_line[-1]
+                continue
+            if nfo.check_token('INCLUDE', line.upper()):
+                include_file = nfo.get_expected_token_value(token='INCLUDE', token_line=line,
+                                                            file_list=file_content_as_list[i:])
+                new_tover = NexusTOver(i1=i1, i2=i2, j1=j1, j2=j2, k1=k1, k2=k2,
+                                       include_file=include_file, array=array, grid=grid, operator=operator,
+                                       value=0)
+                tovers_list.append(new_tover)
+                i1, i2, j1, j2, k1, k2 = 0, 0, 0, 0, 0, 0
+                operator = ''
+
+            elif i1 and i2 and j1 and j2 and k1 and k2 and operator and nfo.get_next_value(0, [line]):
+                # not an include file, so it must be a value or array of values
+                number_of_values = (i2 - i1 + 1) * (j2 - j1 + 1) * (k2 - k1 + 1)
+                array_values = fo.get_multiple_expected_sequential_values(file_content_as_list[i:],
+                                                                          number_tokens=number_of_values,
+                                                                          ignore_values=[])
+                new_tover = NexusTOver(i1=i1, i2=i2, j1=j1, j2=j2, k1=k1, k2=k2,
+                                       include_file=None, array=array, grid=grid, operator=operator,
+                                       value=0, array_values=[float(x) for x in array_values])
+                i1, i2, j1, j2, k1, k2 = 0, 0, 0, 0, 0, 0
+                operator = ''
+                tovers_list.append(new_tover)
+
+        return tovers_list
+
+    @staticmethod
+    def load_nexus_ftrans(file_content_as_list: list[str], unit_system: UnitSystem) -> list[NexusFtrans]:
+        """Function to read in FTRANS tables from a file.
+
+        Args:
+            file_content_as_list (list[str]): list of strings representing the file contents.
+            unit_system (UnitSystem): the unit system used in the grid file.
+
+        Returns:
+            list[NexusFtrans]: list of NexusFtrans objects representing the FTRANS table.
+        """
+        ignore_list = ['FTRANS', 'GRID', 'FNAME', 'ROOT']
+        valid_end_tokens = [x for x in VALID_NEXUS_KEYWORDS if x not in ignore_list]
+        ftrans_list: list[NexusFtrans] = []
+        reading = False
+        grid = 'ROOT'
+        fname = None
+        for line in file_content_as_list:
+            if nfo.nexus_token_found(line, valid_end_tokens):
+                reading = False
+                grid = 'ROOT'
+                fname = None
+                continue
+
+            if reading:
+                split_line = fo.split_line(line)
+                if nfo.check_token('GRID', line):
+                    grid = nfo.get_expected_token_value('GRID', line, file_content_as_list)
+                if nfo.check_token('FNAME', line):
+                    fname = nfo.get_expected_token_value('FNAME', line, file_content_as_list)
+                if len(split_line) == 7:
+                    i1, j1, k1, i2, j2, k2 = (int(x) for x in split_line[0:6])
+                    value = float(split_line[-1])
+                    # cut out the ranges
+                    ftrans_list.append(NexusFtrans(grid=grid, fault_name=fname,
+                                                   i1=i1, i2=i2, j1=j1, j2=j2, k1=k1, k2=k2,
+                                                   value=value, unit_system=unit_system))
+
+            if nfo.check_token('FTRANS', line):
+                # reset the default values if another FTRANS call is found
+                grid = 'ROOT'
+                fname = None
+                reading = True
+
+        return ftrans_list
+
+    @staticmethod
     def __keyword_in_include_file_warning(var_entry_obj: GridArrayDefinition) -> None:
 
         if var_entry_obj.keyword_in_include_file is True:
@@ -1041,4 +1244,154 @@ class NexusGrid(Grid):
         """
         self.load_grid_properties_if_not_loaded()
         return self.__worka2
+
+    @staticmethod
+    def write_nexus_array_to_string(array: np.ndarray, dtype: str, cols: int = 10) -> str:
+        """Writes a numpy array to a string in a Nexus friendly format.
+
+        Args:
+            array (np.ndarray): The numpy array to write.
+            dtype (str): The type of the array. Can be 'integer', 'pressure', or 'float'.
+            cols (int): The number of columns to write in the string.
+
+        Returns:
+            str: The string representation of the array for writing to file.
+        """
+        compiled_str = ''
+        # reshape the array to have the correct number of columns
+        if dtype == 'integer':
+            formatting = "6d"
+            formatting_length = 8
+        elif dtype == 'pressure':
+            formatting = "11.3f"
+            formatting_length = 14
+        else:
+            formatting = "11.6f"
+            formatting_length = 14
+        compiled_str += np.array2string(array, max_line_width=cols * formatting_length,
+                                        precision=6, separator=' ', threshold=maxsize,
+                                        formatter={'float_kind': lambda x: f"{x:{formatting}}"}) \
+            .replace('[', '').replace(']', '')
+        return compiled_str
+
+    def to_string(self) -> str:
+        """Converts the NexusGrid to a string representation for writing to file.
+
+        Returns:
+            str: The string representation of the NexusGrid for writing to file.
+        """
+        if self.range_x is None or self.range_y is None or self.range_z is None:
+            raise ValueError('Grid ranges NX, NY, NZ must be defined to write grid to string.')
+        grid_str = f'NX NY NZ\n{self.range_x} {self.range_y} {self.range_z}\n\n'
+
+        keyword_mapping = self.keyword_mapping()
+        # get the unique ordered array_names from the mapping
+        unique_array_keys = list(dict.fromkeys([x[0] for x in keyword_mapping.values()]))
+
+        # add each grid array to the string
+        for array_name in unique_array_keys:
+            array_definition: GridArrayDefinition = getattr(self, array_name.lower())
+            if isinstance(array_definition, dict):
+                # for IREGION special case
+                for region_name, region_array_definition in array_definition.items():
+                    if region_array_definition.value is not None:
+                        grid_str += region_array_definition.to_string()
+                        grid_str += '\n'
+            elif array_definition.value is not None:
+                grid_str += array_definition.to_string()
+                grid_str += '\n'
+
+        # Add FTRANS
+        add_header = True
+        previous_grid = None
+        previous_fault_name = None
+        for ftrans in self.ftrans:
+            if ftrans.grid != previous_grid or ftrans.fault_name != previous_fault_name:
+                add_header = True
+            grid_str += ftrans.to_string_line(header=add_header)
+            previous_grid = ftrans.grid
+            previous_fault_name = ftrans.fault_name
+            add_header = False
+        if self.ftrans:
+            grid_str += '\n'
+
+        # Add OVER
+        # TODO - format multiple OVERs for same array better
+
+        # add the faults
+        faults_df = self.get_faults_df()
+        if faults_df is not None and not faults_df.empty:
+            grid_str += NexusGrid.fault_df_to_string(faults_df)
+
+        if self.array_functions:
+            for array_function in self.array_functions:
+                grid_str += array_function.to_string()
+                grid_str += '\n'
+
+        return grid_str
+
+    @staticmethod
+    def fault_direction_to_array(direction: str) -> str:
+        """Converts a fault direction to the corresponding array name.
+
+        Args:
+            direction (str): The fault direction. Must be one of 'I', 'I-', 'J', 'J-', 'K', 'K-'.
+
+        Returns:
+            str: The corresponding array name.
+        """
+        direction_mapping = {
+            'I': 'TX',
+            'I-': 'TX',
+            'J': 'TY',
+            'J-': 'TY',
+            'K': 'TZ',
+            'K-': 'TZ',
+            'IF': 'TXF',
+            'IF-': 'TXF',
+            'JF': 'TYF',
+            'JF-': 'TYF',
+            'KF': 'TZF',
+            'KF-': 'TZF',
+            'I+': 'TX',
+            'J+': 'TY',
+            'K+': 'TZ',
+        }
+        if direction not in direction_mapping:
+            raise ValueError(f'Invalid fault direction: {direction}. Must be one of {list(direction_mapping.keys())}.')
+        return direction_mapping[direction]
+
+    @staticmethod
+    def fault_df_to_string(faults_df: pd.DataFrame) -> str:
+        """Converts a faults DataFrame to a string representation for writing to file.
+
+        Args:
+            faults_df (pd.DataFrame): The faults DataFrame.
+
+        Returns:
+            str: The string representation of the faults for writing to file.
+        """
+        fault_str = ''
+        if faults_df is None or faults_df.empty:
+            return fault_str
+        faults_df['unique_table_id'] = faults_df['NAME'] + faults_df['GRID'] + faults_df['FACE']
+        for table_id in faults_df['unique_table_id'].unique():
+            array_faults = faults_df[faults_df['unique_table_id'] == table_id]
+            direction = array_faults['FACE'].iloc[0]
+            fault_name = array_faults['NAME'].iloc[0]
+            grid_name = array_faults['GRID'].iloc[0]
+
+            printable_trans_array = NexusGrid.fault_direction_to_array(direction)
+            direction_sign = 'MINUS' if '-' in direction else 'PLUS'
+            # PLACEHOLDER ALL as sometimes it can be STD/NONSTD faults
+            fault_str += f"MULT {printable_trans_array} ALL {direction_sign} MULT\n"
+            fault_str += f"FNAME {fault_name}\n"
+            if grid_name != 'ROOT':
+                fault_str += f"GRID {grid_name}\n"
+            for _, fault_row in array_faults.iterrows():
+                fault_str += (f"{fault_row['I1']} {fault_row['I2']}"
+                              f" {fault_row['J1']} {fault_row['J2']}"
+                              f" {fault_row['K1']} {fault_row['K2']} {fault_row['MULT']}\n")
+            fault_str += "\n"
+        return fault_str
 
