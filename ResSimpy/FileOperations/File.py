@@ -48,7 +48,7 @@ class File(FileBase):
     line_locations: Optional[list[tuple[int, UUID]]] = field(default=None, repr=False)
     linked_user: Optional[str] = field(default=None)
     last_modified: Optional[datetime] = field(default=None)
-    __id: UUID = field(default_factory=lambda: uuid4(), compare=False)
+    __id: UUID = field(default_factory=uuid4, compare=False)
     __file_modified: bool = False
     __file_loading_skipped: bool = False
 

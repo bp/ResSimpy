@@ -34,7 +34,7 @@ class GridArrayDefinition:
     keyword_in_include_file: bool = False
     absolute_path: Optional[str] = None
     array: Optional[np.ndarray] = None
-    __id: UUID = field(default_factory=lambda: uuid4(), compare=False)
+    __id: UUID = field(default_factory=uuid4, compare=False)
 
     def __init__(self, modifier: Optional[str] = None, value: Optional[str] = None,
                  mods: Optional[dict[str, pd.DataFrame]] = None, keyword_in_include_file: bool = False,

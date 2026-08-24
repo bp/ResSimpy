@@ -531,7 +531,7 @@ class StructuredGridOperations:
         absolute_file_path = os.path.join(default_root, grid_array_definition.value)
 
         line_with_file_uuid = grid_nexus_file.get_flat_list_str_with_file_ids_with_includes
-        line, uuid = line_with_file_uuid[line_index_of_include_file]
+        _line, uuid = line_with_file_uuid[line_index_of_include_file]
 
         # find the include path from within this include file
         if grid_nexus_file.include_objects is None:

@@ -19,7 +19,7 @@ DataObjectMixinDictType = dict[str, None | str | int | float | dict[int, float]]
 @dataclass(kw_only=True)
 class DataObjectMixin(ABC):
     """Base class representing a data object in ResSimpy."""
-    __id: UUID = field(default_factory=lambda: uuid4(), compare=False)
+    __id: UUID = field(default_factory=uuid4, compare=False)
     __iso_date: ISODateTime = field(init=False, repr=True)
     _date_format: Optional[DateFormat] = None
     __date: Optional[str] = None
