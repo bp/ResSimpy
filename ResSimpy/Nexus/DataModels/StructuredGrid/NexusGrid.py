@@ -609,7 +609,8 @@ class NexusGrid(Grid):
                 if len(tolpv_values) >= 2 and tolpv_values[0].upper() == 'TOLPV':
                     selector: str | None = None
                     selector_or_value = tolpv_values[1]
-
+                    
+                    assert selector_or_value is not None
                     value_string = selector_or_value
                     try:
                         float(selector_or_value)
@@ -652,7 +653,7 @@ class NexusGrid(Grid):
                         warnings.warn(f'Unable to parse DRSDT line: {line.strip()}', UserWarning)
                         continue
 
-                    # selector_or_value has been checked for None above; help mypy understand that
+                    
                     assert selector_or_value is not None
                     value_string = selector_or_value
                     try:
