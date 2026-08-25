@@ -532,6 +532,7 @@ class NexusGrid(Grid):
         unit_system = self.__model_unit_system
 
         for idx, (original_line_location, line) in enumerate(file_as_list_with_original_line_numbers):
+            value_string: str | None = None
 
             # Load in the basic properties
             line_start_token = nfo.get_next_value(0, [line])
