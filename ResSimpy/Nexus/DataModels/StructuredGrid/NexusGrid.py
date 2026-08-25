@@ -613,7 +613,7 @@ class NexusGrid(Grid):
                     if selector_or_value is None:
                         warnings.warn(f'Unable to parse TOLPV line: {line.strip()}', UserWarning)
                         continue
-                    value_string: str = selector_or_value
+                    value_string = selector_or_value
                     try:
                         float(selector_or_value)
                     except ValueError:
@@ -655,7 +655,7 @@ class NexusGrid(Grid):
                         warnings.warn(f'Unable to parse DRSDT line: {line.strip()}', UserWarning)
                         continue
 
-                    value_string: str = selector_or_value
+                    value_string = selector_or_value
                     try:
                         float(value_string)
                     except ValueError:
