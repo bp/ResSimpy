@@ -610,8 +610,10 @@ class NexusGrid(Grid):
                     selector: str | None = None
                     selector_or_value = tolpv_values[1]
 
-                    assert selector_or_value is not None
-                    value_string = selector_or_value
+                    if selector_or_value is None:
+                        warnings.warn(f'Unable to parse TOLPV line: {line.strip()}', UserWarning)
+                        continue
+                    value_string: str = selector_or_value
                     try:
                         float(selector_or_value)
                     except ValueError:
@@ -653,8 +655,7 @@ class NexusGrid(Grid):
                         warnings.warn(f'Unable to parse DRSDT line: {line.strip()}', UserWarning)
                         continue
 
-                    assert selector_or_value is not None
-                    value_string = selector_or_value
+                    value_string: str = selector_or_value
                     try:
                         float(value_string)
                     except ValueError:
@@ -1015,6 +1016,13 @@ class NexusGrid(Grid):
         if not self._grid_properties_loaded:
             self.load_grid_properties_if_not_loaded()
         return self.__tovers
+
+    @property
+    def ftrans(self) -> list[NexusFtrans]:
+        """Returns the FTRANS table as a list of NexusFtrans objects."""
+        if not self._grid_properties_loaded:
+            self.load_grid_properties_if_not_loaded()
+        return self.__ftrans
 
     @staticmethod
     def load_nexus_tovers(file_content_as_list: list[str]) -> list[NexusTOver]:
