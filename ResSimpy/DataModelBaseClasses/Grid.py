@@ -39,6 +39,9 @@ class Grid(ABC):
     _overs: Sequence[Over]
     _tolpv: Optional[float]
     _tolpv_grid_name: Optional[str]
+    _drsdt_limit: Optional[float]
+    _drsdt_grid_name: Optional[str]
+    _drsdt_two_phases: Optional[bool]
 
     def __init__(self, assume_loaded: bool = False) -> None:
         """Initialises the Grid class."""
@@ -65,6 +68,11 @@ class Grid(ABC):
         # TOLPV
         self._tolpv: Optional[float] = None
         self._tolpv_grid_name: Optional[str] = None
+        
+        #DRSDT
+        self._drsdt_limit: Optional[float] = None
+        self._drsdt_grid_name: Optional[str] = None
+        self._drsdt_two_phases: Optional[bool] = None
 
     @property
     def range_x(self) -> int | None:
@@ -186,6 +194,24 @@ class Grid(ABC):
         """Returns the grid name (or ALL) that TOLPV was applied to, when provided."""
         self.load_grid_properties_if_not_loaded()
         return self._tolpv_grid_name
+    
+    @property
+    def drsdt_limit(self) -> Optional[float]:
+        """Returns float value for DRSDT LIMIT, if grid property is not loaded."""
+        self.load_grid_properties_if_not_loaded()
+        return self._drsdt_limit
+
+    @property
+    def drsdt_grid_name(self) -> Optional[str]:
+        """Returns the grid name (or ALL) that DRSDT was applied to, when provided."""
+        self.load_grid_properties_if_not_loaded()
+        return self._drsdt_grid_name
+
+    @property
+    def drsdt_two_phases(self) -> Optional[bool]:
+        """Returns whether the DRSDT limit is only applied to blocks that already have oil and gas phases."""
+        self.load_grid_properties_if_not_loaded()
+        return self._drsdt_two_phases
 
     @classmethod
     @abstractmethod
