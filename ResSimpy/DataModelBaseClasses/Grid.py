@@ -68,8 +68,8 @@ class Grid(ABC):
         # TOLPV
         self._tolpv: Optional[float] = None
         self._tolpv_grid_name: Optional[str] = None
-        
-        #DRSDT
+
+        # DRSDT
         self._drsdt_limit: Optional[float] = None
         self._drsdt_grid_name: Optional[str] = None
         self._drsdt_two_phases: Optional[bool] = None
@@ -194,7 +194,7 @@ class Grid(ABC):
         """Returns the grid name (or ALL) that TOLPV was applied to, when provided."""
         self.load_grid_properties_if_not_loaded()
         return self._tolpv_grid_name
-    
+
     @property
     def drsdt_limit(self) -> Optional[float]:
         """Returns float value for DRSDT LIMIT, if grid property is not loaded."""

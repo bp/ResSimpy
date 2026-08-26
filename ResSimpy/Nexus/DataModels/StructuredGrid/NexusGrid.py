@@ -641,8 +641,8 @@ class NexusGrid(Grid):
                 if len(cortol_values) >= 4:
                     self._tolpv = float(cortol_values[3])
                     self._tolpv_grid_name = None
-                    
-             # Load DRSDT LIMIT scalar value, optionally with a grid selector and 2PHASE flag.
+
+                    # Load DRSDT LIMIT scalar value, optionally with a grid selector and 2PHASE flag.
             if nfo.check_token('DRSDT', line):
                 drsdt_values = fo.split_line(line, upper=False)
                 if len(drsdt_values) >= 2 and drsdt_values[0].upper() == 'DRSDT' and drsdt_values[1].upper() == 'LIMIT':
@@ -677,7 +677,7 @@ class NexusGrid(Grid):
                         )
                 else:
                     warnings.warn(f'Unable to parse DRSDT line: {line.strip()}', UserWarning)
-                           
+
         # load the overs:
         if fo.value_in_file('OVER', file_as_list):
             self.__overs = NexusGrid.load_nexus_overs(file_as_list)
