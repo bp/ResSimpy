@@ -123,3 +123,31 @@ DRSDT LIMIT ALL 0.5
     assert result == 0.5
     assert simulation.grid.drsdt_two_phases is False
     assert simulation.grid.drsdt_grid_name == 'ALL'
+
+
+# Minimal test: covers the parser branch for an incomplete DRSDT line
+def test_load_drsdt_incomplete_line_warns(mocker):
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents = """
+    NX NY NZ
+    10 10 3
+DRSDT LIMIT
+"""
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+        {'testpath1/nexus_run.fcs': fcs_file_contents,
+         '/run_control/path': '',
+         structured_grid_name: structured_grid_file_contents,
+         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+    mocker.patch("os.path.isfile", lambda x: True)
+    mocker.patch("os.path.exists", lambda x: True)
+
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
+    assert simulation.grid is not None
+    with pytest.warns(UserWarning, match=r'Unable to parse DRSDT line'):
+        assert simulation.grid.drsdt_limit is None
