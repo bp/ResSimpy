@@ -151,3 +151,59 @@ DRSDT LIMIT
     assert simulation.grid is not None
     with pytest.warns(UserWarning, match=r'Unable to parse DRSDT line'):
         assert simulation.grid.drsdt_limit is None
+
+
+def test_load_drsdt_selector_with_non_numeric_value_skips(mocker):
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    # selector present but following value is non-numeric -> should be skipped
+    structured_grid_file_contents = """
+    NX NY NZ
+    10 10 3
+DRSDT LIMIT LGR1 NOT_A_NUMBER
+"""
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+        {'testpath1/nexus_run.fcs': fcs_file_contents,
+         '/run_control/path': '',
+         structured_grid_name: structured_grid_file_contents,
+         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+    mocker.patch("os.path.isfile", lambda x: True)
+    mocker.patch("os.path.exists", lambda x: True)
+
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
+    assert simulation.grid is not None
+    # parsing should skip setting a numeric limit when value is invalid
+    assert simulation.grid.drsdt_limit is None
+    assert simulation.grid.drsdt_grid_name is None
+
+
+def test_load_drsdt_unrecognized_keyword_warns(mocker):
+    fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents = """
+    NX NY NZ
+    10 10 3
+DRSDT SOMETHING
+"""
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+        {'testpath1/nexus_run.fcs': fcs_file_contents,
+         '/run_control/path': '',
+         structured_grid_name: structured_grid_file_contents,
+         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+    mocker.patch("os.path.isfile", lambda x: True)
+    mocker.patch("os.path.exists", lambda x: True)
+
+    simulation = NexusSimulator(origin='testpath1/nexus_run.fcs')
+    assert simulation.grid is not None
+    with pytest.warns(UserWarning, match=r'Unable to parse DRSDT line'):
+        _ = simulation.grid.drsdt_limit
