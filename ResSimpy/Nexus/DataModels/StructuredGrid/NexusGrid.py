@@ -642,22 +642,39 @@ class NexusGrid(Grid):
                     self._tolpv = float(cortol_values[3])
                     self._tolpv_grid_name = None
 
-                    # Load DRSDT LIMIT scalar value, optionally with a grid selector and 2PHASE flag.
+            # Load DRSDT LIMIT scalar value, optionally with a grid selector and 2PHASE flag.
             if nfo.check_token('DRSDT', line):
                 drsdt_values = fo.split_line(line, upper=False)
-                if len(drsdt_values) >= 2 and drsdt_values[0].upper() == 'DRSDT' and drsdt_values[1].upper() == 'LIMIT':
-                    selector: str | None = None
-                    selector_or_value = fo.get_nth_value(file_as_list[idx:], value_number=3, ignore_values=[])
-                    if selector_or_value is None:
-                        warnings.warn(f'Unable to parse DRSDT line: {line.strip()}', UserWarning)
+                if (
+                    len(drsdt_values) >= 2
+                    and drsdt_values[0].upper() == 'DRSDT'
+                    and drsdt_values[1].upper() == 'LIMIT'
+                ):
+                    drsdt_selector: str | None = None
+                    drsdt_value_or_selector = fo.get_nth_value(
+                        file_as_list[idx:],
+                        value_number=3,
+                        ignore_values=[],
+                    )
+
+                    if drsdt_value_or_selector is None:
+                        warnings.warn(
+                            f'Unable to parse DRSDT line: {line.strip()}',
+                            UserWarning,
+                        )
                         continue
 
-                    value_string = selector_or_value
+                    value_string = drsdt_value_or_selector
+
                     try:
-                        float(selector_or_value)
+                        float(drsdt_value_or_selector)
                     except ValueError:
-                        selector = selector_or_value.upper()
-                        next_value = fo.get_nth_value(file_as_list[idx:], value_number=4, ignore_values=[])
+                        drsdt_selector = drsdt_value_or_selector.upper()
+                        next_value = fo.get_nth_value(
+                            file_as_list[idx:],
+                            value_number=4,
+                            ignore_values=[],
+                        )
                         if next_value is None or next_value.upper() == '2PHASE':
                             continue
                         value_string = next_value
@@ -667,16 +684,21 @@ class NexusGrid(Grid):
                     except ValueError:
                         continue
 
-                    self._drsdt_grid_name = selector
-                    self._drsdt_two_phases = any(value.upper() == '2PHASE' for value in drsdt_values[2:])
+                    self._drsdt_grid_name = drsdt_selector
+                    self._drsdt_two_phases = any(
+                        value.upper() == '2PHASE' for value in drsdt_values[2:]
+                    )
 
-                    if selector is not None:
+                    if drsdt_selector is not None:
                         warnings.warn(
-                            f'DRSDT in Nexus was applied to grid {selector}.',
+                            f'DRSDT in Nexus was applied to grid {drsdt_selector}.',
                             UserWarning,
                         )
                 else:
-                    warnings.warn(f'Unable to parse DRSDT line: {line.strip()}', UserWarning)
+                    warnings.warn(
+                        f'Unable to parse DRSDT line: {line.strip()}',
+                        UserWarning,
+                    )
 
         # load the overs:
         if fo.value_in_file('OVER', file_as_list):
