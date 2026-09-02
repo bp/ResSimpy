@@ -642,64 +642,6 @@ class NexusGrid(Grid):
                     self._tolpv = float(cortol_values[3])
                     self._tolpv_grid_name = None
 
-            # Load DRSDT LIMIT scalar value, optionally with a grid selector and 2PHASE flag.
-            if nfo.check_token('DRSDT', line):
-                drsdt_values = fo.split_line(line, upper=False)
-                if (
-                    len(drsdt_values) >= 2
-                    and drsdt_values[0].upper() == 'DRSDT'
-                    and drsdt_values[1].upper() == 'LIMIT'
-                ):
-                    drsdt_selector: str | None = None
-                    drsdt_value_or_selector = fo.get_nth_value(
-                        file_as_list[idx:],
-                        value_number=3,
-                        ignore_values=[],
-                    )
-
-                    if drsdt_value_or_selector is None:
-                        warnings.warn(
-                            f'Unable to parse DRSDT line: {line.strip()}',
-                            UserWarning,
-                        )
-                        continue
-
-                    value_string = drsdt_value_or_selector
-
-                    try:
-                        float(drsdt_value_or_selector)
-                    except ValueError:
-                        drsdt_selector = drsdt_value_or_selector.upper()
-                        next_value = fo.get_nth_value(
-                            file_as_list[idx:],
-                            value_number=4,
-                            ignore_values=[],
-                        )
-                        if next_value is None or next_value.upper() == '2PHASE':
-                            continue
-                        value_string = next_value
-
-                    try:
-                        self._drsdt_limit = float(value_string)
-                    except ValueError:
-                        continue
-
-                    self._drsdt_grid_name = drsdt_selector
-                    self._drsdt_two_phases = any(
-                        value.upper() == '2PHASE' for value in drsdt_values[2:]
-                    )
-
-                    if drsdt_selector is not None:
-                        warnings.warn(
-                            f'DRSDT in Nexus was applied to grid {drsdt_selector}.',
-                            UserWarning,
-                        )
-                else:
-                    warnings.warn(
-                        f'Unable to parse DRSDT line: {line.strip()}',
-                        UserWarning,
-                    )
-
         # load the overs:
         if fo.value_in_file('OVER', file_as_list):
             self.__overs = NexusGrid.load_nexus_overs(file_as_list)

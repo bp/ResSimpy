@@ -656,6 +656,9 @@ class NexusSimulator(Simulator):
             self._grid = NexusGrid.load_structured_grid_file(self.model_files.structured_grid_file,
                                                              lazy_loading=self.__lazy_loading,
                                                              model_unit_system=self.default_units)
+            grid_file_content = self.model_files.structured_grid_file.get_flat_list_str_file
+            if grid_file_content is not None:
+                self._sim_controls.load_drsdt_from_grid(grid_file_content)
 
         # Load in wellspec files
         if self.model_files.well_files is not None and \

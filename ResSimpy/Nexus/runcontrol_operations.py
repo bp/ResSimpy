@@ -38,6 +38,61 @@ class SimControls:
         self.__number_of_processors: None | int = None
         self.__grid_to_proc: None | GridToProc = None
         self.__solver_parameters: NexusSolverParameters = NexusSolverParameters(model, model.assume_loaded)
+        self.__drsdt_limit: float | None = None
+        self.__drsdt_grid_name: str | None = None
+        self.__drsdt_two_phases: bool | None = None
+
+    @property
+    def drsdt_limit(self) -> float | None:
+        """Returns the DRSDT limit loaded from the structured grid file."""
+        return self.__drsdt_limit
+
+    @property
+    def drsdt_grid_name(self) -> str | None:
+        """Returns the grid name to which DRSDT was applied, when provided."""
+        return self.__drsdt_grid_name
+
+    @property
+    def drsdt_two_phases(self) -> bool | None:
+        """Returns whether DRSDT applies only to blocks with oil and gas phases."""
+        return self.__drsdt_two_phases
+
+    def load_drsdt_from_grid(self, file_content: list[str]) -> None:
+        """Loads DRSDT LIMIT from structured-grid file content."""
+        for index, line in enumerate(file_content):
+            if not nfo.check_token('DRSDT', line):
+                continue
+
+            values = fo.split_line(line, upper=False)
+            if len(values) < 2 or values[0].upper() != 'DRSDT' or values[1].upper() != 'LIMIT':
+                warnings.warn(f'Unable to parse DRSDT line: {line.strip()}', UserWarning)
+                continue
+
+            value_or_selector = fo.get_nth_value(file_content[index:], value_number=3, ignore_values=[])
+            if value_or_selector is None:
+                warnings.warn(f'Unable to parse DRSDT line: {line.strip()}', UserWarning)
+                continue
+
+            selector = None
+            value = value_or_selector
+            try:
+                float(value_or_selector)
+            except ValueError:
+                selector = value_or_selector.upper()
+                next_value = fo.get_nth_value(file_content[index:], value_number=4, ignore_values=[])
+                if next_value is None or next_value.upper() == '2PHASE':
+                    continue
+                value = next_value
+
+            try:
+                self.__drsdt_limit = float(value)
+            except ValueError:
+                continue
+
+            self.__drsdt_grid_name = selector
+            self.__drsdt_two_phases = any(item.upper() == '2PHASE' for item in values[2:])
+            if selector is not None:
+                warnings.warn(f'DRSDT in Nexus was applied to grid {selector}.', UserWarning)
 
     @property
     def date_format_string(self) -> str:
