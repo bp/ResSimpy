@@ -44,7 +44,7 @@ class SimControls:
 
     @property
     def drsdt_limit(self) -> float | None:
-        """Returns the DRSDT limit loaded from the structured grid file."""
+        """Returns the DRSDT limit loaded from the run control file."""
         return self.__drsdt_limit
 
     @property
@@ -57,8 +57,8 @@ class SimControls:
         """Returns whether DRSDT applies only to blocks with oil and gas phases."""
         return self.__drsdt_two_phases
 
-    def load_drsdt_from_grid(self, file_content: list[str]) -> None:
-        """Loads DRSDT LIMIT from structured-grid file content."""
+    def load_drsdt_from_run_control(self, file_content: list[str]) -> None:
+        """Loads DRSDT LIMIT from run-control file content."""
         for index, line in enumerate(file_content):
             if not nfo.check_token('DRSDT', line):
                 continue

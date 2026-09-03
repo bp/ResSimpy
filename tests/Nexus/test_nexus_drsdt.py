@@ -8,16 +8,16 @@ from tests.multifile_mocker import mock_multiple_files
 def test_load_drsdt_limit(mocker):
     fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
     structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    run_control_file_contents = "DRSDT LIMIT 0.0 2PHASE\n"
     structured_grid_file_contents = """
     NX NY NZ
     10 10 3
-DRSDT LIMIT 0.0 2PHASE
 """
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
         {'testpath1/nexus_run.fcs': fcs_file_contents,
-         '/run_control/path': '',
+         '/run_control/path': run_control_file_contents,
          structured_grid_name: structured_grid_file_contents,
          }).return_value
         return mock_open
@@ -37,16 +37,16 @@ DRSDT LIMIT 0.0 2PHASE
 def test_load_drsdt_without_two_phase(mocker):
     fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
     structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    run_control_file_contents = "DRSDT LIMIT 0.1\n"
     structured_grid_file_contents = """
     NX NY NZ
     10 10 3
-DRSDT LIMIT 0.1
 """
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
         {'testpath1/nexus_run.fcs': fcs_file_contents,
-         '/run_control/path': '',
+         '/run_control/path': run_control_file_contents,
          structured_grid_name: structured_grid_file_contents,
          }).return_value
         return mock_open
@@ -66,16 +66,16 @@ DRSDT LIMIT 0.1
 def test_load_drsdt_with_grid_name_warns_and_stores(mocker):
     fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
     structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    run_control_file_contents = "DRSDT LIMIT LGR1 0.25 2PHASE\n"
     structured_grid_file_contents = """
     NX NY NZ
     10 10 3
-DRSDT LIMIT LGR1 0.25 2PHASE
 """
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
         {'testpath1/nexus_run.fcs': fcs_file_contents,
-         '/run_control/path': '',
+         '/run_control/path': run_control_file_contents,
          structured_grid_name: structured_grid_file_contents,
          }).return_value
         return mock_open
@@ -97,16 +97,16 @@ DRSDT LIMIT LGR1 0.25 2PHASE
 def test_load_drsdt_with_all_keyword_warns_and_stores(mocker):
     fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
     structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    run_control_file_contents = "DRSDT LIMIT ALL 0.5\n"
     structured_grid_file_contents = """
     NX NY NZ
     10 10 3
-DRSDT LIMIT ALL 0.5
 """
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
         {'testpath1/nexus_run.fcs': fcs_file_contents,
-         '/run_control/path': '',
+         '/run_control/path': run_control_file_contents,
          structured_grid_name: structured_grid_file_contents,
          }).return_value
         return mock_open
@@ -129,16 +129,16 @@ DRSDT LIMIT ALL 0.5
 def test_load_drsdt_incomplete_line_warns(mocker):
     fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
     structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    run_control_file_contents = "DRSDT LIMIT\n"
     structured_grid_file_contents = """
     NX NY NZ
     10 10 3
-DRSDT LIMIT
 """
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
         {'testpath1/nexus_run.fcs': fcs_file_contents,
-         '/run_control/path': '',
+         '/run_control/path': run_control_file_contents,
          structured_grid_name: structured_grid_file_contents,
          }).return_value
         return mock_open
@@ -156,17 +156,17 @@ DRSDT LIMIT
 def test_load_drsdt_selector_with_non_numeric_value_skips(mocker):
     fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
     structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    run_control_file_contents = "DRSDT LIMIT LGR1 NOT_A_NUMBER\n"
     # selector present but following value is non-numeric -> should be skipped
     structured_grid_file_contents = """
     NX NY NZ
     10 10 3
-DRSDT LIMIT LGR1 NOT_A_NUMBER
 """
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
         {'testpath1/nexus_run.fcs': fcs_file_contents,
-         '/run_control/path': '',
+         '/run_control/path': run_control_file_contents,
          structured_grid_name: structured_grid_file_contents,
          }).return_value
         return mock_open
@@ -185,16 +185,16 @@ DRSDT LIMIT LGR1 NOT_A_NUMBER
 def test_load_drsdt_unrecognized_keyword_warns(mocker):
     fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
     structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
+    run_control_file_contents = "DRSDT SOMETHING\n"
     structured_grid_file_contents = """
     NX NY NZ
     10 10 3
-DRSDT SOMETHING
 """
 
     def mock_open_wrapper(filename, mode):
         mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
         {'testpath1/nexus_run.fcs': fcs_file_contents,
-         '/run_control/path': '',
+         '/run_control/path': run_control_file_contents,
          structured_grid_name: structured_grid_file_contents,
          }).return_value
         return mock_open
