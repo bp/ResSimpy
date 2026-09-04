@@ -205,6 +205,8 @@ class SimControls:
             start_date_as_datetime = datetime.strptime(self.__model.start_date, date_format)
             date_as_datetime = start_date_as_datetime + timedelta(days=converted_date)
         else:
+            if not isinstance(converted_date, str):
+                raise ValueError("convert_date_to_number: Incorrect type for 'date' parameter")
             start_date_format = self.date_format_string
             if len(self.__model.start_date) == DATE_WITH_TIME_LENGTH:
                 start_date_format += "(%H:%M:%S)"
