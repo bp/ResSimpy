@@ -68,11 +68,11 @@ class SimControls:
                 continue
 
             try:
-                value = float(value)
+                drsdt_limit = float(value)
             except ValueError:
                 continue
 
-            self.__drsdt_limit = value
+            self.__drsdt_limit = drsdt_limit
             self.__drsdt_two_phases = any(item.upper() == '2PHASE' for item in values[2:])
 
     @property
