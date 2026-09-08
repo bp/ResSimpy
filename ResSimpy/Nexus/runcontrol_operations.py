@@ -51,30 +51,6 @@ class SimControls:
         """Returns whether DRSDT applies only to blocks with oil and gas phases."""
         return self.__drsdt_two_phases
 
-    def load_drsdt_from_run_control(self, file_content: list[str]) -> None:
-        """Loads DRSDT LIMIT from run-control file content."""
-        for index, line in enumerate(file_content):
-            if not nfo.check_token('DRSDT', line):
-                continue
-
-            values = fo.split_line(line, upper=False)
-            if len(values) < 2 or values[0].upper() != 'DRSDT' or values[1].upper() != 'LIMIT':
-                warnings.warn(f'Unable to parse DRSDT line: {line.strip()}', UserWarning)
-                continue
-
-            value = fo.get_nth_value(file_content[index:], value_number=3, ignore_values=[])
-            if value is None:
-                warnings.warn(f'Unable to parse DRSDT line: {line.strip()}', UserWarning)
-                continue
-
-            try:
-                drsdt_limit = float(value)
-            except ValueError:
-                continue
-
-            self.__drsdt_limit = drsdt_limit
-            self.__drsdt_two_phases = any(item.upper() == '2PHASE' for item in values[2:])
-
     @property
     def date_format_string(self) -> str:
         """Returns how dates should be formatted in the run control file as a string."""
@@ -327,6 +303,28 @@ class SimControls:
 
         if (run_control_file_content is None) or (self.__model.model_files.runcontrol_file.location is None):
             raise ValueError(f"No file path provided for {self.__model.model_files.runcontrol_file.location=}")
+
+        for index, line in enumerate(run_control_file_content):
+            if not nfo.check_token('DRSDT', line):
+                continue
+
+            values = fo.split_line(line, upper=False)
+            if len(values) < 2 or values[0].upper() != 'DRSDT' or values[1].upper() != 'LIMIT':
+                warnings.warn(f'Unable to parse DRSDT line: {line.strip()}', UserWarning)
+                continue
+
+            value = fo.get_nth_value(run_control_file_content[index:], value_number=3, ignore_values=[])
+            if value is None:
+                warnings.warn(f'Unable to parse DRSDT line: {line.strip()}', UserWarning)
+                continue
+
+            try:
+                drsdt_limit = float(value)
+            except ValueError:
+                continue
+
+            self.__drsdt_limit = drsdt_limit
+            self.__drsdt_two_phases = any(item.upper() == '2PHASE' for item in values[2:])
 
         # set the start date
         for line in run_control_file_content:
