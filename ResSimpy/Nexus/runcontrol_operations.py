@@ -292,6 +292,7 @@ class SimControls:
     def load_run_control_file(self) -> None:
         """Loads the run control information into the class instance.
 
+            Loads DRSDT LIMIT and optional 2PHASE settings from the run-control file.
             If the write_times attribute is True then it expands out any INCLUDE files with the times found within
         Raises:
             ValueError: if the run_control_file attribute is None.
