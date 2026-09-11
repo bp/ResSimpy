@@ -92,8 +92,8 @@ def test_load_drsdt_incomplete_line_warns(mocker):
 def test_load_drsdt_selector_with_non_numeric_value_skips(mocker):
     fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
     structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')
-    run_control_file_contents = "DRSDT LIMIT LGR1 NOT_A_NUMBER\n"
-    # selector present but following value is non-numeric -> should be skipped
+    run_control_file_contents = "DRSDT LIMIT NOT_A_NUMBER\n"
+    # non-numeric value after LIMIT should be skipped without requiring an LGR selector
     structured_grid_file_contents = """
     NX NY NZ
     10 10 3
