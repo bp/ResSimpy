@@ -363,24 +363,55 @@ ENDWELLLIST'''
         mock_nexus_network = mocker.MagicMock()
         well_lists = NexusWellLists(mock_nexus_network, well_lists=[self.well_list, self.well_list2, self.well_list3,
                                                                     self.well_list4])
-        
+
         date = ISODateTime(year=2020, month=1, day=1)
-        
+
         expected_string = """WELLLIST well_list_name
-CLEAR
+NEW
 ADD
 wellname_1
 wellname_2
 wellname_3
 ENDWELLLIST
 WELLLIST well_list_name_2
-CLEAR
+NEW
 ADD
 wellname_4
 wellname_5
 wellname_6
 ENDWELLLIST
 """
+        # Act
+        result = well_lists.to_string_for_date(date)
+
+        # Assert
+        assert result == expected_string
+
+    def test_to_string_for_date_splits_large_well_lists_into_multiple_add_blocks(self, mocker):
+        # Arrange
+        mock_nexus_network = mocker.MagicMock()
+        well_list = NexusWellList(
+            name='large_well_list',
+            elements_in_the_list=[f'well_{index}' for index in range(1, 61)],
+            date='01/01/2020',
+            date_format=DateFormat.DD_MM_YYYY,
+        )
+        well_lists = NexusWellLists(mock_nexus_network, well_lists=[well_list])
+
+        date = ISODateTime(year=2020, month=1, day=1)
+
+        expected_string = """WELLLIST large_well_list
+NEW
+ADD
+well_1
+well_2
+well_3
+"""
+        expected_string += "\n".join(f'well_{index}' for index in range(4, 31))
+        expected_string += "\nADD\n"
+        expected_string += "\n".join(f'well_{index}' for index in range(31, 61))
+        expected_string += "\nENDWELLLIST\n"
+
         # Act
         result = well_lists.to_string_for_date(date)
 
