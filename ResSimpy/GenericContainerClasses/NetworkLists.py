@@ -72,10 +72,14 @@ class NetworkLists(ABC):
         if not lists_for_date:
             return ''
         printable_string = ''
+        max_entries_per_add_block = 30
         for list_item in lists_for_date:
             printable_string += f'{self.table_header()} {list_item.name}\n'
-            # remove all the previous wells and reinitialise the list
-            printable_string += 'CLEAR\nADD\n'
-            printable_string += '\n'.join(list_item.elements_in_the_list) + '\n'
+            printable_string += 'NEW\n'
+            list_entries = list_item.elements_in_the_list
+            for block_start in range(0, len(list_entries), max_entries_per_add_block):
+                printable_string += 'ADD\n'
+                printable_string += '\n'.join(list_entries[block_start:block_start + max_entries_per_add_block])
+                printable_string += '\n'
             printable_string += self.table_footer() + '\n'
         return printable_string

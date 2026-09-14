@@ -87,7 +87,7 @@ def load_list_from_table(table_as_list_str: list[str], row_object: Type[SubTypeN
     store_list = previous_list_object.elements_in_the_list.copy() if previous_list_object is not None else []
     operation: OperationEnum | None = None
     for line in table_as_list_str:
-        if nfo.check_token('CLEAR', line):
+        if nfo.check_token('CLEAR', line) or nfo.check_token('NEW', line):
             # clear the existing welllist
             store_list = []
             continue
