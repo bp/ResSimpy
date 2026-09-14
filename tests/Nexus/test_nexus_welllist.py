@@ -84,7 +84,7 @@ ENDWELLLIST'''
                                           date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
         file_as_list = '''TIME 01/01/2020
         WELLLIST well_list_name
-        CLEAR
+        NEW
         ADD
         wellname_1
         wellname_2
@@ -107,7 +107,7 @@ ENDWELLLIST'''
                                           date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
         file_as_list = '''TIME 01/01/2020
         WELLLIST well_list_name
-        CLEAR
+        NEW
         ADD
         wellname_1
         wellname_2
@@ -128,7 +128,7 @@ ENDWELLLIST'''
                                           date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
         file_as_list = '''TIME 01/01/2020
         WELLLIST well_list_name
-        CLEAR
+        NEW
         ENDWELLLIST'''.splitlines()
 
         # Act
