@@ -38,6 +38,18 @@ class SimControls:
         self.__number_of_processors: None | int = None
         self.__grid_to_proc: None | GridToProc = None
         self.__solver_parameters: NexusSolverParameters = NexusSolverParameters(model, model.assume_loaded)
+        self.__drsdt_limit: float | None = None
+        self.__drsdt_two_phases: bool | None = None
+
+    @property
+    def drsdt_limit(self) -> float | None:
+        """Returns the DRSDT limit loaded from the run control file."""
+        return self.__drsdt_limit
+
+    @property
+    def drsdt_two_phases(self) -> bool | None:
+        """Returns whether DRSDT applies only to blocks with oil and gas phases."""
+        return self.__drsdt_two_phases
 
     @property
     def date_format_string(self) -> str:
@@ -150,6 +162,8 @@ class SimControls:
             start_date_as_datetime = datetime.strptime(self.__model.start_date, date_format)
             date_as_datetime = start_date_as_datetime + timedelta(days=converted_date)
         else:
+            if not isinstance(converted_date, str):
+                raise ValueError("convert_date_to_number: Incorrect type for 'date' parameter")
             start_date_format = self.date_format_string
             if len(self.__model.start_date) == DATE_WITH_TIME_LENGTH:
                 start_date_format += "(%H:%M:%S)"
@@ -278,6 +292,7 @@ class SimControls:
     def load_run_control_file(self) -> None:
         """Loads the run control information into the class instance.
 
+            Loads DRSDT LIMIT and optional 2PHASE settings from the run-control file.
             If the write_times attribute is True then it expands out any INCLUDE files with the times found within
         Raises:
             ValueError: if the run_control_file attribute is None.
@@ -289,6 +304,28 @@ class SimControls:
 
         if (run_control_file_content is None) or (self.__model.model_files.runcontrol_file.location is None):
             raise ValueError(f"No file path provided for {self.__model.model_files.runcontrol_file.location=}")
+
+        for index, line in enumerate(run_control_file_content):
+            if not nfo.check_token('DRSDT', line):
+                continue
+
+            values = fo.split_line(line, upper=False)
+            if len(values) < 2 or values[0].upper() != 'DRSDT' or values[1].upper() != 'LIMIT':
+                warnings.warn(f'Unable to parse DRSDT line: {line.strip()}', UserWarning)
+                continue
+
+            value = fo.get_nth_value(run_control_file_content[index:], value_number=3, ignore_values=[])
+            if value is None:
+                warnings.warn(f'Unable to parse DRSDT line: {line.strip()}', UserWarning)
+                continue
+
+            try:
+                drsdt_limit = float(value)
+            except ValueError:
+                continue
+
+            self.__drsdt_limit = drsdt_limit
+            self.__drsdt_two_phases = any(item.upper() == '2PHASE' for item in values[2:])
 
         # set the start date
         for line in run_control_file_content:
