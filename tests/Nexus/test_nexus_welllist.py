@@ -97,6 +97,26 @@ ENDWELLLIST'''
 
         assert welllist == expected_welllist
 
+    def test_nexus_welllist_remove_same_line_keyword_and_names(self):
+        # Arrange
+        existing_welllist = NexusWellList(name='well_list_name',
+                                          elements_in_the_list=['test_well', 'test_well2', 'test_well3'],
+                                          date='01/01/2019', date_format=DateFormat.DD_MM_YYYY)
+        expected_welllist = NexusWellList(name='well_list_name', elements_in_the_list=['test_well3'],
+                                          date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
+        file_as_list = '''TIME 01/01/2020
+        WELLLIST well_list_name
+        REMOVE test_well test_well2
+        ENDWELLLIST'''.splitlines()
+
+        # Act
+        welllist = load_list_from_table(table_as_list_str=file_as_list, current_date='01/01/2020',
+                                        list_name='well_list_name',
+                                        previous_list_object=existing_welllist, date_format=DateFormat.DD_MM_YYYY,
+                                        table_header='WELLLIST', row_object=NexusWellList)
+
+        assert welllist == expected_welllist
+
     def test_nexus_welllist_clear(self):
         # Arrange
         existing_welllist = NexusWellList(name='well_list_name', elements_in_the_list=['test_well', 'test_well2'],
