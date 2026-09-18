@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Literal, Sequence
 from ResSimpy.DataModelBaseClasses.NetworkList import NetworkList
 from ResSimpy.GenericContainerClasses.NetworkLists import NetworkLists
 from ResSimpy.Nexus.DataModels.Network.NexusWellList import NexusWellList
+from ResSimpy.Time.ISODateTime import ISODateTime
 
 if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusNetwork import NexusNetwork
@@ -71,6 +72,29 @@ class NexusWellLists(NetworkLists):
     def table_footer() -> Literal['ENDWELLLIST']:
         """End of the Node definition table."""
         return 'ENDWELLLIST'
+
+    def to_string_for_date(self, date: ISODateTime) -> str:
+        """Formats WELLLIST entries using the Nexus NEW/ADD block rule."""
+        lists_for_date = [x for x in self._lists if x.iso_date == date]
+        if not lists_for_date:
+            return ''
+
+        printable_string = ''
+        max_entries_per_add_block = 30
+        for list_item in lists_for_date:
+            printable_string += f'{self.table_header()} {list_item.name}\n'
+            list_entries = list_item.elements_in_the_list
+            for block_start in range(0, len(list_entries), max_entries_per_add_block):
+                operation = 'NEW' if block_start == 0 else 'ADD'
+                block_entries = list_entries[block_start:block_start + max_entries_per_add_block]
+                printable_string += operation
+                if block_entries:
+                    printable_string += ' ' + ' '.join(block_entries)
+                printable_string += '\n'
+            if not list_entries:
+                printable_string += 'NEW\n'
+            printable_string += self.table_footer() + '\n'
+        return printable_string
 
     def get_all_by_name(self, well_list_name: str) -> list[NexusWellList]:
         """Returns a list of WellLists which match the provided name loaded from the simulator.

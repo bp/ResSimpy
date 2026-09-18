@@ -85,7 +85,6 @@ ENDWELLLIST'''
         file_as_list = '''TIME 01/01/2020
         WELLLIST well_list_name
         NEW
-        ADD
         wellname_1
         wellname_2
         
@@ -108,7 +107,6 @@ ENDWELLLIST'''
         file_as_list = '''TIME 01/01/2020
         WELLLIST well_list_name
         NEW
-        ADD
         wellname_1
         wellname_2
         
@@ -129,6 +127,25 @@ ENDWELLLIST'''
         file_as_list = '''TIME 01/01/2020
         WELLLIST well_list_name
         NEW
+        ENDWELLLIST'''.splitlines()
+
+        # Act
+        welllist = load_list_from_table(table_as_list_str=file_as_list, current_date='01/01/2020',
+                                        list_name='well_list_name', date_format=DateFormat.DD_MM_YYYY,
+                                        table_header='WELLLIST', row_object=NexusWellList)
+
+        assert welllist == expected_welllist
+
+    def test_nexus_welllist_parses_keyword_and_names_on_same_line(self):
+        # Arrange
+        expected_welllist = NexusWellList(name='well_list_name',
+                                          elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3',
+                                                                'wellname_4', 'wellname_5'],
+                                          date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
+        file_as_list = '''TIME 01/01/2020
+        WELLLIST well_list_name
+        NEW wellname_1 wellname_2 wellname_3
+        ADD wellname_4 wellname_5
         ENDWELLLIST'''.splitlines()
 
         # Act
@@ -366,21 +383,14 @@ ENDWELLLIST'''
 
         date = ISODateTime(year=2020, month=1, day=1)
 
-        expected_string = """WELLLIST well_list_name
-NEW
-ADD
-wellname_1
-wellname_2
-wellname_3
-ENDWELLLIST
-WELLLIST well_list_name_2
-NEW
-ADD
-wellname_4
-wellname_5
-wellname_6
-ENDWELLLIST
-"""
+        expected_string = (
+            "WELLLIST well_list_name\n"
+            "NEW wellname_1 wellname_2 wellname_3\n"
+            "ENDWELLLIST\n"
+            "WELLLIST well_list_name_2\n"
+            "NEW wellname_4 wellname_5 wellname_6\n"
+            "ENDWELLLIST\n"
+        )
         # Act
         result = well_lists.to_string_for_date(date)
 
@@ -400,17 +410,10 @@ ENDWELLLIST
 
         date = ISODateTime(year=2020, month=1, day=1)
 
-        expected_string = """WELLLIST large_well_list
-NEW
-ADD
-well_1
-well_2
-well_3
-"""
-        expected_string += "\n".join(f'well_{index}' for index in range(4, 31))
-        expected_string += "\nADD\n"
-        expected_string += "\n".join(f'well_{index}' for index in range(31, 61))
-        expected_string += "\nENDWELLLIST\n"
+        expected_string = "WELLLIST large_well_list\n"
+        expected_string += "NEW " + " ".join(f'well_{index}' for index in range(1, 31)) + "\n"
+        expected_string += "ADD " + " ".join(f'well_{index}' for index in range(31, 61)) + "\n"
+        expected_string += "ENDWELLLIST\n"
 
         # Act
         result = well_lists.to_string_for_date(date)

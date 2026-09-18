@@ -87,22 +87,46 @@ def load_list_from_table(table_as_list_str: list[str], row_object: Type[SubTypeN
     store_list = previous_list_object.elements_in_the_list.copy() if previous_list_object is not None else []
     operation: OperationEnum | None = None
     for line in table_as_list_str:
+        if nfo.check_token('END' + table_header, line):
+            break
+
         if nfo.check_token('CLEAR', line) or nfo.check_token('NEW', line):
             # clear the existing welllist
             store_list = []
+            operation = OperationEnum.ADD
+            names = split_line(line, upper=False)
+            if names and names[0].upper() in {'CLEAR', 'NEW'}:
+                names = names[1:]
+            if names:
+                if operation == OperationEnum.ADD:
+                    for name in names:
+                        if name not in store_list:
+                            store_list.append(name)
             continue
 
         if nfo.check_token('ADD', line):
             operation = OperationEnum.ADD
+            names = split_line(line, upper=False)
+            if names and names[0].upper() == 'ADD':
+                names = names[1:]
+            if names:
+                for name in names:
+                    if name not in store_list:
+                        store_list.append(name)
             continue
         elif nfo.check_token('REMOVE', line):
             operation = OperationEnum.REMOVE
+            names = split_line(line, upper=False)
+            if names and names[0].upper() == 'REMOVE':
+                names = names[1:]
+            if names:
+                for name in names:
+                    if name in store_list:
+                        store_list.remove(name)
             continue
 
         if operation is None:
             continue
-        if nfo.check_token('END' + table_header, line):
-            break
 
         names = split_line(line, upper=False)
         if not names:
