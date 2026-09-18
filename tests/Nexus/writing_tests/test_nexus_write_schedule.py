@@ -17,6 +17,7 @@ from ResSimpy.Nexus.DataModels.Network.NexusWellList import NexusWellList
 from ResSimpy.Nexus.NexusEnums.ActivationChangeEnum import ActivationChangeEnum
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.nexus_model_file_generator import NexusModelFileGenerator
+from ResSimpy.Time.ISODateTime import ISODateTime
 
 
 @pytest.mark.parametrize('pvt_type, eos_details, expected_pvt_string', [
@@ -216,3 +217,21 @@ ENDPROCS
 
     # Assert
     assert result == expected_result
+
+
+def test_write_empty_nodelist_uses_new_keyword():
+    # Arrange
+    model = NexusSimulator(origin='test_file', assume_loaded=True, start_date='01/01/2019',
+                           date_format=DateFormat.DD_MM_YYYY, run_units=UnitSystem.METRIC,
+                           default_units=UnitSystem.METRIC, pvt_type=PvtType.BLACKOIL)
+    model.network._has_been_loaded = True
+    model.network.nodelists._add_to_memory([
+        NexusNodeList(name='empty_nodelist', date='01/01/2020', elements_in_the_list=[],
+                      date_format=DateFormat.DD_MM_YYYY)
+    ])
+
+    # Act
+    result = model.network.nodelists.to_string_for_date(ISODateTime(year=2020, month=1, day=1))
+
+    # Assert
+    assert result == 'NODELIST empty_nodelist\nNEW\nENDNODELIST\n'
