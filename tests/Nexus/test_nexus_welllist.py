@@ -439,7 +439,7 @@ ENDWELLLIST'''
         # Assert
         assert result == expected_string
 
-    def test_to_string_for_date_splits_large_well_lists_into_multiple_add_blocks(self, mocker):
+    def test_to_string_for_multiple_add_blocks(self, mocker):
         # Arrange
         mock_nexus_network = mocker.MagicMock()
         well_list = NexusWellList(
