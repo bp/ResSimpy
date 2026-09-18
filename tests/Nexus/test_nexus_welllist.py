@@ -75,6 +75,48 @@ ENDWELLLIST'''
 
         assert welllist == expected_welllist
 
+    def test_nexus_welllist_remove_after_keyword_on_following_lines(self):
+        # Arrange
+        existing_welllist = NexusWellList(name='well_list_name',
+                                          elements_in_the_list=['test_well', 'test_well2', 'test_well3'],
+                                          date='01/01/2019', date_format=DateFormat.DD_MM_YYYY)
+        expected_welllist = NexusWellList(name='well_list_name', elements_in_the_list=['test_well3'],
+                                          date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
+        file_as_list = '''TIME 01/01/2020
+        WELLLIST well_list_name
+        REMOVE
+        test_well
+        test_well2
+        ENDWELLLIST'''.splitlines()
+
+        # Act
+        welllist = load_list_from_table(table_as_list_str=file_as_list, current_date='01/01/2020',
+                                        list_name='well_list_name',
+                                        previous_list_object=existing_welllist, date_format=DateFormat.DD_MM_YYYY,
+                                        table_header='WELLLIST', row_object=NexusWellList)
+
+        assert welllist == expected_welllist
+
+    def test_nexus_welllist_remove_same_line_keyword_and_names(self):
+        # Arrange
+        existing_welllist = NexusWellList(name='well_list_name',
+                                          elements_in_the_list=['test_well', 'test_well2', 'test_well3'],
+                                          date='01/01/2019', date_format=DateFormat.DD_MM_YYYY)
+        expected_welllist = NexusWellList(name='well_list_name', elements_in_the_list=['test_well3'],
+                                          date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
+        file_as_list = '''TIME 01/01/2020
+        WELLLIST well_list_name
+        REMOVE test_well test_well2
+        ENDWELLLIST'''.splitlines()
+
+        # Act
+        welllist = load_list_from_table(table_as_list_str=file_as_list, current_date='01/01/2020',
+                                        list_name='well_list_name',
+                                        previous_list_object=existing_welllist, date_format=DateFormat.DD_MM_YYYY,
+                                        table_header='WELLLIST', row_object=NexusWellList)
+
+        assert welllist == expected_welllist
+
     def test_nexus_welllist_clear(self):
         # Arrange
         existing_welllist = NexusWellList(name='well_list_name', elements_in_the_list=['test_well', 'test_well2'],
@@ -84,8 +126,7 @@ ENDWELLLIST'''
                                           date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
         file_as_list = '''TIME 01/01/2020
         WELLLIST well_list_name
-        CLEAR
-        ADD
+        NEW
         wellname_1
         wellname_2
         
@@ -107,8 +148,7 @@ ENDWELLLIST'''
                                           date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
         file_as_list = '''TIME 01/01/2020
         WELLLIST well_list_name
-        CLEAR
-        ADD
+        NEW
         wellname_1
         wellname_2
         
@@ -128,7 +168,26 @@ ENDWELLLIST'''
                                           date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
         file_as_list = '''TIME 01/01/2020
         WELLLIST well_list_name
-        CLEAR
+        NEW
+        ENDWELLLIST'''.splitlines()
+
+        # Act
+        welllist = load_list_from_table(table_as_list_str=file_as_list, current_date='01/01/2020',
+                                        list_name='well_list_name', date_format=DateFormat.DD_MM_YYYY,
+                                        table_header='WELLLIST', row_object=NexusWellList)
+
+        assert welllist == expected_welllist
+
+    def test_nexus_welllist_parses_keyword_and_names_on_same_line(self):
+        # Arrange
+        expected_welllist = NexusWellList(name='well_list_name',
+                                          elements_in_the_list=['wellname_1', 'wellname_2', 'wellname_3',
+                                                                'wellname_4', 'wellname_5'],
+                                          date='01/01/2020', date_format=DateFormat.DD_MM_YYYY)
+        file_as_list = '''TIME 01/01/2020
+        WELLLIST well_list_name
+        NEW wellname_1 wellname_2 wellname_3
+        ADD wellname_4 wellname_5
         ENDWELLLIST'''.splitlines()
 
         # Act
@@ -363,24 +422,41 @@ ENDWELLLIST'''
         mock_nexus_network = mocker.MagicMock()
         well_lists = NexusWellLists(mock_nexus_network, well_lists=[self.well_list, self.well_list2, self.well_list3,
                                                                     self.well_list4])
-        
+
         date = ISODateTime(year=2020, month=1, day=1)
-        
-        expected_string = """WELLLIST well_list_name
-CLEAR
-ADD
-wellname_1
-wellname_2
-wellname_3
-ENDWELLLIST
-WELLLIST well_list_name_2
-CLEAR
-ADD
-wellname_4
-wellname_5
-wellname_6
-ENDWELLLIST
-"""
+
+        expected_string = (
+            "WELLLIST well_list_name\n"
+            "NEW wellname_1 wellname_2 wellname_3\n"
+            "ENDWELLLIST\n"
+            "WELLLIST well_list_name_2\n"
+            "NEW wellname_4 wellname_5 wellname_6\n"
+            "ENDWELLLIST\n"
+        )
+        # Act
+        result = well_lists.to_string_for_date(date)
+
+        # Assert
+        assert result == expected_string
+
+    def test_to_string_for_multiple_add_blocks(self, mocker):
+        # Arrange
+        mock_nexus_network = mocker.MagicMock()
+        well_list = NexusWellList(
+            name='large_well_list',
+            elements_in_the_list=[f'well_{index}' for index in range(1, 61)],
+            date='01/01/2020',
+            date_format=DateFormat.DD_MM_YYYY,
+        )
+        well_lists = NexusWellLists(mock_nexus_network, well_lists=[well_list])
+
+        date = ISODateTime(year=2020, month=1, day=1)
+
+        expected_string = "WELLLIST large_well_list\n"
+        expected_string += "NEW " + " ".join(f'well_{index}' for index in range(1, 31)) + "\n"
+        expected_string += "ADD " + " ".join(f'well_{index}' for index in range(31, 61)) + "\n"
+        expected_string += "ENDWELLLIST\n"
+
         # Act
         result = well_lists.to_string_for_date(date)
 

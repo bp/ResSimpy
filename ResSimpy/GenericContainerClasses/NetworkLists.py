@@ -74,8 +74,12 @@ class NetworkLists(ABC):
         printable_string = ''
         for list_item in lists_for_date:
             printable_string += f'{self.table_header()} {list_item.name}\n'
-            # remove all the previous wells and reinitialise the list
-            printable_string += 'CLEAR\nADD\n'
-            printable_string += '\n'.join(list_item.elements_in_the_list) + '\n'
+            list_entries = list_item.elements_in_the_list
+            if list_entries:
+                printable_string += 'NEW\n'
+                printable_string += '\n'.join(list_entries)
+                printable_string += '\n'
+            else:
+                printable_string += 'NEW\n'
             printable_string += self.table_footer() + '\n'
         return printable_string
