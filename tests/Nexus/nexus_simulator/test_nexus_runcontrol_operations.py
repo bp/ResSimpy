@@ -67,8 +67,9 @@ def test_load_run_control_file_warns_when_include_locations_missing():
     model.start_date = '01/01/2020'
     model.write_times = True
     model.destination = None
-    model.model_files.runcontrol_file = NexusFile(
-        location='runcontrol.dat', file_content_as_list=['START 01/01/2020\n'])
+    run_control_file = NexusFile(location='runcontrol.dat', file_content_as_list=['START 01/01/2020\n'])
+    run_control_file.include_locations = None
+    model.model_files.runcontrol_file = run_control_file
     sim_controls = SimControls(model=model)
 
     with pytest.warns(UserWarning, match='No includes files found'):
@@ -83,7 +84,10 @@ def test_load_options_file_reports_missing_options_and_content():
     with pytest.raises(ValueError, match='No options file found'):
         sim_controls._load_options_file()
 
-    model.model_files.options_file = NexusFile(location='options.dat', file_content_as_list=None)
+    options_file = MagicMock()
+    options_file.location = 'options.dat'
+    options_file.get_flat_list_str_file = None
+    model.model_files.options_file = options_file
     with pytest.raises(ValueError, match='No file content found in options file'):
         sim_controls._load_options_file()
 
