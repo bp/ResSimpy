@@ -1,10 +1,15 @@
 from typing import Any
 
 
-class simcontrols:
+class SimControlsBase:
     """Parent class for controlling all runcontrol related functionality."""
 
     def __init__(self, model: Any) -> None:
+        """Initialize shared simulation-control.
+
+        Args:
+            model: Simulator model associated with these controls.
+        """
         self._model = model
         self._times: list[str] | None = None
         self._number_of_processors: int | None = None

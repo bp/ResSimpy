@@ -12,7 +12,7 @@ from ResSimpy.Nexus.DataModels.nexus_grid_to_proc import GridToProc
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
 from ResSimpy.Nexus.NexusSolverParameters import NexusSolverParameters
-from ResSimpy.DataModelBaseClasses.Simcontrols import simcontrols
+from ResSimpy.DataModelBaseClasses.Simcontrols import SimControlsBase
 from ResSimpy.Nexus.constants import DATE_WITH_TIME_LENGTH
 from ResSimpy.Time.ISODateTime import ISODateTime
 
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
 
-class SimControls(simcontrols):
+class SimControls(SimControlsBase):
     """Class for controlling all runcontrol and time related functionality."""
 
     def __init__(self, model: NexusSimulator) -> None:
