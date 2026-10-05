@@ -1143,7 +1143,7 @@ class NexusSimulator(Simulator):
             raise TypeError("sim_controls must be an instance of SimControls")
         self._sim_controls = sim_controls
         # ensure the model is correctly set in sim_controls
-        setattr(self._sim_controls, '_SimControls__model', self)
+        self._sim_controls.model = self
 
     @property
     def ipr_methods(self) -> NexusIprMethods:

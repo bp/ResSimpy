@@ -1047,7 +1047,7 @@ def test_modify_times_run_control(mocker: MockerFixture):
     nex_model._start_date = '01/01/2023'
     sim_controls = SimControls(model=nex_model)
     time_content = ['01/01/2025', '01/01/2026']
-    sim_controls._SimControls__times = ['01/01/2023', '01/01/2024']
+    sim_controls._times = ['01/01/2023', '01/01/2024']
 
     sim_controls.modify_times(content=time_content, operation='MERGE')
 
@@ -1072,7 +1072,7 @@ TIME 01/01/2028
     sim_controls = SimControls(model=nex_model)
 
     time_content = ['01/01/2026', '01/01/2027']
-    sim_controls._SimControls__times = sim_controls.get_times(run_file_content)
+    sim_controls._times = sim_controls.get_times(run_file_content)
 
     sim_controls.modify_times(content=time_content, operation='MERGE')
 
