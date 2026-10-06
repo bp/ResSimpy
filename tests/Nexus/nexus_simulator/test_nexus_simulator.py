@@ -2227,7 +2227,7 @@ def test_model_summary(mocker, fluid_type, expected_fluid_type):
     model._grid = grid
 
     sim_controls = SimControls(model=model)
-    setattr(sim_controls, '_SimControls__times', ['15/01/2020', '16/01/2020', '01/12/2021'])
+    sim_controls._times = ['15/01/2020', '16/01/2020', '01/12/2021']
     model._sim_controls = sim_controls
 
     wells = NexusWells(model=model)

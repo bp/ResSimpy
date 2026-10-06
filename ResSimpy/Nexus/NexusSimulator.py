@@ -32,7 +32,7 @@ from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from ResSimpy.Nexus.NexusReporting import NexusReporting
 from ResSimpy.Nexus.NexusWells import NexusWells
 from ResSimpy.Nexus.nexus_model_file_generator import NexusModelFileGenerator
-from ResSimpy.Nexus.runcontrol_operations import SimControls
+from ResSimpy.Nexus.runcontrol_operations import NexusSimControls
 from ResSimpy.Nexus.logfile_operations import Logging
 from ResSimpy.Nexus.structured_grid_operations import StructuredGridOperations
 from ResSimpy.DataModelBaseClasses.Simulator import Simulator
@@ -164,7 +164,7 @@ class NexusSimulator(Simulator):
         self._reporting: NexusReporting = NexusReporting(self)
         self._structured_grid_operations: StructuredGridOperations = StructuredGridOperations(self)
         self.__lazy_loading: bool = lazy_loading
-        self._sim_controls: SimControls = SimControls(self)
+        self._sim_controls: NexusSimControls = NexusSimControls(self)
         self.__ipr_methods: NexusIprMethods = NexusIprMethods(self)
 
         if destination is not None and destination != '':
@@ -1062,7 +1062,7 @@ class NexusSimulator(Simulator):
         return model_summary
 
     @property
-    def sim_controls(self) -> SimControls:
+    def sim_controls(self) -> NexusSimControls:
         """Returns an instance of Sim controls class."""
         return self._sim_controls
 
@@ -1133,17 +1133,17 @@ class NexusSimulator(Simulator):
         self.model_files.options_file = new_options_file
         self._options.file = new_options_file
 
-    def set_sim_controls(self, sim_controls: SimControls) -> None:
+    def set_sim_controls(self, sim_controls: NexusSimControls) -> None:
         """Sets the simulation controls for the simulator.
 
         Args:
             sim_controls (SimControls): An instance of SimControls to set.
         """
-        if not isinstance(sim_controls, SimControls):
+        if not isinstance(sim_controls, NexusSimControls):
             raise TypeError("sim_controls must be an instance of SimControls")
         self._sim_controls = sim_controls
         # ensure the model is correctly set in sim_controls
-        setattr(self._sim_controls, '_SimControls__model', self)
+        self._sim_controls.model = self
 
     @property
     def ipr_methods(self) -> NexusIprMethods:

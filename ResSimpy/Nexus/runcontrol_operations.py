@@ -12,6 +12,7 @@ from ResSimpy.Nexus.DataModels.nexus_grid_to_proc import GridToProc
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 
 from ResSimpy.Nexus.NexusSolverParameters import NexusSolverParameters
+from ResSimpy.DataModelBaseClasses.Simcontrols import SimControlsBase
 from ResSimpy.Nexus.constants import DATE_WITH_TIME_LENGTH
 from ResSimpy.Time.ISODateTime import ISODateTime
 
@@ -19,7 +20,7 @@ if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
 
-class SimControls:
+class NexusSimControls(SimControlsBase):
     """Class for controlling all runcontrol and time related functionality."""
 
     def __init__(self, model: NexusSimulator) -> None:
@@ -27,29 +28,12 @@ class SimControls:
 
         Args:
             model: NexusSimulator instance
-            __times (None | list[str]): list of times to be included in the runcontrol file
             __date_format_string (str): How the dates should be formatted based on date_format.
-            __number_of_processors (int): number of processors to use for the simulation. Comes from Options file in
-            Nexus. Defaults to None when not specified in a GRIDTOPROC table.
         """
-        self.__model = model
-        self.__times: None | list[str] = None
+        super().__init__(model)
         self.__date_format_string: str = "%m/%d/%Y"
-        self.__number_of_processors: None | int = None
         self.__grid_to_proc: None | GridToProc = None
         self.__solver_parameters: NexusSolverParameters = NexusSolverParameters(model, model.assume_loaded)
-        self.__drsdt_limit: float | None = None
-        self.__drsdt_two_phases: bool | None = None
-
-    @property
-    def drsdt_limit(self) -> float | None:
-        """Returns the DRSDT limit loaded from the run control file."""
-        return self.__drsdt_limit
-
-    @property
-    def drsdt_two_phases(self) -> bool | None:
-        """Returns whether DRSDT applies only to blocks with oil and gas phases."""
-        return self.__drsdt_two_phases
 
     @property
     def date_format_string(self) -> str:
@@ -61,17 +45,10 @@ class SimControls:
         self.__date_format_string = value
 
     @property
-    def times(self) -> list[str]:
-        """Returns list of times, if value is not provided it will return none."""
-        return self.__times if self.__times is not None else []
-
-    @property
     def times_iso_date(self) -> list[ISODateTime]:
         """Returns list of times as ISODateTime objects, if value is not provided it will return none."""
-        if self.times is None:
-            return []
-        return [ISODateTime.convert_to_iso(date=date, date_format=self.__model.date_format,
-                                           start_date=self.__model.start_date) for date in self.times]
+        return [ISODateTime.convert_to_iso(date=date, date_format=self.model.date_format,
+                                           start_date=self.model.start_date) for date in self.times]
 
     @staticmethod
     def get_times(times_file: list[str]) -> list[str]:
@@ -127,7 +104,7 @@ class SimControls:
             file_content (list[str]): a list of strings containing each line of the file as a new entry
             output_file_path (str): path to the file to output to.
         """
-        new_file_content = SimControls.delete_times(file_content)
+        new_file_content = NexusSimControls.delete_times(file_content)
 
         new_file_str = "".join(new_file_content)
 
@@ -150,28 +127,26 @@ class SimControls:
         # If we can retrieve a number of days from date, use that, otherwise convert the string date to a number of days
         try:
             converted_date: str | float = float(date)
-        except ValueError:
+        except (TypeError, ValueError):
             if not isinstance(date, str):
                 raise ValueError("convert_date_to_number: Incorrect type for 'date' parameter")
             converted_date = date
 
         if isinstance(converted_date, float):
             date_format = self.date_format_string
-            if len(self.__model.start_date) == DATE_WITH_TIME_LENGTH:
+            if len(self.model.start_date) == DATE_WITH_TIME_LENGTH:
                 date_format += "(%H:%M:%S)"
-            start_date_as_datetime = datetime.strptime(self.__model.start_date, date_format)
+            start_date_as_datetime = datetime.strptime(self.model.start_date, date_format)
             date_as_datetime = start_date_as_datetime + timedelta(days=converted_date)
         else:
-            if not isinstance(converted_date, str):
-                raise ValueError("convert_date_to_number: Incorrect type for 'date' parameter")
             start_date_format = self.date_format_string
-            if len(self.__model.start_date) == DATE_WITH_TIME_LENGTH:
+            if len(self.model.start_date) == DATE_WITH_TIME_LENGTH:
                 start_date_format += "(%H:%M:%S)"
             end_date_format = self.date_format_string
             if len(converted_date) == DATE_WITH_TIME_LENGTH:
                 end_date_format += "(%H:%M:%S)"
             date_as_datetime = datetime.strptime(converted_date, end_date_format)
-            start_date_as_datetime = datetime.strptime(self.__model.start_date, start_date_format)
+            start_date_as_datetime = datetime.strptime(self.model.start_date, start_date_format)
 
         difference = date_as_datetime - start_date_as_datetime
         return difference.total_seconds() / timedelta(days=1).total_seconds()
@@ -237,7 +212,7 @@ class SimControls:
                     date_format += "(%H:%M:%S)"
                 datetime.strptime(str(date), date_format)
             except ValueError:
-                current_date_format = self.get_date_format(self.__model.date_format)
+                current_date_format = self.get_date_format(self.model.date_format)
                 raise ValueError(
                     "Invalid date format " + str(date) + " the model is using " + current_date_format + " date format.")
 
@@ -254,19 +229,19 @@ class SimControls:
             return 'DD/MM/YYYY'
 
     def __update_times_in_file(self) -> None:
-        """Updates the list of times in the Runcontrol file to the current stored values in __times.
+        """Updates the list of times in the Runcontrol file to the current stored values.
 
         Returns:
             None: writes out a file at the same path as the existing runcontrol file
         """
-        self.__model.check_output_path()
-        if self.__model.model_files.runcontrol_file is None or \
-                self.__model.model_files.runcontrol_file.location is None:
-            raise ValueError(f"No file path found for {self.__model.model_files}")
-        file_content = self.__model.model_files.runcontrol_file.get_flat_list_str_file
-        filename = self.__model.model_files.runcontrol_file.location
+        self.model.check_output_path()
+        if self.model.model_files.runcontrol_file is None or \
+                self.model.model_files.runcontrol_file.location is None:
+            raise ValueError(f"No file path found for {self.model.model_files}")
+        file_content = self.model.model_files.runcontrol_file.get_flat_list_str_file
+        filename = self.model.model_files.runcontrol_file.location
 
-        new_file_content = self.__model._sim_controls.delete_times(file_content)
+        new_file_content = self.model._sim_controls.delete_times(file_content)
 
         time_list = self.times
         stop_string = 'STOP\n'
@@ -297,13 +272,13 @@ class SimControls:
         Raises:
             ValueError: if the run_control_file attribute is None.
         """
-        if self.__model.model_files.runcontrol_file is None:
-            warnings.warn(f"Run control file path not found for {self.__model.model_files.location}")
+        if self.model.model_files.runcontrol_file is None:
+            warnings.warn(f"Run control file path not found for {self.model.model_files.location}")
             return
-        run_control_file_content = self.__model.model_files.runcontrol_file.get_flat_list_str_file
+        run_control_file_content = self.model.model_files.runcontrol_file.get_flat_list_str_file
 
-        if (run_control_file_content is None) or (self.__model.model_files.runcontrol_file.location is None):
-            raise ValueError(f"No file path provided for {self.__model.model_files.runcontrol_file.location=}")
+        if (run_control_file_content is None) or (self.model.model_files.runcontrol_file.location is None):
+            raise ValueError(f"No file path provided for {self.model.model_files.runcontrol_file.location=}")
 
         for index, line in enumerate(run_control_file_content):
             if not nfo.check_token('DRSDT', line):
@@ -324,41 +299,41 @@ class SimControls:
             except ValueError:
                 continue
 
-            self.__drsdt_limit = drsdt_limit
-            self.__drsdt_two_phases = any(item.upper() == '2PHASE' for item in values[2:])
+            self._drsdt_limit = drsdt_limit
+            self._drsdt_two_phases = any(item.upper() == '2PHASE' for item in values[2:])
 
         # set the start date
         for line in run_control_file_content:
             if nfo.check_token('START', line):
                 value = nfo.get_expected_token_value('START', line, run_control_file_content)
                 if value is not None:
-                    self.__model.start_date = value
+                    self.model.start_date = value
 
         times = []
         run_control_times = self.get_times(run_control_file_content)
         times.extend(run_control_times)
-        if self.__model.start_date is None or self.__model.start_date == '':
+        if self.model.start_date is None or self.model.start_date == '':
             try:
-                self.__model.start_date = times[0]
+                self.model.start_date = times[0]
             except IndexError:
                 for line in run_control_file_content:
                     if nfo.check_token('TIME', line):
                         value = nfo.get_expected_token_value('TIME', line, run_control_file_content)
-                        self.__model.start_date = value
+                        self.model.start_date = value
                         warnings.warn(f'Setting start date to first time card found in the runcontrol file as: {value}')
                         break
                 warnings.warn('No value found for start date explicitly with START or TIME card')
 
-        self.__times = self.sort_remove_duplicate_times(times)
+        self._times = self.sort_remove_duplicate_times(times)
 
         # If we don't want to write the times, return here.
-        if not self.__model.write_times:
+        if not self.model.write_times:
             return
-        if self.__model.model_files.runcontrol_file.include_locations is None:
-            warnings.warn(f'No includes files found in {self.__model.model_files.runcontrol_file.location}')
+        if self.model.model_files.runcontrol_file.include_locations is None:
+            warnings.warn(f'No includes files found in {self.model.model_files.runcontrol_file.location}')
             return
-        for file in self.__model.model_files.runcontrol_file.include_locations:
-            if self.__model.destination is not None:
+        for file in self.model.model_files.runcontrol_file.include_locations:
+            if self.model.destination is not None:
                 self.remove_times_from_file(run_control_file_content, file)
 
         self.modify_times(content=times, operation='replace')
@@ -385,42 +360,34 @@ class SimControls:
             self.check_date_format(time)
 
         new_times = self.sort_remove_duplicate_times(content)
-        if len(new_times) > 0 > self.compare_dates(new_times[0], self.__model.start_date):
+        if len(new_times) > 0 > self.compare_dates(new_times[0], self.model.start_date):
             raise ValueError(
-                f"The supplied date of {new_times[0]} precedes the start date of {self.__model.start_date}")
+                f"The supplied date of {new_times[0]} precedes the start date of {self.model.start_date}")
         operation = operation.lower()
-        self.__times = self.__times if self.__times is not None else []
+        self._times = self._times if self._times is not None else []
 
         if operation == 'merge':
-            self.__times.extend(content)
+            self._times.extend(content)
         elif operation == 'replace':
-            self.__times = content
+            self._times = content
         elif operation == 'reset':
-            self.__times = []
+            self._times = []
         elif operation == 'remove':
             for time in content:
-                if time in self.__times:
-                    self.__times.remove(time)
+                if time in self._times:
+                    self._times.remove(time)
 
-        self.__times = self.sort_remove_duplicate_times(self.__times)
+        self._times = self.sort_remove_duplicate_times(self._times)
 
-        if self.__model.destination is not None and update_in_file:
+        if self.model.destination is not None and update_in_file:
             self.__update_times_in_file()
 
-    @property
-    def number_of_processors(self) -> int | None:
-        """Returns the number of processors to use for the simulation.
-
-        Returns:
-        -------
-            int: number of processors to use for the simulation
-        """
-        if self.__number_of_processors is None and self.grid_to_proc is None:
+    def _load_number_of_processors(self) -> None:
+        """Loads the processor count from Nexus options, defaulting to zero."""
+        if self.grid_to_proc is None:
             self._load_options_file()
-        if self.__number_of_processors is None:
-            # if not explicitly set in a GRIDTOPROC table, return 0
-            return 0
-        return self.__number_of_processors
+        if self._number_of_processors is None:
+            self._number_of_processors = 0
 
     def _load_grid_to_procs(self, options_file_as_list: list[str]) -> GridToProc | None:
         """Loads the GRIDTOPROC table from the Options file.
@@ -451,18 +418,18 @@ class SimControls:
         grid_to_procs.grid_to_proc_table = nfo.read_table_to_df(options_file_as_list[start_index:end_index],
                                                                 keep_comments=False)
         # get the number of processors
-        self.__number_of_processors = grid_to_procs.get_number_of_processors()
+        self._number_of_processors = grid_to_procs.get_number_of_processors()
 
         return grid_to_procs
 
     def _load_options_file(self) -> None:
         """Load components of the options file to Objects."""
         # get the options file:
-        if self.__model.model_files.options_file is None:
-            raise ValueError(f"No options file found for {self.__model.model_files.location=}")
-        options_file_content = self.__model.model_files.options_file.get_flat_list_str_file
+        if self.model.model_files.options_file is None:
+            raise ValueError(f"No options file found for {self.model.model_files.location=}")
+        options_file_content = self.model.model_files.options_file.get_flat_list_str_file
         if options_file_content is None:
-            raise ValueError(f"No file content found in options file {self.__model.model_files.options_file.location=}")
+            raise ValueError(f"No file content found in options file {self.model.model_files.options_file.location=}")
         self.__grid_to_proc = self._load_grid_to_procs(options_file_content)
 
     @property
@@ -486,7 +453,7 @@ class SimControls:
         if not isinstance(grid_to_proc, GridToProc):
             raise TypeError("grid_to_proc must be an instance of GridToProc")
         self.__grid_to_proc = grid_to_proc
-        self.__number_of_processors = grid_to_proc.get_number_of_processors()
+        self._number_of_processors = grid_to_proc.get_number_of_processors()
 
     @property
     def solver_parameters(self) -> NexusSolverParameters:
@@ -507,3 +474,6 @@ class SimControls:
         if not isinstance(solver_parameters, NexusSolverParameters):
             raise TypeError("solver_parameters must be an instance of NexusSolverParameters")
         self.__solver_parameters = solver_parameters
+
+
+SimControls = NexusSimControls

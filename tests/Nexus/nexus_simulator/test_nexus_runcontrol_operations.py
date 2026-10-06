@@ -19,6 +19,89 @@ from ResSimpy.Nexus.runcontrol_operations import SimControls
 from tests.utility_for_tests import get_fake_nexus_simulator
 
 
+def test_convert_date_to_number_with_times_and_reject_invalid_type():
+    model = MagicMock()
+    model.start_date = '01/01/2020(12:00:00)'
+    sim_controls = SimControls(model=model)
+
+    assert sim_controls.convert_date_to_number(0.5) == 0.5
+    assert sim_controls.convert_date_to_number('01/02/2020(00:00:00)') == 0.5
+    sim_controls.check_date_format('01/02/2020(00:00:00)')
+
+    with pytest.raises(ValueError, match="Incorrect type for 'date' parameter"):
+        sim_controls.convert_date_to_number(None)
+
+    with pytest.raises(ValueError, match='Invalid date format'):
+        sim_controls.check_date_format('not-a-date')
+
+
+def test_load_run_control_file_without_start_or_times_warns():
+    model = MagicMock()
+    model.start_date = ''
+    model.write_times = False
+    model.model_files.runcontrol_file = NexusFile(location='runcontrol.dat', file_content_as_list=[])
+    sim_controls = SimControls(model=model)
+
+    with pytest.warns(UserWarning, match='No value found for start date'):
+        sim_controls.load_run_control_file()
+
+    assert model.start_date == ''
+
+
+def test_load_run_control_file_uses_first_time_when_start_is_missing(mocker):
+    model = MagicMock()
+    model.start_date = ''
+    model.write_times = False
+    model.model_files.runcontrol_file = NexusFile(location='runcontrol.dat',
+                                                  file_content_as_list=['TIME 01/01/2020\n'])
+    sim_controls = SimControls(model=model)
+    mocker.patch.object(SimControls, 'get_times', return_value=[])
+
+    with pytest.warns(UserWarning, match='Setting start date to first time card'):
+        sim_controls.load_run_control_file()
+    assert model.start_date == '01/01/2020'
+
+
+def test_load_run_control_file_warns_when_include_locations_missing():
+    model = MagicMock()
+    model.start_date = '01/01/2020'
+    model.write_times = True
+    model.destination = None
+    run_control_file = NexusFile(location='runcontrol.dat', file_content_as_list=['START 01/01/2020\n'])
+    run_control_file.include_locations = None
+    model.model_files.runcontrol_file = run_control_file
+    sim_controls = SimControls(model=model)
+
+    with pytest.warns(UserWarning, match='No includes files found'):
+        sim_controls.load_run_control_file()
+
+
+def test_load_options_file_reports_missing_options_and_content():
+    model = MagicMock()
+    model.model_files.options_file = None
+    sim_controls = SimControls(model=model)
+
+    with pytest.raises(ValueError, match='No options file found'):
+        sim_controls._load_options_file()
+
+    options_file = MagicMock()
+    options_file.location = 'options.dat'
+    options_file.get_flat_list_str_file = None
+    model.model_files.options_file = options_file
+    with pytest.raises(ValueError, match='No file content found in options file'):
+        sim_controls._load_options_file()
+
+
+def test_control_setters_reject_invalid_types():
+    sim_controls = SimControls(model=MagicMock())
+
+    with pytest.raises(TypeError, match='grid_to_proc must be an instance of GridToProc'):
+        sim_controls.set_grid_to_proc(None)
+
+    with pytest.raises(TypeError, match='solver_parameters must be an instance of NexusSolverParameters'):
+        sim_controls.set_solver_parameters(None)
+
+
 @pytest.mark.parametrize(
     "date_format,expected_date_format,run_control_contents,include_file_contents,expected_times", [
         # USA date format, no times in run control
@@ -1047,7 +1130,7 @@ def test_modify_times_run_control(mocker: MockerFixture):
     nex_model._start_date = '01/01/2023'
     sim_controls = SimControls(model=nex_model)
     time_content = ['01/01/2025', '01/01/2026']
-    sim_controls._SimControls__times = ['01/01/2023', '01/01/2024']
+    sim_controls._times = ['01/01/2023', '01/01/2024']
 
     sim_controls.modify_times(content=time_content, operation='MERGE')
 
@@ -1072,7 +1155,7 @@ TIME 01/01/2028
     sim_controls = SimControls(model=nex_model)
 
     time_content = ['01/01/2026', '01/01/2027']
-    sim_controls._SimControls__times = sim_controls.get_times(run_file_content)
+    sim_controls._times = sim_controls.get_times(run_file_content)
 
     sim_controls.modify_times(content=time_content, operation='MERGE')
 
