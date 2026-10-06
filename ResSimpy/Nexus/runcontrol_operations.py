@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 
 
-class SimControls(SimControlsBase):
+class NexusSimControls(SimControlsBase):
     """Class for controlling all runcontrol and time related functionality."""
 
     def __init__(self, model: NexusSimulator) -> None:
@@ -104,7 +104,7 @@ class SimControls(SimControlsBase):
             file_content (list[str]): a list of strings containing each line of the file as a new entry
             output_file_path (str): path to the file to output to.
         """
-        new_file_content = SimControls.delete_times(file_content)
+        new_file_content = NexusSimControls.delete_times(file_content)
 
         new_file_str = "".join(new_file_content)
 
@@ -474,3 +474,6 @@ class SimControls(SimControlsBase):
         if not isinstance(solver_parameters, NexusSolverParameters):
             raise TypeError("solver_parameters must be an instance of NexusSolverParameters")
         self.__solver_parameters = solver_parameters
+
+
+SimControls = NexusSimControls
