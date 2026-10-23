@@ -357,7 +357,9 @@ def test_generate_file_include_structure_comment_header_include_not_skipped(mock
     '! header\n! another header\n\n1 2 3 4\n5 6 7 8\n9 10 11 12',
     # comment header longer than the 50 non-empty lines inspected for array detection
     '! header\n' * 30 + 'C header\n\n' * 30 + '1 2 3 4\n5 6 7 8\n9 10 11 12',
-], ids=['short_header', 'long_header'])
+    # only the first 50 non-empty lines are inspected, so the trailing keyword is not seen
+    '! header\n' + '1 2 3 4\n' * 55 + 'KX VALUE',
+], ids=['short_header', 'long_header', 'more_than_50_numeric_lines'])
 def test_generate_file_include_structure_comment_header_array_skipped(mocker, include_file_contents):
     # Arrange
     file_path = '/origin/path/test_file_path.dat'
