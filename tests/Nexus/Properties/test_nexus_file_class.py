@@ -325,6 +325,63 @@ def test_generate_file_include_structure_skip_array(mocker, test_file_contents):
     assert nexus_file.include_objects[0] == expected_result
 
 
+def test_generate_file_include_structure_comment_header_include_not_skipped(mocker):
+    # Arrange
+    file_path = '/origin/path/test_file_path.dat'
+    test_file_contents = 'basic_file\nINCLUDE nexus_data/faults.inc'
+    include_full_file_path = os.path.join('/origin/path', 'nexus_data/faults.inc')
+    # comment header longer than the 50 lines inspected for array detection
+    include_file_contents = '! comment\n' * 60 + 'MULT TX ALL MINUS MULT\nFNAME F1\n1 1 1 1 1 1 1'
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            file_path: test_file_contents,
+            include_full_file_path: include_file_contents,
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act
+    nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path=file_path,
+                                                           skip_arrays=True)
+
+    # Assert
+    assert len(nexus_file.include_objects) == 1
+    include_object = nexus_file.include_objects[0]
+    assert include_object.file_loading_skipped is False
+    assert include_object.file_content_as_list[-3:] == ['MULT TX ALL MINUS MULT\n', 'FNAME F1\n', '1 1 1 1 1 1 1']
+
+
+@pytest.mark.parametrize("include_file_contents", [
+    '! header\n! another header\n\n1 2 3 4\n5 6 7 8\n9 10 11 12',
+    # comment header longer than the 50 non-empty lines inspected for array detection
+    '! header\n' * 30 + 'C header\n\n' * 30 + '1 2 3 4\n5 6 7 8\n9 10 11 12',
+], ids=['short_header', 'long_header'])
+def test_generate_file_include_structure_comment_header_array_skipped(mocker, include_file_contents):
+    # Arrange
+    file_path = '/origin/path/test_file_path.dat'
+    test_file_contents = 'basic_file\nINCLUDE nexus_data/array.inc'
+    include_full_file_path = os.path.join('/origin/path', 'nexus_data/array.inc')
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict={
+            file_path: test_file_contents,
+            include_full_file_path: include_file_contents,
+        }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    # Act
+    nexus_file = NexusFile.generate_file_include_structure(simulator_type=NexusFile, file_path=file_path,
+                                                           skip_arrays=True)
+
+    # Assert
+    assert len(nexus_file.include_objects) == 1
+    assert nexus_file.include_objects[0].file_loading_skipped is True
+
+
 @pytest.mark.parametrize("file_with_nested_grid_array_contents, expected_file_contents", [
     ("""C Corner point grid layout
 C

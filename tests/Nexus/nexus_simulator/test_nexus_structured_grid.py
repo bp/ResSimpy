@@ -1264,6 +1264,62 @@ def test_included_fault_tables(mocker):
     pd.testing.assert_frame_equal(expected_df, faults_df)
 
 
+def test_included_fault_tables_with_long_comment_header(mocker):
+    # Arrange
+    fcs_path = 'testpath1/nexus_run.fcs'
+    fcs_file = "DESC test fcs file\nDATEFORMAT MM/DD/YYYY\nGRID_FILES\n\tSTRUCTURED_GRID test_structured_grid.dat"
+    structured_grid_path = os.path.join('testpath1', 'test_structured_grid.dat')
+    structured_grid_file_contents = '''KX VALUE
+        INCLUDE kx_file.dat
+
+        INCLUDE faults_inc.inc
+        MULTFL F1 0.5
+    '''
+    kx_file_content = '0 1 0 2 0 3 0 4 100 1200\n 102023 9014 109 1293 2727'
+    kx_path = os.path.join('testpath1', 'kx_file.dat')
+    include_file_path = os.path.join('testpath1', 'faults_inc.inc')
+    # comment header longer than the 50 lines inspected for array detection
+    include_file = '! comment\n' * 30 + 'C comment\n' * 30 + '''
+       MULT TX ALL MINUS MULT
+       FNAME F1
+       1 1 2 5 1 10 1.0
+       1 1 6 9 1 10 1.0'''
+
+    def mock_open_wrapper(filename, mode):
+        mock_open = mock_multiple_files(mocker, filename, potential_file_dict=
+        {fcs_path: fcs_file,
+         structured_grid_path: structured_grid_file_contents,
+         include_file_path: include_file,
+         kx_path: kx_file_content,
+         }).return_value
+        return mock_open
+
+    mocker.patch("builtins.open", mock_open_wrapper)
+
+    comparison_types = {'I1': 'int32', 'I2': 'int32', 'J1': 'int32', 'J2': 'int32',
+                        'K1': 'int32', 'K2': 'int32'}
+    expected_df = pd.DataFrame({
+        'I1': [1, 1],
+        'I2': [1, 1],
+        'J1': [2, 6],
+        'J2': [5, 9],
+        'K1': [1, 1],
+        'K2': [10, 10],
+        'MULT': [0.5, 0.5],
+        'GRID': ['ROOT', 'ROOT'],
+        'NAME': ['F1', 'F1'],
+        'FACE': ['I-', 'I-']}
+    ).astype(comparison_types)
+
+    # Act
+    simulation = NexusSimulator(origin=fcs_path)
+    faults_df = simulation.grid.get_faults_df()
+    faults_df = faults_df.astype(comparison_types)
+
+    # Assert
+    pd.testing.assert_frame_equal(expected_df, faults_df)
+
+
 def test_load_structured_grid_file_nocorp(mocker):
     """Read in Structured Grid File where properties are in a nested include file"""
     # Arrange

@@ -421,14 +421,22 @@ class File(FileBase):
                     pass
                 else:
                     all_numeric = False
-                    for inc_file_line in inc_file_as_list[0:50]:
+                    non_empty_lines_checked = 0
+                    for inc_file_line in inc_file_as_list:
+                        if non_empty_lines_checked >= 50:
+                            break
                         split_line = fo.split_line(inc_file_line, upper=False)
+                        if not split_line:
+                            # comment-only or blank line: no evidence either way
+                            continue
+                        non_empty_lines_checked += 1
                         # check if it is numeric data
                         # this won't work if the array has scientific notation.
                         if any(not is_number(x) for x in split_line):
                             # don't set skip_next_include if the line is not entirely numeric
                             all_numeric = False
                             break
+                        # at least one genuinely numeric line seen
                         all_numeric = True
                     if all_numeric:
                         skip_next_include = True
