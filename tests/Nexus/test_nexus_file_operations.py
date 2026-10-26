@@ -17,6 +17,7 @@ from ResSimpy.Enums.UnitsEnum import UnitSystem
 from unittest.mock import Mock
 
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
+from ResSimpy.Nexus.NexusKeywords.nexus_keywords import VALID_NEXUS_KEYWORDS
 from ResSimpy.Nexus.NexusNetwork import NexusNetwork
 from ResSimpy.Nexus.NexusSimulator import NexusSimulator
 from ResSimpy.Nexus.nexus_add_new_object_to_file import AddObjectOperations
@@ -204,6 +205,52 @@ value 3
 
     # Act
     result = nfo.strip_file_of_comments(dummy_file_as_list, comment_characters=['--', '#'])
+    # Assert
+    assert result == expected_result
+
+
+def test_strip_file_of_comments_c_comment_lines():
+    # Arrange
+    file_contents = '''C comment at start of line
+   C indented comment
+\tC tab indented comment
+C\ttab separated comment
+C
+CAREA not a comment
+keep [remove] keep ! comment
+19 39 0 ! C not a comment line
+'''
+
+    expected_result_contents = '''CAREA not a comment
+keep  keep 
+19 39 0 
+'''
+
+    dummy_file_as_list = file_contents.splitlines()
+    expected_result = expected_result_contents.splitlines()
+
+    # Act
+    result = nfo.strip_file_of_comments(dummy_file_as_list, comment_characters=['!', 'C'],
+                                        square_bracket_comments=True)
+    # Assert
+    assert result == expected_result
+
+
+@pytest.mark.parametrize("line, expected_result", [
+    ('C  Region A/B OWC isolation', False),
+    ('   C indented comment', False),
+    ('\tC tab indented comment', False),
+    ('C', False),
+    ('C  KX VALUE commented out', False),
+    ('OVER PV', True),
+    ('19 39 0 ! KX', False),
+    ('KX VALUE [comment] ! comment', True),
+], ids=['C comment', 'indented C comment', 'tab indented C comment', 'bare C', 'C comment containing keyword',
+        'keyword', 'keyword in inline comment', 'keyword with comments'])
+def test_nexus_token_found(line, expected_result):
+    # Act
+    result = nfo.nexus_token_found(line, VALID_NEXUS_KEYWORDS)
+
     # Assert
     assert result == expected_result
 

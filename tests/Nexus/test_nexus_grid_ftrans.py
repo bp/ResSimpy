@@ -66,7 +66,20 @@ from ResSimpy.Nexus.DataModels.StructuredGrid.NexusGrid import NexusGrid
       NexusFtrans(i1=1, j1=1, k1=1, i2=2, j2=2, k2=2, value=0.1, grid='ROOT', fault_name=None,
                   unit_system=UnitSystem.ENGLISH)]
      ),
-], ids=['basic', 'multiple_tables', 'grid_and_fault_names'])
+
+    # C comment lines inside the FTRANS table
+    ("""FTRANS
+    1 12  1 46 10 11  0.5
+C 1 13  1 45 11 12  2
+    1 14  1 44 12 13  3
+       C 1 15  1 43 13 14  4
+    1 16  1 42 14 15  5
+    """,
+     [NexusFtrans(i1=1, j1=12, k1=1, i2=46, j2=10, k2=11, value=0.5, grid='ROOT', unit_system=UnitSystem.ENGLISH),
+      NexusFtrans(i1=1, j1=14, k1=1, i2=44, j2=12, k2=13, value=3.0, grid='ROOT', unit_system=UnitSystem.ENGLISH),
+      NexusFtrans(i1=1, j1=16, k1=1, i2=42, j2=14, k2=15, value=5.0, grid='ROOT', unit_system=UnitSystem.ENGLISH)]
+     ),
+], ids=['basic', 'multiple_tables', 'grid_and_fault_names', 'c_comment_lines'])
 def test_read_nexus_ftrans(file_content, expected_result):
     # Arrange
     # Act

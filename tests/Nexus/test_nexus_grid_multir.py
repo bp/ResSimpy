@@ -67,8 +67,32 @@ from ResSimpy.Nexus.DataModels.StructuredGrid.NexusMultir import NexusMultir
      [NexusMultir(region_1=1, region_2=2, tmult=3, directions='X', std_connections=True, non_std_connections=False),
       NexusMultir(region_1=1, region_2=4, tmult=5, directions='XYZ', std_connections=True, non_std_connections=True),
       NexusMultir(region_1=2, region_2=2, tmult=3, directions='X', std_connections=True, non_std_connections=False),
-      NexusMultir(region_1=2, region_2=4, tmult=5.5, directions='XYZ', std_connections=True, non_std_connections=True)])
-], ids=['basic', 'empty', 'stop_on_keyword', 'include_reference_line', 'multiple_tables'])
+      NexusMultir(region_1=2, region_2=4, tmult=5.5, directions='XYZ', std_connections=True, non_std_connections=True)]),
+    # C comment lines inside the MULTIR table
+    ("""MULTIR
+75  87  0
+C  Region A/B OWC isolation
+19  39   0  !  Region A - Region B
+! 39  58   0  !  not sealed globally
+58  59   0  !  Region C - Region D
+C
+27  58  0
+    C indented comment
+23 58 0
+OVER PV
+1 2 1 2 1 2 *0.5
+""",
+     [NexusMultir(region_1=75, region_2=87, tmult=0, directions='XYZ', std_connections=True,
+                  non_std_connections=True),
+      NexusMultir(region_1=19, region_2=39, tmult=0, directions='XYZ', std_connections=True,
+                  non_std_connections=True),
+      NexusMultir(region_1=58, region_2=59, tmult=0, directions='XYZ', std_connections=True,
+                  non_std_connections=True),
+      NexusMultir(region_1=27, region_2=58, tmult=0, directions='XYZ', std_connections=True,
+                  non_std_connections=True),
+      NexusMultir(region_1=23, region_2=58, tmult=0, directions='XYZ', std_connections=True,
+                  non_std_connections=True)]),
+], ids=['basic', 'empty', 'stop_on_keyword', 'include_reference_line', 'multiple_tables', 'c_comment_lines'])
 def test_load_nexus_multir_table_from_list(file_content, expected_result):
     file_content_as_list = file_content.splitlines(keepends=True)
 
