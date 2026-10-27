@@ -35,7 +35,8 @@ def nexus_token_found(line_to_check: str, valid_list: list[str] = VALID_NEXUS_KE
     """
     valid_set = set(valid_list)
     uppercase_line = line_to_check.upper()
-    strip_comments = strip_file_of_comments([uppercase_line], square_bracket_comments=True)
+    strip_comments = strip_file_of_comments([uppercase_line], square_bracket_comments=True,
+                                            comment_characters=['!', 'C'])
     if len(strip_comments) == 0:
         return False
     split_line = set(strip_comments[0].split())

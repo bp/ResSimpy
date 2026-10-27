@@ -848,6 +848,9 @@ class NexusGrid(Grid):
     @staticmethod
     def __extract_multir_tableline(line: str) -> None | NexusMultir:
         """Takes a single line in a file and extracts a Multir object from it."""
+        if not fo.strip_file_of_comments([line], comment_characters=['!', 'C']):
+            # skip comment lines, including indented C comment lines
+            return None
         stored_values = fo.split_line(line)
         if not stored_values or len(stored_values) < 3:
             return None
@@ -1528,7 +1531,7 @@ class NexusGrid(Grid):
                 fname = None
                 arrays = []
                 continue
-            if reading_over:
+            if reading_over and fo.strip_file_of_comments([line], comment_characters=['!', 'C']):
                 split_line = fo.split_line(line)
                 if nfo.check_token('GRID', line):
                     grid = nfo.get_expected_token_value('GRID', line, file_content_as_list)
@@ -1683,7 +1686,7 @@ class NexusGrid(Grid):
                 fname = None
                 continue
 
-            if reading:
+            if reading and fo.strip_file_of_comments([line], comment_characters=['!', 'C']):
                 split_line = fo.split_line(line)
                 if nfo.check_token('GRID', line):
                     grid = nfo.get_expected_token_value('GRID', line, file_content_as_list)

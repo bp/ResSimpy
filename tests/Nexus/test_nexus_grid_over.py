@@ -185,3 +185,29 @@ def test_over_to_string():
     result = over.to_string()
     # Assert
     assert result == expected_result
+
+
+def test_read_nexus_over_with_c_comment_lines():
+    # Arrange
+    file_content = """OVER PV
+    1 84 1 80 1 2 *0.9
+C 1 84 1 80 3 77 *.995 commented out
+    1 84 1 80 3 4 *0.8
+       C 1 84 1 80 3 77 *.995 indented comment
+    1 84 1 80 5 6 *0.7
+    KX CON
+    5.1
+    """
+
+    expected_result = [NexusOver(i1=1, i2=84, j1=1, j2=80, k1=1, k2=2, operator='*', value=0.9,
+                                 array='PV', grid='ROOT'),
+                       NexusOver(i1=1, i2=84, j1=1, j2=80, k1=3, k2=4, operator='*', value=0.8,
+                                 array='PV', grid='ROOT'),
+                       NexusOver(i1=1, i2=84, j1=1, j2=80, k1=5, k2=6, operator='*', value=0.7,
+                                 array='PV', grid='ROOT')]
+
+    # Act
+    result = NexusGrid.load_nexus_overs(file_content.splitlines(keepends=True))
+
+    # Assert
+    assert result == expected_result
