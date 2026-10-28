@@ -19,7 +19,7 @@ from ResSimpy.Nexus.NexusEnums.ActivationChangeEnum import ActivationChangeEnum
 from ResSimpy.Nexus.NexusEnums.DateFormatEnum import DateFormat
 from ResSimpy.Nexus.nexus_constraint_operations import load_inline_constraints
 from ResSimpy.Nexus.nexus_file_operations import check_property_in_line, check_token, check_list_tokens, \
-    load_table_to_objects
+    load_table_to_objects, blank_square_bracket_comments
 from ResSimpy.Nexus.nexus_load_list_table import load_table_to_lists
 from ResSimpy.Time.ISODateTime import ISODateTime
 
@@ -56,7 +56,8 @@ def collect_all_tables_to_objects(nexus_file: File, table_object_map: dict[str, 
     nexus_object_results: dict[str, list[Any]] = {x: [] for x in table_object_map}
     nexus_constraints: dict[str, list[NexusConstraint]] = {}
 
-    file_as_list: list[str] = nexus_file.get_flat_list_str_file
+    # blank out [ ] block comments while keeping line indices aligned with the file for object locations
+    file_as_list: list[str] = blank_square_bracket_comments(nexus_file.get_flat_list_str_file)
     table_start: int = -1
     table_end: int = -1
     property_dict: dict = {}

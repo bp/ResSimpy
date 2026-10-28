@@ -255,6 +255,28 @@ def test_nexus_token_found(line, expected_result):
     assert result == expected_result
 
 
+@pytest.mark.parametrize("file_contents, expected_contents", [
+    (['keep\n', '[\n', 'WELLS\n', 'ENDWELLS\n', ']\n', 'keep 2\n'],
+     ['keep\n', '\n', '\n', '\n', '\n', 'keep 2\n']),
+    (['a [comment] b\n', '[WELLS\n', 'ENDWELLS]\n', 'c\n'],
+     ['a  b\n', '\n', '\n', 'c\n']),
+    (['keep [start of block\n', 'removed\n', 'end of block] keep\n'],
+     ['keep \n', '\n', ' keep\n']),
+    (['name "[" value\n', 'name "]" value\n'],
+     ['name "[" value\n', 'name "]" value\n']),
+    (['value ! comment [ not a block\n', 'next line\n'],
+     ['value ! comment [ not a block\n', 'next line\n']),
+], ids=['block on own lines', 'brackets on same line as content', 'block mid line', 'quoted brackets',
+        'bracket in inline comment'])
+def test_blank_square_bracket_comments(file_contents, expected_contents):
+    # Act
+    result = nfo.blank_square_bracket_comments(file_contents)
+
+    # Assert
+    assert result == expected_contents
+    assert len(result) == len(file_contents)
+
+
 def mock_includes(mocker, filename, include_contents0, include_contents1):
     # yes this should just index a tuple
     if "0" in filename:
@@ -929,6 +951,102 @@ def test_collect_all_tables_to_objects_correct_line_numbers(mocker, file_as_list
 
     # Assert
     # Check that the line numbers are correct
+    assert nexus_file.object_locations == expected_object_locations
+
+
+@pytest.mark.parametrize('file_contents, expected_names', [
+    ("""TIME 01/01/2020
+[
+WELLS
+NAME   STREAM   DATUM  ONTIME
+well_1 PRODUCER NA     0.7
+well_2 PRODUCER NA     1.08
+ENDWELLS
+]
+""", []),
+    ("""TIME 01/01/2020
+[WELLS
+NAME   STREAM   DATUM  ONTIME
+well_1 PRODUCER NA     0.7
+ENDWELLS]
+""", []),
+    ("""TIME 01/01/2020
+[
+WELLS
+NAME   STREAM   DATUM  ONTIME
+well_1 PRODUCER NA     0.7
+ENDWELLS
+]
+WELLS
+NAME   STREAM   DATUM  ONTIME
+well_3 PRODUCER NA     0.9
+ENDWELLS
+""", ['well_3']),
+    ("""WELLS
+NAME   STREAM
+well_1 PRODUCER
+ENDWELLS
+[ only comment text
+across lines ]
+WELLS
+NAME   STREAM
+well_2 PRODUCER
+ENDWELLS
+""", ['well_1', 'well_2']),
+    ("""WELLS
+NAME      STREAM
+"well[1]" PRODUCER
+ENDWELLS
+""", ['"well[1]"']),
+], ids=['table inside block', 'brackets on keyword lines', 'live table after block', 'comment only block',
+        'quoted brackets'])
+def test_collect_all_tables_to_objects_square_bracket_comments(mocker, file_contents, expected_names):
+    # Arrange
+    mocker.patch('ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4', return_value='uuid1')
+    surface_file = NexusFile(location='surface.dat', file_content_as_list=file_contents.splitlines())
+
+    # Act
+    result_dict, _ = ResSimpy.Nexus.nexus_collect_tables.collect_all_tables_to_objects(
+        nexus_file=surface_file,
+        table_object_map={'WELLS': NexusWellConnection, 'GASWELLS': NexusWellConnection},
+        start_date='01/01/2020',
+        default_units=UnitSystem.ENGLISH,
+        date_format=DateFormat.DD_MM_YYYY,
+    )
+
+    # Assert
+    assert [x.name for x in result_dict['WELLS']] == expected_names
+
+
+def test_collect_all_tables_to_objects_correct_line_numbers_after_block_comment(mocker):
+    # Arrange
+    mocker.patch("ResSimpy.DataModelBaseClasses.DataObjectMixin.uuid4", return_value="uuid_1")
+    file_as_list = """[
+DRILL
+WELL    DRILLSITE   DRILLTIME
+old_well  site_1   1.0
+ENDDRILL
+]
+DRILL
+WELL    DRILLSITE   DRILLTIME
+well_1  site_1   654.1
+ENDDRILL
+""".splitlines()
+    nexus_file = NexusFile(location="", file_content_as_list=file_as_list)
+
+    expected_object_locations = {'uuid_1': [8]}
+
+    # Act
+    nexus_obj_dict, _ = ResSimpy.Nexus.nexus_collect_tables.collect_all_tables_to_objects(
+        nexus_file=nexus_file,
+        table_object_map={"DRILL": NexusDrill},
+        start_date="01/01/2019",
+        default_units=UnitSystem.ENGLISH,
+        date_format=DateFormat.DD_MM_YYYY,
+    )
+
+    # Assert
+    assert [x.name for x in nexus_obj_dict['DRILL']] == ['well_1']
     assert nexus_file.object_locations == expected_object_locations
 
 

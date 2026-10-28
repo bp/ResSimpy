@@ -85,7 +85,27 @@ INCLUDE ../../tover_2.inc
       NexusTOver(i1=1, i2=1, j1=1, j2=1, k1=1, k2=1, operator='MULT', array='TXF+', array_values=[1.2], value=0, 
                  include_file=None, grid='ROOT')
       ]),
-], ids=['basic', 'multiple reads', 'direct from array'])
+    ("""ARRAYS ROOT
+    NX  NY  NZ
+    10  25  10
+    NETGRS VALUE
+    INCLUDE NTG.inc
+
+    [
+    TOVER TX-
+    1 10 1 15 1 3 EQ
+    INCLUDE old_tover.inc
+    ]
+
+    TOVER TX+
+    1 1 1 1 1 1 MULT
+    include tover1.inc
+    [ 1 2 1 2 1 2 MULT
+    include old_tover2.inc ]
+    """,
+     [NexusTOver(i1=1, i2=1, j1=1, j2=1, k1=1, k2=1, operator='MULT', array='TX+', include_file='tover1.inc', value=0,
+                 array_values=None, grid='ROOT')]),
+], ids=['basic', 'multiple reads', 'direct from array', 'square bracket comments'])
 def test_load_tover(mocker, structured_grid_file_contents, expected_result):
     fcs_file_contents = f"RUNCONTROL /run_control/path\nDATEFORMAT DD/MM/YYYY\nSTRUCTURED_GRID test_structured_grid.dat"
     structured_grid_name = os.path.join('testpath1', 'test_structured_grid.dat')

@@ -44,7 +44,8 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
         DateFormat: The date format found in the wellspec file if present, otherwise just the model date format.
     """
     date_format = model_date_format
-    file_as_list = nexus_file.get_flat_list_str_file
+    # blank out [ ] block comments while keeping line indices aligned with the file
+    file_as_list = nfo.blank_square_bracket_comments(nexus_file.get_flat_list_str_file)
     well_name: Optional[str] = None
     wellspec_file_units: Optional[UnitSystem] = None
 
@@ -140,8 +141,6 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
     wells: list[NexusWell] = [] if parent_wells_instance._wells is None else parent_wells_instance._wells
     well_name_list: list[str] = [x.well_name.upper() for x in parent_wells_instance._wells]
 
-    exclude_section: bool = False
-
     for index, line in enumerate(file_as_list):
         uppercase_line = line.upper()
 
@@ -149,15 +148,6 @@ def load_wells(nexus_file: NexusFile, start_date: str, default_units: UnitSystem
 
         if trimmed_line.startswith('!') or nfo.get_next_value(0, [trimmed_line]) is None:
             continue
-
-        if len(trimmed_line) > 0 and trimmed_line[0] == '[':
-            exclude_section = True
-
-        if exclude_section:
-            if ']' in trimmed_line and trimmed_line[0] != '!' and trimmed_line[0] != 'C':
-                exclude_section = False
-            else:
-                continue
 
         # If we haven't got the units yet, check to see if this line contains a declaration for them.
         if wellspec_file_units is None:
@@ -308,9 +298,8 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
         return None if value is None else int(value)
 
     completions: list[NexusCompletion] = []
-    file_as_list: list[str] = nexus_file.get_flat_list_str_file
-
-    exclude_section = False
+    # blank out [ ] block comments while keeping line indices aligned with the file
+    file_as_list: list[str] = nfo.blank_square_bracket_comments(nexus_file.get_flat_list_str_file)
 
     for index, line in enumerate(file_as_list[header_index + 1:]):
         # check for end of table lines:
@@ -318,19 +307,6 @@ def __load_wellspec_table_completions(nexus_file: NexusFile, header_index: int,
         end_of_table = nfo.nexus_token_found(line, WELLS_KEYWORDS)
         if end_of_table:
             return completions
-
-        trimmed_line = line.strip()
-
-        # Exclude block comments
-        if len(trimmed_line) > 0 and trimmed_line[0] == '[':
-            exclude_section = True
-
-        if exclude_section:
-            if ']' in trimmed_line and trimmed_line[0] != '!' and trimmed_line[0] != 'C':
-                exclude_section = False
-                continue
-            else:
-                continue
 
         valid_line, header_values = nfo.table_line_reader(header_values, headers, line)
         # if a valid line is found load a completion otherwise continue

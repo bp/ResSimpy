@@ -150,3 +150,28 @@ def test_NexusMultir_to_string():
 
     # Assert
     assert result == expected_result
+
+
+def test_load_multir_skips_square_bracket_comments():
+    # Arrange
+    file_content = """MULTIR
+1 2 0 XYZ ALL
+[ old seals
+1 3 0 XYZ ALL
+1 4 0 XYZ ALL
+]
+1 5 0.1 XYZ ALL [ 1 6 0 XYZ ALL ]
+"""
+    nexus_grid_file = NexusFile('loc.dat', file_content_as_list=file_content.splitlines(keepends=True))
+    grid = NexusGrid(grid_nexus_file=nexus_grid_file, model_unit_system=UnitSystem.ENGLISH)
+
+    expected_result = [NexusMultir(region_1=1, region_2=2, tmult=0, directions='XYZ', std_connections=True,
+                                   non_std_connections=True),
+                       NexusMultir(region_1=1, region_2=5, tmult=0.1, directions='XYZ', std_connections=True,
+                                   non_std_connections=True)]
+
+    # Act
+    result = grid.multir
+
+    # Assert
+    assert result == expected_result
