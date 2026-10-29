@@ -44,6 +44,48 @@ def nexus_token_found(line_to_check: str, valid_list: list[str] = VALID_NEXUS_KE
     return not valid_set.isdisjoint(split_line)
 
 
+def blank_square_bracket_comments(file_as_list: list[str]) -> list[str]:
+    """Removes text inside Nexus square bracket block comments, which may span multiple lines.
+
+    Unlike strip_file_of_comments, the returned list has the same number of entries as the input, so line indices
+    still refer to the original file. Lines fully inside a block comment become empty strings.
+    Brackets inside double quotes (e.g. "[" or "well[1]") and brackets after a ! comment are ignored. Single quotes
+    are not treated as quotation marks. Brackets nested inside a block comment must be balanced before the block
+    closes, e.g. [comment "well[1]" more comment] closes at the final bracket.
+
+    Args:
+        file_as_list (list[str]): a list of strings containing each line of the file as a new entry
+
+    Returns:
+        list[str]: the lines with any square bracket comments removed
+    """
+    block_depth = 0
+    blanked_file: list[str] = []
+    for line in file_as_list:
+        kept_characters = []
+        in_quotes = False
+        for i, character in enumerate(line):
+            if block_depth > 0:
+                if character == '[':
+                    block_depth += 1
+                elif character == ']':
+                    block_depth -= 1
+                elif character == '\n':
+                    kept_characters.append(character)
+                continue
+            if character == '"':
+                in_quotes = not in_quotes
+            elif not in_quotes and character == '!':
+                kept_characters.append(line[i:])
+                break
+            elif not in_quotes and character == '[':
+                block_depth = 1
+                continue
+            kept_characters.append(character)
+        blanked_file.append(''.join(kept_characters))
+    return blanked_file
+
+
 def create_templated_file(template_location: str, substitutions: dict, output_file_name: str) -> None:
     """Creates a new text file at the requested destination substituting the supplied values.
 

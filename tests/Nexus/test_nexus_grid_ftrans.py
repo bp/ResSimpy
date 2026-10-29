@@ -167,3 +167,33 @@ def test_ftrans_to_string_line(ftrans, header, expected_string):
     result = ftrans.to_string_line(header=header)
     # Assert
     assert result == expected_string
+
+
+def test_read_nexus_ftrans_from_grid_skips_square_bracket_comments():
+    # Arrange
+    grid_file_content = """
+    NX NY NZ
+    20 50 100
+    ARRAYS
+    KX CON
+    1
+    FTRANS
+    1 12  1 46 10 11  0.5
+    [
+    1 13  1 45 11 12  2
+    ]
+    1 14  1 44 12 13  3 [ 1 15  1 43 13 14  4 ]
+    """
+
+    expected_ftrans = [NexusFtrans(i1=1, j1=12, k1=1, i2=46, j2=10, k2=11, value=0.5, grid='ROOT',
+                                   unit_system=UnitSystem.ENGLISH),
+                       NexusFtrans(i1=1, j1=14, k1=1, i2=44, j2=12, k2=13, value=3.0, grid='ROOT',
+                                   unit_system=UnitSystem.ENGLISH)]
+    grid = NexusGrid(grid_nexus_file=NexusFile(location='loc.dat',
+                                               file_content_as_list=grid_file_content.splitlines(keepends=True)),
+                     model_unit_system=UnitSystem.ENGLISH)
+    # Act
+    result = grid.ftrans
+
+    # Assert
+    assert result == expected_ftrans

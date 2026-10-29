@@ -211,3 +211,35 @@ C 1 84 1 80 3 77 *.995 commented out
 
     # Assert
     assert result == expected_result
+
+
+def test_read_nexus_over_from_grid_skips_square_bracket_comments():
+    # Arrange
+    grid_file_content = """
+    NX NY NZ
+    20 50 100
+    ARRAYS
+    KX CON
+    1
+    OVER TX
+    1 12  1 46 10 11 *0.5
+    [ 1 13  1 45 11 12 *0.1 ]
+    [
+    OVER TY
+    1 14  1 44 12 13 *0.2
+    ]
+    1 15  1 43 13 14 *0.3
+    """
+
+    expected_result = [NexusOver(i1=1, i2=12, j1=1, j2=46, k1=10, k2=11, operator='*', value=0.5,
+                                 array='TX', grid='ROOT'),
+                       NexusOver(i1=1, i2=15, j1=1, j2=43, k1=13, k2=14, operator='*', value=0.3,
+                                 array='TX', grid='ROOT')]
+    grid = NexusGrid(grid_nexus_file=NexusFile(location='loc.dat',
+                                               file_content_as_list=grid_file_content.splitlines(keepends=True)),
+                     model_unit_system=UnitSystem.ENGLISH)
+    # Act
+    result = grid.overs
+
+    # Assert
+    assert result == expected_result

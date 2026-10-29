@@ -148,8 +148,9 @@ class NexusGrid(Grid):
         self.__grid_faults_loaded: bool = assume_loaded
         self.__array_functions_list: list[list[str]] | None = None
         self.__array_functions_df: pd.DataFrame | None = None
+        # blank out [ ] block comments while keeping line indices aligned with the file
         self.__grid_file_contents: list[str] | None = None if grid_nexus_file is None else \
-            grid_nexus_file.get_flat_list_str_file_including_includes
+            nfo.blank_square_bracket_comments(grid_nexus_file.get_flat_list_str_file_including_includes)
         self.__grid_file_nested: list[str] | None = None if grid_nexus_file is None else \
             grid_nexus_file.file_content_as_list
         self.__faults_df: pd.DataFrame | None = None
