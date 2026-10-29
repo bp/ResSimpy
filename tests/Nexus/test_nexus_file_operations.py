@@ -266,8 +266,15 @@ def test_nexus_token_found(line, expected_result):
      ['name "[" value\n', 'name "]" value\n']),
     (['value ! comment [ not a block\n', 'next line\n'],
      ['value ! comment [ not a block\n', 'next line\n']),
+    (['[Well "well[1]" commented_out_value 1] outer_value 2\n', 'next line\n'],
+     [' outer_value 2\n', 'next line\n']),
+    (['[ outer [ inner\n', 'still inner ] still outer\n', '] kept\n'],
+     ['\n', '\n', ' kept\n']),
+    (['x [ L1 [ L2\n', '[ L3 [ L4 ] ] back to L2\n', '] back to L1 ] y [a [b] [c]] z\n'],
+     ['x \n', '\n', ' y  z\n']),
 ], ids=['block on own lines', 'brackets on same line as content', 'block mid line', 'quoted brackets',
-        'bracket in inline comment'])
+        'bracket in inline comment', 'quoted brackets inside block',
+        'nested blocks across lines', 'multiple nesting levels'])
 def test_blank_square_bracket_comments(file_contents, expected_contents):
     # Act
     result = nfo.blank_square_bracket_comments(file_contents)

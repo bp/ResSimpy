@@ -49,7 +49,9 @@ def blank_square_bracket_comments(file_as_list: list[str]) -> list[str]:
 
     Unlike strip_file_of_comments, the returned list has the same number of entries as the input, so line indices
     still refer to the original file. Lines fully inside a block comment become empty strings.
-    Brackets inside double quotes (e.g. "[" or "well[1]") and brackets after a ! comment are ignored.
+    Brackets inside double quotes (e.g. "[" or "well[1]") and brackets after a ! comment are ignored. Single quotes
+    are not treated as quotation marks. Brackets nested inside a block comment must be balanced before the block
+    closes, e.g. [comment "well[1]" more comment] closes at the final bracket.
 
     Args:
         file_as_list (list[str]): a list of strings containing each line of the file as a new entry
@@ -57,15 +59,17 @@ def blank_square_bracket_comments(file_as_list: list[str]) -> list[str]:
     Returns:
         list[str]: the lines with any square bracket comments removed
     """
-    in_block = False
+    block_depth = 0
     blanked_file: list[str] = []
     for line in file_as_list:
         kept_characters = []
         in_quotes = False
         for i, character in enumerate(line):
-            if in_block:
-                if character == ']':
-                    in_block = False
+            if block_depth > 0:
+                if character == '[':
+                    block_depth += 1
+                elif character == ']':
+                    block_depth -= 1
                 elif character == '\n':
                     kept_characters.append(character)
                 continue
@@ -75,7 +79,7 @@ def blank_square_bracket_comments(file_as_list: list[str]) -> list[str]:
                 kept_characters.append(line[i:])
                 break
             elif not in_quotes and character == '[':
-                in_block = True
+                block_depth = 1
                 continue
             kept_characters.append(character)
         blanked_file.append(''.join(kept_characters))
